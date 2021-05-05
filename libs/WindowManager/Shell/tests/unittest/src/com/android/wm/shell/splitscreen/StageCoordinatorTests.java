@@ -18,7 +18,7 @@ package com.android.wm.shell.splitscreen;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 
-import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_POSITION_BOTTOM_OR_RIGHT;
+import static com.android.wm.shell.common.split.SplitLayout.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -73,7 +73,7 @@ public class StageCoordinatorTests extends ShellTestCase {
     public void testMoveToSideStage() {
         final ActivityManager.RunningTaskInfo task = new TestRunningTaskInfoBuilder().build();
 
-        mStageCoordinator.moveToSideStage(task, STAGE_POSITION_BOTTOM_OR_RIGHT);
+        mStageCoordinator.moveToSideStage(task, SPLIT_POSITION_BOTTOM_OR_RIGHT);
 
         verify(mMainStage).activate(any(Rect.class), any(WindowContainerTransaction.class));
         verify(mSideStage).addTask(eq(task), any(Rect.class),

@@ -19,9 +19,9 @@ package com.android.wm.shell.splitscreen;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
-import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_POSITION_BOTTOM_OR_RIGHT;
-import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_POSITION_TOP_OR_LEFT;
-import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_POSITION_UNDEFINED;
+import static com.android.wm.shell.common.split.SplitLayout.SPLIT_POSITION_BOTTOM_OR_RIGHT;
+import static com.android.wm.shell.common.split.SplitLayout.SPLIT_POSITION_TOP_OR_LEFT;
+import static com.android.wm.shell.common.split.SplitLayout.SPLIT_POSITION_UNDEFINED;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_MAIN;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_SIDE;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_UNDEFINED;
@@ -53,6 +53,7 @@ import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.annotations.ExternalThread;
+import com.android.wm.shell.common.split.SplitLayout.SplitPosition;
 import com.android.wm.shell.draganddrop.DragAndDropPolicy;
 import com.android.wm.shell.splitscreen.ISplitScreenListener;
 import com.android.wm.shell.transition.Transitions;
@@ -122,7 +123,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         return mStageCoordinator.isSplitScreenVisible();
     }
 
-    public boolean moveToSideStage(int taskId, @SplitScreen.StagePosition int sideStagePosition) {
+    public boolean moveToSideStage(int taskId, @SplitPosition int sideStagePosition) {
         final ActivityManager.RunningTaskInfo task = mTaskOrganizer.getRunningTaskInfo(taskId);
         if (task == null) {
             throw new IllegalArgumentException("Unknown taskId" + taskId);
@@ -131,7 +132,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     }
 
     public boolean moveToSideStage(ActivityManager.RunningTaskInfo task,
-            @SplitScreen.StagePosition int sideStagePosition) {
+            @SplitPosition int sideStagePosition) {
         return mStageCoordinator.moveToSideStage(task, sideStagePosition);
     }
 
@@ -139,7 +140,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         return mStageCoordinator.removeFromSideStage(taskId);
     }
 
-    public void setSideStagePosition(@SplitScreen.StagePosition int sideStagePosition) {
+    public void setSideStagePosition(@SplitPosition int sideStagePosition) {
         mStageCoordinator.setSideStagePosition(sideStagePosition);
     }
 
@@ -149,7 +150,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
 
     public void enterSplitScreen(int taskId, boolean leftOrTop) {
         moveToSideStage(taskId,
-                leftOrTop ? STAGE_POSITION_TOP_OR_LEFT : STAGE_POSITION_BOTTOM_OR_RIGHT);
+                leftOrTop ? SPLIT_POSITION_TOP_OR_LEFT : SPLIT_POSITION_BOTTOM_OR_RIGHT);
     }
 
     public void exitSplitScreen() {
@@ -173,7 +174,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     }
 
     public void startTask(int taskId, @SplitScreen.StageType int stage,
-            @SplitScreen.StagePosition int position, @Nullable Bundle options) {
+            @SplitPosition int position, @Nullable Bundle options) {
         options = resolveStartStage(stage, position, options);
 
         try {
@@ -184,7 +185,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     }
 
     public void startShortcut(String packageName, String shortcutId,
-            @SplitScreen.StageType int stage, @SplitScreen.StagePosition int position,
+            @SplitScreen.StageType int stage, @SplitPosition int position,
             @Nullable Bundle options, UserHandle user) {
         options = resolveStartStage(stage, position, options);
 
@@ -199,7 +200,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     }
 
     public void startIntent(PendingIntent intent, Intent fillInIntent,
-            @SplitScreen.StageType int stage, @SplitScreen.StagePosition int position,
+            @SplitScreen.StageType int stage, @SplitPosition int position,
             @Nullable Bundle options) {
         options = resolveStartStage(stage, position, options);
 
@@ -211,11 +212,11 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     }
 
     private Bundle resolveStartStage(@SplitScreen.StageType int stage,
-            @SplitScreen.StagePosition int position, @Nullable Bundle options) {
+            @SplitPosition int position, @Nullable Bundle options) {
         switch (stage) {
             case STAGE_TYPE_UNDEFINED: {
                 // Use the stage of the specified position is valid.
-                if (position != STAGE_POSITION_UNDEFINED) {
+                if (position != SPLIT_POSITION_UNDEFINED) {
                     if (position == mStageCoordinator.getSideStagePosition()) {
                         options = resolveStartStage(STAGE_TYPE_SIDE, position, options);
                     } else {
@@ -228,7 +229,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                 break;
             }
             case STAGE_TYPE_SIDE: {
-                if (position != STAGE_POSITION_UNDEFINED) {
+                if (position != SPLIT_POSITION_UNDEFINED) {
                     mStageCoordinator.setSideStagePosition(position);
                 } else {
                     position = mStageCoordinator.getSideStagePosition();
@@ -240,10 +241,10 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                 break;
             }
             case STAGE_TYPE_MAIN: {
-                if (position != STAGE_POSITION_UNDEFINED) {
+                if (position != SPLIT_POSITION_UNDEFINED) {
                     // Set the side stage opposite of what we want to the main stage.
-                    final int sideStagePosition = position == STAGE_POSITION_TOP_OR_LEFT
-                            ? STAGE_POSITION_BOTTOM_OR_RIGHT : STAGE_POSITION_TOP_OR_LEFT;
+                    final int sideStagePosition = position == SPLIT_POSITION_TOP_OR_LEFT
+                            ? SPLIT_POSITION_BOTTOM_OR_RIGHT : SPLIT_POSITION_TOP_OR_LEFT;
                     mStageCoordinator.setSideStagePosition(sideStagePosition);
                 } else {
                     position = mStageCoordinator.getMainStagePosition();
@@ -418,7 +419,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         @Override
         public void startTasks(int mainTaskId, @Nullable Bundle mainOptions,
                 int sideTaskId, @Nullable Bundle sideOptions,
-                @SplitScreen.StagePosition int sidePosition,
+                @SplitPosition int sidePosition,
                 @Nullable IRemoteTransition remoteTransition) {
             executeRemoteCallWithTaskPermission(mController, "startTasks",
                     (controller) -> controller.mStageCoordinator.startTasks(mainTaskId, mainOptions,

@@ -29,14 +29,14 @@ import static android.content.Intent.EXTRA_SHORTCUT_ID;
 import static android.content.Intent.EXTRA_TASK_ID;
 import static android.content.Intent.EXTRA_USER;
 
+import static com.android.wm.shell.common.split.SplitLayout.SPLIT_POSITION_BOTTOM_OR_RIGHT;
+import static com.android.wm.shell.common.split.SplitLayout.SPLIT_POSITION_TOP_OR_LEFT;
+import static com.android.wm.shell.common.split.SplitLayout.SPLIT_POSITION_UNDEFINED;
 import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_FULLSCREEN;
 import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPLIT_BOTTOM;
 import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPLIT_LEFT;
 import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPLIT_RIGHT;
 import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPLIT_TOP;
-import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_POSITION_BOTTOM_OR_RIGHT;
-import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_POSITION_TOP_OR_LEFT;
-import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_POSITION_UNDEFINED;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_SIDE;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_UNDEFINED;
 
@@ -64,7 +64,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.wm.shell.common.DisplayLayout;
-import com.android.wm.shell.splitscreen.SplitScreen.StagePosition;
+import com.android.wm.shell.common.split.SplitLayout.SplitPosition;
 import com.android.wm.shell.splitscreen.SplitScreen.StageType;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 
@@ -203,10 +203,10 @@ public class DragAndDropPolicy {
         final boolean leftOrTop = target.type == TYPE_SPLIT_TOP || target.type == TYPE_SPLIT_LEFT;
 
         @StageType int stage = STAGE_TYPE_UNDEFINED;
-        @StagePosition int position = STAGE_POSITION_UNDEFINED;
+        @SplitPosition int position = SPLIT_POSITION_UNDEFINED;
         if (target.type != TYPE_FULLSCREEN && mSplitScreen != null) {
             // Update launch options for the split side we are targeting.
-            position = leftOrTop ? STAGE_POSITION_TOP_OR_LEFT : STAGE_POSITION_BOTTOM_OR_RIGHT;
+            position = leftOrTop ? SPLIT_POSITION_TOP_OR_LEFT : SPLIT_POSITION_BOTTOM_OR_RIGHT;
             if (!inSplitScreen) {
                 // Launch in the side stage if we are not in split-screen already.
                 stage = STAGE_TYPE_SIDE;
@@ -219,7 +219,7 @@ public class DragAndDropPolicy {
     }
 
     private void startClipDescription(ClipDescription description, Intent intent,
-            @StageType int stage, @StagePosition int position) {
+            @StageType int stage, @SplitPosition int position) {
         final boolean isTask = description.hasMimeType(MIMETYPE_APPLICATION_TASK);
         final boolean isShortcut = description.hasMimeType(MIMETYPE_APPLICATION_SHORTCUT);
         final Bundle opts = intent.hasExtra(EXTRA_ACTIVITY_OPTIONS)
@@ -291,12 +291,12 @@ public class DragAndDropPolicy {
      * Interface for actually committing the task launches.
      */
     public interface Starter {
-        void startTask(int taskId, @StageType int stage, @StagePosition int position,
+        void startTask(int taskId, @StageType int stage, @SplitPosition int position,
                 @Nullable Bundle options);
         void startShortcut(String packageName, String shortcutId, @StageType int stage,
-                @StagePosition int position, @Nullable Bundle options, UserHandle user);
+                @SplitPosition int position, @Nullable Bundle options, UserHandle user);
         void startIntent(PendingIntent intent, Intent fillInIntent,
-                @StageType int stage, @StagePosition int position,
+                @StageType int stage, @SplitPosition int position,
                 @Nullable Bundle options);
         void enterSplitScreen(int taskId, boolean leftOrTop);
         void exitSplitScreen();

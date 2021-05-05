@@ -25,6 +25,7 @@ import static com.android.internal.policy.DividerSnapAlgorithm.SnapTarget.FLAG_D
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
+import android.annotation.IntDef;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
@@ -42,7 +43,32 @@ import com.android.wm.shell.common.DisplayImeController;
  * Records and handles layout of splits. Helps to calculate proper bounds when configuration or
  * divide position changes.
  */
-public class SplitLayout {
+public final class SplitLayout {
+    /**
+     * Split position isn't specified normally meaning to use what ever it is currently set to.
+     */
+    public static final int SPLIT_POSITION_UNDEFINED = -1;
+
+    /**
+     * Specifies that a split is positioned at the top half of the screen if
+     * in portrait mode or at the left half of the screen if in landscape mode.
+     */
+    public static final int SPLIT_POSITION_TOP_OR_LEFT = 0;
+
+    /**
+     * Specifies that a split is positioned at the bottom half of the screen if
+     * in portrait mode or at the right half of the screen if in landscape mode.
+     */
+    public static final int SPLIT_POSITION_BOTTOM_OR_RIGHT = 1;
+
+    @IntDef(prefix = {"SPLIT_POSITION_"}, value = {
+            SPLIT_POSITION_UNDEFINED,
+            SPLIT_POSITION_TOP_OR_LEFT,
+            SPLIT_POSITION_BOTTOM_OR_RIGHT
+    })
+    public @interface SplitPosition {
+    }
+
     private final int mDividerWindowWidth;
     private final int mDividerInsets;
     private final int mDividerSize;

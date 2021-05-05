@@ -25,8 +25,8 @@ import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.view.WindowManager.transitTypeToString;
 
-import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_POSITION_BOTTOM_OR_RIGHT;
-import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_POSITION_TOP_OR_LEFT;
+import static com.android.wm.shell.common.split.SplitLayout.SPLIT_POSITION_BOTTOM_OR_RIGHT;
+import static com.android.wm.shell.common.split.SplitLayout.SPLIT_POSITION_TOP_OR_LEFT;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_MAIN;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_SIDE;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_UNDEFINED;
@@ -54,7 +54,6 @@ import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
 import android.window.WindowContainerTransaction;
 
-
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
@@ -64,6 +63,7 @@ import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.split.SplitLayout;
+import com.android.wm.shell.common.split.SplitLayout.SplitPosition;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.transition.Transitions;
 
@@ -96,7 +96,8 @@ class StageCoordinator implements SplitLayout.LayoutChangeListener,
     private final StageListenerImpl mMainStageListener = new StageListenerImpl();
     private final SideStage mSideStage;
     private final StageListenerImpl mSideStageListener = new StageListenerImpl();
-    private @SplitScreen.StagePosition int mSideStagePosition = STAGE_POSITION_BOTTOM_OR_RIGHT;
+    @SplitPosition
+    private int mSideStagePosition = SPLIT_POSITION_BOTTOM_OR_RIGHT;
 
     private final int mDisplayId;
     private SplitLayout mSplitLayout;
@@ -176,7 +177,7 @@ class StageCoordinator implements SplitLayout.LayoutChangeListener,
     }
 
     boolean moveToSideStage(ActivityManager.RunningTaskInfo task,
-            @SplitScreen.StagePosition int sideStagePosition) {
+            @SplitPosition int sideStagePosition) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         setSideStagePosition(sideStagePosition);
         mMainStage.activate(getMainStageBounds(), wct);
@@ -201,7 +202,7 @@ class StageCoordinator implements SplitLayout.LayoutChangeListener,
 
     /** Starts 2 tasks in one transition. */
     void startTasks(int mainTaskId, @Nullable Bundle mainOptions, int sideTaskId,
-            @Nullable Bundle sideOptions, @SplitScreen.StagePosition int sidePosition,
+            @Nullable Bundle sideOptions, @SplitPosition int sidePosition,
             @Nullable IRemoteTransition remoteTransition) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         mainOptions = mainOptions != null ? mainOptions : new Bundle();
@@ -225,20 +226,22 @@ class StageCoordinator implements SplitLayout.LayoutChangeListener,
                 TRANSIT_SPLIT_SCREEN_PAIR_OPEN, wct, remoteTransition, this);
     }
 
-    @SplitScreen.StagePosition int getSideStagePosition() {
+    @SplitLayout.SplitPosition
+    int getSideStagePosition() {
         return mSideStagePosition;
     }
 
-    @SplitScreen.StagePosition int getMainStagePosition() {
-        return mSideStagePosition ==  STAGE_POSITION_TOP_OR_LEFT
-                ? STAGE_POSITION_BOTTOM_OR_RIGHT : STAGE_POSITION_TOP_OR_LEFT;
+    @SplitLayout.SplitPosition
+    int getMainStagePosition() {
+        return mSideStagePosition == SPLIT_POSITION_TOP_OR_LEFT
+                ? SPLIT_POSITION_BOTTOM_OR_RIGHT : SPLIT_POSITION_TOP_OR_LEFT;
     }
 
-    void setSideStagePosition(@SplitScreen.StagePosition int sideStagePosition) {
+    void setSideStagePosition(@SplitPosition int sideStagePosition) {
         setSideStagePosition(sideStagePosition, true /* updateVisibility */);
     }
 
-    private void setSideStagePosition(@SplitScreen.StagePosition int sideStagePosition,
+    private void setSideStagePosition(@SplitPosition int sideStagePosition,
             boolean updateVisibility) {
         if (mSideStagePosition == sideStagePosition) return;
         mSideStagePosition = sideStagePosition;
@@ -289,7 +292,7 @@ class StageCoordinator implements SplitLayout.LayoutChangeListener,
         opts.putParcelable(KEY_LAUNCH_ROOT_TASK_TOKEN, stage.mRootTaskInfo.token);
     }
 
-    void updateActivityOptions(Bundle opts, @SplitScreen.StagePosition int position) {
+    void updateActivityOptions(Bundle opts, @SplitPosition int position) {
         addActivityOptions(opts, position == mSideStagePosition ? mSideStage : mMainStage);
 
         if (!mMainStage.isActive()) {
@@ -487,8 +490,8 @@ class StageCoordinator implements SplitLayout.LayoutChangeListener,
     @Override
     public void onSnappedToDismiss(boolean bottomOrRight) {
         final boolean mainStageToTop =
-                bottomOrRight ? mSideStagePosition == STAGE_POSITION_BOTTOM_OR_RIGHT
-                        : mSideStagePosition == STAGE_POSITION_TOP_OR_LEFT;
+                bottomOrRight ? mSideStagePosition == SPLIT_POSITION_BOTTOM_OR_RIGHT
+                        : mSideStagePosition == SPLIT_POSITION_TOP_OR_LEFT;
         if (ENABLE_SHELL_TRANSITIONS) {
             onSnappedToDismissTransition(mainStageToTop);
             return;
@@ -519,8 +522,8 @@ class StageCoordinator implements SplitLayout.LayoutChangeListener,
 
     @Override
     public void onDoubleTappedDivider() {
-        setSideStagePosition(mSideStagePosition == STAGE_POSITION_TOP_OR_LEFT
-                ? STAGE_POSITION_BOTTOM_OR_RIGHT : STAGE_POSITION_TOP_OR_LEFT);
+        setSideStagePosition(mSideStagePosition == SPLIT_POSITION_TOP_OR_LEFT
+                ? SPLIT_POSITION_BOTTOM_OR_RIGHT : SPLIT_POSITION_TOP_OR_LEFT);
     }
 
     @Override
@@ -574,12 +577,12 @@ class StageCoordinator implements SplitLayout.LayoutChangeListener,
     }
 
     private Rect getSideStageBounds() {
-        return mSideStagePosition == STAGE_POSITION_TOP_OR_LEFT
+        return mSideStagePosition == SPLIT_POSITION_TOP_OR_LEFT
                 ? mSplitLayout.getBounds1() : mSplitLayout.getBounds2();
     }
 
     private Rect getMainStageBounds() {
-        return mSideStagePosition == STAGE_POSITION_TOP_OR_LEFT
+        return mSideStagePosition == SPLIT_POSITION_TOP_OR_LEFT
                 ? mSplitLayout.getBounds2() : mSplitLayout.getBounds1();
     }
 
@@ -742,7 +745,7 @@ class StageCoordinator implements SplitLayout.LayoutChangeListener,
 
             // Update local states (before animating).
             setDividerVisibility(true);
-            setSideStagePosition(STAGE_POSITION_BOTTOM_OR_RIGHT, false /* updateVisibility */);
+            setSideStagePosition(SPLIT_POSITION_BOTTOM_OR_RIGHT, false /* updateVisibility */);
             setSplitsVisible(true);
 
             addDividerBarToTransition(info, t, true /* show */);

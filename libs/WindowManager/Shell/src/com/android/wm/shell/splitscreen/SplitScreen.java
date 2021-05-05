@@ -19,6 +19,7 @@ package com.android.wm.shell.splitscreen;
 import android.annotation.IntDef;
 
 import com.android.wm.shell.common.annotations.ExternalThread;
+import com.android.wm.shell.common.split.SplitLayout.SplitPosition;
 
 /**
  * Interface to engage split-screen feature.
@@ -26,29 +27,6 @@ import com.android.wm.shell.common.annotations.ExternalThread;
  */
 @ExternalThread
 public interface SplitScreen {
-    /**
-     * Stage position isn't specified normally meaning to use what ever it is currently set to.
-     */
-    int STAGE_POSITION_UNDEFINED = -1;
-    /**
-     * Specifies that a stage is positioned at the top half of the screen if
-     * in portrait mode or at the left half of the screen if in landscape mode.
-     */
-    int STAGE_POSITION_TOP_OR_LEFT = 0;
-
-    /**
-     * Specifies that a stage is positioned at the bottom half of the screen if
-     * in portrait mode or at the right half of the screen if in landscape mode.
-     */
-    int STAGE_POSITION_BOTTOM_OR_RIGHT = 1;
-
-    @IntDef(prefix = { "STAGE_POSITION_" }, value = {
-            STAGE_POSITION_UNDEFINED,
-            STAGE_POSITION_TOP_OR_LEFT,
-            STAGE_POSITION_BOTTOM_OR_RIGHT
-    })
-    @interface StagePosition {}
-
     /**
      * Stage type isn't specified normally meaning to use what ever the default is.
      * E.g. exit split-screen and launch the app in fullscreen.
@@ -75,7 +53,7 @@ public interface SplitScreen {
 
     /** Callback interface for listening to changes in a split-screen stage. */
     interface SplitScreenListener {
-        void onStagePositionChanged(@StageType int stage, @StagePosition int position);
+        void onStagePositionChanged(@StageType int stage, @SplitPosition int position);
         void onTaskStageChanged(int taskId, @StageType int stage, boolean visible);
     }
 
