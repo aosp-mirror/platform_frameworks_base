@@ -20,7 +20,6 @@ import android.os.BatteryStats;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
 import android.os.Process;
-import android.os.SystemBatteryConsumer;
 import android.os.UidBatteryConsumer;
 import android.os.UserHandle;
 import android.util.Log;
@@ -79,10 +78,6 @@ public class WifiPowerCalculator extends PowerCalculator {
     public void calculate(BatteryUsageStats.Builder builder, BatteryStats batteryStats,
             long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query) {
 
-        final SystemBatteryConsumer.Builder systemBatteryConsumerBuilder =
-                builder.getOrCreateSystemBatteryConsumerBuilder(
-                        SystemBatteryConsumer.DRAIN_TYPE_WIFI);
-
         long totalAppDurationMs = 0;
         double totalAppPowerMah = 0;
         final PowerDurationAndTraffic powerDurationAndTraffic = new PowerDurationAndTraffic();
@@ -104,11 +99,6 @@ public class WifiPowerCalculator extends PowerCalculator {
                     powerDurationAndTraffic.durationMs);
             app.setConsumedPower(BatteryConsumer.POWER_COMPONENT_WIFI,
                     powerDurationAndTraffic.powerMah, powerModel);
-
-            if (app.getUid() == Process.WIFI_UID) {
-                systemBatteryConsumerBuilder.addUidBatteryConsumer(app);
-                app.excludeFromBatteryUsageStats();
-            }
         }
 
         final long consumptionUC = batteryStats.getWifiMeasuredBatteryConsumptionUC();
@@ -116,13 +106,6 @@ public class WifiPowerCalculator extends PowerCalculator {
         calculateRemaining(powerDurationAndTraffic, powerModel, batteryStats, rawRealtimeUs,
                 BatteryStats.STATS_SINCE_CHARGED, batteryStats.hasWifiActivityReporting(),
                 totalAppDurationMs, totalAppPowerMah, consumptionUC);
-
-        systemBatteryConsumerBuilder
-                .setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_WIFI,
-                        powerDurationAndTraffic.durationMs)
-                .setConsumedPower(BatteryConsumer.POWER_COMPONENT_WIFI,
-                        totalAppPowerMah + powerDurationAndTraffic.powerMah, powerModel)
-                .setPowerConsumedByApps(totalAppPowerMah);
 
         builder.getAggregateBatteryConsumerBuilder(
                 BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE)

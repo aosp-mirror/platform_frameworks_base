@@ -168,7 +168,6 @@ private class PrefsCommand(val context: Context) : Command {
 
         when (topLevel) {
             "list-prefs" -> listPrefs(pw)
-            "set-pref" -> setPref(pw, args.drop(1))
             else -> help(pw)
         }
     }
@@ -178,27 +177,6 @@ private class PrefsCommand(val context: Context) : Command {
         for (field in Prefs.Key::class.java.declaredFields) {
             pw.print("  ")
             pw.println(field.get(Prefs.Key::class.java))
-        }
-    }
-
-    /**
-     * Sets a preference from [Prefs]
-     */
-    private fun setPref(pw: PrintWriter, args: List<String>) {
-        if (args.isEmpty()) {
-            pw.println("invalid arguments: $args")
-            return
-        }
-        val pref = args[0]
-
-        when (pref) {
-            Prefs.Key.HAS_SEEN_PRIORITY_ONBOARDING_IN_S -> {
-                val value = Integer.parseInt(args[1])
-                Prefs.putBoolean(context, Prefs.Key.HAS_SEEN_PRIORITY_ONBOARDING_IN_S, value != 0)
-            }
-            else -> {
-                pw.println("Cannot set pref ($pref)")
-            }
         }
     }
 }

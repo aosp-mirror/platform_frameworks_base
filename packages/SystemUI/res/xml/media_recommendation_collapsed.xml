@@ -22,8 +22,8 @@
         android:id="@+id/recommendation_card_icon"
         android:layout_width="@dimen/qs_aa_media_rec_header_icon_size"
         android:layout_height="@dimen/qs_aa_media_rec_header_icon_size"
-        android:layout_marginTop="@dimen/qs_aa_media_rec_header_icon_padding"
-        android:layout_marginStart="@dimen/qs_aa_media_rec_header_icon_padding"
+        android:layout_marginTop="@dimen/qs_media_padding"
+        android:layout_marginStart="@dimen/qs_aa_media_rec_header_icon_start_margin"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/media_vertical_start_guideline"
@@ -33,7 +33,7 @@
         android:id="@+id/recommendation_card_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/qs_aa_media_rec_header_icon_padding"
+        android:layout_marginStart="@dimen/qs_aa_media_rec_header_icon_start_margin"
         app:layout_constraintTop_toBottomOf="@id/recommendation_card_icon"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/media_vertical_start_guideline"
@@ -45,9 +45,12 @@
         android:layout_height="@dimen/qs_aa_media_rec_album_size"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginTop="@dimen/qs_media_padding"
+        android:layout_marginBottom="@dimen/qs_media_padding"
         app:layout_constraintStart_toEndOf="@id/media_vertical_start_guideline"
         app:layout_constraintEnd_toStartOf="@id/media_cover2"
         app:layout_constraintHorizontal_chainStyle="spread"
+        app:layout_constraintVertical_chainStyle="spread"
         android:visibility="gone" />
 
     <Constraint
@@ -64,6 +67,8 @@
         android:id="@+id/media_cover2"
         android:layout_width="@dimen/qs_aa_media_rec_album_size"
         android:layout_height="@dimen/qs_aa_media_rec_album_size"
+        android:layout_marginTop="@dimen/qs_media_padding"
+        android:layout_marginBottom="@dimen/qs_media_padding"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="@id/media_cover1"
@@ -85,6 +90,8 @@
         android:id="@+id/media_cover3"
         android:layout_width="@dimen/qs_aa_media_rec_album_size"
         android:layout_height="@dimen/qs_aa_media_rec_album_size"
+        android:layout_marginTop="@dimen/qs_media_padding"
+        android:layout_marginBottom="@dimen/qs_media_padding"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="@id/media_cover2"
@@ -112,7 +119,6 @@
         app:layout_constraintStart_toEndOf="@id/media_vertical_start_guideline"
         app:layout_constraintEnd_toStartOf="@id/media_cover5"
         app:layout_constraintHorizontal_chainStyle="spread"
-        app:layout_constraintHorizontal_bias="1"
         android:visibility="gone" />
 
     <Constraint
@@ -134,7 +140,6 @@
         app:layout_constraintStart_toEndOf="@+id/media_cover4"
         app:layout_constraintEnd_toStartOf="@+id/media_cover6"
         app:layout_constraintHorizontal_chainStyle="spread"
-        app:layout_constraintHorizontal_bias="1"
         android:visibility="gone" />
 
     <Constraint

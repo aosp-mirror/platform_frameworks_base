@@ -55,6 +55,7 @@ import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
 import com.android.systemui.util.animation.TransitionLayout;
 
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.concurrent.Executor;
 
@@ -69,6 +70,9 @@ public class MediaControlPanel {
     private static final String TAG = "MediaControlPanel";
     private static final float DISABLED_ALPHA = 0.38f;
     private static final String EXTRAS_MEDIA_SOURCE_PACKAGE_NAME = "package_name";
+    private static final String EXTRAS_SMARTSPACE_INTENT =
+            "com.google.android.apps.gsa.smartspace.extra.SMARTSPACE_INTENT";
+    private static final String KEY_SMARTSPACE_OPEN_IN_FOREGROUND = "KEY_OPEN_IN_FOREGROUND";
     private static final int MEDIA_RECOMMENDATION_ITEMS_PER_ROW = 3;
     private static final int MEDIA_RECOMMENDATION_MAX_NUM = 6;
 
@@ -100,6 +104,8 @@ public class MediaControlPanel {
     private int mBackgroundColor;
     private int mDevicePadding;
     private int mAlbumArtSize;
+    // Instance id for logging purpose.
+    private int mInstanceId;
     private final MediaOutputDialogFactory mMediaOutputDialogFactory;
 
     /**
@@ -258,9 +264,6 @@ public class MediaControlPanel {
 
         ConstraintSet expandedSet = mMediaViewController.getExpandedLayout();
         ConstraintSet collapsedSet = mMediaViewController.getCollapsedLayout();
-
-        mPlayerViewHolder.getPlayer().setBackgroundTintList(
-                ColorStateList.valueOf(mBackgroundColor));
 
         // Click action
         PendingIntent clickIntent = data.getClickIntent();
@@ -459,15 +462,12 @@ public class MediaControlPanel {
     /** Bind this recommendation view based on the data given. */
     public void bindRecommendation(
             @NonNull SmartspaceTarget target,
-            @NonNull int primaryColor,
             @NonNull int backgroundColor) {
         if (mRecommendationViewHolder == null) {
             return;
         }
 
-        mRecommendationViewHolder.getCardIcon().setColorFilter(primaryColor);
-        mRecommendationViewHolder.getCardText().setTextColor(primaryColor);
-
+        mInstanceId = target.getSmartspaceTargetId().hashCode();
         mRecommendationViewHolder.getRecommendations()
                 .setBackgroundTintList(ColorStateList.valueOf(backgroundColor));
         mBackgroundColor = backgroundColor;
@@ -486,8 +486,10 @@ public class MediaControlPanel {
         ConstraintSet collapsedSet = mMediaViewController.getCollapsedLayout();
         int mediaRecommendationNum = Math.min(mediaRecommendationList.size(),
                 MEDIA_RECOMMENDATION_MAX_NUM);
-        for (int i = 0; i < mediaRecommendationNum; i++) {
-            SmartspaceAction recommendation = mediaRecommendationList.get(i);
+        for (int itemIndex = 0, uiComponentIndex = 0;
+                itemIndex < mediaRecommendationNum && uiComponentIndex < mediaRecommendationNum;
+                itemIndex++) {
+            SmartspaceAction recommendation = mediaRecommendationList.get(itemIndex);
             if (recommendation.getIcon() == null) {
                 Log.w(TAG, "No media cover is provided. Skipping this item...");
                 continue;
@@ -511,31 +513,38 @@ public class MediaControlPanel {
             }
 
             // Set up media source app's logo.
-            ImageView mediaSourceLogoImageView = mediaLogoItems.get(i);
+            ImageView mediaSourceLogoImageView = mediaLogoItems.get(uiComponentIndex);
             mediaSourceLogoImageView.setImageDrawable(icon);
             // TODO(b/186699032): Tint the app logo using the accent color.
             mediaSourceLogoImageView.setColorFilter(backgroundColor, PorterDuff.Mode.XOR);
 
             // Set up media item cover.
-            ImageView mediaCoverImageView = mediaCoverItems.get(i);
+            ImageView mediaCoverImageView = mediaCoverItems.get(uiComponentIndex);
             mediaCoverImageView.setImageIcon(recommendation.getIcon());
 
             // Set up the click listener if applicable.
             setSmartspaceRecItemOnClickListener(
                     mediaCoverImageView,
                     recommendation,
-                    target.getSmartspaceTargetId(),
                     null);
 
-            if (i < MEDIA_RECOMMENDATION_ITEMS_PER_ROW) {
-                setVisibleAndAlpha(collapsedSet, mediaCoverItemsResIds.get(i), true);
-                setVisibleAndAlpha(collapsedSet, mediaLogoItemsResIds.get(i), true);
+            if (uiComponentIndex < MEDIA_RECOMMENDATION_ITEMS_PER_ROW) {
+                setVisibleAndAlpha(collapsedSet,
+                        mediaCoverItemsResIds.get(uiComponentIndex), true);
+                setVisibleAndAlpha(collapsedSet,
+                        mediaLogoItemsResIds.get(uiComponentIndex), true);
             } else {
-                setVisibleAndAlpha(collapsedSet, mediaCoverItemsResIds.get(i), false);
-                setVisibleAndAlpha(collapsedSet, mediaLogoItemsResIds.get(i), false);
+                setVisibleAndAlpha(collapsedSet,
+                        mediaCoverItemsResIds.get(uiComponentIndex), false);
+                setVisibleAndAlpha(collapsedSet,
+                        mediaLogoItemsResIds.get(uiComponentIndex), false);
             }
-            setVisibleAndAlpha(expandedSet, mediaCoverItemsResIds.get(i), true);
-            setVisibleAndAlpha(expandedSet, mediaLogoItemsResIds.get(i), true);
+            setVisibleAndAlpha(expandedSet,
+                    mediaCoverItemsResIds.get(uiComponentIndex), true);
+            setVisibleAndAlpha(expandedSet,
+                    mediaLogoItemsResIds.get(uiComponentIndex), true);
+
+            uiComponentIndex++;
         }
 
         // Set up long press to show guts setting panel.
@@ -635,7 +644,6 @@ public class MediaControlPanel {
     private void setSmartspaceRecItemOnClickListener(
             @NonNull View view,
             @NonNull SmartspaceAction action,
-            @NonNull String targetId,
             @Nullable View.OnClickListener callback) {
         if (view == null || action == null || action.getIntent() == null) {
             Log.e(TAG, "No tap action can be set up");
@@ -646,24 +654,60 @@ public class MediaControlPanel {
             // When media recommendation card is shown, there could be only one card.
             SysUiStatsLog.write(SysUiStatsLog.SMARTSPACE_CARD_REPORTED,
                     760, // SMARTSPACE_CARD_CLICK
-                    targetId.hashCode(),
+                    mInstanceId,
                     SysUiStatsLog
                             .SMART_SPACE_CARD_REPORTED__CARD_TYPE__HEADPHONE_MEDIA_RECOMMENDATIONS,
-                    getSurfaceForSmartspaceLogging(mMediaViewController.getCurrentEndLocation()),
-                    /* rank */ 1,
+                    getSurfaceForSmartspaceLogging(),
+                    /* rank */ 0,
                     /* cardinality */ 1);
 
-            mActivityStarter.postStartActivityDismissingKeyguard(
-                    action.getIntent(),
-                    0 /* delay */,
-                    buildLaunchAnimatorController(mRecommendationViewHolder.getRecommendations()));
+            if (shouldSmartspaceRecItemOpenInForeground(action)) {
+                // Request to unlock the device if the activity needs to be opened in foreground.
+                mActivityStarter.postStartActivityDismissingKeyguard(
+                        action.getIntent(),
+                        0 /* delay */,
+                        buildLaunchAnimatorController(
+                                mRecommendationViewHolder.getRecommendations()));
+            } else {
+                // Otherwise, open the activity in background directly.
+                view.getContext().startActivity(action.getIntent());
+            }
+
             if (callback != null) {
                 callback.onClick(v);
             }
         });
     }
 
-    private int getSurfaceForSmartspaceLogging(int currentEndLocation) {
+    /** Returns if the Smartspace action will open the activity in foreground. */
+    private boolean shouldSmartspaceRecItemOpenInForeground(SmartspaceAction action) {
+        if (action == null || action.getIntent() == null
+                || action.getIntent().getExtras() == null) {
+            return false;
+        }
+
+        String intentString = action.getIntent().getExtras().getString(EXTRAS_SMARTSPACE_INTENT);
+        if (intentString == null) {
+            return false;
+        }
+
+        try {
+            Intent wrapperIntent = Intent.parseUri(intentString, Intent.URI_INTENT_SCHEME);
+            return wrapperIntent.getBooleanExtra(KEY_SMARTSPACE_OPEN_IN_FOREGROUND, false);
+        } catch (URISyntaxException e) {
+            Log.wtf(TAG, "Failed to create intent from URI: " + intentString);
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    /**
+     * Get the surface given the current end location for MediaViewController
+     * @return surface used for Smartspace logging
+     */
+    protected int getSurfaceForSmartspaceLogging() {
+        int currentEndLocation = mMediaViewController.getCurrentEndLocation();
         if (currentEndLocation == MediaHierarchyManager.LOCATION_QQS
                 || currentEndLocation == MediaHierarchyManager.LOCATION_QS) {
             return SysUiStatsLog.SMART_SPACE_CARD_REPORTED__DISPLAY_SURFACE__SHADE;
@@ -671,5 +715,9 @@ public class MediaControlPanel {
             return SysUiStatsLog.SMART_SPACE_CARD_REPORTED__DISPLAY_SURFACE__LOCKSCREEN;
         }
         return SysUiStatsLog.SMART_SPACE_CARD_REPORTED__DISPLAY_SURFACE__DEFAULT_SURFACE;
+    }
+
+    protected int getInstanceId() {
+        return mInstanceId;
     }
 }

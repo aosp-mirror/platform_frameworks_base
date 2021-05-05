@@ -303,8 +303,8 @@ public class ApkChecksums {
      * @param onChecksumsReadyListener to receive the resulting checksums
      */
     public static void getChecksums(List<Pair<String, File>> filesToChecksum,
-            @Checksum.Type int optional,
-            @Checksum.Type int required,
+            @Checksum.TypeMask int optional,
+            @Checksum.TypeMask int required,
             @Nullable String installerPackageName,
             @Nullable Certificate[] trustedInstallers,
             @NonNull IOnChecksumsReadyListener onChecksumsReadyListener,
@@ -331,7 +331,7 @@ public class ApkChecksums {
 
     private static void processRequiredChecksums(List<Pair<String, File>> filesToChecksum,
             List<Map<Integer, ApkChecksum>> result,
-            @Checksum.Type int required,
+            @Checksum.TypeMask int required,
             @NonNull IOnChecksumsReadyListener onChecksumsReadyListener,
             @NonNull Injector injector,
             long startTime) {
@@ -382,7 +382,7 @@ public class ApkChecksums {
      * @param checksums             resulting checksums
      */
     private static void getAvailableApkChecksums(String split, File file,
-            @Checksum.Type int types,
+            @Checksum.TypeMask int types,
             @Nullable String installerPackageName,
             @Nullable Certificate[] trustedInstallers,
             Map<Integer, ApkChecksum> checksums,
@@ -415,7 +415,7 @@ public class ApkChecksums {
     }
 
     private static void getInstallerChecksums(String split, File file,
-            @Checksum.Type int types,
+            @Checksum.TypeMask int types,
             @Nullable String installerPackageName,
             @Nullable Certificate[] trustedInstallers,
             Map<Integer, ApkChecksum> checksums,
@@ -523,7 +523,7 @@ public class ApkChecksums {
      * Whether the file is available for checksumming or we need to wait.
      */
     private static boolean needToWait(File file,
-            @Checksum.Type int types,
+            @Checksum.TypeMask int types,
             Map<Integer, ApkChecksum> checksums,
             @NonNull Injector injector) throws IOException {
         if (!isRequired(TYPE_WHOLE_MERKLE_ROOT_4K_SHA256, types, checksums)
@@ -564,7 +564,7 @@ public class ApkChecksums {
      * @param checksums resulting checksums
      */
     private static void getRequiredApkChecksums(String split, File file,
-            @Checksum.Type int types,
+            @Checksum.TypeMask int types,
             Map<Integer, ApkChecksum> checksums) {
         final String filePath = file.getAbsolutePath();
 
@@ -596,7 +596,7 @@ public class ApkChecksums {
     }
 
     private static boolean isRequired(@Checksum.Type int type,
-            @Checksum.Type int types, Map<Integer, ApkChecksum> checksums) {
+            @Checksum.TypeMask int types, Map<Integer, ApkChecksum> checksums) {
         if ((types & type) == 0) {
             return false;
         }

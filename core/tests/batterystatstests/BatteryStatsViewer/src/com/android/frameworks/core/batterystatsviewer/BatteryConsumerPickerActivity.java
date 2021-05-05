@@ -18,68 +18,60 @@ package com.android.frameworks.core.batterystatsviewer;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.BatteryStatsManager;
+import android.os.BatteryUsageStats;
 import android.os.Bundle;
+import android.os.UidBatteryConsumer;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
 
+import androidx.activity.ComponentActivity;
 import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
-import androidx.fragment.app.FragmentStatePagerAdapter;
-import androidx.viewpager.widget.ViewPager;
+import androidx.loader.app.LoaderManager;
+import androidx.loader.content.Loader;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.tabs.TabLayout;
+import com.android.settingslib.utils.AsyncLoaderCompat;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Locale;
 
 /**
  * Picker, showing a sorted lists of applications and other types of entities consuming power.
  * Opens BatteryStatsViewerActivity upon item selection.
  */
-public class BatteryConsumerPickerActivity extends FragmentActivity {
+public class BatteryConsumerPickerActivity extends ComponentActivity {
     private static final String PREF_SELECTED_BATTERY_CONSUMER = "batteryConsumerId";
+    private static final int BATTERY_STATS_REFRESH_RATE_MILLIS = 60 * 1000;
+    private BatteryConsumerListAdapter mBatteryConsumerListAdapter;
+    private RecyclerView mAppList;
+    private View mLoadingView;
+    private final Runnable mBatteryStatsRefresh = this::loadBatteryStats;
+
+    private interface OnBatteryConsumerSelectedListener {
+        void onBatteryConsumerSelected(String batteryConsumerId);
+    }
 
     @Override
     protected void onCreate(Bundle icicle) {
         super.onCreate(icicle);
 
-        setContentView(R.layout.battery_consumer_picker_activity_layout);
+        setContentView(R.layout.battery_consumer_picker_layout);
+        mLoadingView = findViewById(R.id.loading_view);
 
-        ViewPager viewPager = findViewById(R.id.pager);
+        mAppList = findViewById(R.id.list_view);
+        mAppList.setLayoutManager(new LinearLayoutManager(this));
+        mBatteryConsumerListAdapter =
+                new BatteryConsumerListAdapter((this::setSelectedBatteryConsumer));
+        mAppList.setAdapter(mBatteryConsumerListAdapter);
 
-        FragmentStatePagerAdapter adapter = new FragmentStatePagerAdapter(
-                getSupportFragmentManager()) {
-
-            @Override
-            public int getCount() {
-                return 2;
-            }
-
-            @NonNull
-            @Override
-            public Fragment getItem(int position) {
-                switch (position) {
-                    case 0:
-                        return new BatteryConsumerPickerFragment(
-                                BatteryConsumerPickerFragment.PICKER_TYPE_APP);
-                    case 1:
-                    default:
-                        return new BatteryConsumerPickerFragment(
-                                BatteryConsumerPickerFragment.PICKER_TYPE_DRAIN);
-                }
-            }
-
-            @Override
-            public CharSequence getPageTitle(int position) {
-                switch (position) {
-                    case 0:
-                        return "Apps";
-                    case 1:
-                        return "Drains";
-                }
-                return null;
-            }
-        };
-
-        viewPager.setAdapter(adapter);
-        TabLayout tabLayout = findViewById(R.id.tab_layout);
-        tabLayout.setupWithViewPager(viewPager);
         if (icicle == null) {
             final String batteryConsumerId = getPreferences(Context.MODE_PRIVATE)
                     .getString(PREF_SELECTED_BATTERY_CONSUMER, null);
@@ -100,5 +92,184 @@ public class BatteryConsumerPickerActivity extends FragmentActivity {
         final Intent intent = new Intent(this, BatteryStatsViewerActivity.class)
                 .putExtra(BatteryStatsViewerActivity.EXTRA_BATTERY_CONSUMER, batteryConsumerId);
         startActivity(intent);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadBatteryStats();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        getMainThreadHandler().removeCallbacks(mBatteryStatsRefresh);
+    }
+
+    private void loadBatteryStats() {
+        LoaderManager.getInstance(this).restartLoader(0, null,
+                new BatteryConsumerListLoaderCallbacks());
+        getMainThreadHandler().postDelayed(mBatteryStatsRefresh, BATTERY_STATS_REFRESH_RATE_MILLIS);
+    }
+
+    private static class BatteryConsumerListLoader extends
+            AsyncLoaderCompat<List<BatteryConsumerInfoHelper.BatteryConsumerInfo>> {
+        private final BatteryStatsManager mBatteryStatsManager;
+        private final PackageManager mPackageManager;
+
+        BatteryConsumerListLoader(Context context) {
+            super(context);
+            mBatteryStatsManager = context.getSystemService(BatteryStatsManager.class);
+            mPackageManager = context.getPackageManager();
+        }
+
+        @Override
+        public List<BatteryConsumerInfoHelper.BatteryConsumerInfo> loadInBackground() {
+            final BatteryUsageStats batteryUsageStats = mBatteryStatsManager.getBatteryUsageStats();
+            List<BatteryConsumerInfoHelper.BatteryConsumerInfo> batteryConsumerList =
+                    new ArrayList<>();
+
+            for (int scope = 0;
+                    scope < BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_COUNT;
+                    scope++) {
+                batteryConsumerList.add(
+                        BatteryConsumerInfoHelper.makeBatteryConsumerInfo(
+                                batteryUsageStats.getAggregateBatteryConsumer(scope),
+                                BatteryConsumerData.batteryConsumerId(scope),
+                                mPackageManager));
+            }
+
+            for (UidBatteryConsumer consumer : batteryUsageStats.getUidBatteryConsumers()) {
+                batteryConsumerList.add(
+                        BatteryConsumerInfoHelper.makeBatteryConsumerInfo(consumer,
+                                BatteryConsumerData.batteryConsumerId(consumer),
+                                mPackageManager));
+            }
+
+            batteryConsumerList.sort(
+                    Comparator.comparing(
+                            (BatteryConsumerInfoHelper.BatteryConsumerInfo a) -> a.powerMah)
+                            .reversed());
+
+            return batteryConsumerList;
+        }
+
+        @Override
+        protected void onDiscardResult(List<BatteryConsumerInfoHelper.BatteryConsumerInfo> result) {
+        }
+    }
+
+    private class BatteryConsumerListLoaderCallbacks implements
+            LoaderManager.LoaderCallbacks<List<BatteryConsumerInfoHelper.BatteryConsumerInfo>> {
+
+        @NonNull
+        @Override
+        public Loader<List<BatteryConsumerInfoHelper.BatteryConsumerInfo>> onCreateLoader(int id,
+                Bundle args) {
+            return new BatteryConsumerListLoader(BatteryConsumerPickerActivity.this);
+        }
+
+        @Override
+        public void onLoadFinished(
+                @NonNull Loader<List<BatteryConsumerInfoHelper.BatteryConsumerInfo>> loader,
+                List<BatteryConsumerInfoHelper.BatteryConsumerInfo> batteryConsumerList) {
+            mBatteryConsumerListAdapter.setBatteryConsumerList(batteryConsumerList);
+            mAppList.setVisibility(View.VISIBLE);
+            mLoadingView.setVisibility(View.GONE);
+        }
+
+        @Override
+        public void onLoaderReset(
+                @NonNull Loader<List<BatteryConsumerInfoHelper.BatteryConsumerInfo>> loader) {
+        }
+    }
+
+    public class BatteryConsumerListAdapter
+            extends RecyclerView.Adapter<BatteryConsumerViewHolder> {
+        private final OnBatteryConsumerSelectedListener mListener;
+        private List<BatteryConsumerInfoHelper.BatteryConsumerInfo> mBatteryConsumerList;
+
+        public BatteryConsumerListAdapter(OnBatteryConsumerSelectedListener listener) {
+            mListener = listener;
+        }
+
+        void setBatteryConsumerList(
+                List<BatteryConsumerInfoHelper.BatteryConsumerInfo> batteryConsumerList) {
+            mBatteryConsumerList = batteryConsumerList;
+            notifyDataSetChanged();
+        }
+
+        @Override
+        public int getItemCount() {
+            return mBatteryConsumerList.size();
+        }
+
+        @NonNull
+        @Override
+        public BatteryConsumerViewHolder onCreateViewHolder(
+                @NonNull ViewGroup viewGroup,
+                int position) {
+            LayoutInflater layoutInflater = LayoutInflater.from(viewGroup.getContext());
+            View view = layoutInflater.inflate(R.layout.battery_consumer_info_layout, viewGroup,
+                    false);
+            return new BatteryConsumerViewHolder(view, mListener);
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull BatteryConsumerViewHolder viewHolder, int position) {
+            BatteryConsumerInfoHelper.BatteryConsumerInfo item = mBatteryConsumerList.get(position);
+            viewHolder.id = item.id;
+            viewHolder.titleView.setText(item.label);
+            if (item.details != null) {
+                viewHolder.detailsView.setText(item.details);
+                viewHolder.detailsView.setVisibility(View.VISIBLE);
+            } else {
+                viewHolder.detailsView.setVisibility(View.GONE);
+            }
+            viewHolder.powerView.setText(
+                    String.format(Locale.getDefault(), "%.1f mAh", item.powerMah));
+            if (item.iconInfo != null) {
+                viewHolder.iconView.setImageDrawable(
+                        item.iconInfo.loadIcon(getPackageManager()));
+            } else {
+                viewHolder.iconView.setImageResource(R.drawable.gm_device_24);
+            }
+            if (item.packages != null) {
+                viewHolder.packagesView.setText(item.packages);
+                viewHolder.packagesView.setVisibility(View.VISIBLE);
+            } else {
+                viewHolder.packagesView.setVisibility(View.GONE);
+            }
+        }
+    }
+
+    // View Holder used when displaying apps
+    public static class BatteryConsumerViewHolder extends RecyclerView.ViewHolder
+            implements View.OnClickListener {
+        private final OnBatteryConsumerSelectedListener mListener;
+
+        public String id;
+        public TextView titleView;
+        public TextView detailsView;
+        public ImageView iconView;
+        public TextView packagesView;
+        public TextView powerView;
+
+        BatteryConsumerViewHolder(View view, OnBatteryConsumerSelectedListener listener) {
+            super(view);
+            mListener = listener;
+            view.setOnClickListener(this);
+            titleView = view.findViewById(android.R.id.title);
+            detailsView = view.findViewById(R.id.details);
+            iconView = view.findViewById(android.R.id.icon);
+            packagesView = view.findViewById(R.id.packages);
+            powerView = view.findViewById(R.id.power_mah);
+            powerView.setVisibility(View.VISIBLE);
+        }
+
+        @Override
+        public void onClick(View v) {
+            mListener.onBatteryConsumerSelected(id);
+        }
     }
 }

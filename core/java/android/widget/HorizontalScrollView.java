@@ -308,27 +308,6 @@ public class HorizontalScrollView extends FrameLayout {
     }
 
     /**
-     * Returns the {@link EdgeEffect#getType()} for the edge effects.
-     * @return the {@link EdgeEffect#getType()} for the edge effects.
-     * @attr ref android.R.styleable#EdgeEffect_edgeEffectType
-     */
-    @EdgeEffect.EdgeEffectType
-    public int getEdgeEffectType() {
-        return mEdgeGlowLeft.getType();
-    }
-
-    /**
-     * Sets the {@link EdgeEffect#setType(int)} for the edge effects.
-     * @param type The edge effect type to use for the edge effects.
-     * @attr ref android.R.styleable#EdgeEffect_edgeEffectType
-     */
-    public void setEdgeEffectType(@EdgeEffect.EdgeEffectType int type) {
-        mEdgeGlowRight.setType(type);
-        mEdgeGlowLeft.setType(type);
-        invalidate();
-    }
-
-    /**
      * @return The maximum amount this scroll view will scroll in response to
      *   an arrow event.
      */

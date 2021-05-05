@@ -7,7 +7,6 @@ import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.content.Context;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -333,11 +332,6 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
 
     @Override
     public boolean updateResources() {
-        // Update bottom padding, useful for removing extra space once the panel page indicator is
-        // hidden.
-        Resources res = getContext().getResources();
-        setPageMargin(res.getDimensionPixelOffset(R.dimen.qs_tile_margin_horizontal));
-
         setPadding(0, 0, 0,
                 getContext().getResources().getDimensionPixelSize(
                         R.dimen.qs_paged_tile_layout_padding_bottom));

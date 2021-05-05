@@ -1,4 +1,8 @@
 // Baseline format: 1.0
+NotCloseable: com.android.server.wifi.SupplicantManager:
+    Classes that release resources (stop()) should implement AutoClosable and CloseGuard: class com.android.server.wifi.SupplicantManager
+
+
 ProtectedMember: com.android.server.SystemService#publishBinderService(String, android.os.IBinder):
     Protected methods not allowed; must be public: method com.android.server.SystemService.publishBinderService(String,android.os.IBinder)}
 ProtectedMember: com.android.server.SystemService#publishBinderService(String, android.os.IBinder, boolean):

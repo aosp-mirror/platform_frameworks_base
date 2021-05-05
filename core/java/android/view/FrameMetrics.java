@@ -16,6 +16,8 @@
 
 package android.view;
 
+import static android.graphics.FrameInfo.FLAG_WINDOW_VISIBILITY_CHANGED;
+
 import android.annotation.IntDef;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
@@ -171,8 +173,6 @@ public final class FrameMetrics {
      * </p>
      **/
     public static final int DEADLINE = 13;
-
-    private static final int FRAME_INFO_FLAG_FIRST_DRAW = 1 << 0;
 
     /**
      * Identifiers for metrics available for each frame.
@@ -343,7 +343,7 @@ public final class FrameMetrics {
         }
 
         if (id == FIRST_DRAW_FRAME) {
-            return (mTimingData[Index.FLAGS] & FRAME_INFO_FLAG_FIRST_DRAW) != 0 ? 1 : 0;
+            return (mTimingData[Index.FLAGS] & FLAG_WINDOW_VISIBILITY_CHANGED) != 0 ? 1 : 0;
         } else if (id == INTENDED_VSYNC_TIMESTAMP) {
             return mTimingData[Index.INTENDED_VSYNC];
         } else if (id == VSYNC_TIMESTAMP) {

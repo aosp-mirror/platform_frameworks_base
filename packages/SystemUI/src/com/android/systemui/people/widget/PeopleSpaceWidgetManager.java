@@ -17,6 +17,12 @@
 package com.android.systemui.people.widget;
 
 import static android.Manifest.permission.READ_CONTACTS;
+import static android.app.NotificationManager.INTERRUPTION_FILTER_ALARMS;
+import static android.app.NotificationManager.INTERRUPTION_FILTER_ALL;
+import static android.app.NotificationManager.INTERRUPTION_FILTER_NONE;
+import static android.app.NotificationManager.INTERRUPTION_FILTER_PRIORITY;
+import static android.content.Intent.ACTION_BOOT_COMPLETED;
+import static android.service.notification.ZenPolicy.CONVERSATION_SENDERS_ANYONE;
 
 import static com.android.systemui.people.NotificationHelper.getContactUri;
 import static com.android.systemui.people.NotificationHelper.getHighestPriorityNotification;
@@ -30,13 +36,12 @@ import static com.android.systemui.people.PeopleSpaceUtils.augmentTileFromNotifi
 import static com.android.systemui.people.PeopleSpaceUtils.getMessagesCount;
 import static com.android.systemui.people.PeopleSpaceUtils.getNotificationsByUri;
 import static com.android.systemui.people.PeopleSpaceUtils.removeNotificationFields;
-import static com.android.systemui.people.PeopleSpaceUtils.updateAppWidgetOptionsAndView;
-import static com.android.systemui.people.PeopleSpaceUtils.updateAppWidgetViews;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.INotificationManager;
 import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Person;
 import android.app.people.ConversationChannel;
@@ -44,8 +49,11 @@ import android.app.people.IPeopleManager;
 import android.app.people.PeopleManager;
 import android.app.people.PeopleSpaceTile;
 import android.appwidget.AppWidgetManager;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
@@ -60,6 +68,8 @@ import android.preference.PreferenceManager;
 import android.service.notification.ConversationChannelWrapper;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
+import android.service.notification.ZenModeConfig;
+import android.text.TextUtils;
 import android.util.Log;
 import android.widget.RemoteViews;
 
@@ -67,8 +77,9 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.UiEventLoggerImpl;
-import com.android.settingslib.utils.ThreadUtils;
-import com.android.systemui.Dependency;
+import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.people.NotificationHelper;
 import com.android.systemui.people.PeopleSpaceUtils;
 import com.android.systemui.people.PeopleTileViewHelper;
@@ -85,15 +96,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.Executor;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /** Manager for People Space widget. */
-@Singleton
+@SysUISingleton
 public class PeopleSpaceWidgetManager {
     private static final String TAG = "PeopleSpaceWidgetMgr";
     private static final boolean DEBUG = PeopleSpaceUtils.DEBUG;
@@ -107,12 +118,15 @@ public class PeopleSpaceWidgetManager {
     private PeopleManager mPeopleManager;
     private NotificationEntryManager mNotificationEntryManager;
     private PackageManager mPackageManager;
-    private PeopleSpaceWidgetProvider mPeopleSpaceWidgetProvider;
     private INotificationManager mINotificationManager;
     private UserManager mUserManager;
+    private PeopleSpaceWidgetManager mManager;
     public UiEventLogger mUiEventLogger = new UiEventLoggerImpl();
+    private NotificationManager mNotificationManager;
+    private BroadcastDispatcher mBroadcastDispatcher;
+    private Executor mBgExecutor;
     @GuardedBy("mLock")
-    public static Map<PeopleTileKey, PeopleSpaceWidgetProvider.TileConversationListener>
+    public static Map<PeopleTileKey, TileConversationListener>
             mListeners = new HashMap<>();
 
     @GuardedBy("mLock")
@@ -120,46 +134,91 @@ public class PeopleSpaceWidgetManager {
     // This is required because on notification removal, the contact Uri field is stripped and we
     // only have the notification key to determine which widget IDs should be updated.
     private Map<String, Set<String>> mNotificationKeyToWidgetIdsMatchedByUri = new HashMap<>();
-    private boolean mIsForTesting;
+    private boolean mRegisteredReceivers;
 
     @Inject
-    public PeopleSpaceWidgetManager(Context context) {
+    public PeopleSpaceWidgetManager(Context context, LauncherApps launcherApps,
+            NotificationEntryManager notificationEntryManager,
+            PackageManager packageManager, UserManager userManager,
+            NotificationManager notificationManager, BroadcastDispatcher broadcastDispatcher,
+            @Background Executor bgExecutor) {
         if (DEBUG) Log.d(TAG, "constructor");
         mContext = context;
         mAppWidgetManager = AppWidgetManager.getInstance(context);
         mIPeopleManager = IPeopleManager.Stub.asInterface(
                 ServiceManager.getService(Context.PEOPLE_SERVICE));
-        mLauncherApps = context.getSystemService(LauncherApps.class);
+        mLauncherApps = launcherApps;
         mSharedPrefs = PreferenceManager.getDefaultSharedPreferences(mContext);
-        mPeopleManager = mContext.getSystemService(PeopleManager.class);
-        mNotificationEntryManager = Dependency.get(NotificationEntryManager.class);
-        mPackageManager = mContext.getPackageManager();
-        mPeopleSpaceWidgetProvider = new PeopleSpaceWidgetProvider();
+        mPeopleManager = context.getSystemService(PeopleManager.class);
+        mNotificationEntryManager = notificationEntryManager;
+        mPackageManager = packageManager;
         mINotificationManager = INotificationManager.Stub.asInterface(
                 ServiceManager.getService(Context.NOTIFICATION_SERVICE));
-        mUserManager = context.getSystemService(UserManager.class);
+        mUserManager = userManager;
+        mNotificationManager = notificationManager;
+        mManager = this;
+        mBroadcastDispatcher = broadcastDispatcher;
+        mBgExecutor = bgExecutor;
+    }
+
+    /** Initializes {@PeopleSpaceWidgetManager}. */
+    public void init() {
+        synchronized (mLock) {
+            if (!mRegisteredReceivers) {
+                IntentFilter filter = new IntentFilter();
+                filter.addAction(NotificationManager.ACTION_INTERRUPTION_FILTER_CHANGED);
+                filter.addAction(ACTION_BOOT_COMPLETED);
+                filter.addAction(Intent.ACTION_LOCALE_CHANGED);
+                filter.addAction(Intent.ACTION_MANAGED_PROFILE_AVAILABLE);
+                filter.addAction(Intent.ACTION_PACKAGES_SUSPENDED);
+                filter.addAction(Intent.ACTION_PACKAGES_UNSUSPENDED);
+                filter.addAction(Intent.ACTION_MANAGED_PROFILE_AVAILABLE);
+                filter.addAction(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE);
+                filter.addAction(Intent.ACTION_USER_UNLOCKED);
+                mBroadcastDispatcher.registerReceiver(mBaseBroadcastReceiver, filter,
+                        null /* executor */, UserHandle.ALL);
+                mRegisteredReceivers = true;
+            }
+        }
+    }
+
+    /** Listener for the shortcut data changes. */
+    public class TileConversationListener implements PeopleManager.ConversationListener {
+
+        @Override
+        public void onConversationUpdate(@NonNull ConversationChannel conversation) {
+            if (DEBUG) {
+                Log.d(TAG,
+                        "Received updated conversation: "
+                                + conversation.getShortcutInfo().getLabel());
+            }
+            updateWidgetsWithConversationChanged(conversation);
+        }
     }
 
     /**
-     * AppWidgetManager setter used for testing.
+     * PeopleSpaceWidgetManager setter used for testing.
      */
     @VisibleForTesting
-    public void setAppWidgetManager(
+    PeopleSpaceWidgetManager(Context context,
             AppWidgetManager appWidgetManager, IPeopleManager iPeopleManager,
             PeopleManager peopleManager, LauncherApps launcherApps,
             NotificationEntryManager notificationEntryManager, PackageManager packageManager,
-            boolean isForTesting, PeopleSpaceWidgetProvider peopleSpaceWidgetProvider,
-            UserManager userManager, INotificationManager notificationManager) {
+            UserManager userManager, INotificationManager iNotificationManager,
+            NotificationManager notificationManager, @Background Executor executor) {
+        mContext = context;
         mAppWidgetManager = appWidgetManager;
         mIPeopleManager = iPeopleManager;
         mPeopleManager = peopleManager;
         mLauncherApps = launcherApps;
         mNotificationEntryManager = notificationEntryManager;
         mPackageManager = packageManager;
-        mIsForTesting = isForTesting;
-        mPeopleSpaceWidgetProvider = peopleSpaceWidgetProvider;
         mUserManager = userManager;
-        mINotificationManager = notificationManager;
+        mINotificationManager = iNotificationManager;
+        mNotificationManager = notificationManager;
+        mManager = this;
+        mSharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+        mBgExecutor = executor;
     }
 
     /**
@@ -173,7 +232,7 @@ public class PeopleSpaceWidgetManager {
                 return;
             }
 
-            if (DEBUG) Log.d(TAG, "updating " + widgetIds.length + " widgets");
+            if (DEBUG) Log.d(TAG, "updating " + widgetIds.length + " widgets: " + widgetIds);
             synchronized (mLock) {
                 updateSingleConversationWidgets(widgetIds);
             }
@@ -191,16 +250,47 @@ public class PeopleSpaceWidgetManager {
         for (int appWidgetId : appWidgetIds) {
             PeopleSpaceTile tile = getTileForExistingWidget(appWidgetId);
             if (tile == null) {
-                if (DEBUG) Log.d(TAG, "Matching conversation not found for shortcut ID");
-                //TODO: Delete app widget id when crash is fixed (b/172932636)
-                continue;
+                Log.e(TAG, "Matching conversation not found for shortcut ID");
             }
             Bundle options = mAppWidgetManager.getAppWidgetOptions(appWidgetId);
-            updateAppWidgetViews(mAppWidgetManager, mContext, appWidgetId, tile, options);
+            updateAppWidgetViews(appWidgetId, tile, options);
             widgetIdToTile.put(appWidgetId, tile);
+            if (tile != null) {
+                registerConversationListenerIfNeeded(appWidgetId,
+                        new PeopleTileKey(tile));
+            }
         }
-        PeopleSpaceUtils.getBirthdaysOnBackgroundThread(
-                mContext, mAppWidgetManager, widgetIdToTile, appWidgetIds);
+        PeopleSpaceUtils.getDataFromContactsOnBackgroundThread(
+                mContext, mManager, widgetIdToTile, appWidgetIds);
+    }
+
+    /** Updates the current widget view with provided {@link PeopleSpaceTile}. */
+    private void updateAppWidgetViews(int appWidgetId, PeopleSpaceTile tile, Bundle options) {
+        PeopleTileKey key = getKeyFromStorageByWidgetId(appWidgetId);
+        if (DEBUG) Log.d(TAG, "Widget: " + appWidgetId + " for: " + key.toString());
+        if (!key.isValid()) {
+            Log.e(TAG, "Cannot update invalid widget");
+            return;
+        }
+        RemoteViews views = new PeopleTileViewHelper(mContext, tile, appWidgetId,
+                options, key).getViews();
+
+        // Tell the AppWidgetManager to perform an update on the current app widget.
+        mAppWidgetManager.updateAppWidget(appWidgetId, views);
+    }
+
+    /** Updates tile in app widget options and the current view. */
+    public void updateAppWidgetOptionsAndViewOptional(int appWidgetId,
+            Optional<PeopleSpaceTile> tile) {
+        if (tile.isPresent()) {
+            updateAppWidgetOptionsAndView(appWidgetId, tile.get());
+        }
+    }
+
+    /** Updates tile in app widget options and the current view. */
+    public void updateAppWidgetOptionsAndView(int appWidgetId, PeopleSpaceTile tile) {
+        Bundle options = AppWidgetOptionsHelper.setPeopleTile(mAppWidgetManager, appWidgetId, tile);
+        updateAppWidgetViews(appWidgetId, tile, options);
     }
 
     /**
@@ -226,7 +316,7 @@ public class PeopleSpaceWidgetManager {
                 widgetSp.getInt(USER_ID, INVALID_USER_ID),
                 widgetSp.getString(PACKAGE_NAME, EMPTY_STRING));
 
-        return getTileFromPersistentStorage(key);
+        return getTileFromPersistentStorage(key, appWidgetId);
     }
 
     /**
@@ -234,7 +324,7 @@ public class PeopleSpaceWidgetManager {
      * If a {@link PeopleTileKey} is not provided, fetch one from {@link SharedPreferences}.
      */
     @Nullable
-    public PeopleSpaceTile getTileFromPersistentStorage(PeopleTileKey key) {
+    public PeopleSpaceTile getTileFromPersistentStorage(PeopleTileKey key, int appWidgetId) {
         if (!key.isValid()) {
             Log.e(TAG, "PeopleTileKey invalid: " + key.toString());
             return null;
@@ -254,7 +344,22 @@ public class PeopleSpaceWidgetManager {
                 return null;
             }
 
-            return new PeopleSpaceTile.Builder(channel, mLauncherApps).build();
+            // Get tile from shortcut & conversation storage.
+            PeopleSpaceTile.Builder storedTile = new PeopleSpaceTile.Builder(channel,
+                    mLauncherApps);
+            if (storedTile == null) {
+                return storedTile.build();
+            }
+
+            // Supplement with our storage.
+            String contactUri = mSharedPrefs.getString(String.valueOf(appWidgetId), null);
+            if (contactUri != null && storedTile.build().getContactUri() == null) {
+                if (DEBUG) Log.d(TAG, "Restore contact uri from storage: " + contactUri);
+                storedTile.setContactUri(Uri.parse(contactUri));
+            }
+
+            // Add current state.
+            return updateWithCurrentState(storedTile.build(), ACTION_BOOT_COMPLETED);
         } catch (Exception e) {
             Log.e(TAG, "Failed to retrieve conversation for tile: " + e);
             return null;
@@ -275,11 +380,7 @@ public class PeopleSpaceWidgetManager {
                 Log.d(TAG, "Notification removed, key: " + sbn.getKey());
             }
         }
-        if (mIsForTesting) {
-            updateWidgetsWithNotificationChangedInBackground(sbn, notificationAction);
-            return;
-        }
-        ThreadUtils.postOnBackgroundThread(
+        mBgExecutor.execute(
                 () -> updateWidgetsWithNotificationChangedInBackground(sbn, notificationAction));
     }
 
@@ -331,8 +432,7 @@ public class PeopleSpaceWidgetManager {
                     .collect(Collectors.toMap(
                             Function.identity(),
                             id -> getAugmentedTileForExistingWidget(id, groupedNotifications)))
-                    .forEach((id, tile) ->
-                            updateAppWidgetOptionsAndView(mAppWidgetManager, mContext, id, tile));
+                    .forEach((id, tile) -> updateAppWidgetOptionsAndViewOptional(id, tile));
         } catch (Exception e) {
             Log.e(TAG, "Exception updating widgets: " + e);
         }
@@ -341,16 +441,20 @@ public class PeopleSpaceWidgetManager {
     /**
      * Augments {@code tile} based on notifications returned from {@code notificationEntryManager}.
      */
-    public PeopleSpaceTile augmentTileFromNotificationEntryManager(PeopleSpaceTile tile) {
+    public PeopleSpaceTile augmentTileFromNotificationEntryManager(PeopleSpaceTile tile,
+            Optional<Integer> appWidgetId) {
         PeopleTileKey key = new PeopleTileKey(tile);
-        Log.d(TAG, "Augmenting tile from NotificationEntryManager widget: " + key.toString());
+        if (DEBUG) {
+            Log.d(TAG,
+                    "Augmenting tile from NotificationEntryManager widget: " + key.toString());
+        }
         Map<PeopleTileKey, Set<NotificationEntry>> notifications =
                 getGroupedConversationNotifications();
         String contactUri = null;
         if (tile.getContactUri() != null) {
             contactUri = tile.getContactUri().toString();
         }
-        return augmentTileFromNotifications(tile, key, contactUri, notifications);
+        return augmentTileFromNotifications(tile, key, contactUri, notifications, appWidgetId);
     }
 
     /** Returns active and pending notifications grouped by {@link PeopleTileKey}. */
@@ -380,9 +484,11 @@ public class PeopleSpaceWidgetManager {
 
     /** Augments {@code tile} based on {@code notifications}, matching {@code contactUri}. */
     public PeopleSpaceTile augmentTileFromNotifications(PeopleSpaceTile tile, PeopleTileKey key,
-            String contactUri, Map<PeopleTileKey, Set<NotificationEntry>> notifications) {
+            String contactUri,
+            Map<PeopleTileKey, Set<NotificationEntry>> notifications,
+            Optional<Integer> appWidgetId) {
         if (DEBUG) Log.d(TAG, "Augmenting tile from notifications. Tile key: " + key.toString());
-        boolean hasReadContactsPermission =  mPackageManager.checkPermission(READ_CONTACTS,
+        boolean hasReadContactsPermission = mPackageManager.checkPermission(READ_CONTACTS,
                 tile.getPackageName()) == PackageManager.PERMISSION_GRANTED;
 
         List<NotificationEntry> notificationsByUri = new ArrayList<>();
@@ -413,7 +519,8 @@ public class PeopleSpaceWidgetManager {
         NotificationEntry highestPriority = getHighestPriorityNotification(allNotifications);
 
         if (DEBUG) Log.d(TAG, "Augmenting tile from notification, key: " + key.toString());
-        return augmentTileFromNotification(mContext, tile, key, highestPriority, messagesCount);
+        return augmentTileFromNotification(mContext, tile, key, highestPriority, messagesCount,
+                appWidgetId);
     }
 
     /** Returns an augmented tile for an existing widget. */
@@ -434,7 +541,8 @@ public class PeopleSpaceWidgetManager {
         PeopleTileKey key = new PeopleTileKey(tile);
         if (DEBUG) Log.d(TAG, "Existing widget: " + widgetId + ". Tile key: " + key.toString());
         return Optional.ofNullable(
-                augmentTileFromNotifications(tile, key, contactUriString, notifications));
+                augmentTileFromNotifications(tile, key, contactUriString, notifications,
+                        Optional.of(widgetId)));
     }
 
     /** Returns stored widgets for the conversation specified. */
@@ -552,10 +660,8 @@ public class PeopleSpaceWidgetManager {
                 .setStatuses(conversation.getStatuses())
                 .setLastInteractionTimestamp(conversation.getLastEventTimestamp())
                 .setIsImportantConversation(conversation.getParentNotificationChannel() != null
-                        && conversation.getParentNotificationChannel().isImportantConversation())
-                .build();
-        updateAppWidgetOptionsAndView(mAppWidgetManager, mContext, appWidgetId,
-                updatedTile.build());
+                        && conversation.getParentNotificationChannel().isImportantConversation());
+        updateAppWidgetOptionsAndView(appWidgetId, updatedTile.build());
     }
 
     /**
@@ -640,11 +746,11 @@ public class PeopleSpaceWidgetManager {
     /** Adds a widget based on {@code key} mapped to {@code appWidgetId}. */
     public void addNewWidget(int appWidgetId, PeopleTileKey key) {
         if (DEBUG) Log.d(TAG, "addNewWidget called with key for appWidgetId: " + appWidgetId);
-        PeopleSpaceTile tile = getTileFromPersistentStorage(key);
+        PeopleSpaceTile tile = getTileFromPersistentStorage(key, appWidgetId);
         if (tile == null) {
             return;
         }
-        tile = augmentTileFromNotificationEntryManager(tile);
+        tile = augmentTileFromNotificationEntryManager(tile, Optional.of(appWidgetId));
 
         PeopleTileKey existingKeyIfStored;
         synchronized (mLock) {
@@ -665,6 +771,8 @@ public class PeopleSpaceWidgetManager {
             PeopleSpaceUtils.setSharedPreferencesStorageForTile(mContext, key, appWidgetId,
                     tile.getContactUri());
         }
+        if (DEBUG) Log.d(TAG, "Ensure listener is registered for widget: " + appWidgetId);
+        registerConversationListenerIfNeeded(appWidgetId, key);
         try {
             if (DEBUG) Log.d(TAG, "Caching shortcut for PeopleTile: " + key.toString());
             mLauncherApps.cacheShortcuts(tile.getPackageName(),
@@ -674,23 +782,17 @@ public class PeopleSpaceWidgetManager {
             Log.w(TAG, "Exception caching shortcut:" + e);
         }
 
-        PeopleSpaceUtils.updateAppWidgetOptionsAndView(
-                mAppWidgetManager, mContext, appWidgetId, tile);
-        mPeopleSpaceWidgetProvider.onUpdate(mContext, mAppWidgetManager, new int[]{appWidgetId});
+        updateAppWidgetOptionsAndView(appWidgetId, tile);
     }
 
     /** Registers a conversation listener for {@code appWidgetId} if not already registered. */
-    public void registerConversationListenerIfNeeded(int widgetId,
-            PeopleSpaceWidgetProvider.TileConversationListener newListener) {
+    public void registerConversationListenerIfNeeded(int widgetId, PeopleTileKey key) {
         // Retrieve storage needed for registration.
-        PeopleTileKey key;
-        synchronized (mLock) {
-            key = getKeyFromStorageByWidgetId(widgetId);
-            if (!key.isValid()) {
-                if (DEBUG) Log.w(TAG, "Could not register listener for widget: " + widgetId);
-                return;
-            }
+        if (!key.isValid()) {
+            if (DEBUG) Log.w(TAG, "Could not register listener for widget: " + widgetId);
+            return;
         }
+        TileConversationListener newListener = new TileConversationListener();
         synchronized (mListeners) {
             if (mListeners.containsKey(key)) {
                 if (DEBUG) Log.d(TAG, "Already registered listener");
@@ -760,7 +862,7 @@ public class PeopleSpaceWidgetManager {
 
     /** Unregisters the conversation listener for {@code appWidgetId}. */
     private void unregisterConversationListener(PeopleTileKey key, int appWidgetId) {
-        PeopleSpaceWidgetProvider.TileConversationListener registeredListener;
+        TileConversationListener registeredListener;
         synchronized (mListeners) {
             registeredListener = mListeners.get(key);
             if (registeredListener == null) {
@@ -875,9 +977,153 @@ public class PeopleSpaceWidgetManager {
             return null;
         }
 
-        PeopleSpaceTile augmentedTile = augmentTileFromNotificationEntryManager(tile);
+        PeopleSpaceTile augmentedTile = augmentTileFromNotificationEntryManager(tile,
+                Optional.empty());
 
         if (DEBUG) Log.i(TAG, "Returning tile preview for shortcutId: " + shortcutId);
-        return new PeopleTileViewHelper(mContext, augmentedTile, 0, options).getViews();
+        return new PeopleTileViewHelper(mContext, augmentedTile, 0, options,
+                new PeopleTileKey(augmentedTile)).getViews();
+    }
+
+    protected final BroadcastReceiver mBaseBroadcastReceiver = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (DEBUG) Log.d(TAG, "Update widgets from: " + action);
+            mBgExecutor.execute(() -> updateWidgetsOnStateChange(action));
+        }
+    };
+
+    /** Updates any app widget based on the current state. */
+    @VisibleForTesting
+    void updateWidgetsOnStateChange(String entryPoint) {
+        int[] appWidgetIds = mAppWidgetManager.getAppWidgetIds(
+                new ComponentName(mContext, PeopleSpaceWidgetProvider.class));
+        if (appWidgetIds == null) {
+            return;
+        }
+        synchronized (mLock) {
+            for (int appWidgetId : appWidgetIds) {
+                PeopleSpaceTile tile = getTileForExistingWidget(appWidgetId);
+                if (tile == null) {
+                    Log.e(TAG, "Matching conversation not found for shortcut ID");
+                } else {
+                    tile = updateWithCurrentState(tile, entryPoint);
+                }
+                updateAppWidgetOptionsAndView(appWidgetId, tile);
+            }
+        }
+    }
+
+    /** Checks the current state of {@code tile} dependencies, updating fields as necessary. */
+    @Nullable
+    private PeopleSpaceTile updateWithCurrentState(PeopleSpaceTile tile,
+            String entryPoint) {
+        PeopleSpaceTile.Builder updatedTile = tile.toBuilder();
+        try {
+            switch (entryPoint) {
+                case NotificationManager
+                        .ACTION_INTERRUPTION_FILTER_CHANGED:
+                    updatedTile.setNotificationPolicyState(getNotificationPolicyState());
+                    break;
+                case Intent.ACTION_PACKAGES_SUSPENDED:
+                case Intent.ACTION_PACKAGES_UNSUSPENDED:
+                    updatedTile.setIsPackageSuspended(getPackageSuspended(tile));
+                    break;
+                case Intent.ACTION_MANAGED_PROFILE_AVAILABLE:
+                case Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE:
+                case Intent.ACTION_USER_UNLOCKED:
+                    updatedTile.setIsUserQuieted(getUserQuieted(tile));
+                    break;
+                case Intent.ACTION_LOCALE_CHANGED:
+                    break;
+                case ACTION_BOOT_COMPLETED:
+                default:
+                    updatedTile.setIsUserQuieted(getUserQuieted(tile)).setIsPackageSuspended(
+                            getPackageSuspended(tile)).setNotificationPolicyState(
+                            getNotificationPolicyState());
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Package no longer found for tile: " + tile.toString() + e);
+            return null;
+        }
+        return updatedTile.build();
+    }
+
+    private boolean getPackageSuspended(PeopleSpaceTile tile) throws Exception {
+        boolean packageSuspended = !TextUtils.isEmpty(tile.getPackageName())
+                && mPackageManager.isPackageSuspended(tile.getPackageName());
+        if (DEBUG) Log.d(TAG, "Package suspended: " + packageSuspended);
+        return packageSuspended;
+    }
+
+    private boolean getUserQuieted(PeopleSpaceTile tile) {
+        boolean workProfileQuieted =
+                tile.getUserHandle() != null && mUserManager.isQuietModeEnabled(
+                        tile.getUserHandle());
+        if (DEBUG) Log.d(TAG, "Work profile quiet: " + workProfileQuieted);
+        return workProfileQuieted;
+    }
+
+    private int getNotificationPolicyState() {
+        NotificationManager.Policy policy = mNotificationManager.getNotificationPolicy();
+        boolean suppressVisualEffects =
+                NotificationManager.Policy.areAllVisualEffectsSuppressed(
+                        policy.suppressedVisualEffects);
+        int notificationPolicyState = 0;
+        switch (mNotificationManager.getCurrentInterruptionFilter()) {
+            case INTERRUPTION_FILTER_ALL:
+                if (DEBUG) Log.d(TAG, "All interruptions allowed");
+                return PeopleSpaceTile.SHOW_CONVERSATIONS;
+            case INTERRUPTION_FILTER_PRIORITY:
+                if (policy.allowConversations()) {
+                    // If the user sees notifications in DND, show notifications in tiles in DND.
+                    if (!suppressVisualEffects) {
+                        if (DEBUG) Log.d(TAG, "Visual effects not suppressed.");
+                        return PeopleSpaceTile.SHOW_CONVERSATIONS;
+                    }
+                    if (policy.priorityConversationSenders == CONVERSATION_SENDERS_ANYONE) {
+                        if (DEBUG) Log.d(TAG, "All conversations allowed");
+                        // We only show conversations, so we can show everything.
+                        return PeopleSpaceTile.SHOW_CONVERSATIONS;
+                    } else if (policy.priorityConversationSenders
+                            == NotificationManager.Policy.CONVERSATION_SENDERS_IMPORTANT) {
+                        if (DEBUG) Log.d(TAG, "Important conversations allowed");
+                        notificationPolicyState |= PeopleSpaceTile.SHOW_IMPORTANT_CONVERSATIONS;
+                    }
+                }
+                if (policy.allowMessages()) {
+                    switch (policy.allowMessagesFrom()) {
+                        case ZenModeConfig.SOURCE_CONTACT:
+                            if (DEBUG) Log.d(TAG, "All contacts allowed");
+                            notificationPolicyState |= PeopleSpaceTile.SHOW_CONTACTS;
+                            return notificationPolicyState;
+                        case ZenModeConfig.SOURCE_STAR:
+                            if (DEBUG) Log.d(TAG, "Starred contacts allowed");
+                            notificationPolicyState |= PeopleSpaceTile.SHOW_STARRED_CONTACTS;
+                            return notificationPolicyState;
+                        case ZenModeConfig.SOURCE_ANYONE:
+                        default:
+                            if (DEBUG) Log.d(TAG, "All messages allowed");
+                            return PeopleSpaceTile.SHOW_CONVERSATIONS;
+                    }
+                }
+                if (notificationPolicyState != 0) {
+                    if (DEBUG) Log.d(TAG, "Return block state: " + notificationPolicyState);
+                    return notificationPolicyState;
+                }
+                // If only alarms or nothing can bypass DND, the tile shouldn't show conversations.
+            case INTERRUPTION_FILTER_NONE:
+            case INTERRUPTION_FILTER_ALARMS:
+            default:
+                // If the user sees notifications in DND, show notifications in tiles in DND.
+                if (!suppressVisualEffects) {
+                    if (DEBUG) Log.d(TAG, "Visual effects not suppressed.");
+                    return PeopleSpaceTile.SHOW_CONVERSATIONS;
+                }
+                if (DEBUG) Log.d(TAG, "Block conversations");
+                return PeopleSpaceTile.BLOCK_CONVERSATIONS;
+        }
     }
 }

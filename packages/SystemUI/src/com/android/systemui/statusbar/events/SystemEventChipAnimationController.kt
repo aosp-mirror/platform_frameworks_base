@@ -27,6 +27,7 @@ import android.widget.FrameLayout
 
 import com.android.systemui.R
 import com.android.systemui.statusbar.SuperStatusBarViewFactory
+import com.android.systemui.statusbar.phone.StatusBarLocationPublisher
 import com.android.systemui.statusbar.phone.StatusBarWindowController
 import com.android.systemui.statusbar.phone.StatusBarWindowView
 
@@ -39,7 +40,8 @@ import javax.inject.Inject
 class SystemEventChipAnimationController @Inject constructor(
     private val context: Context,
     private val statusBarViewFactory: SuperStatusBarViewFactory,
-    private val statusBarWindowController: StatusBarWindowController
+    private val statusBarWindowController: StatusBarWindowController,
+    private val locationPublisher: StatusBarLocationPublisher
 ) : SystemStatusChipAnimationCallback {
     var showPersistentDot = false
         set(value) {
@@ -64,13 +66,15 @@ class SystemEventChipAnimationController @Inject constructor(
 
         if (state == ANIMATING_IN) {
             currentAnimatedView = viewCreator(context)
-            animationWindowView.addView(currentAnimatedView, layoutParamsDefault)
+            animationWindowView.addView(currentAnimatedView, layoutParamsDefault())
 
             // We are animating IN; chip comes in from View.END
             currentAnimatedView?.apply {
-                translationX = width.toFloat()
+                val translation = width.toFloat()
+                translationX = if (isLayoutRtl) -translation else translation
                 alpha = 0f
                 visibility = View.VISIBLE
+                setPadding(locationPublisher.marginLeft, 0, locationPublisher.marginRight, 0)
             }
         } else {
             // We are animating away
@@ -109,7 +113,7 @@ class SystemEventChipAnimationController @Inject constructor(
 
             val w = width
             val translation = (1 - amt) * w
-            translationX = translation
+            translationX = if (isLayoutRtl) -translation else translation
         }
     }
 
@@ -131,7 +135,13 @@ class SystemEventChipAnimationController @Inject constructor(
         statusBarWindowView.addView(animationWindowView, lp)
     }
 
-    private val layoutParamsDefault = FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).also {
-        it.gravity = Gravity.END or Gravity.CENTER_VERTICAL
+    private fun start() = if (animationWindowView.isLayoutRtl) right() else left()
+    private fun right() = locationPublisher.marginRight
+    private fun left() = locationPublisher.marginLeft
+
+    private fun layoutParamsDefault(): FrameLayout.LayoutParams =
+        FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).also {
+            it.gravity = Gravity.END or Gravity.CENTER_VERTICAL
+            it.marginStart = start()
     }
 }

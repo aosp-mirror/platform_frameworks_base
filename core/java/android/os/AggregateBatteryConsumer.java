@@ -25,17 +25,22 @@ import android.annotation.NonNull;
  */
 public final class AggregateBatteryConsumer extends BatteryConsumer implements Parcelable {
 
+    private final double mConsumedPowerMah;
+
     public AggregateBatteryConsumer(@NonNull Builder builder) {
         super(builder.mPowerComponentsBuilder.build());
+        mConsumedPowerMah = builder.mConsumedPowerMah;
     }
 
     private AggregateBatteryConsumer(@NonNull Parcel source) {
         super(new PowerComponents(source));
+        mConsumedPowerMah = source.readDouble();
     }
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
+        dest.writeDouble(mConsumedPowerMah);
     }
 
     @Override
@@ -55,12 +60,27 @@ public final class AggregateBatteryConsumer extends BatteryConsumer implements P
                 }
             };
 
+    @Override
+    public double getConsumedPower() {
+        return mConsumedPowerMah;
+    }
+
     /**
      * Builder for DeviceBatteryConsumer.
      */
     public static final class Builder extends BaseBuilder<AggregateBatteryConsumer.Builder> {
+        private double mConsumedPowerMah;
+
         public Builder(@NonNull String[] customPowerComponentNames, boolean includePowerModels) {
             super(customPowerComponentNames, includePowerModels);
+        }
+
+        /**
+         * Sets the total power included in this aggregate.
+         */
+        public Builder setConsumedPower(double consumedPowerMah) {
+            mConsumedPowerMah = consumedPowerMah;
+            return this;
         }
 
         /**
