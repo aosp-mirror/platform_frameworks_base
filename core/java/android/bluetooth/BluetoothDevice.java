@@ -1346,6 +1346,17 @@ public final class BluetoothDevice implements Parcelable {
         return null;
     }
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(value = {
+            BluetoothStatusCodes.SUCCESS,
+            BluetoothStatusCodes.ERROR_BLUETOOTH_NOT_ENABLED,
+            BluetoothStatusCodes.ERROR_BLUETOOTH_NOT_ALLOWED,
+            BluetoothStatusCodes.ERROR_MISSING_BLUETOOTH_CONNECT_PERMISSION,
+            BluetoothStatusCodes.ERROR_DEVICE_NOT_BONDED
+    })
+    public @interface SetAliasReturnValues{}
+
     /**
      * Sets the locally modifiable name (alias) of the remote Bluetooth device. This method
      * overwrites the previously stored alias. The new alias is saved in local
@@ -1353,34 +1364,35 @@ public final class BluetoothDevice implements Parcelable {
      *
      * <p>This method requires the calling app to be associated with Companion Device Manager (see
      * {@link android.companion.CompanionDeviceManager#associate(AssociationRequest,
-     * android.companion.CompanionDeviceManager.Callback, Handler)}) and have the {@link
-     * android.Manifest.permission#BLUETOOTH} permission. Alternatively, if the caller has the
-     * {@link android.Manifest.permission#BLUETOOTH_PRIVILEGED} permission, they can bypass the
-     * Companion Device Manager association requirement.
+     * android.companion.CompanionDeviceManager.Callback, Handler)}) and have the
+     * {@link android.Manifest.permission#BLUETOOTH_CONNECT} permission. Alternatively, if the
+     * caller has the {@link android.Manifest.permission#BLUETOOTH_PRIVILEGED} permission, they can
+     * bypass the Companion Device Manager association requirement as well as other permission
+     * requirements.
      *
-     * @param alias is the new locally modifiable name for the remote Bluetooth device which must be
-     *              non-null and not the empty string.
-     * @return {@code true} if the alias is successfully set, {@code false} on error
-     * @throws IllegalArgumentException if the alias is {@code null} or the empty string
+     * @param alias is the new locally modifiable name for the remote Bluetooth device which must
+     *              be the empty string. If null, we clear the alias.
+     * @return whether the alias was successfully changed
+     * @throws IllegalArgumentException if the alias is the empty string
      */
     @RequiresLegacyBluetoothPermission
     @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
-    public boolean setAlias(@NonNull String alias) {
-        if (alias == null || alias.isEmpty()) {
-            throw new IllegalArgumentException("Cannot set the alias to null or the empty string");
+    public @SetAliasReturnValues int setAlias(@Nullable String alias) {
+        if (alias != null && alias.isEmpty()) {
+            throw new IllegalArgumentException("alias cannot be the empty string");
         }
         final IBluetooth service = sService;
         if (service == null) {
             Log.e(TAG, "BT not enabled. Cannot set Remote Device name");
-            return false;
+            return BluetoothStatusCodes.ERROR_BLUETOOTH_NOT_ENABLED;
         }
         try {
             return service.setRemoteAlias(this, alias, mAttributionSource);
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
+            throw e.rethrowFromSystemServer();
         }
-        return false;
     }
 
     /**
