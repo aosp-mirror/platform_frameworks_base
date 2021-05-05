@@ -20,7 +20,6 @@ import android.os.BatteryConsumer;
 import android.os.BatteryStats;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
-import android.os.SystemBatteryConsumer;
 import android.os.UserHandle;
 import android.util.SparseArray;
 
@@ -44,9 +43,6 @@ public class PhonePowerCalculator extends PowerCalculator {
                 BatteryStats.STATS_SINCE_CHARGED) / 1000;
         final double phoneOnPower = mPowerEstimator.calculatePower(phoneOnTimeMs);
         if (phoneOnPower != 0) {
-            builder.getOrCreateSystemBatteryConsumerBuilder(SystemBatteryConsumer.DRAIN_TYPE_PHONE)
-                    .setConsumedPower(BatteryConsumer.POWER_COMPONENT_PHONE, phoneOnPower)
-                    .setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_PHONE, phoneOnTimeMs);
             builder.getAggregateBatteryConsumerBuilder(
                     BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE)
                     .setConsumedPower(BatteryConsumer.POWER_COMPONENT_PHONE, phoneOnPower)

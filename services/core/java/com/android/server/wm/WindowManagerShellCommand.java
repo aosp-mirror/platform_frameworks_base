@@ -130,6 +130,12 @@ public class WindowManagerShellCommand extends ShellCommand {
                     return runResetLetterboxStyle(pw);
                 case "set-sandbox-display-apis":
                     return runSandboxDisplayApis(pw);
+                case "set-multi-window-config":
+                    return runSetMultiWindowConfig();
+                case "get-multi-window-config":
+                    return runGetMultiWindowConfig(pw);
+                case "reset-multi-window-config":
+                    return runResetMultiWindowConfig();
                 case "reset":
                     return runReset(pw);
                 case "disable-blur":
@@ -815,6 +821,80 @@ public class WindowManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    private int runSetMultiWindowConfig() {
+        if (peekNextArg() == null) {
+            getErrPrintWriter().println("Error: No arguments provided.");
+        }
+        int result = 0;
+        while (peekNextArg() != null) {
+            String arg = getNextArg();
+            switch (arg) {
+                case "--supportsNonResizable":
+                    result += runSetSupportsNonResizableMultiWindow();
+                    break;
+                case "--respectsActivityMinWidthHeight":
+                    result += runSetRespectsActivityMinWidthHeightMultiWindow();
+                    break;
+                default:
+                    getErrPrintWriter().println(
+                            "Error: Unrecognized multi window option: " + arg);
+                    return -1;
+            }
+        }
+        return result == 0 ? 0 : -1;
+    }
+
+    private int runSetSupportsNonResizableMultiWindow() {
+        final String arg = getNextArg();
+        if (!arg.equals("-1") && !arg.equals("0") && !arg.equals("1")) {
+            getErrPrintWriter().println("Error: a config value of [-1, 0, 1] must be provided as"
+                    + " an argument for supportsNonResizableMultiWindow");
+            return -1;
+        }
+        final int configValue = Integer.parseInt(arg);
+        synchronized (mInternal.mAtmService.mGlobalLock) {
+            mInternal.mAtmService.mSupportsNonResizableMultiWindow = configValue;
+        }
+        return 0;
+    }
+
+    private int runSetRespectsActivityMinWidthHeightMultiWindow() {
+        final String arg = getNextArg();
+        if (!arg.equals("-1") && !arg.equals("0") && !arg.equals("1")) {
+            getErrPrintWriter().println("Error: a config value of [-1, 0, 1] must be provided as"
+                    + " an argument for respectsActivityMinWidthHeightMultiWindow");
+            return -1;
+        }
+        final int configValue = Integer.parseInt(arg);
+        synchronized (mInternal.mAtmService.mGlobalLock) {
+            mInternal.mAtmService.mRespectsActivityMinWidthHeightMultiWindow = configValue;
+        }
+        return 0;
+    }
+
+    private int runGetMultiWindowConfig(PrintWriter pw) {
+        synchronized (mInternal.mAtmService.mGlobalLock) {
+            pw.println("Supports non-resizable in multi window: "
+                    + mInternal.mAtmService.mSupportsNonResizableMultiWindow);
+            pw.println("Respects activity min width/height in multi window: "
+                    + mInternal.mAtmService.mRespectsActivityMinWidthHeightMultiWindow);
+        }
+        return 0;
+    }
+
+    private int runResetMultiWindowConfig() {
+        final int supportsNonResizable = mInternal.mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_supportsNonResizableMultiWindow);
+        final int respectsActivityMinWidthHeight = mInternal.mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_respectsActivityMinWidthHeightMultiWindow);
+        synchronized (mInternal.mAtmService.mGlobalLock) {
+            mInternal.mAtmService.mSupportsNonResizableMultiWindow = supportsNonResizable;
+            mInternal.mAtmService.mRespectsActivityMinWidthHeightMultiWindow =
+                    respectsActivityMinWidthHeight;
+        }
+        return 0;
+    }
+
     private void resetLetterboxStyle() {
         synchronized (mInternal.mGlobalLock) {
             mLetterboxConfiguration.resetFixedOrientationLetterboxAspectRatio();
@@ -879,6 +959,9 @@ public class WindowManagerShellCommand extends ShellCommand {
         // set-sandbox-display-apis
         mInternal.setSandboxDisplayApis(displayId, /* sandboxDisplayApis= */ true);
 
+        // set-multi-window-config
+        runResetMultiWindowConfig();
+
         pw.println("Reset all settings for displayId=" + displayId);
         return 0;
     }
@@ -916,6 +999,7 @@ public class WindowManagerShellCommand extends ShellCommand {
         pw.println("    Size Compat Mode.");
 
         printLetterboxHelp(pw);
+        printMultiWindowConfigHelp(pw);
 
         pw.println("  reset [-d DISPLAY_ID]");
         pw.println("    Reset all override settings.");
@@ -968,5 +1052,32 @@ public class WindowManagerShellCommand extends ShellCommand {
         pw.println("    If no arguments provided, all values will be reset.");
         pw.println("  get-letterbox-style");
         pw.println("    Prints letterbox style configuration.");
+    }
+
+    private void printMultiWindowConfigHelp(PrintWriter pw) {
+        pw.println("  set-multi-window-config");
+        pw.println("    Sets options to determine if activity should be shown in multi window:");
+        pw.println("      --supportsNonResizable [configValue]");
+        pw.println("        Whether the device supports non-resizable activity in multi window.");
+        pw.println("        -1: The device doesn't support non-resizable in multi window.");
+        pw.println("         0: The device supports non-resizable in multi window only if");
+        pw.println("            this is a large screen device.");
+        pw.println("         1: The device always supports non-resizable in multi window.");
+        pw.println("      --respectsActivityMinWidthHeight [configValue]");
+        pw.println("        Whether the device checks the activity min width/height to determine ");
+        pw.println("        if it can be shown in multi window.");
+        pw.println("        -1: The device ignores the activity min width/height when determining");
+        pw.println("            if it can be shown in multi window.");
+        pw.println("         0: If this is a small screen, the device compares the activity min");
+        pw.println("            width/height with the min multi window modes dimensions");
+        pw.println("            the device supports to determine if the activity can be shown in");
+        pw.println("            multi window.");
+        pw.println("         1: The device always compare the activity min width/height with the");
+        pw.println("            min multi window dimensions the device supports to determine if");
+        pw.println("            the activity can be shown in multi window.");
+        pw.println("  get-multi-window-config");
+        pw.println("    Prints values of the multi window config options.");
+        pw.println("  reset-multi-window-config");
+        pw.println("    Resets overrides to default values of the multi window config options.");
     }
 }

@@ -91,6 +91,7 @@ import static android.content.pm.ActivityInfo.SIZE_CHANGES_UNSUPPORTED_OVERRIDE;
 import static android.content.pm.ActivityInfo.isFixedOrientationLandscape;
 import static android.content.pm.ActivityInfo.isFixedOrientationPortrait;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.content.res.Configuration.ASSETS_SEQ_UNDEFINED;
 import static android.content.res.Configuration.EMPTY;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
@@ -6618,9 +6619,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     @Override
     void onCancelFixedRotationTransform(int originalDisplayRotation) {
-        if (this != mDisplayContent.getLastOrientationSource()
-                || getRequestedConfigurationOrientation() != ORIENTATION_UNDEFINED) {
-            // Only need to handle the activity that should be rotated with display.
+        if (this != mDisplayContent.getLastOrientationSource()) {
+            // This activity doesn't affect display rotation.
+            return;
+        }
+        final int requestedOrientation = getRequestedConfigurationOrientation();
+        if (requestedOrientation != ORIENTATION_UNDEFINED
+                && requestedOrientation != mDisplayContent.getConfiguration().orientation) {
+            // Only need to handle the activity that can be rotated with display or the activity
+            // has requested the same orientation.
             return;
         }
 
@@ -6858,6 +6865,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     @Override
     void resolveOverrideConfiguration(Configuration newParentConfiguration) {
+        final Configuration requestedOverrideConfig = getRequestedOverrideConfiguration();
+        if (requestedOverrideConfig.assetsSeq != ASSETS_SEQ_UNDEFINED
+                && newParentConfiguration.assetsSeq > requestedOverrideConfig.assetsSeq) {
+            requestedOverrideConfig.assetsSeq = ASSETS_SEQ_UNDEFINED;
+        }
         super.resolveOverrideConfiguration(newParentConfiguration);
         final Configuration resolvedConfig = getResolvedOverrideConfiguration();
         if (isFixedRotationTransforming()) {

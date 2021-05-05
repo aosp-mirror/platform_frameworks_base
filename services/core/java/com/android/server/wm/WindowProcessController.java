@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.content.res.Configuration.ASSETS_SEQ_UNDEFINED;
 import static android.os.Build.VERSION_CODES.Q;
 import static android.os.InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 
@@ -1318,6 +1319,11 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
     @Override
     void resolveOverrideConfiguration(Configuration newParentConfig) {
+        final Configuration requestedOverrideConfig = getRequestedOverrideConfiguration();
+        if (requestedOverrideConfig.assetsSeq != ASSETS_SEQ_UNDEFINED
+                && newParentConfig.assetsSeq > requestedOverrideConfig.assetsSeq) {
+            requestedOverrideConfig.assetsSeq = ASSETS_SEQ_UNDEFINED;
+        }
         super.resolveOverrideConfiguration(newParentConfig);
         final Configuration resolvedConfig = getResolvedOverrideConfiguration();
         // Make sure that we don't accidentally override the activity type.
@@ -1394,6 +1400,28 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         }
         mPauseConfigurationDispatchCount--;
         return mHasPendingConfigurationChange;
+    }
+
+    void updateAssetConfiguration(int assetSeq) {
+        // Update the process override configuration directly if the process configuration will
+        // not be override from its activities.
+        if (!mHasActivities || !mIsActivityConfigOverrideAllowed) {
+            Configuration overrideConfig = new Configuration(getRequestedOverrideConfiguration());
+            overrideConfig.assetsSeq = assetSeq;
+            onRequestedOverrideConfigurationChanged(overrideConfig);
+            return;
+        }
+
+        // Otherwise, we can just update the activity override configuration.
+        for (int i = mActivities.size() - 1; i >= 0; i--) {
+            ActivityRecord r = mActivities.get(i);
+            Configuration overrideConfig = new Configuration(r.getRequestedOverrideConfiguration());
+            overrideConfig.assetsSeq = assetSeq;
+            r.onRequestedOverrideConfigurationChanged(overrideConfig);
+            if (r.mVisibleRequested) {
+                r.ensureActivityConfiguration(0, true);
+            }
+        }
     }
 
     /**

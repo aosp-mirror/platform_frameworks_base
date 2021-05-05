@@ -2287,8 +2287,6 @@
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"యాప్ బ్రాండింగ్ ఇమేజ్"</string>
     <string name="view_and_control_notification_title" msgid="4300765399209912240">"యాక్సెస్ సెట్టింగ్‌లను చెక్ చేయండి"</string>
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> మీ స్క్రీన్‌ను చూడవచ్చు, కంట్రోల్ చేయవచ్చు. రివ్యూ చేయడానికి ట్యాప్ చేయండి."</string>
-    <!-- no translation found for ui_translation_accessibility_translated_text (3197547218178944544) -->
-    <skip />
-    <!-- no translation found for ui_translation_accessibility_translation_finished (3057830947610088465) -->
-    <skip />
+    <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> అనువదించబడింది."</string>
+    <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"మెసేజ్ <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> నుండి <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>‌కు అనువదించబడింది."</string>
 </resources>

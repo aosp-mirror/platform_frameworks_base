@@ -1044,8 +1044,7 @@
     <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"移去右下方"</string>
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"移到邊緣並隱藏"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"從邊緣移出並顯示"</string>
-    <!-- no translation found for accessibility_floating_button_action_double_tap_to_toggle (7976492639670692037) -->
-    <skip />
+    <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"切換"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"裝置控制"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"為連接的裝置新增控制選項"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"設定裝置控制"</string>
@@ -1092,8 +1091,7 @@
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"關閉"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"繼續播放"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"設定"</string>
-    <!-- no translation found for controls_media_smartspace_rec_title (1699818353932537407) -->
-    <skip />
+    <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"播放"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"已停用，請檢查應用程式"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"發生錯誤，正在重試…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"找不到"</string>

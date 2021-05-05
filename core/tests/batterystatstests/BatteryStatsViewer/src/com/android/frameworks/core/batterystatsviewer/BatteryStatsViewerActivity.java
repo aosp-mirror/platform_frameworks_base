@@ -51,7 +51,7 @@ public class BatteryStatsViewerActivity extends ComponentActivity {
     private static final int LOADER_BATTERY_USAGE_STATS = 1;
 
     private BatteryStatsDataAdapter mBatteryStatsDataAdapter;
-    private final Runnable mBatteryStatsRefresh = this::periodicBatteryStatsRefresh;
+    private final Runnable mBatteryStatsRefresh = this::loadBatteryStats;
     private String mBatteryConsumerId;
     private TextView mTitleView;
     private TextView mDetailsView;
@@ -85,13 +85,15 @@ public class BatteryStatsViewerActivity extends ComponentActivity {
         mLoadingView = findViewById(R.id.loading_view);
         mEmptyView = findViewById(R.id.empty_view);
 
-        loadBatteryStats();
+        LoaderManager loaderManager = LoaderManager.getInstance(this);
+        loaderManager.restartLoader(LOADER_BATTERY_USAGE_STATS, null,
+                new BatteryUsageStatsLoaderCallbacks());
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        periodicBatteryStatsRefresh();
+        loadBatteryStats();
     }
 
     @Override
@@ -100,15 +102,11 @@ public class BatteryStatsViewerActivity extends ComponentActivity {
         getMainThreadHandler().removeCallbacks(mBatteryStatsRefresh);
     }
 
-    private void periodicBatteryStatsRefresh() {
-        loadBatteryStats();
-        getMainThreadHandler().postDelayed(mBatteryStatsRefresh, BATTERY_STATS_REFRESH_RATE_MILLIS);
-    }
-
     private void loadBatteryStats() {
         LoaderManager loaderManager = LoaderManager.getInstance(this);
         loaderManager.restartLoader(LOADER_BATTERY_USAGE_STATS, null,
                 new BatteryUsageStatsLoaderCallbacks());
+        getMainThreadHandler().postDelayed(mBatteryStatsRefresh, BATTERY_STATS_REFRESH_RATE_MILLIS);
     }
 
     private static class BatteryUsageStatsLoader extends

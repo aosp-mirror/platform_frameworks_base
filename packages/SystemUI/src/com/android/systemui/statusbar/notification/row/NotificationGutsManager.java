@@ -129,7 +129,6 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
     private final LauncherApps mLauncherApps;
     private final ShortcutManager mShortcutManager;
     private final UserContextProvider mContextTracker;
-    private final Provider<PriorityOnboardingDialogController.Builder> mBuilderProvider;
     private final UiEventLogger mUiEventLogger;
     private final ShadeController mShadeController;
     private final AppWidgetManager mAppWidgetManager;
@@ -150,7 +149,6 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
             ShortcutManager shortcutManager,
             ChannelEditorDialogController channelEditorDialogController,
             UserContextProvider contextTracker,
-            Provider<PriorityOnboardingDialogController.Builder> builderProvider,
             AssistantFeedbackController assistantFeedbackController,
             Optional<BubblesManager> bubblesManagerOptional,
             UiEventLogger uiEventLogger,
@@ -168,7 +166,6 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
         mLauncherApps = launcherApps;
         mShortcutManager = shortcutManager;
         mContextTracker = contextTracker;
-        mBuilderProvider = builderProvider;
         mChannelEditorDialogController = channelEditorDialogController;
         mAssistantFeedbackController = assistantFeedbackController;
         mBubblesManagerOptional = bubblesManagerOptional;
@@ -503,7 +500,6 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
                 onSnoozeClickListener,
                 iconFactoryLoader,
                 mContextTracker.getUserContext(),
-                mBuilderProvider,
                 mDeviceProvisionedController.isDeviceProvisioned(),
                 mMainHandler,
                 mBgHandler,

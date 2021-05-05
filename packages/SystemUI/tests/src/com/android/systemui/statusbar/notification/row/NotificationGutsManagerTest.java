@@ -139,9 +139,6 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
     @Mock private BubblesManager mBubblesManager;
     @Mock private ShadeController mShadeController;
     @Mock private PeopleSpaceWidgetManager mPeopleSpaceWidgetManager;
-    @Mock(answer = Answers.RETURNS_SELF)
-    private PriorityOnboardingDialogController.Builder mBuilder;
-    private Provider<PriorityOnboardingDialogController.Builder> mProvider = () -> mBuilder;
     @Mock private AssistantFeedbackController mAssistantFeedbackController;
 
     @Before
@@ -163,7 +160,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 () -> mStatusBar, mHandler, mHandler, mAccessibilityManager, mHighPriorityProvider,
                 mINotificationManager, mNotificationEntryManager, mPeopleSpaceWidgetManager,
                 mLauncherApps, mShortcutManager, mChannelEditorDialogController, mContextTracker,
-                mProvider, mAssistantFeedbackController, Optional.of(mBubblesManager),
+                mAssistantFeedbackController, Optional.of(mBubblesManager),
                 new UiEventLoggerFake(), mOnUserInteractionCallback, mShadeController);
         mGutsManager.setUpWithPresenter(mPresenter, mNotificationListContainer,
                 mCheckSaveListener, mOnSettingsClickListener);

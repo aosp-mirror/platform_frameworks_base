@@ -18,6 +18,7 @@ package com.android.server.pm;
 
 import static org.junit.Assert.assertTrue;
 
+import android.content.ComponentName;
 import android.content.IntentFilter;
 
 import androidx.test.filters.SmallTest;
@@ -83,4 +84,80 @@ public class WatchedIntentHandlingTest {
         watcher.verifyNoChangeReported("pulled snapshot");
     }
 
+    @Test
+    public void testPreferredActivity() {
+        // Create a bunch of nondescript component names
+        ComponentName component = new ComponentName("Package_A", "Class_A");
+        ComponentName[] components = new ComponentName[10];
+        for (int i = 0; i < components.length; i++) {
+            components[i] = new ComponentName("Package_" + i, "Class_" + i);
+        }
+        IntentFilter i = new IntentFilter("TEST_ACTION");
+        PreferredActivity a = new PreferredActivity(i, 1, components, component, true);
+        final WatchableTester watcher = new WatchableTester(a, "PreferredIntentResolver");
+        watcher.register();
+
+        // Verify that the initial IntentFilter and the PreferredActivity are truly
+        // independent.  This is in addition to verifying that the PreferredActivity
+        // properly reports its changes.
+        i.setPriority(i.getPriority() + 1);
+        watcher.verifyNoChangeReported("indepenent intent");
+        a.setPriority(a.getPriority() + 2);
+        watcher.verifyChangeReported("dependent intent");
+        // Verify independence of i and a
+        assertTrue(i.getPriority() != a.getPriority());
+
+        // Verify that snapshots created from the PreferredActivity are stable when the
+        // source PreferredActivity changes.
+        a.setPriority(3);
+        watcher.verifyChangeReported("initialize intent priority");
+        PreferredActivity s1 = a.snapshot();
+        watcher.verifyNoChangeReported("pulled snapshot");
+        // Verify snapshot cache.  In the absence of changes to the PreferredActivity, the
+        // snapshot will not be rebuilt and will be the exact same object as before.
+        assertTrue(s1 == a.snapshot());
+        // Force a change by incrementing the priority.  The next snapshot must be
+        // different from the first snapshot.
+        a.setPriority(a.getPriority() + 1);
+        watcher.verifyChangeReported("increment priority");
+        PreferredActivity s2 = a.snapshot();
+        watcher.verifyNoChangeReported("pulled second snapshot");
+        assertTrue(s1 != s2);
+        // Assert the two snapshots are different.  s1 should have priority 3 and s2
+        // should have priority 4.  s2 should match the current value in a.
+        assertTrue(a.getPriority() == s2.getPriority());
+        assertTrue(s1.getPriority() != s2.getPriority());
+    }
+
+    @Test
+    public void testPreferredIntentResolver() {
+        PreferredIntentResolver r = new PreferredIntentResolver();
+        final WatchableTester watcher = new WatchableTester(r, "PreferredIntentResolver");
+        watcher.register();
+        // Create a bunch of nondescript component names
+        ComponentName component = new ComponentName("Package_A", "Class_A");
+        ComponentName[] components = new ComponentName[10];
+        for (int i = 0; i < components.length; i++) {
+            components[i] = new ComponentName("Package_" + i, "Class_" + i);
+        }
+        IntentFilter i = new IntentFilter("TEST_ACTION");
+        PreferredActivity a1 = new PreferredActivity(i, 1, components, component, true);
+
+        r.addFilter(a1);
+        watcher.verifyChangeReported("addFilter");
+        i.setPriority(i.getPriority() + 1);
+        watcher.verifyNoChangeReported("indepenent intent");
+        a1.setPriority(a1.getPriority() + 1);
+        watcher.verifyChangeReported("dependent intent");
+
+        PreferredActivity s1 = a1.snapshot();
+        watcher.verifyNoChangeReported("pulled snapshot");
+        // Verify snapshot cache.
+        assertTrue(s1 == a1.snapshot());
+        a1.setPriority(a1.getPriority() + 1);
+        watcher.verifyChangeReported("increment priority");
+        PreferredActivity s2 = a1.snapshot();
+        watcher.verifyNoChangeReported("pulled second snapshot");
+        assertTrue(s1.getPriority() != s2.getPriority());
+    }
 }

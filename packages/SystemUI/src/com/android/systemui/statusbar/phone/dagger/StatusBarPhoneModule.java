@@ -62,7 +62,6 @@ import com.android.systemui.statusbar.SuperStatusBarViewFactory;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.charging.WiredChargingRippleController;
-import com.android.systemui.statusbar.events.PrivacyDotViewController;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
@@ -91,6 +90,7 @@ import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
+import com.android.systemui.statusbar.phone.StatusBarLocationPublisher;
 import com.android.systemui.statusbar.phone.StatusBarNotificationActivityStarter;
 import com.android.systemui.statusbar.phone.StatusBarTouchableRegionManager;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
@@ -212,7 +212,7 @@ public interface StatusBarPhoneModule {
             WiredChargingRippleController chargingRippleAnimationController,
             OngoingCallController ongoingCallController,
             SystemStatusAnimationScheduler animationScheduler,
-            PrivacyDotViewController dotViewController,
+            StatusBarLocationPublisher locationPublisher,
             FeatureFlags featureFlags,
             KeyguardUnlockAnimationController keyguardUnlockAnimationController) {
         return new StatusBar(
@@ -298,7 +298,7 @@ public interface StatusBarPhoneModule {
                 chargingRippleAnimationController,
                 ongoingCallController,
                 animationScheduler,
-                dotViewController,
+                locationPublisher,
                 featureFlags,
                 keyguardUnlockAnimationController);
     }

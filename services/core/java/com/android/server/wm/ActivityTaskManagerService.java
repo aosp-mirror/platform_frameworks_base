@@ -472,6 +472,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     /** Current sequencing integer of the configuration, for skipping old configurations. */
     private int mConfigurationSeq;
+
+    /** Current sequencing integer of the asset changes, for skipping old resources overlays. */
+    private int mGlobalAssetsSeq;
+
     // To cache the list of supported system locales
     private String[] mSupportedSystemLocales = null;
 
@@ -4127,6 +4131,35 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         mRootWindowContainer.onConfigurationChanged(mTempConfig);
 
         return changes;
+    }
+
+    private int increaseAssetConfigurationSeq() {
+        mGlobalAssetsSeq = Math.max(++mGlobalAssetsSeq, 1);
+        return mGlobalAssetsSeq;
+    }
+
+    /**
+     * Update the asset configuration and increase the assets sequence number.
+     * @param processes the processes that needs to update the asset configuration, if none
+     *                  updates the global configuration for all processes.
+     */
+    public void updateAssetConfiguration(List<WindowProcessController> processes) {
+        synchronized (mGlobalLock) {
+            final int assetSeq = increaseAssetConfigurationSeq();
+
+            // Update the global configuration if the no target processes
+            if (processes == null) {
+                Configuration newConfig = new Configuration();
+                newConfig.assetsSeq = assetSeq;
+                updateConfiguration(newConfig);
+                return;
+            }
+
+            for (int i = processes.size() - 1; i >= 0; i--) {
+                final WindowProcessController wpc = processes.get(i);
+                wpc.updateAssetConfiguration(assetSeq);
+            }
+        }
     }
 
     void startLaunchPowerMode(@PowerModeReason int reason) {

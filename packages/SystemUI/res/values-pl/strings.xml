@@ -1165,6 +1165,6 @@
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Czytnik linii papilarnych"</string>
     <string name="accessibility_udfps_disabled_button" msgid="4284034245130239384">"Czytnik linii papilarnych został wyłączony"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"uwierzytelnij"</string>
-    <string name="accessibility_enter_hint" msgid="2617864063504824834">"dodaj urządzenie"</string>
+    <string name="accessibility_enter_hint" msgid="2617864063504824834">"otwórz urządzenie"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"By otworzyć, użyj odcisku palca"</string>
 </resources>

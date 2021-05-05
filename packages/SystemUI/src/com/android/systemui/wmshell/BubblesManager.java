@@ -675,7 +675,6 @@ public class BubblesManager implements Dumpable {
         }
         try {
             int flags = Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION;
-            flags |= Notification.BubbleMetadata.FLAG_AUTO_EXPAND_BUBBLE;
             mBarService.onNotificationBubbleChanged(entry.getKey(), true, flags);
         } catch (RemoteException e) {
             Log.e(TAG, e.getMessage());
