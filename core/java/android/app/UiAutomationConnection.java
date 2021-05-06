@@ -220,7 +220,9 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
         final long identity = Binder.clearCallingIdentity();
         try {
             captureBuffer = SurfaceControl.captureLayers(
-                    new SurfaceControl.LayerCaptureArgs.Builder(surfaceControl).build());
+                    new SurfaceControl.LayerCaptureArgs.Builder(surfaceControl)
+                            .setChildrenOnly(false)
+                            .build());
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
