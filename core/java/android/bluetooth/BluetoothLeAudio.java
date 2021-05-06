@@ -356,7 +356,6 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
      * earbud)
      * @param device LE Audio capable device
      * @return group id that this device currently belongs to
-     * @hide
      */
     @RequiresLegacyBluetoothPermission
     @RequiresBluetoothConnectPermission
