@@ -916,5 +916,14 @@ public class WatcherTest {
         assertTrue(s1 != s2);
         assertTrue(leafA.get() == s1.get() + 1);
         assertTrue(leafA.get() == s2.get());
+
+        // Test sealed snapshots
+        SnapshotCache<Leaf> sealed = new SnapshotCache.Sealed();
+        try {
+            Leaf x1 = sealed.snapshot();
+            fail(name + " sealed snapshot did not throw");
+        } catch (UnsupportedOperationException e) {
+            // This is the passing scenario - the exception is expected.
+        }
     }
 }
