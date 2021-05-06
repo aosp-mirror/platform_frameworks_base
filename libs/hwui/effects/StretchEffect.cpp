@@ -189,17 +189,12 @@ static const float ZERO = 0.f;
 static const float CONTENT_DISTANCE_STRETCHED = 1.f;
 static const float INTERPOLATION_STRENGTH_VALUE = 0.7f;
 
-sk_sp<SkShader> StretchEffect::getShader(const sk_sp<SkImage>& snapshotImage) const {
+sk_sp<SkShader> StretchEffect::getShader(float width, float height,
+                                         const sk_sp<SkImage>& snapshotImage) const {
     if (isEmpty()) {
         return nullptr;
     }
 
-    if (mStretchShader != nullptr) {
-        return mStretchShader;
-    }
-
-    float viewportWidth = stretchArea.width();
-    float viewportHeight = stretchArea.height();
     float normOverScrollDistX = mStretchDirection.x();
     float normOverScrollDistY = mStretchDirection.y();
     float distanceStretchedX = CONTENT_DISTANCE_STRETCHED / (1 + abs(normOverScrollDistX));
@@ -228,12 +223,10 @@ sk_sp<SkShader> StretchEffect::getShader(const sk_sp<SkImage>& snapshotImage) co
     mBuilder->uniform("uOverscrollY").set(&normOverScrollDistY, 1);
     mBuilder->uniform("uScrollX").set(&ZERO, 1);
     mBuilder->uniform("uScrollY").set(&ZERO, 1);
-    mBuilder->uniform("viewportWidth").set(&viewportWidth, 1);
-    mBuilder->uniform("viewportHeight").set(&viewportHeight, 1);
+    mBuilder->uniform("viewportWidth").set(&width, 1);
+    mBuilder->uniform("viewportHeight").set(&height, 1);
 
-    mStretchShader = mBuilder->makeShader(nullptr, false);
-
-    return mStretchShader;
+    return mBuilder->makeShader(nullptr, false);
 }
 
 sk_sp<SkRuntimeEffect> StretchEffect::getStretchEffect() {

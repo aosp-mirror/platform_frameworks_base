@@ -477,6 +477,11 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             return;
         }
 
+        if (audioStream == null) {
+            Slog.w(TAG, "External source is null for hotword detector");
+            throw new IllegalStateException("External source is null for hotword detector");
+        }
+
         mHotwordDetectionConnection
                 .startListeningFromExternalSource(audioStream, audioFormat, options, callback);
     }

@@ -178,6 +178,8 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     /**
      * Action that long clicks on the node.
+     *
+     * <p>It does not support coordinate information for anchoring.</p>
      */
     public static final int ACTION_LONG_CLICK = 0x00000020;
 

@@ -32950,6 +32950,7 @@ package android.print {
     field public static final android.print.PrintAttributes.MediaSize JPN_HAGAKI;
     field public static final android.print.PrintAttributes.MediaSize JPN_KAHU;
     field public static final android.print.PrintAttributes.MediaSize JPN_KAKU2;
+    field @NonNull public static final android.print.PrintAttributes.MediaSize JPN_OE_PHOTO_L;
     field public static final android.print.PrintAttributes.MediaSize JPN_OUFUKU;
     field public static final android.print.PrintAttributes.MediaSize JPN_YOU4;
     field @NonNull public static final android.print.PrintAttributes.MediaSize NA_ARCH_A;
@@ -32971,7 +32972,6 @@ package android.print {
     field public static final android.print.PrintAttributes.MediaSize NA_QUARTO;
     field @NonNull public static final android.print.PrintAttributes.MediaSize NA_SUPER_B;
     field public static final android.print.PrintAttributes.MediaSize NA_TABLOID;
-    field @NonNull public static final android.print.PrintAttributes.MediaSize OE_PHOTO_L;
     field public static final android.print.PrintAttributes.MediaSize OM_DAI_PA_KAI;
     field public static final android.print.PrintAttributes.MediaSize OM_JUURO_KU_KAI;
     field public static final android.print.PrintAttributes.MediaSize OM_PA_KAI;
@@ -52965,6 +52965,7 @@ package android.view.translation {
   public interface UiTranslationStateCallback {
     method public void onFinished();
     method public void onPaused();
+    method public void onResumed(@NonNull android.icu.util.ULocale, @NonNull android.icu.util.ULocale);
     method @Deprecated public void onStarted(@NonNull String, @NonNull String);
     method public default void onStarted(@NonNull android.icu.util.ULocale, @NonNull android.icu.util.ULocale);
   }

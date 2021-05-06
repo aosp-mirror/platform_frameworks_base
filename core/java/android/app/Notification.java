@@ -1594,6 +1594,11 @@ public class Notification implements Parcelable
      * Apps should use {@link Notification.Builder#addAction(int, CharSequence, PendingIntent)}
      * or {@link Notification.Builder#addAction(Notification.Action)}
      * to attach actions.
+     * <p>
+     * As of Android {@link android.os.Build.VERSION_CODES#S}, apps targeting API level {@link
+     * android.os.Build.VERSION_CODES#S} or higher won't be able to start activities while
+     * processing broadcast receivers or services in response to notification action clicks. To
+     * launch an activity in those cases, provide a {@link PendingIntent} for the activity itself.
      */
     public static class Action implements Parcelable {
         /**
@@ -1869,6 +1874,13 @@ public class Notification implements Parcelable
 
             /**
              * Construct a new builder for {@link Action} object.
+             *
+             * <p>As of Android {@link android.os.Build.VERSION_CODES#S}, apps targeting API level
+             * {@link android.os.Build.VERSION_CODES#S} or higher won't be able to start activities
+             * while processing broadcast receivers or services in response to notification action
+             * clicks. To launch an activity in those cases, provide a {@link PendingIntent} for the
+             * activity itself.
+             *
              * @param icon icon to show for this action
              * @param title the title of the action
              * @param intent the {@link PendingIntent} to fire when users trigger this action
@@ -4332,7 +4344,13 @@ public class Notification implements Parcelable
         /**
          * Supply a {@link PendingIntent} to be sent when the notification is clicked.
          *
-         * As of {@link android.os.Build.VERSION_CODES#HONEYCOMB}, if this field is unset and you
+         * <p>As of Android {@link android.os.Build.VERSION_CODES#S}, apps targeting API level
+         * {@link android.os.Build.VERSION_CODES#S} or higher won't be able to start activities
+         * while processing broadcast receivers or services in response to notification clicks. To
+         * launch an activity in those cases, provide a {@link PendingIntent} for the activity
+         * itself.
+         *
+         * <p>As of {@link android.os.Build.VERSION_CODES#HONEYCOMB}, if this field is unset and you
          * have specified a custom RemoteViews with {@link #setContent(RemoteViews)}, you can use
          * {@link RemoteViews#setOnClickPendingIntent RemoteViews.setOnClickPendingIntent(int,PendingIntent)}
          * to assign PendingIntents to individual views in that custom layout (i.e., to create
@@ -4856,6 +4874,12 @@ public class Notification implements Parcelable
          * the order they were added. Actions will not be displayed when the notification is
          * collapsed, however, so be sure that any essential functions may be accessed by the user
          * in some other way (for example, in the Activity pointed to by {@link #contentIntent}).
+         * <p>
+         * As of Android {@link android.os.Build.VERSION_CODES#S}, apps targeting API level
+         * {@link android.os.Build.VERSION_CODES#S} or higher won't be able to start activities
+         * while processing broadcast receivers or services in response to notification action
+         * clicks. To launch an activity in those cases, provide a {@link PendingIntent} to the
+         * activity itself.
          *
          * @param icon Resource ID of a drawable that represents the action.
          * @param title Text describing the action.
