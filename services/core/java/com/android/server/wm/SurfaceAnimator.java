@@ -488,6 +488,12 @@ class SurfaceAnimator {
     public static final int ANIMATION_TYPE_FIXED_TRANSFORM = 1 << 6;
 
     /**
+     * Animation when a reveal starting window animation is applied to app window.
+     * @hide
+     */
+    public static final int ANIMATION_TYPE_STARTING_REVEAL = 1 << 7;
+
+    /**
      * Bitmask to include all animation types. This is NOT an {@link AnimationType}
      * @hide
      */
@@ -505,7 +511,8 @@ class SurfaceAnimator {
             ANIMATION_TYPE_RECENTS,
             ANIMATION_TYPE_WINDOW_ANIMATION,
             ANIMATION_TYPE_INSETS_CONTROL,
-            ANIMATION_TYPE_FIXED_TRANSFORM
+            ANIMATION_TYPE_FIXED_TRANSFORM,
+            ANIMATION_TYPE_STARTING_REVEAL
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface AnimationType {}
@@ -523,6 +530,7 @@ class SurfaceAnimator {
             case ANIMATION_TYPE_WINDOW_ANIMATION: return "window_animation";
             case ANIMATION_TYPE_INSETS_CONTROL: return "insets_animation";
             case ANIMATION_TYPE_FIXED_TRANSFORM: return "fixed_rotation";
+            case ANIMATION_TYPE_STARTING_REVEAL: return "starting_reveal";
             default: return "unknown type:" + type;
         }
     }
