@@ -398,16 +398,6 @@ public class RcsFeature extends ImsFeature {
 
     /**
      * Remove the given CapabilityExchangeImplBase instance.
-     * @param capExchangeImpl The {@link RcsCapabilityExchangeImplBase} instance to be removed.
-     * @hide
-     */
-    public void removeCapabilityExchangeImpl(
-            @NonNull RcsCapabilityExchangeImplBase capExchangeImpl) {
-        // Override to implement the process of removing RcsCapabilityExchangeImplBase instance.
-    }
-
-    /**
-     * Remove the given CapabilityExchangeImplBase instance.
      * @param capExchangeImpl The {@link RcsCapabilityExchangeImplBase} instance to be destroyed.
      */
     public void destroyCapabilityExchangeImpl(
@@ -450,7 +440,7 @@ public class RcsFeature extends ImsFeature {
                 // Remove the RcsCapabilityExchangeImplBase instance when the capability exchange
                 // instance has been removed in the framework.
                 if (mCapabilityExchangeImpl != null) {
-                    removeCapabilityExchangeImpl(mCapabilityExchangeImpl);
+                    destroyCapabilityExchangeImpl(mCapabilityExchangeImpl);
                 }
                 mCapabilityExchangeImpl = null;
             }
@@ -468,7 +458,7 @@ public class RcsFeature extends ImsFeature {
         synchronized (mLock) {
             // Remove the original instance
             if (mCapabilityExchangeImpl != null) {
-                removeCapabilityExchangeImpl(mCapabilityExchangeImpl);
+                destroyCapabilityExchangeImpl(mCapabilityExchangeImpl);
             }
             mCapabilityExchangeImpl = createCapabilityExchangeImpl(listener);
         }
