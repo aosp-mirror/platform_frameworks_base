@@ -6854,7 +6854,7 @@ public class AppOpsManager {
             writeLongSparseLongArrayToParcel(mAccessCount, parcel);
             writeLongSparseLongArrayToParcel(mRejectCount, parcel);
             writeLongSparseLongArrayToParcel(mAccessDuration, parcel);
-            writeDiscreteAccessArrayToParcel(mDiscreteAccesses, parcel);
+            writeDiscreteAccessArrayToParcel(mDiscreteAccesses, parcel, flags);
         }
 
         @Override
@@ -9711,29 +9711,16 @@ public class AppOpsManager {
     }
 
     private static void writeDiscreteAccessArrayToParcel(
-            @Nullable List<AttributedOpEntry> array, @NonNull Parcel parcel) {
-        if (array != null) {
-            final int size = array.size();
-            parcel.writeInt(size);
-            for (int i = 0; i < size; i++) {
-                array.get(i).writeToParcel(parcel, 0);
-            }
-        } else {
-            parcel.writeInt(-1);
-        }
+            @Nullable List<AttributedOpEntry> array, @NonNull Parcel parcel, int flags) {
+        ParceledListSlice<AttributedOpEntry> listSlice =
+                array == null ? null : new ParceledListSlice<>(array);
+        parcel.writeParcelable(listSlice, flags);
     }
 
     private static @Nullable List<AttributedOpEntry> readDiscreteAccessArrayFromParcel(
             @NonNull Parcel parcel) {
-        final int size = parcel.readInt();
-        if (size < 0) {
-            return null;
-        }
-        final List<AttributedOpEntry> array = new ArrayList<>(size);
-        for (int i = 0; i < size; i++) {
-            array.add(new AttributedOpEntry(parcel));
-        }
-        return array;
+        final ParceledListSlice<AttributedOpEntry> listSlice = parcel.readParcelable(null);
+        return listSlice == null ? null : listSlice.getList();
     }
 
     /**
