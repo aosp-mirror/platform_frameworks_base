@@ -30,9 +30,6 @@ public interface NotificationManagerInternal {
     void cancelNotification(String pkg, String basePkg, int callingUid, int callingPid,
             String tag, int id, int userId);
 
-    /** is the given notification currently showing? */
-    boolean isNotificationShown(String pkg, String tag, int notificationId, int userId);
-
     void removeForegroundServiceFlagFromNotification(String pkg, int notificationId, int userId);
 
     void onConversationRemoved(String pkg, int uid, Set<String> shortcuts);
