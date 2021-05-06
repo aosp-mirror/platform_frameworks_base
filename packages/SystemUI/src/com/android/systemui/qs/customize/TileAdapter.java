@@ -43,7 +43,6 @@ import androidx.recyclerview.widget.RecyclerView.ViewHolder;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
-import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.QSEditEvent;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.qs.customize.TileAdapter.Holder;
@@ -53,7 +52,7 @@ import com.android.systemui.qs.dagger.QSScope;
 import com.android.systemui.qs.dagger.QSThemedContext;
 import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.qs.tileimpl.QSIconViewImpl;
-import com.android.systemui.qs.tileimpl.QSTileView;
+import com.android.systemui.qs.tileimpl.QSTileViewImpl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -280,7 +279,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         }
         FrameLayout frame = (FrameLayout) inflater.inflate(R.layout.qs_customize_tile_frame, parent,
                 false);
-        View view = new CustomizeTileViewHorizontal(context, new QSIconViewImpl(context));
+        View view = new CustomizeTileView(context, new QSIconViewImpl(context));
         frame.addView(view);
         return new Holder(frame);
     }
@@ -367,6 +366,8 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         // The holder has a tileView, therefore this call is not null
         holder.getTileAsCustomizeView().changeState(info.state);
         holder.getTileAsCustomizeView().setShowAppLabel(position > mEditIndex && !info.isSystem);
+        // Don't show the side view for third party tiles, as we don't have the actual state.
+        holder.getTileAsCustomizeView().setShowSideView(position < mEditIndex || info.isSystem);
         holder.mTileView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
         holder.mTileView.setClickable(true);
         holder.mTileView.setOnClickListener(null);
@@ -545,15 +546,12 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
     }
 
     public class Holder extends ViewHolder {
-        private QSTileView mTileView;
+        private QSTileViewImpl mTileView;
 
         public Holder(View itemView) {
             super(itemView);
             if (itemView instanceof FrameLayout) {
-                mTileView = (QSTileView) ((FrameLayout) itemView).getChildAt(0);
-                if (mTileView instanceof CustomizeTileView) {
-                    mTileView.setBackground(null);
-                }
+                mTileView = (QSTileViewImpl) ((FrameLayout) itemView).getChildAt(0);
                 mTileView.getIcon().disableAnimation();
                 mTileView.setTag(this);
                 ViewCompat.setAccessibilityDelegate(mTileView, mAccessibilityDelegate);
@@ -561,8 +559,8 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         }
 
         @Nullable
-        public CustomizeView getTileAsCustomizeView() {
-            return (CustomizeView) mTileView;
+        public CustomizeTileView getTileAsCustomizeView() {
+            return (CustomizeTileView) mTileView;
         }
 
         public void clearDrag() {
@@ -570,8 +568,8 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
             if (mTileView instanceof CustomizeTileView) {
                 mTileView.findViewById(R.id.tile_label).clearAnimation();
                 mTileView.findViewById(R.id.tile_label).setAlpha(1);
-                mTileView.getAppLabel().clearAnimation();
-                mTileView.getAppLabel().setAlpha(.6f);
+                mTileView.getSecondaryLabel().clearAnimation();
+                mTileView.getSecondaryLabel().setAlpha(.6f);
             }
         }
 
@@ -584,7 +582,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
                 mTileView.findViewById(R.id.tile_label).animate()
                         .setDuration(DRAG_LENGTH)
                         .alpha(0);
-                mTileView.getAppLabel().animate()
+                mTileView.getSecondaryLabel().animate()
                         .setDuration(DRAG_LENGTH)
                         .alpha(0);
             }
@@ -599,7 +597,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
                 mTileView.findViewById(R.id.tile_label).animate()
                         .setDuration(DRAG_LENGTH)
                         .alpha(1);
-                mTileView.getAppLabel().animate()
+                mTileView.getSecondaryLabel().animate()
                         .setDuration(DRAG_LENGTH)
                         .alpha(.6f);
             }
@@ -765,7 +763,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
                 int position = mCurrentDrag.getAdapterPosition();
                 if (position == RecyclerView.NO_POSITION) return;
                 TileInfo info = mTiles.get(position);
-                ((CustomizeView) mCurrentDrag.mTileView).setShowAppLabel(
+                ((CustomizeTileView) mCurrentDrag.mTileView).setShowAppLabel(
                         position > mEditIndex && !info.isSystem);
                 mCurrentDrag.stopDrag();
                 mCurrentDrag = null;
@@ -825,9 +823,4 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         public void onSwiped(ViewHolder viewHolder, int direction) {
         }
     };
-
-    interface CustomizeView {
-        void setShowAppLabel(boolean showAppLabel);
-        void changeState(@NonNull QSTile.State state);
-    }
 }
