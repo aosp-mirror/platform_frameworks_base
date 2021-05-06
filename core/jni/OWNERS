@@ -68,6 +68,7 @@ per-file android_graphics_* = file:/graphics/java/android/graphics/OWNERS
 # These are highly common-use files
 per-file Android.bp = file:/graphics/java/android/graphics/OWNERS
 per-file AndroidRuntime.cpp = file:/graphics/java/android/graphics/OWNERS
+per-file AndroidRuntime.cpp = calin@google.com, ngeoffray@google.com, oth@google.com
 # Although marked "view" this is mostly graphics stuff
 per-file android_view_* = file:/graphics/java/android/graphics/OWNERS
 
