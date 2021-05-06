@@ -1550,6 +1550,10 @@ public final class ProcessState {
             final int key = mDurations.getKeyAt(i);
             final int type = SparseMappingTable.getIdFromKey(key);
             final int aggregatedType = DumpUtils.aggregateCurrentProcessState(type);
+            if ((type % STATE_COUNT) == STATE_SERVICE_RESTARTING) {
+                // Skip restarting service state -- that is not actually a running process.
+                continue;
+            }
 
             long time = mDurations.getValue(key);
             if (mCurCombinedState == type) {
@@ -1563,7 +1567,9 @@ public final class ProcessState {
                 durationByState.put(aggregatedType, time);
             }
         }
-        if (!didCurState && mCurCombinedState != STATE_NOTHING) {
+        if (!didCurState && mCurCombinedState != STATE_NOTHING
+                && (mCurCombinedState % STATE_COUNT) != STATE_SERVICE_RESTARTING) {
+            // Skip restarting service state -- that is not actually a running process.
             final int aggregatedType = DumpUtils.aggregateCurrentProcessState(mCurCombinedState);
             int index = durationByState.indexOfKey(aggregatedType);
             if (index >= 0) {
