@@ -38,7 +38,6 @@ import android.metrics.LogMaker;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.service.quicksettings.Tile;
 import android.text.format.DateUtils;
 import android.util.ArraySet;
 import android.util.Log;
@@ -56,7 +55,6 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.settingslib.RestrictedLockUtils;
 import com.android.settingslib.RestrictedLockUtilsInternal;
-import com.android.settingslib.Utils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.plugins.ActivityStarter;
@@ -561,21 +559,6 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
     @Override
     public boolean isTileReady() {
         return mReadyState == READY_STATE_READY;
-    }
-
-    public static int getColorForState(Context context, int state) {
-        switch (state) {
-            case Tile.STATE_UNAVAILABLE:
-                return Utils.getDisabled(context,
-                        Utils.getColorAttrDefaultColor(context, android.R.attr.textColorSecondary));
-            case Tile.STATE_INACTIVE:
-                return Utils.getColorAttrDefaultColor(context, android.R.attr.textColorSecondary);
-            case Tile.STATE_ACTIVE:
-                return Utils.getColorAttrDefaultColor(context, android.R.attr.colorPrimary);
-            default:
-                Log.e("QSTile", "Invalid state " + state);
-                return 0;
-        }
     }
 
     protected final class H extends Handler {
