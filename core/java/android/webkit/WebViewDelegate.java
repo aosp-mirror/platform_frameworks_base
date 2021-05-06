@@ -16,10 +16,10 @@
 
 package android.webkit;
 
-import android.annotation.ElapsedRealtimeLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.UptimeMillisLong;
 import android.app.ActivityThread;
 import android.app.Application;
 import android.app.ResourcesManager;
@@ -227,7 +227,7 @@ public final class WebViewDelegate {
      * WebViewChromiumFactoryProvider#create method was invoked.
      */
     @NonNull
-    @ElapsedRealtimeLong
+    @UptimeMillisLong
     public long[] getTimestamps() {
         return WebViewFactory.getTimestamps();
     }
