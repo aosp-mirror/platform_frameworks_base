@@ -86,8 +86,8 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
     // Default height for the default loading view, in case we cannot get inflate the first view
     private static final int DEFAULT_LOADING_VIEW_HEIGHT = 50;
 
-    // We cache the FixedSizeRemoteViewsCaches across orientation. These are the related data
-    // structures;
+    // We cache the FixedSizeRemoteViewsCaches across orientation and re-inflation due to color
+    // palette changes. These are the related data structures:
     private static final HashMap<RemoteViewsCacheKey, FixedSizeRemoteViewsCache>
             sCachedRemoteViewsCaches = new HashMap<>();
     private static final HashMap<RemoteViewsCacheKey, Runnable>
