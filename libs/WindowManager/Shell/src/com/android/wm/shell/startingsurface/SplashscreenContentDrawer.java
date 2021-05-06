@@ -75,20 +75,15 @@ public class SplashscreenContentDrawer {
     private int mBrandingImageWidth;
     private int mBrandingImageHeight;
     private final int mAppRevealDuration;
-    private final int mIconExitDuration;
     private int mMainWindowShiftLength;
-    private int mIconNormalExitDistance;
-    private int mIconEarlyExitDistance;
     private final TransactionPool mTransactionPool;
     private final SplashScreenWindowAttrs mTmpAttrs = new SplashScreenWindowAttrs();
     private final Handler mSplashscreenWorkerHandler;
 
-    SplashscreenContentDrawer(Context context, int iconExitAnimDuration, int appRevealAnimDuration,
-            TransactionPool pool) {
+    SplashscreenContentDrawer(Context context, int appRevealAnimDuration, TransactionPool pool) {
         mContext = context;
         mIconProvider = new IconProvider(context);
         mAppRevealDuration = appRevealAnimDuration;
-        mIconExitDuration = iconExitAnimDuration;
         mTransactionPool = pool;
 
         // Initialize Splashscreen worker thread
@@ -139,10 +134,6 @@ public class SplashscreenContentDrawer {
                 com.android.wm.shell.R.dimen.starting_surface_brand_image_height);
         mMainWindowShiftLength = mContext.getResources().getDimensionPixelSize(
                 com.android.wm.shell.R.dimen.starting_surface_exit_animation_window_shift_length);
-        mIconNormalExitDistance = mContext.getResources().getDimensionPixelSize(
-                com.android.wm.shell.R.dimen.starting_surface_normal_exit_icon_distance);
-        mIconEarlyExitDistance = mContext.getResources().getDimensionPixelSize(
-                com.android.wm.shell.R.dimen.starting_surface_early_exit_icon_distance);
     }
 
     private int getSystemBGColor() {
@@ -406,6 +397,7 @@ public class SplashscreenContentDrawer {
             }
             if (mEmptyView) {
                 splashScreenView.setNotCopyable();
+                splashScreenView.setRevealAnimationSupported(false);
             }
             splashScreenView.makeSystemUIColorsTransparent();
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
@@ -678,12 +670,10 @@ public class SplashscreenContentDrawer {
      * Create and play the default exit animation for splash screen view.
      */
     void applyExitAnimation(SplashScreenView view, SurfaceControl leash,
-            Rect frame, boolean isEarlyExit, Runnable finishCallback) {
+            Rect frame, Runnable finishCallback) {
         final SplashScreenExitAnimation animation = new SplashScreenExitAnimation(view, leash,
-                frame, mAppRevealDuration, mIconExitDuration, mMainWindowShiftLength,
-                isEarlyExit ? mIconEarlyExitDistance : mIconNormalExitDistance, mTransactionPool,
+                frame, mAppRevealDuration, mMainWindowShiftLength, mTransactionPool,
                 finishCallback);
-        animation.prepareAnimations();
         animation.startAnimations();
     }
 }
