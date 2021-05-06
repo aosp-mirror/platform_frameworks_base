@@ -33,6 +33,7 @@ import com.android.internal.compat.AndroidBuildClassifier;
 import com.android.internal.compat.CompatibilityChangeConfig;
 import com.android.internal.compat.CompatibilityChangeInfo;
 import com.android.internal.compat.CompatibilityOverrideConfig;
+import com.android.internal.compat.CompatibilityOverridesToRemoveConfig;
 import com.android.internal.compat.IOverrideValidator;
 import com.android.internal.compat.OverrideAllowedState;
 import com.android.server.compat.config.Change;
@@ -364,6 +365,27 @@ final class CompatConfig {
             for (int i = 0; i < mChanges.size(); ++i) {
                 CompatChange change = mChanges.valueAt(i);
                 removeOverrideUnsafe(change.getId(), packageName);
+            }
+            saveOverrides();
+            invalidateCache();
+        }
+    }
+
+    /**
+     * Removes overrides whose change ID is specified in {@code overridesToRemove} that were
+     * previously added via {@link #addOverride(long, String, boolean)} or
+     * {@link #addOverrides(CompatibilityOverrideConfig, String)} for a certain package.
+     *
+     * <p>This restores the default behaviour for the given change IDs and app.
+     *
+     * @param overridesToRemove list of change IDs for which to restore the default behaviour.
+     * @param packageName       the package for which the overrides should be purged
+     */
+    void removePackageOverrides(CompatibilityOverridesToRemoveConfig overridesToRemove,
+            String packageName) {
+        synchronized (mChanges) {
+            for (Long changeId : overridesToRemove.changeIds) {
+                removeOverrideUnsafe(changeId, packageName);
             }
             saveOverrides();
             invalidateCache();
