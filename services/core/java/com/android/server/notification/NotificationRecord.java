@@ -29,6 +29,7 @@ import android.app.ActivityManager;
 import android.app.IActivityManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
+import android.app.Person;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -556,7 +557,7 @@ public final class NotificationRecord {
         pw.println(prefix + "bigContentView=" + formatRemoteViews(notification.bigContentView));
         pw.println(prefix + "headsUpContentView="
                 + formatRemoteViews(notification.headsUpContentView));
-        pw.print(prefix + String.format("color=0x%08x", notification.color));
+        pw.println(prefix + String.format("color=0x%08x", notification.color));
         pw.println(prefix + "timeout="
                 + TimeUtils.formatForLogging(notification.getTimeoutAfter()));
         if (notification.actions != null && notification.actions.length > 0) {
@@ -1438,13 +1439,35 @@ public final class NotificationRecord {
         }
 
         if (mTargetSdkVersion >= Build.VERSION_CODES.R
-            && Notification.MessagingStyle.class.equals(notification.getNotificationStyle())
-            && mShortcutInfo == null) {
+                && Notification.MessagingStyle.class.equals(notification.getNotificationStyle())
+                && (mShortcutInfo == null || isOnlyBots(mShortcutInfo.getPersons()))) {
             return false;
         }
         if (mHasSentValidMsg && mShortcutInfo == null) {
             return false;
         }
+        return true;
+    }
+
+    /**
+     * Determines if the {@link ShortcutInfo#getPersons()} array includes only bots, for the purpose
+     * of excluding that shortcut from the "conversations" section of the notification shade.  If
+     * the shortcut has no people, this returns false to allow the conversation into the shade, and
+     * if there is any non-bot person we allow it as well.  Otherwise, this is only bots and will
+     * not count as a conversation.
+     */
+    private boolean isOnlyBots(Person[] persons) {
+        // Return false if there are no persons at all
+        if (persons == null || persons.length == 0) {
+            return false;
+        }
+        // Return false if there are any non-bot persons
+        for (Person person : persons) {
+            if (!person.isBot()) {
+                return false;
+            }
+        }
+        // Return true otherwise
         return true;
     }
 
