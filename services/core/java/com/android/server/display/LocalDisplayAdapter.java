@@ -790,7 +790,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                         try {
                             final float backlight = brightnessToBacklight(brightness);
                             float nits = NITS_INVALID;
-                            float sdrBacklight = backlight;
+                            float sdrBacklight = PowerManager.BRIGHTNESS_INVALID_FLOAT;
                             float sdrNits = NITS_INVALID;
                             if (getDisplayDeviceConfig().hasNitsMapping()
                                     && sdrBrightness != PowerManager.BRIGHTNESS_INVALID_FLOAT) {
@@ -1306,7 +1306,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         // Set backlight within min and max backlight values
         void setBacklight(float sdrBacklight, float sdrNits, float backlight, float nits) {
             if (mUseSurfaceControlBrightness || mForceSurfaceControl) {
-                if (sdrBacklight == PowerManager.BRIGHTNESS_INVALID_FLOAT) {
+                if (BrightnessSynchronizer.floatEquals(
+                        sdrBacklight, PowerManager.BRIGHTNESS_INVALID_FLOAT)) {
                     mSurfaceControlProxy.setDisplayBrightness(mDisplayToken, backlight);
                 } else {
                     mSurfaceControlProxy.setDisplayBrightness(mDisplayToken, sdrBacklight, sdrNits,
