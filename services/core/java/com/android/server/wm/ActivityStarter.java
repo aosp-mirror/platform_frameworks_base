@@ -602,30 +602,6 @@ class ActivityStarter {
     }
 
     /**
-     * Starts an activity based on the provided {@link ActivityRecord} and environment parameters.
-     * Note that this method is called internally as well as part of {@link #executeRequest}.
-     */
-    void startResolvedActivity(final ActivityRecord r, ActivityRecord sourceRecord,
-            IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
-            int startFlags, boolean doResume, ActivityOptions options, Task inTask,
-            NeededUriGrants intentGrants) {
-        try {
-            final LaunchingState launchingState = mSupervisor.getActivityMetricsLogger()
-                    .notifyActivityLaunching(r.intent, r.resultTo);
-            mLastStartReason = "startResolvedActivity";
-            mLastStartActivityTimeMs = System.currentTimeMillis();
-            mLastStartActivityRecord = r;
-            mLastStartActivityResult = startActivityUnchecked(r, sourceRecord, voiceSession,
-                    voiceInteractor, startFlags, doResume, options, inTask,
-                    false /* restrictedBgActivity */, intentGrants);
-            mSupervisor.getActivityMetricsLogger().notifyActivityLaunched(launchingState,
-                    mLastStartActivityResult, mLastStartActivityRecord, options);
-        } finally {
-            onExecutionComplete();
-        }
-    }
-
-    /**
      * Resolve necessary information according the request parameters provided earlier, and execute
      * the request which begin the journey of starting an activity.
      * @return The starter result.
@@ -707,11 +683,13 @@ class ActivityStarter {
                 // used here because it may be cleared in setTargetRootTaskIfNeeded.
                 final ActivityOptions originalOptions = mRequest.activityOptions != null
                         ? mRequest.activityOptions.getOriginalOptions() : null;
+                // If the new record is the one that started, a new activity has created.
+                final boolean newActivityCreated = mStartActivity == mLastStartActivityRecord;
                 // Notify ActivityMetricsLogger that the activity has launched.
                 // ActivityMetricsLogger will then wait for the windows to be drawn and populate
                 // WaitResult.
                 mSupervisor.getActivityMetricsLogger().notifyActivityLaunched(launchingState, res,
-                        mLastStartActivityRecord, originalOptions);
+                        newActivityCreated, mLastStartActivityRecord, originalOptions);
                 if (mRequest.waitResult != null) {
                     mRequest.waitResult.result = res;
                     res = waitResultIfNeeded(mRequest.waitResult, mLastStartActivityRecord,
