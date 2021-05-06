@@ -132,6 +132,9 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
         @Override
         public void onVisibilityChanged(boolean isVisible) {
+            if (!isVisible) {
+                cancelPostAuthActions();
+            }
             if (mAlternateAuthInterceptor != null) {
                 mAlternateAuthInterceptor.onBouncerVisibilityChanged();
             }
@@ -406,21 +409,25 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                 return;
             }
 
+            mAfterKeyguardGoneAction = r;
+            mKeyguardGoneCancelAction = cancelAction;
             if (mAlternateAuthInterceptor != null) {
-                mAfterKeyguardGoneAction = r;
-                mKeyguardGoneCancelAction = cancelAction;
                 if (mAlternateAuthInterceptor.showAlternateAuthBouncer()) {
                     mStatusBar.updateScrimController();
                 }
                 return;
             }
 
-            if (!afterKeyguardGone) {
-                mBouncer.showWithDismissAction(r, cancelAction);
-            } else {
-                mAfterKeyguardGoneAction = r;
-                mKeyguardGoneCancelAction = cancelAction;
+            if (afterKeyguardGone) {
+                // we'll handle the dismiss action after keyguard is gone, so just show the bouncer
                 mBouncer.show(false /* resetSecuritySelection */);
+            } else {
+                // after authentication success, run dismiss action with the option to defer
+                // hiding the keyguard based on the return value of the OnDismissAction
+                mBouncer.showWithDismissAction(mAfterKeyguardGoneAction, mKeyguardGoneCancelAction);
+                // bouncer will handle the dismiss action, so we no longer need to track it here
+                mAfterKeyguardGoneAction = null;
+                mKeyguardGoneCancelAction = null;
             }
         }
         updateStates();
@@ -1133,15 +1140,21 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     /**
-     * Request to show the udfps affordance in a particular color. This can be used if an
-     * occluding app on the keyguard would like to request udfps.  This method does nothing if
-     * {@link KeyguardUpdateMonitor#shouldListenForFingerprint} is false.
+     * Request to authenticate using face.
      */
-    public void requestUdfps(boolean request, int color) {
-        if (mAlternateAuthInterceptor == null) {
-            return;
+    public void requestFace(boolean request) {
+        mKeyguardUpdateManager.requestFaceAuthOnOccludingApp(request);
+    }
+
+    /**
+     * Request to authenticate using the fingerprint sensor.  If the fingerprint sensor is udfps,
+     * uses the color provided by udfpsColor for the fingerprint icon.
+     */
+    public void requestFp(boolean request, int udfpsColor) {
+        mKeyguardUpdateManager.requestFingerprintAuthOnOccludingApp(request);
+        if (mAlternateAuthInterceptor != null) {
+            mAlternateAuthInterceptor.requestUdfps(request, udfpsColor);
         }
-        mAlternateAuthInterceptor.requestUdfps(request, color);
     }
 
     /**
