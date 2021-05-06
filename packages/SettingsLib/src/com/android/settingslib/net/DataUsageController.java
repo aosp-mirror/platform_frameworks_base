@@ -113,7 +113,8 @@ public class DataUsageController {
     }
 
     public DataUsageInfo getWifiDataUsageInfo() {
-        NetworkTemplate template = NetworkTemplate.buildTemplateWifiWildcard();
+        NetworkTemplate template = NetworkTemplate.buildTemplateWifi(
+                NetworkTemplate.WIFI_NETWORKID_ALL, null);
         return getDataUsageInfo(template);
     }
 
