@@ -128,11 +128,10 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
         int padding = r.getDimensionPixelSize(R.dimen.qs_footer_padding);
         mRootView.setPaddingRelative(padding, padding, padding, padding);
 
-        int verticalMargin = r.getDimensionPixelSize(R.dimen.qs_security_footer_vertical_margin);
+        int bottomMargin = r.getDimensionPixelSize(R.dimen.qs_footers_margin_bottom);
         ViewGroup.MarginLayoutParams lp =
                 (ViewGroup.MarginLayoutParams) mRootView.getLayoutParams();
-        lp.topMargin = verticalMargin;
-        lp.bottomMargin = verticalMargin;
+        lp.bottomMargin = bottomMargin;
         lp.width = r.getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT
                 ? MATCH_PARENT : WRAP_CONTENT;
         mRootView.setLayoutParams(lp);
