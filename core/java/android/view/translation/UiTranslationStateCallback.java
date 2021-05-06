@@ -54,7 +54,9 @@ public interface UiTranslationStateCallback {
      * The system is requesting that the application restore from the temporarily paused state and
      * show the content in translated language.
      */
-    void onResumed(@NonNull ULocale sourceLocale, @NonNull ULocale targetLocale);
+    // TODO: Remove the default implementation when clients have implemented this.
+    default void onResumed(@NonNull ULocale sourceLocale, @NonNull ULocale targetLocale) {
+    }
 
     /**
      * The UI Translation session has ended.
