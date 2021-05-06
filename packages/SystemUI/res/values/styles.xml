@@ -226,13 +226,21 @@
         <item name="android:textSize">@dimen/qs_tile_text_size</item>
     </style>
 
-    <style name="TextAppearance.QS.Status" parent="TextAppearance.QS.TileLabel.Secondary">
-        <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
-        <item name="android:textColor">@color/dark_mode_qs_icon_color_single_tone</item>
+    <style name="TextAppearance.QS.Status">
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamilyMedium</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:letterSpacing">0.01</item>
+        <item name="android:lineHeight">20sp</item>
+    </style>
+
+    <style name="TextAppearance.QS.Status.NoCarrierText">
+        <item name="android:textColor">?android:attr/textColorTertiary</item>
     </style>
 
     <style name="TextAppearance.QS.Build">
         <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
         <item name="android:textSize">14sp</item>
     </style>
 
@@ -389,7 +397,6 @@
     <style name="Theme.SystemUI.QuickSettings" parent="@*android:style/Theme.DeviceDefault">
         <item name="lightIconTheme">@style/QSIconTheme</item>
         <item name="darkIconTheme">@style/QSIconTheme</item>
-        <item name="android:textColor">?android:attr/textColorPrimary</item>
         <item name="android:colorError">@*android:color/error_color_material_dark</item>
         <item name="android:windowIsFloating">true</item>
         <item name="android:homeAsUpIndicator">@drawable/ic_arrow_back</item>
