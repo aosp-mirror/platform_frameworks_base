@@ -118,6 +118,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsService;
+import com.android.internal.os.BinderDeathDispatcher;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.LocalLog;
@@ -202,6 +203,8 @@ public class AlarmManagerService extends SystemService {
                     .addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING
                             | Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
 
+    private static final BinderDeathDispatcher<IAlarmListener> sListenerDeathDispatcher =
+            new BinderDeathDispatcher<>();
     final LocalLog mLog = new LocalLog(TAG);
 
     AppOpsManager mAppOps;
@@ -1809,9 +1812,8 @@ public class AlarmManagerService extends SystemService {
         }
 
         if (directReceiver != null) {
-            try {
-                directReceiver.asBinder().linkToDeath(mListenerDeathRecipient, 0);
-            } catch (RemoteException e) {
+            if (sListenerDeathDispatcher.linkToDeath(directReceiver, mListenerDeathRecipient)
+                    <= 0) {
                 Slog.w(TAG, "Dropping unreachable alarm listener " + listenerTag);
                 return;
             }
@@ -2823,6 +2825,12 @@ public class AlarmManagerService extends SystemService {
                 pw.decreaseIndent();
                 pw.println();
             }
+
+            pw.println("Listener death dispatcher state:");
+            pw.increaseIndent();
+            sListenerDeathDispatcher.dump(pw);
+            pw.println();
+            pw.decreaseIndent();
 
             if (mLog.dump(pw, "Recent problems:")) {
                 pw.println();
