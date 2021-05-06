@@ -52965,6 +52965,7 @@ package android.view.translation {
   public interface UiTranslationStateCallback {
     method public void onFinished();
     method public void onPaused();
+    method public void onResumed(@NonNull android.icu.util.ULocale, @NonNull android.icu.util.ULocale);
     method @Deprecated public void onStarted(@NonNull String, @NonNull String);
     method public default void onStarted(@NonNull android.icu.util.ULocale, @NonNull android.icu.util.ULocale);
   }
