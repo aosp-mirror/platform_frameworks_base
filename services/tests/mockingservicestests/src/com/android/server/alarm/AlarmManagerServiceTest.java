@@ -71,7 +71,9 @@ import static com.android.server.alarm.AlarmManagerService.Constants.KEY_CRASH_N
 import static com.android.server.alarm.AlarmManagerService.Constants.KEY_EXACT_ALARM_DENY_LIST;
 import static com.android.server.alarm.AlarmManagerService.Constants.KEY_LAZY_BATCHING;
 import static com.android.server.alarm.AlarmManagerService.Constants.KEY_LISTENER_TIMEOUT;
+import static com.android.server.alarm.AlarmManagerService.Constants.KEY_MAX_DEVICE_IDLE_FUZZ;
 import static com.android.server.alarm.AlarmManagerService.Constants.KEY_MAX_INTERVAL;
+import static com.android.server.alarm.AlarmManagerService.Constants.KEY_MIN_DEVICE_IDLE_FUZZ;
 import static com.android.server.alarm.AlarmManagerService.Constants.KEY_MIN_FUTURITY;
 import static com.android.server.alarm.AlarmManagerService.Constants.KEY_MIN_INTERVAL;
 import static com.android.server.alarm.AlarmManagerService.Constants.KEY_MIN_WINDOW;
@@ -654,6 +656,8 @@ public class AlarmManagerServiceTest {
         setDeviceConfigLong(KEY_LISTENER_TIMEOUT, 45);
         setDeviceConfigLong(KEY_MIN_WINDOW, 50);
         setDeviceConfigLong(KEY_PRIORITY_ALARM_DELAY, 55);
+        setDeviceConfigLong(KEY_MIN_DEVICE_IDLE_FUZZ, 60);
+        setDeviceConfigLong(KEY_MAX_DEVICE_IDLE_FUZZ, 65);
         assertEquals(5, mService.mConstants.MIN_FUTURITY);
         assertEquals(10, mService.mConstants.MIN_INTERVAL);
         assertEquals(15, mService.mConstants.MAX_INTERVAL);
@@ -665,6 +669,8 @@ public class AlarmManagerServiceTest {
         assertEquals(45, mService.mConstants.LISTENER_TIMEOUT);
         assertEquals(50, mService.mConstants.MIN_WINDOW);
         assertEquals(55, mService.mConstants.PRIORITY_ALARM_DELAY);
+        assertEquals(60, mService.mConstants.MIN_DEVICE_IDLE_FUZZ);
+        assertEquals(65, mService.mConstants.MAX_DEVICE_IDLE_FUZZ);
     }
 
     @Test
@@ -734,6 +740,20 @@ public class AlarmManagerServiceTest {
         setDeviceConfigLong(KEY_ALLOW_WHILE_IDLE_COMPAT_WINDOW, AlarmManager.INTERVAL_HOUR + 1);
         assertEquals(AlarmManager.INTERVAL_HOUR,
                 mService.mConstants.ALLOW_WHILE_IDLE_COMPAT_WINDOW);
+    }
+
+    @Test
+    public void deviceIdleFuzzRangeNonNegative() {
+        final long newMinFuzz = mService.mConstants.MAX_DEVICE_IDLE_FUZZ + 1542;
+        final long newMaxFuzz = mService.mConstants.MIN_DEVICE_IDLE_FUZZ - 131;
+
+        setDeviceConfigLong(KEY_MIN_DEVICE_IDLE_FUZZ, newMinFuzz);
+        assertTrue("Negative device-idle fuzz range", mService.mConstants.MAX_DEVICE_IDLE_FUZZ
+                >= mService.mConstants.MIN_DEVICE_IDLE_FUZZ);
+
+        setDeviceConfigLong(KEY_MAX_DEVICE_IDLE_FUZZ, newMaxFuzz);
+        assertTrue("Negative device-idle fuzz range", mService.mConstants.MAX_DEVICE_IDLE_FUZZ
+                >= mService.mConstants.MIN_DEVICE_IDLE_FUZZ);
     }
 
     @Test
@@ -1431,7 +1451,7 @@ public class AlarmManagerServiceTest {
 
     @Test
     public void singleIdleUntil() {
-        doReturn(0).when(mService).fuzzForDuration(anyLong());
+        setDeviceConfigLong(KEY_MAX_DEVICE_IDLE_FUZZ, 0);
 
         final PendingIntent idleUntilPi6 = getNewMockPendingIntent();
         setIdleUntilAlarm(ELAPSED_REALTIME_WAKEUP, mNowElapsedTest + 6, idleUntilPi6);
@@ -1504,44 +1524,67 @@ public class AlarmManagerServiceTest {
         assertNull(mService.mNextWakeFromIdle);
     }
 
+    private static void assertInRange(String message, long minIncl, long maxIncl, long val) {
+        assertTrue(message, val >= minIncl && val <= maxIncl);
+    }
+
     @Test
-    public void idleUntilBeforeWakeFromIdle() {
-        doReturn(0).when(mService).fuzzForDuration(anyLong());
+    public void idleUntilFuzzedBeforeWakeFromIdle() {
+        final long minFuzz = 6;
+        final long maxFuzz = 17;
+        setDeviceConfigLong(KEY_MIN_DEVICE_IDLE_FUZZ, minFuzz);
+        setDeviceConfigLong(KEY_MAX_DEVICE_IDLE_FUZZ, maxFuzz);
+
+        mNowElapsedTest = 119; // Arbitrary, just to ensure we are not testing on 0.
 
         final PendingIntent idleUntilPi = getNewMockPendingIntent();
-        final long requestedIdleUntil = mNowElapsedTest + 10;
+        final long requestedIdleUntil = mNowElapsedTest + 12;
         setIdleUntilAlarm(ELAPSED_REALTIME_WAKEUP, requestedIdleUntil, idleUntilPi);
 
         assertEquals(requestedIdleUntil, mService.mPendingIdleUntil.getWhenElapsed());
 
         final PendingIntent wakeFromIdle5 = getNewMockPendingIntent();
         setWakeFromIdle(ELAPSED_REALTIME_WAKEUP, mNowElapsedTest + 5, wakeFromIdle5);
-        assertEquals(mNowElapsedTest + 5, mService.mPendingIdleUntil.getWhenElapsed());
+        // Anything before now, gets snapped to now. It is not necessary for it to fire
+        // immediately, just how it is implemented today for simplicity.
+        assertEquals(mNowElapsedTest, mService.mPendingIdleUntil.getWhenElapsed());
 
         final PendingIntent wakeFromIdle8 = getNewMockPendingIntent();
         setWakeFromIdle(ELAPSED_REALTIME_WAKEUP, mNowElapsedTest + 8, wakeFromIdle8);
-        assertEquals(mNowElapsedTest + 5, mService.mPendingIdleUntil.getWhenElapsed());
+        // Next wake from idle is still the same.
+        assertEquals(mNowElapsedTest, mService.mPendingIdleUntil.getWhenElapsed());
 
-        final PendingIntent wakeFromIdle12 = getNewMockPendingIntent();
-        setWakeFromIdle(ELAPSED_REALTIME_WAKEUP, mNowElapsedTest + 12, wakeFromIdle12);
-        assertEquals(mNowElapsedTest + 5, mService.mPendingIdleUntil.getWhenElapsed());
+        final PendingIntent wakeFromIdle19 = getNewMockPendingIntent();
+        setWakeFromIdle(ELAPSED_REALTIME_WAKEUP, mNowElapsedTest + 19, wakeFromIdle19);
+        // Next wake from idle is still the same.
+        assertEquals(mNowElapsedTest, mService.mPendingIdleUntil.getWhenElapsed());
 
         mService.removeLocked(wakeFromIdle5, null, REMOVE_REASON_UNDEFINED);
-        assertEquals(mNowElapsedTest + 8, mService.mPendingIdleUntil.getWhenElapsed());
+        // Next wake from idle is at now + 8.
+        long min = mNowElapsedTest;
+        long max = mNowElapsedTest + 8 - minFuzz;
+        assertInRange("Idle until alarm time not in expected range [" + min + ", " + max + "]",
+                min, max, mService.mPendingIdleUntil.getWhenElapsed());
 
         mService.removeLocked(wakeFromIdle8, null, REMOVE_REASON_UNDEFINED);
+        // Next wake from idle is at now + 19, which is > minFuzz distance from
+        // the requested idle until time: now + 12.
         assertEquals(requestedIdleUntil, mService.mPendingIdleUntil.getWhenElapsed());
 
         mService.removeLocked(idleUntilPi, null, REMOVE_REASON_UNDEFINED);
         assertNull(mService.mPendingIdleUntil);
 
-        setIdleUntilAlarm(ELAPSED_REALTIME_WAKEUP, mNowElapsedTest + 15, idleUntilPi);
-        assertEquals(mNowElapsedTest + 12, mService.mPendingIdleUntil.getWhenElapsed());
+        setIdleUntilAlarm(ELAPSED_REALTIME_WAKEUP, mNowElapsedTest + 21, idleUntilPi);
+        // Next wake from idle is at now + 19, which means this alarm should get pulled back.
+        min = mNowElapsedTest + 19 - maxFuzz;
+        max = mNowElapsedTest + 19 - minFuzz;
+        assertInRange("Idle until alarm time not in expected range [" + min + ", " + max + "]",
+                min, max, mService.mPendingIdleUntil.getWhenElapsed());
     }
 
     @Test
     public void allowWhileIdleAlarmsWhileDeviceIdle() throws Exception {
-        doReturn(0).when(mService).fuzzForDuration(anyLong());
+        setDeviceConfigLong(KEY_MAX_DEVICE_IDLE_FUZZ, 0);
 
         setIdleUntilAlarm(ELAPSED_REALTIME_WAKEUP, mNowElapsedTest + mAllowWhileIdleWindow + 1000,
                 getNewMockPendingIntent());
@@ -1571,7 +1614,7 @@ public class AlarmManagerServiceTest {
 
     @Test
     public void allowWhileIdleUnrestricted() throws Exception {
-        doReturn(0).when(mService).fuzzForDuration(anyLong());
+        setDeviceConfigLong(KEY_MAX_DEVICE_IDLE_FUZZ, 0);
 
         // Both battery saver and doze are on.
         setIdleUntilAlarm(ELAPSED_REALTIME_WAKEUP, mNowElapsedTest + 1000,
@@ -1597,7 +1640,7 @@ public class AlarmManagerServiceTest {
 
     @Test
     public void deviceIdleDeferralOnSet() throws Exception {
-        doReturn(0).when(mService).fuzzForDuration(anyLong());
+        setDeviceConfigLong(KEY_MAX_DEVICE_IDLE_FUZZ, 0);
 
         final long deviceIdleUntil = mNowElapsedTest + 1234;
         setIdleUntilAlarm(ELAPSED_REALTIME_WAKEUP, deviceIdleUntil, getNewMockPendingIntent());
@@ -1622,7 +1665,7 @@ public class AlarmManagerServiceTest {
 
     @Test
     public void deviceIdleStateChanges() throws Exception {
-        doReturn(0).when(mService).fuzzForDuration(anyLong());
+        setDeviceConfigLong(KEY_MAX_DEVICE_IDLE_FUZZ, 0);
 
         final int numAlarms = 10;
         final PendingIntent[] pis = new PendingIntent[numAlarms];
@@ -1740,7 +1783,7 @@ public class AlarmManagerServiceTest {
 
     @Test
     public void prioritizedAlarmsInDeviceIdle() throws Exception {
-        doReturn(0).when(mService).fuzzForDuration(anyLong());
+        setDeviceConfigLong(KEY_MAX_DEVICE_IDLE_FUZZ, 0);
 
         final long minDelay = 5;
         setDeviceConfigLong(KEY_PRIORITY_ALARM_DELAY, minDelay);
@@ -1791,7 +1834,7 @@ public class AlarmManagerServiceTest {
 
     @Test
     public void dispatchOrder() throws Exception {
-        doReturn(0).when(mService).fuzzForDuration(anyLong());
+        setDeviceConfigLong(KEY_MAX_DEVICE_IDLE_FUZZ, 0);
 
         final long deviceIdleUntil = mNowElapsedTest + 1234;
         final PendingIntent idleUntilPi = getNewMockPendingIntent();

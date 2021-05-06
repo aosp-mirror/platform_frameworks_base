@@ -151,10 +151,10 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
-import java.util.Random;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeSet;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 
 /**
@@ -251,7 +251,6 @@ public class AlarmManagerService extends SystemService {
     Intent mTimeTickIntent;
     IAlarmListener mTimeTickTrigger;
     PendingIntent mDateChangeSender;
-    Random mRandom;
     boolean mInteractive = true;
     long mNonInteractiveStartTime;
     long mNonInteractiveTime;
@@ -516,6 +515,10 @@ public class AlarmManagerService extends SystemService {
         static final String KEY_PRIORITY_ALARM_DELAY = "priority_alarm_delay";
         @VisibleForTesting
         static final String KEY_EXACT_ALARM_DENY_LIST = "exact_alarm_deny_list";
+        @VisibleForTesting
+        static final String KEY_MIN_DEVICE_IDLE_FUZZ = "min_device_idle_fuzz";
+        @VisibleForTesting
+        static final String KEY_MAX_DEVICE_IDLE_FUZZ = "max_device_idle_fuzz";
 
         private static final long DEFAULT_MIN_FUTURITY = 5 * 1000;
         private static final long DEFAULT_MIN_INTERVAL = 60 * 1000;
@@ -555,6 +558,9 @@ public class AlarmManagerService extends SystemService {
         private static final boolean DEFAULT_CRASH_NON_CLOCK_APPS = true;
 
         private static final long DEFAULT_PRIORITY_ALARM_DELAY = 9 * 60_000;
+
+        private static final long DEFAULT_MIN_DEVICE_IDLE_FUZZ = 2 * 60_000;
+        private static final long DEFAULT_MAX_DEVICE_IDLE_FUZZ = 15 * 60_000;
 
         // Minimum futurity of a new alarm
         public long MIN_FUTURITY = DEFAULT_MIN_FUTURITY;
@@ -618,10 +624,23 @@ public class AlarmManagerService extends SystemService {
         public long PRIORITY_ALARM_DELAY = DEFAULT_PRIORITY_ALARM_DELAY;
 
         /**
-         * Set of apps that won't get SCHEDULE_EXACT_ALARM when the app-op mode for
-         * OP_SCHEDULE_EXACT_ALARM is MODE_DEFAULT.
+         * Read-only set of apps that won't get SCHEDULE_EXACT_ALARM when the app-op mode for
+         * OP_SCHEDULE_EXACT_ALARM is MODE_DEFAULT. Since this is read-only and volatile, this can
+         * be accessed without synchronizing on {@link #mLock}.
          */
-        public Set<String> EXACT_ALARM_DENY_LIST = Collections.emptySet();
+        public volatile Set<String> EXACT_ALARM_DENY_LIST = Collections.emptySet();
+
+        /**
+         * Minimum time interval that an IDLE_UNTIL will be pulled earlier to a subsequent
+         * WAKE_FROM_IDLE alarm.
+         */
+        public long MIN_DEVICE_IDLE_FUZZ = DEFAULT_MIN_DEVICE_IDLE_FUZZ;
+
+        /**
+         * Maximum time interval that an IDLE_UNTIL will be pulled earlier to a subsequent
+         * WAKE_FROM_IDLE alarm.
+         */
+        public long MAX_DEVICE_IDLE_FUZZ = DEFAULT_MAX_DEVICE_IDLE_FUZZ;
 
         private long mLastAllowWhileIdleWhitelistDuration = -1;
         private int mVersion = 0;
@@ -660,6 +679,7 @@ public class AlarmManagerService extends SystemService {
         @Override
         public void onPropertiesChanged(@NonNull DeviceConfig.Properties properties) {
             boolean standbyQuotaUpdated = false;
+            boolean deviceIdleFuzzBoundariesUpdated = false;
             synchronized (mLock) {
                 mVersion++;
                 for (String name : properties.getKeyset()) {
@@ -787,6 +807,13 @@ public class AlarmManagerService extends SystemService {
                                 updateExactAlarmDenyList(values);
                             }
                             break;
+                        case KEY_MIN_DEVICE_IDLE_FUZZ:
+                        case KEY_MAX_DEVICE_IDLE_FUZZ:
+                            if (!deviceIdleFuzzBoundariesUpdated) {
+                                updateDeviceIdleFuzzBoundaries();
+                                deviceIdleFuzzBoundariesUpdated = true;
+                            }
+                            break;
                         default:
                             if (name.startsWith(KEY_PREFIX_STANDBY_QUOTA) && !standbyQuotaUpdated) {
                                 // The quotas need to be updated in order, so we can't just rely
@@ -822,6 +849,24 @@ public class AlarmManagerService extends SystemService {
             newStore.addAll(allAlarms);
             mAlarmStore = newStore;
             mAlarmStore.setAlarmClockRemovalListener(mAlarmClockUpdater);
+        }
+
+        private void updateDeviceIdleFuzzBoundaries() {
+            final DeviceConfig.Properties properties = DeviceConfig.getProperties(
+                    DeviceConfig.NAMESPACE_ALARM_MANAGER,
+                    KEY_MIN_DEVICE_IDLE_FUZZ, KEY_MAX_DEVICE_IDLE_FUZZ);
+
+            MIN_DEVICE_IDLE_FUZZ = properties.getLong(KEY_MIN_DEVICE_IDLE_FUZZ,
+                    DEFAULT_MIN_DEVICE_IDLE_FUZZ);
+            MAX_DEVICE_IDLE_FUZZ = properties.getLong(KEY_MAX_DEVICE_IDLE_FUZZ,
+                    DEFAULT_MAX_DEVICE_IDLE_FUZZ);
+
+            if (MAX_DEVICE_IDLE_FUZZ < MIN_DEVICE_IDLE_FUZZ) {
+                Slog.w(TAG, "max_device_idle_fuzz cannot be smaller than"
+                        + " min_device_idle_fuzz! Increasing to "
+                        + MIN_DEVICE_IDLE_FUZZ);
+                MAX_DEVICE_IDLE_FUZZ = MIN_DEVICE_IDLE_FUZZ;
+            }
         }
 
         private void updateStandbyQuotasLocked() {
@@ -1133,12 +1178,8 @@ public class AlarmManagerService extends SystemService {
                 if (mNextWakeFromIdle != null && isRtc(mNextWakeFromIdle.type)) {
                     // The next wake from idle got updated due to the rtc time change, so we need
                     // to update the time we have to come out of idle too.
-                    final boolean idleUntilUpdated = mAlarmStore.updateAlarmDeliveries(a -> {
-                        if (a != mPendingIdleUntil) {
-                            return false;
-                        }
-                        return adjustIdleUntilTime(a);
-                    });
+                    final boolean idleUntilUpdated = mAlarmStore.updateAlarmDeliveries(
+                            a -> (a == mPendingIdleUntil) && adjustIdleUntilTime(a));
                     if (idleUntilUpdated) {
                         mAlarmStore.updateAlarmDeliveries(
                                 alarm -> adjustDeliveryTimeBasedOnDeviceIdle(alarm));
@@ -1911,23 +1952,30 @@ public class AlarmManagerService extends SystemService {
         if ((alarm.flags & AlarmManager.FLAG_IDLE_UNTIL) == 0) {
             return false;
         }
-        restoreRequestedTime(alarm);
-        long triggerBeforeFuzz = alarm.getRequestedElapsed();
-        if (mNextWakeFromIdle != null && triggerBeforeFuzz > mNextWakeFromIdle.getWhenElapsed()) {
-            triggerBeforeFuzz = mNextWakeFromIdle.getWhenElapsed();
+        final boolean changedBeforeFuzz = restoreRequestedTime(alarm);
+        if (mNextWakeFromIdle == null) {
+            // No need to change anything in the absence of a wake-from-idle request.
+            return changedBeforeFuzz;
         }
-        // Add fuzz to make the alarm go off some time before the actual desired time.
-        final int fuzz = fuzzForDuration(alarm.getWhenElapsed() - mInjector.getElapsedRealtime());
-        final int delta;
-        if (fuzz > 0) {
-            if (mRandom == null) {
-                mRandom = new Random();
-            }
-            delta = mRandom.nextInt(fuzz);
+        final long upcomingWakeFromIdle = mNextWakeFromIdle.getWhenElapsed();
+        // Add fuzz to make the alarm go off some time before the next upcoming wake-from-idle, as
+        // these alarms are usually wall-clock aligned.
+        if (alarm.getWhenElapsed() < (upcomingWakeFromIdle - mConstants.MIN_DEVICE_IDLE_FUZZ)) {
+            // No need to fuzz as this is already earlier than the coming wake-from-idle.
+            return changedBeforeFuzz;
+        }
+        final long nowElapsed = mInjector.getElapsedRealtime();
+        final long futurity = upcomingWakeFromIdle - nowElapsed;
+
+        if (futurity <= mConstants.MIN_DEVICE_IDLE_FUZZ) {
+            // No point in fuzzing as the minimum fuzz will take the time in the past.
+            alarm.setPolicyElapsed(REQUESTER_POLICY_INDEX, nowElapsed);
         } else {
-            delta = 0;
+            final ThreadLocalRandom random = ThreadLocalRandom.current();
+            final long upperBoundExcl = Math.min(mConstants.MAX_DEVICE_IDLE_FUZZ, futurity) + 1;
+            final long fuzz = random.nextLong(mConstants.MIN_DEVICE_IDLE_FUZZ, upperBoundExcl);
+            alarm.setPolicyElapsed(REQUESTER_POLICY_INDEX, upcomingWakeFromIdle - fuzz);
         }
-        alarm.setPolicyElapsed(REQUESTER_POLICY_INDEX, triggerBeforeFuzz - delta);
         return true;
     }
 
@@ -2130,12 +2178,8 @@ public class AlarmManagerService extends SystemService {
                 // If this wake from idle is earlier than whatever was previously scheduled,
                 // and we are currently idling, then the idle-until time needs to be updated.
                 if (mPendingIdleUntil != null) {
-                    final boolean updated = mAlarmStore.updateAlarmDeliveries(alarm -> {
-                        if (alarm != mPendingIdleUntil) {
-                            return false;
-                        }
-                        return adjustIdleUntilTime(alarm);
-                    });
+                    final boolean updated = mAlarmStore.updateAlarmDeliveries(
+                            alarm -> (alarm == mPendingIdleUntil) && adjustIdleUntilTime(alarm));
                     if (updated) {
                         // idle-until got updated, so also update all alarms not allowed while idle.
                         mAlarmStore.updateAlarmDeliveries(
@@ -3675,20 +3719,6 @@ public class AlarmManagerService extends SystemService {
         }
     }
 
-    int fuzzForDuration(long duration) {
-        if (duration < 15 * 60 * 1000) {
-            // If the duration until the time is less than 15 minutes, the maximum fuzz
-            // is the duration.
-            return (int) duration;
-        } else if (duration < 90 * 60 * 1000) {
-            // If duration is less than 1 1/2 hours, the maximum fuzz is 15 minutes,
-            return 15 * 60 * 1000;
-        } else {
-            // Otherwise, we will fuzz by at most half an hour.
-            return 30 * 60 * 1000;
-        }
-    }
-
     boolean checkAllowNonWakeupDelayLocked(long nowELAPSED) {
         if (mInteractive) {
             return false;
@@ -4698,8 +4728,10 @@ public class AlarmManagerService extends SystemService {
                         if (a.creatorUid != alarm.creatorUid || !isAllowedWhileIdleRestricted(a)) {
                             return false;
                         }
-                        return (doze && adjustDeliveryTimeBasedOnDeviceIdle(a))
-                                || (batterySaver && adjustDeliveryTimeBasedOnBatterySaver(a));
+                        final boolean dozeAdjusted = doze && adjustDeliveryTimeBasedOnDeviceIdle(a);
+                        final boolean batterySaverAdjusted =
+                                batterySaver && adjustDeliveryTimeBasedOnBatterySaver(a);
+                        return dozeAdjusted || batterySaverAdjusted;
                     });
                 } else if ((alarm.flags & FLAG_PRIORITIZE) != 0) {
                     mLastPriorityAlarmDispatch.put(alarm.creatorUid, nowELAPSED);
@@ -4708,8 +4740,10 @@ public class AlarmManagerService extends SystemService {
                                 || (alarm.flags & FLAG_PRIORITIZE) == 0) {
                             return false;
                         }
-                        return (doze && adjustDeliveryTimeBasedOnDeviceIdle(a))
-                                || (batterySaver && adjustDeliveryTimeBasedOnBatterySaver(a));
+                        final boolean dozeAdjusted = doze && adjustDeliveryTimeBasedOnDeviceIdle(a);
+                        final boolean batterySaverAdjusted =
+                                batterySaver && adjustDeliveryTimeBasedOnBatterySaver(a);
+                        return dozeAdjusted || batterySaverAdjusted;
                     });
                 }
                 if (RECORD_DEVICE_IDLE_ALARMS) {
