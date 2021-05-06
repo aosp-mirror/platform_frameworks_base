@@ -1143,16 +1143,18 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      */
     private void updateStackPosition() {
         // Consider interpolating from an mExpansionStartY for use on lockscreen and AOD
-        final float stackY = MathUtils.lerp(0, mTopPadding, mAmbientState.getExpansionFraction());
+        final float fraction = mAmbientState.getExpansionFraction();
+        final float stackY = MathUtils.lerp(0, mTopPadding, fraction);
         mAmbientState.setStackY(stackY);
         if (mOnStackYChanged != null) {
             mOnStackYChanged.run();
         }
 
-        final float shadeBottom = getHeight() - getEmptyBottomMargin();
-        mAmbientState.setStackEndHeight(shadeBottom - mTopPadding);
+        final float stackEndHeight = getHeight() - getEmptyBottomMargin() - mTopPadding;
+        mAmbientState.setStackEndHeight(stackEndHeight);
         mAmbientState.setStackHeight(
-                MathUtils.lerp(0, shadeBottom - mTopPadding, mAmbientState.getExpansionFraction()));
+                MathUtils.lerp(stackEndHeight * StackScrollAlgorithm.START_FRACTION,
+                        stackEndHeight, fraction));
     }
 
     void setOnStackYChanged(Runnable onStackYChanged) {
