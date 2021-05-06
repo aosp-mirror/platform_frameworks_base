@@ -45,7 +45,7 @@ abstract class UdfpsAnimationViewController<T extends UdfpsAnimationView>
     @NonNull final StatusBar mStatusBar;
     @NonNull final DumpManager mDumpManger;
 
-    private boolean mNotificationShadeExpanded;
+    boolean mNotificationShadeExpanded;
 
     protected UdfpsAnimationViewController(
             T view,
