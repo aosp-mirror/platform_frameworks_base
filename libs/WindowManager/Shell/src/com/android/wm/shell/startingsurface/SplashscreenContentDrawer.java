@@ -34,7 +34,6 @@ import android.graphics.drawable.AdaptiveIconDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
-import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Trace;
@@ -112,18 +111,14 @@ public class SplashscreenContentDrawer {
      * @param consumer Receiving the SplashScreenView object, which will also be executed
      *                 on splash screen thread. Note that the view can be null if failed.
      */
-    void createContentView(Context context, boolean emptyView, int splashScreenResId,
-            ActivityInfo info, int taskId, Consumer<SplashScreenView> consumer) {
+    void createContentView(Context context, boolean emptyView, ActivityInfo info, int taskId,
+            Consumer<SplashScreenView> consumer) {
         mSplashscreenWorkerHandler.post(() -> {
             SplashScreenView contentView;
             try {
-                contentView = SplashscreenContentDrawer.makeSplashscreenContent(
-                        context, splashScreenResId);
-                if (contentView == null) {
-                    Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "makeSplashScreenContentView");
-                    contentView = makeSplashScreenContentView(context, info, emptyView);
-                    Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
-                }
+                Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "makeSplashScreenContentView");
+                contentView = makeSplashScreenContentView(context, info, emptyView);
+                Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
             } catch (RuntimeException e) {
                 Slog.w(TAG, "failed creating starting window content at taskId: "
                         + taskId, e);
@@ -476,30 +471,6 @@ public class SplashscreenContentDrawer {
                     + " root " + root);
         }
         return root < 0.1;
-    }
-
-    private static SplashScreenView makeSplashscreenContent(Context ctx,
-            int splashscreenContentResId) {
-        // doesn't support windowSplashscreenContent after S
-        // TODO add an allowlist to skip some packages if needed
-        final int targetSdkVersion = ctx.getApplicationInfo().targetSdkVersion;
-        if (DEBUG) {
-            Slog.d(TAG, "target sdk for package: " + targetSdkVersion);
-        }
-        if (targetSdkVersion >= Build.VERSION_CODES.S) {
-            return null;
-        }
-        if (splashscreenContentResId == 0) {
-            return null;
-        }
-        final Drawable drawable = ctx.getDrawable(splashscreenContentResId);
-        if (drawable == null) {
-            return null;
-        }
-        SplashScreenView view = new SplashScreenView(ctx);
-        view.setNotCopyable();
-        view.setBackground(drawable);
-        return view;
     }
 
     private static class DrawableColorTester {
