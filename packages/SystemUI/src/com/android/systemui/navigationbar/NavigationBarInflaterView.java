@@ -158,7 +158,6 @@ public class NavigationBarInflaterView extends FrameLayout
     }
 
     public void onLikelyDefaultLayoutChange() {
-
         // Reevaluate new layout
         final String newValue = getDefaultLayout();
         if (!Objects.equals(mCurrentLayout, newValue)) {
