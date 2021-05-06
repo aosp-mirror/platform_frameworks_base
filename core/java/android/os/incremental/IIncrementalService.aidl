@@ -186,7 +186,30 @@ interface IIncrementalService {
      * Metrics key for delay in milliseconds to retry data loader binding. The value is a long.
      */
     const @utf8InCpp String METRICS_DATA_LOADER_BIND_DELAY_MILLIS = "dataLoaderBindDelayMillis";
-
+    /**
+     * Metrics key for total count of delayed reads caused by pending reads. The value is an int.
+     */
+    const @utf8InCpp String METRICS_TOTAL_DELAYED_READS = "totalDelayedReads";
+    /**
+     * Metrics key for total count of delayed reads caused by pending reads. The value is an int.
+     */
+    const @utf8InCpp String METRICS_TOTAL_DELAYED_READS_MILLIS = "totalDelayedReadsMillis";
+    /**
+     * Metrics key for total count of failed reads. The value is an int.
+     */
+    const @utf8InCpp String METRICS_TOTAL_FAILED_READS = "totalFailedReads";
+    /**
+     * Metrics key for the uid of the last read error. The value is an int.
+     */
+    const @utf8InCpp String METRICS_LAST_READ_ERROR_UID = "lastReadErrorUid";
+    /**
+     * Metrics key for duration in milliseconds since the last read error. The value is a long.
+     */
+    const @utf8InCpp String METRICS_MILLIS_SINCE_LAST_READ_ERROR = "millisSinceLastReadError";
+    /**
+     * Metrics key for the error number of the last read error. The value is an int.
+     */
+    const @utf8InCpp String METRICS_LAST_READ_ERROR_NUMBER = "lastReadErrorNo";
     /**
      * Return a bundle containing the requested metrics keys and their values.
      */

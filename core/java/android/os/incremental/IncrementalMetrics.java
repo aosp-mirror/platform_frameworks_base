@@ -71,4 +71,46 @@ public class IncrementalMetrics {
     public long getDataLoaderBindDelayMillis() {
         return mData.getLong(IIncrementalService.METRICS_DATA_LOADER_BIND_DELAY_MILLIS, -1);
     }
+
+    /**
+     * @return total count of delayed reads caused by pending reads
+     */
+    public int getTotalDelayedReads() {
+        return mData.getInt(IIncrementalService.METRICS_TOTAL_DELAYED_READS, -1);
+    }
+
+    /**
+     * @return total count of failed reads
+     */
+    public int getTotalFailedReads() {
+        return mData.getInt(IIncrementalService.METRICS_TOTAL_FAILED_READS, -1);
+    }
+
+    /**
+     * @return total duration in milliseconds of delayed reads
+     */
+    public long getTotalDelayedReadsDurationMillis() {
+        return mData.getInt(IIncrementalService.METRICS_TOTAL_DELAYED_READS_MILLIS, -1);
+    }
+
+    /**
+     * @return the uid of the last read error
+     */
+    public int getLastReadErrorUid() {
+        return mData.getInt(IIncrementalService.METRICS_LAST_READ_ERROR_UID, -1);
+    }
+
+    /**
+     * @return duration in milliseconds since the last read error
+     */
+    public long getMillisSinceLastReadError() {
+        return mData.getLong(IIncrementalService.METRICS_MILLIS_SINCE_LAST_READ_ERROR, -1);
+    }
+
+    /**
+     * @return the error number of the last read error
+     */
+    public int getLastReadErrorNumber() {
+        return mData.getInt(IIncrementalService.METRICS_LAST_READ_ERROR_NUMBER, -1);
+    }
 }

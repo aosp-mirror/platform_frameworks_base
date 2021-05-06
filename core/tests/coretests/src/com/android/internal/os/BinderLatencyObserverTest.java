@@ -41,6 +41,7 @@ import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.Random;
 
 @SmallTest
@@ -71,9 +72,9 @@ public class BinderLatencyObserverTest {
 
         ArrayMap<LatencyDims, int[]> latencyHistograms = blo.getLatencyHistograms();
         assertEquals(2, latencyHistograms.keySet().size());
-        assertThat(latencyHistograms.get(new LatencyDims(binder.getClass(), 1)))
+        assertThat(latencyHistograms.get(LatencyDims.create(binder.getClass(), 1)))
             .asList().containsExactly(2, 0, 1, 0, 0).inOrder();
-        assertThat(latencyHistograms.get(new LatencyDims(binder.getClass(), 2)))
+        assertThat(latencyHistograms.get(LatencyDims.create(binder.getClass(), 2)))
             .asList().containsExactly(0, 0, 0, 0, 2).inOrder();
     }
 
@@ -115,7 +116,7 @@ public class BinderLatencyObserverTest {
 
         // The long call should be capped to maxint (to not overflow) and placed in the last bucket.
         assertThat(blo.getLatencyHistograms()
-            .get(new LatencyDims(binder.getClass(), 1)))
+            .get(LatencyDims.create(binder.getClass(), 1)))
             .asList().containsExactly(0, 0, 0, 0, 1)
             .inOrder();
     }
@@ -132,7 +133,7 @@ public class BinderLatencyObserverTest {
         blo.setElapsedTime(2);
         blo.callEnded(callSession);
 
-        LatencyDims dims = new LatencyDims(binder.getClass(), 1);
+        LatencyDims dims = LatencyDims.create(binder.getClass(), 1);
         // Fill the buckets with maxint.
         Arrays.fill(blo.getLatencyHistograms().get(dims), Integer.MAX_VALUE);
         assertThat(blo.getLatencyHistograms().get(dims))
@@ -240,6 +241,61 @@ public class BinderLatencyObserverTest {
                 .inOrder();
     }
 
+    @Test
+    public void testSharding() {
+        TestBinderLatencyObserver blo = new TestBinderLatencyObserver();
+        blo.setShardingModulo(2);
+        blo.setHistogramBucketsParams(5, 5, 1.125f);
+
+        Binder binder = new Binder();
+        CallSession callSession = new CallSession();
+        callSession.binderClass = binder.getClass();
+        callSession.transactionCode = 1;
+        blo.setElapsedTime(2);
+        blo.callEnded(callSession);
+        callSession.transactionCode = 2;
+        blo.setElapsedTime(4);
+        blo.callEnded(callSession);
+        callSession.transactionCode = 3;
+        blo.setElapsedTime(2);
+        blo.callEnded(callSession);
+        callSession.transactionCode = 4;
+        blo.setElapsedTime(4);
+        blo.callEnded(callSession);
+
+        ArrayMap<LatencyDims, int[]> latencyHistograms = blo.getLatencyHistograms();
+        Iterator<LatencyDims> iterator = latencyHistograms.keySet().iterator();
+        LatencyDims dims;
+
+        // Hash codes are not consistent per device and not mockable so the test needs to consider
+        // whether the hashCode of LatencyDims is odd or even and test accordingly.
+        if (LatencyDims.create(binder.getClass(), 0).hashCode() % 2 == 0) {
+            assertEquals(2, latencyHistograms.size());
+            dims = iterator.next();
+            assertEquals(binder.getClass(), dims.getBinderClass());
+            assertEquals(1, dims.getTransactionCode());
+            assertThat(latencyHistograms.get(dims)).asList().containsExactly(1, 0, 0, 0, 0)
+                .inOrder();
+            dims = iterator.next();
+            assertEquals(binder.getClass(), dims.getBinderClass());
+            assertEquals(3, dims.getTransactionCode());
+            assertThat(latencyHistograms.get(dims)).asList().containsExactly(1, 0, 0, 0, 0)
+                .inOrder();
+        } else {
+            assertEquals(2, latencyHistograms.size());
+            dims = iterator.next();
+            assertEquals(binder.getClass(), dims.getBinderClass());
+            assertEquals(2, dims.getTransactionCode());
+            assertThat(latencyHistograms.get(dims)).asList().containsExactly(1, 0, 0, 0, 0)
+                .inOrder();
+            dims = iterator.next();
+            assertEquals(binder.getClass(), dims.getBinderClass());
+            assertEquals(4, dims.getTransactionCode());
+            assertThat(latencyHistograms.get(dims)).asList().containsExactly(1, 0, 0, 0, 0)
+                .inOrder();
+        }
+    }
+
     public static class TestBinderLatencyObserver extends BinderLatencyObserver {
         private long mElapsedTime = 0;
         private ArrayList<String> mWrittenAtoms;
@@ -258,6 +314,10 @@ public class BinderLatencyObserverTest {
 
                                 public int nextInt() {
                                     return mCallCount++;
+                                }
+
+                                public int nextInt(int x) {
+                                    return 1;
                                 }
                             };
                         }

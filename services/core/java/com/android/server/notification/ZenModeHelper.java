@@ -659,7 +659,8 @@ public class ZenModeHelper {
                 mConfig.manualRule.dumpDebug(proto, ZenModeProto.ENABLED_ACTIVE_CONDITIONS);
             }
             for (ZenRule rule : mConfig.automaticRules.values()) {
-                if (rule.enabled && rule.condition.state == Condition.STATE_TRUE
+                if (rule.enabled && rule.condition != null
+                        && rule.condition.state == Condition.STATE_TRUE
                         && !rule.snoozing) {
                     rule.dumpDebug(proto, ZenModeProto.ENABLED_ACTIVE_CONDITIONS);
                 }

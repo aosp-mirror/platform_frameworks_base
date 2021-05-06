@@ -5237,10 +5237,10 @@
     <!-- Title of the button to unsuspend a suspended app immediately [CHAR LIMIT=50]-->
     <string name="app_suspended_unsuspend_message">Unpause app</string>
 
-    <!-- Title of a dialog. The string is asking if the user wants to turn on their work profile, which contains work apps that are managed by their employer. "Work" is an adjective. [CHAR LIMIT=30] -->
-    <string name="work_mode_off_title">Turn on work profile?</string>
-    <!-- Text in a dialog. This string describes what will happen if a user decides to turn on their work profile. "Work profile" is used as an adjective. [CHAR LIMIT=NONE] -->
-    <string name="work_mode_off_message">Your work apps, notifications, data, and other work profile features will be turned on</string>
+    <!-- Title of a dialog. This text is confirming that the user wants to turn on access to their work apps, which the user had previously paused. "Work" is an adjective. [CHAR LIMIT=30] -->
+    <string name="work_mode_off_title">Turn on work apps?</string>
+    <!-- Text in a dialog. This text is confirming that the user wants to turn on access to their work apps and notifications, which the user had previously paused. "Work" is an adjective. [CHAR LIMIT=NONE] -->
+    <string name="work_mode_off_message">Get access to your work apps and notifications</string>
     <!-- Title for button to turn on work profile. [CHAR LIMIT=NONE] -->
     <string name="work_mode_turn_on">Turn on</string>
 

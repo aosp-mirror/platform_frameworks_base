@@ -108,9 +108,7 @@ droidstubs {
     arg_files: [
         "core/res/AndroidManifest.xml",
     ],
-    args: metalava_framework_docs_args +
-        // Needed for hidden libcore annotations for now.
-        " --ignore-classes-on-classpath ",
+    args: metalava_framework_docs_args,
     write_sdk_values: true,
 }
 
@@ -121,8 +119,6 @@ droidstubs {
         "core/res/AndroidManifest.xml",
     ],
     args: metalava_framework_docs_args +
-        // Needed for hidden libcore annotations for now.
-        " --ignore-classes-on-classpath " +
         " --show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.PRIVILEGED_APPS\\) ",
     write_sdk_values: true,
 }

@@ -290,4 +290,11 @@ public class FalsingDataProviderTest extends ClassifierTest {
         mDataProvider.onMotionEvent(appendDownEvent(0, 200));
         verify(listener).onGestureFinalized(100);
     }
+
+    @Test
+    public void test_GetPriorEventsEarly() {
+        // Ensure that if we ask for prior events before any events were added, we at least get
+        // an empty array.
+        assertThat(mDataProvider.getPriorMotionEvents()).isNotNull();
+    }
 }

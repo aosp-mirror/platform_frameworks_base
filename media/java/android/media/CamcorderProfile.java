@@ -602,39 +602,7 @@ public class CamcorderProfile
         } catch (NumberFormatException e) {
             return null;
         }
-        CamcorderProfile cp = native_get_camcorder_profile(id, quality);
-        if (cp == null) {
-            return null;
-        };
-
-        EncoderProfiles.AudioProfile[] audioProfiles;
-        // timelapse profiles do not list audio profiles
-        if (cp.quality >= QUALITY_TIME_LAPSE_LIST_START
-                && cp.quality <= QUALITY_TIME_LAPSE_LIST_END) {
-            audioProfiles = new EncoderProfiles.AudioProfile[] { };
-        } else {
-            audioProfiles = new EncoderProfiles.AudioProfile[] {
-                new EncoderProfiles.AudioProfile(
-                        cp.audioCodec,
-                        cp.audioChannels,
-                        cp.audioSampleRate,
-                        cp.audioBitRate)
-            };
-        }
-
-        return new EncoderProfiles(
-                cp.duration,
-                cp.fileFormat,
-                new EncoderProfiles.VideoProfile[] {
-                    new EncoderProfiles.VideoProfile(
-                        cp.videoCodec,
-                        cp.videoFrameWidth,
-                        cp.videoFrameHeight,
-                        cp.videoFrameRate,
-                        cp.videoBitRate,
-                        0 /* TODO: get profile */)
-                },
-                audioProfiles);
+        return native_get_camcorder_profiles(id, quality);
     }
 
     /**
@@ -742,6 +710,8 @@ public class CamcorderProfile
     private static native final void native_init();
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private static native final CamcorderProfile native_get_camcorder_profile(
+            int cameraId, int quality);
+    private static native final EncoderProfiles native_get_camcorder_profiles(
             int cameraId, int quality);
     private static native final boolean native_has_camcorder_profile(
             int cameraId, int quality);
