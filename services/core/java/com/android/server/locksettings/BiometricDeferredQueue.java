@@ -98,18 +98,6 @@ public class BiometricDeferredQueue {
         }
 
         @Override
-        public void onChallengeInterrupted(int sensorId) {
-            Slog.w(TAG, "Challenge interrupted, sensor: " + sensorId);
-            // Consider re-attempting generateChallenge/resetLockout/revokeChallenge
-            // when onChallengeInterruptFinished is invoked
-        }
-
-        @Override
-        public void onChallengeInterruptFinished(int sensorId) {
-            Slog.w(TAG, "Challenge interrupt finished, sensor: " + sensorId);
-        }
-
-        @Override
         public void onGenerateChallengeResult(int sensorId, long challenge) {
             if (!sensorIds.contains(sensorId)) {
                 Slog.e(TAG, "Unknown sensorId received: " + sensorId);

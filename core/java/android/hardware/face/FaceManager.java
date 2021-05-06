@@ -69,8 +69,6 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
     private static final int MSG_SET_FEATURE_COMPLETED = 107;
     private static final int MSG_CHALLENGE_GENERATED = 108;
     private static final int MSG_FACE_DETECTED = 109;
-    private static final int MSG_CHALLENGE_INTERRUPTED = 110;
-    private static final int MSG_CHALLENGE_INTERRUPT_FINISHED = 111;
     private static final int MSG_AUTHENTICATION_FRAME = 112;
     private static final int MSG_ENROLLMENT_FRAME = 113;
 
@@ -145,16 +143,6 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
         public void onChallengeGenerated(int sensorId, long challenge) {
             mHandler.obtainMessage(MSG_CHALLENGE_GENERATED, sensorId, 0, challenge)
                     .sendToTarget();
-        }
-
-        @Override
-        public void onChallengeInterrupted(int sensorId) {
-            mHandler.obtainMessage(MSG_CHALLENGE_INTERRUPTED, sensorId).sendToTarget();
-        }
-
-        @Override
-        public void onChallengeInterruptFinished(int sensorId) {
-            mHandler.obtainMessage(MSG_CHALLENGE_INTERRUPT_FINISHED, sensorId).sendToTarget();
         }
 
         @Override
@@ -1128,17 +1116,6 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
          * Invoked when a challenge has been generated.
          */
         void onGenerateChallengeResult(int sensorId, long challenge);
-
-        /**
-         * Invoked if the challenge has not been revoked and a subsequent caller/owner invokes
-         * {@link #generateChallenge(int, GenerateChallengeCallback)}, but
-         */
-        default void onChallengeInterrupted(int sensorId) {}
-
-        /**
-         * Invoked when the interrupting client has finished (e.g. revoked its challenge).
-         */
-        default void onChallengeInterruptFinished(int sensorId) {}
     }
 
     private class OnEnrollCancelListener implements OnCancelListener {
@@ -1218,12 +1195,6 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
                     sendFaceDetected(msg.arg1 /* sensorId */, msg.arg2 /* userId */,
                             (boolean) msg.obj /* isStrongBiometric */);
                     break;
-                case MSG_CHALLENGE_INTERRUPTED:
-                    sendChallengeInterrupted((int) msg.obj /* sensorId */);
-                    break;
-                case MSG_CHALLENGE_INTERRUPT_FINISHED:
-                    sendChallengeInterruptFinished((int) msg.obj /* sensorId */);
-                    break;
                 case MSG_AUTHENTICATION_FRAME:
                     sendAuthenticationFrame((FaceAuthenticationFrame) msg.obj /* frame */);
                     break;
@@ -1264,22 +1235,6 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
             return;
         }
         mFaceDetectionCallback.onFaceDetected(sensorId, userId, isStrongBiometric);
-    }
-
-    private void sendChallengeInterrupted(int sensorId) {
-        if (mGenerateChallengeCallback == null) {
-            Slog.e(TAG, "sendChallengeInterrupted, callback null");
-            return;
-        }
-        mGenerateChallengeCallback.onChallengeInterrupted(sensorId);
-    }
-
-    private void sendChallengeInterruptFinished(int sensorId) {
-        if (mGenerateChallengeCallback == null) {
-            Slog.e(TAG, "sendChallengeInterruptFinished, callback null");
-            return;
-        }
-        mGenerateChallengeCallback.onChallengeInterruptFinished(sensorId);
     }
 
     private void sendRemovedResult(Face face, int remaining) {

@@ -34,8 +34,6 @@ oneway interface IFaceServiceReceiver {
     void onFeatureSet(boolean success, int feature);
     void onFeatureGet(boolean success, in int[] features, in boolean[] featureState);
     void onChallengeGenerated(int sensorId, long challenge);
-    void onChallengeInterrupted(int sensorId);
-    void onChallengeInterruptFinished(int sensorId);
     void onAuthenticationFrame(in FaceAuthenticationFrame frame);
     void onEnrollmentFrame(in FaceEnrollFrame frame);
 }

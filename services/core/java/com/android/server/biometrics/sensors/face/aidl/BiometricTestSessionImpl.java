@@ -115,16 +115,6 @@ public class BiometricTestSessionImpl extends ITestSession.Stub {
         }
 
         @Override
-        public void onChallengeInterrupted(int sensorId) {
-
-        }
-
-        @Override
-        public void onChallengeInterruptFinished(int sensorId) {
-
-        }
-
-        @Override
         public void onAuthenticationFrame(FaceAuthenticationFrame frame) {
 
         }

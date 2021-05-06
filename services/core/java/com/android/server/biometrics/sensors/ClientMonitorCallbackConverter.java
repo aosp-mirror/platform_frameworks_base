@@ -153,18 +153,6 @@ public class ClientMonitorCallbackConverter {
         }
     }
 
-    public void onChallengeInterrupted(int sensorId) throws RemoteException {
-        if (mFaceServiceReceiver != null) {
-            mFaceServiceReceiver.onChallengeInterrupted(sensorId);
-        }
-    }
-
-    public void onChallengeInterruptFinished(int sensorId) throws RemoteException {
-        if (mFaceServiceReceiver != null) {
-            mFaceServiceReceiver.onChallengeInterruptFinished(sensorId);
-        }
-    }
-
     // Fingerprint-specific callbacks for FingerprintManager only
 
     public void onUdfpsPointerDown(int sensorId) throws RemoteException {
