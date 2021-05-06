@@ -835,7 +835,7 @@ public class PeopleTileViewHelper {
             return null;
         } else if (durationSinceLastInteraction.toDays() < DAYS_IN_A_WEEK) {
             return context.getString(R.string.timestamp, formatter.formatMeasures(
-                    new Measure(durationSinceLastInteraction.toHours(),
+                    new Measure(durationSinceLastInteraction.toDays(),
                             MeasureUnit.DAY)));
         } else if (durationSinceLastInteraction.toDays() <= DAYS_IN_A_WEEK * 2) {
             return context.getString(durationSinceLastInteraction.toDays() == DAYS_IN_A_WEEK

@@ -1149,11 +1149,11 @@ public class DataManager {
                 if (conversationInfo == null) {
                     return;
                 }
+                if (DEBUG) Log.d(TAG, "Last event from notification: " + sbn.getPostTime());
                 ConversationInfo updated = new ConversationInfo.Builder(conversationInfo)
                         .setLastEventTimestamp(sbn.getPostTime())
                         .setParentNotificationChannelId(sbn.getNotification().getChannelId())
                         .build();
-                // Don't update listeners on notifications posted.
                 packageData.getConversationStore().addOrUpdate(updated);
 
                 EventHistoryImpl eventHistory = packageData.getEventStore().getOrCreateEventHistory(
@@ -1186,9 +1186,19 @@ public class DataManager {
             if (reason != REASON_CLICK || packageData == null) {
                 return;
             }
+            long currentTime = System.currentTimeMillis();
+            ConversationInfo conversationInfo = packageData.getConversationInfo(shortcutId);
+            if (conversationInfo == null) {
+                return;
+            }
+            if (DEBUG) Log.d(TAG, "Last event from notification removed: " + currentTime);
+            ConversationInfo updated = new ConversationInfo.Builder(conversationInfo)
+                    .setLastEventTimestamp(currentTime)
+                    .build();
+            packageData.getConversationStore().addOrUpdate(updated);
+
             EventHistoryImpl eventHistory = packageData.getEventStore().getOrCreateEventHistory(
                     EventStore.CATEGORY_SHORTCUT_BASED, shortcutId);
-            long currentTime = System.currentTimeMillis();
             eventHistory.addEvent(new Event(currentTime, Event.TYPE_NOTIFICATION_OPENED));
         }
 
@@ -1265,6 +1275,7 @@ public class DataManager {
         public void onEvent(PackageData packageData, ConversationInfo conversationInfo,
                 Event event) {
             if (event.getType() == Event.TYPE_IN_APP_CONVERSATION) {
+                if (DEBUG) Log.d(TAG, "Last event from in-app: " + event.getTimestamp());
                 ConversationInfo updated = new ConversationInfo.Builder(conversationInfo)
                         .setLastEventTimestamp(event.getTimestamp())
                         .build();
