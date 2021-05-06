@@ -84,8 +84,6 @@ public class QSPanel extends LinearLayout implements Tunable {
 
     @Nullable
     protected View mFooter;
-    @Nullable
-    protected View mDivider;
 
     @Nullable
     private ViewGroup mHeaderContainer;
@@ -327,7 +325,6 @@ public class QSPanel extends LinearLayout implements Tunable {
     protected void onFinishInflate() {
         super.onFinishInflate();
         mFooter = findViewById(R.id.qs_footer);
-        mDivider = findViewById(R.id.divider);
     }
 
     private void updateHorizontalLinearLayoutMargins() {
@@ -602,11 +599,6 @@ public class QSPanel extends LinearLayout implements Tunable {
         return mTileLayout;
     }
 
-    @Nullable
-    public View getDivider() {
-        return mDivider;
-    }
-
     /** */
     public void setContentMargins(int startMargin, int endMargin, ViewGroup mediaHostView) {
         // Only some views actually want this content padding, others want to go all the way
@@ -614,12 +606,6 @@ public class QSPanel extends LinearLayout implements Tunable {
         mContentMarginStart = startMargin;
         mContentMarginEnd = endMargin;
         updateMediaHostContentMargins(mediaHostView);
-        updateDividerMargin();
-    }
-
-    private void updateDividerMargin() {
-        if (mDivider == null) return;
-        updateMargins(mDivider, mContentMarginStart, mContentMarginEnd);
     }
 
     /**
@@ -712,7 +698,6 @@ public class QSPanel extends LinearLayout implements Tunable {
     }
 
     private void updateMargins(ViewGroup mediaHostView) {
-        updateDividerMargin();
         updateMediaHostContentMargins(mediaHostView);
         updateHorizontalLinearLayoutMargins();
         updatePadding();
