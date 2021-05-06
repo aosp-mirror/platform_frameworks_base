@@ -24,6 +24,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginHorizontal="@dimen/card_margin"
+        android:layout_marginBottom="@dimen/card_margin"
         android:foreground="?android:attr/selectableItemBackground"
         app:cardBackgroundColor="@android:color/transparent"
         app:cardElevation="12dp">
@@ -32,16 +33,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:adjustViewBounds="true"
+            android:layout_gravity="center"
             android:contentDescription="@null"
             android:scaleType="fitXY"/>
-        <ImageView
-            android:id="@+id/add_card_logo"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
-            android:layout_gravity="center"
-            android:drawable="@drawable/ic_qs_plus"
-            android:contentDescription="@null"
-            android:scaleType="fitCenter"
-            android:visibility="gone"/>
     </com.android.systemui.wallet.ui.WalletCardView>
 </FrameLayout>
