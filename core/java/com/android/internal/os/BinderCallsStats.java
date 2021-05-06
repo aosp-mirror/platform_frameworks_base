@@ -1105,9 +1105,11 @@ public class BinderCallsStats implements BinderInternal.Observer {
         public static final String SETTINGS_MAX_CALL_STATS_KEY = "max_call_stats_count";
         public static final String SETTINGS_IGNORE_BATTERY_STATUS_KEY = "ignore_battery_status";
         // Settings for BinderLatencyObserver.
-        public static final String SETTINGS_COLLECT_LATENCY_DATA_KEY = "collect_Latency_data";
+        public static final String SETTINGS_COLLECT_LATENCY_DATA_KEY = "collect_latency_data";
         public static final String SETTINGS_LATENCY_OBSERVER_SAMPLING_INTERVAL_KEY =
                 "latency_observer_sampling_interval";
+        public static final String SETTINGS_LATENCY_OBSERVER_SHARDING_MODULO_KEY =
+                "latency_observer_sharding_modulo";
         public static final String SETTINGS_LATENCY_OBSERVER_PUSH_INTERVAL_MINUTES_KEY =
                 "latency_observer_push_interval_minutes";
         public static final String SETTINGS_LATENCY_HISTOGRAM_BUCKET_COUNT_KEY =
@@ -1187,6 +1189,9 @@ public class BinderCallsStats implements BinderInternal.Observer {
             binderLatencyObserver.setSamplingInterval(mParser.getInt(
                     SETTINGS_LATENCY_OBSERVER_SAMPLING_INTERVAL_KEY,
                     BinderLatencyObserver.PERIODIC_SAMPLING_INTERVAL_DEFAULT));
+            binderLatencyObserver.setShardingModulo(mParser.getInt(
+                    SETTINGS_LATENCY_OBSERVER_SHARDING_MODULO_KEY,
+                    BinderLatencyObserver.SHARDING_MODULO_DEFAULT));
             binderLatencyObserver.setHistogramBucketsParams(
                     mParser.getInt(
                             SETTINGS_LATENCY_HISTOGRAM_BUCKET_COUNT_KEY,
