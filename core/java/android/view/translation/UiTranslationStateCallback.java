@@ -38,7 +38,7 @@ public interface UiTranslationStateCallback {
      * targetLocale}.
      * <p>
      * This is also called if either the requested {@code sourceLocale} or {@code targetLocale} has
-     * changed; or called again after {@link #onPaused()}.
+     * changed.
      */
     default void onStarted(@NonNull ULocale sourceLocale, @NonNull ULocale targetLocale) {
         onStarted(sourceLocale.getLanguage(), targetLocale.getLanguage());
@@ -49,6 +49,12 @@ public interface UiTranslationStateCallback {
      * original language.
      */
     void onPaused();
+
+    /**
+     * The system is requesting that the application restore from the temporarily paused state and
+     * show the content in translated language.
+     */
+    void onResumed(@NonNull ULocale sourceLocale, @NonNull ULocale targetLocale);
 
     /**
      * The UI Translation session has ended.
