@@ -43,9 +43,9 @@ public class FaceGenerateChallengeClient extends GenerateChallengeClient<IBiomet
 
     FaceGenerateChallengeClient(@NonNull Context context,
             @NonNull LazyDaemon<IBiometricsFace> lazyDaemon, @NonNull IBinder token,
-            @NonNull ClientMonitorCallbackConverter listener, @NonNull String owner, int sensorId,
-            @Nullable FaceGenerateChallengeClient interruptedClient) {
-        super(context, lazyDaemon, token, listener, owner, sensorId);
+            @NonNull ClientMonitorCallbackConverter listener, int userId, @NonNull String owner,
+            int sensorId, @Nullable FaceGenerateChallengeClient interruptedClient) {
+        super(context, lazyDaemon, token, listener, userId, owner, sensorId);
         mInterruptedClient = interruptedClient;
     }
 
