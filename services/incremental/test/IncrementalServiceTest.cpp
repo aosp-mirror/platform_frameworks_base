@@ -635,6 +635,14 @@ public:
     void advanceMs(int deltaMs) { mClock += std::chrono::milliseconds(deltaMs); }
 
     TimePoint getClock() const { return mClock; }
+    std::optional<timespec> getClockMono() const {
+        const auto nsSinceEpoch =
+                std::chrono::duration_cast<std::chrono::nanoseconds>(mClock.time_since_epoch())
+                        .count();
+        timespec ts = {.tv_sec = static_cast<time_t>(nsSinceEpoch / 1000000000LL),
+                       .tv_nsec = static_cast<long>(nsSinceEpoch % 1000000000LL)};
+        return ts;
+    }
 
     TimePoint mClock = Clock::now();
 };
@@ -2201,6 +2209,91 @@ TEST_F(IncrementalServiceTest, testInvalidMetricsKeys) {
     ASSERT_FALSE(result.getLong(String16("invalid"), &value));
     ASSERT_EQ(expected, value);
     ASSERT_EQ(6, (int)result.size());
+}
+
+TEST_F(IncrementalServiceTest, testMetricsWithNoLastReadError) {
+    mVold->setIncFsMountOptionsSuccess();
+    ON_CALL(*mIncFs, getMetrics(_))
+            .WillByDefault(Return(Metrics{
+                    .readsDelayedMin = 10,
+                    .readsDelayedMinUs = 5000,
+                    .readsDelayedPending = 10,
+                    .readsDelayedPendingUs = 5000,
+                    .readsFailedHashVerification = 10,
+                    .readsFailedOther = 10,
+                    .readsFailedTimedOut = 10,
+            }));
+    ON_CALL(*mIncFs, getLastReadError(_)).WillByDefault(Return(LastReadError{}));
+    TemporaryDir tempDir;
+    int storageId =
+            mIncrementalService->createStorage(tempDir.path, mDataLoaderParcel,
+                                               IncrementalService::CreateOptions::CreateNew);
+    ASSERT_GE(storageId, 0);
+    ASSERT_TRUE(mIncrementalService->startLoading(storageId, std::move(mDataLoaderParcel), {}, {},
+                                                  {}, {}));
+    android::os::PersistableBundle result{};
+    mIncrementalService->getMetrics(storageId, &result);
+    ASSERT_EQ(9, (int)result.size());
+
+    int expectedtotalDelayedReads = 20, totalDelayedReads = -1;
+    ASSERT_TRUE(result.getInt(String16(BnIncrementalService::METRICS_TOTAL_DELAYED_READS().c_str()),
+                              &totalDelayedReads));
+    ASSERT_EQ(expectedtotalDelayedReads, totalDelayedReads);
+    int expectedtotalFailedReads = 30, totalFailedReads = -1;
+    ASSERT_TRUE(result.getInt(String16(BnIncrementalService::METRICS_TOTAL_FAILED_READS().c_str()),
+                              &totalFailedReads));
+    ASSERT_EQ(expectedtotalFailedReads, totalFailedReads);
+    int64_t expectedtotalDelayedReadsMillis = 10, totalDelayedReadsMillis = -1;
+    ASSERT_TRUE(result.getLong(String16(BnIncrementalService::METRICS_TOTAL_DELAYED_READS_MILLIS()
+                                                .c_str()),
+                               &totalDelayedReadsMillis));
+    ASSERT_EQ(expectedtotalDelayedReadsMillis, totalDelayedReadsMillis);
+
+    int64_t expectedMillisSinceLastReadError = -1, millisSinceLastReadError = -1;
+    ASSERT_FALSE(
+            result.getLong(String16(BnIncrementalService::METRICS_MILLIS_SINCE_LAST_READ_ERROR()
+                                            .c_str()),
+                           &millisSinceLastReadError));
+    ASSERT_EQ(expectedMillisSinceLastReadError, millisSinceLastReadError);
+    int expectedLastReadErrorNumber = -1, lastReadErrorNumber = -1;
+    ASSERT_FALSE(
+            result.getInt(String16(BnIncrementalService::METRICS_LAST_READ_ERROR_NUMBER().c_str()),
+                          &lastReadErrorNumber));
+    ASSERT_EQ(expectedLastReadErrorNumber, lastReadErrorNumber);
+}
+
+TEST_F(IncrementalServiceTest, testMetricsWithLastReadError) {
+    mVold->setIncFsMountOptionsSuccess();
+    ON_CALL(*mIncFs, getMetrics(_)).WillByDefault(Return(Metrics{}));
+    mClock->advanceMs(5);
+    const auto now = mClock->getClock();
+    ON_CALL(*mIncFs, getLastReadError(_))
+            .WillByDefault(Return(LastReadError{.timestampUs = static_cast<uint64_t>(
+                                                        duration_cast<std::chrono::microseconds>(
+                                                                now.time_since_epoch())
+                                                                .count()),
+                                                .errorNo = static_cast<uint32_t>(-ETIME)}));
+    TemporaryDir tempDir;
+    int storageId =
+            mIncrementalService->createStorage(tempDir.path, mDataLoaderParcel,
+                                               IncrementalService::CreateOptions::CreateNew);
+    ASSERT_GE(storageId, 0);
+    ASSERT_TRUE(mIncrementalService->startLoading(storageId, std::move(mDataLoaderParcel), {}, {},
+                                                  {}, {}));
+    mClock->advanceMs(10);
+    android::os::PersistableBundle result{};
+    mIncrementalService->getMetrics(storageId, &result);
+    ASSERT_EQ(11, (int)result.size());
+    int64_t expectedMillisSinceLastReadError = 10, millisSinceLastReadError = -1;
+    ASSERT_TRUE(result.getLong(String16(BnIncrementalService::METRICS_MILLIS_SINCE_LAST_READ_ERROR()
+                                                .c_str()),
+                               &millisSinceLastReadError));
+    ASSERT_EQ(expectedMillisSinceLastReadError, millisSinceLastReadError);
+    int expectedLastReadErrorNumber = -ETIME, lastReadErrorNumber = -1;
+    ASSERT_TRUE(
+            result.getInt(String16(BnIncrementalService::METRICS_LAST_READ_ERROR_NUMBER().c_str()),
+                          &lastReadErrorNumber));
+    ASSERT_EQ(expectedLastReadErrorNumber, lastReadErrorNumber);
 }
 
 } // namespace android::os::incremental
