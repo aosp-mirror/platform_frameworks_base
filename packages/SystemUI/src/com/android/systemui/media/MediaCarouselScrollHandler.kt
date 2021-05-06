@@ -38,6 +38,7 @@ import com.android.systemui.util.concurrency.DelayableExecutor
 
 private const val FLING_SLOP = 1000000
 private const val DISMISS_DELAY = 100L
+private const val SCROLL_DELAY = 100L
 private const val RUBBERBAND_FACTOR = 0.2f
 private const val SETTINGS_BUTTON_TRANSLATION_FRACTION = 0.3f
 
@@ -100,10 +101,11 @@ class MediaCarouselScrollHandler(
     private lateinit var settingsButton: View
 
     /**
-     * What's the currently active player index?
+     * What's the currently visible player index?
      */
-    var activeMediaIndex: Int = 0
+    var visibleMediaIndex: Int = 0
         private set
+
     /**
      * How much are we scrolled into the current media?
      */
@@ -129,7 +131,7 @@ class MediaCarouselScrollHandler(
             field = value
             // The player width has changed, let's update the scroll position to make sure
             // it's still at the same place
-            var newRelativeScroll = activeMediaIndex * playerWidthPlusPadding
+            var newRelativeScroll = visibleMediaIndex * playerWidthPlusPadding
             if (scrollIntoCurrentMedia > playerWidthPlusPadding) {
                 newRelativeScroll += playerWidthPlusPadding -
                         (scrollIntoCurrentMedia - playerWidthPlusPadding)
@@ -457,12 +459,12 @@ class MediaCarouselScrollHandler(
         val wasScrolledIn = scrollIntoCurrentMedia != 0
         scrollIntoCurrentMedia = scrollInAmount
         val nowScrolledIn = scrollIntoCurrentMedia != 0
-        if (newIndex != activeMediaIndex || wasScrolledIn != nowScrolledIn) {
-            activeMediaIndex = newIndex
+        if (newIndex != visibleMediaIndex || wasScrolledIn != nowScrolledIn) {
+            visibleMediaIndex = newIndex
             closeGuts()
             updatePlayerVisibilities()
         }
-        val relativeLocation = activeMediaIndex.toFloat() + if (playerWidthPlusPadding > 0)
+        val relativeLocation = visibleMediaIndex.toFloat() + if (playerWidthPlusPadding > 0)
             scrollInAmount.toFloat() / playerWidthPlusPadding else 0f
         // Fix the location, because PageIndicator does not handle RTL internally
         val location = if (isRtl) {
@@ -500,7 +502,7 @@ class MediaCarouselScrollHandler(
         val scrolledIn = scrollIntoCurrentMedia != 0
         for (i in 0 until mediaContent.childCount) {
             val view = mediaContent.getChildAt(i)
-            val visible = (i == activeMediaIndex) || ((i == (activeMediaIndex + 1)) && scrolledIn)
+            val visible = (i == visibleMediaIndex) || ((i == (visibleMediaIndex + 1)) && scrolledIn)
             view.visibility = if (visible) View.VISIBLE else View.INVISIBLE
         }
     }
@@ -511,12 +513,12 @@ class MediaCarouselScrollHandler(
      */
     fun onPrePlayerRemoved(removed: MediaControlPanel) {
         val removedIndex = mediaContent.indexOfChild(removed.playerViewHolder?.player)
-        // If the removed index is less than the activeMediaIndex, then we need to decrement it.
+        // If the removed index is less than the visibleMediaIndex, then we need to decrement it.
         // RTL has no effect on this, because indices are always relative (start-to-end).
         // Update the index 'manually' since we won't always get a call to onMediaScrollingChanged
-        val beforeActive = removedIndex <= activeMediaIndex
+        val beforeActive = removedIndex <= visibleMediaIndex
         if (beforeActive) {
-            activeMediaIndex = Math.max(0, activeMediaIndex - 1)
+            visibleMediaIndex = Math.max(0, visibleMediaIndex - 1)
         }
         // If the removed media item is "left of" the active one (in an absolute sense), we need to
         // scroll the view to keep that player in view.  This is because scroll position is always
@@ -543,6 +545,17 @@ class MediaCarouselScrollHandler(
      */
     fun scrollToStart() {
         scrollView.relativeScrollX = 0
+    }
+
+    fun scrollToActivePlayer(activePlayerIndex: Int) {
+        var destIndex = activePlayerIndex
+        destIndex = Math.min(mediaContent.getChildCount() - 1, destIndex)
+        val view = mediaContent.getChildAt(destIndex)
+        // We need to post this to wait for the active player becomes visible.
+        mainExecutor.executeDelayed({
+            visibleMediaIndex = activePlayerIndex
+            scrollView.smoothScrollTo(view.left, scrollView.scrollY)
+        }, SCROLL_DELAY)
     }
 
     companion object {
