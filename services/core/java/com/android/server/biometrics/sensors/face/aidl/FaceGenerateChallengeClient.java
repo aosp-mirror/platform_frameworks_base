@@ -35,8 +35,9 @@ public class FaceGenerateChallengeClient extends GenerateChallengeClient<ISessio
 
     FaceGenerateChallengeClient(@NonNull Context context,
             @NonNull LazyDaemon<ISession> lazyDaemon, @NonNull IBinder token,
-            @NonNull ClientMonitorCallbackConverter listener, @NonNull String owner, int sensorId) {
-        super(context, lazyDaemon, token, listener, owner, sensorId);
+            @NonNull ClientMonitorCallbackConverter listener, int userId, @NonNull String owner,
+            int sensorId) {
+        super(context, lazyDaemon, token, listener, userId, owner, sensorId);
     }
 
     @Override
