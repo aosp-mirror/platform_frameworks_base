@@ -125,6 +125,7 @@ public class KeyguardIndicationTextView extends TextView {
                 if (info != null) {
                     setTextColor(info.getTextColor());
                     setOnClickListener(info.getClickListener());
+                    setClickable(info.getClickListener() != null);
                     final Drawable icon = info.getIcon();
                     if (icon != null) {
                         icon.setTint(getCurrentTextColor());
