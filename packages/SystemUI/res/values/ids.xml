@@ -157,9 +157,6 @@
     <item type="id" name="accessibility_action_qs_move_to_position" />
     <item type="id" name="accessibility_action_qs_add_to_position" />
 
-    <!-- Accessibility actions for PIP -->
-    <item type="id" name="action_pip_resize" />
-
     <!-- Accessibility actions for window magnification. -->
     <item type="id" name="accessibility_action_zoom_in"/>
     <item type="id" name="accessibility_action_zoom_out"/>

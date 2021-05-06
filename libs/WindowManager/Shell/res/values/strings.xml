@@ -48,6 +48,12 @@
     <!-- Accessibility action for resizing PIP [CHAR LIMIT=NONE] -->
     <string name="accessibility_action_pip_resize">Resize</string>
 
+    <!-- Accessibility action for stashing PIP [CHAR LIMIT=NONE] -->
+    <string name="accessibility_action_pip_stash">Stash</string>
+
+    <!-- Accessibility action for unstashing PIP [CHAR LIMIT=NONE] -->
+    <string name="accessibility_action_pip_unstash">Unstash</string>
+
     <!-- TODO Deprecated. Label for PIP action to Minimize the PIP. DO NOT TRANSLATE [CHAR LIMIT=25] -->
     <string name="pip_phone_minimize">Minimize</string>
 

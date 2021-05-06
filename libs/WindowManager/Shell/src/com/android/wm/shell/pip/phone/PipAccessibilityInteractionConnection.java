@@ -15,6 +15,8 @@
  */
 package com.android.wm.shell.pip.phone;
 
+import static com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_NONE;
+
 import android.annotation.NonNull;
 import android.content.Context;
 import android.graphics.Rect;
@@ -59,6 +61,7 @@ public class PipAccessibilityInteractionConnection {
     private final PipTaskOrganizer mTaskOrganizer;
     private final PipSnapAlgorithm mSnapAlgorithm;
     private final Runnable mUpdateMovementBoundCallback;
+    private final Runnable mUnstashCallback;
     private final AccessibilityCallbacks mCallbacks;
     private final IAccessibilityInteractionConnection mConnectionImpl;
 
@@ -72,7 +75,7 @@ public class PipAccessibilityInteractionConnection {
             @NonNull PipBoundsState pipBoundsState, PipMotionHelper motionHelper,
             PipTaskOrganizer taskOrganizer, PipSnapAlgorithm snapAlgorithm,
             AccessibilityCallbacks callbacks, Runnable updateMovementBoundCallback,
-            ShellExecutor mainExcutor) {
+            Runnable unstashCallback, ShellExecutor mainExcutor) {
         mContext = context;
         mMainExcutor = mainExcutor;
         mPipBoundsState = pipBoundsState;
@@ -80,6 +83,7 @@ public class PipAccessibilityInteractionConnection {
         mTaskOrganizer = taskOrganizer;
         mSnapAlgorithm = snapAlgorithm;
         mUpdateMovementBoundCallback = updateMovementBoundCallback;
+        mUnstashCallback = unstashCallback;
         mCallbacks = callbacks;
         mConnectionImpl = new PipAccessibilityInteractionConnectionImpl();
     }
@@ -117,6 +121,13 @@ public class PipAccessibilityInteractionConnection {
                 } else {
                     setToNormalBounds();
                 }
+                result = true;
+            } else if (action == R.id.action_pip_stash) {
+                mMotionHelper.animateToStashedClosestEdge();
+                result = true;
+            } else if (action == R.id.action_pip_unstash) {
+                mUnstashCallback.run();
+                mPipBoundsState.setStashed(STASH_TYPE_NONE);
                 result = true;
             } else {
                 switch (action) {
@@ -246,6 +257,10 @@ public class PipAccessibilityInteractionConnection {
         info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_EXPAND);
         info.addAction(new AccessibilityNodeInfo.AccessibilityAction(R.id.action_pip_resize,
                 context.getString(R.string.accessibility_action_pip_resize)));
+        info.addAction(new AccessibilityNodeInfo.AccessibilityAction(R.id.action_pip_stash,
+                context.getString(R.string.accessibility_action_pip_stash)));
+        info.addAction(new AccessibilityNodeInfo.AccessibilityAction(R.id.action_pip_unstash,
+                context.getString(R.string.accessibility_action_pip_unstash)));
         info.setImportantForAccessibility(true);
         info.setClickable(true);
         info.setVisibleToUser(true);
