@@ -1809,6 +1809,10 @@
   <java-symbol type="string" name="bugreport_status" />
   <java-symbol type="string" name="bugreport_title" />
   <java-symbol type="string" name="faceunlock_multiple_failures" />
+  <java-symbol type="string" name="fp_enrollment_powerbutton_intent_title" />
+  <java-symbol type="string" name="fp_enrollment_powerbutton_intent_message" />
+  <java-symbol type="string" name="fp_enrollment_powerbutton_intent_positive_button" />
+  <java-symbol type="string" name="fp_enrollment_powerbutton_intent_negative_button" />
   <java-symbol type="string" name="global_actions" />
   <java-symbol type="string" name="global_action_power_off" />
   <java-symbol type="string" name="global_action_power_options" />
