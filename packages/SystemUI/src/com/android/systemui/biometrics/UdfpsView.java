@@ -87,7 +87,8 @@ public class UdfpsView extends FrameLayout implements DozeReceiver, UdfpsIllumin
     // Don't propagate any touch events to the child views.
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        return true;
+        return mAnimationViewController == null
+                || !mAnimationViewController.shouldPauseAuth();
     }
 
     @Override
@@ -131,11 +132,18 @@ public class UdfpsView extends FrameLayout implements DozeReceiver, UdfpsIllumin
     }
 
     void onTouchOutsideView() {
-        mAnimationViewController.onTouchOutsideView();
+        if (mAnimationViewController != null) {
+            mAnimationViewController.onTouchOutsideView();
+        }
     }
 
-    void setAnimationViewController(UdfpsAnimationViewController animationViewController) {
+    void setAnimationViewController(
+            @Nullable UdfpsAnimationViewController animationViewController) {
         mAnimationViewController = animationViewController;
+    }
+
+    @Nullable UdfpsAnimationViewController getAnimationViewController() {
+        return mAnimationViewController;
     }
 
     @Override

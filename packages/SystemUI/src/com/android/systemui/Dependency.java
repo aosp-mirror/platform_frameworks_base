@@ -28,6 +28,7 @@ import android.view.IWindowManager;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEventLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.Preconditions;
 import com.android.keyguard.KeyguardSecurityModel;
@@ -358,6 +359,7 @@ public class Dependency {
     @Inject Lazy<SystemStatusAnimationScheduler> mSystemStatusAnimationSchedulerLazy;
     @Inject Lazy<PrivacyDotViewController> mPrivacyDotViewControllerLazy;
     @Inject Lazy<EdgeBackGestureHandler> mEdgeBackGestureHandler;
+    @Inject Lazy<UiEventLogger> mUiEventLogger;
 
     @Inject
     public Dependency() {
@@ -571,6 +573,7 @@ public class Dependency {
                 mSystemStatusAnimationSchedulerLazy::get);
         mProviders.put(PrivacyDotViewController.class, mPrivacyDotViewControllerLazy::get);
         mProviders.put(EdgeBackGestureHandler.class, mEdgeBackGestureHandler::get);
+        mProviders.put(UiEventLogger.class, mUiEventLogger::get);
 
         Dependency.setInstance(this);
     }

@@ -179,17 +179,20 @@ final class DiscreteRegistry {
     }
 
     void systemReady() {
-        synchronized (mOnDiskLock) {
-            mDiscreteAccessDir = new File(new File(Environment.getDataSystemDirectory(), "appops"),
-                    "discrete");
-            createDiscreteAccessDirLocked();
-            mDiscreteOps = new DiscreteOps();
-        }
         DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_PRIVACY,
                 AsyncTask.THREAD_POOL_EXECUTOR, (DeviceConfig.Properties p) -> {
                     setDiscreteHistoryParameters(p);
                 });
         setDiscreteHistoryParameters(DeviceConfig.getProperties(DeviceConfig.NAMESPACE_PRIVACY));
+        synchronized (mOnDiskLock) {
+            synchronized (mInMemoryLock) {
+                mDiscreteAccessDir = new File(
+                        new File(Environment.getDataSystemDirectory(), "appops"),
+                        "discrete");
+                createDiscreteAccessDirLocked();
+                mDiscreteOps = new DiscreteOps();
+            }
+        }
     }
 
     private void setDiscreteHistoryParameters(DeviceConfig.Properties p) {

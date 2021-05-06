@@ -409,10 +409,6 @@ public class StretchShaderActivity extends Activity {
             if (mStretchDistance > 0 && canvas instanceof RecordingCanvas) {
                 Rect bounds = getBounds();
                 ((RecordingCanvas) canvas).mNode.stretch(
-                        0,
-                        0,
-                        bounds.width(),
-                        bounds.height(),
                         mOverScrollX,
                         mOverScrollY,
                         mStretchDistance,

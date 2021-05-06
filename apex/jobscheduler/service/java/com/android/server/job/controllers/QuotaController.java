@@ -2198,7 +2198,7 @@ public final class QuotaController extends StateController {
 
         public void dump(IndentingPrintWriter pw, Predicate<JobStatus> predicate) {
             pw.print("Timer<");
-            pw.print(mRegularJobTimer ? "REG" : " EJ");
+            pw.print(mRegularJobTimer ? "REG" : "EJ");
             pw.print(">{");
             pw.print(mPkg);
             pw.print("} ");
@@ -4075,7 +4075,16 @@ public final class QuotaController extends StateController {
 
         pw.println("Special apps:");
         pw.increaseIndent();
-        pw.print("System installers", mSystemInstallers.toString());
+        pw.print("System installers={");
+        for (int si = 0; si < mSystemInstallers.size(); ++si) {
+            if (si > 0) {
+                pw.print(", ");
+            }
+            pw.print(mSystemInstallers.keyAt(si));
+            pw.print("->");
+            pw.print(mSystemInstallers.get(si));
+        }
+        pw.println("}");
         pw.decreaseIndent();
 
         pw.println();

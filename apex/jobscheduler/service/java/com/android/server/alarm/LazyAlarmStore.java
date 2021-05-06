@@ -40,6 +40,7 @@ import java.util.function.Predicate;
 public class LazyAlarmStore implements AlarmStore {
     @VisibleForTesting
     static final String TAG = LazyAlarmStore.class.getSimpleName();
+    private static final long ALARM_DEADLINE_SLOP = 500;
 
     private final ArrayList<Alarm> mAlarms = new ArrayList<>();
     private Runnable mOnAlarmClockRemoved;
@@ -75,7 +76,7 @@ public class LazyAlarmStore implements AlarmStore {
             return;
         }
         mAlarms.addAll(alarms);
-        Collections.sort(alarms, sDecreasingTimeOrder);
+        Collections.sort(mAlarms, sDecreasingTimeOrder);
     }
 
     @Override
@@ -163,25 +164,47 @@ public class LazyAlarmStore implements AlarmStore {
     @Override
     public ArrayList<Alarm> removePendingAlarms(long nowElapsed) {
         final ArrayList<Alarm> pending = new ArrayList<>();
-        final ArrayList<Alarm> standAlones = new ArrayList<>();
+
+        // Only send wake-up alarms if this is the absolutely latest time we can evaluate
+        // for at least one wakeup alarm. This prevents sending other non-wakeup alarms when the
+        // screen is off but the CPU is awake for some reason.
+        boolean sendWakeups = false;
+
+        // If any alarm with FLAG_STANDALONE is present, we cannot send any alarms without that flag
+        // in the present batch.
+        boolean standalonesOnly = false;
 
         for (int i = mAlarms.size() - 1; i >= 0; i--) {
             final Alarm alarm = mAlarms.get(i);
             if (alarm.getWhenElapsed() > nowElapsed) {
                 break;
             }
+            mAlarms.remove(i);
             pending.add(alarm);
+            if (alarm.wakeup && alarm.getMaxWhenElapsed() <= nowElapsed + ALARM_DEADLINE_SLOP) {
+                // Using some slop as it is better to send the wakeup alarm now, rather than
+                // waking up again a short time later, just to send it.
+                sendWakeups = true;
+            }
             if ((alarm.flags & AlarmManager.FLAG_STANDALONE) != 0) {
-                standAlones.add(alarm);
+                standalonesOnly = true;
             }
         }
-        if (!standAlones.isEmpty()) {
-            // If there are deliverable standalone alarms, others must not go out yet.
-            mAlarms.removeAll(standAlones);
-            return standAlones;
+        final ArrayList<Alarm> toSend = new ArrayList<>();
+        for (int i = pending.size() - 1; i >= 0; i--) {
+            final Alarm pendingAlarm = pending.get(i);
+            if (!sendWakeups && pendingAlarm.wakeup) {
+                continue;
+            }
+            if (standalonesOnly && (pendingAlarm.flags & AlarmManager.FLAG_STANDALONE) == 0) {
+                continue;
+            }
+            pending.remove(i);
+            toSend.add(pendingAlarm);
         }
-        mAlarms.removeAll(pending);
-        return pending;
+        // Perhaps some alarms could not be sent right now. Adding them back for later.
+        addAll(pending);
+        return toSend;
     }
 
     @Override

@@ -20,7 +20,6 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
-import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.content.pm.ActivityInfo.FLAG_ALWAYS_FOCUSABLE;
@@ -483,31 +482,6 @@ public class RootWindowContainerTests extends WindowTestsBase {
         // Task with FLAG_ALWAYS_FOCUSABLE should be focusable.
         assertTrue(pinnedTask.isTopActivityFocusable());
         assertTrue(pinnedActivity.isFocusable());
-    }
-
-    /**
-     * Verify that split-screen primary root task will be chosen if activity is launched that
-     * targets split-screen secondary, but a matching existing instance is found on top of
-     * split-screen primary root task.
-     */
-    @Test
-    public void testSplitScreenPrimaryChosenWhenTopActivityLaunchedToSecondary() {
-        // Create primary split-screen root task with a task and an activity.
-        final Task primaryRootTask = mRootWindowContainer.getDefaultTaskDisplayArea()
-                .createRootTask(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_STANDARD,
-                        true /* onTop */);
-        final Task task = new TaskBuilder(mSupervisor).setParentTask(primaryRootTask).build();
-        final ActivityRecord r = new ActivityBuilder(mAtm).setTask(task).build();
-
-        // Find a launch root task for the top activity in split-screen primary, while requesting
-        // split-screen secondary.
-        final ActivityOptions options = ActivityOptions.makeBasic();
-        options.setLaunchWindowingMode(WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY);
-        final Task result =
-                mRootWindowContainer.getLaunchRootTask(r, options, task, true /* onTop */);
-
-        // Assert that the primary root task is returned.
-        assertEquals(primaryRootTask, result);
     }
 
     /**

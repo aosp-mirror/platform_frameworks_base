@@ -479,7 +479,6 @@ public class HdmiCecMessageBuilder {
      * @return newly created {@link HdmiCecMessage}
      */
     static HdmiCecMessage buildReportShortAudioDescriptor(int src, int des, byte[] sadBytes) {
-        // TODO(b/80297701) validate.
         return buildCommand(src, des, Constants.MESSAGE_REPORT_SHORT_AUDIO_DESCRIPTOR, sadBytes);
     }
 
