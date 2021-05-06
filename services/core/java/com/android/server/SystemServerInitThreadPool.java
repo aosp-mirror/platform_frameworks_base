@@ -38,7 +38,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Thread pool used during initialization of system server.
  *
- * <p>System services can {@link #submit(Runnable)} tasks for execution during boot.
+ * <p>System services can {@link #submit(Runnable, String)} tasks for execution during boot.
  * The pool will be shut down after {@link SystemService#PHASE_BOOT_COMPLETED}.
  *
  * <p>New tasks <em>should not</em> be submitted afterwards.
