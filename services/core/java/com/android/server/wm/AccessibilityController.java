@@ -1586,6 +1586,52 @@ final class AccessibilityController {
             mCallback.onDisplayReparented(embeddedDisplayId);
         }
 
+        boolean shellRootIsAbove(WindowState windowState, ShellRoot shellRoot) {
+            int wsLayer = mService.mPolicy.getWindowLayerLw(windowState);
+            int shellLayer = mService.mPolicy.getWindowLayerFromTypeLw(shellRoot.getWindowType(),
+                    true);
+            return shellLayer >= wsLayer;
+        }
+
+        int addShellRootsIfAbove(WindowState windowState, ArrayList<ShellRoot> shellRoots,
+                int shellRootIndex, List<WindowInfo> windows, Set<IBinder> addedWindows,
+                Region unaccountedSpace, boolean focusedWindowAdded) {
+            while (shellRootIndex < shellRoots.size()
+                    && shellRootIsAbove(windowState, shellRoots.get(shellRootIndex))) {
+                ShellRoot shellRoot = shellRoots.get(shellRootIndex);
+                shellRootIndex++;
+                final WindowInfo info = shellRoot.getWindowInfo();
+                if (info == null) {
+                    continue;
+                }
+
+                info.layer = addedWindows.size();
+                windows.add(info);
+                addedWindows.add(info.token);
+                unaccountedSpace.op(info.regionInScreen, unaccountedSpace,
+                        Region.Op.REVERSE_DIFFERENCE);
+                if (unaccountedSpace.isEmpty() && focusedWindowAdded) {
+                    break;
+                }
+            }
+            return shellRootIndex;
+        }
+
+        private ArrayList<ShellRoot> getSortedShellRoots(
+                SparseArray<ShellRoot> originalShellRoots) {
+            ArrayList<ShellRoot> sortedShellRoots = new ArrayList<>(originalShellRoots.size());
+            for (int i = originalShellRoots.size() - 1; i >= 0; --i) {
+                sortedShellRoots.add(originalShellRoots.valueAt(i));
+            }
+
+            sortedShellRoots.sort((left, right) ->
+                    mService.mPolicy.getWindowLayerFromTypeLw(right.getWindowType(), true)
+                            - mService.mPolicy.getWindowLayerFromTypeLw(left.getWindowType(),
+                            true));
+
+            return sortedShellRoots;
+        }
+
         /**
          * Check if windows have changed, and send them to the accessibility subsystem if they have.
          *
@@ -1645,9 +1691,22 @@ final class AccessibilityController {
                 final int visibleWindowCount = visibleWindows.size();
                 HashSet<Integer> skipRemainingWindowsForTasks = new HashSet<>();
 
+                ArrayList<ShellRoot> shellRoots = getSortedShellRoots(dc.mShellRoots);
+
                 // Iterate until we figure out what is touchable for the entire screen.
+                int shellRootIndex = 0;
                 for (int i = visibleWindowCount - 1; i >= 0; i--) {
                     final WindowState windowState = visibleWindows.valueAt(i);
+                    int prevShellRootIndex = shellRootIndex;
+                    shellRootIndex = addShellRootsIfAbove(windowState, shellRoots, shellRootIndex,
+                            windows, addedWindows, unaccountedSpace, focusedWindowAdded);
+
+                    // If a Shell Root was added, it could have accounted for all the space already.
+                    if (shellRootIndex > prevShellRootIndex && unaccountedSpace.isEmpty()
+                            && focusedWindowAdded) {
+                        break;
+                    }
+
                     final Region regionInScreen = new Region();
                     computeWindowRegionInScreen(windowState, regionInScreen);
 
@@ -1669,16 +1728,6 @@ final class AccessibilityController {
                     if (unaccountedSpace.isEmpty() && focusedWindowAdded) {
                         break;
                     }
-                }
-
-                for (int i = dc.mShellRoots.size() - 1; i >= 0; --i) {
-                    final WindowInfo info = dc.mShellRoots.valueAt(i).getWindowInfo();
-                    if (info == null) {
-                        continue;
-                    }
-                    info.layer = addedWindows.size();
-                    windows.add(info);
-                    addedWindows.add(info.token);
                 }
 
                 // Remove child/parent references to windows that were not added.
