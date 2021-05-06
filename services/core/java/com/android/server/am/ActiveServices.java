@@ -155,7 +155,6 @@ import com.android.server.AppStateTracker;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.am.ActivityManagerService.ItemMatcher;
-import com.android.server.notification.NotificationManagerInternal;
 import com.android.server.uri.NeededUriGrants;
 import com.android.server.wm.ActivityServiceConnectionsHolder;
 
@@ -1976,17 +1975,6 @@ public final class ActiveServices {
             // Legacy apps' FGS notifications are not deferred unless the relevant
             // DeviceConfig element has been set
             showNow = isLegacyApp && mAm.mConstants.mFlagFgsNotificationDeferralApiGated;
-        }
-        if (!showNow) {
-            // did we already show it?
-            showNow = r.mFgsNotificationShown;
-        }
-        if (!showNow) {
-            // Is the notification already showing for any reason?
-            final NotificationManagerInternal nmi =
-                    LocalServices.getService(NotificationManagerInternal.class);
-            showNow = nmi.isNotificationShown(r.appInfo.packageName, null,
-                    r.foregroundId, UserHandle.getUserId(uid));
         }
         if (!showNow) {
             // has the app forced deferral?
