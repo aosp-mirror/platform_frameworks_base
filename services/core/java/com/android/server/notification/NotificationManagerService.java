@@ -645,7 +645,7 @@ public class NotificationManagerService extends SystemService {
             sb.append("Archive (");
             sb.append(N);
             sb.append(" notification");
-            sb.append((N==1)?")":"s)");
+            sb.append((N == 1) ? ")" : "s)");
             return sb.toString();
         }
 
@@ -714,6 +714,22 @@ public class NotificationManagerService extends SystemService {
                             && Objects.equals(channelId,
                             pair.first.getNotification().getChannelId())) {
                         bufferIter.remove();
+                    }
+                }
+            }
+        }
+
+        void dumpImpl(PrintWriter pw, @NonNull DumpFilter filter) {
+            synchronized (mBufferLock) {
+                Iterator<Pair<StatusBarNotification, Integer>> iter = descendingIterator();
+                int i = 0;
+                while (iter.hasNext()) {
+                    final StatusBarNotification sbn = iter.next().first;
+                    if (filter != null && !filter.matches(sbn)) continue;
+                    pw.println("    " + sbn);
+                    if (++i >= 5) {
+                        if (iter.hasNext()) pw.println("    ...");
+                        break;
                     }
                 }
             }
@@ -5930,17 +5946,7 @@ public class NotificationManagerService extends SystemService {
                             + mPreferencesHelper.shouldHideSilentStatusIcons());
                 }
                 pw.println("  mArchive=" + mArchive.toString());
-                Iterator<Pair<StatusBarNotification, Integer>> iter = mArchive.descendingIterator();
-                int j=0;
-                while (iter.hasNext()) {
-                    final StatusBarNotification sbn = iter.next().first;
-                    if (filter != null && !filter.matches(sbn)) continue;
-                    pw.println("    " + sbn);
-                    if (++j >= 5) {
-                        if (iter.hasNext()) pw.println("    ...");
-                        break;
-                    }
-                }
+                mArchive.dumpImpl(pw, filter);
 
                 if (!zenOnly) {
                     N = mEnqueuedNotifications.size();
