@@ -518,8 +518,8 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
             scheduleUpdateActiveUserWithoutHandler(userId);
 
             final FaceGenerateChallengeClient client = new FaceGenerateChallengeClient(mContext,
-                    mLazyDaemon, token, new ClientMonitorCallbackConverter(receiver), opPackageName,
-                    mSensorId, mCurrentChallengeOwner);
+                    mLazyDaemon, token, new ClientMonitorCallbackConverter(receiver), userId,
+                    opPackageName, mSensorId, mCurrentChallengeOwner);
             mScheduler.scheduleClientMonitor(client, new BaseClientMonitor.Callback() {
                 @Override
                 public void onClientStarted(@NonNull BaseClientMonitor clientMonitor) {
@@ -548,7 +548,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
             }
 
             final FaceRevokeChallengeClient client = new FaceRevokeChallengeClient(mContext,
-                    mLazyDaemon, token, opPackageName, mSensorId);
+                    mLazyDaemon, token, userId, opPackageName, mSensorId);
             mScheduler.scheduleClientMonitor(client, new BaseClientMonitor.Callback() {
                 @Override
                 public void onClientFinished(@NonNull BaseClientMonitor clientMonitor,
