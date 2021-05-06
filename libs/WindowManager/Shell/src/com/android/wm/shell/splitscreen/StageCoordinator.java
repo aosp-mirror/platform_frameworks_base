@@ -515,55 +515,34 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     }
 
     @Override
-    public void onBoundsChanging(SplitLayout layout) {
-        final SurfaceControl dividerLeash = mSplitLayout.getDividerLeash();
-        if (dividerLeash == null) return;
-        final Rect mainStageBounds = getMainStageBounds();
-        final Rect sideStageBounds = getSideStageBounds();
-
-        mSyncQueue.runInSync(t -> t
-                .setPosition(dividerLeash,
-                        mSplitLayout.getDividerBounds().left, mSplitLayout.getDividerBounds().top)
-                .setPosition(mMainStage.mRootLeash, mainStageBounds.left, mainStageBounds.top)
-                .setPosition(mSideStage.mRootLeash, sideStageBounds.left, sideStageBounds.top)
-                // Sets crop to prevent visible region of tasks overlap with each other when
-                // re-positioning surfaces while resizing.
-                .setWindowCrop(mMainStage.mRootLeash,
-                        mainStageBounds.width(), mainStageBounds.height())
-                .setWindowCrop(mSideStage.mRootLeash,
-                        sideStageBounds.width(), sideStageBounds.height()));
-
-    }
-
-    @Override
     public void onDoubleTappedDivider() {
         setSideStagePosition(mSideStagePosition == SPLIT_POSITION_TOP_OR_LEFT
                 ? SPLIT_POSITION_BOTTOM_OR_RIGHT : SPLIT_POSITION_TOP_OR_LEFT);
     }
 
     @Override
-    public void onBoundsChanged(SplitLayout layout) {
-        final SurfaceControl dividerLeash = mSplitLayout.getDividerLeash();
-        if (dividerLeash == null) return;
-        final Rect mainStageBounds = getMainStageBounds();
-        final Rect sideStageBounds = getSideStageBounds();
-        final WindowContainerTransaction wct = new WindowContainerTransaction();
-        mMainStage.setBounds(mainStageBounds, wct);
-        mSideStage.setBounds(sideStageBounds, wct);
-        mTaskOrganizer.applyTransaction(wct);
+    public void onBoundsChanging(SplitLayout layout) {
+        final StageTaskListener topLeftStage =
+                mSideStagePosition == SPLIT_POSITION_TOP_OR_LEFT ? mSideStage : mMainStage;
+        final StageTaskListener bottomRightStage =
+                mSideStagePosition == SPLIT_POSITION_TOP_OR_LEFT ? mMainStage : mSideStage;
 
-        mSyncQueue.runInSync(t -> t
-                // Resets layer of divider bar to make sure it is always on top.
-                .setLayer(dividerLeash, Integer.MAX_VALUE)
-                .setPosition(dividerLeash,
-                        mSplitLayout.getDividerBounds().left, mSplitLayout.getDividerBounds().top)
-                .setPosition(mMainStage.mRootLeash,
-                        mainStageBounds.left, mainStageBounds.top)
-                .setPosition(mSideStage.mRootLeash,
-                        sideStageBounds.left, sideStageBounds.top)
-                // Resets crop to apply new surface bounds directly.
-                .setWindowCrop(mMainStage.mRootLeash, null)
-                .setWindowCrop(mSideStage.mRootLeash, null));
+        mSyncQueue.runInSync(t -> layout.applySurfaceChanges(t, topLeftStage.mRootLeash,
+                bottomRightStage.mRootLeash, topLeftStage.mDimLayer, bottomRightStage.mDimLayer));
+    }
+
+    @Override
+    public void onBoundsChanged(SplitLayout layout) {
+        final StageTaskListener topLeftStage =
+                mSideStagePosition == SPLIT_POSITION_TOP_OR_LEFT ? mSideStage : mMainStage;
+        final StageTaskListener bottomRightStage =
+                mSideStagePosition == SPLIT_POSITION_TOP_OR_LEFT ? mMainStage : mSideStage;
+
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
+        layout.applyTaskChanges(wct, topLeftStage.mRootTaskInfo, bottomRightStage.mRootTaskInfo);
+        mSyncQueue.queue(wct);
+        mSyncQueue.runInSync(t -> layout.applySurfaceChanges(t, topLeftStage.mRootLeash,
+                bottomRightStage.mRootLeash, topLeftStage.mDimLayer, bottomRightStage.mDimLayer));
     }
 
     @Override

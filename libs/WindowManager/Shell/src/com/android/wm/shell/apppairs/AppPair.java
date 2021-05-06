@@ -291,40 +291,16 @@ class AppPair implements ShellTaskOrganizer.TaskListener, SplitLayout.SplitLayou
 
     @Override
     public void onBoundsChanging(SplitLayout layout) {
-        final SurfaceControl dividerLeash = mSplitLayout.getDividerLeash();
-        if (dividerLeash == null) return;
-        final Rect dividerBounds = layout.getDividerBounds();
-        final Rect bounds1 = layout.getBounds1();
-        final Rect bounds2 = layout.getBounds2();
-        mSyncQueue.runInSync(t -> t
-                .setPosition(dividerLeash, dividerBounds.left, dividerBounds.top)
-                .setPosition(mTaskLeash1, bounds1.left, bounds1.top)
-                .setPosition(mTaskLeash2, bounds2.left, bounds2.top)
-                // Sets crop to prevent visible region of tasks overlap with each other when
-                // re-positioning surfaces while resizing.
-                .setWindowCrop(mTaskLeash1, bounds1.width(), bounds1.height())
-                .setWindowCrop(mTaskLeash2, bounds2.width(), bounds2.height()));
+        mSyncQueue.runInSync(t ->
+                layout.applySurfaceChanges(t, mTaskLeash1, mTaskLeash2, mDimLayer1, mDimLayer2));
     }
 
     @Override
     public void onBoundsChanged(SplitLayout layout) {
-        final SurfaceControl dividerLeash = mSplitLayout.getDividerLeash();
-        if (dividerLeash == null) return;
-        final Rect dividerBounds = layout.getDividerBounds();
-        final Rect bounds1 = layout.getBounds1();
-        final Rect bounds2 = layout.getBounds2();
         final WindowContainerTransaction wct = new WindowContainerTransaction();
-        wct.setBounds(mTaskInfo1.token, bounds1)
-                .setBounds(mTaskInfo2.token, bounds2);
-        mController.getTaskOrganizer().applyTransaction(wct);
-        mSyncQueue.runInSync(t -> t
-                // Resets layer of divider bar to make sure it is always on top.
-                .setLayer(dividerLeash, Integer.MAX_VALUE)
-                .setPosition(dividerLeash, dividerBounds.left, dividerBounds.top)
-                .setPosition(mTaskLeash1, bounds1.left, bounds1.top)
-                .setPosition(mTaskLeash2, bounds2.left, bounds2.top)
-                // Resets crop to apply new surface bounds directly.
-                .setWindowCrop(mTaskLeash1, null)
-                .setWindowCrop(mTaskLeash2, null));
+        layout.applyTaskChanges(wct, mTaskInfo1, mTaskInfo2);
+        mSyncQueue.queue(wct);
+        mSyncQueue.runInSync(t ->
+                layout.applySurfaceChanges(t, mTaskLeash1, mTaskLeash2, mDimLayer1, mDimLayer2));
     }
 }

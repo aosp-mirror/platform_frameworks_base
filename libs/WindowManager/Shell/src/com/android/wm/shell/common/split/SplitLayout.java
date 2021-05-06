@@ -26,6 +26,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.IntDef;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -34,6 +35,7 @@ import android.view.SurfaceControl;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.window.WindowContainerToken;
+import android.window.WindowContainerTransaction;
 
 import androidx.annotation.Nullable;
 
@@ -197,6 +199,7 @@ public final class SplitLayout {
         mInitialized = false;
         mSplitWindowManager.release();
         mDisplayImeController.removePositionProcessor(mImePositionProcessor);
+        mImePositionProcessor.reset();
     }
 
     /**
@@ -302,8 +305,35 @@ public final class SplitLayout {
         return bounds.width() > bounds.height();
     }
 
+    /** Apply recorded surface layout to the {@link SurfaceControl.Transaction}. */
+    public void applySurfaceChanges(SurfaceControl.Transaction t, SurfaceControl leash1,
+            SurfaceControl leash2, SurfaceControl dimLayer1, SurfaceControl dimLayer2) {
+        final SurfaceControl dividerLeash = getDividerLeash();
+        if (dividerLeash != null) {
+            t.setPosition(dividerLeash, mDividerBounds.left, mDividerBounds.top)
+                    // Resets layer of divider bar to make sure it is always on top.
+                    .setLayer(dividerLeash, Integer.MAX_VALUE);
+        }
+
+        t.setPosition(leash1, mBounds1.left, mBounds1.top)
+                .setWindowCrop(leash1, mBounds1.width(), mBounds1.height());
+
+        t.setPosition(leash2, mBounds2.left, mBounds2.top)
+                .setWindowCrop(leash2, mBounds2.width(), mBounds2.height());
+
+        mImePositionProcessor.applySurfaceDimValues(t, dimLayer1, dimLayer2);
+    }
+
+    /** Apply recorded task layout to the {@link WindowContainerTransaction}. */
+    public void applyTaskChanges(WindowContainerTransaction wct,
+            ActivityManager.RunningTaskInfo task1, ActivityManager.RunningTaskInfo task2) {
+        wct.setBounds(task1.token, mBounds1)
+                .setBounds(task2.token, mBounds2);
+    }
+
     /** Handles layout change event. */
     public interface SplitLayoutHandler {
+
         /** Calls when dismissing split. */
         void onSnappedToDismiss(boolean snappedToEnd);
 
@@ -324,8 +354,25 @@ public final class SplitLayout {
 
     /** Records IME top offset changes and updates SplitLayout correspondingly. */
     private class ImePositionProcessor implements DisplayImeController.ImePositionProcessor {
+        /**
+         * Maximum size of an adjusted split bounds relative to original stack bounds. Used to
+         * restrict IME adjustment so that a min portion of top split remains visible.
+         */
+        private static final float ADJUSTED_SPLIT_FRACTION_MAX = 0.7f;
+        private static final float ADJUSTED_NONFOCUS_DIM = 0.3f;
 
         private final int mDisplayId;
+
+        private float mDimValue1;
+        private float mDimValue2;
+
+        private int mStartImeTop;
+        private int mEndImeTop;
+
+        private float mTargetDim1;
+        private float mTargetDim2;
+        private float mLastDim1;
+        private float mLastDim2;
 
         private ImePositionProcessor(int displayId) {
             mDisplayId = displayId;
@@ -337,6 +384,16 @@ public final class SplitLayout {
             if (displayId != mDisplayId) return 0;
             final int imeTargetPosition = getImeTargetPosition();
             if (!mInitialized || imeTargetPosition == SPLIT_POSITION_UNDEFINED) return 0;
+            mStartImeTop = showing ? hiddenTop : shownTop;
+            mEndImeTop = showing ? shownTop : hiddenTop;
+
+            // Update target dim values
+            mLastDim1 = mDimValue1;
+            mTargetDim1 = imeTargetPosition == SPLIT_POSITION_BOTTOM_OR_RIGHT && showing
+                    ? ADJUSTED_NONFOCUS_DIM : 0.0f;
+            mLastDim2 = mDimValue2;
+            mTargetDim2 = imeTargetPosition == SPLIT_POSITION_TOP_OR_LEFT && showing
+                    ? ADJUSTED_NONFOCUS_DIM : 0.0f;
 
             // Make {@link DividerView} non-interactive while IME showing in split mode. Listen to
             // ImePositionProcessor#onImeVisibilityChanged directly in DividerView is not enough
@@ -348,10 +405,48 @@ public final class SplitLayout {
             return 0;
         }
 
+        @Override
+        public void onImePositionChanged(int displayId, int imeTop, SurfaceControl.Transaction t) {
+            if (displayId != mDisplayId) return;
+            onProgress(getProgress(imeTop));
+            mSplitLayoutHandler.onBoundsChanging(SplitLayout.this);
+        }
+
+        @Override
+        public void onImeEndPositioning(int displayId, boolean cancel,
+                SurfaceControl.Transaction t) {
+            if (displayId != mDisplayId || cancel) return;
+            onProgress(1.0f);
+            mSplitLayoutHandler.onBoundsChanging(SplitLayout.this);
+        }
+
         @SplitPosition
         private int getImeTargetPosition() {
             final WindowContainerToken token = mTaskOrganizer.getImeTarget(mDisplayId);
             return mSplitLayoutHandler.getSplitItemPosition(token);
+        }
+
+        private float getProgress(int currImeTop) {
+            return ((float) currImeTop - mStartImeTop) / (mEndImeTop - mStartImeTop);
+        }
+
+        private void onProgress(float progress) {
+            mDimValue1 = getProgressValue(mLastDim1, mTargetDim1, progress);
+            mDimValue2 = getProgressValue(mLastDim2, mTargetDim2, progress);
+        }
+
+        private float getProgressValue(float start, float end, float progress) {
+            return start + (end - start) * progress;
+        }
+
+        private void reset() {
+            mDimValue1 = mDimValue2 = 0.0f;
+        }
+
+        private void applySurfaceDimValues(SurfaceControl.Transaction t, SurfaceControl dimLayer1,
+                SurfaceControl dimLayer2) {
+            t.setAlpha(dimLayer1, mDimValue1).setVisibility(dimLayer1, mDimValue1 > 0.001f);
+            t.setAlpha(dimLayer2, mDimValue2).setVisibility(dimLayer2, mDimValue2 > 0.001f);
         }
     }
 }
