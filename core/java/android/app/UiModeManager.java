@@ -79,7 +79,7 @@ public class UiModeManager {
      * @hide
      */
     @SystemApi
-    public interface OnProjectionStateChangeListener {
+    public interface OnProjectionStateChangedListener {
         /**
          * Callback invoked when projection state changes for a {@link ProjectionType} for which
          * this listener was added.
@@ -254,10 +254,10 @@ public class UiModeManager {
     private final Object mLock = new Object();
     /**
      * Map that stores internally created {@link InnerListener} objects keyed by their corresponding
-     * externally provided {@link OnProjectionStateChangeListener} objects.
+     * externally provided callback objects.
      */
     @GuardedBy("mLock")
-    private final Map<OnProjectionStateChangeListener, InnerListener>
+    private final Map<OnProjectionStateChangedListener, InnerListener>
             mProjectionStateListenerMap = new ArrayMap<>();
 
     /**
@@ -265,9 +265,9 @@ public class UiModeManager {
      * fail to remove listeners.
      */
     @GuardedBy("mLock")
-    private final OnProjectionStateChangeListenerResourceManager
-            mOnProjectionStateChangeListenerResourceManager =
-            new OnProjectionStateChangeListenerResourceManager();
+    private final OnProjectionStateChangedListenerResourceManager
+            mOnProjectionStateChangedListenerResourceManager =
+            new OnProjectionStateChangedListenerResourceManager();
 
     @UnsupportedAppUsage
     /*package*/ UiModeManager() throws ServiceNotFoundException {
@@ -687,7 +687,7 @@ public class UiModeManager {
 
     /**
      * Indicates no projection type. Can be used to compare with the {@link ProjectionType} in
-     * {@link OnProjectionStateChangeListener#onProjectionStateChanged(int, Set)}.
+     * {@link OnProjectionStateChangedListener#onProjectionStateChanged(int, Set)}.
      *
      * @hide
      */
@@ -706,7 +706,7 @@ public class UiModeManager {
     public static final int PROJECTION_TYPE_AUTOMOTIVE = 0x0001;
     /**
      * Indicates all projection types. For use with
-     * {@link #addOnProjectionStateChangeListener(int, Executor, OnProjectionStateChangeListener)}
+     * {@link #addOnProjectionStateChangedListener(int, Executor, OnProjectionStateChangedListener)}
      * and {@link #getProjectingPackages(int)}.
      *
      * @hide
@@ -829,15 +829,15 @@ public class UiModeManager {
      *
      * @param projectionType one or more {@link ProjectionType}s to listen for changes regarding
      * @param executor an {@link Executor} on which to invoke the callbacks
-     * @param listener the {@link OnProjectionStateChangeListener} to add
+     * @param listener the {@link OnProjectionStateChangedListener} to add
      *
      * @hide
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PROJECTION_STATE)
-    public void addOnProjectionStateChangeListener(@ProjectionType int projectionType,
+    public void addOnProjectionStateChangedListener(@ProjectionType int projectionType,
             @NonNull @CallbackExecutor Executor executor,
-            @NonNull OnProjectionStateChangeListener listener) {
+            @NonNull OnProjectionStateChangedListener listener) {
         synchronized (mLock) {
             if (mProjectionStateListenerMap.containsKey(listener)) {
                 Slog.i(TAG, "Attempted to add listener that was already added.");
@@ -845,12 +845,12 @@ public class UiModeManager {
             }
             if (mService != null) {
                 InnerListener innerListener = new InnerListener(executor, listener,
-                        mOnProjectionStateChangeListenerResourceManager);
+                        mOnProjectionStateChangedListenerResourceManager);
                 try {
-                    mService.addOnProjectionStateChangeListener(innerListener, projectionType);
+                    mService.addOnProjectionStateChangedListener(innerListener, projectionType);
                     mProjectionStateListenerMap.put(listener, innerListener);
                 } catch (RemoteException e) {
-                    mOnProjectionStateChangeListenerResourceManager.remove(innerListener);
+                    mOnProjectionStateChangedListenerResourceManager.remove(innerListener);
                     throw e.rethrowFromSystemServer();
                 }
             }
@@ -860,14 +860,14 @@ public class UiModeManager {
     /**
      * Removes the listener so it stops receiving updates for all {@link ProjectionType}s.
      *
-     * @param listener the {@link OnProjectionStateChangeListener} to remove
+     * @param listener the {@link OnProjectionStateChangedListener} to remove
      *
      * @hide
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PROJECTION_STATE)
-    public void removeOnProjectionStateChangeListener(
-            @NonNull OnProjectionStateChangeListener listener) {
+    public void removeOnProjectionStateChangedListener(
+            @NonNull OnProjectionStateChangedListener listener) {
         synchronized (mLock) {
             InnerListener innerListener = mProjectionStateListenerMap.get(listener);
             if (innerListener == null) {
@@ -876,23 +876,23 @@ public class UiModeManager {
             }
             if (mService != null) {
                 try {
-                    mService.removeOnProjectionStateChangeListener(innerListener);
+                    mService.removeOnProjectionStateChangedListener(innerListener);
                 } catch (RemoteException e) {
                     throw e.rethrowFromSystemServer();
                 }
             }
             mProjectionStateListenerMap.remove(listener);
-            mOnProjectionStateChangeListenerResourceManager.remove(innerListener);
+            mOnProjectionStateChangedListenerResourceManager.remove(innerListener);
         }
     }
 
-    private static class InnerListener extends IOnProjectionStateChangeListener.Stub {
-        private final WeakReference<OnProjectionStateChangeListenerResourceManager>
+    private static class InnerListener extends IOnProjectionStateChangedListener.Stub {
+        private final WeakReference<OnProjectionStateChangedListenerResourceManager>
                 mResourceManager;
 
         private InnerListener(@NonNull Executor executor,
-                @NonNull OnProjectionStateChangeListener outerListener,
-                @NonNull OnProjectionStateChangeListenerResourceManager resourceManager) {
+                @NonNull OnProjectionStateChangedListener outerListener,
+                @NonNull OnProjectionStateChangedListenerResourceManager resourceManager) {
             resourceManager.put(this, executor, outerListener);
             mResourceManager = new WeakReference<>(resourceManager);
         }
@@ -900,13 +900,14 @@ public class UiModeManager {
         @Override
         public void onProjectionStateChanged(int activeProjectionTypes,
                 List<String> projectingPackages) {
-            OnProjectionStateChangeListenerResourceManager resourceManager = mResourceManager.get();
+            OnProjectionStateChangedListenerResourceManager resourceManager =
+                    mResourceManager.get();
             if (resourceManager == null) {
                 Slog.w(TAG, "Can't execute onProjectionStateChanged, resource manager is gone.");
                 return;
             }
 
-            OnProjectionStateChangeListener outerListener = resourceManager.getOuterListener(this);
+            OnProjectionStateChangedListener outerListener = resourceManager.getOuterListener(this);
             Executor executor = resourceManager.getExecutor(this);
             if (outerListener == null || executor == null) {
                 Slog.w(TAG, "Can't execute onProjectionStatechanged, references are null.");
@@ -914,7 +915,7 @@ public class UiModeManager {
             }
 
             executor.execute(PooledLambda.obtainRunnable(
-                    OnProjectionStateChangeListener::onProjectionStateChanged,
+                    OnProjectionStateChangedListener::onProjectionStateChanged,
                     outerListener,
                     activeProjectionTypes,
                     new ArraySet<>(projectingPackages)).recycleOnUse());
@@ -924,15 +925,15 @@ public class UiModeManager {
     /**
      * Wrapper class that ensures we don't leak {@link Activity} or other large {@link Context} in
      * which this {@link UiModeManager} resides if/when it ends without unregistering associated
-     * {@link OnProjectionStateChangeListener}s.
+     * callback objects.
      */
-    private static class OnProjectionStateChangeListenerResourceManager {
-        private final Map<InnerListener, OnProjectionStateChangeListener> mOuterListenerMap =
+    private static class OnProjectionStateChangedListenerResourceManager {
+        private final Map<InnerListener, OnProjectionStateChangedListener> mOuterListenerMap =
                 new ArrayMap<>(1);
         private final Map<InnerListener, Executor> mExecutorMap = new ArrayMap<>(1);
 
         void put(@NonNull InnerListener innerListener, @NonNull Executor executor,
-                OnProjectionStateChangeListener outerListener) {
+                OnProjectionStateChangedListener outerListener) {
             mOuterListenerMap.put(innerListener, outerListener);
             mExecutorMap.put(innerListener, executor);
         }
@@ -942,7 +943,7 @@ public class UiModeManager {
             mExecutorMap.remove(innerListener);
         }
 
-        OnProjectionStateChangeListener getOuterListener(@NonNull InnerListener innerListener) {
+        OnProjectionStateChangedListener getOuterListener(@NonNull InnerListener innerListener) {
             return mOuterListenerMap.get(innerListener);
         }
 
