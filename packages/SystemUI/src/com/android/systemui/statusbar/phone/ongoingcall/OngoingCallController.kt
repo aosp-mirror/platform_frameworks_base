@@ -16,6 +16,9 @@
 
 package com.android.systemui.statusbar.phone.ongoingcall
 
+import android.app.ActivityManager
+import android.app.IActivityManager
+import android.app.IUidObserver
 import android.app.Notification
 import android.app.Notification.CallStyle.CALL_TYPE_ONGOING
 import android.content.Intent
@@ -25,6 +28,7 @@ import android.widget.Chronometer
 import com.android.systemui.R
 import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.FeatureFlags
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
@@ -32,6 +36,7 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.Co
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
 import com.android.systemui.statusbar.policy.CallbackController
 import com.android.systemui.util.time.SystemClock
+import java.util.concurrent.Executor
 import javax.inject.Inject
 
 /**
@@ -42,12 +47,17 @@ class OngoingCallController @Inject constructor(
     private val notifCollection: CommonNotifCollection,
     private val featureFlags: FeatureFlags,
     private val systemClock: SystemClock,
-    private val activityStarter: ActivityStarter
+    private val activityStarter: ActivityStarter,
+    @Main private val mainExecutor: Executor,
+    private val iActivityManager: IActivityManager
 ) : CallbackController<OngoingCallListener> {
 
     /** Null if there's no ongoing call. */
     private var ongoingCallInfo: OngoingCallInfo? = null
+    /** True if the application managing the call is visible to the user. */
+    private var isCallAppVisible: Boolean = true
     private var chipView: ViewGroup? = null
+    private var uidObserver: IUidObserver.Stub? = null
 
     private val mListeners: MutableList<OngoingCallListener> = mutableListOf()
 
@@ -67,8 +77,9 @@ class OngoingCallController @Inject constructor(
         override fun onEntryUpdated(entry: NotificationEntry) {
             if (isOngoingCallNotification(entry)) {
                 ongoingCallInfo = OngoingCallInfo(
-                entry.sbn.notification.`when`,
-                        entry.sbn.notification.contentIntent.intent)
+                    entry.sbn.notification.`when`,
+                    entry.sbn.notification.contentIntent.intent,
+                    entry.sbn.uid)
                 updateChip()
             }
         }
@@ -76,7 +87,10 @@ class OngoingCallController @Inject constructor(
         override fun onEntryRemoved(entry: NotificationEntry, reason: Int) {
             if (isOngoingCallNotification(entry)) {
                 ongoingCallInfo = null
-                mListeners.forEach { l -> l.onOngoingCallEnded(animate = true) }
+                mListeners.forEach { l -> l.onOngoingCallStateChanged(animate = true) }
+                if (uidObserver != null) {
+                    iActivityManager.unregisterUidObserver(uidObserver)
+                }
             }
         }
     }
@@ -100,9 +114,13 @@ class OngoingCallController @Inject constructor(
     }
 
     /**
-     * Returns true if there's an active ongoing call that can be displayed in a status bar chip.
+     * Returns true if there's an active ongoing call that should be displayed in a status bar chip.
      */
-    fun hasOngoingCall(): Boolean = ongoingCallInfo != null
+    fun hasOngoingCall(): Boolean {
+        return ongoingCallInfo != null &&
+                // When the user is in the phone app, don't show the chip.
+                !isCallAppVisible
+    }
 
     override fun addCallback(listener: OngoingCallListener) {
         synchronized(mListeners) {
@@ -137,7 +155,9 @@ class OngoingCallController @Inject constructor(
                         ActivityLaunchAnimator.Controller.fromView(it))
             }
 
-            mListeners.forEach { l -> l.onOngoingCallStarted(animate = true) }
+            setUpUidObserver(currentOngoingCallInfo)
+
+            mListeners.forEach { l -> l.onOngoingCallStateChanged(animate = true) }
         } else {
             // If we failed to update the chip, don't store the ongoing call info. Then
             // [hasOngoingCall] will return false and we fall back to typical notification handling.
@@ -150,9 +170,52 @@ class OngoingCallController @Inject constructor(
         }
     }
 
+    /**
+     * Sets up an [IUidObserver] to monitor the status of the application managing the ongoing call.
+     */
+    private fun setUpUidObserver(currentOngoingCallInfo: OngoingCallInfo) {
+        isCallAppVisible = isProcessVisibleToUser(
+                iActivityManager.getUidProcessState(currentOngoingCallInfo.uid, null))
+
+        uidObserver = object : IUidObserver.Stub() {
+            override fun onUidStateChanged(
+                    uid: Int, procState: Int, procStateSeq: Long, capability: Int) {
+                if (uid == currentOngoingCallInfo.uid) {
+                    val oldIsCallAppVisible = isCallAppVisible
+                    isCallAppVisible = isProcessVisibleToUser(procState)
+                    if (oldIsCallAppVisible != isCallAppVisible) {
+                        // Animations may be run as a result of the call's state change, so ensure
+                        // the listener is notified on the main thread.
+                        mainExecutor.execute {
+                            mListeners.forEach { l -> l.onOngoingCallStateChanged(animate = true) }
+                        }
+                    }
+                }
+            }
+
+            override fun onUidGone(uid: Int, disabled: Boolean) {}
+            override fun onUidActive(uid: Int) {}
+            override fun onUidIdle(uid: Int, disabled: Boolean) {}
+            override fun onUidCachedChanged(uid: Int, cached: Boolean) {}
+        }
+
+        iActivityManager.registerUidObserver(
+                uidObserver,
+                ActivityManager.UID_OBSERVER_PROCSTATE,
+                ActivityManager.PROCESS_STATE_UNKNOWN,
+                null
+        )
+    }
+
+    /** Returns true if the given [procState] represents a process that's visible to the user. */
+    private fun isProcessVisibleToUser(procState: Int): Boolean {
+        return procState <= ActivityManager.PROCESS_STATE_TOP
+    }
+
     private class OngoingCallInfo(
         val callStartTime: Long,
-        val intent: Intent
+        val intent: Intent,
+        val uid: Int
     )
 }
 
