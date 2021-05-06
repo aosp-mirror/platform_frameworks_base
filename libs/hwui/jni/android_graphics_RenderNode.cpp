@@ -180,12 +180,10 @@ static jboolean android_view_RenderNode_clearStretch(CRITICAL_JNI_PARAMS_COMMA j
 }
 
 static jboolean android_view_RenderNode_stretch(CRITICAL_JNI_PARAMS_COMMA jlong renderNodePtr,
-                                                jfloat left, jfloat top, jfloat right,
-                                                jfloat bottom, jfloat vX, jfloat vY, jfloat maxX,
+                                                jfloat vX, jfloat vY, jfloat maxX,
                                                 jfloat maxY) {
-    StretchEffect effect = StretchEffect(SkRect::MakeLTRB(left, top, right, bottom),
-                                         {.fX = vX, .fY = vY}, maxX, maxY);
-    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    auto* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    StretchEffect effect = StretchEffect({.fX = vX, .fY = vY}, maxX, maxY);
     renderNode->mutateStagingProperties().mutateLayerProperties().mutableStretchEffect().mergeWith(
             effect);
     renderNode->setPropertyFieldsDirty(RenderNode::GENERIC);
@@ -643,13 +641,15 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
 
         void handleStretchEffect(const TreeInfo& info, const Matrix4& transform) {
             // Search up to find the nearest stretcheffect parent
-            const StretchEffect* effect = info.damageAccumulator->findNearestStretchEffect();
+            const DamageAccumulator::StretchResult result =
+                info.damageAccumulator->findNearestStretchEffect();
+            const StretchEffect* effect = result.stretchEffect;
             if (!effect) {
                 return;
             }
 
-            uirenderer::Rect area = effect->stretchArea;
-            transform.mapRect(area);
+            const auto& childRelativeBounds = result.childRelativeBounds;
+
             JNIEnv* env = jnienv();
 
             jobject localref = env->NewLocalRef(mWeakRef);
@@ -661,9 +661,17 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
 #ifdef __ANDROID__  // Layoutlib does not support CanvasContext
             SkVector stretchDirection = effect->getStretchDirection();
             env->CallVoidMethod(localref, gPositionListener_ApplyStretchMethod,
-                                info.canvasContext.getFrameNumber(), area.left, area.top,
-                                area.right, area.bottom, stretchDirection.fX, stretchDirection.fY,
-                                effect->maxStretchAmountX, effect->maxStretchAmountY);
+                                info.canvasContext.getFrameNumber(),
+                                result.width,
+                                result.height,
+                                stretchDirection.fX,
+                                stretchDirection.fY,
+                                effect->maxStretchAmountX,
+                                effect->maxStretchAmountY,
+                                childRelativeBounds.left(),
+                                childRelativeBounds.top(),
+                                childRelativeBounds.right(),
+                                childRelativeBounds.bottom());
 #endif
             env->DeleteLocalRef(localref);
         }
@@ -739,7 +747,7 @@ static const JNINativeMethod gMethods[] = {
         {"nSetOutlineEmpty", "(J)Z", (void*)android_view_RenderNode_setOutlineEmpty},
         {"nSetOutlineNone", "(J)Z", (void*)android_view_RenderNode_setOutlineNone},
         {"nClearStretch", "(J)Z", (void*)android_view_RenderNode_clearStretch},
-        {"nStretch", "(JFFFFFFFF)Z", (void*)android_view_RenderNode_stretch},
+        {"nStretch", "(JFFFF)Z", (void*)android_view_RenderNode_stretch},
         {"nHasShadow", "(J)Z", (void*)android_view_RenderNode_hasShadow},
         {"nSetSpotShadowColor", "(JI)Z", (void*)android_view_RenderNode_setSpotShadowColor},
         {"nGetSpotShadowColor", "(J)I", (void*)android_view_RenderNode_getSpotShadowColor},
@@ -814,7 +822,7 @@ int register_android_view_RenderNode(JNIEnv* env) {
     gPositionListener_PositionChangedMethod = GetMethodIDOrDie(env, clazz,
             "positionChanged", "(JIIII)V");
     gPositionListener_ApplyStretchMethod =
-            GetMethodIDOrDie(env, clazz, "applyStretch", "(JFFFFFFF)V");
+            GetMethodIDOrDie(env, clazz, "applyStretch", "(JFFFFFFFFFF)V");
     gPositionListener_PositionLostMethod = GetMethodIDOrDie(env, clazz,
             "positionLost", "(J)V");
     return RegisterMethodsOrDie(env, kClassPathName, gMethods, NELEM(gMethods));

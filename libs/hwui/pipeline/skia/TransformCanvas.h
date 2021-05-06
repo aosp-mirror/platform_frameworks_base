@@ -17,10 +17,12 @@
 
 #include <include/core/SkCanvas.h>
 #include "SkPaintFilterCanvas.h"
+#include <effects/StretchEffect.h>
 
 class TransformCanvas : public SkPaintFilterCanvas {
 public:
-    TransformCanvas(SkCanvas* target) : SkPaintFilterCanvas(target), mWrappedCanvas(target) {}
+    TransformCanvas(SkCanvas* target, SkBlendMode blendmode) :
+        SkPaintFilterCanvas(target), mWrappedCanvas(target), mHolePunchBlendMode(blendmode) {}
 
 protected:
     bool onFilter(SkPaint& paint) const override;
@@ -32,4 +34,5 @@ protected:
 private:
     // We don't own the canvas so just maintain a raw pointer to it
     SkCanvas* mWrappedCanvas;
+    const SkBlendMode mHolePunchBlendMode;
 };
