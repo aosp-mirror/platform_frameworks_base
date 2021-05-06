@@ -255,7 +255,6 @@
     <!-- media -->
     <color name="media_disabled">#80ffffff</color>
     <color name="media_seamless_border">?android:attr/colorAccent</color>
-    <color name="media_divider">#1d000000</color>
 
     <!-- controls -->
     <color name="control_primary_text">#E6FFFFFF</color>
