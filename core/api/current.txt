@@ -52983,7 +52983,7 @@ package android.view.translation {
     method @NonNull public android.view.translation.TranslationRequestValue getValue(@NonNull String);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.view.translation.ViewTranslationRequest> CREATOR;
-    field public static final String ID_TEXT = "text";
+    field public static final String ID_TEXT = "android:text";
   }
 
   public static final class ViewTranslationRequest.Builder {
