@@ -21,6 +21,7 @@ import static junit.framework.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -48,6 +49,7 @@ import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardViewMediator;
+import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -110,6 +112,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
     private PowerManager mPowerManager;
     @Mock
     private AccessibilityManager mAccessibilityManager;
+    @Mock
+    private ScreenLifecycle mScreenLifecycle;
 
     private FakeExecutor mFgExecutor;
 
@@ -126,6 +130,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
     private IUdfpsOverlayController mOverlayController;
     @Captor private ArgumentCaptor<UdfpsView.OnTouchListener> mTouchListenerCaptor;
     @Captor private ArgumentCaptor<Runnable> mOnIlluminatedRunnableCaptor;
+    @Captor private ArgumentCaptor<ScreenLifecycle.Observer> mScreenObserverCaptor;
+    private ScreenLifecycle.Observer mScreenObserver;
 
     @Before
     public void setUp() {
@@ -163,9 +169,12 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mKeyguardViewMediator,
                 mFalsingManager,
                 mPowerManager,
-                mAccessibilityManager);
+                mAccessibilityManager,
+                mScreenLifecycle);
         verify(mFingerprintManager).setUdfpsOverlayController(mOverlayCaptor.capture());
         mOverlayController = mOverlayCaptor.getValue();
+        verify(mScreenLifecycle).addObserver(mScreenObserverCaptor.capture());
+        mScreenObserver = mScreenObserverCaptor.getValue();
 
         assertEquals(TEST_UDFPS_SENSOR_ID, mUdfpsController.mSensorProps.sensorId);
     }
@@ -233,9 +242,10 @@ public class UdfpsControllerTest extends SysuiTestCase {
 
     @Test
     public void aodInterrupt() throws RemoteException {
-        // GIVEN that the overlay is showing
+        // GIVEN that the overlay is showing and screen is on
         mOverlayController.showUdfpsOverlay(TEST_UDFPS_SENSOR_ID,
                 IUdfpsOverlayController.REASON_AUTH_FPM_KEYGUARD, mUdfpsOverlayControllerCallback);
+        mScreenObserver.onScreenTurnedOn();
         mFgExecutor.runAllReady();
         // WHEN fingerprint is requested because of AOD interrupt
         mUdfpsController.onAodInterrupt(0, 0, 2f, 3f);
@@ -252,6 +262,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
         // GIVEN AOD interrupt
         mOverlayController.showUdfpsOverlay(TEST_UDFPS_SENSOR_ID,
                 IUdfpsOverlayController.REASON_AUTH_FPM_KEYGUARD, mUdfpsOverlayControllerCallback);
+        mScreenObserver.onScreenTurnedOn();
         mFgExecutor.runAllReady();
         mUdfpsController.onAodInterrupt(0, 0, 0f, 0f);
         // WHEN it is cancelled
@@ -265,6 +276,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
         // GIVEN AOD interrupt
         mOverlayController.showUdfpsOverlay(TEST_UDFPS_SENSOR_ID,
                 IUdfpsOverlayController.REASON_AUTH_FPM_KEYGUARD, mUdfpsOverlayControllerCallback);
+        mScreenObserver.onScreenTurnedOn();
         mFgExecutor.runAllReady();
         mUdfpsController.onAodInterrupt(0, 0, 0f, 0f);
         // WHEN it times out
@@ -272,5 +284,20 @@ public class UdfpsControllerTest extends SysuiTestCase {
         mFgExecutor.runAllReady();
         // THEN the illumination is hidden
         verify(mUdfpsView).stopIllumination();
+    }
+
+    @Test
+    public void aodInterruptScreenOff() throws RemoteException {
+        // GIVEN screen off
+        mOverlayController.showUdfpsOverlay(TEST_UDFPS_SENSOR_ID,
+                IUdfpsOverlayController.REASON_AUTH_FPM_KEYGUARD, mUdfpsOverlayControllerCallback);
+        mScreenObserver.onScreenTurnedOff();
+        mFgExecutor.runAllReady();
+
+        // WHEN aod interrupt is received
+        mUdfpsController.onAodInterrupt(0, 0, 0f, 0f);
+
+        // THEN no illumination because screen is off
+        verify(mUdfpsView, never()).startIllumination(any());
     }
 }
