@@ -16,11 +16,13 @@
 
 package com.android.systemui.statusbar.phone.ongoingcall
 
-/** A listener that's notified when an ongoing call is started or ended. */
+/** A listener that's notified when the state of an ongoing call has changed. */
 interface OngoingCallListener {
-    /** Called when an ongoing call is started. */
-    fun onOngoingCallStarted(animate: Boolean)
 
-    /** Called when an ongoing call is ended. */
-    fun onOngoingCallEnded(animate: Boolean)
+    /**
+     * Called when the state of an ongoing call has changed in any way that may affect view
+     * visibility (including call starting, call stopping, application managing the call becoming
+     * visible or invisible).
+     */
+    fun onOngoingCallStateChanged(animate: Boolean)
 }
