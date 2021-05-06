@@ -52889,7 +52889,7 @@ package android.view.translation {
   public final class TranslationRequestValue implements android.os.Parcelable {
     method public int describeContents();
     method @NonNull public static android.view.translation.TranslationRequestValue forText(@NonNull CharSequence);
-    method @NonNull public CharSequence getText();
+    method @Nullable public CharSequence getText();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.view.translation.TranslationRequestValue> CREATOR;
   }
