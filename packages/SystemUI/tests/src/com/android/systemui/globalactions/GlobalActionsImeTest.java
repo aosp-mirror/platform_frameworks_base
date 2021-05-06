@@ -37,6 +37,7 @@ import android.widget.EditText;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.LargeTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.rule.ActivityTestRule;
@@ -52,6 +53,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.BooleanSupplier;
 
 @LargeTest
+@FlakyTest(bugId = 176891566)
 public class GlobalActionsImeTest extends SysuiTestCase {
 
     @Rule
@@ -75,6 +77,8 @@ public class GlobalActionsImeTest extends SysuiTestCase {
         // To restore USER_SYSTEM settings, we have to use settings shell command.
         executeShellCommand("settings put secure "
                 + SHOW_IME_WITH_HARD_KEYBOARD + " " + mOriginalShowImeWithHardKeyboard);
+        // Hide power menu and return to home screen
+        executeShellCommand("input keyevent --longpress POWER");
         executeShellCommand("input keyevent HOME");
     }
 
@@ -178,6 +182,7 @@ public class GlobalActionsImeTest extends SysuiTestCase {
         @Override
         protected void onCreate(@Nullable Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
+            setShowWhenLocked(true); // Allow this test to work even if device got stuck on keyguard
             mEditText = new EditText(this);
             mEditText.setCursorVisible(false);  // Otherwise, main thread doesn't go idle.
             setContentView(mEditText);

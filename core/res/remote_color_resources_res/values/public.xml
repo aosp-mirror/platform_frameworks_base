@@ -2,6 +2,7 @@
 <resources>
   <public-group type="color" first-id="0x0106001d">
     <public name="system_accent1_0" />
+    <public name="system_accent1_10" />
     <public name="system_accent1_50" />
     <public name="system_accent1_100" />
     <public name="system_accent1_200" />
@@ -14,6 +15,7 @@
     <public name="system_accent1_900" />
     <public name="system_accent1_1000" />
     <public name="system_accent2_0" />
+    <public name="system_accent2_10" />
     <public name="system_accent2_50" />
     <public name="system_accent2_100" />
     <public name="system_accent2_200" />
@@ -26,6 +28,7 @@
     <public name="system_accent2_900" />
     <public name="system_accent2_1000" />
     <public name="system_accent3_0" />
+    <public name="system_accent3_10" />
     <public name="system_accent3_50" />
     <public name="system_accent3_100" />
     <public name="system_accent3_200" />
@@ -38,6 +41,7 @@
     <public name="system_accent3_900" />
     <public name="system_accent3_1000" />
     <public name="system_neutral1_0" />
+    <public name="system_neutral1_10" />
     <public name="system_neutral1_50" />
     <public name="system_neutral1_100" />
     <public name="system_neutral1_200" />
@@ -50,6 +54,7 @@
     <public name="system_neutral1_900" />
     <public name="system_neutral1_1000" />
     <public name="system_neutral2_0" />
+    <public name="system_neutral2_10" />
     <public name="system_neutral2_50" />
     <public name="system_neutral2_100" />
     <public name="system_neutral2_200" />

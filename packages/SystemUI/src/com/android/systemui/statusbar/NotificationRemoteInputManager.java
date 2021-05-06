@@ -15,8 +15,6 @@
  */
 package com.android.systemui.statusbar;
 
-import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -170,7 +168,9 @@ public class NotificationRemoteInputManager implements Dumpable {
                     action == null ? false : action.isAuthenticationRequired(), () -> {
                     Pair<Intent, ActivityOptions> options = response.getLaunchOptions(view);
                     mLogger.logStartingIntentWithDefaultHandler(entry, pendingIntent);
-                    return RemoteViews.startPendingIntent(view, pendingIntent, options);
+                    boolean started = RemoteViews.startPendingIntent(view, pendingIntent, options);
+                    if (started) releaseNotificationIfKeptForRemoteInputHistory(entry.getKey());
+                    return started;
             });
         }
 
@@ -600,6 +600,22 @@ public class NotificationRemoteInputManager implements Dumpable {
         }
         return (mRemoteInputController.isSpinning(entry.getKey())
                 || entry.hasJustSentRemoteInput());
+    }
+
+    /**
+     * Checks if the notification is being kept due to the user sending an inline reply, and if
+     * so, releases that hold.  This is called anytime an action on the notification is dispatched
+     * (after unlock, if applicable), and will then wait a short time to allow the app to update the
+     * notification in response to the action.
+     */
+    private void releaseNotificationIfKeptForRemoteInputHistory(String key) {
+        if (isNotificationKeptForRemoteInputHistory(key)) {
+            mMainHandler.postDelayed(() -> {
+                if (isNotificationKeptForRemoteInputHistory(key)) {
+                    mNotificationLifetimeFinishedCallback.onSafeToRemove(key);
+                }
+            }, REMOTE_INPUT_KEPT_ENTRY_AUTO_CANCEL_DELAY);
+        }
     }
 
     public boolean shouldKeepForSmartReplyHistory(NotificationEntry entry) {

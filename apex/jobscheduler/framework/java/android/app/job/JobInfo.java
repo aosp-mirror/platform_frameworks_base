@@ -1703,7 +1703,7 @@ public class JobInfo implements Parcelable {
                 throw new IllegalArgumentException("An expedited job cannot be periodic");
             }
             if ((constraintFlags & ~CONSTRAINT_FLAG_STORAGE_NOT_LOW) != 0
-                    || (flags & ~FLAG_EXPEDITED) != 0) {
+                    || (flags & ~(FLAG_EXPEDITED | FLAG_EXEMPT_FROM_APP_STANDBY)) != 0) {
                 throw new IllegalArgumentException(
                         "An expedited job can only have network and storage-not-low constraints");
             }

@@ -20,12 +20,13 @@ import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import android.app.PendingIntent;
@@ -50,6 +51,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
@@ -72,7 +74,8 @@ public class WalletScreenControllerTest extends SysuiTestCase {
 
     private static final int MAX_CARDS = 10;
     private static final int CARD_CAROUSEL_WIDTH = 10;
-    private static final String CARD_ID = "card_id";
+    private static final String CARD_ID_1 = "card_id_1";
+    private static final String CARD_ID_2 = "card_id_2";
     private static final CharSequence SHORTCUT_SHORT_LABEL = "View all";
     private static final CharSequence SHORTCUT_LONG_LABEL = "Add a payment method";
     private static final CharSequence SERVICE_LABEL = "Wallet app";
@@ -88,6 +91,8 @@ public class WalletScreenControllerTest extends SysuiTestCase {
     ActivityStarter mActivityStarter;
     @Mock
     UserTracker mUserTracker;
+    @Mock
+    FalsingManager mFalsingManager;
     @Mock
     KeyguardStateController mKeyguardStateController;
     @Captor
@@ -122,11 +127,12 @@ public class WalletScreenControllerTest extends SysuiTestCase {
                 MoreExecutors.directExecutor(),
                 new Handler(mTestableLooper.getLooper()),
                 mUserTracker,
+                mFalsingManager,
                 mKeyguardStateController);
     }
 
     @Test
-    public void queryCards_hasCards_showCarousel() {
+    public void queryCards_hasCards_showCarousel_activeCard() {
         GetWalletCardsResponse response =
                 new GetWalletCardsResponse(
                         Collections.singletonList(createWalletCard(mContext)), 0);
@@ -145,6 +151,33 @@ public class WalletScreenControllerTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
 
         assertEquals(VISIBLE, mWalletView.getCardCarouselContainer().getVisibility());
+        assertEquals("Hold to reader", mWalletView.getCardLabel().getText().toString());
+        assertEquals(GONE, mWalletView.getErrorView().getVisibility());
+    }
+
+    @Test
+    public void queryCards_hasCards_showCarousel_pendingActivationCard_parseLabel() {
+        GetWalletCardsResponse response =
+                new GetWalletCardsResponse(
+                        Collections.singletonList(createNonActiveWalletCard(mContext)), 0);
+
+        mController.queryWalletCards();
+        mTestableLooper.processAllMessages();
+
+        verify(mWalletClient).getWalletCards(any(), any(), mCallbackCaptor.capture());
+
+        QuickAccessWalletClient.OnWalletCardsRetrievedCallback callback =
+                mCallbackCaptor.getValue();
+
+        assertEquals(mController, callback);
+
+        callback.onWalletCardsRetrieved(response);
+        mTestableLooper.processAllMessages();
+
+        assertEquals(VISIBLE, mWalletView.getCardCarouselContainer().getVisibility());
+        assertEquals("Not set up", mWalletView.getCardLabel().getText().toString());
+        assertEquals("Verify now", mWalletView.getActionButton().getText().toString());
+        assertEquals(VISIBLE, mWalletView.getActionButton().getVisibility());
         assertEquals(GONE, mWalletView.getErrorView().getVisibility());
     }
 
@@ -185,7 +218,7 @@ public class WalletScreenControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void onWalletServiceEvent_nfcPaymentStart_dismiss() {
+    public void onWalletServiceEvent_nfcPaymentStart_doNothing() {
         WalletServiceEvent event =
                 new WalletServiceEvent(WalletServiceEvent.TYPE_NFC_PAYMENT_STARTED);
 
@@ -193,8 +226,8 @@ public class WalletScreenControllerTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
 
         assertNull(mController.mSelectedCardId);
-        assertTrue(mController.mIsDismissed);
-        verify(mWalletClient).notifyWalletDismissed();
+        assertFalse(mController.mIsDismissed);
+        verifyZeroInteractions(mWalletClient);
     }
 
     @Test
@@ -228,14 +261,14 @@ public class WalletScreenControllerTest extends SysuiTestCase {
 
     @Test
     public void onCardSelected() {
-        mController.onCardSelected(createCardViewInfo());
+        mController.onCardSelected(createCardViewInfo(createWalletCard(mContext)));
 
-        assertEquals(CARD_ID, mController.mSelectedCardId);
+        assertEquals(CARD_ID_1, mController.mSelectedCardId);
     }
 
     @Test
     public void onCardClicked_startIntent() {
-        WalletCardViewInfo walletCardViewInfo = createCardViewInfo();
+        WalletCardViewInfo walletCardViewInfo = createCardViewInfo(createWalletCard(mContext));
 
         mController.onCardClicked(walletCardViewInfo);
 
@@ -278,18 +311,30 @@ public class WalletScreenControllerTest extends SysuiTestCase {
         assertEquals(GONE, mWalletView.getVisibility());
     }
 
+    private WalletCard createNonActiveWalletCard(Context context) {
+        PendingIntent pendingIntent =
+                PendingIntent.getActivity(context, 0, mWalletIntent, PendingIntent.FLAG_IMMUTABLE);
+        return new WalletCard.Builder(CARD_ID_2, createIcon(), "•••• 5678", pendingIntent)
+                .setCardIcon(createIcon())
+                .setCardLabel("Not set up\nVerify now")
+                .build();
+    }
+
     private WalletCard createWalletCard(Context context) {
         PendingIntent pendingIntent =
                 PendingIntent.getActivity(context, 0, mWalletIntent, PendingIntent.FLAG_IMMUTABLE);
-        return new WalletCard.Builder(CARD_ID, createIcon(), "description", pendingIntent).build();
+        return new WalletCard.Builder(CARD_ID_1, createIcon(), "•••• 1234", pendingIntent)
+                .setCardIcon(createIcon())
+                .setCardLabel("Hold to reader")
+                .build();
     }
 
     private static Icon createIcon() {
         return Icon.createWithBitmap(Bitmap.createBitmap(70, 44, Bitmap.Config.ARGB_8888));
     }
 
-    private WalletCardViewInfo createCardViewInfo() {
+    private WalletCardViewInfo createCardViewInfo(WalletCard walletCard) {
         return new WalletScreenController.QAWalletCardViewInfo(
-                mContext, createWalletCard(mContext));
+                mContext, walletCard);
     }
 }

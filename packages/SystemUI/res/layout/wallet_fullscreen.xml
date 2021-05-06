@@ -19,6 +19,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:clipChildren="false">
+    <Toolbar
+      android:id="@+id/action_bar"
+      style="?android:attr/actionBarStyle"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:background="@android:color/transparent"
+      android:navigationContentDescription="@null" />
     <LinearLayout
         android:id="@+id/card_carousel_container"
         android:layout_width="match_parent"

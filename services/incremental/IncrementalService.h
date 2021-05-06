@@ -472,6 +472,7 @@ private:
                                StorageLoadingProgressListener&& progressListener);
 
     void trimReservedSpaceV1(const IncFsMount& ifs);
+    int64_t elapsedUsSinceMonoTs(uint64_t monoTsUs);
 
 private:
     const std::unique_ptr<VoldServiceWrapper> mVold;
