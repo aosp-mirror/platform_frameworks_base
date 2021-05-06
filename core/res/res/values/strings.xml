@@ -3390,6 +3390,23 @@
     <!-- [CHAR LIMIT=NONE] Message to show in upgrading dialog when the bulk of the upgrade work is done. -->
     <string name="android_upgrading_complete">Finishing boot.</string>
 
+    <!-- [CHAR LIMIT=40] Title of dialog shown to confirm device going to sleep if the power button
+    is pressed during fingerprint enrollment. -->
+    <string name="fp_enrollment_powerbutton_intent_title">Turn off screen?</string>
+
+    <!-- [CHAR LIMIT=NONE] Message of dialog shown to confirm device going to sleep if the power
+    button is pressed during fingerprint enrollment. -->
+    <string name="fp_enrollment_powerbutton_intent_message">While setting up your fingerprint, you
+        pressed the Power button.\n\nThis usually turns off your screen.</string>
+
+    <!-- [CHAR LIMIT=20] Positive button of dialog shown to confirm device going to sleep if the
+    power button is pressed during fingerprint enrollment. -->
+    <string name="fp_enrollment_powerbutton_intent_positive_button">Turn off</string>
+
+    <!-- [CHAR LIMIT=20] Negative button of dialog shown to confirm device going to sleep if the
+    power button is pressed during fingerprint enrollment. -->
+    <string name="fp_enrollment_powerbutton_intent_negative_button">Cancel</string>
+
     <!-- Notification text to tell the user that a heavy-weight application is running. -->
     <string name="heavy_weight_notification"><xliff:g id="app">%1$s</xliff:g> running</string>
 
