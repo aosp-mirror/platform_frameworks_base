@@ -16,7 +16,9 @@
 
 package com.android.wm.shell.onehanded;
 
+import static com.android.wm.shell.onehanded.OneHandedState.STATE_ACTIVE;
 import static com.android.wm.shell.onehanded.OneHandedState.STATE_ENTERING;
+import static com.android.wm.shell.onehanded.OneHandedState.STATE_EXITING;
 import static com.android.wm.shell.onehanded.OneHandedState.STATE_NONE;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -359,5 +361,72 @@ public class OneHandedControllerTest extends OneHandedTestCase {
         mSpiedOneHandedController.setLockedDisabled(isLockWhenKeyguardOn, isEnabledWhenKeyguardOn);
 
         verify(mMockGestureHandler).onGestureEnabled(isOneHandedEnabled);
+    }
+
+    @Test
+    public void testStateActive_shortcutRequestActivate_skipActions() {
+        when(mSpiedTransitionState.getState()).thenReturn(STATE_ACTIVE);
+        when(mSpiedTransitionState.isTransitioning()).thenReturn(false);
+        when(mMockSettingsUitl.getOneHandedModeActivated(any(), anyInt())).thenReturn(true);
+        mSpiedOneHandedController.onActivatedActionChanged();
+
+        verify(mSpiedOneHandedController, never()).startOneHanded();
+        verify(mSpiedOneHandedController, never()).stopOneHanded();
+    }
+
+    @Test
+    public void testStateNotActive_shortcutRequestInActivate_skipAction() {
+        when(mSpiedTransitionState.getState()).thenReturn(STATE_NONE);
+        when(mSpiedTransitionState.isTransitioning()).thenReturn(false);
+        when(mMockSettingsUitl.getOneHandedModeActivated(any(), anyInt())).thenReturn(false);
+        mSpiedOneHandedController.onActivatedActionChanged();
+
+        verify(mSpiedOneHandedController, never()).startOneHanded();
+        verify(mSpiedOneHandedController, never()).stopOneHanded();
+    }
+
+    @Test
+    public void testStateNotActive_shortcutRequestActivate_doAction() {
+        when(mSpiedTransitionState.getState()).thenReturn(STATE_NONE);
+        when(mSpiedTransitionState.isTransitioning()).thenReturn(false);
+        when(mMockSettingsUitl.getOneHandedModeActivated(any(), anyInt())).thenReturn(true);
+        mSpiedOneHandedController.onActivatedActionChanged();
+
+        verify(mSpiedOneHandedController).startOneHanded();
+        verify(mSpiedOneHandedController, never()).stopOneHanded();
+    }
+
+    @Test
+    public void testEnteringTransition_shortcutRequestActivate_skipActions() {
+        when(mSpiedTransitionState.getState()).thenReturn(STATE_ENTERING);
+        when(mSpiedTransitionState.isTransitioning()).thenReturn(true);
+        when(mMockSettingsUitl.getOneHandedModeActivated(any(), anyInt())).thenReturn(true);
+        mSpiedOneHandedController.onActivatedActionChanged();
+
+        verify(mSpiedOneHandedController, never()).startOneHanded();
+        verify(mSpiedOneHandedController, never()).stopOneHanded();
+    }
+
+    @Test
+    public void testExitingTransition_shortcutRequestActivate_skipActions() {
+        when(mSpiedTransitionState.getState()).thenReturn(STATE_EXITING);
+        when(mSpiedTransitionState.isTransitioning()).thenReturn(true);
+        when(mMockSettingsUitl.getOneHandedModeActivated(any(), anyInt())).thenReturn(true);
+        mSpiedOneHandedController.onActivatedActionChanged();
+
+        verify(mSpiedOneHandedController, never()).startOneHanded();
+        verify(mSpiedOneHandedController, never()).stopOneHanded();
+    }
+
+    @Test
+    public void testOneHandedDisabled_shortcutEnabled_skipActions() {
+        when(mSpiedOneHandedController.isOneHandedEnabled()).thenReturn(false);
+        when(mSpiedTransitionState.getState()).thenReturn(STATE_NONE);
+        when(mSpiedTransitionState.isTransitioning()).thenReturn(false);
+        when(mMockSettingsUitl.getOneHandedModeActivated(any(), anyInt())).thenReturn(true);
+        mSpiedOneHandedController.onActivatedActionChanged();
+
+        verify(mSpiedOneHandedController, never()).startOneHanded();
+        verify(mSpiedOneHandedController, never()).stopOneHanded();
     }
 }

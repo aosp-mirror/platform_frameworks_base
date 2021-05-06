@@ -4636,6 +4636,9 @@
      shown in the warning dialog about the accessibility shortcut. -->
     <string name="color_correction_feature_name">Color Correction</string>
 
+    <!-- Title of One Handed Mode feature, shown in the system gestures of the accessibility shortcut. [CHAR LIMIT=none] -->
+    <string name="one_handed_mode_feature_name">One-Handed mode</string>
+
     <!-- Title of Reduce Brightness feature, shown in the warning dialog about the accessibility shortcut. [CHAR LIMIT=none] -->
     <string name="reduce_bright_colors_feature_name">Extra dim</string>
 
