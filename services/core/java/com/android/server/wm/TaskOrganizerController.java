@@ -22,6 +22,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_ORGANIZER;
 import static com.android.server.wm.ActivityTaskManagerService.enforceTaskPermission;
 import static com.android.server.wm.DisplayContent.IME_TARGET_LAYERING;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_STARTING_REVEAL;
 import static com.android.server.wm.WindowOrganizerController.CONTROLLABLE_CONFIGS;
 import static com.android.server.wm.WindowOrganizerController.CONTROLLABLE_WINDOW_CONFIGS;
 
@@ -38,6 +39,7 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.os.RemoteException;
 import android.util.Slog;
+import android.util.proto.ProtoOutputStream;
 import android.view.SurfaceControl;
 import android.window.ITaskOrganizer;
 import android.window.ITaskOrganizerController;
@@ -134,29 +136,72 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
             }
         }
 
-        void removeStartingWindow(Task task, boolean prepareAnimation) {
-            SurfaceControl firstWindowLeash = null;
-            Rect mainFrame = null;
-            // TODO enable shift up animation once we fix flicker test
-//                final boolean playShiftUpAnimation = !task.inMultiWindowMode();
-//                if (prepareAnimation && playShiftUpAnimation) {
-//                    final ActivityRecord topActivity = task.topActivityWithStartingWindow();
-//                    if (topActivity != null) {
-//                        final WindowState mainWindow =
-//                                topActivity.findMainWindow(false/* includeStartingApp */);
-//                        if (mainWindow != null) {
-            // TODO create proper leash instead of the copied SC
-//                            firstWindowLeash = new SurfaceControl(mainWindow.getSurfaceControl(),
-//                                    "TaskOrganizerController.removeStartingWindow");
-//                            mainFrame = mainWindow.getRelativeFrame();
-//                        }
-//                    }
-//                }
-            try {
-                mTaskOrganizer.removeStartingWindow(task.mTaskId, firstWindowLeash, mainFrame,
-                /* TODO(183004107) Revert this when jankiness is solved
-                    prepareAnimation); */ false);
+        // Capture the animation surface control for activity's main window
+        private class StartingWindowAnimationAdaptor implements AnimationAdapter {
+            private SurfaceControl mAnimationLeash;
+            @Override
+            public boolean getShowWallpaper() {
+                return false;
+            }
 
+            @Override
+            public void startAnimation(SurfaceControl animationLeash, SurfaceControl.Transaction t,
+                    int type, SurfaceAnimator.OnAnimationFinishedCallback finishCallback) {
+                mAnimationLeash = animationLeash;
+            }
+
+            @Override
+            public void onAnimationCancelled(SurfaceControl animationLeash) {
+                if (mAnimationLeash == animationLeash) {
+                    mAnimationLeash = null;
+                }
+            }
+
+            @Override
+            public long getDurationHint() {
+                return 0;
+            }
+
+            @Override
+            public long getStatusBarTransitionsStartTime() {
+                return 0;
+            }
+
+            @Override
+            public void dump(PrintWriter pw, String prefix) {
+                pw.print(prefix + "StartingWindowAnimationAdaptor mCapturedLeash=");
+                pw.print(mAnimationLeash);
+                pw.println();
+            }
+
+            @Override
+            public void dumpDebug(ProtoOutputStream proto) {
+            }
+        }
+
+        void removeStartingWindow(Task task, boolean prepareAnimation) {
+            SurfaceControl windowAnimationLeash = null;
+            Rect mainFrame = null;
+            final boolean playShiftUpAnimation = !task.inMultiWindowMode();
+            if (prepareAnimation && playShiftUpAnimation) {
+                final ActivityRecord topActivity = task.topActivityWithStartingWindow();
+                if (topActivity != null) {
+                    final WindowState mainWindow =
+                            topActivity.findMainWindow(false/* includeStartingApp */);
+                    if (mainWindow != null) {
+                        final StartingWindowAnimationAdaptor adaptor =
+                                new StartingWindowAnimationAdaptor();
+                        final SurfaceControl.Transaction t = mainWindow.getPendingTransaction();
+                        mainWindow.startAnimation(t, adaptor, false,
+                                ANIMATION_TYPE_STARTING_REVEAL);
+                        windowAnimationLeash = adaptor.mAnimationLeash;
+                        mainFrame = mainWindow.getRelativeFrame();
+                    }
+                }
+            }
+            try {
+                mTaskOrganizer.removeStartingWindow(task.mTaskId, windowAnimationLeash,
+                        mainFrame, prepareAnimation);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Exception sending onStartTaskFinished callback", e);
             }

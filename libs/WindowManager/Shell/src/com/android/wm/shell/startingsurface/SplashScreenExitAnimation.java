@@ -15,6 +15,7 @@
  */
 package com.android.wm.shell.startingsurface;
 
+import static android.view.Choreographer.CALLBACK_COMMIT;
 import static android.view.View.GONE;
 
 import android.animation.Animator;
@@ -29,13 +30,12 @@ import android.graphics.RadialGradient;
 import android.graphics.Rect;
 import android.graphics.Shader;
 import android.util.Slog;
+import android.view.Choreographer;
 import android.view.SurfaceControl;
+import android.view.SyncRtSurfaceTransactionApplier;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
-import android.view.animation.AnimationSet;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 import android.view.animation.Transformation;
@@ -53,51 +53,36 @@ public class SplashScreenExitAnimation implements Animator.AnimatorListener {
     private static final boolean DEBUG_EXIT_ANIMATION_BLEND = false;
     private static final String TAG = StartingSurfaceDrawer.TAG;
 
-    private static final Interpolator ICON_EXIT_INTERPOLATOR = new PathInterpolator(1f, 0f, 1f, 1f);
     private static final Interpolator APP_EXIT_INTERPOLATOR = new PathInterpolator(0f, 0f, 0f, 1f);
 
-    private static final int EXTRA_REVEAL_DELAY = 133;
     private final Matrix mTmpTransform = new Matrix();
-    private final float[] mTmpFloat9 = new float[9];
-    private SurfaceControl mFirstWindowSurface;
+    private final SurfaceControl mFirstWindowSurface;
     private final Rect mFirstWindowFrame = new Rect();
     private final SplashScreenView mSplashScreenView;
     private final int mMainWindowShiftLength;
-    private final int mIconShiftLength;
     private final int mAppDuration;
-    private final int mIconDuration;
     private final TransactionPool mTransactionPool;
 
     private ValueAnimator mMainAnimator;
-    private Animation mShiftUpAnimation;
-    private AnimationSet mIconAnimationSet;
+    private ShiftUpAnimation mShiftUpAnimation;
     private Runnable mFinishCallback;
 
     SplashScreenExitAnimation(SplashScreenView view, SurfaceControl leash, Rect frame,
-            int appDuration, int iconDuration, int mainWindowShiftLength, int iconShiftLength,
-            TransactionPool pool, Runnable handleFinish) {
+            int appDuration, int mainWindowShiftLength, TransactionPool pool,
+            Runnable handleFinish) {
         mSplashScreenView = view;
         mFirstWindowSurface = leash;
         if (frame != null) {
             mFirstWindowFrame.set(frame);
         }
         mAppDuration = appDuration;
-        mIconDuration = iconDuration;
         mMainWindowShiftLength = mainWindowShiftLength;
-        mIconShiftLength = iconShiftLength;
         mFinishCallback = handleFinish;
         mTransactionPool = pool;
     }
 
-    void prepareAnimations() {
-        prepareRevealAnimation();
-        prepareShiftAnimation();
-    }
-
     void startAnimations() {
-        if (mIconAnimationSet != null) {
-            mIconAnimationSet.start();
-        }
+        prepareRevealAnimation();
         if (mMainAnimator != null) {
             mMainAnimator.start();
         }
@@ -114,8 +99,7 @@ public class SplashScreenExitAnimation implements Animator.AnimatorListener {
         mMainAnimator.setInterpolator(APP_EXIT_INTERPOLATOR);
         mMainAnimator.addListener(this);
 
-        final int startDelay = mIconDuration + EXTRA_REVEAL_DELAY;
-        final float transparentRatio = 0.95f;
+        final float transparentRatio = 0.8f;
         final int globalHeight = mSplashScreenView.getHeight();
         final int verticalCircleCenter = 0;
         final int finalVerticalLength = globalHeight - verticalCircleCenter;
@@ -130,9 +114,8 @@ public class SplashScreenExitAnimation implements Animator.AnimatorListener {
         final float[] stops = {0f, transparentRatio, 1f};
         radialVanishAnimation.setRadialPaintParam(colors, stops);
         radialVanishAnimation.setReady();
-        mMainAnimator.setStartDelay(startDelay);
 
-        if (mFirstWindowSurface != null) {
+        if (mFirstWindowSurface != null && mFirstWindowSurface.isValid()) {
             // shift up main window
             View occludeHoleView = new View(mSplashScreenView.getContext());
             if (DEBUG_EXIT_ANIMATION_BLEND) {
@@ -144,59 +127,16 @@ public class SplashScreenExitAnimation implements Animator.AnimatorListener {
                     WindowManager.LayoutParams.MATCH_PARENT, mMainWindowShiftLength);
             mSplashScreenView.addView(occludeHoleView, params);
 
-            mShiftUpAnimation = new ShiftUpAnimation(0, -mMainWindowShiftLength);
+            mShiftUpAnimation = new ShiftUpAnimation(0, -mMainWindowShiftLength, occludeHoleView);
             mShiftUpAnimation.setDuration(mAppDuration);
             mShiftUpAnimation.setInterpolator(APP_EXIT_INTERPOLATOR);
-            mShiftUpAnimation.setStartOffset(startDelay);
 
             occludeHoleView.setAnimation(mShiftUpAnimation);
         }
     }
 
-    // shift down icon and branding view
-    private void prepareShiftAnimation() {
-        final View iconView = mSplashScreenView.getIconView();
-        if (iconView == null) {
-            return;
-        }
-        if (mIconShiftLength > 0) {
-            mIconAnimationSet = new AnimationSet(true /* shareInterpolator */);
-            if (DEBUG_EXIT_ANIMATION) {
-                Slog.v(TAG, "first exit animation, shift length: " + mIconShiftLength);
-            }
-            mIconAnimationSet.addAnimation(new TranslateYAnimation(0, mIconShiftLength));
-            mIconAnimationSet.addAnimation(new AlphaAnimation(1, 0));
-            mIconAnimationSet.setAnimationListener(new Animation.AnimationListener() {
-                @Override
-                public void onAnimationStart(Animation animation) {
-
-                }
-
-                @Override
-                public void onAnimationEnd(Animation animation) {
-                    if (DEBUG_EXIT_ANIMATION) {
-                        Slog.v(TAG, "first exit animation finished");
-                    }
-                    iconView.post(() -> iconView.setVisibility(GONE));
-                }
-
-                @Override
-                public void onAnimationRepeat(Animation animation) {
-                    // ignore
-                }
-            });
-            mIconAnimationSet.setDuration(mIconDuration);
-            mIconAnimationSet.setInterpolator(ICON_EXIT_INTERPOLATOR);
-            iconView.setAnimation(mIconAnimationSet);
-            final View brandingView = mSplashScreenView.getBrandingView();
-            if (brandingView != null) {
-                brandingView.setAnimation(mIconAnimationSet);
-            }
-        }
-    }
-
     private static class RadialVanishAnimation extends View {
-        private SplashScreenView mView;
+        private final SplashScreenView mView;
         private int mInitRadius;
         private int mFinishRadius;
         private boolean mReady;
@@ -217,7 +157,7 @@ public class SplashScreenExitAnimation implements Animator.AnimatorListener {
                 mVanishMatrix.setScale(scale, scale);
                 mVanishMatrix.postTranslate(mCircleCenter.x, mCircleCenter.y);
                 mVanishPaint.getShader().setLocalMatrix(mVanishMatrix);
-                mView.postInvalidate();
+                postInvalidate();
             });
             mView.addView(this);
         }
@@ -262,27 +202,56 @@ public class SplashScreenExitAnimation implements Animator.AnimatorListener {
     }
 
     private final class ShiftUpAnimation extends TranslateYAnimation {
-        ShiftUpAnimation(float fromYDelta, float toYDelta) {
+        final SyncRtSurfaceTransactionApplier mApplier;
+        ShiftUpAnimation(float fromYDelta, float toYDelta, View targetView) {
             super(fromYDelta, toYDelta);
+            mApplier = new SyncRtSurfaceTransactionApplier(targetView);
         }
 
         @Override
         protected void applyTransformation(float interpolatedTime, Transformation t) {
             super.applyTransformation(interpolatedTime, t);
 
-            if (mFirstWindowSurface == null) {
+            if (mFirstWindowSurface == null || !mFirstWindowSurface.isValid()) {
                 return;
             }
             mTmpTransform.set(t.getMatrix());
+
+            // set the vsyncId to ensure the transaction doesn't get applied too early.
             final SurfaceControl.Transaction tx = mTransactionPool.acquire();
+            tx.setFrameTimelineVsync(Choreographer.getSfInstance().getVsyncId());
             mTmpTransform.postTranslate(mFirstWindowFrame.left,
                     mFirstWindowFrame.top + mMainWindowShiftLength);
-            tx.setMatrix(mFirstWindowSurface, mTmpTransform, mTmpFloat9);
-            // TODO set the vsyncId to ensure the transaction doesn't get applied too early.
-            //  Additionally, do you want to have this synchronized with your view animations?
-            //  If so, you'll need to use SyncRtSurfaceTransactionApplier
-            tx.apply();
+
+            SyncRtSurfaceTransactionApplier.SurfaceParams
+                    params = new SyncRtSurfaceTransactionApplier.SurfaceParams
+                    .Builder(mFirstWindowSurface)
+                    .withMatrix(mTmpTransform)
+                    .withMergeTransaction(tx)
+                    .build();
+            mApplier.scheduleApply(params);
+
             mTransactionPool.release(tx);
+        }
+
+        void finish() {
+            if (mFirstWindowSurface == null || !mFirstWindowSurface.isValid()) {
+                return;
+            }
+            final SurfaceControl.Transaction tx = mTransactionPool.acquire();
+            tx.setFrameTimelineVsync(Choreographer.getSfInstance().getVsyncId());
+
+            SyncRtSurfaceTransactionApplier.SurfaceParams
+                    params = new SyncRtSurfaceTransactionApplier.SurfaceParams
+                    .Builder(mFirstWindowSurface)
+                    .withWindowCrop(null)
+                    .withMergeTransaction(tx)
+                    .build();
+            mApplier.scheduleApply(params);
+            mTransactionPool.release(tx);
+
+            Choreographer.getSfInstance().postCallback(CALLBACK_COMMIT,
+                    mFirstWindowSurface::release, null);
         }
     }
 
@@ -297,12 +266,8 @@ public class SplashScreenExitAnimation implements Animator.AnimatorListener {
                 mFinishCallback = null;
             }
         });
-        if (mFirstWindowSurface != null) {
-            final SurfaceControl.Transaction tx = mTransactionPool.acquire();
-            tx.setWindowCrop(mFirstWindowSurface, null);
-            tx.apply();
-            mFirstWindowSurface.release();
-            mFirstWindowSurface = null;
+        if (mShiftUpAnimation != null) {
+            mShiftUpAnimation.finish();
         }
     }
 
