@@ -220,17 +220,22 @@ public class KeyguardBouncer {
      */
     private void onFullyHidden() {
         cancelShowRunnable();
-        if (mRoot != null) {
-            mRoot.setVisibility(View.INVISIBLE);
-        }
+        setVisibility(View.INVISIBLE);
         mFalsingCollector.onBouncerHidden();
         DejankUtils.postAfterTraversal(mResetRunnable);
+    }
+
+    private void setVisibility(@View.Visibility int visibility) {
+        if (mRoot != null) {
+            mRoot.setVisibility(visibility);
+            dispatchVisibilityChanged();
+        }
     }
 
     private final Runnable mShowRunnable = new Runnable() {
         @Override
         public void run() {
-            mRoot.setVisibility(View.VISIBLE);
+            setVisibility(View.VISIBLE);
             showPromptReason(mBouncerPromptReason);
             final CharSequence customMessage = mCallback.consumeCustomMessage();
             if (customMessage != null) {
@@ -299,7 +304,7 @@ public class KeyguardBouncer {
         }
         mIsAnimatingAway = false;
         if (mRoot != null) {
-            mRoot.setVisibility(View.INVISIBLE);
+            setVisibility(View.INVISIBLE);
             if (destroyView) {
 
                 // We have a ViewFlipper that unregisters a broadcast when being detached, which may
@@ -436,7 +441,7 @@ public class KeyguardBouncer {
         mContainer.addView(mRoot, mContainer.getChildCount());
         mStatusBarHeight = mRoot.getResources().getDimensionPixelOffset(
                 com.android.systemui.R.dimen.status_bar_height);
-        mRoot.setVisibility(View.INVISIBLE);
+        setVisibility(View.INVISIBLE);
 
         final WindowInsets rootInsets = mRoot.getRootWindowInsets();
         if (rootInsets != null) {
@@ -533,6 +538,12 @@ public class KeyguardBouncer {
         }
     }
 
+    private void dispatchVisibilityChanged() {
+        for (BouncerExpansionCallback callback : mExpansionCallbacks) {
+            callback.onVisibilityChanged(mRoot.getVisibility() == View.VISIBLE);
+        }
+    }
+
     /**
      * Apply keyguard configuration from the currently active resources. This can be called when the
      * device configuration changes, to re-apply some resources that are qualified on the device
@@ -573,6 +584,13 @@ public class KeyguardBouncer {
          * to 1f {@link KeyguardBouncer#EXPANSION_HIDDEN} when fully hidden
          */
         default void onExpansionChanged(float bouncerHideAmount) {}
+
+        /**
+         * Invoked when visibility of KeyguardBouncer has changed.
+         * Note the bouncer expansion can be {@link KeyguardBouncer#EXPANSION_VISIBLE}, but the
+         * view's visibility can be {@link View.INVISIBLE}.
+         */
+        default void onVisibilityChanged(boolean isVisible) {}
     }
 
     /** Create a {@link KeyguardBouncer} once a container and bouncer callback are available. */

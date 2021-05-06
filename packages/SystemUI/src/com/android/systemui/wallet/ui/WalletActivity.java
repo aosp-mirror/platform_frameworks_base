@@ -16,6 +16,7 @@
 
 package com.android.systemui.wallet.ui;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.service.quickaccesswallet.QuickAccessWalletClient;
@@ -34,6 +35,7 @@ import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.LifecycleActivity;
 
@@ -54,6 +56,7 @@ public class WalletActivity extends LifecycleActivity {
     private final Handler mHandler;
     private final FalsingManager mFalsingManager;
     private final UserTracker mUserTracker;
+    private final StatusBarKeyguardViewManager mKeyguardViewManager;
     private WalletScreenController mWalletScreenController;
 
     @Inject
@@ -65,7 +68,8 @@ public class WalletActivity extends LifecycleActivity {
             @Background Executor executor,
             @Main Handler handler,
             FalsingManager falsingManager,
-            UserTracker userTracker) {
+            UserTracker userTracker,
+            StatusBarKeyguardViewManager keyguardViewManager) {
         mQuickAccessWalletClient = quickAccessWalletClient;
         mKeyguardStateController = keyguardStateController;
         mKeyguardDismissUtil = keyguardDismissUtil;
@@ -74,6 +78,7 @@ public class WalletActivity extends LifecycleActivity {
         mHandler = handler;
         mFalsingManager = falsingManager;
         mUserTracker = userTracker;
+        mKeyguardViewManager = keyguardViewManager;
     }
 
     @Override
@@ -136,6 +141,13 @@ public class WalletActivity extends LifecycleActivity {
     protected void onResume() {
         super.onResume();
         mWalletScreenController.queryWalletCards();
+        mKeyguardViewManager.requestUdfps(true, Color.BLACK);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mKeyguardViewManager.requestUdfps(false, -1);
     }
 
     @Override
