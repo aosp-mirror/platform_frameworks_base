@@ -16,6 +16,7 @@
 
 package com.android.systemui.wallet.ui;
 
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -41,6 +42,7 @@ import androidx.annotation.NonNull;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
@@ -57,7 +59,6 @@ public class WalletScreenController implements
         KeyguardStateController.Callback {
 
     private static final String TAG = "WalletScreenCtrl";
-    private static final String PREFS_HAS_CARDS = "has_cards";
     private static final String PREFS_WALLET_VIEW_HEIGHT = "wallet_view_height";
     private static final int MAX_CARDS = 10;
     private static final long SELECTION_DELAY_MILLIS = TimeUnit.SECONDS.toMillis(30);
@@ -72,6 +73,7 @@ public class WalletScreenController implements
     private final SharedPreferences mPrefs;
     private final WalletView mWalletView;
     private final WalletCardCarousel mCardCarousel;
+    private final FalsingManager mFalsingManager;
 
     @VisibleForTesting String mSelectedCardId;
     @VisibleForTesting boolean mIsDismissed;
@@ -85,12 +87,14 @@ public class WalletScreenController implements
             Executor executor,
             Handler handler,
             UserTracker userTracker,
+            FalsingManager falsingManager,
             KeyguardStateController keyguardStateController) {
         mContext = context;
         mWalletClient = walletClient;
         mActivityStarter = activityStarter;
         mExecutor = executor;
         mHandler = handler;
+        mFalsingManager = falsingManager;
         mKeyguardStateController = keyguardStateController;
         mPrefs = userTracker.getUserContext().getSharedPreferences(TAG, Context.MODE_PRIVATE);
         mWalletView = walletView;
@@ -101,12 +105,6 @@ public class WalletScreenController implements
         mCardCarousel = mWalletView.getCardCarousel();
         if (mCardCarousel != null) {
             mCardCarousel.setSelectionListener(this);
-        }
-
-        if (!mPrefs.getBoolean(PREFS_HAS_CARDS, false)) {
-            // The empty state view is shown preemptively when cards were not returned last time
-            // to decrease perceived latency.
-            showEmptyStateView();
         }
     }
 
@@ -136,8 +134,6 @@ public class WalletScreenController implements
                 mWalletView.showCardCarousel(
                         data, response.getSelectedIndex(), !mKeyguardStateController.isUnlocked());
             }
-            // The empty state view will not be shown preemptively next time if cards were returned
-            mPrefs.edit().putBoolean(PREFS_HAS_CARDS, !data.isEmpty()).apply();
             removeMinHeightAndRecordHeightOnLayout();
         });
     }
@@ -167,7 +163,6 @@ public class WalletScreenController implements
         }
         switch (event.getEventType()) {
             case WalletServiceEvent.TYPE_NFC_PAYMENT_STARTED:
-                onDismissed();
                 break;
             case WalletServiceEvent.TYPE_WALLET_CARDS_UPDATED:
                 queryWalletCards();
@@ -207,14 +202,17 @@ public class WalletScreenController implements
 
     @Override
     public void onCardClicked(@NonNull WalletCardViewInfo cardInfo) {
+        if (!mKeyguardStateController.isUnlocked()
+                && mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
+            return;
+        }
         if (!(cardInfo instanceof QAWalletCardViewInfo)
                 || ((QAWalletCardViewInfo) cardInfo).mWalletCard == null
                 || ((QAWalletCardViewInfo) cardInfo).mWalletCard.getPendingIntent() == null) {
             return;
         }
         mActivityStarter.startActivity(
-                ((QAWalletCardViewInfo) cardInfo).mWalletCard.getPendingIntent().getIntent(),
-                true);
+                ((QAWalletCardViewInfo) cardInfo).mWalletCard.getPendingIntent().getIntent(), true);
     }
 
     @Override
@@ -235,7 +233,8 @@ public class WalletScreenController implements
 
         mWalletView.show();
         mWalletView.hideErrorMessage();
-        int iconSizePx = mContext.getResources().getDimensionPixelSize(R.dimen.wallet_icon_size);
+        int iconSizePx =
+                mContext.getResources().getDimensionPixelSize(R.dimen.wallet_view_header_icon_size);
         GetWalletCardsRequest request =
                 new GetWalletCardsRequest(cardWidthPx, cardHeightPx, iconSizePx, MAX_CARDS);
         mWalletClient.getWalletCards(mExecutor, request, this);
@@ -248,6 +247,7 @@ public class WalletScreenController implements
         mIsDismissed = true;
         mSelectedCardId = null;
         mHandler.removeCallbacks(mSelectionRunnable);
+        mFalsingManager.cleanup();
         mWalletClient.notifyWalletDismissed();
         mWalletClient.removeWalletServiceEventListener(this);
         mWalletView.animateDismissal();
@@ -341,6 +341,11 @@ public class WalletScreenController implements
         @Override
         public CharSequence getLabel() {
             return mWalletCard.getCardLabel();
+        }
+
+        @Override
+        public PendingIntent getPendingIntent() {
+            return mWalletCard.getPendingIntent();
         }
     }
 }

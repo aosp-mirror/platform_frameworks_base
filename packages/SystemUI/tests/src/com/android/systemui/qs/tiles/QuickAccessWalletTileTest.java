@@ -284,7 +284,7 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
 
         assertEquals(Tile.STATE_ACTIVE, state.state);
         assertEquals(
-                mContext.getString(R.string.wallet_secondary_label_active),
+                "•••• 1234",
                 state.secondaryLabel);
         assertNotNull(state.stateDescription);
         assertNotNull(state.sideViewDrawable);
@@ -332,7 +332,7 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
         assertEquals(
                 mContext.getResources().getDimensionPixelSize(R.dimen.wallet_tile_card_view_height),
                 request.getCardHeightPx());
-        assertEquals(2, request.getMaxCards());
+        assertEquals(1, request.getMaxCards());
         assertThat(mCallbackCaptor.getValue()).isInstanceOf(
                 QuickAccessWalletClient.OnWalletCardsRetrievedCallback.class);
     }
@@ -423,6 +423,6 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
     private WalletCard createWalletCard(Context context) {
         PendingIntent pendingIntent =
                 PendingIntent.getActivity(context, 0, mWalletIntent, PendingIntent.FLAG_IMMUTABLE);
-        return new WalletCard.Builder(CARD_ID, CARD_IMAGE, "description", pendingIntent).build();
+        return new WalletCard.Builder(CARD_ID, CARD_IMAGE, "•••• 1234", pendingIntent).build();
     }
 }

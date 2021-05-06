@@ -205,8 +205,8 @@ public class WalletCardCarousel extends RecyclerView {
     boolean setData(List<WalletCardViewInfo> data, int selectedIndex) {
         boolean wasEmpty = mWalletCardCarouselAdapter.getItemCount() == 0;
         mWalletCardCarouselAdapter.setData(data);
+        scrollToPosition(selectedIndex);
         if (wasEmpty) {
-            scrollToPosition(selectedIndex);
             mNumCardsToAnimate = numCardsOnScreen(data.size(), selectedIndex);
             mCardAnimationStartPosition = Math.max(selectedIndex - 1, 0);
         }
@@ -427,15 +427,6 @@ public class WalletCardCarousel extends RecyclerView {
                             mSelectionListener.onCardClicked(cardViewInfo);
                         }
                     });
-            if (mNumCardsToAnimate > 0 && (position - mCardAnimationStartPosition < 2)) {
-                mNumCardsToAnimate--;
-                int startDelay = (position - mCardAnimationStartPosition) * CARD_ANIM_ALPHA_DELAY
-                        + mExtraAnimationDelay;
-                viewHolder.itemView.setAlpha(0f);
-                viewHolder.itemView.animate().alpha(1f)
-                        .setStartDelay(Math.max(0, startDelay))
-                        .setDuration(CARD_ANIM_ALPHA_DURATION).start();
-            }
         }
 
         @Override
