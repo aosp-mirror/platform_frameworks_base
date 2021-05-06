@@ -261,10 +261,12 @@ public final class ContentService extends IContentService.Stub {
                     pw.print(pidCounts.get(pid)); pw.println(" observers");
                 }
                 pw.println();
-                pw.print(" Total number of nodes: "); pw.println(counts[0]);
-                pw.print(" Total number of observers: "); pw.println(counts[1]);
+                pw.increaseIndent();
+                pw.print("Total number of nodes: "); pw.println(counts[0]);
+                pw.print("Total number of observers: "); pw.println(counts[1]);
 
-                sObserverDeathDispatcher.dump(pw, " ");
+                sObserverDeathDispatcher.dump(pw);
+                pw.decreaseIndent();
             }
             synchronized (sObserverLeakDetectedUid) {
                 pw.println();
