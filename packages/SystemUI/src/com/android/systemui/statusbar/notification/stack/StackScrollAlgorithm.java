@@ -24,6 +24,7 @@ import android.util.MathUtils;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.android.systemui.animation.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.notification.dagger.SilentHeader;
@@ -374,7 +375,13 @@ public class StackScrollAlgorithm {
         ExpandableView view = algorithmState.visibleChildren.get(i);
         ExpandableViewState viewState = view.getViewState();
         viewState.location = ExpandableViewState.LOCATION_UNKNOWN;
-        viewState.alpha = 1f - ambientState.getHideAmount();
+
+        if (ambientState.isExpansionChanging() && !ambientState.isOnKeyguard()) {
+            viewState.alpha = Interpolators.getNotificationScrimAlpha(
+                    ambientState.getExpansionFraction());
+        } else {
+            viewState.alpha = 1f - ambientState.getHideAmount();
+        }
 
         if (view.mustStayOnScreen() && viewState.yTranslation >= 0) {
             // Even if we're not scrolled away we're in view and we're also not in the
