@@ -31,8 +31,8 @@ public abstract class GenerateChallengeClient<T> extends HalClientMonitor<T> {
 
     public GenerateChallengeClient(@NonNull Context context, @NonNull LazyDaemon<T> lazyDaemon,
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener,
-            @NonNull String owner, int sensorId) {
-        super(context, lazyDaemon, token, listener, 0 /* userId */, owner, 0 /* cookie */, sensorId,
+            int userId, @NonNull String owner, int sensorId) {
+        super(context, lazyDaemon, token, listener, userId, owner, 0 /* cookie */, sensorId,
                 BiometricsProtoEnums.MODALITY_UNKNOWN, BiometricsProtoEnums.ACTION_UNKNOWN,
                 BiometricsProtoEnums.CLIENT_UNKNOWN);
     }
