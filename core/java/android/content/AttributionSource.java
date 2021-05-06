@@ -31,10 +31,9 @@ import android.permission.PermissionManager;
 import android.util.ArraySet;
 
 import com.android.internal.annotations.Immutable;
-import com.android.internal.util.CollectionUtils;
-import com.android.internal.util.DataClass;
-import com.android.internal.util.Parcelling;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
 
@@ -70,10 +69,10 @@ import java.util.Set;
  * This is supported to handle cases where you don't have access to the caller's attribution
  * source and you can directly use the {@link AttributionSource.Builder} APIs. However,
  * if the data flows through more than two apps (more than you access the data for the
- * caller - which you cannot know ahead of time) you need to have a handle to the {@link
- * AttributionSource} for the calling app's context in order to create an attribution context.
- * This means you either need to have an API for the other app to send you its attribution
- * source or use a platform API that pipes the callers attribution source.
+ * caller) you need to have a handle to the {@link AttributionSource} for the calling app's
+ * context in order to create an attribution context. This means you either need to have an
+ * API for the other app to send you its attribution source or use a platform API that pipes
+ * the callers attribution source.
  * <p>
  * You cannot forge an attribution chain without the participation of every app in the
  * attribution chain (aside of the special case mentioned above). To create an attribution
@@ -85,80 +84,11 @@ import java.util.Set;
  * permission protected APIs since some app in the chain may not have the permission.
  */
 @Immutable
-// TODO: Codegen doesn't properly verify the class if the parcelling is inner class
-// TODO: Codegen doesn't allow overriding the constructor to change its visibility
-// TODO: Codegen applies method level annotations to argument vs the generated member (@SystemApi)
-// TODO: Codegen doesn't properly read/write IBinder members
-// TODO: Codegen doesn't properly handle Set arguments
-// TODO: Codegen requires @SystemApi annotations on fields which breaks
-//      android.signature.cts.api.AnnotationTest (need to update the test)
-// @DataClass(genEqualsHashCode = true, genConstructor = false, genBuilder = true)
 public final class AttributionSource implements Parcelable {
-    /**
-     * @hide
-     */
-    static class RenouncedPermissionsParcelling implements Parcelling<Set<String>> {
+    private final @NonNull AttributionSourceState mAttributionSourceState;
 
-        @Override
-        public void parcel(Set<String> item, Parcel dest, int parcelFlags) {
-            if (item == null) {
-                dest.writeInt(-1);
-            } else {
-                dest.writeInt(item.size());
-                for (String permission : item) {
-                    dest.writeString8(permission);
-                }
-            }
-        }
-
-        @Override
-        public Set<String> unparcel(Parcel source) {
-            final int size = source.readInt();
-            if (size < 0) {
-                return null;
-            }
-            final ArraySet<String> result = new ArraySet<>(size);
-            for (int i = 0; i < size; i++) {
-                result.add(source.readString8());
-            }
-            return result;
-        }
-    }
-
-    /**
-     * The UID that is accessing the permission protected data.
-     */
-    private final int mUid;
-
-    /**
-     * The package that is accessing the permission protected data.
-     */
-    private @Nullable String mPackageName = null;
-
-    /**
-     * The attribution tag of the app accessing the permission protected data.
-     */
-    private @Nullable String mAttributionTag = null;
-
-    /**
-     * Unique token for that source.
-     *
-     * @hide
-     */
-    private @Nullable IBinder mToken = null;
-
-    /**
-     * Permissions that should be considered revoked regardless if granted.
-     *
-     * @hide
-     */
-    @DataClass.ParcelWith(RenouncedPermissionsParcelling.class)
-    private @Nullable Set<String> mRenouncedPermissions = null;
-
-    /**
-     * The next app to receive the permission protected data.
-     */
-    private @Nullable AttributionSource mNext = null;
+    private @Nullable AttributionSource mNextCached;
+    private @Nullable Set<String> mRenouncedPermissionsCached;
 
     /** @hide */
     @TestApi
@@ -171,8 +101,7 @@ public final class AttributionSource implements Parcelable {
     @TestApi
     public AttributionSource(int uid, @Nullable String packageName,
             @Nullable String attributionTag, @Nullable AttributionSource next) {
-        this(uid, packageName, attributionTag, /*token*/ null,
-                /*renouncedPermissions*/ null, next);
+        this(uid, packageName, attributionTag, /*renouncedPermissions*/ null, next);
     }
 
     /** @hide */
@@ -180,8 +109,8 @@ public final class AttributionSource implements Parcelable {
     public AttributionSource(int uid, @Nullable String packageName,
             @Nullable String attributionTag, @Nullable Set<String> renouncedPermissions,
             @Nullable AttributionSource next) {
-        this(uid, packageName, attributionTag, /*token*/ null,
-                renouncedPermissions, next);
+        this(uid, packageName, attributionTag, /*token*/ null, (renouncedPermissions != null)
+                ? renouncedPermissions.toArray(new String[0]) : null, next);
     }
 
     /** @hide */
@@ -191,16 +120,49 @@ public final class AttributionSource implements Parcelable {
                 /*token*/ null, /*renouncedPermissions*/ null, next);
     }
 
+    AttributionSource(int uid, @Nullable String packageName, @Nullable String attributionTag,
+            @Nullable IBinder token, @Nullable String[] renouncedPermissions,
+            @Nullable AttributionSource next) {
+        mAttributionSourceState = new AttributionSourceState();
+        mAttributionSourceState.uid = uid;
+        mAttributionSourceState.packageName = packageName;
+        mAttributionSourceState.attributionTag = attributionTag;
+        mAttributionSourceState.token = token;
+        mAttributionSourceState.renouncedPermissions = renouncedPermissions;
+        mAttributionSourceState.next = (next != null) ? new AttributionSourceState[]
+                {next.mAttributionSourceState} : null;
+    }
+
+    AttributionSource(@NonNull Parcel in) {
+        this(AttributionSourceState.CREATOR.createFromParcel(in));
+    }
+
+    /** @hide */
+    public AttributionSource(@NonNull AttributionSourceState attributionSourceState) {
+        mAttributionSourceState = attributionSourceState;
+    }
+
     /** @hide */
     public AttributionSource withNextAttributionSource(@Nullable AttributionSource next) {
-        return new AttributionSource(mUid, mPackageName, mAttributionTag,  mToken,
-                mRenouncedPermissions, next);
+        return new AttributionSource(getUid(), getPackageName(), getAttributionTag(),
+                getToken(), mAttributionSourceState.renouncedPermissions, next);
     }
 
     /** @hide */
     public AttributionSource withToken(@Nullable IBinder token) {
-        return new AttributionSource(mUid, mPackageName, mAttributionTag, token,
-                mRenouncedPermissions, mNext);
+        return new AttributionSource(getUid(), getPackageName(), getAttributionTag(),
+                token, mAttributionSourceState.renouncedPermissions, getNext());
+    }
+
+    /** @hide */
+    public AttributionSource withPackageName(@Nullable String packageName) {
+        return new AttributionSource(getUid(), packageName, getAttributionTag(), getToken(),
+                mAttributionSourceState.renouncedPermissions, getNext());
+    }
+
+    /** @hide */
+    public @NonNull AttributionSourceState asState() {
+        return mAttributionSourceState;
     }
 
     /**
@@ -213,10 +175,9 @@ public final class AttributionSource implements Parcelable {
      * from the caller.
      */
     public void enforceCallingUid() {
-        final int callingUid = Binder.getCallingUid();
-        if (callingUid != Process.SYSTEM_UID && callingUid != mUid) {
-            throw new SecurityException("Calling uid: " + callingUid
-                    + " doesn't match source uid: " + mUid);
+        if (!checkCallingUid()) {
+            throw new SecurityException("Calling uid: " + Binder.getCallingUid()
+                    + " doesn't match source uid: " + mAttributionSourceState.uid);
         }
         // No need to check package as app ops manager does it already.
     }
@@ -231,7 +192,8 @@ public final class AttributionSource implements Parcelable {
      */
     public boolean checkCallingUid() {
         final int callingUid = Binder.getCallingUid();
-        if (callingUid != Process.SYSTEM_UID && callingUid != mUid) {
+        if (callingUid != Process.SYSTEM_UID
+                && callingUid != mAttributionSourceState.uid) {
             return false;
         }
         // No need to check package as app ops manager does it already.
@@ -242,11 +204,12 @@ public final class AttributionSource implements Parcelable {
     public String toString() {
         if (Build.IS_DEBUGGABLE) {
             return "AttributionSource { " +
-                    "uid = " + mUid + ", " +
-                    "packageName = " + mPackageName + ", " +
-                    "attributionTag = " + mAttributionTag + ", " +
-                    "token = " + mToken + ", " +
-                    "next = " + mNext +
+                    "uid = " + mAttributionSourceState.uid + ", " +
+                    "packageName = " + mAttributionSourceState.packageName + ", " +
+                    "attributionTag = " + mAttributionSourceState.attributionTag + ", " +
+                    "token = " + mAttributionSourceState.token + ", " +
+                    "next = " + (mAttributionSourceState.next != null
+                            ? mAttributionSourceState.next[0]: null) +
                     " }";
         }
         return super.toString();
@@ -258,8 +221,8 @@ public final class AttributionSource implements Parcelable {
      * @hide
      */
     public int getNextUid() {
-        if (mNext != null) {
-            return mNext.getUid();
+        if (mAttributionSourceState.next != null) {
+            return mAttributionSourceState.next[0].uid;
         }
         return Process.INVALID_UID;
     }
@@ -270,8 +233,8 @@ public final class AttributionSource implements Parcelable {
      * @hide
      */
     public @Nullable String getNextPackageName() {
-        if (mNext != null) {
-            return mNext.getPackageName();
+        if (mAttributionSourceState.next != null) {
+            return mAttributionSourceState.next[0].packageName;
         }
         return null;
     }
@@ -283,8 +246,8 @@ public final class AttributionSource implements Parcelable {
      * @hide
      */
     public @Nullable String getNextAttributionTag() {
-        if (mNext != null) {
-            return mNext.getAttributionTag();
+        if (mAttributionSourceState.next != null) {
+            return mAttributionSourceState.next[0].attributionTag;
         }
         return null;
     }
@@ -297,8 +260,9 @@ public final class AttributionSource implements Parcelable {
      * @return Whether this is a trusted source.
      */
     public boolean isTrusted(@NonNull Context context) {
-        return mToken != null && context.getSystemService(PermissionManager.class)
-                .isRegisteredAttributionSource(this);
+        return mAttributionSourceState.token != null
+                && context.getSystemService(PermissionManager.class)
+                        .isRegisteredAttributionSource(this);
     }
 
     /**
@@ -310,71 +274,36 @@ public final class AttributionSource implements Parcelable {
     @RequiresPermission(android.Manifest.permission.RENOUNCE_PERMISSIONS)
     @NonNull
     public Set<String> getRenouncedPermissions() {
-        return CollectionUtils.emptyIfNull(mRenouncedPermissions);
-    }
-
-    @DataClass.Suppress({"setUid", "setToken"})
-    static class BaseBuilder {}
-
-
-
-
-
-
-    // Code below generated by codegen v1.0.22.
-    //
-    // DO NOT MODIFY!
-    // CHECKSTYLE:OFF Generated code
-    //
-    // To regenerate run:
-    // $ codegen $ANDROID_BUILD_TOP/frameworks/base/core/java/android/content/AttributionSource.java
-    //
-    // To exclude the generated code from IntelliJ auto-formatting enable (one-time):
-    //   Settings > Editor > Code Style > Formatter Control
-    //@formatter:off
-
-
-    /* package-private */ AttributionSource(
-            int uid,
-            @Nullable String packageName,
-            @Nullable String attributionTag,
-            @Nullable IBinder token,
-            @RequiresPermission(android.Manifest.permission.RENOUNCE_PERMISSIONS) @Nullable Set<String> renouncedPermissions,
-            @Nullable AttributionSource next) {
-        this.mUid = uid;
-        this.mPackageName = packageName;
-        this.mAttributionTag = attributionTag;
-        this.mToken = token;
-        this.mRenouncedPermissions = renouncedPermissions;
-        com.android.internal.util.AnnotationValidations.validate(
-                SystemApi.class, null, mRenouncedPermissions);
-        com.android.internal.util.AnnotationValidations.validate(
-                RequiresPermission.class, null, mRenouncedPermissions,
-                "value", android.Manifest.permission.RENOUNCE_PERMISSIONS);
-        this.mNext = next;
-
-        // onConstructed(); // You can define this method to get a callback
+        if (mRenouncedPermissionsCached == null) {
+            if (mAttributionSourceState.renouncedPermissions != null) {
+                mRenouncedPermissionsCached = new ArraySet<>(
+                        mAttributionSourceState.renouncedPermissions);
+            } else {
+                mRenouncedPermissionsCached = Collections.emptySet();
+            }
+        }
+        return mRenouncedPermissionsCached;
     }
 
     /**
      * The UID that is accessing the permission protected data.
      */
     public int getUid() {
-        return mUid;
+        return mAttributionSourceState.uid;
     }
 
     /**
      * The package that is accessing the permission protected data.
      */
     public @Nullable String getPackageName() {
-        return mPackageName;
+        return mAttributionSourceState.packageName;
     }
 
     /**
      * The attribution tag of the app accessing the permission protected data.
      */
     public @Nullable String getAttributionTag() {
-        return mAttributionTag;
+        return mAttributionSourceState.attributionTag;
     }
 
     /**
@@ -383,112 +312,55 @@ public final class AttributionSource implements Parcelable {
      * @hide
      */
     public @Nullable IBinder getToken() {
-        return mToken;
+        return mAttributionSourceState.token;
     }
 
     /**
      * The next app to receive the permission protected data.
      */
     public @Nullable AttributionSource getNext() {
-        return mNext;
+        if (mNextCached == null && mAttributionSourceState.next != null) {
+            mNextCached = new AttributionSource(mAttributionSourceState.next[0]);
+        }
+        return mNextCached;
     }
 
     @Override
     public boolean equals(@Nullable Object o) {
-        // You can override field equality logic by defining either of the methods like:
-        // boolean fieldNameEquals(AttributionSource other) { ... }
-        // boolean fieldNameEquals(FieldType otherValue) { ... }
-
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        @SuppressWarnings("unchecked")
         AttributionSource that = (AttributionSource) o;
-        //noinspection PointlessBooleanExpression
-        return true
-                && mUid == that.mUid
-                && Objects.equals(mPackageName, that.mPackageName)
-                && Objects.equals(mAttributionTag, that.mAttributionTag)
-                && Objects.equals(mToken, that.mToken)
-                && Objects.equals(mRenouncedPermissions, that.mRenouncedPermissions)
-                && Objects.equals(mNext, that.mNext);
+        return mAttributionSourceState.uid == that.mAttributionSourceState.uid
+                && Objects.equals(mAttributionSourceState.packageName,
+                        that.mAttributionSourceState.packageName)
+                && Objects.equals(mAttributionSourceState.attributionTag,
+                        that.mAttributionSourceState.attributionTag)
+                && Objects.equals(mAttributionSourceState.token,
+                        that.mAttributionSourceState.token)
+                && Arrays.equals(mAttributionSourceState.renouncedPermissions,
+                        that.mAttributionSourceState.renouncedPermissions)
+                && Objects.equals(getNext(), that.getNext());
     }
 
     @Override
     public int hashCode() {
-        // You can override field hashCode logic by defining methods like:
-        // int fieldNameHashCode() { ... }
-
         int _hash = 1;
-        _hash = 31 * _hash + mUid;
-        _hash = 31 * _hash + Objects.hashCode(mPackageName);
-        _hash = 31 * _hash + Objects.hashCode(mAttributionTag);
-        _hash = 31 * _hash + Objects.hashCode(mToken);
-        _hash = 31 * _hash + Objects.hashCode(mRenouncedPermissions);
-        _hash = 31 * _hash + Objects.hashCode(mNext);
+        _hash = 31 * _hash + mAttributionSourceState.uid;
+        _hash = 31 * _hash + Objects.hashCode(mAttributionSourceState.packageName);
+        _hash = 31 * _hash + Objects.hashCode(mAttributionSourceState.attributionTag);
+        _hash = 31 * _hash + Objects.hashCode(mAttributionSourceState.token);
+        _hash = 31 * _hash + Objects.hashCode(mAttributionSourceState.renouncedPermissions);
+        _hash = 31 * _hash + Objects.hashCode(getNext());
         return _hash;
-    }
-
-    static Parcelling<Set<String>> sParcellingForRenouncedPermissions =
-            Parcelling.Cache.get(
-                    RenouncedPermissionsParcelling.class);
-    static {
-        if (sParcellingForRenouncedPermissions == null) {
-            sParcellingForRenouncedPermissions = Parcelling.Cache.put(
-                    new RenouncedPermissionsParcelling());
-        }
     }
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        // You can override field parcelling by defining methods like:
-        // void parcelFieldName(Parcel dest, int flags) { ... }
-
-        byte flg = 0;
-        if (mPackageName != null) flg |= 0x2;
-        if (mAttributionTag != null) flg |= 0x4;
-        if (mToken != null) flg |= 0x8;
-        if (mRenouncedPermissions != null) flg |= 0x10;
-        if (mNext != null) flg |= 0x20;
-        dest.writeByte(flg);
-        dest.writeInt(mUid);
-        if (mPackageName != null) dest.writeString(mPackageName);
-        if (mAttributionTag != null) dest.writeString(mAttributionTag);
-        if (mToken != null) dest.writeStrongBinder(mToken);
-        sParcellingForRenouncedPermissions.parcel(mRenouncedPermissions, dest, flags);
-        if (mNext != null) dest.writeTypedObject(mNext, flags);
+        mAttributionSourceState.writeToParcel(dest, flags);
     }
 
     @Override
     public int describeContents() { return 0; }
-
-    /** @hide */
-    @SuppressWarnings({"unchecked", "RedundantCast"})
-    /* package-private */ AttributionSource(@NonNull Parcel in) {
-        // You can override field unparcelling by defining methods like:
-        // static FieldType unparcelFieldName(Parcel in) { ... }
-
-        byte flg = in.readByte();
-        int uid = in.readInt();
-        String packageName = (flg & 0x2) == 0 ? null : in.readString();
-        String attributionTag = (flg & 0x4) == 0 ? null : in.readString();
-        IBinder token = (flg & 0x8) == 0 ? null : in.readStrongBinder();
-        Set<String> renouncedPermissions = sParcellingForRenouncedPermissions.unparcel(in);
-        AttributionSource next = (flg & 0x20) == 0 ? null : (AttributionSource) in.readTypedObject(AttributionSource.CREATOR);
-
-        this.mUid = uid;
-        this.mPackageName = packageName;
-        this.mAttributionTag = attributionTag;
-        this.mToken = token;
-        this.mRenouncedPermissions = renouncedPermissions;
-        com.android.internal.util.AnnotationValidations.validate(
-                SystemApi.class, null, mRenouncedPermissions);
-        com.android.internal.util.AnnotationValidations.validate(
-                RequiresPermission.class, null, mRenouncedPermissions,
-                "value", android.Manifest.permission.RENOUNCE_PERMISSIONS);
-        this.mNext = next;
-
-        // onConstructed(); // You can define this method to get a callback
-    }
 
     public static final @NonNull Parcelable.Creator<AttributionSource> CREATOR
             = new Parcelable.Creator<AttributionSource>() {
@@ -506,15 +378,9 @@ public final class AttributionSource implements Parcelable {
     /**
      * A builder for {@link AttributionSource}
      */
-    @SuppressWarnings("WeakerAccess")
-    public static final class Builder extends BaseBuilder {
-
-        private int mUid;
-        private @Nullable String mPackageName;
-        private @Nullable String mAttributionTag;
-        private @Nullable IBinder mToken;
-        private @Nullable Set<String> mRenouncedPermissions;
-        private @Nullable AttributionSource mNext;
+    public static final class Builder {
+        private @NonNull final AttributionSourceState mAttributionSourceState =
+                new AttributionSourceState();
 
         private long mBuilderFieldsSet = 0L;
 
@@ -524,9 +390,8 @@ public final class AttributionSource implements Parcelable {
          * @param uid
          *   The UID that is accessing the permission protected data.
          */
-        public Builder(
-                int uid) {
-            mUid = uid;
+        public Builder(int uid) {
+            mAttributionSourceState.uid = uid;
         }
 
         /**
@@ -535,7 +400,7 @@ public final class AttributionSource implements Parcelable {
         public @NonNull Builder setPackageName(@Nullable String value) {
             checkNotUsed();
             mBuilderFieldsSet |= 0x2;
-            mPackageName = value;
+            mAttributionSourceState.packageName = value;
             return this;
         }
 
@@ -545,7 +410,7 @@ public final class AttributionSource implements Parcelable {
         public @NonNull Builder setAttributionTag(@Nullable String value) {
             checkNotUsed();
             mBuilderFieldsSet |= 0x4;
-            mAttributionTag = value;
+            mAttributionSourceState.attributionTag = value;
             return this;
         }
 
@@ -578,7 +443,8 @@ public final class AttributionSource implements Parcelable {
         public @NonNull Builder setRenouncedPermissions(@Nullable Set<String> value) {
             checkNotUsed();
             mBuilderFieldsSet |= 0x10;
-            mRenouncedPermissions = value;
+            mAttributionSourceState.renouncedPermissions = (value != null)
+                    ? value.toArray(new String[0]) : null;
             return this;
         }
 
@@ -588,7 +454,8 @@ public final class AttributionSource implements Parcelable {
         public @NonNull Builder setNext(@Nullable AttributionSource value) {
             checkNotUsed();
             mBuilderFieldsSet |= 0x20;
-            mNext = value;
+            mAttributionSourceState.next = (value != null) ? new AttributionSourceState[]
+                    {value.mAttributionSourceState} : null;
             return this;
         }
 
@@ -598,28 +465,21 @@ public final class AttributionSource implements Parcelable {
             mBuilderFieldsSet |= 0x40; // Mark builder used
 
             if ((mBuilderFieldsSet & 0x2) == 0) {
-                mPackageName = null;
+                mAttributionSourceState.packageName = null;
             }
             if ((mBuilderFieldsSet & 0x4) == 0) {
-                mAttributionTag = null;
+                mAttributionSourceState.attributionTag = null;
             }
             if ((mBuilderFieldsSet & 0x8) == 0) {
-                mToken = null;
+                mAttributionSourceState.token = null;
             }
             if ((mBuilderFieldsSet & 0x10) == 0) {
-                mRenouncedPermissions = null;
+                mAttributionSourceState.renouncedPermissions = null;
             }
             if ((mBuilderFieldsSet & 0x20) == 0) {
-                mNext = null;
+                mAttributionSourceState.next = null;
             }
-            AttributionSource o = new AttributionSource(
-                    mUid,
-                    mPackageName,
-                    mAttributionTag,
-                    mToken,
-                    mRenouncedPermissions,
-                    mNext);
-            return o;
+            return new AttributionSource(mAttributionSourceState);
         }
 
         private void checkNotUsed() {
@@ -629,9 +489,4 @@ public final class AttributionSource implements Parcelable {
             }
         }
     }
-
-
-    //@formatter:on
-    // End of generated code
-
 }
