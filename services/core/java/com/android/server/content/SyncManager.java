@@ -1478,12 +1478,11 @@ public class SyncManager {
                         + logSafe(syncOperation.target));
                 backoff = new Pair<Long, Long>(SyncStorageEngine.NOT_IN_BACKOFF_MODE,
                         SyncStorageEngine.NOT_IN_BACKOFF_MODE);
-            } else {
+            } else if (backoff.first != SyncStorageEngine.NOT_IN_BACKOFF_MODE) {
                 // if an EJ is being backed-off but doesn't have SYNC_EXTRAS_IGNORE_BACKOFF set,
-                // reschedule it as a regular job
-                if (syncOperation.isScheduledAsExpeditedJob()) {
-                    syncOperation.scheduleEjAsRegularJob = true;
-                }
+                // reschedule it as a regular job. Immediately downgrade here in case minDelay is
+                // set to 0.
+                syncOperation.scheduleEjAsRegularJob = true;
             }
             long now = SystemClock.elapsedRealtime();
             long backoffDelay = backoff.first == SyncStorageEngine.NOT_IN_BACKOFF_MODE ? 0
