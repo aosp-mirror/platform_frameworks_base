@@ -27,6 +27,7 @@ import static android.view.WindowManager.transitTypeToString;
 
 import static com.android.wm.shell.common.split.SplitLayout.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.common.split.SplitLayout.SPLIT_POSITION_TOP_OR_LEFT;
+import static com.android.wm.shell.common.split.SplitLayout.SPLIT_POSITION_UNDEFINED;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_MAIN;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_SIDE;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_UNDEFINED;
@@ -53,6 +54,7 @@ import android.window.DisplayAreaInfo;
 import android.window.IRemoteTransition;
 import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
+import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
 import com.android.internal.R;
@@ -85,8 +87,8 @@ import java.util.List;
  * This rules are mostly implemented in {@link #onStageVisibilityChanged(StageListenerImpl)} and
  * {@link #onStageHasChildrenChanged(StageListenerImpl).}
  */
-class StageCoordinator implements SplitLayout.LayoutChangeListener,
-        RootTaskDisplayAreaOrganizer.RootTaskDisplayAreaListener, Transitions.TransitionHandler  {
+class StageCoordinator implements SplitLayout.SplitLayoutHandler,
+        RootTaskDisplayAreaOrganizer.RootTaskDisplayAreaListener, Transitions.TransitionHandler {
 
     private static final String TAG = StageCoordinator.class.getSimpleName();
 
@@ -565,13 +567,28 @@ class StageCoordinator implements SplitLayout.LayoutChangeListener,
     }
 
     @Override
+    public int getSplitItemPosition(WindowContainerToken token) {
+        if (token == null) {
+            return SPLIT_POSITION_UNDEFINED;
+        }
+
+        if (token.equals(mMainStage.mRootTaskInfo.getToken())) {
+            return getMainStagePosition();
+        } else if (token.equals(mSideStage.mRootTaskInfo.getToken())) {
+            return getSideStagePosition();
+        }
+
+        return SPLIT_POSITION_UNDEFINED;
+    }
+
+    @Override
     public void onDisplayAreaAppeared(DisplayAreaInfo displayAreaInfo) {
         mDisplayAreaInfo = displayAreaInfo;
         if (mSplitLayout == null) {
             mSplitLayout = new SplitLayout(TAG + "SplitDivider", mContext,
                     mDisplayAreaInfo.configuration, this,
                     b -> mRootTDAOrganizer.attachToDisplayArea(mDisplayId, b),
-                    mDisplayImeController);
+                    mDisplayImeController, mTaskOrganizer);
         }
     }
 

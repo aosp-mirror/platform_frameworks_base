@@ -28,14 +28,17 @@ import android.animation.ValueAnimator;
 import android.annotation.IntDef;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Rect;
 import android.view.SurfaceControl;
 import android.view.WindowInsets;
 import android.view.WindowManager;
+import android.window.WindowContainerToken;
 
 import androidx.annotation.Nullable;
 
 import com.android.internal.policy.DividerSnapAlgorithm;
+import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.animation.Interpolators;
 import com.android.wm.shell.common.DisplayImeController;
 
@@ -77,8 +80,11 @@ public final class SplitLayout {
     private final Rect mDividerBounds = new Rect();
     private final Rect mBounds1 = new Rect();
     private final Rect mBounds2 = new Rect();
-    private final LayoutChangeListener mLayoutChangeListener;
+    private final SplitLayoutHandler mSplitLayoutHandler;
     private final SplitWindowManager mSplitWindowManager;
+    private final DisplayImeController mDisplayImeController;
+    private final ImePositionProcessor mImePositionProcessor;
+    private final ShellTaskOrganizer mTaskOrganizer;
 
     private Context mContext;
     private DividerSnapAlgorithm mDividerSnapAlgorithm;
@@ -86,18 +92,21 @@ public final class SplitLayout {
     private boolean mInitialized = false;
 
     public SplitLayout(String windowName, Context context, Configuration configuration,
-            LayoutChangeListener layoutChangeListener,
+            SplitLayoutHandler splitLayoutHandler,
             SplitWindowManager.ParentContainerCallbacks parentContainerCallbacks,
-            DisplayImeController displayImeController) {
+            DisplayImeController displayImeController, ShellTaskOrganizer taskOrganizer) {
         mContext = context.createConfigurationContext(configuration);
-        mLayoutChangeListener = layoutChangeListener;
+        mSplitLayoutHandler = splitLayoutHandler;
+        mDisplayImeController = displayImeController;
         mSplitWindowManager = new SplitWindowManager(
-                windowName, mContext, configuration, parentContainerCallbacks,
-                displayImeController);
+                windowName, mContext, configuration, parentContainerCallbacks);
+        mTaskOrganizer = taskOrganizer;
+        mImePositionProcessor = new ImePositionProcessor(mContext.getDisplayId());
 
-        mDividerWindowWidth = context.getResources().getDimensionPixelSize(
+        final Resources resources = context.getResources();
+        mDividerWindowWidth = resources.getDimensionPixelSize(
                 com.android.internal.R.dimen.docked_stack_divider_thickness);
-        mDividerInsets = context.getResources().getDimensionPixelSize(
+        mDividerInsets = resources.getDimensionPixelSize(
                 com.android.internal.R.dimen.docked_stack_divider_insets);
         mDividerSize = mDividerWindowWidth - mDividerInsets * 2;
 
@@ -179,6 +188,7 @@ public final class SplitLayout {
         if (mInitialized) return;
         mInitialized = true;
         mSplitWindowManager.init(this);
+        mDisplayImeController.addPositionProcessor(mImePositionProcessor);
     }
 
     /** Releases the surface holding the current {@link DividerView}. */
@@ -186,6 +196,7 @@ public final class SplitLayout {
         if (!mInitialized) return;
         mInitialized = false;
         mSplitWindowManager.release();
+        mDisplayImeController.removePositionProcessor(mImePositionProcessor);
     }
 
     /**
@@ -194,14 +205,14 @@ public final class SplitLayout {
      */
     void updateDivideBounds(int position) {
         updateBounds(position);
-        mLayoutChangeListener.onBoundsChanging(this);
         mSplitWindowManager.setResizingSplits(true);
+        mSplitLayoutHandler.onBoundsChanging(this);
     }
 
     void setDividePosition(int position) {
         mDividePosition = position;
         updateBounds(mDividePosition);
-        mLayoutChangeListener.onBoundsChanged(this);
+        mSplitLayoutHandler.onBoundsChanged(this);
         mSplitWindowManager.setResizingSplits(false);
     }
 
@@ -218,11 +229,11 @@ public final class SplitLayout {
     public void snapToTarget(int currentPosition, DividerSnapAlgorithm.SnapTarget snapTarget) {
         switch (snapTarget.flag) {
             case FLAG_DISMISS_START:
-                mLayoutChangeListener.onSnappedToDismiss(false /* bottomOrRight */);
+                mSplitLayoutHandler.onSnappedToDismiss(false /* bottomOrRight */);
                 mSplitWindowManager.setResizingSplits(false);
                 break;
             case FLAG_DISMISS_END:
-                mLayoutChangeListener.onSnappedToDismiss(true /* bottomOrRight */);
+                mSplitLayoutHandler.onSnappedToDismiss(true /* bottomOrRight */);
                 mSplitWindowManager.setResizingSplits(false);
                 break;
             default:
@@ -232,7 +243,7 @@ public final class SplitLayout {
     }
 
     void onDoubleTappedDivider() {
-        mLayoutChangeListener.onDoubleTappedDivider();
+        mSplitLayoutHandler.onDoubleTappedDivider();
     }
 
     /**
@@ -291,8 +302,8 @@ public final class SplitLayout {
         return bounds.width() > bounds.height();
     }
 
-    /** Listens layout change event. */
-    public interface LayoutChangeListener {
+    /** Handles layout change event. */
+    public interface SplitLayoutHandler {
         /** Calls when dismissing split. */
         void onSnappedToDismiss(boolean snappedToEnd);
 
@@ -304,6 +315,43 @@ public final class SplitLayout {
 
         /** Calls when user double tapped on the divider bar. */
         default void onDoubleTappedDivider() {
+        }
+
+        /** Returns split position of the token. */
+        @SplitPosition
+        int getSplitItemPosition(WindowContainerToken token);
+    }
+
+    /** Records IME top offset changes and updates SplitLayout correspondingly. */
+    private class ImePositionProcessor implements DisplayImeController.ImePositionProcessor {
+
+        private final int mDisplayId;
+
+        private ImePositionProcessor(int displayId) {
+            mDisplayId = displayId;
+        }
+
+        @Override
+        public int onImeStartPositioning(int displayId, int hiddenTop, int shownTop,
+                boolean showing, boolean isFloating, SurfaceControl.Transaction t) {
+            if (displayId != mDisplayId) return 0;
+            final int imeTargetPosition = getImeTargetPosition();
+            if (!mInitialized || imeTargetPosition == SPLIT_POSITION_UNDEFINED) return 0;
+
+            // Make {@link DividerView} non-interactive while IME showing in split mode. Listen to
+            // ImePositionProcessor#onImeVisibilityChanged directly in DividerView is not enough
+            // because DividerView won't receive onImeVisibilityChanged callback after it being
+            // re-inflated.
+            mSplitWindowManager.setInteractive(
+                    !showing || imeTargetPosition == SPLIT_POSITION_UNDEFINED);
+
+            return 0;
+        }
+
+        @SplitPosition
+        private int getImeTargetPosition() {
+            final WindowContainerToken token = mTaskOrganizer.getImeTarget(mDisplayId);
+            return mSplitLayoutHandler.getSplitItemPosition(token);
         }
     }
 }

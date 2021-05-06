@@ -20,6 +20,9 @@ import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
+import static com.android.wm.shell.common.split.SplitLayout.SPLIT_POSITION_BOTTOM_OR_RIGHT;
+import static com.android.wm.shell.common.split.SplitLayout.SPLIT_POSITION_TOP_OR_LEFT;
+import static com.android.wm.shell.common.split.SplitLayout.SPLIT_POSITION_UNDEFINED;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_TASK_ORG;
 
 import android.app.ActivityManager;
@@ -47,7 +50,7 @@ import java.io.PrintWriter;
  * {@link #mTaskInfo1} and {@link #mTaskInfo2} in the pair.
  * Also includes all UI for managing the pair like the divider.
  */
-class AppPair implements ShellTaskOrganizer.TaskListener, SplitLayout.LayoutChangeListener {
+class AppPair implements ShellTaskOrganizer.TaskListener, SplitLayout.SplitLayoutHandler {
     private static final String TAG = AppPair.class.getSimpleName();
 
     private ActivityManager.RunningTaskInfo mRootTaskInfo;
@@ -106,7 +109,8 @@ class AppPair implements ShellTaskOrganizer.TaskListener, SplitLayout.LayoutChan
         mSplitLayout = new SplitLayout(TAG + "SplitDivider",
                 mDisplayController.getDisplayContext(mRootTaskInfo.displayId),
                 mRootTaskInfo.configuration, this /* layoutChangeListener */,
-                b -> b.setParent(mRootTaskLeash), mDisplayImeController);
+                b -> b.setParent(mRootTaskLeash), mDisplayImeController,
+                mController.getTaskOrganizer());
 
         final WindowContainerToken token1 = task1.token;
         final WindowContainerToken token2 = task2.token;
@@ -214,6 +218,21 @@ class AppPair implements ShellTaskOrganizer.TaskListener, SplitLayout.LayoutChan
         } else {
             throw new IllegalStateException("Unknown task=" + taskInfo.taskId);
         }
+    }
+
+    @Override
+    public int getSplitItemPosition(WindowContainerToken token) {
+        if (token == null) {
+            return SPLIT_POSITION_UNDEFINED;
+        }
+
+        if (token.equals(mTaskInfo1.getToken())) {
+            return SPLIT_POSITION_TOP_OR_LEFT;
+        } else if (token.equals(mTaskInfo2.getToken())) {
+            return SPLIT_POSITION_BOTTOM_OR_RIGHT;
+        }
+
+        return SPLIT_POSITION_UNDEFINED;
     }
 
     @Override
