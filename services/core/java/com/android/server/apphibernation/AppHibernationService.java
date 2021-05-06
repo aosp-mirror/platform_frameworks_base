@@ -182,12 +182,18 @@ public final class AppHibernationService extends SystemService {
                     NAMESPACE_APP_HIBERNATION,
                     ActivityThread.currentApplication().getMainExecutor(),
                     this::onDeviceConfigChanged);
-            getContext().getSystemService(StatsManager.class)
-                    .setPullAtomCallback(
-                            FrameworkStatsLog.USER_LEVEL_HIBERNATED_APPS,
-                            /* metadata */ null, // use default PullAtomMetadata values
-                            mBackgroundExecutor,
-                            new StatsPullAtomCallbackImpl());
+            final StatsManager statsManager = getContext().getSystemService(StatsManager.class);
+            final StatsPullAtomCallbackImpl pullAtomCallback = new StatsPullAtomCallbackImpl();
+            statsManager.setPullAtomCallback(
+                    FrameworkStatsLog.USER_LEVEL_HIBERNATED_APPS,
+                    /* metadata */ null, // use default PullAtomMetadata values
+                    mBackgroundExecutor,
+                    pullAtomCallback);
+            statsManager.setPullAtomCallback(
+                    FrameworkStatsLog.GLOBAL_HIBERNATED_APPS,
+                    /* metadata */ null, // use default PullAtomMetadata values
+                    mBackgroundExecutor,
+                    pullAtomCallback);
         }
     }
 
@@ -291,6 +297,7 @@ public final class AppHibernationService extends SystemService {
                         stateSnapshot.packageName,
                         userIdSnapshot,
                         stateSnapshot.hibernated,
+                        // TODO(b/187224817): This isn't the expected value right now.
                         stateSnapshot.lastUnhibernatedMs);
             });
             List<UserLevelState> states = new ArrayList<>(mUserStates.get(userId).values());
@@ -938,23 +945,39 @@ public final class AppHibernationService extends SystemService {
     private final class StatsPullAtomCallbackImpl implements StatsPullAtomCallback {
         @Override
         public int onPullAtom(int atomTag, @NonNull List<StatsEvent> data) {
-            if (atomTag != FrameworkStatsLog.USER_LEVEL_HIBERNATED_APPS) {
-                return StatsManager.PULL_SKIP;
+            if (!isAppHibernationEnabled()
+                    && (atomTag == FrameworkStatsLog.USER_LEVEL_HIBERNATED_APPS
+                    || atomTag == FrameworkStatsLog.GLOBAL_HIBERNATED_APPS)) {
+                return StatsManager.PULL_SUCCESS;
             }
-            if (isAppHibernationEnabled()) {
-                List<UserInfo> userInfos = mUserManager.getAliveUsers();
-                final int numUsers = userInfos.size();
-                for (int i = 0; i < numUsers; ++i) {
-                    final int userId = userInfos.get(i).id;
-                    if (mUserManager.isUserUnlockingOrUnlocked(userId)) {
-                        data.add(
-                                FrameworkStatsLog.buildStatsEvent(
-                                        atomTag,
-                                        getHibernatingPackagesForUser(userId).size(),
-                                        userId)
-                        );
+
+            switch (atomTag) {
+                case FrameworkStatsLog.USER_LEVEL_HIBERNATED_APPS:
+                    List<UserInfo> userInfos = mUserManager.getAliveUsers();
+                    final int numUsers = userInfos.size();
+                    for (int i = 0; i < numUsers; ++i) {
+                        final int userId = userInfos.get(i).id;
+                        if (mUserManager.isUserUnlockingOrUnlocked(userId)) {
+                            data.add(
+                                    FrameworkStatsLog.buildStatsEvent(
+                                            atomTag,
+                                            getHibernatingPackagesForUser(userId).size(),
+                                            userId)
+                            );
+                        }
                     }
-                }
+                    break;
+                case FrameworkStatsLog.GLOBAL_HIBERNATED_APPS:
+                    int hibernatedAppCount = 0;
+                    synchronized (mLock) {
+                        for (GlobalLevelState state : mGlobalHibernationStates.values()) {
+                            if (state.hibernated) hibernatedAppCount++;
+                        }
+                    }
+                    data.add(FrameworkStatsLog.buildStatsEvent(atomTag, hibernatedAppCount));
+                    break;
+                default:
+                    return StatsManager.PULL_SKIP;
             }
             return StatsManager.PULL_SUCCESS;
         }
