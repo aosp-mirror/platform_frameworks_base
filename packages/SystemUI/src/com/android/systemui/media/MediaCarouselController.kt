@@ -115,6 +115,7 @@ class MediaCarouselController @Inject constructor(
     private var needsReordering: Boolean = false
     private var keysNeedRemoval = mutableSetOf<String>()
     private var bgColor = getBackgroundColor()
+    private var shouldScrollToActivePlayer: Boolean = false
     private var isRtl: Boolean = false
         set(value) {
             if (value != field) {
@@ -271,6 +272,15 @@ class MediaCarouselController @Inject constructor(
             }
         }
         mediaCarouselScrollHandler.onPlayersChanged()
+
+        // Automatically scroll to the active player if needed
+        if (shouldScrollToActivePlayer) {
+            shouldScrollToActivePlayer = false
+            val activeMediaIndex = MediaPlayerData.getActiveMediaIndex()
+            if (activeMediaIndex != -1) {
+                mediaCarouselScrollHandler.scrollToActivePlayer(activeMediaIndex)
+            }
+        }
     }
 
     private fun addOrUpdatePlayer(key: String, oldKey: String?, data: MediaData) {
@@ -322,8 +332,8 @@ class MediaCarouselController @Inject constructor(
         val lp = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.WRAP_CONTENT)
         newRecs.recommendationViewHolder?.recommendations?.setLayoutParams(lp)
-        newRecs.bindRecommendation(data, bgColor)
-        MediaPlayerData.addMediaPlayer(key, newRecs)
+        newRecs.bindRecommendation(data, bgColor, { v -> shouldScrollToActivePlayer = true })
+        MediaPlayerData.addMediaRecommendation(key, newRecs)
         updatePlayerToState(newRecs, noAnimation = true)
         reorderAllPlayers()
         updatePageIndicator()
@@ -593,7 +603,7 @@ class MediaCarouselController @Inject constructor(
 @VisibleForTesting
 internal object MediaPlayerData {
     private val EMPTY = MediaData(-1, false, 0, null, null, null, null, null,
-        emptyList(), emptyList(), "INVALID", null, null, null, true, null)
+        emptyList(), emptyList(), "INVALID", null, null, null, false, null)
 
     private data class MediaSortKey(
         // Is Smartspace media recommendation. When the Smartspace media is present, it should
@@ -620,7 +630,7 @@ internal object MediaPlayerData {
         mediaPlayers.put(sortKey, player)
     }
 
-    fun addMediaPlayer(key: String, player: MediaControlPanel) {
+    fun addMediaRecommendation(key: String, player: MediaControlPanel) {
         removeMediaPlayer(key)
         val sortKey = MediaSortKey(isSsMediaRec = true, EMPTY, System.currentTimeMillis())
         mediaData.put(key, sortKey)
@@ -642,6 +652,16 @@ internal object MediaPlayerData {
     fun mediaData() = mediaData.entries.map { e -> Pair(e.key, e.value.data) }
 
     fun players() = mediaPlayers.values
+
+    /** Returns the index of the first non-timeout media. */
+    fun getActiveMediaIndex(): Int {
+        mediaPlayers.entries.forEachIndexed { index, e ->
+            if (e.key.data.active) {
+                return index
+            }
+        }
+        return -1
+    }
 
     @VisibleForTesting
     fun clear() {
