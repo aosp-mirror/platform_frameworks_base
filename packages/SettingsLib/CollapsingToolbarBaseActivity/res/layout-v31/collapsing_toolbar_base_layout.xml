@@ -43,7 +43,7 @@
             app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
             app:scrimAnimationDuration="50"
             app:scrimVisibleHeightTrigger="@dimen/scrim_visible_height_trigger"
-            app:statusBarScrim="@empty"
+            app:statusBarScrim="@null"
             app:titleCollapseMode="fade"
             app:collapsedTitleTextAppearance="@style/CollapsingToolbarTitle.Collapsed"
             app:expandedTitleTextAppearance="@style/CollapsingToolbarTitle.Expanded"
