@@ -93,7 +93,6 @@ public final class DumpUtils {
         STATE_LABELS[STATE_BOUND_TOP_OR_FGS]        = "Bnd TopFgs";
         STATE_LABELS[STATE_FGS]                     = "       Fgs";
         STATE_LABELS[STATE_IMPORTANT_FOREGROUND]    = "    Imp Fg";
-        STATE_LABELS[STATE_IMPORTANT_FOREGROUND]    = "    Imp Fg";
         STATE_LABELS[STATE_IMPORTANT_BACKGROUND]    = "    Imp Bg";
         STATE_LABELS[STATE_BACKUP]                  = "    Backup";
         STATE_LABELS[STATE_SERVICE]                 = "   Service";
