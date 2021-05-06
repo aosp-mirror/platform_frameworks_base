@@ -129,6 +129,13 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             }
             updateStates();
         }
+
+        @Override
+        public void onVisibilityChanged(boolean isVisible) {
+            if (mAlternateAuthInterceptor != null) {
+                mAlternateAuthInterceptor.onBouncerVisibilityChanged();
+            }
+        }
     };
     private final DockManager.DockEventListener mDockEventListener =
             new DockManager.DockEventListener() {
@@ -1126,6 +1133,18 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     /**
+     * Request to show the udfps affordance in a particular color. This can be used if an
+     * occluding app on the keyguard would like to request udfps.  This method does nothing if
+     * {@link KeyguardUpdateMonitor#shouldListenForFingerprint} is false.
+     */
+    public void requestUdfps(boolean request, int color) {
+        if (mAlternateAuthInterceptor == null) {
+            return;
+        }
+        mAlternateAuthInterceptor.requestUdfps(request, color);
+    }
+
+    /**
      * Delegate used to send show/reset events to an alternate authentication method instead of the
      * regular pin/pattern/password bouncer.
      */
@@ -1173,6 +1192,20 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
          * hidden
          */
         void setBouncerExpansionChanged(float expansion);
+
+        /**
+         *  called when the bouncer view visibility has changed.
+         */
+        void onBouncerVisibilityChanged();
+
+        /**
+         * Use when an app occluding the keyguard would like to give the user ability to
+         * unlock the device using udfps.
+         *
+         * @param color of the udfps icon. should have proper contrast with its background. only
+         *              used if requestUdfps = true
+         */
+        void requestUdfps(boolean requestUdfps, int color);
 
     }
 }
