@@ -3065,6 +3065,13 @@ public class AppOpsService extends IAppOpsService.Stub {
                 shouldCollectAsyncNotedOp, message, shouldCollectMessage, skipProxyOperation);
     }
 
+    // TODO b/184963112: remove once full blaming is implemented
+    private boolean isRecognitionServiceTemp(int code, String packageName) {
+        return code == OP_RECORD_AUDIO
+                && (packageName.equals("com.google.android.googlequicksearchbox")
+                || packageName.equals("com.google.android.tts"));
+    }
+
     private SyncNotedAppOp noteProxyOperationImpl(int code, AttributionSource attributionSource,
             boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage,
             boolean skipProxyOperation) {
@@ -3092,7 +3099,8 @@ public class AppOpsService extends IAppOpsService.Stub {
         final boolean isSelfBlame = Binder.getCallingUid() == proxiedUid;
         final boolean isProxyTrusted = mContext.checkPermission(
                 Manifest.permission.UPDATE_APP_OPS_STATS, -1, proxyUid)
-                == PackageManager.PERMISSION_GRANTED || isSelfBlame;
+                == PackageManager.PERMISSION_GRANTED || isSelfBlame
+                || isRecognitionServiceTemp(code, proxyPackageName);
 
         if (!skipProxyOperation) {
             final int proxyFlags = isProxyTrusted ? AppOpsManager.OP_FLAG_TRUSTED_PROXY
