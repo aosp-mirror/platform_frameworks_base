@@ -65,6 +65,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.DozeReceiver;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardViewMediator;
+import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -131,6 +132,8 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
     // mode.
     private boolean mIsAodInterruptActive;
     @Nullable private Runnable mCancelAodTimeoutAction;
+    private boolean mScreenOn;
+    private Runnable mAodInterruptRunnable;
 
     private static final AudioAttributes VIBRATION_SONIFICATION_ATTRIBUTES =
             new AudioAttributes.Builder()
@@ -152,6 +155,22 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
             String effect = Settings.Global.getString(mContext.getContentResolver(),
                     "udfps_acquired_type");
             mVibrator.vibrate(getVibration(effect, mEffectTick), VIBRATION_SONIFICATION_ATTRIBUTES);
+        }
+    };
+
+    private final ScreenLifecycle.Observer mScreenObserver = new ScreenLifecycle.Observer() {
+        @Override
+        public void onScreenTurnedOn() {
+            mScreenOn = true;
+            if (mAodInterruptRunnable != null) {
+                mAodInterruptRunnable.run();
+                mAodInterruptRunnable = null;
+            }
+        }
+
+        @Override
+        public void onScreenTurnedOff() {
+            mScreenOn = false;
         }
     };
 
@@ -296,7 +315,13 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
             // TODO: move isWithinSensorArea to UdfpsController.
             return udfpsView.isWithinSensorArea(x, y);
         }
-        return getSensorLocation().contains(x, y);
+
+        if (mView == null || mView.getAnimationViewController() == null) {
+            return false;
+        }
+
+        return !mView.getAnimationViewController().shouldPauseAuth()
+                && getSensorLocation().contains(x, y);
     }
 
     private boolean onTouch(View view, MotionEvent event, boolean fromUdfpsView) {
@@ -432,7 +457,8 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
             @NonNull KeyguardViewMediator keyguardViewMediator,
             @NonNull FalsingManager falsingManager,
             @NonNull PowerManager powerManager,
-            @NonNull AccessibilityManager accessibilityManager) {
+            @NonNull AccessibilityManager accessibilityManager,
+            @NonNull ScreenLifecycle screenLifecycle) {
         mContext = context;
         // TODO (b/185124905): inject main handler and vibrator once done prototyping
         mMainHandler = new Handler(Looper.getMainLooper());
@@ -452,6 +478,8 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
         mFalsingManager = falsingManager;
         mPowerManager = powerManager;
         mAccessibilityManager = accessibilityManager;
+        screenLifecycle.addObserver(mScreenObserver);
+        mScreenOn = screenLifecycle.getScreenState() == ScreenLifecycle.SCREEN_ON;
 
         mSensorProps = findFirstUdfps();
         // At least one UDFPS sensor exists
@@ -529,7 +557,7 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
         final int paddingY = animation != null ? animation.getPaddingY() : 0;
 
         mCoreLayoutParams.flags = getCoreLayoutParamFlags();
-        if (animation.listenForTouchesOutsideView()) {
+        if (animation != null && animation.listenForTouchesOutsideView()) {
             mCoreLayoutParams.flags |= WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
         }
 
@@ -685,14 +713,23 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
         if (mIsAodInterruptActive) {
             return;
         }
-        mIsAodInterruptActive = true;
-        // Since the sensor that triggers the AOD interrupt doesn't provide ACTION_UP/ACTION_CANCEL,
-        // we need to be careful about not letting the screen accidentally remain in high brightness
-        // mode. As a mitigation, queue a call to cancel the fingerprint scan.
-        mCancelAodTimeoutAction = mFgExecutor.executeDelayed(this::onCancelUdfps,
-                AOD_INTERRUPT_TIMEOUT_MILLIS);
-        // using a hard-coded value for major and minor until it is available from the sensor
-        onFingerDown(screenX, screenY, minor, major);
+
+        mAodInterruptRunnable = () -> {
+            mIsAodInterruptActive = true;
+            // Since the sensor that triggers the AOD interrupt doesn't provide
+            // ACTION_UP/ACTION_CANCEL,  we need to be careful about not letting the screen
+            // accidentally remain in high brightness mode. As a mitigation, queue a call to
+            // cancel the fingerprint scan.
+            mCancelAodTimeoutAction = mFgExecutor.executeDelayed(this::onCancelUdfps,
+                    AOD_INTERRUPT_TIMEOUT_MILLIS);
+            // using a hard-coded value for major and minor until it is available from the sensor
+            onFingerDown(screenX, screenY, minor, major);
+        };
+
+        if (mScreenOn && mAodInterruptRunnable != null) {
+            mAodInterruptRunnable.run();
+            mAodInterruptRunnable = null;
+        }
     }
 
     /**

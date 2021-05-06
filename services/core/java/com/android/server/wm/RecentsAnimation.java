@@ -255,7 +255,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks, OnRootTaskOrderChan
                 options.setSourceInfo(ActivityOptions.SourceInfo.TYPE_RECENTS_ANIMATION, eventTime);
             }
             mTaskSupervisor.getActivityMetricsLogger().notifyActivityLaunched(launchingState,
-                    START_TASK_TO_FRONT, targetActivity, options);
+                    START_TASK_TO_FRONT, !hasExistingActivity, targetActivity, options);
 
             // Register for root task order changes
             mDefaultTaskDisplayArea.registerRootTaskOrderChangedListener(this);

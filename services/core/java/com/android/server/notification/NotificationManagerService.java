@@ -6048,6 +6048,13 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
+        public boolean isNotificationShown(String pkg, String tag, int notificationId, int userId) {
+            synchronized (mNotificationLock) {
+                return findNotificationLocked(pkg, tag, notificationId, userId) != null;
+            }
+        }
+
+        @Override
         public void removeForegroundServiceFlagFromNotification(String pkg, int notificationId,
                 int userId) {
             checkCallerIsSystem();

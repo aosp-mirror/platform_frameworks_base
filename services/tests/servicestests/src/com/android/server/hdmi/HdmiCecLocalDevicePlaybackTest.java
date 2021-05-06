@@ -1046,10 +1046,6 @@ public class HdmiCecLocalDevicePlaybackTest {
         assertThat(mHdmiCecLocalDevicePlayback.isActiveSource()).isTrue();
         // 4. DUT turned off.
         mHdmiControlService.onStandby(HdmiControlService.STANDBY_SCREEN_OFF);
-        // TODO(b/184939731): remove waiting times once pending actions no longer block <Standby>
-        mTestLooper.moveTimeForward(TIMEOUT_MS);
-        mTestLooper.dispatchAll();
-        mTestLooper.moveTimeForward(TIMEOUT_MS);
         mTestLooper.dispatchAll();
         HdmiCecMessage standbyMessageBroadcast = HdmiCecMessageBuilder.buildStandby(
                 mHdmiCecLocalDevicePlayback.mAddress, ADDR_BROADCAST);

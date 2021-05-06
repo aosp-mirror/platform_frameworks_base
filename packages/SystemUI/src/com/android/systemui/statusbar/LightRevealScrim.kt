@@ -112,7 +112,12 @@ class PowerButtonReveal(
     val powerButtonY: Float
 ) : LightRevealEffect {
 
-    private val OVAL_INITIAL_HEIGHT = 50f
+    /**
+     * How far off the side of the screen to start the power button reveal, in terms of percent of
+     * the screen width. This ensures that the initial part of the animation (where the reveal is
+     * just a sliver) starts just off screen.
+     */
+    private val OFF_SCREEN_START_AMOUNT = 0.05f
 
     private val WIDTH_INCREASE_MULTIPLIER = 1.25f
 
@@ -124,13 +129,13 @@ class PowerButtonReveal(
         with(scrim) {
             revealGradientEndColorAlpha = 1f - fadeAmount
             setRevealGradientBounds(
-                    width -
+                    width * (1f + OFF_SCREEN_START_AMOUNT) -
                             width * WIDTH_INCREASE_MULTIPLIER * interpolatedAmount,
-                    powerButtonY - (OVAL_INITIAL_HEIGHT / 2f) -
+                    powerButtonY -
                             height * interpolatedAmount,
-                    width * WIDTH_INCREASE_MULTIPLIER +
+                    width * (1f + OFF_SCREEN_START_AMOUNT) +
                             width * WIDTH_INCREASE_MULTIPLIER * interpolatedAmount,
-                    powerButtonY + (OVAL_INITIAL_HEIGHT / 2f) +
+                    powerButtonY +
                             height * interpolatedAmount)
         }
     }
@@ -147,7 +152,7 @@ class LightRevealScrim(context: Context?, attrs: AttributeSet?) : View(context, 
      * How much of the underlying views are revealed, in percent. 0 means they will be completely
      * obscured and 1 means they'll be fully visible.
      */
-    var revealAmount: Float = 0f
+    var revealAmount: Float = 1f
         set(value) {
             if (field != value) {
                 field = value
@@ -213,6 +218,12 @@ class LightRevealScrim(context: Context?, attrs: AttributeSet?) : View(context, 
      */
     private val shaderGradientMatrix = Matrix()
 
+    init {
+        revealEffect.setRevealAmountOnScrim(revealAmount, this)
+        setPaintColorFilter()
+        invalidate()
+    }
+
     /**
      * Sets bounds for the transparent oval gradient that reveals the views below the scrim. This is
      * simply a helper method that sets [revealGradientCenter], [revealGradientWidth], and
@@ -231,6 +242,9 @@ class LightRevealScrim(context: Context?, attrs: AttributeSet?) : View(context, 
 
     override fun onDraw(canvas: Canvas?) {
         if (canvas == null || revealGradientWidth <= 0 || revealGradientHeight <= 0) {
+            if (revealAmount < 1f) {
+                canvas?.drawColor(revealGradientEndColor)
+            }
             return
         }
 
