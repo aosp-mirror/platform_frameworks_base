@@ -523,6 +523,13 @@ public class LocationProviderManager extends
                 }
 
                 mPermitted = permitted;
+
+                if (mForeground) {
+                    EVENT_LOG.logProviderClientPermitted(mName, getIdentity());
+                } else {
+                    EVENT_LOG.logProviderClientUnpermitted(mName, getIdentity());
+                }
+
                 return true;
             }
 
