@@ -72,7 +72,8 @@ class MetricsHelper {
                                 alarmStore.getCount(
                                         a -> (a.getRequestedElapsed() > now + INDEFINITE_DELAY)),
                                 alarmStore.getCount(a -> (a.repeatInterval != 0)),
-                                alarmStore.getCount(a -> (a.alarmClock != null))
+                                alarmStore.getCount(a -> (a.alarmClock != null)),
+                                alarmStore.getCount(a -> AlarmManagerService.isRtc(a.type))
                         ));
                         return StatsManager.PULL_SUCCESS;
                     }
@@ -101,7 +102,8 @@ class MetricsHelper {
                 (a.flags & AlarmManager.FLAG_ALLOW_WHILE_IDLE) != 0,
                 a.alarmClock != null,
                 a.repeatInterval != 0,
-                reasonToStatsReason(a.mExactAllowReason));
+                reasonToStatsReason(a.mExactAllowReason),
+                AlarmManagerService.isRtc(a.type));
     }
 
     static void pushAlarmBatchDelivered(int numAlarms, int wakeups) {
