@@ -18,6 +18,7 @@
 
 #include <utils/Log.h>
 #include <utils/TraceUtils.h>
+#include <algorithm>
 
 #include "../DeferredLayerUpdater.h"
 #include "../DisplayList.h"
@@ -91,6 +92,7 @@ void DrawFrameTask::postAndWait() {
 void DrawFrameTask::run() {
     const int64_t vsyncId = mFrameInfo[static_cast<int>(FrameInfoIndex::FrameTimelineVsyncId)];
     ATRACE_FORMAT("DrawFrames %" PRId64, vsyncId);
+    nsecs_t syncDelayDuration = systemTime(SYSTEM_TIME_MONOTONIC) - mSyncQueued;
 
     bool canUnblockUiThread;
     bool canDrawThisFrame;
@@ -124,8 +126,9 @@ void DrawFrameTask::run() {
                 [callback, frameNr = context->getFrameNumber()]() { callback(frameNr); });
     }
 
+    nsecs_t dequeueBufferDuration = 0;
     if (CC_LIKELY(canDrawThisFrame)) {
-        context->draw();
+        dequeueBufferDuration = context->draw();
     } else {
         // wait on fences so tasks don't overlap next frame
         context->waitOnFences();
@@ -149,10 +152,14 @@ void DrawFrameTask::run() {
             mUpdateTargetWorkDuration(targetWorkDuration);
         }
         int64_t frameDuration = systemTime(SYSTEM_TIME_MONOTONIC) - frameStartTime;
-        if (frameDuration > kSanityCheckLowerBound && frameDuration < kSanityCheckUpperBound) {
-            mReportActualWorkDuration(frameDuration);
+        int64_t actualDuration = frameDuration -
+                                 (std::min(syncDelayDuration, mLastDequeueBufferDuration)) -
+                                 dequeueBufferDuration;
+        if (actualDuration > kSanityCheckLowerBound && actualDuration < kSanityCheckUpperBound) {
+            mReportActualWorkDuration(actualDuration);
         }
     }
+    mLastDequeueBufferDuration = dequeueBufferDuration;
 }
 
 bool DrawFrameTask::syncFrameState(TreeInfo& info) {

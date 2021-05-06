@@ -127,7 +127,8 @@ public:
     void setColorMode(ColorMode mode);
     bool makeCurrent();
     void prepareTree(TreeInfo& info, int64_t* uiFrameInfo, int64_t syncQueued, RenderNode* target);
-    void draw();
+    // Returns the DequeueBufferDuration.
+    nsecs_t draw();
     void destroy();
 
     // IFrameCallback, Choreographer-driven frame callback entry point
