@@ -48,6 +48,8 @@ public class MultiUserRollbackTest extends BaseHostJUnit4Test {
     public void tearDown() throws Exception {
         removeSecondaryUserIfNecessary();
         runPhaseForUsers("cleanUp", mOriginalUserId);
+        uninstallPackage("com.android.cts.install.lib.testapp.A");
+        uninstallPackage("com.android.cts.install.lib.testapp.B");
     }
 
     @Before
