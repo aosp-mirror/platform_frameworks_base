@@ -94,4 +94,5 @@
     <!-- additional offset for clock switch area items -->
     <dimen name="clock_padding_start">28dp</dimen>
     <dimen name="below_clock_padding_start">32dp</dimen>
+    <dimen name="below_clock_padding_start_extra">36dp</dimen>
 </resources>
