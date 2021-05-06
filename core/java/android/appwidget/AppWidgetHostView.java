@@ -557,7 +557,7 @@ public class AppWidgetHostView extends FrameLayout {
                 return ;
             }
             if (exception != null) {
-                Log.w(TAG, "Error inflating RemoteViews : " + exception.toString());
+                Log.w(TAG, "Error inflating RemoteViews", exception);
             }
             content = getErrorView();
             mViewMode = VIEW_MODE_ERROR;
@@ -743,7 +743,7 @@ public class AppWidgetHostView extends FrameLayout {
         }
 
         if (exception != null) {
-            Log.w(TAG, "Error inflating AppWidget " + mInfo + ": " + exception.toString());
+            Log.w(TAG, "Error inflating AppWidget " + mInfo, exception);
         }
 
         if (defaultView == null) {
