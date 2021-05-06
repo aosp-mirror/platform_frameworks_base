@@ -13,6 +13,16 @@
       ]
     },
     {
+      "file_patterns": [
+        "BinderDeathDispatcher\\.java"
+      ],
+      "name": "FrameworksCoreTests",
+      "options": [
+        { "include-filter": "com.android.internal.os.BinderDeathDispatcherTest" },
+        { "exclude-annotation": "com.android.internal.os.SkipPresubmit" }
+      ]
+    },
+    {
       "file_patterns": ["Battery[^/]*\\.java"],
       "name": "FrameworksServicesTests",
       "options": [
