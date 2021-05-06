@@ -263,7 +263,7 @@ public final class TelephonyPermissions {
             return true;
         }
         return checkPrivilegedReadPermissionOrCarrierPrivilegePermission(
-                context, subId, callingPackage, callingFeatureId, message, true);
+                context, subId, callingPackage, callingFeatureId, message, true, true);
     }
 
     /**
@@ -286,14 +286,28 @@ public final class TelephonyPermissions {
      */
     public static boolean checkCallingOrSelfReadSubscriberIdentifiers(Context context, int subId,
             String callingPackage, @Nullable String callingFeatureId, String message) {
+        return checkCallingOrSelfReadSubscriberIdentifiers(context, subId, callingPackage,
+                callingFeatureId, message, true);
+    }
+
+    /**
+     * Same as {@link #checkCallingOrSelfReadSubscriberIdentifiers(Context, int, String, String,
+     * String)} except this allows an additional parameter reportFailure. Caller may not want to
+     * report a failure when this is an internal/intermediate check, for example,
+     * SubscriptionController calls this with an INVALID_SUBID to check if caller has the required
+     * permissions to bypass carrier privilege checks.
+     * @param reportFailure Indicates if failure should be reported.
+     */
+    public static boolean checkCallingOrSelfReadSubscriberIdentifiers(Context context, int subId,
+            String callingPackage, @Nullable String callingFeatureId, String message,
+            boolean reportFailure) {
         if (checkCallingOrSelfUseIccAuthWithDeviceIdentifier(context, callingPackage,
                 callingFeatureId, message)) {
             return true;
         }
         return checkPrivilegedReadPermissionOrCarrierPrivilegePermission(
-                context, subId, callingPackage, callingFeatureId, message, false);
+                context, subId, callingPackage, callingFeatureId, message, false, reportFailure);
     }
-
     /**
      * Checks whether the app with the given pid/uid can read device identifiers.
      *
@@ -314,7 +328,7 @@ public final class TelephonyPermissions {
      */
     private static boolean checkPrivilegedReadPermissionOrCarrierPrivilegePermission(
             Context context, int subId, String callingPackage, @Nullable String callingFeatureId,
-            String message, boolean allowCarrierPrivilegeOnAnySub) {
+            String message, boolean allowCarrierPrivilegeOnAnySub, boolean reportFailure) {
         int uid = Binder.getCallingUid();
         int pid = Binder.getCallingPid();
 
@@ -334,8 +348,12 @@ public final class TelephonyPermissions {
             return true;
         }
 
-        return reportAccessDeniedToReadIdentifiers(context, subId, pid, uid, callingPackage,
-                message);
+        if (reportFailure) {
+            return reportAccessDeniedToReadIdentifiers(context, subId, pid, uid, callingPackage,
+                    message);
+        } else {
+            return false;
+        }
     }
 
     /**
