@@ -92,8 +92,6 @@ public class HdmiCecLocalDevicePlaybackTest {
 
         Context context = InstrumentationRegistry.getTargetContext();
         mMyLooper = mTestLooper.getLooper();
-        PowerManager powerManager = new PowerManager(context, mIPowerManagerMock,
-                mIThermalServiceMock, new Handler(mMyLooper));
 
         mHdmiControlService =
                 new HdmiControlService(InstrumentationRegistry.getTargetContext()) {
@@ -140,7 +138,8 @@ public class HdmiCecLocalDevicePlaybackTest {
 
                     @Override
                     protected PowerManager getPowerManager() {
-                        return powerManager;
+                        return new PowerManager(context, mIPowerManagerMock,
+                                mIThermalServiceMock, new Handler(mMyLooper));
                     }
                 };
 

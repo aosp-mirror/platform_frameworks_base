@@ -192,10 +192,12 @@ public class HdmiControlServiceTest {
 
         mContextSpy = spy(new ContextWrapper(InstrumentationRegistry.getTargetContext()));
 
-        PowerManager powerManager = new PowerManager(mContextSpy, mIPowerManagerMock,
-                mIThermalServiceMock, null);
-        when(mContextSpy.getSystemService(Context.POWER_SERVICE)).thenReturn(powerManager);
-        when(mContextSpy.getSystemService(PowerManager.class)).thenReturn(powerManager);
+        when(mContextSpy.getSystemService(Context.POWER_SERVICE)).thenAnswer(i ->
+                new PowerManager(mContextSpy, mIPowerManagerMock,
+                mIThermalServiceMock, null));
+        when(mContextSpy.getSystemService(PowerManager.class)).thenAnswer(i ->
+                new PowerManager(mContextSpy, mIPowerManagerMock,
+                mIThermalServiceMock, null));
         when(mIPowerManagerMock.isInteractive()).thenReturn(true);
 
         HdmiCecConfig hdmiCecConfig = new FakeHdmiCecConfig(mContextSpy);

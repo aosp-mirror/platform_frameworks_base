@@ -30,6 +30,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -96,9 +97,10 @@ public class HdmiCecAtomLoggingTest {
         mContextSpy = spy(new ContextWrapper(
                 InstrumentationRegistry.getInstrumentation().getTargetContext()));
 
-        PowerManager powerManager = new PowerManager(
-                mContextSpy, mIPowerManagerMock, mIThermalServiceMock, new Handler(mLooper));
-        doReturn(powerManager).when(mContextSpy).getSystemService(Context.POWER_SERVICE);
+
+        when(mContextSpy.getSystemService(Context.POWER_SERVICE)).thenAnswer(i ->
+                new PowerManager(mContextSpy, mIPowerManagerMock,
+                        mIThermalServiceMock, new Handler(mLooper)));
         doReturn(true).when(mIPowerManagerMock).isInteractive();
 
         mHdmiControlServiceSpy = spy(new HdmiControlService(mContextSpy));

@@ -71,10 +71,12 @@ public class ArcTerminationActionFromAvrTest {
 
         mContextSpy = spy(new ContextWrapper(InstrumentationRegistry.getTargetContext()));
 
-        PowerManager powerManager = new PowerManager(mContextSpy, mIPowerManagerMock,
-                mIThermalServiceMock, new Handler(mTestLooper.getLooper()));
-        when(mContextSpy.getSystemService(Context.POWER_SERVICE)).thenReturn(powerManager);
-        when(mContextSpy.getSystemService(PowerManager.class)).thenReturn(powerManager);
+        when(mContextSpy.getSystemService(Context.POWER_SERVICE)).thenAnswer(i ->
+                new PowerManager(mContextSpy, mIPowerManagerMock,
+                mIThermalServiceMock, new Handler(mTestLooper.getLooper())));
+        when(mContextSpy.getSystemService(PowerManager.class)).thenAnswer(i ->
+                new PowerManager(mContextSpy, mIPowerManagerMock,
+                mIThermalServiceMock, new Handler(mTestLooper.getLooper())));
         when(mIPowerManagerMock.isInteractive()).thenReturn(true);
 
         HdmiControlService hdmiControlService =
@@ -85,7 +87,8 @@ public class ArcTerminationActionFromAvrTest {
 
                     @Override
                     protected PowerManager getPowerManager() {
-                        return powerManager;
+                        return new PowerManager(mContextSpy, mIPowerManagerMock,
+                                mIThermalServiceMock, new Handler(mTestLooper.getLooper()));
                     }
 
                     @Override
