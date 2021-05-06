@@ -462,7 +462,8 @@ public class MediaControlPanel {
     /** Bind this recommendation view based on the data given. */
     public void bindRecommendation(
             @NonNull SmartspaceTarget target,
-            @NonNull int backgroundColor) {
+            @NonNull int backgroundColor,
+            @Nullable View.OnClickListener callback) {
         if (mRecommendationViewHolder == null) {
             return;
         }
@@ -526,7 +527,7 @@ public class MediaControlPanel {
             setSmartspaceRecItemOnClickListener(
                     mediaCoverImageView,
                     recommendation,
-                    null);
+                    callback);
 
             if (uiComponentIndex < MEDIA_RECOMMENDATION_ITEMS_PER_ROW) {
                 setVisibleAndAlpha(collapsedSet,
