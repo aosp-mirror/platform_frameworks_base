@@ -30,6 +30,7 @@ import static android.app.AlarmManager.INTERVAL_HOUR;
 import static android.app.AlarmManager.RTC;
 import static android.app.AlarmManager.RTC_WAKEUP;
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
+import static android.os.PowerExemptionManager.TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
 import static android.os.PowerWhitelistManager.REASON_ALARM_MANAGER_WHILE_IDLE;
 import static android.os.PowerWhitelistManager.TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
 import static android.os.PowerWhitelistManager.TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED;
@@ -81,6 +82,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelableException;
+import android.os.PowerExemptionManager;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
@@ -295,6 +297,7 @@ public class AlarmManagerService extends SystemService {
 
     BroadcastOptions mOptsWithFgs = BroadcastOptions.makeBasic();
     BroadcastOptions mOptsWithoutFgs = BroadcastOptions.makeBasic();
+    BroadcastOptions mOptsTimeBroadcast = BroadcastOptions.makeBasic();
 
     // TODO(b/172085676): Move inside alarm store.
     private final SparseArray<AlarmManager.AlarmClockInfo> mNextAlarmClockForUser =
@@ -1789,7 +1792,12 @@ public class AlarmManagerService extends SystemService {
                     | Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT
                     | Intent.FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS);
             intent.putExtra(Intent.EXTRA_TIMEZONE, zone.getID());
-            getContext().sendBroadcastAsUser(intent, UserHandle.ALL);
+            mOptsTimeBroadcast.setTemporaryAppAllowlist(
+                    mActivityManagerInternal.getBootTimeTempAllowListDuration(),
+                    TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
+                    PowerExemptionManager.REASON_TIMEZONE_CHANGED, "");
+            getContext().sendBroadcastAsUser(intent, UserHandle.ALL,
+                    null /* receiverPermission */, mOptsTimeBroadcast.toBundle());
         }
     }
 
@@ -3937,8 +3945,12 @@ public class AlarmManagerService extends SystemService {
                                 | Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT
                                 | Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND
                                 | Intent.FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS);
-                        getContext().sendBroadcastAsUser(intent, UserHandle.ALL);
-
+                        mOptsTimeBroadcast.setTemporaryAppAllowlist(
+                                mActivityManagerInternal.getBootTimeTempAllowListDuration(),
+                                TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
+                                PowerExemptionManager.REASON_TIME_CHANGED, "");
+                        getContext().sendBroadcastAsUser(intent, UserHandle.ALL,
+                                null /* receiverPermission */, mOptsTimeBroadcast.toBundle());
                         // The world has changed on us, so we need to re-evaluate alarms
                         // regardless of whether the kernel has told us one went off.
                         result |= IS_WAKEUP_MASK;
