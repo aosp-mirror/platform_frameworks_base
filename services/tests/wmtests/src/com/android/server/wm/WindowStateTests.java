@@ -956,4 +956,19 @@ public class WindowStateTests extends WindowTestsBase {
         assertNotNull(state.peekSource(ITYPE_IME));
         assertTrue(state.getSource(ITYPE_IME).isVisible());
     }
+
+    @Test
+    public void testRequestedVisibility() {
+        final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
+        app.mActivityRecord.setVisible(false);
+        app.mActivityRecord.setVisibility(false /* visible */, false /* deferHidingClient */);
+        assertFalse(app.isVisibleRequested());
+
+        // It doesn't have a surface yet, but should still be visible requested.
+        app.setHasSurface(false);
+        app.mActivityRecord.setVisibility(true /* visible */, false /* deferHidingClient */);
+
+        assertFalse(app.isVisible());
+        assertTrue(app.isVisibleRequested());
+    }
 }
