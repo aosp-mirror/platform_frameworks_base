@@ -3418,6 +3418,11 @@ public final class ProcessList {
             return;
         }
 
+        if (app.getPid() == 0 && !app.isPendingStart()) {
+            // This process has been killed and its cleanup is done, don't proceed the LRU update.
+            return;
+        }
+
         synchronized (mProcLock) {
             updateLruProcessLSP(app, client, hasActivity, hasService);
         }
