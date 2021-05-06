@@ -90,7 +90,7 @@ class SystemStatusAnimationScheduler @Inject constructor(
         coordinator.attachScheduler(this)
     }
 
-    fun onStatusEvent(event: StatusEvent, showAnimation: Boolean = true) {
+    fun onStatusEvent(event: StatusEvent) {
         // Ignore any updates until the system is up and running
         if (isTooEarly() || !isImmersiveIndicatorEnabled()) {
             return
@@ -103,7 +103,7 @@ class SystemStatusAnimationScheduler @Inject constructor(
             if (DEBUG) {
                 Log.d(TAG, "scheduling event $event")
             }
-            if (showAnimation) {
+            if (event.showAnimation) {
                 scheduleEvent(event)
             } else if (event.forceVisible) {
                 hasPersistentDot = true
