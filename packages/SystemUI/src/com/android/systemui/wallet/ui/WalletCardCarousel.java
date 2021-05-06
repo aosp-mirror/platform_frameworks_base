@@ -61,7 +61,7 @@ public class WalletCardCarousel extends RecyclerView {
     static final int CARD_ANIM_ALPHA_DELAY = 50;
 
     private final Rect mSystemGestureExclusionZone = new Rect();
-    private WalletCardCarouselAdapter mWalletCardCarouselAdapter;
+    private final WalletCardCarouselAdapter mWalletCardCarouselAdapter;
     private int mExpectedViewWidth;
     private int mCardMarginPx;
     private int mCardWidthPx;
@@ -79,12 +79,6 @@ public class WalletCardCarousel extends RecyclerView {
     // also be used in DotIndicatorDecoration.
     float mEdgeToCenterDistance = Float.MAX_VALUE;
     private float mCardCenterToScreenCenterDistancePx = Float.MAX_VALUE;
-    // When card data is loaded, this many cards should be animated as data is bound to them.
-    private int mNumCardsToAnimate;
-    // When card data is loaded, this is the position of the leftmost card to be animated.
-    private int mCardAnimationStartPosition;
-    // When card data is loaded, the animations may be delayed so that other animations can complete
-    private int mExtraAnimationDelay;
 
     interface OnSelectionListener {
         /**
@@ -179,10 +173,6 @@ public class WalletCardCarousel extends RecyclerView {
         }
     }
 
-    void setExtraAnimationDelay(int extraAnimationDelay) {
-        mExtraAnimationDelay = extraAnimationDelay;
-    }
-
     void setSelectionListener(OnSelectionListener selectionListener) {
         mSelectionListener = selectionListener;
     }
@@ -200,38 +190,20 @@ public class WalletCardCarousel extends RecyclerView {
     }
 
     /**
-     * Set card data. Returns true if carousel was empty, indicating that views will be animated
+     * Returns true if the data set is changed.
      */
-    boolean setData(List<WalletCardViewInfo> data, int selectedIndex) {
-        boolean wasEmpty = mWalletCardCarouselAdapter.getItemCount() == 0;
-        mWalletCardCarouselAdapter.setData(data);
+    boolean setData(List<WalletCardViewInfo> data, int selectedIndex, boolean hasLockStateChanged) {
+        boolean hasDataChanged = mWalletCardCarouselAdapter.setData(data, hasLockStateChanged);
         scrollToPosition(selectedIndex);
-        if (wasEmpty) {
-            mNumCardsToAnimate = numCardsOnScreen(data.size(), selectedIndex);
-            mCardAnimationStartPosition = Math.max(selectedIndex - 1, 0);
-        }
         WalletCardViewInfo selectedCard = data.get(selectedIndex);
         mCardScrollListener.onCardScroll(selectedCard, selectedCard, 0);
-        return wasEmpty;
+        return hasDataChanged;
     }
 
     @Override
     public void scrollToPosition(int position) {
         super.scrollToPosition(position);
         mSelectionListener.onCardSelected(mWalletCardCarouselAdapter.mData.get(position));
-    }
-
-    /**
-     * The number of cards shown on screen when one of the cards is position in the center. This is
-     * also the num
-     */
-    private static int numCardsOnScreen(int numCards, int selectedIndex) {
-        if (numCards <= 2) {
-            return numCards;
-        }
-        // When there are 3 or more cards, 3 cards will be shown unless the first or last card is
-        // centered on screen.
-        return selectedIndex > 0 && selectedIndex < (numCards - 1) ? 3 : 2;
     }
 
     /**
@@ -439,9 +411,29 @@ public class WalletCardCarousel extends RecyclerView {
             return mData.get(position).getCardId().hashCode();
         }
 
-        void setData(List<WalletCardViewInfo> data) {
+        private boolean setData(List<WalletCardViewInfo> data, boolean hasLockedStateChanged) {
+            List<WalletCardViewInfo> oldData = mData;
             mData = data;
-            notifyDataSetChanged();
+            if (hasLockedStateChanged || !isUiEquivalent(oldData, data)) {
+                notifyDataSetChanged();
+                return true;
+            }
+            return false;
+        }
+
+        private boolean isUiEquivalent(
+                List<WalletCardViewInfo> oldData, List<WalletCardViewInfo> newData) {
+            if (oldData.size() != newData.size()) {
+                return false;
+            }
+            for (int i = 0; i < newData.size(); i++) {
+                WalletCardViewInfo oldItem = oldData.get(i);
+                WalletCardViewInfo newItem = newData.get(i);
+                if (!oldItem.isUiEquivalent(newItem)) {
+                    return false;
+                }
+            }
+            return true;
         }
     }
 
