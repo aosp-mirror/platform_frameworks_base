@@ -42,6 +42,8 @@ import android.widget.ImageButton;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.logging.UiEventLogger;
+import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
@@ -76,6 +78,7 @@ public class RemoteInputViewTest extends SysuiTestCase {
     @Mock private RemoteInputQuickSettingsDisabler mRemoteInputQuickSettingsDisabler;
     @Mock private LightBarController mLightBarController;
     private BlockingQueueIntentReceiver mReceiver;
+    private final UiEventLoggerFake mUiEventLoggerFake = new UiEventLoggerFake();
     private RemoteInputView mView;
 
     @Before
@@ -87,6 +90,7 @@ public class RemoteInputViewTest extends SysuiTestCase {
                 mRemoteInputQuickSettingsDisabler);
         mDependency.injectTestDependency(LightBarController.class,
                 mLightBarController);
+        mDependency.injectTestDependency(UiEventLogger.class, mUiEventLoggerFake);
         mDependency.injectMockDependency(NotificationRemoteInputManager.class);
 
         mReceiver = new BlockingQueueIntentReceiver();
@@ -204,5 +208,34 @@ public class RemoteInputViewTest extends SysuiTestCase {
         view.setOnVisibilityChangedListener(null);
         view.setVisibility(View.INVISIBLE);
         view.setVisibility(View.VISIBLE);
+    }
+
+    @Test
+    public void testUiEventLogging_openAndSend() throws Exception {
+        NotificationTestHelper helper = new NotificationTestHelper(
+                mContext,
+                mDependency,
+                TestableLooper.get(this));
+        ExpandableNotificationRow row = helper.createRow();
+        RemoteInputView view = RemoteInputView.inflate(mContext, null, row.getEntry(), mController);
+
+        setTestPendingIntent(view);
+
+        // Open view, send a reply
+        view.focus();
+        EditText editText = view.findViewById(R.id.remote_input_text);
+        editText.setText(TEST_REPLY);
+        ImageButton sendButton = view.findViewById(R.id.remote_input_send);
+        sendButton.performClick();
+
+        mReceiver.waitForIntent();
+
+        assertEquals(2, mUiEventLoggerFake.numLogs());
+        assertEquals(
+                RemoteInputView.NotificationRemoteInputEvent.NOTIFICATION_REMOTE_INPUT_OPEN.getId(),
+                mUiEventLoggerFake.eventId(0));
+        assertEquals(
+                RemoteInputView.NotificationRemoteInputEvent.NOTIFICATION_REMOTE_INPUT_SEND.getId(),
+                mUiEventLoggerFake.eventId(1));
     }
 }
