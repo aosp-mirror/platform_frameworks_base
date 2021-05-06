@@ -58,6 +58,7 @@ import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.logging.QSLogger;
+import com.android.systemui.qs.tileimpl.QSIconViewImpl;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 
 import java.io.FileDescriptor;
@@ -296,7 +297,7 @@ public class GarbageMonitor implements Dumpable {
         MemoryIconDrawable(Context context) {
             baseIcon = context.getDrawable(R.drawable.ic_memory).mutate();
             dp = context.getResources().getDisplayMetrics().density;
-            paint.setColor(QSTileImpl.getColorForState(context, STATE_ACTIVE));
+            paint.setColor(QSIconViewImpl.getIconColorForState(context, STATE_ACTIVE));
         }
 
         public void setRss(long rss) {
