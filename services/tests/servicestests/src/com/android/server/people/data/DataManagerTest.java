@@ -693,7 +693,6 @@ public final class DataManagerTest {
         NotificationListenerService listenerService =
                 mDataManager.getNotificationListenerServiceForTesting(USER_ID_PRIMARY);
         listenerService.onNotificationPosted(mStatusBarNotification);
-
         ConversationChannel result = mDataManager.getConversation(TEST_PKG_NAME, USER_ID_PRIMARY,
                 TEST_SHORTCUT_ID);
 
@@ -1358,6 +1357,27 @@ public final class DataManagerTest {
 
         List<ConversationChannel> result = mDataManager.getRecentConversations(USER_ID_PRIMARY);
         assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void testNotificationRemoved() {
+        mDataManager.onUserUnlocked(USER_ID_PRIMARY);
+
+        ShortcutInfo shortcut = buildShortcutInfo(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID,
+                buildPerson());
+        shortcut.setCached(ShortcutInfo.FLAG_CACHED_NOTIFICATIONS);
+        mDataManager.addOrUpdateConversationInfo(shortcut);
+
+        NotificationListenerService listenerService =
+                mDataManager.getNotificationListenerServiceForTesting(USER_ID_PRIMARY);
+        listenerService.onNotificationPosted(mStatusBarNotification);
+        listenerService.onNotificationRemoved(mStatusBarNotification, null,
+                NotificationListenerService.REASON_CANCEL);
+
+        ConversationInfo conversationInfo = mDataManager.getPackage(TEST_PKG_NAME, USER_ID_PRIMARY)
+                .getConversationStore()
+                .getConversation(TEST_SHORTCUT_ID);
+        assertEquals(conversationInfo.getLastEventTimestamp(), System.currentTimeMillis());
     }
 
     @Test
