@@ -32,6 +32,7 @@ import android.app.smartspace.SmartspaceTarget;
 import android.content.Context;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
+import android.graphics.drawable.Icon;
 import android.os.Handler;
 import android.os.UserHandle;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -41,10 +42,11 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
+import androidx.annotation.Nullable;
+
 import com.android.internal.colorextraction.ColorExtractor;
 import com.android.keyguard.clock.ClockManager;
 import com.android.systemui.R;
-import com.android.systemui.SystemUIFactory;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
@@ -74,6 +76,7 @@ import org.mockito.verification.VerificationMode;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Executor;
 
 @SmallTest
@@ -117,11 +120,11 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
     @Mock
     ConfigurationController mConfigurationController;
     @Mock
+    Optional<BcSmartspaceDataPlugin> mOptionalSmartspaceDataProvider;
+    @Mock
     BcSmartspaceDataPlugin mSmartspaceDataProvider;
     @Mock
     SmartspaceView mSmartspaceView;
-    @Mock
-    SystemUIFactory mSystemUIFactory;
     @Mock
     ActivityStarter mActivityStarter;
     @Mock
@@ -162,7 +165,6 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
         when(mFeatureFlags.isSmartspaceEnabled()).thenReturn(true);
         when(mView.isAttachedToWindow()).thenReturn(true);
         when(mResources.getString(anyInt())).thenReturn("h:mm");
-        when(mSystemUIFactory.getSmartspaceDataProvider()).thenReturn(mSmartspaceDataProvider);
         mController = new KeyguardClockSwitchController(
                 mView,
                 mStatusBarStateController,
@@ -175,14 +177,14 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
                 mExecutor,
                 mBatteryController,
                 mConfigurationController,
-                mSystemUIFactory,
                 mActivityStarter,
                 mFalsingManager,
                 mKeyguardUpdateMonitor,
                 mBypassController,
                 mHandler,
                 mUserTracker,
-                mSecureSettings
+                mSecureSettings,
+                mOptionalSmartspaceDataProvider
         );
 
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE);
@@ -190,6 +192,8 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
 
         mStatusArea = new View(getContext());
         when(mView.findViewById(R.id.keyguard_status_area)).thenReturn(mStatusArea);
+        when(mOptionalSmartspaceDataProvider.isPresent()).thenReturn(true);
+        when(mOptionalSmartspaceDataProvider.get()).thenReturn(mSmartspaceDataProvider);
         when(mSmartspaceDataProvider.getView(any())).thenReturn(mSmartspaceView);
     }
 
@@ -260,7 +264,7 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
     @Test
     public void testSmartspaceEnabledNoDataProviderShowsKeyguardStatusArea() {
         when(mFeatureFlags.isSmartspaceEnabled()).thenReturn(true);
-        when(mSystemUIFactory.getSmartspaceDataProvider()).thenReturn(null);
+        when(mOptionalSmartspaceDataProvider.isPresent()).thenReturn(false);
         mController.init();
 
         assertEquals(View.VISIBLE, mStatusArea.getVisibility());
@@ -389,5 +393,7 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
         public void setIntentStarter(IntentStarter intentStarter) { }
 
         public void setFalsingManager(FalsingManager falsingManager) { }
+
+        public void setDnd(@Nullable Icon dndIcon, @Nullable String description) { }
     }
 }
