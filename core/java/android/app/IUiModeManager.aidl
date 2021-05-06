@@ -16,7 +16,7 @@
 
 package android.app;
 
-import android.app.IOnProjectionStateChangeListener;
+import android.app.IOnProjectionStateChangedListener;
 
 /**
  * Interface used to control special UI modes.
@@ -119,12 +119,12 @@ interface IUiModeManager {
     /**
     * Registers a listener for changes to projection state.
     */
-    void addOnProjectionStateChangeListener(in IOnProjectionStateChangeListener listener, int projectionType);
+    void addOnProjectionStateChangedListener(in IOnProjectionStateChangedListener listener, int projectionType);
 
     /**
     * Unregisters a listener for changes to projection state.
     */
-    void removeOnProjectionStateChangeListener(in IOnProjectionStateChangeListener listener);
+    void removeOnProjectionStateChangedListener(in IOnProjectionStateChangedListener listener);
 
     /**
     * Returns packages that have currently set the given projection type.
