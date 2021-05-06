@@ -48,7 +48,7 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
     private static final float PRECISION = 0.001f;
     private static final int GPS_MODE = 0; // LOCATION_MODE_NO_CHANGE
     private static final int DEFAULT_GPS_MODE =
-            PowerManager.LOCATION_MODE_ALL_DISABLED_WHEN_SCREEN_OFF;
+            PowerManager.LOCATION_MODE_FOREGROUND_ONLY;
     private static final int SOUND_TRIGGER_MODE = 0; // SOUND_TRIGGER_MODE_ALL_ENABLED
     private static final int DEFAULT_SOUND_TRIGGER_MODE =
             PowerManager.SOUND_TRIGGER_MODE_CRITICAL_ONLY;
