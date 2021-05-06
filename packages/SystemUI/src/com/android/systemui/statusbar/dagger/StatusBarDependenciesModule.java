@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.dagger;
 
+import android.app.IActivityManager;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.os.Handler;
@@ -68,6 +69,7 @@ import com.android.systemui.util.time.SystemClock;
 import com.android.wm.shell.bubbles.Bubbles;
 
 import java.util.Optional;
+import java.util.concurrent.Executor;
 
 import dagger.Binds;
 import dagger.Lazy;
@@ -239,10 +241,13 @@ public interface StatusBarDependenciesModule {
             CommonNotifCollection notifCollection,
             FeatureFlags featureFlags,
             SystemClock systemClock,
-            ActivityStarter activityStarter) {
+            ActivityStarter activityStarter,
+            @Main Executor mainExecutor,
+            IActivityManager iActivityManager) {
         OngoingCallController ongoingCallController =
                 new OngoingCallController(
-                        notifCollection, featureFlags, systemClock, activityStarter);
+                        notifCollection, featureFlags, systemClock, activityStarter, mainExecutor,
+                        iActivityManager);
         ongoingCallController.init();
         return ongoingCallController;
     }
