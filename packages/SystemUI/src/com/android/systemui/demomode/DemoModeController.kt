@@ -85,8 +85,6 @@ class DemoModeController constructor(
     }
 
     override fun addCallback(listener: DemoMode) {
-        Assert.isMainThread()
-
         // Register this listener for its commands
         val commands = listener.demoCommands()
 
@@ -99,20 +97,23 @@ class DemoModeController constructor(
             receiverMap[command]!!.add(listener)
         }
 
-        receivers.add(listener)
+        synchronized(this) {
+            receivers.add(listener)
+        }
+
         if (isInDemoMode) {
             listener.onDemoModeStarted()
         }
     }
 
     override fun removeCallback(listener: DemoMode) {
-        Assert.isMainThread()
+        synchronized(this) {
+            listener.demoCommands().forEach { command ->
+                receiverMap[command]!!.remove(listener)
+            }
 
-        listener.demoCommands().forEach { command ->
-            receiverMap[command]!!.remove(listener)
+            receivers.remove(listener)
         }
-
-        receivers.remove(listener)
     }
 
     private fun setIsDemoModeAllowed(enabled: Boolean) {
@@ -125,7 +126,13 @@ class DemoModeController constructor(
     private fun enterDemoMode() {
         isInDemoMode = true
         Assert.isMainThread()
-        receivers.forEach { r ->
+
+        val copy: List<DemoModeCommandReceiver>
+        synchronized(this) {
+            copy = receivers.toList()
+        }
+
+        copy.forEach { r ->
             r.onDemoModeStarted()
         }
     }
@@ -133,7 +140,13 @@ class DemoModeController constructor(
     private fun exitDemoMode() {
         isInDemoMode = false
         Assert.isMainThread()
-        receivers.forEach { r ->
+
+        val copy: List<DemoModeCommandReceiver>
+        synchronized(this) {
+            copy = receivers.toList()
+        }
+
+        copy.forEach { r ->
             r.onDemoModeFinished()
         }
     }
@@ -168,7 +181,11 @@ class DemoModeController constructor(
         pw.println("  isInDemoMode=$isInDemoMode")
         pw.println("  isDemoModeAllowed=$isAvailable")
         pw.print("  receivers=[")
-        receivers.forEach { recv ->
+        val copy: List<DemoModeCommandReceiver>
+        synchronized(this) {
+            copy = receivers.toList()
+        }
+        copy.forEach { recv ->
             pw.print(" ${recv.javaClass.simpleName}")
         }
         pw.println(" ]")
