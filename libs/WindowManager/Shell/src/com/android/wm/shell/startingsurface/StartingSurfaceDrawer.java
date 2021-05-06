@@ -233,12 +233,8 @@ public class StartingSurfaceDrawer {
         windowFlags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
 
         final boolean[] showWallpaper = new boolean[1];
-        final int[] splashscreenContentResId = new int[1];
-        getWindowResFromContext(context, a -> {
-            splashscreenContentResId[0] =
-                    a.getResourceId(R.styleable.Window_windowSplashscreenContent, 0);
-            showWallpaper[0] = a.getBoolean(R.styleable.Window_windowShowWallpaper, false);
-        });
+        getWindowResFromContext(context, a ->
+                showWallpaper[0] = a.getBoolean(R.styleable.Window_windowShowWallpaper, false));
         if (showWallpaper[0]) {
             windowFlags |= WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
         }
@@ -339,8 +335,8 @@ public class StartingSurfaceDrawer {
                 record.setSplashScreenView(contentView);
             }
         };
-        mSplashscreenContentDrawer.createContentView(context, emptyView,
-                splashscreenContentResId[0], activityInfo, taskId, viewSupplier::setView);
+        mSplashscreenContentDrawer.createContentView(context, emptyView, activityInfo, taskId,
+                viewSupplier::setView);
 
         try {
             final View view = win.getDecorView();
