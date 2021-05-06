@@ -76,6 +76,7 @@ import com.android.systemui.statusbar.policy.NetworkController.IconState;
 import com.android.systemui.statusbar.policy.NetworkController.MobileDataIndicators;
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
 import com.android.systemui.telephony.TelephonyListenerManager;
+import com.android.systemui.util.CarrierConfigTracker;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 
@@ -124,6 +125,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     protected DeviceProvisionedListener mUserCallback;
     protected Instrumentation mInstrumentation;
     protected DemoModeController mDemoModeController;
+    protected CarrierConfigTracker mCarrierConfigTracker;
     protected FakeExecutor mFakeExecutor = new FakeExecutor(new FakeSystemClock());
 
     protected int mSubId;
@@ -174,6 +176,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         mMockBd = mock(BroadcastDispatcher.class);
         mMockNsm = mock(NetworkScoreManager.class);
         mMockSubDefaults = mock(SubscriptionDefaults.class);
+        mCarrierConfigTracker = mock(CarrierConfigTracker.class);
         mNetCapabilities = new NetworkCapabilities();
         when(mMockTm.isDataCapable()).thenReturn(true);
         when(mMockTm.createForSubscriptionId(anyInt())).thenReturn(mMockTm);
@@ -231,7 +234,8 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
                 mMockSubDefaults,
                 mMockProvisionController,
                 mMockBd,
-                mDemoModeController);
+                mDemoModeController,
+                mCarrierConfigTracker);
         setupNetworkController();
 
         // Trigger blank callbacks to always get the current state (some tests don't trigger
@@ -298,7 +302,8 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
                         mCallbackHandler,
                         mock(AccessPointControllerImpl.class),
                         mock(DataUsageController.class), mMockSubDefaults,
-                        mock(DeviceProvisionedController.class), mMockBd, mDemoModeController);
+                        mock(DeviceProvisionedController.class), mMockBd, mDemoModeController,
+                        mCarrierConfigTracker);
 
         setupNetworkController();
 
