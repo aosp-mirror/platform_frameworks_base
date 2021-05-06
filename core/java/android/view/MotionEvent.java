@@ -1567,6 +1567,8 @@ public final class MotionEvent extends InputEvent implements Parcelable {
             int axis, int pointerIndex, int historyPos);
     @FastNative
     private static native void nativeTransform(long nativePtr, Matrix matrix);
+    @FastNative
+    private static native void nativeApplyTransform(long nativePtr, Matrix matrix);
 
     // -------------- @CriticalNative ----------------------
 
@@ -3257,6 +3259,21 @@ public final class MotionEvent extends InputEvent implements Parcelable {
         }
 
         nativeTransform(mNativePtr, matrix);
+    }
+
+    /**
+     * Transforms all of the points in the event directly instead of modifying the event's
+     * internal transform.
+     *
+     * @param matrix The transformation matrix to apply.
+     * @hide
+     */
+    public void applyTransform(Matrix matrix) {
+        if (matrix == null) {
+            throw new IllegalArgumentException("matrix must not be null");
+        }
+
+        nativeApplyTransform(mNativePtr, matrix);
     }
 
     /**
