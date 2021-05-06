@@ -115,7 +115,8 @@ public class ActionProxyReceiverTest extends SysuiTestCase {
         actionProxyReceiver.onReceive(mContext, mIntent);
 
         verify(mMockScreenshotSmartActions, never())
-                .notifyScreenshotAction(any(Context.class), anyString(), anyString(), anyBoolean());
+                .notifyScreenshotAction(any(Context.class), anyString(), anyString(), anyBoolean(),
+                        any(Intent.class));
     }
 
     @Test
@@ -128,7 +129,7 @@ public class ActionProxyReceiverTest extends SysuiTestCase {
         actionProxyReceiver.onReceive(mContext, mIntent);
 
         verify(mMockScreenshotSmartActions).notifyScreenshotAction(
-                mContext, testId, ACTION_TYPE_SHARE, false);
+                mContext, testId, ACTION_TYPE_SHARE, false, null);
     }
 
     private ActionProxyReceiver constructActionProxyReceiver(boolean withStatusBar) {
