@@ -6514,8 +6514,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         final Configuration displayConfig = mDisplayContent.getConfiguration();
         return getDisplayContent().mAppTransition.createThumbnailAspectScaleAnimationLocked(
-                appRect, insets, thumbnailHeader, task, displayConfig.uiMode,
-                displayConfig.orientation);
+                appRect, insets, thumbnailHeader, task, displayConfig.orientation);
     }
 
     @Override

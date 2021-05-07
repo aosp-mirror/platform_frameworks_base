@@ -42,12 +42,16 @@ import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.graphics.Point;
 import android.graphics.Rect;
+import android.hardware.HardwareBuffer;
 import android.os.IBinder;
 import android.os.SystemProperties;
+import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.view.Choreographer;
 import android.view.SurfaceControl;
+import android.view.SurfaceSession;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
@@ -85,9 +89,12 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             SystemProperties.getBoolean(DISABLE_CUSTOM_TASK_ANIMATION_PROPERTY, true);
 
     private final TransactionPool mTransactionPool;
+    private final Context mContext;
     private final ShellExecutor mMainExecutor;
     private final ShellExecutor mAnimExecutor;
     private final TransitionAnimation mTransitionAnimation;
+
+    private final SurfaceSession mSurfaceSession = new SurfaceSession();
 
     /** Keeps track of the currently-running animations associated with each transition. */
     private final ArrayMap<IBinder, ArrayList<Animator>> mAnimations = new ArrayMap<>();
@@ -95,12 +102,16 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
     private final Rect mInsets = new Rect(0, 0, 0, 0);
     private float mTransitionAnimationScaleSetting = 1.0f;
 
+    private final int mCurrentUserId;
+
     DefaultTransitionHandler(@NonNull TransactionPool transactionPool, Context context,
             @NonNull ShellExecutor mainExecutor, @NonNull ShellExecutor animExecutor) {
         mTransactionPool = transactionPool;
+        mContext = context;
         mMainExecutor = mainExecutor;
         mAnimExecutor = animExecutor;
         mTransitionAnimation = new TransitionAnimation(context, false /* debug */, Transitions.TAG);
+        mCurrentUserId = UserHandle.myUserId();
 
         AttributeCache.init(context);
     }
@@ -142,7 +153,12 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
 
             Animation a = loadAnimation(info, change);
             if (a != null) {
-                startAnimInternal(animations, a, change.getLeash(), onAnimFinish);
+                startAnimInternal(animations, a, change.getLeash(), onAnimFinish,
+                        null /* position */);
+
+                if (info.getAnimationOptions() != null) {
+                    attachThumbnail(animations, onAnimFinish, change, info.getAnimationOptions());
+                }
             }
         }
         t.apply();
@@ -165,7 +181,6 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
 
     @Nullable
     private Animation loadAnimation(TransitionInfo info, TransitionInfo.Change change) {
-        // TODO(b/178678389): It should handle more type animation here
         Animation a = null;
 
         final int type = info.getType();
@@ -269,7 +284,8 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
     }
 
     private void startAnimInternal(@NonNull ArrayList<Animator> animations, @NonNull Animation anim,
-            @NonNull SurfaceControl leash, @NonNull Runnable finishCallback) {
+            @NonNull SurfaceControl leash, @NonNull Runnable finishCallback,
+            @Nullable Point position) {
         final SurfaceControl.Transaction transaction = mTransactionPool.acquire();
         final ValueAnimator va = ValueAnimator.ofFloat(0f, 1f);
         final Transformation transformation = new Transformation();
@@ -280,11 +296,13 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         va.addUpdateListener(animation -> {
             final long currentPlayTime = Math.min(va.getDuration(), va.getCurrentPlayTime());
 
-            applyTransformation(currentPlayTime, transaction, leash, anim, transformation, matrix);
+            applyTransformation(currentPlayTime, transaction, leash, anim, transformation, matrix,
+                    position);
         });
 
         final Runnable finisher = () -> {
-            applyTransformation(va.getDuration(), transaction, leash, anim, transformation, matrix);
+            applyTransformation(va.getDuration(), transaction, leash, anim, transformation, matrix,
+                    position);
 
             mTransactionPool.release(transaction);
             mMainExecutor.execute(() -> {
@@ -307,9 +325,85 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         mAnimExecutor.execute(va::start);
     }
 
+    private void attachThumbnail(@NonNull ArrayList<Animator> animations,
+            @NonNull Runnable finishCallback, TransitionInfo.Change change,
+            TransitionInfo.AnimationOptions options) {
+        final boolean isTask = change.getTaskInfo() != null;
+        final boolean isOpen = Transitions.isOpeningType(change.getMode());
+        final boolean isClose = Transitions.isClosingType(change.getMode());
+        if (isOpen) {
+            if (options.getType() == ANIM_OPEN_CROSS_PROFILE_APPS && isTask) {
+                attachCrossProfileThunmbnailAnimation(animations, finishCallback, change);
+            } else if (options.getType() == ANIM_THUMBNAIL_SCALE_UP) {
+                attachThumbnailAnimation(animations, finishCallback, change, options);
+            }
+        } else if (isClose && options.getType() == ANIM_THUMBNAIL_SCALE_DOWN) {
+            attachThumbnailAnimation(animations, finishCallback, change, options);
+        }
+    }
+
+    private void attachCrossProfileThunmbnailAnimation(@NonNull ArrayList<Animator> animations,
+            @NonNull Runnable finishCallback, TransitionInfo.Change change) {
+        final int thumbnailDrawableRes = change.getTaskInfo().userId == mCurrentUserId
+                ? R.drawable.ic_account_circle : R.drawable.ic_corp_badge;
+        final Rect bounds = change.getEndAbsBounds();
+        final HardwareBuffer thumbnail = mTransitionAnimation.createCrossProfileAppsThumbnail(
+                thumbnailDrawableRes, bounds);
+        if (thumbnail == null) {
+            return;
+        }
+
+        final SurfaceControl.Transaction transaction = mTransactionPool.acquire();
+        final WindowThumbnail wt = WindowThumbnail.createAndAttach(mSurfaceSession,
+                change.getLeash(), thumbnail, transaction);
+        final Animation a =
+                mTransitionAnimation.createCrossProfileAppsThumbnailAnimationLocked(bounds);
+        if (a == null) {
+            return;
+        }
+
+        final Runnable finisher = () -> {
+            wt.destroy(transaction);
+            mTransactionPool.release(transaction);
+
+            finishCallback.run();
+        };
+        a.restrictDuration(MAX_ANIMATION_DURATION);
+        a.scaleCurrentDuration(mTransitionAnimationScaleSetting);
+        startAnimInternal(animations, a, wt.getSurface(), finisher,
+                new Point(bounds.left, bounds.top));
+    }
+
+    private void attachThumbnailAnimation(@NonNull ArrayList<Animator> animations,
+            @NonNull Runnable finishCallback, TransitionInfo.Change change,
+            TransitionInfo.AnimationOptions options) {
+        final SurfaceControl.Transaction transaction = mTransactionPool.acquire();
+        final WindowThumbnail wt = WindowThumbnail.createAndAttach(mSurfaceSession,
+                change.getLeash(), options.getThumbnail(), transaction);
+        final Rect bounds = change.getEndAbsBounds();
+        final int orientation = mContext.getResources().getConfiguration().orientation;
+        final Animation a = mTransitionAnimation.createThumbnailAspectScaleAnimationLocked(bounds,
+                mInsets, options.getThumbnail(), orientation, null /* startRect */,
+                options.getTransitionBounds(), options.getType() == ANIM_THUMBNAIL_SCALE_UP);
+
+        final Runnable finisher = () -> {
+            wt.destroy(transaction);
+            mTransactionPool.release(transaction);
+
+            finishCallback.run();
+        };
+        a.restrictDuration(MAX_ANIMATION_DURATION);
+        a.scaleCurrentDuration(mTransitionAnimationScaleSetting);
+        startAnimInternal(animations, a, wt.getSurface(), finisher, null /* position */);
+    }
+
     private static void applyTransformation(long time, SurfaceControl.Transaction t,
-            SurfaceControl leash, Animation anim, Transformation transformation, float[] matrix) {
+            SurfaceControl leash, Animation anim, Transformation transformation, float[] matrix,
+            Point position) {
         anim.getTransformation(time, transformation);
+        if (position != null) {
+            transformation.getMatrix().postTranslate(position.x, position.y);
+        }
         t.setMatrix(leash, transformation.getMatrix(), matrix);
         t.setAlpha(leash, transformation.getAlpha());
         t.setFrameTimelineVsync(Choreographer.getInstance().getVsyncId());

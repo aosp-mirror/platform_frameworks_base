@@ -78,6 +78,7 @@ import static com.android.internal.R.styleable.WindowAnimation_wallpaperIntraOpe
 import static com.android.internal.R.styleable.WindowAnimation_wallpaperIntraOpenExitAnimation;
 import static com.android.internal.R.styleable.WindowAnimation_wallpaperOpenEnterAnimation;
 import static com.android.internal.R.styleable.WindowAnimation_wallpaperOpenExitAnimation;
+import static com.android.internal.policy.TransitionAnimation.prepareThumbnailAnimationWithDuration;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS_ANIM;
 import static com.android.server.wm.AppTransitionProto.APP_TRANSITION_STATE;
@@ -98,12 +99,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Picture;
 import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
 import android.hardware.HardwareBuffer;
 import android.os.Binder;
 import android.os.Debug;
@@ -128,7 +124,6 @@ import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
-import android.view.animation.ClipRectAnimation;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 import android.view.animation.ScaleAnimation;
@@ -637,24 +632,6 @@ public class AppTransition implements Dump {
     /**
      * Prepares the specified animation with a standard duration, interpolator, etc.
      */
-    Animation prepareThumbnailAnimationWithDuration(@Nullable Animation a, int appWidth,
-            int appHeight, long duration, Interpolator interpolator) {
-        if (a != null) {
-            if (duration > 0) {
-                a.setDuration(duration);
-            }
-            a.setFillAfter(true);
-            if (interpolator != null) {
-                a.setInterpolator(interpolator);
-            }
-            a.initialize(appWidth, appHeight, appWidth, appHeight);
-        }
-        return a;
-    }
-
-    /**
-     * Prepares the specified animation with a standard duration, interpolator, etc.
-     */
     Animation prepareThumbnailAnimation(Animation a, int appWidth, int appHeight, int transit) {
         // Pick the desired duration.  If this is an inter-activity transition,
         // it  is the standard duration for that.  Otherwise we use the longer
@@ -679,32 +656,11 @@ public class AppTransition implements Dump {
      */
     HardwareBuffer createCrossProfileAppsThumbnail(
             @DrawableRes int thumbnailDrawableRes, Rect frame) {
-        final int width = frame.width();
-        final int height = frame.height();
-
-        final Picture picture = new Picture();
-        final Canvas canvas = picture.beginRecording(width, height);
-        canvas.drawColor(Color.argb(0.6f, 0, 0, 0));
-        final int thumbnailSize = mService.mContext.getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.cross_profile_apps_thumbnail_size);
-        final Drawable drawable = mService.mContext.getDrawable(thumbnailDrawableRes);
-        drawable.setBounds(
-                (width - thumbnailSize) / 2,
-                (height - thumbnailSize) / 2,
-                (width + thumbnailSize) / 2,
-                (height + thumbnailSize) / 2);
-        drawable.setTint(mContext.getColor(android.R.color.white));
-        drawable.draw(canvas);
-        picture.endRecording();
-
-        return Bitmap.createBitmap(picture).getHardwareBuffer();
+        return mTransitionAnimation.createCrossProfileAppsThumbnail(thumbnailDrawableRes, frame);
     }
 
     Animation createCrossProfileAppsThumbnailAnimationLocked(Rect appRect) {
-        final Animation animation =
-                mTransitionAnimation.loadCrossProfileAppThumbnailEnterAnimation();
-        return prepareThumbnailAnimationWithDuration(animation, appRect.width(),
-                appRect.height(), 0, null);
+        return mTransitionAnimation.createCrossProfileAppsThumbnailAnimationLocked(appRect);
     }
 
     /**
@@ -712,115 +668,14 @@ public class AppTransition implements Dump {
      * when a thumbnail is specified with the pending animation override.
      */
     Animation createThumbnailAspectScaleAnimationLocked(Rect appRect, @Nullable Rect contentInsets,
-            HardwareBuffer thumbnailHeader, WindowContainer container, int uiMode,
-            int orientation) {
-        Animation a;
-        final int thumbWidthI = thumbnailHeader.getWidth();
-        final float thumbWidth = thumbWidthI > 0 ? thumbWidthI : 1;
-        final int thumbHeightI = thumbnailHeader.getHeight();
-        final int appWidth = appRect.width();
-
-        float scaleW = appWidth / thumbWidth;
-        getNextAppTransitionStartRect(container, mTmpRect);
-        final float fromX;
-        float fromY;
-        final float toX;
-        float toY;
-        final float pivotX;
-        final float pivotY;
-        if (shouldScaleDownThumbnailTransition(uiMode, orientation)) {
-            fromX = mTmpRect.left;
-            fromY = mTmpRect.top;
-
-            // For the curved translate animation to work, the pivot points needs to be at the
-            // same absolute position as the one from the real surface.
-            toX = mTmpRect.width() / 2 * (scaleW - 1f) + appRect.left;
-            toY = appRect.height() / 2 * (1 - 1 / scaleW) + appRect.top;
-            pivotX = mTmpRect.width() / 2;
-            pivotY = appRect.height() / 2 / scaleW;
-            if (mGridLayoutRecentsEnabled) {
-                // In the grid layout, the header is displayed above the thumbnail instead of
-                // overlapping it.
-                fromY -= thumbHeightI;
-                toY -= thumbHeightI * scaleW;
-            }
-        } else {
-            pivotX = 0;
-            pivotY = 0;
-            fromX = mTmpRect.left;
-            fromY = mTmpRect.top;
-            toX = appRect.left;
-            toY = appRect.top;
-        }
-        final long duration = getAspectScaleDuration();
-        final Interpolator interpolator = getAspectScaleInterpolator();
-        if (mNextAppTransitionScaleUp) {
-            // Animation up from the thumbnail to the full screen
-            Animation scale = new ScaleAnimation(1f, scaleW, 1f, scaleW, pivotX, pivotY);
-            scale.setInterpolator(interpolator);
-            scale.setDuration(duration);
-            Animation alpha = new AlphaAnimation(1f, 0f);
-            alpha.setInterpolator(mThumbnailFadeOutInterpolator);
-            alpha.setDuration(duration);
-            Animation translate = createCurvedMotion(fromX, toX, fromY, toY);
-            translate.setInterpolator(interpolator);
-            translate.setDuration(duration);
-
-            mTmpFromClipRect.set(0, 0, thumbWidthI, thumbHeightI);
-            mTmpToClipRect.set(appRect);
-
-            // Containing frame is in screen space, but we need the clip rect in the
-            // app space.
-            mTmpToClipRect.offsetTo(0, 0);
-            mTmpToClipRect.right = (int) (mTmpToClipRect.right / scaleW);
-            mTmpToClipRect.bottom = (int) (mTmpToClipRect.bottom / scaleW);
-
-            if (contentInsets != null) {
-                mTmpToClipRect.inset((int) (-contentInsets.left * scaleW),
-                        (int) (-contentInsets.top * scaleW),
-                        (int) (-contentInsets.right * scaleW),
-                        (int) (-contentInsets.bottom * scaleW));
-            }
-
-            Animation clipAnim = new ClipRectAnimation(mTmpFromClipRect, mTmpToClipRect);
-            clipAnim.setInterpolator(interpolator);
-            clipAnim.setDuration(duration);
-
-            // This AnimationSet uses the Interpolators assigned above.
-            AnimationSet set = new AnimationSet(false);
-            set.addAnimation(scale);
-            if (!mGridLayoutRecentsEnabled) {
-                // In the grid layout, the header should be shown for the whole animation.
-                set.addAnimation(alpha);
-            }
-            set.addAnimation(translate);
-            set.addAnimation(clipAnim);
-            a = set;
-        } else {
-            // Animation down from the full screen to the thumbnail
-            Animation scale = new ScaleAnimation(scaleW, 1f, scaleW, 1f, pivotX, pivotY);
-            scale.setInterpolator(interpolator);
-            scale.setDuration(duration);
-            Animation alpha = new AlphaAnimation(0f, 1f);
-            alpha.setInterpolator(mThumbnailFadeInInterpolator);
-            alpha.setDuration(duration);
-            Animation translate = createCurvedMotion(toX, fromX, toY, fromY);
-            translate.setInterpolator(interpolator);
-            translate.setDuration(duration);
-
-            // This AnimationSet uses the Interpolators assigned above.
-            AnimationSet set = new AnimationSet(false);
-            set.addAnimation(scale);
-            if (!mGridLayoutRecentsEnabled) {
-                // In the grid layout, the header should be shown for the whole animation.
-                set.addAnimation(alpha);
-            }
-            set.addAnimation(translate);
-            a = set;
-
-        }
-        return prepareThumbnailAnimationWithDuration(a, appWidth, appRect.height(), 0,
-                null);
+            HardwareBuffer thumbnailHeader, WindowContainer container, int orientation) {
+        AppTransitionAnimationSpec spec = mNextAppTransitionAnimationsSpecs.get(
+                container.hashCode());
+        return mTransitionAnimation.createThumbnailAspectScaleAnimationLocked(appRect,
+                contentInsets, thumbnailHeader, orientation, spec != null ? spec.rect : null,
+                mDefaultNextAppTransitionAnimationSpec != null
+                        ? mDefaultNextAppTransitionAnimationSpec.rect : null,
+                mNextAppTransitionScaleUp);
     }
 
     private Animation createCurvedMotion(float fromX, float toX, float fromY, float toY) {
