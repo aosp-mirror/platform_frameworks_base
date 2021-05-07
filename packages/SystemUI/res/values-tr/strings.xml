@@ -289,9 +289,11 @@
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"Mobil hotspot kapatıldı."</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"Mobil hotspot açıldı."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"Ekran yayını durduruldu."</string>
-    <string name="accessibility_quick_settings_work_mode_off" msgid="562749867895549696">"Çalışma modu kapalı."</string>
+    <!-- no translation found for accessibility_quick_settings_work_mode_off (9106217884005620744) -->
+    <skip />
     <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"Çalışma modu açık."</string>
-    <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6256690740556798683">"Çalışma modu kapatıldı."</string>
+    <!-- no translation found for accessibility_quick_settings_work_mode_changed_off (2653550342355027441) -->
+    <skip />
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"Çalışma modu açıldı."</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"Veri Tasarrufu kapatıldı."</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"Veri Tasarrufu açıldı."</string>
@@ -410,6 +412,8 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"Sınır: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"<xliff:g id="DATA_LIMIT">%s</xliff:g> uyarısı"</string>
     <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"İş profili"</string>
+    <!-- no translation found for quick_settings_work_mode_paused (4841109346916998613) -->
+    <skip />
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Gece Işığı"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Gün batımı açılacak"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Sabaha kadar"</string>
@@ -668,10 +672,12 @@
     <string name="wallet_title" msgid="5369767670735827105">"Cüzdan"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Tümünü göster"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Ödeme için kilidi aç"</string>
-    <string name="wallet_secondary_label_active" msgid="4909706168969888137">"Hazır"</string>
-    <string name="wallet_secondary_label_no_card" msgid="1750103386908123401">"Ödeme ayarlarını belirle"</string>
+    <!-- no translation found for wallet_secondary_label_no_card (1282609666895946317) -->
+    <skip />
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Kullanmak için kilidi aç"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Kartlarınız alınırken bir sorun oluştu. Lütfen daha sonra tekrar deneyin"</string>
+    <!-- no translation found for wallet_lockscreen_settings_label (3539105300870383570) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"İş profili"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Uçak modu"</string>
     <string name="add_tile" msgid="6239678623873086686">"Blok ekle"</string>
@@ -740,9 +746,12 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Durum:&lt;/b&gt; Sessize Düşürüldü"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Durum:&lt;/b&gt; Daha Yüksek Sıralandı"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Durum:&lt;/b&gt; Daha Düşük Sıralandı"</string>
-    <string name="notification_channel_summary_priority" msgid="4592979359953954258">"Öncelik modu açık olduğunda bile her zaman bildirimlerinizin üst kısmında gösterilir"</string>
+    <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Görüşme bildirimlerinin üstünde ve kilit ekranında profil resmi olarak gösterilir"</string>
+    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Görüşme bildirimlerinin üstünde ve kilit ekranında profil resmi olarak gösterilir, baloncuk olarak görünür"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Görüşme bildirimlerinin üstünde ve kilit ekranında profil resmi olarak gösterilir, Rahatsız Etmeyin\'i kesintiye uğratır"</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Görüşme bildirimlerinin üstünde ve kilit ekranında profil resmi olarak gösterilir, baloncuk olarak görünür, Rahatsız Etmeyin\'i kesintiye uğratır"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Ayarlar"</string>
-    <string name="notification_priority_title" msgid="5256226572739882190">"Öncelikli görüşmeler"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"Öncelik"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g>, sohbet özelliklerini desteklemiyor"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Bu bildirimler değiştirilemez."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Bu bildirim grubu burada yapılandırılamaz"</string>
@@ -858,6 +867,8 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"Açık"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"Kapalı"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"Kullanılamıyor"</string>
+    <!-- no translation found for tile_disabled (373212051546573069) -->
+    <skip />
     <string name="nav_bar" msgid="4642708685386136807">"Gezinme çubuğu"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"Düzen"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"Ekstra sol düğme türü"</string>
@@ -1016,14 +1027,6 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Sistemde gezinme yöntemi güncellendi. Değişiklik yapmak için Ayarlar\'a gidin."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Sistemde gezinme yöntemini güncellemek için Ayarlar\'a gidin"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Beklemeye alınıyor"</string>
-    <string name="priority_onboarding_title" msgid="2893070698479227616">"Görüşme öncelikli olarak ayarlandı"</string>
-    <string name="priority_onboarding_behavior" msgid="636826237468953117">"Öncelikli görüşmeler"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="3861580571311518785">"Listenizin üst kısmında gösterilen bu görüşmeler, Öncelik modu açık olduğunda her zaman size ulaşabilir"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="1781653813573865071">"Profil resimleri kilit ekranında gösterilir"</string>
-    <string name="priority_onboarding_appear_as_bubble_text" msgid="4359924720680083057">"Bu görüşmeleri, ana ekranınızdaki baloncuklarda kolayca bulabilirsiniz"</string>
-    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Rahatsız Etmeyin\'i keser"</string>
-    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Anladım"</string>
-    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Ayarlar"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Büyütme Penceresi"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Büyütme Penceresi Kontrolleri"</string>
     <string name="accessibility_control_zoom_in" msgid="1189272315480097417">"Yakınlaştır"</string>
@@ -1132,7 +1135,7 @@
     <string name="location_status" msgid="1294990572202541812">"Konum paylaşılıyor"</string>
     <string name="location_status_content_description" msgid="2982386178160071305">"<xliff:g id="NAME">%1$s</xliff:g>, konum bilgisini paylaşıyor"</string>
     <string name="new_story_status" msgid="9012195158584846525">"Yeni hikaye"</string>
-    <string name="new_story_status_content_description" msgid="4963137422622516708">"<xliff:g id="NAME">%1$s</xliff:g>, yeni bir hikaye paylaştı"</string>
+    <string name="new_story_status_content_description" msgid="4963137422622516708">"<xliff:g id="NAME">%1$s</xliff:g> yeni bir hikaye paylaştı"</string>
     <string name="video_status" msgid="4548544654316843225">"İzleniyor"</string>
     <string name="audio_status" msgid="4237055636967709208">"Dinleniyor"</string>
     <string name="game_status" msgid="1340694320630973259">"Çalınıyor"</string>
