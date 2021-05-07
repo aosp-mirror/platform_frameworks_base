@@ -462,6 +462,12 @@ public class LocationProviderManager extends
         }
 
         @GuardedBy("mLock")
+        final boolean onProviderPropertiesChanged() {
+            onHighPowerUsageChanged();
+            return false;
+        }
+
+        @GuardedBy("mLock")
         private void onHighPowerUsageChanged() {
             boolean isUsingHighPower = isUsingHighPower();
             if (isUsingHighPower != mIsUsingHighPower) {
@@ -485,9 +491,14 @@ public class LocationProviderManager extends
                 Preconditions.checkState(Thread.holdsLock(mLock));
             }
 
+            ProviderProperties properties = getProperties();
+            if (properties == null) {
+                return false;
+            }
+
             return isActive()
                     && getRequest().getIntervalMillis() < MAX_HIGH_POWER_INTERVAL_MS
-                    && getProperties().getPowerUsage() == ProviderProperties.POWER_USAGE_HIGH;
+                    && properties.getPowerUsage() == ProviderProperties.POWER_USAGE_HIGH;
         }
 
         @GuardedBy("mLock")
@@ -2268,6 +2279,10 @@ public class LocationProviderManager extends
 
         if (oldState.allowed != newState.allowed) {
             onEnabledChanged(UserHandle.USER_ALL);
+        }
+
+        if (!Objects.equals(oldState.properties, newState.properties)) {
+            updateRegistrations(Registration::onProviderPropertiesChanged);
         }
 
         if (mOnLocationTagsChangeListener != null) {
