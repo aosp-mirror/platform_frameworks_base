@@ -28,13 +28,13 @@ import androidx.dynamicanimation.animation.FloatPropertyCompat
 import androidx.dynamicanimation.animation.SpringForce
 import com.android.settingslib.Utils
 import com.android.systemui.Gefingerpoken
-import com.android.systemui.qs.PageIndicator
 import com.android.systemui.R
 import com.android.systemui.classifier.Classifier.NOTIFICATION_DISMISS
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.plugins.FalsingManager
-import com.android.wm.shell.animation.PhysicsAnimator
+import com.android.systemui.qs.PageIndicator
 import com.android.systemui.util.concurrency.DelayableExecutor
+import com.android.wm.shell.animation.PhysicsAnimator
 
 private const val FLING_SLOP = 1000000
 private const val DISMISS_DELAY = 100L
@@ -61,7 +61,8 @@ class MediaCarouselScrollHandler(
     private var translationChangedListener: () -> Unit,
     private val closeGuts: () -> Unit,
     private val falsingCollector: FalsingCollector,
-    private val falsingManager: FalsingManager
+    private val falsingManager: FalsingManager,
+    private val logSmartspaceImpression: () -> Unit
 ) {
     /**
      * Is the view in RTL
@@ -199,6 +200,13 @@ class MediaCarouselScrollHandler(
                     relativeScrollX % playerWidthPlusPadding)
         }
     }
+
+    var visibleToUser: Boolean = false
+        set(value) {
+            if (field != value) {
+                field = value
+            }
+        }
 
     init {
         gestureDetector = GestureDetectorCompat(scrollView.context, gestureListener)
@@ -460,7 +468,11 @@ class MediaCarouselScrollHandler(
         scrollIntoCurrentMedia = scrollInAmount
         val nowScrolledIn = scrollIntoCurrentMedia != 0
         if (newIndex != visibleMediaIndex || wasScrolledIn != nowScrolledIn) {
+            val oldIndex = visibleMediaIndex
             visibleMediaIndex = newIndex
+            if (oldIndex != visibleMediaIndex && visibleToUser) {
+                logSmartspaceImpression()
+            }
             closeGuts()
             updatePlayerVisibilities()
         }

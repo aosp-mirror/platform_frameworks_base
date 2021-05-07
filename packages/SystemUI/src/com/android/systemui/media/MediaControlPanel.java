@@ -105,7 +105,8 @@ public class MediaControlPanel {
     private int mDevicePadding;
     private int mAlbumArtSize;
     // Instance id for logging purpose.
-    private int mInstanceId;
+    protected int mInstanceId = -1;
+    private MediaCarouselController mMediaCarouselController;
     private final MediaOutputDialogFactory mMediaOutputDialogFactory;
 
     /**
@@ -119,7 +120,7 @@ public class MediaControlPanel {
             ActivityStarter activityStarter, MediaViewController mediaViewController,
             SeekBarViewModel seekBarViewModel, Lazy<MediaDataManager> lazyMediaDataManager,
             KeyguardDismissUtil keyguardDismissUtil, MediaOutputDialogFactory
-            mediaOutputDialogFactory) {
+            mediaOutputDialogFactory, MediaCarouselController mediaCarouselController) {
         mContext = context;
         mBackgroundExecutor = backgroundExecutor;
         mActivityStarter = activityStarter;
@@ -128,6 +129,7 @@ public class MediaControlPanel {
         mMediaDataManagerLazy = lazyMediaDataManager;
         mKeyguardDismissUtil = keyguardDismissUtil;
         mMediaOutputDialogFactory = mediaOutputDialogFactory;
+        mMediaCarouselController = mediaCarouselController;
         loadDimens();
     }
 
@@ -251,6 +253,8 @@ public class MediaControlPanel {
         }
         mKey = key;
         MediaSession.Token token = data.getToken();
+        mInstanceId = data.getPackageName().hashCode();
+
         mBackgroundColor = data.getBackgroundColor();
         if (mToken == null || !mToken.equals(token)) {
             mToken = token;
@@ -270,6 +274,9 @@ public class MediaControlPanel {
         if (clickIntent != null) {
             mPlayerViewHolder.getPlayer().setOnClickListener(v -> {
                 if (mMediaViewController.isGutsVisible()) return;
+
+                logSmartspaceCardReported(760, // SMARTSPACE_CARD_CLICK
+                        false);
                 mActivityStarter.postStartActivityDismissingKeyguard(clickIntent,
                         buildLaunchAnimatorController(mPlayerViewHolder.getPlayer()));
             });
@@ -376,6 +383,8 @@ public class MediaControlPanel {
             } else {
                 button.setEnabled(true);
                 button.setOnClickListener(v -> {
+                    logSmartspaceCardReported(760, // SMARTSPACE_CARD_CLICK
+                            false);
                     action.run();
                 });
             }
@@ -408,6 +417,9 @@ public class MediaControlPanel {
         mPlayerViewHolder.getDismissLabel().setAlpha(isDismissible ? 1 : DISABLED_ALPHA);
         mPlayerViewHolder.getDismiss().setEnabled(isDismissible);
         mPlayerViewHolder.getDismiss().setOnClickListener(v -> {
+            logSmartspaceCardReported(761, // SMARTSPACE_CARD_DISMISS
+                    false);
+
             if (mKey != null) {
                 closeGuts();
                 mKeyguardDismissUtil.executeWhenUnlocked(() -> {
@@ -550,6 +562,8 @@ public class MediaControlPanel {
 
         // Set up long press to show guts setting panel.
         mRecommendationViewHolder.getDismiss().setOnClickListener(v -> {
+            logSmartspaceCardReported(761, // SMARTSPACE_CARD_DISMISS
+                    true);
             closeGuts();
             mKeyguardDismissUtil.executeWhenUnlocked(() -> {
                 mMediaDataManagerLazy.get().dismissSmartspaceRecommendation(
@@ -652,15 +666,9 @@ public class MediaControlPanel {
         }
 
         view.setOnClickListener(v -> {
-            // When media recommendation card is shown, there could be only one card.
-            SysUiStatsLog.write(SysUiStatsLog.SMARTSPACE_CARD_REPORTED,
-                    760, // SMARTSPACE_CARD_CLICK
-                    mInstanceId,
-                    SysUiStatsLog
-                            .SMART_SPACE_CARD_REPORTED__CARD_TYPE__HEADPHONE_MEDIA_RECOMMENDATIONS,
-                    getSurfaceForSmartspaceLogging(),
-                    /* rank */ 0,
-                    /* cardinality */ 1);
+            // When media recommendation card is shown, it will always be the top card.
+            logSmartspaceCardReported(760, // SMARTSPACE_CARD_CLICK
+                    true);
 
             if (shouldSmartspaceRecItemOpenInForeground(action)) {
                 // Request to unlock the device if the activity needs to be opened in foreground.
@@ -718,7 +726,10 @@ public class MediaControlPanel {
         return SysUiStatsLog.SMART_SPACE_CARD_REPORTED__DISPLAY_SURFACE__DEFAULT_SURFACE;
     }
 
-    protected int getInstanceId() {
-        return mInstanceId;
+    private void logSmartspaceCardReported(int eventId, boolean isRecommendationCard) {
+        mMediaCarouselController.logSmartspaceCardReported(eventId,
+                mInstanceId,
+                isRecommendationCard,
+                getSurfaceForSmartspaceLogging());
     }
 }
