@@ -837,8 +837,8 @@ public final class PrintAttributes implements Parcelable {
                 new MediaSize("JPN_YOU4", "android",
                         R.string.mediasize_japanese_you4, 4134, 9252);
         /** Japanese Photo L media size: 89mm x 127mm (3.5 x 5") */
-        public static final @NonNull MediaSize OE_PHOTO_L =
-                new MediaSize("OE_PHOTO_L", "android",
+        public static final @NonNull MediaSize JPN_OE_PHOTO_L =
+                new MediaSize("JPN_OE_PHOTO_L", "android",
                         R.string.mediasize_japanese_l, 3500, 5000);
 
         private final @NonNull String mId;

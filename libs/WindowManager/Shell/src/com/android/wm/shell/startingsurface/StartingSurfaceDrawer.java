@@ -35,7 +35,7 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.os.IBinder;
-import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -106,6 +106,8 @@ public class StartingSurfaceDrawer {
     private final SplashscreenContentDrawer mSplashscreenContentDrawer;
     private Choreographer mChoreographer;
 
+    private static final boolean DEBUG_ENABLE_REVEAL_ANIMATION =
+            SystemProperties.getBoolean("persist.debug.enable_reveal_animation", false);
     /**
      * @param splashScreenExecutor The thread used to control add and remove starting window.
      */
@@ -114,12 +116,10 @@ public class StartingSurfaceDrawer {
         mContext = context;
         mDisplayManager = mContext.getSystemService(DisplayManager.class);
         mSplashScreenExecutor = splashScreenExecutor;
-        final int iconExitAnimDuration = context.getResources().getInteger(
-                com.android.wm.shell.R.integer.starting_window_icon_exit_anim_duration);
         final int appRevealAnimDuration = context.getResources().getInteger(
                 com.android.wm.shell.R.integer.starting_window_app_reveal_anim_duration);
-        mSplashscreenContentDrawer = new SplashscreenContentDrawer(mContext, iconExitAnimDuration,
-                appRevealAnimDuration, pool);
+        mSplashscreenContentDrawer = new SplashscreenContentDrawer(mContext, appRevealAnimDuration,
+                pool);
         mSplashScreenExecutor.execute(() -> mChoreographer = Choreographer.getInstance());
     }
 
@@ -467,20 +467,24 @@ public class StartingSurfaceDrawer {
                 if (DEBUG_SPLASH_SCREEN) {
                     Slog.v(TAG, "Removing splash screen window for task: " + taskId);
                 }
-                if (record.mContentView != null) {
-                    if (leash != null || playRevealAnimation) {
-                        mSplashscreenContentDrawer.applyExitAnimation(record.mContentView,
-                                leash, frame, record.isEarlyExit(),
-                                () -> removeWindowInner(record.mDecorView, true));
+                if (record.mContentView != null
+                        && record.mContentView.isRevealAnimationSupported()) {
+                    if (playRevealAnimation) {
+                        if (DEBUG_ENABLE_REVEAL_ANIMATION) {
+                            mSplashscreenContentDrawer.applyExitAnimation(record.mContentView,
+                                    leash, frame,
+                                    () -> removeWindowInner(record.mDecorView, true));
+                        } else {
+                            // using the default exit animation from framework
+                            removeWindowInner(record.mDecorView, false);
+                        }
                     } else {
-                        // TODO(183004107) Always hide decorView when playRevealAnimation is enabled
-                        //  from TaskOrganizerController#removeStartingWindow
-                        // the SplashScreenView has been copied to client, skip default exit
-                        // animation
-                        removeWindowInner(record.mDecorView, false);
+                        // the SplashScreenView has been copied to client, hide the view to skip
+                        // default exit animation
+                        removeWindowInner(record.mDecorView, true);
                     }
                 } else {
-                    // no animation will be applied
+                    // this is a blank splash screen, don't apply reveal animation
                     removeWindowInner(record.mDecorView, false);
                 }
             }
@@ -514,12 +518,10 @@ public class StartingSurfaceDrawer {
      * Record the view or surface for a starting window.
      */
     private static class StartingWindowRecord {
-        private static final long EARLY_START_MINIMUM_TIME_MS = 250;
         private final View mDecorView;
         private final TaskSnapshotWindow mTaskSnapshotWindow;
         private SplashScreenView mContentView;
         private boolean mSetSplashScreen;
-        private long mContentCreateTime;
 
         StartingWindowRecord(View decorView, TaskSnapshotWindow taskSnapshotWindow) {
             mDecorView = decorView;
@@ -531,12 +533,7 @@ public class StartingSurfaceDrawer {
                 return;
             }
             mContentView = splashScreenView;
-            mContentCreateTime = SystemClock.uptimeMillis();
             mSetSplashScreen = true;
-        }
-
-        boolean isEarlyExit() {
-            return SystemClock.uptimeMillis() - mContentCreateTime < EARLY_START_MINIMUM_TIME_MS;
         }
     }
 }

@@ -621,6 +621,7 @@ public final class QuotaController extends StateController {
     }
 
     @Override
+    @GuardedBy("mLock")
     public void maybeStartTrackingJobLocked(JobStatus jobStatus, JobStatus lastJob) {
         final long nowElapsed = sElapsedRealtimeClock.millis();
         final int userId = jobStatus.getSourceUserId();
@@ -648,6 +649,7 @@ public final class QuotaController extends StateController {
     }
 
     @Override
+    @GuardedBy("mLock")
     public void prepareForExecutionLocked(JobStatus jobStatus) {
         if (DEBUG) {
             Slog.d(TAG, "Prepping for " + jobStatus.toShortString());
@@ -676,6 +678,7 @@ public final class QuotaController extends StateController {
     }
 
     @Override
+    @GuardedBy("mLock")
     public void unprepareFromExecutionLocked(JobStatus jobStatus) {
         Timer timer = mPkgTimers.get(jobStatus.getSourceUserId(), jobStatus.getSourcePackageName());
         if (timer != null) {
@@ -691,6 +694,7 @@ public final class QuotaController extends StateController {
     }
 
     @Override
+    @GuardedBy("mLock")
     public void maybeStopTrackingJobLocked(JobStatus jobStatus, JobStatus incomingJob,
             boolean forUpdate) {
         if (jobStatus.clearTrackingController(JobStatus.TRACKING_QUOTA)) {
@@ -796,10 +800,12 @@ public final class QuotaController extends StateController {
     }
 
     /** Returns the maximum amount of time this job could run for. */
+    @GuardedBy("mLock")
     public long getMaxJobExecutionTimeMsLocked(@NonNull final JobStatus jobStatus) {
         if (!jobStatus.shouldTreatAsExpeditedJob()) {
-            // If quota is currently "free", then the job can run for the full amount of time.
-            if (mChargeTracker.isCharging()
+            // If quota is currently "free", then the job can run for the full amount of time,
+            // regardless of bucket (hence using charging instead of isQuotaFreeLocked()).
+            if (mChargeTracker.isChargingLocked()
                     || mTopAppCache.get(jobStatus.getSourceUid())
                     || isTopStartedJobLocked(jobStatus)
                     || isUidInForeground(jobStatus.getSourceUid())) {
@@ -810,7 +816,7 @@ public final class QuotaController extends StateController {
         }
 
         // Expedited job.
-        if (mChargeTracker.isCharging()) {
+        if (mChargeTracker.isChargingLocked()) {
             return mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS;
         }
         if (mTopAppCache.get(jobStatus.getSourceUid()) || isTopStartedJobLocked(jobStatus)) {
@@ -828,8 +834,9 @@ public final class QuotaController extends StateController {
     }
 
     /** @return true if the job is within expedited job quota. */
+    @GuardedBy("mLock")
     public boolean isWithinEJQuotaLocked(@NonNull final JobStatus jobStatus) {
-        if (isQuotaFree(jobStatus.getEffectiveStandbyBucket())) {
+        if (isQuotaFreeLocked(jobStatus.getEffectiveStandbyBucket())) {
             return true;
         }
         // A job is within quota if one of the following is true:
@@ -887,9 +894,10 @@ public final class QuotaController extends StateController {
                 jobStatus.getSourceUserId(), jobStatus.getSourcePackageName(), standbyBucket);
     }
 
-    private boolean isQuotaFree(final int standbyBucket) {
+    @GuardedBy("mLock")
+    private boolean isQuotaFreeLocked(final int standbyBucket) {
         // Quota constraint is not enforced while charging.
-        if (mChargeTracker.isCharging()) {
+        if (mChargeTracker.isChargingLocked()) {
             // Restricted jobs require additional constraints when charging, so don't immediately
             // mark quota as free when charging.
             return standbyBucket != RESTRICTED_INDEX;
@@ -898,11 +906,12 @@ public final class QuotaController extends StateController {
     }
 
     @VisibleForTesting
+    @GuardedBy("mLock")
     boolean isWithinQuotaLocked(final int userId, @NonNull final String packageName,
             final int standbyBucket) {
         if (standbyBucket == NEVER_INDEX) return false;
 
-        if (isQuotaFree(standbyBucket)) return true;
+        if (isQuotaFreeLocked(standbyBucket)) return true;
 
         ExecutionStats stats = getExecutionStatsLocked(userId, packageName, standbyBucket);
         return getRemainingExecutionTimeLocked(stats) > 0
@@ -1493,14 +1502,13 @@ public final class QuotaController extends StateController {
     /** Schedule a cleanup alarm if necessary and there isn't already one scheduled. */
     @VisibleForTesting
     void maybeScheduleCleanupAlarmLocked() {
-        final long nowElapsed = sElapsedRealtimeClock.millis();
-        if (mNextCleanupTimeElapsed > nowElapsed) {
+        if (mNextCleanupTimeElapsed > sElapsedRealtimeClock.millis()) {
             // There's already an alarm scheduled. Just stick with that one. There's no way we'll
             // end up scheduling an earlier alarm.
             if (DEBUG) {
                 Slog.v(TAG, "Not scheduling cleanup since there's already one at "
-                        + mNextCleanupTimeElapsed
-                        + " (in " + (mNextCleanupTimeElapsed - nowElapsed) + "ms)");
+                        + mNextCleanupTimeElapsed + " (in " + (mNextCleanupTimeElapsed
+                        - sElapsedRealtimeClock.millis()) + "ms)");
             }
             return;
         }
@@ -1522,7 +1530,7 @@ public final class QuotaController extends StateController {
         if (nextCleanupElapsed - mNextCleanupTimeElapsed <= 10 * MINUTE_IN_MILLIS) {
             // No need to clean up too often. Delay the alarm if the next cleanup would be too soon
             // after it.
-            nextCleanupElapsed = mNextCleanupTimeElapsed + 10 * MINUTE_IN_MILLIS;
+            nextCleanupElapsed += 10 * MINUTE_IN_MILLIS;
         }
         mNextCleanupTimeElapsed = nextCleanupElapsed;
         mAlarmManager.set(AlarmManager.ELAPSED_REALTIME, nextCleanupElapsed, ALARM_TAG_CLEANUP,
@@ -1557,9 +1565,9 @@ public final class QuotaController extends StateController {
 
     private void handleNewChargingStateLocked() {
         mTimerChargingUpdateFunctor.setStatus(sElapsedRealtimeClock.millis(),
-                mChargeTracker.isCharging());
+                mChargeTracker.isChargingLocked());
         if (DEBUG) {
-            Slog.d(TAG, "handleNewChargingStateLocked: " + mChargeTracker.isCharging());
+            Slog.d(TAG, "handleNewChargingStateLocked: " + mChargeTracker.isChargingLocked());
         }
         // Deal with Timers first.
         mEJPkgTimers.forEach(mTimerChargingUpdateFunctor);
@@ -1828,6 +1836,7 @@ public final class QuotaController extends StateController {
          * Track whether we're charging. This has a slightly different definition than that of
          * BatteryController.
          */
+        @GuardedBy("mLock")
         private boolean mCharging;
 
         ChargingTracker() {
@@ -1847,7 +1856,8 @@ public final class QuotaController extends StateController {
             mCharging = batteryManagerInternal.isPowered(BatteryManager.BATTERY_PLUGGED_ANY);
         }
 
-        public boolean isCharging() {
+        @GuardedBy("mLock")
+        public boolean isChargingLocked() {
             return mCharging;
         }
 
@@ -2056,9 +2066,12 @@ public final class QuotaController extends StateController {
                     }
                     return;
                 }
-                if (mRunningBgJobs.remove(jobStatus)
-                        && !mChargeTracker.isCharging() && mRunningBgJobs.size() == 0) {
-                    emitSessionLocked(sElapsedRealtimeClock.millis());
+                final long nowElapsed = sElapsedRealtimeClock.millis();
+                final int standbyBucket = JobSchedulerService.standbyBucketForPackage(
+                        mPkg.packageName, mPkg.userId, nowElapsed);
+                if (mRunningBgJobs.remove(jobStatus) && mRunningBgJobs.size() == 0
+                        && !isQuotaFreeLocked(standbyBucket)) {
+                    emitSessionLocked(nowElapsed);
                     cancelCutoff();
                 }
             }
@@ -2078,6 +2091,7 @@ public final class QuotaController extends StateController {
             cancelCutoff();
         }
 
+        @GuardedBy("mLock")
         private void emitSessionLocked(long nowElapsed) {
             if (mBgJobCount <= 0) {
                 // Nothing to emit.
@@ -2122,6 +2136,7 @@ public final class QuotaController extends StateController {
             }
         }
 
+        @GuardedBy("mLock")
         private boolean shouldTrackLocked() {
             final long nowElapsed = sElapsedRealtimeClock.millis();
             final int standbyBucket = JobSchedulerService.standbyBucketForPackage(mPkg.packageName,
@@ -2133,7 +2148,7 @@ public final class QuotaController extends StateController {
             final long topAppGracePeriodEndElapsed = mTopAppGraceCache.get(mUid);
             final boolean hasTopAppExemption = !mRegularJobTimer
                     && (mTopAppCache.get(mUid) || nowElapsed < topAppGracePeriodEndElapsed);
-            return (standbyBucket == RESTRICTED_INDEX || !mChargeTracker.isCharging())
+            return !isQuotaFreeLocked(standbyBucket)
                     && !mForegroundUids.get(mUid) && !hasTempAllowlistExemption
                     && !hasTopAppExemption;
         }
@@ -2463,60 +2478,30 @@ public final class QuotaController extends StateController {
         }
     }
 
-    private static final class TimingSessionTooOldPredicate implements Predicate<TimingSession> {
-        private long mNowElapsed;
-
-        private void updateNow() {
-            mNowElapsed = sElapsedRealtimeClock.millis();
-        }
+    private final class DeleteTimingSessionsFunctor implements Consumer<List<TimingSession>> {
+        private final Predicate<TimingSession> mTooOld = new Predicate<TimingSession>() {
+            public boolean test(TimingSession ts) {
+                return ts.endTimeElapsed <= sElapsedRealtimeClock.millis() - MAX_PERIOD_MS;
+            }
+        };
 
         @Override
-        public boolean test(TimingSession ts) {
-            return ts.endTimeElapsed <= mNowElapsed - MAX_PERIOD_MS;
+        public void accept(List<TimingSession> sessions) {
+            if (sessions != null) {
+                // Remove everything older than MAX_PERIOD_MS time ago.
+                sessions.removeIf(mTooOld);
+            }
         }
     }
 
-    private final TimingSessionTooOldPredicate mTimingSessionTooOld =
-            new TimingSessionTooOldPredicate();
-
-    private final Consumer<List<TimingSession>> mDeleteOldSessionsFunctor = sessions -> {
-        if (sessions != null) {
-            // Remove everything older than MAX_PERIOD_MS time ago.
-            sessions.removeIf(mTimingSessionTooOld);
-        }
-    };
+    private final DeleteTimingSessionsFunctor mDeleteOldSessionsFunctor =
+            new DeleteTimingSessionsFunctor();
 
     @VisibleForTesting
     void deleteObsoleteSessionsLocked() {
-        mTimingSessionTooOld.updateNow();
-
-        // Regular sessions
         mTimingSessions.forEach(mDeleteOldSessionsFunctor);
-
-        // EJ sessions
-        for (int uIdx = 0; uIdx < mEJTimingSessions.numMaps(); ++uIdx) {
-            final int userId = mEJTimingSessions.keyAt(uIdx);
-            for (int pIdx = 0; pIdx < mEJTimingSessions.numElementsForKey(userId); ++pIdx) {
-                final String packageName = mEJTimingSessions.keyAt(uIdx, pIdx);
-                final ShrinkableDebits debits = getEJDebitsLocked(userId, packageName);
-                final List<TimingSession> sessions = mEJTimingSessions.get(userId, packageName);
-                if (sessions == null) {
-                    continue;
-                }
-
-                while (sessions.size() > 0) {
-                    final TimingSession ts = sessions.get(0);
-                    if (mTimingSessionTooOld.test(ts)) {
-                        // Stale sessions may still be factored into tally. Remove them.
-                        final long duration = ts.endTimeElapsed - ts.startTimeElapsed;
-                        debits.transactLocked(-duration);
-                        sessions.remove(0);
-                    } else {
-                        break;
-                    }
-                }
-            }
-        }
+        // Don't delete EJ timing sessions here. They'll be removed in
+        // getRemainingEJExecutionTimeLocked().
     }
 
     private class QcHandler extends Handler {
@@ -4085,7 +4070,7 @@ public final class QuotaController extends StateController {
     @Override
     public void dumpControllerStateLocked(final IndentingPrintWriter pw,
             final Predicate<JobStatus> predicate) {
-        pw.println("Is charging: " + mChargeTracker.isCharging());
+        pw.println("Is charging: " + mChargeTracker.isChargingLocked());
         pw.println("Current elapsed time: " + sElapsedRealtimeClock.millis());
         pw.println();
 
@@ -4262,7 +4247,8 @@ public final class QuotaController extends StateController {
         final long token = proto.start(fieldId);
         final long mToken = proto.start(StateControllerProto.QUOTA);
 
-        proto.write(StateControllerProto.QuotaController.IS_CHARGING, mChargeTracker.isCharging());
+        proto.write(StateControllerProto.QuotaController.IS_CHARGING,
+                mChargeTracker.isChargingLocked());
         proto.write(StateControllerProto.QuotaController.ELAPSED_REALTIME,
                 sElapsedRealtimeClock.millis());
 

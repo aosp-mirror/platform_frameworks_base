@@ -1821,7 +1821,6 @@ package android {
     field public static final int notification_large_icon_width = 17104901; // 0x1050005
     field public static final int system_app_widget_background_radius;
     field public static final int system_app_widget_inner_radius;
-    field public static final int system_app_widget_internal_padding;
     field public static final int thumbnail_height = 17104897; // 0x1050001
     field public static final int thumbnail_width = 17104898; // 0x1050002
   }
@@ -32950,6 +32949,7 @@ package android.print {
     field public static final android.print.PrintAttributes.MediaSize JPN_HAGAKI;
     field public static final android.print.PrintAttributes.MediaSize JPN_KAHU;
     field public static final android.print.PrintAttributes.MediaSize JPN_KAKU2;
+    field @NonNull public static final android.print.PrintAttributes.MediaSize JPN_OE_PHOTO_L;
     field public static final android.print.PrintAttributes.MediaSize JPN_OUFUKU;
     field public static final android.print.PrintAttributes.MediaSize JPN_YOU4;
     field @NonNull public static final android.print.PrintAttributes.MediaSize NA_ARCH_A;
@@ -32971,7 +32971,6 @@ package android.print {
     field public static final android.print.PrintAttributes.MediaSize NA_QUARTO;
     field @NonNull public static final android.print.PrintAttributes.MediaSize NA_SUPER_B;
     field public static final android.print.PrintAttributes.MediaSize NA_TABLOID;
-    field @NonNull public static final android.print.PrintAttributes.MediaSize OE_PHOTO_L;
     field public static final android.print.PrintAttributes.MediaSize OM_DAI_PA_KAI;
     field public static final android.print.PrintAttributes.MediaSize OM_JUURO_KU_KAI;
     field public static final android.print.PrintAttributes.MediaSize OM_PA_KAI;

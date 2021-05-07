@@ -80,6 +80,6 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/notification_shelf_height"
         android:layout_below="@id/keyguard_status_area"
-        android:paddingStart="@dimen/below_clock_padding_start"
+        android:paddingStart="@dimen/below_clock_padding_start_extra"
     />
 </com.android.keyguard.KeyguardClockSwitch>

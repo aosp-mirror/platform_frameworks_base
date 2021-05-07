@@ -68,6 +68,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
@@ -474,6 +475,7 @@ public class QuotaControllerTest {
         expectedRegular.add(thr);
         expectedRegular.add(two);
         expectedRegular.add(one);
+        expectedEJ.add(fiv); // EJ list should be unaffected
         expectedEJ.add(fou);
         expectedEJ.add(one);
         mQuotaController.saveTimingSession(0, "com.android.test", fiv, false);

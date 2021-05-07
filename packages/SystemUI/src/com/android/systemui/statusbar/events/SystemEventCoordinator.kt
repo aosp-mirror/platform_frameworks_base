@@ -16,10 +16,13 @@
 
 package com.android.systemui.statusbar.events
 
+import android.provider.DeviceConfig
+import android.provider.DeviceConfig.NAMESPACE_PRIVACY
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.privacy.PrivacyItem
 import com.android.systemui.privacy.PrivacyItemController
 import com.android.systemui.statusbar.policy.BatteryController
+import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
 
 /**
@@ -28,6 +31,7 @@ import javax.inject.Inject
  */
 @SysUISingleton
 class SystemEventCoordinator @Inject constructor(
+    private val systemClock: SystemClock,
     private val batteryController: BatteryController,
     private val privacyController: PrivacyItemController
 ) {
@@ -59,8 +63,8 @@ class SystemEventCoordinator @Inject constructor(
         scheduler.setShouldShowPersistentPrivacyIndicator(false)
     }
 
-    fun notifyPrivacyItemsChanged() {
-        val event = PrivacyEvent()
+    fun notifyPrivacyItemsChanged(showAnimation: Boolean = true) {
+        val event = PrivacyEvent(showAnimation)
         event.privacyItems = privacyStateListener.currentPrivacyItems
         scheduler.onStatusEvent(event)
     }
@@ -90,8 +94,17 @@ class SystemEventCoordinator @Inject constructor(
 
     private val privacyStateListener = object : PrivacyItemController.Callback {
         var currentPrivacyItems = listOf<PrivacyItem>()
+        var previousPrivacyItems = listOf<PrivacyItem>()
+        var timeLastEmpty = systemClock.elapsedRealtime()
 
         override fun onPrivacyItemsChanged(privacyItems: List<PrivacyItem>) {
+            if (uniqueItemsMatch(privacyItems, currentPrivacyItems)) {
+                return
+            } else if (privacyItems.isEmpty()) {
+                previousPrivacyItems = currentPrivacyItems
+                timeLastEmpty = systemClock.elapsedRealtime()
+            }
+
             currentPrivacyItems = privacyItems
             notifyListeners()
         }
@@ -100,10 +113,25 @@ class SystemEventCoordinator @Inject constructor(
             if (currentPrivacyItems.isEmpty()) {
                 notifyPrivacyItemsEmpty()
             } else {
-                notifyPrivacyItemsChanged()
+                val showAnimation = isChipAnimationEnabled() &&
+                    (!uniqueItemsMatch(currentPrivacyItems, previousPrivacyItems) ||
+                    systemClock.elapsedRealtime() - timeLastEmpty >= DEBOUNCE_TIME)
+                notifyPrivacyItemsChanged(showAnimation)
             }
+        }
+
+        // Return true if the lists contain the same permission groups, used by the same UIDs
+        private fun uniqueItemsMatch(one: List<PrivacyItem>, two: List<PrivacyItem>): Boolean {
+            return one.map { it.application.uid to it.privacyType.permGroupName }.toSet() ==
+                two.map { it.application.uid to it.privacyType.permGroupName }.toSet()
+        }
+
+        private fun isChipAnimationEnabled(): Boolean {
+            return DeviceConfig.getBoolean(NAMESPACE_PRIVACY, CHIP_ANIMATION_ENABLED, true)
         }
     }
 }
 
+private const val DEBOUNCE_TIME = 3000L
+private const val CHIP_ANIMATION_ENABLED = "privacy_chip_animation_enabled"
 private const val TAG = "SystemEventCoordinator"

@@ -17,7 +17,6 @@
 package com.android.systemui.people;
 
 import static com.android.systemui.people.PeopleSpaceUtils.PACKAGE_NAME;
-import static com.android.systemui.people.widget.AppWidgetOptionsHelper.OPTIONS_PEOPLE_TILE;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -200,7 +199,6 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
 
         int[] widgetIdsArray = {WIDGET_ID_WITH_SHORTCUT, WIDGET_ID_WITHOUT_SHORTCUT};
         mOptions = new Bundle();
-        mOptions.putParcelable(OPTIONS_PEOPLE_TILE, PERSON_TILE);
 
         when(mIAppWidgetService.getAppWidgetIds(any())).thenReturn(widgetIdsArray);
         when(mAppWidgetManager.getAppWidgetOptions(eq(WIDGET_ID_WITH_SHORTCUT)))

@@ -36,19 +36,16 @@
         android:paddingStart="@dimen/status_bar_left_clock_starting_padding"
         android:paddingEnd="@dimen/status_bar_left_clock_end_padding"
         android:singleLine="true"
-        android:textAppearance="@style/TextAppearance.StatusBar.Clock" />
-
-    <View
-        android:layout_height="match_parent"
-        android:layout_width="0dp"
-        android:layout_weight="1"
-        />
+        android:textAppearance="@style/TextAppearance.QS.Status" />
 
     <include layout="@layout/qs_carrier_group"
         android:id="@+id/carrier_group"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="match_parent"
+        android:layout_weight="1"
         android:minHeight="48dp"
+        android:minWidth="48dp"
+        android:layout_marginStart="8dp"
         android:layout_gravity="end|center_vertical"
         android:focusable="false"/>
 

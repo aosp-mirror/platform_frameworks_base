@@ -136,6 +136,9 @@ public class PeopleSpaceWidgetManager {
     private Map<String, Set<String>> mNotificationKeyToWidgetIdsMatchedByUri = new HashMap<>();
     private boolean mRegisteredReceivers;
 
+    @GuardedBy("mLock")
+    public static Map<Integer, PeopleSpaceTile> mTiles = new HashMap<>();
+
     @Inject
     public PeopleSpaceWidgetManager(Context context, LauncherApps launcherApps,
             NotificationEntryManager notificationEntryManager,
@@ -252,8 +255,7 @@ public class PeopleSpaceWidgetManager {
             if (tile == null) {
                 Log.e(TAG, "Matching conversation not found for shortcut ID");
             }
-            Bundle options = mAppWidgetManager.getAppWidgetOptions(appWidgetId);
-            updateAppWidgetViews(appWidgetId, tile, options);
+            updateAppWidgetOptionsAndView(appWidgetId, tile);
             widgetIdToTile.put(appWidgetId, tile);
             if (tile != null) {
                 registerConversationListenerIfNeeded(appWidgetId,
@@ -289,7 +291,14 @@ public class PeopleSpaceWidgetManager {
 
     /** Updates tile in app widget options and the current view. */
     public void updateAppWidgetOptionsAndView(int appWidgetId, PeopleSpaceTile tile) {
-        Bundle options = AppWidgetOptionsHelper.setPeopleTile(mAppWidgetManager, appWidgetId, tile);
+        if (tile == null) {
+            if (DEBUG) Log.w(TAG, "Requested to store null tile");
+            return;
+        }
+        synchronized (mTiles) {
+            mTiles.put(appWidgetId, tile);
+        }
+        Bundle options = mAppWidgetManager.getAppWidgetOptions(appWidgetId);
         updateAppWidgetViews(appWidgetId, tile, options);
     }
 
@@ -299,8 +308,11 @@ public class PeopleSpaceWidgetManager {
      */
     @Nullable
     public PeopleSpaceTile getTileForExistingWidget(int appWidgetId) {
-        // First, check if tile is cached in AppWidgetOptions.
-        PeopleSpaceTile tile = AppWidgetOptionsHelper.getPeopleTile(mAppWidgetManager, appWidgetId);
+        // First, check if tile is cached in memory.
+        PeopleSpaceTile tile;
+        synchronized (mTiles) {
+            tile = mTiles.get(appWidgetId);
+        }
         if (tile != null) {
             if (DEBUG) Log.d(TAG, "People Tile is cached for widget: " + appWidgetId);
             return tile;
@@ -781,7 +793,6 @@ public class PeopleSpaceWidgetManager {
         } catch (Exception e) {
             Log.w(TAG, "Exception caching shortcut:" + e);
         }
-
         updateAppWidgetOptionsAndView(appWidgetId, tile);
     }
 

@@ -3184,7 +3184,7 @@
     <!-- System-provided dimensions for app widgets. -->
     <public name="system_app_widget_background_radius" />
     <public name="system_app_widget_inner_radius" />
-    <public name="system_app_widget_internal_padding" />
+    <public name="__removed_system_app_widget_internal_padding" />
   </staging-public-group>
 
   <staging-public-group type="bool" first-id="0x01110007">
