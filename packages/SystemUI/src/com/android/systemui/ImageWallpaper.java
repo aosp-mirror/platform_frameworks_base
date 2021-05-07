@@ -305,10 +305,15 @@ public class ImageWallpaper extends WallpaperService {
                     continue;
                 }
                 Rect subImage = new Rect(
-                        Math.round(area.left * b.getWidth()),
-                        Math.round(area.top * b.getHeight()),
-                        Math.round(area.right * b.getWidth()),
-                        Math.round(area.bottom * b.getHeight()));
+                        (int) Math.floor(area.left * b.getWidth()),
+                        (int) Math.floor(area.top * b.getHeight()),
+                        (int) Math.ceil(area.right * b.getWidth()),
+                        (int) Math.ceil(area.bottom * b.getHeight()));
+                if (subImage.isEmpty()) {
+                    // Do not notify client. treat it as too small to sample
+                    colors.add(null);
+                    continue;
+                }
                 Bitmap colorImg = Bitmap.createBitmap(b,
                         subImage.left, subImage.top, subImage.width(), subImage.height());
                 WallpaperColors color = WallpaperColors.fromBitmap(colorImg);
