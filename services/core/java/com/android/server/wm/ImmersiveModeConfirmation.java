@@ -148,6 +148,15 @@ public class ImmersiveModeConfirmation {
         }
     }
 
+    boolean onSettingChanged(int currentUserId) {
+        final boolean changed = loadSetting(currentUserId, mContext);
+        // Remove the window if the setting changes to be confirmed.
+        if (changed && sConfirmed) {
+            mHandler.sendEmptyMessage(H.HIDE);
+        }
+        return changed;
+    }
+
     void immersiveModeChangedLw(int rootDisplayAreaId, boolean isImmersiveMode,
             boolean userSetupComplete, boolean navBarEmpty) {
         mHandler.removeMessages(H.SHOW);
