@@ -472,10 +472,7 @@ public class MediaControlPanel {
     }
 
     /** Bind this recommendation view based on the data given. */
-    public void bindRecommendation(
-            @NonNull SmartspaceTarget target,
-            @NonNull int backgroundColor,
-            @Nullable View.OnClickListener callback) {
+    public void bindRecommendation(@NonNull SmartspaceTarget target, @NonNull int backgroundColor) {
         if (mRecommendationViewHolder == null) {
             return;
         }
@@ -536,10 +533,7 @@ public class MediaControlPanel {
             mediaCoverImageView.setImageIcon(recommendation.getIcon());
 
             // Set up the click listener if applicable.
-            setSmartspaceRecItemOnClickListener(
-                    mediaCoverImageView,
-                    recommendation,
-                    callback);
+            setSmartspaceRecItemOnClickListener(mediaCoverImageView, recommendation);
 
             if (uiComponentIndex < MEDIA_RECOMMENDATION_ITEMS_PER_ROW) {
                 setVisibleAndAlpha(collapsedSet,
@@ -658,8 +652,7 @@ public class MediaControlPanel {
 
     private void setSmartspaceRecItemOnClickListener(
             @NonNull View view,
-            @NonNull SmartspaceAction action,
-            @Nullable View.OnClickListener callback) {
+            @NonNull SmartspaceAction action) {
         if (view == null || action == null || action.getIntent() == null) {
             Log.e(TAG, "No tap action can be set up");
             return;
@@ -682,9 +675,8 @@ public class MediaControlPanel {
                 view.getContext().startActivity(action.getIntent());
             }
 
-            if (callback != null) {
-                callback.onClick(v);
-            }
+            // Automatically scroll to the active player once the media is loaded.
+            mMediaCarouselController.setShouldScrollToActivePlayer(true);
         });
     }
 

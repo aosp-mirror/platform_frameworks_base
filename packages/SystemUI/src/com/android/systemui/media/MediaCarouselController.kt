@@ -115,7 +115,7 @@ class MediaCarouselController @Inject constructor(
     private var needsReordering: Boolean = false
     private var keysNeedRemoval = mutableSetOf<String>()
     private var bgColor = getBackgroundColor()
-    private var shouldScrollToActivePlayer: Boolean = false
+    protected var shouldScrollToActivePlayer: Boolean = false
     private var isRtl: Boolean = false
         set(value) {
             if (value != field) {
@@ -309,7 +309,7 @@ class MediaCarouselController @Inject constructor(
         } else {
             existingPlayer.bindPlayer(dataCopy, key)
             MediaPlayerData.addMediaPlayer(key, dataCopy, existingPlayer)
-            if (visualStabilityManager.isReorderingAllowed) {
+            if (visualStabilityManager.isReorderingAllowed || shouldScrollToActivePlayer) {
                 reorderAllPlayers()
             } else {
                 needsReordering = true
@@ -340,7 +340,7 @@ class MediaCarouselController @Inject constructor(
         val lp = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.WRAP_CONTENT)
         newRecs.recommendationViewHolder?.recommendations?.setLayoutParams(lp)
-        newRecs.bindRecommendation(data, bgColor, { v -> shouldScrollToActivePlayer = true })
+        newRecs.bindRecommendation(data, bgColor)
         MediaPlayerData.addMediaRecommendation(key, newRecs)
         updatePlayerToState(newRecs, noAnimation = true)
         reorderAllPlayers()
@@ -656,7 +656,7 @@ class MediaCarouselController @Inject constructor(
 @VisibleForTesting
 internal object MediaPlayerData {
     private val EMPTY = MediaData(-1, false, 0, null, null, null, null, null,
-        emptyList(), emptyList(), "INVALID", null, null, null, false, null)
+        emptyList(), emptyList(), "INVALID", null, null, null, true, null)
 
     data class MediaSortKey(
         // Is Smartspace media recommendation. When the Smartspace media is present, it should
@@ -709,7 +709,7 @@ internal object MediaPlayerData {
     /** Returns the index of the first non-timeout media. */
     fun getActiveMediaIndex(): Int {
         mediaPlayers.entries.forEachIndexed { index, e ->
-            if (e.key.data.active) {
+            if (!e.key.isSsMediaRec && e.key.data.active) {
                 return index
             }
         }
