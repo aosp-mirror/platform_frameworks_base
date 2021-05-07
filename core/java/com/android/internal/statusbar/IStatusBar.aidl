@@ -271,4 +271,9 @@ oneway interface IStatusBar
      * @param enable {@code true} if enable, otherwise set to {@code false}.
      */
     void setNavigationBarLumaSamplingEnabled(int displayId, boolean enable);
+
+    /**
+     * Triggers a GC in the system and status bar.
+     */
+    void runGcForTest();
 }
