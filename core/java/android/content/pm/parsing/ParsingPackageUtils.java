@@ -183,6 +183,7 @@ public class ParsingPackageUtils {
     public static final String METADATA_SUPPORTS_SIZE_CHANGES = "android.supports_size_changes";
     public static final String METADATA_ACTIVITY_WINDOW_LAYOUT_AFFINITY =
             "android.activity_window_layout_affinity";
+    public static final String METADATA_ACTIVITY_LAUNCH_MODE = "android.activity.launch_mode";
 
     public static final int SDK_VERSION = Build.VERSION.SDK_INT;
     public static final String[] SDK_CODENAMES = Build.VERSION.ACTIVE_CODENAMES;
@@ -2471,8 +2472,10 @@ public class ParsingPackageUtils {
             ParsingPackage pkg, Resources res, XmlResourceParser parser) {
         TypedArray sa = res.obtainAttributes(parser, R.styleable.AndroidManifestProfileable);
         try {
-            return input.success(pkg.setProfileableByShell(pkg.isProfileableByShell()
-                    || bool(false, R.styleable.AndroidManifestProfileable_shell, sa)));
+            ParsingPackage newPkg = pkg.setProfileableByShell(pkg.isProfileableByShell()
+                    || bool(false, R.styleable.AndroidManifestProfileable_shell, sa));
+            return input.success(newPkg.setProfileable(newPkg.isProfileable()
+                    && bool(true, R.styleable.AndroidManifestProfileable_enabled, sa)));
         } finally {
             sa.recycle();
         }

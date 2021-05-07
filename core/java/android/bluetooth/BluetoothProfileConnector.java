@@ -21,6 +21,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -123,6 +125,16 @@ public abstract class BluetoothProfileConnector<T> {
         mContext = context;
         mServiceListener = listener;
         IBluetoothManager mgr = BluetoothAdapter.getDefaultAdapter().getBluetoothManager();
+
+        // Preserve legacy compatibility where apps were depending on
+        // registerStateChangeCallback() performing a permissions check which
+        // has been relaxed in modern platform versions
+        if (context.getApplicationInfo().targetSdkVersion <= Build.VERSION_CODES.R
+                && context.checkSelfPermission(android.Manifest.permission.BLUETOOTH)
+                        != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Need BLUETOOTH permission");
+        }
+
         if (mgr != null) {
             try {
                 mgr.registerStateChangeCallback(mBluetoothStateChangeCallback);

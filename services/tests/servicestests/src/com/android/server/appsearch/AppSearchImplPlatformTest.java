@@ -70,7 +70,8 @@ public class AppSearchImplPlatformTest {
                         mTemporaryFolder.newFolder(),
                         mContext,
                         mContext.getUserId(),
-                        mContext.getPackageName());
+                        mContext.getPackageName(),
+                        /*logger=*/ null);
         mGlobalQuerierUid =
                 mContext.getPackageManager().getPackageUid(mContext.getPackageName(), /*flags=*/ 0);
     }
@@ -117,9 +118,8 @@ public class AppSearchImplPlatformTest {
         // No query filters specified, global query can retrieve all documents.
         SearchSpec searchSpec =
                 new SearchSpec.Builder().setTermMatch(SearchSpec.TERM_MATCH_EXACT_ONLY).build();
-        SearchResultPage searchResultPage =
-                mAppSearchImpl.globalQuery(
-                        "", searchSpec, mContext.getPackageName(), mGlobalQuerierUid);
+        SearchResultPage searchResultPage = mAppSearchImpl.globalQuery(
+                "", searchSpec, mContext.getPackageName(), mGlobalQuerierUid, /*logger=*/ null);
         assertThat(searchResultPage.getResults()).hasSize(2);
 
         // Document2 will be first since it got indexed later and has a "better", aka more recent
@@ -174,9 +174,8 @@ public class AppSearchImplPlatformTest {
                         .setTermMatch(SearchSpec.TERM_MATCH_PREFIX)
                         .addFilterPackageNames("package1")
                         .build();
-        SearchResultPage searchResultPage =
-                mAppSearchImpl.globalQuery(
-                        "", searchSpec, mContext.getPackageName(), mGlobalQuerierUid);
+        SearchResultPage searchResultPage = mAppSearchImpl.globalQuery(
+                "", searchSpec, mContext.getPackageName(), mGlobalQuerierUid, /*logger=*/ null);
         assertThat(searchResultPage.getResults()).hasSize(1);
         assertThat(searchResultPage.getResults().get(0).getGenericDocument()).isEqualTo(document1);
 
@@ -186,9 +185,8 @@ public class AppSearchImplPlatformTest {
                         .setTermMatch(SearchSpec.TERM_MATCH_PREFIX)
                         .addFilterPackageNames("package2")
                         .build();
-        searchResultPage =
-                mAppSearchImpl.globalQuery(
-                        "", searchSpec, mContext.getPackageName(), mGlobalQuerierUid);
+        searchResultPage = mAppSearchImpl.globalQuery(
+                "", searchSpec, mContext.getPackageName(), mGlobalQuerierUid, /*logger=*/ null);
         assertThat(searchResultPage.getResults()).hasSize(1);
         assertThat(searchResultPage.getResults().get(0).getGenericDocument()).isEqualTo(document2);
     }

@@ -22,6 +22,8 @@
     <integer name="qs_footer_actions_width">0</integer>
     <integer name="qs_footer_actions_weight">1</integer>
 
+    <integer name="qs_security_footer_maxLines">2</integer>
+
     <integer name="magnification_default_scale">2</integer>
 
     <!-- The position of the volume dialog on the screen.

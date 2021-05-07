@@ -1,4 +1,12 @@
 // Signature format: 2.0
+package android {
+
+  public static final class R.dimen {
+    field public static final int __removed_system_app_widget_internal_padding;
+  }
+
+}
+
 package android.app {
 
   public class Notification implements android.os.Parcelable {
@@ -250,6 +258,10 @@ package android.net {
   }
 
   @IntDef({0x0, 0xa, 0x14, 0x1e}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface NetworkBadging.Badging {
+  }
+
+  public final class Proxy {
+    field @Deprecated public static final String EXTRA_PROXY_INFO = "android.intent.extra.PROXY_INFO";
   }
 
   @Deprecated public class SSLCertificateSocketFactory extends javax.net.ssl.SSLSocketFactory {

@@ -656,6 +656,38 @@ static bool DeserializeReferenceFromPb(const pb::Reference& pb_ref, Reference* o
     }
     out_ref->name = name_ref.ToResourceName();
   }
+  if (pb_ref.type_flags() != 0) {
+    out_ref->type_flags = pb_ref.type_flags();
+  }
+  out_ref->allow_raw = pb_ref.allow_raw();
+  return true;
+}
+
+static bool DeserializeMacroFromPb(const pb::MacroBody& pb_ref, Macro* out_ref,
+                                   std::string* out_error) {
+  out_ref->raw_value = pb_ref.raw_string();
+
+  if (pb_ref.has_style_string()) {
+    out_ref->style_string.str = pb_ref.style_string().str();
+    for (const auto& span : pb_ref.style_string().spans()) {
+      out_ref->style_string.spans.emplace_back(Span{
+          .name = span.name(), .first_char = span.start_index(), .last_char = span.end_index()});
+    }
+  }
+
+  for (const auto& untranslatable_section : pb_ref.untranslatable_sections()) {
+    out_ref->untranslatable_sections.emplace_back(
+        UntranslatableSection{.start = static_cast<size_t>(untranslatable_section.start_index()),
+                              .end = static_cast<size_t>(untranslatable_section.end_index())});
+  }
+
+  for (const auto& namespace_decls : pb_ref.namespace_stack()) {
+    out_ref->alias_namespaces.emplace_back(
+        Macro::Namespace{.alias = namespace_decls.prefix(),
+                         .package_name = namespace_decls.package_name(),
+                         .is_private = namespace_decls.is_private()});
+  }
+
   return true;
 }
 
@@ -799,6 +831,15 @@ std::unique_ptr<Value> DeserializeValueFromPb(const pb::Value& pb_value,
           DeserializeItemMetaDataFromPb(pb_entry, src_pool, plural->values[plural_idx].get());
         }
         value = std::move(plural);
+      } break;
+
+      case pb::CompoundValue::kMacro: {
+        const pb::MacroBody& pb_macro = pb_compound_value.macro();
+        auto macro = std::make_unique<Macro>();
+        if (!DeserializeMacroFromPb(pb_macro, macro.get(), out_error)) {
+          return {};
+        }
+        value = std::move(macro);
       } break;
 
       default:

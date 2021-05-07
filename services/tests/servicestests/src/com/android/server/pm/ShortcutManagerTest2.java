@@ -2138,7 +2138,6 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
             mManager.reportShortcutUsed("s2");
             verify(mMockUsageStatsManagerInternal, times(1)).reportShortcutUsage(
                     eq(CALLING_PACKAGE_1), eq("s2"), eq(USER_10));
-
         });
         runWithCaller(CALLING_PACKAGE_2, USER_10, () -> {
             // Try with a different package.
@@ -2158,7 +2157,6 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
             mManager.reportShortcutUsed("s3");
             verify(mMockUsageStatsManagerInternal, times(1)).reportShortcutUsage(
                     eq(CALLING_PACKAGE_2), eq("s3"), eq(USER_10));
-
         });
     }
 

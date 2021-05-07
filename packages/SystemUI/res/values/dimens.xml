@@ -139,7 +139,7 @@
     <dimen name="notification_min_height_before_s">106dp</dimen>
 
     <!-- Height of a large notification in the status bar -->
-    <dimen name="notification_max_height">294dp</dimen>
+    <dimen name="notification_max_height">358dp</dimen>
 
     <!-- Height of a heads up notification in the status bar for legacy custom views -->
     <dimen name="notification_max_heads_up_height_legacy">128dp</dimen>
@@ -157,7 +157,7 @@
     <dimen name="notification_max_heads_up_height_increased">188dp</dimen>
 
     <!-- Side padding on the lockscreen on the side of notifications -->
-    <dimen name="notification_side_paddings">4dp</dimen>
+    <dimen name="notification_side_paddings">16dp</dimen>
 
     <!-- padding between the heads up and the statusbar -->
     <dimen name="heads_up_status_bar_padding">8dp</dimen>
@@ -179,10 +179,13 @@
     <dimen name="notification_min_interaction_height">40dp</dimen>
 
     <!-- Radius for notifications corners without adjacent notifications -->
-    <dimen name="notification_corner_radius">8dp</dimen>
+    <dimen name="notification_corner_radius">28dp</dimen>
+
+    <!-- Distance over which notification corner animations run, near the shelf while scrolling. -->
+    <dimen name="notification_corner_animation_distance">48dp</dimen>
 
     <!-- Radius for notifications corners with adjacent notifications -->
-    <dimen name="notification_corner_radius_small">0dp</dimen>
+    <dimen name="notification_corner_radius_small">4dp</dimen>
 
     <!-- the padding of the shelf icon container -->
     <dimen name="shelf_icon_container_padding">13dp</dimen>
@@ -552,7 +555,9 @@
     <dimen name="qs_icon_size">20dp</dimen>
     <dimen name="qs_label_container_margin">10dp</dimen>
     <dimen name="qs_quick_tile_size">60dp</dimen>
-    <dimen name="qs_quick_tile_padding">12dp</dimen>
+    <dimen name="qs_tile_padding">12dp</dimen>
+    <dimen name="qs_tile_start_padding">16dp</dimen>
+    <dimen name="qs_drawable_end_margin">4dp</dimen>
     <dimen name="qs_header_gear_translation">16dp</dimen>
     <dimen name="qs_header_tile_margin_bottom">18dp</dimen>
     <dimen name="qs_page_indicator_width">16dp</dimen>
@@ -561,8 +566,6 @@
          Scaled @dimen/qs_page_indicator-width by .4f.
     -->
     <dimen name="qs_page_indicator_dot_width">6.4dp</dimen>
-    <dimen name="qs_tile_side_label_padding">12dp</dimen>
-    <dimen name="qs_tile_icon_size">24dp</dimen>
     <dimen name="qs_tile_text_size">14sp</dimen>
     <dimen name="qs_tile_divider_height">1dp</dimen>
     <dimen name="qs_panel_padding">16dp</dimen>
@@ -605,12 +608,17 @@
     <dimen name="qs_header_carrier_separator_width">6dp</dimen>
     <dimen name="qs_status_separator">32dp</dimen>
     <dimen name="qs_carrier_margin_width">4dp</dimen>
-    <dimen name="qs_footer_padding_start">16dp</dimen>
-    <dimen name="qs_footer_padding_end">16dp</dimen>
-    <dimen name="qs_footer_icon_size">16dp</dimen>
+    <dimen name="qs_footer_icon_size">20dp</dimen>
     <dimen name="qs_paged_tile_layout_padding_bottom">0dp</dimen>
     <dimen name="qs_header_top_padding">15dp</dimen>
     <dimen name="qs_header_bottom_padding">14dp</dimen>
+
+    <dimen name="qs_footer_padding">20dp</dimen>
+    <dimen name="qs_security_footer_height">88dp</dimen>
+    <dimen name="qs_security_footer_single_line_height">48dp</dimen>
+    <dimen name="qs_footers_margin_bottom">8dp</dimen>
+    <dimen name="qs_security_footer_background_inset">0dp</dimen>
+    <dimen name="qs_security_footer_corner_radius">28dp</dimen>
 
     <dimen name="qs_notif_collapsed_space">64dp</dimen>
 
@@ -662,7 +670,7 @@
     <dimen name="z_distance_between_notifications">0.5dp</dimen>
 
     <!-- The height of the divider between the individual notifications. -->
-    <dimen name="notification_divider_height">1dp</dimen>
+    <dimen name="notification_divider_height">2dp</dimen>
 
     <!-- The corner radius of the shadow behind the notification. -->
     <dimen name="notification_shadow_radius">0dp</dimen>
@@ -675,7 +683,7 @@
     <dimen name="notification_children_container_divider_height">0.5dp</dimen>
 
     <!-- The horizontal margin of the content in the notification shade -->
-    <dimen name="notification_shade_content_margin_horizontal">4dp</dimen>
+    <dimen name="notification_shade_content_margin_horizontal">16dp</dimen>
 
     <!-- The top margin for the notification children container in its non-expanded form. -->
     <dimen name="notification_children_container_margin_top">
@@ -691,8 +699,11 @@
     <!-- Size of the face pile shown on one-line (children of a group) conversation notifications -->
     <dimen name="conversation_single_line_face_pile_size">25dp</dimen>
 
+    <!-- Size of the avatars within a face pile shown on one-line (children of a group) conversation notifications -->
+    <dimen name="conversation_single_line_face_pile_avatar_size">17dp</dimen>
+
     <!-- Size of an avatar shown on one-line (children of a group) conversation notifications -->
-    <dimen name="conversation_single_line_avatar_size">20dp</dimen>
+    <dimen name="conversation_single_line_avatar_size">24dp</dimen>
 
     <!-- Border width for avatars in the face pile shown on one-line (children of a group) conversation notifications -->
     <dimen name="conversation_single_line_face_pile_protection_width">1dp</dimen>
@@ -1229,7 +1240,7 @@
     <!-- Icon size of Ongoing App Ops chip -->
     <dimen name="ongoing_appops_chip_icon_size">16dp</dimen>
     <!-- Radius of Ongoing App Ops chip corners -->
-    <dimen name="ongoing_appops_chip_bg_corner_radius">16dp</dimen>
+    <dimen name="ongoing_appops_chip_bg_corner_radius">28dp</dimen>
 
     <dimen name="ongoing_appops_dialog_side_margins">@dimen/notification_shade_content_margin_horizontal</dimen>
 
@@ -1246,25 +1257,33 @@
 
     <!-- Size of media cards in the QSPanel carousel -->
     <dimen name="qs_media_padding">16dp</dimen>
-    <dimen name="qs_media_panel_outer_padding">16dp</dimen>
-    <dimen name="qs_media_album_size">120dp</dimen>
+    <dimen name="qs_media_album_size_small">72dp</dimen>
+    <dimen name="qs_media_album_size">92dp</dimen>
     <dimen name="qs_media_album_radius">14dp</dimen>
-    <dimen name="qs_media_icon_size">16dp</dimen>
+    <dimen name="qs_media_album_device_padding">26dp</dimen>
+    <dimen name="qs_media_info_margin">12dp</dimen>
+    <dimen name="qs_media_info_spacing">4dp</dimen>
+    <dimen name="qs_media_icon_size">20dp</dimen>
+    <dimen name="qs_media_icon_offset">4dp</dimen>
     <dimen name="qs_center_guideline_padding">10dp</dimen>
-    <dimen name="qs_seamless_icon_size">@dimen/qs_media_icon_size</dimen>
+    <dimen name="qs_media_action_spacing">4dp</dimen>
+    <dimen name="qs_media_action_top">8dp</dimen>
+    <dimen name="qs_seamless_height">24dp</dimen>
+    <dimen name="qs_seamless_icon_size">16dp</dimen>
     <dimen name="qs_seamless_fallback_icon_size">@dimen/qs_seamless_icon_size</dimen>
-    <dimen name="qs_seamless_fallback_end_margin">16dp</dimen>
-    <dimen name="qqs_media_spacing">16dp</dimen>
+    <dimen name="qs_seamless_fallback_margin">20dp</dimen>
     <dimen name="qs_footer_horizontal_margin">22dp</dimen>
     <dimen name="qs_media_disabled_seekbar_height">1dp</dimen>
-    <dimen name="qs_media_enabled_seekbar_height">3dp</dimen>
-    <dimen name="qs_media_enabled_seekbar_vertical_padding">15dp</dimen>
-    <dimen name="qs_media_disabled_seekbar_vertical_padding">16dp</dimen>
+    <dimen name="qs_media_enabled_seekbar_height">2dp</dimen>
+    <dimen name="qs_media_enabled_seekbar_vertical_padding">35dp</dimen>
+    <dimen name="qs_media_disabled_seekbar_vertical_padding">36dp</dimen>
 
     <!-- Size of Smartspace media recommendations cards in the QSPanel carousel -->
-    <dimen name="qs_aa_media_rec_album_size">80dp</dimen>
-    <dimen name="qs_aa_media_rec_icon_size">20dp</dimen>
-
+    <dimen name="qs_aa_media_rec_header_icon_start_margin">10dp</dimen>
+    <dimen name="qs_aa_media_rec_header_icon_size">18dp</dimen>
+    <dimen name="qs_aa_media_rec_album_size">72dp</dimen>
+    <dimen name="qs_aa_media_rec_album_vertical_margin">8dp</dimen>
+    <dimen name="qq_aa_media_rec_header_text_size">16sp</dimen>
 
     <!-- Window magnification -->
     <dimen name="magnification_border_drag_size">35dp</dimen>
@@ -1464,6 +1483,7 @@
 
     <!-- Wallet activity screen specs -->
     <dimen name="wallet_icon_size">36sp</dimen>
+    <dimen name="wallet_view_header_icon_size">56dp</dimen>
     <dimen name="card_margin">16dp</dimen>
     <dimen name="card_carousel_dot_offset">24dp</dimen>
     <dimen name="card_carousel_dot_unselected_radius">2dp</dimen>

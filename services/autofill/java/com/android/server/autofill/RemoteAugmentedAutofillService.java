@@ -57,7 +57,6 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.os.IResultReceiver;
 import com.android.server.autofill.ui.InlineFillUi;
 
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CancellationException;
@@ -152,8 +151,8 @@ final class RemoteAugmentedAutofillService
      * Called by {@link Session} to request augmented autofill.
      */
     public void onRequestAutofillLocked(int sessionId, @NonNull IAutoFillManagerClient client,
-            int taskId, @NonNull ComponentName activityComponent, @NonNull AutofillId focusedId,
-            @Nullable AutofillValue focusedValue,
+            int taskId, @NonNull ComponentName activityComponent, @NonNull IBinder activityToken,
+            @NonNull AutofillId focusedId, @Nullable AutofillValue focusedValue,
             @Nullable InlineSuggestionsRequest inlineSuggestionsRequest,
             @Nullable Function<InlineFillUi, Boolean> inlineSuggestionsCallback,
             @NonNull Runnable onErrorCallback,
@@ -181,7 +180,8 @@ final class RemoteAugmentedAutofillService
                                             inlineSuggestionsRequest, inlineSuggestionsData,
                                             clientState, focusedId, focusedValue,
                                             inlineSuggestionsCallback, client, onErrorCallback,
-                                            remoteRenderService, userId, activityComponent);
+                                            remoteRenderService, userId,
+                                            activityComponent, activityToken);
                                     if (!showingFillWindow) {
                                         requestAutofill.complete(null);
                                     }
@@ -253,7 +253,7 @@ final class RemoteAugmentedAutofillService
             @NonNull IAutoFillManagerClient client, @NonNull Runnable onErrorCallback,
             @Nullable RemoteInlineSuggestionRenderService remoteRenderService,
             int userId,
-            @NonNull ComponentName targetActivity) {
+            @NonNull ComponentName targetActivity, @NonNull IBinder targetActivityToken) {
         if (inlineSuggestionsData == null || inlineSuggestionsData.isEmpty()
                 || inlineSuggestionsCallback == null || request == null
                 || remoteRenderService == null) {
@@ -307,8 +307,8 @@ final class RemoteAugmentedAutofillService
                                     final ArrayList<AutofillId> fieldIds = dataset.getFieldIds();
                                     final ClipData content = dataset.getFieldContent();
                                     if (content != null) {
-                                        mUriGrantsManager.grantUriPermissions(
-                                                targetActivity, userId, content);
+                                        mUriGrantsManager.grantUriPermissions(targetActivity,
+                                                targetActivityToken, userId, content);
                                         final AutofillId fieldId = fieldIds.get(0);
                                         if (sDebug) {
                                             Slog.d(TAG, "Calling client autofillContent(): "
@@ -366,12 +366,6 @@ final class RemoteAugmentedAutofillService
     public String toString() {
         return "RemoteAugmentedAutofillService["
                 + ComponentName.flattenToShortString(mComponentName) + "]";
-    }
-
-    @Override
-    public void dump(@NonNull String prefix, @NonNull PrintWriter pw) {
-        super.dump(prefix, pw);
-        mUriGrantsManager.dump(prefix, pw);
     }
 
     /**

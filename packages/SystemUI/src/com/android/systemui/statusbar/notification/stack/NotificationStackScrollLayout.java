@@ -431,6 +431,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private DismissAllAnimationListener mDismissAllAnimationListener;
     private NotificationRemoteInputManager mRemoteInputManager;
     private ShadeController mShadeController;
+    private Runnable mOnStackYChanged;
 
     private final DisplayMetrics mDisplayMetrics = Dependency.get(DisplayMetrics.class);
     private final LockscreenGestureLogger mLockscreenGestureLogger =
@@ -999,7 +1000,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mAmbientState.setCurrentScrollVelocity(mScroller.isFinished()
                 ? 0
                 : mScroller.getCurrVelocity());
-        mAmbientState.setScrollY(mOwnScrollY);
         mStackScrollAlgorithm.resetViewStates(mAmbientState, getSpeedBumpIndex());
         if (!isCurrentlyAnimating() && !mNeedsAnimation) {
             applyCurrentState();
@@ -1142,12 +1142,22 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      */
     private void updateStackPosition() {
         // Consider interpolating from an mExpansionStartY for use on lockscreen and AOD
-        mAmbientState.setStackY(
-                MathUtils.lerp(0, mTopPadding, mAmbientState.getExpansionFraction()));
-        final float shadeBottom = getHeight() - getEmptyBottomMargin();
-        mAmbientState.setStackEndHeight(shadeBottom - mTopPadding);
+        final float fraction = mAmbientState.getExpansionFraction();
+        final float stackY = MathUtils.lerp(0, mTopPadding, fraction);
+        mAmbientState.setStackY(stackY);
+        if (mOnStackYChanged != null) {
+            mOnStackYChanged.run();
+        }
+
+        final float stackEndHeight = getHeight() - getEmptyBottomMargin() - mTopPadding;
+        mAmbientState.setStackEndHeight(stackEndHeight);
         mAmbientState.setStackHeight(
-                MathUtils.lerp(0, shadeBottom - mTopPadding, mAmbientState.getExpansionFraction()));
+                MathUtils.lerp(stackEndHeight * StackScrollAlgorithm.START_FRACTION,
+                        stackEndHeight, fraction));
+    }
+
+    void setOnStackYChanged(Runnable onStackYChanged) {
+        mOnStackYChanged = onStackYChanged;
     }
 
     /**
@@ -2058,6 +2068,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         int height = 0;
         float previousPaddingRequest = mPaddingBetweenElements;
         int numShownItems = 0;
+        int numShownNotifs = 0;
         boolean finish = false;
         int maxDisplayedNotifications = mMaxDisplayedNotifications;
         ExpandableView previousView = null;
@@ -2067,7 +2078,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             if (expandableView.getVisibility() != View.GONE
                     && !expandableView.hasNoContentHeight() && !footerViewOnLockScreen) {
                 boolean limitReached = maxDisplayedNotifications != -1
-                        && numShownItems >= maxDisplayedNotifications;
+                        && numShownNotifs >= maxDisplayedNotifications;
                 final float viewHeight;
                 if (limitReached) {
                     viewHeight = mShelf.getIntrinsicHeight();
@@ -2080,7 +2091,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 }
                 height += calculateGapHeight(previousView, expandableView, numShownItems);
                 height += viewHeight;
+
                 numShownItems++;
+                if (!(expandableView instanceof MediaHeaderView)) {
+                    numShownNotifs++;
+                }
                 previousView = expandableView;
                 if (finish) {
                     break;
@@ -2427,18 +2442,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     public float getTopPaddingOverflow() {
         return mTopPaddingOverflow;
-    }
-
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
-    public int getPeekHeight() {
-        final ExpandableView firstChild = getFirstChildNotGone();
-        final int firstChildMinHeight = firstChild != null ? firstChild.getCollapsedHeight()
-                : mCollapsedSize;
-        int shelfHeight = 0;
-        if (getLastVisibleSection() != null && mShelf.getVisibility() != GONE) {
-            shelfHeight = mShelf.getIntrinsicHeight();
-        }
-        return mIntrinsicPadding + firstChildMinHeight + shelfHeight;
     }
 
     @ShadeViewRefactor(RefactorComponent.COORDINATOR)
@@ -4533,7 +4536,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             // We still want to call the normal scrolled changed for accessibility reasons
             onScrollChanged(mScrollX, ownScrollY, mScrollX, mOwnScrollY);
             mOwnScrollY = ownScrollY;
+            mAmbientState.setScrollY(mOwnScrollY);
             updateOnScrollChange();
+            updateStackPosition();
         }
     }
 

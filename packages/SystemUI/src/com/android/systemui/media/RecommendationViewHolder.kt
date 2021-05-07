@@ -31,32 +31,41 @@ class RecommendationViewHolder private constructor(itemView: View) {
     val recommendations = itemView as TransitionLayout
 
     // Recommendation screen
+    val cardIcon = itemView.requireViewById<ImageView>(R.id.recommendation_card_icon)
+    val cardText = itemView.requireViewById<TextView>(R.id.recommendation_card_text)
     val mediaCoverItems = listOf<ImageView>(
         itemView.requireViewById(R.id.media_cover1),
         itemView.requireViewById(R.id.media_cover2),
         itemView.requireViewById(R.id.media_cover3),
-        itemView.requireViewById(R.id.media_cover4))
+        itemView.requireViewById(R.id.media_cover4),
+        itemView.requireViewById(R.id.media_cover5),
+        itemView.requireViewById(R.id.media_cover6))
     val mediaLogoItems = listOf<ImageView>(
         itemView.requireViewById(R.id.media_logo1),
         itemView.requireViewById(R.id.media_logo2),
         itemView.requireViewById(R.id.media_logo3),
-        itemView.requireViewById(R.id.media_logo4))
+        itemView.requireViewById(R.id.media_logo4),
+        itemView.requireViewById(R.id.media_logo5),
+        itemView.requireViewById(R.id.media_logo6))
     val mediaCoverItemsResIds = listOf<@IntegerRes Int>(
         R.id.media_cover1,
         R.id.media_cover2,
         R.id.media_cover3,
-        R.id.media_cover4)
+        R.id.media_cover4,
+        R.id.media_cover5,
+        R.id.media_cover6)
     val mediaLogoItemsResIds = listOf<@IntegerRes Int>(
         R.id.media_logo1,
         R.id.media_logo2,
         R.id.media_logo3,
-        R.id.media_logo4)
+        R.id.media_logo4,
+        R.id.media_logo5,
+        R.id.media_logo6)
 
     // Settings/Guts screen
     val cancel = itemView.requireViewById<View>(R.id.cancel)
     val dismiss = itemView.requireViewById<ViewGroup>(R.id.dismiss)
     val dismissLabel = dismiss.getChildAt(0)
-    val recommendationText = itemView.requireViewById<TextView>(R.id.recommendation_text)
     val settings = itemView.requireViewById<View>(R.id.settings)
 
     init {
@@ -93,19 +102,24 @@ class RecommendationViewHolder private constructor(itemView: View) {
 
         // Res Ids for the control components on the recommendation view.
         val controlsIds = setOf(
+            R.id.recommendation_card_icon,
+            R.id.recommendation_card_text,
             R.id.media_cover1,
             R.id.media_cover2,
             R.id.media_cover3,
             R.id.media_cover4,
+            R.id.media_cover5,
+            R.id.media_cover6,
             R.id.media_logo1,
             R.id.media_logo2,
             R.id.media_logo3,
-            R.id.media_logo4
+            R.id.media_logo4,
+            R.id.media_logo5,
+            R.id.media_logo6
         )
 
         // Res Ids for the components on the guts panel.
         val gutsIds = setOf(
-            R.id.recommendation_text,
             R.id.remove_text,
             R.id.cancel,
             R.id.dismiss,

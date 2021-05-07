@@ -3143,7 +3143,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     @Override
     public void showSoftInput(IInputMethodClient client, IBinder windowToken, int flags,
-            ResultReceiver resultReceiver, IBooleanResultCallback resultCallback) {
+            ResultReceiver resultReceiver, @SoftInputShowHideReason int reason,
+            IBooleanResultCallback resultCallback) {
         CallbackUtils.onResult(resultCallback, () -> {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.showSoftInput");
             int uid = Binder.getCallingUid();
@@ -3172,8 +3173,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         }
                     }
                     if (DEBUG) Slog.v(TAG, "Client requesting input be shown");
-                    return showCurrentInputLocked(windowToken, flags, resultReceiver,
-                                    SoftInputShowHideReason.SHOW_SOFT_INPUT);
+                    return showCurrentInputLocked(windowToken, flags, resultReceiver, reason);
                 } finally {
                     Binder.restoreCallingIdentity(ident);
                     Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
@@ -3262,7 +3262,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     @Override
     public void hideSoftInput(IInputMethodClient client, IBinder windowToken, int flags,
-            ResultReceiver resultReceiver, IBooleanResultCallback resultCallback) {
+            ResultReceiver resultReceiver, @SoftInputShowHideReason int reason,
+            IBooleanResultCallback resultCallback) {
         CallbackUtils.onResult(resultCallback, () -> {
             int uid = Binder.getCallingUid();
             ImeTracing.getInstance().triggerManagerServiceDump(
@@ -3296,8 +3297,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
                     if (DEBUG) Slog.v(TAG, "Client requesting input be hidden");
                     return InputMethodManagerService.this.hideCurrentInputLocked(windowToken,
-                            flags, resultReceiver,
-                            SoftInputShowHideReason.HIDE_SOFT_INPUT);
+                            flags, resultReceiver, reason);
                 } finally {
                     Binder.restoreCallingIdentity(ident);
                     Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
@@ -3326,8 +3326,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         // since Android Eclair.  That's why we need to accept IMM#hideSoftInput() even when only
         // IMMS#InputShown indicates that the software keyboard is shown.
         // TODO: Clean up, IMMS#mInputShown, IMMS#mImeWindowVis and mShowRequested.
-        final boolean shouldHideSoftInput = (mCurMethod != null) && (mInputShown ||
-                (mImeWindowVis & InputMethodService.IME_ACTIVE) != 0);
+        final boolean shouldHideSoftInput = (mCurMethod != null) && (mInputShown
+                || (mImeWindowVis & InputMethodService.IME_ACTIVE) != 0);
         boolean res;
         if (shouldHideSoftInput) {
             final Binder hideInputToken = new Binder();
@@ -4046,9 +4046,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @Override
-    public void reportActivityView(IInputMethodClient parentClient, int childDisplayId,
-            float[] matrixValues, IVoidResultCallback resultCallback) {
-        CallbackUtils.onResult(resultCallback, () -> {
+    public void reportActivityViewAsync(IInputMethodClient parentClient, int childDisplayId,
+            float[] matrixValues) {
+        try {
             final DisplayInfo displayInfo = mDisplayManagerInternal.getDisplayInfo(childDisplayId);
             if (displayInfo == null) {
                 throw new IllegalArgumentException(
@@ -4127,7 +4127,14 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     displayId = info.mParentClient.selfReportedDisplayId;
                 }
             }
-        });
+        } catch (Throwable t) {
+            if (parentClient != null) {
+                try {
+                    parentClient.throwExceptionFromSystem(t.toString());
+                } catch (RemoteException e) {
+                }
+            }
+        }
     }
 
     @Override
@@ -4476,7 +4483,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     ((IInputMethod) args.arg1).showSoftInput(
                             (IBinder) args.arg3, msg.arg1, (ResultReceiver) args.arg2);
                     mSoftInputShowHideHistory.addEntry(new SoftInputShowHideHistory.Entry(
-                            mCurClient, mCurAttribute,
+                            mCurFocusedWindowClient, mCurAttribute,
                             mWindowManagerInternal.getWindowName(mCurFocusedWindow),
                             mCurFocusedWindowSoftInputMode, reason, mInFullscreenMode,
                             mWindowManagerInternal.getWindowName(
@@ -4499,7 +4506,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     ((IInputMethod)args.arg1).hideSoftInput(
                             (IBinder) args.arg3, 0, (ResultReceiver)args.arg2);
                     mSoftInputShowHideHistory.addEntry(new SoftInputShowHideHistory.Entry(
-                            mCurClient, mCurAttribute,
+                            mCurFocusedWindowClient, mCurAttribute,
                             mWindowManagerInternal.getWindowName(mCurFocusedWindow),
                             mCurFocusedWindowSoftInputMode, reason, mInFullscreenMode,
                             mWindowManagerInternal.getWindowName(
@@ -6089,10 +6096,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         @BinderThread
         @Override
-        public void updateStatusIcon(String packageName, @DrawableRes int iconId,
-                IVoidResultCallback resultCallback) {
-            CallbackUtils.onResult(resultCallback,
-                    () -> mImms.updateStatusIcon(mToken, packageName, iconId));
+        public void updateStatusIconAsync(String packageName, @DrawableRes int iconId) {
+            mImms.updateStatusIcon(mToken, packageName, iconId);
         }
 
         @BinderThread
@@ -6119,16 +6124,14 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         @BinderThread
         @Override
-        public void notifyUserAction(IVoidResultCallback resultCallback) {
-            CallbackUtils.onResult(resultCallback, () -> mImms.notifyUserAction(mToken));
+        public void notifyUserActionAsync() {
+            mImms.notifyUserAction(mToken);
         }
 
         @BinderThread
         @Override
-        public void applyImeVisibility(IBinder windowToken, boolean setVisible,
-                IVoidResultCallback resultCallback) {
-            CallbackUtils.onResult(resultCallback,
-                    () -> mImms.applyImeVisibility(mToken, windowToken, setVisible));
+        public void applyImeVisibilityAsync(IBinder windowToken, boolean setVisible) {
+            mImms.applyImeVisibility(mToken, windowToken, setVisible);
         }
     }
 }

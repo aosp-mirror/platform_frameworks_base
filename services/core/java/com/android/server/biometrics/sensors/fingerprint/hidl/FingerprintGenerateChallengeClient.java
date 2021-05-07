@@ -38,8 +38,9 @@ public class FingerprintGenerateChallengeClient
 
     FingerprintGenerateChallengeClient(@NonNull Context context,
             @NonNull LazyDaemon<IBiometricsFingerprint> lazyDaemon, @NonNull IBinder token,
-            @NonNull ClientMonitorCallbackConverter listener, @NonNull String owner, int sensorId) {
-        super(context, lazyDaemon, token, listener, owner, sensorId);
+            @NonNull ClientMonitorCallbackConverter listener, int userId, @NonNull String owner,
+            int sensorId) {
+        super(context, lazyDaemon, token, listener, userId, owner, sensorId);
     }
 
     @Override
@@ -55,6 +56,7 @@ public class FingerprintGenerateChallengeClient
             }
         } catch (RemoteException e) {
             Slog.e(TAG, "preEnroll failed", e);
+            mCallback.onClientFinished(this, false /* success */);
         }
     }
 }

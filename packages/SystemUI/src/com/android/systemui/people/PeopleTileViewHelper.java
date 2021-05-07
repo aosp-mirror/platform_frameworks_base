@@ -30,6 +30,8 @@ import static android.appwidget.AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH;
 import static android.appwidget.AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT;
 import static android.appwidget.AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH;
 
+import static com.android.systemui.people.PeopleSpaceUtils.STARRED_CONTACT;
+import static com.android.systemui.people.PeopleSpaceUtils.VALID_CONTACT;
 import static com.android.systemui.people.PeopleSpaceUtils.convertDrawableToBitmap;
 import static com.android.systemui.people.PeopleSpaceUtils.getUserId;
 
@@ -39,6 +41,8 @@ import android.app.people.ConversationStatus;
 import android.app.people.PeopleSpaceTile;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
@@ -48,14 +52,18 @@ import android.icu.util.Measure;
 import android.icu.util.MeasureUnit;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.IconDrawableFactory;
 import android.util.Log;
+import android.util.Pair;
 import android.view.View;
 import android.widget.RemoteViews;
 import android.widget.TextView;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.launcher3.icons.FastBitmapDrawable;
+import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.people.widget.LaunchConversationActivity;
 import com.android.systemui.people.widget.PeopleSpaceWidgetProvider;
@@ -63,6 +71,7 @@ import com.android.systemui.people.widget.PeopleTileKey;
 
 import java.text.NumberFormat;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -102,12 +111,47 @@ public class PeopleTileViewHelper {
     private static final Pattern ANY_DOUBLE_MARK_PATTERN = Pattern.compile("[!?][!?]+");
     private static final Pattern MIXED_MARK_PATTERN = Pattern.compile("![?].*|.*[?]!");
 
+    // This regex can be used to match Unicode emoji characters and character sequences. It's from
+    // the official Unicode site (https://unicode.org/reports/tr51/#EBNF_and_Regex) with minor
+    // changes to fit our needs. It should be updated once new emoji categories are added.
+    //
+    // Emoji categories that can be matched by this regex:
+    // - Country flags. "\p{RI}\p{RI}" matches country flags since they always consist of 2 Unicode
+    //   scalars.
+    // - Single-Character Emoji. "\p{Emoji}" matches Single-Character Emojis.
+    // - Emoji with modifiers. E.g. Emojis with different skin tones. "\p{Emoji}\p{EMod}" matches
+    //   them.
+    // - Emoji Presentation. Those are characters which can normally be drawn as either text or as
+    //   Emoji. "\p{Emoji}\x{FE0F}" matches them.
+    // - Emoji Keycap. E.g. Emojis for number 0 to 9. "\p{Emoji}\x{FE0F}\x{20E3}" matches them.
+    // - Emoji tag sequence. "\p{Emoji}[\x{E0020}-\x{E007E}]+\x{E007F}" matches them.
+    // - Emoji Zero-Width Joiner (ZWJ) Sequence. A ZWJ emoji is actually multiple emojis joined by
+    //   the jointer "0x200D".
+    //
+    // Note: since "\p{Emoji}" also matches some ASCII characters like digits 0-9, we use
+    // "\p{Emoji}&&\p{So}" to exclude them. This is the change we made from the official emoji
+    // regex.
+    private static final String UNICODE_EMOJI_REGEX =
+            "\\p{RI}\\p{RI}|"
+                    + "("
+                    + "\\p{Emoji}(\\p{EMod}|\\x{FE0F}\\x{20E3}?|[\\x{E0020}-\\x{E007E}]+\\x{E007F})"
+                    + "|[\\p{Emoji}&&\\p{So}]"
+                    + ")"
+                    + "("
+                    + "\\x{200D}"
+                    + "\\p{Emoji}(\\p{EMod}|\\x{FE0F}\\x{20E3}?|[\\x{E0020}-\\x{E007E}]+\\x{E007F})"
+                    + "?)*";
+
+    private static final Pattern EMOJI_PATTERN = Pattern.compile(UNICODE_EMOJI_REGEX);
+
     public static final String EMPTY_STRING = "";
 
     private int mMediumVerticalPadding;
 
     private Context mContext;
+    @Nullable
     private PeopleSpaceTile mTile;
+    private PeopleTileKey mKey;
     private float mDensity;
     private int mAppWidgetId;
     private int mWidth;
@@ -117,10 +161,11 @@ public class PeopleTileViewHelper {
     private Locale mLocale;
     private NumberFormat mIntegerFormat;
 
-    public PeopleTileViewHelper(Context context, PeopleSpaceTile tile,
-            int appWidgetId, Bundle options) {
+    public PeopleTileViewHelper(Context context, @Nullable PeopleSpaceTile tile,
+            int appWidgetId, Bundle options, PeopleTileKey key) {
         mContext = context;
         mTile = tile;
+        mKey = key;
         mAppWidgetId = appWidgetId;
         mDensity = mContext.getResources().getDisplayMetrics().density;
         int display = mContext.getResources().getConfiguration().orientation;
@@ -149,8 +194,19 @@ public class PeopleTileViewHelper {
      * content, then birthdays, then the most recent status, and finally last interaction.
      */
     private RemoteViews getViewForTile() {
-        PeopleTileKey key = new PeopleTileKey(mTile);
-        if (DEBUG) Log.d(TAG, "Creating view for tile key: " + key.toString());
+        if (DEBUG) Log.d(TAG, "Creating view for tile key: " + mKey.toString());
+        if (mTile == null || mTile.isPackageSuspended() || mTile.isUserQuieted()) {
+            if (DEBUG) Log.d(TAG, "Create empty view: " + mTile);
+            return createEmptyView();
+        }
+
+        boolean dndBlockingTileData = isDndBlockingTileData(mTile);
+        if (dndBlockingTileData) {
+            if (DEBUG) Log.d(TAG, "Create DND view: " + mTile.getNotificationPolicyState());
+            // TODO: Create DND view.
+            return createEmptyView();
+        }
+
         if (Objects.equals(mTile.getNotificationCategory(), CATEGORY_MISSED_CALL)) {
             if (DEBUG) Log.d(TAG, "Create missed call view");
             return createMissedCallRemoteViews();
@@ -180,6 +236,58 @@ public class PeopleTileViewHelper {
         }
 
         return createLastInteractionRemoteViews();
+    }
+
+    private boolean isDndBlockingTileData(PeopleSpaceTile tile) {
+        int notificationPolicyState = tile.getNotificationPolicyState();
+        if ((notificationPolicyState & PeopleSpaceTile.SHOW_CONVERSATIONS) != 0) {
+            // Not in DND, or all conversations
+            if (DEBUG) Log.d(TAG, "Tile can show all data: " + tile.getUserName());
+            return false;
+        }
+        if ((notificationPolicyState & PeopleSpaceTile.SHOW_IMPORTANT_CONVERSATIONS) != 0
+                && tile.isImportantConversation()) {
+            if (DEBUG) Log.d(TAG, "Tile can show important: " + tile.getUserName());
+            return false;
+        }
+        if ((notificationPolicyState & PeopleSpaceTile.SHOW_STARRED_CONTACTS) != 0
+                && tile.getContactAffinity() == STARRED_CONTACT) {
+            if (DEBUG) Log.d(TAG, "Tile can show starred: " + tile.getUserName());
+            return false;
+        }
+        if ((notificationPolicyState & PeopleSpaceTile.SHOW_CONTACTS) != 0
+                && (tile.getContactAffinity() == VALID_CONTACT
+                || tile.getContactAffinity() == STARRED_CONTACT)) {
+            if (DEBUG) Log.d(TAG, "Tile can show contacts: " + tile.getUserName());
+            return false;
+        }
+        if (DEBUG) Log.d(TAG, "Tile can show if can bypass DND: " + tile.getUserName());
+        return !tile.canBypassDnd();
+    }
+
+    private RemoteViews createEmptyView() {
+        RemoteViews views = new RemoteViews(mContext.getPackageName(),
+                R.layout.people_tile_empty_layout);
+        Drawable appIcon = getAppBadge(mKey.getPackageName(), mKey.getUserId());
+        Bitmap appIconAsBitmap = convertDrawableToBitmap(appIcon);
+        FastBitmapDrawable drawable = new FastBitmapDrawable(
+                appIconAsBitmap);
+        drawable.setIsDisabled(true);
+        Bitmap convertedBitmap = convertDrawableToBitmap(drawable);
+        views.setImageViewBitmap(R.id.item, convertedBitmap);
+        return views;
+    }
+
+    private Drawable getAppBadge(String packageName, int userId) {
+        Drawable badge = null;
+        try {
+            final ApplicationInfo appInfo = mContext.getPackageManager().getApplicationInfoAsUser(
+                    packageName, PackageManager.GET_META_DATA, userId);
+            badge = Utils.getBadgedIcon(mContext, appInfo);
+        } catch (PackageManager.NameNotFoundException e) {
+            badge = mContext.getPackageManager().getDefaultActivityIcon();
+        }
+        return badge;
     }
 
     private void setMaxLines(RemoteViews views, boolean showSender) {
@@ -302,6 +410,9 @@ public class PeopleTileViewHelper {
     private RemoteViews setCommonRemoteViewsFields(RemoteViews views,
             int maxAvatarSize) {
         try {
+            if (mTile == null) {
+                return views;
+            }
             boolean isAvailable =
                     mTile.getStatuses() != null && mTile.getStatuses().stream().anyMatch(
                             c -> c.getAvailability() == AVAILABILITY_AVAILABLE);
@@ -332,13 +443,16 @@ public class PeopleTileViewHelper {
                             | Intent.FLAG_ACTIVITY_CLEAR_TASK
                             | Intent.FLAG_ACTIVITY_NO_HISTORY
                             | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-            activityIntent.putExtra(PeopleSpaceWidgetProvider.EXTRA_TILE_ID, mTile.getId());
+            activityIntent.putExtra(PeopleSpaceWidgetProvider.EXTRA_TILE_ID, mKey.getShortcutId());
             activityIntent.putExtra(
-                    PeopleSpaceWidgetProvider.EXTRA_PACKAGE_NAME, mTile.getPackageName());
+                    PeopleSpaceWidgetProvider.EXTRA_PACKAGE_NAME, mKey.getPackageName());
             activityIntent.putExtra(PeopleSpaceWidgetProvider.EXTRA_USER_HANDLE,
-                    mTile.getUserHandle());
-            activityIntent.putExtra(
-                    PeopleSpaceWidgetProvider.EXTRA_NOTIFICATION_KEY, mTile.getNotificationKey());
+                    new UserHandle(mKey.getUserId()));
+            if (mTile != null) {
+                activityIntent.putExtra(
+                        PeopleSpaceWidgetProvider.EXTRA_NOTIFICATION_KEY,
+                        mTile.getNotificationKey());
+            }
             views.setOnClickPendingIntent(R.id.item, PendingIntent.getActivity(
                     mContext,
                     mAppWidgetId,
@@ -375,7 +489,7 @@ public class PeopleTileViewHelper {
         } else {
             setMaxLines(views, !TextUtils.isEmpty(sender));
             CharSequence content = mTile.getNotificationContent();
-            views = setPunctuationRemoteViewsFields(views, content);
+            views = decorateBackground(views, content);
             views.setColorAttr(R.id.text_content, "setTextColor", android.R.attr.textColorPrimary);
             views.setTextViewText(R.id.text_content, mTile.getNotificationContent());
             views.setViewVisibility(R.id.image, View.GONE);
@@ -506,33 +620,53 @@ public class PeopleTileViewHelper {
         }
     }
 
-    private RemoteViews setPunctuationRemoteViewsFields(
-            RemoteViews views, CharSequence content) {
-        String punctuation = getBackgroundTextFromMessage(content.toString());
+    private RemoteViews decorateBackground(RemoteViews views, CharSequence content) {
         int visibility = View.GONE;
-        if (punctuation != null) {
-            visibility = View.VISIBLE;
+        CharSequence emoji = getDoubleEmoji(content);
+        if (!TextUtils.isEmpty(emoji)) {
+            setEmojiBackground(views, emoji);
+            setPunctuationBackground(views, null);
+            return views;
         }
-        views.setTextViewText(R.id.punctuation1, punctuation);
-        views.setTextViewText(R.id.punctuation2, punctuation);
-        views.setTextViewText(R.id.punctuation3, punctuation);
-        views.setTextViewText(R.id.punctuation4, punctuation);
-        views.setTextViewText(R.id.punctuation5, punctuation);
-        views.setTextViewText(R.id.punctuation6, punctuation);
 
-        views.setViewVisibility(R.id.punctuation1, visibility);
-        views.setViewVisibility(R.id.punctuation2, visibility);
-        views.setViewVisibility(R.id.punctuation3, visibility);
-        views.setViewVisibility(R.id.punctuation4, visibility);
-        views.setViewVisibility(R.id.punctuation5, visibility);
-        views.setViewVisibility(R.id.punctuation6, visibility);
-
+        CharSequence punctuation = getDoublePunctuation(content);
+        setEmojiBackground(views, null);
+        setPunctuationBackground(views, punctuation);
         return views;
     }
 
-    /** Gets character for mTile background decoration based on notification content. */
+    private RemoteViews setEmojiBackground(RemoteViews views, CharSequence content) {
+        if (TextUtils.isEmpty(content)) {
+            views.setViewVisibility(R.id.emojis, View.GONE);
+            return views;
+        }
+        views.setTextViewText(R.id.emoji1, content);
+        views.setTextViewText(R.id.emoji2, content);
+        views.setTextViewText(R.id.emoji3, content);
+
+        views.setViewVisibility(R.id.emojis, View.VISIBLE);
+        return views;
+    }
+
+    private RemoteViews setPunctuationBackground(RemoteViews views, CharSequence content) {
+        if (TextUtils.isEmpty(content)) {
+            views.setViewVisibility(R.id.punctuations, View.GONE);
+            return views;
+        }
+        views.setTextViewText(R.id.punctuation1, content);
+        views.setTextViewText(R.id.punctuation2, content);
+        views.setTextViewText(R.id.punctuation3, content);
+        views.setTextViewText(R.id.punctuation4, content);
+        views.setTextViewText(R.id.punctuation5, content);
+        views.setTextViewText(R.id.punctuation6, content);
+
+        views.setViewVisibility(R.id.punctuations, View.VISIBLE);
+        return views;
+    }
+
+    /** Returns punctuation character(s) if {@code message} has double punctuation ("!" or "?"). */
     @VisibleForTesting
-    String getBackgroundTextFromMessage(String message) {
+    CharSequence getDoublePunctuation(CharSequence message) {
         if (!ANY_DOUBLE_MARK_PATTERN.matcher(message).find()) {
             return null;
         }
@@ -552,6 +686,48 @@ public class PeopleTileViewHelper {
             return "?";
         }
         return "!";
+    }
+
+    /** Returns emoji if {@code message} has two of the same emoji in sequence. */
+    @VisibleForTesting
+    CharSequence getDoubleEmoji(CharSequence message) {
+        Matcher unicodeEmojiMatcher = EMOJI_PATTERN.matcher(message);
+        // Stores the start and end indices of each matched emoji.
+        List<Pair<Integer, Integer>> emojiIndices = new ArrayList<>();
+        // Stores each emoji text.
+        List<CharSequence> emojiTexts = new ArrayList<>();
+
+        // Scan message for emojis
+        while (unicodeEmojiMatcher.find()) {
+            int start = unicodeEmojiMatcher.start();
+            int end = unicodeEmojiMatcher.end();
+            emojiIndices.add(new Pair(start, end));
+            emojiTexts.add(message.subSequence(start, end));
+        }
+
+        if (DEBUG) Log.d(TAG, "Number of emojis in the message: " + emojiIndices.size());
+        if (emojiIndices.size() < 2) {
+            return null;
+        }
+
+        for (int i = 1; i < emojiIndices.size(); ++i) {
+            Pair<Integer, Integer> second = emojiIndices.get(i);
+            Pair<Integer, Integer> first = emojiIndices.get(i - 1);
+
+            // Check if second emoji starts right after first starts
+            if (second.first == first.second) {
+                // Check if emojis in sequence are the same
+                if (Objects.equals(emojiTexts.get(i), emojiTexts.get(i - 1))) {
+                    if (DEBUG) {
+                        Log.d(TAG, "Two of the same emojis in sequence: " + emojiTexts.get(i));
+                    }
+                    return emojiTexts.get(i);
+                }
+            }
+        }
+
+        // No equal emojis in sequence.
+        return null;
     }
 
     private RemoteViews getViewForContentLayout() {
@@ -630,6 +806,9 @@ public class PeopleTileViewHelper {
                         c -> c.getActivity() == ACTIVITY_NEW_STORY);
 
         Icon icon = tile.getUserIcon();
+        if (icon == null) {
+            return null;
+        }
         PeopleStoryIconFactory storyIcon = new PeopleStoryIconFactory(context,
                 context.getPackageManager(),
                 IconDrawableFactory.newInstance(context, false),
@@ -656,7 +835,7 @@ public class PeopleTileViewHelper {
             return null;
         } else if (durationSinceLastInteraction.toDays() < DAYS_IN_A_WEEK) {
             return context.getString(R.string.timestamp, formatter.formatMeasures(
-                    new Measure(durationSinceLastInteraction.toHours(),
+                    new Measure(durationSinceLastInteraction.toDays(),
                             MeasureUnit.DAY)));
         } else if (durationSinceLastInteraction.toDays() <= DAYS_IN_A_WEEK * 2) {
             return context.getString(durationSinceLastInteraction.toDays() == DAYS_IN_A_WEEK

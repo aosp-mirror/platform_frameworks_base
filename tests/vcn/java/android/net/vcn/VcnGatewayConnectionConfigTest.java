@@ -22,7 +22,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import android.net.NetworkCapabilities;
-import android.net.TunnelConnectionParams;
+import android.net.ipsec.ike.IkeTunnelConnectionParams;
 import android.net.vcn.persistablebundleutils.TunnelConnectionParamsUtilsTest;
 
 import androidx.test.filters.SmallTest;
@@ -60,7 +60,7 @@ public class VcnGatewayConnectionConfigTest {
             };
     public static final int MAX_MTU = 1360;
 
-    public static final TunnelConnectionParams TUNNEL_CONNECTION_PARAMS =
+    public static final IkeTunnelConnectionParams TUNNEL_CONNECTION_PARAMS =
             TunnelConnectionParamsUtilsTest.buildTestParams();
 
     public static final String GATEWAY_CONNECTION_NAME_PREFIX = "gatewayConnectionName-";
@@ -82,7 +82,7 @@ public class VcnGatewayConnectionConfigTest {
     // Public for use in VcnGatewayConnectionTest
     public static VcnGatewayConnectionConfig buildTestConfigWithExposedCaps(int... exposedCaps) {
         final VcnGatewayConnectionConfig.Builder builder =
-                newBuilder().setRetryIntervalsMs(RETRY_INTERVALS_MS).setMaxMtu(MAX_MTU);
+                newBuilder().setRetryIntervalsMillis(RETRY_INTERVALS_MS).setMaxMtu(MAX_MTU);
 
         for (int caps : exposedCaps) {
             builder.addExposedCapability(caps);
@@ -134,7 +134,7 @@ public class VcnGatewayConnectionConfigTest {
     @Test
     public void testBuilderRequiresNonNullRetryInterval() {
         try {
-            newBuilder().setRetryIntervalsMs(null);
+            newBuilder().setRetryIntervalsMillis(null);
             fail("Expected exception due to invalid retryIntervalMs");
         } catch (IllegalArgumentException e) {
         }
@@ -143,7 +143,7 @@ public class VcnGatewayConnectionConfigTest {
     @Test
     public void testBuilderRequiresNonEmptyRetryInterval() {
         try {
-            newBuilder().setRetryIntervalsMs(new long[0]);
+            newBuilder().setRetryIntervalsMillis(new long[0]);
             fail("Expected exception due to invalid retryIntervalMs");
         } catch (IllegalArgumentException e) {
         }
@@ -174,7 +174,7 @@ public class VcnGatewayConnectionConfigTest {
 
         assertEquals(TUNNEL_CONNECTION_PARAMS, config.getTunnelConnectionParams());
 
-        assertArrayEquals(RETRY_INTERVALS_MS, config.getRetryIntervalsMs());
+        assertArrayEquals(RETRY_INTERVALS_MS, config.getRetryIntervalsMillis());
         assertEquals(MAX_MTU, config.getMaxMtu());
     }
 

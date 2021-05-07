@@ -139,6 +139,11 @@ public interface AlarmStore {
     String getName();
 
     /**
+     * Returns the number of alarms that satisfy the given condition.
+     */
+    int getCount(Predicate<Alarm> condition);
+
+    /**
      * A functional interface used to update the alarm. Used to describe the update in
      * {@link #updateAlarmDeliveries(AlarmDeliveryCalculator)}
      */
@@ -153,4 +158,3 @@ public interface AlarmStore {
         boolean updateAlarmDelivery(Alarm a);
     }
 }
-

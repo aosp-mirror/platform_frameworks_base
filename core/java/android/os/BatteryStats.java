@@ -3234,6 +3234,11 @@ public abstract class BatteryStats implements Parcelable {
     public abstract int getMaxLearnedBatteryCapacity() ;
 
     /**
+     * @return The latest learned battery capacity in uAh.
+     */
+    public abstract int getLearnedBatteryCapacity();
+
+    /**
      * Return the array of discharge step durations.
      */
     public abstract LevelStepTracker getDischargeLevelStepTracker();
@@ -3925,7 +3930,9 @@ public abstract class BatteryStats implements Parcelable {
                 getStartClockTime(),
                 whichBatteryScreenOffRealtime / 1000, whichBatteryScreenOffUptime / 1000,
                 getEstimatedBatteryCapacity(),
-                getMinLearnedBatteryCapacity(), getMaxLearnedBatteryCapacity(),
+                getLearnedBatteryCapacity(),
+                getMinLearnedBatteryCapacity(),
+                getMaxLearnedBatteryCapacity(),
                 screenDozeTime / 1000);
 
 
@@ -4688,22 +4695,31 @@ public abstract class BatteryStats implements Parcelable {
             pw.println(sb.toString());
         }
 
+        final int lastLearnedBatteryCapacity = getLearnedBatteryCapacity();
+        if (lastLearnedBatteryCapacity > 0) {
+            sb.setLength(0);
+            sb.append(prefix);
+            sb.append("  Last learned battery capacity: ");
+            sb.append(BatteryStatsHelper.makemAh(lastLearnedBatteryCapacity / 1000));
+            sb.append(" mAh");
+            pw.println(sb.toString());
+        }
         final int minLearnedBatteryCapacity = getMinLearnedBatteryCapacity();
         if (minLearnedBatteryCapacity > 0) {
             sb.setLength(0);
             sb.append(prefix);
-                sb.append("  Min learned battery capacity: ");
-                sb.append(BatteryStatsHelper.makemAh(minLearnedBatteryCapacity / 1000));
-                sb.append(" mAh");
+            sb.append("  Min learned battery capacity: ");
+            sb.append(BatteryStatsHelper.makemAh(minLearnedBatteryCapacity / 1000));
+            sb.append(" mAh");
             pw.println(sb.toString());
         }
         final int maxLearnedBatteryCapacity = getMaxLearnedBatteryCapacity();
         if (maxLearnedBatteryCapacity > 0) {
             sb.setLength(0);
             sb.append(prefix);
-                sb.append("  Max learned battery capacity: ");
-                sb.append(BatteryStatsHelper.makemAh(maxLearnedBatteryCapacity / 1000));
-                sb.append(" mAh");
+            sb.append("  Max learned battery capacity: ");
+            sb.append(BatteryStatsHelper.makemAh(maxLearnedBatteryCapacity / 1000));
+            sb.append(" mAh");
             pw.println(sb.toString());
         }
 

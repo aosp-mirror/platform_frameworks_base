@@ -70,10 +70,18 @@ public abstract class SystemService {
     /** @hide */
     protected static final boolean DEBUG_USER = false;
 
-    /*
+    /**
      * The earliest boot phase the system send to system services on boot.
      */
     public static final int PHASE_WAIT_FOR_DEFAULT_DISPLAY = 100;
+
+    /**
+     * Boot phase that blocks on SensorService availability. The service gets started
+     * asynchronously since it may take awhile to actually finish initializing.
+     *
+     * @hide
+     */
+    public static final int PHASE_WAIT_FOR_SENSOR_SERVICE = 200;
 
     /**
      * After receiving this boot phase, services can obtain lock settings data.

@@ -31,7 +31,9 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.appsearch.external.localstorage.AppSearchLogger;
 import com.android.server.appsearch.external.localstorage.stats.CallStats;
+import com.android.server.appsearch.external.localstorage.stats.InitializeStats;
 import com.android.server.appsearch.external.localstorage.stats.PutDocumentStats;
+import com.android.server.appsearch.external.localstorage.stats.SearchStats;
 
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
@@ -187,6 +189,16 @@ public final class PlatformLogger implements AppSearchLogger {
                 logStatsImplLocked(stats);
             }
         }
+    }
+
+    @Override
+    public void logStats(@NonNull InitializeStats stats) throws AppSearchException {
+        // TODO(b/173532925): Implement
+    }
+
+    @Override
+    public void logStats(@NonNull SearchStats stats) throws AppSearchException {
+        // TODO(b/173532925): Implement
     }
 
     /**

@@ -96,15 +96,6 @@ final class InputMethodSessionWrapper {
     }
 
     @AnyThread
-    void toggleSoftInput(int showFlags, int hideFlags) {
-        try {
-            mSession.toggleSoftInput(showFlags, hideFlags);
-        } catch (RemoteException e) {
-            Log.w(TAG, "IME died", e);
-        }
-    }
-
-    @AnyThread
     void appPrivateCommand(String action, Bundle data) {
         try {
             mSession.appPrivateCommand(action, data);

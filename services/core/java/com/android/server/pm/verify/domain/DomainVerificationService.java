@@ -129,10 +129,10 @@ public class DomainVerificationService extends SystemService
     private final PlatformCompat mPlatformCompat;
 
     @NonNull
-    private final DomainVerificationSettings mSettings;
+    private final DomainVerificationCollector mCollector;
 
     @NonNull
-    private final DomainVerificationCollector mCollector;
+    private final DomainVerificationSettings mSettings;
 
     @NonNull
     private final DomainVerificationEnforcer mEnforcer;
@@ -159,8 +159,8 @@ public class DomainVerificationService extends SystemService
         super(context);
         mSystemConfig = systemConfig;
         mPlatformCompat = platformCompat;
-        mSettings = new DomainVerificationSettings();
         mCollector = new DomainVerificationCollector(platformCompat, systemConfig);
+        mSettings = new DomainVerificationSettings(mCollector);
         mEnforcer = new DomainVerificationEnforcer(context);
         mDebug = new DomainVerificationDebug(mCollector);
         mShell = new DomainVerificationShell(this);
@@ -260,7 +260,7 @@ public class DomainVerificationService extends SystemService
     public DomainVerificationInfo getDomainVerificationInfo(@NonNull String packageName)
             throws NameNotFoundException {
         mEnforcer.assertApprovedQuerent(mConnection.getCallingUid(), mProxy);
-        return mConnection.withPackageSettingsReturningThrowing(pkgSettings -> {
+        return mConnection.withPackageSettingsSnapshotReturningThrowing(pkgSettings -> {
             synchronized (mLock) {
                 PackageSetting pkgSetting = pkgSettings.apply(packageName);
                 AndroidPackage pkg = pkgSetting == null ? null : pkgSetting.getPkg();
@@ -320,7 +320,7 @@ public class DomainVerificationService extends SystemService
             @NonNull Set<String> domains, int state)
             throws NameNotFoundException {
         mEnforcer.assertApprovedVerifier(callingUid, mProxy);
-        return mConnection.withPackageSettingsReturningThrowing(pkgSettings -> {
+        return mConnection.withPackageSettingsSnapshotReturningThrowing(pkgSettings -> {
             synchronized (mLock) {
                 List<String> verifiedDomains = new ArrayList<>();
 
@@ -376,7 +376,7 @@ public class DomainVerificationService extends SystemService
 
         ArraySet<String> verifiedDomains = new ArraySet<>();
         if (packageName == null) {
-            mConnection.withPackageSettings(pkgSettings -> {
+            mConnection.withPackageSettingsSnapshot(pkgSettings -> {
                 synchronized (mLock) {
                     ArraySet<String> validDomains = new ArraySet<>();
 
@@ -411,7 +411,7 @@ public class DomainVerificationService extends SystemService
                 }
             });
         } else {
-            mConnection.withPackageSettingsThrowing(pkgSettings -> {
+            mConnection.withPackageSettingsSnapshotThrowing(pkgSettings -> {
                 synchronized (mLock) {
                     DomainVerificationPkgState pkgState = mAttachedPkgStates.get(packageName);
                     if (pkgState == null) {
@@ -548,7 +548,7 @@ public class DomainVerificationService extends SystemService
             return DomainVerificationManager.ERROR_DOMAIN_SET_ID_INVALID;
         }
 
-        return mConnection.withPackageSettingsReturningThrowing(pkgSettings -> {
+        return mConnection.withPackageSettingsSnapshotReturningThrowing(pkgSettings -> {
             synchronized (mLock) {
                 GetAttachedResult result = getAndValidateAttachedLocked(domainSetId, domains,
                         false /* forAutoVerify */, callingUid, userId, pkgSettings);
@@ -588,7 +588,7 @@ public class DomainVerificationService extends SystemService
             @NonNull String packageName, boolean enabled, @Nullable ArraySet<String> domains)
             throws NameNotFoundException {
         mEnforcer.assertInternal(mConnection.getCallingUid());
-        mConnection.withPackageSettingsThrowing(pkgSettings -> {
+        mConnection.withPackageSettingsSnapshotThrowing(pkgSettings -> {
             synchronized (mLock) {
                 DomainVerificationPkgState pkgState = mAttachedPkgStates.get(packageName);
                 if (pkgState == null) {
@@ -694,7 +694,7 @@ public class DomainVerificationService extends SystemService
             throw DomainVerificationUtils.throwPackageUnavailable(packageName);
         }
 
-        return mConnection.withPackageSettingsReturningThrowing(pkgSettings -> {
+        return mConnection.withPackageSettingsSnapshotReturningThrowing(pkgSettings -> {
             synchronized (mLock) {
                 PackageSetting pkgSetting = pkgSettings.apply(packageName);
                 AndroidPackage pkg = pkgSetting == null ? null : pkgSetting.getPkg();
@@ -747,7 +747,7 @@ public class DomainVerificationService extends SystemService
         mEnforcer.assertOwnerQuerent(mConnection.getCallingUid(), mConnection.getCallingUserId(),
                 userId);
 
-        return mConnection.withPackageSettingsReturningThrowing(pkgSettings -> {
+        return mConnection.withPackageSettingsSnapshotReturningThrowing(pkgSettings -> {
             SparseArray<List<String>> levelToPackages = getOwnersForDomainInternal(domain, false,
                     userId, pkgSettings);
             if (levelToPackages.size() == 0) {
@@ -956,17 +956,25 @@ public class DomainVerificationService extends SystemService
         }
 
         AndroidPackage pkg = newPkgSetting.getPkg();
-        ArraySet<String> domains = mCollector.collectValidAutoVerifyDomains(pkg);
-        boolean hasAutoVerifyDomains = !domains.isEmpty();
+        ArraySet<String> autoVerifyDomains = mCollector.collectValidAutoVerifyDomains(pkg);
+        boolean hasAutoVerifyDomains = !autoVerifyDomains.isEmpty();
         boolean isPendingOrRestored = pkgState != null;
         if (isPendingOrRestored) {
             pkgState = new DomainVerificationPkgState(pkgState, domainSetId, hasAutoVerifyDomains);
+            pkgState.getStateMap().retainAll(autoVerifyDomains);
+
+            Set<String> webDomains = mCollector.collectAllWebDomains(pkg);
+            SparseArray<DomainVerificationInternalUserState> userStates = pkgState.getUserStates();
+            int size = userStates.size();
+            for (int index = 0; index < size; index++) {
+                userStates.valueAt(index).retainHosts(webDomains);
+            }
         } else {
             pkgState = new DomainVerificationPkgState(pkgName, domainSetId, hasAutoVerifyDomains);
         }
 
-        boolean needsBroadcast =
-                applyImmutableState(newPkgSetting, pkgState.getStateMap(), domains);
+        boolean needsBroadcast = applyImmutableState(newPkgSetting, pkgState.getStateMap(),
+                autoVerifyDomains);
         if (needsBroadcast && !isPendingOrRestored) {
             // TODO(b/159952358): Test this behavior
             // Attempt to preserve user experience by automatically verifying all domains from
@@ -997,9 +1005,10 @@ public class DomainVerificationService extends SystemService
                     && legacyInfo.getStatus()
                     == PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS) {
                 ArrayMap<String, Integer> stateMap = pkgState.getStateMap();
-                int domainsSize = domains.size();
+                int domainsSize = autoVerifyDomains.size();
                 for (int index = 0; index < domainsSize; index++) {
-                    stateMap.put(domains.valueAt(index), DomainVerificationState.STATE_MIGRATED);
+                    stateMap.put(autoVerifyDomains.valueAt(index),
+                            DomainVerificationState.STATE_MIGRATED);
                 }
             }
         }
@@ -1045,21 +1054,29 @@ public class DomainVerificationService extends SystemService
     }
 
     @Override
-    public void writeSettings(@NonNull TypedXmlSerializer serializer) throws IOException {
-        mConnection.withPackageSettingsThrowing(pkgSettings -> {
+    public void writeSettings(@NonNull TypedXmlSerializer serializer, boolean includeSignatures,
+            @UserIdInt int userId)
+            throws IOException {
+        mConnection.withPackageSettingsSnapshotThrowing(pkgSettings -> {
             synchronized (mLock) {
-                mSettings.writeSettings(serializer, mAttachedPkgStates, pkgName -> {
-                    PackageSetting pkgSetting = pkgSettings.apply(pkgName);
-                    if (pkgSetting == null) {
-                        // If querying for a user restored package that isn't installed on the
-                        // device yet, there will be no signature to write out. In that case,
-                        // it's expected that this returns null and it falls back to the restored
-                        // state's stored signature if it exists.
-                        return null;
-                    }
+                Function<String, String> pkgNameToSignature = null;
+                if (includeSignatures) {
+                    pkgNameToSignature = pkgName -> {
+                        PackageSetting pkgSetting = pkgSettings.apply(pkgName);
+                        if (pkgSetting == null) {
+                            // If querying for a user restored package that isn't installed on the
+                            // device yet, there will be no signature to write out. In that case,
+                            // it's expected that this returns null and it falls back to the
+                            // restored state's stored signature if it exists.
+                            return null;
+                        }
 
-                    return PackageUtils.computeSignaturesSha256Digest(pkgSetting.getSignatures());
-                });
+                        return PackageUtils.computeSignaturesSha256Digest(
+                                pkgSetting.getSignatures());
+                    };
+                }
+
+                mSettings.writeSettings(serializer, mAttachedPkgStates, userId, pkgNameToSignature);
             }
         });
 
@@ -1067,11 +1084,14 @@ public class DomainVerificationService extends SystemService
     }
 
     @Override
-    public void readSettings(@NonNull TypedXmlPullParser parser)
-            throws IOException, XmlPullParserException {
-        synchronized (mLock) {
-            mSettings.readSettings(parser, mAttachedPkgStates);
-        }
+    public void readSettings(@NonNull TypedXmlPullParser parser) throws IOException,
+            XmlPullParserException {
+        mConnection.<IOException, XmlPullParserException>withPackageSettingsSnapshotThrowing2(
+                pkgSettings -> {
+                    synchronized (mLock) {
+                        mSettings.readSettings(parser, mAttachedPkgStates, pkgSettings);
+                    }
+                });
     }
 
     @Override
@@ -1083,9 +1103,12 @@ public class DomainVerificationService extends SystemService
     @Override
     public void restoreSettings(@NonNull TypedXmlPullParser parser)
             throws IOException, XmlPullParserException {
-        synchronized (mLock) {
-            mSettings.restoreSettings(parser, mAttachedPkgStates);
-        }
+        mConnection.<IOException, XmlPullParserException>withPackageSettingsSnapshotThrowing2(
+                pkgSettings -> {
+                    synchronized (mLock) {
+                        mSettings.restoreSettings(parser, mAttachedPkgStates, pkgSettings);
+                    }
+                });
     }
 
     @Override
@@ -1161,7 +1184,7 @@ public class DomainVerificationService extends SystemService
     @Override
     public void printState(@NonNull IndentingPrintWriter writer, @Nullable String packageName,
             @Nullable Integer userId) throws NameNotFoundException {
-        mConnection.withPackageSettingsThrowing(
+        mConnection.withPackageSettingsSnapshotThrowing(
                 pkgSettings -> printState(writer, packageName, userId, pkgSettings));
     }
 
@@ -1179,7 +1202,7 @@ public class DomainVerificationService extends SystemService
     public void printOwnersForPackage(@NonNull IndentingPrintWriter writer,
             @Nullable String packageName, @Nullable @UserIdInt Integer userId)
             throws NameNotFoundException {
-        mConnection.withPackageSettingsThrowing(pkgSettings -> {
+        mConnection.withPackageSettingsSnapshotThrowing(pkgSettings -> {
             synchronized (mLock) {
                 if (packageName == null) {
                     int size = mAttachedPkgStates.size();
@@ -1228,7 +1251,7 @@ public class DomainVerificationService extends SystemService
     @Override
     public void printOwnersForDomains(@NonNull IndentingPrintWriter writer,
             @NonNull List<String> domains, @Nullable @UserIdInt Integer userId) {
-        mConnection.withPackageSettings(pkgSettings -> {
+        mConnection.withPackageSettingsSnapshot(pkgSettings -> {
             synchronized (mLock) {
                 int size = domains.size();
                 for (int index = 0; index < size; index++) {
@@ -1407,7 +1430,7 @@ public class DomainVerificationService extends SystemService
     @Override
     public void clearDomainVerificationState(@Nullable List<String> packageNames) {
         mEnforcer.assertInternal(mConnection.getCallingUid());
-        mConnection.withPackageSettings(pkgSettings -> {
+        mConnection.withPackageSettingsSnapshot(pkgSettings -> {
             synchronized (mLock) {
                 if (packageNames == null) {
                     int size = mAttachedPkgStates.size();
@@ -2008,34 +2031,46 @@ public class DomainVerificationService extends SystemService
         }
 
         @Override
-        public void withPackageSettings(
+        public void withPackageSettingsSnapshot(
                 @NonNull Consumer<Function<String, PackageSetting>> block) {
             enforceLocking();
-            mConnection.withPackageSettings(block);
+            mConnection.withPackageSettingsSnapshot(block);
         }
 
         @Override
-        public <Output> Output withPackageSettingsReturning(
+        public <Output> Output withPackageSettingsSnapshotReturning(
                 @NonNull FunctionalUtils.ThrowingFunction<Function<String, PackageSetting>, Output>
                         block) {
             enforceLocking();
-            return mConnection.withPackageSettingsReturning(block);
+            return mConnection.withPackageSettingsSnapshotReturning(block);
         }
 
         @Override
-        public <ExceptionType extends Exception> void withPackageSettingsThrowing(
-                @NonNull ThrowingConsumer<Function<String, PackageSetting>, ExceptionType> block)
-                throws ExceptionType {
+        public <ExceptionType extends Exception> void withPackageSettingsSnapshotThrowing(
+                @NonNull FunctionalUtils.ThrowingCheckedConsumer<Function<String, PackageSetting>,
+                        ExceptionType> block) throws ExceptionType {
             enforceLocking();
-            mConnection.withPackageSettingsThrowing(block);
+            mConnection.withPackageSettingsSnapshotThrowing(block);
+        }
+
+        @Override
+        public <ExceptionOne extends Exception, ExceptionTwo extends Exception> void
+                withPackageSettingsSnapshotThrowing2(
+                        @NonNull FunctionalUtils.ThrowingChecked2Consumer<
+                                Function<String, PackageSetting>, ExceptionOne, ExceptionTwo> block)
+                throws ExceptionOne, ExceptionTwo {
+            enforceLocking();
+            mConnection.withPackageSettingsSnapshotThrowing2(block);
         }
 
         @Override
         public <Output, ExceptionType extends Exception> Output
-                withPackageSettingsReturningThrowing(@NonNull ThrowingFunction<Function<String,
-                PackageSetting>, Output, ExceptionType> block) throws ExceptionType {
+                withPackageSettingsSnapshotReturningThrowing(
+                        @NonNull FunctionalUtils.ThrowingCheckedFunction<
+                                Function<String, PackageSetting>, Output, ExceptionType> block)
+                throws ExceptionType {
             enforceLocking();
-            return mConnection.withPackageSettingsReturningThrowing(block);
+            return mConnection.withPackageSettingsSnapshotReturningThrowing(block);
         }
 
         @Override

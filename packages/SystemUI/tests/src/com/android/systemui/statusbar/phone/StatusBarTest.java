@@ -86,6 +86,7 @@ import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
+import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
@@ -114,7 +115,6 @@ import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.SuperStatusBarViewFactory;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.charging.WiredChargingRippleController;
-import com.android.systemui.statusbar.events.PrivacyDotViewController;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
@@ -145,7 +145,6 @@ import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
-import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.volume.VolumeComponent;
@@ -179,7 +178,7 @@ public class StatusBarTest extends SysuiTestCase {
 
     @Mock private NotificationsController mNotificationsController;
     @Mock private LightBarController mLightBarController;
-    @Mock private StatusBarIconController mStatusBarIconController;
+    @Mock private StatusBarSignalPolicy mStatusBarSignalPolicy;
     @Mock private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     @Mock private KeyguardStateController mKeyguardStateController;
     @Mock private KeyguardIndicationController mKeyguardIndicationController;
@@ -267,10 +266,10 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private WiredChargingRippleController mWiredChargingRippleController;
     @Mock private OngoingCallController mOngoingCallController;
     @Mock private SystemStatusAnimationScheduler mAnimationScheduler;
-    @Mock private PrivacyDotViewController mDotViewController;
-    @Mock private TunerService mTunerService;
+    @Mock private StatusBarLocationPublisher mLocationPublisher;
     @Mock private FeatureFlags mFeatureFlags;
     @Mock private IWallpaperManager mWallpaperManager;
+    @Mock private KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
     private ShadeController mShadeController;
     private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
     private InitController mInitController = new InitController();
@@ -357,7 +356,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mLightBarController,
                 mAutoHideController,
                 mKeyguardUpdateMonitor,
-                mStatusBarIconController,
+                mStatusBarSignalPolicy,
                 mPulseExpansionHandler,
                 mNotificationWakeUpCoordinator,
                 mKeyguardBypassController,
@@ -437,9 +436,9 @@ public class StatusBarTest extends SysuiTestCase {
                 mWiredChargingRippleController,
                 mOngoingCallController,
                 mAnimationScheduler,
-                mDotViewController,
-                mTunerService,
-                mFeatureFlags);
+                mLocationPublisher,
+                mFeatureFlags,
+                mKeyguardUnlockAnimationController);
         when(mKeyguardViewMediator.registerStatusBar(any(StatusBar.class), any(ViewGroup.class),
                 any(NotificationPanelViewController.class), any(BiometricUnlockController.class),
                 any(ViewGroup.class), any(KeyguardBypassController.class)))

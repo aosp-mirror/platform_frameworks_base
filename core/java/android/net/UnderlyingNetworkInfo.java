@@ -71,13 +71,13 @@ public final class UnderlyingNetworkInfo implements Parcelable {
 
     /** Get the interface name of this network. */
     @NonNull
-    public String getIface() {
+    public String getInterface() {
         return mIface;
     }
 
     /** Get the names of the interfaces underlying this network. */
     @NonNull
-    public List<String> getUnderlyingIfaces() {
+    public List<String> getUnderlyingInterfaces() {
         return mUnderlyingIfaces;
     }
 
@@ -124,8 +124,8 @@ public final class UnderlyingNetworkInfo implements Parcelable {
         if (!(o instanceof UnderlyingNetworkInfo)) return false;
         final UnderlyingNetworkInfo that = (UnderlyingNetworkInfo) o;
         return mOwnerUid == that.getOwnerUid()
-                && Objects.equals(mIface, that.getIface())
-                && Objects.equals(mUnderlyingIfaces, that.getUnderlyingIfaces());
+                && Objects.equals(mIface, that.getInterface())
+                && Objects.equals(mUnderlyingIfaces, that.getUnderlyingInterfaces());
     }
 
     @Override

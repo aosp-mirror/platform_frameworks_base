@@ -19,7 +19,6 @@ package com.android.internal.os;
 import static com.google.common.truth.Truth.assertThat;
 
 import android.os.BatteryConsumer;
-import android.os.SystemBatteryConsumer;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -53,8 +52,7 @@ public class MemoryPowerCalculatorTest {
 
         mStatsRule.apply(calculator);
 
-        SystemBatteryConsumer consumer =
-                mStatsRule.getSystemBatteryConsumer(SystemBatteryConsumer.DRAIN_TYPE_MEMORY);
+        BatteryConsumer consumer = mStatsRule.getDeviceBatteryConsumer();
         assertThat(consumer.getUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_MEMORY))
                 .isEqualTo(3000);
         assertThat(consumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_MEMORY))

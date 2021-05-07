@@ -20,7 +20,6 @@ import android.os.BatteryConsumer;
 import android.os.BatteryStats;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
-import android.os.SystemBatteryConsumer;
 import android.os.UserHandle;
 import android.util.SparseArray;
 
@@ -50,10 +49,11 @@ public class AmbientDisplayPowerCalculator extends PowerCalculator {
                 BatteryStats.STATS_SINCE_CHARGED);
         final double powerMah = getMeasuredOrEstimatedPower(powerModel,
                 measuredEnergyUC, mPowerEstimator, durationMs);
-        builder.getOrCreateSystemBatteryConsumerBuilder(
-                        SystemBatteryConsumer.DRAIN_TYPE_AMBIENT_DISPLAY)
-                .setConsumedPower(BatteryConsumer.POWER_COMPONENT_SCREEN, powerMah, powerModel)
-                .setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_SCREEN, durationMs);
+        builder.getAggregateBatteryConsumerBuilder(
+                BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE)
+                .setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_AMBIENT_DISPLAY, durationMs)
+                .setConsumedPower(BatteryConsumer.POWER_COMPONENT_AMBIENT_DISPLAY,
+                        powerMah, powerModel);
     }
 
     /**

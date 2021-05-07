@@ -143,4 +143,14 @@ public class KeyguardStateControllerTest extends SysuiTestCase {
         verify(callback).onUnlockedChanged();
     }
 
+    @Test
+    public void testKeyguardDismissAmountCallbackInvoked() {
+        KeyguardStateController.Callback callback = mock(KeyguardStateController.Callback.class);
+        mKeyguardStateController.addCallback(callback);
+
+        mKeyguardStateController.notifyKeyguardDismissAmountChanged(100f, false);
+
+        verify(callback).onKeyguardDismissAmountChanged();
+    }
+
 }

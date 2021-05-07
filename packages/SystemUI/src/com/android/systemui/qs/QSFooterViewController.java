@@ -38,7 +38,7 @@ import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.qs.dagger.QSScope;
 import com.android.systemui.settings.UserTracker;
-import com.android.systemui.statusbar.phone.MultiUserSwitch;
+import com.android.systemui.statusbar.phone.MultiUserSwitchController;
 import com.android.systemui.statusbar.phone.SettingsButton;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.UserInfoController;
@@ -60,16 +60,15 @@ public class QSFooterViewController extends ViewController<QSFooterView> impleme
     private final DeviceProvisionedController mDeviceProvisionedController;
     private final UserTracker mUserTracker;
     private final QSPanelController mQsPanelController;
-    private final QSDetailDisplayer mQsDetailDisplayer;
     private final QuickQSPanelController mQuickQSPanelController;
     private final TunerService mTunerService;
     private final MetricsLogger mMetricsLogger;
     private final FalsingManager mFalsingManager;
+    private final MultiUserSwitchController mMultiUserSwitchController;
     private final SettingsButton mSettingsButton;
     private final View mSettingsButtonContainer;
     private final TextView mBuildText;
     private final View mEdit;
-    private final MultiUserSwitch mMultiUserSwitch;
     private final PageIndicator mPageIndicator;
     private final View mPowerMenuLite;
     private final boolean mShowPMLiteButton;
@@ -135,7 +134,8 @@ public class QSFooterViewController extends ViewController<QSFooterView> impleme
     QSFooterViewController(QSFooterView view, UserManager userManager,
             UserInfoController userInfoController, ActivityStarter activityStarter,
             DeviceProvisionedController deviceProvisionedController, UserTracker userTracker,
-            QSPanelController qsPanelController, QSDetailDisplayer qsDetailDisplayer,
+            QSPanelController qsPanelController,
+            MultiUserSwitchController multiUserSwitchController,
             QuickQSPanelController quickQSPanelController,
             TunerService tunerService, MetricsLogger metricsLogger, FalsingManager falsingManager,
             @Named(PM_LITE_ENABLED) boolean showPMLiteButton,
@@ -147,21 +147,26 @@ public class QSFooterViewController extends ViewController<QSFooterView> impleme
         mDeviceProvisionedController = deviceProvisionedController;
         mUserTracker = userTracker;
         mQsPanelController = qsPanelController;
-        mQsDetailDisplayer = qsDetailDisplayer;
         mQuickQSPanelController = quickQSPanelController;
         mTunerService = tunerService;
         mMetricsLogger = metricsLogger;
         mFalsingManager = falsingManager;
+        mMultiUserSwitchController = multiUserSwitchController;
 
         mSettingsButton = mView.findViewById(R.id.settings_button);
         mSettingsButtonContainer = mView.findViewById(R.id.settings_button_container);
         mBuildText = mView.findViewById(R.id.build);
         mEdit = mView.findViewById(android.R.id.edit);
-        mMultiUserSwitch = mView.findViewById(R.id.multi_user_switch);
         mPageIndicator = mView.findViewById(R.id.footer_page_indicator);
         mPowerMenuLite = mView.findViewById(R.id.pm_lite);
         mShowPMLiteButton = showPMLiteButton;
         mGlobalActionsDialog = globalActionsDialog;
+    }
+
+    @Override
+    protected void onInit() {
+        super.onInit();
+        mMultiUserSwitchController.init();
     }
 
     @Override
@@ -199,9 +204,8 @@ public class QSFooterViewController extends ViewController<QSFooterView> impleme
                     mQsPanelController.showEdit(view));
         });
 
-        mMultiUserSwitch.setQSDetailDisplayer(mQsDetailDisplayer);
         mQsPanelController.setFooterPageIndicator(mPageIndicator);
-        mView.updateEverything(isTunerEnabled());
+        mView.updateEverything(isTunerEnabled(), mMultiUserSwitchController.isMultiUserEnabled());
     }
 
     @Override
@@ -217,9 +221,9 @@ public class QSFooterViewController extends ViewController<QSFooterView> impleme
     @Override
     public void setExpanded(boolean expanded) {
         mExpanded = expanded;
-        mView.setExpanded(expanded, isTunerEnabled());
+        mView.setExpanded(
+                expanded, isTunerEnabled(), mMultiUserSwitchController.isMultiUserEnabled());
     }
-
 
     @Override
     public int getHeight() {
@@ -258,7 +262,7 @@ public class QSFooterViewController extends ViewController<QSFooterView> impleme
 
     @Override
     public void disable(int state1, int state2, boolean animate) {
-        mView.disable(state2, isTunerEnabled());
+        mView.disable(state2, isTunerEnabled(), mMultiUserSwitchController.isMultiUserEnabled());
     }
 
     private void startSettingsActivity() {

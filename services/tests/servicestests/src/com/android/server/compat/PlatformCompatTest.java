@@ -98,7 +98,7 @@ public class PlatformCompatTest {
                 .addEnableAfterSdkChangeWithId(Build.VERSION_CODES.Q, 5L)
                 .addEnableAfterSdkChangeWithId(Build.VERSION_CODES.R, 6L)
                 .addLoggingOnlyChangeWithId(7L)
-                .addOverridableChangeWithId(8L)
+                .addDisabledOverridableChangeWithId(8L)
                 .build();
         mPlatformCompat = new PlatformCompat(mContext, mCompatConfig, mBuildClassifier);
         assertThat(mPlatformCompat.listAllChanges()).asList().containsExactly(

@@ -71,6 +71,13 @@ public class NotificationRoundnessManager {
         }
     }
 
+    public boolean isViewAffectedBySwipe(ExpandableView expandableView) {
+        return expandableView != null
+                && (expandableView == mSwipedView
+                    || expandableView == mViewBeforeSwipedView
+                    || expandableView == mViewAfterSwipedView);
+    }
+
     boolean updateViewWithoutCallback(ExpandableView view,
             boolean animate) {
         if (view == null
@@ -78,38 +85,35 @@ public class NotificationRoundnessManager {
                 || view == mViewAfterSwipedView) {
             return false;
         }
-        float topRoundness = getRoundness(view, true /* top */);
-        float bottomRoundness = getRoundness(view, false /* top */);
-        boolean topChanged = view.setTopRoundness(topRoundness, animate);
-        boolean bottomChanged = view.setBottomRoundness(bottomRoundness, animate);
-        boolean firstInSection = isFirstInSection(view, false /* exclude first section */);
-        boolean lastInSection = isLastInSection(view, false /* exclude last section */);
-        view.setFirstInSection(firstInSection);
-        view.setLastInSection(lastInSection);
-        return (firstInSection || lastInSection) && (topChanged || bottomChanged);
+
+        final float topRoundness = getRoundness(view, true /* top */);
+        final float bottomRoundness = getRoundness(view, false /* top */);
+
+        final boolean topChanged = view.setTopRoundness(topRoundness, animate);
+        final boolean bottomChanged = view.setBottomRoundness(bottomRoundness, animate);
+
+        final boolean isFirstInSection = isFirstInSection(view);
+        final boolean isLastInSection = isLastInSection(view);
+
+        view.setFirstInSection(isFirstInSection);
+        view.setLastInSection(isLastInSection);
+
+        return (isFirstInSection || isLastInSection) && (topChanged || bottomChanged);
     }
 
-    private boolean isFirstInSection(ExpandableView view, boolean includeFirstSection) {
-        int numNonEmptySections = 0;
+    private boolean isFirstInSection(ExpandableView view) {
         for (int i = 0; i < mFirstInSectionViews.length; i++) {
             if (view == mFirstInSectionViews[i]) {
-                return includeFirstSection || numNonEmptySections > 0;
-            }
-            if (mFirstInSectionViews[i] != null) {
-                numNonEmptySections++;
+                return true;
             }
         }
         return false;
     }
 
-    private boolean isLastInSection(ExpandableView view, boolean includeLastSection) {
-        int numNonEmptySections = 0;
+    private boolean isLastInSection(ExpandableView view) {
         for (int i = mLastInSectionViews.length - 1; i >= 0; i--) {
             if (view == mLastInSectionViews[i]) {
-                return includeLastSection || numNonEmptySections > 0;
-            }
-            if (mLastInSectionViews[i] != null) {
-                numNonEmptySections++;
+                return true;
             }
         }
         return false;
@@ -172,10 +176,10 @@ public class NotificationRoundnessManager {
                 || (view.isHeadsUpAnimatingAway()) && !mExpanded)) {
             return 1.0f;
         }
-        if (isFirstInSection(view, true /* include first section */) && top) {
+        if (isFirstInSection(view) && top) {
             return 1.0f;
         }
-        if (isLastInSection(view, true /* include last section */) && !top) {
+        if (isLastInSection(view) && !top) {
             return 1.0f;
         }
         if (view == mTrackedHeadsUp) {
@@ -229,10 +233,8 @@ public class NotificationRoundnessManager {
                                     : section.getLastVisibleChild());
                     if (newView == oldView) {
                         isStillPresent = true;
-                        if (oldView.isFirstInSection() != isFirstInSection(oldView,
-                                false /* exclude first section */)
-                                || oldView.isLastInSection() != isLastInSection(oldView,
-                                false /* exclude last section */)) {
+                        if (oldView.isFirstInSection() != isFirstInSection(oldView)
+                                || oldView.isLastInSection() != isLastInSection(oldView)) {
                             adjacentSectionChanged = true;
                         }
                         break;

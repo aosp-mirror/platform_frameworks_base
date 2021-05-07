@@ -83,16 +83,27 @@ public final class WebViewFactory {
     public @interface Timestamp {
     }
 
+    /** When the overall WebView provider load began. */
     public static final int WEBVIEW_LOAD_START = 0;
+    /** Before creating the WebView APK Context. */
     public static final int CREATE_CONTEXT_START = 1;
+    /** After creating the WebView APK Context. */
     public static final int CREATE_CONTEXT_END = 2;
+    /** Before adding WebView assets to AssetManager. */
     public static final int ADD_ASSETS_START = 3;
+    /** After adding WebView assets to AssetManager. */
     public static final int ADD_ASSETS_END = 4;
+    /** Before creating the WebView ClassLoader. */
     public static final int GET_CLASS_LOADER_START = 5;
+    /** After creating the WebView ClassLoader. */
     public static final int GET_CLASS_LOADER_END = 6;
+    /** Before preloading the WebView native library. */
     public static final int NATIVE_LOAD_START = 7;
+    /** After preloading the WebView native library. */
     public static final int NATIVE_LOAD_END = 8;
+    /** Before looking up the WebView provider class. */
     public static final int PROVIDER_CLASS_FOR_NAME_START = 9;
+    /** After looking up the WebView provider class. */
     public static final int PROVIDER_CLASS_FOR_NAME_END = 10;
     private static final int TIMESTAMPS_SIZE = 11;
 
@@ -262,7 +273,7 @@ public final class WebViewFactory {
             // us honest and minimize usage of WebView internals when binding the proxy.
             if (sProviderInstance != null) return sProviderInstance;
 
-            sTimestamps[WEBVIEW_LOAD_START] = SystemClock.elapsedRealtime();
+            sTimestamps[WEBVIEW_LOAD_START] = SystemClock.uptimeMillis();
             final int uid = android.os.Process.myUid();
             if (uid == android.os.Process.ROOT_UID || uid == android.os.Process.SYSTEM_UID
                     || uid == android.os.Process.PHONE_UID || uid == android.os.Process.NFC_UID
@@ -402,7 +413,7 @@ public final class WebViewFactory {
 
             Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW,
                     "initialApplication.createApplicationContext");
-            sTimestamps[CREATE_CONTEXT_START] = SystemClock.elapsedRealtime();
+            sTimestamps[CREATE_CONTEXT_START] = SystemClock.uptimeMillis();
             try {
                 // Construct an app context to load the Java code into the current app.
                 Context webViewContext = initialApplication.createApplicationContext(
@@ -411,7 +422,7 @@ public final class WebViewFactory {
                 sPackageInfo = newPackageInfo;
                 return webViewContext;
             } finally {
-                sTimestamps[CREATE_CONTEXT_END] = SystemClock.elapsedRealtime();
+                sTimestamps[CREATE_CONTEXT_END] = SystemClock.uptimeMillis();
                 Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
             }
         } catch (RemoteException | PackageManager.NameNotFoundException e) {
@@ -437,26 +448,26 @@ public final class WebViewFactory {
 
             Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "WebViewFactory.getChromiumProviderClass()");
             try {
-                sTimestamps[ADD_ASSETS_START] = SystemClock.elapsedRealtime();
+                sTimestamps[ADD_ASSETS_START] = SystemClock.uptimeMillis();
                 for (String newAssetPath : webViewContext.getApplicationInfo().getAllApkPaths()) {
                     initialApplication.getAssets().addAssetPathAsSharedLibrary(newAssetPath);
                 }
                 sTimestamps[ADD_ASSETS_END] = sTimestamps[GET_CLASS_LOADER_START] =
-                        SystemClock.elapsedRealtime();
+                        SystemClock.uptimeMillis();
                 ClassLoader clazzLoader = webViewContext.getClassLoader();
                 Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "WebViewFactory.loadNativeLibrary()");
                 sTimestamps[GET_CLASS_LOADER_END] = sTimestamps[NATIVE_LOAD_START] =
-                        SystemClock.elapsedRealtime();
+                        SystemClock.uptimeMillis();
                 WebViewLibraryLoader.loadNativeLibrary(clazzLoader,
                         getWebViewLibrary(sPackageInfo.applicationInfo));
                 Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
                 Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "Class.forName()");
                 sTimestamps[NATIVE_LOAD_END] = sTimestamps[PROVIDER_CLASS_FOR_NAME_START] =
-                        SystemClock.elapsedRealtime();
+                        SystemClock.uptimeMillis();
                 try {
                     return getWebViewProviderClass(clazzLoader);
                 } finally {
-                    sTimestamps[PROVIDER_CLASS_FOR_NAME_END] = SystemClock.elapsedRealtime();
+                    sTimestamps[PROVIDER_CLASS_FOR_NAME_END] = SystemClock.uptimeMillis();
                     Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
                 }
             } catch (ClassNotFoundException e) {

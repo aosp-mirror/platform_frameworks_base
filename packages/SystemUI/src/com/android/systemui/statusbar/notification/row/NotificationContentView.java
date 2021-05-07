@@ -1258,7 +1258,7 @@ public class NotificationContentView extends FrameLayout {
                     RemoteInputView riv = RemoteInputView.inflate(
                             mContext, actionContainer, entry, mRemoteInputController);
 
-                    riv.setVisibility(View.INVISIBLE);
+                    riv.setVisibility(View.GONE);
                     actionContainer.addView(riv, new LayoutParams(
                             ViewGroup.LayoutParams.MATCH_PARENT,
                             ViewGroup.LayoutParams.MATCH_PARENT)

@@ -19,6 +19,7 @@ package android.nfc;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -62,7 +63,36 @@ public class NfcControllerAlwaysOnListenerTest {
     }
 
     @Test
+    public void testRegister_RegisterUnregisterWhenNotSupported() throws RemoteException {
+        // isControllerAlwaysOnSupported() returns false, not supported.
+        doReturn(false).when(mNfcAdapter).isControllerAlwaysOnSupported();
+        NfcControllerAlwaysOnListener mListener =
+                new NfcControllerAlwaysOnListener(mNfcAdapter);
+        ControllerAlwaysOnListener mockListener1 = mock(ControllerAlwaysOnListener.class);
+        ControllerAlwaysOnListener mockListener2 = mock(ControllerAlwaysOnListener.class);
+
+        // Verify that the state listener will not registered with the NFC Adapter
+        mListener.register(getExecutor(), mockListener1);
+        verify(mNfcAdapter, times(0)).registerControllerAlwaysOnListener(any());
+
+        // Register a second client and no any call to NFC Adapter
+        mListener.register(getExecutor(), mockListener2);
+        verify(mNfcAdapter, times(0)).registerControllerAlwaysOnListener(any());
+
+        // Unregister first listener, and no any call to NFC Adapter
+        mListener.unregister(mockListener1);
+        verify(mNfcAdapter, times(0)).registerControllerAlwaysOnListener(any());
+        verify(mNfcAdapter, times(0)).unregisterControllerAlwaysOnListener(any());
+
+        // Unregister second listener, and no any call to NFC Adapter
+        mListener.unregister(mockListener2);
+        verify(mNfcAdapter, times(0)).registerControllerAlwaysOnListener(any());
+        verify(mNfcAdapter, times(0)).unregisterControllerAlwaysOnListener(any());
+    }
+
+    @Test
     public void testRegister_RegisterUnregister() throws RemoteException {
+        doReturn(true).when(mNfcAdapter).isControllerAlwaysOnSupported();
         NfcControllerAlwaysOnListener mListener =
                 new NfcControllerAlwaysOnListener(mNfcAdapter);
         ControllerAlwaysOnListener mockListener1 = mock(ControllerAlwaysOnListener.class);
@@ -89,6 +119,7 @@ public class NfcControllerAlwaysOnListenerTest {
 
     @Test
     public void testRegister_FirstRegisterFails() throws RemoteException {
+        doReturn(true).when(mNfcAdapter).isControllerAlwaysOnSupported();
         NfcControllerAlwaysOnListener mListener =
                 new NfcControllerAlwaysOnListener(mNfcAdapter);
         ControllerAlwaysOnListener mockListener1 = mock(ControllerAlwaysOnListener.class);
@@ -116,6 +147,7 @@ public class NfcControllerAlwaysOnListenerTest {
 
     @Test
     public void testRegister_RegisterSameListenerTwice() throws RemoteException {
+        doReturn(true).when(mNfcAdapter).isControllerAlwaysOnSupported();
         NfcControllerAlwaysOnListener mListener =
                 new NfcControllerAlwaysOnListener(mNfcAdapter);
         ControllerAlwaysOnListener mockListener = mock(ControllerAlwaysOnListener.class);
@@ -132,7 +164,7 @@ public class NfcControllerAlwaysOnListenerTest {
 
     @Test
     public void testNotify_AllListenersNotified() throws RemoteException {
-
+        doReturn(true).when(mNfcAdapter).isControllerAlwaysOnSupported();
         NfcControllerAlwaysOnListener listener = new NfcControllerAlwaysOnListener(mNfcAdapter);
         List<ControllerAlwaysOnListener> mockListeners = new ArrayList<>();
         for (int i = 0; i < 10; i++) {
@@ -149,7 +181,8 @@ public class NfcControllerAlwaysOnListenerTest {
     }
 
     @Test
-    public void testStateChange_CorrectValue() {
+    public void testStateChange_CorrectValue() throws RemoteException {
+        doReturn(true).when(mNfcAdapter).isControllerAlwaysOnSupported();
         runStateChangeValue(true, true);
         runStateChangeValue(false, false);
 

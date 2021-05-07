@@ -67,7 +67,8 @@ public class VisibilityStoreTest {
                         mTemporaryFolder.newFolder(),
                         mContext,
                         mContext.getUserId(),
-                        /*globalQuerierPackage=*/ mContext.getPackageName());
+                        /*globalQuerierPackage=*/ mContext.getPackageName(),
+                        /*logger=*/ null);
         mGlobalQuerierUid =
                 mContext.getPackageManager().getPackageUid(mContext.getPackageName(), /*flags=*/ 0);
 
@@ -163,7 +164,8 @@ public class VisibilityStoreTest {
                         mTemporaryFolder.newFolder(),
                         mContext,
                         mContext.getUserId(),
-                        /*globalQuerierPackage=*/ mContext.getPackageName());
+                        /*globalQuerierPackage=*/ mContext.getPackageName(),
+                        /*logger=*/ null);
         VisibilityStore visibilityStore = appSearchImpl.getVisibilityStoreLocked();
 
         // Use some arbitrary callerUid. If we can't find the global querier's uid though,

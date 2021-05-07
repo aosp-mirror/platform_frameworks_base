@@ -1,10 +1,8 @@
 package com.android.systemui.media
 
-import android.animation.ArgbEvaluator
 import android.app.smartspace.SmartspaceTarget
 import android.content.Context
 import android.content.Intent
-import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.provider.Settings.ACTION_MEDIA_CONTROLS_SETTINGS
 import android.util.Log
@@ -21,6 +19,7 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.qs.PageIndicator
+import com.android.systemui.shared.system.SysUiStatsLog
 import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.Utils
@@ -116,8 +115,7 @@ class MediaCarouselController @Inject constructor(
     private var needsReordering: Boolean = false
     private var keysNeedRemoval = mutableSetOf<String>()
     private var bgColor = getBackgroundColor()
-    private var fgColor = com.android.settingslib.Utils.getColorAttr(context,
-            com.android.internal.R.attr.textColorPrimary).defaultColor
+    private var shouldScrollToActivePlayer: Boolean = false
     private var isRtl: Boolean = false
         set(value) {
             if (value != field) {
@@ -157,6 +155,13 @@ class MediaCarouselController @Inject constructor(
             inflateSettingsButton()
         }
     }
+
+    var visibleToUser: Boolean = false
+        set(value) {
+            if (field != value) {
+                field = value
+            }
+        }
 
     init {
         mediaFrame = inflateMediaCarousel()
@@ -205,6 +210,9 @@ class MediaCarouselController @Inject constructor(
             override fun onSmartspaceMediaDataLoaded(key: String, data: SmartspaceTarget) {
                 Log.d(TAG, "My Smartspace media update is here")
                 addSmartspaceMediaRecommendations(key, data)
+                if (visibleToUser) {
+                    logSmartspaceImpression()
+                }
             }
 
             override fun onMediaDataRemoved(key: String) {
@@ -264,13 +272,18 @@ class MediaCarouselController @Inject constructor(
             }
         }
         mediaCarouselScrollHandler.onPlayersChanged()
+
+        // Automatically scroll to the active player if needed
+        if (shouldScrollToActivePlayer) {
+            shouldScrollToActivePlayer = false
+            val activeMediaIndex = MediaPlayerData.getActiveMediaIndex()
+            if (activeMediaIndex != -1) {
+                mediaCarouselScrollHandler.scrollToActivePlayer(activeMediaIndex)
+            }
+        }
     }
 
     private fun addOrUpdatePlayer(key: String, oldKey: String?, data: MediaData) {
-        data.actions.forEach {
-            it.icon?.setTintList(ColorStateList.valueOf(fgColor))
-        }
-        data.appIcon?.setTintList(ColorStateList.valueOf(fgColor))
         val dataCopy = data.copy(backgroundColor = bgColor)
         val existingPlayer = MediaPlayerData.getMediaPlayer(key, oldKey)
         if (existingPlayer == null) {
@@ -319,8 +332,8 @@ class MediaCarouselController @Inject constructor(
         val lp = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.WRAP_CONTENT)
         newRecs.recommendationViewHolder?.recommendations?.setLayoutParams(lp)
-        newRecs.bindRecommendation(data, bgColor)
-        MediaPlayerData.addMediaPlayer(key, newRecs)
+        newRecs.bindRecommendation(data, bgColor, { v -> shouldScrollToActivePlayer = true })
+        MediaPlayerData.addMediaRecommendation(key, newRecs)
         updatePlayerToState(newRecs, noAnimation = true)
         reorderAllPlayers()
         updatePageIndicator()
@@ -360,10 +373,6 @@ class MediaCarouselController @Inject constructor(
     private fun recreatePlayers() {
         bgColor = getBackgroundColor()
 
-        fgColor = com.android.settingslib.Utils.getColorAttr(context,
-                com.android.internal.R.attr.textColorPrimary).defaultColor
-        pageIndicator.tintList = ColorStateList.valueOf(fgColor)
-
         MediaPlayerData.mediaData().forEach { (key, data) ->
             removePlayer(key, dismissMediaData = false)
             addOrUpdatePlayer(key = key, oldKey = null, data = data)
@@ -371,12 +380,7 @@ class MediaCarouselController @Inject constructor(
     }
 
     private fun getBackgroundColor(): Int {
-        val themeAccent = com.android.settingslib.Utils.getColorAttr(context,
-                com.android.internal.R.attr.colorAccent).defaultColor
-        val themeBackground = com.android.settingslib.Utils.getColorAttr(context,
-                com.android.internal.R.attr.colorBackground).defaultColor
-        // Simulate transparency - cannot be actually transparent because of lockscreen
-        return ArgbEvaluator().evaluate(0.25f, themeBackground, themeAccent) as Int
+        return context.getColor(android.R.color.system_accent2_50)
     }
 
     private fun updatePageIndicator() {
@@ -571,12 +575,35 @@ class MediaCarouselController @Inject constructor(
             mediaCarouselScrollHandler.playerWidthPlusPadding = playerWidthPlusPadding
         }
     }
+
+    /**
+     * Log the user impression for media card.
+     */
+    fun logSmartspaceImpression() {
+        MediaPlayerData.players().forEach {
+            // Log every impression of media recommendation card since it will only be shown
+            // for 1 minute after each connection.
+            if (it.recommendationViewHolder?.recommendations?.visibility == View.VISIBLE) {
+                /* ktlint-disable max-line-length */
+                SysUiStatsLog.write(SysUiStatsLog.SMARTSPACE_CARD_REPORTED,
+                        800, // SMARTSPACE_CARD_SEEN
+                        it.getInstanceId(),
+                        SysUiStatsLog.SMART_SPACE_CARD_REPORTED__CARD_TYPE__HEADPHONE_MEDIA_RECOMMENDATIONS,
+                        it.getSurfaceForSmartspaceLogging(),
+                        /* rank */ 0,
+                        /* cardinality */ 1)
+                /* ktlint-disable max-line-length */
+            }
+
+            // TODO(shijieru): add logging for media control card
+        }
+    }
 }
 
 @VisibleForTesting
 internal object MediaPlayerData {
     private val EMPTY = MediaData(-1, false, 0, null, null, null, null, null,
-        emptyList(), emptyList(), "INVALID", null, null, null, true, null)
+        emptyList(), emptyList(), "INVALID", null, null, null, false, null)
 
     private data class MediaSortKey(
         // Is Smartspace media recommendation. When the Smartspace media is present, it should
@@ -603,7 +630,7 @@ internal object MediaPlayerData {
         mediaPlayers.put(sortKey, player)
     }
 
-    fun addMediaPlayer(key: String, player: MediaControlPanel) {
+    fun addMediaRecommendation(key: String, player: MediaControlPanel) {
         removeMediaPlayer(key)
         val sortKey = MediaSortKey(isSsMediaRec = true, EMPTY, System.currentTimeMillis())
         mediaData.put(key, sortKey)
@@ -625,6 +652,16 @@ internal object MediaPlayerData {
     fun mediaData() = mediaData.entries.map { e -> Pair(e.key, e.value.data) }
 
     fun players() = mediaPlayers.values
+
+    /** Returns the index of the first non-timeout media. */
+    fun getActiveMediaIndex(): Int {
+        mediaPlayers.entries.forEachIndexed { index, e ->
+            if (e.key.data.active) {
+                return index
+            }
+        }
+        return -1
+    }
 
     @VisibleForTesting
     fun clear() {

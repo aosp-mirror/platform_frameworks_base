@@ -34,6 +34,7 @@ import com.android.systemui.qs.QSPanel;
 import com.android.systemui.qs.QuickQSPanel;
 import com.android.systemui.qs.QuickStatusBarHeader;
 import com.android.systemui.qs.customize.QSCustomizer;
+import com.android.systemui.statusbar.phone.MultiUserSwitch;
 
 import javax.inject.Named;
 
@@ -70,6 +71,12 @@ public interface QSFragmentModule {
     @RootView
     static View provideRootView(QSFragment qsFragment) {
         return qsFragment.getView();
+    }
+
+    /** */
+    @Provides
+    static MultiUserSwitch providesMultiUserSWitch(QSFooterView qsFooterView) {
+        return qsFooterView.findViewById(R.id.multi_user_switch);
     }
 
     /** */
@@ -129,7 +136,7 @@ public interface QSFragmentModule {
             @QSThemedContext LayoutInflater layoutInflater,
             QSPanel qsPanel
     ) {
-        return layoutInflater.inflate(R.layout.quick_settings_footer, qsPanel, false);
+        return layoutInflater.inflate(R.layout.quick_settings_security_footer, qsPanel, false);
     }
 
     /** */

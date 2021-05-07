@@ -18,6 +18,7 @@ package android.hardware.lights;
 
 import android.annotation.ColorInt;
 import android.annotation.NonNull;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -65,27 +66,61 @@ public final class LightState implements Parcelable {
     }
 
     /**
-     * Creates a new LightState with the desired color and intensity, for a light type
-     * of RBG color or single monochrome color.
-     *
-     * @param color the desired color and intensity in ARGB format.
-     * @return The LightState object contains the color.
+     * Builder for creating device light change requests.
      */
-    @NonNull
-    public static LightState forColor(@ColorInt int color) {
-        return new LightState(color, 0);
-    }
+    public static final class Builder {
+        private int mValue;
+        private boolean mIsForPlayerId;
 
-    /**
-     * Creates a new LightState with the desired player id, for a light of type
-     * {@link android.hardware.lights.Light#LIGHT_TYPE_INPUT_PLAYER_ID}.
-     *
-     * @param playerId the desired player id.
-     * @return The LightState object contains the player id.
-     */
-    @NonNull
-    public static LightState forPlayerId(int playerId) {
-        return new LightState(0, playerId);
+        /** Creates a new {@link LightState.Builder}. */
+        public Builder() {
+            mValue = 0;
+            mIsForPlayerId = false;
+        }
+
+        /**
+         * Set the desired color and intensity of the LightState Builder, for a light type
+         * of RBG color or single monochrome color.
+         *
+         * @param color the desired color and intensity in ARGB format.
+         * @return The {@link LightState.Builder} object contains the light color and intensity.
+         */
+        @SuppressLint("MissingGetterMatchingBuilder")
+        @NonNull
+        public Builder setColor(@ColorInt int color) {
+            mIsForPlayerId = false;
+            mValue = color;
+            return this;
+        }
+
+        /**
+         * Set the desired player id of the LightState Builder, for a light of type
+         * {@link android.hardware.lights.Light#LIGHT_TYPE_INPUT_PLAYER_ID}.
+         *
+         * @param playerId the desired player id.
+         * @return The {@link LightState.Builder} object contains the player id.
+         */
+        @SuppressLint("MissingGetterMatchingBuilder")
+        @NonNull
+        public Builder setPlayerId(int playerId) {
+            mIsForPlayerId = true;
+            mValue = playerId;
+            return this;
+        }
+
+        /**
+         * Create a LightState object used to control lights on the device.
+         *
+         * <p>The generated {@link LightState} should be used in
+         * {@link LightsRequest.Builder#addLight(Light, LightState)}.
+         */
+        public @NonNull LightState build() {
+            if (!mIsForPlayerId) {
+                return new LightState(mValue, 0);
+            } else {
+                return new LightState(0, mValue);
+            }
+        }
     }
 
     /**

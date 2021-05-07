@@ -149,7 +149,8 @@ public final class ImplInstanceManager {
     private AppSearchImpl createImpl(@NonNull Context context, @UserIdInt int userId)
             throws AppSearchException {
         File appSearchDir = getAppSearchDir(userId);
-        return AppSearchImpl.create(appSearchDir, context, userId, mGlobalQuerierPackage);
+        return AppSearchImpl.create(
+                appSearchDir, context, userId, mGlobalQuerierPackage, /*logger=*/ null);
     }
 
     /**

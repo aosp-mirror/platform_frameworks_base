@@ -141,6 +141,7 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Parcel;
 import android.os.Process;
 import android.os.RemoteException;
@@ -267,6 +268,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     RankingHandler mRankingHandler;
     @Mock
     ActivityManagerInternal mAmi;
+    @Mock
+    private Looper mMainLooper;
 
     @Mock
     IIntentSender pi1;
@@ -514,7 +517,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 mAppUsageStats, mock(DevicePolicyManagerInternal.class), mUgm, mUgmInternal,
                 mAppOpsManager, mUm, mHistoryManager, mStatsManager, mock(TelephonyManager.class),
                 mAmi, mToastRateLimiter);
-        mService.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
+        // Return first true for RoleObserver main-thread check
+        when(mMainLooper.isCurrentThread()).thenReturn(true).thenReturn(false);
+        mService.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY, mMainLooper);
 
         mService.setAudioManager(mAudioManager);
 
@@ -4727,6 +4732,22 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         verify(mAppUsageStats, times(1)).reportInterruptiveNotification(
                 anyString(), anyString(), anyInt());
         verify(mHistoryManager, times(1)).addNotification(any());
+    }
+
+    @Test
+    public void testMaybeRecordInterruptionLocked_smallIconsRequiredForHistory()
+            throws RemoteException {
+        final NotificationRecord r = generateNotificationRecord(
+                mTestNotificationChannel, 1, null, true);
+        r.setInterruptive(true);
+        r.getSbn().getNotification().setSmallIcon(null);
+        mService.addNotification(r);
+
+        mService.maybeRecordInterruptionLocked(r);
+
+        verify(mAppUsageStats, times(1)).reportInterruptiveNotification(
+                anyString(), anyString(), anyInt());
+        verify(mHistoryManager, never()).addNotification(any());
     }
 
     @Test

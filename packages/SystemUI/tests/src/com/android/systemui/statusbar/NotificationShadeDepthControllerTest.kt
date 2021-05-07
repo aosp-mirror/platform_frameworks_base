@@ -69,7 +69,6 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
     @Mock private lateinit var shadeSpring: NotificationShadeDepthController.DepthAnimation
     @Mock private lateinit var shadeAnimation: NotificationShadeDepthController.DepthAnimation
     @Mock private lateinit var globalActionsSpring: NotificationShadeDepthController.DepthAnimation
-    @Mock private lateinit var brightnessSpring: NotificationShadeDepthController.DepthAnimation
     @Mock private lateinit var listener: NotificationShadeDepthController.DepthListener
     @Mock private lateinit var dozeParameters: DozeParameters
     @JvmField @Rule val mockitoRule = MockitoJUnit.rule()
@@ -97,7 +96,6 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
                 notificationShadeWindowController, dozeParameters, dumpManager)
         notificationShadeDepthController.shadeSpring = shadeSpring
         notificationShadeDepthController.shadeAnimation = shadeAnimation
-        notificationShadeDepthController.brightnessMirrorSpring = brightnessSpring
         notificationShadeDepthController.globalActionsSpring = globalActionsSpring
         notificationShadeDepthController.root = root
 
@@ -242,31 +240,6 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
                 .setWallpaperZoomOut(any(), anyFloat())
         notificationShadeDepthController.updateBlurCallback.doFrame(0)
         verify(wallpaperManager).setWallpaperZoomOut(any(), anyFloat())
-    }
-
-    @Test
-    fun brightnessMirrorVisible_whenVisible() {
-        notificationShadeDepthController.brightnessMirrorVisible = true
-        verify(brightnessSpring).animateTo(eq(maxBlur), any())
-    }
-
-    @Test
-    fun brightnessMirrorVisible_whenHidden() {
-        notificationShadeDepthController.brightnessMirrorVisible = false
-        verify(brightnessSpring).animateTo(eq(0), any())
-    }
-
-    @Test
-    fun brightnessMirror_hidesShadeBlur() {
-        // Brightness mirror is fully visible
-        `when`(brightnessSpring.ratio).thenReturn(1f)
-        // And shade is blurred
-        `when`(shadeSpring.radius).thenReturn(maxBlur)
-        `when`(shadeAnimation.radius).thenReturn(maxBlur)
-
-        notificationShadeDepthController.updateBlurCallback.doFrame(0)
-        verify(notificationShadeWindowController).setBackgroundBlurRadius(0)
-        verify(blurUtils).applyBlur(eq(viewRootImpl), eq(0))
     }
 
     @Test

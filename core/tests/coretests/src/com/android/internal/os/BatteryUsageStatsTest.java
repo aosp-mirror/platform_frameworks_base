@@ -23,7 +23,6 @@ import static org.junit.Assert.fail;
 import android.os.BatteryConsumer;
 import android.os.BatteryUsageStats;
 import android.os.Parcel;
-import android.os.SystemBatteryConsumer;
 import android.os.UidBatteryConsumer;
 
 import androidx.test.filters.SmallTest;
@@ -71,7 +70,6 @@ public class BatteryUsageStatsTest {
                         .setDischargePercentage(20)
                         .setDischargedPowerRange(1000, 2000)
                         .setStatsStartTimestamp(1000);
-
         builder.getOrCreateUidBatteryConsumerBuilder(batteryStatsUid)
                 .setPackageWithHighestDrain("foo")
                 .setTimeInStateMs(UidBatteryConsumer.STATE_FOREGROUND, 1000)
@@ -87,7 +85,8 @@ public class BatteryUsageStatsTest {
                 .setUsageDurationForCustomComponentMillis(
                         BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID, 800);
 
-        builder.getOrCreateSystemBatteryConsumerBuilder(SystemBatteryConsumer.DRAIN_TYPE_CAMERA)
+        builder.getAggregateBatteryConsumerBuilder(
+                BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_ALL_APPS)
                 .setConsumedPower(
                         BatteryConsumer.POWER_COMPONENT_CPU, 10100)
                 .setConsumedPowerForCustomComponent(
@@ -95,17 +94,25 @@ public class BatteryUsageStatsTest {
                 .setUsageDurationMillis(
                         BatteryConsumer.POWER_COMPONENT_CPU, 10300)
                 .setUsageDurationForCustomComponentMillis(
-                        BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID, 10400)
-                .setPowerConsumedByApps(20000);
+                        BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID, 10400);
+
+        builder.getAggregateBatteryConsumerBuilder(
+                BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE)
+                .setConsumedPower(30000)
+                .setConsumedPower(
+                        BatteryConsumer.POWER_COMPONENT_CPU, 20100)
+                .setConsumedPowerForCustomComponent(
+                        BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID, 20200)
+                .setUsageDurationMillis(
+                        BatteryConsumer.POWER_COMPONENT_CPU, 20300)
+                .setUsageDurationForCustomComponentMillis(
+                        BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID, 20400);
 
         return builder.build();
     }
 
     public void validateBatteryUsageStats(BatteryUsageStats batteryUsageStats) {
-        // Camera: (10100 + 10200) - 20000 (consumed by apps) = 300
-        // App: 300 + 400 + 500 = 1200
-        // Total: 1500
-        assertThat(batteryUsageStats.getConsumedPower()).isEqualTo(1500);
+        assertThat(batteryUsageStats.getConsumedPower()).isEqualTo(30000);
         assertThat(batteryUsageStats.getDischargePercentage()).isEqualTo(20);
         assertThat(batteryUsageStats.getDischargedPowerRange().getLower()).isEqualTo(1000);
         assertThat(batteryUsageStats.getDischargedPowerRange().getUpper()).isEqualTo(2000);
@@ -139,28 +146,32 @@ public class BatteryUsageStatsTest {
             }
         }
 
-        final List<SystemBatteryConsumer> systemBatteryConsumers =
-                batteryUsageStats.getSystemBatteryConsumers();
-        for (SystemBatteryConsumer systemBatteryConsumer : systemBatteryConsumers) {
-            if (systemBatteryConsumer.getDrainType() == SystemBatteryConsumer.DRAIN_TYPE_CAMERA) {
-                assertThat(systemBatteryConsumer.getConsumedPower(
-                        BatteryConsumer.POWER_COMPONENT_CPU)).isEqualTo(10100);
-                assertThat(systemBatteryConsumer.getConsumedPowerForCustomComponent(
-                        BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID)).isEqualTo(10200);
-                assertThat(systemBatteryConsumer.getUsageDurationMillis(
-                        BatteryConsumer.POWER_COMPONENT_CPU)).isEqualTo(10300);
-                assertThat(systemBatteryConsumer.getUsageDurationForCustomComponentMillis(
-                        BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID)).isEqualTo(10400);
-                assertThat(systemBatteryConsumer.getConsumedPower()).isEqualTo(20300);
-                assertThat(systemBatteryConsumer.getPowerConsumedByApps()).isEqualTo(20000);
-                assertThat(systemBatteryConsumer.getUsageDurationMillis())
-                        .isEqualTo(10400); // max
-                assertThat(systemBatteryConsumer.getCustomPowerComponentCount()).isEqualTo(1);
-                assertThat(systemBatteryConsumer.getCustomPowerComponentName(
-                        BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID)).isEqualTo("FOO");
-            } else {
-                fail("Unexpected drain type " + systemBatteryConsumer.getDrainType());
-            }
-        }
+        final BatteryConsumer appsBatteryConsumer = batteryUsageStats.getAggregateBatteryConsumer(
+                BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_ALL_APPS);
+        assertThat(appsBatteryConsumer.getConsumedPower(
+                BatteryConsumer.POWER_COMPONENT_CPU)).isEqualTo(10100);
+        assertThat(appsBatteryConsumer.getConsumedPowerForCustomComponent(
+                BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID)).isEqualTo(10200);
+        assertThat(appsBatteryConsumer.getUsageDurationMillis(
+                BatteryConsumer.POWER_COMPONENT_CPU)).isEqualTo(10300);
+        assertThat(appsBatteryConsumer.getUsageDurationForCustomComponentMillis(
+                BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID)).isEqualTo(10400);
+        assertThat(appsBatteryConsumer.getCustomPowerComponentCount()).isEqualTo(1);
+        assertThat(appsBatteryConsumer.getCustomPowerComponentName(
+                BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID)).isEqualTo("FOO");
+
+        final BatteryConsumer deviceBatteryConsumer = batteryUsageStats.getAggregateBatteryConsumer(
+                BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE);
+        assertThat(deviceBatteryConsumer.getConsumedPower(
+                BatteryConsumer.POWER_COMPONENT_CPU)).isEqualTo(20100);
+        assertThat(deviceBatteryConsumer.getConsumedPowerForCustomComponent(
+                BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID)).isEqualTo(20200);
+        assertThat(deviceBatteryConsumer.getUsageDurationMillis(
+                BatteryConsumer.POWER_COMPONENT_CPU)).isEqualTo(20300);
+        assertThat(deviceBatteryConsumer.getUsageDurationForCustomComponentMillis(
+                BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID)).isEqualTo(20400);
+        assertThat(deviceBatteryConsumer.getCustomPowerComponentCount()).isEqualTo(1);
+        assertThat(deviceBatteryConsumer.getCustomPowerComponentName(
+                BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID)).isEqualTo("FOO");
     }
 }

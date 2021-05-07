@@ -36,18 +36,12 @@ public class BatteryChargeCalculatorTest {
 
     @Rule
     public final BatteryUsageStatsRule mStatsRule = new BatteryUsageStatsRule()
-            .setAveragePower(PowerProfile.POWER_BATTERY_CAPACITY, 4000.0);
+            .setAveragePower(PowerProfile.POWER_BATTERY_CAPACITY, 1234.0); // Should be ignored
 
     @Test
     public void testDischargeTotals() {
-        BatteryChargeCalculator calculator =
-                new BatteryChargeCalculator(mStatsRule.getPowerProfile());
-
         final BatteryStatsImpl batteryStats = mStatsRule.getBatteryStats();
 
-        mStatsRule.setTime(1000, 1000);
-        batteryStats.resetAllStatsCmdLocked();
-        batteryStats.setNoAutoReset(true);
         batteryStats.setBatteryStateLocked(BatteryManager.BATTERY_STATUS_DISCHARGING, 100,
                 /* plugType */ 0, 90, 72, 3700, 3_600_000, 4_000_000, 0,
                 1_000_000, 1_000_000, 1_000_000);
@@ -58,8 +52,11 @@ public class BatteryChargeCalculatorTest {
                 /* plugType */ 0, 80, 72, 3700, 2_400_000, 4_000_000, 0,
                 2_000_000, 2_000_000, 2_000_000);
 
+        BatteryChargeCalculator calculator = new BatteryChargeCalculator();
         BatteryUsageStats batteryUsageStats = mStatsRule.apply(calculator);
 
+        assertThat(batteryUsageStats.getConsumedPower())
+                .isWithin(PRECISION).of(380.0);
         assertThat(batteryUsageStats.getDischargePercentage()).isEqualTo(10);
         assertThat(batteryUsageStats.getDischargedPowerRange().getLower())
                 .isWithin(PRECISION).of(360.0);

@@ -314,7 +314,8 @@ public final class JobServiceContext implements ServiceConnection {
             FrameworkStatsLog.write_non_chained(FrameworkStatsLog.SCHEDULED_JOB_STATE_CHANGED,
                     job.getSourceUid(), null, job.getBatteryName(),
                     FrameworkStatsLog.SCHEDULED_JOB_STATE_CHANGED__STATE__STARTED,
-                    JobProtoEnums.STOP_REASON_UNKNOWN, job.getStandbyBucket(), job.getJobId(),
+                    JobProtoEnums.INTERNAL_STOP_REASON_UNKNOWN,
+                    job.getStandbyBucket(), job.getJobId(),
                     job.hasChargingConstraint(),
                     job.hasBatteryNotLowConstraint(),
                     job.hasStorageNotLowConstraint(),
@@ -324,7 +325,8 @@ public final class JobServiceContext implements ServiceConnection {
                     job.hasConnectivityConstraint(),
                     job.hasContentTriggerConstraint(),
                     job.isRequestedExpeditedJob(),
-                    job.shouldTreatAsExpeditedJob());
+                    job.shouldTreatAsExpeditedJob(),
+                    JobProtoEnums.STOP_REASON_UNDEFINED);
             try {
                 mBatteryStats.noteJobStart(job.getBatteryName(), job.getSourceUid());
             } catch (RemoteException e) {
@@ -923,7 +925,8 @@ public final class JobServiceContext implements ServiceConnection {
                 completedJob.hasConnectivityConstraint(),
                 completedJob.hasContentTriggerConstraint(),
                 completedJob.isRequestedExpeditedJob(),
-                completedJob.startedAsExpeditedJob);
+                completedJob.startedAsExpeditedJob,
+                mParams.getStopReason());
         try {
             mBatteryStats.noteJobFinish(mRunningJob.getBatteryName(), mRunningJob.getSourceUid(),
                     internalStopReason);

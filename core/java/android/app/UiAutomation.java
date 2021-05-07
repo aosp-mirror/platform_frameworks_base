@@ -50,6 +50,10 @@ import android.view.Display;
 import android.view.InputEvent;
 import android.view.KeyEvent;
 import android.view.Surface;
+import android.view.SurfaceControl;
+import android.view.View;
+import android.view.ViewRootImpl;
+import android.view.Window;
 import android.view.WindowAnimationFrameStats;
 import android.view.WindowContentFrameStats;
 import android.view.accessibility.AccessibilityEvent;
@@ -1012,7 +1016,7 @@ public final class UiAutomation {
                 return null;
             }
         } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error while taking screnshot!", re);
+            Log.e(LOG_TAG, "Error while taking screenshot!", re);
             return null;
         }
 
@@ -1020,6 +1024,51 @@ public final class UiAutomation {
         screenShot.setHasAlpha(false);
 
         return screenShot;
+    }
+
+    /**
+     * Used to capture a screenshot of a Window. This can return null in the following cases:
+     * 1. Window content hasn't been layed out.
+     * 2. Window doesn't have a valid SurfaceControl
+     * 3. An error occurred in SurfaceFlinger when trying to take the screenshot.
+     *
+     * @param window Window to take a screenshot of
+     *
+     * @return The screenshot bitmap on success, null otherwise.
+     *
+     * @hide
+     */
+    @TestApi
+    @Nullable
+    public Bitmap takeScreenshot(@NonNull Window window) {
+        if (window == null) {
+            return null;
+        }
+
+        View decorView = window.peekDecorView();
+        if (decorView == null) {
+            return null;
+        }
+
+        ViewRootImpl viewRoot = decorView.getViewRootImpl();
+        if (viewRoot == null) {
+            return null;
+        }
+
+        SurfaceControl sc = viewRoot.getSurfaceControl();
+        if (!sc.isValid()) {
+            return null;
+        }
+
+        // Apply a sync transaction to ensure SurfaceFlinger is flushed before capturing a
+        // screenshot.
+        new SurfaceControl.Transaction().apply(true);
+        try {
+            return mUiAutomationConnection.takeSurfaceControlScreenshot(sc);
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error while taking screenshot!", re);
+            return null;
+        }
     }
 
     /**

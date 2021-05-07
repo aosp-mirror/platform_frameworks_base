@@ -108,6 +108,7 @@ import com.android.server.pm.ShortcutService.FileOutputStreamWithPath;
 import com.android.server.pm.ShortcutUser.PackageWithUser;
 
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -416,8 +417,11 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         mManager.pushDynamicShortcut(s1);
         assertShortcutIds(assertAllNotKeyFieldsOnly(mManager.getDynamicShortcuts()), "s1");
         assertEquals(0, getCallerShortcut("s1").getRank());
+        verify(mMockUsageStatsManagerInternal, times(1)).reportShortcutUsage(
+                eq(CALLING_PACKAGE_1), eq("s1"), eq(USER_0));
 
         // Test push when other shortcuts exist
+        Mockito.reset(mMockUsageStatsManagerInternal);
         assertTrue(mManager.setDynamicShortcuts(list(s1, s2)));
         assertShortcutIds(assertAllNotKeyFieldsOnly(mManager.getDynamicShortcuts()), "s1", "s2");
         mManager.pushDynamicShortcut(s3);
@@ -426,25 +430,38 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         assertEquals(0, getCallerShortcut("s3").getRank());
         assertEquals(1, getCallerShortcut("s1").getRank());
         assertEquals(2, getCallerShortcut("s2").getRank());
+        verify(mMockUsageStatsManagerInternal, times(0)).reportShortcutUsage(
+                eq(CALLING_PACKAGE_1), eq("s1"), eq(USER_0));
+        verify(mMockUsageStatsManagerInternal, times(0)).reportShortcutUsage(
+                eq(CALLING_PACKAGE_1), eq("s2"), eq(USER_0));
+        verify(mMockUsageStatsManagerInternal, times(1)).reportShortcutUsage(
+                eq(CALLING_PACKAGE_1), eq("s3"), eq(USER_0));
 
         mInjectedCurrentTimeMillis += INTERVAL; // reset
 
         // Push with set rank
+        Mockito.reset(mMockUsageStatsManagerInternal);
         s4.setRank(2);
         mManager.pushDynamicShortcut(s4);
         assertEquals(2, getCallerShortcut("s4").getRank());
         assertEquals(3, getCallerShortcut("s2").getRank());
+        verify(mMockUsageStatsManagerInternal, times(1)).reportShortcutUsage(
+                eq(CALLING_PACKAGE_1), eq("s4"), eq(USER_0));
 
         // Push existing shortcut with set rank
+        Mockito.reset(mMockUsageStatsManagerInternal);
         final ShortcutInfo s4_2 = makeShortcut("s4");
         s4_2.setRank(4);
         mManager.pushDynamicShortcut(s4_2);
         assertEquals(2, getCallerShortcut("s2").getRank());
         assertEquals(3, getCallerShortcut("s4").getRank());
+        verify(mMockUsageStatsManagerInternal, times(1)).reportShortcutUsage(
+                eq(CALLING_PACKAGE_1), eq("s4"), eq(USER_0));
 
         mInjectedCurrentTimeMillis += INTERVAL; // reset
 
         // Test push as last
+        Mockito.reset(mMockUsageStatsManagerInternal);
         mManager.pushDynamicShortcut(s5);
         assertShortcutIds(assertAllNotKeyFieldsOnly(mManager.getDynamicShortcuts()),
                 "s1", "s2", "s3", "s4", "s5");
@@ -453,25 +470,34 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         assertEquals(2, getCallerShortcut("s1").getRank());
         assertEquals(3, getCallerShortcut("s2").getRank());
         assertEquals(4, getCallerShortcut("s4").getRank());
+        verify(mMockUsageStatsManagerInternal, times(1)).reportShortcutUsage(
+                eq(CALLING_PACKAGE_1), eq("s5"), eq(USER_0));
 
         // Push when max has already reached
+        Mockito.reset(mMockUsageStatsManagerInternal);
         mManager.pushDynamicShortcut(s6);
         assertShortcutIds(assertAllNotKeyFieldsOnly(mManager.getDynamicShortcuts()),
                 "s1", "s2", "s3", "s5", "s6");
         assertEquals(0, getCallerShortcut("s6").getRank());
         assertEquals(1, getCallerShortcut("s5").getRank());
         assertEquals(4, getCallerShortcut("s2").getRank());
+        verify(mMockUsageStatsManagerInternal, times(1)).reportShortcutUsage(
+                eq(CALLING_PACKAGE_1), eq("s6"), eq(USER_0));
 
         mInjectedCurrentTimeMillis += INTERVAL; // reset
 
         // Push with different activity
+        Mockito.reset(mMockUsageStatsManagerInternal);
         s7.setActivity(makeComponent(ShortcutActivity2.class));
         mManager.pushDynamicShortcut(s7);
         assertEquals(makeComponent(ShortcutActivity2.class),
                 getCallerShortcut("s7").getActivity());
         assertEquals(0, getCallerShortcut("s7").getRank());
+        verify(mMockUsageStatsManagerInternal, times(1)).reportShortcutUsage(
+                eq(CALLING_PACKAGE_1), eq("s7"), eq(USER_0));
 
         // Push to update shortcut with different activity
+        Mockito.reset(mMockUsageStatsManagerInternal);
         final ShortcutInfo s1_2 = makeShortcut("s1");
         s1_2.setActivity(makeComponent(ShortcutActivity2.class));
         s1_2.setRank(1);
@@ -482,10 +508,13 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         assertEquals(1, getCallerShortcut("s5").getRank());
         assertEquals(2, getCallerShortcut("s3").getRank());
         assertEquals(3, getCallerShortcut("s2").getRank());
+        verify(mMockUsageStatsManagerInternal, times(1)).reportShortcutUsage(
+                eq(CALLING_PACKAGE_1), eq("s1"), eq(USER_0));
 
         mInjectedCurrentTimeMillis += INTERVAL; // reset
 
         // Test push when dropped shortcut is cached
+        Mockito.reset(mMockUsageStatsManagerInternal);
         s8.setLongLived();
         s8.setRank(100);
         mManager.pushDynamicShortcut(s8);
@@ -494,14 +523,19 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
             mInjectCheckAccessShortcutsPermission = true;
             mLauncherApps.cacheShortcuts(CALLING_PACKAGE_1, list("s8"), HANDLE_USER_0,
                     CACHE_OWNER_0);
+            verify(mMockUsageStatsManagerInternal, times(1)).reportShortcutUsage(
+                    eq(CALLING_PACKAGE_1), eq("s8"), eq(USER_0));
         });
 
+        Mockito.reset(mMockUsageStatsManagerInternal);
         mManager.pushDynamicShortcut(s9);
         assertShortcutIds(assertAllNotKeyFieldsOnly(mManager.getDynamicShortcuts()),
                 "s1", "s2", "s3", "s5", "s6", "s7", "s9");
         // Verify s13 stayed as cached
         assertShortcutIds(mManager.getShortcuts(ShortcutManager.FLAG_MATCH_CACHED),
                 "s8");
+        verify(mMockUsageStatsManagerInternal, times(1)).reportShortcutUsage(
+                eq(CALLING_PACKAGE_1), eq("s9"), eq(USER_0));
     }
 
     public void testUnlimitedCalls() {

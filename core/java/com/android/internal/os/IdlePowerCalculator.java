@@ -20,7 +20,6 @@ import android.os.BatteryConsumer;
 import android.os.BatteryStats;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
-import android.os.SystemBatteryConsumer;
 import android.os.UserHandle;
 import android.util.Log;
 import android.util.SparseArray;
@@ -53,7 +52,8 @@ public class IdlePowerCalculator extends PowerCalculator {
         calculatePowerAndDuration(batteryStats, rawRealtimeUs, rawUptimeUs,
                 BatteryStats.STATS_SINCE_CHARGED);
         if (mPowerMah != 0) {
-            builder.getOrCreateSystemBatteryConsumerBuilder(SystemBatteryConsumer.DRAIN_TYPE_IDLE)
+            builder.getAggregateBatteryConsumerBuilder(
+                    BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE)
                     .setConsumedPower(BatteryConsumer.POWER_COMPONENT_IDLE, mPowerMah)
                     .setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_IDLE, mDurationMs);
         }

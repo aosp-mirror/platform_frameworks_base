@@ -25,8 +25,8 @@ import static com.android.systemui.classifier.Classifier.QUICK_SETTINGS;
 import android.provider.DeviceConfig;
 import android.view.MotionEvent;
 
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.util.DeviceConfigProxy;
-import com.android.systemui.util.sensors.ProximitySensor;
 
 import java.util.Locale;
 
@@ -107,11 +107,11 @@ class ProximityClassifier extends FalsingClassifier {
 
     @Override
     public void onProximityEvent(
-            ProximitySensor.ThresholdSensorEvent proximityEvent) {
-        boolean near = proximityEvent.getBelow();
+            FalsingManager.ProximityEvent proximityEvent) {
+        boolean covered = proximityEvent.getCovered();
         long timestampNs = proximityEvent.getTimestampNs();
-        logDebug("Sensor is: " + near + " at time " + timestampNs);
-        update(near, timestampNs);
+        logDebug("Sensor is: " + covered + " at time " + timestampNs);
+        update(covered, timestampNs);
     }
 
     @Override

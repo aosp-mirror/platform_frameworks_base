@@ -18,7 +18,10 @@ package com.android.server.alarm;
 
 import static android.app.AlarmManager.ELAPSED_REALTIME;
 import static android.app.AlarmManager.ELAPSED_REALTIME_WAKEUP;
+import static android.app.AlarmManager.RTC;
+import static android.app.AlarmManager.RTC_WAKEUP;
 
+import static com.android.server.alarm.Alarm.EXACT_ALLOW_REASON_NOT_APPLICABLE;
 import static com.android.server.alarm.Constants.TEST_CALLING_PACKAGE;
 import static com.android.server.alarm.Constants.TEST_CALLING_UID;
 
@@ -33,6 +36,7 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.platform.test.annotations.Presubmit;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -69,18 +73,24 @@ public class AlarmStoreTest {
                 mock(PendingIntent.class));
         return new Alarm(ELAPSED_REALTIME_WAKEUP, whenElapsed, whenElapsed, 0, 0,
                 mock(PendingIntent.class), null, null, null, 0, info, TEST_CALLING_UID,
-                TEST_CALLING_PACKAGE, null);
+                TEST_CALLING_PACKAGE, null, EXACT_ALLOW_REASON_NOT_APPLICABLE);
     }
 
     private static Alarm createAlarm(int type, long whenElapsed, long windowLength, int flags) {
         return new Alarm(type, whenElapsed, whenElapsed, windowLength, 0, mock(PendingIntent.class),
-                null, null, null, flags, null, TEST_CALLING_UID, TEST_CALLING_PACKAGE, null);
+                null, null, null, flags, null, TEST_CALLING_UID, TEST_CALLING_PACKAGE, null,
+                EXACT_ALLOW_REASON_NOT_APPLICABLE);
     }
 
     private void addAlarmsToStore(Alarm... alarms) {
         for (Alarm a : alarms) {
             mAlarmStore.add(a);
         }
+    }
+
+    @Before
+    public void clear() {
+        mAlarmStore.remove(unused -> true);
     }
 
     @Test
@@ -209,7 +219,6 @@ public class AlarmStoreTest {
         final Alarm a8 = createAlarm(8, 0);
         final Alarm a10 = createAlarm(10, 0);
         addAlarmsToStore(a8, a10, a5);
-
         assertEquals(5, mAlarmStore.getNextDeliveryTime());
 
         mAlarmStore.updateAlarmDeliveries(a -> {
@@ -240,5 +249,23 @@ public class AlarmStoreTest {
 
         mAlarmStore.remove(alarmClock::equals);
         verify(onRemoved).run();
+    }
+
+    @Test
+    public void getCount() {
+        for (int i = 0; i < 10; i++) {
+            mAlarmStore.add(createAlarm(ELAPSED_REALTIME, i, 4, 0));
+        }
+        assertEquals(5, mAlarmStore.getCount(a -> a.getRequestedElapsed() < 5));
+        assertEquals(10, mAlarmStore.getCount(a -> a.windowLength == 4));
+
+        addAlarmsToStore(
+                createAlarm(RTC_WAKEUP, 45, 0, 53),
+                createAlarm(ELAPSED_REALTIME_WAKEUP, 60, 0, 53)
+        );
+
+        assertEquals(2, mAlarmStore.getCount(a -> a.wakeup));
+        assertEquals(2, mAlarmStore.getCount(a -> a.flags == 53));
+        assertEquals(0, mAlarmStore.getCount(a -> a.type == RTC));
     }
 }

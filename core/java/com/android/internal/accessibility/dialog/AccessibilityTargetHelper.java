@@ -21,6 +21,7 @@ import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_BUTT
 import static com.android.internal.accessibility.AccessibilityShortcutController.COLOR_INVERSION_COMPONENT_NAME;
 import static com.android.internal.accessibility.AccessibilityShortcutController.DALTONIZER_COMPONENT_NAME;
 import static com.android.internal.accessibility.AccessibilityShortcutController.MAGNIFICATION_CONTROLLER_NAME;
+import static com.android.internal.accessibility.AccessibilityShortcutController.ONE_HANDED_COMPONENT_NAME;
 import static com.android.internal.accessibility.AccessibilityShortcutController.REDUCE_BRIGHT_COLORS_COMPONENT_NAME;
 import static com.android.internal.accessibility.util.AccessibilityUtils.getAccessibilityServiceFragmentType;
 import static com.android.internal.accessibility.util.ShortcutUtils.isShortcutContained;
@@ -203,34 +204,43 @@ public final class AccessibilityTargetHelper {
 
         final InvisibleToggleAllowListingFeatureTarget magnification =
                 new InvisibleToggleAllowListingFeatureTarget(context,
-                shortcutType,
-                isShortcutContained(context, shortcutType, MAGNIFICATION_CONTROLLER_NAME),
-                MAGNIFICATION_CONTROLLER_NAME,
-                context.getString(R.string.accessibility_magnification_chooser_text),
-                context.getDrawable(R.drawable.ic_accessibility_magnification),
-                Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED);
+                        shortcutType,
+                        isShortcutContained(context, shortcutType, MAGNIFICATION_CONTROLLER_NAME),
+                        MAGNIFICATION_CONTROLLER_NAME,
+                        context.getString(R.string.accessibility_magnification_chooser_text),
+                        context.getDrawable(R.drawable.ic_accessibility_magnification),
+                        Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED);
 
         final ToggleAllowListingFeatureTarget daltonizer =
                 new ToggleAllowListingFeatureTarget(context,
-                shortcutType,
-                isShortcutContained(context, shortcutType,
-                        DALTONIZER_COMPONENT_NAME.flattenToString()),
-                DALTONIZER_COMPONENT_NAME.flattenToString(),
-                context.getString(R.string.color_correction_feature_name),
-                context.getDrawable(R.drawable.ic_accessibility_color_correction),
-                Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED);
+                        shortcutType,
+                        isShortcutContained(context, shortcutType,
+                                DALTONIZER_COMPONENT_NAME.flattenToString()),
+                        DALTONIZER_COMPONENT_NAME.flattenToString(),
+                        context.getString(R.string.color_correction_feature_name),
+                        context.getDrawable(R.drawable.ic_accessibility_color_correction),
+                        Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED);
 
         final ToggleAllowListingFeatureTarget colorInversion =
                 new ToggleAllowListingFeatureTarget(context,
-                shortcutType,
-                isShortcutContained(context, shortcutType,
-                        COLOR_INVERSION_COMPONENT_NAME.flattenToString()),
-                COLOR_INVERSION_COMPONENT_NAME.flattenToString(),
-                context.getString(R.string.color_inversion_feature_name),
-                context.getDrawable(R.drawable.ic_accessibility_color_inversion),
-                Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED);
+                        shortcutType,
+                        isShortcutContained(context, shortcutType,
+                                COLOR_INVERSION_COMPONENT_NAME.flattenToString()),
+                        COLOR_INVERSION_COMPONENT_NAME.flattenToString(),
+                        context.getString(R.string.color_inversion_feature_name),
+                        context.getDrawable(R.drawable.ic_accessibility_color_inversion),
+                        Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED);
 
-        // TODO: Update with shortcut icon
+        final ToggleAllowListingFeatureTarget oneHandedMode =
+                new ToggleAllowListingFeatureTarget(context,
+                        shortcutType,
+                        isShortcutContained(context, shortcutType,
+                                ONE_HANDED_COMPONENT_NAME.flattenToString()),
+                        ONE_HANDED_COMPONENT_NAME.flattenToString(),
+                        context.getString(R.string.one_handed_mode_feature_name),
+                        context.getDrawable(R.drawable.ic_accessibility_one_handed),
+                        Settings.Secure.ONE_HANDED_MODE_ACTIVATED);
+
         final ToggleAllowListingFeatureTarget reduceBrightColors =
                 new ToggleAllowListingFeatureTarget(context,
                         shortcutType,
@@ -238,12 +248,13 @@ public final class AccessibilityTargetHelper {
                                 REDUCE_BRIGHT_COLORS_COMPONENT_NAME.flattenToString()),
                         REDUCE_BRIGHT_COLORS_COMPONENT_NAME.flattenToString(),
                         context.getString(R.string.reduce_bright_colors_feature_name),
-                        null,
+                        context.getDrawable(R.drawable.ic_accessibility_reduce_bright_colors),
                         Settings.Secure.REDUCE_BRIGHT_COLORS_ACTIVATED);
 
         targets.add(magnification);
         targets.add(daltonizer);
         targets.add(colorInversion);
+        targets.add(oneHandedMode);
         targets.add(reduceBrightColors);
 
         return targets;

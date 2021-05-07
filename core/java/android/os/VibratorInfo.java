@@ -260,7 +260,7 @@ public class VibratorInfo implements Parcelable {
      */
     public int getPrimitiveDuration(
             @VibrationEffect.Composition.PrimitiveType int primitiveId) {
-        return mSupportedPrimitives.get(primitiveId);
+        return mSupportedPrimitives != null ? mSupportedPrimitives.get(primitiveId) : 0;
     }
 
     /**

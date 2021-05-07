@@ -19,7 +19,6 @@ import android.os.BatteryConsumer;
 import android.os.BatteryStats;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
-import android.os.SystemBatteryConsumer;
 import android.os.UidBatteryConsumer;
 import android.os.UserHandle;
 import android.telephony.CellSignalStrength;
@@ -105,14 +104,19 @@ public class MobileRadioPowerCalculator extends PowerCalculator {
         calculateRemaining(total, powerModel, batteryStats, rawRealtimeUs, consumptionUC);
 
         if (total.remainingPowerMah != 0 || total.totalAppPowerMah != 0) {
-            builder.getOrCreateSystemBatteryConsumerBuilder(
-                        SystemBatteryConsumer.DRAIN_TYPE_MOBILE_RADIO)
+            builder.getAggregateBatteryConsumerBuilder(
+                    BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE)
                     .setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO,
                             total.durationMs)
                     .setConsumedPower(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO,
-                            total.remainingPowerMah + total.totalAppPowerMah,
-                            powerModel)
-                    .setPowerConsumedByApps(total.totalAppPowerMah);
+                            total.remainingPowerMah + total.totalAppPowerMah, powerModel);
+
+            builder.getAggregateBatteryConsumerBuilder(
+                    BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_ALL_APPS)
+                    .setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO,
+                            total.durationMs)
+                    .setConsumedPower(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO,
+                            total.totalAppPowerMah, powerModel);
         }
     }
 

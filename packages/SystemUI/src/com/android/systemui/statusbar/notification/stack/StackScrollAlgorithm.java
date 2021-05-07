@@ -24,6 +24,7 @@ import android.util.MathUtils;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.android.systemui.animation.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.notification.dagger.SilentHeader;
@@ -41,6 +42,8 @@ import java.util.List;
  * .stack.StackScrollState}
  */
 public class StackScrollAlgorithm {
+
+    public static final float START_FRACTION = 0.3f;
 
     private static final String LOG_TAG = "StackScrollAlgorithm";
     private final ViewGroup mHostView;
@@ -151,9 +154,8 @@ public class StackScrollAlgorithm {
 
     private void updateClipping(StackScrollAlgorithmState algorithmState,
             AmbientState ambientState) {
-        float drawStart = !ambientState.isOnKeyguard() ? ambientState.getTopPadding()
-                + ambientState.getStackTranslation()
-                : 0;
+        float drawStart = !ambientState.isOnKeyguard()
+                ? ambientState.getStackY() - ambientState.getScrollY() : 0;
         float clipStart = 0;
         int childCount = algorithmState.visibleChildren.size();
         boolean firstHeadsUp = true;
@@ -166,8 +168,7 @@ public class StackScrollAlgorithm {
             float newYTranslation = state.yTranslation;
             float newHeight = state.height;
             float newNotificationEnd = newYTranslation + newHeight;
-            boolean isHeadsUp = (child instanceof ExpandableNotificationRow)
-                    && ((ExpandableNotificationRow) child).isPinned();
+            boolean isHeadsUp = (child instanceof ExpandableNotificationRow) && child.isPinned();
             if (mClipNotificationScrollToTop
                     && (!state.inShelf || (isHeadsUp && !firstHeadsUp))
                     && newYTranslation < clipStart
@@ -374,7 +375,13 @@ public class StackScrollAlgorithm {
         ExpandableView view = algorithmState.visibleChildren.get(i);
         ExpandableViewState viewState = view.getViewState();
         viewState.location = ExpandableViewState.LOCATION_UNKNOWN;
-        viewState.alpha = 1f - ambientState.getHideAmount();
+
+        if (ambientState.isExpansionChanging() && !ambientState.isOnKeyguard()) {
+            viewState.alpha = Interpolators.getNotificationScrimAlpha(
+                    ambientState.getExpansionFraction());
+        } else {
+            viewState.alpha = 1f - ambientState.getHideAmount();
+        }
 
         if (view.mustStayOnScreen() && viewState.yTranslation >= 0) {
             // Even if we're not scrolled away we're in view and we're also not in the
@@ -402,10 +409,14 @@ public class StackScrollAlgorithm {
         }
 
         if (view instanceof FooterView) {
-            viewState.yTranslation = Math.min(viewState.yTranslation,
-                    ambientState.getStackHeight());
-            // Hide footer if shelf is showing
-            viewState.hidden = algorithmState.firstViewInShelf != null;
+            final boolean isShelfShowing = algorithmState.firstViewInShelf != null;
+
+            final float footerEnd = viewState.yTranslation + view.getIntrinsicHeight();
+            final boolean noSpaceForFooter = footerEnd > ambientState.getStackHeight();
+
+            viewState.hidden = isShelfShowing
+                    || (!ambientState.isExpansionChanging() && noSpaceForFooter);
+
         } else if (view != ambientState.getTrackedHeadsUpRow()) {
             if (ambientState.isExpansionChanging()) {
                 // Show all views. Views below the shelf will later be clipped (essentially hidden)
@@ -440,7 +451,8 @@ public class StackScrollAlgorithm {
                     maxViewHeight = algorithmState.viewHeightBeforeShelf;
                 }
             }
-            viewState.height = (int) MathUtils.lerp(0, maxViewHeight, expansionFraction);
+            viewState.height = (int) MathUtils.lerp(maxViewHeight * START_FRACTION, maxViewHeight,
+                    expansionFraction);
         }
 
         currentYPosition += viewState.height + expansionFraction * mPaddingBetweenElements;

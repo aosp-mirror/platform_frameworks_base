@@ -76,7 +76,7 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
     protected void onFinishInflate() {
         super.onFinishInflate();
 
-        mContainer = findViewById(R.id.container);
+        mContainer = findViewById(R.id.pin_container);
         mRow0 = findViewById(R.id.row0);
         mRow1 = findViewById(R.id.row1);
         mRow2 = findViewById(R.id.row2);

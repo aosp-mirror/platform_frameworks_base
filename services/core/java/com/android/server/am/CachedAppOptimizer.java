@@ -395,7 +395,7 @@ public final class CachedAppOptimizer {
 
             pw.println("  Tracking last compaction stats for " + mLastCompactionStats.size()
                     + " processes.");
-            pw.println(" " + KEY_USE_FREEZER + "=" + mUseFreezer);
+            pw.println("  " + KEY_USE_FREEZER + "=" + mUseFreezer);
             pw.println("  " + KEY_FREEZER_STATSD_SAMPLE_RATE + "=" + mFreezerStatsdSampleRate);
             pw.println("  " + KEY_FREEZER_DEBOUNCE_TIMEOUT + "=" + mFreezerDebounceTimeout);
             if (DEBUG_COMPACTION) {

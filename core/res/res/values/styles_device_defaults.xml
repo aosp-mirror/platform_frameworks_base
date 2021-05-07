@@ -302,10 +302,6 @@ easier.
     <style name="TextAppearance.DeviceDefault.Notification.Time" parent="TextAppearance.Material.Notification.Time">
         <item name="fontFamily">@string/config_bodyFontFamily</item>
     </style>
-    <style name="TextAppearance.DeviceDefault.Notification.Conversation.AppName"
-           parent="TextAppearance.Material.Notification.Conversation.AppName">
-        <item name="fontFamily">@string/config_headlineFontFamilyMedium</item>
-    </style>
     <style name="TextAppearance.DeviceDefault.Widget" parent="TextAppearance.Material.Widget">
         <item name="fontFamily">@string/config_bodyFontFamily</item>
     </style>

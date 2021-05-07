@@ -40,7 +40,7 @@
         android:clipToPadding="false">
 
         <LinearLayout
-            android:id="@+id/container"
+            android:id="@+id/pattern_container"
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
             android:orientation="vertical"

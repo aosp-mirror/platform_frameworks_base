@@ -15,8 +15,12 @@
  */
 package com.android.server.devicepolicy;
 
+import android.app.ActivityManager;
 import android.app.admin.DevicePolicyManager;
+import android.content.ComponentName;
 import android.os.ShellCommand;
+import android.os.SystemClock;
+import android.os.UserHandle;
 
 import com.android.server.devicepolicy.Owners.OwnerDto;
 
@@ -32,8 +36,23 @@ final class DevicePolicyManagerServiceShellCommand extends ShellCommand {
     private static final String CMD_SET_SAFE_OPERATION = "set-operation-safe";
     private static final String CMD_LIST_OWNERS = "list-owners";
     private static final String CMD_LIST_POLICY_EXEMPT_APPS = "list-policy-exempt-apps";
+    private static final String CMD_SET_ACTIVE_ADMIN = "set-active-admin";
+    private static final String CMD_SET_DEVICE_OWNER = "set-device-owner";
+    private static final String CMD_SET_PROFILE_OWNER = "set-profile-owner";
+    private static final String CMD_REMOVE_ACTIVE_ADMIN = "remove-active-admin";
+    private static final String CMD_CLEAR_FREEZE_PERIOD_RECORD = "clear-freeze-period-record";
+    private static final String CMD_FORCE_NETWORK_LOGS = "force-network-logs";
+    private static final String CMD_FORCE_SECURITY_LOGS = "force-security-logs";
+    private static final String CMD_MARK_PO_ON_ORG_OWNED_DEVICE =
+            "mark-profile-owner-on-organization-owned-device";
+
+    private static final String USER_OPTION = "--user";
+    private static final String NAME_OPTION = "--name";
 
     private final DevicePolicyManagerService mService;
+    private int mUserId = UserHandle.USER_SYSTEM;
+    private String mName = "";
+    private ComponentName mComponent;
 
     DevicePolicyManagerServiceShellCommand(DevicePolicyManagerService service) {
         mService = Objects.requireNonNull(service);
@@ -41,7 +60,7 @@ final class DevicePolicyManagerServiceShellCommand extends ShellCommand {
 
     @Override
     public void onHelp() {
-        try (PrintWriter pw = getOutPrintWriter();) {
+        try (PrintWriter pw = getOutPrintWriter()) {
             pw.printf("DevicePolicyManager Service (device_policy) commands:\n\n");
             showHelp(pw);
         }
@@ -52,7 +71,7 @@ final class DevicePolicyManagerServiceShellCommand extends ShellCommand {
         if (cmd == null) {
             return handleDefaultCommands(cmd);
         }
-        try (PrintWriter pw = getOutPrintWriter();) {
+        try (PrintWriter pw = getOutPrintWriter()) {
             switch (cmd) {
                 case CMD_IS_SAFE_OPERATION:
                     return runIsSafeOperation(pw);
@@ -64,6 +83,22 @@ final class DevicePolicyManagerServiceShellCommand extends ShellCommand {
                     return runListOwners(pw);
                 case CMD_LIST_POLICY_EXEMPT_APPS:
                     return runListPolicyExemptApps(pw);
+                case CMD_SET_ACTIVE_ADMIN:
+                    return runSetActiveAdmin(pw);
+                case CMD_SET_DEVICE_OWNER:
+                    return runSetDeviceOwner(pw);
+                case CMD_SET_PROFILE_OWNER:
+                    return runSetProfileOwner(pw);
+                case CMD_REMOVE_ACTIVE_ADMIN:
+                    return runRemoveActiveAdmin(pw);
+                case CMD_CLEAR_FREEZE_PERIOD_RECORD:
+                    return runClearFreezePeriodRecord(pw);
+                case CMD_FORCE_NETWORK_LOGS:
+                    return runForceNetworkLogs(pw);
+                case CMD_FORCE_SECURITY_LOGS:
+                    return runForceSecurityLogs(pw);
+                case CMD_MARK_PO_ON_ORG_OWNED_DEVICE:
+                    return runMarkProfileOwnerOnOrganizationOwnedDevice(pw);
                 default:
                     return onInvalidCommand(pw, cmd);
             }
@@ -75,7 +110,7 @@ final class DevicePolicyManagerServiceShellCommand extends ShellCommand {
             return 0;
         }
 
-        pw.println("Usage: ");
+        pw.printf("Usage: \n");
         showHelp(pw);
         return -1;
     }
@@ -94,6 +129,37 @@ final class DevicePolicyManagerServiceShellCommand extends ShellCommand {
         pw.printf("    Lists the device / profile owners per user \n\n");
         pw.printf("  %s\n", CMD_LIST_POLICY_EXEMPT_APPS);
         pw.printf("    Lists the apps that are exempt from policies\n\n");
+        pw.printf("  %s [ %s <USER_ID> | current ] <COMPONENT>\n",
+                CMD_SET_ACTIVE_ADMIN, USER_OPTION);
+        pw.printf("    Sets the given component as active admin for an existing user.\n\n");
+        pw.printf("  %s [ %s <USER_ID> | current *EXPERIMENTAL* ] [ %s <NAME> ] "
+                + "<COMPONENT>\n", CMD_SET_DEVICE_OWNER, USER_OPTION, NAME_OPTION);
+        pw.printf("    Sets the given component as active admin, and its package as device owner."
+                + "\n\n");
+        pw.printf("  %s [ %s <USER_ID> | current ] [ %s <NAME> ] <COMPONENT>\n",
+                CMD_SET_PROFILE_OWNER, USER_OPTION, NAME_OPTION);
+        pw.printf("    Sets the given component as active admin and profile owner for an existing "
+                + "user.\n\n");
+        pw.printf("  %s [ %s <USER_ID> | current ] [ %s <NAME> ] <COMPONENT>\n",
+                CMD_REMOVE_ACTIVE_ADMIN, USER_OPTION, NAME_OPTION);
+        pw.printf("    Disables an active admin, the admin must have declared android:testOnly in "
+                + "the application in its manifest. This will also remove device and profile "
+                + "owners.\n\n");
+        pw.printf("  %s\n", CMD_CLEAR_FREEZE_PERIOD_RECORD);
+        pw.printf("    Clears framework-maintained record of past freeze periods that the device "
+                + "went through. For use during feature development to prevent triggering "
+                + "restriction on setting freeze periods.\n\n");
+        pw.printf("  %s\n", CMD_FORCE_NETWORK_LOGS);
+        pw.printf("    Makes all network logs available to the DPC and triggers "
+                + "DeviceAdminReceiver.onNetworkLogsAvailable() if needed.\n\n");
+        pw.printf("  %s\n", CMD_FORCE_SECURITY_LOGS);
+        pw.printf("    Makes all security logs available to the DPC and triggers "
+                + "DeviceAdminReceiver.onSecurityLogsAvailable() if needed.\n\n");
+        pw.printf("  %s [ %s <USER_ID> | current ] <COMPONENT>\n",
+                CMD_MARK_PO_ON_ORG_OWNED_DEVICE, USER_OPTION);
+        pw.printf("    Marks the profile owner of the given user as managing an organization-owned"
+                + "device. That will give it access to device identifiers (such as serial number, "
+                + "IMEI and MEID), as well as other privileges.\n\n");
     }
 
     private int runIsSafeOperation(PrintWriter pw) {
@@ -161,7 +227,6 @@ final class DevicePolicyManagerServiceShellCommand extends ShellCommand {
         return 0;
     }
 
-
     private int runListPolicyExemptApps(PrintWriter pw) {
         List<String> apps = mService.listPolicyExemptApps();
         int size = printAndGetSize(pw, apps, "policy exempt app");
@@ -173,5 +238,132 @@ final class DevicePolicyManagerServiceShellCommand extends ShellCommand {
             pw.printf("  %d: %s\n", i, app);
         }
         return 0;
+    }
+
+    private int runSetActiveAdmin(PrintWriter pw) {
+        parseArgs(/* canHaveName= */ false);
+        mService.setActiveAdmin(mComponent, /* refreshing= */ true, mUserId);
+
+        pw.printf("Success: Active admin set to component %s\n", mComponent.flattenToShortString());
+        return 0;
+    }
+
+    private int runSetDeviceOwner(PrintWriter pw) {
+        parseArgs(/* canHaveName= */ true);
+        mService.setActiveAdmin(mComponent, /* refreshing= */ true, mUserId);
+
+        try {
+            if (!mService.setDeviceOwner(mComponent, mName, mUserId)) {
+                throw new RuntimeException(
+                        "Can't set package " + mComponent + " as device owner.");
+            }
+        } catch (Exception e) {
+            // Need to remove the admin that we just added.
+            mService.removeActiveAdmin(mComponent, UserHandle.USER_SYSTEM);
+            throw e;
+        }
+
+        mService.setUserProvisioningState(
+                DevicePolicyManager.STATE_USER_SETUP_FINALIZED, mUserId);
+
+        pw.printf("Success: Device owner set to package %s\n", mComponent.flattenToShortString());
+        pw.printf("Active admin set to component %s\n", mComponent.flattenToShortString());
+        return 0;
+    }
+
+    private int runRemoveActiveAdmin(PrintWriter pw) {
+        parseArgs(/* canHaveName= */ false);
+        mService.forceRemoveActiveAdmin(mComponent, mUserId);
+        pw.printf("Success: Admin removed %s\n", mComponent);
+        return 0;
+    }
+
+    private int runSetProfileOwner(PrintWriter pw) {
+        parseArgs(/* canHaveName= */ true);
+        mService.setActiveAdmin(mComponent, /* refreshing= */ true, mUserId);
+
+        try {
+            if (!mService.setProfileOwner(mComponent, mName, mUserId)) {
+                throw new RuntimeException("Can't set component "
+                        + mComponent.flattenToShortString() + " as profile owner for user "
+                        + mUserId);
+            }
+        } catch (Exception e) {
+            // Need to remove the admin that we just added.
+            mService.removeActiveAdmin(mComponent, mUserId);
+            throw e;
+        }
+
+        mService.setUserProvisioningState(
+                DevicePolicyManager.STATE_USER_SETUP_FINALIZED, mUserId);
+
+        pw.printf("Success: Active admin and profile owner set to %s for user %d\n",
+                mComponent.flattenToShortString(), mUserId);
+        return 0;
+    }
+
+    private int runClearFreezePeriodRecord(PrintWriter pw) {
+        mService.clearSystemUpdatePolicyFreezePeriodRecord();
+        pw.printf("Success\n");
+        return 0;
+    }
+
+    private int runForceNetworkLogs(PrintWriter pw) {
+        while (true) {
+            long toWait = mService.forceNetworkLogs();
+            if (toWait == 0) {
+                break;
+            }
+            pw.printf("We have to wait for %d milliseconds...\n", toWait);
+            SystemClock.sleep(toWait);
+        }
+        pw.printf("Success\n");
+        return 0;
+    }
+
+    private int runForceSecurityLogs(PrintWriter pw) {
+        while (true) {
+            long toWait = mService.forceSecurityLogs();
+            if (toWait == 0) {
+                break;
+            }
+            pw.printf("We have to wait for %d milliseconds...\n", toWait);
+            SystemClock.sleep(toWait);
+        }
+        pw.printf("Success\n");
+        return 0;
+    }
+
+    private int runMarkProfileOwnerOnOrganizationOwnedDevice(PrintWriter pw) {
+        parseArgs(/* canHaveName= */ false);
+        mService.markProfileOwnerOnOrganizationOwnedDevice(mComponent, mUserId);
+        pw.printf("Success\n");
+        return 0;
+    }
+
+    private void parseArgs(boolean canHaveName) {
+        String opt;
+        while ((opt = getNextOption()) != null) {
+            if (USER_OPTION.equals(opt)) {
+                String arg = getNextArgRequired();
+                mUserId = UserHandle.parseUserArg(arg);
+                if (mUserId == UserHandle.USER_CURRENT) {
+                    mUserId = ActivityManager.getCurrentUser();
+                }
+            } else if (canHaveName && NAME_OPTION.equals(opt)) {
+                mName = getNextArgRequired();
+            } else {
+                throw new IllegalArgumentException("Unknown option: " + opt);
+            }
+        }
+        mComponent = parseComponentName(getNextArgRequired());
+    }
+
+    private ComponentName parseComponentName(String component) {
+        ComponentName cn = ComponentName.unflattenFromString(component);
+        if (cn == null) {
+            throw new IllegalArgumentException("Invalid component " + component);
+        }
+        return cn;
     }
 }

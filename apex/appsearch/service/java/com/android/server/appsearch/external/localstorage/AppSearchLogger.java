@@ -20,7 +20,9 @@ import android.annotation.NonNull;
 import android.app.appsearch.exceptions.AppSearchException;
 
 import com.android.server.appsearch.external.localstorage.stats.CallStats;
+import com.android.server.appsearch.external.localstorage.stats.InitializeStats;
 import com.android.server.appsearch.external.localstorage.stats.PutDocumentStats;
+import com.android.server.appsearch.external.localstorage.stats.SearchStats;
 
 /**
  * An interface for implementing client-defined logging AppSearch operations stats.
@@ -38,6 +40,12 @@ public interface AppSearchLogger {
 
     /** Logs {@link PutDocumentStats} */
     void logStats(@NonNull PutDocumentStats stats) throws AppSearchException;
+
+    /** Logs {@link InitializeStats} */
+    void logStats(@NonNull InitializeStats stats) throws AppSearchException;
+
+    /** Logs {@link SearchStats} */
+    void logStats(@NonNull SearchStats stats) throws AppSearchException;
 
     // TODO(b/173532925) Add remaining logStats once we add all the stats.
 }

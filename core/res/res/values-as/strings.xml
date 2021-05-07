@@ -1708,7 +1708,7 @@
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"শ্বৰ্টকাট অফ কৰক"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"শ্বৰ্টকাট ব্যৱহাৰ কৰক"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"ৰং বিপৰীতকৰণ"</string>
-    <string name="color_correction_feature_name" msgid="3655077237805422597">"ৰং শুধৰণী"</string>
+    <string name="color_correction_feature_name" msgid="3655077237805422597">"ৰং শুধৰণি"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"এক্সট্ৰা ডিম"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"ভলিউম কীসমূহ ধৰি ৰাখক। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> অন কৰা হ\'ল।"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"ভলিউম কী ধৰি ৰাখিছিল। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> অফ কৰা হ\'ল।"</string>
@@ -1773,28 +1773,17 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"ম\'নাৰ্ক"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"কুৱাট্ৰো"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"ফুলস্কেপ"</string>
-    <!-- no translation found for mediasize_na_ansi_c (3104916921818289618) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_d (254005964819282724) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_e (4424174989686785675) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_f (146980362213260987) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_a (5280681822380032361) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_b (2113344093437297427) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_c (971002546186856623) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_d (6450996075335049806) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_e (6782708486949266519) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_e1 (4707138568738504275) -->
-    <skip />
-    <!-- no translation found for mediasize_na_super_b (6964127155618393178) -->
-    <skip />
+    <string name="mediasize_na_ansi_c" msgid="3104916921818289618">"ANSI C"</string>
+    <string name="mediasize_na_ansi_d" msgid="254005964819282724">"ANSI D"</string>
+    <string name="mediasize_na_ansi_e" msgid="4424174989686785675">"ANSI E"</string>
+    <string name="mediasize_na_ansi_f" msgid="146980362213260987">"ANSI F"</string>
+    <string name="mediasize_na_arch_a" msgid="5280681822380032361">"Arch A"</string>
+    <string name="mediasize_na_arch_b" msgid="2113344093437297427">"Arch B"</string>
+    <string name="mediasize_na_arch_c" msgid="971002546186856623">"Arch C"</string>
+    <string name="mediasize_na_arch_d" msgid="6450996075335049806">"Arch D"</string>
+    <string name="mediasize_na_arch_e" msgid="6782708486949266519">"Arch E"</string>
+    <string name="mediasize_na_arch_e1" msgid="4707138568738504275">"Arch E1"</string>
+    <string name="mediasize_na_super_b" msgid="6964127155618393178">"Super B"</string>
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1"</string>
@@ -1831,8 +1820,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
-    <!-- no translation found for mediasize_japanese_l (1326765321473431817) -->
-    <skip />
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"L"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"অজ্ঞাত প\'ৰ্ট্ৰেইট"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"অজ্ঞাত লেণ্ডস্কেইপ"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"বাতিল কৰা হ’ল"</string>
@@ -1876,10 +1864,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"আপোনাৰ প্ৰশাসকে আপেডট কৰিছে"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"আপোনাৰ প্ৰশাসকে মচিছে"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ঠিক আছে"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (750683025714899363) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (5693741424234005958) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="750683025714899363">"বেটাৰী সঞ্চয়কাৰীয়ে গাঢ় ৰঙৰ থীম অন কৰে আৰু নেপথ্যৰ কাৰ্যকলাপ, কিছুমান ভিজুৱেল ইফেক্ট আৰু নিৰ্দিষ্ট কিছুমান সুবিধা সীমিত অথবা অফ কৰে।\n\n"<annotation id="url">"অধিক জানক"</annotation></string>
+    <string name="battery_saver_description" msgid="5693741424234005958">"বেটাৰী সঞ্চয়কাৰীয়ে গাঢ় ৰঙৰ থীম অন কৰে আৰু নেপথ্যৰ কাৰ্যকলাপ, কিছুমান ভিজুৱেল ইফেক্ট আৰু নিৰ্দিষ্ট কিছুমান সুবিধা সীমিত অথবা অফ কৰে।"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"ডেটা ব্য়ৱহাৰৰ হ্ৰাস কৰিবলৈ ডেটা সঞ্চয়কাৰীয়ে কিছুমান এপক নেপথ্য়ত ডেটা প্ৰেৰণ বা সংগ্ৰহ কৰাত বাধা প্ৰদান কৰে। আপুনি বৰ্তমান ব্য়ৱহাৰ কৰি থকা এটা এপে ডেটা এক্সেছ কৰিব পাৰে, কিন্তু সঘনাই এক্সেছ কৰিব নোৱাৰিব পাৰে। ইয়াৰ অৰ্থ উদাহৰণস্বৰূপে এয়া হ\'ব পাৰে যে, আপুনি নিটিপা পর্যন্ত প্ৰতিচ্ছবিসমূহ দেখুওৱা নহ’ব।"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ডেটা সঞ্চয়কাৰী অন কৰিবনে?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"অন কৰক"</string>
@@ -2099,12 +2085,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"এই জাননীটোৰ গুৰুত্ব নীৰৱলৈ হ্ৰাস কৰা হৈছে। মতামত দিবলৈ টিপক।"</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"এই জাননীটোৰ স্থান ওপৰলৈ কৰা হৈছে। মতামত দিবলৈ টিপক।"</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"এই জাননীটোৰ স্থান তললৈ কৰা হৈছে। মতামত দিবলৈ টিপক।"</string>
-    <string name="nas_upgrade_notification_title" msgid="4224351129445073051">"উন্নত জাননী ব্যৱহাৰ কৰি চাওক"</string>
-    <string name="nas_upgrade_notification_content" msgid="7036860187157134706">"পৰামৰ্শ দিয়া কাৰ্য, প্ৰত্যুত্তৰ আৰু বহুতো সুবিধা পাই থাকিবলৈ উন্নত জাননী অন কৰক। Androidৰ অভিযোজিত জাননী আৰু সমৰ্থিত নহয়।"</string>
-    <string name="nas_upgrade_notification_enable_action" msgid="4823652531622744798">"অন কৰক"</string>
-    <string name="nas_upgrade_notification_disable_action" msgid="7561210256700811433">"এতিয়া নহয়"</string>
+    <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"উন্নত জাননী"</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"এতিয়া উন্নত জাননীয়ে পৰামৰ্শ দিয়া কাৰ্য আৰু প্ৰত্যুত্তৰ প্ৰদান কৰে। Androidৰ অভিযোজিত জাননী আৰু সমৰ্থিত নহয়।"</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"ঠিক আছে"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"অফ কৰক"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"অধিক জানক"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="6276343083934111208">"উন্নত প্ৰত্যুত্তৰে সম্পৰ্কৰ নাম আৰু বাৰ্তাৰ দৰে ব্যক্তিগত তথ্যৰ লগতে আটাইবোৰ জাননীৰ সমল পঢ়িব পাৰে। এই সুবিধাটোৱে জাননী অগ্ৰাহ্য কৰাৰ লগতে জাননীত থকা ফ’ন কলৰ উত্তৰ দিয়াৰ দৰে কাৰ্য বুটামৰ ওপৰত কাৰ্যব্যৱস্থা ল’ব পাৰে।\n\nলগতে, এই সুবিধাটোৱে অগ্ৰাধিকাৰ দিয়া ম’ড অন অথবা অফ কৰিব পাৰে আৰু সম্পৰ্কিত ছেটিং সলনি কৰিব পাৰে।"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"Android 12ত Androidৰ অভিযোজিত জাননীক উন্নত জাননীৰ দ্বাৰা সলনি কৰা হৈছে। এই সুবিধাটোৱে পৰামৰ্শ দিয়া কাৰ্য আৰু প্ৰত্যুত্তৰ দেখুৱায় আৰু আপোনাৰ জাননীসমূহ শৃংখলাবদ্ধ কৰে।\n\nউন্নত জাননীয়ে সম্পৰ্কৰ নাম আৰু বাৰ্তাৰ দৰে ব্যক্তিগত তথ্যকে ধৰি জাননীৰ সমল এক্সেছ কৰিব পাৰে। এই সুবিধাটোৱে জাননী অগ্ৰাহ্য কৰিব অথবা জাননীৰ প্ৰতি সঁহাৰি জনাবও পাৰে, যেনে ফ’ন কলৰ উত্তৰ দিয়া আৰু অসুবিধা নিদিব সুবিধাটো নিয়ন্ত্ৰণ কৰা আদি।"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ৰুটিন ম’ডৰ তথ্য জাননী"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"চ্চাৰ্জ কৰাৰ সচৰাচৰ সময়ৰ আগতেই বেটাৰি শেষ হ’ব পাৰে"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"বেটাৰিৰ খৰচ কমাবলৈ বেটাৰি সঞ্চয়কাৰী অন কৰা হৈছে"</string>
@@ -2301,4 +2287,6 @@
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"এপ্লিকেশ্বনৰ ব্ৰেণ্ডৰ প্ৰতিচ্ছবি"</string>
     <string name="view_and_control_notification_title" msgid="4300765399209912240">"এক্সেছৰ ছেটিং পৰীক্ষা কৰক"</string>
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g>এ আপোনাৰ স্ক্ৰীনখন চাব আৰু পৰিচালনা কৰিব পাৰে। পৰ্যালোচনা কৰিবলৈ টিপক।"</string>
+    <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> অনুবাদ কৰা হ’ল।"</string>
+    <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"বাৰ্তাটো <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g>ৰ পৰা <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>লৈ অনুবাদ কৰা হ’ল।"</string>
 </resources>

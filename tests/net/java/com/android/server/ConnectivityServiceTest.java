@@ -44,9 +44,6 @@ import static android.net.ConnectivityManager.BLOCKED_REASON_NONE;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
 import static android.net.ConnectivityManager.EXTRA_NETWORK_INFO;
 import static android.net.ConnectivityManager.EXTRA_NETWORK_TYPE;
-import static android.net.ConnectivityManager.PRIVATE_DNS_MODE_OFF;
-import static android.net.ConnectivityManager.PRIVATE_DNS_MODE_OPPORTUNISTIC;
-import static android.net.ConnectivityManager.PRIVATE_DNS_MODE_PROVIDER_HOSTNAME;
 import static android.net.ConnectivityManager.PROFILE_NETWORK_PREFERENCE_DEFAULT;
 import static android.net.ConnectivityManager.PROFILE_NETWORK_PREFERENCE_ENTERPRISE;
 import static android.net.ConnectivityManager.TYPE_ETHERNET;
@@ -57,6 +54,9 @@ import static android.net.ConnectivityManager.TYPE_MOBILE_SUPL;
 import static android.net.ConnectivityManager.TYPE_PROXY;
 import static android.net.ConnectivityManager.TYPE_VPN;
 import static android.net.ConnectivityManager.TYPE_WIFI;
+import static android.net.ConnectivitySettingsManager.PRIVATE_DNS_MODE_OFF;
+import static android.net.ConnectivitySettingsManager.PRIVATE_DNS_MODE_OPPORTUNISTIC;
+import static android.net.ConnectivitySettingsManager.PRIVATE_DNS_MODE_PROVIDER_HOSTNAME;
 import static android.net.INetworkMonitor.NETWORK_VALIDATION_PROBE_DNS;
 import static android.net.INetworkMonitor.NETWORK_VALIDATION_PROBE_FALLBACK;
 import static android.net.INetworkMonitor.NETWORK_VALIDATION_PROBE_HTTP;
@@ -4273,10 +4273,9 @@ public class ConnectivityServiceTest {
         waitForIdle();
     }
 
-    private void setPrivateDnsSettings(String mode, String specifier) {
-        final ContentResolver cr = mServiceContext.getContentResolver();
-        Settings.Global.putString(cr, ConnectivitySettingsManager.PRIVATE_DNS_MODE, mode);
-        Settings.Global.putString(cr, ConnectivitySettingsManager.PRIVATE_DNS_SPECIFIER, specifier);
+    private void setPrivateDnsSettings(int mode, String specifier) {
+        ConnectivitySettingsManager.setPrivateDnsMode(mServiceContext, mode);
+        ConnectivitySettingsManager.setPrivateDnsHostname(mServiceContext, specifier);
         mService.updatePrivateDnsSettings();
         waitForIdle();
     }
@@ -5899,9 +5898,9 @@ public class ConnectivityServiceTest {
             assertEquals("Should have exactly one VPN:", 1, infos.length);
             UnderlyingNetworkInfo info = infos[0];
             assertEquals("Unexpected VPN owner:", (int) vpnUid, info.getOwnerUid());
-            assertEquals("Unexpected VPN interface:", vpnIfname, info.getIface());
+            assertEquals("Unexpected VPN interface:", vpnIfname, info.getInterface());
             assertSameElementsNoDuplicates(underlyingIfaces,
-                    info.getUnderlyingIfaces().toArray(new String[0]));
+                    info.getUnderlyingInterfaces().toArray(new String[0]));
         } else {
             assertEquals(0, infos.length);
             return;
@@ -6045,8 +6044,8 @@ public class ConnectivityServiceTest {
         // network for the VPN...
         verify(mStatsManager, never()).notifyNetworkStatus(any(List.class),
                 any(List.class), any() /* anyString() doesn't match null */,
-                argThat(infos -> infos.get(0).getUnderlyingIfaces().size() == 1
-                        && WIFI_IFNAME.equals(infos.get(0).getUnderlyingIfaces().get(0))));
+                argThat(infos -> infos.get(0).getUnderlyingInterfaces().size() == 1
+                        && WIFI_IFNAME.equals(infos.get(0).getUnderlyingInterfaces().get(0))));
         verifyNoMoreInteractions(mStatsManager);
         reset(mStatsManager);
 
@@ -6060,8 +6059,8 @@ public class ConnectivityServiceTest {
         waitForIdle();
         verify(mStatsManager).notifyNetworkStatus(any(List.class),
                 any(List.class), any() /* anyString() doesn't match null */,
-                argThat(vpnInfos -> vpnInfos.get(0).getUnderlyingIfaces().size() == 1
-                        && WIFI_IFNAME.equals(vpnInfos.get(0).getUnderlyingIfaces().get(0))));
+                argThat(vpnInfos -> vpnInfos.get(0).getUnderlyingInterfaces().size() == 1
+                        && WIFI_IFNAME.equals(vpnInfos.get(0).getUnderlyingInterfaces().get(0))));
         mEthernetNetworkAgent.disconnect();
         waitForIdle();
         reset(mStatsManager);

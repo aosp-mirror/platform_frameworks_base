@@ -1520,7 +1520,7 @@
     <string name="gpsNotifTicker" msgid="3207361857637620780">"Standortabfrage von <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="gpsNotifTitle" msgid="1590033371665669570">"Standortabfrage"</string>
     <string name="gpsNotifMessage" msgid="7346649122793758032">"Angefordert von <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
-    <string name="gpsVerifYes" msgid="3719843080744112940">"„Ja“"</string>
+    <string name="gpsVerifYes" msgid="3719843080744112940">"Ja"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"Nein"</string>
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"Löschbegrenzung überschritten"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"Es sind <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> gelöschte Elemente für <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>, Konto <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>, vorhanden. Wie möchtest du fortfahren?"</string>
@@ -1773,28 +1773,17 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"Monarch"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"Quarto"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"Foolscap"</string>
-    <!-- no translation found for mediasize_na_ansi_c (3104916921818289618) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_d (254005964819282724) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_e (4424174989686785675) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_f (146980362213260987) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_a (5280681822380032361) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_b (2113344093437297427) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_c (971002546186856623) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_d (6450996075335049806) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_e (6782708486949266519) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_e1 (4707138568738504275) -->
-    <skip />
-    <!-- no translation found for mediasize_na_super_b (6964127155618393178) -->
-    <skip />
+    <string name="mediasize_na_ansi_c" msgid="3104916921818289618">"ANSI C"</string>
+    <string name="mediasize_na_ansi_d" msgid="254005964819282724">"ANSI D"</string>
+    <string name="mediasize_na_ansi_e" msgid="4424174989686785675">"ANSI E"</string>
+    <string name="mediasize_na_ansi_f" msgid="146980362213260987">"ANSI F"</string>
+    <string name="mediasize_na_arch_a" msgid="5280681822380032361">"Arch A"</string>
+    <string name="mediasize_na_arch_b" msgid="2113344093437297427">"Arch B"</string>
+    <string name="mediasize_na_arch_c" msgid="971002546186856623">"Arch C"</string>
+    <string name="mediasize_na_arch_d" msgid="6450996075335049806">"Arch D"</string>
+    <string name="mediasize_na_arch_e" msgid="6782708486949266519">"Arch E"</string>
+    <string name="mediasize_na_arch_e1" msgid="4707138568738504275">"Arch E1"</string>
+    <string name="mediasize_na_super_b" msgid="6964127155618393178">"Super B"</string>
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1"</string>
@@ -1831,8 +1820,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
-    <!-- no translation found for mediasize_japanese_l (1326765321473431817) -->
-    <skip />
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"L"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"Unbekannt – Hochformat"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"Unbekannt – Querformat"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"Abgebrochen"</string>
@@ -1876,10 +1864,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Von deinem Administrator aktualisiert"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Von deinem Administrator gelöscht"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (750683025714899363) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (5693741424234005958) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="750683025714899363">"Der Energiesparmodus aktiviert das dunkle Design und schränkt Hintergrundaktivitäten, einige optische Effekte und bestimmte Funktionen ein oder deaktiviert sie.\n\n"<annotation id="url">"Weitere Informationen"</annotation></string>
+    <string name="battery_saver_description" msgid="5693741424234005958">"Der Energiesparmodus aktiviert das dunkle Design und schränkt Hintergrundaktivitäten, einige optische Effekte und bestimmte Funktionen ein oder deaktiviert sie."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Der Datensparmodus verhindert zum einen, dass manche Apps im Hintergrund Daten senden oder empfangen, sodass weniger Daten verbraucht werden. Zum anderen werden die Datenzugriffe der gerade aktiven App eingeschränkt, was z. B. dazu führen kann, dass Bilder erst angetippt werden müssen, bevor sie sichtbar werden."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Datensparmodus aktivieren?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Aktivieren"</string>
@@ -2099,12 +2085,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Diese Benachrichtigung wurde auf „Lautlos“ herabgestuft. Tippe, um Feedback zu geben."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Diese Benachrichtigung wurde hochgestuft. Tippe, um Feedback zu geben."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Diese Benachrichtigung wurde herabgestuft. Tippe, um Feedback zu geben."</string>
-    <string name="nas_upgrade_notification_title" msgid="4224351129445073051">"„Erweiterte Benachrichtigungen“ ausprobieren"</string>
-    <string name="nas_upgrade_notification_content" msgid="7036860187157134706">"Wenn du weiterhin beispielsweise Vorschläge für Aktionen und Antworten erhalten möchtest, aktiviere die Funktion „Erweiterte Benachrichtigungen“. Adaptive Benachrichtigungen für Android werden nicht mehr unterstützt."</string>
-    <string name="nas_upgrade_notification_enable_action" msgid="4823652531622744798">"Aktivieren"</string>
-    <string name="nas_upgrade_notification_disable_action" msgid="7561210256700811433">"Nicht jetzt"</string>
+    <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"Erweiterte Benachrichtigungen"</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"Die Funktion „Erweiterte Benachrichtigungen“ liefert jetzt Vorschläge für Aktionen und Antworten. Adaptive Benachrichtigungen für Android werden nicht mehr unterstützt."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Ausschalten"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Weitere Informationen"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="6276343083934111208">"Die Funktion „Erweiterte Benachrichtigungen“ kann alle Benachrichtigungen lesen, darunter auch personenbezogene Daten wie Kontaktnamen und Nachrichten. Außerdem kann sie Benachrichtigungen schließen oder Schaltflächen in Benachrichtigungen verwenden und so beispielsweise Anrufe entgegennehmen.\n\nDiese Funktion kann auch den Prioritätsmodus aktivieren bzw. deaktivieren und zugehörige Einstellungen ändern."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"Die Adaptiven Benachrichtigungen wurden in Android 12 durch die Funktion „Erweiterte Benachrichtigungen“ ersetzt. Diese Funktion zeigt Vorschläge für Aktionen und Antworten an und sortiert Benachrichtigungen.\n\nDie Funktion „Erweiterte Benachrichtigungen“ kann alle Benachrichtigungen lesen, darunter auch personenbezogene Daten wie Kontaktnamen und Nachrichten. Außerdem kann sie auf Benachrichtigungen antworten oder diese schließen und so beispielsweise Anrufe entgegennehmen oder „Bitte nicht stören“ steuern."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Infomitteilung zum Ablaufmodus"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Dein Akku könnte vor der gewöhnlichen Ladezeit leer sein"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Energiesparmodus aktiviert, um die Akkulaufzeit zu verlängern"</string>
@@ -2301,4 +2287,6 @@
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"App-Branding-Hintergrundbild"</string>
     <string name="view_and_control_notification_title" msgid="4300765399209912240">"Zugriffseinstellungen prüfen"</string>
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> kann deinen Bildschirm sehen und steuern. Zum Prüfen tippen."</string>
+    <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"„<xliff:g id="MESSAGE">%1$s</xliff:g>“ wurde übersetzt."</string>
+    <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Nachricht wurde von <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> auf <xliff:g id="TO_LANGUAGE">%2$s</xliff:g> übersetzt."</string>
 </resources>

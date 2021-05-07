@@ -21,6 +21,7 @@ import static com.android.systemui.screenshot.LogConfig.logTag;
 
 import android.app.Notification;
 import android.content.ComponentName;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.UserHandle;
@@ -107,7 +108,8 @@ public class ScreenshotNotificationSmartActionsProvider {
      * @param action        type of notification action invoked.
      * @param isSmartAction whether action invoked was a smart action.
      */
-    public void notifyAction(String screenshotId, String action, boolean isSmartAction) {
+    public void notifyAction(String screenshotId, String action, boolean isSmartAction,
+            Intent intent) {
         if (DEBUG_ACTIONS) {
             Log.d(TAG, "SmartActions: notifyAction: return without notify");
         }

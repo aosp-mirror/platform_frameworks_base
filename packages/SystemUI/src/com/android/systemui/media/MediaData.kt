@@ -31,7 +31,7 @@ data class MediaData(
      */
     val app: String?,
     /**
-     * Icon shown on player, close to app name.
+     * App icon shown on player.
      */
     val appIcon: Icon?,
     /**

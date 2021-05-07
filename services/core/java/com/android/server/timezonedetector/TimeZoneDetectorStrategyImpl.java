@@ -383,7 +383,8 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
                 bestQualifiedTelephonySuggestion == null
                         ? null : bestQualifiedTelephonySuggestion.suggestion;
         // A new generator is created each time: we don't want / require consistency.
-        OrdinalGenerator<String> tzIdOrdinalGenerator = new OrdinalGenerator<>();
+        OrdinalGenerator<String> tzIdOrdinalGenerator =
+                new OrdinalGenerator<>(new TimeZoneCanonicalizer());
         return MetricsTimeZoneDetectorState.create(
                 tzIdOrdinalGenerator,
                 getConfigurationInternal(currentUserId),

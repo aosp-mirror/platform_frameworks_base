@@ -29,9 +29,12 @@ import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityManager;
+import android.view.accessibility.AccessibilityNodeInfo;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
 
 import com.android.settingslib.Utils;
 import com.android.systemui.Dumpable;
@@ -63,6 +66,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     @NonNull private final KeyguardStateController mKeyguardStateController;
     @NonNull private final FalsingManager mFalsingManager;
     @NonNull private final AuthController mAuthController;
+    @NonNull private final AccessibilityManager mAccessibilityManager;
 
     private boolean mHasUdfpsOrFaceAuthFeatures;
     private boolean mUdfpsEnrolled;
@@ -79,6 +83,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     private boolean mQsExpanded;
     private int mStatusBarState;
     private boolean mIsKeyguardShowing;
+    private boolean mUserUnlockedWithBiometric;
 
     private boolean mShowButton;
     private boolean mShowUnlockIcon;
@@ -93,19 +98,17 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
             @NonNull KeyguardStateController keyguardStateController,
             @NonNull FalsingManager falsingManager,
             @NonNull AuthController authController,
-            @NonNull DumpManager dumpManager
+            @NonNull DumpManager dumpManager,
+            @NonNull AccessibilityManager accessibilityManager
     ) {
         super(view);
-        if (mView != null) {
-            mView.setOnClickListener(v -> onAffordanceClick());
-            mView.setOnLongClickListener(v -> onAffordanceClick());
-        }
         mStatusBarStateController = statusBarStateController;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mAuthController = authController;
         mKeyguardViewController = keyguardViewController;
         mKeyguardStateController = keyguardStateController;
         mFalsingManager = falsingManager;
+        mAccessibilityManager = accessibilityManager;
 
         final Context context = view.getContext();
         mButton = context.getResources().getDrawable(
@@ -119,6 +122,11 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
                 context.getResources().getDimensionPixelSize(
                         com.android.systemui.R.dimen.udfps_unlock_icon_inset));
         dumpManager.registerDumpable("LockIconViewController", this);
+    }
+
+    @Override
+    protected void onInit() {
+        mView.setAccessibilityDelegate(mAccessibilityDelegate);
     }
 
     @Override
@@ -148,7 +156,8 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
             mView.setLocation(new PointF(props[0], props[1]), props[2]);
         }
 
-        mIsKeyguardShowing = mKeyguardViewController.isShowing();
+        updateKeyguardShowing();
+        mUserUnlockedWithBiometric = false;
         mIsBouncerShowing = mKeyguardViewController.isBouncerShowing();
         mIsDozing = mStatusBarStateController.isDozing();
         mRunningFPS = mKeyguardUpdateMonitor.isFingerprintDetectionRunning();
@@ -163,6 +172,8 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         mKeyguardUpdateMonitor.registerCallback(mKeyguardUpdateMonitorCallback);
         mStatusBarStateController.addCallback(mStatusBarStateListener);
         mKeyguardStateController.addCallback(mKeyguardStateCallback);
+        mAccessibilityManager.addTouchExplorationStateChangeListener(
+                mTouchExplorationStateChangeListener);
 
         updateVisibility();
     }
@@ -172,6 +183,8 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         mKeyguardUpdateMonitor.removeCallback(mKeyguardUpdateMonitorCallback);
         mStatusBarStateController.removeCallback(mStatusBarStateListener);
         mKeyguardStateController.removeCallback(mKeyguardStateCallback);
+        mAccessibilityManager.removeTouchExplorationStateChangeListener(
+                mTouchExplorationStateChangeListener);
     }
 
     public float getTop() {
@@ -205,30 +218,83 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         }
 
         // these three states are mutually exclusive:
-        mShowButton = mUdfpsEnrolled && !mCanDismissLockScreen && !mRunningFPS && isLockScreen();
+        mShowButton = mUdfpsEnrolled && !mCanDismissLockScreen && !mRunningFPS
+                && !mUserUnlockedWithBiometric && isLockScreen();
         mShowUnlockIcon = mFaceAuthEnrolled & mCanDismissLockScreen && isLockScreen();
         mShowLockIcon = !mUdfpsEnrolled && !mCanDismissLockScreen && isLockScreen()
             && mFaceAuthEnrolled;
 
+        updateClickListener();
         if (mShowButton) {
             mView.setImageDrawable(mButton);
             mView.setVisibility(View.VISIBLE);
+            mView.setContentDescription(getResources().getString(
+                    R.string.accessibility_udfps_disabled_button));
         } else if (mShowUnlockIcon) {
             mView.setImageDrawable(mUnlockIcon);
             mView.setVisibility(View.VISIBLE);
+            mView.setContentDescription(getResources().getString(
+                    R.string.accessibility_unlock_button));
         } else if (mShowLockIcon) {
             mView.setImageDrawable(mLockIcon);
             mView.setVisibility(View.VISIBLE);
+            mView.setContentDescription(getResources().getString(
+                    R.string.accessibility_lock_icon));
         } else {
             mView.setVisibility(View.INVISIBLE);
+            mView.setContentDescription(null);
         }
     }
+
+    private final View.AccessibilityDelegate mAccessibilityDelegate =
+            new View.AccessibilityDelegate() {
+        private final AccessibilityNodeInfo.AccessibilityAction mAccessibilityAuthenticateHint =
+                new AccessibilityNodeInfo.AccessibilityAction(
+                        AccessibilityNodeInfoCompat.ACTION_CLICK,
+                        getResources().getString(R.string.accessibility_authenticate_hint));
+        private final AccessibilityNodeInfo.AccessibilityAction mAccessibilityEnterHint =
+                new AccessibilityNodeInfo.AccessibilityAction(
+                        AccessibilityNodeInfoCompat.ACTION_CLICK,
+                        getResources().getString(R.string.accessibility_enter_hint));
+        public void onInitializeAccessibilityNodeInfo(View v, AccessibilityNodeInfo info) {
+            super.onInitializeAccessibilityNodeInfo(v, info);
+            removeAllActions(info);
+            if (mShowButton || mShowLockIcon) {
+                info.addAction(mAccessibilityAuthenticateHint);
+            } else if (mShowUnlockIcon) {
+                info.addAction(mAccessibilityEnterHint);
+            }
+        }
+
+        private void removeAllActions(AccessibilityNodeInfo info) {
+            info.removeAction(mAccessibilityAuthenticateHint);
+            info.removeAction(mAccessibilityEnterHint);
+            info.removeAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_LONG_CLICK);
+            mView.setLongClickable(false);
+        }
+    };
 
     private boolean isLockScreen() {
         return !mIsDozing
                 && !mIsBouncerShowing
                 && !mQsExpanded
                 && mStatusBarState == StatusBarState.KEYGUARD;
+    }
+
+    private void updateClickListener() {
+        if (mView != null) {
+            mView.setOnClickListener(v -> onAffordanceClick());
+            if (mAccessibilityManager.isTouchExplorationEnabled()) {
+                mView.setOnLongClickListener(null);
+            } else {
+                mView.setOnLongClickListener(v -> onAffordanceClick());
+            }
+        }
+    }
+
+    private void updateKeyguardShowing() {
+        mIsKeyguardShowing = mKeyguardStateController.isShowing()
+                && !mKeyguardStateController.isKeyguardGoingAway();
     }
 
     @Override
@@ -242,6 +308,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         pw.println("  mIsKeyguardShowing: " + mIsKeyguardShowing);
         pw.println("  mIsDozing: " + mIsDozing);
         pw.println("  mIsBouncerShowing: " + mIsBouncerShowing);
+        pw.println("  mUserUnlockedWithBiometric: " + mUserUnlockedWithBiometric);
         pw.println("  mRunningFPS: " + mRunningFPS);
         pw.println("  mCanDismissLockScreen: " + mCanDismissLockScreen);
         pw.println("  mStatusBarState: " + StatusBarState.toShortString(mStatusBarState));
@@ -268,18 +335,20 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
                 @Override
                 public void onKeyguardBouncerChanged(boolean bouncer) {
                     mIsBouncerShowing = bouncer;
-                    mIsKeyguardShowing = mKeyguardStateController.isShowing();
                     updateVisibility();
                 }
 
                 @Override
                 public void onBiometricRunningStateChanged(boolean running,
                         BiometricSourceType biometricSourceType) {
+                    mUserUnlockedWithBiometric =
+                            mKeyguardUpdateMonitor.getUserUnlockedWithBiometric(
+                                    KeyguardUpdateMonitor.getCurrentUser());
+
                     if (biometricSourceType == FINGERPRINT) {
                         mRunningFPS = running;
+                        updateVisibility();
                     }
-
-                    updateVisibility();
                 }
             };
 
@@ -288,14 +357,25 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         @Override
         public void onUnlockedChanged() {
             mCanDismissLockScreen = mKeyguardStateController.canDismissLockScreen();
+            updateKeyguardShowing();
             updateVisibility();
         }
+
         @Override
         public void onKeyguardShowingChanged() {
-            mIsKeyguardShowing = mKeyguardStateController.isShowing();
+            updateKeyguardShowing();
             mUdfpsEnrolled = mKeyguardUpdateMonitor.isUdfpsEnrolled();
             mFaceAuthEnrolled = mKeyguardUpdateMonitor.isFaceEnrolled();
             updateVisibility();
         }
+
+        @Override
+        public void onKeyguardFadingAwayChanged() {
+            updateKeyguardShowing();
+            updateVisibility();
+        }
     };
+
+    private final AccessibilityManager.TouchExplorationStateChangeListener
+            mTouchExplorationStateChangeListener = enabled -> updateClickListener();
 }

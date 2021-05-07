@@ -24,7 +24,9 @@ import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 /**
  * Encapsulates a request to modify the state of multiple lights.
  *
@@ -51,7 +53,7 @@ public final class LightsRequest {
     }
 
     /**
-     * Get a list of Light as ids.  The ids will returned in same order as the lights passed
+     * Get a list of Light as ids. The ids will returned in same order as the lights passed
      * in Builder.
      *
      * @return List of light ids
@@ -72,6 +74,18 @@ public final class LightsRequest {
      */
     public @NonNull List<LightState> getLightStates() {
         return Arrays.asList(mLightStates);
+    }
+
+    /**
+     * Get a map of light ids and states.  The map will contain all the light ids as keys and
+     * the corresponding LightState requested as values.
+     */
+    public @NonNull Map<Integer, LightState> getLightsAndStates() {
+        Map<Integer, LightState> map = new HashMap<>();
+        for (int i = 0; i < mLightIds.length; i++) {
+            map.put(mLightIds[i], mLightStates[i]);
+        }
+        return map;
     }
 
     /**

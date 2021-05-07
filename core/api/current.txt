@@ -586,7 +586,6 @@ package android {
     field public static final int dropDownWidth = 16843362; // 0x1010262
     field public static final int duplicateParentState = 16842985; // 0x10100e9
     field public static final int duration = 16843160; // 0x1010198
-    field public static final int edgeEffectType;
     field public static final int editTextBackground = 16843602; // 0x1010352
     field public static final int editTextColor = 16843601; // 0x1010351
     field public static final int editTextPreferenceStyle = 16842898; // 0x1010092
@@ -1741,6 +1740,7 @@ package android {
     field @Deprecated public static final int secondary_text_light = 17170439; // 0x1060007
     field @Deprecated public static final int secondary_text_light_nodisable = 17170440; // 0x1060008
     field public static final int system_accent1_0;
+    field public static final int system_accent1_10;
     field public static final int system_accent1_100;
     field public static final int system_accent1_1000;
     field public static final int system_accent1_200;
@@ -1753,6 +1753,7 @@ package android {
     field public static final int system_accent1_800;
     field public static final int system_accent1_900;
     field public static final int system_accent2_0;
+    field public static final int system_accent2_10;
     field public static final int system_accent2_100;
     field public static final int system_accent2_1000;
     field public static final int system_accent2_200;
@@ -1765,6 +1766,7 @@ package android {
     field public static final int system_accent2_800;
     field public static final int system_accent2_900;
     field public static final int system_accent3_0;
+    field public static final int system_accent3_10;
     field public static final int system_accent3_100;
     field public static final int system_accent3_1000;
     field public static final int system_accent3_200;
@@ -1777,6 +1779,7 @@ package android {
     field public static final int system_accent3_800;
     field public static final int system_accent3_900;
     field public static final int system_neutral1_0;
+    field public static final int system_neutral1_10;
     field public static final int system_neutral1_100;
     field public static final int system_neutral1_1000;
     field public static final int system_neutral1_200;
@@ -1789,6 +1792,7 @@ package android {
     field public static final int system_neutral1_800;
     field public static final int system_neutral1_900;
     field public static final int system_neutral2_0;
+    field public static final int system_neutral2_10;
     field public static final int system_neutral2_100;
     field public static final int system_neutral2_1000;
     field public static final int system_neutral2_200;
@@ -1817,7 +1821,6 @@ package android {
     field public static final int notification_large_icon_width = 17104901; // 0x1050005
     field public static final int system_app_widget_background_radius;
     field public static final int system_app_widget_inner_radius;
-    field public static final int system_app_widget_internal_padding;
     field public static final int thumbnail_height = 17104897; // 0x1050001
     field public static final int thumbnail_width = 17104898; // 0x1050002
   }
@@ -7466,9 +7469,10 @@ package android.app.admin {
     field public static final int LOCK_TASK_FEATURE_SYSTEM_INFO = 1; // 0x1
     field public static final int MAKE_USER_EPHEMERAL = 2; // 0x2
     field public static final String MIME_TYPE_PROVISIONING_NFC = "application/com.android.managedprovisioning";
-    field public static final int NEARBY_STREAMING_DISABLED = 0; // 0x0
-    field public static final int NEARBY_STREAMING_ENABLED = 1; // 0x1
-    field public static final int NEARBY_STREAMING_SAME_MANAGED_ACCOUNT_ONLY = 2; // 0x2
+    field public static final int NEARBY_STREAMING_DISABLED = 1; // 0x1
+    field public static final int NEARBY_STREAMING_ENABLED = 2; // 0x2
+    field public static final int NEARBY_STREAMING_NOT_CONTROLLED_BY_POLICY = 0; // 0x0
+    field public static final int NEARBY_STREAMING_SAME_MANAGED_ACCOUNT_ONLY = 3; // 0x3
     field public static final int OPERATION_SAFETY_REASON_DRIVING_DISTRACTION = 1; // 0x1
     field public static final int PASSWORD_COMPLEXITY_HIGH = 327680; // 0x50000
     field public static final int PASSWORD_COMPLEXITY_LOW = 65536; // 0x10000
@@ -8014,7 +8018,6 @@ package android.app.job {
     method @Nullable public String[] getTriggeredContentAuthorities();
     method @Nullable public android.net.Uri[] getTriggeredContentUris();
     method public boolean isExpeditedJob();
-    method @Deprecated public boolean isForegroundJob();
     method public boolean isOverrideDeadlineExpired();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.job.JobParameters> CREATOR;
@@ -9036,7 +9039,7 @@ package android.bluetooth {
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public int getType();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public android.os.ParcelUuid[] getUuids();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public boolean setAlias(@NonNull String);
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setPairingConfirmation(boolean);
+    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public boolean setPairingConfirmation(boolean);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public boolean setPin(byte[]);
     method public void writeToParcel(android.os.Parcel, int);
     field @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public static final String ACTION_ACL_CONNECTED = "android.bluetooth.device.action.ACL_CONNECTED";
@@ -11921,6 +11924,8 @@ package android.content.pm {
     method public int getGwpAsanMode();
     method public int getMemtagMode();
     method public int getNativeHeapZeroInitialized();
+    method public int getRequestRawExternalStorageAccess();
+    method public boolean isProfileable();
     method public boolean isProfileableByShell();
     method public boolean isResourceOverlay();
     method public boolean isVirtualPreload();
@@ -11975,6 +11980,9 @@ package android.content.pm {
     field public static final int MEMTAG_DEFAULT = -1; // 0xffffffff
     field public static final int MEMTAG_OFF = 0; // 0x0
     field public static final int MEMTAG_SYNC = 2; // 0x2
+    field public static final int RAW_EXTERNAL_STORAGE_ACCESS_DEFAULT = 0; // 0x0
+    field public static final int RAW_EXTERNAL_STORAGE_ACCESS_NOT_REQUESTED = 2; // 0x2
+    field public static final int RAW_EXTERNAL_STORAGE_ACCESS_REQUESTED = 1; // 0x1
     field public static final int ZEROINIT_DEFAULT = -1; // 0xffffffff
     field public static final int ZEROINIT_DISABLED = 0; // 0x0
     field public static final int ZEROINIT_ENABLED = 1; // 0x1
@@ -12581,7 +12589,7 @@ package android.content.pm {
     method @NonNull public abstract java.util.List<android.content.pm.ResolveInfo> queryIntentActivityOptions(@Nullable android.content.ComponentName, @Nullable android.content.Intent[], @NonNull android.content.Intent, int);
     method @NonNull public abstract java.util.List<android.content.pm.ResolveInfo> queryIntentContentProviders(@NonNull android.content.Intent, int);
     method @NonNull public abstract java.util.List<android.content.pm.ResolveInfo> queryIntentServices(@NonNull android.content.Intent, int);
-    method @NonNull public abstract java.util.List<android.content.pm.PermissionInfo> queryPermissionsByGroup(@NonNull String, int) throws android.content.pm.PackageManager.NameNotFoundException;
+    method @NonNull public abstract java.util.List<android.content.pm.PermissionInfo> queryPermissionsByGroup(@Nullable String, int) throws android.content.pm.PackageManager.NameNotFoundException;
     method @NonNull public java.util.List<android.content.pm.PackageManager.Property> queryProviderProperty(@NonNull String);
     method @NonNull public java.util.List<android.content.pm.PackageManager.Property> queryReceiverProperty(@NonNull String);
     method @NonNull public java.util.List<android.content.pm.PackageManager.Property> queryServiceProperty(@NonNull String);
@@ -17137,11 +17145,11 @@ package android.graphics.text {
 
 package android.hardware {
 
-  public abstract class Battery {
-    ctor public Battery();
+  public abstract class BatteryState {
+    ctor public BatteryState();
     method @FloatRange(from=-1.0F, to=1.0f) public abstract float getCapacity();
     method public abstract int getStatus();
-    method public abstract boolean hasBattery();
+    method public abstract boolean isPresent();
     field public static final int STATUS_CHARGING = 2; // 0x2
     field public static final int STATUS_DISCHARGING = 3; // 0x3
     field public static final int STATUS_FULL = 5; // 0x5
@@ -18964,20 +18972,25 @@ package android.hardware.lights {
     method public int getType();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.lights.Light> CREATOR;
-    field public static final int LIGHT_TYPE_INPUT_PLAYER_ID = 10; // 0xa
-    field public static final int LIGHT_TYPE_INPUT_RGB = 11; // 0xb
-    field public static final int LIGHT_TYPE_INPUT_SINGLE = 9; // 0x9
+    field public static final int LIGHT_TYPE_INPUT_PLAYER_ID = 10002; // 0x2712
+    field public static final int LIGHT_TYPE_INPUT_RGB = 10003; // 0x2713
+    field public static final int LIGHT_TYPE_INPUT_SINGLE = 10001; // 0x2711
     field public static final int LIGHT_TYPE_MICROPHONE = 8; // 0x8
   }
 
   public final class LightState implements android.os.Parcelable {
     method public int describeContents();
-    method @NonNull public static android.hardware.lights.LightState forColor(@ColorInt int);
-    method @NonNull public static android.hardware.lights.LightState forPlayerId(int);
     method @ColorInt public int getColor();
     method public int getPlayerId();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.lights.LightState> CREATOR;
+  }
+
+  public static final class LightState.Builder {
+    ctor public LightState.Builder();
+    method @NonNull public android.hardware.lights.LightState build();
+    method @NonNull public android.hardware.lights.LightState.Builder setColor(@ColorInt int);
+    method @NonNull public android.hardware.lights.LightState.Builder setPlayerId(int);
   }
 
   public abstract class LightsManager {
@@ -18987,7 +19000,6 @@ package android.hardware.lights {
   }
 
   public abstract static class LightsManager.LightsSession implements java.lang.AutoCloseable {
-    ctor public LightsManager.LightsSession();
     method public abstract void close();
     method public abstract void requestLights(@NonNull android.hardware.lights.LightsRequest);
   }
@@ -18995,6 +19007,7 @@ package android.hardware.lights {
   public final class LightsRequest {
     method @NonNull public java.util.List<android.hardware.lights.LightState> getLightStates();
     method @NonNull public java.util.List<java.lang.Integer> getLights();
+    method @NonNull public java.util.Map<java.lang.Integer,android.hardware.lights.LightState> getLightsAndStates();
   }
 
   public static final class LightsRequest.Builder {
@@ -19315,7 +19328,7 @@ package android.inputmethodservice {
     method public void appPrivateCommand(String, android.os.Bundle);
     method public void displayCompletions(android.view.inputmethod.CompletionInfo[]);
     method public void finishInput();
-    method public void toggleSoftInput(int, int);
+    method @Deprecated public void toggleSoftInput(int, int);
     method public void updateCursor(android.graphics.Rect);
     method public void updateCursorAnchorInfo(android.view.inputmethod.CursorAnchorInfo);
     method public void updateExtractedText(int, android.view.inputmethod.ExtractedText);
@@ -26456,7 +26469,6 @@ package android.net {
     method @Deprecated public static int getDefaultPort();
     method @Deprecated public static String getHost(android.content.Context);
     method @Deprecated public static int getPort(android.content.Context);
-    field @Deprecated public static final String EXTRA_PROXY_INFO = "android.intent.extra.PROXY_INFO";
     field public static final String PROXY_CHANGE_ACTION = "android.intent.action.PROXY_CHANGE";
   }
 
@@ -26540,9 +26552,6 @@ package android.net {
     method public static void untagFileDescriptor(java.io.FileDescriptor) throws java.io.IOException;
     method public static void untagSocket(java.net.Socket) throws java.net.SocketException;
     field public static final int UNSUPPORTED = -1; // 0xffffffff
-  }
-
-  public interface TunnelConnectionParams {
   }
 
   public abstract class Uri implements java.lang.Comparable<android.net.Uri> android.os.Parcelable {
@@ -27109,16 +27118,16 @@ package android.net.vcn {
     method @NonNull public int[] getExposedCapabilities();
     method @NonNull public String getGatewayConnectionName();
     method @IntRange(from=android.net.vcn.VcnGatewayConnectionConfig.MIN_MTU_V6) public int getMaxMtu();
-    method @NonNull public long[] getRetryIntervalsMs();
+    method @NonNull public long[] getRetryIntervalsMillis();
   }
 
   public static final class VcnGatewayConnectionConfig.Builder {
-    ctor public VcnGatewayConnectionConfig.Builder(@NonNull String, @NonNull android.net.TunnelConnectionParams);
+    ctor public VcnGatewayConnectionConfig.Builder(@NonNull String, @NonNull android.net.ipsec.ike.IkeTunnelConnectionParams);
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder addExposedCapability(int);
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig build();
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder removeExposedCapability(int);
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder setMaxMtu(@IntRange(from=android.net.vcn.VcnGatewayConnectionConfig.MIN_MTU_V6) int);
-    method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder setRetryIntervalsMs(@NonNull long[]);
+    method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder setRetryIntervalsMillis(@NonNull long[]);
   }
 
   public class VcnManager {
@@ -32940,6 +32949,7 @@ package android.print {
     field public static final android.print.PrintAttributes.MediaSize JPN_HAGAKI;
     field public static final android.print.PrintAttributes.MediaSize JPN_KAHU;
     field public static final android.print.PrintAttributes.MediaSize JPN_KAKU2;
+    field @NonNull public static final android.print.PrintAttributes.MediaSize JPN_OE_PHOTO_L;
     field public static final android.print.PrintAttributes.MediaSize JPN_OUFUKU;
     field public static final android.print.PrintAttributes.MediaSize JPN_YOU4;
     field @NonNull public static final android.print.PrintAttributes.MediaSize NA_ARCH_A;
@@ -32961,7 +32971,6 @@ package android.print {
     field public static final android.print.PrintAttributes.MediaSize NA_QUARTO;
     field @NonNull public static final android.print.PrintAttributes.MediaSize NA_SUPER_B;
     field public static final android.print.PrintAttributes.MediaSize NA_TABLOID;
-    field @NonNull public static final android.print.PrintAttributes.MediaSize OE_PHOTO_L;
     field public static final android.print.PrintAttributes.MediaSize OM_DAI_PA_KAI;
     field public static final android.print.PrintAttributes.MediaSize OM_JUURO_KU_KAI;
     field public static final android.print.PrintAttributes.MediaSize OM_PA_KAI;
@@ -41989,7 +41998,6 @@ package android.telephony {
     method @IntRange(from=1, to=261) public int getBand();
     method @IntRange(from=1) public int getCellBandwidthDownlinkKhz();
     method @IntRange(from=1) public int getCellBandwidthUplinkKhz();
-    method @Deprecated public int getChannelNumber();
     method public int getConnectionStatus();
     method @IntRange(from=0) public int getDownlinkChannelNumber();
     method @IntRange(from=0) public int getDownlinkFrequencyKhz();
@@ -46816,12 +46824,15 @@ package android.view {
     method public void onActionViewExpanded();
   }
 
-  public final class ContentInfo {
+  public final class ContentInfo implements android.os.Parcelable {
+    method public int describeContents();
     method @NonNull public android.content.ClipData getClip();
     method @Nullable public android.os.Bundle getExtras();
     method public int getFlags();
     method @Nullable public android.net.Uri getLinkUri();
     method public int getSource();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.view.ContentInfo> CREATOR;
     field public static final int FLAG_CONVERT_TO_PLAIN_TEXT = 1; // 0x1
     field public static final int SOURCE_APP = 0; // 0x0
     field public static final int SOURCE_AUTOFILL = 4; // 0x4
@@ -47130,7 +47141,7 @@ package android.view {
 
   public final class InputDevice implements android.os.Parcelable {
     method public int describeContents();
-    method @NonNull public android.hardware.Battery getBattery();
+    method @NonNull public android.hardware.BatteryState getBatteryState();
     method public int getControllerNumber();
     method public String getDescriptor();
     method public static android.view.InputDevice getDevice(int);
@@ -52000,8 +52011,8 @@ package android.view.inputmethod {
     method @Deprecated public void showStatusIcon(android.os.IBinder, String, @DrawableRes int);
     method @Deprecated public boolean switchToLastInputMethod(android.os.IBinder);
     method @Deprecated public boolean switchToNextInputMethod(android.os.IBinder, boolean);
-    method public void toggleSoftInput(int, int);
-    method public void toggleSoftInputFromWindow(android.os.IBinder, int, int);
+    method @Deprecated public void toggleSoftInput(int, int);
+    method @Deprecated public void toggleSoftInputFromWindow(android.os.IBinder, int, int);
     method @Deprecated public void updateCursor(android.view.View, int, int, int, int);
     method public void updateCursorAnchorInfo(android.view.View, android.view.inputmethod.CursorAnchorInfo);
     method public void updateExtractedText(android.view.View, int, android.view.inputmethod.ExtractedText);
@@ -52024,7 +52035,7 @@ package android.view.inputmethod {
     method public void dispatchTrackballEvent(int, android.view.MotionEvent, android.view.inputmethod.InputMethodSession.EventCallback);
     method public void displayCompletions(android.view.inputmethod.CompletionInfo[]);
     method public void finishInput();
-    method public void toggleSoftInput(int, int);
+    method @Deprecated public void toggleSoftInput(int, int);
     method public void updateCursor(android.graphics.Rect);
     method public void updateCursorAnchorInfo(android.view.inputmethod.CursorAnchorInfo);
     method public void updateExtractedText(int, android.view.inputmethod.ExtractedText);
@@ -52839,7 +52850,8 @@ package android.view.translation {
     method public void addOnDeviceTranslationCapabilityUpdateListener(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.view.translation.TranslationCapability>);
     method @Deprecated public void addOnDeviceTranslationCapabilityUpdateListener(int, int, @NonNull android.app.PendingIntent);
     method @Deprecated public void addTranslationCapabilityUpdateListener(int, int, @NonNull android.app.PendingIntent);
-    method @Nullable @WorkerThread public android.view.translation.Translator createOnDeviceTranslator(@NonNull android.view.translation.TranslationContext);
+    method public void createOnDeviceTranslator(@NonNull android.view.translation.TranslationContext, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.view.translation.Translator>);
+    method @Deprecated @Nullable @WorkerThread public android.view.translation.Translator createOnDeviceTranslator(@NonNull android.view.translation.TranslationContext);
     method @Deprecated @Nullable @WorkerThread public android.view.translation.Translator createTranslator(@NonNull android.view.translation.TranslationContext);
     method @NonNull @WorkerThread public java.util.Set<android.view.translation.TranslationCapability> getOnDeviceTranslationCapabilities(int, int);
     method @Nullable public android.app.PendingIntent getOnDeviceTranslationSettingsActivityIntent();
@@ -52952,6 +52964,7 @@ package android.view.translation {
   public interface UiTranslationStateCallback {
     method public void onFinished();
     method public void onPaused();
+    method public default void onResumed(@NonNull android.icu.util.ULocale, @NonNull android.icu.util.ULocale);
     method @Deprecated public void onStarted(@NonNull String, @NonNull String);
     method public default void onStarted(@NonNull android.icu.util.ULocale, @NonNull android.icu.util.ULocale);
   }
@@ -53786,7 +53799,6 @@ package android.widget {
     method public int getCheckedItemPosition();
     method public android.util.SparseBooleanArray getCheckedItemPositions();
     method public int getChoiceMode();
-    method public int getEdgeEffectType();
     method public int getListPaddingBottom();
     method public int getListPaddingLeft();
     method public int getListPaddingRight();
@@ -53828,7 +53840,6 @@ package android.widget {
     method public void setChoiceMode(int);
     method public void setDrawSelectorOnTop(boolean);
     method public void setEdgeEffectColor(@ColorInt int);
-    method public void setEdgeEffectType(int);
     method public void setFastScrollAlwaysVisible(boolean);
     method public void setFastScrollEnabled(boolean);
     method public void setFastScrollStyle(int);
@@ -54519,7 +54530,6 @@ package android.widget {
     method @ColorInt public int getColor();
     method public float getDistance();
     method public int getMaxHeight();
-    method public int getType();
     method public boolean isFinished();
     method public void onAbsorb(int);
     method public void onPull(float);
@@ -54529,10 +54539,7 @@ package android.widget {
     method public void setBlendMode(@Nullable android.graphics.BlendMode);
     method public void setColor(@ColorInt int);
     method public void setSize(int, int);
-    method public void setType(int);
     field public static final android.graphics.BlendMode DEFAULT_BLEND_MODE;
-    field public static final int TYPE_GLOW = 0; // 0x0
-    field public static final int TYPE_STRETCH = 1; // 0x1
   }
 
   public class EditText extends android.widget.TextView {
@@ -54837,7 +54844,6 @@ package android.widget {
     method public boolean executeKeyEvent(android.view.KeyEvent);
     method public void fling(int);
     method public boolean fullScroll(int);
-    method public int getEdgeEffectType();
     method @ColorInt public int getLeftEdgeEffectColor();
     method public int getMaxScrollAmount();
     method @ColorInt public int getRightEdgeEffectColor();
@@ -54845,7 +54851,6 @@ package android.widget {
     method public boolean isSmoothScrollingEnabled();
     method public boolean pageScroll(int);
     method public void setEdgeEffectColor(@ColorInt int);
-    method public void setEdgeEffectType(int);
     method public void setFillViewport(boolean);
     method public void setLeftEdgeEffectColor(@ColorInt int);
     method public void setRightEdgeEffectColor(@ColorInt int);
@@ -55731,7 +55736,6 @@ package android.widget {
     method public void fling(int);
     method public boolean fullScroll(int);
     method @ColorInt public int getBottomEdgeEffectColor();
-    method public int getEdgeEffectType();
     method public int getMaxScrollAmount();
     method @ColorInt public int getTopEdgeEffectColor();
     method public boolean isFillViewport();
@@ -55740,7 +55744,6 @@ package android.widget {
     method public void scrollToDescendant(@NonNull android.view.View);
     method public void setBottomEdgeEffectColor(@ColorInt int);
     method public void setEdgeEffectColor(@ColorInt int);
-    method public void setEdgeEffectType(int);
     method public void setFillViewport(boolean);
     method public void setSmoothScrollingEnabled(boolean);
     method public void setTopEdgeEffectColor(@ColorInt int);

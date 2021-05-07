@@ -25,8 +25,10 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.hardware.biometrics.BiometricManager;
+import android.hardware.biometrics.ComponentInfoInternal;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
+import android.hardware.fingerprint.FingerprintSensorProperties;
+import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.UserManager;
@@ -46,6 +48,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Presubmit
 @SmallTest
@@ -83,10 +86,18 @@ public class Fingerprint21Test {
                 .thenReturn(5);
 
         mLockoutResetDispatcher = new LockoutResetDispatcher(mContext);
-        mFingerprint21 = new TestableFingerprint21(mContext, mScheduler,
-                new Handler(Looper.getMainLooper()), SENSOR_ID,
-                BiometricManager.Authenticators.BIOMETRIC_WEAK, mLockoutResetDispatcher,
-                mHalResultController);
+
+        final int maxEnrollmentsPerUser = 1;
+        final List<ComponentInfoInternal> componentInfo = new ArrayList<>();
+        final boolean resetLockoutRequiresHardwareAuthToken = false;
+        final FingerprintSensorPropertiesInternal sensorProps =
+                new FingerprintSensorPropertiesInternal(SENSOR_ID,
+                        FingerprintSensorProperties.STRENGTH_WEAK, maxEnrollmentsPerUser,
+                        componentInfo, FingerprintSensorProperties.TYPE_UNKNOWN,
+                        resetLockoutRequiresHardwareAuthToken);
+
+        mFingerprint21 = new TestableFingerprint21(mContext, sensorProps, mScheduler,
+                new Handler(Looper.getMainLooper()), mLockoutResetDispatcher, mHalResultController);
     }
 
     @Test
@@ -107,12 +118,11 @@ public class Fingerprint21Test {
     private static class TestableFingerprint21 extends Fingerprint21 {
 
         TestableFingerprint21(@NonNull Context context,
-                @NonNull BiometricScheduler scheduler,
-                @NonNull Handler handler, int sensorId, int strength,
+                @NonNull FingerprintSensorPropertiesInternal sensorProps,
+                @NonNull BiometricScheduler scheduler, @NonNull Handler handler,
                 @NonNull LockoutResetDispatcher lockoutResetDispatcher,
                 @NonNull HalResultController controller) {
-            super(context, scheduler, handler, sensorId, strength, lockoutResetDispatcher,
-                    controller);
+            super(context, sensorProps, scheduler, handler, lockoutResetDispatcher, controller);
         }
 
         @Override

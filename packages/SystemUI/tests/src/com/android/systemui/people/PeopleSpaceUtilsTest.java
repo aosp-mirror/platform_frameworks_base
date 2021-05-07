@@ -17,14 +17,12 @@
 package com.android.systemui.people;
 
 import static com.android.systemui.people.PeopleSpaceUtils.PACKAGE_NAME;
-import static com.android.systemui.people.widget.AppWidgetOptionsHelper.OPTIONS_PEOPLE_TILE;
 
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -59,6 +57,7 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.appwidget.IAppWidgetService;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.people.widget.PeopleSpaceWidgetManager;
 import com.android.systemui.people.widget.PeopleTileKey;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -73,6 +72,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RunWith(AndroidTestingRunner.class)
 @SmallTest
@@ -188,6 +188,8 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
     private PackageManager mPackageManager;
     @Mock
     private NotificationEntryManager mNotificationEntryManager;
+    @Mock
+    private PeopleSpaceWidgetManager mPeopleSpaceWidgetManager;
 
     private Bundle mOptions;
 
@@ -197,7 +199,6 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
 
         int[] widgetIdsArray = {WIDGET_ID_WITH_SHORTCUT, WIDGET_ID_WITHOUT_SHORTCUT};
         mOptions = new Bundle();
-        mOptions.putParcelable(OPTIONS_PEOPLE_TILE, PERSON_TILE);
 
         when(mIAppWidgetService.getAppWidgetIds(any())).thenReturn(widgetIdsArray);
         when(mAppWidgetManager.getAppWidgetOptions(eq(WIDGET_ID_WITH_SHORTCUT)))
@@ -212,8 +213,8 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
         when(resources.getConfiguration()).thenReturn(configuration);
         when(resources.getDisplayMetrics()).thenReturn(displayMetrics);
         when(mMockContext.getContentResolver()).thenReturn(mMockContentResolver);
-        when(mMockContentResolver.query(any(Uri.class), any(), anyString(), any(),
-                isNull())).thenReturn(mMockCursor);
+        when(mMockContentResolver.query(any(Uri.class), any(), any(), any(),
+                any())).thenReturn(mMockCursor);
         when(mMockContext.getString(R.string.birthday_status)).thenReturn(
                 mContext.getString(R.string.birthday_status));
         when(mMockContext.getString(R.string.basic_status)).thenReturn(
@@ -236,7 +237,8 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
                         .build();
         PeopleTileKey key = new PeopleTileKey(tile);
         PeopleSpaceTile actual = PeopleSpaceUtils
-                .augmentTileFromNotification(mContext, tile, key, mNotificationEntry1, 0);
+                .augmentTileFromNotification(mContext, tile, key, mNotificationEntry1, 0,
+                        Optional.empty());
 
         assertThat(actual.getNotificationContent().toString()).isEqualTo(NOTIFICATION_TEXT_2);
         assertThat(actual.getNotificationSender()).isEqualTo(null);
@@ -275,7 +277,8 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
                         .build();
         PeopleTileKey key = new PeopleTileKey(tile);
         PeopleSpaceTile actual = PeopleSpaceUtils
-                .augmentTileFromNotification(mContext, tile, key, notificationEntry, 0);
+                .augmentTileFromNotification(mContext, tile, key, notificationEntry, 0,
+                        Optional.empty());
 
         assertThat(actual.getNotificationContent().toString()).isEqualTo(NOTIFICATION_TEXT_2);
         assertThat(actual.getNotificationSender().toString()).isEqualTo("name");
@@ -291,7 +294,8 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
                         .build();
         PeopleTileKey key = new PeopleTileKey(tile);
         PeopleSpaceTile actual = PeopleSpaceUtils
-                .augmentTileFromNotification(mContext, tile, key, mNotificationEntry3, 0);
+                .augmentTileFromNotification(mContext, tile, key, mNotificationEntry3, 0,
+                        Optional.empty());
 
         assertThat(actual.getNotificationContent()).isEqualTo(null);
     }
@@ -308,10 +312,11 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
         Map<Integer, PeopleSpaceTile> widgetIdToTile = Map.of(WIDGET_ID_WITH_SHORTCUT,
                 new PeopleSpaceTile.Builder(mShortcutInfoWithoutPerson,
                         mContext.getSystemService(LauncherApps.class)).build());
-        PeopleSpaceUtils.getBirthdays(mMockContext, mAppWidgetManager,
+        PeopleSpaceUtils.getDataFromContacts(mMockContext, mPeopleSpaceWidgetManager,
                 widgetIdToTile, widgetIdsArray);
 
-        verify(mAppWidgetManager, never()).updateAppWidget(eq(WIDGET_ID_WITH_SHORTCUT),
+        verify(mPeopleSpaceWidgetManager, never()).updateAppWidgetOptionsAndView(
+                eq(WIDGET_ID_WITH_SHORTCUT),
                 any());
     }
 
@@ -328,10 +333,11 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
                 new PeopleSpaceTile.Builder(mShortcutInfoWithoutPerson,
                         mContext.getSystemService(LauncherApps.class)).setBirthdayText(
                         mContext.getString(R.string.birthday_status)).build());
-        PeopleSpaceUtils.getBirthdays(mMockContext, mAppWidgetManager,
+        PeopleSpaceUtils.getDataFromContacts(mMockContext, mPeopleSpaceWidgetManager,
                 widgetIdToTile, widgetIdsArray);
 
-        verify(mAppWidgetManager, times(1)).updateAppWidget(eq(WIDGET_ID_WITH_SHORTCUT),
+        verify(mPeopleSpaceWidgetManager, times(1)).updateAppWidgetOptionsAndView(
+                eq(WIDGET_ID_WITH_SHORTCUT),
                 any());
     }
 
@@ -363,10 +369,11 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
                 new PeopleSpaceTile.Builder(mShortcutInfo,
                         mContext.getSystemService(LauncherApps.class)).setBirthdayText(
                         mContext.getString(R.string.birthday_status)).build());
-        PeopleSpaceUtils.getBirthdays(mMockContext, mAppWidgetManager,
+        PeopleSpaceUtils.getDataFromContacts(mMockContext, mPeopleSpaceWidgetManager,
                 widgetIdToTile, widgetIdsArray);
 
-        verify(mAppWidgetManager, times(1)).updateAppWidget(eq(WIDGET_ID_WITH_SHORTCUT),
+        verify(mPeopleSpaceWidgetManager, times(1)).updateAppWidgetOptionsAndView(
+                eq(WIDGET_ID_WITH_SHORTCUT),
                 any());
     }
 
@@ -375,6 +382,9 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
         int[] widgetIdsArray = {WIDGET_ID_WITH_SHORTCUT};
         when(mMockCursor.moveToNext()).thenReturn(true, false, true, false);
         when(mMockCursor.getString(eq(TEST_COLUMN_INDEX))).thenReturn(TEST_LOOKUP_KEY);
+        when(mMockCursor.getInt(eq(TEST_COLUMN_INDEX + 1))).thenReturn(1);
+        when(mMockCursor.getColumnIndex(eq(ContactsContract.Contacts.STARRED))).thenReturn(
+                TEST_COLUMN_INDEX + 1);
         when(mMockCursor.getColumnIndex(eq(ContactsContract.CommonDataKinds.Event.LOOKUP_KEY)
         )).thenReturn(TEST_COLUMN_INDEX);
 
@@ -383,10 +393,11 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
                 new PeopleSpaceTile.Builder(mShortcutInfo,
                         mContext.getSystemService(LauncherApps.class)).setBirthdayText(
                         mContext.getString(R.string.birthday_status)).build());
-        PeopleSpaceUtils.getBirthdays(mMockContext, mAppWidgetManager,
+        PeopleSpaceUtils.getDataFromContacts(mMockContext, mPeopleSpaceWidgetManager,
                 widgetIdToTile, widgetIdsArray);
 
-        verify(mAppWidgetManager, times(1)).updateAppWidget(eq(WIDGET_ID_WITH_SHORTCUT),
+        verify(mPeopleSpaceWidgetManager, times(1)).updateAppWidgetOptionsAndView(
+                eq(WIDGET_ID_WITH_SHORTCUT),
                 any());
     }
 }

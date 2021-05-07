@@ -37,8 +37,8 @@ class FingerprintGenerateChallengeClient extends GenerateChallengeClient<ISessio
             @NonNull LazyDaemon<ISession> lazyDaemon,
             @NonNull IBinder token,
             @NonNull ClientMonitorCallbackConverter listener,
-            @NonNull String owner, int sensorId) {
-        super(context, lazyDaemon, token, listener, owner, sensorId);
+            int userId, @NonNull String owner, int sensorId) {
+        super(context, lazyDaemon, token, listener, userId, owner, sensorId);
     }
 
     @Override
@@ -47,18 +47,17 @@ class FingerprintGenerateChallengeClient extends GenerateChallengeClient<ISessio
             getFreshDaemon().generateChallenge();
         } catch (RemoteException e) {
             Slog.e(TAG, "Unable to generateChallenge", e);
+            mCallback.onClientFinished(this, false /* success */);
         }
     }
 
     void onChallengeGenerated(int sensorId, int userId, long challenge) {
         try {
             getListener().onChallengeGenerated(sensorId, challenge);
-            mCallback.onClientFinished(FingerprintGenerateChallengeClient.this,
-                    true /* success */);
+            mCallback.onClientFinished(this, true /* success */);
         } catch (RemoteException e) {
             Slog.e(TAG, "Unable to send challenge", e);
-            mCallback.onClientFinished(FingerprintGenerateChallengeClient.this,
-                    false /* success */);
+            mCallback.onClientFinished(this, false /* success */);
         }
     }
 }

@@ -55,6 +55,11 @@ public class ProxyTracker {
     private static final String TAG = ProxyTracker.class.getSimpleName();
     private static final boolean DBG = true;
 
+    // EXTRA_PROXY_INFO is now @removed. In order to continue sending it, hardcode its value here.
+    // The Proxy.EXTRA_PROXY_INFO constant is not visible to this code because android.net.Proxy
+    // a hidden platform constant not visible to mainline modules.
+    private static final String EXTRA_PROXY_INFO = "android.intent.extra.PROXY_INFO";
+
     @NonNull
     private final Context mContext;
 
@@ -253,7 +258,7 @@ public class ProxyTracker {
         Intent intent = new Intent(Proxy.PROXY_CHANGE_ACTION);
         intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING |
                 Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
-        intent.putExtra(Proxy.EXTRA_PROXY_INFO, proxyInfo);
+        intent.putExtra(EXTRA_PROXY_INFO, proxyInfo);
         final long ident = Binder.clearCallingIdentity();
         try {
             mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);

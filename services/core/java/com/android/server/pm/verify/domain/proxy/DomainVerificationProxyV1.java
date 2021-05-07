@@ -298,6 +298,12 @@ public class DomainVerificationProxyV1 implements DomainVerificationProxy {
         return builder.toString();
     }
 
+    @NonNull
+    @Override
+    public ComponentName getComponentName() {
+        return mVerifierComponent;
+    }
+
     private static class Response {
         public final int callingUid;
         public final int verificationId;

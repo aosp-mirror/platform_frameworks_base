@@ -116,6 +116,12 @@ class PrivacyLogger @Inject constructor(
         })
     }
 
+    fun logEmptyDialog() {
+        log(LogLevel.WARNING, {}, {
+            "Trying to show an empty dialog"
+        })
+    }
+
     fun logPrivacyDialogDismissed() {
         log(LogLevel.INFO, {}, {
             "Privacy dialog dismissed"

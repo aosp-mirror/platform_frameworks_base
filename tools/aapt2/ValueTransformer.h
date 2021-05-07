@@ -37,6 +37,7 @@ struct Style;
 struct Array;
 struct Plural;
 struct Styleable;
+struct Macro;
 
 #define AAPT_TRANSFORM_VALUE(T)                                    \
   virtual std::unique_ptr<T> TransformDerived(const T* value) = 0; \
@@ -97,6 +98,7 @@ struct ValueTransformer {
   AAPT_TRANSFORM_VALUE(Array);
   AAPT_TRANSFORM_VALUE(Plural);
   AAPT_TRANSFORM_VALUE(Styleable);
+  AAPT_TRANSFORM_VALUE(Macro);
 
  protected:
   StringPool* const pool_;

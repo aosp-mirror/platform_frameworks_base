@@ -42,6 +42,7 @@ import com.android.internal.util.function.TriConsumer;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.settingslib.Utils;
+import com.android.systemui.animation.Interpolators;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
@@ -49,7 +50,6 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.scrim.ScrimView;
-import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.notification.stack.ViewState;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -164,7 +164,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     private final float mDefaultScrimAlpha;
 
     // Assuming the shade is expanded during initialization
-    private float mExpansionFraction = 1f;
+    private float mPanelExpansion = 1f;
     private float mQsExpansion;
     private boolean mQsBottomVisible;
 
@@ -211,10 +211,9 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
             AlarmManager alarmManager, KeyguardStateController keyguardStateController,
             DelayedWakeLock.Builder delayedWakeLockBuilder, Handler handler,
             KeyguardUpdateMonitor keyguardUpdateMonitor, DockManager dockManager,
-            ConfigurationController configurationController,
-            FeatureFlags featureFlags, @Main Executor mainExecutor) {
+            ConfigurationController configurationController, @Main Executor mainExecutor) {
         mScrimStateListener = lightBarController::setScrimState;
-        mDefaultScrimAlpha = featureFlags.isShadeOpaque() ? BUSY_SCRIM_ALPHA : GAR_SCRIM_ALPHA;
+        mDefaultScrimAlpha = BUSY_SCRIM_ALPHA;
         ScrimState.BUBBLE_EXPANDED.setBubbleAlpha(BUBBLE_SCRIM_ALPHA);
 
         mKeyguardStateController = keyguardStateController;
@@ -269,7 +268,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         updateThemeColors();
 
         behindScrim.enableBottomEdgeConcave(mClipsQsScrim);
-        mNotificationsScrim.enableRoundedCorners();
+        mNotificationsScrim.enableRoundedCorners(true);
 
         if (mScrimBehindChangeRunnable != null) {
             mScrimBehind.setChangeRunnable(mScrimBehindChangeRunnable, mMainExecutor);
@@ -292,6 +291,17 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         }
         updateScrims();
         mKeyguardUpdateMonitor.registerCallback(mKeyguardVisibilityCallback);
+    }
+
+    /**
+     * Sets corner radius of scrims.
+     */
+    public void setScrimCornerRadius(int radius) {
+        if (mScrimBehind == null || mNotificationsScrim == null) {
+            return;
+        }
+        mScrimBehind.setCornerRadius(radius);
+        mNotificationsScrim.setCornerRadius(radius);
     }
 
     void setScrimVisibleListener(Consumer<Integer> listener) {
@@ -478,8 +488,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         if (isNaN(fraction)) {
             throw new IllegalArgumentException("Fraction should not be NaN");
         }
-        if (mExpansionFraction != fraction) {
-            mExpansionFraction = fraction;
+        if (mPanelExpansion != fraction) {
+            mPanelExpansion = fraction;
 
             boolean relevantState = (mState == ScrimState.UNLOCKED
                     || mState == ScrimState.KEYGUARD
@@ -632,7 +642,12 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
                 mBehindTint = Color.BLACK;
             } else {
                 mBehindAlpha = backAlpha;
-                mNotificationsAlpha = Math.max(1.0f - getInterpolatedFraction(), mQsExpansion);
+                if (mState == ScrimState.SHADE_LOCKED) {
+                    // going from KEYGUARD to SHADE_LOCKED state
+                    mNotificationsAlpha = getInterpolatedFraction();
+                } else {
+                    mNotificationsAlpha = Math.max(1.0f - getInterpolatedFraction(), mQsExpansion);
+                }
                 mBehindTint = backTint;
             }
         }
@@ -796,15 +811,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     }
 
     private float getInterpolatedFraction() {
-        float frac = mExpansionFraction;
-        // let's start this 20% of the way down the screen
-        frac = frac * 1.2f - 0.2f;
-        if (frac <= 0) {
-            return 0;
-        } else {
-            // woo, special effects
-            return (float) (1f - 0.5f * (1f - Math.cos(3.14159f * Math.pow(1f - frac, 2f))));
-        }
+        return Interpolators.getNotificationScrimAlpha(mPanelExpansion);
     }
 
     private void setScrimAlpha(ScrimView scrim, float alpha) {
@@ -1156,7 +1163,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         pw.print("  mDefaultScrimAlpha=");
         pw.println(mDefaultScrimAlpha);
         pw.print("  mExpansionFraction=");
-        pw.println(mExpansionFraction);
+        pw.println(mPanelExpansion);
     }
 
     public void setWallpaperSupportsAmbientMode(boolean wallpaperSupportsAmbientMode) {

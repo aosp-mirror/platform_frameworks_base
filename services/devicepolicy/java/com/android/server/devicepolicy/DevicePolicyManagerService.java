@@ -63,7 +63,7 @@ import static android.app.admin.DevicePolicyManager.LEAVE_ALL_SYSTEM_APPS_ENABLE
 import static android.app.admin.DevicePolicyManager.LOCK_TASK_FEATURE_HOME;
 import static android.app.admin.DevicePolicyManager.LOCK_TASK_FEATURE_NOTIFICATIONS;
 import static android.app.admin.DevicePolicyManager.LOCK_TASK_FEATURE_OVERVIEW;
-import static android.app.admin.DevicePolicyManager.NEARBY_STREAMING_DISABLED;
+import static android.app.admin.DevicePolicyManager.NEARBY_STREAMING_NOT_CONTROLLED_BY_POLICY;
 import static android.app.admin.DevicePolicyManager.NON_ORG_OWNED_PROFILE_KEYGUARD_FEATURES_AFFECT_OWNER;
 import static android.app.admin.DevicePolicyManager.OPERATION_SAFETY_REASON_NONE;
 import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_HIGH;
@@ -108,7 +108,6 @@ import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
 import static android.net.ConnectivityManager.PROFILE_NETWORK_PREFERENCE_DEFAULT;
 import static android.net.ConnectivityManager.PROFILE_NETWORK_PREFERENCE_ENTERPRISE;
 import static android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK;
-import static android.provider.Settings.Global.PRIVATE_DNS_MODE;
 import static android.provider.Settings.Global.PRIVATE_DNS_SPECIFIER;
 import static android.provider.Settings.Secure.USER_SETUP_COMPLETE;
 import static android.provider.Telephony.Carriers.DPC_URI;
@@ -227,6 +226,7 @@ import android.location.LocationManager;
 import android.media.AudioManager;
 import android.media.IAudioService;
 import android.net.ConnectivityManager;
+import android.net.ConnectivitySettingsManager;
 import android.net.IIpConnectivityMetrics;
 import android.net.ProxyInfo;
 import android.net.Uri;
@@ -745,6 +745,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Slogf.wtfStack(LOG_TAG, "Not holding DPMS lock.");
     }
 
+    /**
+     * Calls wtfStack() if called with the DPMS lock held.
+     */
+    private void wtfIfInLock() {
+        if (Thread.holdsLock(mLockDoNoUseDirectly)) {
+            Slogf.wtfStack(LOG_TAG, "Shouldn't be called with DPMS lock held");
+        }
+    }
+
     @VisibleForTesting
     final TransferOwnershipMetadataManager mTransferOwnershipMetadataManager;
 
@@ -874,6 +883,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 synchronized (getLockObject()) {
                     // Check whether the user is affiliated, *before* removing its data.
                     boolean isRemovedUserAffiliated = isUserAffiliatedWithDeviceLocked(userHandle);
+                    if (isProfileOwnerOfOrganizationOwnedDevice(userHandle)) {
+                        // Disable network and security logging
+                        mInjector.securityLogSetLoggingEnabledProperty(false);
+                        mSecurityLogMonitor.stop();
+                        setNetworkLoggingActiveInternal(false);
+                    }
                     removeUserData(userHandle);
                     if (!isRemovedUserAffiliated) {
                         // We discard the logs when unaffiliated users are deleted (so that the
@@ -7229,6 +7244,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Objects.requireNonNull(who, "ComponentName is null");
         final CallerIdentity caller = getCallerIdentity(who);
         Preconditions.checkCallAuthorization(isDeviceOwner(caller));
+        checkAllUsersAreAffiliatedWithDevice();
         mInjector.binderWithCleanCallingIdentity(
                 () -> mInjector.getConnectivityManager().setGlobalProxy(proxyInfo));
     }
@@ -7533,21 +7549,25 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public int getNearbyNotificationStreamingPolicy() {
+    public int getNearbyNotificationStreamingPolicy(final int userId) {
         if (!mHasFeature) {
-            return NEARBY_STREAMING_DISABLED;
+            return NEARBY_STREAMING_NOT_CONTROLLED_BY_POLICY;
         }
 
         final CallerIdentity caller = getCallerIdentity();
         Preconditions.checkCallAuthorization(
-                isDeviceOwner(caller)
-                    || isProfileOwner(caller)
-                    || hasCallingOrSelfPermission(permission.READ_NEARBY_STREAMING_POLICY));
+                isProfileOwner(caller)
+                        || isDeviceOwner(caller)
+                        || hasCallingOrSelfPermission(permission.READ_NEARBY_STREAMING_POLICY));
 
         synchronized (getLockObject()) {
-            final ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(caller);
-            return admin.mNearbyNotificationStreamingPolicy;
+            if (mOwners.hasProfileOwner(userId) || mOwners.hasDeviceOwner()) {
+                final ActiveAdmin admin = getDeviceOrProfileOwnerAdminLocked(userId);
+                return admin.mNearbyNotificationStreamingPolicy;
+            }
         }
+
+        return NEARBY_STREAMING_NOT_CONTROLLED_BY_POLICY;
     }
 
     @Override
@@ -7569,21 +7589,25 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public int getNearbyAppStreamingPolicy() {
+    public int getNearbyAppStreamingPolicy(final int userId) {
         if (!mHasFeature) {
-            return NEARBY_STREAMING_DISABLED;
+            return NEARBY_STREAMING_NOT_CONTROLLED_BY_POLICY;
         }
 
         final CallerIdentity caller = getCallerIdentity();
         Preconditions.checkCallAuthorization(
-                isDeviceOwner(caller)
-                    || isProfileOwner(caller)
-                    || hasCallingOrSelfPermission(permission.READ_NEARBY_STREAMING_POLICY));
+                isProfileOwner(caller)
+                        || isDeviceOwner(caller)
+                        || hasCallingOrSelfPermission(permission.READ_NEARBY_STREAMING_POLICY));
 
         synchronized (getLockObject()) {
-            final ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(caller);
-            return admin.mNearbyAppStreamingPolicy;
+            if (mOwners.hasProfileOwner(userId) || mOwners.hasDeviceOwner()) {
+                final ActiveAdmin admin = getDeviceOrProfileOwnerAdminLocked(userId);
+                return admin.mNearbyAppStreamingPolicy;
+            }
         }
+
+        return NEARBY_STREAMING_NOT_CONTROLLED_BY_POLICY;
     }
 
     /**
@@ -8138,8 +8162,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Preconditions.checkArgument(admin != null);
 
         final CallerIdentity caller = getCallerIdentity();
+        // Cannot be called while holding the lock:
+        final boolean hasIncompatibleAccountsOrNonAdb =
+                hasIncompatibleAccountsOrNonAdbNoLock(caller, userId, admin);
         synchronized (getLockObject()) {
-            enforceCanSetDeviceOwnerLocked(caller, admin, userId);
+            enforceCanSetDeviceOwnerLocked(caller, admin, userId, hasIncompatibleAccountsOrNonAdb);
             Preconditions.checkArgument(isPackageInstalledForUser(admin.getPackageName(), userId),
                     "Invalid component " + admin + " for device owner");
             final ActiveAdmin activeAdmin = getActiveAdminUncheckedLocked(admin, userId);
@@ -8534,13 +8561,18 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Preconditions.checkArgument(who != null);
 
         final CallerIdentity caller = getCallerIdentity();
+        // Cannot be called while holding the lock:
+        final boolean hasIncompatibleAccountsOrNonAdb =
+                hasIncompatibleAccountsOrNonAdbNoLock(caller, userHandle, who);
         synchronized (getLockObject()) {
-            enforceCanSetProfileOwnerLocked(caller, who, userHandle);
-            Preconditions.checkArgument(isPackageInstalledForUser(who.getPackageName(), userHandle),
-                    "Component " + who + " not installed for userId:" + userHandle);
+            enforceCanSetProfileOwnerLocked(
+                    caller, who, userHandle, hasIncompatibleAccountsOrNonAdb);
             final ActiveAdmin admin = getActiveAdminUncheckedLocked(who, userHandle);
-            Preconditions.checkArgument(admin != null && !getUserData(
-                    userHandle).mRemovingAdmins.contains(who), "Not active admin: " + who);
+            Preconditions.checkArgument(
+                    isPackageInstalledForUser(who.getPackageName(), userHandle)
+                            && admin != null
+                            && !getUserData(userHandle).mRemovingAdmins.contains(who),
+                    "Not active admin: " + who);
 
             final int parentUserId = getProfileParentId(userHandle);
             // When trying to set a profile owner on a new user, it may be that this user is
@@ -8880,17 +8912,17 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public ComponentName getProfileOwnerAsUser(int userHandle) {
+    public ComponentName getProfileOwnerAsUser(int userId) {
         if (!mHasFeature) {
             return null;
         }
-        Preconditions.checkArgumentNonnegative(userHandle, "Invalid userId");
+        Preconditions.checkArgumentNonnegative(userId, "Invalid userId");
 
-        final CallerIdentity caller = getCallerIdentity();
-        Preconditions.checkCallAuthorization(hasCrossUsersPermission(caller, userHandle));
+        CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(hasCrossUsersPermission(caller, userId));
 
         synchronized (getLockObject()) {
-            return mOwners.getProfileOwnerComponent(userHandle);
+            return mOwners.getProfileOwnerComponent(userId);
         }
     }
 
@@ -9114,15 +9146,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     /**
-     * Calls wtfStack() if called with the DPMS lock held.
-     */
-    private void wtfIfInLock() {
-        if (Thread.holdsLock(this)) {
-            Slogf.wtfStack(LOG_TAG, "Shouldn't be called with DPMS lock held");
-        }
-    }
-
-    /**
      * The profile owner can only be set by adb or an app with the MANAGE_PROFILE_AND_DEVICE_OWNERS
      * permission.
      * The profile owner can only be set before the user setup phase has completed,
@@ -9130,8 +9153,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      * - SYSTEM_UID
      * - adb unless hasIncompatibleAccountsOrNonAdb is true.
      */
-    private void enforceCanSetProfileOwnerLocked(CallerIdentity caller,
-            @Nullable ComponentName owner, int userHandle) {
+    private void enforceCanSetProfileOwnerLocked(
+            CallerIdentity caller, @Nullable ComponentName owner, int userHandle,
+            boolean hasIncompatibleAccountsOrNonAdb) {
         UserInfo info = getUserInfo(userHandle);
         if (info == null) {
             // User doesn't exist.
@@ -9151,7 +9175,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         if (isAdb(caller)) {
             if ((mIsWatch || hasUserSetupCompleted(userHandle))
-                    && hasIncompatibleAccountsOrNonAdbNoLock(caller, userHandle, owner)) {
+                    && hasIncompatibleAccountsOrNonAdb) {
                 throw new IllegalStateException("Not allowed to set the profile owner because "
                         + "there are already some accounts on the profile");
             }
@@ -9188,8 +9212,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      * The Device owner can only be set by adb or an app with the MANAGE_PROFILE_AND_DEVICE_OWNERS
      * permission.
      */
-    private void enforceCanSetDeviceOwnerLocked(CallerIdentity caller,
-            @Nullable ComponentName owner, @UserIdInt int deviceOwnerUserId) {
+    private void enforceCanSetDeviceOwnerLocked(
+            CallerIdentity caller, @Nullable ComponentName owner, @UserIdInt int deviceOwnerUserId,
+            boolean hasIncompatibleAccountsOrNonAdb) {
         if (!isAdb(caller)) {
             Preconditions.checkCallAuthorization(
                     hasCallingOrSelfPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS));
@@ -9197,8 +9222,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         final int code = checkDeviceOwnerProvisioningPreConditionLocked(owner,
                 /* deviceOwnerUserId= */ deviceOwnerUserId, /* callingUserId*/ caller.getUserId(),
-                isAdb(caller),
-                hasIncompatibleAccountsOrNonAdbNoLock(caller, deviceOwnerUserId, owner));
+                isAdb(caller), hasIncompatibleAccountsOrNonAdb);
         if (code != CODE_OK) {
             throw new IllegalStateException(
                     computeProvisioningErrorString(code, deviceOwnerUserId));
@@ -9342,19 +9366,20 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     public List<UserHandle> listForegroundAffiliatedUsers() {
         checkIsDeviceOwner(getCallerIdentity());
 
-        int userId = mInjector.binderWithCleanCallingIdentity(() -> getCurrentForegroundUserId());
+        return mInjector.binderWithCleanCallingIdentity(() -> {
+            int userId = getCurrentForegroundUserId();
+            boolean isAffiliated;
+            synchronized (getLockObject()) {
+                isAffiliated = isUserAffiliatedWithDeviceLocked(userId);
+            }
 
-        boolean isAffiliated;
-        synchronized (getLockObject()) {
-            isAffiliated = isUserAffiliatedWithDeviceLocked(userId);
-        }
+            if (!isAffiliated) return Collections.emptyList();
 
-        if (!isAffiliated) return Collections.emptyList();
+            List<UserHandle> users = new ArrayList<>(1);
+            users.add(UserHandle.of(userId));
 
-        List<UserHandle> users = new ArrayList<>(1);
-        users.add(UserHandle.of(userId));
-
-        return users;
+            return users;
+        });
     }
 
     protected int getProfileParentId(int userHandle) {
@@ -11923,17 +11948,25 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final CallerIdentity caller = getCallerIdentity(who);
         Preconditions.checkCallAuthorization(isDeviceOwner(caller));
 
+        UserHandle userHandle = caller.getUserHandle();
+        if (mIsAutomotive) {
+            Slogf.v(LOG_TAG, "setLocationEnabled(%s, %b): ignoring for user %s on automotive build",
+                    who.flattenToShortString(), locationEnabled, userHandle);
+            return;
+        }
+
         mInjector.binderWithCleanCallingIdentity(() -> {
             boolean wasLocationEnabled = mInjector.getLocationManager().isLocationEnabledForUser(
-                    caller.getUserHandle());
-            mInjector.getLocationManager().setLocationEnabledForUser(locationEnabled,
-                    caller.getUserHandle());
+                    userHandle);
+            Slogf.v(LOG_TAG, "calling locationManager.setLocationEnabledForUser(%b, %s)",
+                    locationEnabled, userHandle);
+            mInjector.getLocationManager().setLocationEnabledForUser(locationEnabled, userHandle);
 
             // make a best effort to only show the notification if the admin is actually enabling
             // location. this is subject to race conditions with settings changes, but those are
             // unlikely to realistically interfere
             if (locationEnabled && !wasLocationEnabled) {
-                showLocationSettingsEnabledNotification(caller.getUserHandle());
+                showLocationSettingsEnabledNotification(userHandle);
             }
         });
 
@@ -13303,12 +13336,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final CallerIdentity caller = getCallerIdentity();
         final long ident = mInjector.binderClearCallingIdentity();
         try {
-            final int uidForPackage = mInjector.getPackageManager().getPackageUidAsUser(
-                    packageName, caller.getUserId());
-            Preconditions.checkArgument(caller.getUid() == uidForPackage,
+            final List<String> callerUidPackageNames = Arrays.asList(
+                    mInjector.getPackageManager().getPackagesForUid(caller.getUid()));
+            Preconditions.checkArgument(callerUidPackageNames.contains(packageName),
                     "Caller uid doesn't match the one for the provided package.");
-        } catch (NameNotFoundException e) {
-            throw new IllegalArgumentException("Invalid package provided " + packageName, e);
         } finally {
             mInjector.binderRestoreCallingIdentity(ident);
         }
@@ -14108,7 +14139,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    private boolean isUserAffiliatedWithDeviceLocked(int userId) {
+    private boolean isUserAffiliatedWithDeviceLocked(@UserIdInt int userId) {
         if (!mOwners.hasDeviceOwner()) {
             return false;
         }
@@ -15689,12 +15720,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         return context.getResources().getString(R.string.config_managed_provisioning_package);
     }
 
-    private void putPrivateDnsSettings(@Nullable String mode, @Nullable String host) {
+    private void putPrivateDnsSettings(int mode, @Nullable String host) {
         // Set Private DNS settings using system permissions, as apps cannot write
         // to global settings.
         mInjector.binderWithCleanCallingIdentity(() -> {
-            mInjector.settingsGlobalPutString(PRIVATE_DNS_MODE, mode);
-            mInjector.settingsGlobalPutString(PRIVATE_DNS_SPECIFIER, host);
+            ConnectivitySettingsManager.setPrivateDnsMode(mContext, mode);
+            ConnectivitySettingsManager.setPrivateDnsHostname(mContext, host);
         });
     }
 
@@ -15706,6 +15737,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Objects.requireNonNull(who, "ComponentName is null");
         final CallerIdentity caller = getCallerIdentity(who);
         Preconditions.checkCallAuthorization(isDeviceOwner(caller));
+        checkAllUsersAreAffiliatedWithDevice();
         checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_SET_GLOBAL_PRIVATE_DNS);
 
         switch (mode) {
@@ -15714,7 +15746,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     throw new IllegalArgumentException(
                             "Host provided for opportunistic mode, but is not needed.");
                 }
-                putPrivateDnsSettings(ConnectivityManager.PRIVATE_DNS_MODE_OPPORTUNISTIC, null);
+                putPrivateDnsSettings(ConnectivitySettingsManager.PRIVATE_DNS_MODE_OPPORTUNISTIC,
+                        null);
                 return PRIVATE_DNS_SET_NO_ERROR;
             case PRIVATE_DNS_MODE_PROVIDER_HOSTNAME:
                 if (TextUtils.isEmpty(privateDnsHost)
@@ -15726,7 +15759,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 // Connectivity check will have been performed in the DevicePolicyManager before
                 // the call here.
                 putPrivateDnsSettings(
-                        ConnectivityManager.PRIVATE_DNS_MODE_PROVIDER_HOSTNAME,
+                        ConnectivitySettingsManager.PRIVATE_DNS_MODE_PROVIDER_HOSTNAME,
                         privateDnsHost);
                 return PRIVATE_DNS_SET_NO_ERROR;
             default:
@@ -15744,13 +15777,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final CallerIdentity caller = getCallerIdentity(who);
         Preconditions.checkCallAuthorization(isDeviceOwner(caller));
 
-        final String currentMode = ConnectivityManager.getPrivateDnsMode(mContext);
+        final int currentMode = ConnectivitySettingsManager.getPrivateDnsMode(mContext);
         switch (currentMode) {
-            case ConnectivityManager.PRIVATE_DNS_MODE_OFF:
+            case ConnectivitySettingsManager.PRIVATE_DNS_MODE_OFF:
                 return PRIVATE_DNS_MODE_OFF;
-            case ConnectivityManager.PRIVATE_DNS_MODE_OPPORTUNISTIC:
+            case ConnectivitySettingsManager.PRIVATE_DNS_MODE_OPPORTUNISTIC:
                 return PRIVATE_DNS_MODE_OPPORTUNISTIC;
-            case ConnectivityManager.PRIVATE_DNS_MODE_PROVIDER_HOSTNAME:
+            case ConnectivitySettingsManager.PRIVATE_DNS_MODE_PROVIDER_HOSTNAME:
                 return PRIVATE_DNS_MODE_PROVIDER_HOSTNAME;
         }
 

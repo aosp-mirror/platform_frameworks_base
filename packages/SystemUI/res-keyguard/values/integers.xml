@@ -20,4 +20,11 @@
 
          0x50 = bottom, 0x01 = center_horizontal -->
     <integer name="keyguard_host_view_gravity">0x51</integer>
+
+    <!-- Gravity for the keyguard when it is in one-handed mode. This is ignored unless
+         can_use_one_handed_bouncer is true, _and_ the one handed bouncer is enabled in the device
+         config (com.android.internal.R.bool.config_enableOneHandedKeyguard)
+
+         0x50 = bottom, 0x01 = center_horizontal -->
+    <integer name="keyguard_host_view_one_handed_gravity">0x51</integer>
 </resources>

@@ -83,7 +83,6 @@ import com.android.systemui.navigationbar.gestural.RegionSamplingHelper;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsOnboarding;
-import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.SysUiStatsLog;
@@ -113,7 +112,6 @@ public class NavigationBarView extends FrameLayout implements
     private final RegionSamplingHelper mRegionSamplingHelper;
     private final int mNavColorSampleMargin;
     private final SysUiState mSysUiFlagContainer;
-    private final PluginManager mPluginManager;
 
     View mCurrentView = null;
     private View mVertical;
@@ -168,6 +166,7 @@ public class NavigationBarView extends FrameLayout implements
     private NavigationBarInflaterView mNavigationInflaterView;
     private RecentsOnboarding mRecentsOnboarding;
     private NotificationPanelViewController mPanelView;
+    private RotationContextButton mRotationContextButton;
     private FloatingRotationButton mFloatingRotationButton;
     private RotationButtonController mRotationButtonController;
     private NavigationBarOverlayController mNavBarOverlayController;
@@ -234,14 +233,6 @@ public class NavigationBarView extends FrameLayout implements
             }
         }
     }
-
-    private final OnClickListener mImeSwitcherClickListener = new OnClickListener() {
-        @Override
-        public void onClick(View view) {
-            mContext.getSystemService(InputMethodManager.class).showInputMethodPickerFromSystem(
-                    true /* showAuxiliarySubtypes */, getContext().getDisplayId());
-        }
-    };
 
     private final AccessibilityDelegate mQuickStepAccessibilityDelegate =
             new AccessibilityDelegate() {
@@ -313,34 +304,26 @@ public class NavigationBarView extends FrameLayout implements
         mIsVertical = false;
         mLongClickableAccessibilityButton = false;
         mNavBarMode = Dependency.get(NavigationModeController.class).addListener(this);
-        boolean isGesturalMode = isGesturalMode(mNavBarMode);
 
         mSysUiFlagContainer = Dependency.get(SysUiState.class);
-        mPluginManager = Dependency.get(PluginManager.class);
         // Set up the context group of buttons
         mContextualButtonGroup = new ContextualButtonGroup(R.id.menu_container);
         final ContextualButton imeSwitcherButton = new ContextualButton(R.id.ime_switcher,
                 mLightContext, R.drawable.ic_ime_switcher_default);
-        final RotationContextButton rotateSuggestionButton = new RotationContextButton(
-                R.id.rotate_suggestion, mLightContext,
-                R.drawable.ic_sysbar_rotate_button_ccw_start_0);
         final ContextualButton accessibilityButton =
                 new ContextualButton(R.id.accessibility_button, mLightContext,
                         R.drawable.ic_sysbar_accessibility_button);
         mContextualButtonGroup.addButton(imeSwitcherButton);
-        if (!isGesturalMode) {
-            mContextualButtonGroup.addButton(rotateSuggestionButton);
-        }
         mContextualButtonGroup.addButton(accessibilityButton);
+        mRotationContextButton = new RotationContextButton(R.id.rotate_suggestion,
+                mLightContext, R.drawable.ic_sysbar_rotate_button_ccw_start_0);
+        mFloatingRotationButton = new FloatingRotationButton(context);
+        mRotationButtonController = new RotationButtonController(mLightContext,
+                mLightIconColor, mDarkIconColor);
+        updateRotationButton();
 
         mOverviewProxyService = Dependency.get(OverviewProxyService.class);
-        mFloatingRotationButton = new FloatingRotationButton(context);
         mRecentsOnboarding = new RecentsOnboarding(context, mOverviewProxyService);
-        mRotationButtonController = new RotationButtonController(mLightContext,
-                mLightIconColor, mDarkIconColor,
-                isGesturalMode ? mFloatingRotationButton : rotateSuggestionButton,
-                mRotationButtonListener);
-
         mNavBarOverlayController = Dependency.get(NavigationBarOverlayController.class);
         if (mNavBarOverlayController.isNavigationBarOverlayEnabled()) {
             mNavBarOverlayController.init(
@@ -360,14 +343,13 @@ public class NavigationBarView extends FrameLayout implements
         mButtonDispatchers.put(R.id.recent_apps, new ButtonDispatcher(R.id.recent_apps));
         mButtonDispatchers.put(R.id.ime_switcher, imeSwitcherButton);
         mButtonDispatchers.put(R.id.accessibility_button, accessibilityButton);
-        mButtonDispatchers.put(R.id.rotate_suggestion, rotateSuggestionButton);
         mButtonDispatchers.put(R.id.menu_container, mContextualButtonGroup);
         mDeadZone = new DeadZone(this);
 
         mNavColorSampleMargin = getResources()
                         .getDimensionPixelSize(R.dimen.navigation_handle_sample_horizontal_margin);
-        mEdgeBackGestureHandler = new EdgeBackGestureHandler(context, mOverviewProxyService,
-                mSysUiFlagContainer, mPluginManager, this::updateStates);
+        mEdgeBackGestureHandler = Dependency.get(EdgeBackGestureHandler.class);
+        mEdgeBackGestureHandler.setStateChangeCallback(this::updateStates);
         mRegionSamplingHelper = new RegionSamplingHelper(this,
                 new RegionSamplingHelper.SamplingCallback() {
                     @Override
@@ -555,6 +537,23 @@ public class NavigationBarView extends FrameLayout implements
         }
         if (orientationChange || densityChange || dirChange) {
             mBackIcon = getBackDrawable();
+        }
+    }
+
+    /**
+     * Updates the rotation button based on the current navigation mode.
+     */
+    private void updateRotationButton() {
+        if (isGesturalMode(mNavBarMode)) {
+            mContextualButtonGroup.removeButton(R.id.rotate_suggestion);
+            mButtonDispatchers.remove(R.id.rotate_suggestion);
+            mRotationButtonController.setRotationButton(mFloatingRotationButton,
+                    mRotationButtonListener);
+        } else if (mContextualButtonGroup.getContextButton(R.id.rotate_suggestion) == null) {
+            mContextualButtonGroup.addButton(mRotationContextButton);
+            mButtonDispatchers.put(R.id.rotate_suggestion, mRotationContextButton);
+            mRotationButtonController.setRotationButton(mRotationContextButton,
+                    mRotationButtonListener);
         }
     }
 
@@ -911,6 +910,7 @@ public class NavigationBarView extends FrameLayout implements
         mBarTransitions.onNavigationModeChanged(mNavBarMode);
         mEdgeBackGestureHandler.onNavigationModeChanged(mNavBarMode);
         mRecentsOnboarding.onNavigationModeChanged(mNavBarMode);
+        updateRotationButton();
 
         if (isGesturalMode(mNavBarMode)) {
             mRegionSamplingHelper.start(mSamplingBounds);
@@ -935,7 +935,6 @@ public class NavigationBarView extends FrameLayout implements
         mNavigationInflaterView = findViewById(R.id.navigation_inflater);
         mNavigationInflaterView.setButtonDispatchers(mButtonDispatchers);
 
-        getImeSwitchButton().setOnClickListener(mImeSwitcherClickListener);
         updateOrientationViews();
         reloadNavIcons();
     }
@@ -1030,6 +1029,9 @@ public class NavigationBarView extends FrameLayout implements
 
     private void updateButtonLocation(ButtonDispatcher button, boolean inScreenSpace,
             boolean useNearestRegion) {
+        if (button == null) {
+            return;
+        }
         View view = button.getCurrentView();
         if (view == null || !button.isVisible()) {
             return;

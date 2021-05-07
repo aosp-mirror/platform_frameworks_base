@@ -31,7 +31,6 @@ abstract class StubExtension implements ExtensionInterface {
 
     private ExtensionCallback mExtensionCallback;
     private final Set<Activity> mWindowLayoutChangeListenerActivities = new HashSet<>();
-    private boolean mDeviceStateChangeListenerRegistered;
 
     StubExtension() {
     }
@@ -53,18 +52,6 @@ abstract class StubExtension implements ExtensionInterface {
         this.onListenersChanged();
     }
 
-    @Override
-    public void onDeviceStateListenersChanged(boolean isEmpty) {
-        this.mDeviceStateChangeListenerRegistered = !isEmpty;
-        this.onListenersChanged();
-    }
-
-    void updateDeviceState(ExtensionDeviceState newState) {
-        if (this.mExtensionCallback != null) {
-            mExtensionCallback.onDeviceStateChanged(newState);
-        }
-    }
-
     void updateWindowLayout(@NonNull Activity activity,
             @NonNull ExtensionWindowLayoutInfo newLayout) {
         if (this.mExtensionCallback != null) {
@@ -78,8 +65,7 @@ abstract class StubExtension implements ExtensionInterface {
     }
 
     protected boolean hasListeners() {
-        return !mWindowLayoutChangeListenerActivities.isEmpty()
-                || mDeviceStateChangeListenerRegistered;
+        return !mWindowLayoutChangeListenerActivities.isEmpty();
     }
 
     protected abstract void onListenersChanged();

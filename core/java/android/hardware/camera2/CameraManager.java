@@ -28,6 +28,7 @@ import android.hardware.CameraStatus;
 import android.hardware.ICameraService;
 import android.hardware.ICameraServiceListener;
 import android.hardware.camera2.impl.CameraDeviceImpl;
+import android.hardware.camera2.impl.CameraInjectionSessionImpl;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.params.ExtensionSessionConfiguration;
 import android.hardware.camera2.params.SessionConfiguration;
@@ -1116,6 +1117,67 @@ public final class CameraManager {
             // Camera service is now down, no support for any API level
         }
         return false;
+    }
+
+    /**
+     * Inject the external camera to replace the internal camera session.
+     *
+     * <p>If injecting the external camera device fails, then the injection callback's
+     * {@link CameraInjectionSession.InjectionStatusCallback#onInjectionError
+     * onInjectionError} method will be called.</p>
+     *
+     * @param packageName   It scopes the injection to a particular app.
+     * @param internalCamId The id of one of the physical or logical cameras on the phone.
+     * @param externalCamId The id of one of the remote cameras that are provided by the dynamic
+     *                      camera HAL.
+     * @param executor      The executor which will be used when invoking the callback.
+     * @param callback      The callback which is invoked once the external camera is injected.
+     *
+     * @throws CameraAccessException    If the camera device has been disconnected.
+     *                                  {@link CameraAccessException#CAMERA_DISCONNECTED} will be
+     *                                  thrown if camera service is not available.
+     * @throws SecurityException        If the specific application that can cast to external
+     *                                  devices does not have permission to inject the external
+     *                                  camera.
+     * @throws IllegalArgumentException If cameraId doesn't match any currently or previously
+     *                                  available camera device or some camera functions might not
+     *                                  work properly or the injection camera runs into a fatal
+     *                                  error.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.CAMERA_INJECT_EXTERNAL_CAMERA)
+    public void injectCamera(@NonNull String packageName, @NonNull String internalCamId,
+            @NonNull String externalCamId, @NonNull @CallbackExecutor Executor executor,
+            @NonNull CameraInjectionSession.InjectionStatusCallback callback)
+            throws CameraAccessException, SecurityException,
+            IllegalArgumentException {
+        if (CameraManagerGlobal.sCameraServiceDisabled) {
+            throw new IllegalArgumentException("No cameras available on device");
+        }
+        ICameraService cameraService = CameraManagerGlobal.get().getCameraService();
+        if (cameraService == null) {
+            throw new CameraAccessException(CameraAccessException.CAMERA_DISCONNECTED,
+                    "Camera service is currently unavailable");
+        }
+        synchronized (mLock) {
+            try {
+                CameraInjectionSessionImpl injectionSessionImpl =
+                        new CameraInjectionSessionImpl(callback, executor);
+                ICameraInjectionCallback cameraInjectionCallback =
+                        injectionSessionImpl.getCallback();
+                ICameraInjectionSession injectionSession = cameraService.injectCamera(packageName,
+                        internalCamId, externalCamId, cameraInjectionCallback);
+                injectionSessionImpl.setRemoteInjectionSession(injectionSession);
+            } catch (ServiceSpecificException e) {
+                throwAsPublicException(e);
+            } catch (RemoteException e) {
+                // Camera service died - act as if it's a CAMERA_DISCONNECTED case
+                ServiceSpecificException sse = new ServiceSpecificException(
+                        ICameraService.ERROR_DISCONNECTED,
+                        "Camera service is currently unavailable");
+                throwAsPublicException(sse);
+            }
+        }
     }
 
     /**

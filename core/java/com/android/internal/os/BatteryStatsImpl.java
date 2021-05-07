@@ -161,7 +161,7 @@ public class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    static final int VERSION = 198;
+    static final int VERSION = 199;
 
     // The maximum number of names wakelocks we will keep track of
     // per uid; once the limit is reached, we batch the remaining wakelocks
@@ -1056,6 +1056,7 @@ public class BatteryStatsImpl extends BatteryStats {
     private int mBatteryVoltageMv = -1;
     private int mEstimatedBatteryCapacityMah = -1;
 
+    private int mLastLearnedBatteryCapacityUah = -1;
     private int mMinLearnedBatteryCapacityUah = -1;
     private int mMaxLearnedBatteryCapacityUah = -1;
 
@@ -1139,6 +1140,11 @@ public class BatteryStatsImpl extends BatteryStats {
     @Override
     public int getEstimatedBatteryCapacity() {
         return mEstimatedBatteryCapacityMah;
+    }
+
+    @Override
+    public int getLearnedBatteryCapacity() {
+        return mLastLearnedBatteryCapacityUah;
     }
 
     @Override
@@ -11199,6 +11205,7 @@ public class BatteryStatsImpl extends BatteryStats {
         } else {
             mEstimatedBatteryCapacityMah = -1;
         }
+        mLastLearnedBatteryCapacityUah = -1;
         mMinLearnedBatteryCapacityUah = -1;
         mMaxLearnedBatteryCapacityUah = -1;
         mInteractiveTimer.reset(false, elapsedRealtimeUs);
@@ -13799,6 +13806,7 @@ public class BatteryStatsImpl extends BatteryStats {
             mRecordingHistory = DEBUG;
         }
 
+        mLastLearnedBatteryCapacityUah = chargeFullUah;
         if (mMinLearnedBatteryCapacityUah == -1) {
             mMinLearnedBatteryCapacityUah = chargeFullUah;
         } else {
@@ -15066,6 +15074,7 @@ public class BatteryStatsImpl extends BatteryStats {
         mDischargeCurrentLevel = in.readInt();
         mCurrentBatteryLevel = in.readInt();
         mEstimatedBatteryCapacityMah = in.readInt();
+        mLastLearnedBatteryCapacityUah = in.readInt();
         mMinLearnedBatteryCapacityUah = in.readInt();
         mMaxLearnedBatteryCapacityUah = in.readInt();
         mLowDischargeAmountSinceCharge = in.readInt();
@@ -15570,6 +15579,7 @@ public class BatteryStatsImpl extends BatteryStats {
         out.writeInt(mDischargeCurrentLevel);
         out.writeInt(mCurrentBatteryLevel);
         out.writeInt(mEstimatedBatteryCapacityMah);
+        out.writeInt(mLastLearnedBatteryCapacityUah);
         out.writeInt(mMinLearnedBatteryCapacityUah);
         out.writeInt(mMaxLearnedBatteryCapacityUah);
         out.writeInt(getLowDischargeAmountSinceCharge());
@@ -16071,6 +16081,7 @@ public class BatteryStatsImpl extends BatteryStats {
         mRealtimeStartUs = in.readLong();
         mOnBattery = in.readInt() != 0;
         mEstimatedBatteryCapacityMah = in.readInt();
+        mLastLearnedBatteryCapacityUah = in.readInt();
         mMinLearnedBatteryCapacityUah = in.readInt();
         mMaxLearnedBatteryCapacityUah = in.readInt();
         mOnBatteryInternal = false; // we are no longer really running.
@@ -16310,6 +16321,7 @@ public class BatteryStatsImpl extends BatteryStats {
         out.writeLong(mRealtimeStartUs);
         out.writeInt(mOnBattery ? 1 : 0);
         out.writeInt(mEstimatedBatteryCapacityMah);
+        out.writeInt(mLastLearnedBatteryCapacityUah);
         out.writeInt(mMinLearnedBatteryCapacityUah);
         out.writeInt(mMaxLearnedBatteryCapacityUah);
         mOnBatteryTimeBase.writeToParcel(out, uSecUptime, uSecRealtime);

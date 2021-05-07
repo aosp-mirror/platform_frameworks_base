@@ -31,14 +31,12 @@ import android.os.Looper;
 import android.util.AttributeSet;
 import android.view.View;
 
-import androidx.annotation.DimenRes;
 import androidx.annotation.Nullable;
 import androidx.core.graphics.ColorUtils;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.colorextraction.ColorExtractor;
-import com.android.systemui.R;
 
 import java.util.concurrent.Executor;
 
@@ -49,9 +47,6 @@ import java.util.concurrent.Executor;
  * need to be careful to synchronize when necessary.
  */
 public class ScrimView extends View {
-
-    @DimenRes
-    private static final int CORNER_RADIUS = R.dimen.notification_scrim_corner_radius;
 
     private final Object mColorLock = new Object();
 
@@ -301,13 +296,10 @@ public class ScrimView extends View {
      * Make bottom edge concave so overlap between layers is not visible for alphas between 0 and 1
      * @return height of concavity
      */
-    public float enableBottomEdgeConcave(boolean clipScrim) {
+    public void enableBottomEdgeConcave(boolean clipScrim) {
         if (mDrawable instanceof ScrimDrawable) {
-            float radius = clipScrim ? getResources().getDimensionPixelSize(CORNER_RADIUS) : 0;
-            ((ScrimDrawable) mDrawable).setBottomEdgeConcave(radius);
-            return radius;
+            ((ScrimDrawable) mDrawable).setBottomEdgeConcave(clipScrim);
         }
-        return 0;
     }
 
     /**
@@ -321,12 +313,11 @@ public class ScrimView extends View {
     }
 
     /**
-     * Enable view to have rounded corners with radius of {@link #CORNER_RADIUS}
+     * Enable view to have rounded corners.
      */
-    public void enableRoundedCorners() {
+    public void enableRoundedCorners(boolean enabled) {
         if (mDrawable instanceof ScrimDrawable) {
-            int radius = getResources().getDimensionPixelSize(CORNER_RADIUS);
-            ((ScrimDrawable) mDrawable).setRoundedCorners(radius);
+            ((ScrimDrawable) mDrawable).setRoundedCornersEnabled(enabled);
         }
     }
 
@@ -339,5 +330,16 @@ public class ScrimView extends View {
         }
         mDrawableBounds.set((int) left, (int) top, (int) right, (int) bottom);
         mDrawable.setBounds(mDrawableBounds);
+    }
+
+    /**
+     * Corner radius of both concave or convex corners.
+     * @see #enableRoundedCorners(boolean)
+     * @see #enableBottomEdgeConcave(boolean)
+     */
+    public void setCornerRadius(int radius) {
+        if (mDrawable instanceof ScrimDrawable) {
+            ((ScrimDrawable) mDrawable).setRoundedCorners(radius);
+        }
     }
 }

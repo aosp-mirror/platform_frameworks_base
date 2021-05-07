@@ -179,6 +179,9 @@ class PrivacyDialogControllerTest : SysuiTestCase() {
 
     @Test
     fun testShowDialogShowsDialog() {
+        val usage = createMockPermGroupUsage()
+        `when`(permissionManager.getIndicatorAppOpUsageData(anyBoolean())).thenReturn(listOf(usage))
+
         controller.showDialog(context)
         exhaustExecutors()
 
@@ -186,7 +189,17 @@ class PrivacyDialogControllerTest : SysuiTestCase() {
     }
 
     @Test
+    fun testDontShowEmptyDialog() {
+        controller.showDialog(context)
+        exhaustExecutors()
+
+        verify(dialog, never()).show()
+    }
+
+    @Test
     fun testHideDialogDismissesDialogIfShown() {
+        val usage = createMockPermGroupUsage()
+        `when`(permissionManager.getIndicatorAppOpUsageData(anyBoolean())).thenReturn(listOf(usage))
         controller.showDialog(context)
         exhaustExecutors()
 
@@ -202,6 +215,8 @@ class PrivacyDialogControllerTest : SysuiTestCase() {
 
     @Test
     fun testHideDialogNoopAfterDismissed() {
+        val usage = createMockPermGroupUsage()
+        `when`(permissionManager.getIndicatorAppOpUsageData(anyBoolean())).thenReturn(listOf(usage))
         controller.showDialog(context)
         exhaustExecutors()
 
@@ -214,6 +229,8 @@ class PrivacyDialogControllerTest : SysuiTestCase() {
 
     @Test
     fun testShowForAllUsers() {
+        val usage = createMockPermGroupUsage()
+        `when`(permissionManager.getIndicatorAppOpUsageData(anyBoolean())).thenReturn(listOf(usage))
         controller.showDialog(context)
 
         exhaustExecutors()
@@ -439,7 +456,7 @@ class PrivacyDialogControllerTest : SysuiTestCase() {
         controller.showDialog(context)
         exhaustExecutors()
 
-        assertThat(dialogProvider.list).isEmpty()
+        verify(dialog, never()).show()
     }
 
     @Test
@@ -467,11 +484,13 @@ class PrivacyDialogControllerTest : SysuiTestCase() {
         controller.showDialog(context)
         exhaustExecutors()
 
-        assertThat(dialogProvider.list).isEmpty()
+        verify(dialog, never()).show()
     }
 
     @Test
     fun testStartActivityCorrectIntent() {
+        val usage = createMockPermGroupUsage()
+        `when`(permissionManager.getIndicatorAppOpUsageData(anyBoolean())).thenReturn(listOf(usage))
         controller.showDialog(context)
         exhaustExecutors()
 
@@ -488,6 +507,8 @@ class PrivacyDialogControllerTest : SysuiTestCase() {
 
     @Test
     fun testStartActivityCorrectIntent_enterpriseUser() {
+        val usage = createMockPermGroupUsage()
+        `when`(permissionManager.getIndicatorAppOpUsageData(anyBoolean())).thenReturn(listOf(usage))
         controller.showDialog(context)
         exhaustExecutors()
 
@@ -501,6 +522,8 @@ class PrivacyDialogControllerTest : SysuiTestCase() {
 
     @Test
     fun testStartActivitySuccess() {
+        val usage = createMockPermGroupUsage()
+        `when`(permissionManager.getIndicatorAppOpUsageData(anyBoolean())).thenReturn(listOf(usage))
         controller.showDialog(context)
         exhaustExecutors()
 
@@ -514,6 +537,8 @@ class PrivacyDialogControllerTest : SysuiTestCase() {
 
     @Test
     fun testStartActivityFailure() {
+        val usage = createMockPermGroupUsage()
+        `when`(permissionManager.getIndicatorAppOpUsageData(anyBoolean())).thenReturn(listOf(usage))
         controller.showDialog(context)
         exhaustExecutors()
 

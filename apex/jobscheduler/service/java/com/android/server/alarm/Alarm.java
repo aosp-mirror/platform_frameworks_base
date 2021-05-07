@@ -66,6 +66,23 @@ class Alarm {
      */
     public static final int BATTERY_SAVER_POLICY_INDEX = 3;
 
+    /**
+     * Reason to use for inexact alarms.
+     */
+    static final int EXACT_ALLOW_REASON_NOT_APPLICABLE = -1;
+    /**
+     * Caller had SCHEDULE_EXACT_ALARM permission.
+     */
+    static final int EXACT_ALLOW_REASON_PERMISSION = 0;
+    /**
+     * Caller was in the power allow-list.
+     */
+    static final int EXACT_ALLOW_REASON_ALLOW_LIST = 1;
+    /**
+     * Change wasn't enable for the caller due to compat reasons.
+     */
+    static final int EXACT_ALLOW_REASON_COMPAT = 2;
+
     public final int type;
     /**
      * The original trigger time supplied by the caller. This can be in the elapsed or rtc time base
@@ -92,13 +109,15 @@ class Alarm {
     /** The ultimate delivery time to be used for this alarm */
     private long mWhenElapsed;
     private long mMaxWhenElapsed;
+    public int mExactAllowReason;
     public AlarmManagerService.PriorityClass priorityClass;
     /** Broadcast options to use when delivering this alarm */
     public Bundle mIdleOptions;
 
     Alarm(int type, long when, long requestedWhenElapsed, long windowLength, long interval,
             PendingIntent op, IAlarmListener rec, String listenerTag, WorkSource ws, int flags,
-            AlarmManager.AlarmClockInfo info, int uid, String pkgName, Bundle idleOptions) {
+            AlarmManager.AlarmClockInfo info, int uid, String pkgName, Bundle idleOptions,
+            int exactAllowReason) {
         this.type = type;
         origWhen = when;
         wakeup = type == AlarmManager.ELAPSED_REALTIME_WAKEUP
@@ -119,6 +138,7 @@ class Alarm {
         this.uid = uid;
         packageName = pkgName;
         mIdleOptions = idleOptions;
+        mExactAllowReason = exactAllowReason;
         sourcePackage = (operation != null) ? operation.getCreatorPackage() : packageName;
         creatorUid = (operation != null) ? operation.getCreatorUid() : this.uid;
     }
@@ -216,7 +236,6 @@ class Alarm {
         sb.append(type);
         sb.append(" origWhen ");
         sb.append(origWhen);
-        sb.append(" ");
         sb.append(" whenElapsed ");
         sb.append(getWhenElapsed());
         sb.append(" ");
@@ -235,6 +254,21 @@ class Alarm {
                 return "device_idle";
             case BATTERY_SAVER_POLICY_INDEX:
                 return "battery_saver";
+            default:
+                return "--unknown--";
+        }
+    }
+
+    private static String exactReasonToString(int reason) {
+        switch (reason) {
+            case EXACT_ALLOW_REASON_ALLOW_LIST:
+                return "allow-listed";
+            case EXACT_ALLOW_REASON_COMPAT:
+                return "compat";
+            case EXACT_ALLOW_REASON_PERMISSION:
+                return "permission";
+            case EXACT_ALLOW_REASON_NOT_APPLICABLE:
+                return "N/A";
             default:
                 return "--unknown--";
         }
@@ -270,6 +304,10 @@ class Alarm {
         }
         ipw.print(" window=");
         TimeUtils.formatDuration(windowLength, ipw);
+        if (mExactAllowReason != EXACT_ALLOW_REASON_NOT_APPLICABLE) {
+            ipw.print(" exactAllowReason=");
+            ipw.print(exactReasonToString(mExactAllowReason));
+        }
         ipw.print(" repeatInterval=");
         ipw.print(repeatInterval);
         ipw.print(" count=");

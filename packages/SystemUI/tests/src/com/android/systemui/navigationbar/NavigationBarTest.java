@@ -72,6 +72,7 @@ import com.android.systemui.accessibility.SystemActions;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.model.SysUiState;
+import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.recents.Recents;
@@ -132,6 +133,7 @@ public class NavigationBarTest extends SysuiTestCase {
         mDependency.injectMockDependency(StatusBarStateController.class);
         mDependency.injectMockDependency(NavigationBarController.class);
         mOverviewProxyService = mDependency.injectMockDependency(OverviewProxyService.class);
+        mDependency.injectMockDependency(EdgeBackGestureHandler.class);
         TestableLooper.get(this).runWithLooper(() -> {
             mNavigationBar = createNavBar(mContext);
             mExternalDisplayNavigationBar = createNavBar(mSysuiTestableContextExternal);

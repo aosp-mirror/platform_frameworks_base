@@ -22,7 +22,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
-import android.hardware.biometrics.BiometricManager;
+import android.hardware.biometrics.ComponentInfoInternal;
+import android.hardware.biometrics.SensorProperties;
+import android.hardware.face.FaceSensorProperties;
+import android.hardware.face.FaceSensorPropertiesInternal;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.UserManager;
@@ -40,6 +43,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Presubmit
 @SmallTest
@@ -71,9 +75,18 @@ public class Face10Test {
         when(mUserManager.getAliveUsers()).thenReturn(new ArrayList<>());
 
         mLockoutResetDispatcher = new LockoutResetDispatcher(mContext);
-        mFace10 = new Face10(mContext, SENSOR_ID, BiometricManager.Authenticators.BIOMETRIC_STRONG,
-                mLockoutResetDispatcher, false /* supportsSelfIllumination */,
-                1 /* maxTemplatesAllowed */, mScheduler);
+
+        final int maxEnrollmentsPerUser = 1;
+        final List<ComponentInfoInternal> componentInfo = new ArrayList<>();
+        final boolean supportsFaceDetection = false;
+        final boolean supportsSelfIllumination = false;
+        final boolean resetLockoutRequiresChallenge = false;
+        final FaceSensorPropertiesInternal sensorProps = new FaceSensorPropertiesInternal(SENSOR_ID,
+                SensorProperties.STRENGTH_STRONG, maxEnrollmentsPerUser, componentInfo,
+                FaceSensorProperties.TYPE_UNKNOWN, supportsFaceDetection, supportsSelfIllumination,
+                resetLockoutRequiresChallenge);
+
+        mFace10 = new Face10(mContext, sensorProps, mLockoutResetDispatcher, mScheduler);
         mBinder = new Binder();
     }
 

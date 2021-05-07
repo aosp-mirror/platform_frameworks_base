@@ -133,6 +133,7 @@ import static com.android.server.wm.MoveAnimationSpecProto.TO;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_ALL;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_STARTING_REVEAL;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
@@ -1265,7 +1266,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mHaveFrame = true;
 
         final Task task = getTask();
-        final boolean isFullscreenAndFillsDisplay = !inMultiWindowMode() && matchesDisplayBounds();
+        final boolean isFullscreenAndFillsArea = !inMultiWindowMode() && matchesDisplayAreaBounds();
         final boolean windowsAreFloating = task != null && task.isFloating();
         final DisplayContent dc = getDisplayContent();
         final DisplayInfo displayInfo = getDisplayInfo();
@@ -1290,7 +1291,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 : isImeLayeringTarget();
         final boolean isImeTarget =
                 imeWin != null && imeWin.isVisibleNow() && isInputMethodAdjustTarget;
-        if (isFullscreenAndFillsDisplay || layoutInParentFrame()) {
+        if (isFullscreenAndFillsArea || layoutInParentFrame()) {
             // We use the parent frame as the containing frame for fullscreen and child windows
             windowFrames.mContainingFrame.set(windowFrames.mParentFrame);
             layoutDisplayFrame = windowFrames.mDisplayFrame;
@@ -2272,19 +2273,15 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 && mWindowFrames.mFrame.bottom >= displayInfo.appHeight;
     }
 
-    private boolean matchesDisplayBounds() {
-        final Rect displayBounds = mToken.getFixedRotationTransformDisplayBounds();
-        if (displayBounds != null) {
-            // If the rotated display bounds are available, the window bounds are also rotated.
-            return displayBounds.equals(getBounds());
-        }
-        return getDisplayContent().getBounds().equals(getBounds());
-    }
-
     boolean matchesDisplayAreaBounds() {
+        final Rect rotatedDisplayBounds = mToken.getFixedRotationTransformDisplayBounds();
+        if (rotatedDisplayBounds != null) {
+            // If the rotated display bounds are available, the window bounds are also rotated.
+            return rotatedDisplayBounds.equals(getBounds());
+        }
         final DisplayArea displayArea = getDisplayArea();
         if (displayArea == null) {
-            return matchesDisplayBounds();
+            return getDisplayContent().getBounds().equals(getBounds());
         }
         return displayArea.getBounds().equals(getBounds());
     }
@@ -2295,6 +2292,27 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     boolean isLastConfigReportedToClient() {
         return mLastConfigReportedToClient;
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newParentConfig) {
+        if (getDisplayContent().getImeTarget(IME_TARGET_INPUT) != this && !isImeLayeringTarget()) {
+            super.onConfigurationChanged(newParentConfig);
+            return;
+        }
+
+        mTempConfiguration.setTo(getConfiguration());
+        super.onConfigurationChanged(newParentConfig);
+        final boolean windowConfigChanged = mTempConfiguration.windowConfiguration
+                .diff(newParentConfig.windowConfiguration, false) != 0;
+
+        // When the window configuration changed, we need to update the IME control target in
+        // case the app may lose the IME inets control when exiting from split-screen mode, or the
+        // IME parent may failed to attach to the app during rotating the screen.
+        // See DisplayContent#isImeAttachedToApp, DisplayContent#isImeControlledByApp
+        if (windowConfigChanged) {
+            getDisplayContent().updateImeControlTarget();
+        }
     }
 
     @Override
@@ -2391,6 +2409,18 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final boolean startingWindow = mAttrs.type == TYPE_APPLICATION_STARTING;
         if (startingWindow) {
             ProtoLog.d(WM_DEBUG_STARTING_WINDOW, "Starting window removed %s", this);
+        }
+
+        if (startingWindow && StartingSurfaceController.DEBUG_ENABLE_SHELL_DRAWER) {
+            // cancel the remove starting window animation on shell
+            if (mActivityRecord != null) {
+                final WindowState mainWindow =
+                        mActivityRecord.findMainWindow(false/* includeStartingApp */);
+                if (mainWindow != null && mainWindow.isSelfAnimating(0 /* flags */,
+                        ANIMATION_TYPE_STARTING_REVEAL)) {
+                    mainWindow.cancelAnimation();
+                }
+            }
         }
 
         ProtoLog.v(WM_DEBUG_FOCUS, "Remove client=%x, surfaceController=%s Callers=%s",

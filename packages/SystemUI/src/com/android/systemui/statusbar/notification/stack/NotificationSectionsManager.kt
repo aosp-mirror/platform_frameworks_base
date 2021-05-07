@@ -138,7 +138,7 @@ class NotificationSectionsManager @Inject internal constructor(
         incomingHeaderController.reinflateView(parent)
         mediaControlsView =
                 reinflateView(mediaControlsView, layoutInflater, R.layout.keyguard_media_header)
-                        .also(keyguardMediaController::attach)
+        keyguardMediaController.attachSinglePaneContainer(mediaControlsView)
     }
 
     override fun beginsSection(view: View, previous: View?): Boolean =

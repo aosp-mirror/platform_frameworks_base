@@ -575,6 +575,7 @@ public class BubbleData {
             Log.d(TAG, "Overflowing: " + bubble);
         }
         mLogger.logOverflowAdd(bubble, reason);
+        mOverflowBubbles.remove(bubble);
         mOverflowBubbles.add(0, bubble);
         mStateChange.addedOverflowBubble = bubble;
         bubble.stopInflation();

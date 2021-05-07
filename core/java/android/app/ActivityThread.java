@@ -4416,11 +4416,20 @@ public final class ActivityThread extends ClientTransactionHandler
             if (localLOGV) Slog.v(TAG, "Creating service " + data.info.name);
 
             Application app = packageInfo.makeApplication(false, mInstrumentation);
-            java.lang.ClassLoader cl = packageInfo.getClassLoader();
+
+            final java.lang.ClassLoader cl;
+            if (data.info.splitName != null) {
+                cl = packageInfo.getSplitClassLoader(data.info.splitName);
+            } else {
+                cl = packageInfo.getClassLoader();
+            }
             service = packageInfo.getAppFactory()
                     .instantiateService(cl, data.info.name, data.intent);
-            final ContextImpl context = ContextImpl.getImpl(service
+            ContextImpl context = ContextImpl.getImpl(service
                     .createServiceBaseContext(this, packageInfo));
+            if (data.info.splitName != null) {
+                context = (ContextImpl) context.createContextForSplit(data.info.splitName);
+            }
             // Service resources must be initialized with the same loaders as the application
             // context.
             context.getResources().addLoaders(
@@ -5604,7 +5613,7 @@ public final class ActivityThread extends ClientTransactionHandler
     }
 
     /** Performs the activity relaunch locally vs. requesting from system-server. */
-    private void handleRelaunchActivityLocally(IBinder token) {
+    public void handleRelaunchActivityLocally(IBinder token) {
         final ActivityClientRecord r = mActivities.get(token);
         if (r == null) {
             Log.w(TAG, "Activity to relaunch no longer exists");
@@ -6535,7 +6544,7 @@ public final class ActivityThread extends ClientTransactionHandler
 
         // Allow binder tracing, and application-generated systrace messages if we're profileable.
         boolean isAppDebuggable = (data.appInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
-        boolean isAppProfileable = isAppDebuggable || data.appInfo.isProfileableByShell();
+        boolean isAppProfileable = isAppDebuggable || data.appInfo.isProfileable();
         Trace.setAppTracingAllowed(isAppProfileable);
         if ((isAppProfileable || Build.IS_DEBUGGABLE) && data.enableBinderTracking) {
             Binder.enableTracing();

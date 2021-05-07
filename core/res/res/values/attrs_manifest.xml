@@ -1949,7 +1949,10 @@
 
         <!-- Applications can set this attribute to an xml resource within their app where they
          specified the rules determining which files and directories can be copied from the device
-         as part of backup or transfer operations. -->
+         as part of backup or transfer operations.
+
+         See the <a href="{@docRoot}about/versions/12/backup-restore">Changes in backup and restore</a>
+         document for the format of the XML file.-->
         <attr name="dataExtractionRules" format="reference"/>
     </declare-styleable>
 
@@ -3435,5 +3438,9 @@
         <!-- Flag indicating whether the application can be profiled by the shell user,
              even when running on a device that is running in user mode. -->
         <attr name="shell" format="boolean" />
+        <!-- Flag indicating whether the application can be profiled by system services, but not
+             necessarily via shell tools (for which also android:shell="true" must be set). If
+             false, the application cannot be profiled at all. Defaults to true. -->
+        <attr name="enabled" format="boolean" />
     </declare-styleable>
 </resources>

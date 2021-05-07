@@ -23,10 +23,10 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.net.NetworkStats;
+import android.os.BatteryConsumer;
 import android.os.BatteryStats;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
-import android.os.SystemBatteryConsumer;
 import android.os.UidBatteryConsumer;
 import android.os.UserBatteryConsumer;
 import android.util.SparseArray;
@@ -186,20 +186,20 @@ public class BatteryUsageStatsRule implements TestRule {
         return mBatteryUsageStats;
     }
 
+    public BatteryConsumer getDeviceBatteryConsumer() {
+        return mBatteryUsageStats.getAggregateBatteryConsumer(
+                BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE);
+    }
+
+    public BatteryConsumer getAppsBatteryConsumer() {
+        return mBatteryUsageStats.getAggregateBatteryConsumer(
+                BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_ALL_APPS);
+    }
+
     public UidBatteryConsumer getUidBatteryConsumer(int uid) {
         for (UidBatteryConsumer ubc : mBatteryUsageStats.getUidBatteryConsumers()) {
             if (ubc.getUid() == uid) {
                 return ubc;
-            }
-        }
-        return null;
-    }
-
-    public SystemBatteryConsumer getSystemBatteryConsumer(
-            @SystemBatteryConsumer.DrainType int drainType) {
-        for (SystemBatteryConsumer sbc : mBatteryUsageStats.getSystemBatteryConsumers()) {
-            if (sbc.getDrainType() == drainType) {
-                return sbc;
             }
         }
         return null;

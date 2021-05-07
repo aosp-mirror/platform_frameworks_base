@@ -55,14 +55,14 @@ public class AlarmTest {
     private Alarm createDefaultAlarm(long requestedElapsed, long windowLength, int flags) {
         return new Alarm(ELAPSED_REALTIME, 0, requestedElapsed, windowLength, 0,
                 createAlarmSender(), null, null, null, flags, null, TEST_CALLING_UID,
-                TEST_CALLING_PACKAGE, null);
+                TEST_CALLING_PACKAGE, null, 0);
     }
 
     private Alarm createAlarmClock(long requestedRtc) {
         final AlarmManager.AlarmClockInfo info = mock(AlarmManager.AlarmClockInfo.class);
         return new Alarm(RTC_WAKEUP, requestedRtc, requestedRtc, 0, 0, createAlarmSender(),
                 null, null, null, FLAG_WAKE_FROM_IDLE | FLAG_STANDALONE, info, TEST_CALLING_UID,
-                TEST_CALLING_PACKAGE, null);
+                TEST_CALLING_PACKAGE, null, 0);
     }
 
     private PendingIntent createAlarmSender() {

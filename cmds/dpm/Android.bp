@@ -18,8 +18,7 @@ license {
     ],
 }
 
-java_binary {
+sh_binary {
     name: "dpm",
-    wrapper: "dpm",
-    srcs: ["**/*.java"],
+    src: "dpm",
 }

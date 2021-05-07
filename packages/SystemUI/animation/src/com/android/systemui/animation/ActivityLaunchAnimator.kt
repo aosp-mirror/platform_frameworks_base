@@ -8,6 +8,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.graphics.Matrix
 import android.graphics.Rect
+import android.os.Looper
 import android.os.RemoteException
 import android.util.MathUtils
 import android.view.IRemoteAnimationFinishedCallback
@@ -16,6 +17,7 @@ import android.view.RemoteAnimationAdapter
 import android.view.RemoteAnimationTarget
 import android.view.SyncRtSurfaceTransactionApplier
 import android.view.View
+import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.animation.AnimationUtils
 import android.view.animation.PathInterpolator
@@ -73,16 +75,20 @@ class ActivityLaunchAnimator(context: Context) {
      * in [Controller.onLaunchAnimationProgress]. No animation will start if there is no window
      * opening.
      *
-     * If [controller] is null, then the intent will be started and no animation will run.
+     * If [controller] is null or [animate] is false, then the intent will be started and no
+     * animation will run.
      *
      * This method will throw any exception thrown by [intentStarter].
      */
+    @JvmOverloads
     inline fun startIntentWithAnimation(
         controller: Controller?,
+        animate: Boolean = true,
         intentStarter: (RemoteAnimationAdapter?) -> Int
     ) {
-        if (controller == null) {
+        if (controller == null || !animate) {
             intentStarter(null)
+            controller?.callOnIntentStartedOnMainThread(willAnimate = false)
             return
         }
 
@@ -95,12 +101,23 @@ class ActivityLaunchAnimator(context: Context) {
         val launchResult = intentStarter(animationAdapter)
         val willAnimate = launchResult == ActivityManager.START_TASK_TO_FRONT ||
             launchResult == ActivityManager.START_SUCCESS
-        runner.context.mainExecutor.execute { controller.onIntentStarted(willAnimate) }
+        controller.callOnIntentStartedOnMainThread(willAnimate)
 
         // If we expect an animation, post a timeout to cancel it in case the remote animation is
         // never started.
         if (willAnimate) {
             runner.postTimeout()
+        }
+    }
+
+    @PublishedApi
+    internal fun Controller.callOnIntentStartedOnMainThread(willAnimate: Boolean) {
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            this.launchContainer.context.mainExecutor.execute {
+                this.onIntentStarted(willAnimate)
+            }
+        } else {
+            this.onIntentStarted(willAnimate)
         }
     }
 
@@ -110,11 +127,13 @@ class ActivityLaunchAnimator(context: Context) {
      * for Java caller starting a [PendingIntent].
      */
     @Throws(PendingIntent.CanceledException::class)
+    @JvmOverloads
     fun startPendingIntentWithAnimation(
         controller: Controller?,
+        animate: Boolean = true,
         intentStarter: PendingIntentStarter
     ) {
-        startIntentWithAnimation(controller) { intentStarter.startPendingIntent(it) }
+        startIntentWithAnimation(controller, animate) { intentStarter.startPendingIntent(it) }
     }
 
     /** Create a new animation [Runner] controlled by [controller]. */
@@ -148,15 +167,19 @@ class ActivityLaunchAnimator(context: Context) {
         }
 
         /**
-         * Return the root [View] that contains the view that started the intent and will be
-         * animating together with the window.
+         * The container in which the view that started the intent will be animating together with
+         * the opening window.
          *
-         * This view will be used to:
+         * This will be used to:
          *  - Get the associated [Context].
          *  - Compute whether we are expanding fully above the current window.
          *  - Apply surface transactions in sync with RenderThread.
+         *
+         * This container can be changed to force this [Controller] to animate the expanding view
+         * inside a different location, for instance to ensure correct layering during the
+         * animation.
          */
-        fun getRootView(): View
+        var launchContainer: ViewGroup
 
         /**
          * Return the [State] of the view that will be animated. We will animate from this state to
@@ -191,23 +214,11 @@ class ActivityLaunchAnimator(context: Context) {
         fun onLaunchAnimationEnd(isExpandingFullyAbove: Boolean) {}
 
         /**
-         * The animation was cancelled remotely. Note that [onLaunchAnimationEnd] will still be
-         * called after this if the animation was already started, i.e. if [onLaunchAnimationStart]
-         * was called before the cancellation.
+         * The animation was cancelled. Note that [onLaunchAnimationEnd] will still be called after
+         * this if the animation was already started, i.e. if [onLaunchAnimationStart] was called
+         * before the cancellation.
          */
         fun onLaunchAnimationCancelled() {}
-
-        /**
-         * The remote animation was not started within the expected time. It timed out and will
-         * never [start][onLaunchAnimationStart].
-         */
-        fun onLaunchAnimationTimedOut() {}
-
-        /**
-         * The animation was aborted because the opening window was not found. It will never
-         * [start][onLaunchAnimationStart].
-         */
-        fun onLaunchAnimationAborted() {}
     }
 
     /** The state of an expandable view during an [ActivityLaunchAnimator] animation. */
@@ -266,9 +277,9 @@ class ActivityLaunchAnimator(context: Context) {
 
     @VisibleForTesting
     inner class Runner(private val controller: Controller) : IRemoteAnimationRunner.Stub() {
-        private val rootView = controller.getRootView()
-        @PublishedApi internal val context = rootView.context
-        private val transactionApplier = SyncRtSurfaceTransactionApplier(rootView)
+        private val launchContainer = controller.launchContainer
+        @PublishedApi internal val context = launchContainer.context
+        private val transactionApplier = SyncRtSurfaceTransactionApplier(launchContainer)
         private var animator: ValueAnimator? = null
 
         private var windowCrop = Rect()
@@ -285,11 +296,11 @@ class ActivityLaunchAnimator(context: Context) {
 
         @PublishedApi
         internal fun postTimeout() {
-            rootView.postDelayed(onTimeout, LAUNCH_TIMEOUT)
+            launchContainer.postDelayed(onTimeout, LAUNCH_TIMEOUT)
         }
 
         private fun removeTimeout() {
-            rootView.removeCallbacks(onTimeout)
+            launchContainer.removeCallbacks(onTimeout)
         }
 
         override fun onAnimationStart(
@@ -332,7 +343,7 @@ class ActivityLaunchAnimator(context: Context) {
             if (window == null) {
                 removeTimeout()
                 invokeCallback(iCallback)
-                controller.onLaunchAnimationAborted()
+                controller.onLaunchAnimationCancelled()
                 return
             }
 
@@ -363,11 +374,11 @@ class ActivityLaunchAnimator(context: Context) {
             val endWidth = endRight - endLeft
 
             // TODO(b/184121838): Ensure that we are launching on the same screen.
-            val rootViewLocation = rootView.locationOnScreen
+            val rootViewLocation = launchContainer.locationOnScreen
             val isExpandingFullyAbove = endTop <= rootViewLocation[1] &&
-                endBottom >= rootViewLocation[1] + rootView.height &&
+                endBottom >= rootViewLocation[1] + launchContainer.height &&
                 endLeft <= rootViewLocation[0] &&
-                endRight >= rootViewLocation[0] + rootView.width
+                endRight >= rootViewLocation[0] + launchContainer.width
 
             // TODO(b/184121838): We should somehow get the top and bottom radius of the window.
             val endRadius = if (isExpandingFullyAbove) {
@@ -486,7 +497,7 @@ class ActivityLaunchAnimator(context: Context) {
             }
 
             timedOut = true
-            controller.onLaunchAnimationTimedOut()
+            controller.onLaunchAnimationCancelled()
         }
 
         override fun onAnimationCancelled() {

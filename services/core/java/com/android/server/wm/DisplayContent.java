@@ -1538,6 +1538,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             // to cover the activity configuration change.
             return false;
         }
+        if (r.mStartingData != null && r.mStartingData.hasImeSurface()) {
+            // Currently it is unknown that when will IME window be ready. Reject the case to
+            // avoid flickering by showing IME in inconsistent orientation.
+            return false;
+        }
         if (checkOpening) {
             if (!mAppTransition.isTransitionSet() || !mOpeningApps.contains(r)) {
                 // Apply normal rotation animation in case of the activity set different requested
@@ -1575,7 +1580,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             }
             return false;
         }
-        if (!r.getParent().matchParentBounds()) {
+        if (!r.getDisplayArea().matchParentBounds()) {
             // Because the fixed rotated configuration applies to activity directly, if its parent
             // has it own policy for bounds, the activity bounds based on parent is unknown.
             return false;
@@ -2108,9 +2113,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             }
 
             // Check if input device can dispatch events to current display.
-            // If display type is virtual, will follow the default display.
-            if (!mWmService.mInputManager.canDispatchToDisplay(device.getId(),
-                    displayInfo.type == Display.TYPE_VIRTUAL ? DEFAULT_DISPLAY : mDisplayId)) {
+            if (!mWmService.mInputManager.canDispatchToDisplay(device.getId(), mDisplayId)) {
                 continue;
             }
 

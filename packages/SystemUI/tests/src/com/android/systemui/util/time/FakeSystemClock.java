@@ -71,6 +71,10 @@ public class FakeSystemClock implements SystemClock {
         mCurrentTimeMillis = millis;
     }
 
+    public void setElapsedRealtime(long millis) {
+        mElapsedRealtime = millis;
+    }
+
     /**
      * Advances the time tracked by the fake clock and notifies any listeners that the time has
      * changed (for example, an attached {@link FakeExecutor} may fire its pending runnables).

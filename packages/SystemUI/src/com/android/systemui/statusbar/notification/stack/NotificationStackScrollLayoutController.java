@@ -708,9 +708,10 @@ public class NotificationStackScrollLayoutController {
             mView.setKeyguardMediaControllorVisible(visible);
             if (visible) {
                 mView.generateAddAnimation(
-                        mKeyguardMediaController.getView(), false /*fromMoreCard */);
+                        mKeyguardMediaController.getSinglePaneContainer(),
+                        false /*fromMoreCard */);
             } else {
-                mView.generateRemoveAnimation(mKeyguardMediaController.getView());
+                mView.generateRemoveAnimation(mKeyguardMediaController.getSinglePaneContainer());
             }
             mView.requestChildrenUpdate();
             return Unit.INSTANCE;
@@ -737,6 +738,10 @@ public class NotificationStackScrollLayoutController {
             return false;
         }
         return true;
+    }
+
+    public boolean isViewAffectedBySwipe(ExpandableView expandableView) {
+        return mNotificationRoundnessManager.isViewAffectedBySwipe(expandableView);
     }
 
     public void addOnExpandedHeightChangedListener(BiConsumer<Float, Float> listener) {
@@ -970,6 +975,10 @@ public class NotificationStackScrollLayoutController {
         mView.setQsExpansionFraction(expansionFraction);
     }
 
+    public void setOnStackYChanged(Runnable onStackYChanged) {
+        mView.setOnStackYChanged(onStackYChanged);
+    }
+
     public float calculateAppearFractionBypass() {
         return mView.calculateAppearFractionBypass();
     }
@@ -1050,10 +1059,6 @@ public class NotificationStackScrollLayoutController {
 
     public void setUnlockHintRunning(boolean running) {
         mView.setUnlockHintRunning(running);
-    }
-
-    public float getPeekHeight() {
-        return mView.getPeekHeight();
     }
 
     public boolean isFooterViewNotGone() {

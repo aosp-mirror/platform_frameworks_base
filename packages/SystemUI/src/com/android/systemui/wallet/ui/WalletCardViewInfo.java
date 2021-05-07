@@ -16,6 +16,7 @@
 
 package com.android.systemui.wallet.ui;
 
+import android.app.PendingIntent;
 import android.graphics.drawable.Drawable;
 
 import androidx.annotation.NonNull;
@@ -47,4 +48,17 @@ interface WalletCardViewInfo {
      */
     @NonNull
     CharSequence getLabel();
+
+    /**
+     * Pending intent upon the card is clicked.
+     */
+    @NonNull
+    PendingIntent getPendingIntent();
+
+    default boolean isUiEquivalent(WalletCardViewInfo other) {
+        if (other == null) {
+            return false;
+        }
+        return getCardId().equals(other.getCardId());
+    }
 }

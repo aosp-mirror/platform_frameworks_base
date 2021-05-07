@@ -43,16 +43,6 @@ class StatusBarLaunchAnimatorController(
 
     override fun onLaunchAnimationCancelled() {
         delegate.onLaunchAnimationCancelled()
-        statusBar.onLaunchAnimationCancelled()
-    }
-
-    override fun onLaunchAnimationTimedOut() {
-        delegate.onLaunchAnimationTimedOut()
-        statusBar.onLaunchAnimationTimedOut(isLaunchForActivity)
-    }
-
-    override fun onLaunchAnimationAborted() {
-        delegate.onLaunchAnimationAborted()
-        statusBar.collapsePanelOnMainThread()
+        statusBar.onLaunchAnimationCancelled(isLaunchForActivity)
     }
 }

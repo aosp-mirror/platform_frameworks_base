@@ -1994,7 +1994,25 @@ class Task extends WindowContainer<WindowContainer> {
 
     boolean supportsMultiWindow() {
         return mAtmService.mSupportsMultiWindow
-                && (isResizeable() || mAtmService.mSupportsNonResizableMultiWindow);
+                && (isResizeable() || mAtmService.mDevEnableNonResizableMultiWindow);
+    }
+
+    // TODO(b/176061101) replace supportsMultiWindow() after fixing tests.
+    boolean supportsMultiWindow2() {
+        if (!mAtmService.mSupportsMultiWindow) {
+            return false;
+        }
+        final TaskDisplayArea tda = getDisplayArea();
+        if (tda == null) {
+            return false;
+        }
+
+        if (!isResizeable() && !tda.supportsNonResizableMultiWindow()) {
+            // Not support non-resizable in multi window.
+            return false;
+        }
+
+        return tda.supportsActivityMinWidthHeightMultiWindow(mMinWidth, mMinHeight);
     }
 
     /**
@@ -2240,7 +2258,6 @@ class Task extends WindowContainer<WindowContainer> {
         mTmpPrevBounds.set(getBounds());
         final boolean wasInMultiWindowMode = inMultiWindowMode();
         final boolean wasInPictureInPicture = inPinnedWindowingMode();
-        final int oldOrientation = getOrientation();
         super.onConfigurationChanged(newParentConfig);
         // Only need to update surface size here since the super method will handle updating
         // surface position.
@@ -2281,11 +2298,6 @@ class Task extends WindowContainer<WindowContainer> {
             // If the display orientation change is done, let the corresponding task organizer take
             // back the control of this task.
             mForceNotOrganized = false;
-        }
-
-        // Report orientation change such as changing from freeform to fullscreen.
-        if (oldOrientation != getOrientation()) {
-            onDescendantOrientationChanged(this);
         }
 
         saveLaunchingStateIfNeeded();
@@ -2836,14 +2848,13 @@ class Task extends WindowContainer<WindowContainer> {
             getResolvedOverrideConfiguration().windowConfiguration.setWindowingMode(windowingMode);
         }
 
-        // Do not allow non-resizable tasks to be in a multi-window mode, unless it is in pinned
-        // windowing mode or supports non-resizable tasks in multi-window mode.
-        if (!isResizeable()) {
+        // Do not allow tasks not support multi window to be in a multi-window mode, unless it is in
+        // pinned windowing mode.
+        if (!supportsMultiWindow()) {
             final int candidateWindowingMode =
                     windowingMode != WINDOWING_MODE_UNDEFINED ? windowingMode : parentWindowingMode;
             if (WindowConfiguration.inMultiWindowMode(candidateWindowingMode)
-                    && candidateWindowingMode != WINDOWING_MODE_PINNED
-                    && !mTaskSupervisor.mService.mSupportsNonResizableMultiWindow) {
+                    && candidateWindowingMode != WINDOWING_MODE_PINNED) {
                 getResolvedOverrideConfiguration().windowConfiguration.setWindowingMode(
                         WINDOWING_MODE_FULLSCREEN);
             }
@@ -4079,6 +4090,7 @@ class Task extends WindowContainer<WindowContainer> {
         info.lastActiveTime = lastActiveTime;
         info.taskDescription = new ActivityManager.TaskDescription(getTaskDescription());
         info.supportsSplitScreenMultiWindow = supportsSplitScreenWindowingMode();
+        info.supportsMultiWindow = supportsMultiWindow();
         info.configuration.setTo(getConfiguration());
         // Update to the task's current activity type and windowing mode which may differ from the
         // window configuration
@@ -7176,8 +7188,11 @@ class Task extends WindowContainer<WindowContainer> {
         if (DEBUG_TRANSITION) Slog.v(TAG_TRANSITION, "Prepare to back transition: task="
                 + tr.mTaskId);
 
-        mDisplayContent.prepareAppTransition(TRANSIT_TO_BACK);
-        mDisplayContent.requestTransitionAndLegacyPrepare(TRANSIT_TO_BACK, tr);
+        // Skip the transition for pinned task.
+        if (!inPinnedWindowingMode()) {
+            mDisplayContent.prepareAppTransition(TRANSIT_TO_BACK);
+            mDisplayContent.requestTransitionAndLegacyPrepare(TRANSIT_TO_BACK, tr);
+        }
         moveToBack("moveTaskToBackLocked", tr);
 
         if (inPinnedWindowingMode()) {
@@ -7952,12 +7967,33 @@ class Task extends WindowContainer<WindowContainer> {
         private boolean mHasBeenVisible;
         private boolean mRemoveWithTaskOrganizer;
 
+        /**
+         * Records the source task that requesting to build a new task, used to determine which of
+         * the adjacent roots should be launch root of the new task.
+         */
+        private Task mSourceTask;
+
+        /**
+         * Records launch flags to apply when launching new task.
+         */
+        private int mLaunchFlags;
+
         Builder(ActivityTaskManagerService atm) {
             mAtmService = atm;
         }
 
         Builder setParent(WindowContainer parent) {
             mParent = parent;
+            return this;
+        }
+
+        Builder setSourceTask(Task sourceTask) {
+            mSourceTask = sourceTask;
+            return this;
+        }
+
+        Builder setLaunchFlags(int launchFlags) {
+            mLaunchFlags = launchFlags;
             return this;
         }
 
@@ -8215,9 +8251,14 @@ class Task extends WindowContainer<WindowContainer> {
                 tda.getRootPinnedTask().dismissPip();
             }
 
+            if (mIntent != null) {
+                mLaunchFlags |= mIntent.getFlags();
+            }
+
             // Task created by organizer are added as root.
             final Task launchRootTask = mCreatedByOrganizer
-                    ? null : tda.getLaunchRootTask(mWindowingMode, mActivityType, mActivityOptions);
+                    ? null : tda.getLaunchRootTask(mWindowingMode, mActivityType, mActivityOptions,
+                    mSourceTask, mLaunchFlags);
             if (launchRootTask != null) {
                 // Since this task will be put into a root task, its windowingMode will be
                 // inherited.

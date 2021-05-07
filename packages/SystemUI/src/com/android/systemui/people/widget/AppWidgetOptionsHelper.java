@@ -16,7 +16,6 @@
 
 package com.android.systemui.people.widget;
 
-import static com.android.systemui.people.PeopleSpaceUtils.DEBUG;
 import static com.android.systemui.people.PeopleSpaceUtils.EMPTY_KEY;
 import static com.android.systemui.people.PeopleSpaceUtils.EMPTY_STRING;
 import static com.android.systemui.people.PeopleSpaceUtils.INVALID_USER_ID;
@@ -24,37 +23,12 @@ import static com.android.systemui.people.PeopleSpaceUtils.PACKAGE_NAME;
 import static com.android.systemui.people.PeopleSpaceUtils.SHORTCUT_ID;
 import static com.android.systemui.people.PeopleSpaceUtils.USER_ID;
 
-import android.app.people.PeopleSpaceTile;
 import android.appwidget.AppWidgetManager;
 import android.os.Bundle;
-import android.util.Log;
 
 /** Helper class encapsulating AppWidgetOptions for People Tile. */
 public class AppWidgetOptionsHelper {
     private static final String TAG = "AppWidgetOptionsHelper";
-
-    /** Key to store {@link PeopleSpaceTile} in AppWidgetOptions Bundle. */
-    public static final String OPTIONS_PEOPLE_TILE = "options_people_tile";
-
-    /** Sets {@link PeopleSpaceTile} in AppWidgetOptions. */
-    public static Bundle setPeopleTile(AppWidgetManager appWidgetManager, int appWidgetId,
-            PeopleSpaceTile tile) {
-        Bundle options = appWidgetManager.getAppWidgetOptions(appWidgetId);
-        if (tile == null) {
-            if (DEBUG) Log.w(TAG, "Requested to store null tile");
-            return options;
-        }
-        options.putParcelable(OPTIONS_PEOPLE_TILE, tile);
-        appWidgetManager.updateAppWidgetOptions(appWidgetId, options);
-        return options;
-    }
-
-    /** Gets {@link PeopleSpaceTile} from AppWidgetOptions. */
-    public static PeopleSpaceTile getPeopleTile(AppWidgetManager appWidgetManager,
-            int appWidgetId) {
-        Bundle options = appWidgetManager.getAppWidgetOptions(appWidgetId);
-        return options != null ? options.getParcelable(OPTIONS_PEOPLE_TILE) : null;
-    }
 
     /** Sets {@link PeopleTileKey} in AppWidgetOptions. */
     public static void setPeopleTileKey(AppWidgetManager appWidgetManager, int appWidgetId,
@@ -64,16 +38,6 @@ public class AppWidgetOptionsHelper {
         options.putInt(USER_ID, key.getUserId());
         options.putString(PACKAGE_NAME, key.getPackageName());
         appWidgetManager.updateAppWidgetOptions(appWidgetId, options);
-    }
-
-    /** Gets {@link PeopleTileKey} from AppWidgetOptions. */
-    public static PeopleTileKey getPeopleTileKey(AppWidgetManager appWidgetManager,
-            int appWidgetId) {
-        Bundle options = appWidgetManager.getAppWidgetOptions(appWidgetId);
-        if (options == null) {
-            return EMPTY_KEY;
-        }
-        return getPeopleTileKeyFromBundle(options);
     }
 
     /** Gets {@link PeopleTileKey} from Bundle {@code options}. */

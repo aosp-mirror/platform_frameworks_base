@@ -27,6 +27,7 @@ import android.util.AttributeSet;
 import android.widget.TextView;
 
 import com.android.systemui.R;
+import com.android.systemui.statusbar.phone.KeyguardBypassController;
 
 import java.util.Calendar;
 import java.util.TimeZone;
@@ -41,7 +42,7 @@ public class AnimatableClockView extends TextView {
     private static final CharSequence DOUBLE_LINE_FORMAT_12_HOUR = "hh\nmm";
     private static final CharSequence DOUBLE_LINE_FORMAT_24_HOUR = "HH\nmm";
     private static final CharSequence SINGLE_LINE_FORMAT_12_HOUR = "h:mm";
-    private static final CharSequence SINGLE_LINE_FORMAT_24_HOUR = "H:mm";
+    private static final CharSequence SINGLE_LINE_FORMAT_24_HOUR = "HH:mm";
     private static final long DOZE_ANIM_DURATION = 300;
     private static final long CHARGE_ANIM_DURATION_PHASE_0 = 500;
     private static final long CHARGE_ANIM_DURATION_PHASE_1 = 1000;
@@ -153,6 +154,21 @@ public class AnimatableClockView extends TextView {
     void setColors(int dozingColor, int lockScreenColor) {
         mDozingColor = dozingColor;
         mLockScreenColor = lockScreenColor;
+    }
+
+    void animateDisappear() {
+        if (mTextAnimator == null) {
+            return;
+        }
+
+        setTextStyle(
+                0 /* weight */,
+                -1 /* text size, no update */,
+                null /* color, no update */,
+                true /* animate */,
+                KeyguardBypassController.BYPASS_FADE_DURATION /* duration */,
+                0 /* delay */,
+                null /* onAnimationEnd */);
     }
 
     void animateCharge(boolean isDozing) {

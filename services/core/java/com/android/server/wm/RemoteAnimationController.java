@@ -55,7 +55,7 @@ import java.util.ArrayList;
 class RemoteAnimationController implements DeathRecipient {
     private static final String TAG = TAG_WITH_CLASS_NAME
                     ? "RemoteAnimationController" : TAG_WM;
-    private static final long TIMEOUT_MS = 2000;
+    private static final long TIMEOUT_MS = 10000;
 
     private final WindowManagerService mService;
     private final DisplayContent mDisplayContent;

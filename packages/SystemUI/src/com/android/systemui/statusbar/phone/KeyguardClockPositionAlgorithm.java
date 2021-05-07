@@ -155,6 +155,8 @@ public class KeyguardClockPositionAlgorithm {
 
     private int mLockScreenMode;
 
+    private boolean mIsSplitShade;
+
     /**
      * Refreshes the dimension values.
      */
@@ -180,7 +182,7 @@ public class KeyguardClockPositionAlgorithm {
             int keyguardStatusHeight, int userSwitchHeight, int clockPreferredY,
             int userSwitchPreferredY, boolean hasCustomClock, boolean hasVisibleNotifs, float dark,
             float emptyDragAmount, boolean bypassEnabled, int unlockedStackScrollerPadding,
-            float qsExpansion, int cutoutTopInset) {
+            float qsExpansion, int cutoutTopInset, boolean isSplitShade) {
         mMinTopMargin = keyguardStatusBarHeaderHeight + Math.max(mContainerTopPadding,
                 userSwitchHeight);
         mMaxShadeBottom = maxShadeBottom;
@@ -199,6 +201,7 @@ public class KeyguardClockPositionAlgorithm {
         mUnlockedStackScrollerPadding = unlockedStackScrollerPadding;
         mQsExpansion = qsExpansion;
         mCutoutTopInset = cutoutTopInset;
+        mIsSplitShade = isSplitShade;
     }
 
     public void run(Result result) {
@@ -208,12 +211,21 @@ public class KeyguardClockPositionAlgorithm {
         result.clockYFullyDozing = getClockY(
                 1.0f /* panelExpansion */, 1.0f /* darkAmount */);
         result.clockAlpha = getClockAlpha(y);
-        result.stackScrollerPadding = mBypassEnabled ? mUnlockedStackScrollerPadding
-                : y + mKeyguardStatusHeight;
+        result.stackScrollerPadding = getStackScrollerPadding(y);
         result.stackScrollerPaddingExpanded = mBypassEnabled ? mUnlockedStackScrollerPadding
                 : getClockY(1.0f, mDarkAmount) + mKeyguardStatusHeight;
         result.clockX = (int) interpolate(0, burnInPreventionOffsetX(), mDarkAmount);
         result.clockScale = interpolate(getBurnInScale(), 1.0f, 1.0f - mDarkAmount);
+    }
+
+    private int getStackScrollerPadding(int clockYPosition) {
+        if (mBypassEnabled) {
+            return mUnlockedStackScrollerPadding;
+        } else if (mIsSplitShade) {
+            return clockYPosition;
+        } else {
+            return clockYPosition + mKeyguardStatusHeight;
+        }
     }
 
     /**
@@ -232,15 +244,11 @@ public class KeyguardClockPositionAlgorithm {
         return mHeight / 2 - mKeyguardStatusHeight - mClockNotificationsMargin;
     }
 
-    private int getPreferredClockY() {
-        return mClockPreferredY;
-    }
-
     private int getExpandedPreferredClockY() {
         if (mLockScreenMode != KeyguardUpdateMonitor.LOCK_SCREEN_MODE_NORMAL) {
             return mMinTopMargin + mUserSwitchHeight;
         }
-        return (mHasCustomClock && (!mHasVisibleNotifs || mBypassEnabled)) ? getPreferredClockY()
+        return (mHasCustomClock && (!mHasVisibleNotifs || mBypassEnabled)) ? mClockPreferredY
                 : getExpandedClockPosition();
     }
 
@@ -271,7 +279,7 @@ public class KeyguardClockPositionAlgorithm {
 
     private int getClockY(float panelExpansion, float darkAmount) {
         // Dark: Align the bottom edge of the clock at about half of the screen:
-        float clockYDark = (mHasCustomClock ? getPreferredClockY() : getMaxClockY())
+        float clockYDark = (mHasCustomClock ? mClockPreferredY : getMaxClockY())
                 + burnInPreventionOffsetY();
         clockYDark = MathUtils.max(0, clockYDark);
 

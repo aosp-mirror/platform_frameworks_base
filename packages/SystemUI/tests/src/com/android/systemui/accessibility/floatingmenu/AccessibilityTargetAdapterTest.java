@@ -65,9 +65,9 @@ public class AccessibilityTargetAdapterTest extends SysuiTestCase {
         mTargets.add(mAccessibilityTarget);
         mAdapter = new AccessibilityTargetAdapter(mTargets);
 
-        final View root = LayoutInflater.from(mContext).inflate(
+        final View rootView = LayoutInflater.from(mContext).inflate(
                 R.layout.accessibility_floating_menu_item, null);
-        mViewHolder = new ViewHolder(root);
+        mViewHolder = new ViewHolder(rootView);
         when(mAccessibilityTarget.getIcon()).thenReturn(mIcon);
         when(mIcon.getConstantState()).thenReturn(mConstantState);
     }
@@ -81,5 +81,28 @@ public class AccessibilityTargetAdapterTest extends SysuiTestCase {
         final int actualIconWith = mViewHolder.mIconView.getLayoutParams().width;
 
         assertThat(actualIconWith).isEqualTo(iconWidthHeight);
+    }
+
+    @Test
+    public void getContentDescription_invisibleToggleTarget_descriptionWithoutState() {
+        when(mAccessibilityTarget.getFragmentType()).thenReturn(/* InvisibleToggle */ 1);
+        when(mAccessibilityTarget.getLabel()).thenReturn("testLabel");
+        when(mAccessibilityTarget.getStateDescription()).thenReturn("testState");
+
+        mAdapter.onBindViewHolder(mViewHolder, 0);
+
+        assertThat(mViewHolder.itemView.getContentDescription().toString().contentEquals(
+                "testLabel")).isTrue();
+    }
+
+    @Test
+    public void getStateDescription_toggleTarget_switchOff_stateOffText() {
+        when(mAccessibilityTarget.getFragmentType()).thenReturn(/* Toggle */ 2);
+        when(mAccessibilityTarget.getStateDescription()).thenReturn("testState");
+
+        mAdapter.onBindViewHolder(mViewHolder, 0);
+
+        assertThat(mViewHolder.itemView.getStateDescription().toString().contentEquals(
+                "testState")).isTrue();
     }
 }

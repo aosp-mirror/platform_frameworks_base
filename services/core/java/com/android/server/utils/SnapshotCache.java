@@ -57,6 +57,15 @@ public abstract class SnapshotCache<T> extends Watcher{
     }
 
     /**
+     * A private constructor that sets fields to null and mSealed to true.  This supports
+     * the Sealed subclass.
+     */
+    public SnapshotCache() {
+        mSource = null;
+        mSealed = true;
+    }
+
+    /**
      * Notify the object that the source object has changed.  If the local object is sealed then
      * IllegalStateException is thrown.  Otherwise, the cache is cleared.
      */
@@ -93,4 +102,25 @@ public abstract class SnapshotCache<T> extends Watcher{
      * @return A snapshot
      */
     public abstract T createSnapshot();
+
+    /**
+     * A snapshot cache suitable for sealed snapshots.  Attempting to retrieve the
+     * snapshot will throw an UnsupportedOperationException.
+     * @param <T> the type of object being cached.  This is needed for compilation only.  It
+     * has no effect on execution.
+     */
+    public static class Sealed<T> extends SnapshotCache<T> {
+        /**
+         * Create a sealed SnapshotCache that cannot be used to create new snapshots.
+         */
+        public Sealed() {
+        }
+        /**
+         * Provide a concrete implementation of createSnapshot() that throws
+         * UnsupportedOperationException.
+         */
+        public T createSnapshot() {
+            throw new UnsupportedOperationException("cannot snapshot a sealed snaphot");
+        }
+    }
 }

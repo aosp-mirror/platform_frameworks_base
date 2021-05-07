@@ -51,7 +51,8 @@ import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_NORMAL;
 import static android.os.IServiceManager.DUMP_FLAG_PROTO;
 import static android.os.InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 import static android.os.PowerExemptionManager.REASON_SYSTEM_ALLOW_LISTED;
-import static android.os.PowerWhitelistManager.TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
+import static android.os.PowerExemptionManager.TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
+import static android.os.PowerExemptionManager.TEMPORARY_ALLOW_LIST_TYPE_NONE;
 import static android.os.Process.BLUETOOTH_UID;
 import static android.os.Process.FIRST_APPLICATION_UID;
 import static android.os.Process.INVALID_UID;
@@ -7776,16 +7777,25 @@ public class ActivityManagerService extends IActivityManager.Stub
                 incrementalMetrics != null /* isIncremental */, loadingProgress,
                 incrementalMetrics != null ? incrementalMetrics.getMillisSinceOldestPendingRead()
                         : -1,
-                0 /* storage_health_code */,
-                0 /* data_loader_status_code */,
-                false /* read_logs_enabled */,
-                0 /* millis_since_last_data_loader_bind */,
-                0 /* data_loader_bind_delay_millis */,
-                0 /* total_delayed_reads */,
-                0 /* total_failed_reads */,
-                0 /* last_read_error_uid */,
-                0 /* last_read_error_millis_since */,
-                0 /* last_read_error_code */
+                incrementalMetrics != null ? incrementalMetrics.getStorageHealthStatusCode()
+                        : -1,
+                incrementalMetrics != null ? incrementalMetrics.getDataLoaderStatusCode()
+                        : -1,
+                incrementalMetrics != null && incrementalMetrics.getReadLogsEnabled(),
+                incrementalMetrics != null ? incrementalMetrics.getMillisSinceLastDataLoaderBind()
+                        : -1,
+                incrementalMetrics != null ? incrementalMetrics.getDataLoaderBindDelayMillis()
+                        : -1,
+                incrementalMetrics != null ? incrementalMetrics.getTotalDelayedReads()
+                        : -1,
+                incrementalMetrics != null ? incrementalMetrics.getTotalFailedReads()
+                        : -1,
+                incrementalMetrics != null ? incrementalMetrics.getLastReadErrorUid()
+                        : -1,
+                incrementalMetrics != null ? incrementalMetrics.getMillisSinceLastReadError()
+                        : -1,
+                incrementalMetrics != null ? incrementalMetrics.getLastReadErrorNumber()
+                        : 0
         );
 
         final int relaunchReason = r == null ? RELAUNCH_REASON_NONE
@@ -14603,15 +14613,20 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     @GuardedBy("this")
     void tempAllowlistUidLocked(int targetUid, long duration, @ReasonCode int reasonCode,
-            String reason, int type, int callingUid) {
+            String reason, @TempAllowListType int type, int callingUid) {
         synchronized (mProcLock) {
+            // The temp allowlist type could change according to the reasonCode.
+            type = mLocalDeviceIdleController.getTempAllowListType(reasonCode, type);
+            if (type == TEMPORARY_ALLOW_LIST_TYPE_NONE) {
+                return;
+            }
             mPendingTempAllowlist.put(targetUid,
                     new PendingTempAllowlist(targetUid, duration, reasonCode, reason, type,
                             callingUid));
             setUidTempAllowlistStateLSP(targetUid, true);
             mUiHandler.obtainMessage(PUSH_TEMP_ALLOWLIST_UI_MSG).sendToTarget();
 
-            if (type == TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED) {
+            if (type == TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED) {
                 mFgsStartTempAllowList.add(targetUid, duration,
                         new FgsTempAllowListItem(duration, reasonCode, reason, callingUid));
             }
@@ -14825,7 +14840,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 throw new IllegalArgumentException("null fd");
             }
 
-            synchronized (mProcLock) {
+            synchronized (this) {
                 ProcessRecord proc = findProcessLOSP(process, userId, "dumpHeap");
                 IApplicationThread thread;
                 if (proc == null || (thread = proc.getThread()) == null) {
@@ -15285,7 +15300,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 synchronized (mProcLock) {
                     mDeviceIdleTempAllowlist = appids;
                     if (adding) {
-                        if (type == TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED) {
+                        if (type == TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED) {
                             mFgsStartTempAllowList.add(changingUid, durationMs,
                                     new FgsTempAllowListItem(durationMs, reasonCode, reason,
                                     callingUid));
@@ -15825,8 +15840,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                     if (initLocale || !mProcessesReady) {
                         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
                     }
+                    final BroadcastOptions bOptions = BroadcastOptions.makeBasic();
+                    bOptions.setTemporaryAppAllowlist(mInternal.getBootTimeTempAllowListDuration(),
+                            TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
+                            PowerExemptionManager.REASON_LOCALE_CHANGED, "");
                     broadcastIntentLocked(null, null, null, intent, null, null, 0, null, null, null,
-                            null, OP_NONE, null, false, false, MY_PID, SYSTEM_UID,
+                            null, OP_NONE, bOptions.toBundle(), false, false, MY_PID, SYSTEM_UID,
                             Binder.getCallingUid(), Binder.getCallingPid(),
                             UserHandle.USER_ALL);
                 }
@@ -16150,6 +16169,13 @@ public class ActivityManagerService extends IActivityManager.Stub
                 @NonNull String packageName) {
             synchronized (ActivityManagerService.this) {
                 return mServices.canAllowWhileInUsePermissionInFgsLocked(pid, uid, packageName);
+            }
+        }
+
+        @Override
+        public @TempAllowListType int getPushMessagingOverQuotaBehavior() {
+            synchronized (ActivityManagerService.this) {
+                return mConstants.mPushMessagingOverQuotaBehavior;
             }
         }
     }

@@ -378,7 +378,8 @@ static jlong android_view_MotionEvent_nativeInitialize(
                       flags, edgeFlags, metaState, buttonState,
                       static_cast<MotionClassification>(classification), transform, xPrecision,
                       yPrecision, AMOTION_EVENT_INVALID_CURSOR_POSITION,
-                      AMOTION_EVENT_INVALID_CURSOR_POSITION, downTimeNanos, eventTimeNanos,
+                      AMOTION_EVENT_INVALID_CURSOR_POSITION, AMOTION_EVENT_INVALID_DISPLAY_SIZE,
+                      AMOTION_EVENT_INVALID_DISPLAY_SIZE, downTimeNanos, eventTimeNanos,
                       pointerCount, pointerProperties, rawPointerCoords);
 
     return reinterpret_cast<jlong>(event.release());
@@ -575,6 +576,15 @@ static void android_view_MotionEvent_nativeTransform(JNIEnv* env, jclass clazz,
     std::array<float, 9> matrix;
     AMatrix_getContents(env, matrixObj, matrix.data());
     event->transform(matrix);
+}
+
+static void android_view_MotionEvent_nativeApplyTransform(JNIEnv* env, jclass clazz,
+                                                          jlong nativePtr, jobject matrixObj) {
+    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
+
+    std::array<float, 9> matrix;
+    AMatrix_getContents(env, matrixObj, matrix.data());
+    event->applyTransform(matrix);
 }
 
 // ----------------- @CriticalNative ------------------------------
@@ -789,6 +799,8 @@ static const JNINativeMethod gMotionEventMethods[] = {
         {"nativeGetAxisValue", "(JIII)F", (void*)android_view_MotionEvent_nativeGetAxisValue},
         {"nativeTransform", "(JLandroid/graphics/Matrix;)V",
          (void*)android_view_MotionEvent_nativeTransform},
+        {"nativeApplyTransform", "(JLandroid/graphics/Matrix;)V",
+         (void*)android_view_MotionEvent_nativeApplyTransform},
 
         // --------------- @CriticalNative ------------------
 

@@ -70,4 +70,17 @@ public class Interpolators {
      */
     public static final Interpolator TOUCH_RESPONSE_REVERSE =
             new PathInterpolator(0.9f, 0f, 0.7f, 1f);
+
+    /**
+     * Interpolate alpha for notifications background scrim during shade expansion.
+     * @param fraction Shade expansion fraction
+     */
+    public static float getNotificationScrimAlpha(float fraction) {
+        fraction = fraction * 1.2f - 0.2f;
+        if (fraction <= 0) {
+            return 0;
+        } else {
+            return (float) (1f - 0.5f * (1f - Math.cos(3.14159f * Math.pow(1f - fraction, 2f))));
+        }
+    }
 }

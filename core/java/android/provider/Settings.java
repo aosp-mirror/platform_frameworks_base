@@ -6607,7 +6607,6 @@ public final class Settings {
          *
          * @hide
          */
-        @Readable
         public static final String ALWAYS_ON_VPN_APP = "always_on_vpn_app";
 
         /**
@@ -8514,6 +8513,12 @@ public final class Settings {
          */
         public static final String SWIPE_BOTTOM_TO_NOTIFICATION_ENABLED =
                 "swipe_bottom_to_notification_enabled";
+
+        /**
+         * Controls whether One-Handed mode is currently activated.
+         * @hide
+         */
+        public static final String ONE_HANDED_MODE_ACTIVATED = "one_handed_mode_activated";
 
         /**
          * For user preference if One-Handed Mode enabled.

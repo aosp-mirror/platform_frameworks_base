@@ -49,6 +49,7 @@ import android.view.animation.AnimationUtils;
 import android.view.inspector.InspectableProperty;
 
 import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.List;
 
@@ -95,20 +96,24 @@ public class ScrollView extends FrameLayout {
      *
      * Even though this field is practically final, we cannot make it final because there are apps
      * setting it via reflection and they need to keep working until they target Q.
+     * @hide
      */
     @NonNull
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 123768600)
-    private EdgeEffect mEdgeGlowTop;
+    @VisibleForTesting
+    public EdgeEffect mEdgeGlowTop;
 
     /**
      * Tracks the state of the bottom edge glow.
      *
      * Even though this field is practically final, we cannot make it final because there are apps
      * setting it via reflection and they need to keep working until they target Q.
+     * @hide
      */
     @NonNull
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 123769386)
-    private EdgeEffect mEdgeGlowBottom;
+    @VisibleForTesting
+    public EdgeEffect mEdgeGlowBottom;
 
     /**
      * Position of the last motion event.
@@ -335,34 +340,12 @@ public class ScrollView extends FrameLayout {
     }
 
     /**
-     * Returns the {@link EdgeEffect#getType()} for the edge effects.
-     * @return the {@link EdgeEffect#getType()} for the edge effects.
-     * @attr ref android.R.styleable#EdgeEffect_edgeEffectType
-     */
-    @EdgeEffect.EdgeEffectType
-    public int getEdgeEffectType() {
-        return mEdgeGlowTop.getType();
-    }
-
-    /**
-     * Sets the {@link EdgeEffect#setType(int)} for the edge effects.
-     * @param type The edge effect type to use for the edge effects.
-     * @attr ref android.R.styleable#EdgeEffect_edgeEffectType
-     */
-    public void setEdgeEffectType(@EdgeEffect.EdgeEffectType int type) {
-        mEdgeGlowTop.setType(type);
-        mEdgeGlowBottom.setType(type);
-        invalidate();
-    }
-
-    /**
      * @return The maximum amount this scroll view will scroll in response to
      *   an arrow event.
      */
     public int getMaxScrollAmount() {
         return (int) (MAX_SCROLL_FACTOR * (mBottom - mTop));
     }
-
 
     private void initScrollView() {
         mScroller = new OverScroller(getContext());
@@ -763,8 +746,7 @@ public class ScrollView extends FrameLayout {
                 if (getChildCount() == 0) {
                     return false;
                 }
-                if ((mIsBeingDragged = !mScroller.isFinished() || !mEdgeGlowTop.isFinished()
-                        || !mEdgeGlowBottom.isFinished())) {
+                if (!mScroller.isFinished()) {
                     final ViewParent parent = getParent();
                     if (parent != null) {
                         parent.requestDisallowInterceptTouchEvent(true);
@@ -1792,9 +1774,15 @@ public class ScrollView extends FrameLayout {
         final boolean canFling = (mScrollY > 0 || velocityY > 0) &&
                 (mScrollY < getScrollRange() || velocityY < 0);
         if (!dispatchNestedPreFling(0, velocityY)) {
-            dispatchNestedFling(0, velocityY, canFling);
+            final boolean consumed = dispatchNestedFling(0, velocityY, canFling);
             if (canFling) {
                 fling(velocityY);
+            } else if (!consumed) {
+                if (!mEdgeGlowTop.isFinished()) {
+                    mEdgeGlowTop.onAbsorb(-velocityY);
+                } else if (!mEdgeGlowBottom.isFinished()) {
+                    mEdgeGlowBottom.onAbsorb(velocityY);
+                }
             }
         }
     }

@@ -56,7 +56,7 @@ public final class DeviceIdlenessTracker extends BroadcastReceiver implements Id
     private boolean mDockIdle;
     private boolean mProjectionActive;
     private IdlenessListener mIdleListener;
-    private final UiModeManager.OnProjectionStateChangeListener mOnProjectionStateChangeListener =
+    private final UiModeManager.OnProjectionStateChangedListener mOnProjectionStateChangedListener =
             this::onProjectionStateChanged;
 
     private AlarmManager.OnAlarmListener mIdleAlarmListener = () -> {
@@ -105,9 +105,9 @@ public final class DeviceIdlenessTracker extends BroadcastReceiver implements Id
 
         // TODO(b/172579710): Move the callbacks off the main executor and on to
         //  JobSchedulerBackgroundThread.getExecutor() once synchronization is fixed in this class.
-        context.getSystemService(UiModeManager.class).addOnProjectionStateChangeListener(
+        context.getSystemService(UiModeManager.class).addOnProjectionStateChangedListener(
                 UiModeManager.PROJECTION_TYPE_ALL, context.getMainExecutor(),
-                mOnProjectionStateChangeListener);
+                mOnProjectionStateChangedListener);
     }
 
     private void onProjectionStateChanged(@UiModeManager.ProjectionType int activeProjectionTypes,

@@ -1568,16 +1568,6 @@ public class ApnSetting implements Parcelable {
     }
 
     /**
-     * Same as {@link #getApnTypeString(int)}, but returns "Unknown" instead of an empty string
-     * when provided with an invalid int for compatibility purposes.
-     * @hide
-     */
-    public static @NonNull String getApnTypeStringInternal(@ApnType int apnType) {
-        String result = getApnTypeString(apnType);
-        return TextUtils.isEmpty(result) ? "Unknown" : result;
-    }
-
-    /**
      * Converts the string representation of an APN type to its integer representation.
      *
      * @param apnType APN type as a string

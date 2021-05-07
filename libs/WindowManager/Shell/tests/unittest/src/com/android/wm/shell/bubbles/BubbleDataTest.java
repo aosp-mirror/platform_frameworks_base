@@ -19,6 +19,8 @@ package com.android.wm.shell.bubbles;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
+import static junit.framework.TestCase.assertEquals;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
@@ -797,6 +799,15 @@ public class BubbleDataTest extends ShellTestCase {
         mBubbleData.dismissBubbleWithKey(mEntryA1.getKey(), Bubbles.DISMISS_USER_GESTURE);
         verifyUpdateReceived();
         assertExpandedChangedTo(false);
+    }
+
+    @Test
+    public void test_addToOverflow_doesntAllowDupes() {
+        assertEquals(0, mBubbleData.getOverflowBubbles().size());
+        mBubbleData.overflowBubble(Bubbles.DISMISS_AGED, mBubbleA1);
+        mBubbleData.overflowBubble(Bubbles.DISMISS_AGED, mBubbleA1);
+        mBubbleData.overflowBubble(Bubbles.DISMISS_AGED, mBubbleA1);
+        assertEquals(1, mBubbleData.getOverflowBubbles().size());
     }
 
     private void verifyUpdateReceived() {

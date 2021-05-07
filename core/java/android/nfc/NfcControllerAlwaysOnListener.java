@@ -52,6 +52,14 @@ public class NfcControllerAlwaysOnListener extends INfcControllerAlwaysOnListene
      */
     public void register(@NonNull Executor executor,
             @NonNull ControllerAlwaysOnListener listener) {
+        try {
+            if (!mAdapter.isControllerAlwaysOnSupported()) {
+                return;
+            }
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failed to register");
+            return;
+        }
         synchronized (this) {
             if (mListenerMap.containsKey(listener)) {
                 return;
@@ -75,6 +83,14 @@ public class NfcControllerAlwaysOnListener extends INfcControllerAlwaysOnListene
      * @param listener user implementation of the {@link ControllerAlwaysOnListener}
      */
     public void unregister(@NonNull ControllerAlwaysOnListener listener) {
+        try {
+            if (!mAdapter.isControllerAlwaysOnSupported()) {
+                return;
+            }
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failed to unregister");
+            return;
+        }
         synchronized (this) {
             if (!mListenerMap.containsKey(listener)) {
                 return;

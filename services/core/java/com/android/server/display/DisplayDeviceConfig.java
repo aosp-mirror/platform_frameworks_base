@@ -79,6 +79,9 @@ public class DisplayDeviceConfig {
     // The details of the ambient light sensor associated with this display.
     private final SensorIdentifier mAmbientLightSensor = new SensorIdentifier();
 
+    // The details of the proximity sensor associated with this display.
+    private final SensorIdentifier mProximitySensor = new SensorIdentifier();
+
     // Nits and backlight values that are loaded from either the display device config file, or
     // config.xml. These are the raw values and just used for the dumpsys
     private float[] mRawNits;
@@ -104,6 +107,7 @@ public class DisplayDeviceConfig {
     private float mBrightnessRampSlowIncrease = Float.NaN;
     private Spline mBrightnessToBacklightSpline;
     private Spline mBacklightToBrightnessSpline;
+    private Spline mBacklightToNitsSpline;
     private List<String> mQuirks;
     private boolean mIsHighBrightnessModeEnabled = false;
     private HighBrightnessModeData mHbmData;
@@ -219,6 +223,20 @@ public class DisplayDeviceConfig {
     }
 
     /**
+     * Calculates the nits value for the specified backlight value if a mapping exists.
+     *
+     * @return The mapped nits or 0 if no mapping exits.
+     */
+    public float getNitsFromBacklight(float backlight) {
+        if (mBacklightToNitsSpline == null) {
+            Slog.wtf(TAG, "requesting nits when no mapping exists.");
+            return -1;
+        }
+        backlight = Math.max(backlight, mBacklightMinimum);
+        return mBacklightToNitsSpline.interpolate(backlight);
+    }
+
+    /**
      * Return an array of equal length to backlight and nits, that covers the entire system
      * brightness range of 0.0-1.0.
      *
@@ -255,6 +273,17 @@ public class DisplayDeviceConfig {
 
     SensorIdentifier getAmbientLightSensor() {
         return mAmbientLightSensor;
+    }
+
+    SensorIdentifier getProximitySensor() {
+        return mProximitySensor;
+    }
+
+    /**
+     * @return true if a nits to backlight mapping is defined in this config, false otherwise.
+     */
+    public boolean hasNitsMapping() {
+        return mBacklightToNitsSpline != null;
     }
 
     /**
@@ -300,6 +329,7 @@ public class DisplayDeviceConfig {
                 + ", mBrightnessRampSlowDecrease=" + mBrightnessRampSlowDecrease
                 + ", mBrightnessRampSlowIncrease=" + mBrightnessRampSlowIncrease
                 + ", mAmbientLightSensor=" + mAmbientLightSensor
+                + ", mProximitySensor=" + mProximitySensor
                 + "}";
         return str;
     }
@@ -352,6 +382,7 @@ public class DisplayDeviceConfig {
                 loadQuirks(config);
                 loadBrightnessRamps(config);
                 loadAmbientLightSensorFromDdc(config);
+                loadProxSensorFromDdc(config);
             } else {
                 Slog.w(TAG, "DisplayDeviceConfig file is null");
             }
@@ -368,6 +399,7 @@ public class DisplayDeviceConfig {
         loadBrightnessMapFromConfigXml();
         loadBrightnessRampsFromConfigXml();
         loadAmbientLightSensorFromConfigXml();
+        setProxSensorUnspecified();
     }
 
     private void initFromDefaultValues() {
@@ -381,6 +413,7 @@ public class DisplayDeviceConfig {
         mBrightnessRampSlowIncrease = PowerManager.BRIGHTNESS_MAX;
         setSimpleMappingStrategyValues();
         loadAmbientLightSensorFromConfigXml();
+        setProxSensorUnspecified();
     }
 
     private void loadBrightnessDefaultFromDdcXml(DisplayConfiguration config) {
@@ -584,6 +617,7 @@ public class DisplayDeviceConfig {
         }
         mBrightnessToBacklightSpline = Spline.createSpline(mBrightness, mBacklight);
         mBacklightToBrightnessSpline = Spline.createSpline(mBacklight, mBrightness);
+        mBacklightToNitsSpline = Spline.createSpline(mBacklight, mNits);
     }
 
     private void loadQuirks(DisplayConfiguration config) {
@@ -660,6 +694,21 @@ public class DisplayDeviceConfig {
         if (sensorDetails != null) {
             mAmbientLightSensor.type = sensorDetails.getType();
             mAmbientLightSensor.name = sensorDetails.getName();
+        }
+    }
+
+    private void setProxSensorUnspecified() {
+        mProximitySensor.name = "";
+        mProximitySensor.type = "";
+    }
+
+    private void loadProxSensorFromDdc(DisplayConfiguration config) {
+        SensorDetails sensorDetails = config.getProxSensor();
+        if (sensorDetails != null) {
+            mProximitySensor.name = sensorDetails.getName();
+            mProximitySensor.type = sensorDetails.getType();
+        } else {
+            setProxSensorUnspecified();
         }
     }
 

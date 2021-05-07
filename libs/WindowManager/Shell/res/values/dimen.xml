@@ -125,7 +125,9 @@
     <dimen name="bubble_expanded_view_slop">8dp</dimen>
     <!-- Default (and minimum) height of the expanded view shown when the bubble is expanded -->
     <dimen name="bubble_expanded_default_height">180dp</dimen>
-    <!-- Default height of bubble overflow -->
+    <!-- On large screens the width of the expanded view is restricted to this size. -->
+    <dimen name="bubble_expanded_view_tablet_width">412dp</dimen>
+    <!-- Default (and minimum) height of bubble overflow -->
     <dimen name="bubble_overflow_height">480dp</dimen>
     <!-- Bubble overflow padding when there are no bubbles  -->
     <dimen name="bubble_overflow_empty_state_padding">16dp</dimen>
@@ -178,7 +180,9 @@
     <dimen name="bubble_stack_user_education_side_inset">72dp</dimen>
 
     <!-- The width/height of the icon view on staring surface. -->
-    <dimen name="starting_surface_icon_size">108dp</dimen>
+    <dimen name="starting_surface_icon_size">160dp</dimen>
+    <!-- The default width/height of the icon on the spec of adaptive icon drawable. -->
+    <dimen name="default_icon_size">108dp</dimen>
 
     <!-- The width/height of the size compat restart button. -->
     <dimen name="size_compat_button_size">48dp</dimen>

@@ -52,6 +52,7 @@ import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.graphics.PointF;
+import android.graphics.Rect;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -70,6 +71,7 @@ import android.util.SparseSetArray;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.window.WindowContainerTransaction;
 
 import androidx.annotation.MainThread;
 import androidx.annotation.Nullable;
@@ -79,6 +81,8 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.WindowManagerShellWrapper;
+import com.android.wm.shell.common.DisplayChangeController;
+import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TaskStackListenerCallback;
@@ -131,6 +135,7 @@ public class BubbleController {
     private final WindowManager mWindowManager;
     private final TaskStackListenerImpl mTaskStackListener;
     private final ShellTaskOrganizer mTaskOrganizer;
+    private final DisplayController mDisplayController;
 
     // Used to post to main UI thread
     private final ShellExecutor mMainExecutor;
@@ -171,25 +176,21 @@ public class BubbleController {
     /** Whether or not the BubbleStackView has been added to the WindowManager. */
     private boolean mAddedToWindowManager = false;
 
-    /** Last known orientation, used to detect orientation changes in {@link #onConfigChanged}. */
-    private int mOrientation = Configuration.ORIENTATION_UNDEFINED;
-
-    /**
-     * Last known screen density, used to detect display size changes in {@link #onConfigChanged}.
-     */
+    /** Saved screen density, used to detect display size changes in {@link #onConfigChanged}. */
     private int mDensityDpi = Configuration.DENSITY_DPI_UNDEFINED;
 
-    /**
-     * Last known font scale, used to detect font size changes in {@link #onConfigChanged}.
-     */
+    /** Saved screen bounds, used to detect screen size changes in {@link #onConfigChanged}. **/
+    private Rect mScreenBounds = new Rect();
+
+    /** Saved font scale, used to detect font size changes in {@link #onConfigChanged}. */
     private float mFontScale = 0;
 
-    /** Last known direction, used to detect layout direction changes @link #onConfigChanged}. */
+    /** Saved direction, used to detect layout direction changes @link #onConfigChanged}. */
     private int mLayoutDirection = View.LAYOUT_DIRECTION_UNDEFINED;
 
     private boolean mInflateSynchronously;
 
-    /** true when user is in status bar unlock shade. */
+    /** True when user is in status bar unlock shade. */
     private boolean mIsStatusBarShade = true;
 
     /**
@@ -205,6 +206,7 @@ public class BubbleController {
             TaskStackListenerImpl taskStackListener,
             UiEventLogger uiEventLogger,
             ShellTaskOrganizer organizer,
+            DisplayController displayController,
             ShellExecutor mainExecutor,
             Handler mainHandler) {
         BubbleLogger logger = new BubbleLogger(uiEventLogger);
@@ -213,7 +215,8 @@ public class BubbleController {
         return new BubbleController(context, data, synchronizer, floatingContentCoordinator,
                 new BubbleDataRepository(context, launcherApps, mainExecutor),
                 statusBarService, windowManager, windowManagerShellWrapper, launcherApps,
-                logger, taskStackListener, organizer, positioner, mainExecutor, mainHandler);
+                logger, taskStackListener, organizer, positioner, displayController, mainExecutor,
+                mainHandler);
     }
 
     /**
@@ -233,6 +236,7 @@ public class BubbleController {
             TaskStackListenerImpl taskStackListener,
             ShellTaskOrganizer organizer,
             BubblePositioner positioner,
+            DisplayController displayController,
             ShellExecutor mainExecutor,
             Handler mainHandler) {
         mContext = context;
@@ -256,6 +260,7 @@ public class BubbleController {
         mBubbleData = data;
         mSavedBubbleKeysPerUser = new SparseSetArray<>();
         mBubbleIconFactory = new BubbleIconFactory(context);
+        mDisplayController = displayController;
     }
 
     public void initialize() {
@@ -286,7 +291,6 @@ public class BubbleController {
         } catch (RemoteException e) {
             e.printStackTrace();
         }
-
 
         mBubbleData.setCurrentUserId(mCurrentUserId);
 
@@ -366,6 +370,23 @@ public class BubbleController {
                 }
             }
         });
+
+        mDisplayController.addDisplayChangingController(
+                new DisplayChangeController.OnDisplayChangingListener() {
+                    @Override
+                    public void onRotateDisplay(int displayId, int fromRotation, int toRotation,
+                            WindowContainerTransaction t) {
+                        // This is triggered right before the rotation is applied
+                        if (fromRotation != toRotation) {
+                            mBubblePositioner.setRotation(toRotation);
+                            if (mStackView != null) {
+                                // Layout listener set on stackView will update the positioner
+                                // once the rotation is applied
+                                mStackView.onOrientationChanged();
+                            }
+                        }
+                    }
+                });
     }
 
     @VisibleForTesting
@@ -585,7 +606,7 @@ public class BubbleController {
             mStackView.addView(mBubbleScrim);
             mWindowManager.addView(mStackView, mWmLayoutParams);
             // Position info is dependent on us being attached to a window
-            mBubblePositioner.update(mOrientation);
+            mBubblePositioner.update();
         } catch (IllegalStateException e) {
             // This means the stack has already been added. This shouldn't happen...
             e.printStackTrace();
@@ -682,16 +703,13 @@ public class BubbleController {
 
     private void onConfigChanged(Configuration newConfig) {
         if (mBubblePositioner != null) {
-            // This doesn't trigger any changes, always update it
-            mBubblePositioner.update(newConfig.orientation);
+            mBubblePositioner.update();
         }
         if (mStackView != null && newConfig != null) {
-            if (newConfig.orientation != mOrientation) {
-                mOrientation = newConfig.orientation;
-                mStackView.onOrientationChanged();
-            }
-            if (newConfig.densityDpi != mDensityDpi) {
+            if (newConfig.densityDpi != mDensityDpi
+                    || !newConfig.windowConfiguration.getBounds().equals(mScreenBounds)) {
                 mDensityDpi = newConfig.densityDpi;
+                mScreenBounds.set(newConfig.windowConfiguration.getBounds());
                 mBubbleIconFactory = new BubbleIconFactory(mContext);
                 mStackView.onDisplaySizeChanged();
             }

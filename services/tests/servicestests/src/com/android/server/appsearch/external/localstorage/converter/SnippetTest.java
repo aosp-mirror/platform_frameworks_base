@@ -96,7 +96,7 @@ public class SnippetTest {
                         Collections.singletonList(DATABASE_NAME),
                         SCHEMA_MAP);
         assertThat(searchResultPage.getResults()).hasSize(1);
-        SearchResult.MatchInfo match = searchResultPage.getResults().get(0).getMatches().get(0);
+        SearchResult.MatchInfo match = searchResultPage.getResults().get(0).getMatchInfos().get(0);
         assertThat(match.getPropertyPath()).isEqualTo(propertyKeyString);
         assertThat(match.getFullText()).isEqualTo(propertyValueString);
         assertThat(match.getExactMatch()).isEqualTo(exactMatch);
@@ -142,7 +142,7 @@ public class SnippetTest {
                         Collections.singletonList(DATABASE_NAME),
                         SCHEMA_MAP);
         assertThat(searchResultPage.getResults()).hasSize(1);
-        assertThat(searchResultPage.getResults().get(0).getMatches()).isEmpty();
+        assertThat(searchResultPage.getResults().get(0).getMatchInfos()).isEmpty();
     }
 
     @Test
@@ -198,7 +198,7 @@ public class SnippetTest {
                         Collections.singletonList(DATABASE_NAME),
                         SCHEMA_MAP);
         assertThat(searchResultPage.getResults()).hasSize(1);
-        SearchResult.MatchInfo match1 = searchResultPage.getResults().get(0).getMatches().get(0);
+        SearchResult.MatchInfo match1 = searchResultPage.getResults().get(0).getMatchInfos().get(0);
         assertThat(match1.getPropertyPath()).isEqualTo("senderName");
         assertThat(match1.getFullText()).isEqualTo("Test Name Jr.");
         assertThat(match1.getExactMatchRange())
@@ -208,7 +208,7 @@ public class SnippetTest {
                 .isEqualTo(new SearchResult.MatchRange(/*lower=*/ 0, /*upper=*/ 9));
         assertThat(match1.getSnippet()).isEqualTo("Test Name");
 
-        SearchResult.MatchInfo match2 = searchResultPage.getResults().get(0).getMatches().get(1);
+        SearchResult.MatchInfo match2 = searchResultPage.getResults().get(0).getMatchInfos().get(1);
         assertThat(match2.getPropertyPath()).isEqualTo("senderEmail");
         assertThat(match2.getFullText()).isEqualTo("TestNameJr@gmail.com");
         assertThat(match2.getExactMatchRange())
@@ -281,7 +281,7 @@ public class SnippetTest {
                         Collections.singletonList(DATABASE_NAME),
                         SCHEMA_MAP);
         assertThat(searchResultPage.getResults()).hasSize(1);
-        SearchResult.MatchInfo match1 = searchResultPage.getResults().get(0).getMatches().get(0);
+        SearchResult.MatchInfo match1 = searchResultPage.getResults().get(0).getMatchInfos().get(0);
         assertThat(match1.getPropertyPath()).isEqualTo("sender.name");
         assertThat(match1.getFullText()).isEqualTo("Test Name Jr.");
         assertThat(match1.getExactMatchRange())
@@ -291,7 +291,7 @@ public class SnippetTest {
                 .isEqualTo(new SearchResult.MatchRange(/*lower=*/ 0, /*upper=*/ 9));
         assertThat(match1.getSnippet()).isEqualTo("Test Name");
 
-        SearchResult.MatchInfo match2 = searchResultPage.getResults().get(0).getMatches().get(1);
+        SearchResult.MatchInfo match2 = searchResultPage.getResults().get(0).getMatchInfos().get(1);
         assertThat(match2.getPropertyPath()).isEqualTo("sender.email[1]");
         assertThat(match2.getFullText()).isEqualTo("TestNameJr2@gmail.com");
         assertThat(match2.getExactMatchRange())

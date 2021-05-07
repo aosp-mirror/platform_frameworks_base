@@ -91,6 +91,7 @@ import static android.content.pm.ActivityInfo.SIZE_CHANGES_UNSUPPORTED_OVERRIDE;
 import static android.content.pm.ActivityInfo.isFixedOrientationLandscape;
 import static android.content.pm.ActivityInfo.isFixedOrientationPortrait;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.content.res.Configuration.ASSETS_SEQ_UNDEFINED;
 import static android.content.res.Configuration.EMPTY;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
@@ -2465,8 +2466,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (windowingMode == WINDOWING_MODE_PINNED && info.supportsPictureInPicture()) {
             return false;
         }
-        if (WindowConfiguration.inMultiWindowMode(windowingMode)
-                && mAtmService.mSupportsNonResizableMultiWindow
+        if (WindowConfiguration.inMultiWindowMode(windowingMode) && supportsMultiWindow()
                 && !mAtmService.mForceResizableActivities) {
             // The non resizable app will be letterboxed instead of being forced resizable.
             return false;
@@ -2509,7 +2509,28 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      */
     boolean supportsMultiWindow() {
         return mAtmService.mSupportsMultiWindow && !isActivityTypeHome()
-                && (isResizeable() || mAtmService.mSupportsNonResizableMultiWindow);
+                && (isResizeable() || mAtmService.mDevEnableNonResizableMultiWindow);
+    }
+
+    // TODO(b/176061101) replace supportsMultiWindow() after fixing tests.
+    boolean supportsMultiWindow2() {
+        if (!mAtmService.mSupportsMultiWindow) {
+            return false;
+        }
+        final TaskDisplayArea tda = getDisplayArea();
+        if (tda == null) {
+            return false;
+        }
+
+        if (!isResizeable() && !tda.supportsNonResizableMultiWindow()) {
+            // Not support non-resizable in multi window.
+            return false;
+        }
+
+        final ActivityInfo.WindowLayout windowLayout = info.windowLayout;
+        return windowLayout == null
+                || tda.supportsActivityMinWidthHeightMultiWindow(windowLayout.minWidth,
+                windowLayout.minHeight);
     }
 
     /**
@@ -6598,9 +6619,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     @Override
     void onCancelFixedRotationTransform(int originalDisplayRotation) {
-        if (this != mDisplayContent.getLastOrientationSource()
-                || getRequestedConfigurationOrientation() != ORIENTATION_UNDEFINED) {
-            // Only need to handle the activity that should be rotated with display.
+        if (this != mDisplayContent.getLastOrientationSource()) {
+            // This activity doesn't affect display rotation.
+            return;
+        }
+        final int requestedOrientation = getRequestedConfigurationOrientation();
+        if (requestedOrientation != ORIENTATION_UNDEFINED
+                && requestedOrientation != mDisplayContent.getConfiguration().orientation) {
+            // Only need to handle the activity that can be rotated with display or the activity
+            // has requested the same orientation.
             return;
         }
 
@@ -6838,6 +6865,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     @Override
     void resolveOverrideConfiguration(Configuration newParentConfiguration) {
+        final Configuration requestedOverrideConfig = getRequestedOverrideConfiguration();
+        if (requestedOverrideConfig.assetsSeq != ASSETS_SEQ_UNDEFINED
+                && newParentConfiguration.assetsSeq > requestedOverrideConfig.assetsSeq) {
+            requestedOverrideConfig.assetsSeq = ASSETS_SEQ_UNDEFINED;
+        }
         super.resolveOverrideConfiguration(newParentConfiguration);
         final Configuration resolvedConfig = getResolvedOverrideConfiguration();
         if (isFixedRotationTransforming()) {

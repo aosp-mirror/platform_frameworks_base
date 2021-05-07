@@ -523,6 +523,13 @@ public class LocationProviderManager extends
                 }
 
                 mPermitted = permitted;
+
+                if (mForeground) {
+                    EVENT_LOG.logProviderClientPermitted(mName, getIdentity());
+                } else {
+                    EVENT_LOG.logProviderClientUnpermitted(mName, getIdentity());
+                }
+
                 return true;
             }
 
@@ -2271,22 +2278,28 @@ public class LocationProviderManager extends
         }
 
         if (mOnLocationTagsChangeListener != null) {
-            if (!oldState.extraAttributionTags.equals(newState.extraAttributionTags)) {
+            if (!oldState.extraAttributionTags.equals(newState.extraAttributionTags)
+                    || !Objects.equals(oldState.identity, newState.identity)) {
                 if (oldState.identity != null) {
                     FgThread.getHandler().sendMessage(PooledLambda.obtainMessage(
                             OnProviderLocationTagsChangeListener::onLocationTagsChanged,
                             mOnLocationTagsChangeListener, new LocationTagInfo(
                                     oldState.identity.getUid(), oldState.identity.getPackageName(),
                                     Collections.emptySet())
-                            ));
+                    ));
                 }
                 if (newState.identity != null) {
+                    ArraySet<String> attributionTags = new ArraySet<>(
+                            newState.extraAttributionTags.size() + 1);
+                    attributionTags.addAll(newState.extraAttributionTags);
+                    attributionTags.add(newState.identity.getAttributionTag());
+
                     FgThread.getHandler().sendMessage(PooledLambda.obtainMessage(
                             OnProviderLocationTagsChangeListener::onLocationTagsChanged,
                             mOnLocationTagsChangeListener, new LocationTagInfo(
                                     newState.identity.getUid(), newState.identity.getPackageName(),
-                                    newState.extraAttributionTags)
-                            ));
+                                    attributionTags)
+                    ));
                 }
             }
         }

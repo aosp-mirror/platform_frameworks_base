@@ -32,7 +32,6 @@
 
 #include <memtrackproxy/MemtrackProxy.h>
 #include <schedulerservice/SchedulingPolicyService.h>
-#include <sensorservice/SensorService.h>
 #include <sensorservicehidl/SensorManager.h>
 #include <stats/StatsAidl.h>
 #include <stats/StatsHal.h>
@@ -41,12 +40,10 @@
 #include <bionic/reserved_signals.h>
 
 #include <android-base/properties.h>
-#include <cutils/properties.h>
 #include <utils/Log.h>
 #include <utils/misc.h>
 #include <utils/AndroidThreads.h>
 
-using android::base::GetIntProperty;
 using namespace std::chrono_literals;
 
 namespace {
@@ -79,15 +76,6 @@ namespace android {
 static void android_server_SystemServer_startIStatsService(JNIEnv* /* env */, jobject /* clazz */) {
     startStatsHidlService();
     startStatsAidlService();
-}
-
-static void android_server_SystemServer_startSensorService(JNIEnv* /* env */, jobject /* clazz */) {
-    char propBuf[PROPERTY_VALUE_MAX];
-    property_get("system_init.startsensorservice", propBuf, "1");
-    if (strcmp(propBuf, "1") == 0) {
-        SensorService::publish(false /* allowIsolated */,
-                               IServiceManager::DUMP_FLAG_PRIORITY_CRITICAL);
-    }
 }
 
 static void android_server_SystemServer_startMemtrackProxyService(JNIEnv* env,
@@ -163,7 +151,6 @@ static void android_server_SystemServer_setIncrementalServiceSystemReady(JNIEnv*
 static const JNINativeMethod gMethods[] = {
         /* name, signature, funcPtr */
         {"startIStatsService", "()V", (void*)android_server_SystemServer_startIStatsService},
-        {"startSensorService", "()V", (void*)android_server_SystemServer_startSensorService},
         {"startMemtrackProxyService", "()V",
          (void*)android_server_SystemServer_startMemtrackProxyService},
         {"startHidlServices", "()V", (void*)android_server_SystemServer_startHidlServices},

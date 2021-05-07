@@ -44,7 +44,7 @@ public class SensorPropertiesInternal implements Parcelable {
                 prop.resetLockoutRequiresHardwareAuthToken, prop.resetLockoutRequiresChallenge);
     }
 
-    protected SensorPropertiesInternal(int sensorId, @SensorProperties.Strength int sensorStrength,
+    public SensorPropertiesInternal(int sensorId, @SensorProperties.Strength int sensorStrength,
             int maxEnrollmentsPerUser, @NonNull List<ComponentInfoInternal> componentInfo,
             boolean resetLockoutRequiresHardwareAuthToken, boolean resetLockoutRequiresChallenge) {
         this.sensorId = sensorId;

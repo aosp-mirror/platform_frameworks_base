@@ -80,13 +80,28 @@ public class CpuPowerCalculator extends PowerCalculator {
     @Override
     public void calculate(BatteryUsageStats.Builder builder, BatteryStats batteryStats,
             long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query) {
+        double totalPowerMah = 0;
+
         Result result = new Result();
         final SparseArray<UidBatteryConsumer.Builder> uidBatteryConsumerBuilders =
                 builder.getUidBatteryConsumerBuilders();
         for (int i = uidBatteryConsumerBuilders.size() - 1; i >= 0; i--) {
             final UidBatteryConsumer.Builder app = uidBatteryConsumerBuilders.valueAt(i);
             calculateApp(app, app.getBatteryStatsUid(), query, result);
+            totalPowerMah += result.powerMah;
         }
+
+        final long consumptionUC = batteryStats.getCpuMeasuredBatteryConsumptionUC();
+        final int powerModel = getPowerModel(consumptionUC, query);
+
+        builder.getAggregateBatteryConsumerBuilder(
+                BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_ALL_APPS)
+                .setConsumedPower(BatteryConsumer.POWER_COMPONENT_CPU, totalPowerMah);
+        builder.getAggregateBatteryConsumerBuilder(
+                BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE)
+                .setConsumedPower(BatteryConsumer.POWER_COMPONENT_CPU,
+                        powerModel == BatteryConsumer.POWER_MODEL_MEASURED_ENERGY
+                                ? uCtoMah(consumptionUC) : totalPowerMah, powerModel);
     }
 
     private void calculateApp(UidBatteryConsumer.Builder app, BatteryStats.Uid u,

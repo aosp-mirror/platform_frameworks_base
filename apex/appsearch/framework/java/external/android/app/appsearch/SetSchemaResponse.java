@@ -18,6 +18,7 @@ package android.app.appsearch;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Bundle;
 import android.util.ArraySet;
 
@@ -96,8 +97,13 @@ public class SetSchemaResponse {
     }
 
     /**
-     * Returns a {@link Set} of schema type that were deleted by the {@link
-     * AppSearchSession#setSchema} call.
+     * Returns a {@link Set} of deleted schema types.
+     *
+     * <p>A "deleted" type is a schema type that was previously a part of the database schema but
+     * was not present in the {@link SetSchemaRequest} object provided in the
+     * {@link AppSearchSession#setSchema) call.
+     *
+     * <p>Documents for a deleted type are removed from the database.
      */
     @NonNull
     public Set<String> getDeletedTypes() {
@@ -113,6 +119,15 @@ public class SetSchemaResponse {
     /**
      * Returns a {@link Set} of schema type that were migrated by the {@link
      * AppSearchSession#setSchema} call.
+     *
+     * <p>A "migrated" type is a schema type that has triggered a {@link Migrator} instance to
+     * migrate documents of the schema type to another schema type, or to another version of the
+     * schema type.
+     *
+     * <p>If a document fails to be migrated, a {@link MigrationFailure} will be generated for that
+     * document.
+     *
+     * @see Migrator
      */
     @NonNull
     public Set<String> getMigratedTypes() {
@@ -132,6 +147,7 @@ public class SetSchemaResponse {
      * <p>If a {@link Migrator} is provided for this type and the migration is success triggered.
      * The type will also appear in {@link #getMigratedTypes()}.
      *
+     * @see SetSchemaRequest
      * @see AppSearchSession#setSchema
      * @see SetSchemaRequest.Builder#setForceOverride
      */
@@ -307,6 +323,17 @@ public class SetSchemaResponse {
         @NonNull
         public String getNamespace() {
             return mBundle.getString(NAMESPACE_FIELD, /*defaultValue=*/ "");
+        }
+
+        /**
+         * @deprecated TODO(b/181887768): Exists for dogfood transition; must be removed.
+         * @hide
+         */
+        @Deprecated
+        @UnsupportedAppUsage
+        @NonNull
+        public String getUri() {
+            return getDocumentId();
         }
 
         /** Returns the id of the {@link GenericDocument} that failed to be migrated. */

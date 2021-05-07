@@ -20,6 +20,7 @@ import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
 import static android.hardware.biometrics.BiometricManager.Authenticators;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
@@ -39,6 +40,7 @@ import android.hardware.face.FaceManager;
 import android.hardware.face.FaceSensorPropertiesInternal;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
+import android.hardware.fingerprint.IFingerprintAuthenticatorsRegisteredCallback;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -57,6 +59,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -73,16 +76,13 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
     private static final String TAG = "AuthController";
     private static final boolean DEBUG = true;
 
+    private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final CommandQueue mCommandQueue;
     private final StatusBarStateController mStatusBarStateController;
     private final ActivityTaskManager mActivityTaskManager;
     @Nullable private final FingerprintManager mFingerprintManager;
     @Nullable private final FaceManager mFaceManager;
     private final Provider<UdfpsController> mUdfpsControllerFactory;
-
-    @Nullable private final List<FingerprintSensorPropertiesInternal> mFpProps;
-    @Nullable private final List<FaceSensorPropertiesInternal> mFaceProps;
-    @Nullable private final List<FingerprintSensorPropertiesInternal> mUdfpsProps;
     @Nullable private final PointF mFaceAuthSensorLocation;
 
     // TODO: These should just be saved from onSaveState
@@ -90,7 +90,6 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
     @VisibleForTesting
     AuthDialog mCurrentDialog;
 
-    private Handler mHandler = new Handler(Looper.getMainLooper());
     private WindowManager mWindowManager;
     @Nullable
     private UdfpsController mUdfpsController;
@@ -98,6 +97,9 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
     TaskStackListener mTaskStackListener;
     @VisibleForTesting
     IBiometricSysuiReceiver mReceiver;
+    @Nullable private final List<FaceSensorPropertiesInternal> mFaceProps;
+    @Nullable private List<FingerprintSensorPropertiesInternal> mFpProps;
+    @Nullable private List<FingerprintSensorPropertiesInternal> mUdfpsProps;
 
     private class BiometricTaskStackListener extends TaskStackListener {
         @Override
@@ -106,8 +108,31 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         }
     }
 
-    @VisibleForTesting
-    final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+    @NonNull
+    private final IFingerprintAuthenticatorsRegisteredCallback
+            mFingerprintAuthenticatorsRegisteredCallback =
+            new IFingerprintAuthenticatorsRegisteredCallback.Stub() {
+                @Override public void onAllAuthenticatorsRegistered(
+                        List<FingerprintSensorPropertiesInternal> sensors) {
+                    if (DEBUG) {
+                        Log.d(TAG, "onFingerprintProvidersAvailable | sensors: " + Arrays.toString(
+                                sensors.toArray()));
+                    }
+                    mFpProps = sensors;
+                    List<FingerprintSensorPropertiesInternal> udfpsProps = new ArrayList<>();
+                    for (FingerprintSensorPropertiesInternal props : mFpProps) {
+                        if (props.isAnyUdfpsType()) {
+                            udfpsProps.add(props);
+                        }
+                    }
+                    mUdfpsProps = !udfpsProps.isEmpty() ? udfpsProps : null;
+                    if (mUdfpsProps != null) {
+                        mUdfpsController = mUdfpsControllerFactory.get();
+                    }
+                }
+            };
+
+    @VisibleForTesting final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (mCurrentDialog != null
@@ -348,19 +373,8 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         mFaceManager = faceManager;
         mUdfpsControllerFactory = udfpsControllerFactory;
 
-        mFpProps = mFingerprintManager != null ? mFingerprintManager.getSensorPropertiesInternal()
-                : null;
         mFaceProps = mFaceManager != null ? mFaceManager.getSensorPropertiesInternal() : null;
 
-        List<FingerprintSensorPropertiesInternal> udfpsProps = new ArrayList<>();
-        if (mFpProps != null) {
-            for (FingerprintSensorPropertiesInternal props : mFpProps) {
-                if (props.isAnyUdfpsType()) {
-                    udfpsProps.add(props);
-                }
-            }
-        }
-        mUdfpsProps = !udfpsProps.isEmpty() ? udfpsProps : null;
         int[] faceAuthLocation = context.getResources().getIntArray(
                 com.android.systemui.R.array.config_face_auth_props);
         if (faceAuthLocation == null || faceAuthLocation.length < 2) {
@@ -383,9 +397,9 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         mCommandQueue.addCallback(this);
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
 
-        if (mFingerprintManager != null && mFingerprintManager.isHardwareDetected()
-                && mUdfpsProps != null) {
-            mUdfpsController = mUdfpsControllerFactory.get();
+        if (mFingerprintManager != null) {
+            mFingerprintManager.addAuthenticatorsRegisteredCallback(
+                    mFingerprintAuthenticatorsRegisteredCallback);
         }
 
         mTaskStackListener = new BiometricTaskStackListener();
@@ -527,7 +541,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         return mFaceManager.hasEnrolledTemplates(userId);
     }
 
-   /**
+    /**
      * Whether the passed userId has enrolled UDFPS.
      */
     public boolean isUdfpsEnrolled(int userId) {

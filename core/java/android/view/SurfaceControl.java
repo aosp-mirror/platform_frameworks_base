@@ -146,8 +146,9 @@ public final class SurfaceControl implements Parcelable {
     private static native void nativeSetBlurRegions(long transactionObj, long nativeObj,
             float[][] regions, int length);
     private static native void nativeSetStretchEffect(long transactionObj, long nativeObj,
-            float left, float top, float right, float bottom, float vecX, float vecY,
-            float maxStretchAmount);
+            float width, float height, float vecX, float vecY,
+            float maxStretchAmountX, float maxStretchAmountY, float childRelativeLeft,
+            float childRelativeTop, float childRelativeRight, float childRelativeBottom);
 
     private static native boolean nativeClearContentFrameStats(long nativeObject);
     private static native boolean nativeGetContentFrameStats(long nativeObject, WindowContentFrameStats outStats);
@@ -2468,7 +2469,7 @@ public final class SurfaceControl implements Parcelable {
         if (Float.isNaN(sdrBrightness) || sdrBrightness > 1.0f
                 || (sdrBrightness < 0.0f && sdrBrightness != -1.0f)) {
             throw new IllegalArgumentException("sdrBrightness must be a number between 0.0f "
-                    + "and 1.0f, or -1 to turn the backlight off: " + displayBrightness);
+                    + "and 1.0f, or -1 to turn the backlight off: " + sdrBrightness);
         }
         return nativeSetDisplayBrightness(displayToken, sdrBrightness, sdrBrightnessNits,
                 displayBrightness, displayBrightnessNits);
@@ -3038,11 +3039,14 @@ public final class SurfaceControl implements Parcelable {
         /**
          * @hide
          */
-        public Transaction setStretchEffect(SurfaceControl sc, float left, float top, float right,
-                float bottom, float vecX, float vecY, float maxStretchAmount) {
+        public Transaction setStretchEffect(SurfaceControl sc, float width, float height,
+                float vecX, float vecY, float maxStretchAmountX,
+                float maxStretchAmountY, float childRelativeLeft, float childRelativeTop, float childRelativeRight,
+                float childRelativeBottom) {
             checkPreconditions(sc);
-            nativeSetStretchEffect(mNativeObject, sc.mNativeObject, left, top, right, bottom,
-                    vecX, vecY, maxStretchAmount);
+            nativeSetStretchEffect(mNativeObject, sc.mNativeObject, width, height,
+                    vecX, vecY, maxStretchAmountX, maxStretchAmountY, childRelativeLeft, childRelativeTop,
+                    childRelativeRight, childRelativeBottom);
             return this;
         }
 
@@ -3298,20 +3302,26 @@ public final class SurfaceControl implements Parcelable {
          * because the system may change the display refresh rate, calls to this function may result
          * in changes to Choreographer callback timings, and changes to the time interval at which
          * the system releases buffers back to the application.
+         * <p>
+         * Note that this only has an effect for surfaces presented on the display. If this
+         * surface is consumed by something other than the system compositor, e.g. a media
+         * codec, this call has no effect.
          *
          * @param sc The SurfaceControl to specify the frame rate of.
          * @param frameRate The intended frame rate for this surface, in frames per second. 0 is a
          *                  special value that indicates the app will accept the system's choice for
          *                  the display frame rate, which is the default behavior if this function
-         *                  isn't called. The frameRate param does <em>not</em> need to be a valid
-         *                  refresh rate for this device's display - e.g., it's fine to pass 30fps
-         *                  to a device that can only run the display at 60fps.
+         *                  isn't called. The <code>frameRate</code> param does <em>not</em> need
+         *                  to be a valid refresh rate for this device's display - e.g., it's fine
+         *                  to pass 30fps to a device that can only run the display at 60fps.
          * @param compatibility The frame rate compatibility of this surface. The compatibility
          *                      value may influence the system's choice of display frame rate.
-         * @param changeFrameRateStrategy Whether display refresh rate transitions should be
-         *                                seamless. A seamless transition is one that doesn't have
-         *                                any visual interruptions, such as a black screen for a
-         *                                second or two.
+         *                      This parameter is ignored when <code>frameRate</code> is 0.
+         * @param changeFrameRateStrategy Whether display refresh rate transitions caused by this
+         *                                surface should be seamless. A seamless transition is one
+         *                                that doesn't have any visual interruptions, such as a
+         *                                black screen for a second or two. This parameter is
+         *                                ignored when <code>frameRate</code> is 0.
          * @return This transaction object.
          */
         @NonNull

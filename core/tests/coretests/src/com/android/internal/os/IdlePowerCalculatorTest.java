@@ -19,7 +19,6 @@ package com.android.internal.os;
 import static com.google.common.truth.Truth.assertThat;
 
 import android.os.BatteryConsumer;
-import android.os.SystemBatteryConsumer;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -46,11 +45,16 @@ public class IdlePowerCalculatorTest {
 
         mStatsRule.apply(calculator);
 
-        SystemBatteryConsumer consumer =
-                mStatsRule.getSystemBatteryConsumer(SystemBatteryConsumer.DRAIN_TYPE_IDLE);
-        assertThat(consumer.getUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_IDLE))
+        BatteryConsumer deviceConsumer = mStatsRule.getDeviceBatteryConsumer();
+        assertThat(deviceConsumer.getUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_IDLE))
                 .isEqualTo(3000);
-        assertThat(consumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_IDLE))
+        assertThat(deviceConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_IDLE))
                 .isWithin(PRECISION).of(0.7);
+
+        BatteryConsumer appsConsumer = mStatsRule.getAppsBatteryConsumer();
+        assertThat(appsConsumer.getUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_IDLE))
+                .isEqualTo(0);
+        assertThat(appsConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_IDLE))
+                .isWithin(PRECISION).of(0);
     }
 }

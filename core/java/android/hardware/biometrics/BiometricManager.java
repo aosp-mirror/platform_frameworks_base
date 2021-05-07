@@ -33,6 +33,8 @@ import android.annotation.TestApi;
 import android.content.Context;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.UserHandle;
+import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 import android.util.Slog;
 
@@ -556,9 +558,22 @@ public class BiometricManager {
      * @hide
      */
     public long[] getAuthenticatorIds() {
+        return getAuthenticatorIds(UserHandle.myUserId());
+    }
+
+    /**
+     * Get a list of AuthenticatorIDs for biometric authenticators which have 1) enrolled templates,
+     * and 2) meet the requirements for integrating with Keystore. The AuthenticatorIDs are known
+     * in Keystore land as SIDs, and are used during key generation.
+     *
+     * @param userId Android user ID for user to look up.
+     *
+     * @hide
+     */
+    public long[] getAuthenticatorIds(int userId) {
         if (mService != null) {
             try {
-                return mService.getAuthenticatorIds();
+                return mService.getAuthenticatorIds(userId);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

@@ -16,7 +16,6 @@
 
 package android.view;
 
-import static android.hardware.input.InputManager.APP_USES_RAW_INPUT_COORDS;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
@@ -24,7 +23,6 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
-import android.compat.Compatibility;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.Matrix;
 import android.os.Build;
@@ -1569,6 +1567,8 @@ public final class MotionEvent extends InputEvent implements Parcelable {
             int axis, int pointerIndex, int historyPos);
     @FastNative
     private static native void nativeTransform(long nativePtr, Matrix matrix);
+    @FastNative
+    private static native void nativeApplyTransform(long nativePtr, Matrix matrix);
 
     // -------------- @CriticalNative ----------------------
 
@@ -2674,7 +2674,6 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @see #AXIS_X
      */
     public final float getRawX() {
-        Compatibility.reportUnconditionalChange(APP_USES_RAW_INPUT_COORDS);
         return nativeGetRawAxisValue(mNativePtr, AXIS_X, 0, HISTORY_CURRENT);
     }
 
@@ -2688,7 +2687,6 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @see #AXIS_Y
      */
     public final float getRawY() {
-        Compatibility.reportUnconditionalChange(APP_USES_RAW_INPUT_COORDS);
         return nativeGetRawAxisValue(mNativePtr, AXIS_Y, 0, HISTORY_CURRENT);
     }
 
@@ -2705,7 +2703,6 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @see #AXIS_X
      */
     public float getRawX(int pointerIndex) {
-        Compatibility.reportUnconditionalChange(APP_USES_RAW_INPUT_COORDS);
         return nativeGetRawAxisValue(mNativePtr, AXIS_X, pointerIndex, HISTORY_CURRENT);
     }
 
@@ -2722,7 +2719,6 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @see #AXIS_Y
      */
     public float getRawY(int pointerIndex) {
-        Compatibility.reportUnconditionalChange(APP_USES_RAW_INPUT_COORDS);
         return nativeGetRawAxisValue(mNativePtr, AXIS_Y, pointerIndex, HISTORY_CURRENT);
     }
 
@@ -3263,6 +3259,21 @@ public final class MotionEvent extends InputEvent implements Parcelable {
         }
 
         nativeTransform(mNativePtr, matrix);
+    }
+
+    /**
+     * Transforms all of the points in the event directly instead of modifying the event's
+     * internal transform.
+     *
+     * @param matrix The transformation matrix to apply.
+     * @hide
+     */
+    public void applyTransform(Matrix matrix) {
+        if (matrix == null) {
+            throw new IllegalArgumentException("matrix must not be null");
+        }
+
+        nativeApplyTransform(mNativePtr, matrix);
     }
 
     /**

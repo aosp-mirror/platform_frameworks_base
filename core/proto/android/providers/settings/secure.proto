@@ -430,6 +430,7 @@ message SecureSettingsProto {
         optional SettingProto one_handed_mode_enabled = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto one_handed_mode_timeout = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto taps_app_to_exit = 3 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto one_handed_mode_activated = 4 [ (android.privacy).dest = DEST_AUTOMATIC ];
     }
     optional OneHanded onehanded = 80;
 

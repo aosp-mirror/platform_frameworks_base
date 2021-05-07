@@ -249,7 +249,7 @@ private:
         bool isSystemDataLoader() const;
         void setHealthListener(const StorageHealthCheckParams& healthCheckParams,
                                StorageHealthListener&& healthListener);
-        long elapsedMsSinceOldestPendingRead();
+        void getMetrics(android::os::PersistableBundle* _aidl_return);
 
     private:
         binder::Status onStatusChanged(MountId mount, int newStatus) final;
@@ -281,6 +281,7 @@ private:
         BootClockTsUs getOldestPendingReadTs();
         BootClockTsUs getOldestTsFromLastPendingReads();
         Milliseconds elapsedMsSinceKernelTs(TimePoint now, BootClockTsUs kernelTsUs);
+        long elapsedMsSinceOldestPendingRead();
 
         // If the stub has to bind to the DL.
         // Returns {} if bind operation is already in progress.
@@ -298,6 +299,7 @@ private:
         content::pm::FileSystemControlParcel mControl;
         DataLoaderStatusListener mStatusListener;
         StorageHealthListener mHealthListener;
+        std::atomic<int> mHealthStatus = IStorageHealthListener::HEALTH_STATUS_OK;
 
         std::condition_variable mStatusCondition;
         int mCurrentStatus = content::pm::IDataLoaderStatusListener::DATA_LOADER_DESTROYED;
@@ -468,9 +470,9 @@ private:
 
     bool updateLoadingProgress(int32_t storageId,
                                StorageLoadingProgressListener&& progressListener);
-    long getMillsSinceOldestPendingRead(StorageId storage);
 
     void trimReservedSpaceV1(const IncFsMount& ifs);
+    int64_t elapsedUsSinceMonoTs(uint64_t monoTsUs);
 
 private:
     const std::unique_ptr<VoldServiceWrapper> mVold;

@@ -3969,6 +3969,7 @@ public abstract class PackageManager {
      * @hide
      */
     @TestApi
+    @SystemApi
     public static final int FLAG_PERMISSION_REVOKE_WHEN_REQUESTED =  1 << 7;
 
     /**
@@ -4604,7 +4605,7 @@ public abstract class PackageManager {
      * Query for all of the permissions associated with a particular group.
      *
      * @param permissionGroup The fully qualified name (i.e. com.google.permission.LOGIN)
-     *            of the permission group you are interested in. Use null to
+     *            of the permission group you are interested in. Use {@code null} to
      *            find all of the permissions not associated with a group.
      * @param flags Additional option flags to modify the data returned.
      * @return Returns a list of {@link PermissionInfo} containing information
@@ -4614,7 +4615,7 @@ public abstract class PackageManager {
      */
     //@Deprecated
     @NonNull
-    public abstract List<PermissionInfo> queryPermissionsByGroup(@NonNull String permissionGroup,
+    public abstract List<PermissionInfo> queryPermissionsByGroup(@Nullable String permissionGroup,
             @PermissionInfoFlags int flags) throws NameNotFoundException;
 
     /**
@@ -8710,7 +8711,7 @@ public abstract class PackageManager {
      * @throws NameNotFoundException if a package with the given name cannot be found on the system.
      */
     public void requestChecksums(@NonNull String packageName, boolean includeSplits,
-            @Checksum.Type int required, @NonNull List<Certificate> trustedInstallers,
+            @Checksum.TypeMask int required, @NonNull List<Certificate> trustedInstallers,
             @NonNull OnChecksumsReadyListener onChecksumsReadyListener)
             throws CertificateEncodingException, NameNotFoundException {
         throw new UnsupportedOperationException("requestChecksums not implemented in subclass");

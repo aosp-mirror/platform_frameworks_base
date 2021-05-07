@@ -11,7 +11,8 @@ import android.view.IRemoteAnimationFinishedCallback
 import android.view.RemoteAnimationAdapter
 import android.view.RemoteAnimationTarget
 import android.view.SurfaceControl
-import android.view.View
+import android.view.ViewGroup
+import android.widget.LinearLayout
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import junit.framework.Assert.assertFalse
@@ -36,20 +37,21 @@ import kotlin.concurrent.thread
 @RunWithLooper
 class ActivityLaunchAnimatorTest : SysuiTestCase() {
     private val activityLaunchAnimator = ActivityLaunchAnimator(mContext)
-    private val rootView = View(mContext)
-    @Spy private val controller = TestLaunchAnimatorController(rootView)
+    private val launchContainer = LinearLayout(mContext)
+    @Spy private val controller = TestLaunchAnimatorController(launchContainer)
     @Mock lateinit var iCallback: IRemoteAnimationFinishedCallback
 
     @get:Rule val rule = MockitoJUnit.rule()
 
     private fun startIntentWithAnimation(
         controller: ActivityLaunchAnimator.Controller? = this.controller,
+        animate: Boolean = true,
         intentStarter: (RemoteAnimationAdapter?) -> Int
     ) {
         // We start in a new thread so that we can ensure that the callbacks are called in the main
         // thread.
         thread {
-            activityLaunchAnimator.startIntentWithAnimation(controller, intentStarter)
+            activityLaunchAnimator.startIntentWithAnimation(controller, animate, intentStarter)
         }.join()
     }
 
@@ -95,6 +97,16 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
     }
 
     @Test
+    fun doesNotAnimateIfAnimateIsFalse() {
+        val willAnimateCaptor = ArgumentCaptor.forClass(Boolean::class.java)
+        startIntentWithAnimation(animate = false) { ActivityManager.START_SUCCESS }
+
+        waitForIdleSync()
+        verify(controller).onIntentStarted(willAnimateCaptor.capture())
+        assertFalse(willAnimateCaptor.value)
+    }
+
+    @Test
     fun doesNotStartIfAnimationIsCancelled() {
         val runner = activityLaunchAnimator.createRunner(controller)
         runner.onAnimationCancelled()
@@ -106,12 +118,12 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
     }
 
     @Test
-    fun abortsIfNoOpeningWindowIsFound() {
+    fun cancelsIfNoOpeningWindowIsFound() {
         val runner = activityLaunchAnimator.createRunner(controller)
         runner.onAnimationStart(0, emptyArray(), emptyArray(), emptyArray(), iCallback)
 
         waitForIdleSync()
-        verify(controller).onLaunchAnimationAborted()
+        verify(controller).onLaunchAnimationCancelled()
         verify(controller, never()).onLaunchAnimationStart(anyBoolean())
     }
 
@@ -135,10 +147,8 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
  * outside of the main thread.
  */
 private class TestLaunchAnimatorController(
-    private val rootView: View
+    override var launchContainer: ViewGroup
 ) : ActivityLaunchAnimator.Controller {
-    override fun getRootView(): View = rootView
-
     override fun createAnimatorState() = ActivityLaunchAnimator.State(
             top = 100,
             bottom = 200,
@@ -175,14 +185,6 @@ private class TestLaunchAnimatorController(
     }
 
     override fun onLaunchAnimationCancelled() {
-        assertOnMainThread()
-    }
-
-    override fun onLaunchAnimationTimedOut() {
-        assertOnMainThread()
-    }
-
-    override fun onLaunchAnimationAborted() {
         assertOnMainThread()
     }
 }

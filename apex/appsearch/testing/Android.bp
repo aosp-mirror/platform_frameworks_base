@@ -31,6 +31,7 @@ java_library {
         "truth-prebuilt",
     ],
     visibility: [
+        "//frameworks/base/core/tests/coretests",
         "//cts/hostsidetests/appsearch",
         "//cts/tests/appsearch",
         "//vendor:__subpackages__",

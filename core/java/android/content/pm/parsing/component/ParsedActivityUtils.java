@@ -24,7 +24,6 @@ import android.annotation.NonNull;
 import android.app.ActivityTaskManager;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.content.pm.PackageParser;
 import android.content.pm.parsing.ParsingPackage;
 import android.content.pm.parsing.ParsingPackageUtils;
 import android.content.pm.parsing.ParsingUtils;
@@ -414,9 +413,9 @@ public class ParsedActivityUtils {
 
         if (!isAlias && activity.launchMode != LAUNCH_SINGLE_INSTANCE_PER_TASK
                 && activity.metaData != null && activity.metaData.containsKey(
-                PackageParser.METADATA_ACTIVITY_LAUNCH_MODE)) {
+                ParsingPackageUtils.METADATA_ACTIVITY_LAUNCH_MODE)) {
             final String launchMode = activity.metaData.getString(
-                    PackageParser.METADATA_ACTIVITY_LAUNCH_MODE);
+                    ParsingPackageUtils.METADATA_ACTIVITY_LAUNCH_MODE);
             if (launchMode != null && launchMode.equals("singleInstancePerTask")) {
                 activity.launchMode = LAUNCH_SINGLE_INSTANCE_PER_TASK;
             }

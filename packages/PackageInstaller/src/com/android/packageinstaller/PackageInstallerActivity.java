@@ -23,6 +23,7 @@ import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTE
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.StringRes;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
@@ -631,6 +632,12 @@ public class PackageInstallerActivity extends AlertActivity {
                     .setMessage(getArguments().getInt(MESSAGE_KEY))
                     .setPositiveButton(R.string.ok, (dialog, which) -> getActivity().finish())
                     .create();
+        }
+
+        @Override
+        public void onCancel(DialogInterface dialog) {
+            getActivity().setResult(Activity.RESULT_CANCELED);
+            getActivity().finish();
         }
     }
 

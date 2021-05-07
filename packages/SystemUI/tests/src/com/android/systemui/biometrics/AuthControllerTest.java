@@ -50,7 +50,9 @@ import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorProperties;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
+import android.hardware.fingerprint.IFingerprintAuthenticatorsRegisteredCallback;
 import android.os.Bundle;
+import android.os.RemoteException;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableContext;
@@ -66,6 +68,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.AdditionalMatchers;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -100,12 +103,13 @@ public class AuthControllerTest extends SysuiTestCase {
     private FaceManager mFaceManager;
     @Mock
     private UdfpsController mUdfpsController;
+    @Captor
+    ArgumentCaptor<IFingerprintAuthenticatorsRegisteredCallback> mAuthenticatorsRegisteredCaptor;
 
     private TestableAuthController mAuthController;
 
-
     @Before
-    public void setup() {
+    public void setup() throws RemoteException {
         MockitoAnnotations.initMocks(this);
 
         TestableContext context = spy(mContext);
@@ -148,6 +152,9 @@ public class AuthControllerTest extends SysuiTestCase {
                 () -> mUdfpsController);
 
         mAuthController.start();
+        verify(mFingerprintManager).addAuthenticatorsRegisteredCallback(
+                mAuthenticatorsRegisteredCaptor.capture());
+        mAuthenticatorsRegisteredCaptor.getValue().onAllAuthenticatorsRegistered(props);
     }
 
     // Callback tests

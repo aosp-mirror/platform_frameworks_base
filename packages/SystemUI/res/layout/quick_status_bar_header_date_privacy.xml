@@ -55,6 +55,16 @@
         android:layout_gravity="center_vertical|center_horizontal"
         android:visibility="gone" />
 
+    <!-- Will hold security footer in landscape with media -->
+    <FrameLayout
+        android:id="@+id/header_text_container"
+        android:layout_height="match_parent"
+        android:layout_width="wrap_content"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:gravity="center"
+    />
+
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="match_parent"

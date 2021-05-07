@@ -958,17 +958,26 @@ public class StackAnimationController extends
         if (!isActiveController()) {
             return;
         }
-        v.setTranslationX(mStackPosition.x);
+
         final float yOffset =
                 getOffsetForChainedPropertyAnimation(DynamicAnimation.TRANSLATION_Y);
-        final float endY = mStackPosition.y + yOffset * index;
-        final float startY = endY + NEW_BUBBLE_START_Y;
-        v.setTranslationY(startY);
+        float endY = mStackPosition.y + yOffset * index;
+        float endX = mStackPosition.x;
+        if (mPositioner.showBubblesVertically()) {
+            v.setTranslationY(endY);
+            final float startX = isStackOnLeftSide()
+                    ? endX - NEW_BUBBLE_START_Y
+                    : endX + NEW_BUBBLE_START_Y;
+            v.setTranslationX(startX);
+        } else {
+            v.setTranslationX(mStackPosition.x);
+            final float startY = endY + NEW_BUBBLE_START_Y;
+            v.setTranslationY(startY);
+        }
         v.setScaleX(NEW_BUBBLE_START_SCALE);
         v.setScaleY(NEW_BUBBLE_START_SCALE);
         v.setAlpha(0f);
         final ViewPropertyAnimator animator = v.animate()
-                .translationY(endY)
                 .scaleX(1f)
                 .scaleY(1f)
                 .alpha(1f)
@@ -977,6 +986,11 @@ public class StackAnimationController extends
                     v.setTag(R.id.reorder_animator_tag, null);
                 });
         v.setTag(R.id.reorder_animator_tag, animator);
+        if (mPositioner.showBubblesVertically()) {
+            animator.translationX(endX);
+        } else {
+            animator.translationY(endY);
+        }
     }
 
     /**

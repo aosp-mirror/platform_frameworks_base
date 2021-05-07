@@ -1678,23 +1678,30 @@ public class DevicePolicyManager {
     })
     public @interface PasswordComplexity {}
 
+    /**
+     * Indicates that nearby streaming is not controlled by policy, which means nearby streaming is
+     * allowed.
+     */
+    public static final int NEARBY_STREAMING_NOT_CONTROLLED_BY_POLICY = 0;
+
     /** Indicates that nearby streaming is disabled. */
-    public static final int NEARBY_STREAMING_DISABLED = 0;
+    public static final int NEARBY_STREAMING_DISABLED = 1;
 
     /** Indicates that nearby streaming is enabled. */
-    public static final int NEARBY_STREAMING_ENABLED = 1;
+    public static final int NEARBY_STREAMING_ENABLED = 2;
 
     /**
      * Indicates that nearby streaming is enabled only to devices offering a comparable level of
      * security, with the same authenticated managed account.
      */
-    public static final int NEARBY_STREAMING_SAME_MANAGED_ACCOUNT_ONLY = 2;
+    public static final int NEARBY_STREAMING_SAME_MANAGED_ACCOUNT_ONLY = 3;
 
     /**
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"NEARBY_STREAMING_"}, value = {
+        NEARBY_STREAMING_NOT_CONTROLLED_BY_POLICY,
         NEARBY_STREAMING_DISABLED,
         NEARBY_STREAMING_ENABLED,
         NEARBY_STREAMING_SAME_MANAGED_ACCOUNT_ONLY,
@@ -1840,6 +1847,8 @@ public class DevicePolicyManager {
      * Delegation of certificate installation and management. This scope grants access to the
      * {@link #getInstalledCaCerts}, {@link #hasCaCertInstalled}, {@link #installCaCert},
      * {@link #uninstallCaCert}, {@link #uninstallAllUserCaCerts} and {@link #installKeyPair} APIs.
+     * This scope also grants the ability to read identifiers that the delegating device owner or
+     * profile owner can obtain. See {@link #getEnrollmentSpecificId()}.
      */
     public static final String DELEGATION_CERT_INSTALL = "delegation-cert-install";
 
@@ -5504,6 +5513,10 @@ public class DevicePolicyManager {
      * This method requires the caller to be the device owner.
      * <p>
      * This proxy is only a recommendation and it is possible that some apps will ignore it.
+     * <p>
+     * Note: The device owner won't be able to set a global HTTP proxy if there are unaffiliated
+     * secondary users or profiles on the device. It's recommended that affiliation ids are set for
+     * new users as soon as possible after provisioning via {@link #setAffiliationIds}.
      *
      * @see ProxyInfo
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
@@ -7199,15 +7212,20 @@ public class DevicePolicyManager {
 
     /**
      * Returns the current runtime nearby notification streaming policy set by the device or profile
-     * owner. The default is {@link #NEARBY_STREAMING_DISABLED}.
+     * owner.
      */
     public @NearbyStreamingPolicy int getNearbyNotificationStreamingPolicy() {
+        return getNearbyNotificationStreamingPolicy(myUserId());
+    }
+
+    /** @hide per-user version */
+    public @NearbyStreamingPolicy int getNearbyNotificationStreamingPolicy(int userId) {
         throwIfParentInstance("getNearbyNotificationStreamingPolicy");
         if (mService == null) {
-            return NEARBY_STREAMING_DISABLED;
+            return NEARBY_STREAMING_NOT_CONTROLLED_BY_POLICY;
         }
         try {
-            return mService.getNearbyNotificationStreamingPolicy();
+            return mService.getNearbyNotificationStreamingPolicy(userId);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -7235,15 +7253,19 @@ public class DevicePolicyManager {
 
     /**
      * Returns the current runtime nearby app streaming policy set by the device or profile owner.
-     * The default is {@link #NEARBY_STREAMING_DISABLED}.
      */
     public @NearbyStreamingPolicy int getNearbyAppStreamingPolicy() {
+        return getNearbyAppStreamingPolicy(myUserId());
+    }
+
+    /** @hide per-user version */
+    public @NearbyStreamingPolicy int getNearbyAppStreamingPolicy(int userId) {
         throwIfParentInstance("getNearbyAppStreamingPolicy");
         if (mService == null) {
-            return NEARBY_STREAMING_DISABLED;
+            return NEARBY_STREAMING_NOT_CONTROLLED_BY_POLICY;
         }
         try {
-            return mService.getNearbyAppStreamingPolicy();
+            return mService.getNearbyAppStreamingPolicy(userId);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -10368,6 +10390,9 @@ public class DevicePolicyManager {
     /**
      * Called by device owners to set the user's global location setting.
      *
+     * <p><b>Note: </b> this call is ignored on
+     * {@link android.content.pm.PackageManager#FEATURE_AUTOMOTIVE automotive builds}.
+     *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with
      * @param locationEnabled whether location should be enabled or disabled
      * @throws SecurityException if {@code admin} is not a device owner.
@@ -12770,6 +12795,11 @@ public class DevicePolicyManager {
      * <p>In this mode, the DNS subsystem will attempt a TLS handshake to the network-supplied
      * resolver prior to attempting name resolution in cleartext.
      *
+     * <p>Note: The device owner won't be able to set the global private DNS mode if there are
+     * unaffiliated secondary users or profiles on the device. It's recommended that affiliation
+     * ids are set for new users as soon as possible after provisioning via
+     * {@link #setAffiliationIds}.
+     *
      * @param admin which {@link DeviceAdminReceiver} this request is associated with.
      *
      * @return {@code PRIVATE_DNS_SET_NO_ERROR} if the mode was set successfully, or
@@ -12804,6 +12834,11 @@ public class DevicePolicyManager {
      * must be reachable both from within and outside the VPN. Otherwise, the device may lose
      * the ability to resolve hostnames as system traffic to the resolver may not go through the
      * VPN.
+     *
+     * <p>Note: The device owner won't be able to set the global private DNS mode if there are
+     * unaffiliated secondary users or profiles on the device. It's recommended that affiliation
+     * ids are set for new users as soon as possible after provisioning via
+     * {@link #setAffiliationIds}.
      *
      * @param admin which {@link DeviceAdminReceiver} this request is associated with.
      * @param privateDnsHost The hostname of a server that implements DNS over TLS (RFC7858).
@@ -13601,11 +13636,19 @@ public class DevicePolicyManager {
      * It is available both in a work profile and on a fully-managed device.
      * The identifier would be consistent even if the work profile is removed and enrolled again
      * (to the same organization), or the device is factory reset and re-enrolled.
-
+     *
      * Can only be called by the Profile Owner or Device Owner, if the
      * {@link #setOrganizationId(String)} was previously called.
      * If {@link #setOrganizationId(String)} was not called, then the returned value will be an
      * empty string.
+     *
+     * <p>Note about access to device identifiers: a device owner, a profile owner of an
+     * organization-owned device or the delegated certificate installer (holding the
+     * {@link #DELEGATION_CERT_INSTALL} delegation) on such a device can still obtain hardware
+     * identifiers by calling e.g. {@link android.os.Build#getSerial()}, in addition to using
+     * this method. However, a profile owner on a personal (non organization-owned) device, or the
+     * delegated certificate installer on such a device, cannot obtain hardware identifiers anymore
+     * and must switch to using this method.
      *
      * @return A stable, enrollment-specific identifier.
      * @throws SecurityException if the caller is not a profile owner or device owner.

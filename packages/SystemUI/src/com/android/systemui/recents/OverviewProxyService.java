@@ -213,7 +213,9 @@ public class OverviewProxyService extends CurrentUserTracker implements
                 // TODO move this logic to message queue
                 mStatusBarOptionalLazy.ifPresent(statusBarLazy -> {
                     StatusBar statusBar = statusBarLazy.get();
-                    statusBar.getPanelController().startExpandLatencyTracking();
+                    if (event.getActionMasked() == ACTION_DOWN) {
+                        statusBar.getPanelController().startExpandLatencyTracking();
+                    }
                     mHandler.post(()-> {
                         int action = event.getActionMasked();
                         if (action == ACTION_DOWN) {
@@ -408,6 +410,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
                 mPipOptional.ifPresent(
                         pip -> pip.setPinnedStackAnimationType(
                                 PipAnimationController.ANIM_TYPE_ALPHA));
+                mHandler.post(() -> notifySwipeToHomeFinishedInternal());
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -886,6 +889,12 @@ public class OverviewProxyService extends CurrentUserTracker implements
         }
     }
 
+    public void notifySwipeToHomeFinishedInternal() {
+        for (int i = mConnectionCallbacks.size() - 1; i >= 0; --i) {
+            mConnectionCallbacks.get(i).onSwipeToHomeFinished();
+        }
+    }
+
     public void notifyAssistantVisibilityChanged(float visibility) {
         try {
             if (mOverviewProxy != null) {
@@ -922,6 +931,21 @@ public class OverviewProxyService extends CurrentUserTracker implements
         for (int i = mConnectionCallbacks.size() - 1; i >= 0; --i) {
             mConnectionCallbacks.get(i).onToggleRecentApps();
         }
+    }
+
+    public void notifyImeWindowStatus(int displayId, IBinder token, int vis, int backDisposition,
+            boolean showImeSwitcher) {
+        try {
+            if (mOverviewProxy != null) {
+                mOverviewProxy.onImeWindowStatusChanged(displayId, token, vis, backDisposition,
+                        showImeSwitcher);
+            } else {
+                Log.e(TAG_OPS, "Failed to get overview proxy for setting IME status.");
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG_OPS, "Failed to call notifyImeWindowStatus()", e);
+        }
+
     }
 
     private void updateEnabledState() {
@@ -962,6 +986,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
     public interface OverviewProxyListener {
         default void onConnectionChanged(boolean isConnected) {}
         default void onQuickStepStarted() {}
+        default void onSwipeToHomeFinished() {}
         default void onQuickSwitchToNewTask(@Surface.Rotation int rotation) {}
         default void onOverviewShown(boolean fromHome) {}
         default void onQuickScrubStarted() {}
@@ -973,5 +998,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
         default void onAssistantProgress(@FloatRange(from = 0.0, to = 1.0) float progress) {}
         default void onAssistantGestureCompletion(float velocity) {}
         default void startAssistant(Bundle bundle) {}
+        default void onImeWindowStatusChanged(int displayId, IBinder token, int vis,
+                int backDisposition, boolean showImeSwitcher) {}
     }
 }

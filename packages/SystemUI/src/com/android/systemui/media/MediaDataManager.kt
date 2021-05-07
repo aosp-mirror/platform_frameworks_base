@@ -56,6 +56,7 @@ import com.android.systemui.statusbar.notification.row.HybridGroupManager
 import com.android.systemui.util.Assert
 import com.android.systemui.util.Utils
 import com.android.systemui.util.concurrency.DelayableExecutor
+import com.android.systemui.util.time.SystemClock
 import java.io.FileDescriptor
 import java.io.IOException
 import java.io.PrintWriter
@@ -108,19 +109,23 @@ class MediaDataManager(
     private val activityStarter: ActivityStarter,
     private val smartspaceMediaDataProvider: SmartspaceMediaDataProvider,
     private var useMediaResumption: Boolean,
-    private val useQsMediaPlayer: Boolean
+    private val useQsMediaPlayer: Boolean,
+    private val systemClock: SystemClock
 ) : Dumpable, BcSmartspaceDataPlugin.SmartspaceTargetListener {
 
     companion object {
         // UI surface label for subscribing Smartspace updates.
         @JvmField
         val SMARTSPACE_UI_SURFACE_LABEL = "media_data_manager"
+
+        // Maximum number of actions allowed in compact view
+        @JvmField
+        val MAX_COMPACT_ACTIONS = 3
     }
 
     private val themeText = com.android.settingslib.Utils.getColorAttr(context,
             com.android.internal.R.attr.textColorPrimary).defaultColor
-    private val bgColor = com.android.settingslib.Utils.getColorAttr(context,
-            com.android.internal.R.attr.colorBackground).defaultColor
+    private val bgColor = context.getColor(android.R.color.system_accent2_50)
 
     // Internal listeners are part of the internal pipeline. External listeners (those registered
     // with [MediaDeviceManager.addListener]) receive events after they have propagated through
@@ -161,12 +166,13 @@ class MediaDataManager(
         mediaDataCombineLatest: MediaDataCombineLatest,
         mediaDataFilter: MediaDataFilter,
         activityStarter: ActivityStarter,
-        smartspaceMediaDataProvider: SmartspaceMediaDataProvider
+        smartspaceMediaDataProvider: SmartspaceMediaDataProvider,
+        clock: SystemClock
     ) : this(context, backgroundExecutor, foregroundExecutor, mediaControllerFactory,
             broadcastDispatcher, dumpManager, mediaTimeoutListener, mediaResumeListener,
             mediaSessionBasedFilter, mediaDeviceManager, mediaDataCombineLatest, mediaDataFilter,
             activityStarter, smartspaceMediaDataProvider, Utils.useMediaResumption(context),
-            Utils.useQsMediaPlayer(context))
+            Utils.useQsMediaPlayer(context), clock)
 
     private val appChangeReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -471,7 +477,7 @@ class MediaDataManager(
         }
 
         val mediaAction = getResumeMediaAction(resumeAction)
-        val lastActive = System.currentTimeMillis()
+        val lastActive = systemClock.elapsedRealtime()
         foregroundExecutor.execute {
             onMediaDataLoaded(packageName, null, MediaData(userId, true, bgColor, appName,
                     null, desc.subtitle, desc.title, artworkIcon, listOf(mediaAction), listOf(0),
@@ -549,8 +555,12 @@ class MediaDataManager(
         // Control buttons
         val actionIcons: MutableList<MediaAction> = ArrayList()
         val actions = notif.actions
-        val actionsToShowCollapsed = notif.extras.getIntArray(
+        var actionsToShowCollapsed = notif.extras.getIntArray(
                 Notification.EXTRA_COMPACT_ACTIONS)?.toMutableList() ?: mutableListOf<Int>()
+        if (actionsToShowCollapsed.size > MAX_COMPACT_ACTIONS) {
+            Log.e(TAG, "Too many compact actions for $key, limiting to first $MAX_COMPACT_ACTIONS")
+            actionsToShowCollapsed = actionsToShowCollapsed.subList(0, MAX_COMPACT_ACTIONS)
+        }
         // TODO: b/153736623 look into creating actions when this isn't a media style notification
 
         if (actions != null) {
@@ -590,7 +600,7 @@ class MediaDataManager(
         val isLocalSession = mediaController.playbackInfo?.playbackType ==
             MediaController.PlaybackInfo.PLAYBACK_TYPE_LOCAL
         val isPlaying = mediaController.playbackState?.let { isPlayingState(it.state) } ?: null
-        val lastActive = System.currentTimeMillis()
+        val lastActive = systemClock.elapsedRealtime()
         foregroundExecutor.execute {
             val resumeAction: Runnable? = mediaEntries[key]?.resumeAction
             val hasCheckedForResume = mediaEntries[key]?.hasCheckedForResume == true

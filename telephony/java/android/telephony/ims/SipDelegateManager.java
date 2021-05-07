@@ -34,6 +34,7 @@ import android.telephony.ims.aidl.SipDelegateConnectionAidlWrapper;
 import android.telephony.ims.stub.DelegateConnectionMessageCallback;
 import android.telephony.ims.stub.DelegateConnectionStateCallback;
 import android.telephony.ims.stub.SipDelegate;
+import android.util.ArrayMap;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -80,13 +81,18 @@ public class SipDelegateManager {
     public static final int MESSAGE_FAILURE_REASON_DELEGATE_CLOSED = 2;
 
     /**
-     * The SIP message has an invalid start line and the message can not be sent.
+     * The SIP message has an invalid start line and the message can not be sent or the start line
+     * failed validation due to the request containing a restricted SIP request method.
+     * {@link SipDelegateConnection}s can not send SIP requests for the methods: REGISTER, PUBLISH,
+     * or OPTIONS.
      */
     public static final int MESSAGE_FAILURE_REASON_INVALID_START_LINE = 3;
 
     /**
      * One or more of the header fields in the header section of the outgoing SIP message is invalid
-     * and the SIP message can not be sent.
+     * or contains a restricted header value and the SIP message can not be sent.
+     * {@link SipDelegateConnection}s can not send SIP SUBSCRIBE requests for the "Event" header
+     * value of "presence".
      */
     public static final int MESSAGE_FAILURE_REASON_INVALID_HEADER_FIELDS = 4;
 
@@ -97,7 +103,7 @@ public class SipDelegateManager {
 
     /**
      * The feature tag associated with the outgoing message does not match any known feature tags
-     * and this message can not be sent.
+     * or it matches a denied tag and this message can not be sent.
      */
     public static final int MESSAGE_FAILURE_REASON_INVALID_FEATURE_TAG = 6;
 
@@ -163,6 +169,35 @@ public class SipDelegateManager {
     })
     public @interface MessageFailureReason {}
 
+    /**@hide*/
+    public static final ArrayMap<Integer, String> MESSAGE_FAILURE_REASON_STRING_MAP =
+            new ArrayMap<>(11);
+    static {
+        MESSAGE_FAILURE_REASON_STRING_MAP.append(MESSAGE_FAILURE_REASON_UNKNOWN,
+                "MESSAGE_FAILURE_REASON_UNKNOWN");
+        MESSAGE_FAILURE_REASON_STRING_MAP.append(MESSAGE_FAILURE_REASON_DELEGATE_DEAD,
+                "MESSAGE_FAILURE_REASON_DELEGATE_DEAD");
+        MESSAGE_FAILURE_REASON_STRING_MAP.append(MESSAGE_FAILURE_REASON_DELEGATE_CLOSED,
+                "MESSAGE_FAILURE_REASON_DELEGATE_CLOSED");
+        MESSAGE_FAILURE_REASON_STRING_MAP.append(MESSAGE_FAILURE_REASON_INVALID_HEADER_FIELDS,
+                "MESSAGE_FAILURE_REASON_INVALID_HEADER_FIELDS");
+        MESSAGE_FAILURE_REASON_STRING_MAP.append(MESSAGE_FAILURE_REASON_INVALID_BODY_CONTENT,
+                "MESSAGE_FAILURE_REASON_INVALID_BODY_CONTENT");
+        MESSAGE_FAILURE_REASON_STRING_MAP.append(MESSAGE_FAILURE_REASON_INVALID_FEATURE_TAG,
+                "MESSAGE_FAILURE_REASON_INVALID_FEATURE_TAG");
+        MESSAGE_FAILURE_REASON_STRING_MAP.append(
+                MESSAGE_FAILURE_REASON_TAG_NOT_ENABLED_FOR_DELEGATE,
+                "MESSAGE_FAILURE_REASON_TAG_NOT_ENABLED_FOR_DELEGATE");
+        MESSAGE_FAILURE_REASON_STRING_MAP.append(MESSAGE_FAILURE_REASON_NETWORK_NOT_AVAILABLE,
+                "MESSAGE_FAILURE_REASON_NETWORK_NOT_AVAILABLE");
+        MESSAGE_FAILURE_REASON_STRING_MAP.append(MESSAGE_FAILURE_REASON_NOT_REGISTERED,
+                "MESSAGE_FAILURE_REASON_NOT_REGISTERED");
+        MESSAGE_FAILURE_REASON_STRING_MAP.append(MESSAGE_FAILURE_REASON_STALE_IMS_CONFIGURATION,
+                "MESSAGE_FAILURE_REASON_STALE_IMS_CONFIGURATION");
+        MESSAGE_FAILURE_REASON_STRING_MAP.append(
+                MESSAGE_FAILURE_REASON_INTERNAL_DELEGATE_STATE_TRANSITION,
+                "MESSAGE_FAILURE_REASON_INTERNAL_DELEGATE_STATE_TRANSITION");
+    }
 
     /**
      * Access to use this feature tag has been denied for an unknown reason.

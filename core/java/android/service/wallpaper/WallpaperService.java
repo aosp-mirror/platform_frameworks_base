@@ -254,6 +254,7 @@ public abstract class WallpaperService extends Service {
         private int mDisplayState;
 
         SurfaceControl mSurfaceControl = new SurfaceControl();
+        SurfaceControl mBbqSurfaceControl;
         BLASTBufferQueue mBlastBufferQueue;
 
         final BaseSurfaceHolder mSurfaceHolder = new BaseSurfaceHolder() {
@@ -976,6 +977,15 @@ public abstract class WallpaperService extends Service {
                             View.VISIBLE, 0, -1, mWinFrames, mMergedConfiguration, mSurfaceControl,
                             mInsetsState, mTempControls, mSurfaceSize);
                     if (mSurfaceControl.isValid()) {
+                        if (mBbqSurfaceControl == null) {
+                            mBbqSurfaceControl = new SurfaceControl.Builder()
+                                    .setName("Wallpaper BBQ wrapper")
+                                    .setHidden(false)
+                                    .setBLASTLayer()
+                                    .setParent(mSurfaceControl)
+                                    .setCallsite("Wallpaper#relayout")
+                                    .build();
+                        }
                         Surface blastSurface = getOrCreateBLASTSurface(mSurfaceSize.x,
                                 mSurfaceSize.y, mFormat);
                         // If blastSurface == null that means it hasn't changed since the last
@@ -987,11 +997,6 @@ public abstract class WallpaperService extends Service {
                     }
                     if (!mLastSurfaceSize.equals(mSurfaceSize)) {
                         mLastSurfaceSize.set(mSurfaceSize.x, mSurfaceSize.y);
-                        if (mSurfaceControl != null && mSurfaceControl.isValid()) {
-                            SurfaceControl.Transaction t = new SurfaceControl.Transaction();
-                            t.setBufferSize(mSurfaceControl, mSurfaceSize.x, mSurfaceSize.y);
-                            t.apply();
-                        }
                     }
 
                     if (DEBUG) Log.v(TAG, "New surface: " + mSurfaceHolder.mSurface
@@ -1830,6 +1835,14 @@ public abstract class WallpaperService extends Service {
                 } catch (RemoteException e) {
                 }
                 mSurfaceHolder.mSurface.release();
+                if (mBlastBufferQueue != null) {
+                    mBlastBufferQueue.destroy();
+                    mBlastBufferQueue = null;
+                }
+                if (mBbqSurfaceControl != null) {
+                    new SurfaceControl.Transaction().remove(mBbqSurfaceControl).apply();
+                    mBbqSurfaceControl = null;
+                }
                 mCreated = false;
             }
         }
@@ -1854,13 +1867,13 @@ public abstract class WallpaperService extends Service {
         private Surface getOrCreateBLASTSurface(int width, int height, int format) {
             Surface ret = null;
             if (mBlastBufferQueue == null) {
-                mBlastBufferQueue = new BLASTBufferQueue("Wallpaper", mSurfaceControl, width,
-                        height, format);
+                mBlastBufferQueue = new BLASTBufferQueue("Wallpaper", mBbqSurfaceControl,
+                        width, height, format);
                 // We only return the Surface the first time, as otherwise
                 // it hasn't changed and there is no need to update.
                 ret = mBlastBufferQueue.createSurface();
             } else {
-                mBlastBufferQueue.update(mSurfaceControl, width, height, format);
+                mBlastBufferQueue.update(mBbqSurfaceControl, width, height, format);
             }
 
             return ret;

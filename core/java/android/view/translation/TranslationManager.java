@@ -100,10 +100,6 @@ public final class TranslationManager {
 
     private final ITranslationManager mService;
 
-    @Nullable
-    @GuardedBy("mLock")
-    private ITranslationDirectManager mDirectServiceBinder;
-
     @NonNull
     @GuardedBy("mLock")
     private final SparseArray<Translator> mTranslators = new SparseArray<>();
@@ -131,11 +127,72 @@ public final class TranslationManager {
     /**
      * Creates an on-device Translator for natural language translation.
      *
+     * @param translationContext {@link TranslationContext} containing the specs for creating the
+     *                                                     Translator.
+     * @param executor Executor to run callback operations
+     * @param callback {@link Consumer} to receive the translator. A {@code null} value is returned
+     *                                 if the service could not create the translator.
+     */
+    public void createOnDeviceTranslator(@NonNull TranslationContext translationContext,
+            @NonNull @CallbackExecutor Executor executor, @NonNull Consumer<Translator> callback) {
+        Objects.requireNonNull(translationContext, "translationContext cannot be null");
+        Objects.requireNonNull(executor, "executor cannot be null");
+        Objects.requireNonNull(callback, "callback cannot be null");
+
+        synchronized (mLock) {
+            // TODO(b/176464808): Disallow multiple Translator now, it will throw
+            //  IllegalStateException. Need to discuss if we can allow multiple Translators.
+            if (mTranslatorIds.containsKey(translationContext)) {
+                executor.execute(() -> callback.accept(
+                        mTranslators.get(mTranslatorIds.get(translationContext))));
+                return;
+            }
+
+            int translatorId;
+            do {
+                translatorId = Math.abs(ID_GENERATOR.nextInt());
+            } while (translatorId == 0 || mTranslators.indexOfKey(translatorId) >= 0);
+            final int tId = translatorId;
+
+            new Translator(mContext, translationContext, translatorId, this, mHandler, mService,
+                    new Consumer<Translator>() {
+                        @Override
+                        public void accept(Translator translator) {
+                            if (translator == null) {
+                                final long token = Binder.clearCallingIdentity();
+                                try {
+                                    executor.execute(() -> callback.accept(null));
+                                } finally {
+                                    Binder.restoreCallingIdentity(token);
+                                }
+                                return;
+                            }
+
+                            mTranslators.put(tId, translator);
+                            mTranslatorIds.put(translationContext, tId);
+                            final long token = Binder.clearCallingIdentity();
+                            try {
+                                executor.execute(() -> callback.accept(translator));
+                            } finally {
+                                Binder.restoreCallingIdentity(token);
+                            }
+                        }
+                    });
+        }
+    }
+
+    /**
+     * Creates an on-device Translator for natural language translation.
+     *
      * <p><strong>NOTE: </strong>Call on a worker thread.
+     *
+     * @deprecated use {@link #createOnDeviceTranslator(TranslationContext, Executor, Consumer)}
+     * instead.
      *
      * @param translationContext {@link TranslationContext} containing the specs for creating the
      *                                                     Translator.
      */
+    @Deprecated
     @Nullable
     @WorkerThread
     public Translator createOnDeviceTranslator(@NonNull TranslationContext translationContext) {

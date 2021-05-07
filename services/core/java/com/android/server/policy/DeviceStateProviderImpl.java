@@ -83,6 +83,7 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
     private static final String TAG = "DeviceStateProviderImpl";
 
     private static final BooleanSupplier TRUE_BOOLEAN_SUPPLIER = () -> true;
+    private static final BooleanSupplier FALSE_BOOLEAN_SUPPLIER = () -> false;
 
     @VisibleForTesting
     static final DeviceState DEFAULT_DEVICE_STATE = new DeviceState(MINIMUM_DEVICE_STATE,
@@ -152,7 +153,7 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
     private final DeviceState[] mOrderedStates;
     // Map of state identifier to a boolean supplier that returns true when all required conditions
     // are met for the device to be in the state.
-    private final SparseArray<BooleanSupplier> mStateConditions;
+    private final SparseArray<BooleanSupplier> mStateConditions = new SparseArray<>();
 
     @Nullable
     @GuardedBy("mLock")
@@ -177,6 +178,11 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
         Arrays.sort(orderedStates, Comparator.comparingInt(DeviceState::getIdentifier));
         mOrderedStates = orderedStates;
 
+        setStateConditions(deviceStates, stateConditions);
+    }
+
+    private void setStateConditions(@NonNull List<DeviceState> deviceStates,
+            @NonNull List<Conditions> stateConditions) {
         // Whether or not this instance should register to receive lid switch notifications from
         // InputManagerInternal. If there are no device state conditions that are based on the lid
         // switch there is no need to register for a callback.
@@ -185,7 +191,6 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
         // The set of Sensor(s) that this instance should register to receive SensorEvent(s) from.
         final ArraySet<Sensor> sensorsToListenTo = new ArraySet<>();
 
-        mStateConditions = new SparseArray<>();
         for (int i = 0; i < stateConditions.size(); i++) {
             final int state = deviceStates.get(i).getIdentifier();
             final Conditions conditions = stateConditions.get(i);
@@ -194,12 +199,20 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
                 continue;
             }
 
+            // Whether or not all the required hardware components could be found that match the
+            // requirements from the config.
+            boolean allRequiredComponentsFound = true;
+            // Whether or not this condition requires the lid switch.
+            boolean lidSwitchRequired = false;
+            // Set of sensors required for this condition.
+            ArraySet<Sensor> sensorsRequired = new ArraySet<>();
+
             List<BooleanSupplier> suppliers = new ArrayList<>();
 
             LidSwitchCondition lidSwitchCondition = conditions.getLidSwitch();
             if (lidSwitchCondition != null) {
                 suppliers.add(new LidSwitchBooleanSupplier(lidSwitchCondition.getOpen()));
-                shouldListenToLidSwitch = true;
+                lidSwitchRequired = true;
             }
 
             List<SensorCondition> sensorConditions = conditions.getSensor();
@@ -210,22 +223,33 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
 
                 final Sensor foundSensor = findSensor(expectedSensorType, expectedSensorName);
                 if (foundSensor == null) {
-                    throw new IllegalStateException("Failed to find Sensor with type: "
-                            + expectedSensorType + " and name: " + expectedSensorName);
+                    Slog.e(TAG, "Failed to find Sensor with type: " + expectedSensorType
+                            + " and name: " + expectedSensorName);
+                    allRequiredComponentsFound = false;
+                    break;
                 }
 
                 suppliers.add(new SensorBooleanSupplier(foundSensor, sensorCondition.getValue()));
-                sensorsToListenTo.add(foundSensor);
+                sensorsRequired.add(foundSensor);
             }
 
-            if (suppliers.size() > 1) {
-                mStateConditions.put(state, new AndBooleanSupplier(suppliers));
-            } else if (suppliers.size() > 0) {
-                // No need to wrap with an AND supplier if there is only 1.
-                mStateConditions.put(state, suppliers.get(0));
+            if (allRequiredComponentsFound) {
+                shouldListenToLidSwitch |= lidSwitchRequired;
+                sensorsToListenTo.addAll(sensorsRequired);
+
+                if (suppliers.size() > 1) {
+                    mStateConditions.put(state, new AndBooleanSupplier(suppliers));
+                } else if (suppliers.size() > 0) {
+                    // No need to wrap with an AND supplier if there is only 1.
+                    mStateConditions.put(state, suppliers.get(0));
+                } else {
+                    // There are no conditions for this state. Default to always true.
+                    mStateConditions.put(state, TRUE_BOOLEAN_SUPPLIER);
+                }
             } else {
-                // There are no conditions for this state. Default to always true.
-                mStateConditions.put(state, TRUE_BOOLEAN_SUPPLIER);
+                // Failed to setup this condition. This can happen if a sensor is missing. Default
+                // this state to always false.
+                mStateConditions.put(state, FALSE_BOOLEAN_SUPPLIER);
             }
         }
 

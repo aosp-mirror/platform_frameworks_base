@@ -109,8 +109,9 @@ class DividerImeController implements DisplayImeController.ImePositionProcessor 
         return mSplits.mSplitScreenController.getSplitLayout();
     }
 
-    private boolean isDividerVisible() {
-        return mSplits.mSplitScreenController.isDividerVisible();
+    private boolean isDividerHidden() {
+        final DividerView view = mSplits.mSplitScreenController.getDividerView();
+        return view == null || view.isHidden();
     }
 
     private boolean getSecondaryHasFocus(int displayId) {
@@ -143,7 +144,7 @@ class DividerImeController implements DisplayImeController.ImePositionProcessor 
     @ImeAnimationFlags
     public int onImeStartPositioning(int displayId, int hiddenTop, int shownTop,
             boolean imeShouldShow, boolean imeIsFloating, SurfaceControl.Transaction t) {
-        if (!isDividerVisible()) {
+        if (isDividerHidden()) {
             return 0;
         }
         mHiddenTop = hiddenTop;
@@ -263,7 +264,7 @@ class DividerImeController implements DisplayImeController.ImePositionProcessor 
     @Override
     public void onImePositionChanged(int displayId, int imeTop,
             SurfaceControl.Transaction t) {
-        if (mAnimation != null || !isDividerVisible() || mPaused) {
+        if (mAnimation != null || isDividerHidden() || mPaused) {
             // Not synchronized with IME anymore, so return.
             return;
         }
@@ -275,7 +276,7 @@ class DividerImeController implements DisplayImeController.ImePositionProcessor 
     @Override
     public void onImeEndPositioning(int displayId, boolean cancelled,
             SurfaceControl.Transaction t) {
-        if (mAnimation != null || !isDividerVisible() || mPaused) {
+        if (mAnimation != null || isDividerHidden() || mPaused) {
             // Not synchronized with IME anymore, so return.
             return;
         }

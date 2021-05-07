@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.appsearch.exceptions.AppSearchException;
 import android.app.appsearch.util.SchemaMigrationUtil;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -28,7 +29,6 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 
-import com.android.internal.infra.AndroidFuture;
 import com.android.internal.util.Preconditions;
 
 import java.io.Closeable;
@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
@@ -295,6 +296,19 @@ public final class AppSearchSession implements Closeable {
     }
 
     /**
+     * @deprecated TODO(b/181887768): Exists for dogfood transition; must be removed.
+     * @hide
+     */
+    @Deprecated
+    @UnsupportedAppUsage
+    public void getByUri(
+            @NonNull GetByUriRequest request,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull BatchResultCallback<String, GenericDocument> callback) {
+        getByDocumentId(request.toGetByDocumentIdRequest(), executor, callback);
+    }
+
+    /**
      * Gets {@link GenericDocument} objects by document IDs in a namespace from the {@link
      * AppSearchSession} database.
      *
@@ -486,6 +500,19 @@ public final class AppSearchSession implements Closeable {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * @deprecated TODO(b/181887768): Exists for dogfood transition; must be removed.
+     * @hide
+     */
+    @Deprecated
+    @UnsupportedAppUsage
+    public void remove(
+            @NonNull RemoveByUriRequest request,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull BatchResultCallback<String, Void> callback) {
+        remove(request.toRemoveByDocumentIdRequest(), executor, callback);
     }
 
     /**
@@ -708,8 +735,8 @@ public final class AppSearchSession implements Closeable {
             try {
                 // Migration process
                 // 1. Validate and retrieve all active migrators.
-                AndroidFuture<AppSearchResult<GetSchemaResponse>> getSchemaFuture =
-                        new AndroidFuture<>();
+                CompletableFuture<AppSearchResult<GetSchemaResponse>> getSchemaFuture =
+                        new CompletableFuture<>();
                 getSchema(callbackExecutor, getSchemaFuture::complete);
                 AppSearchResult<GetSchemaResponse> getSchemaResult = getSchemaFuture.get();
                 if (!getSchemaResult.isSuccess()) {
@@ -733,7 +760,8 @@ public final class AppSearchSession implements Closeable {
 
                 // 2. SetSchema with forceOverride=false, to retrieve the list of
                 // incompatible/deleted types.
-                AndroidFuture<AppSearchResult<Bundle>> setSchemaFuture = new AndroidFuture<>();
+                CompletableFuture<AppSearchResult<Bundle>> setSchemaFuture =
+                        new CompletableFuture<>();
                 mService.setSchema(
                         mPackageName,
                         mDatabaseName,
@@ -781,8 +809,8 @@ public final class AppSearchSession implements Closeable {
                     // failed.
                     if (!setSchemaResponse.getIncompatibleTypes().isEmpty()
                             || !setSchemaResponse.getDeletedTypes().isEmpty()) {
-                        AndroidFuture<AppSearchResult<Bundle>> setSchema2Future =
-                                new AndroidFuture<>();
+                        CompletableFuture<AppSearchResult<Bundle>> setSchema2Future =
+                                new CompletableFuture<>();
                         // only trigger second setSchema() call if the first one is fail.
                         mService.setSchema(
                                 mPackageName,

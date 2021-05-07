@@ -257,8 +257,8 @@ public class AttentionManagerService extends SystemService {
             return false;
         }
 
-        // don't allow attention check in screen off state
-        if (!mPowerManager.isInteractive()) {
+        // don't allow attention check in screen off state or power save mode
+        if (!mPowerManager.isInteractive() || mPowerManager.isPowerSaveMode()) {
             return false;
         }
 

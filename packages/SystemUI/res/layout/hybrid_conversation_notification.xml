@@ -26,21 +26,22 @@
 
     <FrameLayout
         android:layout_width="@*android:dimen/conversation_content_start"
-        android:layout_height="25dp"
+        android:layout_height="@dimen/conversation_single_line_face_pile_size"
+        android:paddingHorizontal="16dp"
     >
         <ImageView
             android:id="@*android:id/conversation_icon"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:layout_gravity="center"
+            android:layout_width="@dimen/conversation_single_line_avatar_size"
+            android:layout_height="@dimen/conversation_single_line_avatar_size"
+            android:layout_gravity="center_vertical|end"
         />
 
         <ViewStub
             android:id="@*android:id/conversation_face_pile"
             android:layout="@*android:layout/conversation_face_pile_layout"
-            android:layout_width="25dp"
-            android:layout_height="25dp"
-            android:layout_gravity="center"
+            android:layout_width="@dimen/conversation_single_line_face_pile_size"
+            android:layout_height="@dimen/conversation_single_line_face_pile_size"
+            android:layout_gravity="center_vertical|end"
         />
     </FrameLayout>
 

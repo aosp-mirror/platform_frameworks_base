@@ -36,6 +36,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.SysuiTestableContext;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.navigationbar.NavigationBarView;
+import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
@@ -67,6 +68,7 @@ public class NavigationBarButtonTest extends SysuiTestCase {
         mDependency.injectMockDependency(OverviewProxyService.class);
         mDependency.injectMockDependency(KeyguardStateController.class);
         mDependency.injectMockDependency(NavigationBarController.class);
+        mDependency.injectMockDependency(EdgeBackGestureHandler.class);
         mNavBar = new NavigationBarView(context, null);
     }
 

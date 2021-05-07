@@ -16,16 +16,10 @@
 
 package com.android.internal.widget;
 
-import static android.widget.EdgeEffect.TYPE_GLOW;
-import static android.widget.EdgeEffect.TYPE_STRETCH;
-import static android.widget.EdgeEffect.USE_STRETCH_EDGE_EFFECT_BY_DEFAULT;
-import static android.widget.EdgeEffect.USE_STRETCH_EDGE_EFFECT_FOR_SUPPORTED;
-
 import android.annotation.CallSuper;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.compat.Compatibility;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -466,8 +460,6 @@ public class RecyclerView extends ViewGroup implements ScrollingView, NestedScro
     private final int[] mScrollConsumed = new int[2];
     private final int[] mNestedOffsets = new int[2];
 
-    private int mEdgeEffectType;
-
     /**
      * These are views that had their a11y importance changed during a layout. We defer these events
      * until the end of the layout because a11y service may make sync calls back to the RV while
@@ -595,12 +587,8 @@ public class RecyclerView extends ViewGroup implements ScrollingView, NestedScro
             setDescendantFocusability(ViewGroup.FOCUS_AFTER_DESCENDANTS);
         }
 
-        boolean defaultToStretch = Compatibility.isChangeEnabled(USE_STRETCH_EDGE_EFFECT_BY_DEFAULT)
-                || Compatibility.isChangeEnabled(USE_STRETCH_EDGE_EFFECT_FOR_SUPPORTED);
         TypedArray a = context.obtainStyledAttributes(attrs,
                 com.android.internal.R.styleable.EdgeEffect);
-        mEdgeEffectType = a.getInt(com.android.internal.R.styleable.EdgeEffect_edgeEffectType,
-                defaultToStretch ? TYPE_STRETCH : TYPE_GLOW);
         a.recycle();
 
         // Re-set whether nested scrolling is enabled so that it is set on all API levels
@@ -623,28 +611,6 @@ public class RecyclerView extends ViewGroup implements ScrollingView, NestedScro
             RecyclerViewAccessibilityDelegate accessibilityDelegate) {
         mAccessibilityDelegate = accessibilityDelegate;
         setAccessibilityDelegate(mAccessibilityDelegate);
-    }
-
-    /**
-     * Returns the {@link EdgeEffect#getType()} used for all EdgeEffects.
-     *
-     * @return @link EdgeEffect#getType()} used for all EdgeEffects.
-     */
-    @EdgeEffect.EdgeEffectType
-    public int getEdgeEffectType() {
-        return mEdgeEffectType;
-    }
-
-    /**
-     * Sets the {@link EdgeEffect#getType()} used in all EdgeEffects.
-     * Any existing over-scroll effects are cleared and new effects are created as needed.
-     *
-     * @param type the {@link EdgeEffect#getType()} used in all EdgeEffects.
-     */
-    public void setEdgeEffectType(@EdgeEffect.EdgeEffectType int type) {
-        mEdgeEffectType = type;
-        invalidateGlows();
-        invalidate();
     }
 
     /**
@@ -2223,7 +2189,6 @@ public class RecyclerView extends ViewGroup implements ScrollingView, NestedScro
             return;
         }
         mLeftGlow = new EdgeEffect(getContext());
-        mLeftGlow.setType(mEdgeEffectType);
         if (mClipToPadding) {
             mLeftGlow.setSize(getMeasuredHeight() - getPaddingTop() - getPaddingBottom(),
                     getMeasuredWidth() - getPaddingLeft() - getPaddingRight());
@@ -2237,7 +2202,6 @@ public class RecyclerView extends ViewGroup implements ScrollingView, NestedScro
             return;
         }
         mRightGlow = new EdgeEffect(getContext());
-        mRightGlow.setType(mEdgeEffectType);
         if (mClipToPadding) {
             mRightGlow.setSize(getMeasuredHeight() - getPaddingTop() - getPaddingBottom(),
                     getMeasuredWidth() - getPaddingLeft() - getPaddingRight());
@@ -2251,7 +2215,6 @@ public class RecyclerView extends ViewGroup implements ScrollingView, NestedScro
             return;
         }
         mTopGlow = new EdgeEffect(getContext());
-        mTopGlow.setType(mEdgeEffectType);
         if (mClipToPadding) {
             mTopGlow.setSize(getMeasuredWidth() - getPaddingLeft() - getPaddingRight(),
                     getMeasuredHeight() - getPaddingTop() - getPaddingBottom());
@@ -2266,7 +2229,6 @@ public class RecyclerView extends ViewGroup implements ScrollingView, NestedScro
             return;
         }
         mBottomGlow = new EdgeEffect(getContext());
-        mBottomGlow.setType(mEdgeEffectType);
         if (mClipToPadding) {
             mBottomGlow.setSize(getMeasuredWidth() - getPaddingLeft() - getPaddingRight(),
                     getMeasuredHeight() - getPaddingTop() - getPaddingBottom());

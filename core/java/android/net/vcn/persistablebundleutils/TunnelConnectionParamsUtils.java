@@ -16,7 +16,6 @@
 package android.net.vcn.persistablebundleutils;
 
 import android.annotation.NonNull;
-import android.net.TunnelConnectionParams;
 import android.net.ipsec.ike.IkeSessionParams;
 import android.net.ipsec.ike.IkeTunnelConnectionParams;
 import android.net.ipsec.ike.TunnelModeChildSessionParams;
@@ -25,7 +24,7 @@ import android.os.PersistableBundle;
 import java.util.Objects;
 
 /**
- * Utility class to convert TunnelConnectionParams to/from PersistableBundle
+ * Utility class to convert Tunnel Connection Params to/from PersistableBundle
  *
  * @hide
  */
@@ -34,30 +33,28 @@ public final class TunnelConnectionParamsUtils {
 
     private static final String PARAMS_TYPE_IKE = "IKE";
 
-    /** Serializes an TunnelConnectionParams to a PersistableBundle. */
+    /** Serializes an IkeTunnelConnectionParams to a PersistableBundle. */
     @NonNull
-    public static PersistableBundle toPersistableBundle(@NonNull TunnelConnectionParams params) {
+    public static PersistableBundle toPersistableBundle(@NonNull IkeTunnelConnectionParams params) {
         final PersistableBundle result = new PersistableBundle();
 
-        if (params instanceof IkeTunnelConnectionParams) {
-            result.putPersistableBundle(
-                    PARAMS_TYPE_IKE,
-                    IkeTunnelConnectionParamsUtils.serializeIkeParams(
-                            (IkeTunnelConnectionParams) params));
-            return result;
-        } else {
-            throw new UnsupportedOperationException("Invalid TunnelConnectionParams type");
-        }
+        result.putPersistableBundle(
+                PARAMS_TYPE_IKE,
+                IkeTunnelConnectionParamsUtils.serializeIkeParams(
+                        (IkeTunnelConnectionParams) params));
+        return result;
     }
 
-    /** Constructs an TunnelConnectionParams by deserializing a PersistableBundle. */
+    /** Constructs an IkeTunnelConnectionParams by deserializing a PersistableBundle. */
     @NonNull
-    public static TunnelConnectionParams fromPersistableBundle(@NonNull PersistableBundle in) {
+    public static IkeTunnelConnectionParams fromPersistableBundle(@NonNull PersistableBundle in) {
         Objects.requireNonNull(in, "PersistableBundle was null");
 
         if (in.keySet().size() != EXPECTED_BUNDLE_KEY_CNT) {
             throw new IllegalArgumentException(
-                    "Expect PersistableBundle to have one element but found: " + in.keySet());
+                    String.format(
+                            "Expect PersistableBundle to have %d element but found: %d",
+                            EXPECTED_BUNDLE_KEY_CNT, in.keySet()));
         }
 
         if (in.get(PARAMS_TYPE_IKE) != null) {
@@ -66,7 +63,7 @@ public final class TunnelConnectionParamsUtils {
         }
 
         throw new IllegalArgumentException(
-                "Invalid TunnelConnectionParams type " + in.keySet().iterator().next());
+                "Invalid Tunnel Connection Params type " + in.keySet().iterator().next());
     }
 
     private static final class IkeTunnelConnectionParamsUtils {

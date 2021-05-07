@@ -129,6 +129,13 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             }
             updateStates();
         }
+
+        @Override
+        public void onVisibilityChanged(boolean isVisible) {
+            if (mAlternateAuthInterceptor != null) {
+                mAlternateAuthInterceptor.onBouncerVisibilityChanged();
+            }
+        }
     };
     private final DockManager.DockEventListener mDockEventListener =
             new DockManager.DockEventListener() {
@@ -572,6 +579,11 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     @Override
+    public void blockPanelExpansionFromCurrentTouch() {
+        mNotificationPanelViewController.blockExpansionForCurrentTouch();
+    }
+
+    @Override
     public void hide(long startTime, long fadeoutDuration) {
         mShowing = false;
         mKeyguardStateController.notifyKeyguardState(mShowing,
@@ -584,7 +596,10 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         long uptimeMillis = SystemClock.uptimeMillis();
         long delay = Math.max(0, startTime + HIDE_TIMING_CORRECTION_MS - uptimeMillis);
 
-        if (mStatusBar.isInLaunchTransition() ) {
+        if (mStatusBar.isInLaunchTransition()
+                || mKeyguardStateController.isFlingingToDismissKeyguard()) {
+            final boolean wasFlingingToDismissKeyguard =
+                    mKeyguardStateController.isFlingingToDismissKeyguard();
             mStatusBar.fadeKeyguardAfterLaunchTransition(new Runnable() {
                 @Override
                 public void run() {
@@ -598,6 +613,11 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                 public void run() {
                     mStatusBar.hideKeyguard();
                     mNotificationShadeWindowController.setKeyguardFadingAway(false);
+
+                    if (wasFlingingToDismissKeyguard) {
+                        mStatusBar.finishKeyguardFadingAway();
+                    }
+
                     mViewMediatorCallback.keyguardGone();
                     executeAfterKeyguardGoneAction();
                 }
@@ -609,7 +629,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             boolean needsFading = needsBypassFading();
             if (needsFading) {
                 delay = 0;
-                fadeoutDuration = KeyguardBypassController.BYPASS_PANEL_FADE_DURATION;
+                fadeoutDuration = KeyguardBypassController.BYPASS_FADE_DURATION;
             } else if (wakeUnlockPulsing) {
                 delay = 0;
                 fadeoutDuration = 240;
@@ -973,7 +993,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             resetAlternateAuth(false);
             executeAfterKeyguardGoneAction();
         }
-
     }
 
     public void showBouncerMessage(String message, ColorStateList colorState) {
@@ -1114,6 +1133,18 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     /**
+     * Request to show the udfps affordance in a particular color. This can be used if an
+     * occluding app on the keyguard would like to request udfps.  This method does nothing if
+     * {@link KeyguardUpdateMonitor#shouldListenForFingerprint} is false.
+     */
+    public void requestUdfps(boolean request, int color) {
+        if (mAlternateAuthInterceptor == null) {
+            return;
+        }
+        mAlternateAuthInterceptor.requestUdfps(request, color);
+    }
+
+    /**
      * Delegate used to send show/reset events to an alternate authentication method instead of the
      * regular pin/pattern/password bouncer.
      */
@@ -1161,6 +1192,20 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
          * hidden
          */
         void setBouncerExpansionChanged(float expansion);
+
+        /**
+         *  called when the bouncer view visibility has changed.
+         */
+        void onBouncerVisibilityChanged();
+
+        /**
+         * Use when an app occluding the keyguard would like to give the user ability to
+         * unlock the device using udfps.
+         *
+         * @param color of the udfps icon. should have proper contrast with its background. only
+         *              used if requestUdfps = true
+         */
+        void requestUdfps(boolean requestUdfps, int color);
 
     }
 }

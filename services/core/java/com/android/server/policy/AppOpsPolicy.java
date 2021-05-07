@@ -280,14 +280,15 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
     private static void updateAllowListedTagsForPackageLocked(int uid, String packageName,
             Set<String> allowListedTags, ConcurrentHashMap<Integer, ArrayMap<String,
             ArraySet<String>>> datastore) {
+        final int appId = UserHandle.getAppId(uid);
         // We make a copy of the per UID state to limit our mutation to one
         // operation in the underlying concurrent data structure.
-        ArrayMap<String, ArraySet<String>> uidTags = datastore.get(uid);
-        if (uidTags != null) {
-            uidTags = new ArrayMap<>(uidTags);
+        ArrayMap<String, ArraySet<String>> appIdTags = datastore.get(appId);
+        if (appIdTags != null) {
+            appIdTags = new ArrayMap<>(appIdTags);
         }
 
-        ArraySet<String> packageTags = (uidTags != null) ? uidTags.get(packageName) : null;
+        ArraySet<String> packageTags = (appIdTags != null) ? appIdTags.get(packageName) : null;
         if (packageTags != null) {
             packageTags = new ArraySet<>(packageTags);
         }
@@ -299,17 +300,17 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
             } else {
                 packageTags = new ArraySet<>(allowListedTags);
             }
-            if (uidTags == null) {
-                uidTags = new ArrayMap<>();
+            if (appIdTags == null) {
+                appIdTags = new ArrayMap<>();
             }
-            uidTags.put(packageName, packageTags);
-            datastore.put(uid, uidTags);
-        } else if (uidTags != null) {
-            uidTags.remove(packageName);
-            if (!uidTags.isEmpty()) {
-                datastore.put(uid, uidTags);
+            appIdTags.put(packageName, packageTags);
+            datastore.put(appId, appIdTags);
+        } else if (appIdTags != null) {
+            appIdTags.remove(packageName);
+            if (!appIdTags.isEmpty()) {
+                datastore.put(appId, appIdTags);
             } else {
-                datastore.remove(uid);
+                datastore.remove(appId);
             }
         }
     }
@@ -318,9 +319,10 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
             @NonNull String attributionTag, @NonNull Map<Integer, ArrayMap<String,
             ArraySet<String>>> mappedOps) {
         // Only a single lookup from the underlying concurrent data structure
-        final ArrayMap<String, ArraySet<String>> uidTags = mappedOps.get(uid);
-        if (uidTags != null) {
-            final ArraySet<String> packageTags = uidTags.get(packageName);
+        final int appId = UserHandle.getAppId(uid);
+        final ArrayMap<String, ArraySet<String>> appIdTags = mappedOps.get(appId);
+        if (appIdTags != null) {
+            final ArraySet<String> packageTags = appIdTags.get(packageName);
             if (packageTags != null && packageTags.contains(attributionTag)) {
                 return true;
             }

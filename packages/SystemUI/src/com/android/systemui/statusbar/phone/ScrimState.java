@@ -282,7 +282,7 @@ public enum ScrimState {
         public void prepare(ScrimState previousState) {
             mFrontTint = Color.TRANSPARENT;
             mBehindTint = Color.TRANSPARENT;
-            mBubbleTint = Color.TRANSPARENT;
+            mBubbleTint = Color.BLACK;
 
             mFrontAlpha = 0f;
             mBehindAlpha = mDefaultScrimAlpha;

@@ -4,6 +4,7 @@ import static junit.framework.Assert.assertEquals;
 
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -268,9 +269,9 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
         }
         // Set the ImsType to be IMS_TYPE_WWAN
         setImsType(1);
+        setupDefaultSignal();
         for (int testStrength = 0;
                 testStrength < CellSignalStrength.getNumSignalStrengthLevels(); testStrength++) {
-            setupDefaultSignal();
             setLevel(testStrength);
             verifyLastCallStrength(TelephonyIcons.MOBILE_CALL_STRENGTH_ICONS[testStrength]);
         }
@@ -309,6 +310,7 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
         // Put RSSI in the middle of the range.
         rssi += amountPerLevel / 2;
         when(mVcnTransportInfo.getWifiInfo()).thenReturn(mWifiInfo);
+        when(mVcnTransportInfo.makeCopy(anyLong())).thenReturn(mVcnTransportInfo);
         when(mWifiInfo.getRssi()).thenReturn(rssi);
         when(mWifiInfo.isCarrierMerged()).thenReturn(true);
         when(mWifiInfo.getSubscriptionId()).thenReturn(1);
@@ -318,6 +320,7 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
 
     protected void setWifiStateForVcn(boolean connected, String ssid) {
         when(mVcnTransportInfo.getWifiInfo()).thenReturn(mWifiInfo);
+        when(mVcnTransportInfo.makeCopy(anyLong())).thenReturn(mVcnTransportInfo);
         when(mWifiInfo.getSSID()).thenReturn(ssid);
         when(mWifiInfo.isCarrierMerged()).thenReturn(true);
         when(mWifiInfo.getSubscriptionId()).thenReturn(1);

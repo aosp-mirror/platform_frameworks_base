@@ -18,9 +18,11 @@ package com.android.server.display;
 
 import android.hardware.display.BrightnessInfo;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.util.Slog;
+import android.view.SurfaceControlHdrLayerInfoListener;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.display.DisplayDeviceConfig.HighBrightnessModeData;
@@ -45,17 +47,21 @@ class HighBrightnessModeController {
 
     private final float mBrightnessMin;
     private final float mBrightnessMax;
-    private final HighBrightnessModeData mHbmData;
     private final Handler mHandler;
     private final Runnable mHbmChangeCallback;
     private final Runnable mRecalcRunnable;
     private final Clock mClock;
+
+    private SurfaceControlHdrLayerInfoListener mHdrListener;
+    private HighBrightnessModeData mHbmData;
+    private IBinder mRegisteredDisplayToken;
 
     private boolean mIsInAllowedAmbientRange = false;
     private boolean mIsTimeAvailable = false;
     private boolean mIsAutoBrightnessEnabled = false;
     private float mAutoBrightness;
     private int mHbmMode = BrightnessInfo.HIGH_BRIGHTNESS_MODE_OFF;
+    private boolean mIsHdrLayerPresent = false;
 
     /**
      * If HBM is currently running, this is the start time for the current HBM session.
@@ -69,23 +75,26 @@ class HighBrightnessModeController {
      */
     private LinkedList<HbmEvent> mEvents = new LinkedList<>();
 
-    HighBrightnessModeController(Handler handler, float brightnessMin, float brightnessMax,
-            HighBrightnessModeData hbmData, Runnable hbmChangeCallback) {
-        this(SystemClock::uptimeMillis, handler, brightnessMin, brightnessMax, hbmData,
-                hbmChangeCallback);
+    HighBrightnessModeController(Handler handler, IBinder displayToken, float brightnessMin,
+            float brightnessMax, HighBrightnessModeData hbmData, Runnable hbmChangeCallback) {
+        this(SystemClock::uptimeMillis, handler, displayToken, brightnessMin, brightnessMax,
+                hbmData, hbmChangeCallback);
     }
 
     @VisibleForTesting
-    HighBrightnessModeController(Clock clock, Handler handler, float brightnessMin,
-            float brightnessMax, HighBrightnessModeData hbmData, Runnable hbmChangeCallback) {
+    HighBrightnessModeController(Clock clock, Handler handler, IBinder displayToken,
+            float brightnessMin, float brightnessMax, HighBrightnessModeData hbmData,
+            Runnable hbmChangeCallback) {
         mClock = clock;
         mHandler = handler;
         mBrightnessMin = brightnessMin;
         mBrightnessMax = brightnessMax;
-        mHbmData = hbmData;
         mHbmChangeCallback = hbmChangeCallback;
         mAutoBrightness = PowerManager.BRIGHTNESS_INVALID_FLOAT;
         mRecalcRunnable = this::recalculateTimeAllowance;
+        mHdrListener = new HdrListener();
+
+        resetHbmData(displayToken, hbmData);
     }
 
     void setAutoBrightnessEnabled(boolean isEnabled) {
@@ -117,6 +126,10 @@ class HighBrightnessModeController {
         }
     }
 
+    float getHdrBrightnessValue() {
+        return mBrightnessMax;
+    }
+
     void onAmbientLuxChange(float ambientLux) {
         if (!deviceSupportsHbm() || !mIsAutoBrightnessEnabled) {
             return;
@@ -138,11 +151,12 @@ class HighBrightnessModeController {
 
         // If we are starting or ending a high brightness mode session, store the current
         // session in mRunningStartTimeMillis, or the old one in mEvents.
-        final boolean wasOldBrightnessHigh = oldAutoBrightness > mHbmData.transitionPoint;
-        final boolean isNewBrightnessHigh = mAutoBrightness > mHbmData.transitionPoint;
-        if (wasOldBrightnessHigh != isNewBrightnessHigh) {
+        final boolean wasHbmDrainingAvailableTime = mRunningStartTimeMillis != -1;
+        final boolean shouldHbmDrainAvailableTime = mAutoBrightness > mHbmData.transitionPoint
+                && !mIsHdrLayerPresent;
+        if (wasHbmDrainingAvailableTime != shouldHbmDrainAvailableTime) {
             final long currentTime = mClock.uptimeMillis();
-            if (isNewBrightnessHigh) {
+            if (shouldHbmDrainAvailableTime) {
                 mRunningStartTimeMillis = currentTime;
             } else {
                 mEvents.addFirst(new HbmEvent(mRunningStartTimeMillis, currentTime));
@@ -161,30 +175,49 @@ class HighBrightnessModeController {
         return mHbmMode;
     }
 
+    void stop() {
+        registerHdrListener(null /*displayToken*/);
+    }
+
+    void resetHbmData(IBinder displayToken, HighBrightnessModeData hbmData) {
+        mHbmData = hbmData;
+        unregisterHdrListener();
+        if (deviceSupportsHbm()) {
+            registerHdrListener(displayToken);
+            recalculateTimeAllowance();
+        }
+    }
+
     void dump(PrintWriter pw) {
         pw.println("HighBrightnessModeController:");
-        pw.println("  mBrightnessMin=" + mBrightnessMin);
-        pw.println("  mBrightnessMax=" + mBrightnessMax);
+        pw.println("  mCurrentMin=" + getCurrentBrightnessMin());
+        pw.println("  mCurrentMax=" + getCurrentBrightnessMax());
+        pw.println("  mHbmMode=" + BrightnessInfo.hbmToString(mHbmMode));
+        pw.println("  remainingTime=" + calculateRemainingTime(mClock.uptimeMillis()));
         pw.println("  mHbmData=" + mHbmData);
         pw.println("  mIsInAllowedAmbientRange=" + mIsInAllowedAmbientRange);
         pw.println("  mIsTimeAvailable= " + mIsTimeAvailable);
         pw.println("  mIsAutoBrightnessEnabled=" + mIsAutoBrightnessEnabled);
         pw.println("  mAutoBrightness=" + mAutoBrightness);
+        pw.println("  mIsHdrLayerPresent=" + mIsHdrLayerPresent);
+        pw.println("  mBrightnessMin=" + mBrightnessMin);
+        pw.println("  mBrightnessMax=" + mBrightnessMax);
     }
 
     private boolean isCurrentlyAllowed() {
-        return mIsAutoBrightnessEnabled && mIsTimeAvailable && mIsInAllowedAmbientRange;
+        return mIsHdrLayerPresent
+                || (mIsAutoBrightnessEnabled && mIsTimeAvailable && mIsInAllowedAmbientRange);
     }
 
     private boolean deviceSupportsHbm() {
         return mHbmData != null;
     }
 
-    /**
-     * Recalculates the allowable HBM time.
-     */
-    private void recalculateTimeAllowance() {
-        final long currentTime = mClock.uptimeMillis();
+    private long calculateRemainingTime(long currentTime) {
+        if (!deviceSupportsHbm()) {
+            return 0;
+        }
+
         long timeAlreadyUsed = 0;
 
         // First, lets see how much time we've taken for any currently running
@@ -222,8 +255,15 @@ class HighBrightnessModeController {
             Slog.d(TAG, "Time already used after all sessions: " + timeAlreadyUsed);
         }
 
-        // See how much allowable time we have left.
-        final long remainingTime = Math.max(0, mHbmData.timeMaxMillis - timeAlreadyUsed);
+        return Math.max(0, mHbmData.timeMaxMillis - timeAlreadyUsed);
+    }
+
+    /**
+     * Recalculates the allowable HBM time.
+     */
+    private void recalculateTimeAllowance() {
+        final long currentTime = mClock.uptimeMillis();
+        final long remainingTime = calculateRemainingTime(currentTime);
 
         // We allow HBM if there is more than the minimum required time available
         // or if brightness is already in the high range, if there is any time left at all.
@@ -242,6 +282,7 @@ class HighBrightnessModeController {
             // If we are not allowed...timeout when the oldest event moved outside of the timing
             // window by at least minTime. Basically, we're calculating the soonest time we can
             // get {@code timeMinMillis} back to us.
+            final long windowstartTimeMillis = currentTime - mHbmData.timeWindowMillis;
             final HbmEvent lastEvent = mEvents.getLast();
             final long startTimePlusMinMillis =
                     Math.max(windowstartTimeMillis, lastEvent.startTimeMillis)
@@ -278,10 +319,34 @@ class HighBrightnessModeController {
     }
 
     private int calculateHighBrightnessMode() {
-        if (deviceSupportsHbm() && isCurrentlyAllowed()) {
+        if (!deviceSupportsHbm()) {
+            return BrightnessInfo.HIGH_BRIGHTNESS_MODE_OFF;
+        } else if (mIsHdrLayerPresent) {
+            return BrightnessInfo.HIGH_BRIGHTNESS_MODE_HDR;
+        } else if (isCurrentlyAllowed()) {
             return BrightnessInfo.HIGH_BRIGHTNESS_MODE_SUNLIGHT;
         }
+
         return BrightnessInfo.HIGH_BRIGHTNESS_MODE_OFF;
+    }
+
+    private void registerHdrListener(IBinder displayToken) {
+        if (mRegisteredDisplayToken == displayToken) {
+            return;
+        }
+
+        unregisterHdrListener();
+        mRegisteredDisplayToken = displayToken;
+        if (mRegisteredDisplayToken != null) {
+            mHdrListener.register(mRegisteredDisplayToken);
+        }
+    }
+
+    private void unregisterHdrListener() {
+        if (mRegisteredDisplayToken != null) {
+            mHdrListener.unregister(mRegisteredDisplayToken);
+            mIsHdrLayerPresent = false;
+        }
     }
 
     /**
@@ -300,6 +365,20 @@ class HighBrightnessModeController {
         public String toString() {
             return "[Event: {" + startTimeMillis + ", " + endTimeMillis + "}, total: "
                     + ((endTimeMillis - startTimeMillis) / 1000) + "]";
+        }
+    }
+
+    private class HdrListener extends SurfaceControlHdrLayerInfoListener {
+        @Override
+        public void onHdrInfoChanged(IBinder displayToken, int numberOfHdrLayers,
+                int maxW, int maxH, int flags) {
+            mHandler.post(() -> {
+                mIsHdrLayerPresent = numberOfHdrLayers > 0;
+                // Calling the auto-brightness update so that we can recalculate
+                // auto-brightness with HDR in mind. When HDR layers are present,
+                // we don't limit auto-brightness' HBM time limits.
+                onAutoBrightnessChanged(mAutoBrightness);
+            });
         }
     }
 }

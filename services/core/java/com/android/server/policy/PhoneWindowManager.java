@@ -379,6 +379,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private DisplayFoldController mDisplayFoldController;
     AppOpsManager mAppOpsManager;
     PackageManager mPackageManager;
+    SideFpsEventHandler mSideFpsEventHandler;
     private boolean mHasFeatureAuto;
     private boolean mHasFeatureWatch;
     private boolean mHasFeatureLeanback;
@@ -413,13 +414,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     volatile boolean mBootAnimationDismissable;
     private KeyguardServiceDelegate mKeyguardDelegate;
     private boolean mKeyguardBound;
-    final Runnable mWindowManagerDrawCallback = new Runnable() {
-        @Override
-        public void run() {
-            if (DEBUG_WAKEUP) Slog.i(TAG, "All windows ready for display!");
-            mHandler.sendEmptyMessage(MSG_WINDOW_MANAGER_DRAWN_COMPLETE);
-        }
-    };
     final DrawnListener mKeyguardDrawnCallback = new DrawnListener() {
         @Override
         public void onDrawn() {
@@ -646,7 +640,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     break;
                 case MSG_WINDOW_MANAGER_DRAWN_COMPLETE:
                     if (DEBUG_WAKEUP) Slog.w(TAG, "Setting mWindowManagerDrawComplete");
-                    finishWindowsDrawn();
+                    finishWindowsDrawn(msg.arg1);
                     break;
                 case MSG_HIDE_BOOT_MESSAGE:
                     handleHideBootMessage();
@@ -935,6 +929,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         } else if (count == 3) {
             powerMultiPressAction(eventTime, interactive, mTriplePressOnPowerBehavior);
         } else if (interactive && !beganFromNonInteractive) {
+            if (mSideFpsEventHandler.onSinglePressDetected(eventTime)) {
+                Slog.i(TAG, "Suppressing power key because the user is interacting with the "
+                        + "fingerprint sensor");
+                return;
+            }
             switch (mShortPressOnPowerBehavior) {
                 case SHORT_PRESS_POWER_NOTHING:
                     break;
@@ -1810,6 +1809,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 });
         initKeyCombinationRules();
         initSingleKeyGestureRules();
+        mSideFpsEventHandler = new SideFpsEventHandler(mContext, mHandler, mPowerManager);
     }
 
     private void initKeyCombinationRules() {
@@ -4308,8 +4308,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         // ... eventually calls finishWindowsDrawn which will finalize our screen turn on
         // as well as enabling the orientation change logic/sensor.
-        mWindowManagerInternal.waitForAllWindowsDrawn(mWindowManagerDrawCallback,
-                WAITING_FOR_DRAWN_TIMEOUT, INVALID_DISPLAY);
+        mWindowManagerInternal.waitForAllWindowsDrawn(() -> {
+            if (DEBUG_WAKEUP) Slog.i(TAG, "All windows ready for every display");
+            mHandler.sendMessage(mHandler.obtainMessage(MSG_WINDOW_MANAGER_DRAWN_COMPLETE,
+                    INVALID_DISPLAY, 0));
+            }, WAITING_FOR_DRAWN_TIMEOUT, INVALID_DISPLAY);
     }
 
     // Called on the DisplayManager's DisplayPowerController thread.
@@ -4369,6 +4372,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         } else {
             mScreenOnListeners.put(displayId, screenOnListener);
+            mWindowManagerInternal.waitForAllWindowsDrawn(() -> {
+                if (DEBUG_WAKEUP) Slog.i(TAG, "All windows ready for display: " + displayId);
+                mHandler.sendMessage(mHandler.obtainMessage(MSG_WINDOW_MANAGER_DRAWN_COMPLETE,
+                        displayId, 0));
+            }, WAITING_FOR_DRAWN_TIMEOUT, displayId);
         }
     }
 
@@ -4409,7 +4417,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mVrManagerInternal.onScreenStateChanged(isScreenOn);
     }
 
-    private void finishWindowsDrawn() {
+    private void finishWindowsDrawn(int displayId) {
+        if (displayId != DEFAULT_DISPLAY && displayId != INVALID_DISPLAY) {
+            final ScreenOnListener screenOnListener = mScreenOnListeners.removeReturnOld(displayId);
+            if (screenOnListener != null) {
+                screenOnListener.onScreenOn();
+            }
+            return;
+        }
+
         if (!mDefaultDisplayPolicy.finishWindowsDrawn()) {
             return;
         }
@@ -4453,14 +4469,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (listener != null) {
                 listener.onScreenOn();
             }
-
-            for (int i = mScreenOnListeners.size() - 1; i >= 0; i--) {
-                final ScreenOnListener screenOnListener = mScreenOnListeners.valueAt(i);
-                if (screenOnListener != null) {
-                    screenOnListener.onScreenOn();
-                }
-            }
-            mScreenOnListeners.clear();
         }
 
         if (enableScreen) {
@@ -4667,6 +4675,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mKeyguardDelegate.onBootCompleted();
             }
         }
+        mSideFpsEventHandler.onFingerprintSensorReady();
         startedWakingUp(PowerManager.WAKE_REASON_UNKNOWN);
         finishedWakingUp(PowerManager.WAKE_REASON_UNKNOWN);
 
@@ -5153,7 +5162,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             .compose();
                 }
                 // fallback for devices without composition support
-                return VibrationEffect.get(VibrationEffect.EFFECT_DOUBLE_CLICK);
+                return VibrationEffect.get(VibrationEffect.EFFECT_HEAVY_CLICK);
 
             default:
                 return null;

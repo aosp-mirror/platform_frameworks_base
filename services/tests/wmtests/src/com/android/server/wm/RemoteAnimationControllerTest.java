@@ -177,7 +177,7 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
                 mFinishedCallback);
         mController.goodToGo(TRANSIT_OLD_ACTIVITY_OPEN);
 
-        mClock.fastForward(2500);
+        mClock.fastForward(10500);
         mHandler.timeAdvance();
 
         verify(mMockRunner).onAnimationCancelled();
@@ -198,12 +198,12 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
                     mFinishedCallback);
             mController.goodToGo(TRANSIT_OLD_ACTIVITY_OPEN);
 
-            mClock.fastForward(2500);
+            mClock.fastForward(10500);
             mHandler.timeAdvance();
 
             verify(mMockRunner, never()).onAnimationCancelled();
 
-            mClock.fastForward(10000);
+            mClock.fastForward(52500);
             mHandler.timeAdvance();
 
             verify(mMockRunner).onAnimationCancelled();

@@ -219,6 +219,7 @@ package android.app {
   public class AppOpsManager {
     method @RequiresPermission("android.permission.MANAGE_APPOPS") public void addHistoricalOps(@NonNull android.app.AppOpsManager.HistoricalOps);
     method @RequiresPermission("android.permission.MANAGE_APPOPS") public void clearHistory();
+    method public static void collectNotedOpSync(@NonNull android.app.SyncNotedAppOp);
     method @RequiresPermission("android.permission.MANAGE_APPOPS") public void getHistoricalOpsFromDiskRaw(@NonNull android.app.AppOpsManager.HistoricalOpsRequest, @Nullable java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.app.AppOpsManager.HistoricalOps>);
     method public static int getNumOps();
     method public boolean isOperationActive(int, int, String);
@@ -360,6 +361,10 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void setExpansionDisabledForSimNetworkLock(boolean);
   }
 
+  public final class SyncNotedAppOp implements android.os.Parcelable {
+    ctor public SyncNotedAppOp(int, @IntRange(from=0L) int, @Nullable String, @NonNull String);
+  }
+
   public class TaskInfo {
     method public boolean containsLaunchCookie(@NonNull android.os.IBinder);
     method @NonNull public android.content.res.Configuration getConfiguration();
@@ -382,6 +387,7 @@ package android.app {
     method @Deprecated public boolean revokeRuntimePermission(String, String, android.os.UserHandle);
     method public void syncInputTransactions();
     method public void syncInputTransactions(boolean);
+    method @Nullable public android.graphics.Bitmap takeScreenshot(@NonNull android.view.Window);
     field @NonNull public static final java.util.Set<java.lang.String> ALL_PERMISSIONS;
   }
 
@@ -390,7 +396,7 @@ package android.app {
     method public boolean isUiModeLocked();
     method @RequiresPermission(value=android.Manifest.permission.TOGGLE_AUTOMOTIVE_PROJECTION, conditional=true) public boolean releaseProjection(int);
     method @RequiresPermission(value=android.Manifest.permission.TOGGLE_AUTOMOTIVE_PROJECTION, conditional=true) public boolean requestProjection(int);
-    field public static final int PROJECTION_TYPE_ALL = 65535; // 0xffff
+    field public static final int PROJECTION_TYPE_ALL = -1; // 0xffffffff
     field public static final int PROJECTION_TYPE_AUTOMOTIVE = 1; // 0x1
     field public static final int PROJECTION_TYPE_NONE = 0; // 0x0
   }
@@ -428,7 +434,6 @@ package android.app {
     field public static final int ROTATION_UNDEFINED = -1; // 0xffffffff
     field public static final int WINDOWING_MODE_FREEFORM = 5; // 0x5
     field public static final int WINDOWING_MODE_FULLSCREEN = 1; // 0x1
-    field public static final int WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY = 4; // 0x4
     field public static final int WINDOWING_MODE_MULTI_WINDOW = 6; // 0x6
     field public static final int WINDOWING_MODE_PINNED = 2; // 0x2
     field public static final int WINDOWING_MODE_SPLIT_SCREEN_PRIMARY = 3; // 0x3
@@ -1809,6 +1814,7 @@ package android.os {
 
   public class VintfObject {
     method public static String[] getHalNamesAndVersions();
+    method @NonNull public static String getPlatformSepolicyVersion();
     method public static String getSepolicyVersion();
     method public static Long getTargetFrameworkCompatibilityMatrixVersion();
     method public static java.util.Map<java.lang.String,java.lang.String[]> getVndkSnapshots();
@@ -2671,8 +2677,14 @@ package android.view {
     field public static final int CALLBACK_ANIMATION = 1; // 0x1
   }
 
-  public final class ContentInfo {
+  public final class ContentInfo implements android.os.Parcelable {
     method @NonNull public android.util.Pair<android.view.ContentInfo,android.view.ContentInfo> partition(@NonNull java.util.function.Predicate<android.content.ClipData.Item>);
+    method public void releasePermissions();
+  }
+
+  public static final class ContentInfo.Builder {
+    method @NonNull public android.view.ContentInfo.Builder setDragAndDropPermissions(@Nullable android.view.DragAndDropPermissions);
+    method @NonNull public android.view.ContentInfo.Builder setInputContentInfo(@Nullable android.view.inputmethod.InputContentInfo);
   }
 
   public final class Display {

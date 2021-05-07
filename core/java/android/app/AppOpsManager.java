@@ -1237,9 +1237,17 @@ public class AppOpsManager {
     public static final int OP_ACTIVITY_RECOGNITION_SOURCE =
             AppProtoEnums.APP_OP_ACTIVITY_RECOGNITION_SOURCE;
 
+    /**
+     * Incoming phone audio is being recorded
+     *
+     * @hide
+     */
+    public static final int OP_RECORD_INCOMING_PHONE_AUDIO =
+            AppProtoEnums.APP_OP_RECORD_INCOMING_PHONE_AUDIO;
+
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int _NUM_OP = 115;
+    public static final int _NUM_OP = 116;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -1669,6 +1677,12 @@ public class AppOpsManager {
     public static final String OPSTR_ACTIVITY_RECOGNITION_SOURCE =
             "android:activity_recognition_source";
 
+    /**
+     * @hide
+     */
+    public static final String OPSTR_RECORD_INCOMING_PHONE_AUDIO =
+            "android:record_incoming_phone_audio";
+
     /** {@link #sAppOpsToNote} not initialized yet for this op */
     private static final byte SHOULD_COLLECT_NOTE_OP_NOT_INITIALIZED = 0;
     /** Should not collect noting of this app-op in {@link #sAppOpsToNote} */
@@ -1880,8 +1894,9 @@ public class AppOpsManager {
             OP_MANAGE_MEDIA,                    // MANAGE_MEDIA
             OP_BLUETOOTH_CONNECT,               // OP_BLUETOOTH_CONNECT
             OP_UWB_RANGING,                     // OP_UWB_RANGING
-            OP_ACTIVITY_RECOGNITION_SOURCE,     // OP_ACTIVITY_RECOGNITION_SOURCE
+            OP_ACTIVITY_RECOGNITION,            // OP_ACTIVITY_RECOGNITION_SOURCE
             OP_BLUETOOTH_ADVERTISE,             // OP_BLUETOOTH_ADVERTISE
+            OP_RECORD_INCOMING_PHONE_AUDIO,     // OP_RECORD_INCOMING_PHONE_AUDIO
     };
 
     /**
@@ -2003,6 +2018,7 @@ public class AppOpsManager {
             OPSTR_UWB_RANGING,
             OPSTR_ACTIVITY_RECOGNITION_SOURCE,
             OPSTR_BLUETOOTH_ADVERTISE,
+            OPSTR_RECORD_INCOMING_PHONE_AUDIO,
     };
 
     /**
@@ -2125,6 +2141,7 @@ public class AppOpsManager {
             "UWB_RANGING",
             "ACTIVITY_RECOGNITION_SOURCE",
             "BLUETOOTH_ADVERTISE",
+            "RECORD_INCOMING_PHONE_AUDIO",
     };
 
     /**
@@ -2248,6 +2265,7 @@ public class AppOpsManager {
             Manifest.permission.UWB_RANGING,
             null, // no permission for OP_ACTIVITY_RECOGNITION_SOURCE,
             Manifest.permission.BLUETOOTH_ADVERTISE,
+            null, // no permission for OP_RECORD_INCOMING_PHONE_AUDIO,
     };
 
     /**
@@ -2371,6 +2389,7 @@ public class AppOpsManager {
             null, // UWB_RANGING
             null, // ACTIVITY_RECOGNITION_SOURCE
             null, // BLUETOOTH_ADVERTISE
+            null, // RECORD_INCOMING_PHONE_AUDIO
     };
 
     /**
@@ -2493,6 +2512,7 @@ public class AppOpsManager {
             null, // UWB_RANGING
             null, // ACTIVITY_RECOGNITION_SOURCE
             null, // BLUETOOTH_ADVERTISE
+            null, // RECORD_INCOMING_PHONE_AUDIO
     };
 
     /**
@@ -2614,6 +2634,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_ALLOWED, // UWB_RANGING
             AppOpsManager.MODE_ALLOWED, // ACTIVITY_RECOGNITION_SOURCE
             AppOpsManager.MODE_ALLOWED, // BLUETOOTH_ADVERTISE
+            AppOpsManager.MODE_ALLOWED, // RECORD_INCOMING_PHONE_AUDIO
     };
 
     /**
@@ -2739,6 +2760,7 @@ public class AppOpsManager {
             false, // UWB_RANGING
             false, // ACTIVITY_RECOGNITION_SOURCE
             false, // BLUETOOTH_ADVERTISE
+            false, // RECORD_INCOMING_PHONE_AUDIO
     };
 
     /**
@@ -2761,14 +2783,24 @@ public class AppOpsManager {
     private static final ThreadLocal<Integer> sBinderThreadCallingUid = new ThreadLocal<>();
 
     /**
-     * If a thread is currently executing a two-way binder transaction, this stores the op-codes of
-     * the app-ops that were noted during this transaction.
+     * Optimization: we need to propagate to IPCs whether the current thread is collecting
+     * app ops but using only the thread local above is too slow as it requires a map lookup
+     * on every IPC. We add this static var that is lockless and stores an OR-ed mask of the
+     * thread id's currently collecting ops, thus reducing the map lookup to a simple bit
+     * operation except the extremely unlikely case when threads with overlapping id bits
+     * execute op collecting ops.
+     */
+    private static volatile long sThreadsListeningForOpNotedInBinderTransaction = 0L;
+
+    /**
+     * If a thread is currently executing a two-way binder transaction, this stores the
+     * ops that were noted blaming any app (the caller, the caller of the caller, etc).
      *
      * @see #getNotedOpCollectionMode
      * @see #collectNotedOpSync
      */
-    private static final ThreadLocal<ArrayMap<String, long[]>> sAppOpsNotedInThisBinderTransaction =
-            new ThreadLocal<>();
+    private static final ThreadLocal<ArrayMap<String, ArrayMap<String, long[]>>>
+            sAppOpsNotedInThisBinderTransaction = new ThreadLocal<>();
 
     /** Whether noting for an appop should be collected */
     private static final @ShouldCollectNoteOp byte[] sAppOpsToNote = new byte[_NUM_OP];
@@ -4701,8 +4733,8 @@ public class AppOpsManager {
     }
 
     /**
-     * Flag for querying app op history: get only aggregate information and no
-     * discrete accesses.
+     * Flag for querying app op history: get only aggregate information (counts of events) and no
+     * discret accesses information - specific accesses with timestamp.
      *
      * @see #getHistoricalOps(HistoricalOpsRequest, Executor, Consumer)
      *
@@ -4713,8 +4745,8 @@ public class AppOpsManager {
     public static final int HISTORY_FLAG_AGGREGATE = 1 << 0;
 
     /**
-     * Flag for querying app op history: get only discrete information and no
-     * aggregate accesses.
+     * Flag for querying app op history: get only discrete access information (only specific
+     * accesses with timestamps) and no aggregate information (counts over time).
      *
      * @see #getHistoricalOps(HistoricalOpsRequest, Executor, Consumer)
      *
@@ -4725,7 +4757,7 @@ public class AppOpsManager {
     public static final int HISTORY_FLAG_DISCRETE = 1 << 1;
 
     /**
-     * Flag for querying app op history: get all types of historical accesses.
+     * Flag for querying app op history: get all types of historical access information.
      *
      * @see #getHistoricalOps(HistoricalOpsRequest, Executor, Consumer)
      *
@@ -6511,13 +6543,21 @@ public class AppOpsManager {
             NoteOpEvent note = new NoteOpEvent(discreteAccessTime, discreteAccessDuration, null);
             accessEvents.append(key, note);
             AttributedOpEntry access = new AttributedOpEntry(mOp, false, accessEvents, null);
-            for (int i = discreteAccesses.size() - 1; i >= 0; i--) {
-                if (discreteAccesses.get(i).getLastAccessTime(OP_FLAGS_ALL) < discreteAccessTime) {
-                    discreteAccesses.add(i + 1, access);
-                    return;
+            int insertionPoint = discreteAccesses.size() - 1;
+            for (; insertionPoint >= 0; insertionPoint--) {
+                if (discreteAccesses.get(insertionPoint).getLastAccessTime(OP_FLAGS_ALL)
+                        < discreteAccessTime) {
+                    break;
                 }
             }
-            discreteAccesses.add(0, access);
+            insertionPoint++;
+            if (insertionPoint < discreteAccesses.size() && discreteAccesses.get(
+                    insertionPoint).getLastAccessTime(OP_FLAGS_ALL) == discreteAccessTime) {
+                discreteAccesses.set(insertionPoint, mergeAttributedOpEntries(
+                        Arrays.asList(discreteAccesses.get(insertionPoint), access)));
+            } else {
+                discreteAccesses.add(insertionPoint, access);
+            }
         }
 
         /**
@@ -6814,7 +6854,7 @@ public class AppOpsManager {
             writeLongSparseLongArrayToParcel(mAccessCount, parcel);
             writeLongSparseLongArrayToParcel(mRejectCount, parcel);
             writeLongSparseLongArrayToParcel(mAccessDuration, parcel);
-            writeDiscreteAccessArrayToParcel(mDiscreteAccesses, parcel);
+            writeDiscreteAccessArrayToParcel(mDiscreteAccesses, parcel, flags);
         }
 
         @Override
@@ -8075,7 +8115,7 @@ public class AppOpsManager {
             SyncNotedAppOp syncOp = mService.noteOperation(op, uid, packageName, attributionTag,
                     collectionMode == COLLECT_ASYNC, message, shouldCollectMessage);
 
-            if (syncOp.getOpMode()== MODE_ALLOWED) {
+            if (syncOp.getOpMode() == MODE_ALLOWED) {
                 if (collectionMode == COLLECT_SELF) {
                     collectNotedOpForSelf(syncOp);
                 } else if (collectionMode == COLLECT_SYNC) {
@@ -8842,67 +8882,8 @@ public class AppOpsManager {
      * @hide
      */
     public static void startNotedAppOpsCollection(int callingUid) {
+        sThreadsListeningForOpNotedInBinderTransaction |= Thread.currentThread().getId();
         sBinderThreadCallingUid.set(callingUid);
-    }
-
-    /**
-     * State of a temporarily paused noted app-ops collection.
-     *
-     * @see #pauseNotedAppOpsCollection()
-     *
-     * @hide
-     */
-    public static class PausedNotedAppOpsCollection {
-        final int mUid;
-        final @Nullable ArrayMap<String, long[]> mCollectedNotedAppOps;
-
-        PausedNotedAppOpsCollection(int uid, @Nullable ArrayMap<String,
-                long[]> collectedNotedAppOps) {
-            mUid = uid;
-            mCollectedNotedAppOps = collectedNotedAppOps;
-        }
-    }
-
-    /**
-     * Temporarily suspend collection of noted app-ops when binder-thread calls into the other
-     * process. During such a call there might be call-backs coming back on the same thread which
-     * should not be accounted to the current collection.
-     *
-     * @return a state needed to resume the collection
-     *
-     * @hide
-     */
-    public static @Nullable PausedNotedAppOpsCollection pauseNotedAppOpsCollection() {
-        Integer previousUid = sBinderThreadCallingUid.get();
-        if (previousUid != null) {
-            ArrayMap<String, long[]> previousCollectedNotedAppOps =
-                    sAppOpsNotedInThisBinderTransaction.get();
-
-            sBinderThreadCallingUid.remove();
-            sAppOpsNotedInThisBinderTransaction.remove();
-
-            return new PausedNotedAppOpsCollection(previousUid, previousCollectedNotedAppOps);
-        }
-
-        return null;
-    }
-
-    /**
-     * Resume a collection paused via {@link #pauseNotedAppOpsCollection}.
-     *
-     * @param prevCollection The state of the previous collection
-     *
-     * @hide
-     */
-    public static void resumeNotedAppOpsCollection(
-            @Nullable PausedNotedAppOpsCollection prevCollection) {
-        if (prevCollection != null) {
-            sBinderThreadCallingUid.set(prevCollection.mUid);
-
-            if (prevCollection.mCollectedNotedAppOps != null) {
-                sAppOpsNotedInThisBinderTransaction.set(prevCollection.mCollectedNotedAppOps);
-            }
-        }
     }
 
     /**
@@ -8916,6 +8897,7 @@ public class AppOpsManager {
      */
     public static void finishNotedAppOpsCollection() {
         sBinderThreadCallingUid.remove();
+        sThreadsListeningForOpNotedInBinderTransaction &= ~Thread.currentThread().getId();
         sAppOpsNotedInThisBinderTransaction.remove();
     }
 
@@ -8940,28 +8922,52 @@ public class AppOpsManager {
      * <p> Delivered to caller via {@link #prefixParcelWithAppOpsIfNeeded}
      *
      * @param syncOp the op and attribution tag to note for
+     *
+     * @hide
      */
-    private void collectNotedOpSync(@NonNull SyncNotedAppOp syncOp) {
+    @TestApi
+    public static void collectNotedOpSync(@NonNull SyncNotedAppOp syncOp) {
+        collectNotedOpSync(sOpStrToOp.get(syncOp.getOp()), syncOp.getAttributionTag(),
+                syncOp.getPackageName());
+    }
+
+    /**
+     * Collect a noted op when inside of a two-way binder call.
+     *
+     * <p> Delivered to caller via {@link #prefixParcelWithAppOpsIfNeeded}
+     *
+     * @param code the op code to note for
+     * @param attributionTag the attribution tag to note for
+     * @param packageName the package to note for
+     */
+    private static void collectNotedOpSync(int code, @Nullable String attributionTag,
+            @NonNull String packageName) {
         // If this is inside of a two-way binder call:
         // We are inside of a two-way binder call. Delivered to caller via
         // {@link #prefixParcelWithAppOpsIfNeeded}
-        int op = sOpStrToOp.get(syncOp.getOp());
-        ArrayMap<String, long[]> appOpsNoted = sAppOpsNotedInThisBinderTransaction.get();
+        ArrayMap<String, ArrayMap<String, long[]>> appOpsNoted =
+                sAppOpsNotedInThisBinderTransaction.get();
         if (appOpsNoted == null) {
             appOpsNoted = new ArrayMap<>(1);
             sAppOpsNotedInThisBinderTransaction.set(appOpsNoted);
         }
 
-        long[] appOpsNotedForAttribution = appOpsNoted.get(syncOp.getAttributionTag());
-        if (appOpsNotedForAttribution == null) {
-            appOpsNotedForAttribution = new long[2];
-            appOpsNoted.put(syncOp.getAttributionTag(), appOpsNotedForAttribution);
+        ArrayMap<String, long[]> packageAppOpsNotedForAttribution = appOpsNoted.get(packageName);
+        if (packageAppOpsNotedForAttribution == null) {
+            packageAppOpsNotedForAttribution = new ArrayMap<>(1);
+            appOpsNoted.put(packageName, packageAppOpsNotedForAttribution);
         }
 
-        if (op < 64) {
-            appOpsNotedForAttribution[0] |= 1L << op;
+        long[] appOpsNotedForAttribution = packageAppOpsNotedForAttribution.get(attributionTag);
+        if (appOpsNotedForAttribution == null) {
+            appOpsNotedForAttribution = new long[2];
+            packageAppOpsNotedForAttribution.put(attributionTag, appOpsNotedForAttribution);
+        }
+
+        if (code < 64) {
+            appOpsNotedForAttribution[0] |= 1L << code;
         } else {
-            appOpsNotedForAttribution[1] |= 1L << (op - 64);
+            appOpsNotedForAttribution[1] |= 1L << (code - 64);
         }
     }
 
@@ -9015,9 +9021,7 @@ public class AppOpsManager {
             }
         }
 
-        Integer binderUid = sBinderThreadCallingUid.get();
-
-        if (binderUid != null && binderUid == uid) {
+        if (isListeningForOpNotedInBinderTransaction()) {
             return COLLECT_SYNC;
         } else {
             return COLLECT_ASYNC;
@@ -9034,21 +9038,31 @@ public class AppOpsManager {
      *
      * @hide
      */
+    // TODO (b/186872903) Refactor how sync noted ops are propagaged.
     public static void prefixParcelWithAppOpsIfNeeded(@NonNull Parcel p) {
-        ArrayMap<String, long[]> notedAppOps = sAppOpsNotedInThisBinderTransaction.get();
+        final ArrayMap<String, ArrayMap<String, long[]>> notedAppOps =
+                sAppOpsNotedInThisBinderTransaction.get();
         if (notedAppOps == null) {
             return;
         }
 
         p.writeInt(Parcel.EX_HAS_NOTED_APPOPS_REPLY_HEADER);
 
-        int numAttributionWithNotesAppOps = notedAppOps.size();
-        p.writeInt(numAttributionWithNotesAppOps);
+        final int packageCount = notedAppOps.size();
+        p.writeInt(packageCount);
 
-        for (int i = 0; i < numAttributionWithNotesAppOps; i++) {
+        for (int i = 0; i < packageCount; i++) {
             p.writeString(notedAppOps.keyAt(i));
-            p.writeLong(notedAppOps.valueAt(i)[0]);
-            p.writeLong(notedAppOps.valueAt(i)[1]);
+
+            final ArrayMap<String, long[]> notedTagAppOps = notedAppOps.valueAt(i);
+            final int tagCount = notedTagAppOps.size();
+            p.writeInt(tagCount);
+
+            for (int j = 0; j < tagCount; j++) {
+                p.writeString(notedTagAppOps.keyAt(j));
+                p.writeLong(notedTagAppOps.valueAt(j)[0]);
+                p.writeLong(notedTagAppOps.valueAt(j)[1]);
+            }
         }
     }
 
@@ -9063,36 +9077,57 @@ public class AppOpsManager {
      * @hide
      */
     public static void readAndLogNotedAppops(@NonNull Parcel p) {
-        int numAttributionsWithNotedAppOps = p.readInt();
+        final int packageCount = p.readInt();
+        if (packageCount <= 0) {
+            return;
+        }
 
-        for (int i = 0; i < numAttributionsWithNotedAppOps; i++) {
-            String attributionTag = p.readString();
-            long[] rawNotedAppOps = new long[2];
-            rawNotedAppOps[0] = p.readLong();
-            rawNotedAppOps[1] = p.readLong();
+        final String myPackageName = ActivityThread.currentPackageName();
+        if (myPackageName == null) {
+            return;
+        }
 
-            if (rawNotedAppOps[0] != 0 || rawNotedAppOps[1] != 0) {
-                BitSet notedAppOps = BitSet.valueOf(rawNotedAppOps);
+        synchronized (sLock) {
+            for (int i = 0; i < packageCount; i++) {
+                final String packageName = p.readString();
 
-                synchronized (sLock) {
+                final int tagCount = p.readInt();
+                for (int j = 0; j < tagCount; j++) {
+                    final String attributionTag = p.readString();
+                    final long[] rawNotedAppOps = new long[2];
+                    rawNotedAppOps[0] = p.readLong();
+                    rawNotedAppOps[1] = p.readLong();
+
+                    if (rawNotedAppOps[0] == 0 && rawNotedAppOps[1] == 0) {
+                        continue;
+                    }
+
+                    final BitSet notedAppOps = BitSet.valueOf(rawNotedAppOps);
                     for (int code = notedAppOps.nextSetBit(0); code != -1;
                             code = notedAppOps.nextSetBit(code + 1)) {
-                        if (sOnOpNotedCallback != null) {
-                            sOnOpNotedCallback.onNoted(new SyncNotedAppOp(code, attributionTag));
-                        } else {
-                            String message = getFormattedStackTrace();
-                            sUnforwardedOps.add(
-                                    new AsyncNotedAppOp(code, Process.myUid(), attributionTag,
-                                            message, System.currentTimeMillis()));
-                            if (sUnforwardedOps.size() > MAX_UNFORWARDED_OPS) {
-                                sUnforwardedOps.remove(0);
+                        if (myPackageName.equals(packageName)) {
+                            if (sOnOpNotedCallback != null) {
+                                sOnOpNotedCallback.onNoted(new SyncNotedAppOp(code,
+                                        attributionTag, packageName));
+                            } else {
+                                String message = getFormattedStackTrace();
+                                sUnforwardedOps.add(new AsyncNotedAppOp(code, Process.myUid(),
+                                        attributionTag, message, System.currentTimeMillis()));
+                                if (sUnforwardedOps.size() > MAX_UNFORWARDED_OPS) {
+                                    sUnforwardedOps.remove(0);
+                                }
                             }
+                        } else if (isListeningForOpNotedInBinderTransaction()) {
+                            collectNotedOpSync(code, attributionTag, packageName);
                         }
                     }
-                }
-                for (int code = notedAppOps.nextSetBit(0); code != -1;
-                        code = notedAppOps.nextSetBit(code + 1)) {
-                    sMessageCollector.onNoted(new SyncNotedAppOp(code, attributionTag));
+                    for (int code = notedAppOps.nextSetBit(0); code != -1;
+                            code = notedAppOps.nextSetBit(code + 1)) {
+                        if (myPackageName.equals(packageName)) {
+                            sMessageCollector.onNoted(new SyncNotedAppOp(code,
+                                    attributionTag, packageName));
+                        }
+                    }
                 }
             }
         }
@@ -9199,7 +9234,17 @@ public class AppOpsManager {
      * @hide
      */
     public static boolean isListeningForOpNoted() {
-        return sOnOpNotedCallback != null || isCollectingStackTraces();
+        return sOnOpNotedCallback != null || isListeningForOpNotedInBinderTransaction()
+                || isCollectingStackTraces();
+    }
+
+    /**
+     * @return whether we are in a binder transaction and collecting appops.
+     */
+    private static boolean isListeningForOpNotedInBinderTransaction() {
+        return (sThreadsListeningForOpNotedInBinderTransaction
+                        & Thread.currentThread().getId()) != 0
+                && sBinderThreadCallingUid.get() != null;
     }
 
     /**
@@ -9666,29 +9711,16 @@ public class AppOpsManager {
     }
 
     private static void writeDiscreteAccessArrayToParcel(
-            @Nullable List<AttributedOpEntry> array, @NonNull Parcel parcel) {
-        if (array != null) {
-            final int size = array.size();
-            parcel.writeInt(size);
-            for (int i = 0; i < size; i++) {
-                array.get(i).writeToParcel(parcel, 0);
-            }
-        } else {
-            parcel.writeInt(-1);
-        }
+            @Nullable List<AttributedOpEntry> array, @NonNull Parcel parcel, int flags) {
+        ParceledListSlice<AttributedOpEntry> listSlice =
+                array == null ? null : new ParceledListSlice<>(array);
+        parcel.writeParcelable(listSlice, flags);
     }
 
     private static @Nullable List<AttributedOpEntry> readDiscreteAccessArrayFromParcel(
             @NonNull Parcel parcel) {
-        final int size = parcel.readInt();
-        if (size < 0) {
-            return null;
-        }
-        final List<AttributedOpEntry> array = new ArrayList<>(size);
-        for (int i = 0; i < size; i++) {
-            array.add(new AttributedOpEntry(parcel));
-        }
-        return array;
+        final ParceledListSlice<AttributedOpEntry> listSlice = parcel.readParcelable(null);
+        return listSlice == null ? null : listSlice.getList();
     }
 
     /**
@@ -9858,7 +9890,10 @@ public class AppOpsManager {
                 NoteOpEvent reject = a.getLastRejectEvent(uidState, uidState, flags);
 
                 if (access != null) {
-                    accessEvents.append(key, access);
+                    NoteOpEvent existingAccess = accessEvents.get(key);
+                    if (existingAccess == null || existingAccess.getDuration() == -1) {
+                        accessEvents.append(key, access);
+                    }
                 }
                 if (reject != null) {
                     rejectEvents.append(key, reject);

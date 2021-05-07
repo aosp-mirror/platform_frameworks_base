@@ -338,6 +338,8 @@
     <string name="accessibility_voice_assist_button">Voice Assist</string>
     <!-- Content description of the unlock button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_unlock_button">Unlock</string>
+    <!-- Content description of the lock icon for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_lock_icon">Device locked</string>
     <!-- Content description hint of the unlock button when fingerprint is on (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_waiting_for_fingerprint">Waiting for fingerprint</string>
     <!-- Accessibility action of the unlock button when fingerpint is on (not shown on the screen). [CHAR LIMIT=NONE] -->
@@ -688,11 +690,11 @@
     <!-- Announcement made when the screen stopped casting (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_casting_turned_off">Screen casting stopped.</string>
     <!-- Content description of the work mode title in quick settings when off (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_work_mode_off">Work mode off.</string>
+    <string name="accessibility_quick_settings_work_mode_off">Work mode paused.</string>
     <!-- Content description of the work mode title in quick settings when on (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_work_mode_on">Work mode on.</string>
     <!-- Announcement made when the work mode changes to off (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_work_mode_changed_off">Work mode turned off.</string>
+    <string name="accessibility_quick_settings_work_mode_changed_off">Work mode turned paused.</string>
     <!-- Announcement made when the work mode changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_work_mode_changed_on">Work mode turned on.</string>
     <!-- Announcement made when the Data Saver changes to off (not shown on the screen). [CHAR LIMIT=NONE] -->
@@ -952,6 +954,8 @@
     off. "Work profile" means a separate profile on a user's phone that's specifically for their
     work apps and managed by their company. "Work" is used as an adjective. [CHAR LIMIT=NONE] -->
     <string name="quick_settings_work_mode_label">Work profile</string>
+    <!-- QuickSettings: Secondary label for work mode tile when it's off. [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_work_mode_paused">Paused</string>
     <!-- QuickSettings: Label for the toggle to activate Night display (renamed "Night Light" with title caps). [CHAR LIMIT=20] -->
     <string name="quick_settings_night_display_label">Night Light</string>
     <!-- QuickSettings: Secondary text for when the Night Light will be enabled at sunset. [CHAR LIMIT=20] -->
@@ -1654,14 +1658,14 @@
     <string name="wallet_app_button_label">Show all</string>
     <!-- Label of the button underneath the card carousel prompting user unlock device. [CHAR LIMIT=NONE] -->
     <string name="wallet_action_button_label_unlock">Unlock to pay</string>
-    <!-- Secondary label of the quick access wallet tile if active. [CHAR LIMIT=32] -->
-    <string name="wallet_secondary_label_active">Ready</string>
     <!-- Secondary label of the quick access wallet tile if no card. [CHAR LIMIT=NONE] -->
-    <string name="wallet_secondary_label_no_card">Set up payment</string>
+    <string name="wallet_secondary_label_no_card">Not set up</string>
     <!-- Secondary label of the quick access wallet tile if device locked. [CHAR LIMIT=NONE] -->
     <string name="wallet_secondary_label_device_locked">Unlock to use</string>
     <!-- Message shown when an unknown failure occurred when fetching cards. [CHAR LIMIT=NONE] -->
     <string name="wallet_error_generic">There was a problem getting your cards, please try again later</string>
+    <!-- Overflow menu item label to open the lockscreen settings in wallet activity. [CHAR LIMIT=NONE] -->
+    <string name="wallet_lockscreen_settings_label">Lock screen settings</string>
 
     <!-- Name of the work status bar icon. -->
     <string name="status_bar_work">Work profile</string>
@@ -1895,13 +1899,16 @@
     <string name="notification_channel_summary_automatic_demoted">&lt;b>Status:&lt;/b> Ranked Lower</string>
 
     <!-- [CHAR LIMIT=150] Notification Importance title: important conversation level summary -->
-    <string name="notification_channel_summary_priority">Always shown at the top of your notifications, even when Priority mode is on</string>
+    <string name="notification_channel_summary_priority_baseline">Shows at the top of conversation notifications and as a profile picture on lock screen</string>
+    <string name="notification_channel_summary_priority_bubble">Shows at the top of conversation notifications and as a profile picture on lock screen, appears as a bubble</string>
+    <string name="notification_channel_summary_priority_dnd">Shows at the top of conversation notifications and as a profile picture on lock screen, interrupts Do Not Disturb</string>
+    <string name="notification_channel_summary_priority_all">Shows at the top of conversation notifications and as a profile picture on lock screen, appears as a bubble, interrupts Do Not Disturb</string>
 
     <!--[CHAR LIMIT=30] Linkable text to Settings app -->
     <string name="notification_conversation_channel_settings">Settings</string>
 
     <!-- [CHAR LIMIT=150] Notification Importance title: important conversation level -->
-    <string name="notification_priority_title">Priority conversations</string>
+    <string name="notification_priority_title">Priority</string>
 
     <!-- Text shown in notification guts for conversation notifications that don't implement the full feature -->
     <string name="no_shortcut"><xliff:g id="app_name" example="YouTube">%1$s</xliff:g> doesn\u2019t support conversation features</string>
@@ -2181,6 +2188,9 @@
 
     <!-- The tile in quick settings is unavailable. [CHAR LIMIT=32] -->
     <string name="tile_unavailable">Unavailable</string>
+
+    <!-- The tile in quick settings is disabled by a device administration policy [CHAR LIMIT=32] -->
+    <string name="tile_disabled">Disabled</string>
 
     <!-- SysUI Tuner: Button that leads to the navigation bar customization screen [CHAR LIMIT=60] -->
     <string name="nav_bar">Navigation bar</string>
@@ -2665,25 +2675,6 @@
     <!-- Title of the overlay warning the user to interact with the device or it will go to sleep. [CHAR LIMIT=25] -->
     <string name="inattentive_sleep_warning_title">Standby</string>
 
-    <!-- Priority conversation onboarding screen -->
-    <!--  title of priority onboarding [CHAR LIMIT=75]  -->
-    <string name="priority_onboarding_title">Conversation set to priority</string>
-    <!--  Text explaining that the following actions are the behaviors of priority conversations.
-    E.g. priority conversations will show at the top of the conversation section [CHAR LIMIT=75]  -->
-    <string name="priority_onboarding_behavior">Priority conversations</string>
-    <!--  Text explaining that priority conversations show at the top of the conversation section [CHAR LIMIT=120]  -->
-    <string name="priority_onboarding_show_at_top_text">These conversations are shown at the top of your list and can always reach you when Priority mode is on</string>
-    <!--  Text explaining that priority conversations show an avatar on the lock screen [CHAR LIMIT=120]  -->
-    <string name="priority_onboarding_show_avatar_text">Profile pictures are shown on the lock screen</string>
-    <!--  Text explaining that priority conversations will appear as a bubble [CHAR LIMIT=120]  -->
-    <string name="priority_onboarding_appear_as_bubble_text">You can easily find these conversations in bubbles on your Home screen</string>
-    <!--  Text explaining that priority conversations can interrupt DnD settings [CHAR LIMIT=120]  -->
-    <string name="priority_onboarding_ignores_dnd_text">Interrupt Do Not Disturb</string>
-    <!--  Title for the affirmative button [CHAR LIMIT=50]  -->
-    <string name="priority_onboarding_done_button_title">Got it</string>
-    <!--  Title for the settings button button [CHAR LIMIT=50]  -->
-    <string name="priority_onboarding_settings_button_title">Settings</string>
-
     <!-- Window Magnification strings -->
     <!-- Title for Magnification Window [CHAR LIMIT=NONE] -->
     <string name="magnification_window_title">Magnification Window</string>
@@ -2725,8 +2716,10 @@
     <string name="accessibility_floating_button_action_move_bottom_right">Move bottom right</string>
     <!-- Action in accessibility menu to move the accessibility floating button to the edge and hide it to half. [CHAR LIMIT=30]-->
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half">Move to edge and hide</string>
-    <!-- Action in accessibility menu to move the accessibility floating button out the edge and show. [CHAR LIMIT=30]-->
+    <!-- Action in accessibility menu to move the accessibility floating button out the edge and show. [CHAR LIMIT=36]-->
     <string name="accessibility_floating_button_action_move_out_edge_and_show">Move out edge and show</string>
+    <!-- Action in accessibility menu to toggle on/off the accessibility feature. [CHAR LIMIT=30]-->
+    <string name="accessibility_floating_button_action_double_tap_to_toggle">toggle</string>
 
     <!-- Device Controls strings -->
     <!-- Device Controls empty state, title [CHAR LIMIT=30] -->
@@ -2824,16 +2817,19 @@
 
     <!-- Title for media controls [CHAR_LIMIT=50] -->
     <string name="controls_media_title">Media</string>
-    <!-- Explanation for closing controls associated with a specific media session [CHAR_LIMIT=NONE] -->
-    <string name="controls_media_close_session">Hide the current session.</string>
-    <!-- Explanation that controls associated with a specific media session are active [CHAR_LIMIT=NONE] -->
-    <string name="controls_media_active_session">Current session cannot be hidden.</string>
+    <!-- Explanation for closing controls associated with a specific media session [CHAR_LIMIT=50] -->
+    <string name="controls_media_close_session">Hide this media session?</string>
+    <!-- Explanation that controls associated with a specific media session are active [CHAR_LIMIT=50] -->
+    <string name="controls_media_active_session">The current media session cannot be hidden.</string>
     <!-- Label for a button that will hide media controls [CHAR_LIMIT=30] -->
     <string name="controls_media_dismiss_button">Dismiss</string>
     <!-- Label for button to resume media playback [CHAR_LIMIT=NONE] -->
     <string name="controls_media_resume">Resume</string>
     <!-- Label for button to go to media control settings screen [CHAR_LIMIT=30] -->
     <string name="controls_media_settings_button">Settings</string>
+
+    <!-- Title for Smartspace recommendation card within media controls [CHAR_LIMIT=50] -->
+    <string name="controls_media_smartspace_rec_title">Play</string>
 
     <!-- Error message indicating that a control timed out while waiting for an update [CHAR_LIMIT=30] -->
     <string name="controls_error_timeout">Inactive, check app</string>
@@ -2958,4 +2954,18 @@
 
     <!-- Secondary label for alarm tile when there is no next alarm information [CHAR LIMIT=20] -->
     <string name="qs_alarm_tile_no_alarm">No alarm set</string>
+
+    <!-- Accessibility label for fingerprint sensor [CHAR LIMIT=NONE] -->
+    <string name="accessibility_fingerprint_label">Fingerprint sensor</string>
+    <!-- Accessibility label for disabled udfps sensor [CHAR LIMIT=NONE] -->
+    <string name="accessibility_udfps_disabled_button">Fingerprint sensor disabled</string>
+    <!-- Accessibility action for tapping on an affordance that will bring up the user's
+    pin/pattern/password bouncer (ie: "Double tap to authenticate") [CHAR LIMIT=NONE] -->
+    <string name="accessibility_authenticate_hint">authenticate</string>
+    <!-- Accessibility action for tapping on an affordance on an unlocked lock screen (ie: "Double
+     tap to enter device") [CHAR LIMIT=NONE] -->
+    <string name="accessibility_enter_hint">enter device</string>
+    <!-- Message shown to suggest authentication using [CHAR LIMIT=60]-->
+    <string name="keyguard_try_fingerprint">Use fingerprint to open</string>
+
 </resources>

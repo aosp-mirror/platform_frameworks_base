@@ -98,15 +98,6 @@ class NotificationShadeDepthController @Inject constructor(
     var globalActionsSpring = DepthAnimation()
     var showingHomeControls: Boolean = false
 
-    @VisibleForTesting
-    var brightnessMirrorSpring = DepthAnimation()
-    var brightnessMirrorVisible: Boolean = false
-        set(value) {
-            field = value
-            brightnessMirrorSpring.animateTo(if (value) blurUtils.blurRadiusOfRatio(1f)
-                else 0)
-        }
-
     var qsPanelExpansion = 0f
         set(value) {
             if (field == value) return
@@ -169,7 +160,6 @@ class NotificationShadeDepthController @Inject constructor(
                 normalizedBlurRadius * ANIMATION_BLUR_FRACTION).toInt()
         combinedBlur = max(combinedBlur, blurUtils.blurRadiusOfRatio(qsPanelExpansion))
         var shadeRadius = max(combinedBlur, wakeAndUnlockBlurRadius).toFloat()
-        shadeRadius *= 1f - brightnessMirrorSpring.ratio
         val launchProgress = notificationLaunchAnimationParams?.linearProgress ?: 0f
         shadeRadius *= (1f - launchProgress) * (1f - launchProgress)
 
@@ -263,7 +253,6 @@ class NotificationShadeDepthController @Inject constructor(
                 shadeSpring.finishIfRunning()
                 shadeAnimation.finishIfRunning()
                 globalActionsSpring.finishIfRunning()
-                brightnessMirrorSpring.finishIfRunning()
             }
         }
 
@@ -425,7 +414,6 @@ class NotificationShadeDepthController @Inject constructor(
             it.println("shadeRadius: ${shadeSpring.radius}")
             it.println("shadeAnimation: ${shadeAnimation.radius}")
             it.println("globalActionsRadius: ${globalActionsSpring.radius}")
-            it.println("brightnessMirrorRadius: ${brightnessMirrorSpring.radius}")
             it.println("wakeAndUnlockBlur: $wakeAndUnlockBlurRadius")
             it.println("notificationLaunchAnimationProgress: " +
                     "${notificationLaunchAnimationParams?.linearProgress}")

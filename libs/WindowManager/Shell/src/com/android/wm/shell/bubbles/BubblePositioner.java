@@ -20,13 +20,13 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.annotation.IntDef;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Insets;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.Log;
+import android.view.Surface;
 import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowManager;
@@ -65,15 +65,21 @@ public class BubblePositioner {
     private Context mContext;
     private WindowManager mWindowManager;
     private Rect mPositionRect;
-    private int mOrientation;
+    private @Surface.Rotation int mRotation = Surface.ROTATION_0;
     private Insets mInsets;
 
     private int mBubbleSize;
     private int mBubbleBitmapSize;
+    private int mExpandedViewLargeScreenWidth;
+    private int mExpandedViewPadding;
+    private int mPointerHeight;
+    private int mBubblePaddingTop;
 
     private PointF mPinLocation;
     private PointF mRestingStackPosition;
+    private int[] mLeftRightPadding = new int[2];
 
+    private boolean mIsLargeScreen;
     private boolean mShowingInTaskbar;
     private @TaskbarPosition int mTaskbarPosition = TASKBAR_POSITION_NONE;
     private int mTaskbarIconSize;
@@ -82,32 +88,38 @@ public class BubblePositioner {
     public BubblePositioner(Context context, WindowManager windowManager) {
         mContext = context;
         mWindowManager = windowManager;
-        update(Configuration.ORIENTATION_UNDEFINED);
+        update();
+    }
+
+    public void setRotation(int rotation) {
+        mRotation = rotation;
     }
 
     /**
-     * Updates orientation, available space, and inset information. Call this when config changes
+     * Available space and inset information. Call this when config changes
      * occur or when added to a window.
      */
-    public void update(int orientation) {
+    public void update() {
         WindowMetrics windowMetrics = mWindowManager.getCurrentWindowMetrics();
         if (windowMetrics == null) {
             return;
         }
         WindowInsets metricInsets = windowMetrics.getWindowInsets();
-
         Insets insets = metricInsets.getInsetsIgnoringVisibility(WindowInsets.Type.navigationBars()
                 | WindowInsets.Type.statusBars()
                 | WindowInsets.Type.displayCutout());
 
+        mIsLargeScreen = mContext.getResources().getConfiguration().smallestScreenWidthDp >= 600;
+
         if (BubbleDebugConfig.DEBUG_POSITIONER) {
             Log.w(TAG, "update positioner:"
-                    + " landscape= " + (orientation == Configuration.ORIENTATION_LANDSCAPE)
+                    + " rotation: " + mRotation
                     + " insets: " + insets
+                    + " isLargeScreen: " + mIsLargeScreen
                     + " bounds: " + windowMetrics.getBounds()
                     + " showingInTaskbar: " + mShowingInTaskbar);
         }
-        updateInternal(orientation, insets, windowMetrics.getBounds());
+        updateInternal(mRotation, insets, windowMetrics.getBounds());
     }
 
     /**
@@ -122,12 +134,12 @@ public class BubblePositioner {
         mTaskbarIconSize =  iconSize;
         mTaskbarPosition = taskbarPosition;
         mTaskbarSize = taskbarSize;
-        update(mOrientation);
+        update();
     }
 
     @VisibleForTesting
-    public void updateInternal(int orientation, Insets insets, Rect bounds) {
-        mOrientation = orientation;
+    public void updateInternal(int rotation, Insets insets, Rect bounds) {
+        mRotation = rotation;
         mInsets = insets;
 
         mPositionRect = new Rect(bounds);
@@ -139,6 +151,11 @@ public class BubblePositioner {
         Resources res = mContext.getResources();
         mBubbleSize = res.getDimensionPixelSize(R.dimen.individual_bubble_size);
         mBubbleBitmapSize = res.getDimensionPixelSize(R.dimen.bubble_bitmap_size);
+        mExpandedViewLargeScreenWidth = res.getDimensionPixelSize(
+                R.dimen.bubble_expanded_view_tablet_width);
+        mExpandedViewPadding = res.getDimensionPixelSize(R.dimen.bubble_expanded_view_padding);
+        mPointerHeight = res.getDimensionPixelSize(R.dimen.bubble_pointer_height);
+        mBubblePaddingTop = res.getDimensionPixelSize(R.dimen.bubble_padding_top);
         if (mShowingInTaskbar) {
             adjustForTaskbar();
         }
@@ -185,11 +202,14 @@ public class BubblePositioner {
         return mInsets;
     }
 
-    /**
-     * @return whether the device is in landscape orientation.
-     */
+    /** @return whether the device is in landscape orientation. */
     public boolean isLandscape() {
-        return mOrientation == Configuration.ORIENTATION_LANDSCAPE;
+        return mRotation == Surface.ROTATION_90 || mRotation == Surface.ROTATION_270;
+    }
+
+    /** @return whether the screen is considered large. */
+    public boolean isLargeScreen() {
+        return mIsLargeScreen;
     }
 
     /**
@@ -200,8 +220,7 @@ public class BubblePositioner {
      * to the left or right side.
      */
     public boolean showBubblesVertically() {
-        return mOrientation == Configuration.ORIENTATION_LANDSCAPE
-                || mShowingInTaskbar;
+        return isLandscape() || mShowingInTaskbar || mIsLargeScreen;
     }
 
     /** Size of the bubble account for badge & dot. */
@@ -218,6 +237,45 @@ public class BubblePositioner {
                 ? (mTaskbarIconSize * BUBBLE_BITMAP_SIZE_PERCENT)
                 : mBubbleBitmapSize;
         return (int) size;
+    }
+
+    /**
+     * Calculates the left & right padding for the bubble expanded view.
+     *
+     * On larger screens the width of the expanded view is restricted via this padding.
+     * On landscape the bubble overflow expanded view is also restricted via this padding.
+     */
+    public int[] getExpandedViewPadding(boolean onLeft, boolean isOverflow) {
+        int leftPadding = mInsets.left + mExpandedViewPadding;
+        int rightPadding = mInsets.right + mExpandedViewPadding;
+        final boolean isLargeOrOverflow = mIsLargeScreen || isOverflow;
+        if (showBubblesVertically()) {
+            if (!onLeft) {
+                rightPadding += mPointerHeight + mBubbleSize;
+                leftPadding += isLargeOrOverflow
+                        ? (mPositionRect.width() - rightPadding - mExpandedViewLargeScreenWidth)
+                        : 0;
+            } else {
+                //TODO: pointer height should be padding between pointer & bubbles here & above
+                leftPadding += mPointerHeight + mBubbleSize;
+                rightPadding += isLargeOrOverflow
+                        ? (mPositionRect.width() - leftPadding - mExpandedViewLargeScreenWidth)
+                        : 0;
+            }
+        }
+        mLeftRightPadding[0] = leftPadding;
+        mLeftRightPadding[1] = rightPadding;
+        return mLeftRightPadding;
+    }
+
+    /** Calculates the y position of the expanded view when it is expanded. */
+    public float getExpandedViewY() {
+        final int top = getAvailableRect().top;
+        if (showBubblesVertically()) {
+            return top + mExpandedViewPadding;
+        } else {
+            return top + mBubbleSize + mBubblePaddingTop;
+        }
     }
 
     /**

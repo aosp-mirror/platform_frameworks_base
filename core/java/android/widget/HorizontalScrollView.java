@@ -47,6 +47,7 @@ import android.view.animation.AnimationUtils;
 import android.view.inspector.InspectableProperty;
 
 import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.List;
 
@@ -86,19 +87,23 @@ public class HorizontalScrollView extends FrameLayout {
      *
      * Even though this field is practically final, we cannot make it final because there are apps
      * setting it via reflection and they need to keep working until they target Q.
+     * @hide
      */
     @NonNull
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 124053130)
-    private EdgeEffect mEdgeGlowLeft;
+    @VisibleForTesting
+    public EdgeEffect mEdgeGlowLeft;
 
     /**
      * Tracks the state of the bottom edge glow.
      *
      * Even though this field is practically final, we cannot make it final because there are apps
      * setting it via reflection and they need to keep working until they target Q.
+     * @hide
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 124052619)
-    private EdgeEffect mEdgeGlowRight;
+    @VisibleForTesting
+    public EdgeEffect mEdgeGlowRight;
 
     /**
      * Position of the last motion event.
@@ -300,27 +305,6 @@ public class HorizontalScrollView extends FrameLayout {
     @ColorInt
     public int getRightEdgeEffectColor() {
         return mEdgeGlowRight.getColor();
-    }
-
-    /**
-     * Returns the {@link EdgeEffect#getType()} for the edge effects.
-     * @return the {@link EdgeEffect#getType()} for the edge effects.
-     * @attr ref android.R.styleable#EdgeEffect_edgeEffectType
-     */
-    @EdgeEffect.EdgeEffectType
-    public int getEdgeEffectType() {
-        return mEdgeGlowLeft.getType();
-    }
-
-    /**
-     * Sets the {@link EdgeEffect#setType(int)} for the edge effects.
-     * @param type The edge effect type to use for the edge effects.
-     * @attr ref android.R.styleable#EdgeEffect_edgeEffectType
-     */
-    public void setEdgeEffectType(@EdgeEffect.EdgeEffectType int type) {
-        mEdgeGlowRight.setType(type);
-        mEdgeGlowLeft.setType(type);
-        invalidate();
     }
 
     /**
@@ -706,8 +690,7 @@ public class HorizontalScrollView extends FrameLayout {
                 if (getChildCount() == 0) {
                     return false;
                 }
-                if ((mIsBeingDragged = !mScroller.isFinished() || !mEdgeGlowRight.isFinished()
-                        || !mEdgeGlowLeft.isFinished())) {
+                if (!mScroller.isFinished()) {
                     final ViewParent parent = getParent();
                     if (parent != null) {
                         parent.requestDisallowInterceptTouchEvent(true);
@@ -775,11 +758,8 @@ public class HorizontalScrollView extends FrameLayout {
 
                     // Calling overScrollBy will call onOverScrolled, which
                     // calls onScrollChanged if applicable.
-                    if (overScrollBy(deltaX, 0, mScrollX, 0, range, 0,
-                            mOverscrollDistance, 0, true)) {
-                        // Break our velocity if we hit a scroll barrier.
-                        mVelocityTracker.clear();
-                    }
+                    overScrollBy(deltaX, 0, mScrollX, 0, range, 0,
+                            mOverscrollDistance, 0, true);
 
                     if (canOverscroll && deltaX != 0f) {
                         final int pulledToX = oldX + deltaX;
@@ -1738,23 +1718,31 @@ public class HorizontalScrollView extends FrameLayout {
     public void fling(int velocityX) {
         if (getChildCount() > 0) {
             int width = getWidth() - mPaddingRight - mPaddingLeft;
-            int right = getChildAt(0).getWidth();
+            int right = getChildAt(0).getRight() - mPaddingLeft;
 
-            mScroller.fling(mScrollX, mScrollY, velocityX, 0, 0,
-                    Math.max(0, right - width), 0, 0, width/2, 0);
+            int maxScroll = Math.max(0, right - width);
 
-            final boolean movingRight = velocityX > 0;
+            if (mScrollX == 0 && !mEdgeGlowLeft.isFinished()) {
+                mEdgeGlowLeft.onAbsorb(-velocityX);
+            } else if (mScrollX == maxScroll && !mEdgeGlowRight.isFinished()) {
+                mEdgeGlowRight.onAbsorb(velocityX);
+            } else {
+                mScroller.fling(mScrollX, mScrollY, velocityX, 0, 0,
+                        maxScroll, 0, 0, width / 2, 0);
 
-            View currentFocused = findFocus();
-            View newFocused = findFocusableViewInMyBounds(movingRight,
-                    mScroller.getFinalX(), currentFocused);
+                final boolean movingRight = velocityX > 0;
 
-            if (newFocused == null) {
-                newFocused = this;
-            }
+                View currentFocused = findFocus();
+                View newFocused = findFocusableViewInMyBounds(movingRight,
+                        mScroller.getFinalX(), currentFocused);
 
-            if (newFocused != currentFocused) {
-                newFocused.requestFocus(movingRight ? View.FOCUS_RIGHT : View.FOCUS_LEFT);
+                if (newFocused == null) {
+                    newFocused = this;
+                }
+
+                if (newFocused != currentFocused) {
+                    newFocused.requestFocus(movingRight ? View.FOCUS_RIGHT : View.FOCUS_LEFT);
+                }
             }
 
             postInvalidateOnAnimation();

@@ -1723,6 +1723,15 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         assertFalse(display.hasTopFixedRotationLaunchingApp());
         assertFalse(activity.hasFixedRotationTransform());
+
+        // Simulate that the activity requests the same orientation as display.
+        activity.setOrientation(display.getConfiguration().orientation);
+        // Skip the real freezing.
+        activity.mVisibleRequested = false;
+        clearInvocations(activity);
+        activity.onCancelFixedRotationTransform(originalRotation);
+        // The implementation of cancellation must be executed.
+        verify(activity).startFreezingScreen(originalRotation);
     }
 
     @Test
@@ -2009,17 +2018,17 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         // Non-resizable
         mAtm.mForceResizableActivities = false;
-        mAtm.mSupportsNonResizableMultiWindow = false;
+        mAtm.mDevEnableNonResizableMultiWindow = false;
         assertFalse(activity.supportsSplitScreenWindowingMode());
 
         // Force resizable
         mAtm.mForceResizableActivities = true;
-        mAtm.mSupportsNonResizableMultiWindow = false;
+        mAtm.mDevEnableNonResizableMultiWindow = false;
         assertTrue(activity.supportsSplitScreenWindowingMode());
 
         // Allow non-resizable
         mAtm.mForceResizableActivities = false;
-        mAtm.mSupportsNonResizableMultiWindow = true;
+        mAtm.mDevEnableNonResizableMultiWindow = true;
         assertTrue(activity.supportsSplitScreenWindowingMode());
     }
 
@@ -2033,17 +2042,17 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         // Non-resizable
         mAtm.mForceResizableActivities = false;
-        mAtm.mSupportsNonResizableMultiWindow = false;
+        mAtm.mDevEnableNonResizableMultiWindow = false;
         assertFalse(activity.supportsFreeform());
 
         // Force resizable
         mAtm.mForceResizableActivities = true;
-        mAtm.mSupportsNonResizableMultiWindow = false;
+        mAtm.mDevEnableNonResizableMultiWindow = false;
         assertTrue(activity.supportsFreeform());
 
         // Allow non-resizable
         mAtm.mForceResizableActivities = false;
-        mAtm.mSupportsNonResizableMultiWindow = true;
+        mAtm.mDevEnableNonResizableMultiWindow = true;
         assertTrue(activity.supportsFreeform());
     }
 

@@ -69,21 +69,15 @@ class SampleExtensionImpl extends StubExtension {
                 new ResourceConfigDisplayFeatureProducer(context)
         ));
 
-        mDevicePostureProducer.addDataChangedCallback(this::onDevicePostureChanged);
+        mDevicePostureProducer.addDataChangedCallback(this::onDisplayFeaturesChanged);
         mDisplayFeatureProducer.addDataChangedCallback(this::onDisplayFeaturesChanged);
     }
 
-    private void onDevicePostureChanged() {
-        updateDeviceState(new ExtensionDeviceState(getDevicePosture()));
-
-        // Trigger a change in display features as the posture will be used in place of the feature
-        // state if the state is left unset by the producer.
-        onDisplayFeaturesChanged();
-    }
-
-    private int getDevicePosture() {
+    private int getFeatureState(DisplayFeature feature) {
+        Integer featureState = feature.getState();
         Optional<Integer> posture = mDevicePostureProducer.getData();
-        return posture.orElse(ExtensionDeviceState.POSTURE_UNKNOWN);
+        int fallbackPosture = posture.orElse(ExtensionFoldingFeature.STATE_FLAT);
+        return featureState == null ? fallbackPosture : featureState;
     }
 
     private void onDisplayFeaturesChanged() {
@@ -115,17 +109,14 @@ class SampleExtensionImpl extends StubExtension {
 
         Optional<List<DisplayFeature>> storedFeatures = mDisplayFeatureProducer.getData();
         if (storedFeatures.isPresent()) {
-            int posture = getDevicePosture();
 
             for (DisplayFeature baseFeature : storedFeatures.get()) {
                 Rect featureRect = baseFeature.getRect();
                 rotateRectToDisplayRotation(displayId, featureRect);
                 transformToWindowSpaceRect(activity, featureRect);
 
-                Integer featureState = baseFeature.getState();
-
                 features.add(new ExtensionFoldingFeature(featureRect, baseFeature.getType(),
-                        featureState == null ? posture : featureState));
+                        getFeatureState(baseFeature)));
             }
         }
         return features;
@@ -141,7 +132,6 @@ class SampleExtensionImpl extends StubExtension {
             mSettingsDisplayFeatureProducer.unregisterObserversIfNeeded();
         }
 
-        onDevicePostureChanged();
         onDisplayFeaturesChanged();
     }
 }

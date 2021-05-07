@@ -1179,15 +1179,6 @@
         <!-- Color applied to effects. -->
         <attr name="effectColor" format="color" />
 
-        <!-- The type of the edge effect. The default is glow. -->
-        <attr name="edgeEffectType">
-            <!-- Use a colored glow at the edge. -->
-            <enum name="glow" value="0" />
-
-            <!-- Stretch the content. -->
-            <enum name="stretch" value="1" />
-        </attr>
-
         <!-- =================== -->
         <!-- Lighting properties -->
         <!-- =================== -->
@@ -3602,6 +3593,10 @@
         <attr name="__removed2" format="boolean" />
         <!-- Specifies whether the IME supports showing inline suggestions. -->
         <attr name="supportsInlineSuggestions" format="boolean" />
+        <!-- Specifies whether the IME suppresses system spell checker.
+             The default value is false. If an IME sets this attribute to true,
+             the system spell checker will be disabled while the IME has an
+             active input session. -->
         <attr name="suppressesSpellChecker" format="boolean" />
         <!-- Specifies whether the IME wants to be shown in the Input Method picker. Defaults to
              true. Set this to false if the IME is intended to be accessed programmatically.
@@ -9253,7 +9248,6 @@
     <!-- Used as a filter array on the theme to pull out only the EdgeEffect-relevant bits. -->
     <declare-styleable name="EdgeEffect">
         <attr name="colorEdgeEffect" />
-        <attr name="edgeEffectType" />
     </declare-styleable>
 
     <!-- Use <code>tv-input</code> as the root tag of the XML resource that describes a
@@ -9576,8 +9570,9 @@
     <attr name="lStar" format="float"/>
 
     <declare-styleable name="DisplayHashingService">
-        <!-- The throttle duration for display hash requests
+        <!-- The interval required between display hash requests. Requests made faster than this
+             delay will be throttled."
              @hide @SystemApi -->
-        <attr name="throttleDurationMillis" format="integer" />
+        <attr name="durationBetweenRequestsMillis" format="integer" />
     </declare-styleable>
 </resources>

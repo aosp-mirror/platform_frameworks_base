@@ -284,10 +284,6 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
         return mView.getBrightnessView();
     }
 
-    public View getDivider() {
-        return mView.getDivider();
-    }
-
     /** */
     public void setPageListener(PagedTileLayout.PageListener listener) {
         mView.setPageListener(listener);
@@ -320,6 +316,10 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
     /** */
     public boolean isExpanded() {
         return mView.isExpanded();
+    }
+
+    void setPageMargin(int pageMargin) {
+        mView.setPageMargin(pageMargin);
     }
 }
 

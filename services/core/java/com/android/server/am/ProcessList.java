@@ -54,6 +54,7 @@ import static com.android.server.am.ActivityManagerService.TAG_NETWORK;
 import static com.android.server.am.ActivityManagerService.TAG_PROCESSES;
 import static com.android.server.am.ActivityManagerService.TAG_UID_OBSERVERS;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.ActivityManager.ProcessCapability;
@@ -76,8 +77,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
-import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.net.LocalSocket;
@@ -134,6 +135,7 @@ import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.wm.ActivityServiceConnectionsHolder;
 import com.android.server.wm.WindowManagerService;
+import com.android.server.wm.WindowProcessController;
 
 import dalvik.system.VMRuntime;
 
@@ -791,7 +793,7 @@ public final class ProcessList {
         mAppDataIsolationEnabled =
                 SystemProperties.getBoolean(ANDROID_APP_DATA_ISOLATION_ENABLED_PROPERTY, true);
         mVoldAppDataIsolationEnabled = SystemProperties.getBoolean(
-                ANDROID_VOLD_APP_DATA_ISOLATION_ENABLED_PROPERTY, false);
+                ANDROID_VOLD_APP_DATA_ISOLATION_ENABLED_PROPERTY, true);
         mAppDataIsolationAllowlistedApps = new ArrayList<>(
                 SystemConfig.getInstance().getAppDataIsolationWhitelistedApps());
 
@@ -1775,8 +1777,8 @@ public final class ProcessList {
         checkSlow(startTime, "startProcess: done updating cpu stats");
 
         try {
+            final int userId = UserHandle.getUserId(app.uid);
             try {
-                final int userId = UserHandle.getUserId(app.uid);
                 AppGlobals.getPackageManager().checkPackageStartable(app.info.packageName, userId);
             } catch (RemoteException e) {
                 throw e.rethrowAsRuntimeException();
@@ -1799,6 +1801,12 @@ public final class ProcessList {
                             app.info.packageName);
                     externalStorageAccess = storageManagerInternal.hasExternalStorageAccess(uid,
                             app.info.packageName);
+                    if (pm.checkPermission(Manifest.permission.INSTALL_PACKAGES,
+                            app.info.packageName, userId)
+                            == PackageManager.PERMISSION_GRANTED) {
+                        Slog.i(TAG, app.info.packageName + " is exempt from freezer");
+                        app.mOptRecord.setFreezeExempt(true);
+                    }
                 } catch (RemoteException e) {
                     throw e.rethrowAsRuntimeException();
                 }
@@ -1847,6 +1855,9 @@ public final class ProcessList {
             }
             if ((app.info.privateFlags & ApplicationInfo.PRIVATE_FLAG_PROFILEABLE_BY_SHELL) != 0) {
                 runtimeFlags |= Zygote.PROFILE_FROM_SHELL;
+            }
+            if ((app.info.privateFlagsExt & ApplicationInfo.PRIVATE_FLAG_EXT_PROFILEABLE) != 0) {
+                runtimeFlags |= Zygote.PROFILEABLE;
             }
             if ("1".equals(SystemProperties.get("debug.checkjni"))) {
                 runtimeFlags |= Zygote.DEBUG_ENABLE_CHECKJNI;
@@ -3407,6 +3418,11 @@ public final class ProcessList {
             return;
         }
 
+        if (app.getPid() == 0 && !app.isPendingStart()) {
+            // This process has been killed and its cleanup is done, don't proceed the LRU update.
+            return;
+        }
+
         synchronized (mProcLock) {
             updateLruProcessLSP(app, client, hasActivity, hasService);
         }
@@ -4616,6 +4632,7 @@ public final class ProcessList {
     @GuardedBy(anyOf = {"mService", "mProcLock"})
     void updateApplicationInfoLOSP(List<String> packagesToUpdate, int userId,
             boolean updateFrameworkRes) {
+        final ArrayList<WindowProcessController> targetProcesses = new ArrayList<>();
         for (int i = mLruProcesses.size() - 1; i >= 0; i--) {
             final ProcessRecord app = mLruProcesses.get(i);
             if (app.getThread() == null) {
@@ -4636,6 +4653,7 @@ public final class ProcessList {
                             if (ai.packageName.equals(app.info.packageName)) {
                                 app.info = ai;
                             }
+                            targetProcesses.add(app.getWindowProcessController());
                         }
                     } catch (RemoteException e) {
                         Slog.w(TAG, String.format("Failed to update %s ApplicationInfo for %s",
@@ -4645,11 +4663,8 @@ public final class ProcessList {
             });
         }
 
-        // Update the global configuration and increase the assets sequence number.
-        Configuration currentConfig = mService.mActivityTaskManager.getConfiguration();
-        Configuration newConfig = new Configuration();
-        newConfig.assetsSeq = (currentConfig != null ? currentConfig.assetsSeq : 0) + 1;
-        mService.mActivityTaskManager.updateConfiguration(newConfig);
+        mService.mActivityTaskManager.updateAssetConfiguration(
+                updateFrameworkRes ? null : targetProcesses);
     }
 
     @GuardedBy("mService")

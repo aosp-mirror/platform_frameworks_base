@@ -24,6 +24,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.IntDef;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.PixelFormat;
@@ -105,6 +106,7 @@ public class AccessibilityFloatingMenuView extends FrameLayout
     private float mRadius;
     private float mPercentageY = LOCATION_Y_PERCENTAGE;
     private float mSquareScaledTouchSlop;
+    private final Configuration mLastConfiguration;
     private final RecyclerView mListView;
     private final AccessibilityTargetAdapter mAdapter;
     private float mFadeOutValue;
@@ -201,6 +203,8 @@ public class AccessibilityFloatingMenuView extends FrameLayout
                 fadeOut();
             }
         });
+
+        mLastConfiguration = new Configuration(getResources().getConfiguration());
 
         updateDimensions();
         initListView();
@@ -368,9 +372,10 @@ public class AccessibilityFloatingMenuView extends FrameLayout
 
         mTargets.clear();
         mTargets.addAll(newTargets);
-        mAdapter.notifyDataSetChanged();
+        onEnabledFeaturesChanged();
 
         updateRadiusWith(mSizeType, mRadiusType, mTargets.size());
+        updateScrollModeWith(hasExceededMaxLayoutHeight());
         setSystemGestureExclusion();
 
         fadeOut();
@@ -413,6 +418,10 @@ public class AccessibilityFloatingMenuView extends FrameLayout
         mFadeOutAnimator.cancel();
         mFadeOutAnimator.setFloatValues(1.0f, mFadeOutValue);
         setAlpha(mIsFadeEffectEnabled ? mFadeOutValue : /* completely opaque */ 1.0f);
+    }
+
+    void onEnabledFeaturesChanged() {
+        mAdapter.notifyDataSetChanged();
     }
 
     @VisibleForTesting
@@ -600,13 +609,17 @@ public class AccessibilityFloatingMenuView extends FrameLayout
         params.gravity = Gravity.START | Gravity.TOP;
         params.x = getMaxWindowX();
         params.y = (int) (getMaxWindowY() * mPercentageY);
-
+        updateAccessibilityTitle(params);
         return params;
     }
 
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
+        final int diff = newConfig.diff(mLastConfiguration);
+        if ((diff & ActivityInfo.CONFIG_LOCALE) != 0) {
+            updateAccessibilityTitle(mCurrentLayoutParams);
+        }
 
         updateDimensions();
         updateListView();
@@ -614,6 +627,9 @@ public class AccessibilityFloatingMenuView extends FrameLayout
         updateColor();
         updateStrokeWith(newConfig.uiMode, mAlignment);
         updateLocationWith(mAlignment, mPercentageY);
+        updateScrollModeWith(hasExceededMaxLayoutHeight());
+
+        mLastConfiguration.setTo(newConfig);
     }
 
     @VisibleForTesting
@@ -679,6 +695,12 @@ public class AccessibilityFloatingMenuView extends FrameLayout
         mListView.setLayoutParams(layoutParams);
     }
 
+    private void updateScrollModeWith(boolean hasExceededMaxLayoutHeight) {
+        mListView.setOverScrollMode(hasExceededMaxLayoutHeight
+                ? OVER_SCROLL_ALWAYS
+                : OVER_SCROLL_NEVER);
+    }
+
     private void updateColor() {
         final int menuColorResId = R.color.accessibility_floating_menu_background;
         getMenuGradientDrawable().setColor(getResources().getColor(menuColorResId));
@@ -716,6 +738,11 @@ public class AccessibilityFloatingMenuView extends FrameLayout
         setInset(insetLeft, insetRight);
     }
 
+    private void updateAccessibilityTitle(WindowManager.LayoutParams params) {
+        params.accessibilityTitle = getResources().getString(
+                com.android.internal.R.string.accessibility_select_shortcut_menu_title);
+    }
+
     private void setInset(int left, int right) {
         final LayerDrawable layerDrawable = getMenuLayerDrawable();
         if (layerDrawable.getLayerInsetLeft(INDEX_MENU_ITEM) == left
@@ -724,6 +751,11 @@ public class AccessibilityFloatingMenuView extends FrameLayout
         }
 
         layerDrawable.setLayerInset(INDEX_MENU_ITEM, left, 0, right, 0);
+    }
+
+    @VisibleForTesting
+    boolean hasExceededMaxLayoutHeight() {
+        return calculateActualLayoutHeight() > getMaxLayoutHeight();
     }
 
     @Alignment
@@ -735,6 +767,10 @@ public class AccessibilityFloatingMenuView extends FrameLayout
 
     private float calculateCurrentPercentageY() {
         return mCurrentLayoutParams.y / (float) getMaxWindowY();
+    }
+
+    private int calculateActualLayoutHeight() {
+        return (mPadding + mIconHeight) * mTargets.size() + mPadding;
     }
 
     private @DimenRes int getRadiusResId(@SizeType int sizeType, int itemCount) {
@@ -760,13 +796,16 @@ public class AccessibilityFloatingMenuView extends FrameLayout
         return new Rect(0, 0, mScreenWidth - getWindowWidth(), mScreenHeight - getWindowHeight());
     }
 
+    private int getMaxLayoutHeight() {
+        return mScreenHeight - mMargin * 2;
+    }
+
     private int getLayoutWidth() {
         return mPadding * 2 + mIconWidth;
     }
 
     private int getLayoutHeight() {
-        return Math.min(mScreenHeight - mMargin * 2,
-                (mPadding + mIconHeight) * mTargets.size() + mPadding);
+        return Math.min(getMaxLayoutHeight(), calculateActualLayoutHeight());
     }
 
     private int getWindowWidth() {

@@ -80,6 +80,12 @@ final class ProcessCachedOptimizerRecord {
     @GuardedBy("mProcLock")
     private boolean mShouldNotFreeze;
 
+    /**
+     * Exempt from freezer (now for system apps with INSTALL_PACKAGES permission)
+     */
+    @GuardedBy("mProcLock")
+    private boolean mFreezeExempt;
+
     @GuardedBy("mProcLock")
     long getLastCompactTime() {
         return mLastCompactTime;
@@ -160,6 +166,16 @@ final class ProcessCachedOptimizerRecord {
         mShouldNotFreeze = shouldNotFreeze;
     }
 
+    @GuardedBy("mProcLock")
+    boolean isFreezeExempt() {
+        return mFreezeExempt;
+    }
+
+    @GuardedBy("mPreLock")
+    void setFreezeExempt(boolean exempt) {
+        mFreezeExempt = exempt;
+    }
+
     ProcessCachedOptimizerRecord(ProcessRecord app) {
         mApp = app;
         mProcLock = app.mService.mProcLock;
@@ -173,6 +189,7 @@ final class ProcessCachedOptimizerRecord {
     void dump(PrintWriter pw, String prefix, long nowUptime) {
         pw.print(prefix); pw.print("lastCompactTime="); pw.print(mLastCompactTime);
         pw.print(" lastCompactAction="); pw.println(mLastCompactAction);
+        pw.print(prefix); pw.print("isFreezeExempt="); pw.print(mFreezeExempt);
         pw.print(" " + IS_FROZEN + "="); pw.println(mFrozen);
     }
 }

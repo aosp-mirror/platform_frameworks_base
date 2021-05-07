@@ -187,22 +187,19 @@ public final class InputMethodPrivilegedOperations {
     }
 
     /**
-     * Calls {@link IInputMethodPrivilegedOperations#updateStatusIcon(String, int,
-     * IVoidResultCallback)}.
+     * Calls {@link IInputMethodPrivilegedOperations#updateStatusIconAsync(String, int)}.
      *
      * @param packageName package name from which the status icon should be loaded
      * @param iconResId resource ID of the icon to be loaded
      */
     @AnyThread
-    public void updateStatusIcon(String packageName, @DrawableRes int iconResId) {
+    public void updateStatusIconAsync(String packageName, @DrawableRes int iconResId) {
         final IInputMethodPrivilegedOperations ops = mOps.getAndWarnIfNull();
         if (ops == null) {
             return;
         }
         try {
-            final Completable.Void value = Completable.createVoid();
-            ops.updateStatusIcon(packageName, iconResId, ResultCallbacks.of(value));
-            Completable.getResult(value);
+            ops.updateStatusIconAsync(packageName, iconResId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -362,26 +359,23 @@ public final class InputMethodPrivilegedOperations {
     }
 
     /**
-     * Calls {@link IInputMethodPrivilegedOperations#notifyUserAction(IVoidResultCallback)}
+     * Calls {@link IInputMethodPrivilegedOperations#notifyUserActionAsync()}
      */
     @AnyThread
-    public void notifyUserAction() {
+    public void notifyUserActionAsync() {
         final IInputMethodPrivilegedOperations ops = mOps.getAndWarnIfNull();
         if (ops == null) {
             return;
         }
         try {
-            final Completable.Void value = Completable.createVoid();
-            ops.notifyUserAction(ResultCallbacks.of(value));
-            Completable.getResult(value);
+            ops.notifyUserActionAsync();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Calls {@link IInputMethodPrivilegedOperations#applyImeVisibility(IBinder, boolean,
-     * IVoidResultCallback)}.
+     * Calls {@link IInputMethodPrivilegedOperations#applyImeVisibilityAsync(IBinder, boolean)}.
      *
      * @param showOrHideInputToken placeholder token that maps to window requesting
      *        {@link android.view.inputmethod.InputMethodManager#showSoftInput(View, int)} or
@@ -390,15 +384,13 @@ public final class InputMethodPrivilegedOperations {
      * @param setVisible {@code true} to set IME visible, else hidden.
      */
     @AnyThread
-    public void applyImeVisibility(IBinder showOrHideInputToken, boolean setVisible) {
+    public void applyImeVisibilityAsync(IBinder showOrHideInputToken, boolean setVisible) {
         final IInputMethodPrivilegedOperations ops = mOps.getAndWarnIfNull();
         if (ops == null) {
             return;
         }
         try {
-            final Completable.Void value = Completable.createVoid();
-            ops.applyImeVisibility(showOrHideInputToken, setVisible, ResultCallbacks.of(value));
-            Completable.getResult(value);
+            ops.applyImeVisibilityAsync(showOrHideInputToken, setVisible);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

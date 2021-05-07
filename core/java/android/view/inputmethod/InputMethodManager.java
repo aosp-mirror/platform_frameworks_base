@@ -93,6 +93,7 @@ import com.android.internal.inputmethod.Completable;
 import com.android.internal.inputmethod.InputMethodDebug;
 import com.android.internal.inputmethod.InputMethodPrivilegedOperationsRegistry;
 import com.android.internal.inputmethod.ResultCallbacks;
+import com.android.internal.inputmethod.SoftInputShowHideReason;
 import com.android.internal.inputmethod.StartInputFlags;
 import com.android.internal.inputmethod.StartInputReason;
 import com.android.internal.inputmethod.UnbindReason;
@@ -271,7 +272,7 @@ public final class InputMethodManager {
      * {@link StartInputReason#WINDOW_FOCUS_GAIN_REPORT_WITHOUT_CONNECTION} in a truly asynchronous
      * way. {@code false} to go back to the previous synchronous semantics.
      */
-    private static final boolean USE_REPORT_WINDOW_GAINED_FOCUS_ASYNC = false;
+    private static final boolean USE_REPORT_WINDOW_GAINED_FOCUS_ASYNC = true;
 
     /**
      * A constant that represents Voice IME.
@@ -1405,7 +1406,8 @@ public final class InputMethodManager {
      */
     @Deprecated
     public void showStatusIcon(IBinder imeToken, String packageName, @DrawableRes int iconId) {
-        InputMethodPrivilegedOperationsRegistry.get(imeToken).updateStatusIcon(packageName, iconId);
+        InputMethodPrivilegedOperationsRegistry.get(
+                imeToken).updateStatusIconAsync(packageName, iconId);
     }
 
     /**
@@ -1415,7 +1417,7 @@ public final class InputMethodManager {
      */
     @Deprecated
     public void hideStatusIcon(IBinder imeToken) {
-        InputMethodPrivilegedOperationsRegistry.get(imeToken).updateStatusIcon(null, 0);
+        InputMethodPrivilegedOperationsRegistry.get(imeToken).updateStatusIconAsync(null, 0);
     }
 
     /**
@@ -1696,6 +1698,11 @@ public final class InputMethodManager {
      * {@link #RESULT_HIDDEN}.
      */
     public boolean showSoftInput(View view, int flags, ResultReceiver resultReceiver) {
+        return showSoftInput(view, flags, resultReceiver, SoftInputShowHideReason.SHOW_SOFT_INPUT);
+    }
+
+    private boolean showSoftInput(View view, int flags, ResultReceiver resultReceiver,
+            @SoftInputShowHideReason int reason) {
         ImeTracing.getInstance().triggerClientDump("InputMethodManager#showSoftInput", this,
                 null /* icProto */);
         // Re-dispatch if there is a context mismatch.
@@ -1712,13 +1719,15 @@ public final class InputMethodManager {
             }
 
             try {
-                Log.d(TAG, "showSoftInput() view=" + view + " flags=" + flags);
+                Log.d(TAG, "showSoftInput() view=" + view + " flags=" + flags + " reason="
+                        + InputMethodDebug.softInputDisplayReasonToString(reason));
                 final Completable.Boolean value = Completable.createBoolean();
                 mService.showSoftInput(
                         mClient,
                         view.getWindowToken(),
                         flags,
                         resultReceiver,
+                        reason,
                         ResultCallbacks.of(value));
                 return Completable.getResult(value);
             } catch (RemoteException e) {
@@ -1753,6 +1762,7 @@ public final class InputMethodManager {
                         mCurRootView.getView().getWindowToken(),
                         flags,
                         resultReceiver,
+                        SoftInputShowHideReason.SHOW_SOFT_INPUT,
                         ResultCallbacks.of(value));
                 Completable.getResult(value); // ignore the result
             } catch (RemoteException e) {
@@ -1817,6 +1827,12 @@ public final class InputMethodManager {
      */
     public boolean hideSoftInputFromWindow(IBinder windowToken, int flags,
             ResultReceiver resultReceiver) {
+        return hideSoftInputFromWindow(windowToken, flags, resultReceiver,
+                SoftInputShowHideReason.HIDE_SOFT_INPUT);
+    }
+
+    private boolean hideSoftInputFromWindow(IBinder windowToken, int flags,
+            ResultReceiver resultReceiver, @SoftInputShowHideReason int reason) {
         ImeTracing.getInstance().triggerClientDump("InputMethodManager#hideSoftInputFromWindow",
                 this, null /* icProto */);
         checkFocus();
@@ -1828,8 +1844,8 @@ public final class InputMethodManager {
 
             try {
                 final Completable.Boolean value = Completable.createBoolean();
-                mService.hideSoftInput(
-                        mClient, windowToken, flags, resultReceiver, ResultCallbacks.of(value));
+                mService.hideSoftInput(mClient, windowToken, flags, resultReceiver, reason,
+                        ResultCallbacks.of(value));
                 return Completable.getResult(value);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
@@ -1849,7 +1865,14 @@ public final class InputMethodManager {
      * @param hideFlags Provides additional operating flags.  May be
      * 0 or have the {@link #HIDE_IMPLICIT_ONLY},
      * {@link #HIDE_NOT_ALWAYS} bit set.
-     **/
+     *
+     * @deprecated Use {@link #showSoftInput(View, int)} or
+     * {@link #hideSoftInputFromWindow(IBinder, int)} explicitly instead.
+     * In particular during focus changes, the current visibility of the IME is not
+     * well defined. Starting in {@link Build.VERSION_CODES#S Android S}, this only
+     * has an effect if the calling app is the current IME focus.
+     */
+    @Deprecated
     public void toggleSoftInputFromWindow(IBinder windowToken, int showFlags, int hideFlags) {
         ImeTracing.getInstance().triggerClientDump(
                 "InputMethodManager#toggleSoftInputFromWindow", InputMethodManager.this,
@@ -1859,9 +1882,7 @@ public final class InputMethodManager {
             if (servedView == null || servedView.getWindowToken() != windowToken) {
                 return;
             }
-            if (mCurrentInputMethodSession != null) {
-                mCurrentInputMethodSession.toggleSoftInput(showFlags, hideFlags);
-            }
+            toggleSoftInput(showFlags, hideFlags);
         }
     }
 
@@ -1876,13 +1897,29 @@ public final class InputMethodManager {
      * @param hideFlags Provides additional operating flags.  May be
      * 0 or have the {@link #HIDE_IMPLICIT_ONLY},
      * {@link #HIDE_NOT_ALWAYS} bit set.
+     *
+     * @deprecated Use {@link #showSoftInput(View, int)} or
+     * {@link #hideSoftInputFromWindow(IBinder, int)} explicitly instead.
+     * In particular during focus changes, the current visibility of the IME is not
+     * well defined. Starting in {@link Build.VERSION_CODES#S Android S}, this only
+     * has an effect if the calling app is the current IME focus.
      */
+    @Deprecated
     public void toggleSoftInput(int showFlags, int hideFlags) {
         ImeTracing.getInstance().triggerClientDump(
                 "InputMethodManager#toggleSoftInput", InputMethodManager.this,
                 null /* icProto */);
-        if (mCurrentInputMethodSession != null) {
-            mCurrentInputMethodSession.toggleSoftInput(showFlags, hideFlags);
+        synchronized (mH) {
+            final View view = getServedViewLocked();
+            if (mImeInsetsConsumer != null && view != null) {
+                if (mImeInsetsConsumer.isRequestedVisible()) {
+                    hideSoftInputFromWindow(view.getWindowToken(), hideFlags, null,
+                            SoftInputShowHideReason.HIDE_TOGGLE_SOFT_INPUT);
+                } else {
+                    showSoftInput(view, showFlags, null,
+                            SoftInputShowHideReason.SHOW_TOGGLE_SOFT_INPUT);
+                }
+            }
         }
     }
 
@@ -2166,6 +2203,7 @@ public final class InputMethodManager {
                         mCurRootView.getView().getWindowToken(),
                         HIDE_NOT_ALWAYS,
                         null,
+                        SoftInputShowHideReason.HIDE_SOFT_INPUT,
                         ResultCallbacks.of(value));
                 Completable.getResult(value); // ignore the result
             } catch (RemoteException e) {
@@ -2221,7 +2259,8 @@ public final class InputMethodManager {
             if (servedView == null || servedView.getWindowToken() != windowToken) {
                 return false;
             }
-            showSoftInput(servedView, 0 /* flags */, null /* resultReceiver */);
+            showSoftInput(servedView, 0 /* flags */, null /* resultReceiver */,
+                    SoftInputShowHideReason.SHOW_SOFT_INPUT_BY_INSETS_API);
             return true;
         }
     }
@@ -3067,10 +3106,7 @@ public final class InputMethodManager {
                 matrixValues = new float[9];
                 matrix.getValues(matrixValues);
             }
-            final Completable.Void value = Completable.createVoid();
-            mService.reportActivityView(
-                    mClient, childDisplayId, matrixValues, ResultCallbacks.of(value));
-            Completable.getResult(value);
+            mService.reportActivityViewAsync(mClient, childDisplayId, matrixValues);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

@@ -1433,7 +1433,10 @@ public class JobInfo implements Parcelable {
         }
 
         /**
-         * Specify that this job should be delayed by the provided amount of time.
+         * Specify that this job should be delayed by the provided amount of time. The job may not
+         * run the instant the delay has elapsed. JobScheduler will start the job at an
+         * indeterminate time after the delay has elapsed.
+         * <p>
          * Because it doesn't make sense setting this property on a periodic job, doing so will
          * throw an {@link java.lang.IllegalArgumentException} when
          * {@link android.app.job.JobInfo.Builder#build()} is called.
@@ -1449,9 +1452,11 @@ public class JobInfo implements Parcelable {
 
         /**
          * Set deadline which is the maximum scheduling latency. The job will be run by this
-         * deadline even if other requirements are not met. Because it doesn't make sense setting
-         * this property on a periodic job, doing so will throw an
-         * {@link java.lang.IllegalArgumentException} when
+         * deadline even if other requirements (including a delay set through
+         * {@link #setMinimumLatency(long)}) are not met.
+         * <p>
+         * Because it doesn't make sense setting this property on a periodic job, doing so will
+         * throw an {@link java.lang.IllegalArgumentException} when
          * {@link android.app.job.JobInfo.Builder#build()} is called.
          * @see JobInfo#getMaxExecutionDelayMillis()
          */
@@ -1465,6 +1470,7 @@ public class JobInfo implements Parcelable {
          * Set up the back-off/retry policy.
          * This defaults to some respectable values: {30 seconds, Exponential}. We cap back-off at
          * 5hrs.
+         * <p>
          * Note that trying to set a backoff criteria for a job with
          * {@link #setRequiresDeviceIdle(boolean)} will throw an exception when you call build().
          * This is because back-off typically does not make sense for these types of jobs. See
@@ -1511,6 +1517,11 @@ public class JobInfo implements Parcelable {
          * has expedited guarantees or not. In addition, {@link JobScheduler#schedule(JobInfo)}
          * will immediately return {@link JobScheduler#RESULT_FAILURE} if the app does not have
          * available quota (and the job will not be successfully scheduled).
+         *
+         * <p>
+         * Expedited job quota will replenish over time and as the user interacts with the app,
+         * so you should not have to worry about running out of quota because of processing from
+         * frequent user engagement.
          *
          * <p>
          * Expedited jobs may only set network, storage-not-low, and persistence constraints.
@@ -1692,7 +1703,7 @@ public class JobInfo implements Parcelable {
                 throw new IllegalArgumentException("An expedited job cannot be periodic");
             }
             if ((constraintFlags & ~CONSTRAINT_FLAG_STORAGE_NOT_LOW) != 0
-                    || (flags & ~FLAG_EXPEDITED) != 0) {
+                    || (flags & ~(FLAG_EXPEDITED | FLAG_EXEMPT_FROM_APP_STANDBY)) != 0) {
                 throw new IllegalArgumentException(
                         "An expedited job can only have network and storage-not-low constraints");
             }

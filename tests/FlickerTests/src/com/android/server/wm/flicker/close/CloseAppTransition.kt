@@ -116,7 +116,7 @@ abstract class CloseAppTransition(protected val testSpec: FlickerTestParameter) 
         }
     }
 
-    @Presubmit
+    @FlakyTest(bugId = 185400889)
     @Test
     open fun noUncoveredRegions() {
         testSpec.noUncoveredRegions(testSpec.config.startRotation, Surface.ROTATION_0)
@@ -134,7 +134,7 @@ abstract class CloseAppTransition(protected val testSpec: FlickerTestParameter) 
         testSpec.launcherWindowBecomesVisible()
     }
 
-    @Presubmit
+    @FlakyTest(bugId = 185400889)
     @Test
     open fun launcherLayerReplacesApp() {
         testSpec.launcherLayerReplacesApp(testApp)
