@@ -4573,27 +4573,6 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Determine whether the current profile password the user has set is sufficient
-     * to meet the policy requirements (e.g. quality, minimum length) that have been
-     * requested by the admins of the parent user and its profiles.
-     *
-     * @param userHandle the userId of the profile to check the password for.
-     * @return Returns true if the password would meet the current requirements, else false.
-     * @throws SecurityException if {@code userHandle} is not a managed profile.
-     * @hide
-     */
-    public boolean isProfileActivePasswordSufficientForParent(int userHandle) {
-        if (mService != null) {
-            try {
-                return mService.isProfileActivePasswordSufficientForParent(userHandle);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        }
-        return false;
-    }
-
-    /**
      * Returns whether the given user's credential will be sufficient for all password policy
      * requirement, once the user's profile has switched to unified challenge.
      *
