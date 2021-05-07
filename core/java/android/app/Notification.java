@@ -5538,12 +5538,11 @@ public class Notification implements Parcelable
 
         /**
          * Determines if the notification should be colorized *for the purposes of applying colors*.
-         * If this is the minimized view of a colorized notification, or if the app did not provide
-         * a color to colorize with, this will return false so that internal coloring logic can
-         * still render the notification normally.
+         * If this is the minimized view of a colorized notification, this will return false so that
+         * internal coloring logic can still render the notification normally.
          */
         private boolean isBackgroundColorized(StandardTemplateParams p) {
-            return p.allowColorization && mN.color != COLOR_DEFAULT && mN.isColorized();
+            return p.allowColorization && mN.isColorized();
         }
 
         private boolean isCallActionColorCustomizable() {
@@ -5551,8 +5550,7 @@ public class Notification implements Parcelable
             //  that is only used for disallowing colorization of headers for the minimized state,
             //  and neither of those conditions applies when showing actions.
             //  Not requiring StandardTemplateParams as an argument simplifies the creation process.
-            return mN.color != COLOR_DEFAULT && mN.isColorized()
-                    && mContext.getResources().getBoolean(
+            return mN.isColorized() && mContext.getResources().getBoolean(
                     R.bool.config_callNotificationActionColorsRequireColorized);
         }
 
