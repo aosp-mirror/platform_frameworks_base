@@ -258,16 +258,16 @@ class AudioPlayerStateMonitor {
                 if (mActiveAudioUids.size() > 0
                         && !mActiveAudioUids.contains(mSortedAudioPlaybackClientUids.get(0))) {
                     int firstActiveUid = -1;
-                    int firatActiveUidIndex = -1;
+                    int firstActiveUidIndex = -1;
                     for (int i = 1; i < mSortedAudioPlaybackClientUids.size(); ++i) {
                         int uid = mSortedAudioPlaybackClientUids.get(i);
                         if (mActiveAudioUids.contains(uid)) {
-                            firatActiveUidIndex = i;
+                            firstActiveUidIndex = i;
                             firstActiveUid = uid;
                             break;
                         }
                     }
-                    for (int i = firatActiveUidIndex; i > 0; --i) {
+                    for (int i = firstActiveUidIndex; i > 0; --i) {
                         mSortedAudioPlaybackClientUids.set(i,
                                 mSortedAudioPlaybackClientUids.get(i - 1));
                     }
