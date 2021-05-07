@@ -289,9 +289,11 @@
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"A mobil hotspot kikapcsolva."</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"A mobil hotspot bekapcsolva."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"A képernyő átküldése leállítva."</string>
-    <string name="accessibility_quick_settings_work_mode_off" msgid="562749867895549696">"Munka mód ki."</string>
+    <!-- no translation found for accessibility_quick_settings_work_mode_off (9106217884005620744) -->
+    <skip />
     <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"Munka mód be."</string>
-    <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6256690740556798683">"Munka mód kikapcsolva."</string>
+    <!-- no translation found for accessibility_quick_settings_work_mode_changed_off (2653550342355027441) -->
+    <skip />
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"Munka mód bekapcsolva."</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"Adatforgalom-csökkentő kikapcsolva."</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"Adatforgalom-csökkentő bekapcsolva."</string>
@@ -410,6 +412,8 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"<xliff:g id="DATA_LIMIT">%s</xliff:g> korlát"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"Figyelem! <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"Munkaprofil"</string>
+    <!-- no translation found for quick_settings_work_mode_paused (4841109346916998613) -->
+    <skip />
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Éjszakai fény"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Be: naplemente"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Napfelkeltéig"</string>
@@ -668,10 +672,12 @@
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Összes mutatása"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Feloldás a fizetéshez"</string>
-    <string name="wallet_secondary_label_active" msgid="4909706168969888137">"Kész"</string>
-    <string name="wallet_secondary_label_no_card" msgid="1750103386908123401">"Fizetési mód beállítása"</string>
+    <!-- no translation found for wallet_secondary_label_no_card (1282609666895946317) -->
+    <skip />
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Oldja fel a használathoz"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Probléma merült fel a kártyák lekérésekor, próbálja újra később"</string>
+    <!-- no translation found for wallet_lockscreen_settings_label (3539105300870383570) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"Munkahelyi profil"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Repülős üzemmód"</string>
     <string name="add_tile" msgid="6239678623873086686">"Mozaik hozzáadása"</string>
@@ -740,9 +746,12 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Állapot:&lt;/b&gt; némára állítva"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Állapot:&lt;/b&gt; előrébb sorolva"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Állapot:&lt;/b&gt; hátrébb sorolva"</string>
-    <string name="notification_channel_summary_priority" msgid="4592979359953954258">"Még akkor is az értesítések tetején jelenik meg, ha a Prioritásos mód be van kapcsolva"</string>
+    <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"A beszélgetésekre vonatkozó értesítések tetején látható, és megjeleníti a profilképet a lezárási képernyőn"</string>
+    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"A beszélgetésekre vonatkozó értesítések tetején, lebegő buborékként látható, és megjeleníti a profilképet a lezárási képernyőn"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"A beszélgetésekre vonatkozó értesítések tetején látható, megjeleníti a profilképet a lezárási képernyőn, és megszakítja a Ne zavarjanak funkciót"</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"A beszélgetésekre vonatkozó értesítések tetején, lebegő buborékként látható, megjeleníti a profilképet a lezárási képernyőn, és megszakítja a Ne zavarjanak funkciót"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Beállítások"</string>
-    <string name="notification_priority_title" msgid="5256226572739882190">"Fontos beszélgetések"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"Prioritás"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"A(z) <xliff:g id="APP_NAME">%1$s</xliff:g> nem támogatja a beszélgetési funkciókat"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Ezeket az értesítéseket nem lehet módosítani."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Az értesítések jelen csoportját itt nem lehet beállítani"</string>
@@ -858,6 +867,8 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"Be"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"Ki"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"Nem használható"</string>
+    <!-- no translation found for tile_disabled (373212051546573069) -->
+    <skip />
     <string name="nav_bar" msgid="4642708685386136807">"Navigációs sáv"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"Elrendezés"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"További bal oldali gombtípus"</string>
@@ -1016,14 +1027,6 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"A rendszer-navigáció módja megváltozott. Módosításához nyissa meg a Beállításokat."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"A rendszer-navigációs lehetőségeket a Beállításokban módosíthatja"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Készenléti mód"</string>
-    <string name="priority_onboarding_title" msgid="2893070698479227616">"Fontosnak beállított beszélgetés"</string>
-    <string name="priority_onboarding_behavior" msgid="636826237468953117">"Fontos beszélgetések"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="3861580571311518785">"Ezek a beszélgetések a lista tetején jelennek meg, és mindig megkapja őket, ha a Prioritásos mód be van kapcsolva"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="1781653813573865071">"A profilképek mindig megjelennek a lezárási képernyőn"</string>
-    <string name="priority_onboarding_appear_as_bubble_text" msgid="4359924720680083057">"Ezeket a beszélgetéseket könnyedén megtalálja a kezdőképernyő tetején lévő buborékokban"</string>
-    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Megszakítják a Ne zavarjanak módot"</string>
-    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Értem"</string>
-    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Beállítások"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Nagyítás ablaka"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Nagyítási vezérlők ablaka"</string>
     <string name="accessibility_control_zoom_in" msgid="1189272315480097417">"Nagyítás"</string>
@@ -1044,8 +1047,7 @@
     <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"Áthelyezés le és jobbra"</string>
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Áthelyezés a szélen kívül és elrejtés"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Áthelyezés a szélen kívül és mutatás"</string>
-    <!-- no translation found for accessibility_floating_button_action_double_tap_to_toggle (7976492639670692037) -->
-    <skip />
+    <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"váltás"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Eszközvezérlők"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Vezérlők hozzáadása a csatlakoztatott eszközökhöz"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"Eszközvezérlők beállítása"</string>
@@ -1092,8 +1094,7 @@
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Elvetés"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Folytatás"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Beállítások"</string>
-    <!-- no translation found for controls_media_smartspace_rec_title (1699818353932537407) -->
-    <skip />
+    <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"Játék"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Inaktív, ellenőrizze az appot"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Hiba, újrapróbálkozás…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Nem található"</string>

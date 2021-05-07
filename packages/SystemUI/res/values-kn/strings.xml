@@ -137,8 +137,7 @@
     <string name="accessibility_phone_button" msgid="4256353121703100427">"ಫೋನ್"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"ಧ್ವನಿ ಸಹಾಯಕ"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"ಅನ್‌ಲಾಕ್"</string>
-    <!-- no translation found for accessibility_lock_icon (661492842417875775) -->
-    <skip />
+    <string name="accessibility_lock_icon" msgid="661492842417875775">"ಸಾಧನ ಲಾಕ್ ಆಗಿದೆ"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="5209142744692162598">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್‍‍ಗಾಗಿ ನಿರೀಕ್ಷಿಸಲಾಗುತ್ತಿದೆ"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="1811563723195375298">"ನಿಮ್ಮ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಬಳಸದೆಯೇ ಅನ್‌ಲಾಕ್ ಮಾಡಿ"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"ಮುಖವನ್ನು ಸ್ಕ್ಯಾನ್ ಮಾಡಲಾಗುತ್ತಿದೆ"</string>
@@ -290,9 +289,11 @@
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"ಮೊಬೈಲ್ ಹಾಟ್‌ಸ್ಪಾಟ್ ಆಫ್ ಮಾಡಲಾಗಿದೆ."</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"ಮೊಬೈಲ್ ಹಾಟ್‌ಸ್ಪಾಟ್ ಆನ್ ಮಾಡಲಾಗಿದೆ."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"ಸ್ಕ್ರೀನ್ ಪ್ರಸಾರವನ್ನು ನಿಲ್ಲಿಸಲಾಗಿದೆ."</string>
-    <string name="accessibility_quick_settings_work_mode_off" msgid="562749867895549696">"ಕೆಲಸದ ಮೋಡ್ ಆಫ್ ಆಗಿದೆ."</string>
+    <!-- no translation found for accessibility_quick_settings_work_mode_off (9106217884005620744) -->
+    <skip />
     <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"ಕೆಲಸದ ಮೋಡ್ ಆನ್ ಆಗಿದೆ."</string>
-    <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6256690740556798683">"ಕೆಲಸದ ಮೋಡ್ ಆಫ್ ಮಾಡಲಾಗಿದೆ."</string>
+    <!-- no translation found for accessibility_quick_settings_work_mode_changed_off (2653550342355027441) -->
+    <skip />
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"ಕೆಲಸದ ಮೋಡ್ ಆನ್ ಮಾಡಲಾಗಿದೆ."</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"ಡೇಟಾ ಸೇವರ್ ಆಫ್ ಮಾಡಲಾಗಿದೆ."</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"ಡೇಟಾ ಸೇವರ್ ಆನ್ ಮಾಡಲಾಗಿದೆ."</string>
@@ -411,6 +412,8 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"<xliff:g id="DATA_LIMIT">%s</xliff:g> ಮಿತಿ"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"<xliff:g id="DATA_LIMIT">%s</xliff:g> ಎಚ್ಚರಿಕೆ"</string>
     <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"ಕೆಲಸದ ಪ್ರೊಫೈಲ್"</string>
+    <!-- no translation found for quick_settings_work_mode_paused (4841109346916998613) -->
+    <skip />
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"ನೈಟ್ ಲೈಟ್"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"ಸೂರ್ಯಾಸ್ತದಲ್ಲಿ"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"ಸೂರ್ಯೋದಯದವರೆಗೆ"</string>
@@ -669,10 +672,12 @@
     <string name="wallet_title" msgid="5369767670735827105">"ವಾಲೆಟ್"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"ಎಲ್ಲವನ್ನೂ ತೋರಿಸಿ"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"ಪಾವತಿಸಲು ಅನ್‌ಲಾಕ್ ಮಾಡಿ"</string>
-    <string name="wallet_secondary_label_active" msgid="4909706168969888137">"ಸಿದ್ಧವಾಗಿದೆ"</string>
-    <string name="wallet_secondary_label_no_card" msgid="1750103386908123401">"ಪಾವತಿಯನ್ನು ಸೆಟಪ್ ಮಾಡಿ"</string>
+    <!-- no translation found for wallet_secondary_label_no_card (1282609666895946317) -->
+    <skip />
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"ಬಳಸಲು ಅನ್‌ಲಾಕ್ ಮಾಡಿ"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"ನಿಮ್ಮ ಕಾರ್ಡ್‌ಗಳನ್ನು ಪಡೆಯುವಾಗ ಸಮಸ್ಯೆ ಉಂಟಾಗಿದೆ, ನಂತರ ಪುನಃ ಪ್ರಯತ್ನಿಸಿ"</string>
+    <!-- no translation found for wallet_lockscreen_settings_label (3539105300870383570) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"ಕೆಲಸದ ಪ್ರೊಫೈಲ್"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"ಏರ್‌ಪ್ಲೇನ್ ಮೋಡ್"</string>
     <string name="add_tile" msgid="6239678623873086686">"ಟೈಲ್ ಸೇರಿಸಿ"</string>
@@ -741,9 +746,16 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;ಸ್ಥಿತಿ:&lt;/b&gt; ಸೈಲೆಂಟ್‌ಗೆ ಕೆಳದರ್ಜೆಗೆ ಇಳಿದಿದೆ"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;ಸ್ಥಿತಿ:&lt;/b&gt; ಉನ್ನತ ಸ್ಥಾನವನ್ನು ಹೊಂದಿದೆ"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;ಸ್ಥಿತಿ:&lt;/b&gt; ಕಡಿಮೆ ಸ್ಥಾನವನ್ನು ಹೊಂದಿದೆ"</string>
-    <string name="notification_channel_summary_priority" msgid="4592979359953954258">"ಆದ್ಯತಾ ಮೋಡ್ ಆನ್ ಆಗಿದ್ದರೂ ಸಹ, ನಿಮ್ಮ ಅಧಿಸೂಚನೆಗಳ ಮೇಲ್ಭಾಗದಲ್ಲಿ ಯಾವಾಗಲೂ ತೋರಿಸಲಾಗುತ್ತದೆ"</string>
+    <!-- no translation found for notification_channel_summary_priority_baseline (46674690072551234) -->
+    <skip />
+    <!-- no translation found for notification_channel_summary_priority_bubble (1275413109619074576) -->
+    <skip />
+    <!-- no translation found for notification_channel_summary_priority_dnd (6665395023264154361) -->
+    <skip />
+    <!-- no translation found for notification_channel_summary_priority_all (7151752959650048285) -->
+    <skip />
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
-    <string name="notification_priority_title" msgid="5256226572739882190">"ಆದ್ಯತೆಯ ಸಂಭಾಷಣೆಗಳು"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"ಆದ್ಯತೆ"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"ಸಂವಾದ ಫೀಚರ್‌ಗಳನ್ನು <xliff:g id="APP_NAME">%1$s</xliff:g> ಬೆಂಬಲಿಸುವುದಿಲ್ಲ"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"ಈ ಅಧಿಸೂಚನೆಗಳನ್ನು ಮಾರ್ಪಡಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"ಈ ಗುಂಪಿನ ಅಧಿಸೂಚನೆಗಳನ್ನು ಇಲ್ಲಿ ಕಾನ್ಫಿಗರ್‌ ಮಾಡಲಾಗಿರುವುದಿಲ್ಲ"</string>
@@ -859,6 +871,8 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"ಆನ್"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"ಆಫ್"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"ಲಭ್ಯವಿಲ್ಲ"</string>
+    <!-- no translation found for tile_disabled (373212051546573069) -->
+    <skip />
     <string name="nav_bar" msgid="4642708685386136807">"ನ್ಯಾವಿಗೇಷನ್ ಬಾರ್"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"ಲೇಔಟ್"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"ಹೆಚ್ಚುವರಿ ಎಡ ಬಟನ್ ವಿಧ"</string>
@@ -1017,14 +1031,6 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"ಸಿಸ್ಟಂ ನ್ಯಾವಿಗೇಷನ ಅಪ್‌ಡೇಟ್ ಮಾಡಲಾಗಿದೆ ಬದಲಾವಣೆಗಳನ್ನು ಮಾಡಲು, ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಗೆ ಹೋಗಿ."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"ಸಿಸ್ಟಂ ನ್ಯಾವಿಗೇಷನ್ ಅಪ್‌ಡೇಟ್ ಮಾಡಲು ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಗೆ ಹೋಗಿ"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"ಸ್ಟ್ಯಾಂಡ್‌ಬೈ"</string>
-    <string name="priority_onboarding_title" msgid="2893070698479227616">"ಸಂವಾದವನ್ನು ಆದ್ಯತೆಯಾಗಿ ಹೊಂದಿಸಲಾಗಿದೆ"</string>
-    <string name="priority_onboarding_behavior" msgid="636826237468953117">"ಆದ್ಯತೆಯ ಸಂಭಾಷಣೆಗಳು"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="3861580571311518785">"ಈ ಸಂಭಾಷಣೆಗಳನ್ನು ನಿಮ್ಮ ಪಟ್ಟಿಯ ಮೇಲ್ಭಾಗದಲ್ಲಿ ತೋರಿಸಲಾಗಿದೆ ಮತ್ತು ಆದ್ಯತಾ ಮೋಡ್ ಆನ್ ಆಗಿರುವಾಗ ಯಾವಾಗಲೂ ನಿಮ್ಮನ್ನು ತಲುಪಬಹುದು"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="1781653813573865071">"ಪ್ರೊಫೈಲ್ ಚಿತ್ರಗಳನ್ನು ಲಾಕ್ ಸ್ಕ್ರೀನ್‌ನಲ್ಲಿ ತೋರಿಸಲಾಗಿದೆ"</string>
-    <string name="priority_onboarding_appear_as_bubble_text" msgid="4359924720680083057">"ನಿಮ್ಮ ಹೋಮ್ ಸ್ಕ್ರೀನ್‌ನ ಬಬಲ್ಸ್‌ನಲ್ಲಿ ಈ ಸಂಭಾಷಣೆಗಳನ್ನು ನೀವು ಸುಲಭವಾಗಿ ಕಾಣಬಹುದು"</string>
-    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"ಅಡಚಣೆ ಮಾಡಬೇಡ ಅನ್ನು ಅಡ್ಡಿಪಡಿಸಿ"</string>
-    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"ಅರ್ಥವಾಯಿತು"</string>
-    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"ವರ್ಧನೆಯ ವಿಂಡೋ"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"ವರ್ಧನೆಯ ವಿಂಡೋ ನಿಯಂತ್ರಣಗಳು"</string>
     <string name="accessibility_control_zoom_in" msgid="1189272315480097417">"ಝೂಮ್ ಇನ್ ಮಾಡಿ"</string>
@@ -1045,8 +1051,7 @@
     <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"ಕೆಳಗಿನ ಬಲಭಾಗಕ್ಕೆ ಸರಿಸಿ"</string>
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"ಅಂಚಿಗೆ ಸರಿಸಿ ಮತ್ತು ಮರೆಮಾಡಿ"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"ಅಂಚನ್ನು ಸರಿಸಿ ಮತ್ತು ತೋರಿಸಿ"</string>
-    <!-- no translation found for accessibility_floating_button_action_double_tap_to_toggle (7976492639670692037) -->
-    <skip />
+    <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"ಟಾಗಲ್ ಮಾಡಿ"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"ಸಾಧನ ನಿಯಂತ್ರಣಗಳು"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"ನಿಮ್ಮ ಕನೆಕ್ಟ್ ಆಗಿರುವ ಸಾಧನಗಳಿಗೆ ನಿಯಂತ್ರಣಗಳನ್ನು ಸೇರಿಸಿ"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"ಸಾಧನ ನಿಯಂತ್ರಣಗಳನ್ನು ಸೆಟಪ್ ಮಾಡಿ"</string>
@@ -1088,15 +1093,12 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"ಇನ್ನಷ್ಟು ನೋಡಲು ಸ್ವೈಪ್ ಮಾಡಿ"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"ಶಿಫಾರಸುಗಳು ಲೋಡ್ ಆಗುತ್ತಿವೆ"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"ಮಾಧ್ಯಮ"</string>
-    <!-- no translation found for controls_media_close_session (1193000643003066508) -->
-    <skip />
-    <!-- no translation found for controls_media_active_session (3146882316024153337) -->
-    <skip />
+    <string name="controls_media_close_session" msgid="1193000643003066508">"ಈ ಮಾಧ್ಯಮ ಸೆಶನ್ ಅನ್ನು ಮರೆಮಾಡಬೇಕೆ?"</string>
+    <string name="controls_media_active_session" msgid="3146882316024153337">"ಪ್ರಸ್ತುತ ಮಾಧ್ಯಮ ಸೆಶನ್ ಅನ್ನು ಮರೆಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ."</string>
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"ವಜಾಗೊಳಿಸಿ"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"ಪುನರಾರಂಭಿಸಿ"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
-    <!-- no translation found for controls_media_smartspace_rec_title (1699818353932537407) -->
-    <skip />
+    <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"ಪ್ಲೇ ಮಾಡಿ"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"ನಿಷ್ಕ್ರಿಯ, ಆ್ಯಪ್ ಪರಿಶೀಲಿಸಿ"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"ದೋಷ, ಮರುಪ್ರಯತ್ನಿಸಲಾಗುತ್ತಿದೆ…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"ಕಂಡುಬಂದಿಲ್ಲ"</string>
@@ -1153,14 +1155,9 @@
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"ನಿಮ್ಮ ಬ್ಯಾಟರಿ ಮೀಟರ್ ಓದುವಾಗ ಸಮಸ್ಯೆ ಎದುರಾಗಿದೆ"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"ಇನ್ನಷ್ಟು ಮಾಹಿತಿಗಾಗಿ ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"ಅಲಾರಾಂ ಸೆಟ್ ಆಗಿಲ್ಲ"</string>
-    <!-- no translation found for accessibility_fingerprint_label (5255731221854153660) -->
-    <skip />
-    <!-- no translation found for accessibility_udfps_disabled_button (4284034245130239384) -->
-    <skip />
-    <!-- no translation found for accessibility_authenticate_hint (798914151813205721) -->
-    <skip />
-    <!-- no translation found for accessibility_enter_hint (2617864063504824834) -->
-    <skip />
-    <!-- no translation found for keyguard_try_fingerprint (2825130772993061165) -->
-    <skip />
+    <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಸೆನ್ಸರ್"</string>
+    <string name="accessibility_udfps_disabled_button" msgid="4284034245130239384">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಸೆನ್ಸರ್ ಅನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>
+    <string name="accessibility_authenticate_hint" msgid="798914151813205721">"ದೃಢೀಕರಿಸಿ"</string>
+    <string name="accessibility_enter_hint" msgid="2617864063504824834">"ಸಾಧನವನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
+    <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"ತೆರೆಯುವುದಕ್ಕಾಗಿ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಅನ್ನು ಬಳಸಿ"</string>
 </resources>
