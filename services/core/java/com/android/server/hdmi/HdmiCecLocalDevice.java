@@ -17,7 +17,6 @@
 package com.android.server.hdmi;
 
 import android.annotation.CallSuper;
-import android.annotation.Nullable;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.IHdmiControlCallback;
@@ -282,7 +281,7 @@ abstract class HdmiCecLocalDevice {
             case Constants.MESSAGE_SET_MENU_LANGUAGE:
                 return handleSetMenuLanguage(message);
             case Constants.MESSAGE_GIVE_PHYSICAL_ADDRESS:
-                return handleGivePhysicalAddress(null);
+                return handleGivePhysicalAddress(message);
             case Constants.MESSAGE_GIVE_OSD_NAME:
                 return handleGiveOsdName(message);
             case Constants.MESSAGE_GIVE_DEVICE_VENDOR_ID:
@@ -381,14 +380,17 @@ abstract class HdmiCecLocalDevice {
 
     @ServiceThreadOnly
     @Constants.HandleMessageResult
-    protected int handleGivePhysicalAddress(@Nullable SendMessageCallback callback) {
+    protected int handleGivePhysicalAddress(HdmiCecMessage message) {
         assertRunOnServiceThread();
-
         int physicalAddress = mService.getPhysicalAddress();
-        HdmiCecMessage cecMessage =
-                HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
-                        mAddress, physicalAddress, mDeviceType);
-        mService.sendCecCommand(cecMessage, callback);
+        if (physicalAddress == Constants.INVALID_PHYSICAL_ADDRESS) {
+            mService.maySendFeatureAbortCommand(message, Constants.ABORT_UNABLE_TO_DETERMINE);
+        } else {
+            HdmiCecMessage cecMessage =
+                    HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
+                            mAddress, physicalAddress, mDeviceType);
+            mService.sendCecCommand(cecMessage);
+        }
         return Constants.HANDLED;
     }
 
