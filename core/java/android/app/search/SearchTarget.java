@@ -15,9 +15,11 @@
  */
 package android.app.search;
 
+import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.StringDef;
 import android.annotation.SystemApi;
 import android.app.slice.SliceManager;
 import android.appwidget.AppWidgetProviderInfo;
@@ -66,6 +68,24 @@ public final class SearchTarget implements Parcelable {
     public static final int RESULT_TYPE_SHORTCUT = 1 << 1;
     public static final int RESULT_TYPE_SLICE = 1 << 2;
     public static final int RESULT_TYPE_WIDGETS = 1 << 3;
+
+    //     ------
+    //    | icon |
+    //     ------
+    //      text
+    public static final String LAYOUT_TYPE_ICON = "icon";
+
+    //     ------                            ------   ------
+    //    |      | title                    |(opt)|  |(opt)|
+    //    | icon | subtitle (optional)      | icon|  | icon|
+    //     ------                            ------  ------
+    public static final String LAYOUT_TYPE_ICON_ROW = "icon_row";
+
+    //     ------
+    //    | icon | title / subtitle (optional)
+    //     ------
+    public static final String LAYOUT_TYPE_SHORT_ICON_ROW = "short_icon_row";
+
     /**
      * @hide
      */
@@ -78,6 +98,17 @@ public final class SearchTarget implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     public @interface SearchResultType {}
     private final int mResultType;
+
+    /**
+     * @hide
+     */
+    @StringDef(prefix = {"LAYOUT_TYPE_"}, value = {
+            LAYOUT_TYPE_ICON,
+            LAYOUT_TYPE_ICON_ROW,
+            LAYOUT_TYPE_SHORT_ICON_ROW,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SearchLayoutType {}
 
     /**
      * Constant to express how the group of {@link SearchTarget} should be rendered on
@@ -178,7 +209,7 @@ public final class SearchTarget implements Parcelable {
      * Retrieves the layout type.
      */
     @NonNull
-    public String getLayoutType() {
+    public @SearchLayoutType String getLayoutType() {
         return mLayoutType;
     }
 
@@ -337,7 +368,7 @@ public final class SearchTarget implements Parcelable {
         private Bundle mExtras;
 
         public Builder(@SearchResultType int resultType,
-                @NonNull String layoutType,
+                @SearchLayoutType @NonNull String layoutType,
                 @NonNull String id) {
             mId = id;
             mLayoutType = Objects.requireNonNull(layoutType);
@@ -433,13 +464,13 @@ public final class SearchTarget implements Parcelable {
          * Sets the score of the object.
          */
         @NonNull
-        public Builder setScore(float score) {
+        public Builder setScore(@FloatRange(from = 0.0f, to = 1.0f) float score) {
             mScore = score;
             return this;
         }
 
         /**
-         * Sets whether the result should be hidden by default inside client.
+         * Sets whether the result should be hidden (e.g. not visible) by default inside client.
          */
         @NonNull
         public Builder setShouldHide(boolean shouldHide) {

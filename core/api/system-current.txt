@@ -1528,6 +1528,9 @@ package android.app.search {
     method public boolean shouldHide();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.search.SearchTarget> CREATOR;
+    field public static final String LAYOUT_TYPE_ICON = "icon";
+    field public static final String LAYOUT_TYPE_ICON_ROW = "icon_row";
+    field public static final String LAYOUT_TYPE_SHORT_ICON_ROW = "short_icon_row";
     field public static final int RESULT_TYPE_APPLICATION = 1; // 0x1
     field public static final int RESULT_TYPE_SHORTCUT = 2; // 0x2
     field public static final int RESULT_TYPE_SLICE = 4; // 0x4
@@ -1541,7 +1544,7 @@ package android.app.search {
     method @NonNull public android.app.search.SearchTarget.Builder setExtras(@NonNull android.os.Bundle);
     method @NonNull public android.app.search.SearchTarget.Builder setPackageName(@NonNull String);
     method @NonNull public android.app.search.SearchTarget.Builder setParentId(@NonNull String);
-    method @NonNull public android.app.search.SearchTarget.Builder setScore(float);
+    method @NonNull public android.app.search.SearchTarget.Builder setScore(@FloatRange(from=0.0f, to=1.0f) float);
     method @NonNull public android.app.search.SearchTarget.Builder setSearchAction(@Nullable android.app.search.SearchAction);
     method @NonNull public android.app.search.SearchTarget.Builder setShortcutInfo(@NonNull android.content.pm.ShortcutInfo);
     method @NonNull public android.app.search.SearchTarget.Builder setShouldHide(boolean);
