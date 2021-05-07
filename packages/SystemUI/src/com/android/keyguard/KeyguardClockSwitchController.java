@@ -25,7 +25,6 @@ import android.app.smartspace.SmartspaceConfig;
 import android.app.smartspace.SmartspaceManager;
 import android.app.smartspace.SmartspaceSession;
 import android.app.smartspace.SmartspaceTarget;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
@@ -112,7 +111,6 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     private boolean mShowSensitiveContentForCurrentUser;
     private boolean mShowSensitiveContentForManagedUser;
     private UserHandle mManagedUserHandle;
-    private UserTracker.Callback mUserTrackerCallback;
 
     /**
      * Listener for changes to the color palette.
@@ -294,13 +292,6 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
                 }
             };
 
-            mUserTrackerCallback = new UserTracker.Callback() {
-                public void onUserChanged(int newUser, Context userContext) {
-                    reloadSmartspace();
-                }
-            };
-            mUserTracker.addCallback(mUserTrackerCallback, mUiExecutor);
-
             getContext().getContentResolver().registerContentObserver(
                     Settings.Secure.getUriFor(
                             Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS),
@@ -375,10 +366,6 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
 
         if (mSettingsObserver != null) {
             getContext().getContentResolver().unregisterContentObserver(mSettingsObserver);
-        }
-
-        if (mUserTrackerCallback != null) {
-            mUserTracker.removeCallback(mUserTrackerCallback);
         }
     }
 
