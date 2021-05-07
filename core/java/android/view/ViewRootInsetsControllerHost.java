@@ -127,7 +127,9 @@ public class ViewRootInsetsControllerHost implements InsetsController.Host {
             // Window doesn't support hardware acceleration, no synchronization for now.
             // TODO(b/149342281): use mViewRoot.mSurface.getNextFrameNumber() to sync on every
             //  frame instead.
-            mApplier.applyParams(new SurfaceControl.Transaction(), -1 /* frame */, params);
+            final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+            mApplier.applyParams(t, params);
+            mApplier.applyTransaction(t, -1);
         }
     }
 
