@@ -1531,7 +1531,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             // to cover the activity configuration change.
             return false;
         }
-        if (r.mStartingData != null && r.mStartingData.hasImeSurface()) {
+        if ((r.mStartingData != null && r.mStartingData.hasImeSurface())
+                || (mInsetsStateController.getImeSourceProvider()
+                        .getSource().getVisibleFrame() != null)) {
             // Currently it is unknown that when will IME window be ready. Reject the case to
             // avoid flickering by showing IME in inconsistent orientation.
             return false;
@@ -3621,7 +3623,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         return mImeInputTarget != null && !mImeInputTarget.inMultiWindowMode();
     }
 
-    boolean isImeAttachedToApp() {
+    boolean shouldImeAttachedToApp() {
         return isImeControlledByApp()
                 && mImeLayeringTarget != null
                 && mImeLayeringTarget.mActivityRecord != null
@@ -3632,6 +3634,20 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 // IME is attached to non-Letterboxed app windows, other than windows with
                 // LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER flag. (Refer to WS.isLetterboxedAppWindow())
                 && mImeLayeringTarget.matchesDisplayAreaBounds();
+    }
+
+    /**
+     * Unlike {@link #shouldImeAttachedToApp()}, this method returns {@code @true} only when both
+     * the IME layering target is valid to attach the IME surface to the app, and the
+     * {@link #mInputMethodSurfaceParent} of the {@link ImeContainer} has actually attached to
+     * the app. (i.e. Even if {@link #shouldImeAttachedToApp()} returns {@code true}, calling this
+     * method will return {@code false} if the IME surface doesn't actually attach to the app.)
+     */
+    boolean isImeAttachedToApp() {
+        return shouldImeAttachedToApp()
+                && mInputMethodSurfaceParent != null
+                && mInputMethodSurfaceParent.isSameSurface(
+                        mImeLayeringTarget.mActivityRecord.getSurfaceControl());
     }
 
     /**
@@ -3762,7 +3778,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     @VisibleForTesting
     void attachAndShowImeScreenshotOnTarget() {
         // No need to attach screenshot if the IME target not exists or screen is off.
-        if (!isImeAttachedToApp() || !mWmService.mPolicy.isScreenOn()) {
+        if (!shouldImeAttachedToApp() || !mWmService.mPolicy.isScreenOn()) {
             return;
         }
 
@@ -3930,7 +3946,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // Attach it to app if the target is part of an app and such app is covering the entire
         // screen. If it's not covering the entire screen the IME might extend beyond the apps
         // bounds.
-        if (allowAttachToApp && isImeAttachedToApp()) {
+        if (allowAttachToApp && shouldImeAttachedToApp()) {
             return mImeLayeringTarget.mActivityRecord.getSurfaceControl();
         }
 
