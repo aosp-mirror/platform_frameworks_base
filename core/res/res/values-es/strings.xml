@@ -240,7 +240,7 @@
     <string name="global_action_power_options" msgid="1185286119330160073">"Encender o apagar"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"Reiniciar"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"Emergencia"</string>
-    <string name="global_action_bug_report" msgid="5127867163044170003">"Informe de error"</string>
+    <string name="global_action_bug_report" msgid="5127867163044170003">"Informe de errores"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Finalizar sesión"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"Captura de pantalla"</string>
     <string name="bugreport_title" msgid="8549990811777373050">"Informar de un error"</string>
