@@ -23,7 +23,6 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.util.AttributeSet;
-import android.util.MathUtils;
 import android.util.Pair;
 import android.view.DisplayCutout;
 import android.view.View;
@@ -36,7 +35,6 @@ import android.widget.Space;
 import com.android.settingslib.Utils;
 import com.android.systemui.BatteryMeterView;
 import com.android.systemui.R;
-import com.android.systemui.animation.Interpolators;
 import com.android.systemui.qs.QSDetail.Callback;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.phone.StatusBarIconController.TintedIconManager;
@@ -80,7 +78,7 @@ public class QuickStatusBarHeader extends FrameLayout {
     private int mWaterfallTopInset;
     private int mCutOutPaddingLeft;
     private int mCutOutPaddingRight;
-    private float mClockIconsAlpha = 1.0f;
+    private float mViewAlpha = 1.0f;
     private float mKeyguardExpansionFraction;
     private int mTextColorPrimary = Color.TRANSPARENT;
     private int mTopViewMeasureHeight;
@@ -408,35 +406,12 @@ public class QuickStatusBarHeader extends FrameLayout {
     }
 
     /**
-     * When QS is scrolling, mClockIconsAlpha should scroll away and fade out.
-     *
-     * For a given scroll level, this method does the following:
-     * <ol>
-     *     <li>Determine the alpha that {@code mClockIconsView} should have when the panel is fully
-     *         expanded.</li>
-     *     <li>Set the scroll of {@code mClockIconsView} to the same of {@code QSPanel}.</li>
-     *     <li>Set the alpha of {@code mClockIconsView} to that determined by the expansion of
-     *         the panel, interpolated between 1 (no expansion) and {@code mClockIconsAlpha} (fully
-     *         expanded), matching the animator.</li>
-     * </ol>
+     * Scroll the headers away.
      *
      * @param scrollY the scroll of the QSPanel container
      */
     public void setExpandedScrollAmount(int scrollY) {
-        // The scrolling of the expanded qs has changed. Since the header text isn't part of it,
-        // but would overlap content, we're fading it out.
-        float newAlpha = 1.0f;
-        if (mClockIconsView.getHeight() > 0) {
-            newAlpha = MathUtils.map(0, mClockIconsView.getHeight() / 2.0f, 1.0f, 0.0f,
-                    scrollY);
-            newAlpha = Interpolators.ALPHA_OUT.getInterpolation(newAlpha);
-        }
         mClockIconsView.setScrollY(scrollY);
-        if (newAlpha != mClockIconsAlpha) {
-            mClockIconsAlpha = newAlpha;
-            mClockIconsView.setAlpha(MathUtils.lerp(1.0f, mClockIconsAlpha,
-                    mKeyguardExpansionFraction));
-            updateAlphaAnimator();
-        }
+        mDatePrivacyView.setScrollY(scrollY);
     }
 }
