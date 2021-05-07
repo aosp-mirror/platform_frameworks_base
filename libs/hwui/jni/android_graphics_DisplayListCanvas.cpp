@@ -144,7 +144,7 @@ static void android_view_DisplayListCanvas_drawCircleProps(CRITICAL_JNI_PARAMS_C
 static void android_view_DisplayListCanvas_drawRippleProps(
         CRITICAL_JNI_PARAMS_COMMA jlong canvasPtr, jlong xPropPtr, jlong yPropPtr,
         jlong radiusPropPtr, jlong paintPropPtr, jlong progressPropPtr, jlong turbulencePhasePtr,
-        jlong builderPtr) {
+        jint color, jlong builderPtr) {
     Canvas* canvas = reinterpret_cast<Canvas*>(canvasPtr);
     CanvasPropertyPrimitive* xProp = reinterpret_cast<CanvasPropertyPrimitive*>(xPropPtr);
     CanvasPropertyPrimitive* yProp = reinterpret_cast<CanvasPropertyPrimitive*>(yPropPtr);
@@ -155,8 +155,12 @@ static void android_view_DisplayListCanvas_drawRippleProps(
     CanvasPropertyPrimitive* progressProp =
             reinterpret_cast<CanvasPropertyPrimitive*>(progressPropPtr);
     SkRuntimeShaderBuilder* builder = reinterpret_cast<SkRuntimeShaderBuilder*>(builderPtr);
-    canvas->drawRipple(xProp, yProp, radiusProp, paintProp, progressProp, turbulencePhaseProp,
-                       *builder);
+
+    const uirenderer::skiapipeline::RippleDrawableParams params =
+            uirenderer::skiapipeline::RippleDrawableParams{
+                    xProp,          yProp,     radiusProp, progressProp, turbulencePhaseProp,
+                    (SkColor)color, paintProp, *builder};
+    canvas->drawRipple(params);
 }
 
 static void android_view_DisplayListCanvas_drawWebViewFunctor(CRITICAL_JNI_PARAMS_COMMA jlong canvasPtr, jint functor) {
@@ -186,7 +190,7 @@ static JNINativeMethod gMethods[] = {
         {"nDrawCircle", "(JJJJJ)V", (void*)android_view_DisplayListCanvas_drawCircleProps},
         {"nDrawRoundRect", "(JJJJJJJJ)V", (void*)android_view_DisplayListCanvas_drawRoundRectProps},
         {"nDrawWebViewFunctor", "(JI)V", (void*)android_view_DisplayListCanvas_drawWebViewFunctor},
-        {"nDrawRipple", "(JJJJJJJJ)V", (void*)android_view_DisplayListCanvas_drawRippleProps},
+        {"nDrawRipple", "(JJJJJJJIJ)V", (void*)android_view_DisplayListCanvas_drawRippleProps},
 };
 
 int register_android_view_DisplayListCanvas(JNIEnv* env) {
