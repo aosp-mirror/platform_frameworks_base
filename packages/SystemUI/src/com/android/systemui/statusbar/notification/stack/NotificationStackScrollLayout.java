@@ -2068,6 +2068,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         int height = 0;
         float previousPaddingRequest = mPaddingBetweenElements;
         int numShownItems = 0;
+        int numShownNotifs = 0;
         boolean finish = false;
         int maxDisplayedNotifications = mMaxDisplayedNotifications;
         ExpandableView previousView = null;
@@ -2077,7 +2078,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             if (expandableView.getVisibility() != View.GONE
                     && !expandableView.hasNoContentHeight() && !footerViewOnLockScreen) {
                 boolean limitReached = maxDisplayedNotifications != -1
-                        && numShownItems >= maxDisplayedNotifications;
+                        && numShownNotifs >= maxDisplayedNotifications;
                 final float viewHeight;
                 if (limitReached) {
                     viewHeight = mShelf.getIntrinsicHeight();
@@ -2090,7 +2091,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 }
                 height += calculateGapHeight(previousView, expandableView, numShownItems);
                 height += viewHeight;
+
                 numShownItems++;
+                if (!(expandableView instanceof MediaHeaderView)) {
+                    numShownNotifs++;
+                }
                 previousView = expandableView;
                 if (finish) {
                     break;

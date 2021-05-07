@@ -379,6 +379,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private DisplayFoldController mDisplayFoldController;
     AppOpsManager mAppOpsManager;
     PackageManager mPackageManager;
+    SideFpsEventHandler mSideFpsEventHandler;
     private boolean mHasFeatureAuto;
     private boolean mHasFeatureWatch;
     private boolean mHasFeatureLeanback;
@@ -928,6 +929,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         } else if (count == 3) {
             powerMultiPressAction(eventTime, interactive, mTriplePressOnPowerBehavior);
         } else if (interactive && !beganFromNonInteractive) {
+            if (mSideFpsEventHandler.onSinglePressDetected(eventTime)) {
+                Slog.i(TAG, "Suppressing power key because the user is interacting with the "
+                        + "fingerprint sensor");
+                return;
+            }
             switch (mShortPressOnPowerBehavior) {
                 case SHORT_PRESS_POWER_NOTHING:
                     break;
@@ -1803,6 +1809,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 });
         initKeyCombinationRules();
         initSingleKeyGestureRules();
+        mSideFpsEventHandler = new SideFpsEventHandler(mContext, mHandler, mPowerManager);
     }
 
     private void initKeyCombinationRules() {
@@ -3427,7 +3434,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // If the key would be handled globally, just return the result, don't worry about special
         // key processing.
         if (isValidGlobalKey(keyCode)
-                && mGlobalKeyManager.shouldHandleGlobalKey(keyCode, event)) {
+                && mGlobalKeyManager.shouldHandleGlobalKey(keyCode)) {
+            // Dispatch if global key defined dispatchWhenNonInteractive.
+            if (!interactive && isWakeKey && down
+                    && mGlobalKeyManager.shouldDispatchFromNonInteractive(keyCode)) {
+                mGlobalKeyManager.setBeganFromNonInteractive();
+                result = ACTION_PASS_TO_USER;
+                // Since we're dispatching the input, reset the pending key
+                mPendingWakeKey = PENDING_KEY_NULL;
+            }
+
             if (isWakeKey) {
                 wakeUpFromWakeKey(event);
             }
@@ -3981,6 +3997,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 Slog.e(TAG, "RemoteException when checking if dreaming", e);
             }
         }
+
         // Otherwise, consume events since the user can't see what is being
         // interacted with.
         return false;
@@ -4668,6 +4685,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mKeyguardDelegate.onBootCompleted();
             }
         }
+        mSideFpsEventHandler.onFingerprintSensorReady();
         startedWakingUp(PowerManager.WAKE_REASON_UNKNOWN);
         finishedWakingUp(PowerManager.WAKE_REASON_UNKNOWN);
 

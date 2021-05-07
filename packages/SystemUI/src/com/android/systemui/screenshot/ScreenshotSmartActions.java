@@ -26,6 +26,7 @@ import android.app.ActivityManager;
 import android.app.Notification;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Handler;
@@ -165,7 +166,7 @@ public class ScreenshotSmartActions {
     }
 
     void notifyScreenshotAction(Context context, String screenshotId, String action,
-            boolean isSmartAction) {
+            boolean isSmartAction, Intent intent) {
         try {
             ScreenshotNotificationSmartActionsProvider provider =
                     SystemUIFactory.getInstance().createScreenshotNotificationSmartActionsProvider(
@@ -174,7 +175,7 @@ public class ScreenshotSmartActions {
                 Log.d(TAG, String.format("%s notifyAction: %s id=%s, isSmartAction=%b",
                         provider.getClass(), action, screenshotId, isSmartAction));
             }
-            provider.notifyAction(screenshotId, action, isSmartAction);
+            provider.notifyAction(screenshotId, action, isSmartAction, intent);
         } catch (Throwable e) {
             Log.e(TAG, "Error in notifyScreenshotAction: ", e);
         }

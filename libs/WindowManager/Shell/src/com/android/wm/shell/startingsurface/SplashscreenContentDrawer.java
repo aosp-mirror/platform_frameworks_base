@@ -75,20 +75,15 @@ public class SplashscreenContentDrawer {
     private int mBrandingImageWidth;
     private int mBrandingImageHeight;
     private final int mAppRevealDuration;
-    private final int mIconExitDuration;
     private int mMainWindowShiftLength;
-    private int mIconNormalExitDistance;
-    private int mIconEarlyExitDistance;
     private final TransactionPool mTransactionPool;
     private final SplashScreenWindowAttrs mTmpAttrs = new SplashScreenWindowAttrs();
     private final Handler mSplashscreenWorkerHandler;
 
-    SplashscreenContentDrawer(Context context, int iconExitAnimDuration, int appRevealAnimDuration,
-            TransactionPool pool) {
+    SplashscreenContentDrawer(Context context, int appRevealAnimDuration, TransactionPool pool) {
         mContext = context;
         mIconProvider = new IconProvider(context);
         mAppRevealDuration = appRevealAnimDuration;
-        mIconExitDuration = iconExitAnimDuration;
         mTransactionPool = pool;
 
         // Initialize Splashscreen worker thread
@@ -139,10 +134,6 @@ public class SplashscreenContentDrawer {
                 com.android.wm.shell.R.dimen.starting_surface_brand_image_height);
         mMainWindowShiftLength = mContext.getResources().getDimensionPixelSize(
                 com.android.wm.shell.R.dimen.starting_surface_exit_animation_window_shift_length);
-        mIconNormalExitDistance = mContext.getResources().getDimensionPixelSize(
-                com.android.wm.shell.R.dimen.starting_surface_normal_exit_icon_distance);
-        mIconEarlyExitDistance = mContext.getResources().getDimensionPixelSize(
-                com.android.wm.shell.R.dimen.starting_surface_early_exit_icon_distance);
     }
 
     private int getSystemBGColor() {
@@ -245,7 +236,7 @@ public class SplashscreenContentDrawer {
         private SplashScreenView mCachedResult;
         private int mThemeColor;
         private Drawable mFinalIconDrawable;
-        private float mScale = 1f;
+        private int mFinalIconSize = mIconSize;
 
         StartingWindowViewBuilder setWindowBGColor(@ColorInt int background) {
             mThemeColor = background;
@@ -282,48 +273,46 @@ public class SplashscreenContentDrawer {
 
             Drawable iconDrawable;
             final int animationDuration;
-            final int iconSize;
             if (mEmptyView) {
                 // empty splash screen case
                 animationDuration = 0;
-                iconSize = 0;
+                mFinalIconSize = 0;
             } else if (mTmpAttrs.mReplaceIcon != null) {
                 // replaced icon, don't process
                 iconDrawable = mTmpAttrs.mReplaceIcon;
                 animationDuration = mTmpAttrs.mAnimationDuration;
-                createIconDrawable(iconDrawable, mIconSize);
-                iconSize = mIconSize;
+                createIconDrawable(iconDrawable);
             } else {
-                final float iconScale =  (float) mIconSize / (float) mDefaultIconSize;
-                iconDrawable = mIconProvider.getIcon(mActivityInfo);
+                final float iconScale = (float) mIconSize / (float) mDefaultIconSize;
+                final int densityDpi = mContext.getResources().getDisplayMetrics().densityDpi;
+                final int scaledIconDpi = (int) (0.5f + iconScale * densityDpi);
+                iconDrawable = mIconProvider.getIcon(mActivityInfo, scaledIconDpi);
                 if (iconDrawable == null) {
                     iconDrawable = mContext.getPackageManager().getDefaultActivityIcon();
                 }
-                if (!processAdaptiveIcon(iconDrawable, iconScale)) {
+                if (!processAdaptiveIcon(iconDrawable)) {
                     if (DEBUG) {
                         Slog.d(TAG, "The icon is not an AdaptiveIconDrawable");
                     }
                     // TODO process legacy icon(bitmap)
-                    final Drawable tempIcon = loadIconByDensity(iconDrawable, iconScale);
-                    createIconDrawable(tempIcon, mIconSize);
+                    createIconDrawable(iconDrawable);
                 }
                 animationDuration = 0;
-                iconSize = (int) (0.5 + mIconSize * mScale);
             }
 
-            mCachedResult = fillViewWithIcon(iconSize, mFinalIconDrawable, animationDuration);
+            mCachedResult = fillViewWithIcon(mFinalIconSize, mFinalIconDrawable, animationDuration);
             mBuildComplete = true;
             return mCachedResult;
         }
 
-        private void createIconDrawable(Drawable iconDrawable, int iconSize) {
+        private void createIconDrawable(Drawable iconDrawable) {
             mFinalIconDrawable = SplashscreenIconDrawableFactory.makeIconDrawable(
                     mTmpAttrs.mIconBgColor != Color.TRANSPARENT
                             ? mTmpAttrs.mIconBgColor : mThemeColor,
-                    iconDrawable, iconSize, mSplashscreenWorkerHandler);
+                    iconDrawable, mFinalIconSize, mSplashscreenWorkerHandler);
         }
 
-        private boolean processAdaptiveIcon(Drawable iconDrawable, float iconScale) {
+        private boolean processAdaptiveIcon(Drawable iconDrawable) {
             if (!(iconDrawable instanceof AdaptiveIconDrawable)) {
                 return false;
             }
@@ -334,7 +323,7 @@ public class SplashscreenContentDrawer {
             final DrawableColorTester backIconTester =
                     new DrawableColorTester(adaptiveIconDrawable.getBackground());
 
-            Drawable iconForeground = adaptiveIconDrawable.getForeground();
+            final Drawable iconForeground = adaptiveIconDrawable.getForeground();
             final DrawableColorTester foreIconTester =
                     new DrawableColorTester(iconForeground, true /* filterTransparent */);
 
@@ -373,33 +362,18 @@ public class SplashscreenContentDrawer {
                 final float noBgScale =
                         foreIconTester.nonTransparentRatio() < ENLARGE_FOREGROUND_ICON_THRESHOLD
                                 ? NO_BACKGROUND_SCALE : 1f;
-                final Drawable tempIcon = loadIconByDensity(iconDrawable, iconScale * noBgScale);
-                if (tempIcon instanceof AdaptiveIconDrawable) {
-                    mScale = noBgScale;
-                    iconForeground = ((AdaptiveIconDrawable) tempIcon).getForeground();
-                }
                 // Using AdaptiveIconDrawable here can help keep the shape consistent with the
                 // current settings.
-                final int iconSize = (int) (0.5f + mIconSize * mScale);
-                createIconDrawable(iconForeground, iconSize);
+                mFinalIconSize = (int) (0.5f + mIconSize * noBgScale);
+                createIconDrawable(iconForeground);
             } else {
                 if (DEBUG) {
                     Slog.d(TAG, "makeSplashScreenContentView: draw whole icon");
                 }
-                final Drawable tempIcon = loadIconByDensity(iconDrawable, iconScale);
-                createIconDrawable(tempIcon, mIconSize);
+                createIconDrawable(iconDrawable);
             }
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
             return true;
-        }
-
-        private Drawable loadIconByDensity(Drawable baseDrawable, float scale) {
-            if (scale == 1 && baseDrawable != null) {
-                return baseDrawable;
-            }
-            final int densityDpi = mContext.getResources().getDisplayMetrics().densityDpi;
-            final int updateDpi = (int) (0.5f + scale * densityDpi);
-            return  mIconProvider.getIcon(mActivityInfo, updateDpi);
         }
 
         private SplashScreenView fillViewWithIcon(int iconSize, Drawable iconDrawable,
@@ -423,6 +397,7 @@ public class SplashscreenContentDrawer {
             }
             if (mEmptyView) {
                 splashScreenView.setNotCopyable();
+                splashScreenView.setRevealAnimationSupported(false);
             }
             splashScreenView.makeSystemUIColorsTransparent();
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
@@ -695,12 +670,10 @@ public class SplashscreenContentDrawer {
      * Create and play the default exit animation for splash screen view.
      */
     void applyExitAnimation(SplashScreenView view, SurfaceControl leash,
-            Rect frame, boolean isEarlyExit, Runnable finishCallback) {
+            Rect frame, Runnable finishCallback) {
         final SplashScreenExitAnimation animation = new SplashScreenExitAnimation(view, leash,
-                frame, mAppRevealDuration, mIconExitDuration, mMainWindowShiftLength,
-                isEarlyExit ? mIconEarlyExitDistance : mIconNormalExitDistance, mTransactionPool,
+                frame, mAppRevealDuration, mMainWindowShiftLength, mTransactionPool,
                 finishCallback);
-        animation.prepareAnimations();
         animation.startAnimations();
     }
 }

@@ -528,7 +528,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
         mHandler.post(() -> {
             final FingerprintGenerateChallengeClient client =
                     new FingerprintGenerateChallengeClient(mContext, mLazyDaemon, token,
-                            new ClientMonitorCallbackConverter(receiver), opPackageName,
+                            new ClientMonitorCallbackConverter(receiver), userId, opPackageName,
                             mSensorProperties.sensorId);
             mScheduler.scheduleClientMonitor(client);
         });
@@ -539,7 +539,8 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
             @NonNull String opPackageName, long challenge) {
         mHandler.post(() -> {
             final FingerprintRevokeChallengeClient client = new FingerprintRevokeChallengeClient(
-                    mContext, mLazyDaemon, token, opPackageName, mSensorProperties.sensorId);
+                    mContext, mLazyDaemon, token, userId, opPackageName,
+                    mSensorProperties.sensorId);
             mScheduler.scheduleClientMonitor(client);
         });
     }

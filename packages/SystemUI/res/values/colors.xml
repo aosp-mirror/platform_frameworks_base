@@ -255,7 +255,6 @@
     <!-- media -->
     <color name="media_disabled">#80ffffff</color>
     <color name="media_seamless_border">?android:attr/colorAccent</color>
-    <color name="media_divider">#1d000000</color>
 
     <!-- controls -->
     <color name="control_primary_text">#E6FFFFFF</color>
@@ -280,7 +279,7 @@
 
     <color name="screenrecord_status_color">#E94235</color>
 
-    <color name="privacy_circle">#5BB974</color> <!-- g400 -->
+    <color name="privacy_chip_background">#3ddc84</color>
 
     <!-- Accessibility floating menu -->
     <color name="accessibility_floating_menu_background">#CCFFFFFF</color> <!-- 80% -->

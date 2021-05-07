@@ -26,8 +26,8 @@ import com.android.server.biometrics.BiometricsProto;
 public abstract class RevokeChallengeClient<T> extends HalClientMonitor<T> {
 
     public RevokeChallengeClient(@NonNull Context context, @NonNull LazyDaemon<T> lazyDaemon,
-            @NonNull IBinder token, @NonNull String owner, int sensorId) {
-        super(context, lazyDaemon, token, null /* listener */, 0 /* userId */, owner,
+            @NonNull IBinder token, int userId, @NonNull String owner, int sensorId) {
+        super(context, lazyDaemon, token, null /* listener */, userId, owner,
                 0 /* cookie */, sensorId, BiometricsProtoEnums.MODALITY_UNKNOWN,
                 BiometricsProtoEnums.ACTION_UNKNOWN, BiometricsProtoEnums.CLIENT_UNKNOWN);
     }

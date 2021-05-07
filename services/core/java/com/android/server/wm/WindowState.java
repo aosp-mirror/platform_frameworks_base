@@ -133,6 +133,7 @@ import static com.android.server.wm.MoveAnimationSpecProto.TO;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_ALL;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_STARTING_REVEAL;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
@@ -2408,6 +2409,18 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final boolean startingWindow = mAttrs.type == TYPE_APPLICATION_STARTING;
         if (startingWindow) {
             ProtoLog.d(WM_DEBUG_STARTING_WINDOW, "Starting window removed %s", this);
+        }
+
+        if (startingWindow && StartingSurfaceController.DEBUG_ENABLE_SHELL_DRAWER) {
+            // cancel the remove starting window animation on shell
+            if (mActivityRecord != null) {
+                final WindowState mainWindow =
+                        mActivityRecord.findMainWindow(false/* includeStartingApp */);
+                if (mainWindow != null && mainWindow.isSelfAnimating(0 /* flags */,
+                        ANIMATION_TYPE_STARTING_REVEAL)) {
+                    mainWindow.cancelAnimation();
+                }
+            }
         }
 
         ProtoLog.v(WM_DEBUG_FOCUS, "Remove client=%x, surfaceController=%s Callers=%s",

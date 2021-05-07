@@ -168,7 +168,7 @@ public class ActivityManagerServiceTest {
 
     private void mockNoteOperation() {
         SyncNotedAppOp allowed = new SyncNotedAppOp(AppOpsManager.MODE_ALLOWED,
-                AppOpsManager.OP_GET_USAGE_STATS, null);
+                AppOpsManager.OP_GET_USAGE_STATS, null, mContext.getPackageName());
         when(mAppOpsService.noteOperation(eq(AppOpsManager.OP_GET_USAGE_STATS), eq(Process.myUid()),
                 nullable(String.class), nullable(String.class), any(Boolean.class),
                 nullable(String.class), any(Boolean.class))).thenReturn(allowed);

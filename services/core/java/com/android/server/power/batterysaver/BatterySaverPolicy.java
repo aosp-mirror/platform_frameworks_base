@@ -256,7 +256,7 @@ public class BatterySaverPolicy extends ContentObserver implements
     private final ContentResolver mContentResolver;
     private final BatterySavingStats mBatterySavingStats;
 
-    private final UiModeManager.OnProjectionStateChangeListener mOnProjectionStateChangeListener =
+    private final UiModeManager.OnProjectionStateChangedListener mOnProjectionStateChangedListener =
             (t, pkgs) -> mAutomotiveProjectionActive.update(!pkgs.isEmpty());
 
     @GuardedBy("mLock")
@@ -292,8 +292,8 @@ public class BatterySaverPolicy extends ContentObserver implements
         mAccessibilityEnabled.initialize(acm.isEnabled());
 
         UiModeManager uiModeManager = mContext.getSystemService(UiModeManager.class);
-        uiModeManager.addOnProjectionStateChangeListener(UiModeManager.PROJECTION_TYPE_AUTOMOTIVE,
-                mContext.getMainExecutor(), mOnProjectionStateChangeListener);
+        uiModeManager.addOnProjectionStateChangedListener(UiModeManager.PROJECTION_TYPE_AUTOMOTIVE,
+                mContext.getMainExecutor(), mOnProjectionStateChangedListener);
         mAutomotiveProjectionActive.initialize(
                 uiModeManager.getActiveProjectionTypes() != UiModeManager.PROJECTION_TYPE_NONE);
 

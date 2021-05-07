@@ -697,16 +697,6 @@ public abstract class PanelViewController {
         if (isNaN(h)) {
             Log.wtf(TAG, "ExpandedHeight set to NaN");
         }
-        if (mAmbientState.isExpansionChanging()
-                && !mIsFlinging  // Fling already uses interpolated height from end of swipe
-                && !mAmbientState.isOnKeyguard()
-                && !mAmbientState.isDozing()
-                && !mAmbientState.isPulsing()) {
-            final float fraction = h / mView.getHeight();
-            final float interpolatedFraction = new PathInterpolator(0.2f, 0.8f, 0.8f, 1f)
-                    .getInterpolation(fraction);
-            h = interpolatedFraction * mView.getHeight();
-        }
         maybeOverScrollForShadeFlingOpen(h);
         if (mExpandLatencyTracking && h != 0f) {
             DejankUtils.postAfterTraversal(

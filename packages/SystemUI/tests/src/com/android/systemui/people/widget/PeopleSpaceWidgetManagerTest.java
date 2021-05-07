@@ -51,7 +51,6 @@ import static com.android.systemui.people.PeopleSpaceUtils.EMPTY_STRING;
 import static com.android.systemui.people.PeopleSpaceUtils.INVALID_USER_ID;
 import static com.android.systemui.people.PeopleSpaceUtils.PACKAGE_NAME;
 import static com.android.systemui.people.PeopleSpaceUtils.USER_ID;
-import static com.android.systemui.people.widget.AppWidgetOptionsHelper.OPTIONS_PEOPLE_TILE;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -192,6 +191,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
             | SUPPRESSED_EFFECT_LIGHTS
             | SUPPRESSED_EFFECT_PEEK
             | SUPPRESSED_EFFECT_NOTIFICATION_LIST;
+    private static final long SBN_POST_TIME = 567L;
 
     private ShortcutInfo mShortcutInfo;
     private NotificationEntry mNotificationEntry;
@@ -474,8 +474,6 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
                 .setId(1));
         mClock.advanceTime(MIN_LINGER_DURATION);
 
-        verify(mAppWidgetManager, never())
-                .updateAppWidgetOptions(anyInt(), any());
         verify(mAppWidgetManager, never()).updateAppWidget(anyInt(),
                 any());
     }
@@ -495,8 +493,6 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
                 .setId(1));
         mClock.advanceTime(MIN_LINGER_DURATION);
 
-        verify(mAppWidgetManager, never())
-                .updateAppWidgetOptions(anyInt(), any());
         verify(mAppWidgetManager, never()).updateAppWidget(anyInt(),
                 any());
     }
@@ -515,8 +511,6 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         NotifEvent notif1b = mNoMan.retractNotif(notif1.sbn, 0);
         mClock.advanceTime(MIN_LINGER_DURATION);
 
-        verify(mAppWidgetManager, never())
-                .updateAppWidgetOptions(anyInt(), any());
         verify(mAppWidgetManager, never()).updateAppWidget(anyInt(),
                 any());
     }
@@ -538,8 +532,6 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         NotifEvent notif1b = mNoMan.retractNotif(notif1.sbn, 0);
         mClock.advanceTime(MIN_LINGER_DURATION);
 
-        verify(mAppWidgetManager, never())
-                .updateAppWidgetOptions(anyInt(), any());
         verify(mAppWidgetManager, never()).updateAppWidget(anyInt(),
                 any());
     }
@@ -559,8 +551,6 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         mManager.updateWidgetsWithConversationChanged(conversationChannel);
         mClock.advanceTime(MIN_LINGER_DURATION);
 
-        verify(mAppWidgetManager, never())
-                .updateAppWidgetOptions(anyInt(), any());
         verify(mAppWidgetManager, never()).updateAppWidget(anyInt(),
                 any());
     }
@@ -578,11 +568,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         mManager.updateWidgetsWithConversationChanged(conversationChannel);
         mClock.advanceTime(MIN_LINGER_DURATION);
 
-        verify(mAppWidgetManager, times(1))
-                .updateAppWidgetOptions(eq(WIDGET_ID_WITH_SHORTCUT),
-                        mBundleArgumentCaptor.capture());
-        Bundle bundle = mBundleArgumentCaptor.getValue();
-        PeopleSpaceTile tile = bundle.getParcelable(OPTIONS_PEOPLE_TILE);
+        PeopleSpaceTile tile = mManager.mTiles.get(WIDGET_ID_WITH_SHORTCUT);
         assertThat(tile.getStatuses()).containsExactly(status);
         verify(mAppWidgetManager, times(1)).updateAppWidget(eq(WIDGET_ID_WITH_SHORTCUT),
                 any());
@@ -599,14 +585,8 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         mManager.updateWidgetsWithConversationChanged(conversationChannel);
         mClock.advanceTime(MIN_LINGER_DURATION);
 
-        verify(mAppWidgetManager, times(1))
-                .updateAppWidgetOptions(eq(WIDGET_ID_WITH_SHORTCUT),
-                        any());
         verify(mAppWidgetManager, times(1)).updateAppWidget(eq(WIDGET_ID_WITH_SHORTCUT),
                 any());
-        verify(mAppWidgetManager, times(1))
-                .updateAppWidgetOptions(eq(SECOND_WIDGET_ID_WITH_SHORTCUT),
-                        any());
         verify(mAppWidgetManager, times(1)).updateAppWidget(eq(SECOND_WIDGET_ID_WITH_SHORTCUT),
                 any());
     }
@@ -626,12 +606,9 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         NotifEvent notif1 = mNoMan.postNotif(builder);
         mClock.advanceTime(MIN_LINGER_DURATION);
 
-        verify(mAppWidgetManager, times(1))
-                .updateAppWidgetOptions(eq(WIDGET_ID_WITH_SHORTCUT),
-                        mBundleArgumentCaptor.capture());
-        Bundle bundle = mBundleArgumentCaptor.getValue();
-        PeopleSpaceTile tile = bundle.getParcelable(OPTIONS_PEOPLE_TILE);
+        PeopleSpaceTile tile = mManager.mTiles.get(WIDGET_ID_WITH_SHORTCUT);
         assertThat(tile.getNotificationKey()).isEqualTo(NOTIFICATION_KEY);
+        assertThat(tile.getLastInteractionTimestamp()).isEqualTo(SBN_POST_TIME);
         assertThat(tile.getNotificationContent()).isEqualTo(NOTIFICATION_CONTENT_1);
         verify(mAppWidgetManager, times(1)).updateAppWidget(eq(WIDGET_ID_WITH_SHORTCUT),
                 any());
@@ -647,14 +624,8 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
                 .setId(1));
         mClock.advanceTime(MIN_LINGER_DURATION);
 
-        verify(mAppWidgetManager, times(1))
-                .updateAppWidgetOptions(eq(WIDGET_ID_WITH_SHORTCUT),
-                        any());
         verify(mAppWidgetManager, times(1)).updateAppWidget(eq(WIDGET_ID_WITH_SHORTCUT),
                 any());
-        verify(mAppWidgetManager, times(1))
-                .updateAppWidgetOptions(eq(SECOND_WIDGET_ID_WITH_SHORTCUT),
-                        any());
         verify(mAppWidgetManager, times(1)).updateAppWidget(eq(SECOND_WIDGET_ID_WITH_SHORTCUT),
                 any());
     }
@@ -672,14 +643,8 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
                 .setId(1));
         mClock.advanceTime(MIN_LINGER_DURATION);
 
-        verify(mAppWidgetManager, times(1))
-                .updateAppWidgetOptions(eq(WIDGET_ID_WITH_SHORTCUT),
-                        any());
         verify(mAppWidgetManager, times(1)).updateAppWidget(eq(WIDGET_ID_WITH_SHORTCUT),
                 any());
-        verify(mAppWidgetManager, never())
-                .updateAppWidgetOptions(eq(SECOND_WIDGET_ID_WITH_SHORTCUT),
-                        any());
         verify(mAppWidgetManager, never()).updateAppWidget(eq(SECOND_WIDGET_ID_WITH_SHORTCUT),
                 any());
     }
@@ -700,12 +665,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         NotifEvent notif1 = mNoMan.postNotif(builder);
         mClock.advanceTime(MIN_LINGER_DURATION);
 
-        verify(mAppWidgetManager, times(1))
-                .updateAppWidgetOptions(eq(WIDGET_ID_WITH_SHORTCUT),
-                        mBundleArgumentCaptor.capture());
-        Bundle bundle = requireNonNull(mBundleArgumentCaptor.getValue());
-
-        PeopleSpaceTile tile = bundle.getParcelable(OPTIONS_PEOPLE_TILE);
+        PeopleSpaceTile tile = mManager.mTiles.get(WIDGET_ID_WITH_SHORTCUT);
         assertThat(tile.getNotificationKey()).isEqualTo(NOTIFICATION_KEY);
         assertThat(tile.getNotificationContent())
                 .isEqualTo(mContext.getString(R.string.missed_call));
@@ -729,12 +689,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         NotifEvent notif1 = mNoMan.postNotif(builder);
         mClock.advanceTime(MIN_LINGER_DURATION);
 
-        verify(mAppWidgetManager, times(1))
-                .updateAppWidgetOptions(eq(WIDGET_ID_WITH_SHORTCUT),
-                        mBundleArgumentCaptor.capture());
-        Bundle bundle = requireNonNull(mBundleArgumentCaptor.getValue());
-
-        PeopleSpaceTile tile = bundle.getParcelable(OPTIONS_PEOPLE_TILE);
+        PeopleSpaceTile tile = mManager.mTiles.get(WIDGET_ID_WITH_SHORTCUT);
         assertThat(tile.getNotificationKey()).isEqualTo(NOTIFICATION_KEY);
         assertThat(tile.getNotificationContent()).isEqualTo(NOTIFICATION_CONTENT_1);
         verify(mAppWidgetManager, times(1)).updateAppWidget(eq(WIDGET_ID_WITH_SHORTCUT),
@@ -758,21 +713,13 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         NotifEvent notif1 = mNoMan.postNotif(builder);
         mClock.advanceTime(MIN_LINGER_DURATION);
 
-        verify(mAppWidgetManager, times(1))
-                .updateAppWidgetOptions(eq(WIDGET_ID_WITH_SHORTCUT),
-                        mBundleArgumentCaptor.capture());
-        Bundle bundle = requireNonNull(mBundleArgumentCaptor.getValue());
-        PeopleSpaceTile tileWithMissedCallOrigin = bundle.getParcelable(OPTIONS_PEOPLE_TILE);
+        PeopleSpaceTile tileWithMissedCallOrigin = mManager.mTiles.get(WIDGET_ID_WITH_SHORTCUT);
         assertThat(tileWithMissedCallOrigin.getNotificationKey()).isEqualTo(NOTIFICATION_KEY);
         assertThat(tileWithMissedCallOrigin.getNotificationContent()).isEqualTo(
                 NOTIFICATION_CONTENT_1);
         verify(mAppWidgetManager, times(1)).updateAppWidget(eq(WIDGET_ID_WITH_SHORTCUT),
                 any());
-        verify(mAppWidgetManager, times(1))
-                .updateAppWidgetOptions(eq(WIDGET_ID_WITH_SAME_URI),
-                        mBundleArgumentCaptor.capture());
-        Bundle bundleForSameUriTile = requireNonNull(mBundleArgumentCaptor.getValue());
-        PeopleSpaceTile tileWithSameUri = bundleForSameUriTile.getParcelable(OPTIONS_PEOPLE_TILE);
+        PeopleSpaceTile tileWithSameUri = mManager.mTiles.get(WIDGET_ID_WITH_SAME_URI);
         assertThat(tileWithSameUri.getNotificationKey()).isEqualTo(NOTIFICATION_KEY);
         assertThat(tileWithSameUri.getNotificationContent()).isEqualTo(NOTIFICATION_CONTENT_1);
         verify(mAppWidgetManager, times(1)).updateAppWidget(eq(WIDGET_ID_WITH_SAME_URI),
@@ -801,19 +748,12 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         NotifEvent notif1b = mNoMan.retractNotif(notif1.sbn.cloneLight(), 0);
         mClock.advanceTime(MIN_LINGER_DURATION);
 
-        verify(mAppWidgetManager, times(2)).updateAppWidgetOptions(eq(WIDGET_ID_WITH_SHORTCUT),
-                mBundleArgumentCaptor.capture());
-        Bundle bundle = mBundleArgumentCaptor.getValue();
-        PeopleSpaceTile tileWithMissedCallOrigin = bundle.getParcelable(OPTIONS_PEOPLE_TILE);
+        PeopleSpaceTile tileWithMissedCallOrigin = mManager.mTiles.get(WIDGET_ID_WITH_SHORTCUT);
         assertThat(tileWithMissedCallOrigin.getNotificationKey()).isEqualTo(null);
         assertThat(tileWithMissedCallOrigin.getNotificationContent()).isEqualTo(null);
         verify(mAppWidgetManager, times(2)).updateAppWidget(eq(WIDGET_ID_WITH_SHORTCUT),
                 any());
-        verify(mAppWidgetManager, times(2))
-                .updateAppWidgetOptions(eq(WIDGET_ID_WITH_SAME_URI),
-                        mBundleArgumentCaptor.capture());
-        Bundle bundleForSameUriTile = requireNonNull(mBundleArgumentCaptor.getValue());
-        PeopleSpaceTile tileWithSameUri = bundleForSameUriTile.getParcelable(OPTIONS_PEOPLE_TILE);
+        PeopleSpaceTile tileWithSameUri = mManager.mTiles.get(WIDGET_ID_WITH_SAME_URI);
         assertThat(tileWithSameUri.getNotificationKey()).isEqualTo(null);
         assertThat(tileWithSameUri.getNotificationContent()).isEqualTo(null);
         verify(mAppWidgetManager, times(2)).updateAppWidget(eq(WIDGET_ID_WITH_SAME_URI),
@@ -847,21 +787,13 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         NotifEvent notif1 = mNoMan.postNotif(builder);
         mClock.advanceTime(MIN_LINGER_DURATION);
 
-        verify(mAppWidgetManager, times(1))
-                .updateAppWidgetOptions(eq(WIDGET_ID_WITH_SHORTCUT),
-                        mBundleArgumentCaptor.capture());
-        Bundle bundle = requireNonNull(mBundleArgumentCaptor.getValue());
-        PeopleSpaceTile tileWithMissedCallOrigin = bundle.getParcelable(OPTIONS_PEOPLE_TILE);
+        PeopleSpaceTile tileWithMissedCallOrigin = mManager.mTiles.get(WIDGET_ID_WITH_SHORTCUT);
         assertThat(tileWithMissedCallOrigin.getNotificationKey()).isEqualTo(NOTIFICATION_KEY);
         assertThat(tileWithMissedCallOrigin.getNotificationContent()).isEqualTo(
                 NOTIFICATION_CONTENT_1);
         verify(mAppWidgetManager, times(1)).updateAppWidget(eq(WIDGET_ID_WITH_SHORTCUT),
                 any());
-        verify(mAppWidgetManager, times(1))
-                .updateAppWidgetOptions(eq(WIDGET_ID_WITH_SAME_URI),
-                        mBundleArgumentCaptor.capture());
-        Bundle bundleForSameUriTile = requireNonNull(mBundleArgumentCaptor.getValue());
-        PeopleSpaceTile tileWithSameUri = bundleForSameUriTile.getParcelable(OPTIONS_PEOPLE_TILE);
+        PeopleSpaceTile tileWithSameUri = mManager.mTiles.get(WIDGET_ID_WITH_SAME_URI);
         assertThat(tileWithSameUri.getNotificationKey()).isEqualTo(NOTIFICATION_KEY);
         assertThat(tileWithSameUri.getNotificationContent()).isEqualTo(NOTIFICATION_CONTENT_1);
         verify(mAppWidgetManager, times(1)).updateAppWidget(eq(WIDGET_ID_WITH_SAME_URI),
@@ -900,20 +832,13 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
 
         mClock.advanceTime(MIN_LINGER_DURATION);
 
-        verify(mAppWidgetManager, times(1))
-                .updateAppWidgetOptions(eq(WIDGET_ID_WITH_SHORTCUT),
-                        mBundleArgumentCaptor.capture());
-        Bundle bundle = requireNonNull(mBundleArgumentCaptor.getValue());
-        PeopleSpaceTile tileWithMissedCallOrigin = bundle.getParcelable(OPTIONS_PEOPLE_TILE);
+        PeopleSpaceTile tileWithMissedCallOrigin = mManager.mTiles.get(WIDGET_ID_WITH_SHORTCUT);
         assertThat(tileWithMissedCallOrigin.getNotificationKey()).isEqualTo(NOTIFICATION_KEY);
         assertThat(tileWithMissedCallOrigin.getNotificationContent()).isEqualTo(
                 NOTIFICATION_CONTENT_1);
         verify(mAppWidgetManager, times(1)).updateAppWidget(eq(WIDGET_ID_WITH_SHORTCUT),
                 any());
         // Do not update since notification doesn't include a Person reference.
-        verify(mAppWidgetManager, times(0))
-                .updateAppWidgetOptions(eq(WIDGET_ID_WITH_SAME_URI),
-                        any());
         verify(mAppWidgetManager, times(0)).updateAppWidget(eq(WIDGET_ID_WITH_SAME_URI),
                 any());
     }
@@ -939,20 +864,13 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         NotifEvent notif1 = mNoMan.postNotif(builder);
         mClock.advanceTime(MIN_LINGER_DURATION);
 
-        verify(mAppWidgetManager, times(1))
-                .updateAppWidgetOptions(eq(WIDGET_ID_WITH_SHORTCUT),
-                        mBundleArgumentCaptor.capture());
-        Bundle bundle = requireNonNull(mBundleArgumentCaptor.getValue());
-        PeopleSpaceTile tileWithMissedCallOrigin = bundle.getParcelable(OPTIONS_PEOPLE_TILE);
+        PeopleSpaceTile tileWithMissedCallOrigin = mManager.mTiles.get(WIDGET_ID_WITH_SHORTCUT);
         assertThat(tileWithMissedCallOrigin.getNotificationKey()).isEqualTo(NOTIFICATION_KEY);
         assertThat(tileWithMissedCallOrigin.getNotificationContent()).isEqualTo(
                 NOTIFICATION_CONTENT_1);
         verify(mAppWidgetManager, times(1)).updateAppWidget(eq(WIDGET_ID_WITH_SHORTCUT),
                 any());
         // Do not update since missing permission to read contacts.
-        verify(mAppWidgetManager, times(0))
-                .updateAppWidgetOptions(eq(WIDGET_ID_WITH_DIFFERENT_URI),
-                        any());
         verify(mAppWidgetManager, times(0)).updateAppWidget(eq(WIDGET_ID_WITH_DIFFERENT_URI),
                 any());
     }
@@ -977,23 +895,14 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         NotifEvent notif1 = mNoMan.postNotif(builder);
         mClock.advanceTime(MIN_LINGER_DURATION);
 
-        verify(mAppWidgetManager, times(1))
-                .updateAppWidgetOptions(eq(WIDGET_ID_WITH_SHORTCUT),
-                        mBundleArgumentCaptor.capture());
-        Bundle bundle = requireNonNull(mBundleArgumentCaptor.getValue());
-        PeopleSpaceTile tileWithMissedCallOrigin = bundle.getParcelable(OPTIONS_PEOPLE_TILE);
+        PeopleSpaceTile tileWithMissedCallOrigin = mManager.mTiles.get(WIDGET_ID_WITH_SHORTCUT);
         assertThat(tileWithMissedCallOrigin.getNotificationKey()).isEqualTo(NOTIFICATION_KEY);
         assertThat(tileWithMissedCallOrigin.getNotificationContent()).isEqualTo(
                 NOTIFICATION_CONTENT_1);
         verify(mAppWidgetManager, times(1)).updateAppWidget(eq(WIDGET_ID_WITH_SHORTCUT),
                 any());
         // Do not update since missing permission to read contacts.
-        verify(mAppWidgetManager, times(1))
-                .updateAppWidgetOptions(eq(WIDGET_ID_WITH_SAME_URI),
-                        mBundleArgumentCaptor.capture());
-        Bundle noNotificationBundle = requireNonNull(mBundleArgumentCaptor.getValue());
-        PeopleSpaceTile tileNoNotification =
-                noNotificationBundle.getParcelable(OPTIONS_PEOPLE_TILE);
+        PeopleSpaceTile tileNoNotification = mManager.mTiles.get(WIDGET_ID_WITH_SAME_URI);
         assertThat(tileNoNotification.getNotificationKey()).isNull();
         verify(mAppWidgetManager, times(1)).updateAppWidget(eq(WIDGET_ID_WITH_SAME_URI),
                 any());
@@ -1010,20 +919,19 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
                 .setSbn(sbn)
                 .setId(1));
         mClock.advanceTime(MIN_LINGER_DURATION);
+        long timestampBeforeNotificationClear = System.currentTimeMillis();
         NotifEvent notif1b = mNoMan.retractNotif(notif1.sbn, 0);
         mClock.advanceTime(MIN_LINGER_DURATION);
 
-        verify(mAppWidgetManager, times(2)).updateAppWidgetOptions(eq(WIDGET_ID_WITH_SHORTCUT),
-                mBundleArgumentCaptor.capture());
-        Bundle bundle = mBundleArgumentCaptor.getValue();
-        PeopleSpaceTile tile = bundle.getParcelable(OPTIONS_PEOPLE_TILE);
+        PeopleSpaceTile tile = mManager.mTiles.get(WIDGET_ID_WITH_SHORTCUT);
         assertThat(tile.getNotificationKey()).isEqualTo(null);
+        assertThat(tile.getLastInteractionTimestamp()).isLessThan(
+                timestampBeforeNotificationClear);
         assertThat(tile.getNotificationContent()).isEqualTo(null);
         assertThat(tile.getNotificationDataUri()).isEqualTo(null);
         verify(mAppWidgetManager, times(2)).updateAppWidget(eq(WIDGET_ID_WITH_SHORTCUT),
                 any());
     }
-
 
     @Test
     public void testAddThenReconfigureWidgetsUpdatesStorageCacheAndListeners()
@@ -1131,7 +1039,6 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
     @Test
     public void testOnAppWidgetOptionsChangedNoWidgetAdded() {
         Bundle newOptions = new Bundle();
-        newOptions.putParcelable(OPTIONS_PEOPLE_TILE, PERSON_TILE);
         mManager.onAppWidgetOptionsChanged(SECOND_WIDGET_ID_WITH_SHORTCUT, newOptions);
 
 
@@ -1166,10 +1073,9 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
 
         mManager.onAppWidgetOptionsChanged(SECOND_WIDGET_ID_WITH_SHORTCUT, newOptions);
 
-        verify(mAppWidgetManager, times(2)).updateAppWidgetOptions(
+        verify(mAppWidgetManager, times(1)).updateAppWidgetOptions(
                 eq(SECOND_WIDGET_ID_WITH_SHORTCUT), mBundleArgumentCaptor.capture());
-        List<Bundle> bundles = mBundleArgumentCaptor.getAllValues();
-        Bundle first = bundles.get(0);
+        Bundle first = mBundleArgumentCaptor.getValue();
         assertThat(first.getString(PeopleSpaceUtils.SHORTCUT_ID, EMPTY_STRING))
                 .isEqualTo(EMPTY_STRING);
         assertThat(first.getInt(USER_ID, INVALID_USER_ID)).isEqualTo(INVALID_USER_ID);
@@ -1177,21 +1083,6 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         verify(mLauncherApps, times(1)).cacheShortcuts(eq(TEST_PACKAGE_A),
                 eq(Arrays.asList(SHORTCUT_ID)), eq(UserHandle.of(0)),
                 eq(LauncherApps.FLAG_CACHE_PEOPLE_TILE_SHORTCUTS));
-
-        Bundle second = bundles.get(1);
-        PeopleSpaceTile tile = second.getParcelable(OPTIONS_PEOPLE_TILE);
-        assertThat(tile.getId()).isEqualTo(SHORTCUT_ID);
-
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(mContext);
-        assertThat(sp.getStringSet(KEY.toString(), new HashSet<>())).contains(
-                String.valueOf(SECOND_WIDGET_ID_WITH_SHORTCUT));
-        SharedPreferences widgetSp = mContext.getSharedPreferences(
-                String.valueOf(SECOND_WIDGET_ID_WITH_SHORTCUT),
-                Context.MODE_PRIVATE);
-        assertThat(widgetSp.getString(PACKAGE_NAME, EMPTY_STRING)).isEqualTo(TEST_PACKAGE_A);
-        assertThat(widgetSp.getString(PeopleSpaceUtils.SHORTCUT_ID, EMPTY_STRING))
-                .isEqualTo(SHORTCUT_ID);
-        assertThat(widgetSp.getInt(USER_ID, INVALID_USER_ID)).isEqualTo(0);
     }
 
     @Test
@@ -1306,11 +1197,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
     public void testUpdateWidgetsOnStateChange() {
         mManager.updateWidgetsOnStateChange(ACTION_BOOT_COMPLETED);
 
-        verify(mAppWidgetManager, times(1))
-                .updateAppWidgetOptions(eq(WIDGET_ID_WITH_SHORTCUT),
-                        mBundleArgumentCaptor.capture());
-        Bundle bundle = mBundleArgumentCaptor.getValue();
-        PeopleSpaceTile tile = bundle.getParcelable(OPTIONS_PEOPLE_TILE);
+        PeopleSpaceTile tile = mManager.mTiles.get(WIDGET_ID_WITH_SHORTCUT);
         assertThat(tile.isPackageSuspended()).isFalse();
         assertThat(tile.isUserQuieted()).isFalse();
         assertThat(tile.canBypassDnd()).isFalse();
@@ -1325,11 +1212,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
 
         mManager.updateWidgetsOnStateChange(ACTION_BOOT_COMPLETED);
 
-        verify(mAppWidgetManager, times(1))
-                .updateAppWidgetOptions(eq(WIDGET_ID_WITH_SHORTCUT),
-                        mBundleArgumentCaptor.capture());
-        Bundle bundle = mBundleArgumentCaptor.getValue();
-        PeopleSpaceTile tile = bundle.getParcelable(OPTIONS_PEOPLE_TILE);
+        PeopleSpaceTile tile = mManager.mTiles.get(WIDGET_ID_WITH_SHORTCUT);
         assertThat(tile.isPackageSuspended()).isFalse();
         assertThat(tile.isUserQuieted()).isTrue();
         assertThat(tile.getNotificationPolicyState()).isEqualTo(SHOW_CONVERSATIONS);
@@ -1341,11 +1224,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
 
         mManager.updateWidgetsOnStateChange(ACTION_PACKAGES_SUSPENDED);
 
-        verify(mAppWidgetManager, times(1))
-                .updateAppWidgetOptions(eq(WIDGET_ID_WITH_SHORTCUT),
-                        mBundleArgumentCaptor.capture());
-        Bundle bundle = mBundleArgumentCaptor.getValue();
-        PeopleSpaceTile tile = bundle.getParcelable(OPTIONS_PEOPLE_TILE);
+        PeopleSpaceTile tile = mManager.mTiles.get(WIDGET_ID_WITH_SHORTCUT);
         assertThat(tile.isPackageSuspended()).isTrue();
         assertThat(tile.isUserQuieted()).isFalse();
         assertThat(tile.getNotificationPolicyState()).isEqualTo(SHOW_CONVERSATIONS);
@@ -1357,10 +1236,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         mManager.updateWidgetsOnStateChange(NotificationManager
                 .ACTION_INTERRUPTION_FILTER_CHANGED);
 
-        verify(mAppWidgetManager, times(1))
-                .updateAppWidgetOptions(eq(WIDGET_ID_WITH_SHORTCUT),
-                        mBundleArgumentCaptor.capture());
-        PeopleSpaceTile tile = mBundleArgumentCaptor.getValue().getParcelable(OPTIONS_PEOPLE_TILE);
+        PeopleSpaceTile tile = mManager.mTiles.get(WIDGET_ID_WITH_SHORTCUT);
         assertThat(tile.getNotificationPolicyState()).isEqualTo(expected | SHOW_CONVERSATIONS);
     }
 
@@ -1375,10 +1251,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         mManager.updateWidgetsOnStateChange(NotificationManager
                 .ACTION_INTERRUPTION_FILTER_CHANGED);
 
-        verify(mAppWidgetManager, times(1))
-                .updateAppWidgetOptions(eq(WIDGET_ID_WITH_SHORTCUT),
-                        mBundleArgumentCaptor.capture());
-        PeopleSpaceTile tile = mBundleArgumentCaptor.getValue().getParcelable(OPTIONS_PEOPLE_TILE);
+        PeopleSpaceTile tile = mManager.mTiles.get(WIDGET_ID_WITH_SHORTCUT);
         assertThat(tile.getNotificationPolicyState()).isEqualTo(expected | SHOW_CONVERSATIONS);
     }
 
@@ -1394,10 +1267,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         mManager.updateWidgetsOnStateChange(NotificationManager
                 .ACTION_INTERRUPTION_FILTER_CHANGED);
 
-        verify(mAppWidgetManager, times(1))
-                .updateAppWidgetOptions(eq(WIDGET_ID_WITH_SHORTCUT),
-                        mBundleArgumentCaptor.capture());
-        PeopleSpaceTile tile = mBundleArgumentCaptor.getValue().getParcelable(OPTIONS_PEOPLE_TILE);
+        PeopleSpaceTile tile = mManager.mTiles.get(WIDGET_ID_WITH_SHORTCUT);
         assertThat(tile.getNotificationPolicyState()).isEqualTo(
                 expected | SHOW_IMPORTANT_CONVERSATIONS);
     }
@@ -1412,10 +1282,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         mManager.updateWidgetsOnStateChange(NotificationManager
                 .ACTION_INTERRUPTION_FILTER_CHANGED);
 
-        verify(mAppWidgetManager, times(1))
-                .updateAppWidgetOptions(eq(WIDGET_ID_WITH_SHORTCUT),
-                        mBundleArgumentCaptor.capture());
-        PeopleSpaceTile tile = mBundleArgumentCaptor.getValue().getParcelable(OPTIONS_PEOPLE_TILE);
+        PeopleSpaceTile tile = mManager.mTiles.get(WIDGET_ID_WITH_SHORTCUT);
         assertThat(tile.getNotificationPolicyState()).isEqualTo(expected | BLOCK_CONVERSATIONS);
     }
 
@@ -1430,10 +1297,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
 
         mManager.updateWidgetsOnStateChange(ACTION_BOOT_COMPLETED);
 
-        verify(mAppWidgetManager, times(1))
-                .updateAppWidgetOptions(eq(WIDGET_ID_WITH_SHORTCUT),
-                        mBundleArgumentCaptor.capture());
-        PeopleSpaceTile tile = mBundleArgumentCaptor.getValue().getParcelable(OPTIONS_PEOPLE_TILE);
+        PeopleSpaceTile tile = mManager.mTiles.get(WIDGET_ID_WITH_SHORTCUT);
         assertThat(tile.getNotificationPolicyState()).isEqualTo(expected | SHOW_CONTACTS);
     }
 
@@ -1448,10 +1312,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
 
         mManager.updateWidgetsOnStateChange(ACTION_BOOT_COMPLETED);
 
-        verify(mAppWidgetManager, times(1))
-                .updateAppWidgetOptions(eq(WIDGET_ID_WITH_SHORTCUT),
-                        mBundleArgumentCaptor.capture());
-        PeopleSpaceTile tile = mBundleArgumentCaptor.getValue().getParcelable(OPTIONS_PEOPLE_TILE);
+        PeopleSpaceTile tile = mManager.mTiles.get(WIDGET_ID_WITH_SHORTCUT);
         assertThat(tile.getNotificationPolicyState()).isEqualTo(expected | SHOW_STARRED_CONTACTS);
     }
 
@@ -1464,10 +1325,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         mManager.updateWidgetsOnStateChange(NotificationManager
                 .ACTION_INTERRUPTION_FILTER_CHANGED);
 
-        verify(mAppWidgetManager, times(1))
-                .updateAppWidgetOptions(eq(WIDGET_ID_WITH_SHORTCUT),
-                        mBundleArgumentCaptor.capture());
-        PeopleSpaceTile tile = mBundleArgumentCaptor.getValue().getParcelable(OPTIONS_PEOPLE_TILE);
+        PeopleSpaceTile tile = mManager.mTiles.get(WIDGET_ID_WITH_SHORTCUT);
         assertThat(tile.getNotificationPolicyState()).isEqualTo(expected | BLOCK_CONVERSATIONS);
     }
 
@@ -1482,10 +1340,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
 
         mManager.updateWidgetsOnStateChange(ACTION_BOOT_COMPLETED);
 
-        verify(mAppWidgetManager, times(1))
-                .updateAppWidgetOptions(eq(WIDGET_ID_WITH_SHORTCUT),
-                        mBundleArgumentCaptor.capture());
-        PeopleSpaceTile tile = mBundleArgumentCaptor.getValue().getParcelable(OPTIONS_PEOPLE_TILE);
+        PeopleSpaceTile tile = mManager.mTiles.get(WIDGET_ID_WITH_SHORTCUT);
         assertThat(tile.getNotificationPolicyState()).isEqualTo(expected | SHOW_CONVERSATIONS);
     }
 
@@ -1513,7 +1368,6 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
     private void addTileForWidget(PeopleSpaceTile tile, int widgetId) throws Exception {
         setStorageForTile(tile.getId(), tile.getPackageName(), widgetId, tile.getContactUri());
         Bundle options = new Bundle();
-        options.putParcelable(OPTIONS_PEOPLE_TILE, tile);
         ConversationChannel channel = getConversationWithShortcutId(new PeopleTileKey(tile));
         when(mAppWidgetManager.getAppWidgetOptions(eq(widgetId)))
                 .thenReturn(options);
@@ -1596,6 +1450,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
                 .setNotification(notification)
                 .setPkg(TEST_PACKAGE_A)
                 .setUid(0)
+                .setPostTime(SBN_POST_TIME)
                 .setUser(new UserHandle(0))
                 .build();
     }

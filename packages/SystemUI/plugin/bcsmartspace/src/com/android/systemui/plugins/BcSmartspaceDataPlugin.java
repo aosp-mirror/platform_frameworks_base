@@ -20,9 +20,12 @@ import android.app.PendingIntent;
 import android.app.smartspace.SmartspaceAction;
 import android.app.smartspace.SmartspaceTarget;
 import android.content.Intent;
+import android.graphics.drawable.Icon;
 import android.os.Parcelable;
 import android.view.View;
 import android.view.ViewGroup;
+
+import androidx.annotation.Nullable;
 
 import com.android.systemui.plugins.annotations.ProvidesInterface;
 
@@ -49,6 +52,11 @@ public interface BcSmartspaceDataPlugin extends Plugin {
     default SmartspaceView getView(ViewGroup parent) {
         return null;
     }
+
+    /**
+     * As the smartspace view becomes available, allow listeners to receive an event.
+     */
+    default void addOnAttachStateChangeListener(View.OnAttachStateChangeListener listener) { }
 
     /** Updates Smartspace data and propagates it to any listeners. */
     void onTargetsAvailable(List<SmartspaceTarget> targets);
@@ -83,6 +91,11 @@ public interface BcSmartspaceDataPlugin extends Plugin {
          * When on the lockscreen, use the FalsingManager to help detect errant touches
          */
         void setFalsingManager(com.android.systemui.plugins.FalsingManager falsingManager);
+
+        /**
+         * Set or clear any Do Not Disturb information.
+         */
+        void setDnd(@Nullable Icon dndIcon, @Nullable String description);
     }
 
     /** Interface for launching Intents, which can differ on the lockscreen */

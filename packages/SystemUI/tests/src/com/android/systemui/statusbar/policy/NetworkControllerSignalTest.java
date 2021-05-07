@@ -41,6 +41,7 @@ import com.android.settingslib.graph.SignalDrawable;
 import com.android.settingslib.mobile.TelephonyIcons;
 import com.android.settingslib.net.DataUsageController;
 import com.android.systemui.R;
+import com.android.systemui.util.CarrierConfigTracker;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -66,7 +67,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
                 Looper.getMainLooper(), mFakeExecutor, mCallbackHandler,
                 mock(AccessPointControllerImpl.class), mock(DataUsageController.class),
                 mMockSubDefaults, mock(DeviceProvisionedController.class), mMockBd,
-                mDemoModeController);
+                mDemoModeController, mock(CarrierConfigTracker.class));
         setupNetworkController();
 
         verifyLastMobileDataIndicators(false, -1, 0);
@@ -86,7 +87,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
                 Looper.getMainLooper(), mFakeExecutor, mCallbackHandler,
                 mock(AccessPointControllerImpl.class), mock(DataUsageController.class),
                 mMockSubDefaults, mock(DeviceProvisionedController.class), mMockBd,
-                mDemoModeController);
+                mDemoModeController, mock(CarrierConfigTracker.class));
         mNetworkController.registerListeners();
 
         // Wait for the main looper to execute the previous command
@@ -154,7 +155,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
                 Looper.getMainLooper(), mFakeExecutor, mCallbackHandler,
                 mock(AccessPointControllerImpl.class), mock(DataUsageController.class),
                 mMockSubDefaults, mock(DeviceProvisionedController.class), mMockBd,
-                mDemoModeController);
+                mDemoModeController, mock(CarrierConfigTracker.class));
         setupNetworkController();
 
         // No Subscriptions.

@@ -163,7 +163,7 @@ public interface QSTile {
         public SlashState slash;
         public boolean handlesLongClick = true;
         public boolean showRippleEffect = true;
-        public Drawable sideViewDrawable;
+        public Drawable sideViewCustomDrawable;
 
         public boolean copyTo(State other) {
             if (other == null) throw new IllegalArgumentException();
@@ -185,7 +185,7 @@ public interface QSTile {
                     || !Objects.equals(other.slash, slash)
                     || !Objects.equals(other.handlesLongClick, handlesLongClick)
                     || !Objects.equals(other.showRippleEffect, showRippleEffect)
-                    || !Objects.equals(other.sideViewDrawable, sideViewDrawable);
+                    || !Objects.equals(other.sideViewCustomDrawable, sideViewCustomDrawable);
             other.icon = icon;
             other.iconSupplier = iconSupplier;
             other.label = label;
@@ -201,7 +201,7 @@ public interface QSTile {
             other.slash = slash != null ? slash.copy() : null;
             other.handlesLongClick = handlesLongClick;
             other.showRippleEffect = showRippleEffect;
-            other.sideViewDrawable = sideViewDrawable;
+            other.sideViewCustomDrawable = sideViewCustomDrawable;
             return changed;
         }
 
@@ -227,7 +227,7 @@ public interface QSTile {
             sb.append(",isTransient=").append(isTransient);
             sb.append(",state=").append(state);
             sb.append(",slash=\"").append(slash).append("\"");
-            sb.append(",sideViewDrawable").append(sideViewDrawable);
+            sb.append(",sideViewCustomDrawable=").append(sideViewCustomDrawable);
             return sb.append(']');
         }
 
@@ -242,12 +242,16 @@ public interface QSTile {
     public static class BooleanState extends State {
         public static final int VERSION = 1;
         public boolean value;
+        public boolean forceExpandIcon;
 
         @Override
         public boolean copyTo(State other) {
             final BooleanState o = (BooleanState) other;
-            final boolean changed = super.copyTo(other) || o.value != value;
+            final boolean changed = super.copyTo(other)
+                    || o.value != value
+                    || o.forceExpandIcon != forceExpandIcon;
             o.value = value;
+            o.forceExpandIcon = forceExpandIcon;
             return changed;
         }
 
@@ -255,6 +259,7 @@ public interface QSTile {
         protected StringBuilder toStringBuilder() {
             final StringBuilder rt = super.toStringBuilder();
             rt.insert(rt.length() - 1, ",value=" + value);
+            rt.insert(rt.length() - 1, ",forceExpandIcon=" + forceExpandIcon);
             return rt;
         }
 

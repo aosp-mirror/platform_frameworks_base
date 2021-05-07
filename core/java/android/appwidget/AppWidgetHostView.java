@@ -17,6 +17,7 @@
 package android.appwidget;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityOptions;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -68,6 +69,7 @@ public class AppWidgetHostView extends FrameLayout {
 
     static final String TAG = "AppWidgetHostView";
     private static final String KEY_JAILED_ARRAY = "jail";
+    private static final String KEY_INFLATION_ID = "inflation_id";
 
     static final boolean LOGD = false;
 
@@ -97,9 +99,12 @@ public class AppWidgetHostView extends FrameLayout {
     private RemoteViews.ColorResources mColorResources = null;
     // Stores the last remote views last inflated.
     private RemoteViews mLastInflatedRemoteViews = null;
+    private long mLastInflatedRemoteViewsId = -1;
 
     private Executor mAsyncExecutor;
     private CancellationSignal mLastExecutionSignal;
+    private SparseArray<Parcelable> mDelayedRestoredState;
+    private long mDelayedRestoredInflationId;
 
     /**
      * Create a host view.  Uses default fade animations.
@@ -226,6 +231,8 @@ public class AppWidgetHostView extends FrameLayout {
 
         Bundle bundle = new Bundle();
         bundle.putSparseParcelableArray(KEY_JAILED_ARRAY, jail);
+        bundle.putLong(KEY_INFLATION_ID, mLastInflatedRemoteViewsId);
+        container.put(generateId(), bundle);
         container.put(generateId(), bundle);
     }
 
@@ -239,14 +246,30 @@ public class AppWidgetHostView extends FrameLayout {
         final Parcelable parcelable = container.get(generateId());
 
         SparseArray<Parcelable> jail = null;
+        long inflationId = -1;
         if (parcelable instanceof Bundle) {
-            jail = ((Bundle) parcelable).getSparseParcelableArray(KEY_JAILED_ARRAY);
+            Bundle bundle = (Bundle) parcelable;
+            jail = bundle.getSparseParcelableArray(KEY_JAILED_ARRAY);
+            inflationId = bundle.getLong(KEY_INFLATION_ID, -1);
         }
 
         if (jail == null) jail = new SparseArray<>();
 
+        mDelayedRestoredState = jail;
+        mDelayedRestoredInflationId = inflationId;
+        restoreInstanceState();
+    }
+
+    void restoreInstanceState() {
+        long inflationId = mDelayedRestoredInflationId;
+        SparseArray<Parcelable> state = mDelayedRestoredState;
+        if (inflationId == -1 || inflationId != mLastInflatedRemoteViewsId) {
+            return; // We don't restore.
+        }
+        mDelayedRestoredInflationId = -1;
+        mDelayedRestoredState = null;
         try  {
-            super.dispatchRestoreInstanceState(jail);
+            super.dispatchRestoreInstanceState(state);
         } catch (Exception e) {
             Log.e(TAG, "failed to restoreInstanceState for widget id: " + mAppWidgetId + ", "
                     + (mInfo == null ? "null" : mInfo.provider), e);
@@ -476,7 +499,7 @@ public class AppWidgetHostView extends FrameLayout {
      * AppWidget provider. Will animate into these new views as needed
      */
     public void updateAppWidget(RemoteViews remoteViews) {
-        this.mLastInflatedRemoteViews = remoteViews;
+        mLastInflatedRemoteViews = remoteViews;
         applyRemoteViews(remoteViews, true);
     }
 
@@ -484,16 +507,22 @@ public class AppWidgetHostView extends FrameLayout {
      * Reapply the last inflated remote views, or the default view is none was inflated.
      */
     private void reapplyLastRemoteViews() {
+        SparseArray<Parcelable> savedState = new SparseArray<>();
+        saveHierarchyState(savedState);
         applyRemoteViews(mLastInflatedRemoteViews, true);
+        restoreHierarchyState(savedState);
     }
 
     /**
      * @hide
      */
-    protected void applyRemoteViews(RemoteViews remoteViews, boolean useAsyncIfPossible) {
+    protected void applyRemoteViews(@Nullable RemoteViews remoteViews, boolean useAsyncIfPossible) {
         boolean recycled = false;
         View content = null;
         Exception exception = null;
+
+        // Block state restore until the end of the apply.
+        mLastInflatedRemoteViewsId = -1;
 
         if (mLastExecutionSignal != null) {
             mLastExecutionSignal.cancel();
@@ -525,6 +554,7 @@ public class AppWidgetHostView extends FrameLayout {
                     rvToApply.reapply(mContext, mView, mInteractionHandler, mCurrentSize,
                             mColorResources);
                     content = mView;
+                    mLastInflatedRemoteViewsId = rvToApply.computeUniqueId(remoteViews);
                     recycled = true;
                     if (LOGD) Log.d(TAG, "was able to recycle existing layout");
                 } catch (RuntimeException e) {
@@ -537,6 +567,7 @@ public class AppWidgetHostView extends FrameLayout {
                 try {
                     content = rvToApply.apply(mContext, this, mInteractionHandler,
                             mCurrentSize, mColorResources);
+                    mLastInflatedRemoteViewsId = rvToApply.computeUniqueId(remoteViews);
                     if (LOGD) Log.d(TAG, "had to inflate new layout");
                 } catch (RuntimeException e) {
                     exception = e;
@@ -574,11 +605,15 @@ public class AppWidgetHostView extends FrameLayout {
         }
     }
 
-    private void inflateAsync(RemoteViews remoteViews) {
+    private void inflateAsync(@NonNull RemoteViews remoteViews) {
         // Prepare a local reference to the remote Context so we're ready to
         // inflate any requested LayoutParams.
         mRemoteContext = getRemoteContext();
         int layoutId = remoteViews.getLayoutId();
+
+        if (mLastExecutionSignal != null) {
+            mLastExecutionSignal.cancel();
+        }
 
         // If our stale view has been prepared to match active, and the new
         // layout matches, try recycling it
@@ -611,7 +646,10 @@ public class AppWidgetHostView extends FrameLayout {
         private final boolean mIsReapply;
         private final int mLayoutId;
 
-        public ViewApplyListener(RemoteViews views, int layoutId, boolean isReapply) {
+        ViewApplyListener(
+                RemoteViews views,
+                int layoutId,
+                boolean isReapply) {
             mViews = views;
             mLayoutId = layoutId;
             mIsReapply = isReapply;
@@ -623,6 +661,10 @@ public class AppWidgetHostView extends FrameLayout {
             mViewMode = VIEW_MODE_CONTENT;
 
             applyContent(v, mIsReapply, null);
+
+            mLastInflatedRemoteViewsId = mViews.computeUniqueId(mLastInflatedRemoteViews);
+            restoreInstanceState();
+            mLastExecutionSignal = null;
         }
 
         @Override
@@ -638,6 +680,7 @@ public class AppWidgetHostView extends FrameLayout {
             } else {
                 applyContent(null, false, e);
             }
+            mLastExecutionSignal = null;
         }
     }
 

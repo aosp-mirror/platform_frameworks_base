@@ -645,7 +645,7 @@ public class NotificationManagerService extends SystemService {
             sb.append("Archive (");
             sb.append(N);
             sb.append(" notification");
-            sb.append((N==1)?")":"s)");
+            sb.append((N == 1) ? ")" : "s)");
             return sb.toString();
         }
 
@@ -714,6 +714,22 @@ public class NotificationManagerService extends SystemService {
                             && Objects.equals(channelId,
                             pair.first.getNotification().getChannelId())) {
                         bufferIter.remove();
+                    }
+                }
+            }
+        }
+
+        void dumpImpl(PrintWriter pw, @NonNull DumpFilter filter) {
+            synchronized (mBufferLock) {
+                Iterator<Pair<StatusBarNotification, Integer>> iter = descendingIterator();
+                int i = 0;
+                while (iter.hasNext()) {
+                    final StatusBarNotification sbn = iter.next().first;
+                    if (filter != null && !filter.matches(sbn)) continue;
+                    pw.println("    " + sbn);
+                    if (++i >= 5) {
+                        if (iter.hasNext()) pw.println("    ...");
+                        break;
                     }
                 }
             }
@@ -5930,17 +5946,7 @@ public class NotificationManagerService extends SystemService {
                             + mPreferencesHelper.shouldHideSilentStatusIcons());
                 }
                 pw.println("  mArchive=" + mArchive.toString());
-                Iterator<Pair<StatusBarNotification, Integer>> iter = mArchive.descendingIterator();
-                int j=0;
-                while (iter.hasNext()) {
-                    final StatusBarNotification sbn = iter.next().first;
-                    if (filter != null && !filter.matches(sbn)) continue;
-                    pw.println("    " + sbn);
-                    if (++j >= 5) {
-                        if (iter.hasNext()) pw.println("    ...");
-                        break;
-                    }
-                }
+                mArchive.dumpImpl(pw, filter);
 
                 if (!zenOnly) {
                     N = mEnqueuedNotifications.size();
@@ -8298,6 +8304,21 @@ public class NotificationManagerService extends SystemService {
             @NotificationListenerService.NotificationCancelReason int reason,
             int rank, int count, boolean wasPosted, String listenerName) {
         final String canceledKey = r.getKey();
+
+        // Get pending intent used to create alarm, use FLAG_NO_CREATE if PendingIntent
+        // does not already exist, then null will be returned.
+        final PendingIntent pi = PendingIntent.getBroadcast(getContext(),
+                REQUEST_CODE_TIMEOUT,
+                new Intent(ACTION_NOTIFICATION_TIMEOUT)
+                        .setData(new Uri.Builder().scheme(SCHEME_TIMEOUT)
+                                .appendPath(r.getKey()).build())
+                        .addFlags(Intent.FLAG_RECEIVER_FOREGROUND),
+                PendingIntent.FLAG_NO_CREATE | PendingIntent.FLAG_IMMUTABLE);
+
+        // Cancel alarm corresponding to pi.
+        if (pi != null) {
+            mAlarmManager.cancel(pi);
+        }
 
         // Record caller.
         recordCallerLocked(r);

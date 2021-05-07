@@ -791,6 +791,7 @@
   <java-symbol type="string" name="ime_action_previous" />
   <java-symbol type="string" name="ime_action_search" />
   <java-symbol type="string" name="ime_action_send" />
+  <java-symbol type="string" name="in_progress" />
   <java-symbol type="string" name="invalidPin" />
   <java-symbol type="string" name="js_dialog_before_unload_positive_button" />
   <java-symbol type="string" name="js_dialog_before_unload_negative_button" />
@@ -1814,6 +1815,10 @@
   <java-symbol type="string" name="bugreport_status" />
   <java-symbol type="string" name="bugreport_title" />
   <java-symbol type="string" name="faceunlock_multiple_failures" />
+  <java-symbol type="string" name="fp_enrollment_powerbutton_intent_title" />
+  <java-symbol type="string" name="fp_enrollment_powerbutton_intent_message" />
+  <java-symbol type="string" name="fp_enrollment_powerbutton_intent_positive_button" />
+  <java-symbol type="string" name="fp_enrollment_powerbutton_intent_negative_button" />
   <java-symbol type="string" name="global_actions" />
   <java-symbol type="string" name="global_action_power_off" />
   <java-symbol type="string" name="global_action_power_options" />
@@ -3410,8 +3415,11 @@
   <java-symbol type="drawable" name="ic_accessibility_color_correction" />
   <java-symbol type="drawable" name="ic_accessibility_magnification" />
   <java-symbol type="drawable" name="ic_accessibility_reduce_bright_colors" />
+  <java-symbol type="drawable" name="ic_accessibility_one_handed" />
 
   <java-symbol type="string" name="reduce_bright_colors_feature_name" />
+
+  <java-symbol type="string" name="one_handed_mode_feature_name" />
 
   <!-- com.android.internal.widget.RecyclerView -->
   <java-symbol type="id" name="item_touch_helper_previous_elevation"/>
