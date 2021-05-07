@@ -93,6 +93,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Mock private lateinit var expandedSet: ConstraintSet
     @Mock private lateinit var collapsedSet: ConstraintSet
     @Mock private lateinit var mediaOutputDialogFactory: MediaOutputDialogFactory
+    @Mock private lateinit var mediaCarouselController: MediaCarouselController
     private lateinit var appIcon: ImageView
     private lateinit var albumView: ImageView
     private lateinit var titleText: TextView
@@ -129,7 +130,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
         player = MediaControlPanel(context, bgExecutor, activityStarter, mediaViewController,
                 seekBarViewModel, Lazy { mediaDataManager }, keyguardDismissUtil,
-                mediaOutputDialogFactory)
+                mediaOutputDialogFactory, mediaCarouselController)
         whenever(seekBarViewModel.progress).thenReturn(seekBarData)
 
         // Mock out a view holder for the player to attach to.
