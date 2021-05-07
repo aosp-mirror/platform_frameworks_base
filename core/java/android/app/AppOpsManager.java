@@ -9038,8 +9038,11 @@ public class AppOpsManager {
      *
      * @hide
      */
-    // TODO (b/186872903) Refactor how sync noted ops are propagaged.
+    // TODO (b/186872903) Refactor how sync noted ops are propagated.
     public static void prefixParcelWithAppOpsIfNeeded(@NonNull Parcel p) {
+        if (!isListeningForOpNotedInBinderTransaction()) {
+            return;
+        }
         final ArrayMap<String, ArrayMap<String, long[]>> notedAppOps =
                 sAppOpsNotedInThisBinderTransaction.get();
         if (notedAppOps == null) {
@@ -9083,9 +9086,6 @@ public class AppOpsManager {
         }
 
         final String myPackageName = ActivityThread.currentPackageName();
-        if (myPackageName == null) {
-            return;
-        }
 
         synchronized (sLock) {
             for (int i = 0; i < packageCount; i++) {
@@ -9105,7 +9105,7 @@ public class AppOpsManager {
                     final BitSet notedAppOps = BitSet.valueOf(rawNotedAppOps);
                     for (int code = notedAppOps.nextSetBit(0); code != -1;
                             code = notedAppOps.nextSetBit(code + 1)) {
-                        if (myPackageName.equals(packageName)) {
+                        if (Objects.equals(myPackageName, packageName)) {
                             if (sOnOpNotedCallback != null) {
                                 sOnOpNotedCallback.onNoted(new SyncNotedAppOp(code,
                                         attributionTag, packageName));
@@ -9123,7 +9123,7 @@ public class AppOpsManager {
                     }
                     for (int code = notedAppOps.nextSetBit(0); code != -1;
                             code = notedAppOps.nextSetBit(code + 1)) {
-                        if (myPackageName.equals(packageName)) {
+                        if (Objects.equals(myPackageName, packageName)) {
                             sMessageCollector.onNoted(new SyncNotedAppOp(code,
                                     attributionTag, packageName));
                         }
