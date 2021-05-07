@@ -864,6 +864,10 @@ public class RippleDrawable extends LayerDrawable {
         boolean shouldExit = mExitingAnimation;
         mRippleActive = false;
         mExitingAnimation = false;
+        if (mRunningAnimations.size() > 0 && !shouldAnimate) {
+            // update paint when view is invalidated
+            getRipplePaint();
+        }
         drawContent(canvas);
         drawPatternedBackground(canvas, cx, cy);
         if (shouldAnimate && mRunningAnimations.size() <= MAX_RIPPLES) {
