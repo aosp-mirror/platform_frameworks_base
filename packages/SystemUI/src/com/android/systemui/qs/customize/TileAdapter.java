@@ -690,11 +690,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
                     continue;
                 }
 
-                final RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) child
-                        .getLayoutParams();
-                final int top = child.getTop() + params.topMargin +
-                        Math.round(ViewCompat.getTranslationY(child));
-                // Draw full width, in case there aren't tiles all the way across.
+                final int top = child.getTop() + Math.round(ViewCompat.getTranslationY(child));
                 mDrawable.setBounds(0, top, width, bottom);
                 mDrawable.draw(c);
                 break;
