@@ -95,12 +95,12 @@ public final class WallpaperColors implements Parcelable {
     private static final float MIN_COLOR_OCCURRENCE = 0.05f;
 
     // Decides when dark theme is optimal for this wallpaper
-    private static final float DARK_THEME_MEAN_LUMINANCE = 0.25f;
+    private static final float DARK_THEME_MEAN_LUMINANCE = 0.3f;
     // Minimum mean luminosity that an image needs to have to support dark text
-    private static final float BRIGHT_IMAGE_MEAN_LUMINANCE = 0.75f;
+    private static final float BRIGHT_IMAGE_MEAN_LUMINANCE = 0.7f;
     // We also check if the image has dark pixels in it,
     // to avoid bright images with some dark spots.
-    private static final float DARK_PIXEL_CONTRAST = 6f;
+    private static final float DARK_PIXEL_CONTRAST = 5.5f;
     private static final float MAX_DARK_AREA = 0.025f;
 
     private final List<Color> mMainColors;
