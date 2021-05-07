@@ -2456,6 +2456,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         setWindowingMode(windowingMode);
     }
 
+    /**
+     * See {@code WindowState#applyImeWindowsIfNeeded} for the details that we won't traverse the
+     * IME window in some cases.
+     */
     boolean forAllImeWindows(ToBooleanFunction<WindowState> callback, boolean traverseTopToBottom) {
         return mImeWindowsContainer.forAllWindowForce(callback, traverseTopToBottom);
     }
@@ -4573,6 +4577,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         private boolean skipImeWindowsDuringTraversal(DisplayContent dc) {
             // We skip IME windows so they're processed just above their target, except
             // in split-screen mode where we process the IME containers above the docked divider.
+            // Note that this method check should align with {@link
+            // WindowState#applyImeWindowsIfNeeded} in case of any state mismatch.
             return dc.getImeTarget(IME_TARGET_LAYERING) != null
                     && !dc.getDefaultTaskDisplayArea().isSplitScreenModeActivated();
         }
