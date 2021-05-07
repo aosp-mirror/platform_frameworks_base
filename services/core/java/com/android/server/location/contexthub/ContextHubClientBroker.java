@@ -665,7 +665,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
             long nanoAppId, List<String> nanoappPermissions, boolean gracePeriodExpired) {
         return updateNanoAppAuthState(
                 nanoAppId, nanoappPermissions, gracePeriodExpired,
-                mForceDeniedNapps.contains(nanoAppId) /* forceDenied */);
+                false /* forceDenied */);
     }
 
     /**
@@ -705,7 +705,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
             // DENIED_GRACE_PERIOD -> DENIED only if the grace period expires
             // DENIED/DENIED_GRACE_PERIOD -> GRANTED only if permissions are granted again
             // any state -> DENIED if "forceDenied" is true
-            if (forceDenied) {
+            if (forceDenied || mForceDeniedNapps.contains(nanoAppId)) {
                 newAuthState = AUTHORIZATION_DENIED;
                 mForceDeniedNapps.add(nanoAppId);
             } else if (gracePeriodExpired) {
