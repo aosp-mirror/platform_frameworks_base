@@ -107,7 +107,7 @@ class SystemStatusAnimationScheduler @Inject constructor(
                 scheduleEvent(event)
             } else if (event.forceVisible) {
                 hasPersistentDot = true
-                notifyTransitionToPersistentDot(showAnimation = false)
+                notifyTransitionToPersistentDot()
             }
         } else {
             if (DEBUG) {
@@ -202,7 +202,7 @@ class SystemStatusAnimationScheduler @Inject constructor(
 
                 aSet2.play(chipAnimator).before(systemAnimator)
                 if (hasPersistentDot) {
-                    val dotAnim = notifyTransitionToPersistentDot(showAnimation = true)
+                    val dotAnim = notifyTransitionToPersistentDot()
                     if (dotAnim != null) aSet2.playTogether(systemAnimator, dotAnim)
                 }
 
@@ -214,9 +214,9 @@ class SystemStatusAnimationScheduler @Inject constructor(
         }, DELAY)
     }
 
-    private fun notifyTransitionToPersistentDot(showAnimation: Boolean): Animator? {
+    private fun notifyTransitionToPersistentDot(): Animator? {
         val anims: List<Animator> = listeners.mapNotNull {
-            it.onSystemStatusAnimationTransitionToPersistentDot(showAnimation)
+            it.onSystemStatusAnimationTransitionToPersistentDot()
         }
         if (anims.isNotEmpty()) {
             val aSet = AnimatorSet()
@@ -326,9 +326,7 @@ interface SystemStatusAnimationCallback {
     @JvmDefault fun onSystemChromeAnimationEnd() {}
 
     // Best method name, change my mind
-    @JvmDefault fun onSystemStatusAnimationTransitionToPersistentDot(
-        showAnimation: Boolean
-    ): Animator? { return null }
+    @JvmDefault fun onSystemStatusAnimationTransitionToPersistentDot(): Animator? { return null }
     @JvmDefault fun onHidePersistentDot(): Animator? { return null }
 }
 
