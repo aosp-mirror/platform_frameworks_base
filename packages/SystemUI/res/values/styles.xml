@@ -342,7 +342,6 @@
         <item name="wallpaperTextColorSecondary">@*android:color/secondary_text_material_dark</item>
         <item name="wallpaperTextColorAccent">@*android:color/system_accent1_100</item>
         <item name="android:colorError">@*android:color/error_color_material_dark</item>
-        <item name="android:colorControlHighlight">@*android:color/primary_text_material_dark</item>
         <item name="*android:lockPatternStyle">@style/LockPatternStyle</item>
         <item name="passwordStyle">@style/PasswordTheme</item>
         <item name="numPadKeyStyle">@style/NumPadKey</item>
@@ -359,7 +358,6 @@
         <item name="wallpaperTextColorSecondary">@*android:color/secondary_text_material_light</item>
         <item name="wallpaperTextColorAccent">@*android:color/system_accent2_600</item>
         <item name="android:colorError">@*android:color/error_color_material_light</item>
-        <item name="android:colorControlHighlight">#40000000</item>
         <item name="shadowRadius">0</item>
 
         <!-- Needed for MediaRoute chooser dialog -->
