@@ -56,6 +56,7 @@ final class FakeNativeWrapper implements NativeWrapper {
     private final Map<Integer, Boolean> mPortConnectionStatus = new HashMap<>();
     private final HashMap<Integer, Integer> mMessageSendResult = new HashMap<>();
     private int mMyPhysicalAddress = 0;
+    private int mVendorId = 0;
     private HdmiPortInfo[] mHdmiPortInfo = null;
     private HdmiCecController.HdmiCecCallback mCallback = null;
     private int mCecVersion = HdmiControlManager.HDMI_CEC_VERSION_2_0;
@@ -102,7 +103,7 @@ final class FakeNativeWrapper implements NativeWrapper {
 
     @Override
     public int nativeGetVendorId() {
-        return 0;
+        return mVendorId;
     }
 
     @Override
@@ -178,6 +179,11 @@ final class FakeNativeWrapper implements NativeWrapper {
 
     public void setMessageSendResult(int opcode, int result) {
         mMessageSendResult.put(opcode, result);
+    }
+
+    @VisibleForTesting
+    protected void setVendorId(int vendorId) {
+        mVendorId = vendorId;
     }
 
     @VisibleForTesting

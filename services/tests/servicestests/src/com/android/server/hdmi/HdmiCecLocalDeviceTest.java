@@ -40,6 +40,7 @@ import static org.mockito.Mockito.verify;
 import android.content.Context;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiPortInfo;
+import android.hardware.tv.cec.V1_0.Result;
 import android.media.AudioManager;
 import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
@@ -205,6 +206,7 @@ public class HdmiCecLocalDeviceTest {
         mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mNativeWrapper.setPhysicalAddress(0x2000);
         mTestLooper.dispatchAll();
+        mNativeWrapper.clearResultMessages();
     }
 
     @Test
@@ -243,15 +245,37 @@ public class HdmiCecLocalDeviceTest {
 
     @Test
     public void handleGiveDeviceVendorId_success() {
-        mSrcAddr = ADDR_UNREGISTERED;
-        mDesAddr = ADDR_BROADCAST;
-        /** nativeGetVendorId returns 0 */
-        param = new byte[] {(byte) ((0 >> 8) & 0xFF), (byte) (0 & 0xFF), (byte) (0 & 0xFF)};
-        callbackResult = -1;
-        mHdmiLocalDevice.handleGiveDeviceVendorId(
-                (int finalResult) -> callbackResult = finalResult);
+        /** Set vendor id to 0 */
+        mNativeWrapper.setVendorId(0);
+        HdmiCecMessage expectedMessage =
+                HdmiCecMessageBuilder.buildDeviceVendorIdCommand(ADDR_TV, 0);
+        @Constants.HandleMessageResult
+        int handleResult =
+                mHdmiLocalDevice.handleGiveDeviceVendorId(
+                        HdmiCecMessageBuilder.buildGiveDeviceVendorIdCommand(
+                                ADDR_PLAYBACK_1, ADDR_TV));
         mTestLooper.dispatchAll();
-        assertEquals(0, callbackResult);
+        assertEquals(Constants.HANDLED, handleResult);
+        assertThat(mNativeWrapper.getOnlyResultMessage()).isEqualTo(expectedMessage);
+    }
+
+    @Test
+    public void handleGiveDeviceVendorId_failure() {
+        mNativeWrapper.setVendorId(Result.FAILURE_UNKNOWN);
+        HdmiCecMessage expectedMessage =
+                HdmiCecMessageBuilder.buildFeatureAbortCommand(
+                        ADDR_TV,
+                        ADDR_PLAYBACK_1,
+                        Constants.MESSAGE_GIVE_DEVICE_VENDOR_ID,
+                        Constants.ABORT_UNABLE_TO_DETERMINE);
+        @Constants.HandleMessageResult
+        int handleResult =
+                mHdmiLocalDevice.handleGiveDeviceVendorId(
+                        HdmiCecMessageBuilder.buildGiveDeviceVendorIdCommand(
+                                ADDR_PLAYBACK_1, ADDR_TV));
+        mTestLooper.dispatchAll();
+        assertEquals(Constants.HANDLED, handleResult);
+        assertThat(mNativeWrapper.getOnlyResultMessage()).isEqualTo(expectedMessage);
     }
 
     @Test

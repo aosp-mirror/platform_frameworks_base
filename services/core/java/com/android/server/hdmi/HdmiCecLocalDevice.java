@@ -22,6 +22,7 @@ import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.hardware.input.InputManager;
+import android.hardware.tv.cec.V1_0.Result;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
 import android.media.AudioManager;
 import android.os.Handler;
@@ -285,7 +286,7 @@ abstract class HdmiCecLocalDevice {
             case Constants.MESSAGE_GIVE_OSD_NAME:
                 return handleGiveOsdName(message);
             case Constants.MESSAGE_GIVE_DEVICE_VENDOR_ID:
-                return handleGiveDeviceVendorId(null);
+                return handleGiveDeviceVendorId(message);
             case Constants.MESSAGE_CEC_VERSION:
                 return handleCecVersion();
             case Constants.MESSAGE_GET_CEC_VERSION:
@@ -393,12 +394,16 @@ abstract class HdmiCecLocalDevice {
 
     @ServiceThreadOnly
     @Constants.HandleMessageResult
-    protected int handleGiveDeviceVendorId(@Nullable SendMessageCallback callback) {
+    protected int handleGiveDeviceVendorId(HdmiCecMessage message) {
         assertRunOnServiceThread();
         int vendorId = mService.getVendorId();
-        HdmiCecMessage cecMessage =
-                HdmiCecMessageBuilder.buildDeviceVendorIdCommand(mAddress, vendorId);
-        mService.sendCecCommand(cecMessage, callback);
+        if (vendorId == Result.FAILURE_UNKNOWN) {
+            mService.maySendFeatureAbortCommand(message, Constants.ABORT_UNABLE_TO_DETERMINE);
+        } else {
+            HdmiCecMessage cecMessage =
+                    HdmiCecMessageBuilder.buildDeviceVendorIdCommand(mAddress, vendorId);
+            mService.sendCecCommand(cecMessage);
+        }
         return Constants.HANDLED;
     }
 
