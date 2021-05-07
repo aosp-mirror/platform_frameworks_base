@@ -1712,9 +1712,10 @@ public class AudioTrack extends PlayerBase
                 mChannelCount = 0;
                 break; // channel index configuration only
             }
-            if (!isMultichannelConfigSupported(channelConfig)) {
-                // input channel configuration features unsupported channels
-                throw new IllegalArgumentException("Unsupported channel configuration.");
+            if (!isMultichannelConfigSupported(channelConfig, audioFormat)) {
+                throw new IllegalArgumentException(
+                        "Unsupported channel mask configuration " + channelConfig
+                        + " for encoding " + audioFormat);
             }
             mChannelMask = channelConfig;
             mChannelCount = AudioFormat.channelCountFromOutChannelMask(channelConfig);
@@ -1722,13 +1723,17 @@ public class AudioTrack extends PlayerBase
         // check the channel index configuration (if present)
         mChannelIndexMask = channelIndexMask;
         if (mChannelIndexMask != 0) {
-            // restrictive: indexMask could allow up to AUDIO_CHANNEL_BITS_LOG2
-            final int indexMask = (1 << AudioSystem.OUT_CHANNEL_COUNT_MAX) - 1;
-            if ((channelIndexMask & ~indexMask) != 0) {
-                throw new IllegalArgumentException("Unsupported channel index configuration "
-                        + channelIndexMask);
+            // As of S, we accept up to 24 channel index mask.
+            final int fullIndexMask = (1 << AudioSystem.FCC_24) - 1;
+            final int channelIndexCount = Integer.bitCount(channelIndexMask);
+            final boolean accepted = (channelIndexMask & ~fullIndexMask) == 0
+                    && (!AudioFormat.isEncodingLinearFrames(audioFormat)  // compressed OK
+                            || channelIndexCount <= AudioSystem.OUT_CHANNEL_COUNT_MAX); // PCM
+            if (!accepted) {
+                throw new IllegalArgumentException(
+                        "Unsupported channel index mask configuration " + channelIndexMask
+                        + " for encoding " + audioFormat);
             }
-            int channelIndexCount = Integer.bitCount(channelIndexMask);
             if (mChannelCount == 0) {
                  mChannelCount = channelIndexCount;
             } else if (mChannelCount != channelIndexCount) {
@@ -1781,16 +1786,19 @@ public class AudioTrack extends PlayerBase
      * @param channelConfig the mask to validate
      * @return false if the AudioTrack can't be used with such a mask
      */
-    private static boolean isMultichannelConfigSupported(int channelConfig) {
+    private static boolean isMultichannelConfigSupported(int channelConfig, int encoding) {
         // check for unsupported channels
         if ((channelConfig & SUPPORTED_OUT_CHANNELS) != channelConfig) {
             loge("Channel configuration features unsupported channels");
             return false;
         }
         final int channelCount = AudioFormat.channelCountFromOutChannelMask(channelConfig);
-        if (channelCount > AudioSystem.OUT_CHANNEL_COUNT_MAX) {
-            loge("Channel configuration contains too many channels " +
-                    channelCount + ">" + AudioSystem.OUT_CHANNEL_COUNT_MAX);
+        final int channelCountLimit = AudioFormat.isEncodingLinearFrames(encoding)
+                ? AudioSystem.OUT_CHANNEL_COUNT_MAX  // PCM limited to OUT_CHANNEL_COUNT_MAX
+                : AudioSystem.FCC_24;                // Compressed limited to 24 channels
+        if (channelCount > channelCountLimit) {
+            loge("Channel configuration contains too many channels for encoding "
+                    + encoding + "(" + channelCount + " > " + channelCountLimit + ")");
             return false;
         }
         // check for unsupported multichannel combinations:
@@ -2301,7 +2309,7 @@ public class AudioTrack extends PlayerBase
             channelCount = 2;
             break;
         default:
-            if (!isMultichannelConfigSupported(channelConfig)) {
+            if (!isMultichannelConfigSupported(channelConfig, audioFormat)) {
                 loge("getMinBufferSize(): Invalid channel configuration.");
                 return ERROR_BAD_VALUE;
             } else {
