@@ -270,6 +270,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private final PackageManagerService mPm;
     private final Handler mHandler;
     private final PackageSessionProvider mSessionProvider;
+    private final SilentUpdatePolicy mSilentUpdatePolicy;
     /**
      * Note all calls must be done outside {@link #mLock} to prevent lock inversion.
      */
@@ -995,8 +996,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     public PackageInstallerSession(PackageInstallerService.InternalCallback callback,
-            Context context, PackageManagerService pm,
-            PackageSessionProvider sessionProvider, Looper looper, StagingManager stagingManager,
+            Context context, PackageManagerService pm, PackageSessionProvider sessionProvider,
+            SilentUpdatePolicy silentUpdatePolicy, Looper looper, StagingManager stagingManager,
             int sessionId, int userId, int installerUid, @NonNull InstallSource installSource,
             SessionParams params, long createdMillis, long committedMillis,
             File stageDir, String stageCid, InstallationFile[] files,
@@ -1009,6 +1010,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         mContext = context;
         mPm = pm;
         mSessionProvider = sessionProvider;
+        mSilentUpdatePolicy = silentUpdatePolicy;
         mHandler = new Handler(looper, mHandlerCallback);
         mStagingManager = stagingManager;
 
@@ -2384,6 +2386,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             } // else, we'll wait until we parse to determine if we need to
         }
 
+        boolean silentUpdatePolicyEnforceable = false;
         synchronized (mLock) {
             if (mRelinquished) {
                 throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
@@ -2408,12 +2411,28 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 extractNativeLibraries(
                         mPackageLite, stageDir, params.abiOverride, mayInheritNativeLibs());
 
-                if (userActionRequirement == USER_ACTION_PENDING_APK_PARSING
-                        && (result.getTargetSdk() < Build.VERSION_CODES.Q)) {
-                    sendPendingUserActionIntent();
-                    return null;
+                if (userActionRequirement == USER_ACTION_PENDING_APK_PARSING) {
+                    if (result.getTargetSdk() < Build.VERSION_CODES.Q) {
+                        sendPendingUserActionIntent();
+                        return null;
+                    }
+                    if (params.requireUserAction == SessionParams.USER_ACTION_NOT_REQUIRED) {
+                        silentUpdatePolicyEnforceable = true;
+                    }
                 }
             }
+        }
+        if (silentUpdatePolicyEnforceable) {
+            if (!mSilentUpdatePolicy.isSilentUpdateAllowed(
+                    getInstallerPackageName(), getPackageName())) {
+                // Fall back to the non-silent update if a repeated installation is invoked within
+                // the throttle time.
+                sendPendingUserActionIntent();
+                return null;
+            }
+            mSilentUpdatePolicy.track(getInstallerPackageName(), getPackageName());
+        }
+        synchronized (mLock) {
             return makeVerificationParamsLocked();
         }
     }
@@ -4569,7 +4588,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             @NonNull PackageInstallerService.InternalCallback callback, @NonNull Context context,
             @NonNull PackageManagerService pm, Looper installerThread,
             @NonNull StagingManager stagingManager, @NonNull File sessionsDir,
-            @NonNull PackageSessionProvider sessionProvider)
+            @NonNull PackageSessionProvider sessionProvider,
+            @NonNull SilentUpdatePolicy silentUpdatePolicy)
             throws IOException, XmlPullParserException {
         final int sessionId = in.getAttributeInt(null, ATTR_SESSION_ID);
         final int userId = in.getAttributeInt(null, ATTR_USER_ID);
@@ -4743,10 +4763,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         InstallSource installSource = InstallSource.create(installInitiatingPackageName,
                 installOriginatingPackageName, installerPackageName, installerAttributionTag);
-        return new PackageInstallerSession(callback, context, pm, sessionProvider, installerThread,
-                stagingManager, sessionId, userId, installerUid, installSource, params,
-                createdMillis, committedMillis, stageDir, stageCid, fileArray, checksumsMap,
-                prepared, committed, destroyed, sealed, childSessionIdsArray, parentSessionId,
-                isReady, isFailed, isApplied, stagedSessionErrorCode, stagedSessionErrorMessage);
+        return new PackageInstallerSession(callback, context, pm, sessionProvider,
+                silentUpdatePolicy, installerThread, stagingManager, sessionId, userId,
+                installerUid, installSource, params, createdMillis, committedMillis, stageDir,
+                stageCid, fileArray, checksumsMap, prepared, committed, destroyed, sealed,
+                childSessionIdsArray, parentSessionId, isReady, isFailed, isApplied,
+                stagedSessionErrorCode, stagedSessionErrorMessage);
     }
 }
