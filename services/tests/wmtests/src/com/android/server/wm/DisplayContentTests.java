@@ -574,12 +574,11 @@ public class DisplayContentTests extends WindowTestsBase {
         final WindowState ws = createWindow(null, TYPE_APPLICATION, dc, "app window");
         dc.setImeLayeringTarget(ws);
 
-        // Adjust bounds so that matchesRootDisplayAreaBounds() returns false and
-        // hence isLetterboxedAppWindow() returns true.
+        // Adjust bounds so that matchesRootDisplayAreaBounds() returns false.
         ws.mActivityRecord.getConfiguration().windowConfiguration.setBounds(new Rect(1, 1, 1, 1));
         assertFalse("matchesRootDisplayAreaBounds() should return false",
                 ws.matchesDisplayAreaBounds());
-        assertTrue("isLetterboxedAppWindow() should return true", ws.isLetterboxedAppWindow());
+
         assertTrue("IME shouldn't be attached to app",
                 dc.computeImeParent() != dc.getImeTarget(IME_TARGET_LAYERING).getWindow()
                         .mActivityRecord.getSurfaceControl());
@@ -1328,7 +1327,7 @@ public class DisplayContentTests extends WindowTestsBase {
 
         assertTrue(app.isFixedRotationTransforming());
         assertTrue(mAppWindow.matchesDisplayAreaBounds());
-        assertFalse(mAppWindow.isLetterboxedAppWindow());
+        assertFalse(mAppWindow.areAppWindowBoundsLetterboxed());
         assertTrue(mDisplayContent.getDisplayRotation().shouldRotateSeamlessly(
                 ROTATION_0 /* oldRotation */, ROTATION_90 /* newRotation */,
                 false /* forceUpdate */));
