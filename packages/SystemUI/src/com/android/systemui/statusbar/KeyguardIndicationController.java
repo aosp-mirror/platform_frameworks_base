@@ -492,8 +492,12 @@ public class KeyguardIndicationController implements KeyguardStateController.Cal
         return UserHandle.USER_NULL;
     }
 
-    @VisibleForTesting
-    protected void setVisible(boolean visible) {
+    /**
+     * Sets the visibility of keyguard bottom area, and if the indications are updatable.
+     *
+     * @param visible true to make the area visible and update the indication, false otherwise.
+     */
+    public void setVisible(boolean visible) {
         mVisible = visible;
         mIndicationArea.setVisibility(visible ? VISIBLE : GONE);
         if (visible) {
