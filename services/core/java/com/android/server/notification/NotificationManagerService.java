@@ -10259,13 +10259,24 @@ public class NotificationManagerService extends SystemService {
             if (typeList != null) {
                 String[] typeStrings = typeList.split(XML_SEPARATOR);
                 for (int i = 0; i < typeStrings.length; i++) {
-                    if (TextUtils.isEmpty(typeStrings[i])) {
+                    final String typeString = typeStrings[i];
+                    if (TextUtils.isEmpty(typeString)) {
                         continue;
                     }
-                    try {
-                        types |= Integer.parseInt(typeStrings[i]);
-                    } catch (NumberFormatException e) {
-                        // skip
+                    if (typeString.equalsIgnoreCase("ONGOING")) {
+                        types |= FLAG_FILTER_TYPE_ONGOING;
+                    } else if (typeString.equalsIgnoreCase("CONVERSATIONS")) {
+                        types |= FLAG_FILTER_TYPE_CONVERSATIONS;
+                    } else if (typeString.equalsIgnoreCase("SILENT")) {
+                        types |= FLAG_FILTER_TYPE_SILENT;
+                    } else if (typeString.equalsIgnoreCase("ALERTING")) {
+                        types |= FLAG_FILTER_TYPE_ALERTING;
+                    } else {
+                        try {
+                            types |= Integer.parseInt(typeString);
+                        } catch (NumberFormatException e) {
+                            // skip
+                        }
                     }
                 }
             }
