@@ -109,15 +109,8 @@ void SkiaRecordingCanvas::drawCircle(uirenderer::CanvasPropertyPrimitive* x,
     drawDrawable(mDisplayList->allocateDrawable<AnimatedCircle>(x, y, radius, paint));
 }
 
-void SkiaRecordingCanvas::drawRipple(uirenderer::CanvasPropertyPrimitive* x,
-                                     uirenderer::CanvasPropertyPrimitive* y,
-                                     uirenderer::CanvasPropertyPrimitive* radius,
-                                     uirenderer::CanvasPropertyPaint* paint,
-                                     uirenderer::CanvasPropertyPrimitive* progress,
-                                     uirenderer::CanvasPropertyPrimitive* turbulencePhase,
-                                     const SkRuntimeShaderBuilder& effectBuilder) {
-    drawDrawable(mDisplayList->allocateDrawable<AnimatedRipple>(x, y, radius, paint, progress,
-                                                                turbulencePhase, effectBuilder));
+void SkiaRecordingCanvas::drawRipple(const skiapipeline::RippleDrawableParams& params) {
+    mRecorder.drawRippleDrawable(params);
 }
 
 void SkiaRecordingCanvas::enableZ(bool enableZ) {

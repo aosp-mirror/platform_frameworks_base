@@ -22,6 +22,7 @@
 
 #include <androidfw/ResourceTypes.h>
 #include "Properties.h"
+#include "pipeline/skia/AnimatedDrawables.h"
 #include "utils/Macros.h"
 
 #include <SkBitmap.h>
@@ -141,13 +142,7 @@ public:
                             uirenderer::CanvasPropertyPrimitive* y,
                             uirenderer::CanvasPropertyPrimitive* radius,
                             uirenderer::CanvasPropertyPaint* paint) = 0;
-    virtual void drawRipple(uirenderer::CanvasPropertyPrimitive* x,
-                            uirenderer::CanvasPropertyPrimitive* y,
-                            uirenderer::CanvasPropertyPrimitive* radius,
-                            uirenderer::CanvasPropertyPaint* paint,
-                            uirenderer::CanvasPropertyPrimitive* progress,
-                            uirenderer::CanvasPropertyPrimitive* turbulencePhase,
-                            const SkRuntimeShaderBuilder& effectBuilder) = 0;
+    virtual void drawRipple(const uirenderer::skiapipeline::RippleDrawableParams& params) = 0;
 
     virtual void drawLayer(uirenderer::DeferredLayerUpdater* layerHandle) = 0;
     virtual void drawRenderNode(uirenderer::RenderNode* renderNode) = 0;
