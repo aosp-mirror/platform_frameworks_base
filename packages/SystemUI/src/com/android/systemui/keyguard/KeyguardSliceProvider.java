@@ -38,7 +38,6 @@ import android.provider.Settings;
 import android.service.notification.ZenModeConfig;
 import android.text.TextUtils;
 import android.text.style.StyleSpan;
-import android.util.Log;
 
 import androidx.core.graphics.drawable.IconCompat;
 import androidx.slice.Slice;
@@ -53,8 +52,6 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SystemUIAppComponentFactory;
-import com.android.systemui.SystemUIFactory;
-import com.android.systemui.dagger.SysUIComponent;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.StatusBarState;
@@ -65,8 +62,6 @@ import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.util.wakelock.SettableWakeLock;
 import com.android.systemui.util.wakelock.WakeLock;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -318,25 +313,7 @@ public class KeyguardSliceProvider extends SliceProvider implements
             mPendingIntent = PendingIntent.getActivity(getContext(), 0,
                     new Intent(getContext(), KeyguardSliceProvider.class),
                     PendingIntent.FLAG_IMMUTABLE);
-            try {
-                //TODO(b/168778439): Remove this whole try catch. This is for debugging in dogfood.
-                mMediaManager.addCallback(this);
-            } catch (NullPointerException e) {
-                // We are sometimes failing to set the media manager. Why?
-                Log.w(TAG, "Failed to setup mMediaManager. Trying again.");
-                SysUIComponent rootComponent = SystemUIFactory.getInstance().getSysUIComponent();
-                try {
-                    Method injectMethod = rootComponent.getClass()
-                            .getMethod("inject", getClass());
-                    injectMethod.invoke(rootComponent, this);
-                    Log.w(TAG, "mMediaManager is now: " + mMediaManager);
-                } catch (NoSuchMethodException ex) {
-                    Log.e(TAG, "Failed to find inject method for KeyguardSliceProvider", ex);
-                } catch (IllegalAccessException | InvocationTargetException ex) {
-                    Log.e(TAG, "Failed to call inject", ex);
-                }
-                throw e;
-            }
+            mMediaManager.addCallback(this);
             mStatusBarStateController.addCallback(this);
             mNextAlarmController.addCallback(this);
             mZenModeController.addCallback(this);

@@ -45,7 +45,6 @@ import com.android.settingslib.Utils;
 import com.android.settingslib.development.DevelopmentSettingsEnabler;
 import com.android.settingslib.drawable.UserIconDrawable;
 import com.android.systemui.R;
-import com.android.systemui.R.dimen;
 import com.android.systemui.qs.TouchAnimator.Builder;
 import com.android.systemui.statusbar.phone.MultiUserSwitch;
 import com.android.systemui.statusbar.phone.SettingsButton;
@@ -140,7 +139,7 @@ public class QSFooterView extends FrameLayout {
 
     void updateAnimator(int width, int numTiles) {
         int size = mContext.getResources().getDimensionPixelSize(R.dimen.qs_quick_tile_size)
-                - mContext.getResources().getDimensionPixelSize(dimen.qs_quick_tile_padding);
+                - mContext.getResources().getDimensionPixelSize(R.dimen.qs_tile_padding);
         int remaining = (width - numTiles * size) / (numTiles - 1);
         int defSpace = mContext.getResources().getDimensionPixelOffset(R.dimen.default_gear_space);
 
@@ -167,6 +166,9 @@ public class QSFooterView extends FrameLayout {
 
     private void updateResources() {
         updateFooterAnimator();
+        MarginLayoutParams lp = (MarginLayoutParams) getLayoutParams();
+        lp.bottomMargin = getResources().getDimensionPixelSize(R.dimen.qs_footers_margin_bottom);
+        setLayoutParams(lp);
         mTunerIconTranslation = mContext.getResources()
                 .getDimensionPixelOffset(R.dimen.qs_footer_tuner_icon_translation);
         mTunerIcon.setTranslationX(isLayoutRtl() ? -mTunerIconTranslation : mTunerIconTranslation);

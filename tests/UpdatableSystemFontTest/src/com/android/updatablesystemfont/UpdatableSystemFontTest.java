@@ -112,7 +112,8 @@ public class UpdatableSystemFontTest {
 
     @After
     public void tearDown() throws Exception {
-        expectCommandToSucceed("cmd font clear");
+        // Ignore errors because this may fail if updatable system font is not enabled.
+        runShellCommand("cmd font clear", null);
         if (mKeyId != null) {
             expectCommandToSucceed("mini-keyctl unlink " + mKeyId + " .fs-verity");
         }

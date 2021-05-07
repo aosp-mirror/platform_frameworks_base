@@ -271,7 +271,7 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
                 mContext.getString(R.string.wallet_secondary_label_device_locked),
                 state.secondaryLabel);
         assertNotNull(state.stateDescription);
-        assertNull(state.sideViewDrawable);
+        assertNull(state.sideViewCustomDrawable);
     }
 
     @Test
@@ -287,7 +287,7 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
                 "•••• 1234",
                 state.secondaryLabel);
         assertNotNull(state.stateDescription);
-        assertNotNull(state.sideViewDrawable);
+        assertNotNull(state.sideViewCustomDrawable);
     }
 
 
@@ -303,7 +303,7 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
                 mContext.getString(R.string.wallet_secondary_label_no_card),
                 state.secondaryLabel);
         assertNotNull(state.stateDescription);
-        assertNull(state.sideViewDrawable);
+        assertNull(state.sideViewCustomDrawable);
     }
 
     @Test
@@ -315,7 +315,7 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
 
         assertEquals(Tile.STATE_UNAVAILABLE, state.state);
         assertNull(state.stateDescription);
-        assertNull(state.sideViewDrawable);
+        assertNull(state.sideViewCustomDrawable);
     }
 
     @Test
@@ -342,7 +342,7 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
         when(mKeyguardStateController.isUnlocked()).thenReturn(true);
         setUpWalletCard(/* hasCard= */ true);
 
-        assertNotNull(mTile.getState().sideViewDrawable);
+        assertNotNull(mTile.getState().sideViewCustomDrawable);
     }
 
     @Test
@@ -362,7 +362,7 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
         mCallbackCaptor.getValue().onWalletCardsRetrieved(responseWithCards);
         mTestableLooper.processAllMessages();
 
-        assertNotNull(mTile.getState().sideViewDrawable);
+        assertNotNull(mTile.getState().sideViewCustomDrawable);
 
         mTile.handleSetListening(true);
 
@@ -373,14 +373,14 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
         mCallbackCaptor.getValue().onWalletCardsRetrieved(responseWithoutCards);
         mTestableLooper.processAllMessages();
 
-        assertNull(mTile.getState().sideViewDrawable);
+        assertNull(mTile.getState().sideViewCustomDrawable);
     }
 
     @Test
     public void testQueryCards_noCards_notUpdateSideViewDrawable() {
         setUpWalletCard(/* hasCard= */ false);
 
-        assertNull(mTile.getState().sideViewDrawable);
+        assertNull(mTile.getState().sideViewCustomDrawable);
     }
 
     @Test
@@ -395,7 +395,7 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
         mCallbackCaptor.getValue().onWalletCardRetrievalError(error);
         mTestableLooper.processAllMessages();
 
-        assertNull(mTile.getState().sideViewDrawable);
+        assertNull(mTile.getState().sideViewCustomDrawable);
     }
 
     @Test

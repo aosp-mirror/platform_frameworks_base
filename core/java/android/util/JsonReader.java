@@ -16,7 +16,7 @@
 
 package android.util;
 
-import libcore.internal.StringPool;
+import com.android.internal.util.StringPool;
 
 import java.io.Closeable;
 import java.io.EOFException;

@@ -32,7 +32,7 @@
 
     <dimen name="qs_security_footer_single_line_height">@*android:dimen/quick_qs_offset_height</dimen>
     <dimen name="qs_footer_padding">14dp</dimen>
-    <dimen name="qs_security_footer_vertical_margin">0dp</dimen>
+    <dimen name="qs_footers_margin_bottom">0dp</dimen>
     <dimen name="qs_security_footer_background_inset">12dp</dimen>
     <dimen name="qs_security_footer_corner_radius">28dp</dimen>
 
