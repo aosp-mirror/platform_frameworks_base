@@ -27,6 +27,7 @@ public class PipPinchResizingAlgorithm {
     private static final int PINCH_RESIZE_MAX_ANGLE_ROTATION = 45;
     private static final float OVERROTATE_DAMP_FACTOR = 0.4f;
     private static final float ANGLE_THRESHOLD = 5f;
+    private static final float OVERRESIZE_DAMP_FACTOR = 0.25f;
 
     private final PointF mTmpDownVector = new PointF();
     private final PointF mTmpLastVector = new PointF();
@@ -46,7 +47,10 @@ public class PipPinchResizingAlgorithm {
                 lastSecondPoint.y - lastPoint.y);
         float minScale = getMinScale(initialBounds, minSize);
         float maxScale = getMaxScale(initialBounds, maxSize);
-        float scale = Math.max(minScale, Math.min(maxScale, dist / downDist));
+        float overStretchMin = minScale - dist / downDist > 0 ? minScale - dist / downDist : 0;
+        float overStretchMax = dist / downDist - maxScale > 0 ? dist / downDist - maxScale : 0;
+        float scale = Math.max(minScale - overStretchMin * OVERRESIZE_DAMP_FACTOR,
+                Math.min(maxScale + overStretchMax * OVERRESIZE_DAMP_FACTOR, dist / downDist));
 
         // Scale the bounds by the change in distance between the points
         resizeBoundsOut.set(initialBounds);
