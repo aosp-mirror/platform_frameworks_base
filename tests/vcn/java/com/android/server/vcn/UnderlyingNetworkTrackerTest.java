@@ -112,7 +112,13 @@ public class UnderlyingNetworkTrackerTest {
         MockitoAnnotations.initMocks(this);
 
         mTestLooper = new TestLooper();
-        mVcnContext = spy(new VcnContext(mContext, mTestLooper.getLooper(), mVcnNetworkProvider));
+        mVcnContext =
+                spy(
+                        new VcnContext(
+                                mContext,
+                                mTestLooper.getLooper(),
+                                mVcnNetworkProvider,
+                                false /* isInTestMode */));
         doNothing().when(mVcnContext).ensureRunningOnLooperThread();
 
         setupSystemService(

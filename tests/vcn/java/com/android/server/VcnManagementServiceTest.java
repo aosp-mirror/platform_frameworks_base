@@ -37,6 +37,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
@@ -198,7 +199,8 @@ public class VcnManagementServiceTest {
                 .newVcnContext(
                         eq(mMockContext),
                         eq(mTestLooper.getLooper()),
-                        any(VcnNetworkProvider.class));
+                        any(VcnNetworkProvider.class),
+                        anyBoolean());
         doReturn(mSubscriptionTracker)
                 .when(mMockDeps)
                 .newTelephonySubscriptionTracker(
@@ -371,6 +373,12 @@ public class VcnManagementServiceTest {
     public void testTelephonyNetworkTrackerCallbackStartsInstances() throws Exception {
         TelephonySubscriptionSnapshot snapshot =
                 triggerSubscriptionTrackerCbAndGetSnapshot(Collections.singleton(TEST_UUID_1));
+        verify(mMockDeps)
+                .newVcnContext(
+                        eq(mMockContext),
+                        eq(mTestLooper.getLooper()),
+                        any(VcnNetworkProvider.class),
+                        anyBoolean());
         verify(mMockDeps)
                 .newVcn(eq(mVcnContext), eq(TEST_UUID_1), eq(TEST_VCN_CONFIG), eq(snapshot), any());
     }
