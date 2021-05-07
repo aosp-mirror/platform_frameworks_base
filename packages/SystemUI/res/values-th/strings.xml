@@ -475,7 +475,7 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"แสดงโปรไฟล์"</string>
     <string name="user_add_user" msgid="4336657383006913022">"เพิ่มผู้ใช้"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"ผู้ใช้ใหม่"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"ต้องการนำผู้เข้าร่วมออกไหม"</string>
+    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"ต้องการนำผู้ใช้ชั่วคราวออกไหม"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ระบบจะลบแอปและข้อมูลทั้งหมดในเซสชันนี้"</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"นำออก"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"ยินดีต้อนรับผู้เข้าร่วมกลับมาอีกครั้ง"</string>
@@ -484,7 +484,7 @@
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"ใช่ ดำเนินการต่อ"</string>
     <string name="guest_notification_title" msgid="4434456703930764167">"ผู้ใช้ที่เป็นผู้เข้าร่วม"</string>
     <string name="guest_notification_text" msgid="4202692942089571351">"หากต้องการลบแอปและข้อมูล ให้นำผู้ใช้ที่เป็นผู้เข้าร่วมออก"</string>
-    <string name="guest_notification_remove_action" msgid="4153019027696868099">"นำผู้เข้าร่วมออก"</string>
+    <string name="guest_notification_remove_action" msgid="4153019027696868099">"นำผู้ใช้ชั่วคราวออก"</string>
     <string name="user_logout_notification_title" msgid="3644848998053832589">"ออกจากระบบผู้ใช้"</string>
     <string name="user_logout_notification_text" msgid="7441286737342997991">"ทำการออกจากระบบให้ผู้ใช้รายปัจจุบัน"</string>
     <string name="user_logout_notification_action" msgid="7974458760719361881">"ออกจากระบบผู้ใช้"</string>

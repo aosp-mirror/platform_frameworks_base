@@ -489,7 +489,7 @@
     <string name="user_logout_notification_text" msgid="7441286737342997991">"मौजूदा उपयोगकर्ता से प्रस्थान करें"</string>
     <string name="user_logout_notification_action" msgid="7974458760719361881">"उपयोगकर्ता को प्रस्थान करवाएं"</string>
     <string name="user_add_user_title" msgid="4172327541504825032">"नया उपयोगकर्ता जोड़ें?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"जब आप कोई नया उपयोगकर्ता जोड़ते हैं तो उस व्यक्ति को अपनी जगह सेट करनी होती है.\n\nकोई भी उपयोगकर्ता बाकी सभी उपयोगकर्ताओं के लिए ऐप्लिकेशन अपडेट कर सकता है."</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"जब आप कोई नया उपयोगकर्ता जोड़ते हैं, तो उसे अपनी जगह सेट करनी होती है.\n\nकोई भी उपयोगकर्ता बाकी सभी उपयोगकर्ताओं के लिए ऐप्लिकेशन अपडेट कर सकता है."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"अब और उपयोगकर्ता नहीं जोड़े जा सकते"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="one">आप ज़्यादा से ज़्यादा <xliff:g id="COUNT">%d</xliff:g> उपयोगकर्ता जोड़ सकते हैं.</item>
