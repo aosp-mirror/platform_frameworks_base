@@ -36,6 +36,7 @@
 #include "SkTextBlob.h"
 #include "SkVertices.h"
 #include "VectorDrawable.h"
+#include "pipeline/skia/AnimatedDrawables.h"
 #include "pipeline/skia/FunctorDrawable.h"
 
 namespace android {
@@ -497,6 +498,18 @@ struct DrawVectorDrawable final : Op {
     SkPaint paint;
     BitmapPalette palette;
 };
+
+struct DrawRippleDrawable final : Op {
+    static const auto kType = Type::DrawRippleDrawable;
+    DrawRippleDrawable(const skiapipeline::RippleDrawableParams& params) : mParams(params) {}
+
+    void draw(SkCanvas* canvas, const SkMatrix&) const {
+        skiapipeline::AnimatedRippleDrawable::draw(canvas, mParams);
+    }
+
+    skiapipeline::RippleDrawableParams mParams;
+};
+
 struct DrawWebView final : Op {
     static const auto kType = Type::DrawWebView;
     DrawWebView(skiapipeline::FunctorDrawable* drawable) : drawable(sk_ref_sp(drawable)) {}
@@ -721,6 +734,10 @@ void DisplayListData::drawTextBlob(const SkTextBlob* blob, SkScalar x, SkScalar 
     mHasText = true;
 }
 
+void DisplayListData::drawRippleDrawable(const skiapipeline::RippleDrawableParams& params) {
+    this->push<DrawRippleDrawable>(0, params);
+}
+
 void DisplayListData::drawPatch(const SkPoint points[12], const SkColor colors[4],
                                 const SkPoint texs[4], SkBlendMode bmode, const SkPaint& paint) {
     this->push<DrawPatch>(0, points, colors, texs, bmode, paint);
@@ -848,6 +865,16 @@ constexpr color_transform_fn colorTransformForOp<DrawTextBlob>() {
             transformPaint(transform, const_cast<SkPaint*>(&(op->paint)));
             break;
         }
+    };
+}
+
+template <>
+constexpr color_transform_fn colorTransformForOp<DrawRippleDrawable>() {
+    return [](const void* opRaw, ColorTransform transform) {
+        const DrawRippleDrawable* op = reinterpret_cast<const DrawRippleDrawable*>(opRaw);
+        // Ripple drawable needs to contrast against the background, so we need the inverse color.
+        SkColor color = transformColorInverse(transform, op->mParams.color);
+        const_cast<DrawRippleDrawable*>(op)->mParams.color = color;
     };
 }
 
@@ -983,6 +1010,10 @@ void RecordingCanvas::onDrawAnnotation(const SkRect& rect, const char key[], SkD
 void RecordingCanvas::onDrawTextBlob(const SkTextBlob* blob, SkScalar x, SkScalar y,
                                      const SkPaint& paint) {
     fDL->drawTextBlob(blob, x, y, paint);
+}
+
+void RecordingCanvas::drawRippleDrawable(const skiapipeline::RippleDrawableParams& params) {
+    fDL->drawRippleDrawable(params);
 }
 
 void RecordingCanvas::drawImage(const sk_sp<SkImage>& image, SkScalar x, SkScalar y,

@@ -16,6 +16,7 @@
 
 package android.graphics;
 
+import android.annotation.ColorInt;
 import android.annotation.NonNull;
 import android.os.SystemProperties;
 import android.util.Pools.SynchronizedPool;
@@ -227,11 +228,11 @@ public final class RecordingCanvas extends BaseRecordingCanvas {
     public void drawRipple(CanvasProperty<Float> cx, CanvasProperty<Float> cy,
             CanvasProperty<Float> radius, CanvasProperty<Paint> paint,
             CanvasProperty<Float> progress, CanvasProperty<Float> turbulencePhase,
-            RuntimeShader shader) {
+            @ColorInt int color, RuntimeShader shader) {
         nDrawRipple(mNativeCanvasWrapper, cx.getNativeContainer(), cy.getNativeContainer(),
                 radius.getNativeContainer(), paint.getNativeContainer(),
                 progress.getNativeContainer(), turbulencePhase.getNativeContainer(),
-                shader.getNativeShaderBuilder());
+                color, shader.getNativeShaderBuilder());
     }
 
     /**
@@ -292,7 +293,7 @@ public final class RecordingCanvas extends BaseRecordingCanvas {
             long propCy, long propRadius, long propPaint);
     @CriticalNative
     private static native void nDrawRipple(long renderer, long propCx, long propCy, long propRadius,
-            long propPaint, long propProgress, long turbulencePhase, long runtimeEffect);
+            long propPaint, long propProgress, long turbulencePhase, int color, long runtimeEffect);
     @CriticalNative
     private static native void nDrawRoundRect(long renderer, long propLeft, long propTop,
             long propRight, long propBottom, long propRx, long propRy, long propPaint);
