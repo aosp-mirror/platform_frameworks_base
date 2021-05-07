@@ -421,6 +421,14 @@ public class VcnManagementService extends IVcnManagementService.Stub {
                 "Carrier privilege required for subscription group to set VCN Config");
     }
 
+    private void enforceManageTestNetworksForTestMode(@NonNull VcnConfig vcnConfig) {
+        if (vcnConfig.isTestModeProfile()) {
+            mContext.enforceCallingPermission(
+                    android.Manifest.permission.MANAGE_TEST_NETWORKS,
+                    "Test-mode require the MANAGE_TEST_NETWORKS permission");
+        }
+    }
+
     private class VcnSubscriptionTrackerCallback implements TelephonySubscriptionTrackerCallback {
         /**
          * Handles subscription group changes, as notified by {@link TelephonySubscriptionTracker}
@@ -588,6 +596,7 @@ public class VcnManagementService extends IVcnManagementService.Stub {
 
         mContext.getSystemService(AppOpsManager.class)
                 .checkPackage(mDeps.getBinderCallingUid(), config.getProvisioningPackageName());
+        enforceManageTestNetworksForTestMode(config);
         enforceCallingUserAndCarrierPrivilege(subscriptionGroup, opPkgName);
 
         Binder.withCleanCallingIdentity(() -> {

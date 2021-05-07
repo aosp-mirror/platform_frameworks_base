@@ -66,6 +66,7 @@ import android.net.vcn.IVcnStatusCallback;
 import android.net.vcn.IVcnUnderlyingNetworkPolicyListener;
 import android.net.vcn.VcnConfig;
 import android.net.vcn.VcnConfigTest;
+import android.net.vcn.VcnGatewayConnectionConfigTest;
 import android.net.vcn.VcnManager;
 import android.net.vcn.VcnUnderlyingNetworkPolicy;
 import android.os.IBinder;
@@ -525,6 +526,28 @@ public class VcnManagementServiceTest {
         mVcnMgmtSvc.setVcnConfig(TEST_UUID_2, TEST_VCN_CONFIG, TEST_PACKAGE_NAME);
         assertEquals(TEST_VCN_CONFIG, mVcnMgmtSvc.getConfigs().get(TEST_UUID_2));
         verify(mConfigReadWriteHelper).writeToDisk(any(PersistableBundle.class));
+    }
+
+    @Test
+    public void testSetVcnConfigTestModeRequiresPermission() throws Exception {
+        doThrow(new SecurityException("Requires MANAGE_TEST_NETWORKS"))
+                .when(mMockContext)
+                .enforceCallingPermission(
+                        eq(android.Manifest.permission.MANAGE_TEST_NETWORKS), any());
+
+        final VcnConfig vcnConfig =
+                new VcnConfig.Builder(mMockContext)
+                        .addGatewayConnectionConfig(
+                                VcnGatewayConnectionConfigTest.buildTestConfig())
+                        .setIsTestModeProfile()
+                        .build();
+
+        try {
+            mVcnMgmtSvc.setVcnConfig(TEST_UUID_2, vcnConfig, TEST_PACKAGE_NAME);
+            fail("Expected exception due to using test-mode without permission");
+        } catch (SecurityException e) {
+            verify(mMockPolicyListener, never()).onPolicyChanged();
+        }
     }
 
     @Test
