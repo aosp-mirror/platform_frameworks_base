@@ -91,6 +91,7 @@ import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.events.PrivacyDotViewController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
+import com.android.systemui.util.concurrency.ThreadFactory;
 import com.android.systemui.util.settings.SecureSettings;
 
 import java.util.ArrayList;
@@ -128,6 +129,7 @@ public class ScreenDecorations extends SystemUI implements Tunable {
     private CameraAvailabilityListener mCameraListener;
     private final UserTracker mUserTracker;
     private final PrivacyDotViewController mDotViewController;
+    private final ThreadFactory mThreadFactory;
 
     //TODO: These are piecemeal being updated to Points for now to support non-square rounded
     // corners. for now it is only supposed when reading the intrinsic size from the drawables with
@@ -215,7 +217,8 @@ public class ScreenDecorations extends SystemUI implements Tunable {
             BroadcastDispatcher broadcastDispatcher,
             TunerService tunerService,
             UserTracker userTracker,
-            PrivacyDotViewController dotViewController) {
+            PrivacyDotViewController dotViewController,
+            ThreadFactory threadFactory) {
         super(context);
         mMainHandler = handler;
         mSecureSettings = secureSettings;
@@ -223,6 +226,7 @@ public class ScreenDecorations extends SystemUI implements Tunable {
         mTunerService = tunerService;
         mUserTracker = userTracker;
         mDotViewController = dotViewController;
+        mThreadFactory = threadFactory;
     }
 
     @Override
@@ -233,7 +237,8 @@ public class ScreenDecorations extends SystemUI implements Tunable {
         }
         mHandler = startHandlerThread();
         mHandler.post(this::startOnScreenDecorationsThread);
-        mDotViewController.setUiExecutor(mHandler::post);
+        mDotViewController.setUiExecutor(
+                mThreadFactory.buildDelayableExecutorOnLooper(mHandler.getLooper()));
     }
 
     @VisibleForTesting
@@ -643,7 +648,7 @@ public class ScreenDecorations extends SystemUI implements Tunable {
 
         int newRotation = mContext.getDisplay().getRotation();
         if (mRotation != newRotation) {
-            mDotViewController.updateRotation(newRotation);
+            mDotViewController.setNewRotation(newRotation);
         }
 
         if (mPendingRotationChange) {
