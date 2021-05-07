@@ -522,7 +522,7 @@ stubs_defaults {
         "android.hardware.usb.gadget-V1.0-java",
         "android.hardware.vibrator-V1.3-java",
         "framework-protos",
-        "stable.core.platform.api.stubs",
+        "art.module.public.api",
         // There are a few classes from modules used by the core that
         // need to be resolved by metalava. We use a prebuilt stub of the
         // full sdk to ensure we can resolve them. If a new class gets added,
