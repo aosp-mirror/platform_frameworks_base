@@ -776,8 +776,8 @@
     <dimen name="conversation_expand_button_height">88dp</dimen>
     <!-- this is the margin between the Conversation image and the content -->
     <dimen name="conversation_image_start_margin">12dp</dimen>
-    <!-- Side margins of the conversation badge in relation to the conversation icon -->
-    <dimen name="conversation_badge_side_margin">32dp</dimen>
+    <!-- amount the badge sticks out from the conversation avatar -->
+    <dimen name="conversation_badge_protrusion">4dp</dimen>
     <!-- size of the notification badge when applied to the conversation icon -->
     <dimen name="conversation_icon_size_badged">20dp</dimen>
     <!-- size of the conversation avatar in an expanded group -->
@@ -786,10 +786,10 @@
     <dimen name="conversation_face_pile_avatar_size">32dp</dimen>
     <!-- size of the face pile icons when the group is expanded -->
     <dimen name="conversation_face_pile_avatar_size_group_expanded">@dimen/conversation_face_pile_avatar_size</dimen>
-    <!-- Side margins of the conversation badge in relation to the conversation icon when the group is expanded-->
-    <dimen name="conversation_badge_side_margin_group_expanded">@dimen/conversation_badge_side_margin</dimen>
-    <!-- Side margins of the conversation badge in relation to the conversation icon when the group is expanded-->
-    <dimen name="conversation_badge_side_margin_group_expanded_face_pile">@dimen/conversation_badge_side_margin</dimen>
+    <!-- amount the badge sticks out from the conversation avatar when the group is expanded -->
+    <dimen name="conversation_badge_protrusion_group_expanded">@dimen/conversation_badge_protrusion</dimen>
+    <!-- amount the badge sticks out from the conversation face pile when the group is expanded -->
+    <dimen name="conversation_badge_protrusion_group_expanded_face_pile">@dimen/conversation_badge_protrusion</dimen>
     <!-- The width of the protection of the face pile layout-->
     <dimen name="conversation_face_pile_protection_width">2dp</dimen>
     <!-- The width of the protection of the face pile layout when expanded-->
@@ -809,8 +809,8 @@
     <!-- The top padding of the conversation icon container when the avatar is small-->
     <dimen name="conversation_icon_container_top_padding_small_avatar">8dp</dimen>
 
-    <!-- The padding of the conversation header when expanded. This is calculated from the expand button size + notification_content_margin_end -->
-    <dimen name="conversation_header_expanded_padding_end">38dp</dimen>
+    <!-- The padding of the conversation header when expanded. This is calculated from the expand button size (56dp) - notification_content_margin_end (16dp) -->
+    <dimen name="conversation_header_expanded_padding_end">40dp</dimen>
 
     <!-- extra padding at the start of the icons when not conversations to keep them horizontally aligned with the notification icon -->
     <dimen name="messaging_layout_icon_padding_start">4dp</dimen>
