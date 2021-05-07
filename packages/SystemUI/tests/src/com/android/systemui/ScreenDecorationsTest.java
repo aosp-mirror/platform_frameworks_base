@@ -67,7 +67,6 @@ import com.android.systemui.statusbar.events.PrivacyDotViewController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.concurrency.FakeThreadFactory;
-import com.android.systemui.util.concurrency.ThreadFactory;
 import com.android.systemui.util.settings.FakeSettings;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.util.time.FakeSystemClock;
@@ -87,13 +86,12 @@ public class ScreenDecorationsTest extends SysuiTestCase {
 
     private static final Rect ZERO_RECT = new Rect();
 
-    private TestableLooper mTestableLooper;
     private ScreenDecorations mScreenDecorations;
     private WindowManager mWindowManager;
     private DisplayManager mDisplayManager;
     private SecureSettings mSecureSettings;
-    private Handler mMainHandler;
-    private ThreadFactory mThreadFactory;
+    private final FakeExecutor mExecutor = new FakeExecutor(new FakeSystemClock());
+    private FakeThreadFactory mThreadFactory;
     @Mock
     private TunerService mTunerService;
     @Mock
@@ -107,10 +105,10 @@ public class ScreenDecorationsTest extends SysuiTestCase {
     public void setup() {
         MockitoAnnotations.initMocks(this);
 
-        mTestableLooper = TestableLooper.get(this);
-        mMainHandler = new Handler(mTestableLooper.getLooper());
+        Handler mainHandler = new Handler(TestableLooper.get(this).getLooper());
         mSecureSettings = new FakeSettings();
-        mThreadFactory = new FakeThreadFactory(new FakeExecutor(new FakeSystemClock()));
+        mThreadFactory = new FakeThreadFactory(mExecutor);
+        mThreadFactory.setHandler(mainHandler);
 
         mWindowManager = mock(WindowManager.class);
         WindowMetrics metrics = mContext.getSystemService(WindowManager.class)
@@ -124,30 +122,25 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         when(mDisplayManager.getDisplay(anyInt())).thenReturn(display);
         mContext.addMockSystemService(DisplayManager.class, mDisplayManager);
 
-        mScreenDecorations = spy(new ScreenDecorations(mContext, mMainHandler, mSecureSettings,
+        mScreenDecorations = spy(new ScreenDecorations(mContext, mExecutor, mSecureSettings,
                 mBroadcastDispatcher, mTunerService, mUserTracker, mDotViewController,
                 mThreadFactory) {
             @Override
             public void start() {
                 super.start();
-                mTestableLooper.processAllMessages();
-            }
-
-            @Override
-            Handler startHandlerThread() {
-                return new Handler(mTestableLooper.getLooper());
+                mExecutor.runAllReady();
             }
 
             @Override
             protected void onConfigurationChanged(Configuration newConfig) {
                 super.onConfigurationChanged(newConfig);
-                mTestableLooper.processAllMessages();
+                mExecutor.runAllReady();
             }
 
             @Override
             public void onTuningChanged(String key, String newValue) {
                 super.onTuningChanged(key, newValue);
-                mTestableLooper.processAllMessages();
+                mExecutor.runAllReady();
             }
         });
         reset(mTunerService);
