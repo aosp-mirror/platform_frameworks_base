@@ -5070,7 +5070,7 @@ public class Notification implements Parcelable
             if (profileBadge != null) {
                 contentView.setImageViewBitmap(R.id.profile_badge, profileBadge);
                 contentView.setViewVisibility(R.id.profile_badge, View.VISIBLE);
-                if (isColorized(p)) {
+                if (isBackgroundColorized(p)) {
                     contentView.setDrawableTint(R.id.profile_badge, false,
                             getPrimaryTextColor(p), PorterDuff.Mode.SRC_ATOP);
                 }
@@ -5257,7 +5257,7 @@ public class Notification implements Parcelable
 
         private void updateBackgroundColor(RemoteViews contentView,
                 StandardTemplateParams p) {
-            if (isColorized(p)) {
+            if (isBackgroundColorized(p)) {
                 contentView.setInt(R.id.status_bar_latest_event_content, "setBackgroundColor",
                         getBackgroundColor(p));
             } else {
@@ -5541,8 +5541,14 @@ public class Notification implements Parcelable
             return true;
         }
 
-        private boolean isColorized(StandardTemplateParams p) {
-            return p.allowColorization && mN.isColorized();
+        /**
+         * Determines if the notification should be colorized *for the purposes of applying colors*.
+         * If this is the minimized view of a colorized notification, or if the app did not provide
+         * a color to colorize with, this will return false so that internal coloring logic can
+         * still render the notification normally.
+         */
+        private boolean isBackgroundColorized(StandardTemplateParams p) {
+            return p.allowColorization && mN.color != COLOR_DEFAULT && mN.isColorized();
         }
 
         private boolean isCallActionColorCustomizable() {
@@ -5550,7 +5556,8 @@ public class Notification implements Parcelable
             //  that is only used for disallowing colorization of headers for the minimized state,
             //  and neither of those conditions applies when showing actions.
             //  Not requiring StandardTemplateParams as an argument simplifies the creation process.
-            return mN.isColorized() && mContext.getResources().getBoolean(
+            return mN.color != COLOR_DEFAULT && mN.isColorized()
+                    && mContext.getResources().getBoolean(
                     R.bool.config_callNotificationActionColorsRequireColorized);
         }
 
@@ -5594,7 +5601,8 @@ public class Notification implements Parcelable
 
         private void bindSnoozeAction(RemoteViews big, StandardTemplateParams p) {
             boolean hideSnoozeButton = mN.isForegroundService() || mN.fullScreenIntent != null
-                    || isColorized(p) || p.mViewType == StandardTemplateParams.VIEW_TYPE_HEADS_UP;
+                    || isBackgroundColorized(p)
+                    || p.mViewType == StandardTemplateParams.VIEW_TYPE_HEADS_UP;
             big.setBoolean(R.id.snooze_button, "setEnabled", !hideSnoozeButton);
             if (hideSnoozeButton) {
                 // Only hide; NotificationContentView will show it when it adds the click listener
@@ -6110,7 +6118,7 @@ public class Notification implements Parcelable
                     background = outResultColor[0].getDefaultColor();
                     textColor = ContrastColorUtil.resolvePrimaryColor(mContext,
                             background, mInNightMode);
-                } else if (mTintActionButtons && !mInNightMode && !isColorized(p)) {
+                } else if (mTintActionButtons && !mInNightMode && !isBackgroundColorized(p)) {
                     textColor = getAccentColor(p);
                 } else {
                     textColor = getPrimaryTextColor(p);
@@ -6276,14 +6284,15 @@ public class Notification implements Parcelable
          * Gets the standard action button color
          */
         private @ColorInt int getStandardActionColor(Notification.StandardTemplateParams p) {
-            return mTintActionButtons || isColorized(p) ? getAccentColor(p) : getNeutralColor(p);
+            return mTintActionButtons || isBackgroundColorized(p)
+                    ? getAccentColor(p) : getNeutralColor(p);
         }
 
         /**
          * Gets a neutral color that can be used for icons or similar that should not stand out.
          */
         private @ColorInt int getHeaderIconColor(StandardTemplateParams p) {
-            return isColorized(p) ? getSecondaryTextColor(p) : getNeutralColor(p);
+            return isBackgroundColorized(p) ? getSecondaryTextColor(p) : getNeutralColor(p);
         }
 
         /**
@@ -6300,7 +6309,7 @@ public class Notification implements Parcelable
          * {@link #getSmallIconColor(StandardTemplateParams)}.
          */
         private @ColorInt int getAccentColor(StandardTemplateParams p) {
-            if (isColorized(p)) {
+            if (isBackgroundColorized(p)) {
                 return getPrimaryTextColor(p);
             }
             int color = obtainThemeColor(R.attr.colorAccent, COLOR_INVALID);
@@ -6315,7 +6324,7 @@ public class Notification implements Parcelable
          * color when colorized, or when not using theme color tints.
          */
         private @ColorInt int getProtectionColor(StandardTemplateParams p) {
-            if (!isColorized(p)) {
+            if (!isBackgroundColorized(p)) {
                 int color = obtainThemeColor(R.attr.colorBackgroundFloating, COLOR_INVALID);
                 if (color != COLOR_INVALID) {
                     return color;
@@ -6329,7 +6338,7 @@ public class Notification implements Parcelable
          * Gets the theme's error color, or the primary text color for colorized notifications.
          */
         private @ColorInt int getErrorColor(StandardTemplateParams p) {
-            if (!isColorized(p)) {
+            if (!isBackgroundColorized(p)) {
                 int color = obtainThemeColor(R.attr.colorError, COLOR_INVALID);
                 if (color != COLOR_INVALID) {
                     return color;
@@ -6350,7 +6359,7 @@ public class Notification implements Parcelable
          * Gets the contrast-adjusted version of the color provided by the app.
          */
         private @ColorInt int getContrastColor(StandardTemplateParams p) {
-            if (isColorized(p)) {
+            if (isBackgroundColorized(p)) {
                 return getPrimaryTextColor(p);
             }
             int rawColor = getRawColor(p);
@@ -6493,7 +6502,6 @@ public class Notification implements Parcelable
                                 + " notification: " + mN.mShortcutId
                                 + " vs bubble: " + mN.mBubbleMetadata.getShortcutId());
             }
-            validateColorizedHasColor();
 
             // first, add any extras from the calling code
             if (mUserExtras != null) {
@@ -6545,21 +6553,6 @@ public class Notification implements Parcelable
             mN.allPendingIntents = null;
 
             return mN;
-        }
-
-        // This code is executed on behalf of other apps' notifications, sometimes even by 3p apps,
-        // a use case that is not supported by the Compat Framework library.
-        @SuppressWarnings("AndroidFrameworkCompatChange")
-        private void validateColorizedHasColor() {
-            if (mN.color == COLOR_DEFAULT && mN.extras.getBoolean(EXTRA_COLORIZED)) {
-                if (mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.S) {
-                    throw new IllegalArgumentException(
-                            "Colorized notifications must set a color (other than COLOR_DEFAULT).");
-                } else {
-                    Log.w(TAG, "Colorized notifications must set a color (other than "
-                            + "COLOR_DEFAULT).  This is required for apps targeting S.");
-                }
-            }
         }
 
         /**
@@ -6694,7 +6687,7 @@ public class Notification implements Parcelable
          * which must be resolved by the caller before being used.
          */
         private @ColorInt int getUnresolvedBackgroundColor(StandardTemplateParams p) {
-            return isColorized(p) ? getRawColor(p) : COLOR_DEFAULT;
+            return isBackgroundColorized(p) ? getRawColor(p) : COLOR_DEFAULT;
         }
 
         /**
@@ -6880,12 +6873,14 @@ public class Notification implements Parcelable
     }
 
     /**
-     * @return true if this notification is colorized.
+     * @return true if this notification is colorized *for the purposes of ranking*.  If the
+     * {@link #color} is {@link #COLOR_DEFAULT} this will be true, even though the actual
+     * appearance of the notification may not be "colorized".
      *
      * @hide
      */
     public boolean isColorized() {
-        return color != COLOR_DEFAULT && extras.getBoolean(EXTRA_COLORIZED)
+        return extras.getBoolean(EXTRA_COLORIZED)
                 && (hasColorizedPermission() || isForegroundService());
     }
 
