@@ -137,8 +137,7 @@
     <string name="accessibility_phone_button" msgid="4256353121703100427">"فون"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"صوتی معاون"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"غیر مقفل کریں"</string>
-    <!-- no translation found for accessibility_lock_icon (661492842417875775) -->
-    <skip />
+    <string name="accessibility_lock_icon" msgid="661492842417875775">"آلہ مقفل کر دیا گیا"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="5209142744692162598">"فنگر پرنٹ کا انتظار ہے"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="1811563723195375298">"فنگر پرنٹ استعمال کیے بغیرغیر مقفل کریں"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"اسکیننگ چہرہ"</string>
@@ -290,9 +289,11 @@
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"موبائل ہاٹ اسپاٹ کو آف کر دیا گیا۔"</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"موبائل ہاٹ اسپاٹ کو آن کر دیا گیا۔"</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"اسکرین کو کاسٹ کرنا بند کر دیا۔"</string>
-    <string name="accessibility_quick_settings_work_mode_off" msgid="562749867895549696">"کام موڈ آف ہے۔"</string>
+    <!-- no translation found for accessibility_quick_settings_work_mode_off (9106217884005620744) -->
+    <skip />
     <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"کام موڈ آن ہے۔"</string>
-    <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6256690740556798683">"کام موڈ آف ہو گیا۔"</string>
+    <!-- no translation found for accessibility_quick_settings_work_mode_changed_off (2653550342355027441) -->
+    <skip />
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"کام موڈ آن ہو گیا۔"</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"ڈیٹا سیور آف ہو گیا۔"</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"ڈیٹا سرور آن ہو گیا۔"</string>
@@ -411,6 +412,8 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"<xliff:g id="DATA_LIMIT">%s</xliff:g> حد"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"<xliff:g id="DATA_LIMIT">%s</xliff:g> وارننگ"</string>
     <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"دفتری پروفائل"</string>
+    <!-- no translation found for quick_settings_work_mode_paused (4841109346916998613) -->
+    <skip />
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"نائٹ لائٹ"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"غروب آفتاب کے وقت آن ہوگی"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"طلوع آفتاب تک"</string>
@@ -669,10 +672,12 @@
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"سبھی دکھائیں"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"ادائیگی کرنے کے لیے غیر مقفل کریں"</string>
-    <string name="wallet_secondary_label_active" msgid="4909706168969888137">"تیار ہے"</string>
-    <string name="wallet_secondary_label_no_card" msgid="1750103386908123401">"ادائیگی سیٹ اپ کریں"</string>
+    <!-- no translation found for wallet_secondary_label_no_card (1282609666895946317) -->
+    <skip />
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"استعمال کرنے کے لیے غیر مقفل کریں"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"آپ کے کارڈز حاصل کرنے میں ایک مسئلہ درپیش تھا، براہ کرم بعد میں دوبارہ کوشش کریں"</string>
+    <!-- no translation found for wallet_lockscreen_settings_label (3539105300870383570) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"دفتری پروفائل"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"ہوائی جہاز وضع"</string>
     <string name="add_tile" msgid="6239678623873086686">"ٹائل شامل کریں"</string>
@@ -741,9 +746,12 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"‏&lt;b&gt;اسٹیٹس:&lt;/b&gt; کو خاموش پر درجہ بند کیا گیا"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"‏&lt;b&gt;اسٹیٹس:&lt;/b&gt; کو اعلی درجہ دیا گیا"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"‏&lt;b&gt;اسٹیٹس:&lt;/b&gt; کو کم درجہ دیا گیا"</string>
-    <string name="notification_channel_summary_priority" msgid="4592979359953954258">"ترجیحی موڈ آن ہونے پر بھی، ہمیشہ آپ کی اطلاعات کے اوپری حصے میں دکھائی جاتی ہے"</string>
+    <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"یہ گفتگو کی اطلاعات کے اوپری حصّے پر اور مقفل اسکرین پر پروفائل کی تصویر کے بطور دکھائی دیتا ہے"</string>
+    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"یہ گفتگو کی اطلاعات کے اوپری حصّے پر اور مقفل اسکرین پر پروفائل کی تصویر کے بطور دکھائی دیتا ہے، بلبلے کے بطور ظاہر ہوتا ہے"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"یہ گفتگو کی اطلاعات کے اوپری حصّے پر اور مقفل اسکرین پر پروفائل کی تصویر کے بطور دکھائی دیتا ہے، \'ڈسٹرب نہ کریں\' میں مداخلت کرتا ہے"</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"یہ گفتگو کی اطلاعات کے اوپری حصّے پر اور مقفل اسکرین پر پروفائل کی تصویر کے بطور دکھائی دیتا ہے، بلبلے کے بطور ظاہر ہوتا ہے، \'ڈسٹرب نہ کریں\' میں مداخلت کرتا ہے"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"ترتیبات"</string>
-    <string name="notification_priority_title" msgid="5256226572739882190">"ترجیحی گفتگوئیں"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"ترجیح"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> گفتگو کی خصوصیات کو سپورٹ نہیں کرتا ہے"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"ان اطلاعات کی ترمیم نہیں کی جا سکتی۔"</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"اطلاعات کے اس گروپ کو یہاں کنفیگر نہیں کیا جا سکتا"</string>
@@ -859,6 +867,8 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"آن"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"آف"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"غیر دستیاب ہے"</string>
+    <!-- no translation found for tile_disabled (373212051546573069) -->
+    <skip />
     <string name="nav_bar" msgid="4642708685386136807">"نیویگیشن بار"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"لے آؤٹ"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"بائيں جانب کی اضافی بٹن کی قسم"</string>
@@ -1017,14 +1027,6 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"سسٹم نیویگیشن اپ ڈیٹ کیا گیا۔ تبدیلیاں کرنے کے لیے، ترتیبات پر جائیں۔"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"سسٹم نیویگیشن اپ ڈیٹ کرنے کے لیے ترتیبات پر جائیں"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"اسٹینڈ بائی"</string>
-    <string name="priority_onboarding_title" msgid="2893070698479227616">"گفتگو کو ترجیح پر سیٹ کیا گیا"</string>
-    <string name="priority_onboarding_behavior" msgid="636826237468953117">"ترجیحی گفتگوئیں"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="3861580571311518785">"یہ گفتگوئیں آپ کی فہرست کے اوپری حصے میں دکھائ جاتی ہیں اور جب آپ کا ترجیحی موڈ آن ہوتا ہے تو ہمیشہ آپ تک پہنچ سکتی ہیں"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="1781653813573865071">"پروفائل کی تصاویر مقفل اسکرین پر دکھائی جاتی ہیں"</string>
-    <string name="priority_onboarding_appear_as_bubble_text" msgid="4359924720680083057">"آپ ان مکالموں کو آسانی سے اپنی ہوم اسکرین پر بلبلوں میں تلاش کر سکتے ہیں"</string>
-    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"ڈسٹرب نہ کریں میں مداخلت کریں"</string>
-    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"سمجھ آ گئی"</string>
-    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"ترتیبات"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"میگنیفکیشن ونڈو"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"میگنیفکیشن ونڈو کنٹرولز"</string>
     <string name="accessibility_control_zoom_in" msgid="1189272315480097417">"زوم ان کریں"</string>
@@ -1045,8 +1047,7 @@
     <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"نیچے دائیں جانب لے جائیں"</string>
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"‏EDGE پر لے جائیں اور چھپائیں"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"‏EDGE اور شو سے باہر منتقل کریں"</string>
-    <!-- no translation found for accessibility_floating_button_action_double_tap_to_toggle (7976492639670692037) -->
-    <skip />
+    <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"ٹوگل کریں"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"آلہ کے کنٹرولز"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"اپنے منسلک آلات کے لیے کنٹرولز شامل کریں"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"آلہ کے کنٹرولز سیٹ اپ کریں"</string>
@@ -1088,15 +1089,12 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"مزید دیکھنے کیلئے سوائپ کریں"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"تجاویز لوڈ ہو رہی ہیں"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"میڈیا"</string>
-    <!-- no translation found for controls_media_close_session (1193000643003066508) -->
-    <skip />
-    <!-- no translation found for controls_media_active_session (3146882316024153337) -->
-    <skip />
+    <string name="controls_media_close_session" msgid="1193000643003066508">"اس میڈیا سیشن کو چھپائیں؟"</string>
+    <string name="controls_media_active_session" msgid="3146882316024153337">"میڈیا کے موجودہ سیشن کو چھپایا نہیں جا سکتا۔"</string>
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"برخاست کریں"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"دوبارہ شروع کریں"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"ترتیبات"</string>
-    <!-- no translation found for controls_media_smartspace_rec_title (1699818353932537407) -->
-    <skip />
+    <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"چلائیں"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"غیر فعال، ایپ چیک کریں"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"خرابی، دوبارہ کوشش کی جا رہی ہے…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"نہیں ملا"</string>
@@ -1153,14 +1151,9 @@
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"آپ کے بیٹری میٹر کو پڑھنے میں دشواری"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"مزید معلومات کے لیے تھپتھپائیں"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"کوئی الارم سیٹ نہیں ہے"</string>
-    <!-- no translation found for accessibility_fingerprint_label (5255731221854153660) -->
-    <skip />
-    <!-- no translation found for accessibility_udfps_disabled_button (4284034245130239384) -->
-    <skip />
-    <!-- no translation found for accessibility_authenticate_hint (798914151813205721) -->
-    <skip />
-    <!-- no translation found for accessibility_enter_hint (2617864063504824834) -->
-    <skip />
-    <!-- no translation found for keyguard_try_fingerprint (2825130772993061165) -->
-    <skip />
+    <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"فنگر پرنٹ سینسر"</string>
+    <string name="accessibility_udfps_disabled_button" msgid="4284034245130239384">"فنگر پرنٹ سینسر غیر فعال ہے"</string>
+    <string name="accessibility_authenticate_hint" msgid="798914151813205721">"تصدیق کریں"</string>
+    <string name="accessibility_enter_hint" msgid="2617864063504824834">"آلہ درج کریں"</string>
+    <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"کھولنے کے لیے فنگر پرنٹ کا استعمال کریں"</string>
 </resources>
