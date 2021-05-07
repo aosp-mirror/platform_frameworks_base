@@ -2861,6 +2861,10 @@ public class DisplayPolicy {
         mImmersiveModeConfirmation.onLockTaskModeChangedLw(lockTaskState);
     }
 
+    boolean onSystemUiSettingsChanged() {
+        return mImmersiveModeConfirmation.onSettingChanged(mService.mCurrentUserId);
+    }
+
     /**
      * Request a screenshot be taken.
      *
