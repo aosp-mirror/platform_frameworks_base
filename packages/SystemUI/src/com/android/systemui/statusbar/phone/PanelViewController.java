@@ -26,7 +26,6 @@ import static java.lang.Float.isNaN;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -42,7 +41,6 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.animation.Interpolator;
-import android.view.animation.PathInterpolator;
 
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -336,8 +334,7 @@ public abstract class PanelViewController {
     protected void startExpandMotion(float newX, float newY, boolean startTracking,
             float expandedHeight) {
         if (!mHandlingPointerUp) {
-            InteractionJankMonitor.getInstance().begin(mView,
-                    CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
+            beginJankMonitoring(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
         }
         mInitialOffsetOnTouch = expandedHeight;
         mInitialTouchY = newY;
@@ -533,7 +530,7 @@ public abstract class PanelViewController {
     protected void flingToHeight(float vel, boolean expand, float target,
             float collapseSpeedUpFactor, boolean expandBecauseOfFalsing) {
         if (target == mExpandedHeight || getOverExpansionAmount() > 0f && expand) {
-            InteractionJankMonitor.getInstance().end(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
+            endJankMonitoring(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
             mKeyguardStateController.notifyPanelFlingEnd();
             notifyExpandingFinished();
             return;
@@ -579,8 +576,7 @@ public abstract class PanelViewController {
 
             @Override
             public void onAnimationStart(Animator animation) {
-                InteractionJankMonitor.getInstance()
-                        .begin(mView, CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
+                beginJankMonitoring(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
             }
 
             @Override
@@ -632,12 +628,10 @@ public abstract class PanelViewController {
         setAnimator(null);
         mKeyguardStateController.notifyPanelFlingEnd();
         if (!cancelled) {
-            InteractionJankMonitor.getInstance()
-                    .end(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
+            endJankMonitoring(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
             notifyExpandingFinished();
         } else {
-            InteractionJankMonitor.getInstance()
-                    .cancel(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
+            cancelJankMonitoring(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
         }
         notifyBarPanelExpansionChanged();
     }
@@ -847,8 +841,7 @@ public abstract class PanelViewController {
                             mView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                             if (mAnimateAfterExpanding) {
                                 notifyExpandingStarted();
-                                InteractionJankMonitor.getInstance().begin(mView,
-                                        CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
+                                beginJankMonitoring(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
                                 fling(0, true /* expand */);
                             } else {
                                 setExpandedFraction(1f);
@@ -1304,11 +1297,10 @@ public abstract class PanelViewController {
                     endMotionEvent(event, x, y, false /* forceCancel */);
                     // mHeightAnimator is null, there is no remaining frame, ends instrumenting.
                     if (mHeightAnimator == null) {
-                        InteractionJankMonitor monitor = InteractionJankMonitor.getInstance();
                         if (event.getActionMasked() == MotionEvent.ACTION_UP) {
-                            monitor.end(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
+                            endJankMonitoring(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
                         } else {
-                            monitor.cancel(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
+                            cancelJankMonitoring(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
                         }
                     }
                     break;
@@ -1337,5 +1329,21 @@ public abstract class PanelViewController {
         public void onConfigurationChanged(Configuration newConfig) {
             loadDimens();
         }
+    }
+
+    private void beginJankMonitoring(int cuj) {
+        InteractionJankMonitor.Configuration.Builder builder =
+                new InteractionJankMonitor.Configuration.Builder(cuj)
+                        .setView(mView)
+                        .setTag(isFullyCollapsed() ? "Expand" : "Collapse");
+        InteractionJankMonitor.getInstance().begin(builder);
+    }
+
+    private void endJankMonitoring(int cuj) {
+        InteractionJankMonitor.getInstance().end(cuj);
+    }
+
+    private void cancelJankMonitoring(int cuj) {
+        InteractionJankMonitor.getInstance().cancel(cuj);
     }
 }

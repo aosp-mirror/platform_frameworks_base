@@ -62,6 +62,7 @@ import java.util.stream.Collectors;
 
 @SmallTest
 public class InteractionJankMonitorTest {
+    private static final String CUJ_POSTFIX = "";
     private ViewAttachTestActivity mActivity;
     private View mView;
     private HandlerThread mWorker;
@@ -90,7 +91,7 @@ public class InteractionJankMonitorTest {
         InteractionJankMonitor monitor = spy(new InteractionJankMonitor(mWorker));
         verify(mWorker).start();
 
-        Session session = new Session(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
+        Session session = new Session(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE, CUJ_POSTFIX);
         FrameTracker tracker = spy(new FrameTracker(session, mWorker.getThreadHandler(),
                 new ThreadedRendererWrapper(mView.getThreadedRenderer()),
                 new ViewRootWrapper(mView.getViewRootImpl()), new SurfaceControlWrapper(),
@@ -137,7 +138,7 @@ public class InteractionJankMonitorTest {
 
         ArgumentCaptor<Message> captor = ArgumentCaptor.forClass(Message.class);
 
-        Session session = new Session(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
+        Session session = new Session(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE, CUJ_POSTFIX);
         FrameTracker tracker = spy(new FrameTracker(session, mWorker.getThreadHandler(),
                 new ThreadedRendererWrapper(mView.getThreadedRenderer()),
                 new ViewRootWrapper(mView.getViewRootImpl()), new SurfaceControlWrapper(),

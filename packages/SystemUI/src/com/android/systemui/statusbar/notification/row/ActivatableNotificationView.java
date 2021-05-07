@@ -32,6 +32,7 @@ import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 
 import com.android.internal.jank.InteractionJankMonitor;
+import com.android.internal.jank.InteractionJankMonitor.Configuration;
 import com.android.settingslib.Utils;
 import com.android.systemui.Gefingerpoken;
 import com.android.systemui.R;
@@ -542,8 +543,9 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
             @Override
             public void onAnimationStart(Animator animation) {
                 mWasCancelled = false;
-                InteractionJankMonitor.getInstance().begin(ActivatableNotificationView.this,
-                        getCujType(isAppearing));
+                Configuration.Builder builder = new Configuration.Builder(getCujType(isAppearing))
+                        .setView(ActivatableNotificationView.this);
+                InteractionJankMonitor.getInstance().begin(builder);
             }
 
             @Override
