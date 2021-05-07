@@ -242,35 +242,26 @@ public class QuickStatusBarHeader extends FrameLayout {
                 .addFloat(mDateView, "alpha", 0, 1)
                 .addFloat(mSecurityHeaderView, "alpha", 0, 1)
                 .addFloat(mQSCarriers, "alpha", 0, 1);
-
-        if (noCallingIcon != null || callStrengthIcon != null) {
-            if (noCallingIcon != null) {
-                builder.addFloat(noCallingIcon, "alpha", 1, 0);
+        builder.setListener(new TouchAnimator.ListenerAdapter() {
+            @Override
+            public void onAnimationAtEnd() {
+                mIconContainer.addIgnoredSlot(mMobileSlotName);
+                mIconContainer.addIgnoredSlot(mCallStrengthSlotName);
             }
-            if (callStrengthIcon != null) {
-                builder.addFloat(callStrengthIcon, "alpha", 1, 0);
+
+            @Override
+            public void onAnimationStarted() {
+                mIconContainer.addIgnoredSlot(mMobileSlotName);
+                mIconContainer.addIgnoredSlot(mCallStrengthSlotName);
             }
-            builder.setListener(new TouchAnimator.ListenerAdapter() {
-                @Override
-                public void onAnimationAtEnd() {
-                    mIconContainer.addIgnoredSlot(mMobileSlotName);
-                    mIconContainer.addIgnoredSlot(mCallStrengthSlotName);
-                }
 
-                @Override
-                public void onAnimationStarted() {
-                    mIconContainer.removeIgnoredSlot(mMobileSlotName);
-                    mIconContainer.removeIgnoredSlot(mCallStrengthSlotName);
-                }
-
-                @Override
-                public void onAnimationAtStart() {
-                    super.onAnimationAtStart();
-                    mIconContainer.removeIgnoredSlot(mMobileSlotName);
-                    mIconContainer.removeIgnoredSlot(mCallStrengthSlotName);
-                }
-            });
-        }
+            @Override
+            public void onAnimationAtStart() {
+                super.onAnimationAtStart();
+                mIconContainer.removeIgnoredSlot(mMobileSlotName);
+                mIconContainer.removeIgnoredSlot(mCallStrengthSlotName);
+            }
+        });
         mAlphaAnimator = builder.build();
     }
 
