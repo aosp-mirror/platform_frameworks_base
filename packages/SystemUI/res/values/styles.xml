@@ -14,8 +14,8 @@
      limitations under the License.
 -->
 
-<resources xmlns:android="http://schemas.android.com/apk/res/android"
-           xmlns:androidprv="http://schemas.android.com/apk/prv/res/android">
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- NOTE: Adding the androidprv: namespace to this file will break the studio build. -->
     <style name="ClearAllButtonDefaultMargins">
         <item name="android:layout_marginStart">0dp</item>
         <item name="android:layout_marginTop">0dp</item>
@@ -642,7 +642,7 @@
     <style name="MediaPlayer.OutlineButton">
         <item name="android:background">@drawable/qs_media_button_background</item>
         <item name="android:textColor">?android:attr/textColorPrimary</item>
-        <item name="android:backgroundTint">?androidprv:attr/colorAccentPrimaryVariant</item>
+        <item name="android:backgroundTint">@color/media_player_outline_button_bg</item>
         <item name="android:fontFamily">@*android:string/config_headlineFontFamilyMedium</item>
     </style>
 
@@ -659,7 +659,7 @@
     </style>
 
     <style name="MediaPlayer.Album">
-        <item name="android:backgroundTint">?androidprv:attr/colorAccentSecondary</item>
+        <item name="android:backgroundTint">@color/media_player_album_bg</item>
 
     </style>
 
