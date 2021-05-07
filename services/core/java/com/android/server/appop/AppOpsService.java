@@ -3161,7 +3161,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             boolean shouldCollectMessage) {
         RestrictionBypass bypass;
         try {
-            bypass = verifyAndGetBypass(uid, packageName, attributionTag);
+            bypass = verifyAndGetBypass(uid, packageName, attributionTag, proxyPackageName);
         } catch (SecurityException e) {
             Slog.e(TAG, "noteOperation", e);
             return new SyncNotedAppOp(AppOpsManager.MODE_ERRORED, code, attributionTag,
@@ -3653,7 +3653,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             boolean shouldCollectMessage, boolean dryRun) {
         RestrictionBypass bypass;
         try {
-            bypass = verifyAndGetBypass(uid, packageName, attributionTag);
+            bypass = verifyAndGetBypass(uid, packageName, attributionTag, proxyPackageName);
         } catch (SecurityException e) {
             Slog.e(TAG, "startOperation", e);
             return new SyncNotedAppOp(AppOpsManager.MODE_ERRORED, code, attributionTag,
@@ -4187,17 +4187,26 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     /**
+     * @see verifyAndGetBypass(int, String, String, String)
+     */
+    private @Nullable RestrictionBypass verifyAndGetBypass(int uid, String packageName,
+            @Nullable String attributionTag) {
+        return verifyAndGetBypass(uid, packageName, attributionTag, null);
+    }
+
+    /**
      * Verify that package belongs to uid and return the {@link RestrictionBypass bypass
      * description} for the package.
      *
      * @param uid The uid the package belongs to
      * @param packageName The package the might belong to the uid
      * @param attributionTag attribution tag or {@code null} if no need to verify
+     * @param proxyPackageName The proxy package, from which the attribution tag is to be pulled
      *
      * @return {@code true} iff the package is privileged
      */
     private @Nullable RestrictionBypass verifyAndGetBypass(int uid, String packageName,
-            @Nullable String attributionTag) {
+            @Nullable String attributionTag, @Nullable String proxyPackageName) {
         if (uid == Process.ROOT_UID) {
             // For backwards compatibility, don't check package name for root UID.
             return null;
@@ -4235,34 +4244,36 @@ public class AppOpsService extends IAppOpsService.Stub {
         final long ident = Binder.clearCallingIdentity();
         try {
             boolean isAttributionTagValid = false;
-            AndroidPackage pkg = LocalServices.getService(PackageManagerInternal.class)
-                    .getPackage(packageName);
+            PackageManagerInternal pmInt = LocalServices.getService(PackageManagerInternal.class);
+            AndroidPackage pkg = pmInt.getPackage(packageName);
             if (pkg != null) {
-                if (attributionTag == null) {
-                    isAttributionTagValid = true;
-                } else {
-                    if (pkg.getAttributions() != null) {
-                        int numAttributions = pkg.getAttributions().size();
-                        for (int i = 0; i < numAttributions; i++) {
-                            if (pkg.getAttributions().get(i).tag.equals(attributionTag)) {
-                                isAttributionTagValid = true;
-                            }
-                        }
-                    }
-                }
+                isAttributionTagValid = isAttributionInPackage(pkg, attributionTag);
 
                 pkgUid = UserHandle.getUid(userId, UserHandle.getAppId(pkg.getUid()));
                 bypass = getBypassforPackage(pkg);
             }
             if (!isAttributionTagValid) {
-                String msg = "attributionTag " + attributionTag + " not declared in"
-                        + " manifest of " + packageName;
+                AndroidPackage proxyPkg = proxyPackageName != null
+                        ? pmInt.getPackage(proxyPackageName) : null;
+                boolean foundInProxy = isAttributionInPackage(proxyPkg, attributionTag);
+                String msg;
+                if (pkg != null && foundInProxy) {
+                    msg = "attributionTag " + attributionTag + " declared in manifest of the proxy"
+                            + " package " + proxyPackageName + ", this is not advised";
+                } else if (pkg != null) {
+                    msg = "attributionTag " + attributionTag + " not declared in manifest of "
+                            + packageName;
+                } else {
+                    msg = "package " + packageName + " not found, can't check for "
+                            + "attributionTag " + attributionTag;
+                }
+
                 try {
                     if (mPlatformCompat.isChangeEnabledByPackageName(
                             SECURITY_EXCEPTION_ON_INVALID_ATTRIBUTION_TAG_CHANGE, packageName,
                             userId) && mPlatformCompat.isChangeEnabledByUid(
                                     SECURITY_EXCEPTION_ON_INVALID_ATTRIBUTION_TAG_CHANGE,
-                            callingUid)) {
+                            callingUid) && !foundInProxy) {
                         throw new SecurityException(msg);
                     } else {
                         Slog.e(TAG, msg);
@@ -4280,6 +4291,25 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
 
         return bypass;
+    }
+
+    private boolean isAttributionInPackage(@Nullable AndroidPackage pkg,
+            @Nullable String attributionTag) {
+        if (pkg == null) {
+            return false;
+        } else if (attributionTag == null) {
+            return true;
+        }
+        if (pkg.getAttributions() != null) {
+            int numAttributions = pkg.getAttributions().size();
+            for (int i = 0; i < numAttributions; i++) {
+                if (pkg.getAttributions().get(i).tag.equals(attributionTag)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     /**
