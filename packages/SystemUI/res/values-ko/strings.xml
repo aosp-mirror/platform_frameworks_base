@@ -289,9 +289,11 @@
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"모바일 핫스팟이 사용 중지되었습니다."</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"모바일 핫스팟을 사용합니다."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"화면 전송이 중지되었습니다."</string>
-    <string name="accessibility_quick_settings_work_mode_off" msgid="562749867895549696">"작업 모드가 사용 중지되었습니다."</string>
+    <!-- no translation found for accessibility_quick_settings_work_mode_off (9106217884005620744) -->
+    <skip />
     <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"작업 모드가 사용 설정되었습니다."</string>
-    <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6256690740556798683">"작업 모드가 사용 중지되었습니다."</string>
+    <!-- no translation found for accessibility_quick_settings_work_mode_changed_off (2653550342355027441) -->
+    <skip />
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"작업 모드가 사용 설정되었습니다."</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"데이터 절약 모드를 사용 중지했습니다."</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"데이터 절약 모드를 사용 설정했습니다."</string>
@@ -410,6 +412,8 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"한도: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"<xliff:g id="DATA_LIMIT">%s</xliff:g> 경고"</string>
     <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"직장 프로필"</string>
+    <!-- no translation found for quick_settings_work_mode_paused (4841109346916998613) -->
+    <skip />
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"야간 조명"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"일몰에"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"일출까지"</string>
@@ -668,10 +672,12 @@
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"모두 표시"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"잠금 해제하여 결제"</string>
-    <string name="wallet_secondary_label_active" msgid="4909706168969888137">"준비됨"</string>
-    <string name="wallet_secondary_label_no_card" msgid="1750103386908123401">"결제 설정"</string>
+    <!-- no translation found for wallet_secondary_label_no_card (1282609666895946317) -->
+    <skip />
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"잠금 해제하여 사용"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"카드를 가져오는 중에 문제가 발생했습니다. 나중에 다시 시도해 보세요."</string>
+    <!-- no translation found for wallet_lockscreen_settings_label (3539105300870383570) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"직장 프로필"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"비행기 모드"</string>
     <string name="add_tile" msgid="6239678623873086686">"타일 추가"</string>
@@ -740,9 +746,12 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;상태:&lt;/b&gt; 무음으로 낮춤"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;상태:&lt;/b&gt; 순위 높임"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;상태:&lt;/b&gt; 순위 낮춤"</string>
-    <string name="notification_channel_summary_priority" msgid="4592979359953954258">"우선순위 모드가 켜져 있어도 항상 알림 맨 위에 표시됩니다"</string>
+    <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"대화 알림 상단에 표시, 잠금 화면에 프로필 사진으로 표시"</string>
+    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"대화 알림 상단에 표시, 잠금 화면에 프로필 사진으로 표시, 대화창으로 표시"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"대화 알림 상단에 표시, 잠금 화면에 프로필 사진으로 표시, 방해 금지 모드를 무시함"</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"대화 알림 상단에 표시, 잠금 화면에 프로필 사진으로 표시, 대화창으로 표시, 방해 금지 모드를 무시함"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"설정"</string>
-    <string name="notification_priority_title" msgid="5256226572739882190">"우선순위 대화"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"우선순위"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> 앱은 대화 기능을 지원하지 않습니다."</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"이 알림은 수정할 수 없습니다."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"이 알림 그룹은 여기에서 설정할 수 없습니다."</string>
@@ -858,6 +867,8 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"사용"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"사용 안함"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"사용할 수 없음"</string>
+    <!-- no translation found for tile_disabled (373212051546573069) -->
+    <skip />
     <string name="nav_bar" msgid="4642708685386136807">"탐색 메뉴"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"레이아웃"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"추가 왼쪽 버튼 유형"</string>
@@ -1016,14 +1027,6 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"시스템 탐색이 업데이트되었습니다. 변경하려면 설정으로 이동하세요."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"설정으로 이동하여 시스템 탐색을 업데이트하세요."</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"대기"</string>
-    <string name="priority_onboarding_title" msgid="2893070698479227616">"대화가 우선순위 대화로 설정됨"</string>
-    <string name="priority_onboarding_behavior" msgid="636826237468953117">"우선순위 대화"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="3861580571311518785">"우선순위 대화는 목록 맨 위에 표시되며 우선순위 모드가 켜져 있을 때는 항상 표시됩니다."</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="1781653813573865071">"프로필 사진이 잠금 화면에 표시됩니다."</string>
-    <string name="priority_onboarding_appear_as_bubble_text" msgid="4359924720680083057">"홈 화면에서 풍선 모양의 대화창을 쉽게 찾을 수 있습니다."</string>
-    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"방해 금지 모드 무시"</string>
-    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"확인"</string>
-    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"설정"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"확대 창"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"확대 창 컨트롤"</string>
     <string name="accessibility_control_zoom_in" msgid="1189272315480097417">"확대"</string>

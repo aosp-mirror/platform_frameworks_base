@@ -289,9 +289,11 @@
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"Мобилната точка за достъп се изключи."</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"Мобилната точка за достъп се включи."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"Предаването на съдържанието от екрана спря."</string>
-    <string name="accessibility_quick_settings_work_mode_off" msgid="562749867895549696">"Работният режим е изключен."</string>
+    <!-- no translation found for accessibility_quick_settings_work_mode_off (9106217884005620744) -->
+    <skip />
     <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"Работният режим е включен."</string>
-    <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6256690740556798683">"Работният режим е изключен."</string>
+    <!-- no translation found for accessibility_quick_settings_work_mode_changed_off (2653550342355027441) -->
+    <skip />
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"Работният режим е включен."</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"Функцията „Икономия на данни“ е изключена."</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"Функцията „Икономия на данни“ е включена."</string>
@@ -410,6 +412,8 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"Ограничение от <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"Предупреждение: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"Служебен потребителски профил"</string>
+    <!-- no translation found for quick_settings_work_mode_paused (4841109346916998613) -->
+    <skip />
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Нощно осветление"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Ще се вкл. по залез"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"До изгрев"</string>
@@ -668,10 +672,12 @@
     <string name="wallet_title" msgid="5369767670735827105">"Портфейл"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Показване на всички"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Отключване с цел плащане"</string>
-    <string name="wallet_secondary_label_active" msgid="4909706168969888137">"Готово"</string>
-    <string name="wallet_secondary_label_no_card" msgid="1750103386908123401">"Настройване на плащане"</string>
+    <!-- no translation found for wallet_secondary_label_no_card (1282609666895946317) -->
+    <skip />
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Отключване с цел използване"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"При извличането на картите ви възникна проблем. Моля, опитайте отново по-късно"</string>
+    <!-- no translation found for wallet_lockscreen_settings_label (3539105300870383570) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"Потребителски профил в Work"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Самолетен режим"</string>
     <string name="add_tile" msgid="6239678623873086686">"Добавяне на плочка"</string>
@@ -740,9 +746,12 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Състояние:&lt;/b&gt; Понижено до беззвучно"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Състояние:&lt;/b&gt; Класирано по-високо"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Състояние:&lt;/b&gt; Класирано по-ниско"</string>
-    <string name="notification_channel_summary_priority" msgid="4592979359953954258">"Винаги се показва най-горе в списъка с известия дори когато режимът за приоритетни разговори е включен"</string>
+    <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Показва се в горната част на известията за разговори и като снимка на потребителския профил на заключения екран"</string>
+    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Показва се в горната част на известията за разговори и като снимка на потребителския профил на заключения екран, изглежда като балонче"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Показва се в горната част на известията за разговори и като снимка на потребителския профил на заключения екран, прекъсва режима „Не безпокойте“"</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Показва се в горната част на известията за разговори и като снимка на потребителския профил на заключения екран, изглежда като балонче, прекъсва режима „Не безпокойте“"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Настройки"</string>
-    <string name="notification_priority_title" msgid="5256226572739882190">"Разговори с приоритет"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"Приоритет"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> не поддържа функциите за разговор"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Тези известия не могат да бъдат променяни."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Тази група от известия не може да бъде конфигурирана тук"</string>
@@ -858,6 +867,8 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"Вкл."</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"Изкл."</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"Не е налице"</string>
+    <!-- no translation found for tile_disabled (373212051546573069) -->
+    <skip />
     <string name="nav_bar" msgid="4642708685386136807">"Лента за навигация"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"Оформление"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"Тип на допълнителния ляв бутон"</string>
@@ -1016,14 +1027,6 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Режимът за навигиране в системата е актуализиран. За да извършите промени, отворете настройките."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Отворете настройките, за да актуализирате режима за навигиране в системата"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Режим на готовност"</string>
-    <string name="priority_onboarding_title" msgid="2893070698479227616">"Разговорът е зададен като приоритетен"</string>
-    <string name="priority_onboarding_behavior" msgid="636826237468953117">"Разговори с приоритет"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="3861580571311518785">"Тези разговори се показват най-горе в списъка ви и винаги ще стигат до вас, когато приоритетният режим е включен"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="1781653813573865071">"Снимките на потребителските профили се показват на заключения екран"</string>
-    <string name="priority_onboarding_appear_as_bubble_text" msgid="4359924720680083057">"Лесно можете да намерите тези разговори под формата на балончета на началния екран"</string>
-    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Прекъсване на режима „Не безпокойте“"</string>
-    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Разбрах"</string>
-    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Настройки"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Прозорец за ниво на мащаба"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Контроли за прозореца за ниво на мащаба"</string>
     <string name="accessibility_control_zoom_in" msgid="1189272315480097417">"Увеличаване на мащаба"</string>
