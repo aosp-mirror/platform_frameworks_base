@@ -21,6 +21,7 @@ import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_BUTT
 import static com.android.internal.accessibility.AccessibilityShortcutController.COLOR_INVERSION_COMPONENT_NAME;
 import static com.android.internal.accessibility.AccessibilityShortcutController.DALTONIZER_COMPONENT_NAME;
 import static com.android.internal.accessibility.AccessibilityShortcutController.MAGNIFICATION_CONTROLLER_NAME;
+import static com.android.internal.accessibility.AccessibilityShortcutController.ONE_HANDED_COMPONENT_NAME;
 import static com.android.internal.accessibility.AccessibilityShortcutController.REDUCE_BRIGHT_COLORS_COMPONENT_NAME;
 import static com.android.internal.accessibility.util.AccessibilityUtils.getAccessibilityServiceFragmentType;
 import static com.android.internal.accessibility.util.ShortcutUtils.isShortcutContained;
@@ -230,6 +231,16 @@ public final class AccessibilityTargetHelper {
                         context.getDrawable(R.drawable.ic_accessibility_color_inversion),
                         Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED);
 
+        final ToggleAllowListingFeatureTarget oneHandedMode =
+                new ToggleAllowListingFeatureTarget(context,
+                        shortcutType,
+                        isShortcutContained(context, shortcutType,
+                                ONE_HANDED_COMPONENT_NAME.flattenToString()),
+                        ONE_HANDED_COMPONENT_NAME.flattenToString(),
+                        context.getString(R.string.one_handed_mode_feature_name),
+                        context.getDrawable(R.drawable.ic_accessibility_one_handed),
+                        Settings.Secure.ONE_HANDED_MODE_ACTIVATED);
+
         final ToggleAllowListingFeatureTarget reduceBrightColors =
                 new ToggleAllowListingFeatureTarget(context,
                         shortcutType,
@@ -243,6 +254,7 @@ public final class AccessibilityTargetHelper {
         targets.add(magnification);
         targets.add(daltonizer);
         targets.add(colorInversion);
+        targets.add(oneHandedMode);
         targets.add(reduceBrightColors);
 
         return targets;

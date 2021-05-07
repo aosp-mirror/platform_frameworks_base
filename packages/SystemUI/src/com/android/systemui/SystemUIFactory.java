@@ -29,7 +29,6 @@ import com.android.systemui.dagger.GlobalRootComponent;
 import com.android.systemui.dagger.SysUIComponent;
 import com.android.systemui.dagger.WMComponent;
 import com.android.systemui.navigationbar.gestural.BackGestureTfClassifierProvider;
-import com.android.systemui.plugins.BcSmartspaceDataPlugin;
 import com.android.systemui.screenshot.ScreenshotNotificationSmartActionsProvider;
 import com.android.wm.shell.transition.Transitions;
 
@@ -209,9 +208,5 @@ public class SystemUIFactory {
     public BackGestureTfClassifierProvider createBackGestureTfClassifierProvider(
             AssetManager am, String modelName) {
         return new BackGestureTfClassifierProvider();
-    }
-
-    public BcSmartspaceDataPlugin getSmartspaceDataProvider() {
-        return null;
     }
 }

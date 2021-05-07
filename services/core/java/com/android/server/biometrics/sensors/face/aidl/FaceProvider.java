@@ -300,7 +300,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
         mHandler.post(() -> {
             final FaceGenerateChallengeClient client = new FaceGenerateChallengeClient(mContext,
                     mSensors.get(sensorId).getLazySession(), token,
-                    new ClientMonitorCallbackConverter(receiver), opPackageName, sensorId);
+                    new ClientMonitorCallbackConverter(receiver), userId, opPackageName, sensorId);
             scheduleForSensor(sensorId, client);
         });
     }
@@ -310,7 +310,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
             @NonNull String opPackageName, long challenge) {
         mHandler.post(() -> {
             final FaceRevokeChallengeClient client = new FaceRevokeChallengeClient(mContext,
-                    mSensors.get(sensorId).getLazySession(), token, opPackageName, sensorId,
+                    mSensors.get(sensorId).getLazySession(), token, userId, opPackageName, sensorId,
                     challenge);
             scheduleForSensor(sensorId, client);
         });

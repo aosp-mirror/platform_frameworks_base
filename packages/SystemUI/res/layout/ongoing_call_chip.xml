@@ -29,18 +29,17 @@
         android:src="@*android:drawable/ic_phone"
         android:layout_width="@dimen/ongoing_call_chip_icon_size"
         android:layout_height="@dimen/ongoing_call_chip_icon_size"
-        android:paddingEnd="@dimen/ongoing_call_chip_icon_text_padding"
         android:tint="?android:attr/colorPrimary"
     />
 
     <!-- TODO(b/183229367): The text in this view isn't quite centered within the chip. -->
-    <!-- TODO(b/183229367): This text view's width shouldn't change as the time increases. -->
-    <Chronometer
+    <com.android.systemui.statusbar.phone.ongoingcall.OngoingCallChronometer
         android:id="@+id/ongoing_call_chip_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:singleLine="true"
-        android:gravity="center"
+        android:gravity="center|start"
+        android:paddingStart="@dimen/ongoing_call_chip_icon_text_padding"
         android:textAppearance="@android:style/TextAppearance.Material.Small"
         android:fontFamily="@*android:string/config_headlineFontFamily"
         android:textColor="?android:attr/colorPrimary"

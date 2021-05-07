@@ -3390,6 +3390,23 @@
     <!-- [CHAR LIMIT=NONE] Message to show in upgrading dialog when the bulk of the upgrade work is done. -->
     <string name="android_upgrading_complete">Finishing boot.</string>
 
+    <!-- [CHAR LIMIT=40] Title of dialog shown to confirm device going to sleep if the power button
+    is pressed during fingerprint enrollment. -->
+    <string name="fp_enrollment_powerbutton_intent_title">Turn off screen?</string>
+
+    <!-- [CHAR LIMIT=NONE] Message of dialog shown to confirm device going to sleep if the power
+    button is pressed during fingerprint enrollment. -->
+    <string name="fp_enrollment_powerbutton_intent_message">While setting up your fingerprint, you
+        pressed the Power button.\n\nThis usually turns off your screen.</string>
+
+    <!-- [CHAR LIMIT=20] Positive button of dialog shown to confirm device going to sleep if the
+    power button is pressed during fingerprint enrollment. -->
+    <string name="fp_enrollment_powerbutton_intent_positive_button">Turn off</string>
+
+    <!-- [CHAR LIMIT=20] Negative button of dialog shown to confirm device going to sleep if the
+    power button is pressed during fingerprint enrollment. -->
+    <string name="fp_enrollment_powerbutton_intent_negative_button">Cancel</string>
+
     <!-- Notification text to tell the user that a heavy-weight application is running. -->
     <string name="heavy_weight_notification"><xliff:g id="app">%1$s</xliff:g> running</string>
 
@@ -4636,6 +4653,9 @@
      shown in the warning dialog about the accessibility shortcut. -->
     <string name="color_correction_feature_name">Color Correction</string>
 
+    <!-- Title of One Handed Mode feature, shown in the system gestures of the accessibility shortcut. [CHAR LIMIT=none] -->
+    <string name="one_handed_mode_feature_name">One-Handed mode</string>
+
     <!-- Title of Reduce Brightness feature, shown in the warning dialog about the accessibility shortcut. [CHAR LIMIT=none] -->
     <string name="reduce_bright_colors_feature_name">Extra dim</string>
 
@@ -5007,10 +5027,10 @@
     <string name="confirm_battery_saver">OK</string>
 
     <!-- [CHAR_LIMIT=NONE] Battery saver: Feature description, with a "learn more" link. -->
-    <string name="battery_saver_description_with_learn_more">Battery Saver turns on Dark theme and limits or turns off background activity, some visual effects, and certain features.\n\n<annotation id="url">Learn more</annotation></string>
+    <string name="battery_saver_description_with_learn_more">Battery Saver turns on Dark theme and limits or turns off background activity, some visual effects, certain features, and some network connections.\n\n<annotation id="url">Learn more</annotation></string>
 
     <!-- [CHAR_LIMIT=NONE] Battery saver: Feature description, without a "learn more" link. -->
-    <string name="battery_saver_description">Battery Saver turns on Dark theme and limits or turns off background activity, some visual effects, and certain features.</string>
+    <string name="battery_saver_description">Battery Saver turns on Dark theme and limits or turns off background activity, some visual effects, certain features, and some network connections.</string>
 
     <!-- [CHAR_LIMIT=NONE] Data saver: Feature description -->
     <string name="data_saver_description">To help reduce data usage, Data Saver prevents some apps from sending or receiving data in the background. An app you’re currently using can access data, but may do so less frequently. This may mean, for example, that images don’t display until you tap them.</string>

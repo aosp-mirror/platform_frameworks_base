@@ -178,7 +178,7 @@ public class StatusBarTest extends SysuiTestCase {
 
     @Mock private NotificationsController mNotificationsController;
     @Mock private LightBarController mLightBarController;
-    @Mock private StatusBarIconController mStatusBarIconController;
+    @Mock private StatusBarSignalPolicy mStatusBarSignalPolicy;
     @Mock private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     @Mock private KeyguardStateController mKeyguardStateController;
     @Mock private KeyguardIndicationController mKeyguardIndicationController;
@@ -356,7 +356,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mLightBarController,
                 mAutoHideController,
                 mKeyguardUpdateMonitor,
-                mStatusBarIconController,
+                mStatusBarSignalPolicy,
                 mPulseExpansionHandler,
                 mNotificationWakeUpCoordinator,
                 mKeyguardBypassController,

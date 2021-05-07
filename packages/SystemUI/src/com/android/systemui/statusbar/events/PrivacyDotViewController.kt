@@ -181,12 +181,19 @@ class PrivacyDotViewController @Inject constructor(
         designatedCorner = newCorner
 
         if (animationScheduler.hasPersistentDot) {
-            designatedCorner!!.visibility = View.VISIBLE
-            designatedCorner!!.alpha = 0f
-            designatedCorner!!.animate()
-                    .alpha(1.0f)
-                    .setDuration(300)
-                    .start()
+            fadeInDot()
+        }
+    }
+
+    @UiThread
+    private fun fadeInDot() {
+        designatedCorner?.let { dot ->
+            dot.visibility = View.VISIBLE
+            dot.alpha = 0f
+            dot.animate()
+                .alpha(1.0f)
+                .setDuration(300)
+                .start()
         }
     }
 
@@ -300,8 +307,13 @@ class PrivacyDotViewController @Inject constructor(
 
     private val systemStatusAnimationCallback: SystemStatusAnimationCallback =
             object : SystemStatusAnimationCallback {
-        override fun onSystemStatusAnimationTransitionToPersistentDot(): Animator? {
+        override fun onSystemStatusAnimationTransitionToPersistentDot(
+            showAnimation: Boolean
+        ): Animator? {
             if (designatedCorner == null) {
+                return null
+            } else if (!showAnimation) {
+                uiExecutor?.execute { fadeInDot() }
                 return null
             }
 
