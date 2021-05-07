@@ -113,10 +113,11 @@ final class RippleShader extends RuntimeShader {
             + "    float sparkle = sparkles(densityUv, in_noisePhase) * ring * alpha "
             + "* turbulence;\n"
             + "    float fade = min(fadeIn, 1. - fadeOutRipple);\n"
-            + "    vec4 circle = in_color * (softCircle(p, center, in_maxRadius "
-            + "      * scaleIn, 0.2) * fade);\n"
+            + "    float circleAlpha = softCircle(p, center, in_maxRadius * scaleIn, 0.2) * fade;\n"
+            + "    vec3 color = mix(in_color.rgb, in_sparkleColor.rgb, sparkle);\n"
             + "    float mask = in_hasMask == 1. ? sample(in_shader, p).a > 0. ? 1. : 0. : 1.;\n"
-            + "    return mix(circle, in_sparkleColor, sparkle) * mask;\n"
+            + "    float a = (in_color.a * circleAlpha + in_sparkleColor.a * sparkle) * mask;\n"
+            + "    return vec4(color * a, a);\n"
             + "}";
     private static final String SHADER = SHADER_UNIFORMS + SHADER_LIB + SHADER_MAIN;
     private static final double PI_ROTATE_RIGHT = Math.PI * 0.0078125;
