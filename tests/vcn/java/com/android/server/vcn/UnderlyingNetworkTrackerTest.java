@@ -26,6 +26,7 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -119,7 +120,7 @@ public class UnderlyingNetworkTrackerTest {
                                 mTestLooper.getLooper(),
                                 mVcnNetworkProvider,
                                 false /* isInTestMode */));
-        doNothing().when(mVcnContext).ensureRunningOnLooperThread();
+        resetVcnContext();
 
         setupSystemService(
                 mContext,
@@ -136,6 +137,11 @@ public class UnderlyingNetworkTrackerTest {
                         mSubscriptionSnapshot,
                         Collections.singleton(NetworkCapabilities.NET_CAPABILITY_INTERNET),
                         mNetworkTrackerCb);
+    }
+
+    private void resetVcnContext() {
+        reset(mVcnContext);
+        doNothing().when(mVcnContext).ensureRunningOnLooperThread();
     }
 
     private static LinkProperties getLinkPropertiesWithName(String iface) {
@@ -155,7 +161,29 @@ public class UnderlyingNetworkTrackerTest {
         verifyNetworkRequestsRegistered(INITIAL_SUB_IDS);
     }
 
+    @Test
+    public void testNetworkCallbacksRegisteredOnStartupForTestMode() {
+        resetVcnContext();
+        when(mVcnContext.isInTestMode()).thenReturn(true);
+        reset(mConnectivityManager);
+
+        mUnderlyingNetworkTracker =
+                new UnderlyingNetworkTracker(
+                        mVcnContext,
+                        SUB_GROUP,
+                        mSubscriptionSnapshot,
+                        Collections.singleton(NetworkCapabilities.NET_CAPABILITY_INTERNET),
+                        mNetworkTrackerCb);
+
+        verifyNetworkRequestsRegistered(INITIAL_SUB_IDS, true /* expectTestMode */);
+    }
+
     private void verifyNetworkRequestsRegistered(Set<Integer> expectedSubIds) {
+        verifyNetworkRequestsRegistered(expectedSubIds, false /* expectTestMode */);
+    }
+
+    private void verifyNetworkRequestsRegistered(
+            Set<Integer> expectedSubIds, boolean expectTestMode) {
         verify(mConnectivityManager)
                 .requestBackgroundNetwork(
                         eq(getWifiRequest(expectedSubIds)),
@@ -168,10 +196,16 @@ public class UnderlyingNetworkTrackerTest {
                             any(NetworkBringupCallback.class), any());
         }
 
+        final NetworkRequest expectedRouteSelectionRequest =
+                expectTestMode
+                        ? getTestNetworkRequest(expectedSubIds)
+                        : getRouteSelectionRequest(expectedSubIds);
+
         verify(mConnectivityManager)
                 .requestBackgroundNetwork(
-                        eq(getRouteSelectionRequest(expectedSubIds)),
-                        any(RouteSelectionCallback.class), any());
+                        eq(expectedRouteSelectionRequest),
+                        any(RouteSelectionCallback.class),
+                        any());
     }
 
     @Test
@@ -208,6 +242,15 @@ public class UnderlyingNetworkTrackerTest {
 
     private NetworkRequest getRouteSelectionRequest(Set<Integer> netCapsSubIds) {
         return getExpectedRequestBase().setSubscriptionIds(netCapsSubIds).build();
+    }
+
+    private NetworkRequest getTestNetworkRequest(Set<Integer> netCapsSubIds) {
+        return getExpectedRequestBase()
+                .addTransportType(NetworkCapabilities.TRANSPORT_TEST)
+                .removeCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                .removeCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)
+                .setSubscriptionIds(netCapsSubIds)
+                .build();
     }
 
     private NetworkRequest.Builder getExpectedRequestBase() {
