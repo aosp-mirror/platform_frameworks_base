@@ -45,11 +45,14 @@
             android:layout_marginEnd="12dp"
         >
 
-            <!-- Big icon: 52x52, 12dp padding left + top, 16dp padding right -->
+            <!-- Big icon: 48x48, 12dp padding top, 16dp padding sides -->
             <ImageView
                 android:id="@+id/conversation_icon"
                 android:layout_width="@*android:dimen/conversation_avatar_size"
                 android:layout_height="@*android:dimen/conversation_avatar_size"
+                android:layout_marginLeft="@*android:dimen/conversation_badge_protrusion"
+                android:layout_marginRight="@*android:dimen/conversation_badge_protrusion"
+                android:layout_marginBottom="@*android:dimen/conversation_badge_protrusion"
                 android:scaleType="centerCrop"
                 android:importantForAccessibility="no"
             />
@@ -58,8 +61,7 @@
                 android:id="@+id/conversation_icon_badge"
                 android:layout_width="@*android:dimen/conversation_icon_size_badged"
                 android:layout_height="@*android:dimen/conversation_icon_size_badged"
-                android:layout_marginLeft="@*android:dimen/conversation_badge_side_margin"
-                android:layout_marginTop="@*android:dimen/conversation_badge_side_margin"
+                android:layout_gravity="end|bottom"
                 android:clipChildren="false"
                 android:clipToPadding="false"
             >
