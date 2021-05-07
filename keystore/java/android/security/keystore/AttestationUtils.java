@@ -293,6 +293,11 @@ public abstract class AttestationUtils {
         } catch (SecurityException e) {
             throw e;
         } catch (Exception e) {
+            // If a DeviceIdAttestationException was previously wrapped with some other type,
+            // let's throw the original exception instead of wrapping it yet again.
+            if (e.getCause() instanceof DeviceIdAttestationException) {
+                throw (DeviceIdAttestationException) e.getCause();
+            }
             throw new DeviceIdAttestationException("Unable to perform attestation", e);
         }
     }
