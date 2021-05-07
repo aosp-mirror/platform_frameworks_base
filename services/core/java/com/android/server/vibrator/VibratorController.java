@@ -67,7 +67,7 @@ final class VibratorController {
         mNativeWrapper = nativeWrapper;
         mNativeWrapper.init(vibratorId, listener);
         // TODO(b/167947076): load suggested range from config
-        mVibratorInfo = mNativeWrapper.getInfo(/* suggestedFrequencyRange= */ 100);
+        mVibratorInfo = mNativeWrapper.getInfo(/* suggestedFrequencyRange= */ 200);
         Preconditions.checkNotNull(mVibratorInfo, "Failed to retrieve data for vibrator %d",
                 vibratorId);
     }

@@ -47,6 +47,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.UserHandle;
+import android.os.VibrationEffect;
 import android.provider.Settings;
 import android.service.notification.Adjustment;
 import android.service.notification.NotificationListenerService;
@@ -158,7 +159,7 @@ public final class NotificationRecord {
     private String mUserExplanation;
     private boolean mPreChannelsNotification = true;
     private Uri mSound;
-    private long[] mVibration;
+    private VibrationEffect mVibration;
     private AudioAttributes mAttributes;
     private NotificationChannel mChannel;
     private ArrayList<String> mPeopleOverride;
@@ -287,29 +288,28 @@ public final class NotificationRecord {
         return light;
     }
 
-    private long[] calculateVibration() {
-        long[] vibration;
-        final long[] defaultVibration =  NotificationManagerService.getLongArray(
-                mContext.getResources(),
-                com.android.internal.R.array.config_defaultNotificationVibePattern,
-                NotificationManagerService.VIBRATE_PATTERN_MAXLEN,
-                NotificationManagerService.DEFAULT_VIBRATE_PATTERN);
+    private VibrationEffect calculateVibration() {
+        VibratorHelper helper = new VibratorHelper(mContext);
+        final Notification notification = getSbn().getNotification();
+        final boolean insistent = (notification.flags & Notification.FLAG_INSISTENT) != 0;
+        VibrationEffect defaultVibration = helper.createDefaultVibration(insistent);
+        VibrationEffect vibration;
         if (getChannel().shouldVibrate()) {
             vibration = getChannel().getVibrationPattern() == null
-                    ? defaultVibration : getChannel().getVibrationPattern();
+                    ? defaultVibration
+                    : helper.createWaveformVibration(getChannel().getVibrationPattern(), insistent);
         } else {
             vibration = null;
         }
         if (mPreChannelsNotification
                 && (getChannel().getUserLockedFields()
                 & NotificationChannel.USER_LOCKED_VIBRATION) == 0) {
-            final Notification notification = getSbn().getNotification();
             final boolean useDefaultVibrate =
                     (notification.defaults & Notification.DEFAULT_VIBRATE) != 0;
             if (useDefaultVibrate) {
                 vibration = defaultVibration;
             } else {
-                vibration = notification.vibrate;
+                vibration = helper.createWaveformVibration(notification.vibrate, insistent);
             }
         }
         return vibration;
@@ -1067,7 +1067,7 @@ public final class NotificationRecord {
         return mSound;
     }
 
-    public long[] getVibration() {
+    public VibrationEffect getVibration() {
         return mVibration;
     }
 
