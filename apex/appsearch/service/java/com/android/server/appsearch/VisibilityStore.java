@@ -37,6 +37,8 @@ import android.util.Log;
 
 import com.android.server.appsearch.external.localstorage.util.PrefixUtil;
 
+import com.google.android.icing.proto.PersistType;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -373,6 +375,8 @@ public class VisibilityStore {
 
         mAppSearchImpl.putDocument(
                 PACKAGE_NAME, DATABASE_NAME, visibilityDocument.build(), /*logger=*/ null);
+        // Now that the visibility document has been written. Persist the newly written data.
+        mAppSearchImpl.persistToDisk(PersistType.Code.LITE);
 
         // Update derived data structures.
         mNotPlatformSurfaceableMap.put(prefix, schemasNotPlatformSurfaceable);
