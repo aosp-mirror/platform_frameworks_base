@@ -304,7 +304,7 @@ public final class EncoderProfiles
             } else if (codec == MediaRecorder.AudioEncoder.AAC_ELD) {
                 return MediaCodecInfo.CodecProfileLevel.AACObjectELD;
             }
-            return 0;
+            return profile;
         }
 
 
@@ -313,17 +313,20 @@ public final class EncoderProfiles
                 int codec,
                 int channels,
                 int sampleRate,
-                int bitrate) {
+                int bitrate,
+                int profile) {
             this.codec = codec;
             this.channels = channels;
             this.sampleRate = sampleRate;
             this.bitrate = bitrate;
+            this.profile = profile;
         }
 
         private int codec;
         private int channels;
         private int sampleRate;
         private int bitrate;
+        private int profile;  // this contains the profile if codec itself does not
     }
 
     private int durationSecs;
