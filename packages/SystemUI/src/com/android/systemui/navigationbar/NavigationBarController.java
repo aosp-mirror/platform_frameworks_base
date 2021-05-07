@@ -113,6 +113,7 @@ public class NavigationBarController implements Callbacks,
     private final Handler mHandler;
     private final DisplayManager mDisplayManager;
     private final NavigationBarOverlayController mNavBarOverlayController;
+    private final TaskbarDelegate mTaskbarDelegate;
     private int mNavMode;
     private boolean mIsTablet;
 
@@ -182,6 +183,7 @@ public class NavigationBarController implements Callbacks,
         mNavBarOverlayController = navBarOverlayController;
         mNavMode = mNavigationModeController.addListener(this);
         mNavigationModeController.addListener(this);
+        mTaskbarDelegate = new TaskbarDelegate(mOverviewProxyService);
     }
 
     @Override
@@ -190,17 +192,7 @@ public class NavigationBarController implements Callbacks,
         mIsTablet = isTablet(newConfig);
         boolean largeScreenChanged = mIsTablet != isOldConfigTablet;
         // If we folded/unfolded while in 3 button, show navbar in folded state, hide in unfolded
-        if (isThreeButtonTaskbarFlagEnabled() &&
-                largeScreenChanged && mNavMode == NAV_BAR_MODE_3BUTTON) {
-            if (!mIsTablet) {
-                // Folded state, show 3 button nav bar
-                createNavigationBar(mContext.getDisplay(), null, null);
-            } else {
-                // Unfolded state, hide 3 button nav bars
-                for (int i = 0; i < mNavigationBars.size(); i++) {
-                    removeNavigationBar(mNavigationBars.keyAt(i));
-                }
-            }
+        if (largeScreenChanged && updateNavbarForTaskbar()) {
             return;
         }
 
@@ -217,18 +209,15 @@ public class NavigationBarController implements Callbacks,
 
     @Override
     public void onNavigationModeChanged(int mode) {
+        if (mNavMode == mode) {
+            return;
+        }
         final int oldMode = mNavMode;
         mNavMode = mode;
         mHandler.post(() -> {
             // create/destroy nav bar based on nav mode only in unfolded state
-            if (isThreeButtonTaskbarFlagEnabled() && oldMode != mNavMode && mIsTablet) {
-                if (oldMode == NAV_BAR_MODE_3BUTTON &&
-                        mNavigationBars.get(mContext.getDisplayId()) == null) {
-                    // We remove navbar for 3 button unfolded, add it back in
-                    createNavigationBar(mContext.getDisplay(), null, null);
-                } else if (mNavMode == NAV_BAR_MODE_3BUTTON) {
-                    removeNavigationBar(mContext.getDisplayId());
-                }
+            if (oldMode != mNavMode) {
+                updateNavbarForTaskbar();
             }
             for (int i = 0; i < mNavigationBars.size(); i++) {
                 NavigationBar navBar = mNavigationBars.valueAt(i);
@@ -241,6 +230,27 @@ public class NavigationBarController implements Callbacks,
                 }
             }
         });
+    }
+
+    /**
+     * @return {@code true} if navbar was added/removed, false otherwise
+     */
+    public boolean updateNavbarForTaskbar() {
+        if (!isThreeButtonTaskbarFlagEnabled()) {
+            return false;
+        }
+
+        if (mIsTablet && mNavMode == NAV_BAR_MODE_3BUTTON) {
+            // Remove navigation bar when taskbar is showing, currently only for 3 button mode
+            removeNavigationBar(mContext.getDisplayId());
+            mCommandQueue.addCallback(mTaskbarDelegate);
+        } else if (mNavigationBars.get(mContext.getDisplayId()) == null) {
+            // Add navigation bar after taskbar goes away
+            createNavigationBar(mContext.getDisplay(), null, null);
+            mCommandQueue.removeCallback(mTaskbarDelegate);
+        }
+
+        return true;
     }
 
     @Override

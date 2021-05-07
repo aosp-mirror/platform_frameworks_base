@@ -37,8 +37,8 @@ class FingerprintGenerateChallengeClient extends GenerateChallengeClient<ISessio
             @NonNull LazyDaemon<ISession> lazyDaemon,
             @NonNull IBinder token,
             @NonNull ClientMonitorCallbackConverter listener,
-            @NonNull String owner, int sensorId) {
-        super(context, lazyDaemon, token, listener, owner, sensorId);
+            int userId, @NonNull String owner, int sensorId) {
+        super(context, lazyDaemon, token, listener, userId, owner, sensorId);
     }
 
     @Override

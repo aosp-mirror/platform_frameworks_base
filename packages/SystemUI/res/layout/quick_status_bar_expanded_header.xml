@@ -52,7 +52,6 @@
         android:layout_below="@id/quick_qs_status_icons"
         android:layout_marginTop="8dp"
         android:accessibilityTraversalAfter="@id/quick_qs_status_icons"
-        android:accessibilityTraversalBefore="@id/expand_indicator"
         android:clipChildren="false"
         android:clipToPadding="false"
         android:focusable="true"

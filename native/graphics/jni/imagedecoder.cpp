@@ -506,7 +506,7 @@ int AImageDecoder_getFrameInfo(AImageDecoder* decoder,
 }
 
 int64_t AImageDecoderFrameInfo_getDuration(const AImageDecoderFrameInfo* info) {
-    if (!info) return 0;
+    if (!info) return ANDROID_IMAGE_DECODER_BAD_PARAMETER;
 
     return toFrameInfo(info)->fDuration * 1'000'000;
 }

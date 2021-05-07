@@ -236,7 +236,21 @@ public class PowerExemptionManager {
      * @hide
      */
     public static final int REASON_BLUETOOTH_BROADCAST = 203;
-
+    /**
+     * Broadcast {@link android.content.Intent#ACTION_TIMEZONE_CHANGED}
+     * @hide
+     */
+    public static final int REASON_TIMEZONE_CHANGED = 204;
+    /**
+     * Broadcast {@link android.content.Intent#ACTION_TIME_CHANGED}
+     * @hide
+     */
+    public static final int REASON_TIME_CHANGED = 205;
+    /**
+     * Broadcast {@link android.content.Intent#ACTION_LOCALE_CHANGED}
+     * @hide
+     */
+    public static final int REASON_LOCALE_CHANGED = 206;
     /* Reason code range 300-399 are reserved for other internal reasons */
     /**
      * Device idle system allow list, including EXCEPT-IDLE
@@ -369,6 +383,9 @@ public class PowerExemptionManager {
             REASON_PRE_BOOT_COMPLETED,
             REASON_LOCKED_BOOT_COMPLETED,
             REASON_BLUETOOTH_BROADCAST,
+            REASON_TIMEZONE_CHANGED,
+            REASON_TIME_CHANGED,
+            REASON_LOCALE_CHANGED,
             REASON_SYSTEM_ALLOW_LISTED,
             REASON_ALARM_MANAGER_ALARM_CLOCK,
             REASON_ALARM_MANAGER_WHILE_IDLE,
@@ -641,6 +658,12 @@ public class PowerExemptionManager {
                 return "LOCKED_BOOT_COMPLETED";
             case REASON_BLUETOOTH_BROADCAST:
                 return "BLUETOOTH_BROADCAST";
+            case REASON_TIMEZONE_CHANGED:
+                return "TIMEZONE_CHANGED";
+            case REASON_TIME_CHANGED:
+                return "TIME_CHANGED";
+            case REASON_LOCALE_CHANGED:
+                return "LOCALE_CHANGED";
             case REASON_SYSTEM_ALLOW_LISTED:
                 return "SYSTEM_ALLOW_LISTED";
             case REASON_ALARM_MANAGER_ALARM_CLOCK:

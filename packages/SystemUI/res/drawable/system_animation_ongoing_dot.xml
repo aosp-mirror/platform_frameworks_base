@@ -18,7 +18,7 @@
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="oval">
     <solid
-        android:color="@color/privacy_circle"/>
+        android:color="@color/privacy_chip_background"/>
     <size
         android:width="6dp"
         android:height="6dp"

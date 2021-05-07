@@ -37,8 +37,8 @@ class FingerprintRevokeChallengeClient extends RevokeChallengeClient<ISession> {
 
     FingerprintRevokeChallengeClient(@NonNull Context context,
             @NonNull LazyDaemon<ISession> lazyDaemon, @NonNull IBinder token,
-            @NonNull String owner, int sensorId, long challenge) {
-        super(context, lazyDaemon, token, owner, sensorId);
+            int userId, @NonNull String owner, int sensorId, long challenge) {
+        super(context, lazyDaemon, token, userId, owner, sensorId);
         mChallenge = challenge;
     }
 
