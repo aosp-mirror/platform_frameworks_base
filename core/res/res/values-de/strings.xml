@@ -220,7 +220,7 @@
     <string name="reboot_to_update_prepare" msgid="6978842143587422365">"Aktualisierung wird vorbereitet…"</string>
     <string name="reboot_to_update_package" msgid="4644104795527534811">"Updatepaket wird verarbeitet…"</string>
     <string name="reboot_to_update_reboot" msgid="4474726009984452312">"Neustart…"</string>
-    <string name="reboot_to_reset_title" msgid="2226229680017882787">"Auf Werkszustand zurücksetzen"</string>
+    <string name="reboot_to_reset_title" msgid="2226229680017882787">"Auf Werkseinstellungen zurücksetzen"</string>
     <string name="reboot_to_reset_message" msgid="3347690497972074356">"Neustart…"</string>
     <string name="shutdown_progress" msgid="5017145516412657345">"Wird heruntergefahren..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="2872769463279602432">"Dein Tablet wird heruntergefahren."</string>
