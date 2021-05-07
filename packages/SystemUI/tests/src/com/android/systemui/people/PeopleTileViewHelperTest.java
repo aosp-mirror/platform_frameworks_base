@@ -29,7 +29,6 @@ import static android.appwidget.AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH;
 
 import static com.android.systemui.people.PeopleSpaceUtils.STARRED_CONTACT;
 import static com.android.systemui.people.PeopleSpaceUtils.VALID_CONTACT;
-import static com.android.systemui.people.widget.AppWidgetOptionsHelper.OPTIONS_PEOPLE_TILE;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -140,7 +139,6 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
 
         mOptions = new Bundle();
-        mOptions.putParcelable(OPTIONS_PEOPLE_TILE, PERSON_TILE);
 
         when(mMockContext.getString(R.string.birthday_status)).thenReturn(
                 mContext.getString(R.string.birthday_status));

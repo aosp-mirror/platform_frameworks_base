@@ -933,6 +933,21 @@ public class OverviewProxyService extends CurrentUserTracker implements
         }
     }
 
+    public void notifyImeWindowStatus(int displayId, IBinder token, int vis, int backDisposition,
+            boolean showImeSwitcher) {
+        try {
+            if (mOverviewProxy != null) {
+                mOverviewProxy.onImeWindowStatusChanged(displayId, token, vis, backDisposition,
+                        showImeSwitcher);
+            } else {
+                Log.e(TAG_OPS, "Failed to get overview proxy for setting IME status.");
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG_OPS, "Failed to call notifyImeWindowStatus()", e);
+        }
+
+    }
+
     private void updateEnabledState() {
         final int currentUser = ActivityManagerWrapper.getInstance().getCurrentUserId();
         mIsEnabled = mContext.getPackageManager().resolveServiceAsUser(mQuickStepIntent,
@@ -983,5 +998,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
         default void onAssistantProgress(@FloatRange(from = 0.0, to = 1.0) float progress) {}
         default void onAssistantGestureCompletion(float velocity) {}
         default void startAssistant(Bundle bundle) {}
+        default void onImeWindowStatusChanged(int displayId, IBinder token, int vis,
+                int backDisposition, boolean showImeSwitcher) {}
     }
 }

@@ -269,9 +269,9 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
         }
         // Set the ImsType to be IMS_TYPE_WWAN
         setImsType(1);
+        setupDefaultSignal();
         for (int testStrength = 0;
                 testStrength < CellSignalStrength.getNumSignalStrengthLevels(); testStrength++) {
-            setupDefaultSignal();
             setLevel(testStrength);
             verifyLastCallStrength(TelephonyIcons.MOBILE_CALL_STRENGTH_ICONS[testStrength]);
         }

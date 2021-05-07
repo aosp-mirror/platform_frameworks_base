@@ -19,8 +19,6 @@ package com.android.systemui.wallet.ui;
 import static com.android.systemui.wallet.ui.WalletCardCarousel.CARD_ANIM_ALPHA_DELAY;
 import static com.android.systemui.wallet.ui.WalletCardCarousel.CARD_ANIM_ALPHA_DURATION;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.annotation.Nullable;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -29,6 +27,7 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
@@ -46,9 +45,8 @@ import java.util.List;
 public class WalletView extends FrameLayout implements WalletCardCarousel.OnCardScrollListener {
 
     private static final String TAG = "WalletView";
-    private static final int CAROUSEL_IN_ANIMATION_DURATION = 300;
+    private static final int CAROUSEL_IN_ANIMATION_DURATION = 100;
     private static final int CAROUSEL_OUT_ANIMATION_DURATION = 200;
-    private static final int CARD_LABEL_ANIM_DELAY = 133;
 
     private final WalletCardCarousel mCardCarousel;
     private final ImageView mIcon;
@@ -57,14 +55,12 @@ public class WalletView extends FrameLayout implements WalletCardCarousel.OnCard
     private final Button mAppButton;
     // Displays underneath the carousel, allow user to unlock device, verify card, etc.
     private final Button mActionButton;
-    private final Interpolator mInInterpolator;
     private final Interpolator mOutInterpolator;
     private final float mAnimationTranslationX;
     private final ViewGroup mCardCarouselContainer;
     private final TextView mErrorView;
     private final ViewGroup mEmptyStateView;
     private CharSequence mCenterCardText;
-    private Drawable mCenterCardIcon;
     private boolean mIsDeviceLocked = false;
 
     public WalletView(Context context) {
@@ -83,8 +79,6 @@ public class WalletView extends FrameLayout implements WalletCardCarousel.OnCard
         mActionButton = requireViewById(R.id.wallet_action_button);
         mErrorView = requireViewById(R.id.error_view);
         mEmptyStateView = requireViewById(R.id.wallet_empty_state);
-        mInInterpolator =
-                AnimationUtils.loadInterpolator(context, android.R.interpolator.fast_out_slow_in);
         mOutInterpolator =
                 AnimationUtils.loadInterpolator(context, android.R.interpolator.accelerate_cubic);
         mAnimationTranslationX = mCardCarousel.getCardWidthPx() / 4f;
@@ -109,7 +103,6 @@ public class WalletView extends FrameLayout implements WalletCardCarousel.OnCard
         Drawable centerCardIcon = centerCard.getIcon();
         if (!TextUtils.equals(mCenterCardText, centerCardText)) {
             mCenterCardText = centerCardText;
-            mCenterCardIcon = centerCardIcon;
             mCardLabel.setText(centerCardText);
             mIcon.setImageDrawable(centerCardIcon);
         }
@@ -134,39 +127,15 @@ public class WalletView extends FrameLayout implements WalletCardCarousel.OnCard
      */
     void showCardCarousel(
             List<WalletCardViewInfo> data, int selectedIndex, boolean isDeviceLocked) {
+        boolean shouldAnimate =
+                mCardCarousel.setData(data, selectedIndex, mIsDeviceLocked != isDeviceLocked);
         mIsDeviceLocked = isDeviceLocked;
-        boolean shouldAnimate = mCardCarousel.setData(data, selectedIndex);
         mCardCarouselContainer.setVisibility(VISIBLE);
         mErrorView.setVisibility(GONE);
+        mEmptyStateView.setVisibility(GONE);
         renderHeaderIconAndActionButton(data.get(selectedIndex), isDeviceLocked);
         if (shouldAnimate) {
-            // If the empty state is visible, animate it away and delay the card carousel animation
-            int emptyStateAnimDelay = 0;
-            if (mEmptyStateView.getVisibility() == VISIBLE) {
-                emptyStateAnimDelay = CARD_ANIM_ALPHA_DURATION;
-                mEmptyStateView.animate()
-                        .alpha(0)
-                        .setDuration(emptyStateAnimDelay)
-                        .setListener(new AnimatorListenerAdapter() {
-                            @Override
-                            public void onAnimationEnd(Animator animation) {
-                                mEmptyStateView.setVisibility(GONE);
-                            }
-                        })
-                        .start();
-            }
-            mCardLabel.setAlpha(0f);
-            mCardLabel.animate().alpha(1f)
-                    .setStartDelay(CARD_LABEL_ANIM_DELAY + emptyStateAnimDelay)
-                    .setDuration(CARD_ANIM_ALPHA_DURATION)
-                    .start();
-            mCardCarousel.setExtraAnimationDelay(emptyStateAnimDelay);
-            mCardCarousel.setTranslationX(mAnimationTranslationX);
-            mCardCarousel.animate().translationX(0)
-                    .setInterpolator(mInInterpolator)
-                    .setDuration(CAROUSEL_IN_ANIMATION_DURATION)
-                    .setStartDelay(emptyStateAnimDelay)
-                    .start();
+            animateViewsShown(mIcon, mCardLabel, mActionButton);
         }
     }
 
@@ -274,6 +243,15 @@ public class WalletView extends FrameLayout implements WalletCardCarousel.OnCard
             });
         } else {
             mActionButton.setVisibility(GONE);
+        }
+    }
+
+    private static void animateViewsShown(View... uiElements) {
+        for (View view : uiElements) {
+            if (view.getVisibility() == VISIBLE) {
+                view.setAlpha(0f);
+                view.animate().alpha(1f).setDuration(CAROUSEL_IN_ANIMATION_DURATION).start();
+            }
         }
     }
 

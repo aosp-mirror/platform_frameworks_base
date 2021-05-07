@@ -565,8 +565,8 @@
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"กำลังสร้างผู้ใช้ใหม่…"</string>
     <string name="add_user_failed" msgid="4809887794313944872">"สร้างผู้ใช้ใหม่ไม่ได้"</string>
     <string name="user_nickname" msgid="262624187455825083">"ชื่อเล่น"</string>
-    <string name="guest_new_guest" msgid="3482026122932643557">"เพิ่มผู้เข้าร่วม"</string>
-    <string name="guest_exit_guest" msgid="5908239569510734136">"นำผู้เข้าร่วมออก"</string>
+    <string name="guest_new_guest" msgid="3482026122932643557">"เพิ่มผู้ใช้ชั่วคราว"</string>
+    <string name="guest_exit_guest" msgid="5908239569510734136">"นำผู้ใช้ชั่วคราวออก"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"ผู้ใช้ชั่วคราว"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"ถ่ายรูป"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"เลือกรูปภาพ"</string>

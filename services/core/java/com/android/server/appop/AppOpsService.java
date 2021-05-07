@@ -3065,6 +3065,13 @@ public class AppOpsService extends IAppOpsService.Stub {
                 shouldCollectAsyncNotedOp, message, shouldCollectMessage, skipProxyOperation);
     }
 
+    // TODO b/184963112: remove once full blaming is implemented
+    private boolean isRecognitionServiceTemp(int code, String packageName) {
+        return code == OP_RECORD_AUDIO
+                && (packageName.equals("com.google.android.googlequicksearchbox")
+                || packageName.equals("com.google.android.tts"));
+    }
+
     private SyncNotedAppOp noteProxyOperationImpl(int code, AttributionSource attributionSource,
             boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage,
             boolean skipProxyOperation) {
@@ -3085,13 +3092,15 @@ public class AppOpsService extends IAppOpsService.Stub {
         String resolveProxyPackageName = AppOpsManager.resolvePackageName(proxyUid,
                 proxyPackageName);
         if (resolveProxyPackageName == null) {
-            return new SyncNotedAppOp(AppOpsManager.MODE_IGNORED, code, proxiedAttributionTag);
+            return new SyncNotedAppOp(AppOpsManager.MODE_IGNORED, code,
+                    proxiedAttributionTag, proxiedPackageName);
         }
 
         final boolean isSelfBlame = Binder.getCallingUid() == proxiedUid;
         final boolean isProxyTrusted = mContext.checkPermission(
                 Manifest.permission.UPDATE_APP_OPS_STATS, -1, proxyUid)
-                == PackageManager.PERMISSION_GRANTED || isSelfBlame;
+                == PackageManager.PERMISSION_GRANTED || isSelfBlame
+                || isRecognitionServiceTemp(code, proxyPackageName);
 
         if (!skipProxyOperation) {
             final int proxyFlags = isProxyTrusted ? AppOpsManager.OP_FLAG_TRUSTED_PROXY
@@ -3101,14 +3110,16 @@ public class AppOpsService extends IAppOpsService.Stub {
                     resolveProxyPackageName, proxyAttributionTag, Process.INVALID_UID, null, null,
                     proxyFlags, !isProxyTrusted, "proxy " + message, shouldCollectMessage);
             if (proxyReturn.getOpMode() != AppOpsManager.MODE_ALLOWED) {
-                return new SyncNotedAppOp(proxyReturn.getOpMode(), code, proxiedAttributionTag);
+                return new SyncNotedAppOp(proxyReturn.getOpMode(), code, proxiedAttributionTag,
+                        proxiedPackageName);
             }
         }
 
         String resolveProxiedPackageName = AppOpsManager.resolvePackageName(proxiedUid,
                 proxiedPackageName);
         if (resolveProxiedPackageName == null) {
-            return new SyncNotedAppOp(AppOpsManager.MODE_IGNORED, code, proxiedAttributionTag);
+            return new SyncNotedAppOp(AppOpsManager.MODE_IGNORED, code, proxiedAttributionTag,
+                    proxiedPackageName);
         }
 
         final int proxiedFlags = isProxyTrusted ? AppOpsManager.OP_FLAG_TRUSTED_PROXIED
@@ -3135,7 +3146,8 @@ public class AppOpsService extends IAppOpsService.Stub {
 
         String resolvedPackageName = AppOpsManager.resolvePackageName(uid, packageName);
         if (resolvedPackageName == null) {
-            return new SyncNotedAppOp(AppOpsManager.MODE_IGNORED, code, attributionTag);
+            return new SyncNotedAppOp(AppOpsManager.MODE_IGNORED, code, attributionTag,
+                    packageName);
         }
         return noteOperationUnchecked(code, uid, resolvedPackageName, attributionTag,
                 Process.INVALID_UID, null, null, AppOpsManager.OP_FLAG_SELF,
@@ -3152,7 +3164,8 @@ public class AppOpsService extends IAppOpsService.Stub {
             bypass = verifyAndGetBypass(uid, packageName, attributionTag);
         } catch (SecurityException e) {
             Slog.e(TAG, "noteOperation", e);
-            return new SyncNotedAppOp(AppOpsManager.MODE_ERRORED, code, attributionTag);
+            return new SyncNotedAppOp(AppOpsManager.MODE_ERRORED, code, attributionTag,
+                    packageName);
         }
 
         synchronized (this) {
@@ -3163,7 +3176,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                         AppOpsManager.MODE_IGNORED);
                 if (DEBUG) Slog.d(TAG, "noteOperation: no op for code " + code + " uid " + uid
                         + " package " + packageName);
-                return new SyncNotedAppOp(AppOpsManager.MODE_ERRORED, code, attributionTag);
+                return new SyncNotedAppOp(AppOpsManager.MODE_ERRORED, code, attributionTag,
+                        packageName);
             }
             final Op op = getOpLocked(ops, code, uid, true);
             final AttributedOp attributedOp = op.getOrCreateAttribution(op, attributionTag);
@@ -3179,7 +3193,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                 attributedOp.rejected(uidState.state, flags);
                 scheduleOpNotedIfNeededLocked(code, uid, packageName, attributionTag, flags,
                         AppOpsManager.MODE_IGNORED);
-                return new SyncNotedAppOp(AppOpsManager.MODE_IGNORED, code, attributionTag);
+                return new SyncNotedAppOp(AppOpsManager.MODE_IGNORED, code, attributionTag,
+                        packageName);
             }
             // If there is a non-default per UID policy (we set UID op mode only if
             // non-default) it takes over, otherwise use the per package policy.
@@ -3192,7 +3207,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     attributedOp.rejected(uidState.state, flags);
                     scheduleOpNotedIfNeededLocked(code, uid, packageName, attributionTag, flags,
                             uidMode);
-                    return new SyncNotedAppOp(uidMode, code, attributionTag);
+                    return new SyncNotedAppOp(uidMode, code, attributionTag, packageName);
                 }
             } else {
                 final Op switchOp = switchCode != code ? getOpLocked(ops, switchCode, uid, true)
@@ -3205,7 +3220,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     attributedOp.rejected(uidState.state, flags);
                     scheduleOpNotedIfNeededLocked(code, uid, packageName, attributionTag, flags,
                             mode);
-                    return new SyncNotedAppOp(mode, code, attributionTag);
+                    return new SyncNotedAppOp(mode, code, attributionTag, packageName);
                 }
             }
             if (DEBUG) {
@@ -3224,7 +3239,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                         shouldCollectMessage);
             }
 
-            return new SyncNotedAppOp(AppOpsManager.MODE_ALLOWED, code, attributionTag);
+            return new SyncNotedAppOp(AppOpsManager.MODE_ALLOWED, code, attributionTag,
+                    packageName);
         }
     }
 
@@ -3528,7 +3544,8 @@ public class AppOpsService extends IAppOpsService.Stub {
 
         String resolvedPackageName = AppOpsManager.resolvePackageName(uid, packageName);
         if (resolvedPackageName == null) {
-            return new SyncNotedAppOp(AppOpsManager.MODE_IGNORED, code, attributionTag);
+            return new SyncNotedAppOp(AppOpsManager.MODE_IGNORED, code, attributionTag,
+                    packageName);
         }
 
         // As a special case for OP_RECORD_AUDIO_HOTWORD, which we use only for attribution
@@ -3539,7 +3556,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         if (code == OP_RECORD_AUDIO_HOTWORD) {
             int result = checkOperation(OP_RECORD_AUDIO, uid, packageName);
             if (result != AppOpsManager.MODE_ALLOWED) {
-                return new SyncNotedAppOp(result, code, attributionTag);
+                return new SyncNotedAppOp(result, code, attributionTag, packageName);
             }
         }
         return startOperationUnchecked(clientId, code, uid, packageName, attributionTag,
@@ -3578,7 +3595,8 @@ public class AppOpsService extends IAppOpsService.Stub {
         String resolvedProxyPackageName = AppOpsManager.resolvePackageName(proxyUid,
                 proxyPackageName);
         if (resolvedProxyPackageName == null) {
-            return new SyncNotedAppOp(AppOpsManager.MODE_IGNORED, code, proxiedAttributionTag);
+            return new SyncNotedAppOp(AppOpsManager.MODE_IGNORED, code, proxiedAttributionTag,
+                    proxiedPackageName);
         }
 
         final boolean isSelfBlame = Binder.getCallingUid() == proxiedUid;
@@ -3589,7 +3607,8 @@ public class AppOpsService extends IAppOpsService.Stub {
         String resolvedProxiedPackageName = AppOpsManager.resolvePackageName(proxiedUid,
                 proxiedPackageName);
         if (resolvedProxiedPackageName == null) {
-            return new SyncNotedAppOp(AppOpsManager.MODE_IGNORED, code, proxiedAttributionTag);
+            return new SyncNotedAppOp(AppOpsManager.MODE_IGNORED, code, proxiedAttributionTag,
+                    proxiedPackageName);
         }
 
         final int proxiedFlags = isProxyTrusted ? AppOpsManager.OP_FLAG_TRUSTED_PROXIED
@@ -3637,7 +3656,8 @@ public class AppOpsService extends IAppOpsService.Stub {
             bypass = verifyAndGetBypass(uid, packageName, attributionTag);
         } catch (SecurityException e) {
             Slog.e(TAG, "startOperation", e);
-            return new SyncNotedAppOp(AppOpsManager.MODE_ERRORED, code, attributionTag);
+            return new SyncNotedAppOp(AppOpsManager.MODE_ERRORED, code, attributionTag,
+                    packageName);
         }
 
         synchronized (this) {
@@ -3649,7 +3669,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                 }
                 if (DEBUG) Slog.d(TAG, "startOperation: no op for code " + code + " uid " + uid
                         + " package " + packageName);
-                return new SyncNotedAppOp(AppOpsManager.MODE_ERRORED, code, attributionTag);
+                return new SyncNotedAppOp(AppOpsManager.MODE_ERRORED, code, attributionTag,
+                        packageName);
             }
             final Op op = getOpLocked(ops, code, uid, true);
             if (isOpRestrictedLocked(uid, code, packageName, bypass)) {
@@ -3657,7 +3678,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                     scheduleOpStartedIfNeededLocked(code, uid, packageName, attributionTag,
                             flags, AppOpsManager.MODE_IGNORED);
                 }
-                return new SyncNotedAppOp(AppOpsManager.MODE_IGNORED, code, attributionTag);
+                return new SyncNotedAppOp(AppOpsManager.MODE_IGNORED, code, attributionTag,
+                        packageName);
             }
 
             final AttributedOp attributedOp = op.getOrCreateAttribution(op, attributionTag);
@@ -3678,7 +3700,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                         scheduleOpStartedIfNeededLocked(code, uid, packageName, attributionTag,
                                 flags, uidMode);
                     }
-                    return new SyncNotedAppOp(uidMode, code, attributionTag);
+                    return new SyncNotedAppOp(uidMode, code, attributionTag, packageName);
                 }
             } else {
                 final Op switchOp = switchCode != code ? getOpLocked(ops, switchCode, uid, true)
@@ -3694,7 +3716,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                         scheduleOpStartedIfNeededLocked(code, uid, packageName, attributionTag,
                                 flags, mode);
                     }
-                    return new SyncNotedAppOp(mode, code, attributionTag);
+                    return new SyncNotedAppOp(mode, code, attributionTag, packageName);
                 }
             }
             if (DEBUG) Slog.d(TAG, "startOperation: allowing code " + code + " uid " + uid
@@ -3716,7 +3738,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                     message, shouldCollectMessage);
         }
 
-        return new SyncNotedAppOp(AppOpsManager.MODE_ALLOWED, code, attributionTag);
+        return new SyncNotedAppOp(AppOpsManager.MODE_ALLOWED, code, attributionTag,
+                packageName);
     }
 
     @Override

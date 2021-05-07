@@ -451,10 +451,8 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"La tablette va bientôt s\'éteindre (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"L\'appareil va bientôt s\'éteindre (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_remaining_charging_duration_only (8085099012811384899) -->
-    <skip />
-    <!-- no translation found for power_charging_duration (6127154952524919719) -->
-    <skip />
+    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"Chargée à 100 %% dans <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - chargée à 100 %% dans <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - Optimisation pour préserver batterie"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Inconnu"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Batterie en charge"</string>

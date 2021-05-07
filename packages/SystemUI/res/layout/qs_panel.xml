@@ -42,8 +42,6 @@
             android:clipToPadding="false"
             android:clipChildren="false">
             <include layout="@layout/qs_footer_impl" />
-            <include layout="@layout/qs_media_divider"
-                android:id="@+id/divider"/>
         </com.android.systemui.qs.QSPanel>
     </com.android.systemui.qs.NonInterceptingScrollView>
 

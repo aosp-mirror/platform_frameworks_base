@@ -385,6 +385,11 @@ public class RemoteViews implements Parcelable, Filter {
      */
     private int mViewId = View.NO_ID;
 
+    /**
+     * Id used to uniquely identify a {@link RemoteViews} instance coming from a given provider.
+     */
+    private long mProviderInstanceId = -1;
+
     /** Class cookies of the Parcel this instance was read from. */
     private Map<Class, Object> mClassCookies;
 
@@ -3646,6 +3651,7 @@ public class RemoteViews implements Parcelable, Filter {
         mApplyFlags = src.mApplyFlags;
         mClassCookies = src.mClassCookies;
         mIdealSize = src.mIdealSize;
+        mProviderInstanceId = src.mProviderInstanceId;
 
         if (src.hasLandscapeAndPortraitLayouts()) {
             mLandscape = new RemoteViews(src.mLandscape);
@@ -3744,6 +3750,7 @@ public class RemoteViews implements Parcelable, Filter {
             mLightBackgroundLayoutId = mPortrait.mLightBackgroundLayoutId;
         }
         mApplyFlags = parcel.readInt();
+        mProviderInstanceId = parcel.readLong();
     }
 
     private void readActionsFromParcel(Parcel parcel, int depth) {
@@ -6021,6 +6028,7 @@ public class RemoteViews implements Parcelable, Filter {
             mPortrait.writeToParcel(dest, flags | PARCELABLE_ELIDE_DUPLICATES);
         }
         dest.writeInt(mApplyFlags);
+        dest.writeLong(mProviderInstanceId);
     }
 
     private void writeActionsToParcel(Parcel parcel) {
@@ -6710,5 +6718,86 @@ public class RemoteViews implements Parcelable, Filter {
      */
     public @IdRes int getViewId() {
         return mViewId;
+    }
+
+    /**
+     * Set the provider instance ID.
+     *
+     * This should only be used by {@link com.android.server.appwidget.AppWidgetService}.
+     * @hide
+     */
+    public void setProviderInstanceId(long id) {
+        mProviderInstanceId = id;
+    }
+
+    /**
+     * Get the provider instance id.
+     *
+     * This should uniquely identifies {@link RemoteViews} coming from a given App Widget
+     * Provider. This changes each time the App Widget provider update the {@link RemoteViews} of
+     * its widget. Returns -1 if the {@link RemoteViews} doesn't come from an App Widget provider.
+     * @hide
+     */
+    public long getProviderInstanceId() {
+        return mProviderInstanceId;
+    }
+
+    /**
+     * Identify the child of this {@link RemoteViews}, or 0 if this is not a child.
+     *
+     * The returned value is always a small integer, currently between 0 and 17.
+     */
+    private int getChildId(@NonNull RemoteViews child) {
+        if (child == this) {
+            return 0;
+        }
+        if (hasSizedRemoteViews()) {
+            for (int i = 0; i < mSizedRemoteViews.size(); i++) {
+                if (mSizedRemoteViews.get(i) == child) {
+                    return i + 1;
+                }
+            }
+        }
+        if (hasLandscapeAndPortraitLayouts()) {
+            if (mLandscape == child) {
+                return 1;
+            } else if (mPortrait == child) {
+                return 2;
+            }
+        }
+        // This is not a child of this RemoteViews.
+        return 0;
+    }
+
+    /**
+     * Identify uniquely this RemoteViews, or returns -1 if not possible.
+     *
+     * @param parent If the {@link RemoteViews} is not a root {@link RemoteViews}, this should be
+     *              the parent that contains it.
+     *
+     * @hide
+     */
+    public long computeUniqueId(@Nullable RemoteViews parent) {
+        if (mIsRoot) {
+            long viewId = getProviderInstanceId();
+            if (viewId != -1) {
+                viewId <<= 8;
+            }
+            return viewId;
+        }
+        if (parent == null) {
+            return -1;
+        }
+        long viewId = parent.getProviderInstanceId();
+        if (viewId == -1) {
+            return -1;
+        }
+        int childId = parent.getChildId(this);
+        if (childId == -1) {
+            return -1;
+        }
+        viewId <<= 8;
+        viewId |= childId;
+        return viewId;
     }
 }

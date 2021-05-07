@@ -54,4 +54,11 @@ interface WalletCardViewInfo {
      */
     @NonNull
     PendingIntent getPendingIntent();
+
+    default boolean isUiEquivalent(WalletCardViewInfo other) {
+        if (other == null) {
+            return false;
+        }
+        return getCardId().equals(other.getCardId());
+    }
 }

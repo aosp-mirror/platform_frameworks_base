@@ -7777,16 +7777,25 @@ public class ActivityManagerService extends IActivityManager.Stub
                 incrementalMetrics != null /* isIncremental */, loadingProgress,
                 incrementalMetrics != null ? incrementalMetrics.getMillisSinceOldestPendingRead()
                         : -1,
-                0 /* storage_health_code */,
-                0 /* data_loader_status_code */,
-                false /* read_logs_enabled */,
-                0 /* millis_since_last_data_loader_bind */,
-                0 /* data_loader_bind_delay_millis */,
-                0 /* total_delayed_reads */,
-                0 /* total_failed_reads */,
-                0 /* last_read_error_uid */,
-                0 /* last_read_error_millis_since */,
-                0 /* last_read_error_code */
+                incrementalMetrics != null ? incrementalMetrics.getStorageHealthStatusCode()
+                        : -1,
+                incrementalMetrics != null ? incrementalMetrics.getDataLoaderStatusCode()
+                        : -1,
+                incrementalMetrics != null && incrementalMetrics.getReadLogsEnabled(),
+                incrementalMetrics != null ? incrementalMetrics.getMillisSinceLastDataLoaderBind()
+                        : -1,
+                incrementalMetrics != null ? incrementalMetrics.getDataLoaderBindDelayMillis()
+                        : -1,
+                incrementalMetrics != null ? incrementalMetrics.getTotalDelayedReads()
+                        : -1,
+                incrementalMetrics != null ? incrementalMetrics.getTotalFailedReads()
+                        : -1,
+                incrementalMetrics != null ? incrementalMetrics.getLastReadErrorUid()
+                        : -1,
+                incrementalMetrics != null ? incrementalMetrics.getMillisSinceLastReadError()
+                        : -1,
+                incrementalMetrics != null ? incrementalMetrics.getLastReadErrorNumber()
+                        : 0
         );
 
         final int relaunchReason = r == null ? RELAUNCH_REASON_NONE
@@ -15831,8 +15840,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                     if (initLocale || !mProcessesReady) {
                         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
                     }
+                    final BroadcastOptions bOptions = BroadcastOptions.makeBasic();
+                    bOptions.setTemporaryAppAllowlist(mInternal.getBootTimeTempAllowListDuration(),
+                            TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
+                            PowerExemptionManager.REASON_LOCALE_CHANGED, "");
                     broadcastIntentLocked(null, null, null, intent, null, null, 0, null, null, null,
-                            null, OP_NONE, null, false, false, MY_PID, SYSTEM_UID,
+                            null, OP_NONE, bOptions.toBundle(), false, false, MY_PID, SYSTEM_UID,
                             Binder.getCallingUid(), Binder.getCallingPid(),
                             UserHandle.USER_ALL);
                 }

@@ -135,6 +135,7 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
                 }
             };
 
+    private final ContentObserver mActivatedObserver;
     private final ContentObserver mEnabledObserver;
     private final ContentObserver mTimeoutObserver;
     private final ContentObserver mTaskChangeExitObserver;
@@ -170,11 +171,13 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
                 @Override
                 public void onStartFinished(Rect bounds) {
                     mState.setState(STATE_ACTIVE);
+                    notifyShortcutState(STATE_ACTIVE);
                 }
 
                 @Override
                 public void onStopFinished(Rect bounds) {
                     mState.setState(STATE_NONE);
+                    notifyShortcutState(STATE_NONE);
                 }
             };
 
@@ -287,6 +290,7 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
                         context.getContentResolver(), mUserId);
         mTimeoutHandler = timeoutHandler;
 
+        mActivatedObserver = getObserver(this::onActivatedActionChanged);
         mEnabledObserver = getObserver(this::onEnabledSettingChanged);
         mTimeoutObserver = getObserver(this::onTimeoutSettingChanged);
         mTaskChangeExitObserver = getObserver(this::onTaskChangeExitSettingChanged);
@@ -345,6 +349,12 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
     void setSwipeToNotificationEnabled(boolean enabled) {
         mIsSwipeToNotificationEnabled = enabled;
         updateOneHandedEnabled();
+    }
+
+    @VisibleForTesting
+    void notifyShortcutState(@OneHandedState.State int state) {
+        mOneHandedSettingsUtil.setOneHandedModeActivated(
+                mContext.getContentResolver(), state == STATE_ACTIVE ? 1 : 0, mUserId);
     }
 
     @VisibleForTesting
@@ -416,6 +426,9 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
     }
 
     private void registerSettingObservers(int newUserId) {
+        mOneHandedSettingsUtil.registerSettingsKeyObserver(
+                Settings.Secure.ONE_HANDED_MODE_ACTIVATED,
+                mContext.getContentResolver(), mActivatedObserver, newUserId);
         mOneHandedSettingsUtil.registerSettingsKeyObserver(Settings.Secure.ONE_HANDED_MODE_ENABLED,
                 mContext.getContentResolver(), mEnabledObserver, newUserId);
         mOneHandedSettingsUtil.registerSettingsKeyObserver(Settings.Secure.ONE_HANDED_MODE_TIMEOUT,
@@ -463,6 +476,26 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
                 onChangeRunnable.run();
             }
         };
+    }
+
+    @VisibleForTesting
+    void onActivatedActionChanged() {
+        if (mState.isTransitioning() || !isOneHandedEnabled()) {
+            return;
+        }
+
+        final boolean isActivated = mState.getState() == STATE_ACTIVE;
+        final boolean requestActivated = mOneHandedSettingsUtil.getOneHandedModeActivated(
+                mContext.getContentResolver(), mUserId);
+        // When gesture trigger action, we will update settings and introduce observer callback
+        // again, then the following logic will just ignore the second redundant callback.
+        if (isActivated ^ requestActivated) {
+            if (requestActivated) {
+                startOneHanded();
+            } else {
+                stopOneHanded();
+            }
+        }
     }
 
     @VisibleForTesting
@@ -542,6 +575,11 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
     @VisibleForTesting
     boolean isLockedDisabled() {
         return mLockedDisabled;
+    }
+
+    @VisibleForTesting
+    boolean isOneHandedEnabled() {
+        return mIsOneHandedEnabled;
     }
 
     private void updateOneHandedEnabled() {

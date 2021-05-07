@@ -369,7 +369,9 @@ public final class Icon implements Parcelable {
                         final PackageManager pm = context.getPackageManager();
                         try {
                             ApplicationInfo ai = pm.getApplicationInfo(
-                                    resPackage, PackageManager.MATCH_UNINSTALLED_PACKAGES);
+                                    resPackage,
+                                    PackageManager.MATCH_UNINSTALLED_PACKAGES
+                                    | PackageManager.GET_SHARED_LIBRARY_FILES);
                             if (ai != null) {
                                 mObj1 = pm.getResourcesForApplication(ai);
                             } else {

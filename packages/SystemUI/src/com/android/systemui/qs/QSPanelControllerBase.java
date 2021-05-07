@@ -22,7 +22,6 @@ import static com.android.systemui.qs.dagger.QSFragmentModule.QS_USING_MEDIA_PLA
 import android.content.ComponentName;
 import android.content.res.Configuration;
 import android.metrics.LogMaker;
-import android.view.View;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
@@ -294,13 +293,6 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     boolean switchTileLayout(boolean force) {
         /** Whether or not the QuickQSPanel currently contains a media player. */
         boolean horizontal = shouldUseHorizontalLayout();
-        if (mView.getDivider() != null) {
-            if (!horizontal && mUsingMediaPlayer && mMediaHost.getVisible()) {
-                mView.getDivider().setVisibility(View.VISIBLE);
-            } else {
-                mView.getDivider().setVisibility(View.GONE);
-            }
-        }
         if (horizontal != mUsingHorizontalLayout || force) {
             mUsingHorizontalLayout = horizontal;
             for (QSPanelControllerBase.TileRecord record : mRecords) {
