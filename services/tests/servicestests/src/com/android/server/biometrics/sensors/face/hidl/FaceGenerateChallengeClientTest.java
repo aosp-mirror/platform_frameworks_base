@@ -86,20 +86,20 @@ public class FaceGenerateChallengeClientTest {
     @Test
     public void reuseResult_whenNotReady() throws Exception {
         mClient.reuseResult(mOtherReceiver);
-        verify(mOtherReceiver, never()).onChallengeGenerated(anyInt(), anyInt());
+        verify(mOtherReceiver, never()).onChallengeGenerated(anyInt(), anyInt(), anyInt());
     }
 
     @Test
     public void reuseResult_whenReady() throws Exception {
         mClient.start(mMonitorCallback);
         mClient.reuseResult(mOtherReceiver);
-        verify(mOtherReceiver).onChallengeGenerated(eq(SENSOR_ID), eq(CHALLENGE));
+        verify(mOtherReceiver).onChallengeGenerated(eq(SENSOR_ID), eq(USER_ID), eq(CHALLENGE));
     }
 
     @Test
     public void reuseResult_whenReallyReady() throws Exception {
         mClient.reuseResult(mOtherReceiver);
         mClient.start(mMonitorCallback);
-        verify(mOtherReceiver).onChallengeGenerated(eq(SENSOR_ID), eq(CHALLENGE));
+        verify(mOtherReceiver).onChallengeGenerated(eq(SENSOR_ID), eq(USER_ID), eq(CHALLENGE));
     }
 }

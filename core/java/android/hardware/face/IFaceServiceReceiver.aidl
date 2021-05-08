@@ -33,7 +33,7 @@ oneway interface IFaceServiceReceiver {
     void onRemoved(in Face face, int remaining);
     void onFeatureSet(boolean success, int feature);
     void onFeatureGet(boolean success, in int[] features, in boolean[] featureState);
-    void onChallengeGenerated(int sensorId, long challenge);
+    void onChallengeGenerated(int sensorId, int userId, long challenge);
     void onAuthenticationFrame(in FaceAuthenticationFrame frame);
     void onEnrollmentFrame(in FaceEnrollFrame frame);
 }

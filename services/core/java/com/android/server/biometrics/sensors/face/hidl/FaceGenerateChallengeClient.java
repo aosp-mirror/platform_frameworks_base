@@ -97,7 +97,7 @@ public class FaceGenerateChallengeClient extends GenerateChallengeClient<IBiomet
             @NonNull Callback ownerCallback) {
         Preconditions.checkState(mChallengeResult != null, "result not available");
         try {
-            receiver.onChallengeGenerated(getSensorId(), mChallengeResult);
+            receiver.onChallengeGenerated(getSensorId(), getTargetUserId(), mChallengeResult);
             ownerCallback.onClientFinished(this, true /* success */);
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception", e);

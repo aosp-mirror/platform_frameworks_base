@@ -110,7 +110,7 @@ public class BiometricTestSessionImpl extends ITestSession.Stub {
         }
 
         @Override
-        public void onChallengeGenerated(int sensorId, long challenge) {
+        public void onChallengeGenerated(int sensorId, int userId, long challenge) {
 
         }
 

@@ -223,6 +223,7 @@ public abstract class BaseClientMonitor extends LoggableMonitor
                 + this.getClass().getSimpleName()
                 + ", " + getProtoEnum()
                 + ", " + getOwnerString()
-                + ", " + getCookie() + "}";
+                + ", " + getCookie()
+                + ", " + getTargetUserId() + "}";
     }
 }
