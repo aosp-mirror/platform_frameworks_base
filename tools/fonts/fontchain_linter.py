@@ -114,7 +114,7 @@ def get_variation_sequences_cmap(font):
 def get_emoji_map(font):
     # Add normal characters
     emoji_map = copy.copy(get_best_cmap(font))
-    reverse_cmap = {glyph: code for code, glyph in emoji_map.items()}
+    reverse_cmap = {glyph: code for code, glyph in emoji_map.items() if not contains_pua(code) }
 
     # Add variation sequences
     vs_dict = get_variation_sequences_cmap(font).uvsDict
@@ -322,6 +322,22 @@ def get_emoji_font():
     return emoji_fonts[0]
 
 
+def is_pua(x):
+    return 0xE000 <= x <= 0xF8FF or 0xF0000 <= x <= 0xFFFFD or 0x100000 <= x <= 0x10FFFD
+
+def contains_pua(sequence):
+  if type(sequence) is tuple:
+    return any([is_pua(x) for x in sequence])
+  else:
+    return is_pua(sequence)
+
+
+def check_emoji_compat():
+    ttf = open_font(get_emoji_font())
+    meta = ttf['meta']
+    assert meta, 'Compat font must have meta table'
+    assert 'Emji' in meta.data, 'meta table should have \'Emji\' data.'
+
 def check_emoji_font_coverage(emoji_font, all_emoji, equivalent_emoji):
     coverage = get_emoji_map(emoji_font)
 
@@ -335,6 +351,11 @@ def check_emoji_font_coverage(emoji_font, all_emoji, equivalent_emoji):
         if sequence in {0x0000, 0x000D, 0x0020}:
             # The font needs to support a few extra characters, which is OK
             continue
+
+        if contains_pua(sequence):
+            # The font needs to have some PUA for EmojiCompat library.
+            continue
+
         if sequence not in all_emoji:
           errors.append('%s support unexpected in the emoji font.' % printable(sequence))
 
@@ -347,7 +368,8 @@ def check_emoji_font_coverage(emoji_font, all_emoji, equivalent_emoji):
                 printable(second)))
 
     for glyph in set(coverage.values()):
-        maps_to_glyph = [seq for seq in coverage if coverage[seq] == glyph]
+        maps_to_glyph = [
+            seq for seq in coverage if coverage[seq] == glyph and not contains_pua(seq) ]
         if len(maps_to_glyph) > 1:
             # There are more than one sequences mapping to the same glyph. We
             # need to make sure they were expected to be equivalent.
@@ -728,6 +750,7 @@ def main():
         ucd_path = sys.argv[3]
         parse_ucd(ucd_path)
         all_emoji, default_emoji, equivalent_emoji = compute_expected_emoji()
+        check_emoji_compat()
         check_emoji_coverage(all_emoji, equivalent_emoji)
         check_emoji_defaults(default_emoji)
 

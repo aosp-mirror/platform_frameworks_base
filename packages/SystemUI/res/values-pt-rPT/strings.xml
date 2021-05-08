@@ -289,9 +289,11 @@
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"Zona Wi-Fi móvel desligada."</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"Zona Wi-Fi móvel ligada."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"Transmissão do ecrã interrompida."</string>
-    <string name="accessibility_quick_settings_work_mode_off" msgid="562749867895549696">"Modo de trabalho desativado."</string>
+    <!-- no translation found for accessibility_quick_settings_work_mode_off (9106217884005620744) -->
+    <skip />
     <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"Modo de trabalho ativado."</string>
-    <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6256690740556798683">"O modo de trabalho foi desativado."</string>
+    <!-- no translation found for accessibility_quick_settings_work_mode_changed_off (2653550342355027441) -->
+    <skip />
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"O modo de trabalho foi ativado."</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"Poupança de dados desativada."</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"Poupança de dados ativada."</string>
@@ -410,6 +412,8 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"Limite de <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"Aviso de <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"Perfil de trabalho"</string>
+    <!-- no translation found for quick_settings_work_mode_paused (4841109346916998613) -->
+    <skip />
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Luz noturna"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Ativ. ao pôr-do-sol"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Até ao amanhecer"</string>
@@ -668,10 +672,12 @@
     <string name="wallet_title" msgid="5369767670735827105">"Carteira"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Mostrar tudo"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Desbloquear para pagar"</string>
-    <string name="wallet_secondary_label_active" msgid="4909706168969888137">"Pronto"</string>
-    <string name="wallet_secondary_label_no_card" msgid="1750103386908123401">"Configurar pagamento"</string>
+    <!-- no translation found for wallet_secondary_label_no_card (1282609666895946317) -->
+    <skip />
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Desbloquear para utilizar"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Ocorreu um problema ao obter os seus cartões. Tente novamente mais tarde."</string>
+    <!-- no translation found for wallet_lockscreen_settings_label (3539105300870383570) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"Perfil de trabalho"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Modo de avião"</string>
     <string name="add_tile" msgid="6239678623873086686">"Adicionar mosaico"</string>
@@ -740,9 +746,12 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Estado:&lt;/b&gt; despromovida para Silenciosa"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Estado:&lt;/b&gt; passou para classificação superior"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Estado:&lt;/b&gt; passou para classificação inferior"</string>
-    <string name="notification_channel_summary_priority" msgid="4592979359953954258">"Apresentadas sempre no topo das suas notificações, mesmo quando o modo Prioridade está ativado"</string>
+    <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Aparece na parte superior das notificações de conversas e como uma imagem do perfil no ecrã de bloqueio"</string>
+    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Aparece na parte superior das notificações de conversas e como uma imagem do perfil no ecrã de bloqueio, surge como um balão"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Aparece na parte superior das notificações de conversas e como uma imagem do perfil no ecrã de bloqueio, interrompe o modo Não incomodar"</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Aparece na parte superior das notificações de conversas e como uma imagem do perfil no ecrã de bloqueio, surge como um balão, interrompe o modo Não incomodar"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Definições"</string>
-    <string name="notification_priority_title" msgid="5256226572739882190">"Conversas com prioridade"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"Prioridade"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"A app <xliff:g id="APP_NAME">%1$s</xliff:g> não suporta funcionalidades de conversa."</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Não é possível modificar estas notificações."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Não é possível configurar este grupo de notificações aqui."</string>
@@ -858,6 +867,8 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"Ativado"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"Desativado"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"Indisponível"</string>
+    <!-- no translation found for tile_disabled (373212051546573069) -->
+    <skip />
     <string name="nav_bar" msgid="4642708685386136807">"Barra de navegação"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"Esquema"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"Tipo de botão esquerdo adicional"</string>
@@ -1016,14 +1027,6 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"A navegação no sistema foi atualizada. Para efetuar alterações, aceda às Definições."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Aceda às Definições para atualizar a navegação no sistema."</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Modo de espera"</string>
-    <string name="priority_onboarding_title" msgid="2893070698479227616">"Conversa definida como prioritária"</string>
-    <string name="priority_onboarding_behavior" msgid="636826237468953117">"Conversas com prioridade"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="3861580571311518785">"Estas conversas são apresentadas no topo da sua lista e recebe-as sempre quando o modo Prioridade está ativado"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="1781653813573865071">"As imagens de perfil são apresentadas no ecrã de bloqueio"</string>
-    <string name="priority_onboarding_appear_as_bubble_text" msgid="4359924720680083057">"Pode encontrar facilmente estas conversas em balões no seu ecrã principal"</string>
-    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Interrompem o modo Não incomodar."</string>
-    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"OK"</string>
-    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Definições"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Janela de ampliação"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Controlos da janela de ampliação"</string>
     <string name="accessibility_control_zoom_in" msgid="1189272315480097417">"Aumentar zoom"</string>

@@ -1135,7 +1135,7 @@ public class AlarmManagerService extends SystemService {
         this(context, new Injector(context));
     }
 
-    private static boolean isRtc(int type) {
+    static boolean isRtc(int type) {
         return (type == RTC || type == RTC_WAKEUP);
     }
 

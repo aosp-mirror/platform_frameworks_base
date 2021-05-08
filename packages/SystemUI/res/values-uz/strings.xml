@@ -289,9 +289,11 @@
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"Mobil ulanish nuqtasi o‘chirildi."</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"Mobil ulanish nuqtasi yoqildi."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"Ekranni translatsiya qilish to‘xtadi."</string>
-    <string name="accessibility_quick_settings_work_mode_off" msgid="562749867895549696">"Ish rejimi o‘chiq."</string>
+    <!-- no translation found for accessibility_quick_settings_work_mode_off (9106217884005620744) -->
+    <skip />
     <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"Ish rejimi yoniq."</string>
-    <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6256690740556798683">"Ish rejimi o‘chirib qo‘yildi."</string>
+    <!-- no translation found for accessibility_quick_settings_work_mode_changed_off (2653550342355027441) -->
+    <skip />
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"Ishchi rejim yoqildi."</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"Trafik tejash rejimi o‘chirib qo‘yildi."</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"Trafik tejash rejimi yoqildi."</string>
@@ -410,6 +412,8 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"Cheklov: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"Ogohlantirish: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"Ish profili"</string>
+    <!-- no translation found for quick_settings_work_mode_paused (4841109346916998613) -->
+    <skip />
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Tungi rejim"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Kunbotarda yoqish"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Quyosh chiqqunicha"</string>
@@ -668,10 +672,12 @@
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Hammasi"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Toʻlov uchun qulfdan chiqarish"</string>
-    <string name="wallet_secondary_label_active" msgid="4909706168969888137">"Tayyor"</string>
-    <string name="wallet_secondary_label_no_card" msgid="1750103386908123401">"Toʻlovni sozlash"</string>
+    <!-- no translation found for wallet_secondary_label_no_card (1282609666895946317) -->
+    <skip />
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Foydalanish uchun qulfdan chiqarish"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Bildirgilarni yuklashda xatolik yuz berdi, keyinroq qaytadan urining"</string>
+    <!-- no translation found for wallet_lockscreen_settings_label (3539105300870383570) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"Ish profili"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Parvoz rejimi"</string>
     <string name="add_tile" msgid="6239678623873086686">"Tezkor sozlamalar tugmasini qo‘shish"</string>
@@ -740,9 +746,12 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Holati:&lt;/b&gt; Sokin darajaga tushirildi"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Holati:&lt;/b&gt; Yuqori darajaga chiqarildi"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Holati:&lt;/b&gt; Quyi darajaga tushirildi"</string>
-    <string name="notification_channel_summary_priority" msgid="4592979359953954258">"“Faqat muhim” rejimi yoniq boʻlsa ham doimo bildirishnomalaringizning tepasida chiqadi"</string>
+    <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Suhbat bildirishnomalari tepasida va ekran qulfida profil rasmi sifatida chiqariladi"</string>
+    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Suhbat bildirishnomalari tepasida va ekran qulfida profil rasmi sifatida chiqariladi, bulutcha sifatida chiqadi"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Suhbat bildirishnomalari tepasida va ekran qulfida profil rasmi sifatida chiqariladi, Bezovta qilinmasin rejimini bekor qiladi"</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Suhbat bildirishnomalari tepasida va ekran qulfida profil rasmi sifatida chiqariladi, bulutcha sifatida chiqadi, Bezovta qilinmasin rejimini bekor qiladi"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Sozlamalar"</string>
-    <string name="notification_priority_title" msgid="5256226572739882190">"Muhim suhbatlar"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"Muhim"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> ilovasida suhbat funksiyalari ishlamaydi"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Bu bildirishnomalarni tahrirlash imkonsiz."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Ushbu bildirishnomalar guruhi bu yerda sozlanmaydi"</string>
@@ -858,6 +867,8 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"Yoniq"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"Yoqilmagan"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"Mavjud emas"</string>
+    <!-- no translation found for tile_disabled (373212051546573069) -->
+    <skip />
     <string name="nav_bar" msgid="4642708685386136807">"Navigatsiya paneli"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"Tugmalar joylashuvi"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"Qo‘shimcha Chapga tugmasi turi"</string>
@@ -1016,14 +1027,6 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Tizim navigatsiyasi yangilandi. Buni Sozlamalar orqali oʻzgartirishingiz mumkin."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Tizim navigatsiyasini yangilash uchun Sozlamalarni oching"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Kutib turing"</string>
-    <string name="priority_onboarding_title" msgid="2893070698479227616">"Suhbat muhim deb belgilandi"</string>
-    <string name="priority_onboarding_behavior" msgid="636826237468953117">"Muhim suhbatlar"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="3861580571311518785">"Bu suhbatlar roʻyxat yuqorisida chiqadi va “M|uhim” rejimi yoniq boʻlganda oʻqish mumkin"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="1781653813573865071">"Profil rasmlari ekran qulfida chiqadi"</string>
-    <string name="priority_onboarding_appear_as_bubble_text" msgid="4359924720680083057">"Bu suhbatlarni osongina bosh ekrandagi bulutchalardan topishingiz mumkin"</string>
-    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Bezovta qilinmasin rejimida chiqarish"</string>
-    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"OK"</string>
-    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Sozlamalar"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Kattalashtirish oynasi"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Kattalashtirish oynasi sozlamalari"</string>
     <string name="accessibility_control_zoom_in" msgid="1189272315480097417">"Yaqinlashtirish"</string>

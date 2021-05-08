@@ -81,7 +81,8 @@ public class DeleteScreenshotReceiverTest extends SysuiTestCase {
 
         verify(mMockExecutor, never()).execute(any(Runnable.class));
         verify(mMockScreenshotSmartActions, never()).notifyScreenshotAction(
-                any(Context.class), any(String.class), any(String.class), anyBoolean());
+                any(Context.class), any(String.class), any(String.class), anyBoolean(),
+                any(Intent.class));
     }
 
     @Test
@@ -112,8 +113,8 @@ public class DeleteScreenshotReceiverTest extends SysuiTestCase {
         }
 
         // ensure smart actions not called by default
-        verify(mMockScreenshotSmartActions, never()).notifyScreenshotAction(
-                any(Context.class), any(String.class), any(String.class), anyBoolean());
+        verify(mMockScreenshotSmartActions, never()).notifyScreenshotAction(any(Context.class),
+                any(String.class), any(String.class), anyBoolean(), any(Intent.class));
     }
 
     @Test
@@ -128,8 +129,8 @@ public class DeleteScreenshotReceiverTest extends SysuiTestCase {
         mDeleteScreenshotReceiver.onReceive(mContext, intent);
 
         verify(mMockExecutor).execute(any(Runnable.class));
-        verify(mMockScreenshotSmartActions).notifyScreenshotAction(
-                mContext, testId, ACTION_TYPE_DELETE, false);
+        verify(mMockScreenshotSmartActions).notifyScreenshotAction(mContext, testId,
+                ACTION_TYPE_DELETE, false, null);
     }
 
     private static ContentValues getFakeContentValues() {

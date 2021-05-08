@@ -430,10 +430,6 @@ public final class MediaTranscodeManager {
         mUid = Os.getuid();
         mPid = Os.getpid();
         mIsLowRamDevice = mContext.getSystemService(ActivityManager.class).isLowRamDevice();
-        IMediaTranscodingService service = getService(false /*retry*/);
-        if (service != null) {
-            mTranscodingClient = registerClient(service);
-        }
     }
 
     /**

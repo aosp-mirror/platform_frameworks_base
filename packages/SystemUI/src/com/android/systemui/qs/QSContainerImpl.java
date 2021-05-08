@@ -297,9 +297,7 @@ public class QSContainerImpl extends FrameLayout {
                 // start margin of next page).
                 qsPanelController.setPageMargin(2 * mSideMargins);
             } else if (view == mHeader) {
-                // The header contains the QQS panel which needs to have special padding, to
-                // visually align them.
-                quickStatusBarHeaderController.setContentMargins(mContentPadding, mContentPadding);
+                // No content padding for the header.
             } else {
                 view.setPaddingRelative(
                         mContentPadding,

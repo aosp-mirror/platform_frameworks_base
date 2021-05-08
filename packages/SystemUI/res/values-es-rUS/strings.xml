@@ -289,9 +289,11 @@
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"Zona móvil desactivada"</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"Zona móvil activada"</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"Transmisión de pantalla detenida"</string>
-    <string name="accessibility_quick_settings_work_mode_off" msgid="562749867895549696">"Modo de trabajo desactivado"</string>
+    <!-- no translation found for accessibility_quick_settings_work_mode_off (9106217884005620744) -->
+    <skip />
     <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"Modo de trabajo activado"</string>
-    <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6256690740556798683">"Se desactivó el modo de trabajo."</string>
+    <!-- no translation found for accessibility_quick_settings_work_mode_changed_off (2653550342355027441) -->
+    <skip />
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"Se activó el modo de trabajo."</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"Se desactivó el Ahorro de datos."</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"Se activó el Ahorro de datos."</string>
@@ -410,6 +412,8 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"Límite de <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"Advertencia de <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"Perfil de trabajo"</string>
+    <!-- no translation found for quick_settings_work_mode_paused (4841109346916998613) -->
+    <skip />
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Luz nocturna"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Al atardecer"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Hasta el amanecer"</string>
@@ -554,7 +558,7 @@
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Ver políticas"</string>
     <string name="monitoring_button_view_controls" msgid="8316440345340701117">"Ver controles"</string>
     <string name="monitoring_description_named_management" msgid="505833016545056036">"Este dispositivo pertenece a <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nTu administrador de TI puede controlar y administrar la configuración, el acceso corporativo, las apps, los datos asociados al dispositivo y la información de ubicación.\n\nPara obtener más información, comunícate con el administrador de TI."</string>
-    <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"Es posible que <xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g> pueda acceder a los datos asociados con este dispositivo y administrar las apps y cambiar su configuración. \n\nSi tienes preguntas, comunícate con <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g>."</string>
+    <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"Es posible que <xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g> pueda acceder a los datos asociados con este dispositivo, cambie la configuración y administre las apps. \n\nSi tienes preguntas, comunícate con <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g>."</string>
     <string name="monitoring_description_management" msgid="4308879039175729014">"Este dispositivo pertenece a tu organización.\n\nTu administrador de TI puede controlar y administrar la configuración, el acceso corporativo, las apps, los datos asociados al dispositivo y la información de ubicación.\n\nPara obtener más información, comunícate con el administrador de TI."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Tu organización instaló una autoridad de certificación en este dispositivo. Es posible que se controle o modifique el tráfico de tu red segura."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Tu organización instaló una autoridad de certificación en tu perfil de trabajo. Es posible que se controle o modifique el tráfico de tu red segura."</string>
@@ -668,10 +672,12 @@
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Mostrar todo"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Desbloquear para pagar"</string>
-    <string name="wallet_secondary_label_active" msgid="4909706168969888137">"Listo"</string>
-    <string name="wallet_secondary_label_no_card" msgid="1750103386908123401">"Configurar pago"</string>
+    <!-- no translation found for wallet_secondary_label_no_card (1282609666895946317) -->
+    <skip />
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Desbloquear para usar"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Ocurrió un problema al obtener las tarjetas; vuelve a intentarlo más tarde"</string>
+    <!-- no translation found for wallet_lockscreen_settings_label (3539105300870383570) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"Perfil de trabajo"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Modo de avión"</string>
     <string name="add_tile" msgid="6239678623873086686">"Agregar mosaico"</string>
@@ -740,9 +746,12 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Estado:&lt;/b&gt; Descendió de nivel a Silenciada"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Estado:&lt;/b&gt; Se clasificó en una posición superior"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Estado:&lt;/b&gt; Se clasificó en una posición inferior"</string>
-    <string name="notification_channel_summary_priority" msgid="4592979359953954258">"Se muestran siempre en la parte superior de las notificaciones, incluso cuando el Modo prioridad está activado"</string>
+    <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Aparece como foto de perfil en la parte superior de las notificaciones de conversación, en la pantalla de bloqueo"</string>
+    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Aparece en forma de burbuja y como foto de perfil en la parte superior de las notificaciones de conversación, en la pantalla de bloqueo"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Aparece como foto de perfil en la parte superior de las notificaciones de conversación, en la pantalla de bloqueo, y detiene el modo No interrumpir"</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Aparece en forma de burbuja y como foto de perfil en la parte superior de las notificaciones de conversación, en la pantalla de bloqueo, y detiene el modo No interrumpir"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Configuración"</string>
-    <string name="notification_priority_title" msgid="5256226572739882190">"Conversaciones prioritarias"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"Prioritaria"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> no admite funciones de conversación"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"No se pueden modificar estas notificaciones."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"No se puede configurar aquí este grupo de notificaciones"</string>
@@ -858,6 +867,8 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"Activado"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"Desactivado"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"No disponible"</string>
+    <!-- no translation found for tile_disabled (373212051546573069) -->
+    <skip />
     <string name="nav_bar" msgid="4642708685386136807">"Barra de navegación"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"Diseño"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"Tipo de botón izquierdo adicional"</string>
@@ -1016,14 +1027,6 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Se actualizó el sistema de navegación. Para hacer cambios, ve a Configuración."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Ve a Configuración para actualizar la navegación del sistema"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"En espera"</string>
-    <string name="priority_onboarding_title" msgid="2893070698479227616">"Se estableció la conversación como prioritaria"</string>
-    <string name="priority_onboarding_behavior" msgid="636826237468953117">"Conversaciones prioritarias"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="3861580571311518785">"Estas conversaciones aparecen arriba en la lista y están siempre al alcance cuando el Modo prioridad está activado"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="1781653813573865071">"Las fotos de perfil se muestran en la pantalla de bloqueo"</string>
-    <string name="priority_onboarding_appear_as_bubble_text" msgid="4359924720680083057">"Puedes encontrar estas conversaciones con facilidad en burbujas, en las pantalla principal"</string>
-    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Suspender No interrumpir"</string>
-    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Entendido"</string>
-    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Configuración"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Ventana de ampliación"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Controles de ampliación de la ventana"</string>
     <string name="accessibility_control_zoom_in" msgid="1189272315480097417">"Acercar"</string>

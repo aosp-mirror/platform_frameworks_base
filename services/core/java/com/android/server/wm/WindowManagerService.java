@@ -818,7 +818,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             if (mImmersiveModeConfirmationsUri.equals(uri) || mPolicyControlUri.equals(uri)) {
-                updateSystemUiSettings();
+                updateSystemUiSettings(true /* handleChange */);
                 return;
             }
 
@@ -874,17 +874,22 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         void loadSettings() {
-            updateSystemUiSettings();
+            updateSystemUiSettings(false /* handleChange */);
             updatePointerLocation();
         }
 
-        void updateSystemUiSettings() {
-            boolean changed;
+        void updateSystemUiSettings(boolean handleChange) {
             synchronized (mGlobalLock) {
-                changed = ImmersiveModeConfirmation.loadSetting(mCurrentUserId, mContext);
-            }
-            if (changed) {
-                updateRotation(false /* alwaysSendConfiguration */, false /* forceRelayout */);
+                boolean changed = false;
+                if (handleChange) {
+                    changed = getDefaultDisplayContentLocked().getDisplayPolicy()
+                            .onSystemUiSettingsChanged();
+                } else {
+                    ImmersiveModeConfirmation.loadSetting(mCurrentUserId, mContext);
+                }
+                if (changed) {
+                    mWindowPlacerLocked.requestTraversal();
+                }
             }
         }
 
@@ -2990,7 +2995,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void onUserSwitched() {
-        mSettingsObserver.updateSystemUiSettings();
+        mSettingsObserver.updateSystemUiSettings(true /* handleChange */);
         synchronized (mGlobalLock) {
             // force a re-application of focused window sysui visibility on each display.
             mRoot.forAllDisplayPolicies(DisplayPolicy::resetSystemUiVisibilityLw);

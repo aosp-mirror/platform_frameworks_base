@@ -65,8 +65,12 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.events.PrivacyDotViewController;
 import com.android.systemui.tuner.TunerService;
+import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.concurrency.FakeThreadFactory;
+import com.android.systemui.util.concurrency.ThreadFactory;
 import com.android.systemui.util.settings.FakeSettings;
 import com.android.systemui.util.settings.SecureSettings;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -89,6 +93,7 @@ public class ScreenDecorationsTest extends SysuiTestCase {
     private DisplayManager mDisplayManager;
     private SecureSettings mSecureSettings;
     private Handler mMainHandler;
+    private ThreadFactory mThreadFactory;
     @Mock
     private TunerService mTunerService;
     @Mock
@@ -105,6 +110,7 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         mTestableLooper = TestableLooper.get(this);
         mMainHandler = new Handler(mTestableLooper.getLooper());
         mSecureSettings = new FakeSettings();
+        mThreadFactory = new FakeThreadFactory(new FakeExecutor(new FakeSystemClock()));
 
         mWindowManager = mock(WindowManager.class);
         WindowMetrics metrics = mContext.getSystemService(WindowManager.class)
@@ -119,7 +125,8 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         mContext.addMockSystemService(DisplayManager.class, mDisplayManager);
 
         mScreenDecorations = spy(new ScreenDecorations(mContext, mMainHandler, mSecureSettings,
-                mBroadcastDispatcher, mTunerService, mUserTracker, mDotViewController) {
+                mBroadcastDispatcher, mTunerService, mUserTracker, mDotViewController,
+                mThreadFactory) {
             @Override
             public void start() {
                 super.start();

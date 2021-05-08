@@ -289,9 +289,11 @@
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"ম’বাইল হটস্পট  অফ কৰা হ’ল।"</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"ম’বাইল হটস্পট  অন কৰা হ’ল।"</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"স্ক্ৰীণ কাষ্টিং বন্ধ কৰা হ’ল।"</string>
-    <string name="accessibility_quick_settings_work_mode_off" msgid="562749867895549696">"কৰ্মস্থান ম\'ড অফ হৈ আছে।"</string>
+    <!-- no translation found for accessibility_quick_settings_work_mode_off (9106217884005620744) -->
+    <skip />
     <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"কৰ্মস্থান ম\'ড অন হৈ আছে।"</string>
-    <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6256690740556798683">"কৰ্মস্থান ম\'ড অফ কৰা হ’ল।"</string>
+    <!-- no translation found for accessibility_quick_settings_work_mode_changed_off (2653550342355027441) -->
+    <skip />
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"কৰ্মস্থান ম\'ড অন কৰা হ’ল।"</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"ডেটা সঞ্চয়কাৰী সুবিধা অফ কৰা হ’ল।"</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"ডেটা সঞ্চয়কাৰী সুবিধা অন কৰা হ’ল।"</string>
@@ -410,6 +412,8 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"<xliff:g id="DATA_LIMIT">%s</xliff:g> সীমা"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"<xliff:g id="DATA_LIMIT">%s</xliff:g> সকীয়নি"</string>
     <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"কৰ্মস্থানৰ প্ৰ\'ফাইল"</string>
+    <!-- no translation found for quick_settings_work_mode_paused (4841109346916998613) -->
+    <skip />
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"ৰাতিৰ পোহৰ"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"সূৰ্যাস্তত অন কৰক"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"সূৰ্যোদয়ৰ লৈকে"</string>
@@ -668,10 +672,12 @@
     <string name="wallet_title" msgid="5369767670735827105">"ৱালেট"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"আটাইবোৰ দেখুৱাওক"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"পৰিশোধ কৰিবলৈ আনলক কৰক"</string>
-    <string name="wallet_secondary_label_active" msgid="4909706168969888137">"সাজু"</string>
-    <string name="wallet_secondary_label_no_card" msgid="1750103386908123401">"পৰিশোধ ছেট আপ কৰক"</string>
+    <!-- no translation found for wallet_secondary_label_no_card (1282609666895946317) -->
+    <skip />
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"ব্যৱহাৰ কৰিবলৈ আনলক কৰক"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"আপোনাৰ কাৰ্ড লাভ কৰোঁতে এটা সমস্যা হৈছে, অনুগ্ৰহ কৰি পাছত পুনৰ চেষ্টা কৰক"</string>
+    <!-- no translation found for wallet_lockscreen_settings_label (3539105300870383570) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"কৰ্মস্থানৰ প্ৰ\'ফাইল"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"এয়াৰপ্লেইন ম\'ড"</string>
     <string name="add_tile" msgid="6239678623873086686">"টাইল যোগ দিয়ক"</string>
@@ -740,9 +746,16 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;স্থিতি:&lt;/b&gt; নীৰৱলৈ হ্ৰাস কৰা হৈছে"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;স্থিতি:&lt;/b&gt; স্থান ওপৰলৈ কৰা হৈছে"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;স্থিতি:&lt;/b&gt; স্থান তললৈ কৰা হৈছে"</string>
-    <string name="notification_channel_summary_priority" msgid="4592979359953954258">"সদায় আপোনাৰ জাননীৰ শীৰ্ষত দেখুওৱা হয় আনকি অগ্ৰাধিকাৰ ম’ডটো অন হৈ থাকিলেও"</string>
+    <!-- no translation found for notification_channel_summary_priority_baseline (46674690072551234) -->
+    <skip />
+    <!-- no translation found for notification_channel_summary_priority_bubble (1275413109619074576) -->
+    <skip />
+    <!-- no translation found for notification_channel_summary_priority_dnd (6665395023264154361) -->
+    <skip />
+    <!-- no translation found for notification_channel_summary_priority_all (7151752959650048285) -->
+    <skip />
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"ছেটিংসমূহ"</string>
-    <string name="notification_priority_title" msgid="5256226572739882190">"অগ্ৰাধিকাৰপ্ৰাপ্ত বাৰ্তালাপ"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"অগ্ৰাধিকাৰ"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g>এ বাৰ্তালাপৰ সুবিধাসমূহ সমৰ্থন নকৰে"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"এই জাননীসমূহ সংশোধন কৰিব নোৱাৰি।"</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"এই ধৰণৰ জাননীবোৰ ইয়াত কনফিগাৰ কৰিব পৰা নাযায়"</string>
@@ -858,6 +871,8 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"অন"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"অফ"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"উপলব্ধ নহয়"</string>
+    <!-- no translation found for tile_disabled (373212051546573069) -->
+    <skip />
     <string name="nav_bar" msgid="4642708685386136807">"নেভিগেশ্বন দণ্ড"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"লেআউট"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"বাওঁ বুটামৰ অতিৰিক্ত প্ৰকাৰ"</string>
@@ -1016,14 +1031,6 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"ছিষ্টেম নেভিগেশ্বন আপডে’ট কৰা হ’ল। সলনি কৰিবলৈ ছেটিংসমূহ-লৈ যাওক।"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"ছিষ্টেম নেভিগেশ্বন আপডে’ট কৰিবলৈ ছেটিংসমূহ-লৈ যাওক"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"ষ্টেণ্ডবাই"</string>
-    <string name="priority_onboarding_title" msgid="2893070698479227616">"বাৰ্তালাপসমূহ অগ্ৰাধিকাৰপ্ৰাপ্ত হিচাপে ছেট কৰা হৈছে"</string>
-    <string name="priority_onboarding_behavior" msgid="636826237468953117">"অগ্ৰাধিকাৰপ্ৰাপ্ত বাৰ্তালাপ"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="3861580571311518785">"এই বাৰ্তালাপসমূহ আপোনাৰ সূচীৰ শীৰ্ষত দেখুওৱা হয় আৰু অগ্ৰাধিকাৰ ম’ডটো অন হৈ থাকিলে আপুনি সদায় এইসমূহ পাব পাৰে"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="1781653813573865071">"লক স্ক্ৰীনত প্ৰ’ফাইল চিত্ৰ দেখুওৱা হয়"</string>
-    <string name="priority_onboarding_appear_as_bubble_text" msgid="4359924720680083057">"আপুনি নিজৰ গৃহ স্ক্ৰীনৰ বাবলত সহজে এই বাৰ্তালাপসমূহ বিচাৰি পাব পাৰে"</string>
-    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"অসুবিধা নিদিব সুবিধাটোত ব্যাঘাত জন্মাওক"</string>
-    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"বুজি পালোঁ"</string>
-    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"ছেটিংসমূহ"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"বিবৰ্ধন ৱিণ্ড’"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"বিবৰ্ধন ৱিণ্ড’ৰ নিয়ন্ত্ৰণসমূহ"</string>
     <string name="accessibility_control_zoom_in" msgid="1189272315480097417">"জুম ইন কৰক"</string>

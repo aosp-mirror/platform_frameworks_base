@@ -289,9 +289,11 @@
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"Mobiliojo ryšio viešosios interneto prieigos taškas išjungtas."</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"Mobiliojo ryšio viešosios interneto prieigos taškas įjungtas."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"Ekrano perdavimas sustabdytas."</string>
-    <string name="accessibility_quick_settings_work_mode_off" msgid="562749867895549696">"Darbo režimas išjungtas."</string>
+    <!-- no translation found for accessibility_quick_settings_work_mode_off (9106217884005620744) -->
+    <skip />
     <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"Darbo režimas įjungtas."</string>
-    <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6256690740556798683">"Darbo režimas išjungtas."</string>
+    <!-- no translation found for accessibility_quick_settings_work_mode_changed_off (2653550342355027441) -->
+    <skip />
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"Darbo režimas įjungtas."</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"Duomenų taupymo priemonė išjungta."</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"Duomenų taupymo priemonė įjungta."</string>
@@ -414,6 +416,8 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"Limitas: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"<xliff:g id="DATA_LIMIT">%s</xliff:g> įspėjimas"</string>
     <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"Darbo profilis"</string>
+    <!-- no translation found for quick_settings_work_mode_paused (4841109346916998613) -->
+    <skip />
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Nakties šviesa"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Per saulėlydį"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Iki saulėtekio"</string>
@@ -674,10 +678,12 @@
     <string name="wallet_title" msgid="5369767670735827105">"Piniginė"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Rodyti viską"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Atrakinti, kad būtų galima mokėti"</string>
-    <string name="wallet_secondary_label_active" msgid="4909706168969888137">"Paruošta"</string>
-    <string name="wallet_secondary_label_no_card" msgid="1750103386908123401">"Nustatyti mokėjimą"</string>
+    <!-- no translation found for wallet_secondary_label_no_card (1282609666895946317) -->
+    <skip />
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Atrakinti, kad būtų galima naudoti"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Gaunant korteles kilo problema, bandykite dar kartą vėliau"</string>
+    <!-- no translation found for wallet_lockscreen_settings_label (3539105300870383570) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"Darbo profilis"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Lėktuvo režimas"</string>
     <string name="add_tile" msgid="6239678623873086686">"Pridėti išklotinės elementą"</string>
@@ -746,9 +752,12 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Būsena:&lt;/b&gt; pakeista į begarsį lygį"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Būsenos:&lt;/b&gt; reitingas padidintas"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Būsenos:&lt;/b&gt; reitingas sumažintas"</string>
-    <string name="notification_channel_summary_priority" msgid="4592979359953954258">"Visada rodoma pranešimų viršuje, net įjungus svarbiausių pokalbių režimą"</string>
+    <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Rodoma pokalbių pranešimų viršuje ir kaip profilio nuotrauka užrakinimo ekrane"</string>
+    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Rodoma pokalbių pranešimų viršuje ir kaip profilio nuotrauka užrakinimo ekrane, debesėlyje"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Rodoma pokalbių pranešimų viršuje ir kaip profilio nuotrauka užrakinimo ekrane, pertraukia netrukdymo režimą"</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Rodoma pokalbių pranešimų viršuje ir kaip profilio nuotrauka užrakinimo ekrane, debesėlyje, pertraukia netrukdymo režimą"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Nustatymai"</string>
-    <string name="notification_priority_title" msgid="5256226572739882190">"Svarbiausi pokalbiai"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"Prioritetiniai"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"Programa „<xliff:g id="APP_NAME">%1$s</xliff:g>“ nepalaiko pokalbių funkcijų"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Šių pranešimų keisti negalima."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Šios grupės pranešimai čia nekonfigūruojami"</string>
@@ -868,6 +877,8 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"Įjungta"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"Išjungta"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"Nepasiekiama"</string>
+    <!-- no translation found for tile_disabled (373212051546573069) -->
+    <skip />
     <string name="nav_bar" msgid="4642708685386136807">"Naršymo juosta"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"Išdėstymas"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"Papildomo mygtuko kairėje tipas"</string>
@@ -1026,14 +1037,6 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Sistemos naršymo funkcijos atnaujintos. Jei norite pakeisti, eikite į skiltį „Nustatymai“."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Eikite į skiltį „Nustatymai“, kad atnaujintumėte sistemos naršymo funkcijas"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Budėjimo laikas"</string>
-    <string name="priority_onboarding_title" msgid="2893070698479227616">"Pokalbis nustatytas į prioritetinį"</string>
-    <string name="priority_onboarding_behavior" msgid="636826237468953117">"Svarbiausi pokalbiai"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="3861580571311518785">"Įjungus svarbiausių pokalbių režimą, šie pokalbiai visada rodomi sąrašo viršuje"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="1781653813573865071">"Profilio nuotraukos rodomos užrakinimo ekrane"</string>
-    <string name="priority_onboarding_appear_as_bubble_text" msgid="4359924720680083057">"Lengvai rasite šiuos pokalbius burbuluose pagrindiniame ekrane"</string>
-    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Pertraukti netrukdymo režimą"</string>
-    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Supratau"</string>
-    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Nustatymai"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Didinimo langas"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Didinimo lango valdikliai"</string>
     <string name="accessibility_control_zoom_in" msgid="1189272315480097417">"Artinti"</string>
@@ -1054,8 +1057,7 @@
     <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"Perkelti į apačią dešinėje"</string>
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Perkelti į kraštą ir slėpti"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Perkelti iš krašto ir rodyti"</string>
-    <!-- no translation found for accessibility_floating_button_action_double_tap_to_toggle (7976492639670692037) -->
-    <skip />
+    <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"perjungti"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Įrenginio valdikliai"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Pridėkite prijungtų įrenginių valdiklių"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"Įrenginio valdiklių nustatymas"</string>
@@ -1104,8 +1106,7 @@
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Atsisakyti"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Tęsti"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Nustatymai"</string>
-    <!-- no translation found for controls_media_smartspace_rec_title (1699818353932537407) -->
-    <skip />
+    <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"Leisti"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Neaktyvu, patikrinkite progr."</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Klaida, bandoma iš naujo…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Nerasta"</string>

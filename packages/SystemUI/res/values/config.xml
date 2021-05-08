@@ -148,6 +148,9 @@
     <!-- Minimum display time for a heads up notification, in milliseconds. -->
     <integer name="heads_up_notification_minimum_time">2000</integer>
 
+    <!-- Whether to hide the notification header when the HUN is expanded. -->
+    <bool name="heads_up_notification_hides_header">false</bool>
+
     <!-- The number of milliseconds before the heads up notification accepts touches. -->
     <integer name="touch_acceptance_delay">700</integer>
 
