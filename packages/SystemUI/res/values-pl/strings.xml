@@ -289,9 +289,11 @@
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"Mobilny hotspot został wyłączony."</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"Mobilny hotspot został włączony."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"Zatrzymano przesyłanie ekranu."</string>
-    <string name="accessibility_quick_settings_work_mode_off" msgid="562749867895549696">"Tryb pracy wyłączony."</string>
+    <!-- no translation found for accessibility_quick_settings_work_mode_off (9106217884005620744) -->
+    <skip />
     <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"Tryb pracy włączony."</string>
-    <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6256690740556798683">"Tryb pracy wyłączony."</string>
+    <!-- no translation found for accessibility_quick_settings_work_mode_changed_off (2653550342355027441) -->
+    <skip />
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"Tryb pracy włączony."</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"Oszczędzanie danych jest wyłączone."</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"Oszczędzanie danych jest włączone."</string>
@@ -414,6 +416,8 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"Limit <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"Ostrzeżenie: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"Profil służbowy"</string>
+    <!-- no translation found for quick_settings_work_mode_paused (4841109346916998613) -->
+    <skip />
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Podświetlenie nocne"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Włącz o zachodzie"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Do wschodu słońca"</string>
@@ -674,10 +678,12 @@
     <string name="wallet_title" msgid="5369767670735827105">"Portfel"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Pokaż wszystko"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Odblokuj, aby zapłacić"</string>
-    <string name="wallet_secondary_label_active" msgid="4909706168969888137">"Gotowe"</string>
-    <string name="wallet_secondary_label_no_card" msgid="1750103386908123401">"Skonfiguruj płatność"</string>
+    <!-- no translation found for wallet_secondary_label_no_card (1282609666895946317) -->
+    <skip />
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Odblokuj, aby użyć"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Podczas pobierania kart wystąpił problem. Spróbuj ponownie później."</string>
+    <!-- no translation found for wallet_lockscreen_settings_label (3539105300870383570) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"Profil służbowy"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Tryb samolotowy"</string>
     <string name="add_tile" msgid="6239678623873086686">"Dodaj nazwę"</string>
@@ -746,9 +752,12 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Stan:&lt;/b&gt; zmieniono na Ciche"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Stan:&lt;/b&gt; podniesiono ważność"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Stan:&lt;/b&gt; obniżono ważność"</string>
-    <string name="notification_channel_summary_priority" msgid="4592979359953954258">"Zawsze pokazywane u góry powiadomień, nawet po włączeniu trybu Priorytet"</string>
+    <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Wyświetla się u góry powiadomień w rozmowach oraz jako zdjęcie profilowe na ekran blokady"</string>
+    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Wyświetla się u góry powiadomień w rozmowach oraz jako zdjęcie profilowe na ekran blokady, jako dymek"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Wyświetla się u góry powiadomień w rozmowach oraz jako zdjęcie profilowe na ekran blokady, przerywa działanie trybu Nie przeszkadzać"</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Wyświetla się u góry powiadomień w rozmowach oraz jako zdjęcie profilowe na ekran blokady, jako dymek, przerywa działanie trybu Nie przeszkadzać"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Ustawienia"</string>
-    <string name="notification_priority_title" msgid="5256226572739882190">"Rozmowy priorytetowe"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"Priorytet"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"Aplikacja <xliff:g id="APP_NAME">%1$s</xliff:g> nie obsługuje funkcji rozmów"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Tych powiadomień nie można zmodyfikować."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Tej grupy powiadomień nie można tu skonfigurować"</string>
@@ -868,6 +877,8 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"Wł."</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"Wył."</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"Niedostępne"</string>
+    <!-- no translation found for tile_disabled (373212051546573069) -->
+    <skip />
     <string name="nav_bar" msgid="4642708685386136807">"Pasek nawigacji"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"Układ"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"Typ dodatkowego lewego przycisku"</string>
@@ -1026,14 +1037,6 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Nawigacja w systemie została zaktualizowana. Aby wprowadzić zmiany, otwórz Ustawienia."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Otwórz Ustawienia, by zaktualizować nawigację w systemie"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Tryb gotowości"</string>
-    <string name="priority_onboarding_title" msgid="2893070698479227616">"Rozmowę ustawiono jako priorytetową"</string>
-    <string name="priority_onboarding_behavior" msgid="636826237468953117">"Rozmowy priorytetowe"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="3861580571311518785">"Te rozmowy są pokazywane na początku listy i nie przegapisz ich, jeśli włączysz tryb Priorytet"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="1781653813573865071">"Zdjęcia profilowe są widoczne na ekranie blokady"</string>
-    <string name="priority_onboarding_appear_as_bubble_text" msgid="4359924720680083057">"Łatwo znajdziesz te rozmowy w dymkach na ekranie głównym"</string>
-    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Ignorują tryb Nie przeszkadzać"</string>
-    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"OK"</string>
-    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Ustawienia"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Okno powiększenia"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Elementy sterujące okna powiększenia"</string>
     <string name="accessibility_control_zoom_in" msgid="1189272315480097417">"Powiększ"</string>
@@ -1054,8 +1057,7 @@
     <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"Przenieś w prawy dolny róg"</string>
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Przenieś do krawędzi i ukryj"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Przenieś poza krawędź i pokaż"</string>
-    <!-- no translation found for accessibility_floating_button_action_double_tap_to_toggle (7976492639670692037) -->
-    <skip />
+    <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"przełącz"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Sterowanie urządzeniami"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Dodaj elementy sterujące połączonymi urządzeniami"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"Konfigurowanie sterowania urządzeniami"</string>
@@ -1104,8 +1106,7 @@
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Odrzuć"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Wznów"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Ustawienia"</string>
-    <!-- no translation found for controls_media_smartspace_rec_title (1699818353932537407) -->
-    <skip />
+    <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"Odtwórz"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Nieaktywny, sprawdź aplikację"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Błąd, próbuję jeszcze raz…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Nie znaleziono"</string>
@@ -1165,6 +1166,6 @@
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Czytnik linii papilarnych"</string>
     <string name="accessibility_udfps_disabled_button" msgid="4284034245130239384">"Czytnik linii papilarnych został wyłączony"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"uwierzytelnij"</string>
-    <string name="accessibility_enter_hint" msgid="2617864063504824834">"dodaj urządzenie"</string>
+    <string name="accessibility_enter_hint" msgid="2617864063504824834">"otwórz urządzenie"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"By otworzyć, użyj odcisku palca"</string>
 </resources>

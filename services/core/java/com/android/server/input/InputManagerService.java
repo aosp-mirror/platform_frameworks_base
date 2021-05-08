@@ -16,6 +16,8 @@
 
 package com.android.server.input;
 
+import static android.view.Surface.ROTATION_0;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Notification;
@@ -38,6 +40,7 @@ import android.content.res.Resources.NotFoundException;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.database.ContentObserver;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayViewport;
@@ -97,6 +100,7 @@ import android.view.InputDevice;
 import android.view.InputEvent;
 import android.view.InputMonitor;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.PointerIcon;
 import android.view.Surface;
 import android.view.VerifiedInputEvent;
@@ -819,6 +823,28 @@ public class InputManagerService extends IInputManager.Stub
                 && mode != InputEventInjectionSync.WAIT_FOR_FINISHED
                 && mode != InputEventInjectionSync.WAIT_FOR_RESULT) {
             throw new IllegalArgumentException("mode is invalid");
+        }
+        if (ENABLE_PER_WINDOW_INPUT_ROTATION) {
+            if (event instanceof MotionEvent) {
+                final Context dispCtx = getContextForDisplay(event.getDisplayId());
+                final Display display = dispCtx.getDisplay();
+                final int rotation = display.getRotation();
+                if (rotation != ROTATION_0) {
+                    final MotionEvent motion = (MotionEvent) event;
+                    // Injections are currently expected to be in the space of the injector (ie.
+                    // usually assumed to be post-rotated). Thus we need to unrotate into raw
+                    // input coordinates for dispatch.
+                    final Point sz = new Point();
+                    display.getRealSize(sz);
+                    if ((rotation % 2) != 0) {
+                        final int tmpX = sz.x;
+                        sz.x = sz.y;
+                        sz.y = tmpX;
+                    }
+                    motion.applyTransform(MotionEvent.createRotateMatrix(
+                            (4 - rotation), sz.x, sz.y));
+                }
+            }
         }
 
         final int pid = Binder.getCallingPid();

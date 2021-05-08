@@ -47,6 +47,54 @@ public final class UnattributedNoteOpCallChecker extends BugChecker
     private static final Matcher<ExpressionTree> UNATTRIBUTED_NOTEOP_CALL_3 = methodInvocation(
             instanceMethod().onExactClass("android.app.AppOpsManager")
                     .withSignature("noteOp(int)"));
+    private static final Matcher<ExpressionTree> UNATTRIBUTED_NOTEOPNOTHROW_CALL_1 = methodInvocation(
+            instanceMethod().onExactClass("android.app.AppOpsManager")
+                    .withSignature("noteOpNoThrow(int,int,java.lang.String)"));
+    private static final Matcher<ExpressionTree> UNATTRIBUTED_NOTEOPNOTHROW_CALL_2 = methodInvocation(
+            instanceMethod().onExactClass("android.app.AppOpsManager")
+                    .withSignature("noteOpNoThrow(java.lang.String,int,java.lang.String)"));
+    private static final Matcher<ExpressionTree> UNATTRIBUTED_STARTOP_CALL_1 = methodInvocation(
+            instanceMethod().onExactClass("android.app.AppOpsManager")
+                    .withSignature("startOp(java.lang.String,int,java.lang.String)"));
+    private static final Matcher<ExpressionTree> UNATTRIBUTED_STARTOP_CALL_2 = methodInvocation(
+            instanceMethod().onExactClass("android.app.AppOpsManager")
+                    .withSignature("startOp(int,int,java.lang.String)"));
+    private static final Matcher<ExpressionTree> UNATTRIBUTED_STARTOP_CALL_3 = methodInvocation(
+            instanceMethod().onExactClass("android.app.AppOpsManager")
+                    .withSignature("startOp(int)"));
+    private static final Matcher<ExpressionTree> UNATTRIBUTED_STARTOP_CALL_4 = methodInvocation(
+            instanceMethod().onExactClass("android.app.AppOpsManager")
+                    .withSignature("startOp(int,int,java.lang.String,boolean)"));
+    private static final Matcher<ExpressionTree> UNATTRIBUTED_STARTOPNOTHROW_CALL_1 = methodInvocation(
+            instanceMethod().onExactClass("android.app.AppOpsManager")
+                    .withSignature("startOpNoThrow(java.lang.String,int,java.lang.String)"));
+    private static final Matcher<ExpressionTree> UNATTRIBUTED_STARTOPNOTHROW_CALL_2 = methodInvocation(
+            instanceMethod().onExactClass("android.app.AppOpsManager")
+                    .withSignature("startOpNoThrow(int,int,java.lang.String)"));
+    private static final Matcher<ExpressionTree> UNATTRIBUTED_STARTOPNOTHROW_CALL_3 = methodInvocation(
+            instanceMethod().onExactClass("android.app.AppOpsManager")
+                    .withSignature("startOpNoThrow(int,int,java.lang.String,boolean)"));
+    private static final Matcher<ExpressionTree> UNATTRIBUTED_NOTEPROXYOP_CALL_1 = methodInvocation(
+            instanceMethod().onExactClass("android.app.AppOpsManager")
+                    .withSignature("noteProxyOp(java.lang.String,java.lang.String)"));
+    private static final Matcher<ExpressionTree> UNATTRIBUTED_NOTEPROXYOP_CALL_2 = methodInvocation(
+            instanceMethod().onExactClass("android.app.AppOpsManager")
+                    .withSignature("noteProxyOp(int,java.lang.String)"));
+    private static final Matcher<ExpressionTree> UNATTRIBUTED_NOTEPROXYOPNOTHROW_CALL_1 = methodInvocation(
+            instanceMethod().onExactClass("android.app.AppOpsManager")
+                    .withSignature("noteProxyOpNoThrow(java.lang.String,java.lang.String)"));
+    private static final Matcher<ExpressionTree> UNATTRIBUTED_NOTEPROXYOPNOTHROW_CALL_2 = methodInvocation(
+            instanceMethod().onExactClass("android.app.AppOpsManager")
+                    .withSignature("noteProxyOpNoThrow(java.lang.String,java.lang.String,int)"));
+    private static final Matcher<ExpressionTree> UNATTRIBUTED_FINISHOP_CALL_1 = methodInvocation(
+            instanceMethod().onExactClass("android.app.AppOpsManager")
+                    .withSignature("finishOp(int)"));
+    private static final Matcher<ExpressionTree> UNATTRIBUTED_FINISHOP_CALL_2 = methodInvocation(
+            instanceMethod().onExactClass("android.app.AppOpsManager")
+                    .withSignature("finishOp(java.lang.String,int,java.lang.String)"));
+    private static final Matcher<ExpressionTree> UNATTRIBUTED_FINISHOP_CALL_3 = methodInvocation(
+            instanceMethod().onExactClass("android.app.AppOpsManager")
+                    .withSignature("finishOp(int,int,java.lang.String)"));
 
     @Override
     public Description matchMethodInvocation(MethodInvocationTree tree, VisitorState state) {
@@ -57,6 +105,49 @@ public final class UnattributedNoteOpCallChecker extends BugChecker
                 .setMessage("Unattributed noteOp call! Please use noteOp(int, String, String, String) or noteOp(int, CallerIdentity)")
                 .build();
         }
+        if (UNATTRIBUTED_NOTEOPNOTHROW_CALL_1.matches(tree, state)
+            || UNATTRIBUTED_NOTEOPNOTHROW_CALL_2.matches(tree, state)) {
+            return buildDescription(tree)
+                .setMessage("Unattributed noteOpNoThrow call! Please use noteOpNoThrow(String, int, String, String, String)")
+                .build();
+        }
+        if (UNATTRIBUTED_STARTOP_CALL_1.matches(tree, state)
+            || UNATTRIBUTED_STARTOP_CALL_2.matches(tree, state)
+            || UNATTRIBUTED_STARTOP_CALL_3.matches(tree, state)
+            || UNATTRIBUTED_STARTOP_CALL_4.matches(tree, state)) {
+            return buildDescription(tree)
+                .setMessage("Unattributed startOp call! Please use startOp(int, int, String, boolean, String, String)")
+                .build();
+        }
+        if (UNATTRIBUTED_STARTOPNOTHROW_CALL_1.matches(tree, state)
+            || UNATTRIBUTED_STARTOPNOTHROW_CALL_2.matches(tree, state)
+            || UNATTRIBUTED_STARTOPNOTHROW_CALL_3.matches(tree, state)) {
+            return buildDescription(tree)
+                .setMessage("Unattributed startOpNoThrow call!")
+                .build();
+        }
+        if (UNATTRIBUTED_NOTEPROXYOP_CALL_1.matches(tree, state)
+            || UNATTRIBUTED_NOTEPROXYOP_CALL_2.matches(tree, state)) {
+            return buildDescription(tree)
+                .setMessage("Unattributed noteProxyOp call!")
+                .build();
+        }
+        if (UNATTRIBUTED_NOTEPROXYOPNOTHROW_CALL_1.matches(tree, state)
+            || UNATTRIBUTED_NOTEPROXYOPNOTHROW_CALL_2.matches(tree, state)) {
+            return buildDescription(tree)
+                .setMessage("Unattributed noteProxyOpNoThrow call!")
+                .build();
+        }
+        if (UNATTRIBUTED_FINISHOP_CALL_1.matches(tree, state)
+            || UNATTRIBUTED_FINISHOP_CALL_2.matches(tree, state)
+            || UNATTRIBUTED_FINISHOP_CALL_3.matches(tree, state)) {
+            return buildDescription(tree)
+                .setMessage("Unattributed finishOp call!")
+                .build();
+        }
+
+
+
         return Description.NO_MATCH;
     }
 }

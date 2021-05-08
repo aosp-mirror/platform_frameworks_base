@@ -289,9 +289,11 @@
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"ମୋବାଇଲ୍ ହଟସ୍ପଟ୍‌ ବନ୍ଦ ଅଛି।"</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"ମୋବାଇଲ୍ ହଟସ୍ପଟ୍‌ ଅନ୍ ଅଛି।"</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"ସ୍କ୍ରୀନ୍‌ କାଷ୍ଟ କରିବା ରହିଯାଇଛି।"</string>
-    <string name="accessibility_quick_settings_work_mode_off" msgid="562749867895549696">"ୱର୍କ ମୋଡ୍‍ ଅଫ୍‍।"</string>
+    <!-- no translation found for accessibility_quick_settings_work_mode_off (9106217884005620744) -->
+    <skip />
     <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"ୱର୍କ ମୋଡ୍‍ ଅନ୍‍।"</string>
-    <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6256690740556798683">"ୱର୍କ ମୋଡ୍‌କୁ ଅଫ୍‍ କରାଯାଇଛି।"</string>
+    <!-- no translation found for accessibility_quick_settings_work_mode_changed_off (2653550342355027441) -->
+    <skip />
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"ୱର୍କ ମୋଡ୍‌କୁ ଅନ୍‍ କରାଯାଇଛି।"</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"ଡାଟା ସେଭର୍‌ ଅଫ୍‍ କରାଗଲା।"</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"ଡାଟା ସେଭର୍‌ ଅନ୍‍ କରାଗଲା।"</string>
@@ -410,6 +412,8 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"<xliff:g id="DATA_LIMIT">%s</xliff:g> ସୀମା"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"<xliff:g id="DATA_LIMIT">%s</xliff:g> ଚେତାବନୀ"</string>
     <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"ୱର୍କ ପ୍ରୋଫାଇଲ୍‌"</string>
+    <!-- no translation found for quick_settings_work_mode_paused (4841109346916998613) -->
+    <skip />
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"ନାଇଟ୍ ଲାଇଟ୍"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"ସୂର୍ଯ୍ୟାସ୍ତ ବେଳେ ଅନ୍ ହେବ"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"ସୂର୍ଯ୍ୟୋଦୟ ପର୍ଯ୍ୟନ୍ତ"</string>
@@ -668,10 +672,12 @@
     <string name="wallet_title" msgid="5369767670735827105">"ୱାଲେଟ୍"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"ସବୁ ଦେଖାନ୍ତୁ"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"ପେମେଣ୍ଟ କରିବାକୁ ଅନଲକ୍ କରନ୍ତୁ"</string>
-    <string name="wallet_secondary_label_active" msgid="4909706168969888137">"ପ୍ରସ୍ତୁତ"</string>
-    <string name="wallet_secondary_label_no_card" msgid="1750103386908123401">"ପେମେଣ୍ଟ ସେଟ୍ ଅପ୍ କରନ୍ତୁ"</string>
+    <!-- no translation found for wallet_secondary_label_no_card (1282609666895946317) -->
+    <skip />
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"ବ୍ୟବହାର କରିବାକୁ ଅନଲକ୍ କରନ୍ତୁ"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"ଆପଣଙ୍କ କାର୍ଡଗୁଡ଼ିକ ପାଇବାରେ ଏକ ସମସ୍ୟା ହୋଇଥିଲା। ଦୟାକରି ପରେ ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ"</string>
+    <!-- no translation found for wallet_lockscreen_settings_label (3539105300870383570) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"ୱର୍କ ପ୍ରୋଫାଇଲ୍‌"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"ଏରୋପ୍ଲେନ୍‍ ମୋଡ୍"</string>
     <string name="add_tile" msgid="6239678623873086686">"ଟାଇଲ୍‍ ଯୋଡ଼ନ୍ତୁ"</string>
@@ -740,9 +746,16 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;ସ୍ଥିତି:&lt;/b&gt; ନୀରବକୁ ଡିମୋଟ୍ କରାଯାଇଛି"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;ସ୍ଥିତି:&lt;/b&gt; ରେଙ୍କ ଉପରକୁ କରାଯାଇଛି"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;ସ୍ଥିତି:&lt;/b&gt; ରେଙ୍କ ତଳକୁ କରାଯାଇଛି"</string>
-    <string name="notification_channel_summary_priority" msgid="4592979359953954258">"ଆପଣଙ୍କ ପ୍ରାଥମିକତା ମୋଡ୍ ଚାଲୁ ଥିବା ସମୟରେ ମଧ୍ୟ ସର୍ବଦା ଆପଣଙ୍କ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକର ଶୀର୍ଷରେ ଦେଖାଯାଇଥାଏ"</string>
+    <!-- no translation found for notification_channel_summary_priority_baseline (46674690072551234) -->
+    <skip />
+    <!-- no translation found for notification_channel_summary_priority_bubble (1275413109619074576) -->
+    <skip />
+    <!-- no translation found for notification_channel_summary_priority_dnd (6665395023264154361) -->
+    <skip />
+    <!-- no translation found for notification_channel_summary_priority_all (7151752959650048285) -->
+    <skip />
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"ସେଟିଂସ୍"</string>
-    <string name="notification_priority_title" msgid="5256226572739882190">"ପ୍ରାଥମିକତା ଦିଆଯାଇଥିବା ବାର୍ତ୍ତାଳାପଗୁଡ଼ିକ"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"ପ୍ରାଥମିକତା"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> ବାର୍ତ୍ତାଳାପ ଫିଚରଗୁଡ଼ିକୁ ସମର୍ଥନ କରେ ନାହିଁ"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"ଏହି ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକ ପରିବର୍ତ୍ତନ କରିହେବ ନାହିଁ।"</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"ଏଠାରେ ଏହି ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକର ଗ୍ରୁପ୍ କନଫ୍ୟୁଗର୍ କରାଯାଇପାରିବ ନାହିଁ"</string>
@@ -858,6 +871,8 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"ଚାଲୁ"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"ବନ୍ଦ"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"ଅନୁପଲବ୍ଧ"</string>
+    <!-- no translation found for tile_disabled (373212051546573069) -->
+    <skip />
     <string name="nav_bar" msgid="4642708685386136807">"ନାଭିଗେଶନ୍ ବାର୍‍"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"ଲେଆଉଟ୍"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"ସମ୍ପୂର୍ଣ୍ଣ ବାମ ବଟନ୍‍ ପ୍ରକାର"</string>
@@ -1016,14 +1031,6 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"ସିଷ୍ଟମ୍ ନାଭିଗେସନ୍ ଅପ୍‌ଡେଟ୍ ହୋଇଛି। ପରିବର୍ତ୍ତନ କରିବା ପାଇଁ, ସେଟିଂସ୍‌କୁ ଯାଆନ୍ତୁ।"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"ସିଷ୍ଟମ୍ ନାଭିଗେସନ୍ ଅପ୍‌ଡେଟ୍ କରିବା ପାଇଁ ସେଟିଂସ୍‍କୁ ଯାଆନ୍ତୁ"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"ଷ୍ଟାଣ୍ଡବାଏ"</string>
-    <string name="priority_onboarding_title" msgid="2893070698479227616">"ବାର୍ତ୍ତାଳାପ ପ୍ରାଥମିକତାରେ ସେଟ୍ କରାଯାଇଛି"</string>
-    <string name="priority_onboarding_behavior" msgid="636826237468953117">"ପ୍ରାଥମିକତା ଦିଆଯାଇଥିବା ବାର୍ତ୍ତାଳାପଗୁଡ଼ିକ"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="3861580571311518785">"ଏହି ବାର୍ତ୍ତାଳାପଗୁଡ଼ିକ ଆପଣଙ୍କ ତାଲିକାର ଶୀର୍ଷରେ ଦେଖାଯାଏ ଏବଂ ପ୍ରାଥମିକତା ମୋଡ୍ ଚାଲୁ ଥିବା ସମୟରେ ସର୍ବଦା ଆପଣଙ୍କ ନିକଟରେ ପହଞ୍ଚିପାରିବ"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="1781653813573865071">"ପ୍ରୋଫାଇଲ୍ ଛବିଗୁଡ଼ିକ ଲକ୍ ସ୍କ୍ରିନରେ ଦେଖାଯାଏ"</string>
-    <string name="priority_onboarding_appear_as_bubble_text" msgid="4359924720680083057">"ଆପଣ ଆପଣଙ୍କ ମୂଳସ୍କ୍ରିନରେ ଥିବା ବବଲଗୁଡ଼ିକରେ ଏହି ବାର୍ତ୍ତାଳାପଗୁଡ଼ିକୁ ସହଜରେ ପାଇପାରିବେ"</string>
-    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"\'ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ\' ମୋଡରେ ବାଧା"</string>
-    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"ବୁଝିଗଲି"</string>
-    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"ସେଟିଂସ୍"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"ମ୍ୟାଗ୍ନିଫିକେସନ୍ ୱିଣ୍ଡୋ"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"ମ୍ୟାଗ୍ନିଫିକେସନ୍ ୱିଣ୍ଡୋ ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକ"</string>
     <string name="accessibility_control_zoom_in" msgid="1189272315480097417">"ଜୁମ୍ ଇନ୍ କରନ୍ତୁ"</string>
@@ -1044,8 +1051,7 @@
     <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"ନିମ୍ନ ଡାହାଣକୁ ମୁଭ୍ କରନ୍ତୁ"</string>
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"ଧାରକୁ ମୁଭ୍ କରି ଲୁଚାନ୍ତୁ"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"ଧାର ବାହାରକୁ ମୁଭ୍ କରି ଦେଖାନ୍ତୁ"</string>
-    <!-- no translation found for accessibility_floating_button_action_double_tap_to_toggle (7976492639670692037) -->
-    <skip />
+    <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"ଟୋଗଲ୍ କରନ୍ତୁ"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"ଡିଭାଇସ୍ ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକ"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"ଆପଣଙ୍କ ସଂଯୁକ୍ତ ଡିଭାଇସଗୁଡ଼ିକ ପାଇଁ ନିୟନ୍ତ୍ରଣ ଯୋଗ କରନ୍ତୁ"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"ଡିଭାଇସ୍ ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକୁ ସେଟ୍ ଅପ୍ କରନ୍ତୁ"</string>
@@ -1087,15 +1093,12 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"ଅଧିକ ଦେଖିବାକୁ ସ୍ୱାଇପ୍ କରନ୍ତୁ"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"ସୁପାରିଶଗୁଡ଼ିକ ଲୋଡ୍ କରାଯାଉଛି"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"ମିଡିଆ"</string>
-    <!-- no translation found for controls_media_close_session (1193000643003066508) -->
-    <skip />
-    <!-- no translation found for controls_media_active_session (3146882316024153337) -->
-    <skip />
+    <string name="controls_media_close_session" msgid="1193000643003066508">"ଏହି ମିଡିଆ ସେସନକୁ ଲୁଚାଇବେ?"</string>
+    <string name="controls_media_active_session" msgid="3146882316024153337">"ବର୍ତ୍ତମାନର ମିଡିଆ ସେସନକୁ ଲୁଚାଯାଇପାରିବ ନାହିଁ।"</string>
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"ଖାରଜ କରନ୍ତୁ"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"ପୁଣି ଆରମ୍ଭ କରନ୍ତୁ"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"ସେଟିଂସ୍"</string>
-    <!-- no translation found for controls_media_smartspace_rec_title (1699818353932537407) -->
-    <skip />
+    <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"ଚଲାନ୍ତୁ"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"ନିଷ୍କ୍ରିୟ ଅଛି, ଆପ ଯାଞ୍ଚ କରନ୍ତୁ"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"ତ୍ରୁଟି, ପୁଣି ଚେଷ୍ଟା କରୁଛି…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"ମିଳିଲା ନାହିଁ"</string>
@@ -1156,6 +1159,5 @@
     <string name="accessibility_udfps_disabled_button" msgid="4284034245130239384">"ଟିପଚିହ୍ନ ସେନ୍ସରକୁ ଅକ୍ଷମ କରାଯାଇଛି"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"ପ୍ରମାଣୀକରଣ କରନ୍ତୁ"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"ଡିଭାଇସ୍ ବିଷୟରେ ସୂଚନା ଲେଖନ୍ତୁ"</string>
-    <!-- no translation found for keyguard_try_fingerprint (2825130772993061165) -->
-    <skip />
+    <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"ଖୋଲିବାକୁ ଟିପଚିହ୍ନ ବ୍ୟବହାର କରନ୍ତୁ"</string>
 </resources>

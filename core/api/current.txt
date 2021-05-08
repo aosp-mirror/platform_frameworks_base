@@ -1821,7 +1821,6 @@ package android {
     field public static final int notification_large_icon_width = 17104901; // 0x1050005
     field public static final int system_app_widget_background_radius;
     field public static final int system_app_widget_inner_radius;
-    field public static final int system_app_widget_internal_padding;
     field public static final int thumbnail_height = 17104897; // 0x1050001
     field public static final int thumbnail_width = 17104898; // 0x1050002
   }
@@ -52965,7 +52964,7 @@ package android.view.translation {
   public interface UiTranslationStateCallback {
     method public void onFinished();
     method public void onPaused();
-    method public void onResumed(@NonNull android.icu.util.ULocale, @NonNull android.icu.util.ULocale);
+    method public default void onResumed(@NonNull android.icu.util.ULocale, @NonNull android.icu.util.ULocale);
     method @Deprecated public void onStarted(@NonNull String, @NonNull String);
     method public default void onStarted(@NonNull android.icu.util.ULocale, @NonNull android.icu.util.ULocale);
   }

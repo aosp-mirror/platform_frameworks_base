@@ -289,9 +289,11 @@
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"மொபைல் ஹாட்ஸ்பாட் முடக்கப்பட்டது."</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"மொபைல் ஹாட்ஸ்பாட் இயக்கப்பட்டது."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"திரையை அனுப்புதல் நிறுத்தப்பட்டது."</string>
-    <string name="accessibility_quick_settings_work_mode_off" msgid="562749867895549696">"பணிப் பயன்முறை முடக்கப்பட்டுள்ளது."</string>
+    <!-- no translation found for accessibility_quick_settings_work_mode_off (9106217884005620744) -->
+    <skip />
     <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"பணிப் பயன்முறை இயக்கப்பட்டுள்ளது."</string>
-    <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6256690740556798683">"பணிப் பயன்முறை முடக்கப்பட்டது."</string>
+    <!-- no translation found for accessibility_quick_settings_work_mode_changed_off (2653550342355027441) -->
+    <skip />
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"பணிப் பயன்முறை இயக்கப்பட்டது."</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"டேட்டா சேமிப்பான் முடக்கப்பட்டது."</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"டேட்டா சேமிப்பான் இயக்கப்பட்டது."</string>
@@ -410,6 +412,8 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"<xliff:g id="DATA_LIMIT">%s</xliff:g> வரம்பு"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"<xliff:g id="DATA_LIMIT">%s</xliff:g> எச்சரிக்கை"</string>
     <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"பணிக் கணக்கு"</string>
+    <!-- no translation found for quick_settings_work_mode_paused (4841109346916998613) -->
+    <skip />
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"நைட் லைட்"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"மாலையில் ஆன் செய்"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"காலை வரை"</string>
@@ -668,10 +672,12 @@
     <string name="wallet_title" msgid="5369767670735827105">"வாலட்"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"அனைத்தையும் காட்டு"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"பணம் செலுத்த அன்லாக் செய்க"</string>
-    <string name="wallet_secondary_label_active" msgid="4909706168969888137">"தயார்"</string>
-    <string name="wallet_secondary_label_no_card" msgid="1750103386908123401">"பேமெண்ட் முறையை அமையுங்கள்"</string>
+    <!-- no translation found for wallet_secondary_label_no_card (1282609666895946317) -->
+    <skip />
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"பயன்படுத்துவதற்கு அன்லாக் செய்க"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"உங்கள் கார்டுகளின் விவரங்களைப் பெறுவதில் சிக்கல் ஏற்பட்டது, பிறகு முயலவும்"</string>
+    <!-- no translation found for wallet_lockscreen_settings_label (3539105300870383570) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"பணிக் கணக்கு"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"விமானப் பயன்முறை"</string>
     <string name="add_tile" msgid="6239678623873086686">"டைலைச் சேர்க்கும்"</string>
@@ -740,9 +746,12 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;நிலை:&lt;/b&gt; சைலன்ட் நிலைக்குக் குறைத்து அமைக்கப்பட்டது"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;நிலை:&lt;/b&gt; முக்கியத்துவம் உயர்த்தப்பட்டது"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;நிலை:&lt;/b&gt; முக்கியத்துவம் குறைக்கப்பட்டது"</string>
-    <string name="notification_channel_summary_priority" msgid="4592979359953954258">"முன்னுரிமைப் பயன்முறை இயக்கப்பட்டிருக்கும்போதும், எப்போதுமே அறிவிப்புகளின் மேல்புறத்தில் காட்டப்படும்"</string>
+    <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"உரையாடல் அறிவிப்புகளின் மேற்பகுதியில் காட்டப்படும், திரை பூட்டப்பட்டிருக்கும்போது சுயவிவரப் படமாகக் காட்டப்படும்"</string>
+    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"உரையாடல் அறிவிப்புகளின் மேற்பகுதியில் காட்டப்படும், திரை பூட்டப்பட்டிருக்கும்போது சுயவிவரப் படமாகக் காட்டப்படும், குமிழாகத் தோன்றும்"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"உரையாடல் அறிவிப்புகளின் மேற்பகுதியில் காட்டப்படும், திரை பூட்டப்பட்டிருக்கும்போது சுயவிவரப் படமாகக் காட்டப்படும், தொந்தரவு செய்ய வேண்டாம் அம்சம் இயக்கப்பட்டிருக்கும்போதும் காட்டப்படும்"</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"உரையாடல் அறிவிப்புகளின் மேற்பகுதியில் காட்டப்படும், திரை பூட்டப்பட்டிருக்கும்போது சுயவிவரப் படமாகக் காட்டப்படும், குமிழாகத் தோன்றும், தொந்தரவு செய்ய வேண்டாம் அம்சம் இயக்கப்பட்டிருக்கும்போதும் காட்டப்படும்"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"அமைப்புகள்"</string>
-    <string name="notification_priority_title" msgid="5256226572739882190">"முன்னுரிமை உரையாடல்கள்"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"முன்னுரிமை"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"உரையாடல் அம்சங்களை <xliff:g id="APP_NAME">%1$s</xliff:g> ஆதரிக்காது"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"இந்த அறிவிப்புகளை மாற்ற இயலாது."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"இந்த அறிவுப்புக் குழுக்களை இங்கே உள்ளமைக்க இயலாது"</string>
@@ -858,6 +867,8 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"ஆன்"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"ஆஃப்"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"இல்லை"</string>
+    <!-- no translation found for tile_disabled (373212051546573069) -->
+    <skip />
     <string name="nav_bar" msgid="4642708685386136807">"வழிசெலுத்தல் பட்டி"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"தளவமைப்பு"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"கூடுதல் இடப்புற பட்டன் வகை"</string>
@@ -1016,14 +1027,6 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"சிஸ்டம் நேவிகேஷன் மாற்றப்பட்டது. மாற்றங்களைச் செய்ய ‘அமைப்புகளுக்குச்’ செல்லவும்."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"சிஸ்டம் நேவிகேஷனை மாற்ற ’அமைப்புகளுக்குச்’ செல்லவும்"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"இயக்க நேரம்"</string>
-    <string name="priority_onboarding_title" msgid="2893070698479227616">"முன்னுரிமை அளிக்கப்பட்ட உரையாடலாக அமைக்கப்பட்டது"</string>
-    <string name="priority_onboarding_behavior" msgid="636826237468953117">"முன்னுரிமை உரையாடல்கள்"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="3861580571311518785">"முன்னுரிமைப் பயன்முறை இயக்கப்பட்டிருக்கும்போது பட்டியலின் மேல்புறத்தில் இந்த உரையாடல்கள் எப்போதுமே காட்டப்படும்"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="1781653813573865071">"லாக் ஸ்கிரீனில் சுயவிவரப் படங்கள் காட்டப்படும்"</string>
-    <string name="priority_onboarding_appear_as_bubble_text" msgid="4359924720680083057">"முகப்புத் திரையில் தோன்றும் குமிழ்களில் இந்த உரையாடல்களை எளிதாகப் பார்க்கலாம்"</string>
-    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"\'தொந்தரவு செய்ய வேண்டாம்\' அம்சத்தைக் குறுக்கிடும்"</string>
-    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"சரி"</string>
-    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"அமைப்புகள்"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"பெரிதாக்கல் சாளரம்"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"பெரிதாக்கல் சாளரக் கட்டுப்பாடுகள்"</string>
     <string name="accessibility_control_zoom_in" msgid="1189272315480097417">"பெரிதாக்கு"</string>
@@ -1044,8 +1047,7 @@
     <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"கீழே வலதுபுறத்திற்கு நகர்த்து"</string>
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"ஓரத்திற்கு நகர்த்தி மறை"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"ஓரத்திற்கு நகர்த்தி, காட்டு"</string>
-    <!-- no translation found for accessibility_floating_button_action_double_tap_to_toggle (7976492639670692037) -->
-    <skip />
+    <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"நிலைமாற்று"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"சாதனக் கட்டுப்பாடுகள்"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"இணைக்கப்பட்ட சாதனங்களில் கட்டுப்பாடுகளைச் சேர்க்கலாம்"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"சாதனக் கட்டுப்பாடுகளை அமைத்தல்"</string>
@@ -1092,8 +1094,7 @@
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"மூடுக"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"தொடர்க"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"அமைப்புகள்"</string>
-    <!-- no translation found for controls_media_smartspace_rec_title (1699818353932537407) -->
-    <skip />
+    <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"இயக்குதல்"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"செயலில் இல்லை , சரிபார்க்கவும்"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"பிழை, மீண்டும் முயல்கிறது…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"இல்லை"</string>

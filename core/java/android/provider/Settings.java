@@ -2660,7 +2660,6 @@ public final class Settings {
     private static final class ContentProviderHolder {
         private final Object mLock = new Object();
 
-        @GuardedBy("mLock")
         private final Uri mUri;
         @GuardedBy("mLock")
         @UnsupportedAppUsage

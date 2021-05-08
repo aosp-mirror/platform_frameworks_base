@@ -38,6 +38,7 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.log.dagger.LogModule;
 import com.android.systemui.model.SysUiState;
+import com.android.systemui.plugins.BcSmartspaceDataPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.power.dagger.PowerModule;
 import com.android.systemui.recents.Recents;
@@ -149,6 +150,9 @@ public abstract class SystemUIModule {
 
     @BindsOptionalOf
     abstract HeadsUpManager optionalHeadsUpManager();
+
+    @BindsOptionalOf
+    abstract BcSmartspaceDataPlugin optionalBcSmartspaceDataPlugin();
 
     @BindsOptionalOf
     abstract Recents optionalRecents();

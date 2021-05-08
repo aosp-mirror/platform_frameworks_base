@@ -25,7 +25,6 @@ import android.app.smartspace.SmartspaceConfig;
 import android.app.smartspace.SmartspaceManager;
 import android.app.smartspace.SmartspaceSession;
 import android.app.smartspace.SmartspaceTarget;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
@@ -45,7 +44,6 @@ import com.android.internal.colorextraction.ColorExtractor;
 import com.android.keyguard.clock.ClockManager;
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
-import com.android.systemui.SystemUIFactory;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -69,6 +67,7 @@ import com.android.systemui.util.ViewController;
 import com.android.systemui.util.settings.SecureSettings;
 
 import java.util.Locale;
+import java.util.Optional;
 import java.util.TimeZone;
 import java.util.concurrent.Executor;
 
@@ -89,7 +88,6 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     private final Executor mUiExecutor;
     private final BatteryController mBatteryController;
     private final FeatureFlags mFeatureFlags;
-    private final SystemUIFactory mSystemUIFactory;
 
     /**
      * Clock for both small and large sizes
@@ -113,7 +111,6 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     private boolean mShowSensitiveContentForCurrentUser;
     private boolean mShowSensitiveContentForManagedUser;
     private UserHandle mManagedUserHandle;
-    private UserTracker.Callback mUserTrackerCallback;
 
     /**
      * Listener for changes to the color palette.
@@ -152,6 +149,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
 
     // If set, will replace keyguard_status_area
     private BcSmartspaceDataPlugin.SmartspaceView mSmartspaceView;
+    private Optional<BcSmartspaceDataPlugin> mSmartspacePlugin;
 
     @Inject
     public KeyguardClockSwitchController(
@@ -165,14 +163,14 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             @Main Executor uiExecutor,
             BatteryController batteryController,
             ConfigurationController configurationController,
-            SystemUIFactory systemUIFactory,
             ActivityStarter activityStarter,
             FalsingManager falsingManager,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             KeyguardBypassController bypassController,
             @Main Handler handler,
             UserTracker userTracker,
-            SecureSettings secureSettings) {
+            SecureSettings secureSettings,
+            Optional<BcSmartspaceDataPlugin> smartspacePlugin) {
         super(keyguardClockSwitch);
         mStatusBarStateController = statusBarStateController;
         mColorExtractor = colorExtractor;
@@ -184,7 +182,6 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mUiExecutor = uiExecutor;
         mBatteryController = batteryController;
         mConfigurationController = configurationController;
-        mSystemUIFactory = systemUIFactory;
         mActivityStarter = activityStarter;
         mFalsingManager = falsingManager;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
@@ -192,6 +189,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mHandler = handler;
         mUserTracker = userTracker;
         mSecureSettings = secureSettings;
+        mSmartspacePlugin = smartspacePlugin;
     }
 
     /**
@@ -237,8 +235,8 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mStatusBarStateController.addCallback(mStatusBarStateListener);
         mConfigurationController.addCallback(mConfigurationListener);
 
-        BcSmartspaceDataPlugin smartspaceDataPlugin = mSystemUIFactory.getSmartspaceDataProvider();
-        if (mFeatureFlags.isSmartspaceEnabled() && smartspaceDataPlugin != null) {
+        if (mFeatureFlags.isSmartspaceEnabled() && mSmartspacePlugin.isPresent()) {
+            BcSmartspaceDataPlugin smartspaceDataPlugin = mSmartspacePlugin.get();
             View ksa = mView.findViewById(R.id.keyguard_status_area);
             int ksaIndex = mView.indexOfChild(ksa);
             ksa.setVisibility(View.GONE);
@@ -293,13 +291,6 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
                     reloadSmartspace();
                 }
             };
-
-            mUserTrackerCallback = new UserTracker.Callback() {
-                public void onUserChanged(int newUser, Context userContext) {
-                    reloadSmartspace();
-                }
-            };
-            mUserTracker.addCallback(mUserTrackerCallback, mUiExecutor);
 
             getContext().getContentResolver().registerContentObserver(
                     Settings.Secure.getUriFor(
@@ -375,10 +366,6 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
 
         if (mSettingsObserver != null) {
             getContext().getContentResolver().unregisterContentObserver(mSettingsObserver);
-        }
-
-        if (mUserTrackerCallback != null) {
-            mUserTracker.removeCallback(mUserTrackerCallback);
         }
     }
 

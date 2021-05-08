@@ -791,6 +791,7 @@
   <java-symbol type="string" name="ime_action_previous" />
   <java-symbol type="string" name="ime_action_search" />
   <java-symbol type="string" name="ime_action_send" />
+  <java-symbol type="string" name="in_progress" />
   <java-symbol type="string" name="invalidPin" />
   <java-symbol type="string" name="js_dialog_before_unload_positive_button" />
   <java-symbol type="string" name="js_dialog_before_unload_negative_button" />
@@ -1814,6 +1815,10 @@
   <java-symbol type="string" name="bugreport_status" />
   <java-symbol type="string" name="bugreport_title" />
   <java-symbol type="string" name="faceunlock_multiple_failures" />
+  <java-symbol type="string" name="fp_enrollment_powerbutton_intent_title" />
+  <java-symbol type="string" name="fp_enrollment_powerbutton_intent_message" />
+  <java-symbol type="string" name="fp_enrollment_powerbutton_intent_positive_button" />
+  <java-symbol type="string" name="fp_enrollment_powerbutton_intent_negative_button" />
   <java-symbol type="string" name="global_actions" />
   <java-symbol type="string" name="global_action_power_off" />
   <java-symbol type="string" name="global_action_power_options" />
@@ -4080,15 +4085,15 @@
   <java-symbol type="id" name="conversation_image_message_container" />
   <java-symbol type="id" name="conversation_icon_container" />
   <java-symbol type="dimen" name="messaging_group_singleline_sender_padding_end" />
-  <java-symbol type="dimen" name="conversation_badge_side_margin" />
+  <java-symbol type="dimen" name="conversation_badge_protrusion" />
   <java-symbol type="dimen" name="conversation_avatar_size" />
   <java-symbol type="dimen" name="conversation_avatar_size_group_expanded" />
   <java-symbol type="dimen" name="conversation_face_pile_avatar_size" />
   <java-symbol type="dimen" name="conversation_face_pile_avatar_size_group_expanded" />
   <java-symbol type="dimen" name="conversation_face_pile_protection_width" />
   <java-symbol type="dimen" name="conversation_face_pile_protection_width_expanded" />
-  <java-symbol type="dimen" name="conversation_badge_side_margin_group_expanded" />
-  <java-symbol type="dimen" name="conversation_badge_side_margin_group_expanded_face_pile" />
+  <java-symbol type="dimen" name="conversation_badge_protrusion_group_expanded" />
+  <java-symbol type="dimen" name="conversation_badge_protrusion_group_expanded_face_pile" />
   <java-symbol type="dimen" name="conversation_content_start" />
   <java-symbol type="dimen" name="expanded_group_conversation_message_padding" />
   <java-symbol type="dimen" name="messaging_layout_icon_padding_start" />

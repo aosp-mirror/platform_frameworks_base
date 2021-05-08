@@ -77,8 +77,6 @@ public class QuickStatusBarHeader extends FrameLayout {
 
     private int mStatusBarPaddingTop = 0;
     private int mRoundedCornerPadding = 0;
-    private int mContentMarginStart;
-    private int mContentMarginEnd;
     private int mWaterfallTopInset;
     private int mCutOutPaddingLeft;
     private int mCutOutPaddingRight;
@@ -242,35 +240,26 @@ public class QuickStatusBarHeader extends FrameLayout {
                 .addFloat(mDateView, "alpha", 0, 1)
                 .addFloat(mSecurityHeaderView, "alpha", 0, 1)
                 .addFloat(mQSCarriers, "alpha", 0, 1);
-
-        if (noCallingIcon != null || callStrengthIcon != null) {
-            if (noCallingIcon != null) {
-                builder.addFloat(noCallingIcon, "alpha", 1, 0);
+        builder.setListener(new TouchAnimator.ListenerAdapter() {
+            @Override
+            public void onAnimationAtEnd() {
+                mIconContainer.addIgnoredSlot(mMobileSlotName);
+                mIconContainer.addIgnoredSlot(mCallStrengthSlotName);
             }
-            if (callStrengthIcon != null) {
-                builder.addFloat(callStrengthIcon, "alpha", 1, 0);
+
+            @Override
+            public void onAnimationStarted() {
+                mIconContainer.addIgnoredSlot(mMobileSlotName);
+                mIconContainer.addIgnoredSlot(mCallStrengthSlotName);
             }
-            builder.setListener(new TouchAnimator.ListenerAdapter() {
-                @Override
-                public void onAnimationAtEnd() {
-                    mIconContainer.addIgnoredSlot(mMobileSlotName);
-                    mIconContainer.addIgnoredSlot(mCallStrengthSlotName);
-                }
 
-                @Override
-                public void onAnimationStarted() {
-                    mIconContainer.removeIgnoredSlot(mMobileSlotName);
-                    mIconContainer.removeIgnoredSlot(mCallStrengthSlotName);
-                }
-
-                @Override
-                public void onAnimationAtStart() {
-                    super.onAnimationAtStart();
-                    mIconContainer.removeIgnoredSlot(mMobileSlotName);
-                    mIconContainer.removeIgnoredSlot(mCallStrengthSlotName);
-                }
-            });
-        }
+            @Override
+            public void onAnimationAtStart() {
+                super.onAnimationAtStart();
+                mIconContainer.removeIgnoredSlot(mMobileSlotName);
+                mIconContainer.removeIgnoredSlot(mCallStrengthSlotName);
+            }
+        });
         mAlphaAnimator = builder.build();
     }
 
@@ -370,6 +359,8 @@ public class QuickStatusBarHeader extends FrameLayout {
     }
 
     private void updateHeadersPadding() {
+        setContentMargins(mDatePrivacyView, 0, 0);
+        setContentMargins(mClockIconsView, 0, 0);
         int paddingLeft = 0;
         int paddingRight = 0;
 
@@ -383,14 +374,12 @@ public class QuickStatusBarHeader extends FrameLayout {
         if (mCutOutPaddingLeft > 0) {
             // if there's a cutout, let's use at least the rounded corner inset
             int cutoutPadding = Math.max(mCutOutPaddingLeft, mRoundedCornerPadding);
-            int contentMarginLeft = isLayoutRtl() ? mContentMarginEnd : mContentMarginStart;
-            paddingLeft = Math.max(cutoutPadding - contentMarginLeft - leftMargin, 0);
+            paddingLeft = Math.max(cutoutPadding - leftMargin, 0);
         }
         if (mCutOutPaddingRight > 0) {
             // if there's a cutout, let's use at least the rounded corner inset
             int cutoutPadding = Math.max(mCutOutPaddingRight, mRoundedCornerPadding);
-            int contentMarginRight = isLayoutRtl() ? mContentMarginStart : mContentMarginEnd;
-            paddingRight = Math.max(cutoutPadding - contentMarginRight - rightMargin, 0);
+            paddingRight = Math.max(cutoutPadding - rightMargin, 0);
         }
 
         mDatePrivacyView.setPadding(paddingLeft,
@@ -409,19 +398,6 @@ public class QuickStatusBarHeader extends FrameLayout {
 
     public void setCallback(Callback qsPanelCallback) {
         mHeaderQsPanel.setCallback(qsPanelCallback);
-    }
-
-    /** */
-    public void setContentMargins(int marginStart, int marginEnd,
-            QuickQSPanelController quickQSPanelController) {
-        mContentMarginStart = marginStart;
-        mContentMarginEnd = marginEnd;
-        // The clock and QQS are not direct children, but the container should be just a wrapper to
-        // be able to move them together. So we set the margins to the actual views.
-        quickQSPanelController.setContentMargins(0, 0);
-        setContentMargins(mDatePrivacyView, marginStart, marginEnd);
-        setContentMargins(mClockIconsView, marginStart, marginEnd);
-        updateHeadersPadding();
     }
 
     private void setContentMargins(View view, int marginStart, int marginEnd) {

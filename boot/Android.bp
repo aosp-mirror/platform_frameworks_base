@@ -98,4 +98,12 @@ platform_bootclasspath {
             dest: "hiddenapi-unsupported.csv",
         },
     ],
+
+    required: [
+        "platform-systemserverclasspath",
+    ],
+}
+
+platform_systemserverclasspath {
+    name: "platform-systemserverclasspath",
 }

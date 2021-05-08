@@ -357,9 +357,9 @@ public final class RcsConfig {
     /**
      * Check whether Rcs Volte single registration is supported by the config.
      */
-    public boolean isRcsVolteSingleRegistrationSupported() {
-        return getBoolean(PARM_SINGLE_REGISTRATION, false)
-                || getInteger(PARM_SINGLE_REGISTRATION, 0) != 0;
+    public boolean isRcsVolteSingleRegistrationSupported(boolean isRoaming) {
+        int val = getInteger(PARM_SINGLE_REGISTRATION, 1);
+        return isRoaming ? val == 1 : val > 0;
     }
 
     @Override

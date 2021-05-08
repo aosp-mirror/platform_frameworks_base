@@ -54,4 +54,123 @@ public class UnattributedNoteOpCallCheckerTest {
                         "}")
                 .doTest();
     }
+
+    @Test
+    public void testNoteOpNoThrow() {
+        mCompilationHelper
+                .addSourceFile("/android/app/AppOpsManager.java")
+                .addSourceLines("Example.java",
+                        "import android.app.AppOpsManager;",
+                        "public class Example {",
+                        "  void example() {",
+                        "    AppOpsManager mAppOps = new AppOpsManager();",
+                        "    // BUG: Diagnostic contains:",
+                        "    mAppOps.noteOpNoThrow(0, 1, \"foo\");",
+                        "    // BUG: Diagnostic contains:",
+                        "    mAppOps.noteOpNoThrow(\"foo\", 1, \"bar\");",
+                        "  }",
+                        "}")
+                .doTest();
+    }
+
+    @Test
+    public void testStartOp() {
+        mCompilationHelper
+                .addSourceFile("/android/app/AppOpsManager.java")
+                .addSourceLines("Example.java",
+                        "import android.app.AppOpsManager;",
+                        "public class Example {",
+                        "  void example() {",
+                        "    AppOpsManager mAppOps = new AppOpsManager();",
+                        "    // BUG: Diagnostic contains:",
+                        "    mAppOps.startOp(0, 0, \"bar\", true);",
+                        "    // BUG: Diagnostic contains:",
+                        "    mAppOps.startOp(1, 2, \"foo\");",
+                        "    // BUG: Diagnostic contains:",
+                        "    mAppOps.startOp(\"foo\", 1, \"bar\");",
+                        "    // BUG: Diagnostic contains:",
+                        "    mAppOps.startOp(1);",
+                        "  }",
+                        "}")
+                .doTest();
+    }
+
+    @Test
+    public void testStartOpNoThrow() {
+        mCompilationHelper
+                .addSourceFile("/android/app/AppOpsManager.java")
+                .addSourceLines("Example.java",
+                        "import android.app.AppOpsManager;",
+                        "public class Example {",
+                        "  void example() {",
+                        "    AppOpsManager mAppOps = new AppOpsManager();",
+                        "    // BUG: Diagnostic contains:",
+                        "    mAppOps.startOpNoThrow(0, 0, \"bar\", true);",
+                        "    // BUG: Diagnostic contains:",
+                        "    mAppOps.startOpNoThrow(1, 2, \"foo\");",
+                        "    // BUG: Diagnostic contains:",
+                        "    mAppOps.startOpNoThrow(\"foo\", 1, \"bar\");",
+                        "  }",
+                        "}")
+                .doTest();
+    }
+
+    @Test
+    public void testNoteProxyOp() {
+        mCompilationHelper
+                .addSourceFile("/android/app/AppOpsManager.java")
+                .addSourceLines("Example.java",
+                        "import android.app.AppOpsManager;",
+                        "public class Example {",
+                        "  void example() {",
+                        "    AppOpsManager mAppOps = new AppOpsManager();",
+                        "    // BUG: Diagnostic contains:",
+                        "    mAppOps.noteProxyOp(1, \"foo\");",
+                        "    // BUG: Diagnostic contains:",
+                        "    mAppOps.noteProxyOp(\"foo\", \"bar\");",
+                        "  }",
+                        "}")
+                .doTest();
+    }
+
+    @Test
+    public void testNoteProxyOpNoThrow() {
+        mCompilationHelper
+                .addSourceFile("/android/app/AppOpsManager.java")
+                .addSourceLines("Example.java",
+                        "import android.app.AppOpsManager;",
+                        "public class Example {",
+                        "  void example() {",
+                        "    AppOpsManager mAppOps = new AppOpsManager();",
+                        "    // BUG: Diagnostic contains:",
+                        "    mAppOps.noteProxyOpNoThrow(\"foo\", \"bar\");",
+                        "    // BUG: Diagnostic contains:",
+                        "    mAppOps.noteProxyOpNoThrow(\"foo\", \"bar\", 1);",
+                        "  }",
+                        "}")
+                .doTest();
+    }
+
+    @Test
+    public void testFinishOp() {
+        mCompilationHelper
+                .addSourceFile("/android/app/AppOpsManager.java")
+                .addSourceLines("Example.java",
+                        "import android.app.AppOpsManager;",
+                        "public class Example {",
+                        "  void example() {",
+                        "    AppOpsManager mAppOps = new AppOpsManager();",
+                        "    // BUG: Diagnostic contains:",
+                        "    mAppOps.finishOp(1, 2, \"foo\");",
+                        "    // BUG: Diagnostic contains:",
+                        "    mAppOps.finishOp(\"foo\", 1, \"bar\");",
+                        "    // BUG: Diagnostic contains:",
+                        "    mAppOps.finishOp(1);",
+                        "  }",
+                        "}")
+                .doTest();
+    }
+
+
+
 }
