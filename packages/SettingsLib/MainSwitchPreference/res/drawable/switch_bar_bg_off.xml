@@ -14,9 +14,13 @@
   See the License for the specific language governing permissions and
   limitations under the License.
   -->
-<resources>
-    <style name="TextAppearance.PreferenceTitle"
-           parent="@*android:style/TextAppearance.DeviceDefault.ListItem">
-        <item name="android:textSize">@dimen/preference_title_font_size</item>
-    </style>
-</resources>
+
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="?android:attr/colorControlHighlight">
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/state_off_color"/>
+            <corners android:radius="@dimen/switch_bar_radius"/>
+        </shape>
+    </item>
+</ripple>
