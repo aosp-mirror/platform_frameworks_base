@@ -211,6 +211,7 @@ java_library {
         "apex_aidl_interface-java",
         "framework-protos",
         "updatable-driver-protos",
+        "ota_metadata_proto_java",
         "android.hidl.base-V1.0-java",
         "android.hardware.cas-V1.0-java",
         "android.hardware.cas-V1.1-java",

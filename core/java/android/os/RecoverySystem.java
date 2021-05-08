@@ -672,6 +672,14 @@ public class RecoverySystem {
             if (!rs.setupBcb(command)) {
                 throw new IOException("Setup BCB failed");
             }
+            try {
+                if (!rs.allocateSpaceForUpdate(packageFile)) {
+                    throw new IOException("Failed to allocate space for update "
+                            + packageFile.getAbsolutePath());
+                }
+            } catch (RemoteException e) {
+                e.rethrowAsRuntimeException();
+            }
 
             // Having set up the BCB (bootloader control block), go ahead and reboot
             PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
@@ -1389,6 +1397,13 @@ public class RecoverySystem {
         } catch (RemoteException unused) {
         }
         return false;
+    }
+
+    /**
+     * Talks to RecoverySystemService via Binder to allocate space
+     */
+    private boolean allocateSpaceForUpdate(File packageFile) throws RemoteException {
+        return mService.allocateSpaceForUpdate(packageFile.getAbsolutePath());
     }
 
     /**
