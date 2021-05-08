@@ -29,6 +29,9 @@
 #include "SkPath.h"
 #include "SkRect.h"
 
+#include "pipeline/skia/AnimatedDrawables.h"
+
+#include <SkRuntimeEffect.h>
 #include <vector>
 
 namespace android {
@@ -125,6 +128,7 @@ private:
     void drawVertices(const SkVertices*, SkBlendMode, const SkPaint&);
     void drawAtlas(const SkImage*, const SkRSXform[], const SkRect[], const SkColor[], int,
                    SkBlendMode, const SkSamplingOptions&, const SkRect*, const SkPaint*);
+    void drawRippleDrawable(const skiapipeline::RippleDrawableParams& params);
     void drawShadowRec(const SkPath&, const SkDrawShadowRec&);
     void drawVectorDrawable(VectorDrawableRoot* tree);
     void drawWebView(skiapipeline::FunctorDrawable*);
@@ -184,6 +188,7 @@ public:
 
     void drawImage(const sk_sp<SkImage>&, SkScalar left, SkScalar top, const SkSamplingOptions&,
                    const SkPaint* paint, BitmapPalette pallete);
+    void drawRippleDrawable(const skiapipeline::RippleDrawableParams& params);
 
     void drawImageRect(const sk_sp<SkImage>& image, const SkRect& src, const SkRect& dst,
                        const SkSamplingOptions&, const SkPaint*, SrcRectConstraint, BitmapPalette);

@@ -23,6 +23,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.app.PendingIntent;
 import android.content.Intent;
@@ -65,12 +66,14 @@ public class SmartActionsReceiverTest extends SysuiTestCase {
         String testActionType = "testActionType";
         mIntent.putExtra(EXTRA_ID, testId);
         mIntent.putExtra(EXTRA_ACTION_TYPE, testActionType);
+        Intent intent = new Intent();
+        when(mMockPendingIntent.getIntent()).thenReturn(intent);
 
         mSmartActionsReceiver.onReceive(mContext, mIntent);
 
         verify(mMockPendingIntent).send(
                 eq(mContext), eq(0), isNull(), isNull(), isNull(), isNull(), any(Bundle.class));
         verify(mMockScreenshotSmartActions).notifyScreenshotAction(
-                mContext, testId, testActionType, true);
+                mContext, testId, testActionType, true, intent);
     }
 }

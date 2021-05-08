@@ -51,6 +51,7 @@ import com.android.systemui.statusbar.notification.row.HybridNotificationView;
 public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapper {
 
     private final int mFullHeaderTranslation;
+    private final boolean mAllowHideHeader;
     protected ImageView mRightIcon;
     protected ImageView mLeftIcon;
     private ProgressBar mProgressBar;
@@ -71,6 +72,7 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
     protected NotificationTemplateViewWrapper(Context ctx, View view,
             ExpandableNotificationRow row) {
         super(ctx, view, row);
+        mAllowHideHeader = ctx.getResources().getBoolean(R.bool.heads_up_notification_hides_header);
         mTransformationHelper.setCustomTransformation(
                 new ViewTransformationHelper.CustomTransformation() {
                     @Override
@@ -249,7 +251,7 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
         super.onContentUpdated(row);
         // With the modern templates, a large icon visually overlaps the header, so we can't
         // hide the header, we must show it.
-        mCanHideHeader = mNotificationHeader != null
+        mCanHideHeader = mAllowHideHeader && mNotificationHeader != null
                 && (mRightIcon == null || mRightIcon.getVisibility() != VISIBLE);
         if (row.getHeaderVisibleAmount() != DEFAULT_HEADER_VISIBLE_AMOUNT) {
             setHeaderVisibleAmount(row.getHeaderVisibleAmount());

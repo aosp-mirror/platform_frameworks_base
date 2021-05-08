@@ -4084,15 +4084,15 @@
   <java-symbol type="id" name="conversation_image_message_container" />
   <java-symbol type="id" name="conversation_icon_container" />
   <java-symbol type="dimen" name="messaging_group_singleline_sender_padding_end" />
-  <java-symbol type="dimen" name="conversation_badge_side_margin" />
+  <java-symbol type="dimen" name="conversation_badge_protrusion" />
   <java-symbol type="dimen" name="conversation_avatar_size" />
   <java-symbol type="dimen" name="conversation_avatar_size_group_expanded" />
   <java-symbol type="dimen" name="conversation_face_pile_avatar_size" />
   <java-symbol type="dimen" name="conversation_face_pile_avatar_size_group_expanded" />
   <java-symbol type="dimen" name="conversation_face_pile_protection_width" />
   <java-symbol type="dimen" name="conversation_face_pile_protection_width_expanded" />
-  <java-symbol type="dimen" name="conversation_badge_side_margin_group_expanded" />
-  <java-symbol type="dimen" name="conversation_badge_side_margin_group_expanded_face_pile" />
+  <java-symbol type="dimen" name="conversation_badge_protrusion_group_expanded" />
+  <java-symbol type="dimen" name="conversation_badge_protrusion_group_expanded_face_pile" />
   <java-symbol type="dimen" name="conversation_content_start" />
   <java-symbol type="dimen" name="expanded_group_conversation_message_padding" />
   <java-symbol type="dimen" name="messaging_layout_icon_padding_start" />

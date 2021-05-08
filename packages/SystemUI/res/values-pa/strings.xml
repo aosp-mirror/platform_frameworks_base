@@ -289,9 +289,11 @@
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"ਮੋਬਾਈਲ ਹੌਟਸਪੌਟ ਬੰਦ ਕੀਤਾ।"</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"ਮੋਬਾਈਲ ਹੌਟਸਪੌਟ ਚਾਲੂ ਕੀਤਾ।"</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"ਸਕ੍ਰੀਨ ਜੋੜਨਾ ਬੰਦ ਹੋਇਆ।"</string>
-    <string name="accessibility_quick_settings_work_mode_off" msgid="562749867895549696">"ਕੰਮ ਮੋਡ ਬੰਦ ਹੈ।"</string>
+    <!-- no translation found for accessibility_quick_settings_work_mode_off (9106217884005620744) -->
+    <skip />
     <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"ਕੰਮ ਮੋਡ ਚਾਲੂ ਹੈ।"</string>
-    <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6256690740556798683">"ਕੰਮ ਮੋਡ ਬੰਦ ਕੀਤਾ ਗਿਆ।"</string>
+    <!-- no translation found for accessibility_quick_settings_work_mode_changed_off (2653550342355027441) -->
+    <skip />
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"ਕੰਮ ਮੋਡ ਚਾਲੂ ਕੀਤਾ ਗਿਆ।"</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"ਡਾਟਾ ਸੇਵਰ ਬੰਦ ਕੀਤਾ ਗਿਆ।"</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"ਡਾਟਾ ਸੇਵਰ ਚਾਲੂ ਕੀਤਾ ਗਿਆ।"</string>
@@ -410,6 +412,8 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"<xliff:g id="DATA_LIMIT">%s</xliff:g> ਸੀਮਾ"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"<xliff:g id="DATA_LIMIT">%s</xliff:g> ਚਿਤਾਵਨੀ"</string>
     <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ"</string>
+    <!-- no translation found for quick_settings_work_mode_paused (4841109346916998613) -->
+    <skip />
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"ਰਾਤ ਦੀ ਰੋਸ਼ਨੀ"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"ਸੂਰਜ ਛਿਪਣ \'ਤੇ ਚਾਲੂ"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"ਸੂਰਜ ਚੜ੍ਹਨ ਤੱਕ"</string>
@@ -668,10 +672,12 @@
     <string name="wallet_title" msgid="5369767670735827105">"ਵਾਲੇਟ"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"ਸਭ ਦਿਖਾਓ"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"ਭੁਗਤਾਨ ਕਰਨ ਲਈ ਅਣਲਾਕ ਕਰੋ"</string>
-    <string name="wallet_secondary_label_active" msgid="4909706168969888137">"ਤਿਆਰ"</string>
-    <string name="wallet_secondary_label_no_card" msgid="1750103386908123401">"ਭੁਗਤਾਨ ਸੈੱਟਅੱਪ ਕਰੋ"</string>
+    <!-- no translation found for wallet_secondary_label_no_card (1282609666895946317) -->
+    <skip />
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"ਵਰਤਣ ਲਈ ਅਣਲਾਕ ਕਰੋ"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"ਤੁਹਾਡੇ ਕਾਰਡ ਪ੍ਰਾਪਤ ਕਰਨ ਵਿੱਚ ਕੋਈ ਸਮੱਸਿਆ ਆਈ, ਕਿਰਪਾ ਕਰਕੇ ਬਾਅਦ ਵਿੱਚ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ"</string>
+    <!-- no translation found for wallet_lockscreen_settings_label (3539105300870383570) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"ਹਵਾਈ-ਜਹਾਜ਼ ਮੋਡ"</string>
     <string name="add_tile" msgid="6239678623873086686">"ਟਾਇਲ ਸ਼ਾਮਲ ਕਰੋ"</string>
@@ -740,9 +746,16 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;ਸਥਿਤੀ:&lt;/b&gt; ਦਰਜਾ ਘਟਾ ਕੇ ਸ਼ਾਂਤ \'ਤੇ ਸੈੱਟ ਕੀਤਾ ਗਿਆ"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;ਸਥਿਤੀ:&lt;/b&gt; ਦਰਜਾ ਵਧਾਇਆ ਗਿਆ"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;ਸਥਿਤੀ:&lt;/b&gt; ਦਰਜਾ ਘਟਾਇਆ ਗਿਆ"</string>
-    <string name="notification_channel_summary_priority" msgid="4592979359953954258">"ਹਮੇਸ਼ਾਂ ਤੁਹਾਡੀਆਂ ਸੂਚਨਾਵਾਂ ਦੇ ਸਿਖਰ \'ਤੇ ਦਿਖਾਇਆ ਜਾਂਦਾ ਹੈ, ਭਾਵੇਂ ਤਰਜੀਹ ਮੋਡ ਚਾਲੂ ਹੋਵੇ"</string>
+    <!-- no translation found for notification_channel_summary_priority_baseline (46674690072551234) -->
+    <skip />
+    <!-- no translation found for notification_channel_summary_priority_bubble (1275413109619074576) -->
+    <skip />
+    <!-- no translation found for notification_channel_summary_priority_dnd (6665395023264154361) -->
+    <skip />
+    <!-- no translation found for notification_channel_summary_priority_all (7151752959650048285) -->
+    <skip />
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"ਸੈਟਿੰਗਾਂ"</string>
-    <string name="notification_priority_title" msgid="5256226572739882190">"ਤਰਜੀਹੀ ਗੱਲਾਂਬਾਤਾਂ"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"ਤਰਜੀਹ"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਐਪ ਗੱਲਬਾਤ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਦਾ ਸਮਰਥਨ ਨਹੀਂ ਕਰਦੀ"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"ਇਹਨਾਂ ਸੂਚਨਾਵਾਂ ਨੂੰ ਸੋਧਿਆ ਨਹੀਂ ਜਾ ਸਕਦਾ।"</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"ਇਹ ਸੂਚਨਾਵਾਂ ਦਾ ਗਰੁੱਪ ਇੱਥੇ ਸੰਰੂਪਿਤ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ"</string>
@@ -858,6 +871,8 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"ਚਾਲੂ"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"ਬੰਦ"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"ਅਣਉਪਲਬਧ"</string>
+    <!-- no translation found for tile_disabled (373212051546573069) -->
+    <skip />
     <string name="nav_bar" msgid="4642708685386136807">"ਦਿਸ਼ਾ-ਨਿਰਦੇਸ਼ ਪੱਟੀ"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"ਖਾਕਾ"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"ਵਧੇਰੇ ਖੱਬੇ ਬਟਨ ਕਿਸਮ"</string>
@@ -1016,14 +1031,6 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"ਸਿਸਟਮ ਨੈਵੀਗੇਸ਼ਨ ਅੱਪਡੇਟ ਹੋ ਗਿਆ। ਤਬਦੀਲੀਆਂ ਕਰਨ ਲਈ, ਸੈਟਿੰਗਾਂ \'ਤੇ ਜਾਓ।"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"ਸਿਸਟਮ ਨੈਵੀਗੇਸ਼ਨ ਨੂੰ ਅੱਪਡੇਟ ਕਰਨ ਲਈ ਸੈਟਿੰਗਾਂ \'ਤੇ ਜਾਓ"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"ਸਟੈਂਡਬਾਈ"</string>
-    <string name="priority_onboarding_title" msgid="2893070698479227616">"ਗੱਲਬਾਤ ਨੂੰ ਤਰਜੀਹੀ ਗੱਲਬਾਤ ਵਜੋਂ ਸੈੱਟ ਕੀਤਾ ਗਿਆ"</string>
-    <string name="priority_onboarding_behavior" msgid="636826237468953117">"ਤਰਜੀਹੀ ਗੱਲਾਂਬਾਤਾਂ"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="3861580571311518785">"ਇਹ ਗੱਲਾਂਬਾਤਾਂ ਤੁਹਾਡੀ ਸੂਚੀ ਦੇ ਸਿਖਰ \'ਤੇ ਦਿਖਾਈਆਂ ਜਾਂਦੀਆਂ ਹਨ ਅਤੇ ਤਰਜੀਹ ਮੋਡ ਚਾਲੂ ਹੋਣ \'ਤੇ ਹਮੇਸ਼ਾਂ ਤੁਹਾਡੇ ਤੱਕ ਪਹੁੰਚ ਸਕਦੀਆਂ ਹਨ"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="1781653813573865071">"ਪ੍ਰੋਫਾਈਲ ਤਸਵੀਰਾਂ ਨੂੰ ਲਾਕ ਸਕ੍ਰੀਨ \'ਤੇ ਦਿਖਾਇਆ ਜਾਂਦਾ ਹੈ"</string>
-    <string name="priority_onboarding_appear_as_bubble_text" msgid="4359924720680083057">"ਤੁਸੀਂ ਆਪਣੀ ਹੋਮ ਸਕ੍ਰੀਨ \'ਤੇ ਬੁਲਬੁਲਿਆਂ ਵਿੱਚ ਇਹਨਾਂ ਗੱਲਾਂਬਾਤਾਂ ਨੂੰ ਆਸਾਨੀ ਨਾਲ ਲੱਭ ਸਕਦੇ ਹੋ"</string>
-    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"\'ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ\' ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਵਿਘਨ ਪੈ ਸਕਦਾ ਹੈ"</string>
-    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"ਸਮਝ ਲਿਆ"</string>
-    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"ਸੈਟਿੰਗਾਂ"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"ਵੱਡਦਰਸ਼ੀਕਰਨ Window"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"ਵੱਡਦਰਸ਼ੀਕਰਨ Window ਦੇ ਕੰਟਰੋਲ"</string>
     <string name="accessibility_control_zoom_in" msgid="1189272315480097417">"ਜ਼ੂਮ ਵਧਾਓ"</string>
@@ -1044,8 +1051,7 @@
     <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"ਹੇਠਾਂ ਵੱਲ ਸੱਜੇ ਲਿਜਾਓ"</string>
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"ਕਿਨਾਰੇ ਵਿੱਚ ਲਿਜਾ ਕੇ ਲੁਕਾਓ"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"ਕਿਨਾਰੇ ਤੋਂ ਬਾਹਰ ਕੱਢ ਕੇ ਦਿਖਾਓ"</string>
-    <!-- no translation found for accessibility_floating_button_action_double_tap_to_toggle (7976492639670692037) -->
-    <skip />
+    <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"ਟੌਗਲ ਕਰੋ"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"ਡੀਵਾਈਸ ਕੰਟਰੋਲ"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"ਆਪਣੇ ਕਨੈਕਟ ਕੀਤੇ ਡੀਵਾਈਸਾਂ ਲਈ ਕੰਟਰੋਲ ਸ਼ਾਮਲ ਕਰੋ"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"ਡੀਵਾਈਸ ਕੰਟਰੋਲਾਂ ਦਾ ਸੈੱਟਅੱਪ ਕਰੋ"</string>
@@ -1092,8 +1098,7 @@
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"ਖਾਰਜ ਕਰੋ"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"ਮੁੜ-ਚਾਲੂ ਕਰੋ"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"ਸੈਟਿੰਗਾਂ"</string>
-    <!-- no translation found for controls_media_smartspace_rec_title (1699818353932537407) -->
-    <skip />
+    <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"ਚਲਾਓ"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"ਅਕਿਰਿਆਸ਼ੀਲ, ਐਪ ਦੀ ਜਾਂਚ ਕਰੋ"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"ਗੜਬੜ, ਮੁੜ ਕੋਸ਼ਿਸ਼ ਹੋ ਰਹੀ ਹੈ…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"ਨਹੀਂ ਮਿਲਿਆ"</string>

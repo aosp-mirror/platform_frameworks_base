@@ -289,9 +289,11 @@
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"Der mobile Hotspot ist deaktiviert."</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"Der mobile Hotspot ist aktiviert."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"Die Bildschirmübertragung wurde angehalten."</string>
-    <string name="accessibility_quick_settings_work_mode_off" msgid="562749867895549696">"Arbeitsmodus aus."</string>
+    <!-- no translation found for accessibility_quick_settings_work_mode_off (9106217884005620744) -->
+    <skip />
     <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"Arbeitsmodus an."</string>
-    <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6256690740556798683">"Arbeitsmodus deaktiviert."</string>
+    <!-- no translation found for accessibility_quick_settings_work_mode_changed_off (2653550342355027441) -->
+    <skip />
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"Arbeitsmodus aktiviert."</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"Der Datensparmodus ist deaktiviert."</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"Der Datensparmodus ist aktiviert."</string>
@@ -410,6 +412,8 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"<xliff:g id="DATA_LIMIT">%s</xliff:g> Datenlimit"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"Warnung für <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"Arbeitsprofil"</string>
+    <!-- no translation found for quick_settings_work_mode_paused (4841109346916998613) -->
+    <skip />
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Nachtlicht"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"An bei Sonnenuntergang"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Bis Sonnenaufgang"</string>
@@ -642,9 +646,9 @@
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s. Zum Aktivieren der Vibration tippen."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s. Zum Stummschalten tippen."</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"Zum Ändern des Klingeltonmodus tippen"</string>
-    <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"stummschalten"</string>
-    <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"Stummschaltung aufheben"</string>
-    <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"vibrieren"</string>
+    <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"Stummschalten"</string>
+    <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"Aufheben der Stummschaltung"</string>
+    <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"Vibrieren lassen"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"Lautstärkeregler von %s"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"Gerät klingelt bei Anrufen und Benachrichtigungen (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="output_title" msgid="3938776561655668350">"Medienausgabe"</string>
@@ -668,10 +672,12 @@
     <string name="wallet_title" msgid="5369767670735827105">"Geldbörse"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Alle anzeigen"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Zum Bezahlen entsperren"</string>
-    <string name="wallet_secondary_label_active" msgid="4909706168969888137">"Bereit"</string>
-    <string name="wallet_secondary_label_no_card" msgid="1750103386908123401">"Zahlungsmethode einrichten"</string>
+    <!-- no translation found for wallet_secondary_label_no_card (1282609666895946317) -->
+    <skip />
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Zum Verwenden entsperren"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Beim Abrufen deiner Karten ist ein Fehler aufgetreten – bitte versuch es später noch einmal"</string>
+    <!-- no translation found for wallet_lockscreen_settings_label (3539105300870383570) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"Arbeitsprofil"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Flugmodus"</string>
     <string name="add_tile" msgid="6239678623873086686">"Kachel hinzufügen"</string>
@@ -740,9 +746,16 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Status&lt;/b&gt;: auf „Lautlos“ herabgestuft"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Status&lt;/b&gt;: höher eingestuft"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Status&lt;/b&gt;: niedriger eingestuft"</string>
-    <string name="notification_channel_summary_priority" msgid="4592979359953954258">"Werden in deinen Benachrichtigungen immer oben angezeigt, auch wenn der Prioritätsmodus aktiviert ist"</string>
+    <!-- no translation found for notification_channel_summary_priority_baseline (46674690072551234) -->
+    <skip />
+    <!-- no translation found for notification_channel_summary_priority_bubble (1275413109619074576) -->
+    <skip />
+    <!-- no translation found for notification_channel_summary_priority_dnd (6665395023264154361) -->
+    <skip />
+    <!-- no translation found for notification_channel_summary_priority_all (7151752959650048285) -->
+    <skip />
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Einstellungen"</string>
-    <string name="notification_priority_title" msgid="5256226572739882190">"Vorrangige Unterhaltungen"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"Priorität"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> unterstützt keine Funktionen für Unterhaltungen"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Diese Benachrichtigungen können nicht geändert werden."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Die Benachrichtigungsgruppe kann hier nicht konfiguriert werden"</string>
@@ -849,7 +862,7 @@
     <string name="battery" msgid="769686279459897127">"Akku"</string>
     <string name="clock" msgid="8978017607326790204">"Uhr"</string>
     <string name="headset" msgid="4485892374984466437">"Headset"</string>
-    <string name="accessibility_long_click_tile" msgid="210472753156768705">"Einstellungen öffnen"</string>
+    <string name="accessibility_long_click_tile" msgid="210472753156768705">"Öffnen der Einstellungen"</string>
     <string name="accessibility_status_bar_headphones" msgid="1304082414912647414">"Mit Kopfhörer verbunden"</string>
     <string name="accessibility_status_bar_headset" msgid="2699275863720926104">"Mit Headset verbunden"</string>
     <string name="data_saver" msgid="3484013368530820763">"Datensparmodus"</string>
@@ -858,6 +871,8 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"An"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"Aus"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"Nicht verfügbar"</string>
+    <!-- no translation found for tile_disabled (373212051546573069) -->
+    <skip />
     <string name="nav_bar" msgid="4642708685386136807">"Navigationsleiste"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"Layout"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"Zusätzlicher linker Schaltflächentyp"</string>
@@ -903,8 +918,8 @@
   </string-array>
     <string name="tuner_low_priority" msgid="8412666814123009820">"Symbole für Benachrichtigungen mit einer niedrigen Priorität anzeigen"</string>
     <string name="other" msgid="429768510980739978">"Sonstiges"</string>
-    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"die Kachel zu entfernen"</string>
-    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"die Kachel am Ende hinzuzufügen"</string>
+    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"Entfernen der Kachel"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"Hinzufügen der Kachel am Ende"</string>
     <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Kachel verschieben"</string>
     <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Kachel hinzufügen"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Auf Position <xliff:g id="POSITION">%1$d</xliff:g> verschieben"</string>
@@ -919,7 +934,7 @@
     <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"Schnelleinstellungen schließen."</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="7237918261045099853">"Weckruf eingerichtet."</string>
     <string name="accessibility_quick_settings_user" msgid="505821942882668619">"Angemeldet als <xliff:g id="ID_1">%s</xliff:g>"</string>
-    <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"Nutzer auszuwählen"</string>
+    <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"Auswählen des Nutzers"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"Kein Internet"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4879279912389052142">"Details öffnen."</string>
     <string name="accessibility_quick_settings_not_available" msgid="6860875849497473854">"Aus diesem Grund nicht verfügbar: <xliff:g id="REASON">%s</xliff:g>"</string>
@@ -1016,14 +1031,6 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Systemsteuerungseinstellungen wurden angepasst. Änderungen kannst du in den Einstellungen vornehmen."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Gehe zu den Einstellungen, um die Systemsteuerung anzupassen"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Standby"</string>
-    <string name="priority_onboarding_title" msgid="2893070698479227616">"Unterhaltung als vorrangig eingestuft"</string>
-    <string name="priority_onboarding_behavior" msgid="636826237468953117">"Vorrangige Unterhaltungen"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="3861580571311518785">"Unterhaltungen, bei denen der Prioritätsmodus an ist, werden auf der Liste oben angezeigt und kommen immer bei dir an"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="1781653813573865071">"Profilbilder werden auf dem Sperrbildschirm angezeigt"</string>
-    <string name="priority_onboarding_appear_as_bubble_text" msgid="4359924720680083057">"Diese Unterhaltungen kannst du in Bubbles auf deinem Startbildschirm sehen"</string>
-    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"„Bitte nicht stören“ unterbrechen"</string>
-    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"OK"</string>
-    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Einstellungen"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Vergrößerungsfenster"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Einstellungen für Vergrößerungsfenster"</string>
     <string name="accessibility_control_zoom_in" msgid="1189272315480097417">"Heranzoomen"</string>
@@ -1044,8 +1051,7 @@
     <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"Nach unten rechts verschieben"</string>
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"An den Rand verschieben und verbergen"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Vom Rand verschieben und anzeigen"</string>
-    <!-- no translation found for accessibility_floating_button_action_double_tap_to_toggle (7976492639670692037) -->
-    <skip />
+    <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"Wechseln"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Gerätesteuerung"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Steuerelemente für verbundene Geräte hinzufügen"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"Gerätesteuerung einrichten"</string>
@@ -1059,8 +1065,8 @@
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Zu Favoriten hinzugefügt"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Zu Favoriten hinzugefügt, Position <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"Aus Favoriten entfernt"</string>
-    <string name="accessibility_control_change_favorite" msgid="2943178027582253261">"Zum Hinzufügen zu Favoriten"</string>
-    <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"Zum Entfernen aus Favoriten"</string>
+    <string name="accessibility_control_change_favorite" msgid="2943178027582253261">"Hinzufügen zu Favoriten"</string>
+    <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"Entfernen aus Favoriten"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Auf Position <xliff:g id="NUMBER">%d</xliff:g> verschieben"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Steuerelemente"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Steuerelemente auswählen, auf die man über das Ein-/Aus-Menü zugreifen kann"</string>
@@ -1092,8 +1098,7 @@
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Ablehnen"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Fortsetzen"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Einstellungen"</string>
-    <!-- no translation found for controls_media_smartspace_rec_title (1699818353932537407) -->
-    <skip />
+    <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"Wiedergeben"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Inaktiv – sieh in der App nach"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Fehler. Neuer Versuch…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Nicht gefunden"</string>
@@ -1152,7 +1157,7 @@
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Kein Wecker gestellt"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Fingerabdrucksensor"</string>
     <string name="accessibility_udfps_disabled_button" msgid="4284034245130239384">"Fingerabdrucksensor ist deaktiviert"</string>
-    <string name="accessibility_authenticate_hint" msgid="798914151813205721">"zu authentifizieren"</string>
-    <string name="accessibility_enter_hint" msgid="2617864063504824834">"das Gerät einzugeben"</string>
+    <string name="accessibility_authenticate_hint" msgid="798914151813205721">"Authentifizieren"</string>
+    <string name="accessibility_enter_hint" msgid="2617864063504824834">"Eingeben des Geräts"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Mit Fingerabdruck öffnen"</string>
 </resources>

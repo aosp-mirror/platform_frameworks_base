@@ -16,7 +16,9 @@
 
 package com.android.server.wm;
 
-import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY;
+import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PRESENTATION;
+import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
@@ -31,7 +33,6 @@ import android.app.Activity;
 import android.app.ActivityManager.TaskDescription;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
-import android.app.ActivityView;
 import android.app.ITaskStackListener;
 import android.app.Instrumentation.ActivityMonitor;
 import android.app.TaskStackListener;
@@ -39,6 +40,10 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.graphics.PixelFormat;
+import android.hardware.display.DisplayManager;
+import android.hardware.display.VirtualDisplay;
+import android.media.ImageReader;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -46,13 +51,16 @@ import android.platform.test.annotations.Presubmit;
 import android.text.TextUtils;
 import android.view.Display;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 
 import androidx.test.filters.FlakyTest;
 import androidx.test.filters.MediumTest;
 
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -65,15 +73,49 @@ import java.util.function.Predicate;
 @MediumTest
 public class TaskStackChangedListenerTest {
 
+    private static final int VIRTUAL_DISPLAY_WIDTH = 800;
+    private static final int VIRTUAL_DISPLAY_HEIGHT = 600;
+    private static final int VIRTUAL_DISPLAY_DENSITY = 160;
+
     private ITaskStackListener mTaskStackListener;
+    private DisplayManager mDisplayManager;
+    private VirtualDisplay mVirtualDisplay;
 
     private static final int WAIT_TIMEOUT_MS = 5000;
     private static final Object sLock = new Object();
+
+    @Before
+    public void setUp() {
+        mDisplayManager = getInstrumentation().getContext().getSystemService(
+                DisplayManager.class);
+        mVirtualDisplay = createVirtualDisplay(
+                getClass().getSimpleName() + "_virtualDisplay",
+                VIRTUAL_DISPLAY_WIDTH, VIRTUAL_DISPLAY_HEIGHT, VIRTUAL_DISPLAY_DENSITY);
+    }
 
     @After
     public void tearDown() throws Exception {
         ActivityTaskManager.getService().unregisterTaskStackListener(mTaskStackListener);
         mTaskStackListener = null;
+        mVirtualDisplay.release();
+    }
+
+    private VirtualDisplay createVirtualDisplay(String name, int width, int height, int density) {
+        VirtualDisplay virtualDisplay = null;
+        try (ImageReader reader = ImageReader.newInstance(width, height,
+                /* format= */ PixelFormat.RGBA_8888, /* maxImages= */ 2)) {
+            int flags = VIRTUAL_DISPLAY_FLAG_PRESENTATION | VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY
+                    | VIRTUAL_DISPLAY_FLAG_PUBLIC;
+            virtualDisplay = mDisplayManager.createVirtualDisplay(
+                    name, width, height, density, reader.getSurface(), flags);
+            virtualDisplay.setSurface(reader.getSurface());
+        }
+        assertTrue("display id must be unique",
+                virtualDisplay.getDisplay().getDisplayId() != Display.DEFAULT_DISPLAY);
+        assertNotNull("display must be registered",
+                Arrays.asList(mDisplayManager.getDisplays()).stream().filter(
+                        d -> d.getName().equals(name)).findAny());
+        return virtualDisplay;
     }
 
     @Test
@@ -235,48 +277,19 @@ public class TaskStackChangedListenerTest {
         assertTrue(activity.mOnDetachedFromWindowCalled);
     }
 
-    public static class ActivityLaunchesNewActivityInActivityView extends TestActivity {
-        private boolean mActivityBLaunched = false;
-
-        @Override
-        protected void onPostResume() {
-            super.onPostResume();
-            if (mActivityBLaunched) {
-                return;
-            }
-            mActivityBLaunched = true;
-            startActivity(new Intent(this, ActivityB.class));
-        }
-    }
-
     @Test
     public void testTaskDisplayChanged() throws Exception {
-        final CountDownLatch activityViewReadyLatch = new CountDownLatch(1);
-        final ActivityViewTestActivity activity =
-                (ActivityViewTestActivity) startTestActivity(ActivityViewTestActivity.class);
-        final ActivityView activityView = activity.getActivityView();
-        activityView.setCallback(new ActivityView.StateCallback() {
-            @Override
-            public void onActivityViewReady(ActivityView view) {
-                activityViewReadyLatch.countDown();
-            }
-            @Override
-            public void onActivityViewDestroyed(ActivityView view) {}
-        });
-        waitForCallback(activityViewReadyLatch);
+        int virtualDisplayId = mVirtualDisplay.getDisplay().getDisplayId();
 
-        // Launch a Activity inside ActivityView.
+        // Launch a Activity inside VirtualDisplay
+        CountDownLatch displayChangedLatch1 = new CountDownLatch(1);
         final Object[] params1 = new Object[1];
-        final CountDownLatch displayChangedLatch1 = new CountDownLatch(1);
-        final int activityViewDisplayId = activityView.getVirtualDisplayId();
-        registerTaskStackChangedListener(
-                new TaskDisplayChangedListener(
-                        activityViewDisplayId, params1, displayChangedLatch1));
+        registerTaskStackChangedListener(new TaskDisplayChangedListener(
+                virtualDisplayId, params1, displayChangedLatch1));
+        ActivityOptions options1 = ActivityOptions.makeBasic().setLaunchDisplayId(virtualDisplayId);
         int taskId1;
-        ActivityOptions options1 = ActivityOptions.makeBasic()
-                .setLaunchDisplayId(activityView.getVirtualDisplayId());
         synchronized (sLock) {
-            taskId1 = startTestActivity(ActivityInActivityView.class, options1).getTaskId();
+            taskId1 = startTestActivity(ActivityInVirtualDisplay.class, options1).getTaskId();
         }
         waitForCallback(displayChangedLatch1);
 
@@ -292,7 +305,7 @@ public class TaskStackChangedListenerTest {
         ActivityOptions options2 = ActivityOptions.makeBasic()
                 .setLaunchDisplayId(Display.DEFAULT_DISPLAY);
         synchronized (sLock) {
-            taskId2 = startTestActivity(ActivityInActivityView.class, options2).getTaskId();
+            taskId2 = startTestActivity(ActivityInVirtualDisplay.class, options2).getTaskId();
         }
         waitForCallback(displayChangedLatch2);
 
@@ -447,8 +460,7 @@ public class TaskStackChangedListenerTest {
         }
     }
 
-    public static class ActivityA extends TestActivity {
-    }
+    public static class ActivityA extends TestActivity {}
 
     public static class ActivityB extends TestActivity {
 
@@ -500,29 +512,19 @@ public class TaskStackChangedListenerTest {
         }
     }
 
-    public static class ActivityViewTestActivity extends TestActivity {
-        private ActivityView mActivityView;
+    public static class ActivityInVirtualDisplay extends TestActivity {
 
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
 
-            mActivityView = new ActivityView.Builder(this).build();
-            setContentView(mActivityView);
-
-            ViewGroup.LayoutParams layoutParams = mActivityView.getLayoutParams();
-            layoutParams.width = MATCH_PARENT;
-            layoutParams.height = MATCH_PARENT;
-            mActivityView.requestLayout();
-        }
-
-        ActivityView getActivityView() {
-            return mActivityView;
+            LinearLayout layout = new LinearLayout(this);
+            layout.setLayoutParams(new ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT));
+            setContentView(layout);
         }
     }
-
-    // Activity that has {@link android.R.attr#resizeableActivity} attribute set to {@code true}
-    public static class ActivityInActivityView extends TestActivity {}
 
     public static class ResumeWhilePausingActivity extends TestActivity {}
 

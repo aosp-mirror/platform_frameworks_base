@@ -289,9 +289,11 @@
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"Na-off ang mobile hotspot."</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"Na-on ang mobile hotspot."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"Itinigil ang pagka-cast sa screen."</string>
-    <string name="accessibility_quick_settings_work_mode_off" msgid="562749867895549696">"Naka-off ang work mode."</string>
+    <!-- no translation found for accessibility_quick_settings_work_mode_off (9106217884005620744) -->
+    <skip />
     <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"Naka-on ang work mode."</string>
-    <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6256690740556798683">"Na-off ang work mode."</string>
+    <!-- no translation found for accessibility_quick_settings_work_mode_changed_off (2653550342355027441) -->
+    <skip />
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"Na-on ang work mode."</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"Na-off ang Data Saver."</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"Na-on ang Data Saver."</string>
@@ -410,6 +412,8 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"<xliff:g id="DATA_LIMIT">%s</xliff:g> ang limitasyon"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"Babala sa <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"Profile sa trabaho"</string>
+    <!-- no translation found for quick_settings_work_mode_paused (4841109346916998613) -->
+    <skip />
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Night Light"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Mao-on sa sunset"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Hanggang sunrise"</string>
@@ -668,10 +672,12 @@
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Ipakita lahat"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"I-unlock para magbayad"</string>
-    <string name="wallet_secondary_label_active" msgid="4909706168969888137">"Handa na"</string>
-    <string name="wallet_secondary_label_no_card" msgid="1750103386908123401">"Mag-set up ng pagbabayad"</string>
+    <!-- no translation found for wallet_secondary_label_no_card (1282609666895946317) -->
+    <skip />
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"I-unlock para magamit"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Nagkaproblema sa pagkuha ng iyong mga card, pakisubukan ulit sa ibang pagkakataon"</string>
+    <!-- no translation found for wallet_lockscreen_settings_label (3539105300870383570) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"Profile sa trabaho"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Airplane mode"</string>
     <string name="add_tile" msgid="6239678623873086686">"Magdagdag ng tile"</string>
@@ -740,9 +746,12 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Status:&lt;/b&gt; Na-demote sa Naka-silent"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Status:&lt;/b&gt; Ranked nang Mas Mataas"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Status:&lt;/b&gt; Na-rank nang Mas Mababa"</string>
-    <string name="notification_channel_summary_priority" msgid="4592979359953954258">"Palaging ipinapakita sa itaas ng iyong mga notification, kahit na naka-on ang Priority mode"</string>
+    <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Makikita sa itaas ng mga notification ng pag-uusap at bilang larawan sa profile sa lock screen"</string>
+    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Makikita sa itaas ng mga notification ng pag-uusap at bilang larawan sa profile sa lock screen, lumalabas bilang bubble"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Makikita sa itaas ng mga notification ng pag-uusap at bilang larawan sa profile sa lock screen, naaabala ang Huwag Istorbohin"</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Makikita sa itaas ng mga notification ng pag-uusap at bilang larawan sa profile sa lock screen, lumalabas bilang bubble, naaabala ang Huwag Istorbohin"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Mga Setting"</string>
-    <string name="notification_priority_title" msgid="5256226572739882190">"Mga priyoridad na pag-uusap"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"Priyoridad"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"Hindi sinusuportahan ng <xliff:g id="APP_NAME">%1$s</xliff:g> ang mga feature ng pag-uusap"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Hindi puwedeng baguhin ang mga notification na ito."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Hindi mako-configure dito ang pangkat na ito ng mga notification"</string>
@@ -858,6 +867,8 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"I-on"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"I-off"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"Hindi available"</string>
+    <!-- no translation found for tile_disabled (373212051546573069) -->
+    <skip />
     <string name="nav_bar" msgid="4642708685386136807">"Navigation bar"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"Layout"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"Uri ng extra na button ng kaliwa"</string>
@@ -1016,14 +1027,6 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Na-update na ang pag-navigate ng system. Para gumawa ng mga pagbabago, pumunta sa Mga Setting."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Pumunta sa Mga Setting para i-update ang pag-navigate sa system"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Naka-standby"</string>
-    <string name="priority_onboarding_title" msgid="2893070698479227616">"Ginawang priyoridad ang pag-uusap"</string>
-    <string name="priority_onboarding_behavior" msgid="636826237468953117">"Mga priyoridad na pag-uusap"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="3861580571311518785">"Ipinapakita ang pag-uusap na ito sa itaas ng listahan mo at palaging ipapakita sa iyo kapag naka-on ang Priority mode"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="1781653813573865071">"Ipinapakita ang mga larawan sa profile sa lock screen"</string>
-    <string name="priority_onboarding_appear_as_bubble_text" msgid="4359924720680083057">"Madali mong mahahanap ang mga pag-uusap na ito sa mga bubble sa iyong Home screen"</string>
-    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Ihinto ang Huwag Istorbohin"</string>
-    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"OK"</string>
-    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Mga Setting"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Window ng Pag-magnify"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Mga Kontrol sa Pag-magnify ng Window"</string>
     <string name="accessibility_control_zoom_in" msgid="1189272315480097417">"Mag-zoom in"</string>
