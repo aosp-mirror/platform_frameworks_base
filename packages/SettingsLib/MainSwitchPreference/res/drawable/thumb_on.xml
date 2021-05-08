@@ -16,16 +16,16 @@
   -->
 
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-  <item
-      android:top="4dp"
-      android:left="4dp"
-      android:right="4dp"
-      android:bottom="4dp">
-
-    <shape android:shape="oval" >
-      <size android:height="20dp" android:width="20dp" />
-      <solid android:color="?android:attr/colorAccent" />
-    </shape>
-
-  </item>
+    <item
+        android:top="@dimen/switch_thumb_margin"
+        android:left="@dimen/switch_thumb_margin"
+        android:right="@dimen/switch_thumb_margin"
+        android:bottom="@dimen/switch_thumb_margin">
+        <shape android:shape="oval">
+            <size
+                android:height="@dimen/switch_thumb_size"
+                android:width="@dimen/switch_thumb_size"/>
+            <solid android:color="@color/state_on_color"/>
+        </shape>
+    </item>
 </layer-list>
