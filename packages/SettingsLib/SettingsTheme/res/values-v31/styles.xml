@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Copyright (C) 2020 The Android Open Source Project
+  Copyright (C) 2021 The Android Open Source Project
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -14,18 +14,12 @@
   See the License for the specific language governing permissions and
   limitations under the License.
   -->
+<resources>
+    <style name="TextAppearance.PreferenceTitle.SettingsLib"
+           parent="@*android:style/TextAppearance.DeviceDefault.ListItem">
+        <item name="android:textSize">20sp</item>
+    </style>
 
-<vector
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="13.19dp"
-    android:height="10.06dp"
-    android:viewportWidth="13.19"
-    android:viewportHeight="10.06">
-
-  <group>
-    <path
-        android:pathData="M4.75012 8.12738L1.62262 4.99988L0.557617 6.05738L4.75012 10.2499L13.7501 1.24988L12.6926 0.192383L4.75012 8.12738Z"
-        android:fillColor="@android:color/white" />
-  </group>
-
-</vector>
+    <style name="TextAppearance.CategoryTitle.SettingsLib"
+           parent="@*android:style/TextAppearance.DeviceDefault.Body2" />
+</resources>
