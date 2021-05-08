@@ -16,6 +16,7 @@
   -->
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-  <item android:drawable="@drawable/thumb_on" android:state_checked="true" />
-  <item android:drawable="@drawable/thumb_off" android:state_checked="false" />
+    <item android:drawable="@drawable/thumb_on" android:state_checked="true"/>
+    <item android:drawable="@drawable/thumb_off" android:state_checked="false"/>
+    <item android:drawable="@drawable/thumb_disabled" android:state_enabled="false"/>
 </selector>
