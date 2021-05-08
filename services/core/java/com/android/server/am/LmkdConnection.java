@@ -31,6 +31,8 @@ import com.android.internal.annotations.GuardedBy;
 
 import libcore.io.IoUtils;
 
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.InputStream;
@@ -74,7 +76,7 @@ public class LmkdConnection {
          * @param receivedLen Size of the data received
          * @return True if the message has been handled correctly, false otherwise.
          */
-        boolean handleUnsolicitedMessage(ByteBuffer dataReceived, int receivedLen);
+        boolean handleUnsolicitedMessage(DataInputStream inputData, int receivedLen);
     }
 
     private final MessageQueue mMsgQueue;
@@ -98,6 +100,10 @@ public class LmkdConnection {
     // buffer to store incoming data
     private final ByteBuffer mInputBuf =
             ByteBuffer.allocate(LMKD_REPLY_MAX_SIZE);
+
+    // Input stream to parse the incoming data
+    private final DataInputStream mInputData = new DataInputStream(
+            new ByteArrayInputStream(mInputBuf.array()));
 
     // object to protect mReplyBuf and to wait/notify when reply is received
     private final Object mReplyBufLock = new Object();
@@ -190,26 +196,32 @@ public class LmkdConnection {
     private void processIncomingData() {
         int len = read(mInputBuf);
         if (len > 0) {
-            synchronized (mReplyBufLock) {
-                if (mReplyBuf != null) {
-                    if (mListener.isReplyExpected(mReplyBuf, mInputBuf, len)) {
-                        // copy into reply buffer
-                        mReplyBuf.put(mInputBuf.array(), 0, len);
-                        mReplyBuf.rewind();
-                        // wakeup the waiting thread
-                        mReplyBufLock.notifyAll();
-                    } else if (!mListener.handleUnsolicitedMessage(mInputBuf, len)) {
-                        // received unexpected packet
-                        // treat this as an error
-                        mReplyBuf = null;
-                        mReplyBufLock.notifyAll();
-                        Slog.e(TAG, "Received an unexpected packet from lmkd");
+            try {
+                // reset InputStream to point into mInputBuf.array() begin
+                mInputData.reset();
+                synchronized (mReplyBufLock) {
+                    if (mReplyBuf != null) {
+                        if (mListener.isReplyExpected(mReplyBuf, mInputBuf, len)) {
+                            // copy into reply buffer
+                            mReplyBuf.put(mInputBuf.array(), 0, len);
+                            mReplyBuf.rewind();
+                            // wakeup the waiting thread
+                            mReplyBufLock.notifyAll();
+                        } else if (!mListener.handleUnsolicitedMessage(mInputData, len)) {
+                            // received unexpected packet
+                            // treat this as an error
+                            mReplyBuf = null;
+                            mReplyBufLock.notifyAll();
+                            Slog.e(TAG, "Received an unexpected packet from lmkd");
+                        }
+                    } else if (!mListener.handleUnsolicitedMessage(mInputData, len)) {
+                        // received asynchronous communication from lmkd
+                        // but we don't recognize it.
+                        Slog.w(TAG, "Received an unexpected packet from lmkd");
                     }
-                } else if (!mListener.handleUnsolicitedMessage(mInputBuf, len)) {
-                    // received asynchronous communication from lmkd
-                    // but we don't recognize it.
-                    Slog.w(TAG, "Received an unexpected packet from lmkd");
                 }
+            } catch (IOException e) {
+                Slog.e(TAG, "Failed to parse lmkd data buffer. Size = " + len);
             }
         }
     }
