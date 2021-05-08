@@ -189,7 +189,6 @@ final class ContentProviderRecord implements ComponentName.WithComponentName {
      */
     void onProviderPublishStatusLocked(boolean status) {
         final int numOfConns = connections.size();
-        final int userId = UserHandle.getUserId(appInfo.uid);
         for (int i = 0; i < numOfConns; i++) {
             final ContentProviderConnection conn = connections.get(i);
             if (conn.waiting && conn.client != null) {
@@ -201,7 +200,7 @@ final class ContentProviderRecord implements ComponentName.WithComponentName {
                                 + appInfo.uid + " for provider "
                                 + info.authority + ": launching app became null");
                         EventLogTags.writeAmProviderLostProcess(
-                                userId,
+                                UserHandle.getUserId(appInfo.uid),
                                 appInfo.packageName,
                                 appInfo.uid, info.authority);
                     } else {
@@ -217,7 +216,7 @@ final class ContentProviderRecord implements ComponentName.WithComponentName {
                     try {
                         thread.notifyContentProviderPublishStatus(
                                 newHolder(status ? conn : null, false),
-                                info.authority, userId, status);
+                                info.authority, conn.mExpectedUserId, status);
                     } catch (RemoteException e) {
                     }
                 }
