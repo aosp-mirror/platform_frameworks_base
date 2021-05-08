@@ -1659,13 +1659,31 @@ public class SyncManager {
         final UsageStatsManagerInternal usmi =
                 LocalServices.getService(UsageStatsManagerInternal.class);
         if (usmi != null) {
+            // This method name is unfortunate. It elevates apps to a higher bucket, so it ideally
+            // should be called before we attempt to schedule the job (especially as EJ).
             usmi.reportSyncScheduled(syncOperation.owningPackage,
                     UserHandle.getUserId(syncOperation.owningUid),
                     syncOperation.isAppStandbyExempted());
         }
 
-        getJobScheduler().scheduleAsPackage(b.build(), syncOperation.owningPackage,
+        final JobInfo ji = b.build();
+        int result = getJobScheduler().scheduleAsPackage(ji, syncOperation.owningPackage,
                 syncOperation.target.userId, syncOperation.wakeLockName());
+        if (result == JobScheduler.RESULT_FAILURE && ji.isExpedited()) {
+            if (isLoggable) {
+                Slog.i(TAG, "Failed to schedule EJ for " + syncOperation.owningPackage
+                        + ". Downgrading to regular");
+            }
+            syncOperation.scheduleEjAsRegularJob = true;
+            b.setExpedited(false).setExtras(syncOperation.toJobInfoExtras());
+            result = getJobScheduler().scheduleAsPackage(b.build(), syncOperation.owningPackage,
+                    syncOperation.target.userId, syncOperation.wakeLockName());
+        }
+        if (result == JobScheduler.RESULT_FAILURE) {
+            Slog.e(TAG, "Failed to schedule job for " + syncOperation.owningPackage);
+            // TODO: notify AppStandbyController that the sync isn't actually scheduled so the
+            // bucket doesn't stay elevated
+        }
     }
 
     /**

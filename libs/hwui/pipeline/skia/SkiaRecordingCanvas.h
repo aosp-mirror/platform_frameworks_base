@@ -20,6 +20,7 @@
 #include "ReorderBarrierDrawables.h"
 #include "SkiaCanvas.h"
 #include "SkiaDisplayList.h"
+#include "pipeline/skia/AnimatedDrawables.h"
 
 namespace android {
 namespace uirenderer {
@@ -70,13 +71,7 @@ public:
                             uirenderer::CanvasPropertyPrimitive* y,
                             uirenderer::CanvasPropertyPrimitive* radius,
                             uirenderer::CanvasPropertyPaint* paint) override;
-    virtual void drawRipple(uirenderer::CanvasPropertyPrimitive* x,
-                            uirenderer::CanvasPropertyPrimitive* y,
-                            uirenderer::CanvasPropertyPrimitive* radius,
-                            uirenderer::CanvasPropertyPaint* paint,
-                            uirenderer::CanvasPropertyPrimitive* progress,
-                            uirenderer::CanvasPropertyPrimitive* turbulencePhase,
-                            const SkRuntimeShaderBuilder& effectBuilder) override;
+    virtual void drawRipple(const RippleDrawableParams& params) override;
 
     virtual void drawVectorDrawable(VectorDrawableRoot* vectorDrawable) override;
 

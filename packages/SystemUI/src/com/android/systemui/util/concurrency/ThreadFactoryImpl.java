@@ -17,6 +17,7 @@
 package com.android.systemui.util.concurrency;
 
 import android.os.HandlerThread;
+import android.os.Looper;
 
 import java.util.concurrent.Executor;
 
@@ -34,5 +35,9 @@ class ThreadFactoryImpl implements ThreadFactory {
         HandlerThread handlerThread = new HandlerThread(threadName);
         handlerThread.start();
         return new ExecutorImpl(handlerThread.getLooper());
+    }
+
+    public DelayableExecutor buildDelayableExecutorOnLooper(Looper looper) {
+        return new ExecutorImpl(looper);
     }
 }

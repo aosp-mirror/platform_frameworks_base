@@ -21,7 +21,6 @@ import android.content.Context
 import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.content.res.Resources.ID_NULL
-import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.RippleDrawable
 import android.service.quicksettings.Tile
@@ -83,7 +82,7 @@ open class QSTileViewImpl @JvmOverloads constructor(
 
     private lateinit var ripple: RippleDrawable
     private lateinit var colorBackgroundDrawable: Drawable
-    private var paintColor = Color.WHITE
+    private var paintColor: Int = 0
     private var paintAnimator: ValueAnimator? = null
     private var labelAnimator: ValueAnimator? = null
     private var secondaryLabelAnimator: ValueAnimator? = null
@@ -105,6 +104,8 @@ open class QSTileViewImpl @JvmOverloads constructor(
         clipToPadding = false
         isFocusable = true
         background = createTileBackground()
+        paintColor = getCircleColor(QSTile.State.DEFAULT_STATE)
+        colorBackgroundDrawable.setTint(paintColor)
 
         val padding = resources.getDimensionPixelSize(R.dimen.qs_tile_padding)
         val startPadding = resources.getDimensionPixelSize(R.dimen.qs_tile_start_padding)
@@ -165,8 +166,8 @@ open class QSTileViewImpl @JvmOverloads constructor(
             labelContainer.ignoreLastView = true
             secondaryLabel.alpha = 0f
         }
-        label.setTextColor(getLabelColor(0)) // Default state
-        secondaryLabel.setTextColor(getSecondaryLabelColor(0))
+        label.setTextColor(getLabelColor(QSTile.State.DEFAULT_STATE))
+        secondaryLabel.setTextColor(getSecondaryLabelColor(QSTile.State.DEFAULT_STATE))
         addView(labelContainer)
     }
 
@@ -314,7 +315,7 @@ open class QSTileViewImpl @JvmOverloads constructor(
     // HANDLE STATE CHANGES RELATED METHODS
 
     protected open fun handleStateChanged(state: QSTile.State) {
-        val allowAnimations = animationsEnabled() && paintColor != Color.WHITE
+        val allowAnimations = animationsEnabled()
         showRippleEffect = state.showRippleEffect
         isClickable = state.state != Tile.STATE_UNAVAILABLE
         isLongClickable = state.handlesLongClick

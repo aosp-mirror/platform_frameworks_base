@@ -4547,30 +4547,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public boolean isProfileActivePasswordSufficientForParent(int userHandle) {
-        if (!mHasFeature) {
-            return true;
-        }
-        Preconditions.checkArgumentNonnegative(userHandle, "Invalid userId");
-
-        final CallerIdentity caller = getCallerIdentity();
-        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
-        Preconditions.checkCallAuthorization(isManagedProfile(userHandle),
-                "can not call APIs refering to the parent profile outside a managed profile, "
-                        + "userId = %d", userHandle);
-
-        synchronized (getLockObject()) {
-            final int targetUser = getProfileParentId(userHandle);
-            enforceUserUnlocked(targetUser, false);
-            int credentialOwner = getCredentialOwner(userHandle, false);
-            DevicePolicyData policy = getUserDataUnchecked(credentialOwner);
-            PasswordMetrics metrics = mLockSettingsInternal.getUserPasswordMetrics(credentialOwner);
-            return isActivePasswordSufficientForUserLocked(
-                    policy.mPasswordValidAtLastCheckpoint, metrics, targetUser);
-        }
-    }
-
-    @Override
     public boolean isPasswordSufficientAfterProfileUnification(int userHandle, int profileUser) {
         if (!mHasFeature) {
             return true;
