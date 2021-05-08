@@ -139,6 +139,7 @@ import com.android.server.wm.WindowProcessController;
 
 import dalvik.system.VMRuntime;
 
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -835,37 +836,44 @@ public final class ProcessList {
                         }
 
                         @Override
-                        public boolean handleUnsolicitedMessage(ByteBuffer dataReceived,
+                        public boolean handleUnsolicitedMessage(DataInputStream inputData,
                                 int receivedLen) {
                             if (receivedLen < 4) {
                                 return false;
                             }
 
-                            switch (dataReceived.getInt(0)) {
-                                case LMK_PROCKILL:
-                                    if (receivedLen != 12) {
+                            try {
+                                switch (inputData.readInt()) {
+                                    case LMK_PROCKILL:
+                                        if (receivedLen != 12) {
+                                            return false;
+                                        }
+                                        final int pid = inputData.readInt();
+                                        final int uid = inputData.readInt();
+                                        mAppExitInfoTracker.scheduleNoteLmkdProcKilled(pid, uid);
+                                        return true;
+                                    case LMK_KILL_OCCURRED:
+                                        if (receivedLen
+                                                < LmkdStatsReporter.KILL_OCCURRED_MSG_SIZE) {
+                                            return false;
+                                        }
+                                        LmkdStatsReporter.logKillOccurred(inputData);
+                                        return true;
+                                    case LMK_STATE_CHANGED:
+                                        if (receivedLen
+                                                != LmkdStatsReporter.STATE_CHANGED_MSG_SIZE) {
+                                            return false;
+                                        }
+                                        final int state = inputData.readInt();
+                                        LmkdStatsReporter.logStateChanged(state);
+                                        return true;
+                                    default:
                                         return false;
-                                    }
-                                    mAppExitInfoTracker.scheduleNoteLmkdProcKilled(
-                                            dataReceived.getInt(4), dataReceived.getInt(8));
-                                    return true;
-                                case LMK_KILL_OCCURRED:
-                                    if (receivedLen < LmkdStatsReporter.KILL_OCCURRED_MSG_SIZE) {
-                                        return false;
-                                    }
-                                    dataReceived.position(4);
-                                    LmkdStatsReporter.logKillOccurred(dataReceived);
-                                    return true;
-                                case LMK_STATE_CHANGED:
-                                    if (receivedLen != LmkdStatsReporter.STATE_CHANGED_MSG_SIZE) {
-                                        return false;
-                                    }
-                                    LmkdStatsReporter.logStateChanged(
-                                            dataReceived.getInt(4));
-                                    return true;
-                                default:
-                                    return false;
+                                }
+                            } catch (IOException e) {
+                                Slog.e(TAG, "Invalid buffer data. Failed to log LMK_KILL_OCCURRED");
                             }
+                            return false;
                         }
                     }
             );
