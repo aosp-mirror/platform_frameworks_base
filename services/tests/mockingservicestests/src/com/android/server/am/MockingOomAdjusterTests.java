@@ -2078,7 +2078,7 @@ public class MockingOomAdjusterTests {
             doReturn(hasExternalProviders).when(record).hasExternalProcessHandles();
         }
         ContentProviderConnection conn = spy(new ContentProviderConnection(record, client,
-                client.info.packageName));
+                client.info.packageName, UserHandle.getUserId(client.uid)));
         record.connections.add(conn);
         client.mProviders.addProviderConnection(conn);
         return record;
