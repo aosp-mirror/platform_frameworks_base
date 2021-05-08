@@ -203,7 +203,7 @@ public class PeopleSpaceUtils {
         if (DEBUG) {
             Log.i(TAG, "Removing any notification stored for tile Id: " + tile.getId());
         }
-        return tile
+        PeopleSpaceTile.Builder updatedTile = tile
                 .toBuilder()
                 // Reset notification content.
                 .setNotificationKey(null)
@@ -212,8 +212,15 @@ public class PeopleSpaceUtils {
                 .setNotificationDataUri(null)
                 .setMessagesCount(0)
                 // Reset missed calls category.
-                .setNotificationCategory(null)
-                .build();
+                .setNotificationCategory(null);
+
+        // Only set last interaction to now if we are clearing a notification.
+        if (!TextUtils.isEmpty(tile.getNotificationKey())) {
+            long currentTimeMillis = System.currentTimeMillis();
+            if (DEBUG) Log.d(TAG, "Set last interaction on clear: " + currentTimeMillis);
+            updatedTile.setLastInteractionTimestamp(currentTimeMillis);
+        }
+        return updatedTile.build();
     }
 
     /**
@@ -227,10 +234,11 @@ public class PeopleSpaceUtils {
             if (DEBUG) Log.d(TAG, "Tile key: " + key.toString() + ". Notification is null");
             return removeNotificationFields(tile);
         }
-        Notification notification = notificationEntry.getSbn().getNotification();
+        StatusBarNotification sbn = notificationEntry.getSbn();
+        Notification notification = sbn.getNotification();
 
         PeopleSpaceTile.Builder updatedTile = tile.toBuilder();
-        String uriFromNotification = getContactUri(notificationEntry.getSbn());
+        String uriFromNotification = getContactUri(sbn);
         if (appWidgetId.isPresent() && tile.getContactUri() == null && !TextUtils.isEmpty(
                 uriFromNotification)) {
             if (DEBUG) Log.d(TAG, "Add uri from notification to tile: " + uriFromNotification);
@@ -241,7 +249,6 @@ public class PeopleSpaceUtils {
             // Update cached tile in-memory.
             updatedTile.setContactUri(contactUri);
         }
-
         boolean isMissedCall = isMissedCall(notification);
         List<Notification.MessagingStyle.Message> messages =
                 getMessagingStyleMessages(notification);
@@ -261,12 +268,13 @@ public class PeopleSpaceUtils {
         Uri dataUri = message != null ? message.getDataUri() : null;
         if (DEBUG) {
             Log.d(TAG, "Tile key: " + key.toString() + ". Notification message has text: "
-                    + hasMessageText);
+                    + hasMessageText + " Has last interaction: " + sbn.getPostTime());
         }
         CharSequence sender = getSenderIfGroupConversation(notification, message);
 
         return updatedTile
-                .setNotificationKey(notificationEntry.getSbn().getKey())
+                .setLastInteractionTimestamp(sbn.getPostTime())
+                .setNotificationKey(sbn.getKey())
                 .setNotificationCategory(notification.category)
                 .setNotificationContent(content)
                 .setNotificationSender(sender)

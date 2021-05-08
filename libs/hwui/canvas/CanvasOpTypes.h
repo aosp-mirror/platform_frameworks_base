@@ -43,7 +43,7 @@ enum class CanvasOpType : int8_t {
     DrawRoundRectProperty,
     DrawDoubleRoundRect,
     DrawCircleProperty,
-    DrawRippleProperty,
+    DrawRippleDrawable,
     DrawCircle,
     DrawOval,
     DrawArc,

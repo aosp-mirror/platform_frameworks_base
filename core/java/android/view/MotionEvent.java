@@ -485,6 +485,15 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     public static final int FLAG_CANCELED = 0x20;
 
     /**
+     * This flag indicates that the event will not cause a focus change if it is directed to an
+     * unfocused window, even if it an {@link #ACTION_DOWN}. This is typically used with pointer
+     * gestures to allow the user to direct gestures to an unfocused window without bringing the
+     * window into focus.
+     * @hide
+     */
+    public static final int FLAG_NO_FOCUS_CHANGE = 0x40;
+
+    /**
      * Private flag that indicates when the system has detected that this motion event
      * may be inconsistent with respect to the sequence of previously delivered motion events,
      * such as when a pointer move event is sent but the pointer is not down.
@@ -1567,6 +1576,8 @@ public final class MotionEvent extends InputEvent implements Parcelable {
             int axis, int pointerIndex, int historyPos);
     @FastNative
     private static native void nativeTransform(long nativePtr, Matrix matrix);
+    @FastNative
+    private static native void nativeApplyTransform(long nativePtr, Matrix matrix);
 
     // -------------- @CriticalNative ----------------------
 
@@ -3257,6 +3268,21 @@ public final class MotionEvent extends InputEvent implements Parcelable {
         }
 
         nativeTransform(mNativePtr, matrix);
+    }
+
+    /**
+     * Transforms all of the points in the event directly instead of modifying the event's
+     * internal transform.
+     *
+     * @param matrix The transformation matrix to apply.
+     * @hide
+     */
+    public void applyTransform(Matrix matrix) {
+        if (matrix == null) {
+            throw new IllegalArgumentException("matrix must not be null");
+        }
+
+        nativeApplyTransform(mNativePtr, matrix);
     }
 
     /**

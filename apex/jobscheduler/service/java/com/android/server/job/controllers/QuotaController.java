@@ -1502,13 +1502,14 @@ public final class QuotaController extends StateController {
     /** Schedule a cleanup alarm if necessary and there isn't already one scheduled. */
     @VisibleForTesting
     void maybeScheduleCleanupAlarmLocked() {
-        if (mNextCleanupTimeElapsed > sElapsedRealtimeClock.millis()) {
+        final long nowElapsed = sElapsedRealtimeClock.millis();
+        if (mNextCleanupTimeElapsed > nowElapsed) {
             // There's already an alarm scheduled. Just stick with that one. There's no way we'll
             // end up scheduling an earlier alarm.
             if (DEBUG) {
                 Slog.v(TAG, "Not scheduling cleanup since there's already one at "
-                        + mNextCleanupTimeElapsed + " (in " + (mNextCleanupTimeElapsed
-                        - sElapsedRealtimeClock.millis()) + "ms)");
+                        + mNextCleanupTimeElapsed
+                        + " (in " + (mNextCleanupTimeElapsed - nowElapsed) + "ms)");
             }
             return;
         }
@@ -1530,7 +1531,7 @@ public final class QuotaController extends StateController {
         if (nextCleanupElapsed - mNextCleanupTimeElapsed <= 10 * MINUTE_IN_MILLIS) {
             // No need to clean up too often. Delay the alarm if the next cleanup would be too soon
             // after it.
-            nextCleanupElapsed += 10 * MINUTE_IN_MILLIS;
+            nextCleanupElapsed = mNextCleanupTimeElapsed + 10 * MINUTE_IN_MILLIS;
         }
         mNextCleanupTimeElapsed = nextCleanupElapsed;
         mAlarmManager.set(AlarmManager.ELAPSED_REALTIME, nextCleanupElapsed, ALARM_TAG_CLEANUP,
@@ -2478,30 +2479,60 @@ public final class QuotaController extends StateController {
         }
     }
 
-    private final class DeleteTimingSessionsFunctor implements Consumer<List<TimingSession>> {
-        private final Predicate<TimingSession> mTooOld = new Predicate<TimingSession>() {
-            public boolean test(TimingSession ts) {
-                return ts.endTimeElapsed <= sElapsedRealtimeClock.millis() - MAX_PERIOD_MS;
-            }
-        };
+    private static final class TimingSessionTooOldPredicate implements Predicate<TimingSession> {
+        private long mNowElapsed;
+
+        private void updateNow() {
+            mNowElapsed = sElapsedRealtimeClock.millis();
+        }
 
         @Override
-        public void accept(List<TimingSession> sessions) {
-            if (sessions != null) {
-                // Remove everything older than MAX_PERIOD_MS time ago.
-                sessions.removeIf(mTooOld);
-            }
+        public boolean test(TimingSession ts) {
+            return ts.endTimeElapsed <= mNowElapsed - MAX_PERIOD_MS;
         }
     }
 
-    private final DeleteTimingSessionsFunctor mDeleteOldSessionsFunctor =
-            new DeleteTimingSessionsFunctor();
+    private final TimingSessionTooOldPredicate mTimingSessionTooOld =
+            new TimingSessionTooOldPredicate();
+
+    private final Consumer<List<TimingSession>> mDeleteOldSessionsFunctor = sessions -> {
+        if (sessions != null) {
+            // Remove everything older than MAX_PERIOD_MS time ago.
+            sessions.removeIf(mTimingSessionTooOld);
+        }
+    };
 
     @VisibleForTesting
     void deleteObsoleteSessionsLocked() {
+        mTimingSessionTooOld.updateNow();
+
+        // Regular sessions
         mTimingSessions.forEach(mDeleteOldSessionsFunctor);
-        // Don't delete EJ timing sessions here. They'll be removed in
-        // getRemainingEJExecutionTimeLocked().
+
+        // EJ sessions
+        for (int uIdx = 0; uIdx < mEJTimingSessions.numMaps(); ++uIdx) {
+            final int userId = mEJTimingSessions.keyAt(uIdx);
+            for (int pIdx = 0; pIdx < mEJTimingSessions.numElementsForKey(userId); ++pIdx) {
+                final String packageName = mEJTimingSessions.keyAt(uIdx, pIdx);
+                final ShrinkableDebits debits = getEJDebitsLocked(userId, packageName);
+                final List<TimingSession> sessions = mEJTimingSessions.get(userId, packageName);
+                if (sessions == null) {
+                    continue;
+                }
+
+                while (sessions.size() > 0) {
+                    final TimingSession ts = sessions.get(0);
+                    if (mTimingSessionTooOld.test(ts)) {
+                        // Stale sessions may still be factored into tally. Remove them.
+                        final long duration = ts.endTimeElapsed - ts.startTimeElapsed;
+                        debits.transactLocked(-duration);
+                        sessions.remove(0);
+                    } else {
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     private class QcHandler extends Handler {
