@@ -3036,8 +3036,16 @@ class ContextImpl extends Context {
             }
         }
 
+        final String attributionTag;
+        if (activityInfo.attributionTags != null && activityInfo.attributionTags.length > 0) {
+            attributionTag = activityInfo.attributionTags[0];
+        } else {
+            attributionTag = null;
+        }
+
         ContextImpl context = new ContextImpl(null, mainThread, packageInfo, ContextParams.EMPTY,
-                null, null, activityInfo.splitName, activityToken, null, 0, classLoader, null);
+                attributionTag, null, activityInfo.splitName, activityToken, null, 0, classLoader,
+                null);
         context.mContextType = CONTEXT_TYPE_ACTIVITY;
         context.mIsConfigurationBasedContext = true;
 
