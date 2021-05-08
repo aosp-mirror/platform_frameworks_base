@@ -22005,7 +22005,7 @@ public class PackageManagerService extends IPackageManager.Stub
             pir.addFilter(new PreferredActivity(filter, match, set, activity, always));
             scheduleWritePackageRestrictionsLocked(userId);
         }
-        if (!updateDefaultHomeNotLocked(userId)) {
+        if (!(isHomeFilter(filter) && updateDefaultHomeNotLocked(userId))) {
             postPreferredActivityChangedBroadcast(userId);
         }
     }
@@ -22295,7 +22295,9 @@ public class PackageManagerService extends IPackageManager.Stub
                     new PersistentPreferredActivity(filter, activity, true));
             scheduleWritePackageRestrictionsLocked(userId);
         }
-        updateDefaultHomeNotLocked(userId);
+        if (isHomeFilter(filter)) {
+            updateDefaultHomeNotLocked(userId);
+        }
         postPreferredActivityChangedBroadcast(userId);
     }
 
@@ -22662,6 +22664,11 @@ public class PackageManagerService extends IPackageManager.Stub
         filter.addCategory(Intent.CATEGORY_HOME);
         filter.addCategory(Intent.CATEGORY_DEFAULT);
         return filter;
+    }
+
+    private boolean isHomeFilter(@NonNull IntentFilter filter) {
+        return filter.hasAction(Intent.ACTION_MAIN) && filter.hasCategory(Intent.CATEGORY_HOME)
+                && filter.hasCategory(CATEGORY_DEFAULT);
     }
 
     ComponentName getHomeActivitiesAsUser(List<ResolveInfo> allHomeCandidates,
