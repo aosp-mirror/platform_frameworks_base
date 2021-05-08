@@ -1658,9 +1658,14 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
 
         @Override
-        public void setStatsProviderLimitAsync(@NonNull String iface, long quota) {
-            if (LOGV) Slog.v(TAG, "setStatsProviderLimitAsync(" + iface + "," + quota + ")");
-            invokeForAllStatsProviderCallbacks((cb) -> cb.mProvider.onSetLimit(iface, quota));
+        public void setStatsProviderWarningAndLimitAsync(
+                @NonNull String iface, long warning, long limit) {
+            if (LOGV) {
+                Slog.v(TAG, "setStatsProviderWarningAndLimitAsync("
+                        + iface + "," + warning + "," + limit + ")");
+            }
+            invokeForAllStatsProviderCallbacks((cb) -> cb.mProvider.onSetWarningAndLimit(iface,
+                    warning, limit));
         }
     }
 
@@ -2051,10 +2056,10 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
 
         @Override
-        public void notifyLimitReached() {
-            Log.d(TAG, mTag + ": onLimitReached");
+        public void notifyWarningOrLimitReached() {
+            Log.d(TAG, mTag + ": notifyWarningOrLimitReached");
             LocalServices.getService(NetworkPolicyManagerInternal.class)
-                    .onStatsProviderLimitReached(mTag);
+                    .onStatsProviderWarningOrLimitReached(mTag);
         }
 
         @Override

@@ -630,9 +630,9 @@
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Zum Stummschalten tippen. Bedienungshilfen werden unter Umständen stummgeschaltet."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s. Zum Aktivieren der Vibration tippen."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s. Zum Stummschalten tippen."</string>
-    <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"stummschalten"</string>
-    <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"Stummschaltung aufheben"</string>
-    <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"vibrieren"</string>
+    <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"Stummschalten"</string>
+    <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"Aufheben der Stummschaltung"</string>
+    <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"Vibrieren lassen"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"Lautstärkeregler von %s"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"Gerät klingelt bei Anrufen und Benachrichtigungen (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="output_title" msgid="3938776561655668350">"Medienausgabe"</string>
@@ -819,7 +819,7 @@
     <string name="battery" msgid="769686279459897127">"Akku"</string>
     <string name="clock" msgid="8978017607326790204">"Uhr"</string>
     <string name="headset" msgid="4485892374984466437">"Headset"</string>
-    <string name="accessibility_long_click_tile" msgid="210472753156768705">"Einstellungen öffnen"</string>
+    <string name="accessibility_long_click_tile" msgid="210472753156768705">"Öffnen der Einstellungen"</string>
     <string name="accessibility_status_bar_headphones" msgid="1304082414912647414">"Mit Kopfhörer verbunden"</string>
     <string name="accessibility_status_bar_headset" msgid="2699275863720926104">"Mit Headset verbunden"</string>
     <string name="data_saver" msgid="3484013368530820763">"Datensparmodus"</string>
@@ -1038,8 +1038,8 @@
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Zu Favoriten hinzugefügt"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Zu Favoriten hinzugefügt, Position <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"Aus Favoriten entfernt"</string>
-    <string name="accessibility_control_change_favorite" msgid="2943178027582253261">"Zum Hinzufügen zu Favoriten"</string>
-    <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"Zum Entfernen aus Favoriten"</string>
+    <string name="accessibility_control_change_favorite" msgid="2943178027582253261">"Hinzufügen zu Favoriten"</string>
+    <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"Entfernen aus Favoriten"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Auf Position <xliff:g id="NUMBER">%d</xliff:g> verschieben"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Steuerelemente"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Steuerelemente auswählen, auf die man über das Ein-/Aus-Menü zugreifen kann"</string>

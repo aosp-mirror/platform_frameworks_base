@@ -285,10 +285,10 @@
     <string name="accessibility_quick_settings_bluetooth_connected" msgid="5237625393869747261">"Bluetooth қосылған."</string>
     <string name="accessibility_quick_settings_bluetooth_changed_off" msgid="3344226652293797283">"Bluetooth өшірілді."</string>
     <string name="accessibility_quick_settings_bluetooth_changed_on" msgid="1263282011749437549">"Bluetooth қосылды."</string>
-    <string name="accessibility_quick_settings_location_off" msgid="6122523378294740598">"Орындар туралы есептер өшірулі."</string>
-    <string name="accessibility_quick_settings_location_on" msgid="6869947200325467243">"Орындар туралы есептер қосулы."</string>
-    <string name="accessibility_quick_settings_location_changed_off" msgid="5132776369388699133">"Орындар туралы есептер өшірілді."</string>
-    <string name="accessibility_quick_settings_location_changed_on" msgid="7159115433070112154">"Орындар туралы есептер қосылды."</string>
+    <string name="accessibility_quick_settings_location_off" msgid="6122523378294740598">"Геодерек жіберу функциясы өшірулі."</string>
+    <string name="accessibility_quick_settings_location_on" msgid="6869947200325467243">"Геодерек жіберу функциясы қосулы."</string>
+    <string name="accessibility_quick_settings_location_changed_off" msgid="5132776369388699133">"Геодерек жіберу функциясы өшірілді."</string>
+    <string name="accessibility_quick_settings_location_changed_on" msgid="7159115433070112154">"Геодерек жіберу функциясы қосылды."</string>
     <string name="accessibility_quick_settings_alarm" msgid="558094529584082090">"Дабыл <xliff:g id="TIME">%s</xliff:g> уақытына реттелген."</string>
     <string name="accessibility_quick_settings_close" msgid="2974895537860082341">"Тақтаны жабу."</string>
     <string name="accessibility_quick_settings_more_time" msgid="7646479831704665284">"Көбірек уақыт."</string>
