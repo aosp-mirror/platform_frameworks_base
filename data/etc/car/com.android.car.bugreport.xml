@@ -22,5 +22,6 @@
         <permission name="android.permission.MANAGE_USERS"/>
         <permission name="android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS"/>
         <permission name="android.car.permission.CAR_DRIVING_STATE"/>
+        <permission name="android.car.permission.CONTROL_CAR_CLIMATE"/>
     </privapp-permissions>
   </permissions>
