@@ -15,8 +15,11 @@
   limitations under the License.
   -->
 <resources>
-    <style name="TextAppearance.PreferenceTitle"
+    <style name="TextAppearance.PreferenceTitle.SettingsLib"
            parent="@*android:style/TextAppearance.DeviceDefault.ListItem">
-        <item name="android:textSize">@dimen/preference_title_font_size</item>
+        <item name="android:textSize">20sp</item>
     </style>
+
+    <style name="TextAppearance.CategoryTitle.SettingsLib"
+           parent="@*android:style/TextAppearance.DeviceDefault.Body2" />
 </resources>

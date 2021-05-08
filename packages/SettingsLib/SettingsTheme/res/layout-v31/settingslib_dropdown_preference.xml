@@ -30,6 +30,6 @@
         android:layout_marginLeft="@dimen/preference_dropdown_padding_start"
         android:visibility="invisible" />
 
-    <include layout="@layout/settings_preference" />
+    <include layout="@layout/settingslib_preference" />
 
 </FrameLayout>
