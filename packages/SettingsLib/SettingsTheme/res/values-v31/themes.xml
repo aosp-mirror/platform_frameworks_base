@@ -17,12 +17,20 @@
 
 <resources>
     <!-- Only using in Settings application -->
-    <style name="Theme.SettingsBase" parent="@android:style/Theme.DeviceDefault.Settings" />
+    <style name="Theme.SettingsBase" parent="@android:style/Theme.DeviceDefault.Settings" >
+        <item name="android:textAppearanceListItem">@style/TextAppearance.PreferenceTitle.SettingsLib</item>
+        <item name="android:listPreferredItemPaddingStart">24dp</item>
+        <item name="android:listPreferredItemPaddingEnd">16dp</item>
+        <item name="preferenceTheme">@style/PreferenceTheme.SettingsLib</item>
+    </style>
 
     <!-- Using in SubSettings page including injected settings page -->
     <style name="Theme.SubSettingsBase" parent="Theme.SettingsBase">
         <!-- Suppress the built-in action bar -->
         <item name="android:windowActionBar">false</item>
         <item name="android:windowNoTitle">true</item>
+        <!-- Set up edge-to-edge configuration for top app bar -->
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
     </style>
 </resources>
