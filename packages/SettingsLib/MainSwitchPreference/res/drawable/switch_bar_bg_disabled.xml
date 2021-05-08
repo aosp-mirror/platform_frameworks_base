@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Copyright (C) 2020 The Android Open Source Project
+  Copyright (C) 2021 The Android Open Source Project
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -15,20 +15,12 @@
   limitations under the License.
   -->
 
-<vector
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="13.33dp"
-    android:height="1.67dp"
-    android:viewportWidth="13.33"
-    android:viewportHeight="1.67">
-
-  <group>
-    <clip-path
-        android:pathData="M0 0H13.3333V1.66667H0V0Z" />
-
-    <path
-        android:pathData="M0 0V1.66667H13.3333V0"
-        android:fillColor="@android:color/white" />
-  </group>
-
-</vector>
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="?android:attr/colorControlHighlight">
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/state_off_color"/>
+            <corners android:radius="@dimen/switch_bar_radius"/>
+        </shape>
+    </item>
+</ripple>
