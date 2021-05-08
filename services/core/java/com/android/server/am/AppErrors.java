@@ -32,6 +32,7 @@ import android.app.ActivityOptions;
 import android.app.AnrController;
 import android.app.ApplicationErrorReport;
 import android.app.ApplicationExitInfo;
+import android.app.usage.UsageStatsManager;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
@@ -57,7 +58,9 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.ProcessMap;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
+import com.android.server.LocalServices;
 import com.android.server.PackageWatchdog;
+import com.android.server.usage.AppStandbyInternal;
 import com.android.server.wm.WindowProcessController;
 
 import java.io.FileDescriptor;
@@ -885,6 +888,16 @@ class AppErrors {
                 }
                 errState.setBad(true);
                 app.setRemoved(true);
+                final AppStandbyInternal appStandbyInternal =
+                        LocalServices.getService(AppStandbyInternal.class);
+                if (appStandbyInternal != null) {
+                    appStandbyInternal.restrictApp(
+                            // Sometimes the processName is the same as the package name, so use
+                            // that if we don't have the ApplicationInfo object.
+                            // AppStandbyController will just return if it can't find the app.
+                            app.info != null ? app.info.packageName : processName,
+                            userId, UsageStatsManager.REASON_SUB_FORCED_SYSTEM_FLAG_BUGGY);
+                }
                 // Don't let services in this process be restarted and potentially
                 // annoy the user repeatedly.  Unless it is persistent, since those
                 // processes run critical code.

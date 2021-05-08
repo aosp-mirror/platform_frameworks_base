@@ -17,20 +17,25 @@
 package com.android.systemui.statusbar.events
 
 import android.animation.Animator
-import android.animation.AnimatorListenerAdapter
-import android.animation.ObjectAnimator
 import android.annotation.UiThread
 import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.widget.FrameLayout
 
+import com.android.internal.annotations.GuardedBy
 import com.android.systemui.animation.Interpolators
 import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.phone.StatusBarLocationPublisher
 import com.android.systemui.statusbar.phone.StatusBarMarginUpdatedListener
+import com.android.systemui.util.concurrency.DelayableExecutor
+import com.android.systemui.util.leak.RotationUtils.ROTATION_LANDSCAPE
+import com.android.systemui.util.leak.RotationUtils.ROTATION_NONE
+import com.android.systemui.util.leak.RotationUtils.ROTATION_SEASCAPE
+import com.android.systemui.util.leak.RotationUtils.ROTATION_UPSIDE_DOWN
 
 import java.lang.IllegalStateException
 import java.util.concurrent.Executor
@@ -54,31 +59,33 @@ import javax.inject.Inject
 @SysUISingleton
 class PrivacyDotViewController @Inject constructor(
     @Main private val mainExecutor: Executor,
+    private val stateController: StatusBarStateController,
     private val locationPublisher: StatusBarLocationPublisher,
     private val animationScheduler: SystemStatusAnimationScheduler
 ) {
-    private var rotation = 0
-    private var leftSize = 0
-    private var rightSize = 0
-
     private var sbHeightPortrait = 0
     private var sbHeightLandscape = 0
-
-    private var hasMultipleHeights = false
-    private var needsHeightUpdate = false
-    private var needsRotationUpdate = false
-    private var needsMarginUpdate = false
 
     private lateinit var tl: View
     private lateinit var tr: View
     private lateinit var bl: View
     private lateinit var br: View
 
-    // Track which corner is active (based on orientation + RTL)
-    private var designatedCorner: View? = null
+    // Only can be modified on @UiThread
+    private var currentViewState: ViewState = ViewState()
+
+    @GuardedBy("lock")
+    private var nextViewState: ViewState = currentViewState.copy()
+        set(value) {
+            field = value
+            scheduleUpdate()
+        }
+    private val lock = Object()
+    private var cancelRunnable: Runnable? = null
 
     // Privacy dots are created in ScreenDecoration's UiThread, which is not the main thread
-    private var uiExecutor: Executor? = null
+    private var uiExecutor: DelayableExecutor? = null
+    private var e: DelayableExecutor? = null
 
     private val views: Sequence<View>
         get() = if (!this::tl.isInitialized) sequenceOf() else sequenceOf(tl, tr, br, bl)
@@ -89,29 +96,78 @@ class PrivacyDotViewController @Inject constructor(
                 setStatusBarMargins(marginLeft, marginRight)
             }
         })
+
+        stateController.addCallback(object : StatusBarStateController.StateListener {
+            override fun onExpandedChanged(isExpanded: Boolean) {
+                setStatusBarExpanded(isExpanded)
+            }
+        })
     }
 
-    fun setUiExecutor(e: Executor) {
+    fun setUiExecutor(e: DelayableExecutor) {
         uiExecutor = e
     }
 
     @UiThread
-    fun updateRotation(rot: Int) {
-        dlog("updateRotation: ")
-        if (rot == rotation) {
-            return
+    fun setNewRotation(rot: Int) {
+        dlog("updateRotation: $rot")
+
+        synchronized(lock) {
+            if (rot == nextViewState.rotation) {
+                return
+            }
         }
 
-        // A rotation has started, hide the views to avoid flicker
+        // If we rotated, hide all dotes until the next state resolves
         setCornerVisibilities(View.INVISIBLE)
 
-        if (hasMultipleHeights && (rotation % 2) != (rot % 2)) {
-            // we've changed from vertical to horizontal; update status bar height
-            needsHeightUpdate = true
-        }
+        val newCorner = selectDesignatedCorner(rot)
+        val index = newCorner.cornerIndex()
 
-        rotation = rot
-        needsRotationUpdate = true
+        val h = when (rot) {
+            ROTATION_NONE, ROTATION_UPSIDE_DOWN -> sbHeightPortrait
+            ROTATION_LANDSCAPE, ROTATION_SEASCAPE -> sbHeightLandscape
+            else -> 0
+        }
+        synchronized(lock) {
+            nextViewState = nextViewState.copy(
+                    rotation = rot,
+                    height = h,
+                    designatedCorner = newCorner,
+                    cornerIndex = index)
+        }
+    }
+
+    @UiThread
+    private fun hideDotView(dot: View, animate: Boolean) {
+        dot.clearAnimation()
+        if (animate) {
+            dot.animate()
+                    .setDuration(DURATION)
+                    .setInterpolator(Interpolators.ALPHA_OUT)
+                    .alpha(0f)
+                    .withEndAction { dot.visibility = View.INVISIBLE }
+                    .start()
+        } else {
+            dot.visibility = View.INVISIBLE
+        }
+    }
+
+    @UiThread
+    private fun showDotView(dot: View, animate: Boolean) {
+        dot.clearAnimation()
+        if (animate) {
+            dot.visibility = View.VISIBLE
+            dot.alpha = 0f
+            dot.animate()
+                    .alpha(1f)
+                    .setDuration(DURATION)
+                    .setInterpolator(Interpolators.ALPHA_IN)
+                    .start()
+        } else {
+            dot.visibility = View.VISIBLE
+            dot.alpha = 1f
+        }
     }
 
     @UiThread
@@ -127,14 +183,14 @@ class PrivacyDotViewController @Inject constructor(
 
     // Update the gravity and margins of the privacy views
     @UiThread
-    private fun updateRotations() {
+    private fun updateRotations(rotation: Int) {
         // To keep a view in the corner, its gravity is always the description of its current corner
         // Therefore, just figure out which view is in which corner. This turns out to be something
         // like (myCorner - rot) mod 4, where topLeft = 0, topRight = 1, etc. and portrait = 0, and
         // rotating the device counter-clockwise increments rotation by 1
 
         views.forEach { corner ->
-            val rotatedCorner = rotatedCorner(cornerForView(corner))
+            val rotatedCorner = rotatedCorner(cornerForView(corner), rotation)
             (corner.layoutParams as FrameLayout.LayoutParams).apply {
                 gravity = rotatedCorner.toGravity()
             }
@@ -147,26 +203,24 @@ class PrivacyDotViewController @Inject constructor(
     }
 
     @UiThread
-    private fun updateCornerSizes() {
+    private fun updateCornerSizes(l: Int, r: Int, rotation: Int) {
         views.forEach { corner ->
-            val rotatedCorner = rotatedCorner(cornerForView(corner))
-            val w = widthForCorner(rotatedCorner)
-            Log.d(TAG, "updateCornerSizes: setting (${cornerForView(corner)}) to $w")
+            val rotatedCorner = rotatedCorner(cornerForView(corner), rotation)
+            val w = widthForCorner(rotatedCorner, l, r)
             (corner.layoutParams as FrameLayout.LayoutParams).width = w
-            corner.requestLayout()
         }
     }
 
     // Designated view will be the one at statusbar's view.END
     @UiThread
-    private fun selectDesignatedCorner(): View? {
+    private fun selectDesignatedCorner(r: Int): View? {
         if (!this::tl.isInitialized) {
             return null
         }
 
         val isRtl = tl.isLayoutRtl
 
-        return when (rotation) {
+        return when (r) {
             0 -> if (isRtl) tl else tr
             1 -> if (isRtl) tr else br
             2 -> if (isRtl) br else bl
@@ -177,23 +231,17 @@ class PrivacyDotViewController @Inject constructor(
 
     // Track the current designated corner and maybe animate to a new rotation
     @UiThread
-    private fun updateDesignatedCorner(newCorner: View) {
-        designatedCorner = newCorner
-
-        if (animationScheduler.hasPersistentDot) {
-            fadeInDot()
-        }
-    }
-
-    @UiThread
-    private fun fadeInDot() {
-        designatedCorner?.let { dot ->
-            dot.visibility = View.VISIBLE
-            dot.alpha = 0f
-            dot.animate()
-                .alpha(1.0f)
-                .setDuration(300)
-                .start()
+    private fun updateDesignatedCorner(newCorner: View?, shouldShowDot: Boolean) {
+        if (shouldShowDot) {
+            newCorner?.apply {
+                clearAnimation()
+                visibility = View.VISIBLE
+                alpha = 0f
+                animate()
+                    .alpha(1.0f)
+                    .setDuration(300)
+                    .start()
+            }
         }
     }
 
@@ -214,7 +262,7 @@ class PrivacyDotViewController @Inject constructor(
         }
     }
 
-    private fun rotatedCorner(corner: Int): Int {
+    private fun rotatedCorner(corner: Int, rotation: Int): Int {
         var modded = corner - rotation
         if (modded < 0) {
             modded += 4
@@ -223,10 +271,10 @@ class PrivacyDotViewController @Inject constructor(
         return modded
     }
 
-    private fun widthForCorner(corner: Int): Int {
+    private fun widthForCorner(corner: Int, left: Int, right: Int): Int {
         return when (corner) {
-            TOP_LEFT, BOTTOM_LEFT -> leftSize
-            TOP_RIGHT, BOTTOM_RIGHT -> rightSize
+            TOP_LEFT, BOTTOM_LEFT -> left
+            TOP_RIGHT, BOTTOM_RIGHT -> right
             else -> throw IllegalArgumentException("Unknown corner")
         }
     }
@@ -244,9 +292,15 @@ class PrivacyDotViewController @Inject constructor(
         bl = bottomLeft
         br = bottomRight
 
-        designatedCorner = selectDesignatedCorner()
+        val dc = selectDesignatedCorner(0)
+        val index = dc.cornerIndex()
+
         mainExecutor.execute {
             animationScheduler.addCallback(systemStatusAnimationCallback)
+        }
+
+        synchronized(lock) {
+            nextViewState = nextViewState.copy(designatedCorner = dc, cornerIndex = index)
         }
     }
 
@@ -257,8 +311,6 @@ class PrivacyDotViewController @Inject constructor(
     fun setStatusBarHeights(portrait: Int, landscape: Int) {
         sbHeightPortrait = portrait
         sbHeightLandscape = landscape
-
-        hasMultipleHeights = portrait != landscape
     }
 
     /**
@@ -268,84 +320,108 @@ class PrivacyDotViewController @Inject constructor(
      * @param right space between the status bar contents and the right side of the screen
      */
     private fun setStatusBarMargins(left: Int, right: Int) {
-        leftSize = left
-        rightSize = right
-
-        needsMarginUpdate = true
-
-        // Margins come after PhoneStatusBarView does a layout pass, and so will always happen
-        // after rotation changes. It is safe to execute the updates from here
-        uiExecutor?.execute {
-            doUpdates(needsRotationUpdate, needsHeightUpdate, needsMarginUpdate)
+        dlog("setStatusBarMargins l=$left r=$right")
+        synchronized(lock) {
+            nextViewState = nextViewState.copy(marginLeft = left, marginRight = right)
         }
     }
 
-    private fun doUpdates(rot: Boolean, height: Boolean, width: Boolean) {
-        dlog("doUpdates: ")
-        var newDesignatedCorner: View? = null
+    /**
+     *  We won't show the dot when quick settings is showing
+     */
+    private fun setStatusBarExpanded(expanded: Boolean) {
+        synchronized(lock) {
+            nextViewState = nextViewState.copy(hideDotForQuickSettings = expanded)
+        }
+    }
 
-        if (rot) {
-            needsRotationUpdate = false
-            updateRotations()
-            newDesignatedCorner = selectDesignatedCorner()
+    private fun scheduleUpdate() {
+        dlog("scheduleUpdate: ")
+
+        cancelRunnable?.run()
+        cancelRunnable = uiExecutor?.executeDelayed({
+            processNextViewState()
+        }, 100)
+    }
+
+    @UiThread
+    private fun processNextViewState() {
+        dlog("processNextViewState: ")
+
+        val newState: ViewState
+        synchronized(lock) {
+            newState = nextViewState.copy()
         }
 
-        if (height) {
-            needsHeightUpdate = false
-            updateHeights(rotation)
+        resolveState(newState)
+    }
+
+    @UiThread
+    private fun resolveState(state: ViewState) {
+        dlog("resolveState $state")
+        if (state == currentViewState) {
+            dlog("resolveState: skipping")
+            return
         }
 
-        if (width) {
-            needsMarginUpdate = false
-            updateCornerSizes()
+        if (state.rotation != currentViewState.rotation) {
+            // A rotation has started, hide the views to avoid flicker
+            updateRotations(state.rotation)
         }
 
-        if (newDesignatedCorner != null && newDesignatedCorner != designatedCorner) {
-            updateDesignatedCorner(newDesignatedCorner)
+        if (state.height != currentViewState.height) {
+            updateHeights(state.rotation)
         }
+
+        if (state.marginLeft != currentViewState.marginLeft ||
+                state.marginRight != currentViewState.marginRight) {
+            updateCornerSizes(state.marginLeft, state.marginRight, state.rotation)
+        }
+
+        if (state.designatedCorner != currentViewState.designatedCorner) {
+            updateDesignatedCorner(state.designatedCorner, state.shouldShowDot())
+        }
+
+        if (state.needsLayout(currentViewState)) {
+            views.forEach { it.requestLayout() }
+        }
+
+        val shouldShow = state.shouldShowDot()
+        if (shouldShow != currentViewState.shouldShowDot()) {
+            if (shouldShow && state.designatedCorner != null) {
+                showDotView(state.designatedCorner, true)
+            } else if (!shouldShow && state.designatedCorner != null) {
+                hideDotView(state.designatedCorner, true)
+            }
+        }
+
+        currentViewState = state
     }
 
     private val systemStatusAnimationCallback: SystemStatusAnimationCallback =
             object : SystemStatusAnimationCallback {
-        override fun onSystemStatusAnimationTransitionToPersistentDot(
-            showAnimation: Boolean
-        ): Animator? {
-            if (designatedCorner == null) {
-                return null
-            } else if (!showAnimation) {
-                uiExecutor?.execute { fadeInDot() }
-                return null
+        override fun onSystemStatusAnimationTransitionToPersistentDot(): Animator? {
+            synchronized(lock) {
+                nextViewState = nextViewState.copy(systemPrivacyEventIsActive = true)
             }
 
-            val alpha = ObjectAnimator.ofFloat(
-                    designatedCorner, "alpha", 0f, 1f)
-            alpha.duration = DURATION
-            alpha.interpolator = Interpolators.ALPHA_OUT
-            alpha.addListener(object : AnimatorListenerAdapter() {
-                override fun onAnimationStart(animator: Animator) {
-                    uiExecutor?.execute { designatedCorner?.visibility = View.VISIBLE }
-                }
-            })
-            return alpha
+            return null
         }
 
         override fun onHidePersistentDot(): Animator? {
-            if (designatedCorner == null) {
-                return null
+            synchronized(lock) {
+                nextViewState = nextViewState.copy(systemPrivacyEventIsActive = false)
             }
 
-            val alpha = ObjectAnimator.ofFloat(
-                    designatedCorner, "alpha", 1f, 0f)
-            alpha.duration = DURATION
-            alpha.interpolator = Interpolators.ALPHA_OUT
-            alpha.addListener(object : AnimatorListenerAdapter() {
-                override fun onAnimationEnd(animator: Animator) {
-                    uiExecutor?.execute { designatedCorner?.visibility = View.INVISIBLE }
-                }
-            })
-            alpha.start()
             return null
         }
+    }
+
+    private fun View?.cornerIndex(): Int {
+        if (this != null) {
+            return cornerForView(this)
+        }
+        return -1
     }
 }
 
@@ -380,5 +456,28 @@ private fun Int.innerGravity(): Int {
         BOTTOM_LEFT -> Gravity.CENTER_VERTICAL or Gravity.RIGHT
         BOTTOM_RIGHT -> Gravity.CENTER_VERTICAL or Gravity.LEFT
         else -> throw IllegalArgumentException("Not a corner")
+    }
+}
+
+private data class ViewState(
+    // don't @ me with names
+    val systemPrivacyEventIsActive: Boolean = false,
+    val hideDotForQuickSettings: Boolean = false,
+    val statusBarExpanded: Boolean = false,
+    val rotation: Int = 0,
+    val height: Int = 0,
+    val marginLeft: Int = 0,
+    val marginRight: Int = 0,
+    val cornerIndex: Int = -1,
+    val designatedCorner: View? = null
+) {
+    fun shouldShowDot(): Boolean {
+        return systemPrivacyEventIsActive && !hideDotForQuickSettings
+    }
+
+    fun needsLayout(other: ViewState): Boolean {
+        return rotation != other.rotation ||
+                marginRight != other.marginRight ||
+                height != other.height
     }
 }

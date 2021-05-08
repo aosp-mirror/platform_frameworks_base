@@ -466,7 +466,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         final PowerManagerInternal powerMgr = LocalServices.getService(PowerManagerInternal.class);
         powerMgr.registerLowPowerModeObserver(this);
         synchronized (mStats) {
-            mStats.notePowerSaveModeLocked(
+            mStats.notePowerSaveModeLockedInit(
                     powerMgr.getLowPowerState(ServiceType.BATTERY_STATS).batterySaverEnabled,
                     SystemClock.elapsedRealtime(), SystemClock.uptimeMillis());
         }

@@ -289,9 +289,11 @@
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"モバイルアクセスポイントをOFFにしました。"</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"モバイルアクセスポイントをONにしました。"</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"画面のキャストが停止しました。"</string>
-    <string name="accessibility_quick_settings_work_mode_off" msgid="562749867895549696">"Work モードがオフです。"</string>
+    <!-- no translation found for accessibility_quick_settings_work_mode_off (9106217884005620744) -->
+    <skip />
     <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"Work モードがオンです。"</string>
-    <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6256690740556798683">"Work モードをオフにしました。"</string>
+    <!-- no translation found for accessibility_quick_settings_work_mode_changed_off (2653550342355027441) -->
+    <skip />
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"Work モードをオンにしました。"</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"データセーバーが OFF になりました。"</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"データセーバーが ON になりました。"</string>
@@ -410,6 +412,8 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"上限: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"警告: 上限は<xliff:g id="DATA_LIMIT">%s</xliff:g>です"</string>
     <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"仕事用プロファイル"</string>
+    <!-- no translation found for quick_settings_work_mode_paused (4841109346916998613) -->
+    <skip />
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"夜間モード"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"日の入りに ON"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"日の出まで"</string>
@@ -668,10 +672,12 @@
     <string name="wallet_title" msgid="5369767670735827105">"ウォレット"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"すべて表示"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"ロックを解除して支払う"</string>
-    <string name="wallet_secondary_label_active" msgid="4909706168969888137">"準備完了"</string>
-    <string name="wallet_secondary_label_no_card" msgid="1750103386908123401">"お支払いの設定"</string>
+    <!-- no translation found for wallet_secondary_label_no_card (1282609666895946317) -->
+    <skip />
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"ロックを解除して使用"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"カードの取得中に問題が発生しました。しばらくしてからもう一度お試しください"</string>
+    <!-- no translation found for wallet_lockscreen_settings_label (3539105300870383570) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"仕事用プロファイル"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"機内モード"</string>
     <string name="add_tile" msgid="6239678623873086686">"タイルを追加"</string>
@@ -740,9 +746,12 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;ステータス:&lt;/b&gt; ランクがサイレントに下がりました"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;ステータス:&lt;/b&gt; ランクが上がりました"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;ステータス:&lt;/b&gt; ランクが下がりました"</string>
-    <string name="notification_channel_summary_priority" msgid="4592979359953954258">"優先モードが ON の場合でも、常に通知の一番上に表示されます"</string>
+    <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"会話通知の一番上に表示されると同時に、ロック画面にプロフィール写真として表示されます"</string>
+    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"会話通知の一番上に表示されると同時に、ロック画面にプロフィール写真として表示されるほか、バブルとして表示されます"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"会話通知の一番上に表示されると同時に、ロック画面にプロフィール写真として表示され、サイレント モードが中断されます"</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"会話通知の一番上に表示されると同時に、ロック画面にプロフィール写真として表示されるほか、バブルとして表示され、サイレント モードが中断されます"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"設定"</string>
-    <string name="notification_priority_title" msgid="5256226572739882190">"優先度の高い会話"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"優先"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g>は会話機能に対応していません"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"これらの通知は変更できません。"</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"このグループの通知はここでは設定できません"</string>
@@ -858,6 +867,8 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"ON"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"OFF"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"使用不可"</string>
+    <!-- no translation found for tile_disabled (373212051546573069) -->
+    <skip />
     <string name="nav_bar" msgid="4642708685386136807">"ナビゲーション バー"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"レイアウト"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"その他の左ボタンタイプ"</string>
@@ -1016,14 +1027,6 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"システム ナビゲーションを更新しました。変更するには [設定] に移動してください。"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"システム ナビゲーションを更新するには [設定] に移動してください"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"スタンバイ"</string>
-    <string name="priority_onboarding_title" msgid="2893070698479227616">"優先度を高く設定された会話"</string>
-    <string name="priority_onboarding_behavior" msgid="636826237468953117">"優先度の高い会話"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="3861580571311518785">"優先モードが ON の場合、これらの会話はリストの一番上に表示されるのでいつでも確認できます"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="1781653813573865071">"プロフィール写真がロック画面に表示されます"</string>
-    <string name="priority_onboarding_appear_as_bubble_text" msgid="4359924720680083057">"これらの会話はホーム画面のバブル内で簡単に確認できます"</string>
-    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"サイレント モードが ON でも表示"</string>
-    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"OK"</string>
-    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"設定"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"拡大ウィンドウ"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"拡大ウィンドウ コントロール"</string>
     <string name="accessibility_control_zoom_in" msgid="1189272315480097417">"拡大"</string>
@@ -1044,8 +1047,7 @@
     <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"右下に移動"</string>
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"端に移動して非表示"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"端から移動して表示"</string>
-    <!-- no translation found for accessibility_floating_button_action_double_tap_to_toggle (7976492639670692037) -->
-    <skip />
+    <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"切り替え"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"デバイス コントロール"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"コネクテッド デバイスのコントロールを追加します"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"デバイス コントロールの設定"</string>
@@ -1092,8 +1094,7 @@
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"閉じる"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"再開"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"設定"</string>
-    <!-- no translation found for controls_media_smartspace_rec_title (1699818353932537407) -->
-    <skip />
+    <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"再生"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"無効: アプリをご確認ください"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"エラー。再試行しています…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"見つかりませんでした"</string>

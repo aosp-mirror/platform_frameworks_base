@@ -485,7 +485,7 @@ metalava_framework_docs_args = "--manifest $(location core/res/AndroidManifest.x
     "--api-lint-ignore-prefix org. "
 
 filegroup {
-    name: "framework-non-updatable-stub-sources",
+    name: "android-non-updatable-stub-sources",
     srcs: [
         ":framework-mime-sources", // mimemap builds separately but has no separate droidstubs.
         ":framework-non-updatable-sources",
@@ -495,6 +495,63 @@ filegroup {
         "**/package.html",
     ],
     visibility: ["//visibility:private"],
+}
+
+// These defaults are used for both the jar stubs and the doc stubs.
+stubs_defaults {
+    name: "android-non-updatable-stubs-defaults",
+    srcs: [":android-non-updatable-stub-sources"],
+    sdk_version: "none",
+    system_modules: "none",
+    java_version: "1.8",
+    arg_files: ["core/res/AndroidManifest.xml"],
+    // TODO(b/147699819): remove below aidl includes.
+    aidl: {
+        local_include_dirs: [
+            "apex/media/aidl/stable",
+            "media/aidl",
+            // TODO: move to include-dirs for packages/modules/Connectivity when this moves out of
+            // frameworks/base
+            "packages/Connectivity/framework/aidl-export",
+            "telephony/java",
+        ],
+        include_dirs: ["frameworks/av/aidl"],
+    },
+    // These are libs from framework-internal-utils that are required (i.e. being referenced)
+    // from framework-non-updatable-sources. Add more here when there's a need.
+    // DO NOT add the entire framework-internal-utils. It might cause unnecessary circular
+    // dependencies gets bigger.
+    libs: [
+        "android.hardware.cas-V1.2-java",
+        "android.hardware.health-V1.0-java-constants",
+        "android.hardware.radio-V1.5-java",
+        "android.hardware.radio-V1.6-java",
+        "android.hardware.thermal-V1.0-java-constants",
+        "android.hardware.thermal-V2.0-java",
+        "android.hardware.tv.input-V1.0-java-constants",
+        "android.hardware.tv.tuner-V1.0-java-constants",
+        "android.hardware.tv.tuner-V1.1-java-constants",
+        "android.hardware.usb-V1.0-java-constants",
+        "android.hardware.usb-V1.1-java-constants",
+        "android.hardware.usb.gadget-V1.0-java",
+        "android.hardware.vibrator-V1.3-java",
+        "framework-protos",
+        "stable.core.platform.api.stubs",
+        // There are a few classes from modules used by the core that
+        // need to be resolved by metalava. We use a prebuilt stub of the
+        // full sdk to ensure we can resolve them. If a new class gets added,
+        // the prebuilts/sdk/current needs to be updated.
+        "sdk_system_current_android",
+        // NOTE: The below can be removed once the prebuilt stub contains IKE.
+        "sdk_system_current_android.net.ipsec.ike",
+    ],
+    high_mem: true, // Lots of sources => high memory use, see b/170701554
+    installable: false,
+    annotations_enabled: true,
+    previous_api: ":android.api.public.latest",
+    merge_annotations_dirs: ["metalava-manual"],
+    defaults_visibility: ["//visibility:private"],
+    visibility: ["//frameworks/base/api"],
 }
 
 build = [

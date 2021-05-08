@@ -5067,6 +5067,23 @@ public class BatteryStatsImpl extends BatteryStats {
         notePowerSaveModeLocked(enabled, mClocks.elapsedRealtime(), mClocks.uptimeMillis());
     }
 
+    /**
+     * Toggles the power save mode state.
+     */
+    public void notePowerSaveModeLockedInit(boolean enabled, long elapsedRealtimeMs,
+            long uptimeMs) {
+        if (mPowerSaveModeEnabled != enabled) {
+            notePowerSaveModeLocked(enabled, elapsedRealtimeMs, uptimeMs);
+        } else {
+            // Log an initial value for BATTERY_SAVER_MODE_STATE_CHANGED in order to
+            // allow the atom to read all future state changes.
+            FrameworkStatsLog.write(FrameworkStatsLog.BATTERY_SAVER_MODE_STATE_CHANGED,
+                    enabled
+                        ? FrameworkStatsLog.BATTERY_SAVER_MODE_STATE_CHANGED__STATE__ON
+                        : FrameworkStatsLog.BATTERY_SAVER_MODE_STATE_CHANGED__STATE__OFF);
+        }
+    }
+
     public void notePowerSaveModeLocked(boolean enabled, long elapsedRealtimeMs, long uptimeMs) {
         if (mPowerSaveModeEnabled != enabled) {
             int stepState = enabled ? STEP_LEVEL_MODE_POWER_SAVE : 0;

@@ -19,7 +19,6 @@ package android.widget;
 import static android.content.ContentResolver.SCHEME_CONTENT;
 import static android.view.ContentInfo.FLAG_CONVERT_TO_PLAIN_TEXT;
 import static android.view.ContentInfo.SOURCE_AUTOFILL;
-import static android.view.ContentInfo.SOURCE_DRAG_AND_DROP;
 import static android.view.ContentInfo.SOURCE_INPUT_METHOD;
 
 import android.annotation.NonNull;
@@ -82,10 +81,6 @@ public final class TextViewOnReceiveContentListener implements OnReceiveContentL
             onReceiveForAutofill((TextView) view, payload);
             return null;
         }
-        if (source == SOURCE_DRAG_AND_DROP) {
-            onReceiveForDragAndDrop((TextView) view, payload);
-            return null;
-        }
 
         // The code here follows the original paste logic from TextView:
         // https://cs.android.com/android/_/android/platform/frameworks/base/+/9fefb65aa9e7beae9ca8306b925b9fbfaeffecc9:core/java/android/widget/TextView.java;l=12644
@@ -145,13 +140,6 @@ public final class TextViewOnReceiveContentListener implements OnReceiveContentL
         // ...then move cursor to the end.
         final Editable editable = (Editable) view.getText();
         Selection.setSelection(editable, editable.length());
-    }
-
-    private static void onReceiveForDragAndDrop(@NonNull TextView view,
-            @NonNull ContentInfo payload) {
-        final CharSequence text = coerceToText(payload.getClip(), view.getContext(),
-                payload.getFlags());
-        replaceSelection((Editable) view.getText(), text);
     }
 
     private static @NonNull CharSequence coerceToText(@NonNull ClipData clip,

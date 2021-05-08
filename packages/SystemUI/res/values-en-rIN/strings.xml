@@ -289,9 +289,11 @@
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"Mobile hotspot turned off."</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"Mobile hotspot turned on."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"Screen casting stopped."</string>
-    <string name="accessibility_quick_settings_work_mode_off" msgid="562749867895549696">"Work mode off."</string>
+    <!-- no translation found for accessibility_quick_settings_work_mode_off (9106217884005620744) -->
+    <skip />
     <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"Work mode on."</string>
-    <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6256690740556798683">"Work mode turned off."</string>
+    <!-- no translation found for accessibility_quick_settings_work_mode_changed_off (2653550342355027441) -->
+    <skip />
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"Work mode turned on."</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"Data Saver turned off."</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"Data Saver turned on."</string>
@@ -410,6 +412,8 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"<xliff:g id="DATA_LIMIT">%s</xliff:g> limit"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"<xliff:g id="DATA_LIMIT">%s</xliff:g> warning"</string>
     <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"Work profile"</string>
+    <!-- no translation found for quick_settings_work_mode_paused (4841109346916998613) -->
+    <skip />
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Night Light"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"On at sunset"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Until sunrise"</string>
@@ -668,10 +672,12 @@
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Show all"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Unlock to pay"</string>
-    <string name="wallet_secondary_label_active" msgid="4909706168969888137">"Ready"</string>
-    <string name="wallet_secondary_label_no_card" msgid="1750103386908123401">"Set up payment"</string>
+    <!-- no translation found for wallet_secondary_label_no_card (1282609666895946317) -->
+    <skip />
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Unlock to use"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"There was a problem getting your cards. Please try again later."</string>
+    <!-- no translation found for wallet_lockscreen_settings_label (3539105300870383570) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"Work profile"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Aeroplane mode"</string>
     <string name="add_tile" msgid="6239678623873086686">"Add tile"</string>
@@ -740,9 +746,12 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Status:&lt;/b&gt; demoted to silent"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Status:&lt;/b&gt; ranked higher"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Status:&lt;/b&gt; ranked lower"</string>
-    <string name="notification_channel_summary_priority" msgid="4592979359953954258">"Always shown at the top of your notifications, even when priority mode is on"</string>
+    <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Shows at the top of conversation notifications and as a profile picture on lock screen"</string>
+    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Shows at the top of conversation notifications and as a profile picture on lock screen, appears as a bubble"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Shows at the top of conversation notifications and as a profile picture on lock screen, interrupts Do Not Disturb"</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Shows at the top of conversation notifications and as a profile picture on lock screen, appears as a bubble, interrupts Do Not Disturb"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Settings"</string>
-    <string name="notification_priority_title" msgid="5256226572739882190">"Priority conversations"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"Priority"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> doesn’t support conversation features"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"These notifications can\'t be modified."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"This group of notifications cannot be configured here"</string>
@@ -858,6 +867,8 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"On"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"Off"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"Unavailable"</string>
+    <!-- no translation found for tile_disabled (373212051546573069) -->
+    <skip />
     <string name="nav_bar" msgid="4642708685386136807">"Navigation bar"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"Layout"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"Extra left button type"</string>
@@ -1016,14 +1027,6 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"System navigation updated. To make changes, go to Settings."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Go to Settings to update system navigation"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Standby"</string>
-    <string name="priority_onboarding_title" msgid="2893070698479227616">"Conversation set to priority"</string>
-    <string name="priority_onboarding_behavior" msgid="636826237468953117">"Priority conversations"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="3861580571311518785">"These conversations are shown at the top of your list and can always reach you when priority mode is on"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="1781653813573865071">"Profile pictures are shown on the lock screen"</string>
-    <string name="priority_onboarding_appear_as_bubble_text" msgid="4359924720680083057">"You can easily find these conversations in bubbles on your Home screen"</string>
-    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Interrupt Do Not Disturb"</string>
-    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"OK"</string>
-    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Settings"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Magnification window"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Magnification window controls"</string>
     <string name="accessibility_control_zoom_in" msgid="1189272315480097417">"Zoom in"</string>

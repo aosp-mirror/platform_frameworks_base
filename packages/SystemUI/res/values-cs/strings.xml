@@ -289,9 +289,11 @@
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"Mobile hotspot je vypnutý."</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"Mobile hotspot je zapnutý."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"Odesílání obrazovky zastaveno."</string>
-    <string name="accessibility_quick_settings_work_mode_off" msgid="562749867895549696">"Pracovní režim vypnutý"</string>
+    <!-- no translation found for accessibility_quick_settings_work_mode_off (9106217884005620744) -->
+    <skip />
     <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"Pracovní režim zapnutý"</string>
-    <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6256690740556798683">"Pracovní režim je vypnutý."</string>
+    <!-- no translation found for accessibility_quick_settings_work_mode_changed_off (2653550342355027441) -->
+    <skip />
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"Pracovní režim je zapnutý."</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"Spořič dat byl vypnut."</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"Spořič dat byl zapnut."</string>
@@ -414,6 +416,8 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"Limit: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"Upozornění při <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"Pracovní profil"</string>
+    <!-- no translation found for quick_settings_work_mode_paused (4841109346916998613) -->
+    <skip />
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Noční režim"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Při soumraku"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Do svítání"</string>
@@ -561,7 +565,7 @@
     <string name="monitoring_button_view_controls" msgid="8316440345340701117">"Zobrazit ovládací prvky"</string>
     <string name="monitoring_description_named_management" msgid="505833016545056036">"Toto zařízení patří organizaci <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nVáš administrátor IT může sledovat a spravovat nastavení, firemní přístup, aplikace, data přidružená k tomuto zařízení a jeho polohu.\n\nDalší informace vám poskytne váš administrátor IT."</string>
     <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"<xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g> má přístup k datům spojeným s tímto zařízením, může měnit jeho nastavení a spravovat aplikace.\n\nPokud máte nějaké otázky, obraťte se na organizaci <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g>."</string>
-    <string name="monitoring_description_management" msgid="4308879039175729014">"Toto zařízení patří vaší organizaci\n\nVáš administrátor IT může sledovat a spravovat nastavení, firemní přístup, aplikace, data přidružená k tomuto zařízení a jeho polohu.\n\nDalší informace vám poskytne váš administrátor IT."</string>
+    <string name="monitoring_description_management" msgid="4308879039175729014">"Toto zařízení patří vaší organizaci.\n\nVáš administrátor IT může sledovat a spravovat nastavení, firemní přístup, aplikace, data přidružená k tomuto zařízení a jeho polohu.\n\nDalší informace vám poskytne administrátor IT."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Organizace do tohoto zařízení nainstalovala certifikační autoritu. Zabezpečený síťový provoz může být sledován nebo upravován."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Organizace do vašeho pracovního profilu nainstalovala certifikační autoritu. Zabezpečený síťový provoz může být sledován nebo upravován."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"V zařízení je nainstalována certifikační autorita. Zabezpečený síťový provoz může být sledován nebo upravován."</string>
@@ -674,10 +678,12 @@
     <string name="wallet_title" msgid="5369767670735827105">"Peněženka"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Zobrazit vše"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Odemknout a zaplatit"</string>
-    <string name="wallet_secondary_label_active" msgid="4909706168969888137">"Připraveno"</string>
-    <string name="wallet_secondary_label_no_card" msgid="1750103386908123401">"Nastavit platbu"</string>
+    <!-- no translation found for wallet_secondary_label_no_card (1282609666895946317) -->
+    <skip />
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Odemknout a použít"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Při načítání karet došlo k problému, zkuste to později"</string>
+    <!-- no translation found for wallet_lockscreen_settings_label (3539105300870383570) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"Pracovní profil"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Režim Letadlo"</string>
     <string name="add_tile" msgid="6239678623873086686">"Přidat dlaždici"</string>
@@ -746,9 +752,12 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Stav:&lt;/b&gt; priorita snížena na Tiché"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Stav:&lt;/b&gt; zařazeno výše"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Stav:&lt;/b&gt; zařazeno níže"</string>
-    <string name="notification_channel_summary_priority" msgid="4592979359953954258">"Vždy se zobrazuje na začátku vašich oznámení (i když je zapnutý prioritní režim)"</string>
+    <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Zobrazuje se v horní části oznámení konverzace a jako profilový obrázek na obrazovce uzamčení"</string>
+    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Zobrazuje se v horní části oznámení konverzace a jako profilový obrázek na obrazovce uzamčení, má podobu bubliny"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Zobrazuje se v horní části oznámení konverzace a jako profilový obrázek na obrazovce uzamčení, deaktivuje režim Nerušit"</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Zobrazuje se v horní části oznámení konverzace a jako profilový obrázek na obrazovce uzamčení, má podobu bubliny a deaktivuje režim Nerušit"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Nastavení"</string>
-    <string name="notification_priority_title" msgid="5256226572739882190">"Prioritní konverzace"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"Priorita"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"Aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> funkce konverzace nepodporuje"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Tato oznámení nelze upravit."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Tuto skupinu oznámení tady nelze nakonfigurovat"</string>
@@ -868,6 +877,8 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"Zapnuto"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"Vypnuto"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"Nedostupné"</string>
+    <!-- no translation found for tile_disabled (373212051546573069) -->
+    <skip />
     <string name="nav_bar" msgid="4642708685386136807">"Navigační panel"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"Rozvržení"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"Zvláštní typ tlačítka vlevo"</string>
@@ -1026,14 +1037,6 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Systémová navigace byla aktualizována. Chcete-li provést změny, přejděte do Nastavení."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Přejděte do Nastavení a aktualizujte systémovou navigaci"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Pohotovostní režim"</string>
-    <string name="priority_onboarding_title" msgid="2893070698479227616">"Konverzace byla nastavena jako prioritní"</string>
-    <string name="priority_onboarding_behavior" msgid="636826237468953117">"Prioritní konverzace"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="3861580571311518785">"Tyto konverzace se zařazují na začátek seznamu, a když je zapnutý prioritní režim, mohou se vám vždy zobrazit"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="1781653813573865071">"Na obrazovce uzamčení se zobrazují profilové obrázky"</string>
-    <string name="priority_onboarding_appear_as_bubble_text" msgid="4359924720680083057">"Tyto konverzace snadno najdete v bublinách na ploše"</string>
-    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Přerušit režim Nerušit"</string>
-    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Rozumím"</string>
-    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Nastavení"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Zvětšovací okno"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Ovládací prvky zvětšovacího okna"</string>
     <string name="accessibility_control_zoom_in" msgid="1189272315480097417">"Přiblížit"</string>
@@ -1054,8 +1057,7 @@
     <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"Přesunout vpravo dolů"</string>
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Přesunout k okraji a skrýt"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Přesunout okraj ven a zobrazit"</string>
-    <!-- no translation found for accessibility_floating_button_action_double_tap_to_toggle (7976492639670692037) -->
-    <skip />
+    <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"přepnout"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Ovládání zařízení"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Přidejte si ovládací prvky pro připojená zařízení"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"Nastavení ovládání zařízení"</string>
@@ -1104,8 +1106,7 @@
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Zavřít"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Pokračovat"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Nastavení"</string>
-    <!-- no translation found for controls_media_smartspace_rec_title (1699818353932537407) -->
-    <skip />
+    <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"Přehrát"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Neaktivní, zkontrolujte aplikaci"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Chyba. Nový pokus…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Nenalezeno"</string>
