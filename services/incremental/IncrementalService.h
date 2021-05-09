@@ -340,6 +340,7 @@ private:
 
         mutable std::mutex lock;
         const std::string root;
+        const std::string metricsKey;
         Control control;
         /*const*/ MountId mountId;
         int32_t flags = StorageFlags::ReadLogsAllowed;
@@ -350,9 +351,10 @@ private:
         std::atomic<int> nextStorageDirNo{0};
         const IncrementalService& incrementalService;
 
-        IncFsMount(std::string root, MountId mountId, Control control,
+        IncFsMount(std::string root, std::string metricsKey, MountId mountId, Control control,
                    const IncrementalService& incrementalService)
               : root(std::move(root)),
+                metricsKey(std::move(metricsKey)),
                 control(std::move(control)),
                 mountId(mountId),
                 incrementalService(incrementalService) {}
