@@ -21,6 +21,7 @@ import static android.graphics.Matrix.MSCALE_Y;
 import static android.graphics.Matrix.MSKEW_X;
 import static android.graphics.Matrix.MSKEW_Y;
 import static android.view.View.SYSTEM_UI_FLAG_VISIBLE;
+import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
 import android.annotation.FloatRange;
 import android.annotation.NonNull;
@@ -1218,7 +1219,9 @@ public abstract class WallpaperService extends Service {
             mIWallpaperEngine.mDisplayManager.registerDisplayListener(mDisplayListener,
                     mCaller.getHandler());
             mDisplay = mIWallpaperEngine.mDisplay;
-            mDisplayContext = createDisplayContext(mDisplay);
+            // Use window context of TYPE_WALLPAPER so client can access UI resources correctly.
+            mDisplayContext = createDisplayContext(mDisplay)
+                    .createWindowContext(TYPE_WALLPAPER, null /* options */);
             mDisplayState = mDisplay.getState();
 
             if (DEBUG) Log.v(TAG, "onCreate(): " + this);
