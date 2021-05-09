@@ -52,7 +52,8 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final String TAG = "ActivityManagerConstants";
 
     // Key names stored in the settings value.
-    private static final String KEY_BACKGROUND_SETTLE_TIME = "background_settle_time";
+    static final String KEY_BACKGROUND_SETTLE_TIME = "background_settle_time";
+
     private static final String KEY_FGSERVICE_MIN_SHOWN_TIME
             = "fgservice_min_shown_time";
     private static final String KEY_FGSERVICE_MIN_REPORT_TIME
@@ -108,9 +109,9 @@ final class ActivityManagerConstants extends ContentObserver {
     static final String KEY_FG_TO_BG_FGS_GRACE_DURATION = "fg_to_bg_fgs_grace_duration";
     static final String KEY_FGS_START_FOREGROUND_TIMEOUT = "fgs_start_foreground_timeout";
     static final String KEY_FGS_ATOM_SAMPLE_RATE = "fgs_atom_sample_rate";
+    static final String KEY_KILL_FAS_CACHED_IDLE = "kill_fas_cached_idle";
 
     private static final int DEFAULT_MAX_CACHED_PROCESSES = 32;
-    private static final long DEFAULT_BACKGROUND_SETTLE_TIME = 60*1000;
     private static final long DEFAULT_FGSERVICE_MIN_SHOWN_TIME = 2*1000;
     private static final long DEFAULT_FGSERVICE_MIN_REPORT_TIME = 3*1000;
     private static final long DEFAULT_FGSERVICE_SCREEN_ON_BEFORE_TIME = 1*1000;
@@ -151,6 +152,10 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final long DEFAULT_FG_TO_BG_FGS_GRACE_DURATION = 5 * 1000;
     private static final int DEFAULT_FGS_START_FOREGROUND_TIMEOUT_MS = 10 * 1000;
     private static final float DEFAULT_FGS_ATOM_SAMPLE_RATE = 1; // 100 %
+
+    static final long DEFAULT_BACKGROUND_SETTLE_TIME = 60 * 1000;
+    static final boolean DEFAULT_KILL_FAS_CACHED_IDLE = true;
+
     /**
      * Same as {@link TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED}
      */
@@ -482,6 +487,12 @@ final class ActivityManagerConstants extends ContentObserver {
      */
     volatile float mFgsAtomSampleRate = DEFAULT_FGS_ATOM_SAMPLE_RATE;
 
+    /**
+     * Whether or not to kill apps in force-app-standby state and it's cached, its UID state is
+     * idle.
+     */
+    volatile boolean mKillForceAppStandByAndCachedIdle = DEFAULT_KILL_FAS_CACHED_IDLE;
+
     private final ActivityManagerService mService;
     private ContentResolver mResolver;
     private final KeyValueListParser mParser = new KeyValueListParser(',');
@@ -686,6 +697,9 @@ final class ActivityManagerConstants extends ContentObserver {
                                 break;
                             case KEY_FGS_ATOM_SAMPLE_RATE:
                                 updateFgsAtomSamplePercent();
+                                break;
+                            case KEY_KILL_FAS_CACHED_IDLE:
+                                updateKillFasCachedIdle();
                                 break;
                             default:
                                 break;
@@ -1017,6 +1031,13 @@ final class ActivityManagerConstants extends ContentObserver {
                 DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 KEY_FGS_ATOM_SAMPLE_RATE,
                 DEFAULT_FGS_ATOM_SAMPLE_RATE);
+    }
+
+    private void updateKillFasCachedIdle() {
+        mKillForceAppStandByAndCachedIdle = DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_KILL_FAS_CACHED_IDLE,
+                DEFAULT_KILL_FAS_CACHED_IDLE);
     }
 
     private void updateImperceptibleKillExemptions() {
