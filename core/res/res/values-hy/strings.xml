@@ -321,7 +321,7 @@
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"լուսանկարել և տեսագրել"</string>
     <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"Մոտակա սարքեր"</string>
     <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"հայտնաբերել մոտակա սարքերը և միանալ դրանց"</string>
-    <string name="permgrouplab_calllog" msgid="7926834372073550288">"Զանգերի մատյան"</string>
+    <string name="permgrouplab_calllog" msgid="7926834372073550288">"Կանչերի ցուցակ"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"հեռախոսազանգերի մատյանի դիտում և գրանցում"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Հեռախոս"</string>
     <string name="permgroupdesc_phone" msgid="270048070781478204">"կատարել զանգեր և կառավարել զանգերը"</string>
@@ -1022,7 +1022,8 @@
     <string name="text_copied" msgid="2531420577879738860">"Տեքստը պատճենված է սեղմատախտակին:"</string>
     <string name="copied" msgid="4675902854553014676">"Պատճենվեց"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> հավելվածը տվյալներ տեղադրեց <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> հավելվածից"</string>
-    <string name="pasted_from_clipboard" msgid="6295556725844421812">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> հավելվածը տվյալներ տեղադրեց սեղմատախտակից"</string>
+    <!-- no translation found for pasted_from_clipboard (7355790625710831847) -->
+    <skip />
     <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> հավելվածը տեղադրեց ձեր պատճենած տեքստը"</string>
     <string name="pasted_image" msgid="4729097394781491022">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> հավելվածը տեղադրեց ձեր պատճենած պատկերը"</string>
     <string name="pasted_content" msgid="646276353060777131">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> հավելվածը տեղադրեց ձեր պատճենած բովանդակությունը"</string>
@@ -1181,6 +1182,8 @@
     <string name="not_checked" msgid="7972320087569023342">"նշված չէ"</string>
     <string name="selected" msgid="6614607926197755875">"ընտրված է"</string>
     <string name="not_selected" msgid="410652016565864475">"ընտրված չէ"</string>
+    <!-- no translation found for in_progress (2149208189184319441) -->
+    <skip />
     <string name="whichApplication" msgid="5432266899591255759">"Ավարտել գործողությունը` օգտագործելով"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"Եզրափակել գործողությունը՝ օգտագործելով %1$s"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"Ավարտել գործողությունը"</string>
@@ -1259,6 +1262,14 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> հավելվածը պատրաստվում է:"</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Հավելվածները մեկնարկում են:"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Բեռնումն ավարտվում է:"</string>
+    <!-- no translation found for fp_enrollment_powerbutton_intent_title (3385634173366119903) -->
+    <skip />
+    <!-- no translation found for fp_enrollment_powerbutton_intent_message (6582149052513682522) -->
+    <skip />
+    <!-- no translation found for fp_enrollment_powerbutton_intent_positive_button (5963520983910436791) -->
+    <skip />
+    <!-- no translation found for fp_enrollment_powerbutton_intent_negative_button (6465764183480190748) -->
+    <skip />
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g>-ն աշխատում է"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Հպեք՝ խաղին վերադառնալու համար"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Ընտրեք խաղ"</string>
@@ -1709,6 +1720,8 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Օգտագործել դյուրանցումը"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Գունաշրջում"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Գունաշտկում"</string>
+    <!-- no translation found for one_handed_mode_feature_name (2334330034828094891) -->
+    <skip />
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Հավելյալ խամրեցում"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Ձայնի կարգավորման կոճակները սեղմվեցին։ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ծառայությունը միացավ։"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Ձայնի կարգավորման կոճակները սեղմվեցին։ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ծառայությունն անջատվեց։"</string>
@@ -1864,8 +1877,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Թարմացվել է ձեր ադմինիստրատորի կողմից"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Ջնջվել է ձեր ադմինիստրատորի կողմից"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Եղավ"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="750683025714899363">"«Մարտկոցի տնտեսում» գործառույթը միացնում է մուգ թեման և անջատում կամ սահմանափակում է աշխատանքը ֆոնային ռեժիմում, որոշ վիզուալ էֆեկտներ և այլ գործառույթներ։\n\n"<annotation id="url">"Իմանալ ավելին"</annotation></string>
-    <string name="battery_saver_description" msgid="5693741424234005958">"«Մարտկոցի տնտեսում» գործառույթը միացնում է մուգ թեման և անջատում կամ սահմանափակում է աշխատանքը ֆոնային ռեժիմում, որոշ վիզուալ էֆեկտներ և այլ գործառույթներ։"</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (4877297130366222145) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (8518809702138617167) -->
+    <skip />
     <string name="data_saver_description" msgid="4995164271550590517">"Թրաֆիկի տնտեսման ռեժիմում որոշ հավելվածների համար տվյալների ֆոնային փոխանցումն անջատված է։ Հավելվածը, որն օգտագործում եք, կարող է տվյալներ փոխանցել և ստանալ, սակայն ոչ այնքան հաճախ: Օրինակ՝ պատկերները կցուցադրվեն միայն դրանց վրա սեղմելուց հետո։"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Միացնե՞լ թրաֆիկի տնտեսումը"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Միացնել"</string>
@@ -1968,8 +1983,10 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> հավելվածը հասանելի չէ։ Դրա աշխատանքը սահմանափակում է <xliff:g id="APP_NAME_1">%2$s</xliff:g> հավելվածը։"</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Մանրամասն"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Չեղարկել դադարեցումը"</string>
-    <string name="work_mode_off_title" msgid="5503291976647976560">"Միացնե՞լ աշխատանքային պրոֆիլը"</string>
-    <string name="work_mode_off_message" msgid="8417484421098563803">"Ձեր աշխատանքային հավելվածները, ծանուցումները, տվյալները և աշխատանքային պրոֆիլի մյուս գործառույթները կմիացվեն։"</string>
+    <!-- no translation found for work_mode_off_title (961171256005852058) -->
+    <skip />
+    <!-- no translation found for work_mode_off_message (7319580997683623309) -->
+    <skip />
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Միացնել"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Հավելվածը հասանելի չէ"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածն այս պահին հասանելի չէ։"</string>
@@ -2287,6 +2304,6 @@
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Հավելվածի բրենդային պատկեր"</string>
     <string name="view_and_control_notification_title" msgid="4300765399209912240">"Ստուգեք մուտքի կարգավորումները"</string>
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> ծառայությունը կարող է դիտել և կառավարել ձեր էկրանի բովանդակությունը։ Հպեք՝ մանրամասներն իմանալու համար։"</string>
-    <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"«<xliff:g id="MESSAGE">%1$s</xliff:g>» հաղորդագրությունը թարգմանվել է"</string>
+    <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"«<xliff:g id="MESSAGE">%1$s</xliff:g>» հաղորդագրությունը թարգմանված է։"</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Հաղորդագրությունը <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g>ից թարգմանվել է <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>։"</string>
 </resources>
