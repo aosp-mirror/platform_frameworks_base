@@ -24,10 +24,13 @@ import static android.os.RecoverySystem.RESUME_ON_REBOOT_REBOOT_ERROR_SLOT_MISMA
 import static android.os.RecoverySystem.RESUME_ON_REBOOT_REBOOT_ERROR_UNSPECIFIED;
 import static android.os.RecoverySystem.ResumeOnRebootRebootErrorCode;
 import static android.os.UserHandle.USER_SYSTEM;
+import static android.ota.nano.OtaPackageMetadata.ApexMetadata;
 
 import static com.android.internal.widget.LockSettingsInternal.ARM_REBOOT_ERROR_NONE;
 
 import android.annotation.IntDef;
+import android.apex.CompressedApexInfo;
+import android.apex.CompressedApexInfoList;
 import android.content.Context;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
@@ -47,9 +50,11 @@ import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.os.SystemProperties;
 import android.provider.DeviceConfig;
+import android.sysprop.ApexProperties;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.FastImmutableArraySet;
+import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
@@ -59,6 +64,7 @@ import com.android.internal.widget.LockSettingsInternal;
 import com.android.internal.widget.RebootEscrowListener;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.pm.ApexManager;
 
 import libcore.io.IoUtils;
 
@@ -68,9 +74,13 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 /**
  * The recovery system service is responsible for coordinating recovery related
@@ -869,6 +879,76 @@ public class RecoverySystemService extends IRecoverySystem.Stub implements Reboo
             boolean slotSwitch) {
         enforcePermissionForResumeOnReboot();
         return rebootWithLskfImpl(packageName, reason, slotSwitch);
+    }
+
+    public static boolean isUpdatableApexSupported() {
+        return ApexProperties.updatable().orElse(false);
+    }
+
+    // Metadata should be no more than few MB, if it's larger than 100MB something is wrong.
+    private static final long APEX_INFO_SIZE_LIMIT = 24 * 1024 * 100;
+
+    private static CompressedApexInfoList getCompressedApexInfoList(String packageFile)
+            throws IOException {
+        try (ZipFile zipFile = new ZipFile(packageFile)) {
+            final ZipEntry entry = zipFile.getEntry("apex_info.pb");
+            if (entry == null) {
+                return null;
+            }
+            if (entry.getSize() >= APEX_INFO_SIZE_LIMIT) {
+                throw new IllegalArgumentException("apex_info.pb has size "
+                        + entry.getSize()
+                        + " which is larger than the permitted limit" + APEX_INFO_SIZE_LIMIT);
+            }
+            if (entry.getSize() == 0) {
+                CompressedApexInfoList infoList = new CompressedApexInfoList();
+                infoList.apexInfos = new CompressedApexInfo[0];
+                return infoList;
+            }
+            Log.i(TAG, "Allocating " + entry.getSize()
+                    + " bytes of memory to store OTA Metadata");
+            byte[] data = new byte[(int) entry.getSize()];
+
+            try (InputStream is = zipFile.getInputStream(entry)) {
+                int bytesRead = is.read(data);
+                String msg = "Read " + bytesRead + " when expecting " + data.length;
+                Log.e(TAG, msg);
+                if (bytesRead != data.length) {
+                    throw new IOException(msg);
+                }
+            }
+            ApexMetadata metadata = ApexMetadata.parseFrom(data);
+            CompressedApexInfoList apexInfoList = new CompressedApexInfoList();
+            apexInfoList.apexInfos =
+                    Arrays.stream(metadata.apexInfo).filter(apex -> apex.isCompressed).map(apex -> {
+                        CompressedApexInfo info = new CompressedApexInfo();
+                        info.moduleName = apex.packageName;
+                        info.decompressedSize = apex.decompressedSize;
+                        info.versionCode = apex.version;
+                        return info;
+                    }).toArray(CompressedApexInfo[]::new);
+            return apexInfoList;
+        }
+    }
+
+    @Override
+    public boolean allocateSpaceForUpdate(String packageFile) {
+        if (!isUpdatableApexSupported()) {
+            Log.i(TAG, "Updatable Apex not supported, "
+                    + "allocateSpaceForUpdate does nothing.");
+            return true;
+        }
+        try {
+            CompressedApexInfoList apexInfoList = getCompressedApexInfoList(packageFile);
+            ApexManager apexManager = ApexManager.getInstance();
+            apexManager.reserveSpaceForCompressedApex(apexInfoList);
+            return true;
+        } catch (RemoteException e) {
+            e.rethrowAsRuntimeException();
+        } catch (IOException | UnsupportedOperationException e) {
+            Slog.e(TAG, "Failed to reserve space for compressed apex: ", e);
+        }
+        return false;
     }
 
     @Override // Binder call
