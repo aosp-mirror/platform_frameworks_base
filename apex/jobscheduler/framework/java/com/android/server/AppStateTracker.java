@@ -25,19 +25,29 @@ public interface AppStateTracker {
     String TAG = "AppStateTracker";
 
     /**
-     * Register a {@link ServiceStateListener} to listen for forced-app-standby changes that should
-     * affect services.
+     * Register a {@link ForcedAppStandbyListener} to listen for forced-app-standby changes that
+     * should affect services etc.
      */
-    void addServiceStateListener(@NonNull ServiceStateListener listener);
+    void addForcedAppStandbyListener(@NonNull ForcedAppStandbyListener listener);
 
     /**
-     * A listener to listen to forced-app-standby changes that should affect services.
+     * @return {code true} if the given UID/package has been in forced app standby mode.
      */
-    interface ServiceStateListener {
+    boolean isAppInForcedAppStandby(int uid, @NonNull String packageName);
+
+    /**
+     * A listener to listen to forced-app-standby changes that should affect services etc.
+     */
+    interface ForcedAppStandbyListener {
         /**
-         * Called when an app goes into forced app standby and its foreground
-         * services need to be removed from that state.
+         * Called when an app goes in/out of forced app standby.
          */
-        void stopForegroundServicesForUidPackage(int uid, String packageName);
+        void updateForceAppStandbyForUidPackage(int uid, String packageName, boolean standby);
+
+        /**
+         * Called when all apps' forced-app-standby states need to be re-evaluated, due to
+         * enable/disable certain feature flags.
+         */
+        void updateForcedAppStandbyForAllApps();
     }
 }
