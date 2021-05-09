@@ -29,7 +29,7 @@
     android:clipToPadding="false"
     android:baselineAligned="false">
 
-    <include layout="@layout/settings_icon"/>
+    <include layout="@layout/settingslib_icon_frame"/>
 
     <RelativeLayout
         android:layout_width="0dp"
