@@ -826,7 +826,7 @@
     <string name="accessibility_data_saver_on" msgid="5394743820189757731">"डेटा सेभर सक्रिय छ"</string>
     <string name="accessibility_data_saver_off" msgid="58339669022107171">"डेटा सेभर बन्द छ"</string>
     <string name="switch_bar_on" msgid="1770868129120096114">"अन छ"</string>
-    <string name="switch_bar_off" msgid="5669805115416379556">"अफ"</string>
+    <string name="switch_bar_off" msgid="5669805115416379556">"अफ छ"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"उपलब्ध छैन"</string>
     <string name="nav_bar" msgid="4642708685386136807">"नेभिगेशन पट्टी"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"लेआउट"</string>
