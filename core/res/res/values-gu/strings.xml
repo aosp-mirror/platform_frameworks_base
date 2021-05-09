@@ -1022,7 +1022,8 @@
     <string name="text_copied" msgid="2531420577879738860">"ક્લિપબોર્ડ પર ટેક્સ્ટ કૉપિ કરી."</string>
     <string name="copied" msgid="4675902854553014676">"કૉપિ કરેલ"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>માંથી કૉપિ કરાયેલો ડેટા <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>માં પેસ્ટ કરવામાં આવ્યો"</string>
-    <string name="pasted_from_clipboard" msgid="6295556725844421812">"ક્લિપબોર્ડ ડેટાને <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>માં પેસ્ટ કર્યો"</string>
+    <!-- no translation found for pasted_from_clipboard (7355790625710831847) -->
+    <skip />
     <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> દ્વારા તમે કૉપિ કરેલી ટેક્સ્ટ પેસ્ટ કરાઈ"</string>
     <string name="pasted_image" msgid="4729097394781491022">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> દ્વારા તમે કૉપિ કરેલી છબી પેસ્ટ કરાઈ"</string>
     <string name="pasted_content" msgid="646276353060777131">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> દ્વારા તમે કૉપિ કરેલું કન્ટેન્ટ પેસ્ટ કરાયું"</string>
@@ -1181,6 +1182,8 @@
     <string name="not_checked" msgid="7972320087569023342">"ચેક કર્યું નથી"</string>
     <string name="selected" msgid="6614607926197755875">"પસંદ કરેલી"</string>
     <string name="not_selected" msgid="410652016565864475">"પસંદ નહીં કરેલી"</string>
+    <!-- no translation found for in_progress (2149208189184319441) -->
+    <skip />
     <string name="whichApplication" msgid="5432266899591255759">"આના ઉપયોગથી ક્રિયા પૂર્ણ કરો"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"%1$s ઉપયોગથી ક્રિયા પૂર્ણ કરો"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"ક્રિયા પૂર્ણ કરો"</string>
@@ -1259,6 +1262,14 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> તૈયાર કરી રહ્યું છે."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"ઍપ્લિકેશનો શરૂ કરી રહ્યાં છે."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"બૂટ સમાપ્ત કરી રહ્યાં છે."</string>
+    <!-- no translation found for fp_enrollment_powerbutton_intent_title (3385634173366119903) -->
+    <skip />
+    <!-- no translation found for fp_enrollment_powerbutton_intent_message (6582149052513682522) -->
+    <skip />
+    <!-- no translation found for fp_enrollment_powerbutton_intent_positive_button (5963520983910436791) -->
+    <skip />
+    <!-- no translation found for fp_enrollment_powerbutton_intent_negative_button (6465764183480190748) -->
+    <skip />
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> ચાલુ છે"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"ગેમ પર પાછા આવવા માટે ટૅપ કરો"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"ગેમ પસંદ કરો"</string>
@@ -1709,6 +1720,8 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"શૉર્ટકટનો ઉપયોગ કરો"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"વિપરીત રંગમાં બદલવું"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"રંગ સુધારણા"</string>
+    <!-- no translation found for one_handed_mode_feature_name (2334330034828094891) -->
+    <skip />
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"એક્સ્ટ્રા ડિમ"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"વૉલ્યૂમ કી દબાવી રાખો. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ચાલુ કરી."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"વૉલ્યૂમ કી દબાવી રાખો. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> બંધ કરી."</string>
@@ -1864,8 +1877,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"તમારા વ્યવસ્થાપક દ્વારા અપડેટ કરવામાં આવેલ છે"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"તમારા વ્યવસ્થાપક દ્વારા કાઢી નાખવામાં આવેલ છે"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ઓકે"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="750683025714899363">"બૅટરી સેવર ઘેરી થીમની સુવિધા ચાલુ કરે છે અને બૅકગ્રાઉન્ડમાં થતી પ્રવૃત્તિ, કેટલીક વિઝ્યુઅલ ઇફેક્ટ અને કેટલીક સુવિધાઓને મર્યાદિત કે બંધ કરે છે.\n\n"<annotation id="url">"વધુ જાણો"</annotation></string>
-    <string name="battery_saver_description" msgid="5693741424234005958">"બૅટરી સેવર ઘેરી થીમની સુવિધા ચાલુ કરે છે અને બૅકગ્રાઉન્ડમાં થતી પ્રવૃત્તિ, કેટલીક વિઝ્યુઅલ ઇફેક્ટ અને કેટલીક સુવિધાઓને મર્યાદિત કે બંધ કરે છે."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (4877297130366222145) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (8518809702138617167) -->
+    <skip />
     <string name="data_saver_description" msgid="4995164271550590517">"ડેટા વપરાશને ઘટાડવામાં સહાય માટે, ડેટા સેવર કેટલીક ઍપને બૅકગ્રાઉન્ડમાં ડેટા મોકલવા અથવા પ્રાપ્ત કરવાથી અટકાવે છે. તમે હાલમાં ઉપયોગ કરી રહ્યાં છો તે ઍપ ડેટાને ઍક્સેસ કરી શકે છે, પરંતુ તે આ ક્યારેક જ કરી શકે છે. આનો અર્થ એ હોઈ શકે છે, ઉદાહરણ તરીકે, છબીઓ ત્યાં સુધી પ્રદર્શિત થશે નહીં જ્યાં સુધી તમે તેને ટૅપ નહીં કરો."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ડેટા સેવર ચાલુ કરીએ?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ચાલુ કરો"</string>
@@ -1968,8 +1983,10 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> હમણાં ઉપલબ્ધ નથી. આને <xliff:g id="APP_NAME_1">%2$s</xliff:g> દ્વારા મેનેજ કરવામાં આવે છે."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"વધુ જાણો"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"ઍપ ફરી શરૂ કરો"</string>
-    <string name="work_mode_off_title" msgid="5503291976647976560">"ઑફિસની પ્રોફાઇલ ચાલુ કરીએ?"</string>
-    <string name="work_mode_off_message" msgid="8417484421098563803">"તમારી ઑફિસ માટેની ઍપ, નોટિફિકેશન, ડેટા અને અન્ય ઑફિસની પ્રોફાઇલ સુવિધાઓ ચાલુ કરવામાં આવશે"</string>
+    <!-- no translation found for work_mode_off_title (961171256005852058) -->
+    <skip />
+    <!-- no translation found for work_mode_off_message (7319580997683623309) -->
+    <skip />
     <string name="work_mode_turn_on" msgid="3662561662475962285">"ચાલુ કરો"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"ઍપ ઉપલબ્ધ નથી"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> હાલમાં ઉપલબ્ધ નથી."</string>

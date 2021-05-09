@@ -1022,7 +1022,8 @@
     <string name="text_copied" msgid="2531420577879738860">"텍스트가 클립보드에 복사되었습니다."</string>
     <string name="copied" msgid="4675902854553014676">"복사 완료"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> 앱이 <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> 앱에서 복사하여 붙여넣음"</string>
-    <string name="pasted_from_clipboard" msgid="6295556725844421812">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> 앱이 클립보드에서 복사하여 붙여넣음"</string>
+    <!-- no translation found for pasted_from_clipboard (7355790625710831847) -->
+    <skip />
     <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>에서 복사한 텍스트를 붙여넣음"</string>
     <string name="pasted_image" msgid="4729097394781491022">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>에서 복사한 이미지를 붙여넣음"</string>
     <string name="pasted_content" msgid="646276353060777131">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>에서 복사한 콘텐츠를 붙여넣음"</string>
@@ -1181,6 +1182,8 @@
     <string name="not_checked" msgid="7972320087569023342">"선택 안함"</string>
     <string name="selected" msgid="6614607926197755875">"선택됨"</string>
     <string name="not_selected" msgid="410652016565864475">"선택되지 않음"</string>
+    <!-- no translation found for in_progress (2149208189184319441) -->
+    <skip />
     <string name="whichApplication" msgid="5432266899591255759">"작업을 수행할 때 사용하는 애플리케이션"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"%1$s을(를) 사용하여 작업 완료"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"작업 완료"</string>
@@ -1259,6 +1262,14 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> 준비 중..."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"앱을 시작하는 중입니다."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"부팅 완료"</string>
+    <!-- no translation found for fp_enrollment_powerbutton_intent_title (3385634173366119903) -->
+    <skip />
+    <!-- no translation found for fp_enrollment_powerbutton_intent_message (6582149052513682522) -->
+    <skip />
+    <!-- no translation found for fp_enrollment_powerbutton_intent_positive_button (5963520983910436791) -->
+    <skip />
+    <!-- no translation found for fp_enrollment_powerbutton_intent_negative_button (6465764183480190748) -->
+    <skip />
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> 실행 중"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"게임으로 돌아가려면 탭하세요."</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"게임 선택"</string>
@@ -1709,6 +1720,8 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"단축키 사용"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"색상 반전"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"색상 보정"</string>
+    <!-- no translation found for one_handed_mode_feature_name (2334330034828094891) -->
+    <skip />
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"더 어둡게"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"볼륨 키를 길게 눌렀습니다. <xliff:g id="SERVICE_NAME">%1$s</xliff:g>이(가) 사용 설정되었습니다."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"볼륨 키를 길게 눌렀습니다. <xliff:g id="SERVICE_NAME">%1$s</xliff:g>이(가) 사용 중지되었습니다."</string>
@@ -1864,8 +1877,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"관리자에 의해 업데이트되었습니다."</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"관리자에 의해 삭제되었습니다."</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"확인"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="750683025714899363">"절전 모드는 어두운 테마를 사용 설정하고 백그라운드 활동, 일부 시각 효과, 특정 기능을 제한하거나 사용 중지합니다.\n\n"<annotation id="url">"자세히 알아보기"</annotation></string>
-    <string name="battery_saver_description" msgid="5693741424234005958">"절전 모드는 어두운 테마를 사용 설정하고 백그라운드 활동, 일부 시각 효과, 특정 기능을 제한하거나 사용 중지합니다."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (4877297130366222145) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (8518809702138617167) -->
+    <skip />
     <string name="data_saver_description" msgid="4995164271550590517">"데이터 사용량을 줄이기 위해 데이터 절약 모드는 일부 앱이 백그라운드에서 데이터를 전송하거나 수신하지 못하도록 합니다. 현재 사용 중인 앱에서 데이터에 액세스할 수 있지만 빈도가 줄어듭니다. 예를 들면, 이미지를 탭하기 전에는 이미지가 표시되지 않습니다."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"데이터 절약 모드를 사용 설정하시겠습니까?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"사용 설정"</string>
@@ -1968,8 +1983,10 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g>은(는) 현재 사용할 수 없습니다. <xliff:g id="APP_NAME_1">%2$s</xliff:g>에서 관리하는 앱입니다."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"자세히 알아보기"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"앱 일시중지 해제"</string>
-    <string name="work_mode_off_title" msgid="5503291976647976560">"직장 프로필을 사용 설정하시겠어요?"</string>
-    <string name="work_mode_off_message" msgid="8417484421098563803">"직장 앱, 알림, 데이터 및 기타 직장 프로필 기능이 사용 설정됩니다."</string>
+    <!-- no translation found for work_mode_off_title (961171256005852058) -->
+    <skip />
+    <!-- no translation found for work_mode_off_message (7319580997683623309) -->
+    <skip />
     <string name="work_mode_turn_on" msgid="3662561662475962285">"사용 설정"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"앱을 사용할 수 없습니다"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"현재 <xliff:g id="APP_NAME">%1$s</xliff:g> 앱을 사용할 수 없습니다."</string>
