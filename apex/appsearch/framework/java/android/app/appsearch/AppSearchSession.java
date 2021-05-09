@@ -90,17 +90,20 @@ public final class AppSearchSession implements Closeable {
             @NonNull @CallbackExecutor Executor executor,
             @NonNull Consumer<AppSearchResult<AppSearchSession>> callback) {
         try {
-            mService.initialize(mUserId, new IAppSearchResultCallback.Stub() {
-                @Override
-                public void onResult(AppSearchResultParcel resultParcel) {
-                    executor.execute(() -> {
-                        AppSearchResult<Void> result = resultParcel.getResult();
-                        if (result.isSuccess()) {
-                            callback.accept(
-                                    AppSearchResult.newSuccessfulResult(AppSearchSession.this));
-                        } else {
-                            callback.accept(AppSearchResult.newFailedResult(result));
-                        }
+            mService.initialize(mUserId,
+                    /*binderCallStartTimeMillis=*/ SystemClock.elapsedRealtime(),
+                    new IAppSearchResultCallback.Stub() {
+                        @Override
+                        public void onResult(AppSearchResultParcel resultParcel) {
+                            executor.execute(() -> {
+                                AppSearchResult<Void> result = resultParcel.getResult();
+                                if (result.isSuccess()) {
+                                    callback.accept(
+                                            AppSearchResult.newSuccessfulResult(
+                                                    AppSearchSession.this));
+                                } else {
+                                    callback.accept(AppSearchResult.newFailedResult(result));
+                                }
                     });
                 }
             });
