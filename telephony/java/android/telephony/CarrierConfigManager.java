@@ -4279,6 +4279,26 @@ public class CarrierConfigManager {
         public static final String KEY_RCS_FEATURE_TAG_ALLOWED_STRING_ARRAY =
                 KEY_PREFIX + "rcs_feature_tag_allowed_string_array";
 
+        /**
+         * Flag indicating whether or not carrier forbids device send the RCS request when the
+         * device receive the network response with the SIP code 489 BAD EVENT.
+         * <p>
+         * The default value for this key is {@code false}.
+         * @hide
+         */
+        public static final String KEY_RCS_REQUEST_FORBIDDEN_BY_SIP_489_BOOL =
+                KEY_PREFIX + "rcs_request_forbidden_by_sip_489_bool";
+
+        /**
+         * Indicates the interval that SUBSCRIBE requests from applications will be retried at when
+         * the carrier network has responded to a previous request with a forbidden error.
+         * <p>
+         * The default value for this key is 20 minutes.
+         * @hide
+         */
+        public static final String KEY_RCS_REQUEST_RETRY_INTERVAL_MILLIS_LONG =
+                KEY_PREFIX + "rcs_request_retry_interval_millis_long";
+
         private Ims() {}
 
         private static PersistableBundle getDefaults() {
@@ -4292,6 +4312,8 @@ public class CarrierConfigManager {
             defaults.putBoolean(KEY_RCS_BULK_CAPABILITY_EXCHANGE_BOOL, false);
             defaults.putBoolean(KEY_ENABLE_PRESENCE_GROUP_SUBSCRIBE_BOOL, true);
             defaults.putInt(KEY_NON_RCS_CAPABILITIES_CACHE_EXPIRATION_SEC_INT, 30 * 24 * 60 * 60);
+            defaults.putBoolean(KEY_RCS_REQUEST_FORBIDDEN_BY_SIP_489_BOOL, false);
+            defaults.putLong(KEY_RCS_REQUEST_RETRY_INTERVAL_MILLIS_LONG, 20 * 60 * 1000);
             defaults.putStringArray(KEY_RCS_FEATURE_TAG_ALLOWED_STRING_ARRAY, new String[]{
                     "+g.3gpp.icsi-ref=\"urn%3Aurn-7%3A3gpp-service.ims.icsi.oma.cpm.msg\"",
                     "+g.3gpp.icsi-ref=\"urn%3Aurn-7%3A3gpp-service.ims.icsi.oma.cpm.largemsg\"",
