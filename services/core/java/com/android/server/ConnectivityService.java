@@ -9133,7 +9133,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     private NetworkCapabilities getNetworkCapabilitiesWithoutUids(@NonNull NetworkCapabilities nc) {
-        final NetworkCapabilities sanitized = new NetworkCapabilities(nc);
+        final NetworkCapabilities sanitized = new NetworkCapabilities(nc,
+                NetworkCapabilities.REDACT_ALL);
         sanitized.setUids(null);
         sanitized.setAdministratorUids(new int[0]);
         sanitized.setOwnerUid(Process.INVALID_UID);

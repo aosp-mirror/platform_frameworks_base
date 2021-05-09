@@ -341,7 +341,7 @@ public class NetworkCapabilitiesTest {
 
     private void testParcelSane(NetworkCapabilities cap) {
         if (isAtLeastS()) {
-            assertParcelSane(cap, 17);
+            assertParcelSane(cap, 16);
         } else if (isAtLeastR()) {
             assertParcelSane(cap, 15);
         } else {

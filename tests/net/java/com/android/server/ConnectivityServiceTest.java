@@ -19,6 +19,7 @@ package com.android.server;
 import static android.Manifest.permission.CHANGE_NETWORK_STATE;
 import static android.Manifest.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS;
 import static android.Manifest.permission.DUMP;
+import static android.Manifest.permission.LOCAL_MAC_ADDRESS;
 import static android.Manifest.permission.NETWORK_FACTORY;
 import static android.Manifest.permission.NETWORK_SETTINGS;
 import static android.app.PendingIntent.FLAG_IMMUTABLE;
@@ -9469,9 +9470,9 @@ public class ConnectivityServiceTest {
         @Override
         public TransportInfo makeCopy(@NetworkCapabilities.RedactionType long redactions) {
             return new TestTransportInfo(
-                    (redactions & REDACT_FOR_ACCESS_FINE_LOCATION) != 0,
-                    (redactions & REDACT_FOR_LOCAL_MAC_ADDRESS) != 0,
-                    (redactions & REDACT_FOR_NETWORK_SETTINGS) != 0
+                    locationRedacted | (redactions & REDACT_FOR_ACCESS_FINE_LOCATION) != 0,
+                    localMacAddressRedacted | (redactions & REDACT_FOR_LOCAL_MAC_ADDRESS) != 0,
+                    settingsRedacted | (redactions & REDACT_FOR_NETWORK_SETTINGS) != 0
             );
         }
 
@@ -9494,7 +9495,25 @@ public class ConnectivityServiceTest {
         public int hashCode() {
             return Objects.hash(locationRedacted, localMacAddressRedacted, settingsRedacted);
         }
+
+        @Override
+        public String toString() {
+            return String.format(
+                    "TestTransportInfo{locationRedacted=%s macRedacted=%s settingsRedacted=%s}",
+                    locationRedacted, localMacAddressRedacted, settingsRedacted);
+        }
     }
+
+    private TestTransportInfo getTestTransportInfo(NetworkCapabilities nc) {
+        return (TestTransportInfo) nc.getTransportInfo();
+    }
+
+    private TestTransportInfo getTestTransportInfo(TestNetworkAgentWrapper n) {
+        final NetworkCapabilities nc = mCm.getNetworkCapabilities(n.getNetwork());
+        assertNotNull(nc);
+        return getTestTransportInfo(nc);
+    }
+
 
     private void verifyNetworkCallbackLocationDataInclusionUsingTransportInfoAndOwnerUidInNetCaps(
             @NonNull TestNetworkCallback wifiNetworkCallback, int actualOwnerUid,
@@ -9524,7 +9543,6 @@ public class ConnectivityServiceTest {
         wifiNetworkCallback.expectCapabilitiesThat(mWiFiNetworkAgent,
                 nc -> Objects.equals(expectedOwnerUid, nc.getOwnerUid())
                         && Objects.equals(expectedTransportInfo, nc.getTransportInfo()));
-
     }
 
     @Test
@@ -9543,6 +9561,40 @@ public class ConnectivityServiceTest {
         // location data.
         verifyNetworkCallbackLocationDataInclusionUsingTransportInfoAndOwnerUidInNetCaps(
                 wifiNetworkCallack, ownerUid, transportInfo, INVALID_UID, sanitizedTransportInfo);
+    }
+
+    @Test
+    public void testTransportInfoRedactionInSynchronousCalls() throws Exception {
+        final NetworkCapabilities ncTemplate = new NetworkCapabilities()
+                .addTransportType(TRANSPORT_WIFI)
+                .setTransportInfo(new TestTransportInfo());
+
+        mWiFiNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_WIFI, new LinkProperties(),
+                ncTemplate);
+        mWiFiNetworkAgent.connect(true /* validated; waits for callback */);
+
+        // NETWORK_SETTINGS redaction is controlled by the NETWORK_SETTINGS permission
+        assertTrue(getTestTransportInfo(mWiFiNetworkAgent).settingsRedacted);
+        withPermission(NETWORK_SETTINGS, () -> {
+            assertFalse(getTestTransportInfo(mWiFiNetworkAgent).settingsRedacted);
+        });
+        assertTrue(getTestTransportInfo(mWiFiNetworkAgent).settingsRedacted);
+
+        // LOCAL_MAC_ADDRESS redaction is controlled by the LOCAL_MAC_ADDRESS permission
+        assertTrue(getTestTransportInfo(mWiFiNetworkAgent).localMacAddressRedacted);
+        withPermission(LOCAL_MAC_ADDRESS, () -> {
+            assertFalse(getTestTransportInfo(mWiFiNetworkAgent).localMacAddressRedacted);
+        });
+        assertTrue(getTestTransportInfo(mWiFiNetworkAgent).localMacAddressRedacted);
+
+        // Synchronous getNetworkCapabilities calls never return unredacted location-sensitive
+        // information.
+        assertTrue(getTestTransportInfo(mWiFiNetworkAgent).locationRedacted);
+        setupLocationPermissions(Build.VERSION_CODES.S, true, AppOpsManager.OPSTR_FINE_LOCATION,
+                Manifest.permission.ACCESS_FINE_LOCATION);
+        assertTrue(getTestTransportInfo(mWiFiNetworkAgent).locationRedacted);
+        denyAllLocationPrivilegedPermissions();
+        assertTrue(getTestTransportInfo(mWiFiNetworkAgent).locationRedacted);
     }
 
     private void setupConnectionOwnerUid(int vpnOwnerUid, @VpnManager.VpnType int vpnType)
@@ -9903,10 +9955,25 @@ public class ConnectivityServiceTest {
         // Connect the cell agent verify that it notifies TestNetworkCallback that it is available
         final TestNetworkCallback callback = new TestNetworkCallback();
         mCm.registerDefaultNetworkCallback(callback);
-        mCellNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_CELLULAR);
+
+        final NetworkCapabilities ncTemplate = new NetworkCapabilities()
+                .addTransportType(TRANSPORT_CELLULAR)
+                .setTransportInfo(new TestTransportInfo());
+        mCellNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_CELLULAR, new LinkProperties(),
+                ncTemplate);
         mCellNetworkAgent.connect(true);
         callback.expectAvailableThenValidatedCallbacks(mCellNetworkAgent);
         callback.assertNoCallback();
+    }
+
+    private boolean areConnDiagCapsRedacted(NetworkCapabilities nc) {
+        TestTransportInfo ti = (TestTransportInfo) nc.getTransportInfo();
+        return nc.getUids() == null
+                && nc.getAdministratorUids().length == 0
+                && nc.getOwnerUid() == Process.INVALID_UID
+                && getTestTransportInfo(nc).locationRedacted
+                && getTestTransportInfo(nc).localMacAddressRedacted
+                && getTestTransportInfo(nc).settingsRedacted;
     }
 
     @Test
@@ -9919,12 +9986,7 @@ public class ConnectivityServiceTest {
 
         // Verify onConnectivityReport fired
         verify(mConnectivityDiagnosticsCallback).onConnectivityReportAvailable(
-                argThat(report -> {
-                    final NetworkCapabilities nc = report.getNetworkCapabilities();
-                    return nc.getUids() == null
-                            && nc.getAdministratorUids().length == 0
-                            && nc.getOwnerUid() == Process.INVALID_UID;
-                }));
+                argThat(report -> areConnDiagCapsRedacted(report.getNetworkCapabilities())));
     }
 
     @Test
@@ -9940,12 +10002,7 @@ public class ConnectivityServiceTest {
 
         // Verify onDataStallSuspected fired
         verify(mConnectivityDiagnosticsCallback).onDataStallSuspected(
-                argThat(report -> {
-                    final NetworkCapabilities nc = report.getNetworkCapabilities();
-                    return nc.getUids() == null
-                            && nc.getAdministratorUids().length == 0
-                            && nc.getOwnerUid() == Process.INVALID_UID;
-                }));
+                argThat(report -> areConnDiagCapsRedacted(report.getNetworkCapabilities())));
     }
 
     @Test
