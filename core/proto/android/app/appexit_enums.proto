@@ -213,10 +213,15 @@ enum AppExitSubReasonCode {
      * The process was killed because it's isolated and was in a cached state.
      */
     SUBREASON_ISOLATED_NOT_NEEDED = 17;
+
+    /**
+     * The process was killed because it's in forced-app-standby state, and it's cached and
+     * its uid state is idle; this would be set only when the reason is {@link #REASON_OTHER}.
+     */
+    SUBREASON_CACHED_IDLE_FORCED_APP_STANDBY = 18;
 }
 
-/**
- * The relative importance level that the system places on a process.
+/** * The relative importance level that the system places on a process.
  * Keep sync with the definitions in
  * {@link android.app.ActivityManager.RunningAppProcessInfo}
  */
