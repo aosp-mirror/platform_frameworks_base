@@ -391,9 +391,11 @@ public class NetworkCapabilitiesTest {
     @Test
     public void testOemPaid() {
         NetworkCapabilities nc = new NetworkCapabilities();
-        // By default OEM_PAID is neither in the unwanted or required lists and the network is not
+        // By default OEM_PAID is neither in the required or forbidden lists and the network is not
         // restricted.
-        assertFalse(nc.hasUnwantedCapability(NET_CAPABILITY_OEM_PAID));
+        if (isAtLeastS()) {
+            assertFalse(nc.hasForbiddenCapability(NET_CAPABILITY_OEM_PAID));
+        }
         assertFalse(nc.hasCapability(NET_CAPABILITY_OEM_PAID));
         nc.maybeMarkCapabilitiesRestricted();
         assertTrue(nc.hasCapability(NET_CAPABILITY_NOT_RESTRICTED));
@@ -418,9 +420,9 @@ public class NetworkCapabilitiesTest {
     @Test @IgnoreUpTo(Build.VERSION_CODES.R)
     public void testOemPrivate() {
         NetworkCapabilities nc = new NetworkCapabilities();
-        // By default OEM_PRIVATE is neither in the unwanted or required lists and the network is
+        // By default OEM_PRIVATE is neither in the required or forbidden lists and the network is
         // not restricted.
-        assertFalse(nc.hasUnwantedCapability(NET_CAPABILITY_OEM_PRIVATE));
+        assertFalse(nc.hasForbiddenCapability(NET_CAPABILITY_OEM_PRIVATE));
         assertFalse(nc.hasCapability(NET_CAPABILITY_OEM_PRIVATE));
         nc.maybeMarkCapabilitiesRestricted();
         assertTrue(nc.hasCapability(NET_CAPABILITY_NOT_RESTRICTED));
@@ -442,8 +444,8 @@ public class NetworkCapabilitiesTest {
         assertFalse(nr.satisfiedByNetworkCapabilities(new NetworkCapabilities()));
     }
 
-    @Test
-    public void testUnwantedCapabilities() {
+    @Test @IgnoreUpTo(Build.VERSION_CODES.R)
+    public void testForbiddenCapabilities() {
         NetworkCapabilities network = new NetworkCapabilities();
 
         NetworkCapabilities request = new NetworkCapabilities();
@@ -451,19 +453,19 @@ public class NetworkCapabilitiesTest {
                 request.satisfiedByNetworkCapabilities(network));
 
         // Requesting absence of capabilities that network doesn't have. Request should satisfy.
-        request.addUnwantedCapability(NET_CAPABILITY_WIFI_P2P);
-        request.addUnwantedCapability(NET_CAPABILITY_NOT_METERED);
+        request.addForbiddenCapability(NET_CAPABILITY_WIFI_P2P);
+        request.addForbiddenCapability(NET_CAPABILITY_NOT_METERED);
         assertTrue(request.satisfiedByNetworkCapabilities(network));
-        assertArrayEquals(new int[] {NET_CAPABILITY_WIFI_P2P,
+        assertArrayEquals(new int[]{NET_CAPABILITY_WIFI_P2P,
                         NET_CAPABILITY_NOT_METERED},
-                request.getUnwantedCapabilities());
+                request.getForbiddenCapabilities());
 
         // This is a default capability, just want to make sure its there because we use it below.
         assertTrue(network.hasCapability(NET_CAPABILITY_NOT_RESTRICTED));
 
-        // Verify that adding unwanted capability will effectively remove it from capability list.
-        request.addUnwantedCapability(NET_CAPABILITY_NOT_RESTRICTED);
-        assertTrue(request.hasUnwantedCapability(NET_CAPABILITY_NOT_RESTRICTED));
+        // Verify that adding forbidden capability will effectively remove it from capability list.
+        request.addForbiddenCapability(NET_CAPABILITY_NOT_RESTRICTED);
+        assertTrue(request.hasForbiddenCapability(NET_CAPABILITY_NOT_RESTRICTED));
         assertFalse(request.hasCapability(NET_CAPABILITY_NOT_RESTRICTED));
 
         // Now this request won't be satisfied because network contains NOT_RESTRICTED.
@@ -471,10 +473,10 @@ public class NetworkCapabilitiesTest {
         network.removeCapability(NET_CAPABILITY_NOT_RESTRICTED);
         assertTrue(request.satisfiedByNetworkCapabilities(network));
 
-        // Verify that adding capability will effectively remove it from unwanted list
+        // Verify that adding capability will effectively remove it from forbidden list
         request.addCapability(NET_CAPABILITY_NOT_RESTRICTED);
         assertTrue(request.hasCapability(NET_CAPABILITY_NOT_RESTRICTED));
-        assertFalse(request.hasUnwantedCapability(NET_CAPABILITY_NOT_RESTRICTED));
+        assertFalse(request.hasForbiddenCapability(NET_CAPABILITY_NOT_RESTRICTED));
 
         assertFalse(request.satisfiedByNetworkCapabilities(network));
         network.addCapability(NET_CAPABILITY_NOT_RESTRICTED);
@@ -513,24 +515,20 @@ public class NetworkCapabilitiesTest {
         assertTrue(nc1.equalsNetCapabilities(nc2));
         assertEquals(nc1, nc2);
 
-        nc1.addUnwantedCapability(NET_CAPABILITY_INTERNET);
-        assertFalse(nc1.equalsNetCapabilities(nc2));
-        nc2.addUnwantedCapability(NET_CAPABILITY_INTERNET);
-        assertTrue(nc1.equalsNetCapabilities(nc2));
         if (isAtLeastS()) {
-            // Remove a required capability doesn't affect unwanted capabilities.
-            // This is a behaviour change from S.
+            nc1.addForbiddenCapability(NET_CAPABILITY_INTERNET);
+            assertFalse(nc1.equalsNetCapabilities(nc2));
+            nc2.addForbiddenCapability(NET_CAPABILITY_INTERNET);
+            assertTrue(nc1.equalsNetCapabilities(nc2));
+
+            // Remove a required capability doesn't affect forbidden capabilities.
+            // This is a behaviour change from R to S.
             nc1.removeCapability(NET_CAPABILITY_INTERNET);
             assertTrue(nc1.equalsNetCapabilities(nc2));
 
-            nc1.removeUnwantedCapability(NET_CAPABILITY_INTERNET);
+            nc1.removeForbiddenCapability(NET_CAPABILITY_INTERNET);
             assertFalse(nc1.equalsNetCapabilities(nc2));
-            nc2.removeUnwantedCapability(NET_CAPABILITY_INTERNET);
-            assertTrue(nc1.equalsNetCapabilities(nc2));
-        } else {
-            nc1.removeCapability(NET_CAPABILITY_INTERNET);
-            assertFalse(nc1.equalsNetCapabilities(nc2));
-            nc2.removeCapability(NET_CAPABILITY_INTERNET);
+            nc2.removeForbiddenCapability(NET_CAPABILITY_INTERNET);
             assertTrue(nc1.equalsNetCapabilities(nc2));
         }
     }
@@ -582,31 +580,25 @@ public class NetworkCapabilitiesTest {
         NetworkCapabilities nc1 = new NetworkCapabilities();
         NetworkCapabilities nc2 = new NetworkCapabilities();
 
-        nc1.addUnwantedCapability(NET_CAPABILITY_CAPTIVE_PORTAL);
+        if (isAtLeastS()) {
+            nc1.addForbiddenCapability(NET_CAPABILITY_CAPTIVE_PORTAL);
+        }
         nc1.addCapability(NET_CAPABILITY_NOT_ROAMING);
         assertNotEquals(nc1, nc2);
         nc2.combineCapabilities(nc1);
         assertEquals(nc1, nc2);
         assertTrue(nc2.hasCapability(NET_CAPABILITY_NOT_ROAMING));
-        assertTrue(nc2.hasUnwantedCapability(NET_CAPABILITY_CAPTIVE_PORTAL));
-
-        // This will effectively move NOT_ROAMING capability from required to unwanted for nc1.
-        nc1.addUnwantedCapability(NET_CAPABILITY_NOT_ROAMING);
+        if (isAtLeastS()) {
+            assertTrue(nc2.hasForbiddenCapability(NET_CAPABILITY_CAPTIVE_PORTAL));
+        }
 
         if (isAtLeastS()) {
-            // From S, it is not allowed to have the same capability in both wanted and
-            // unwanted list.
+            // This will effectively move NOT_ROAMING capability from required to forbidden for nc1.
+            nc1.addForbiddenCapability(NET_CAPABILITY_NOT_ROAMING);
+            // It is not allowed to have the same capability in both wanted and forbidden list.
             assertThrows(IllegalArgumentException.class, () -> nc2.combineCapabilities(nc1));
-            // Remove unwanted capability to continue other tests.
-            nc1.removeUnwantedCapability(NET_CAPABILITY_NOT_ROAMING);
-        } else {
-            nc2.combineCapabilities(nc1);
-            // We will get this capability in both requested and unwanted lists thus this request
-            // will never be satisfied.
-            assertTrue(nc2.hasCapability(NET_CAPABILITY_NOT_ROAMING));
-            assertTrue(nc2.hasUnwantedCapability(NET_CAPABILITY_NOT_ROAMING));
-            // For R or below, remove unwanted capability via removeCapability.
-            nc1.removeCapability(NET_CAPABILITY_NOT_ROAMING);
+            // Remove forbidden capability to continue other tests.
+            nc1.removeForbiddenCapability(NET_CAPABILITY_NOT_ROAMING);
         }
 
         nc1.setSSID(TEST_SSID);
@@ -684,14 +676,11 @@ public class NetworkCapabilitiesTest {
     public void testSetCapabilities() {
         final int[] REQUIRED_CAPABILITIES = new int[] {
                 NET_CAPABILITY_INTERNET, NET_CAPABILITY_NOT_VPN };
-        final int[] UNWANTED_CAPABILITIES = new int[] {
-                NET_CAPABILITY_NOT_RESTRICTED, NET_CAPABILITY_NOT_METERED
-        };
 
         NetworkCapabilities nc1 = new NetworkCapabilities();
         NetworkCapabilities nc2 = new NetworkCapabilities();
 
-        nc1.setCapabilities(REQUIRED_CAPABILITIES, UNWANTED_CAPABILITIES);
+        nc1.setCapabilities(REQUIRED_CAPABILITIES);
         assertArrayEquals(REQUIRED_CAPABILITIES, nc1.getCapabilities());
 
         // Verify that setting and adding capabilities leads to the same object state.
@@ -699,10 +688,25 @@ public class NetworkCapabilitiesTest {
         for (int cap : REQUIRED_CAPABILITIES) {
             nc2.addCapability(cap);
         }
-        for (int cap : UNWANTED_CAPABILITIES) {
-            nc2.addUnwantedCapability(cap);
-        }
         assertEquals(nc1, nc2);
+
+        if (isAtLeastS()) {
+            final int[] forbiddenCapabilities = new int[]{
+                    NET_CAPABILITY_NOT_METERED, NET_CAPABILITY_NOT_RESTRICTED };
+
+            nc1.setCapabilities(REQUIRED_CAPABILITIES, forbiddenCapabilities);
+            assertArrayEquals(REQUIRED_CAPABILITIES, nc1.getCapabilities());
+            assertArrayEquals(forbiddenCapabilities, nc1.getForbiddenCapabilities());
+
+            nc2.clearAll();
+            for (int cap : REQUIRED_CAPABILITIES) {
+                nc2.addCapability(cap);
+            }
+            for (int cap : forbiddenCapabilities) {
+                nc2.addForbiddenCapability(cap);
+            }
+            assertEquals(nc1, nc2);
+        }
     }
 
     @Test
@@ -770,23 +774,32 @@ public class NetworkCapabilitiesTest {
         NetworkCapabilities nc1 = new NetworkCapabilities();
         NetworkCapabilities nc2 = new NetworkCapabilities();
 
-        nc1.addUnwantedCapability(NET_CAPABILITY_CAPTIVE_PORTAL);
+        if (isAtLeastS()) {
+            nc1.addForbiddenCapability(NET_CAPABILITY_CAPTIVE_PORTAL);
+        }
         nc1.addCapability(NET_CAPABILITY_NOT_ROAMING);
         assertNotEquals(nc1, nc2);
         nc2.set(nc1);
         assertEquals(nc1, nc2);
         assertTrue(nc2.hasCapability(NET_CAPABILITY_NOT_ROAMING));
-        assertTrue(nc2.hasUnwantedCapability(NET_CAPABILITY_CAPTIVE_PORTAL));
+        if (isAtLeastS()) {
+            assertTrue(nc2.hasForbiddenCapability(NET_CAPABILITY_CAPTIVE_PORTAL));
+        }
 
-        // This will effectively move NOT_ROAMING capability from required to unwanted for nc1.
-        nc1.addUnwantedCapability(NET_CAPABILITY_NOT_ROAMING);
+        if (isAtLeastS()) {
+            // This will effectively move NOT_ROAMING capability from required to forbidden for nc1.
+            nc1.addForbiddenCapability(NET_CAPABILITY_NOT_ROAMING);
+        }
         nc1.setSSID(TEST_SSID);
         nc2.set(nc1);
         assertEquals(nc1, nc2);
-        // Contrary to combineCapabilities, set() will have removed the NOT_ROAMING capability
-        // from nc2.
-        assertFalse(nc2.hasCapability(NET_CAPABILITY_NOT_ROAMING));
-        assertTrue(nc2.hasUnwantedCapability(NET_CAPABILITY_NOT_ROAMING));
+        if (isAtLeastS()) {
+            // Contrary to combineCapabilities, set() will have removed the NOT_ROAMING capability
+            // from nc2.
+            assertFalse(nc2.hasCapability(NET_CAPABILITY_NOT_ROAMING));
+            assertTrue(nc2.hasForbiddenCapability(NET_CAPABILITY_NOT_ROAMING));
+        }
+
         if (isAtLeastR()) {
             assertTrue(TEST_SSID.equals(nc2.getSsid()));
         }
