@@ -260,6 +260,8 @@ public final class NotificationChannel implements Parcelable {
     private boolean mDemoted = false;
     private boolean mImportantConvo = false;
     private long mDeletedTime = DEFAULT_DELETION_TIME_MS;
+    // If the sound for this channel is missing, e.g. after restore.
+    private boolean mIsSoundMissing;
 
     /**
      * Creates a notification channel.
@@ -715,6 +717,13 @@ public final class NotificationChannel implements Parcelable {
     }
 
     /**
+     * @hide
+     */
+    public boolean isSoundMissing() {
+        return mIsSoundMissing;
+    }
+
+    /**
      * Returns the audio attributes for sound played by notifications posted to this channel.
      */
     public AudioAttributes getAudioAttributes() {
@@ -998,8 +1007,9 @@ public final class NotificationChannel implements Parcelable {
         // according to the docs because canonicalize method has to handle canonical uris as well.
         Uri canonicalizedUri = contentResolver.canonicalize(uri);
         if (canonicalizedUri == null) {
-            // We got a null because the uri in the backup does not exist here, so we return default
-            return Settings.System.DEFAULT_NOTIFICATION_URI;
+            // We got a null because the uri in the backup does not exist here.
+            mIsSoundMissing = true;
+            return null;
         }
         return contentResolver.uncanonicalize(canonicalizedUri);
     }
