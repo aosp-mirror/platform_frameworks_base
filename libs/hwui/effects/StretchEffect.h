@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "Properties.h"
 #include "utils/MathUtils.h"
 
 #include <SkImage.h>
@@ -106,6 +107,11 @@ public:
         matrix.setScale(1 + std::abs(sX), 1 + std::abs(sY), sX > 0 ? 0 : width,
                         sY > 0 ? 0 : height);
         return matrix;
+    }
+
+    bool requiresLayer() const {
+        return !(isEmpty() ||
+                 Properties::stretchEffectBehavior == StretchEffectBehavior::LinearScale);
     }
 
 private:
