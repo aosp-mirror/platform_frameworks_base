@@ -224,14 +224,14 @@
     <!-- The margin on the end of the top-line content views (accommodates the expander) -->
     <dimen name="notification_heading_margin_end">56dp</dimen>
 
-    <!-- The height of the notification action list -->
+    <!-- The total height of the notification action list -->
     <dimen name="notification_action_list_height">60dp</dimen>
 
     <!-- The margin of the notification action list at the top -->
     <dimen name="notification_action_list_margin_top">0dp</dimen>
 
-    <!-- The height of the notification action list -->
-    <dimen name="notification_action_emphasized_height">48dp</dimen>
+    <!-- The visual height of the emphasized notification action -->
+    <dimen name="notification_action_emphasized_height">36dp</dimen>
 
     <!-- The padding of the actions in non-conversation layout. For conversations, the analogous
          value is calculated in ConversationLayout#updateActionListPadding() -->
@@ -252,7 +252,7 @@
     <dimen name="notification_actions_icon_drawable_size">20dp</dimen>
 
     <!-- The corner radius if the emphasized action buttons in a notification -->
-    <dimen name="notification_action_button_radius">8dp</dimen>
+    <dimen name="notification_action_button_radius">18dp</dimen>
 
     <!-- Size of the stroke with for the emphasized notification button style -->
     <dimen name="emphasized_button_stroke_width">1dp</dimen>

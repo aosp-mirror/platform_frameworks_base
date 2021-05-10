@@ -27,9 +27,7 @@ import android.graphics.drawable.Icon;
 import android.graphics.drawable.RippleDrawable;
 import android.util.AttributeSet;
 import android.view.RemotableViewMethod;
-import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.RemoteViews;
 
 import com.android.internal.R;
@@ -42,8 +40,6 @@ import com.android.internal.R;
 @RemoteViews.RemoteView
 public class EmphasizedNotificationButton extends Button {
     private final RippleDrawable mRipple;
-    private final int mStrokeWidth;
-    private final int mStrokeColor;
     private boolean mPriority;
 
     public EmphasizedNotificationButton(Context context) {
@@ -63,9 +59,6 @@ public class EmphasizedNotificationButton extends Button {
         super(context, attrs, defStyleAttr, defStyleRes);
         DrawableWrapper background = (DrawableWrapper) getBackground().mutate();
         mRipple = (RippleDrawable) background.getDrawable();
-        mStrokeWidth = getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.emphasized_button_stroke_width);
-        mStrokeColor = getContext().getColor(com.android.internal.R.color.material_grey_300);
         mRipple.mutate();
     }
 
@@ -79,13 +72,6 @@ public class EmphasizedNotificationButton extends Button {
     public void setButtonBackground(ColorStateList color) {
         GradientDrawable inner = (GradientDrawable) mRipple.getDrawable(0);
         inner.setColor(color);
-        invalidate();
-    }
-
-    @RemotableViewMethod
-    public void setHasStroke(boolean hasStroke) {
-        GradientDrawable inner = (GradientDrawable) mRipple.getDrawable(0);
-        inner.setStroke(hasStroke ? mStrokeWidth : 0, mStrokeColor);
         invalidate();
     }
 
@@ -121,18 +107,13 @@ public class EmphasizedNotificationButton extends Button {
     }
 
     /**
-     * Changes the LayoutParams.width to WRAP_CONTENT, with the argument representing if this view
-     * is a priority over its peers (which affects weight).
+     * Sets whether this view is a priority over its peers (which affects width).
+     * Specifically, this is used by {@link NotificationActionListLayout} to give this view width
+     * priority ahead of user-defined buttons when allocating horizontal space.
      */
     @RemotableViewMethod
-    public void setWrapModePriority(boolean priority) {
+    public void setIsPriority(boolean priority) {
         mPriority = priority;
-        ViewGroup.LayoutParams layoutParams = getLayoutParams();
-        layoutParams.width = ViewGroup.LayoutParams.WRAP_CONTENT;
-        if (layoutParams instanceof LinearLayout.LayoutParams) {
-            ((LinearLayout.LayoutParams) layoutParams).weight = 0;
-        }
-        setLayoutParams(layoutParams);
     }
 
     /**

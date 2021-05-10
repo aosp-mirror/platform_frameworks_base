@@ -46,7 +46,6 @@ public class NotificationActionListLayout extends LinearLayout {
     private ArrayList<Pair<Integer, TextView>> mMeasureOrderTextViews = new ArrayList<>();
     private ArrayList<View> mMeasureOrderOther = new ArrayList<>();
     private boolean mEmphasizedMode;
-    private boolean mPrioritizedWrapMode;
     private int mDefaultPaddingBottom;
     private int mDefaultPaddingTop;
     private int mEmphasizedHeight;
@@ -72,10 +71,6 @@ public class NotificationActionListLayout extends LinearLayout {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        if (mEmphasizedMode && !mPrioritizedWrapMode) {
-            super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-            return;
-        }
         final int N = getChildCount();
         int textViews = 0;
         int otherViews = 0;
@@ -175,8 +170,7 @@ public class NotificationActionListLayout extends LinearLayout {
         final int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
             View c = getChildAt(i);
-            if (c instanceof EmphasizedNotificationButton
-                    && ((EmphasizedNotificationButton) c).isPriority()) {
+            if (isPriority(c)) {
                 // add with 0 length to ensure that this view is measured before others.
                 mMeasureOrderTextViews.add(Pair.create(0, (TextView) c));
             } else if (c instanceof TextView && ((TextView) c).getText().length() > 0) {
@@ -213,10 +207,6 @@ public class NotificationActionListLayout extends LinearLayout {
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        if (mEmphasizedMode && !mPrioritizedWrapMode) {
-            super.onLayout(changed, left, top, right, bottom);
-            return;
-        }
         final boolean isLayoutRtl = isLayoutRtl();
         final int paddingTop = mPaddingTop;
         final boolean centerAligned = (mGravity & Gravity.CENTER_HORIZONTAL) != 0;
@@ -290,16 +280,6 @@ public class NotificationActionListLayout extends LinearLayout {
                 com.android.internal.R.dimen.notification_action_emphasized_height);
         mRegularHeight = getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.notification_action_list_height);
-    }
-
-    /**
-     * When used with emphasizedMode, changes the button sizing behavior to prioritize certain
-     * buttons (which are system generated) to not scrunch, and leave the remaining space for
-     * custom actions.
-     */
-    @RemotableViewMethod
-    public void setPrioritizedWrapMode(boolean prioritizedWrapMode) {
-        mPrioritizedWrapMode = prioritizedWrapMode;
     }
 
     /**

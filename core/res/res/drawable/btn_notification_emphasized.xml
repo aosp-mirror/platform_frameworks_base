@@ -24,13 +24,11 @@
         <item>
             <shape android:shape="rectangle">
                 <corners android:radius="@dimen/notification_action_button_radius" />
-                <padding android:left="@dimen/button_padding_horizontal_material"
+                <padding android:left="12dp"
                          android:top="@dimen/button_padding_vertical_material"
-                         android:right="@dimen/button_padding_horizontal_material"
+                         android:right="12dp"
                          android:bottom="@dimen/button_padding_vertical_material" />
                 <solid android:color="@color/white" />
-                <stroke android:width="@dimen/emphasized_button_stroke_width"
-                        android:color="@color/material_grey_300"/>
             </shape>
         </item>
     </ripple>

@@ -5662,11 +5662,6 @@ public class Notification implements Parcelable
                         R.dimen.call_notification_collapsible_indent);
             }
             big.setBoolean(R.id.actions, "setEmphasizedMode", emphazisedMode);
-            if (p.mCallStyleActions) {
-                // Use "wrap_content" (unlike normal emphasized mode) and allow prioritizing the
-                // required actions (Answer, Decline, and Hang Up).
-                big.setBoolean(R.id.actions, "setPrioritizedWrapMode", true);
-            }
             if (numActions > 0 && !p.mHideActions) {
                 big.setViewVisibility(R.id.actions_container, View.VISIBLE);
                 big.setViewVisibility(R.id.actions, View.VISIBLE);
@@ -5683,7 +5678,7 @@ public class Notification implements Parcelable
                         // Clear the drawable
                         button.setInt(R.id.action0, "setBackgroundResource", 0);
                     }
-                    if (p.mCallStyleActions && i > 0) {
+                    if (emphazisedMode && i > 0) {
                         // Clear start margin from non-first buttons to reduce the gap between them.
                         //  (8dp remaining gap is from all buttons' standard 4dp inset).
                         button.setViewLayoutMarginDimen(R.id.action0, RemoteViews.MARGIN_START, 0);
@@ -6103,26 +6098,21 @@ public class Notification implements Parcelable
                 // change the background bgColor
                 CharSequence title = action.title;
                 ColorStateList[] outResultColor = new ColorStateList[1];
-                int background = getBackgroundColor(p);
+                int background = getSecondaryAccentColor(p);
                 if (isLegacy()) {
                     title = ContrastColorUtil.clearColorSpans(title);
                 } else {
                     title = ensureColorSpanContrast(title, background, outResultColor);
                 }
                 button.setTextViewText(R.id.action0, processTextSpans(title));
-                final int textColor;
                 boolean hasColorOverride = outResultColor[0] != null;
                 if (hasColorOverride) {
                     // There's a span spanning the full text, let's take it and use it as the
                     // background color
                     background = outResultColor[0].getDefaultColor();
-                    textColor = ContrastColorUtil.resolvePrimaryColor(mContext,
-                            background, mInNightMode);
-                } else if (mTintActionButtons && !mInNightMode && !isBackgroundColorized(p)) {
-                    textColor = getAccentColor(p);
-                } else {
-                    textColor = getPrimaryTextColor(p);
                 }
+                final int textColor = ContrastColorUtil.resolvePrimaryColor(mContext,
+                        background, mInNightMode);
                 button.setTextColor(R.id.action0, textColor);
                 // We only want about 20% alpha for the ripple
                 final int rippleColor = (textColor & 0x00ffffff) | 0x33000000;
@@ -6130,11 +6120,10 @@ public class Notification implements Parcelable
                         ColorStateList.valueOf(rippleColor));
                 button.setColorStateList(R.id.action0, "setButtonBackground",
                         ColorStateList.valueOf(background));
-                button.setBoolean(R.id.action0, "setHasStroke", !hasColorOverride);
                 if (p.mCallStyleActions) {
                     button.setImageViewIcon(R.id.action0, action.getIcon());
                     boolean priority = action.getExtras().getBoolean(CallStyle.KEY_ACTION_PRIORITY);
-                    button.setBoolean(R.id.action0, "setWrapModePriority", priority);
+                    button.setBoolean(R.id.action0, "setIsPriority", priority);
                     int minWidthDimen =
                             priority ? R.dimen.call_notification_system_action_min_width : 0;
                     button.setIntDimen(R.id.action0, "setMinimumWidth", minWidthDimen);
@@ -6313,6 +6302,22 @@ public class Notification implements Parcelable
                 return getPrimaryTextColor(p);
             }
             int color = obtainThemeColor(R.attr.colorAccent, COLOR_INVALID);
+            if (color != COLOR_INVALID) {
+                return color;
+            }
+            return getContrastColor(p);
+        }
+
+        /**
+         * Gets the secondary accent color for colored UI elements.  If we're tinting with the theme
+         * accent, this is the theme accent color, otherwise this would be identical to
+         * {@link #getSmallIconColor(StandardTemplateParams)}.
+         */
+        private @ColorInt int getSecondaryAccentColor(StandardTemplateParams p) {
+            if (isBackgroundColorized(p)) {
+                return getSecondaryTextColor(p);
+            }
+            int color = obtainThemeColor(R.attr.colorAccentSecondary, COLOR_INVALID);
             if (color != COLOR_INVALID) {
                 return color;
             }
