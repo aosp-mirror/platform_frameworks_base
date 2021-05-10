@@ -52,6 +52,7 @@ java_sdk_library {
 
     compile_dex: true,
     default_to_stubs: true,
+    dist_group: "android",
 }
 
 // Build the android.test.runner-minus-junit library

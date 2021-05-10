@@ -48,6 +48,7 @@ java_sdk_library {
     ],
     compile_dex: true,
     default_to_stubs: true,
+    dist_group: "android",
 }
 
 // Make the current.txt available for use by the cts/tests/signature tests.

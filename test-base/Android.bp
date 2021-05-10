@@ -55,6 +55,7 @@ java_sdk_library {
     hiddenapi_additional_annotations: [
         "android.test.base-hiddenapi-annotations",
     ],
+    dist_group: "android",
 }
 
 // Build the android.test.base_static library
