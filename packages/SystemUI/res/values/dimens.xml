@@ -623,8 +623,6 @@
 
     <dimen name="qs_notif_collapsed_space">64dp</dimen>
 
-    <dimen name="qs_container_bottom_padding">24dp</dimen>
-
     <!-- Desired qs icon overlay size. -->
     <dimen name="qs_detail_icon_overlay_size">24dp</dimen>
 
