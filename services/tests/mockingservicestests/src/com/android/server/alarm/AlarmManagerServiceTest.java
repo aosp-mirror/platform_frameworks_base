@@ -2403,6 +2403,34 @@ public class AlarmManagerServiceTest {
     }
 
     @Test
+    public void opScheduleExactAlarmGranted() throws Exception {
+        final long durationMs = 20000L;
+        when(mActivityManagerInternal.getBootTimeTempAllowListDuration()).thenReturn(durationMs);
+
+        mockExactAlarmPermissionGrant(true, false, MODE_ALLOWED);
+        mIAppOpsCallback.opChanged(OP_SCHEDULE_EXACT_ALARM, TEST_CALLING_UID, TEST_CALLING_PACKAGE);
+
+        final ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
+        final ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
+
+        verify(mMockContext).sendBroadcastAsUser(intentCaptor.capture(), eq(UserHandle.SYSTEM),
+                isNull(), bundleCaptor.capture());
+
+        // Validate the intent.
+        assertEquals(AlarmManager.ACTION_SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED,
+                intentCaptor.getValue().getAction());
+        assertEquals(TEST_CALLING_PACKAGE, intentCaptor.getValue().getPackage());
+
+        // Validate the options.
+        final BroadcastOptions bOptions = new BroadcastOptions(bundleCaptor.getValue());
+        assertEquals(TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
+                bOptions.getTemporaryAppAllowlistType());
+        assertEquals(durationMs, bOptions.getTemporaryAppAllowlistDuration());
+        assertEquals(PowerExemptionManager.REASON_SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED,
+                bOptions.getTemporaryAppAllowlistReasonCode());
+    }
+
+    @Test
     public void removeExactAlarmsOnPermissionRevoked() {
         doReturn(true).when(
                 () -> CompatChanges.isChangeEnabled(eq(AlarmManager.REQUIRE_EXACT_ALARM_PERMISSION),
