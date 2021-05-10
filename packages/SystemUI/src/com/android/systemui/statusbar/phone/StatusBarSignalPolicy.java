@@ -97,13 +97,13 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
         mActivityEnabled = mContext.getResources().getBoolean(R.bool.config_showActivity);
 
         mIconController = iconController;
+        mCarrierConfigTracker = carrierConfigTracker;
         mNetworkController = Dependency.get(NetworkController.class);
         mSecurityController = Dependency.get(SecurityController.class);
 
         Dependency.get(TunerService.class).addTunable(this, StatusBarIconController.ICON_HIDE_LIST);
         mNetworkController.addCallback(this);
         mSecurityController.addCallback(this);
-        mCarrierConfigTracker = carrierConfigTracker;
     }
 
     public void destroy() {
