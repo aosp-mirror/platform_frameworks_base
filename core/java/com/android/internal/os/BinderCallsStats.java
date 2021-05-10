@@ -54,6 +54,7 @@ public class BinderCallsStats implements BinderInternal.Observer {
     public static final int PERIODIC_SAMPLING_INTERVAL_DEFAULT = 1000;
     public static final boolean DEFAULT_TRACK_SCREEN_INTERACTIVE = false;
     public static final boolean DEFAULT_TRACK_DIRECT_CALLING_UID = true;
+    public static final boolean DEFAULT_COLLECT_LATENCY_DATA = false;
     public static final int MAX_BINDER_CALL_STATS_COUNT_DEFAULT = 1500;
     private static final String DEBUG_ENTRY_PREFIX = "__DEBUG_";
 
@@ -89,19 +90,27 @@ public class BinderCallsStats implements BinderInternal.Observer {
     private boolean mAddDebugEntries = false;
     private boolean mTrackDirectCallingUid = DEFAULT_TRACK_DIRECT_CALLING_UID;
     private boolean mTrackScreenInteractive = DEFAULT_TRACK_SCREEN_INTERACTIVE;
+    private boolean mCollectLatencyData = DEFAULT_COLLECT_LATENCY_DATA;
 
     private CachedDeviceState.Readonly mDeviceState;
     private CachedDeviceState.TimeInStateStopwatch mBatteryStopwatch;
+
+    private BinderLatencyObserver mLatencyObserver;
 
     /** Injector for {@link BinderCallsStats}. */
     public static class Injector {
         public Random getRandomGenerator() {
             return new Random();
         }
+
+        public BinderLatencyObserver getLatencyObserver() {
+            return new BinderLatencyObserver(new BinderLatencyObserver.Injector());
+        }
     }
 
     public BinderCallsStats(Injector injector) {
         this.mRandom = injector.getRandomGenerator();
+        this.mLatencyObserver = injector.getLatencyObserver();
     }
 
     public void setDeviceState(@NonNull CachedDeviceState.Readonly deviceState) {
@@ -128,7 +137,10 @@ public class BinderCallsStats implements BinderInternal.Observer {
         if (shouldRecordDetailedData()) {
             s.cpuTimeStarted = getThreadTimeMicro();
             s.timeStarted = getElapsedRealtimeMicro();
+        } else if (mCollectLatencyData) {
+            s.timeStarted = getElapsedRealtimeMicro();
         }
+
         return s;
     }
 
@@ -153,6 +165,10 @@ public class BinderCallsStats implements BinderInternal.Observer {
 
     private void processCallEnded(CallSession s,
             int parcelRequestSize, int parcelReplySize, int workSourceUid) {
+        if (mCollectLatencyData) {
+            mLatencyObserver.callEnded(s);
+        }
+
         // Non-negative time signals we need to record data for this call.
         final boolean recordCall = s.cpuTimeStarted >= 0;
         final long duration;
@@ -555,6 +571,17 @@ public class BinderCallsStats implements BinderInternal.Observer {
         }
     }
 
+    /** Whether to collect latency histograms. */
+    public void setCollectLatencyData(boolean collectLatencyData) {
+        mCollectLatencyData = collectLatencyData;
+    }
+
+    /** Whether to collect latency histograms. */
+    @VisibleForTesting
+    public boolean getCollectLatencyData() {
+        return mCollectLatencyData;
+    }
+
     public void reset() {
         synchronized (mLock) {
             mCallStatsCount = 0;
@@ -565,6 +592,8 @@ public class BinderCallsStats implements BinderInternal.Observer {
             if (mBatteryStopwatch != null) {
                 mBatteryStopwatch.reset();
             }
+            // Do not reset the latency observer as binder stats and latency will be pushed to
+            // statsd at different intervals so the resets should not be coupled.
         }
     }
 
@@ -765,6 +794,10 @@ public class BinderCallsStats implements BinderInternal.Observer {
     @VisibleForTesting
     public ArrayMap<String, Integer> getExceptionCounts() {
         return mExceptionCounts;
+    }
+
+    public BinderLatencyObserver getLatencyObserver() {
+        return mLatencyObserver;
     }
 
     @VisibleForTesting
