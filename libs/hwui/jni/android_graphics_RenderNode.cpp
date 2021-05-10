@@ -572,11 +572,11 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
             info.damageAccumulator->computeCurrentTransform(&transform);
             const RenderProperties& props = node.properties();
 
+            uirenderer::Rect bounds(props.getWidth(), props.getHeight());
             if (info.stretchEffectCount) {
-                handleStretchEffect(info, transform);
+                handleStretchEffect(info, bounds);
             }
 
-            uirenderer::Rect bounds(props.getWidth(), props.getHeight());
             transform.mapRect(bounds);
 
             if (CC_LIKELY(transform.isPureTranslate())) {
@@ -639,7 +639,33 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
             return env;
         }
 
-        void handleStretchEffect(const TreeInfo& info, const Matrix4& transform) {
+        void stretchTargetBounds(const StretchEffect& stretchEffect,
+                                 float width, float height,
+                                 const SkRect& childRelativeBounds,
+                                 uirenderer::Rect& bounds) {
+              float normalizedLeft = childRelativeBounds.left() / width;
+              float normalizedTop = childRelativeBounds.top() / height;
+              float normalizedRight = childRelativeBounds.right() / width;
+              float normalizedBottom = childRelativeBounds.bottom() / height;
+              float reverseLeft = width *
+                  (stretchEffect.computeStretchedPositionX(normalizedLeft) -
+                    normalizedLeft);
+              float reverseTop = height *
+                  (stretchEffect.computeStretchedPositionY(normalizedTop) -
+                    normalizedTop);
+              float reverseRight = width *
+                  (stretchEffect.computeStretchedPositionX(normalizedRight) -
+                    normalizedLeft);
+              float reverseBottom = height *
+                  (stretchEffect.computeStretchedPositionY(normalizedBottom) -
+                    normalizedTop);
+              bounds.left = reverseLeft;
+              bounds.top = reverseTop;
+              bounds.right = reverseRight;
+              bounds.bottom = reverseBottom;
+        }
+
+        void handleStretchEffect(const TreeInfo& info, uirenderer::Rect& targetBounds) {
             // Search up to find the nearest stretcheffect parent
             const DamageAccumulator::StretchResult result =
                 info.damageAccumulator->findNearestStretchEffect();
@@ -649,6 +675,8 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
             }
 
             const auto& childRelativeBounds = result.childRelativeBounds;
+            stretchTargetBounds(*effect, result.width, result.height,
+                                childRelativeBounds,targetBounds);
 
             JNIEnv* env = jnienv();
 
