@@ -33,6 +33,7 @@
 #include "idmap2/BinaryStreamVisitor.h"
 #include "idmap2/FileUtils.h"
 #include "idmap2/Idmap.h"
+#include "idmap2/PrettyPrintVisitor.h"
 #include "idmap2/Result.h"
 #include "idmap2/SysTrace.h"
 
@@ -45,6 +46,7 @@ using android::idmap2::FabricatedOverlayContainer;
 using android::idmap2::Idmap;
 using android::idmap2::IdmapHeader;
 using android::idmap2::OverlayResourceContainer;
+using android::idmap2::PrettyPrintVisitor;
 using android::idmap2::TargetResourceContainer;
 using android::idmap2::utils::kIdmapCacheDir;
 using android::idmap2::utils::kIdmapFilePermissionMask;
@@ -349,6 +351,26 @@ binder::Status Idmap2Service::deleteFabricatedOverlay(const std::string& overlay
   }
 
   *_aidl_return = true;
+  return ok();
+}
+
+binder::Status Idmap2Service::dumpIdmap(const std::string& overlay_path,
+                                        std::string* _aidl_return) {
+  assert(_aidl_return);
+
+  const auto idmap_path = Idmap::CanonicalIdmapPathFor(kIdmapCacheDir, overlay_path);
+  std::ifstream fin(idmap_path);
+  const auto idmap = Idmap::FromBinaryStream(fin);
+  fin.close();
+  if (!idmap) {
+    return error(idmap.GetErrorMessage());
+  }
+
+  std::stringstream stream;
+  PrettyPrintVisitor visitor(stream);
+  (*idmap)->accept(&visitor);
+  *_aidl_return = stream.str();
+
   return ok();
 }
 

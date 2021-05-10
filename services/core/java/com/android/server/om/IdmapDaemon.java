@@ -170,6 +170,16 @@ class IdmapDaemon {
         }
     }
 
+    String dumpIdmap(@NonNull String overlayPath) {
+        try (Connection c = connect()) {
+            String dump = mService.dumpIdmap(overlayPath);
+            return TextUtils.nullIfEmpty(dump);
+        } catch (Exception e) {
+            Slog.wtf(TAG, "failed to dump idmap", e);
+            return null;
+        }
+    }
+
     private IBinder getIdmapService() throws TimeoutException, RemoteException {
         SystemService.start(IDMAP_DAEMON);
 

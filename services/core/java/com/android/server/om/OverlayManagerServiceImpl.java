@@ -22,6 +22,7 @@ import static android.content.om.OverlayInfo.STATE_MISSING_TARGET;
 import static android.content.om.OverlayInfo.STATE_NO_IDMAP;
 import static android.content.om.OverlayInfo.STATE_OVERLAY_IS_BEING_REPLACED;
 import static android.content.om.OverlayInfo.STATE_TARGET_IS_BEING_REPLACED;
+import static android.os.UserHandle.USER_SYSTEM;
 
 import static com.android.server.om.OverlayManagerService.DEBUG;
 import static com.android.server.om.OverlayManagerService.TAG;
@@ -38,6 +39,7 @@ import android.os.FabricatedOverlayInternal;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.Pair;
 import android.util.Slog;
 
 import com.android.internal.content.om.OverlayConfig;
@@ -682,8 +684,38 @@ final class OverlayManagerServiceImpl {
     }
 
     void dump(@NonNull final PrintWriter pw, @NonNull DumpState dumpState) {
+        Pair<OverlayIdentifier, String> overlayIdmap = null;
+        if (dumpState.getPackageName() != null) {
+            OverlayIdentifier id = new OverlayIdentifier(dumpState.getPackageName(),
+                    dumpState.getOverlayName());
+            OverlayInfo oi = mSettings.getNullableOverlayInfo(id, USER_SYSTEM);
+            if (oi != null) {
+                overlayIdmap = new Pair<>(id, oi.baseCodePath);
+            }
+        }
+
+        // settings
         mSettings.dump(pw, dumpState);
-        if (dumpState.getPackageName() == null) {
+
+        // idmap data
+        if (dumpState.getField() == null) {
+            Set<Pair<OverlayIdentifier, String>> allIdmaps = (overlayIdmap != null)
+                    ? Set.of(overlayIdmap) : mSettings.getAllIdentifiersAndBaseCodePaths();
+            for (Pair<OverlayIdentifier, String> pair : allIdmaps) {
+                pw.println("IDMAP OF " + pair.first);
+                String dump = mIdmapManager.dumpIdmap(pair.second);
+                if (dump != null) {
+                    pw.println(dump);
+                } else {
+                    OverlayInfo oi = mSettings.getNullableOverlayInfo(pair.first, USER_SYSTEM);
+                    pw.println((oi != null && !mIdmapManager.idmapExists(oi))
+                            ? "<missing idmap>" : "<internal error>");
+                }
+            }
+        }
+
+        // default overlays
+        if (overlayIdmap == null) {
             pw.println("Default overlays: " + TextUtils.join(";", mDefaultOverlays));
         }
     }
