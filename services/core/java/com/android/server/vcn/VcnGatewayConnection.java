@@ -701,6 +701,7 @@ public class VcnGatewayConnection extends StateMachine {
      * <p>Once torn down, this VcnTunnel CANNOT be started again.
      */
     public void teardownAsynchronously() {
+        Slog.d(TAG, "Triggering async teardown");
         sendDisconnectRequestedAndAcquireWakelock(
                 DISCONNECT_REASON_TEARDOWN, true /* shouldQuit */);
 
@@ -710,6 +711,8 @@ public class VcnGatewayConnection extends StateMachine {
 
     @Override
     protected void onQuitting() {
+        Slog.d(TAG, "Quitting VcnGatewayConnection");
+
         // No need to call setInterfaceDown(); the IpSecInterface is being fully torn down.
         if (mTunnelIface != null) {
             mTunnelIface.close();
@@ -750,6 +753,11 @@ public class VcnGatewayConnection extends StateMachine {
             // TODO(b/180132994): explore safely removing this Thread check
             mVcnContext.ensureRunningOnLooperThread();
 
+            Slog.d(
+                    TAG,
+                    "Selected underlying network changed: "
+                            + (underlying == null ? null : underlying.network));
+
             // TODO(b/179091925): Move the delayed-message handling to BaseState
 
             // If underlying is null, all underlying networks have been lost. Disconnect VCN after a
@@ -774,6 +782,10 @@ public class VcnGatewayConnection extends StateMachine {
 
         if (!mIsQuitting) {
             mWakeLock.acquire();
+
+            if (VDBG) {
+                Slog.v(TAG, "Wakelock acquired: " + mWakeLock);
+            }
         }
     }
 
@@ -781,6 +793,10 @@ public class VcnGatewayConnection extends StateMachine {
         mVcnContext.ensureRunningOnLooperThread();
 
         mWakeLock.release();
+
+        if (VDBG) {
+            Slog.v(TAG, "Wakelock released: " + mWakeLock);
+        }
     }
 
     /**
@@ -935,10 +951,17 @@ public class VcnGatewayConnection extends StateMachine {
     }
 
     private void setTeardownTimeoutAlarm() {
+        if (VDBG) {
+            Slog.v(TAG, "Setting teardown timeout alarm; mCurrentToken: " + mCurrentToken);
+        }
+
         // Safe to assign this alarm because it is either 1) already null, or 2) already fired. In
         // either case, there is nothing to cancel.
         if (mTeardownTimeoutAlarm != null) {
-            Slog.wtf(TAG, "mTeardownTimeoutAlarm should be null before being set");
+            Slog.wtf(
+                    TAG,
+                    "mTeardownTimeoutAlarm should be null before being set; mCurrentToken: "
+                            + mCurrentToken);
         }
 
         final Message delayedMessage = obtainMessage(EVENT_TEARDOWN_TIMEOUT_EXPIRED, mCurrentToken);
@@ -950,6 +973,10 @@ public class VcnGatewayConnection extends StateMachine {
     }
 
     private void cancelTeardownTimeoutAlarm() {
+        if (VDBG) {
+            Slog.v(TAG, "Cancelling teardown timeout alarm; mCurrentToken: " + mCurrentToken);
+        }
+
         if (mTeardownTimeoutAlarm != null) {
             mTeardownTimeoutAlarm.cancel();
             mTeardownTimeoutAlarm = null;
@@ -960,6 +987,13 @@ public class VcnGatewayConnection extends StateMachine {
     }
 
     private void setDisconnectRequestAlarm() {
+        if (VDBG) {
+            Slog.v(
+                    TAG,
+                    "Setting alarm to disconnect due to underlying network loss; mCurrentToken: "
+                            + mCurrentToken);
+        }
+
         // Only schedule a NEW alarm if none is already set.
         if (mDisconnectRequestAlarm != null) {
             return;
@@ -980,6 +1014,13 @@ public class VcnGatewayConnection extends StateMachine {
     }
 
     private void cancelDisconnectRequestAlarm() {
+        if (VDBG) {
+            Slog.v(
+                    TAG,
+                    "Cancelling alarm to disconnect due to underlying network loss; mCurrentToken: "
+                            + mCurrentToken);
+        }
+
         if (mDisconnectRequestAlarm != null) {
             mDisconnectRequestAlarm.cancel();
             mDisconnectRequestAlarm = null;
@@ -993,10 +1034,17 @@ public class VcnGatewayConnection extends StateMachine {
     }
 
     private void setRetryTimeoutAlarm(long delay) {
+        if (VDBG) {
+            Slog.v(TAG, "Setting retry alarm; mCurrentToken: " + mCurrentToken);
+        }
+
         // Safe to assign this alarm because it is either 1) already null, or 2) already fired. In
         // either case, there is nothing to cancel.
         if (mRetryTimeoutAlarm != null) {
-            Slog.wtf(TAG, "mRetryTimeoutAlarm should be null before being set");
+            Slog.wtf(
+                    TAG,
+                    "mRetryTimeoutAlarm should be null before being set; mCurrentToken: "
+                            + mCurrentToken);
         }
 
         final Message delayedMessage = obtainMessage(EVENT_RETRY_TIMEOUT_EXPIRED, mCurrentToken);
@@ -1004,6 +1052,10 @@ public class VcnGatewayConnection extends StateMachine {
     }
 
     private void cancelRetryTimeoutAlarm() {
+        if (VDBG) {
+            Slog.v(TAG, "Cancel retry alarm; mCurrentToken: " + mCurrentToken);
+        }
+
         if (mRetryTimeoutAlarm != null) {
             mRetryTimeoutAlarm.cancel();
             mRetryTimeoutAlarm = null;
@@ -1014,6 +1066,10 @@ public class VcnGatewayConnection extends StateMachine {
 
     @VisibleForTesting(visibility = Visibility.PRIVATE)
     void setSafeModeAlarm() {
+        if (VDBG) {
+            Slog.v(TAG, "Setting safe mode alarm; mCurrentToken: " + mCurrentToken);
+        }
+
         // Only schedule a NEW alarm if none is already set.
         if (mSafeModeTimeoutAlarm != null) {
             return;
@@ -1028,6 +1084,10 @@ public class VcnGatewayConnection extends StateMachine {
     }
 
     private void cancelSafeModeAlarm() {
+        if (VDBG) {
+            Slog.v(TAG, "Cancel safe mode alarm; mCurrentToken: " + mCurrentToken);
+        }
+
         if (mSafeModeTimeoutAlarm != null) {
             mSafeModeTimeoutAlarm.cancel();
             mSafeModeTimeoutAlarm = null;
@@ -1091,6 +1151,15 @@ public class VcnGatewayConnection extends StateMachine {
                             + " with message: "
                             + exception.getMessage();
         }
+
+        Slog.d(
+                TAG,
+                "Encountered error; code="
+                        + errorCode
+                        + ", exceptionClass="
+                        + exceptionClass
+                        + ", exceptionMessage="
+                        + exceptionMessage);
 
         mGatewayStatusCallback.onGatewayConnectionError(
                 mConnectionConfig.getGatewayConnectionName(),
@@ -1234,7 +1303,7 @@ public class VcnGatewayConnection extends StateMachine {
         protected void handleDisconnectRequested(EventDisconnectRequestedInfo info) {
             // TODO(b/180526152): notify VcnStatusCallback for Network loss
 
-            Slog.v(TAG, "Tearing down. Cause: " + info.reason);
+            Slog.d(TAG, "Tearing down. Cause: " + info.reason);
             mIsQuitting = info.shouldQuit;
 
             teardownNetwork();
@@ -1250,6 +1319,7 @@ public class VcnGatewayConnection extends StateMachine {
 
         protected void handleSafeModeTimeoutExceeded() {
             mSafeModeTimeoutAlarm = null;
+            Slog.d(TAG, "Entering safe mode after timeout exceeded");
 
             // Connectivity for this GatewayConnection is broken; tear down the Network.
             teardownNetwork();
@@ -1722,6 +1792,8 @@ public class VcnGatewayConnection extends StateMachine {
         }
 
         private void handleMigrationCompleted(EventMigrationCompletedInfo migrationCompletedInfo) {
+            Slog.v(TAG, "Migration completed: " + mUnderlying.network);
+
             applyTransform(
                     mCurrentToken,
                     mTunnelIface,
@@ -1744,6 +1816,8 @@ public class VcnGatewayConnection extends StateMachine {
             mUnderlying = ((EventUnderlyingNetworkChangedInfo) msg.obj).newUnderlying;
 
             if (mUnderlying == null) {
+                Slog.v(TAG, "Underlying network lost");
+
                 // Ignored for now; a new network may be coming up. If none does, the delayed
                 // NETWORK_LOST disconnect will be fired, and tear down the session + network.
                 return;
