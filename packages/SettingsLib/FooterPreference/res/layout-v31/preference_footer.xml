@@ -24,6 +24,7 @@
     android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
     android:background="?android:attr/selectableItemBackground"
     android:orientation="vertical"
+    android:importantForAccessibility = "no"
     android:clipToPadding="false">
 
     <LinearLayout
