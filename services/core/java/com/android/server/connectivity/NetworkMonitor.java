@@ -38,22 +38,12 @@ import android.net.metrics.IpConnectivityLog;
 import android.net.metrics.NetworkEvent;
 import android.net.metrics.ValidationProbeEvent;
 import android.net.util.Stopwatch;
-import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.telephony.CellIdentityCdma;
-import android.telephony.CellIdentityGsm;
-import android.telephony.CellIdentityLte;
-import android.telephony.CellIdentityWcdma;
-import android.telephony.CellInfo;
-import android.telephony.CellInfoCdma;
-import android.telephony.CellInfoGsm;
-import android.telephony.CellInfoLte;
-import android.telephony.CellInfoWcdma;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.LocalLog;
@@ -121,22 +111,6 @@ public class NetworkMonitor extends StateMachine {
             this.isFirstValidation = isFirstValidation;
         }
     }
-
-    public static final String ACTION_NETWORK_CONDITIONS_MEASURED =
-            "android.net.conn.NETWORK_CONDITIONS_MEASURED";
-    public static final String EXTRA_CONNECTIVITY_TYPE = "extra_connectivity_type";
-    public static final String EXTRA_NETWORK_TYPE = "extra_network_type";
-    public static final String EXTRA_RESPONSE_RECEIVED = "extra_response_received";
-    public static final String EXTRA_IS_CAPTIVE_PORTAL = "extra_is_captive_portal";
-    public static final String EXTRA_CELL_ID = "extra_cellid";
-    public static final String EXTRA_SSID = "extra_ssid";
-    public static final String EXTRA_BSSID = "extra_bssid";
-    /** real time since boot */
-    public static final String EXTRA_REQUEST_TIMESTAMP_MS = "extra_request_timestamp_ms";
-    public static final String EXTRA_RESPONSE_TIMESTAMP_MS = "extra_response_timestamp_ms";
-
-    private static final String PERMISSION_ACCESS_NETWORK_CONDITIONS =
-            "android.permission.ACCESS_NETWORK_CONDITIONS";
 
     // After a network has been tested this result can be sent with EVENT_NETWORK_TESTED.
     // The network should be used as a default internet connection.  It was found to be:
@@ -804,10 +778,6 @@ public class NetworkMonitor extends StateMachine {
 
         long endTime = SystemClock.elapsedRealtime();
 
-        sendNetworkConditionsBroadcast(true /* response received */,
-                result.isPortal() /* isCaptivePortal */,
-                startTime, endTime);
-
         return result;
     }
 
@@ -1024,88 +994,6 @@ public class NetworkMonitor extends StateMachine {
             }
         }
         return null;
-    }
-
-    /**
-     * @param responseReceived - whether or not we received a valid HTTP response to our request.
-     * If false, isCaptivePortal and responseTimestampMs are ignored
-     * TODO: This should be moved to the transports.  The latency could be passed to the transports
-     * along with the captive portal result.  Currently the TYPE_MOBILE broadcasts appear unused so
-     * perhaps this could just be added to the WiFi transport only.
-     */
-    private void sendNetworkConditionsBroadcast(boolean responseReceived, boolean isCaptivePortal,
-            long requestTimestampMs, long responseTimestampMs) {
-        if (Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.WIFI_SCAN_ALWAYS_AVAILABLE, 0) == 0) {
-            return;
-        }
-
-        if (systemReady == false) return;
-
-        Intent latencyBroadcast = new Intent(ACTION_NETWORK_CONDITIONS_MEASURED);
-        switch (mNetworkAgentInfo.networkInfo.getType()) {
-            case ConnectivityManager.TYPE_WIFI:
-                WifiInfo currentWifiInfo = mWifiManager.getConnectionInfo();
-                if (currentWifiInfo != null) {
-                    // NOTE: getSSID()'s behavior changed in API 17; before that, SSIDs were not
-                    // surrounded by double quotation marks (thus violating the Javadoc), but this
-                    // was changed to match the Javadoc in API 17. Since clients may have started
-                    // sanitizing the output of this method since API 17 was released, we should
-                    // not change it here as it would become impossible to tell whether the SSID is
-                    // simply being surrounded by quotes due to the API, or whether those quotes
-                    // are actually part of the SSID.
-                    latencyBroadcast.putExtra(EXTRA_SSID, currentWifiInfo.getSSID());
-                    latencyBroadcast.putExtra(EXTRA_BSSID, currentWifiInfo.getBSSID());
-                } else {
-                    if (VDBG) logw("network info is TYPE_WIFI but no ConnectionInfo found");
-                    return;
-                }
-                break;
-            case ConnectivityManager.TYPE_MOBILE:
-                latencyBroadcast.putExtra(EXTRA_NETWORK_TYPE, mTelephonyManager.getNetworkType());
-                List<CellInfo> info = mTelephonyManager.getAllCellInfo();
-                if (info == null) return;
-                int numRegisteredCellInfo = 0;
-                for (CellInfo cellInfo : info) {
-                    if (cellInfo.isRegistered()) {
-                        numRegisteredCellInfo++;
-                        if (numRegisteredCellInfo > 1) {
-                            if (VDBG) logw("more than one registered CellInfo." +
-                                    " Can't tell which is active.  Bailing.");
-                            return;
-                        }
-                        if (cellInfo instanceof CellInfoCdma) {
-                            CellIdentityCdma cellId = ((CellInfoCdma) cellInfo).getCellIdentity();
-                            latencyBroadcast.putExtra(EXTRA_CELL_ID, cellId);
-                        } else if (cellInfo instanceof CellInfoGsm) {
-                            CellIdentityGsm cellId = ((CellInfoGsm) cellInfo).getCellIdentity();
-                            latencyBroadcast.putExtra(EXTRA_CELL_ID, cellId);
-                        } else if (cellInfo instanceof CellInfoLte) {
-                            CellIdentityLte cellId = ((CellInfoLte) cellInfo).getCellIdentity();
-                            latencyBroadcast.putExtra(EXTRA_CELL_ID, cellId);
-                        } else if (cellInfo instanceof CellInfoWcdma) {
-                            CellIdentityWcdma cellId = ((CellInfoWcdma) cellInfo).getCellIdentity();
-                            latencyBroadcast.putExtra(EXTRA_CELL_ID, cellId);
-                        } else {
-                            if (VDBG) logw("Registered cellinfo is unrecognized");
-                            return;
-                        }
-                    }
-                }
-                break;
-            default:
-                return;
-        }
-        latencyBroadcast.putExtra(EXTRA_CONNECTIVITY_TYPE, mNetworkAgentInfo.networkInfo.getType());
-        latencyBroadcast.putExtra(EXTRA_RESPONSE_RECEIVED, responseReceived);
-        latencyBroadcast.putExtra(EXTRA_REQUEST_TIMESTAMP_MS, requestTimestampMs);
-
-        if (responseReceived) {
-            latencyBroadcast.putExtra(EXTRA_IS_CAPTIVE_PORTAL, isCaptivePortal);
-            latencyBroadcast.putExtra(EXTRA_RESPONSE_TIMESTAMP_MS, responseTimestampMs);
-        }
-        mContext.sendBroadcastAsUser(latencyBroadcast, UserHandle.CURRENT,
-                PERMISSION_ACCESS_NETWORK_CONDITIONS);
     }
 
     private void logNetworkEvent(int evtype) {
