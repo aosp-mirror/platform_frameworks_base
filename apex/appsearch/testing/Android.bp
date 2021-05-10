@@ -33,7 +33,7 @@ java_library {
     visibility: [
         "//frameworks/base/core/tests/coretests",
         "//cts/hostsidetests/appsearch",
-        "//cts/tests/appsearch",
+        "//cts/tests:__subpackages__",
         "//vendor:__subpackages__",
     ],
 }

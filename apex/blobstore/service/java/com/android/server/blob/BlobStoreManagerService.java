@@ -101,14 +101,15 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.util.function.pooled.PooledLambda;
+import com.android.server.LocalManagerRegistry;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.SystemService;
 import com.android.server.Watchdog;
 import com.android.server.blob.BlobMetadata.Committer;
 import com.android.server.pm.UserManagerInternal;
-import com.android.server.usage.StorageStatsManagerInternal;
-import com.android.server.usage.StorageStatsManagerInternal.StorageStatsAugmenter;
+import com.android.server.usage.StorageStatsManagerLocal;
+import com.android.server.usage.StorageStatsManagerLocal.StorageStatsAugmenter;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlSerializer;
@@ -208,7 +209,7 @@ public class BlobStoreManagerService extends SystemService {
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
         mStatsManager = getContext().getSystemService(StatsManager.class);
         registerReceivers();
-        LocalServices.getService(StorageStatsManagerInternal.class)
+        LocalManagerRegistry.getManager(StorageStatsManagerLocal.class)
                 .registerStorageStatsAugmenter(new BlobStorageStatsAugmenter(), TAG);
     }
 
@@ -1281,17 +1282,20 @@ public class BlobStoreManagerService extends SystemService {
 
     private class BlobStorageStatsAugmenter implements StorageStatsAugmenter {
         @Override
-        public void augmentStatsForPackage(@NonNull PackageStats stats, @NonNull String packageName,
-                @UserIdInt int userId, boolean callerHasStatsPermission) {
+        public void augmentStatsForPackageForUser(
+                @NonNull PackageStats stats,
+                @NonNull String packageName,
+                @NonNull UserHandle userHandle,
+                boolean callerHasStatsPermission) {
             final AtomicLong blobsDataSize = new AtomicLong(0);
             forEachSessionInUser(session -> {
                 if (session.getOwnerPackageName().equals(packageName)) {
                     blobsDataSize.getAndAdd(session.getSize());
                 }
-            }, userId);
+            }, userHandle.getIdentifier());
 
             forEachBlob(blobMetadata -> {
-                if (blobMetadata.shouldAttributeToLeasee(packageName, userId,
+                if (blobMetadata.shouldAttributeToLeasee(packageName, userHandle.getIdentifier(),
                         callerHasStatsPermission)) {
                     blobsDataSize.getAndAdd(blobMetadata.getSize());
                 }
@@ -1316,6 +1320,22 @@ public class BlobStoreManagerService extends SystemService {
                         callerHasStatsPermission)) {
                     blobsDataSize.getAndAdd(blobMetadata.getSize());
                 }
+            });
+
+            stats.dataSize += blobsDataSize.get();
+        }
+
+        @Override
+        public void augmentStatsForUser(
+                @NonNull PackageStats stats, @NonNull UserHandle userHandle) {
+            final AtomicLong blobsDataSize = new AtomicLong(0);
+            forEachSessionInUser(session -> {
+                blobsDataSize.getAndAdd(session.getSize());
+            }, userHandle.getIdentifier());
+
+            // TODO(http://b/187460239): Update this to only include blobs available to userId.
+            forEachBlob(blobMetadata -> {
+                blobsDataSize.getAndAdd(blobMetadata.getSize());
             });
 
             stats.dataSize += blobsDataSize.get();

@@ -60,6 +60,20 @@ package com.android.server.stats {
 
 }
 
+package com.android.server.usage {
+
+  public interface StorageStatsManagerLocal {
+    method public void registerStorageStatsAugmenter(@NonNull com.android.server.usage.StorageStatsManagerLocal.StorageStatsAugmenter, @NonNull String);
+  }
+
+  public static interface StorageStatsManagerLocal.StorageStatsAugmenter {
+    method public void augmentStatsForPackageForUser(@NonNull android.content.pm.PackageStats, @NonNull String, @NonNull android.os.UserHandle, boolean);
+    method public void augmentStatsForUid(@NonNull android.content.pm.PackageStats, int, boolean);
+    method public void augmentStatsForUser(@NonNull android.content.pm.PackageStats, @NonNull android.os.UserHandle);
+  }
+
+}
+
 package com.android.server.wifi {
 
   public class SupplicantManager {
