@@ -167,17 +167,13 @@ public final class SetSchemaRequest {
         return mVersion;
     }
 
-    /**
-     * Builder for {@link SetSchemaRequest} objects.
-     *
-     * <p>Once {@link #build} is called, the instance can no longer be used.
-     */
+    /** Builder for {@link SetSchemaRequest} objects. */
     public static final class Builder {
-        private final Set<AppSearchSchema> mSchemas = new ArraySet<>();
-        private final Set<String> mSchemasNotDisplayedBySystem = new ArraySet<>();
-        private final Map<String, Set<PackageIdentifier>> mSchemasVisibleToPackages =
+        private ArraySet<AppSearchSchema> mSchemas = new ArraySet<>();
+        private ArraySet<String> mSchemasNotDisplayedBySystem = new ArraySet<>();
+        private ArrayMap<String, Set<PackageIdentifier>> mSchemasVisibleToPackages =
                 new ArrayMap<>();
-        private final Map<String, Migrator> mMigrators = new ArrayMap<>();
+        private ArrayMap<String, Migrator> mMigrators = new ArrayMap<>();
         private boolean mForceOverride = false;
         private int mVersion = 1;
         private boolean mBuilt = false;
@@ -188,12 +184,11 @@ public final class SetSchemaRequest {
          * <p>An {@link AppSearchSchema} object represents one type of structured data.
          *
          * <p>Any documents of these types will be displayed on system UI surfaces by default.
-         *
-         * @throws IllegalStateException if the builder has already been used.
          */
         @NonNull
         public Builder addSchemas(@NonNull AppSearchSchema... schemas) {
             Objects.requireNonNull(schemas);
+            resetIfBuilt();
             return addSchemas(Arrays.asList(schemas));
         }
 
@@ -201,13 +196,11 @@ public final class SetSchemaRequest {
          * Adds a collection of {@link AppSearchSchema} objects to the schema.
          *
          * <p>An {@link AppSearchSchema} object represents one type of structured data.
-         *
-         * @throws IllegalStateException if the builder has already been used.
          */
         @NonNull
         public Builder addSchemas(@NonNull Collection<AppSearchSchema> schemas) {
-            Preconditions.checkState(!mBuilt, "Builder has already been used");
             Objects.requireNonNull(schemas);
+            resetIfBuilt();
             mSchemas.addAll(schemas);
             return this;
         }
@@ -225,7 +218,6 @@ public final class SetSchemaRequest {
          * @param schemaType The name of an {@link AppSearchSchema} within the same {@link
          *     SetSchemaRequest}, which will be configured.
          * @param displayed Whether documents of this type will be displayed on system UI surfaces.
-         * @throws IllegalStateException if the builder has already been used.
          */
         // Merged list available from getSchemasNotDisplayedBySystem
         @SuppressLint("MissingGetterMatchingBuilder")
@@ -233,8 +225,7 @@ public final class SetSchemaRequest {
         public Builder setSchemaTypeDisplayedBySystem(
                 @NonNull String schemaType, boolean displayed) {
             Objects.requireNonNull(schemaType);
-            Preconditions.checkState(!mBuilt, "Builder has already been used");
-
+            resetIfBuilt();
             if (displayed) {
                 mSchemasNotDisplayedBySystem.remove(schemaType);
             } else {
@@ -262,7 +253,6 @@ public final class SetSchemaRequest {
          * @param schemaType The schema type to set visibility on.
          * @param visible Whether the {@code schemaType} will be visible or not.
          * @param packageIdentifier Represents the package that will be granted visibility.
-         * @throws IllegalStateException if the builder has already been used.
          */
         // Merged list available from getSchemasVisibleToPackages
         @SuppressLint("MissingGetterMatchingBuilder")
@@ -273,7 +263,7 @@ public final class SetSchemaRequest {
                 @NonNull PackageIdentifier packageIdentifier) {
             Objects.requireNonNull(schemaType);
             Objects.requireNonNull(packageIdentifier);
-            Preconditions.checkState(!mBuilt, "Builder has already been used");
+            resetIfBuilt();
 
             Set<PackageIdentifier> packageIdentifiers = mSchemasVisibleToPackages.get(schemaType);
             if (visible) {
@@ -324,6 +314,7 @@ public final class SetSchemaRequest {
         public Builder setMigrator(@NonNull String schemaType, @NonNull Migrator migrator) {
             Objects.requireNonNull(schemaType);
             Objects.requireNonNull(migrator);
+            resetIfBuilt();
             mMigrators.put(schemaType, migrator);
             return this;
         }
@@ -352,6 +343,7 @@ public final class SetSchemaRequest {
         @NonNull
         public Builder setMigrators(@NonNull Map<String, Migrator> migrators) {
             Objects.requireNonNull(migrators);
+            resetIfBuilt();
             mMigrators.putAll(migrators);
             return this;
         }
@@ -369,6 +361,7 @@ public final class SetSchemaRequest {
          */
         @NonNull
         public Builder setForceOverride(boolean forceOverride) {
+            resetIfBuilt();
             mForceOverride = forceOverride;
             return this;
         }
@@ -391,8 +384,7 @@ public final class SetSchemaRequest {
          * @param version A positive integer representing the version of the entire set of schemas
          *     represents the version of the whole schema in the {@link AppSearchSession} database,
          *     default version is 1.
-         * @throws IllegalStateException if the version is negative or the builder has already been
-         *     used.
+         * @throws IllegalArgumentException if the version is negative.
          * @see AppSearchSession#setSchema
          * @see Migrator
          * @see SetSchemaRequest.Builder#setMigrator
@@ -400,6 +392,7 @@ public final class SetSchemaRequest {
         @NonNull
         public Builder setVersion(@IntRange(from = 1) int version) {
             Preconditions.checkArgument(version >= 1, "Version must be a positive number.");
+            resetIfBuilt();
             mVersion = version;
             return this;
         }
@@ -409,12 +402,9 @@ public final class SetSchemaRequest {
          *
          * @throws IllegalArgumentException if schema types were referenced, but the corresponding
          *     {@link AppSearchSchema} type was never added.
-         * @throws IllegalStateException if the builder has already been used.
          */
         @NonNull
         public SetSchemaRequest build() {
-            Preconditions.checkState(!mBuilt, "Builder has already been used");
-
             // Verify that any schema types with display or visibility settings refer to a real
             // schema.
             // Create a copy because we're going to remove from the set for verification purposes.
@@ -439,6 +429,23 @@ public final class SetSchemaRequest {
                     mMigrators,
                     mForceOverride,
                     mVersion);
+        }
+
+        private void resetIfBuilt() {
+            if (mBuilt) {
+                ArrayMap<String, Set<PackageIdentifier>> schemasVisibleToPackages =
+                        new ArrayMap<>(mSchemasVisibleToPackages.size());
+                for (Map.Entry<String, Set<PackageIdentifier>> entry :
+                        mSchemasVisibleToPackages.entrySet()) {
+                    schemasVisibleToPackages.put(entry.getKey(), new ArraySet<>(entry.getValue()));
+                }
+                mSchemasVisibleToPackages = schemasVisibleToPackages;
+
+                mSchemas = new ArraySet<>(mSchemas);
+                mSchemasNotDisplayedBySystem = new ArraySet<>(mSchemasNotDisplayedBySystem);
+                mMigrators = new ArrayMap<>(mMigrators);
+                mBuilt = false;
+            }
         }
     }
 }

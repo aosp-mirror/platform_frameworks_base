@@ -892,64 +892,129 @@ public class GenericDocument {
     @Override
     @NonNull
     public String toString() {
-        return bundleToString(mBundle).toString();
+        return formatGenericDocumentString(this, /*indentLevel=*/ 0);
     }
 
-    private static StringBuilder bundleToString(Bundle bundle) {
+    @NonNull
+    private static String formatGenericDocumentString(
+            @NonNull GenericDocument document, int indentLevel) {
         StringBuilder stringBuilder = new StringBuilder();
-        try {
-            String[] names = bundle.keySet().toArray(new String[0]);
-            // Sort names to make output deterministic. We need a custom comparator to handle
-            // nulls (arbitrarily putting them first, similar to Comparator.nullsFirst, which is
-            // only available since N).
-            Arrays.sort(
-                    names,
-                    (@Nullable String s1, @Nullable String s2) -> {
-                        if (s1 == null) {
-                            return s2 == null ? 0 : -1;
-                        } else if (s2 == null) {
-                            return 1;
-                        } else {
-                            return s1.compareTo(s2);
-                        }
-                    });
-            for (String name : names) {
-                stringBuilder.append("{ name: '").append(name).append("' value: ");
-                Object valueObject = bundle.get(name);
-                if (valueObject == null) {
-                    stringBuilder.append("<null>");
-                } else if (valueObject instanceof Bundle) {
-                    stringBuilder.append(bundleToString((Bundle) valueObject));
-                } else if (valueObject.getClass().isArray()) {
-                    stringBuilder.append("[ ");
-                    for (int i = 0; i < Array.getLength(valueObject); i++) {
-                        Object element = Array.get(valueObject, i);
-                        stringBuilder.append("'");
-                        if (element instanceof Bundle) {
-                            stringBuilder.append(bundleToString((Bundle) element));
-                        } else {
-                            stringBuilder.append(Array.get(valueObject, i));
-                        }
-                        stringBuilder.append("' ");
-                    }
-                    stringBuilder.append("]");
-                } else if (valueObject instanceof List) {
-                    @SuppressWarnings("unchecked")
-                    List<Bundle> bundles = (List<Bundle>) valueObject;
-                    for (int i = 0; i < bundles.size(); i++) {
-                        stringBuilder.append(bundleToString(bundles.get(i)));
-                    }
-                } else {
-                    stringBuilder.append(valueObject.toString());
-                }
-                stringBuilder.append(" } ");
+        stringBuilder.append(getIndent(indentLevel)).append("{\n");
+
+        String indentLevelOneString = getIndent(indentLevel + 1);
+
+        stringBuilder
+                .append(indentLevelOneString)
+                .append("namespace: \"")
+                .append(document.getNamespace())
+                .append("\",\n");
+
+        stringBuilder
+                .append(indentLevelOneString)
+                .append("id: \"")
+                .append(document.getId())
+                .append("\",\n");
+
+        stringBuilder
+                .append(indentLevelOneString)
+                .append("score: " + document.getScore())
+                .append(",\n");
+
+        stringBuilder
+                .append(indentLevelOneString)
+                .append("schemaType: \"")
+                .append(document.getSchemaType())
+                .append("\",\n");
+
+        stringBuilder
+                .append(indentLevelOneString)
+                .append("creationTimestampMillis: " + document.getCreationTimestampMillis())
+                .append(",\n");
+
+        stringBuilder
+                .append(indentLevelOneString)
+                .append("timeToLiveMillis: " + document.getTtlMillis())
+                .append(",\n");
+
+        stringBuilder.append(indentLevelOneString).append("properties: {\n");
+
+        int idx = 0;
+        for (String propertyName : document.getPropertyNames()) {
+            Object property = document.getProperty(propertyName);
+            stringBuilder
+                    .append(getIndent(indentLevel + 2))
+                    .append("\"")
+                    .append(propertyName)
+                    .append("\"")
+                    .append(": ");
+            stringBuilder.append(getPropertyString(property, indentLevel + 2));
+            if (idx != document.getPropertyNames().size() - 1) {
+                stringBuilder.append(",\n");
             }
-        } catch (RuntimeException e) {
-            // Catch any exceptions here since corrupt Bundles can throw different types of
-            // exceptions (e.g. b/38445840 & b/68937025).
-            stringBuilder.append("<error>");
+            ++idx;
         }
-        return stringBuilder;
+
+        stringBuilder.append("\n");
+        stringBuilder.append(indentLevelOneString).append("}");
+
+        stringBuilder.append("\n");
+        stringBuilder.append(getIndent(indentLevel)).append("}");
+
+        return stringBuilder.toString();
+    }
+
+    /**
+     * Creates string for property.
+     *
+     * @param property property object to create string for.
+     * @param indentLevel base indent level for property.
+     */
+    @NonNull
+    private static String getPropertyString(@NonNull Object property, int indentLevel) {
+        Objects.requireNonNull(property);
+
+        StringBuilder str = new StringBuilder("[");
+
+        if (property instanceof GenericDocument[]) {
+            GenericDocument[] documentValues = (GenericDocument[]) property;
+            for (int i = 0; i < documentValues.length; ++i) {
+                str.append("\n");
+                str.append(formatGenericDocumentString(documentValues[i], indentLevel + 1));
+                if (i != documentValues.length - 1) {
+                    str.append(", ");
+                }
+                str.append("\n");
+            }
+            str.append(getIndent(indentLevel));
+        } else {
+            int propertyArrLength = Array.getLength(property);
+            for (int i = 0; i < propertyArrLength; i++) {
+                Object propertyElement = Array.get(property, i);
+                if (propertyElement instanceof String) {
+                    str.append("\"").append(propertyElement).append("\"");
+                } else if (propertyElement instanceof byte[]) {
+                    str.append(Arrays.toString((byte[]) propertyElement));
+                } else {
+                    str.append(propertyElement);
+                }
+                if (i != propertyArrLength - 1) {
+                    str.append(", ");
+                }
+            }
+        }
+
+        str.append("]");
+        return str.toString();
+    }
+
+    /** Creates string for given indent level. */
+    @NonNull
+    private static String getIndent(int indentLevel) {
+        StringBuilder indentedString = new StringBuilder();
+        for (int i = 0; i < indentLevel; ++i) {
+            indentedString.append("  ");
+        }
+        return indentedString.toString();
     }
 
     /**
