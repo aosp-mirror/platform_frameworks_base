@@ -3888,37 +3888,28 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     public void testForceUpdateUserSetupComplete_permission() {
         // GIVEN the permission MANAGE_PROFILE_AND_DEVICE_OWNERS is not granted
         assertExpectException(SecurityException.class, /* messageRegex =*/ null,
-                () -> dpm.forceUpdateUserSetupComplete());
-    }
-
-    @Test
-    public void testForceUpdateUserSetupComplete_systemUser() {
-        mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
-        // GIVEN calling from user 20
-        mContext.binder.callingUid = DpmMockContext.CALLER_UID;
-        assertExpectException(SecurityException.class, /* messageRegex =*/ null,
-                () -> dpm.forceUpdateUserSetupComplete());
+                () -> dpm.forceUpdateUserSetupComplete(UserHandle.USER_SYSTEM));
     }
 
     @Test
     public void testForceUpdateUserSetupComplete_forcesUpdate() {
         mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+        final int userId = UserHandle.getUserId(mContext.binder.callingUid);
 
-        final int userId = UserHandle.USER_SYSTEM;
         // GIVEN userComplete is false in SettingsProvider
         setUserSetupCompleteForUser(false, userId);
 
         // GIVEN userComplete is true in DPM
         DevicePolicyData userData = new DevicePolicyData(userId);
         userData.mUserSetupComplete = true;
-        dpms.mUserData.put(UserHandle.USER_SYSTEM, userData);
+        dpms.mUserData.put(userId, userData);
 
         assertThat(dpms.hasUserSetupCompleted()).isTrue();
 
-        dpm.forceUpdateUserSetupComplete();
+        dpm.forceUpdateUserSetupComplete(userId);
 
-        // THEN the state in dpms is not changed
+        // THEN the state in dpms is changed
         assertThat(dpms.hasUserSetupCompleted()).isFalse();
     }
 
