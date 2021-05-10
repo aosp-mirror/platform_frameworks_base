@@ -87,6 +87,16 @@ public final class VcnNetworkPolicyResult implements Parcelable {
                 && mNetworkCapabilities.equals(that.mNetworkCapabilities);
     }
 
+    @Override
+    public String toString() {
+        return "VcnNetworkPolicyResult { "
+                + "mIsTeardownRequested = "
+                + mIsTearDownRequested
+                + ", mNetworkCapabilities"
+                + mNetworkCapabilities
+                + " }";
+    }
+
     /** {@inheritDoc} */
     @Override
     public int describeContents() {
