@@ -2273,7 +2273,7 @@ android_media_AudioSystem_setSurroundFormatEnabled(JNIEnv *env, jobject thiz,
     return (jint)nativeToJavaStatus(status);
 }
 
-static jint android_media_AudioSystem_get_FCC_8(JNIEnv *env, jobject thiz) {
+static jint android_media_AudioSystem_getMaxChannelCount(JNIEnv *env, jobject thiz) {
     return FCC_8;
 }
 
@@ -2672,14 +2672,16 @@ static const JNINativeMethod gEventHandlerMethods[] = {
         (void *)android_media_AudioSystem_eventHandlerFinalize},
 };
 
-static const JNINativeMethod gGetFCC8Methods[] = {
-    {"native_get_FCC_8", "()I", (void *)android_media_AudioSystem_get_FCC_8},
+static const JNINativeMethod gFrameworkCapabilities[] = {
+        {"native_getMaxChannelCount", "()I", (void *)android_media_AudioSystem_getMaxChannelCount},
 };
 
 int register_android_media_AudioSystem(JNIEnv *env)
 {
     // This needs to be done before hooking up methods AudioTrackRoutingProxy (below)
-    RegisterMethodsOrDie(env, kClassPathName, gGetFCC8Methods, NELEM(gGetFCC8Methods));
+    // as the calls are performed in the static initializer of AudioSystem.
+    RegisterMethodsOrDie(env, kClassPathName, gFrameworkCapabilities,
+                         NELEM(gFrameworkCapabilities));
 
     jclass arrayListClass = FindClassOrDie(env, "java/util/ArrayList");
     gArrayListClass = MakeGlobalRefOrDie(env, arrayListClass);
