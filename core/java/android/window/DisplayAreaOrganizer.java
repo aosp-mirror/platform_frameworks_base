@@ -34,6 +34,15 @@ import java.util.concurrent.Executor;
 public class DisplayAreaOrganizer extends WindowOrganizer {
 
     /**
+     * Key to specify the {@link com.android.server.wm.RootDisplayArea} to attach a window to.
+     * It will be used by the function passed in from
+     * {@link com.android.server.wm.DisplayAreaPolicyBuilder#setSelectRootForWindowFunc(BiFunction)}
+     * to find the Root DA to attach the window.
+     * @hide
+     */
+    public static final String KEY_ROOT_DISPLAY_AREA_ID = "root_display_area_id";
+
+    /**
      * The value in display area indicating that no value has been set.
      */
     public static final int FEATURE_UNDEFINED = -1;
