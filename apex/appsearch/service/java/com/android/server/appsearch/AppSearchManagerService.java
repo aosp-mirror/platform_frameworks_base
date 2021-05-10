@@ -384,10 +384,10 @@ public class AppSearchManagerService extends SystemService {
             Objects.requireNonNull(databaseName);
             Objects.requireNonNull(documentBundles);
             Objects.requireNonNull(callback);
+            long totalLatencyStartTimeMillis = SystemClock.elapsedRealtime();
             int callingUid = Binder.getCallingUid();
             int callingUserId = handleIncomingUser(userId, callingUid);
             EXECUTOR.execute(() -> {
-                long totalLatencyStartTimeMillis = SystemClock.elapsedRealtime();
                 @AppSearchResult.ResultCode int statusCode = AppSearchResult.RESULT_OK;
                 PlatformLogger logger = null;
                 int operationSuccessCount = 0;
@@ -498,32 +498,62 @@ public class AppSearchManagerService extends SystemService {
                 @NonNull String queryExpression,
                 @NonNull Bundle searchSpecBundle,
                 @UserIdInt int userId,
+                @ElapsedRealtimeLong long binderCallStartTimeMillis,
                 @NonNull IAppSearchResultCallback callback) {
             Objects.requireNonNull(packageName);
             Objects.requireNonNull(databaseName);
             Objects.requireNonNull(queryExpression);
             Objects.requireNonNull(searchSpecBundle);
             Objects.requireNonNull(callback);
+            long totalLatencyStartTimeMillis = SystemClock.elapsedRealtime();
             int callingUid = Binder.getCallingUid();
             int callingUserId = handleIncomingUser(userId, callingUid);
             EXECUTOR.execute(() -> {
+                @AppSearchResult.ResultCode int statusCode = AppSearchResult.RESULT_OK;
+                PlatformLogger logger = null;
+                int operationSuccessCount = 0;
+                int operationFailureCount = 0;
                 try {
                     verifyUserUnlocked(callingUserId);
                     verifyCallingPackage(callingUid, packageName);
                     AppSearchImpl impl =
                             mImplInstanceManager.getAppSearchImpl(callingUserId);
+                    logger = mLoggerInstanceManager.getPlatformLogger(callingUserId);
                     SearchResultPage searchResultPage =
                             impl.query(
                                     packageName,
                                     databaseName,
                                     queryExpression,
                                     new SearchSpec(searchSpecBundle),
-                                    /*logger=*/ null);
+                                    logger);
+                    ++operationSuccessCount;
                     invokeCallbackOnResult(
                             callback,
                             AppSearchResult.newSuccessfulResult(searchResultPage.getBundle()));
                 } catch (Throwable t) {
+                    ++operationFailureCount;
+                    statusCode = throwableToFailedResult(t).getResultCode();
                     invokeCallbackOnError(callback, t);
+                } finally {
+                    if (logger != null) {
+                        int estimatedBinderLatencyMillis =
+                                2 * (int) (totalLatencyStartTimeMillis - binderCallStartTimeMillis);
+                        int totalLatencyMillis =
+                                (int) (SystemClock.elapsedRealtime() - totalLatencyStartTimeMillis);
+                        CallStats.Builder cBuilder = new CallStats.Builder(packageName,
+                                databaseName)
+                                .setCallType(CallStats.CALL_TYPE_SEARCH)
+                                // TODO(b/173532925) check the existing binder call latency chart
+                                // is good enough for us:
+                                // http://dashboards/view/_72c98f9a_91d9_41d4_ab9a_bc14f79742b4
+                                .setEstimatedBinderLatencyMillis(estimatedBinderLatencyMillis)
+                                .setNumOperationsSucceeded(operationSuccessCount)
+                                .setNumOperationsFailed(operationFailureCount);
+                        cBuilder.getGeneralStatsBuilder()
+                                .setStatusCode(statusCode)
+                                .setTotalLatencyMillis(totalLatencyMillis);
+                        logger.logStats(cBuilder.build());
+                    }
                 }
             });
         }
@@ -534,17 +564,24 @@ public class AppSearchManagerService extends SystemService {
                 @NonNull String queryExpression,
                 @NonNull Bundle searchSpecBundle,
                 @UserIdInt int userId,
+                @ElapsedRealtimeLong long binderCallStartTimeMillis,
                 @NonNull IAppSearchResultCallback callback) {
             Objects.requireNonNull(packageName);
             Objects.requireNonNull(queryExpression);
             Objects.requireNonNull(searchSpecBundle);
             Objects.requireNonNull(callback);
+            long totalLatencyStartTimeMillis = SystemClock.elapsedRealtime();
             int callingUid = Binder.getCallingUid();
             int callingUserId = handleIncomingUser(userId, callingUid);
             EXECUTOR.execute(() -> {
+                @AppSearchResult.ResultCode int statusCode = AppSearchResult.RESULT_OK;
+                PlatformLogger logger = null;
+                int operationSuccessCount = 0;
+                int operationFailureCount = 0;
                 try {
                     verifyUserUnlocked(callingUserId);
                     verifyCallingPackage(callingUid, packageName);
+                    logger = mLoggerInstanceManager.getPlatformLogger(callingUserId);
                     AppSearchImpl impl =
                             mImplInstanceManager.getAppSearchImpl(callingUserId);
                     SearchResultPage searchResultPage =
@@ -553,12 +590,36 @@ public class AppSearchManagerService extends SystemService {
                                     new SearchSpec(searchSpecBundle),
                                     packageName,
                                     callingUid,
-                                    /*logger=*/ null);
+                                    logger);
+                    ++operationSuccessCount;
                     invokeCallbackOnResult(
                             callback,
                             AppSearchResult.newSuccessfulResult(searchResultPage.getBundle()));
-                }  catch (Throwable t) {
+                } catch (Throwable t) {
+                    ++operationFailureCount;
+                    statusCode = throwableToFailedResult(t).getResultCode();
                     invokeCallbackOnError(callback, t);
+                } finally {
+                    if (logger != null) {
+                        int estimatedBinderLatencyMillis =
+                                2 * (int) (totalLatencyStartTimeMillis - binderCallStartTimeMillis);
+                        int totalLatencyMillis =
+                                (int) (SystemClock.elapsedRealtime() - totalLatencyStartTimeMillis);
+                        // TODO(b/173532925) database would be nulluable once we remove generalStats
+                        CallStats.Builder cBuilder = new CallStats.Builder(packageName,
+                                /*database=*/ "")
+                                .setCallType(CallStats.CALL_TYPE_GLOBAL_SEARCH)
+                                // TODO(b/173532925) check the existing binder call latency chart
+                                // is good enough for us:
+                                // http://dashboards/view/_72c98f9a_91d9_41d4_ab9a_bc14f79742b4
+                                .setEstimatedBinderLatencyMillis(estimatedBinderLatencyMillis)
+                                .setNumOperationsSucceeded(operationSuccessCount)
+                                .setNumOperationsFailed(operationFailureCount);
+                        cBuilder.getGeneralStatsBuilder()
+                                .setStatusCode(statusCode)
+                                .setTotalLatencyMillis(totalLatencyMillis);
+                        logger.logStats(cBuilder.build());
+                    }
                 }
             });
         }
