@@ -52,6 +52,12 @@
      when the PIP menu is shown in center. -->
     <string translatable="false" name="pip_menu_bounds">"596 280 1324 690"</string>
 
+    <!-- Animation duration when exit starting window: fade out icon -->
+    <integer name="starting_window_app_reveal_icon_fade_out_duration">133</integer>
+
     <!-- Animation duration when exit starting window: reveal app -->
-    <integer name="starting_window_app_reveal_anim_duration">333</integer>
+    <integer name="starting_window_app_reveal_anim_delay">83</integer>
+
+    <!-- Animation duration when exit starting window: reveal app -->
+    <integer name="starting_window_app_reveal_anim_duration">266</integer>
 </resources>
