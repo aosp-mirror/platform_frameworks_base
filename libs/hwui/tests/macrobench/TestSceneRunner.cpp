@@ -62,53 +62,23 @@ private:
     T mAverage;
 };
 
+using BenchmarkResults = std::vector<benchmark::BenchmarkReporter::Run>;
+
 void outputBenchmarkReport(const TestScene::Info& info, const TestScene::Options& opts,
-                           benchmark::BenchmarkReporter* reporter, RenderProxy* proxy,
-                           double durationInS) {
-    using namespace benchmark;
-
-    struct ReportInfo {
-        int percentile;
-        const char* suffix;
-    };
-
-    static std::array<ReportInfo, 4> REPORTS = {
-            ReportInfo{50, "_50th"}, ReportInfo{90, "_90th"}, ReportInfo{95, "_95th"},
-            ReportInfo{99, "_99th"},
-    };
-
-    // Although a vector is used, it must stay with only a single element
-    // otherwise the BenchmarkReporter will automatically compute
-    // mean and stddev which doesn't make sense for our usage
-    std::vector<BenchmarkReporter::Run> reports;
-    BenchmarkReporter::Run report;
+                           double durationInS, int repetationIndex, BenchmarkResults* reports) {
+    benchmark::BenchmarkReporter::Run report;
+    report.repetitions = opts.repeatCount;
+    report.repetition_index = repetationIndex;
     report.run_name.function_name = info.name;
-    report.iterations = static_cast<int64_t>(opts.count);
+    report.iterations = static_cast<int64_t>(opts.frameCount);
     report.real_accumulated_time = durationInS;
     report.cpu_accumulated_time = durationInS;
-    report.counters["items_per_second"] = opts.count / durationInS;
-    reports.push_back(report);
-    reporter->ReportRuns(reports);
-
-    // Pretend the percentiles are single-iteration runs of the test
-    // If rendering offscreen skip this as it's fps that's more interesting
-    // in that test case than percentiles.
-    if (!opts.renderOffscreen) {
-        for (auto& ri : REPORTS) {
-            reports[0].run_name.function_name = info.name;
-            reports[0].run_name.function_name += ri.suffix;
-            durationInS = proxy->frameTimePercentile(ri.percentile) / 1000.0;
-            reports[0].real_accumulated_time = durationInS;
-            reports[0].cpu_accumulated_time = durationInS;
-            reports[0].iterations = 1;
-            reports[0].counters["items_per_second"] = 0;
-            reporter->ReportRuns(reports);
-        }
-    }
+    report.counters["items_per_second"] = opts.frameCount / durationInS;
+    reports->push_back(report);
 }
 
-void run(const TestScene::Info& info, const TestScene::Options& opts,
-         benchmark::BenchmarkReporter* reporter) {
+static void doRun(const TestScene::Info& info, const TestScene::Options& opts, int repetitionIndex,
+                  BenchmarkResults* reports) {
     Properties::forceDrawFrame = true;
     TestContext testContext;
     testContext.setRenderOffscreen(opts.renderOffscreen);
@@ -158,7 +128,7 @@ void run(const TestScene::Info& info, const TestScene::Options& opts,
     ModifiedMovingAverage<double> avgMs(opts.reportFrametimeWeight);
 
     nsecs_t start = systemTime(SYSTEM_TIME_MONOTONIC);
-    for (int i = 0; i < opts.count; i++) {
+    for (int i = 0; i < opts.frameCount; i++) {
         testContext.waitForVsync();
         nsecs_t vsync = systemTime(SYSTEM_TIME_MONOTONIC);
         {
@@ -182,9 +152,24 @@ void run(const TestScene::Info& info, const TestScene::Options& opts,
     proxy->fence();
     nsecs_t end = systemTime(SYSTEM_TIME_MONOTONIC);
 
-    if (reporter) {
-        outputBenchmarkReport(info, opts, reporter, proxy.get(), (end - start) / (double)s2ns(1));
+    if (reports) {
+        outputBenchmarkReport(info, opts, (end - start) / (double)s2ns(1), repetitionIndex,
+                              reports);
     } else {
         proxy->dumpProfileInfo(STDOUT_FILENO, DumpFlags::JankStats);
+    }
+}
+
+void run(const TestScene::Info& info, const TestScene::Options& opts,
+         benchmark::BenchmarkReporter* reporter) {
+    BenchmarkResults results;
+    for (int i = 0; i < opts.repeatCount; i++) {
+        doRun(info, opts, i, reporter ? &results : nullptr);
+    }
+    if (reporter) {
+        reporter->ReportRuns(results);
+        if (results.size() > 1) {
+            // TODO: Report summary
+        }
     }
 }
