@@ -169,20 +169,6 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView 
     }
 
     /**
-     * By default, the new layout will be enabled. When false, revert to the old style.
-     */
-    public void setIsNewLayoutEnabled(boolean isEnabled) {
-        if (!isEnabled) {
-            for (int i = 0; i < mButtons.length; i++) {
-                mButtons[i].disableNewLayout();
-            }
-            mDeleteButton.disableNewLayout();
-            mOkButton.disableNewLayout();
-            reloadColors();
-        }
-    }
-
-    /**
      * Reload colors from resources.
      **/
     public void reloadColors() {
