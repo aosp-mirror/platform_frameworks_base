@@ -12331,6 +12331,7 @@ package android.telephony.ims.stub {
     field public static final int REGISTRATION_TECH_IWLAN = 1; // 0x1
     field public static final int REGISTRATION_TECH_LTE = 0; // 0x0
     field public static final int REGISTRATION_TECH_NONE = -1; // 0xffffffff
+    field public static final int REGISTRATION_TECH_NR = 3; // 0x3
   }
 
   public class ImsSmsImplBase {
