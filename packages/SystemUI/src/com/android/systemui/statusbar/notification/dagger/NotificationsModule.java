@@ -80,8 +80,6 @@ import com.android.systemui.wmshell.BubblesManager;
 import java.util.Optional;
 import java.util.concurrent.Executor;
 
-import javax.inject.Provider;
-
 import dagger.Binds;
 import dagger.Lazy;
 import dagger.Module;
@@ -102,7 +100,7 @@ public interface NotificationsModule {
     static NotificationEntryManager provideNotificationEntryManager(
             NotificationEntryManagerLogger logger,
             NotificationGroupManagerLegacy groupManager,
-            NotificationRankingManager rankingManager,
+            Lazy<NotificationRankingManager> rankingManager,
             NotificationEntryManager.KeyguardEnvironment keyguardEnvironment,
             FeatureFlags featureFlags,
             Lazy<NotificationRowBinder> notificationRowBinderLazy,
