@@ -2277,6 +2277,15 @@ static jint android_media_AudioSystem_getMaxChannelCount(JNIEnv *env, jobject th
     return FCC_8;
 }
 
+static jint android_media_AudioSystem_getMaxSampleRate(JNIEnv *env, jobject thiz) {
+    // see frameworks/av/services/audiopolicy/common/include/policy.h
+    return 192000; // SAMPLE_RATE_HZ_MAX (for API)
+}
+
+static jint android_media_AudioSystem_getMinSampleRate(JNIEnv *env, jobject thiz) {
+    return 4000; // SAMPLE_RATE_HZ_MIN  (for API)
+}
+
 static jint
 android_media_AudioSystem_setAssistantUid(JNIEnv *env, jobject thiz, jint uid)
 {
@@ -2674,6 +2683,8 @@ static const JNINativeMethod gEventHandlerMethods[] = {
 
 static const JNINativeMethod gFrameworkCapabilities[] = {
         {"native_getMaxChannelCount", "()I", (void *)android_media_AudioSystem_getMaxChannelCount},
+        {"native_getMaxSampleRate", "()I", (void *)android_media_AudioSystem_getMaxSampleRate},
+        {"native_getMinSampleRate", "()I", (void *)android_media_AudioSystem_getMinSampleRate},
 };
 
 int register_android_media_AudioSystem(JNIEnv *env)
