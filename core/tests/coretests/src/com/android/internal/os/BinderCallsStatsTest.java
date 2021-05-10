@@ -753,6 +753,34 @@ public class BinderCallsStatsTest {
         assertEquals(1, callStats.recordedCallCount);
     }
 
+    @Test
+    public void testLatencyCollectionEnabled() {
+        TestBinderCallsStats bcs = new TestBinderCallsStats();
+        bcs.setCollectLatencyData(true);
+
+        Binder binder = new Binder();
+        CallSession callSession = bcs.callStarted(binder, 1, WORKSOURCE_UID);
+        bcs.time += 10;
+        bcs.elapsedTime += 20;
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE, WORKSOURCE_UID);
+
+        assertEquals(1, bcs.getLatencyObserver().getLatencySamples().size());
+    }
+
+    @Test
+    public void testLatencyCollectionDisabledByDefault() {
+        TestBinderCallsStats bcs = new TestBinderCallsStats();
+        assertEquals(false, bcs.getCollectLatencyData());
+
+        Binder binder = new Binder();
+        CallSession callSession = bcs.callStarted(binder, 1, WORKSOURCE_UID);
+        bcs.time += 10;
+        bcs.elapsedTime += 20;
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE, WORKSOURCE_UID);
+
+        assertEquals(0, bcs.getLatencyObserver().getLatencySamples().size());
+    }
+
     class TestBinderCallsStats extends BinderCallsStats {
         public int callingUid = CALLING_UID;
         public long time = 1234;
@@ -773,6 +801,10 @@ public class BinderCallsStatsTest {
                             return mCallCount++;
                         }
                     };
+                }
+
+                public BinderLatencyObserver getLatencyObserver() {
+                    return new BinderLatencyObserverTest.TestBinderLatencyObserver();
                 }
             });
             setSamplingInterval(1);
