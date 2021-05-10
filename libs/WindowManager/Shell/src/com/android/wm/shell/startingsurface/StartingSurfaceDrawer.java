@@ -116,10 +116,7 @@ public class StartingSurfaceDrawer {
         mContext = context;
         mDisplayManager = mContext.getSystemService(DisplayManager.class);
         mSplashScreenExecutor = splashScreenExecutor;
-        final int appRevealAnimDuration = context.getResources().getInteger(
-                com.android.wm.shell.R.integer.starting_window_app_reveal_anim_duration);
-        mSplashscreenContentDrawer = new SplashscreenContentDrawer(mContext, appRevealAnimDuration,
-                pool);
+        mSplashscreenContentDrawer = new SplashscreenContentDrawer(mContext, pool);
         mSplashScreenExecutor.execute(() -> mChoreographer = Choreographer.getInstance());
     }
 
