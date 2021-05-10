@@ -105,11 +105,19 @@ public class AudioSystem
      */
     public static final int NUM_STREAMS = 5;
 
-    /** Maximum value for AudioTrack channel count
-     * @hide public for MediaCode only, do not un-hide or change to a numeric literal
+    /*
+     * Framework static final constants that are primitives or Strings
+     * accessed by CTS tests or internal applications must be set from methods
+     * (or in a static block) to prevent Java compile-time replacement.
+     * We set them from methods so they are read from the device framework.
+     * Do not un-hide or change to a numeric literal.
      */
-    public static final int OUT_CHANNEL_COUNT_MAX = native_get_FCC_8();
-    private static native int native_get_FCC_8();
+
+    /** Maximum value for AudioTrack channel count
+     * @hide
+     */
+    public static final int OUT_CHANNEL_COUNT_MAX = native_getMaxChannelCount();
+    private static native int native_getMaxChannelCount();
 
     // Expose only the getter method publicly so we can change it in the future
     private static final int NUM_STREAM_TYPES = 12;
