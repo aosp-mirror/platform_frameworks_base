@@ -4404,6 +4404,7 @@ package android.app {
     method public void setWindow(int, long, long, android.app.PendingIntent);
     method public void setWindow(int, long, long, String, android.app.AlarmManager.OnAlarmListener, android.os.Handler);
     field public static final String ACTION_NEXT_ALARM_CLOCK_CHANGED = "android.app.action.NEXT_ALARM_CLOCK_CHANGED";
+    field public static final String ACTION_SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED = "android.app.action.SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED";
     field public static final int ELAPSED_REALTIME = 3; // 0x3
     field public static final int ELAPSED_REALTIME_WAKEUP = 2; // 0x2
     field public static final long INTERVAL_DAY = 86400000L; // 0x5265c00L

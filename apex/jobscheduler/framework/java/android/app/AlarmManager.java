@@ -22,6 +22,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
+import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
@@ -137,6 +138,36 @@ public class AlarmManager {
     @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_NEXT_ALARM_CLOCK_CHANGED =
             "android.app.action.NEXT_ALARM_CLOCK_CHANGED";
+
+    /**
+     * Broadcast Action: An app is granted the
+     * {@link android.Manifest.permission#SCHEDULE_EXACT_ALARM} permission.
+     *
+     * <p>When the user revokes the {@link android.Manifest.permission#SCHEDULE_EXACT_ALARM}
+     * permission, all alarms scheduled with
+     * {@link #setExact}, {@link #setExactAndAllowWhileIdle} and
+     * {@link #setAlarmClock(AlarmClockInfo, PendingIntent)} will be deleted.
+     *
+     * <p>When the user grants the {@link android.Manifest.permission#SCHEDULE_EXACT_ALARM},
+     * this broadcast will be sent. Applications can reschedule all the necessary alarms when
+     * receiving it.
+     *
+     * <p><em>Note:</em>
+     * Applications are still required to check {@link #canScheduleExactAlarms()}
+     * before using the above APIs after receiving this broadcast,
+     * because it's possible that the permission is already revoked again by the time
+     * applications receive this broadcast.
+     *
+     * <p>This broadcast will be sent to both runtime receivers and manifest receivers.
+     *
+     * <p>This broadcast is sent as a foreground broadcast.
+     * See {@link android.content.Intent#FLAG_RECEIVER_FOREGROUND}.
+     *
+     * <p>When an application receives this broadcast, it's allowed to start a foreground service.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED =
+            "android.app.action.SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED";
 
     /** @hide */
     @UnsupportedAppUsage
