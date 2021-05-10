@@ -1041,7 +1041,6 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         Bundle newOptions = new Bundle();
         mManager.onAppWidgetOptionsChanged(SECOND_WIDGET_ID_WITH_SHORTCUT, newOptions);
 
-
         // Check that options is not modified
         verify(mAppWidgetManager, never()).updateAppWidgetOptions(
                 eq(SECOND_WIDGET_ID_WITH_SHORTCUT), any());
@@ -1478,6 +1477,8 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         widgetSp5.edit().clear().commit();
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(mContext);
         sp.edit().clear().commit();
+        mManager.mListeners.clear();
+        mManager.mTiles.clear();
     }
 
     private void setStorageForTile(String shortcutId, String packageName, int widgetId,
