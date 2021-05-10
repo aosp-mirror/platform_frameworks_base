@@ -108,9 +108,10 @@ public class FullScore {
     // and all bits managed by FullScore unset. As bits are handled from 0 up in NetworkScore and
     // from 63 down in FullScore, cut at the 32nd bit for simplicity, but change this if some day
     // there are more than 32 bits handled on either side.
-    // YIELD_TO_BAD_WIFI is temporarily handled by ConnectivityService.
-    private static final long EXTERNAL_POLICIES_MASK =
-            0x00000000FFFFFFFFL & ~(1L << POLICY_YIELD_TO_BAD_WIFI);
+    // YIELD_TO_BAD_WIFI is temporarily handled by ConnectivityService, but the factory is still
+    // allowed to set it, so that it's possible to transition from handling it in CS to handling
+    // it in the factory.
+    private static final long EXTERNAL_POLICIES_MASK = 0x00000000FFFFFFFFL;
 
     @VisibleForTesting
     static @NonNull String policyNameOf(final int policy) {
