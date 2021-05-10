@@ -54,6 +54,7 @@ jmethodID method_gnssMeasurementCtor;
 jmethodID method_reportMeasurementData;
 jmethodID method_satellitePvtBuilderBuild;
 jmethodID method_satellitePvtBuilderCtor;
+jmethodID method_satellitePvtBuilderSetFlags;
 jmethodID method_satellitePvtBuilderSetPositionEcef;
 jmethodID method_satellitePvtBuilderSetVelocityEcef;
 jmethodID method_satellitePvtBuilderSetClockInfo;
@@ -89,6 +90,9 @@ void GnssMeasurement_class_init_once(JNIEnv* env, jclass& clazz) {
     jclass satellitePvtBuilder = env->FindClass("android/location/SatellitePvt$Builder");
     class_satellitePvtBuilder = (jclass)env->NewGlobalRef(satellitePvtBuilder);
     method_satellitePvtBuilderCtor = env->GetMethodID(class_satellitePvtBuilder, "<init>", "()V");
+    method_satellitePvtBuilderSetFlags =
+            env->GetMethodID(class_satellitePvtBuilder, "setFlags",
+                             "(I)Landroid/location/SatellitePvt$Builder;");
     method_satellitePvtBuilderSetPositionEcef =
             env->GetMethodID(class_satellitePvtBuilder, "setPositionEcef",
                              "(Landroid/location/SatellitePvt$PositionEcef;)"
@@ -313,22 +317,33 @@ void GnssMeasurementCallbackAidl::translateSingleGnssMeasurement(JNIEnv* env,
 
     if (measurement.flags & static_cast<uint32_t>(GnssMeasurement::HAS_SATELLITE_PVT)) {
         const SatellitePvt& satellitePvt = measurement.satellitePvt;
-        jobject positionEcef = env->NewObject(class_positionEcef, method_positionEcef,
-                                              satellitePvt.satPosEcef.posXMeters,
-                                              satellitePvt.satPosEcef.posYMeters,
-                                              satellitePvt.satPosEcef.posZMeters,
-                                              satellitePvt.satPosEcef.ureMeters);
-        jobject velocityEcef =
-                env->NewObject(class_velocityEcef, method_velocityEcef,
-                               satellitePvt.satVelEcef.velXMps, satellitePvt.satVelEcef.velYMps,
-                               satellitePvt.satVelEcef.velZMps, satellitePvt.satVelEcef.ureRateMps);
-        jobject clockInfo = env->NewObject(class_clockInfo, method_clockInfo,
-                                           satellitePvt.satClockInfo.satHardwareCodeBiasMeters,
-                                           satellitePvt.satClockInfo.satTimeCorrectionMeters,
-                                           satellitePvt.satClockInfo.satClkDriftMps);
+        uint16_t satFlags = static_cast<uint16_t>(satellitePvt.flags);
+        jobject positionEcef = nullptr;
+        jobject velocityEcef = nullptr;
+        jobject clockInfo = nullptr;
+
+        if (satFlags & SatellitePvt::HAS_POSITION_VELOCITY_CLOCK_INFO) {
+            positionEcef = env->NewObject(class_positionEcef, method_positionEcef,
+                                          satellitePvt.satPosEcef.posXMeters,
+                                          satellitePvt.satPosEcef.posYMeters,
+                                          satellitePvt.satPosEcef.posZMeters,
+                                          satellitePvt.satPosEcef.ureMeters);
+            velocityEcef =
+                    env->NewObject(class_velocityEcef, method_velocityEcef,
+                                   satellitePvt.satVelEcef.velXMps, satellitePvt.satVelEcef.velYMps,
+                                   satellitePvt.satVelEcef.velZMps,
+                                   satellitePvt.satVelEcef.ureRateMps);
+            clockInfo = env->NewObject(class_clockInfo, method_clockInfo,
+                                       satellitePvt.satClockInfo.satHardwareCodeBiasMeters,
+                                       satellitePvt.satClockInfo.satTimeCorrectionMeters,
+                                       satellitePvt.satClockInfo.satClkDriftMps);
+        }
+
         jobject satellitePvtBuilderObject =
                 env->NewObject(class_satellitePvtBuilder, method_satellitePvtBuilderCtor);
 
+        env->CallObjectMethod(satellitePvtBuilderObject, method_satellitePvtBuilderSetFlags,
+                              satellitePvt.flags);
         env->CallObjectMethod(satellitePvtBuilderObject, method_satellitePvtBuilderSetPositionEcef,
                               positionEcef);
         env->CallObjectMethod(satellitePvtBuilderObject, method_satellitePvtBuilderSetVelocityEcef,
