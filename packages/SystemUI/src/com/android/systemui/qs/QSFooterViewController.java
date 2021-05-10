@@ -29,6 +29,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.R;
@@ -73,6 +74,7 @@ public class QSFooterViewController extends ViewController<QSFooterView> impleme
     private final View mPowerMenuLite;
     private final boolean mShowPMLiteButton;
     private GlobalActionsDialogLite mGlobalActionsDialog;
+    private final UiEventLogger mUiEventLogger;
 
     private final UserInfoController.OnUserInfoChangedListener mOnUserInfoChangedListener =
             new UserInfoController.OnUserInfoChangedListener() {
@@ -122,6 +124,7 @@ public class QSFooterViewController extends ViewController<QSFooterView> impleme
                     startSettingsActivity();
                 }
             } else if (v == mPowerMenuLite) {
+                mUiEventLogger.log(GlobalActionsDialogLite.GlobalActionsEvent.GA_OPEN_QS);
                 mGlobalActionsDialog.showOrHideDialog(false, true);
             }
         }
@@ -139,7 +142,7 @@ public class QSFooterViewController extends ViewController<QSFooterView> impleme
             QuickQSPanelController quickQSPanelController,
             TunerService tunerService, MetricsLogger metricsLogger, FalsingManager falsingManager,
             @Named(PM_LITE_ENABLED) boolean showPMLiteButton,
-            GlobalActionsDialogLite globalActionsDialog) {
+            GlobalActionsDialogLite globalActionsDialog, UiEventLogger uiEventLogger) {
         super(view);
         mUserManager = userManager;
         mUserInfoController = userInfoController;
@@ -161,6 +164,7 @@ public class QSFooterViewController extends ViewController<QSFooterView> impleme
         mPowerMenuLite = mView.findViewById(R.id.pm_lite);
         mShowPMLiteButton = showPMLiteButton;
         mGlobalActionsDialog = globalActionsDialog;
+        mUiEventLogger = uiEventLogger;
     }
 
     @Override
