@@ -20,7 +20,6 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
-import static junit.framework.Assert.fail;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
@@ -100,8 +99,6 @@ public class SmartReplyViewTest extends SysuiTestCase {
 
     private Icon mActionIcon;
 
-    private int mSingleLinePaddingHorizontal;
-    private int mDoubleLinePaddingHorizontal;
     private int mSpacing;
 
     private NotificationEntry mEntry;
@@ -141,10 +138,6 @@ public class SmartReplyViewTest extends SysuiTestCase {
         mView = SmartReplyView.inflate(mContext, mConstants);
 
         final Resources res = mContext.getResources();
-        mSingleLinePaddingHorizontal = res.getDimensionPixelSize(
-                R.dimen.smart_reply_button_padding_horizontal_single_line);
-        mDoubleLinePaddingHorizontal = res.getDimensionPixelSize(
-                R.dimen.smart_reply_button_padding_horizontal_double_line);
         mSpacing = res.getDimensionPixelSize(R.dimen.smart_reply_button_spacing);
 
         mNotification = new Notification.Builder(mContext, "")
@@ -588,18 +581,6 @@ public class SmartReplyViewTest extends SysuiTestCase {
         layout.setBaselineAligned(false);
 
         final boolean isRtl = mView.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL;
-        final int paddingHorizontal;
-        switch (lineCount) {
-            case 1:
-                paddingHorizontal = mSingleLinePaddingHorizontal;
-                break;
-            case 2:
-                paddingHorizontal = mDoubleLinePaddingHorizontal;
-                break;
-            default:
-                fail("Invalid line count " + lineCount);
-                return null;
-        }
 
         // Add smart replies
         Button previous = null;
@@ -617,8 +598,6 @@ public class SmartReplyViewTest extends SysuiTestCase {
                                 true /* delayOnClickListener */))
                         .iterator()));
         for (Button current : inflatedReplies) {
-            current.setPadding(paddingHorizontal, current.getPaddingTop(), paddingHorizontal,
-                    current.getPaddingBottom());
             if (previous != null) {
                 ViewGroup.MarginLayoutParams lp =
                         (ViewGroup.MarginLayoutParams) previous.getLayoutParams();
@@ -647,8 +626,6 @@ public class SmartReplyViewTest extends SysuiTestCase {
 
         // Add smart actions
         for (Button current : inflatedSmartActions) {
-            current.setPadding(paddingHorizontal, current.getPaddingTop(), paddingHorizontal,
-                    current.getPaddingBottom());
             if (previous != null) {
                 ViewGroup.MarginLayoutParams lp =
                         (ViewGroup.MarginLayoutParams) previous.getLayoutParams();
