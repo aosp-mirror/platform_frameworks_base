@@ -45,22 +45,12 @@ import android.net.metrics.IpConnectivityLog;
 import android.net.metrics.NetworkEvent;
 import android.net.metrics.ValidationProbeEvent;
 import android.net.util.Stopwatch;
-import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.telephony.CellIdentityCdma;
-import android.telephony.CellIdentityGsm;
-import android.telephony.CellIdentityLte;
-import android.telephony.CellIdentityWcdma;
-import android.telephony.CellInfo;
-import android.telephony.CellInfoCdma;
-import android.telephony.CellInfoGsm;
-import android.telephony.CellInfoLte;
-import android.telephony.CellInfoWcdma;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.LocalLog;
@@ -888,10 +878,6 @@ public class NetworkMonitor extends StateMachine {
         return mSettings.getSetting(mContext, Settings.Global.CAPTIVE_PORTAL_USE_HTTPS, 1) == 1;
     }
 
-    public boolean getWifiScansAlwaysAvailableDisabled() {
-        return mSettings.getSetting(mContext, Settings.Global.WIFI_SCAN_ALWAYS_AVAILABLE, 0) == 0;
-    }
-
     private String getCaptivePortalServerHttpsUrl() {
         return mSettings.getSetting(mContext,
                 Settings.Global.CAPTIVE_PORTAL_HTTPS_URL, DEFAULT_HTTPS_URL);
@@ -1027,10 +1013,6 @@ public class NetworkMonitor extends StateMachine {
         }
 
         long endTime = SystemClock.elapsedRealtime();
-
-        sendNetworkConditionsBroadcast(true /* response received */,
-                result.isPortal() /* isCaptivePortal */,
-                startTime, endTime);
 
         return result;
     }
@@ -1267,98 +1249,6 @@ public class NetworkMonitor extends StateMachine {
             }
         }
         return null;
-    }
-
-    /**
-     * @param responseReceived - whether or not we received a valid HTTP response to our request.
-     * If false, isCaptivePortal and responseTimestampMs are ignored
-     * TODO: This should be moved to the transports.  The latency could be passed to the transports
-     * along with the captive portal result.  Currently the TYPE_MOBILE broadcasts appear unused so
-     * perhaps this could just be added to the WiFi transport only.
-     */
-    private void sendNetworkConditionsBroadcast(boolean responseReceived, boolean isCaptivePortal,
-            long requestTimestampMs, long responseTimestampMs) {
-        if (getWifiScansAlwaysAvailableDisabled()) {
-            return;
-        }
-
-        if (!systemReady) {
-            return;
-        }
-
-        Intent latencyBroadcast =
-                new Intent(ConnectivityConstants.ACTION_NETWORK_CONDITIONS_MEASURED);
-        switch (mNetworkAgentInfo.networkInfo.getType()) {
-            case ConnectivityManager.TYPE_WIFI:
-                WifiInfo currentWifiInfo = mWifiManager.getConnectionInfo();
-                if (currentWifiInfo != null) {
-                    // NOTE: getSSID()'s behavior changed in API 17; before that, SSIDs were not
-                    // surrounded by double quotation marks (thus violating the Javadoc), but this
-                    // was changed to match the Javadoc in API 17. Since clients may have started
-                    // sanitizing the output of this method since API 17 was released, we should
-                    // not change it here as it would become impossible to tell whether the SSID is
-                    // simply being surrounded by quotes due to the API, or whether those quotes
-                    // are actually part of the SSID.
-                    latencyBroadcast.putExtra(ConnectivityConstants.EXTRA_SSID,
-                            currentWifiInfo.getSSID());
-                    latencyBroadcast.putExtra(ConnectivityConstants.EXTRA_BSSID,
-                            currentWifiInfo.getBSSID());
-                } else {
-                    if (VDBG) logw("network info is TYPE_WIFI but no ConnectionInfo found");
-                    return;
-                }
-                break;
-            case ConnectivityManager.TYPE_MOBILE:
-                latencyBroadcast.putExtra(ConnectivityConstants.EXTRA_NETWORK_TYPE,
-                        mTelephonyManager.getNetworkType());
-                List<CellInfo> info = mTelephonyManager.getAllCellInfo();
-                if (info == null) return;
-                int numRegisteredCellInfo = 0;
-                for (CellInfo cellInfo : info) {
-                    if (cellInfo.isRegistered()) {
-                        numRegisteredCellInfo++;
-                        if (numRegisteredCellInfo > 1) {
-                            if (VDBG) logw("more than one registered CellInfo." +
-                                    " Can't tell which is active.  Bailing.");
-                            return;
-                        }
-                        if (cellInfo instanceof CellInfoCdma) {
-                            CellIdentityCdma cellId = ((CellInfoCdma) cellInfo).getCellIdentity();
-                            latencyBroadcast.putExtra(ConnectivityConstants.EXTRA_CELL_ID, cellId);
-                        } else if (cellInfo instanceof CellInfoGsm) {
-                            CellIdentityGsm cellId = ((CellInfoGsm) cellInfo).getCellIdentity();
-                            latencyBroadcast.putExtra(ConnectivityConstants.EXTRA_CELL_ID, cellId);
-                        } else if (cellInfo instanceof CellInfoLte) {
-                            CellIdentityLte cellId = ((CellInfoLte) cellInfo).getCellIdentity();
-                            latencyBroadcast.putExtra(ConnectivityConstants.EXTRA_CELL_ID, cellId);
-                        } else if (cellInfo instanceof CellInfoWcdma) {
-                            CellIdentityWcdma cellId = ((CellInfoWcdma) cellInfo).getCellIdentity();
-                            latencyBroadcast.putExtra(ConnectivityConstants.EXTRA_CELL_ID, cellId);
-                        } else {
-                            if (VDBG) logw("Registered cellinfo is unrecognized");
-                            return;
-                        }
-                    }
-                }
-                break;
-            default:
-                return;
-        }
-        latencyBroadcast.putExtra(ConnectivityConstants.EXTRA_CONNECTIVITY_TYPE,
-                mNetworkAgentInfo.networkInfo.getType());
-        latencyBroadcast.putExtra(ConnectivityConstants.EXTRA_RESPONSE_RECEIVED,
-                responseReceived);
-        latencyBroadcast.putExtra(ConnectivityConstants.EXTRA_REQUEST_TIMESTAMP_MS,
-                requestTimestampMs);
-
-        if (responseReceived) {
-            latencyBroadcast.putExtra(ConnectivityConstants.EXTRA_IS_CAPTIVE_PORTAL,
-                    isCaptivePortal);
-            latencyBroadcast.putExtra(ConnectivityConstants.EXTRA_RESPONSE_TIMESTAMP_MS,
-                    responseTimestampMs);
-        }
-        mContext.sendBroadcastAsUser(latencyBroadcast, UserHandle.CURRENT,
-                ConnectivityConstants.PERMISSION_ACCESS_NETWORK_CONDITIONS);
     }
 
     private void logNetworkEvent(int evtype) {
