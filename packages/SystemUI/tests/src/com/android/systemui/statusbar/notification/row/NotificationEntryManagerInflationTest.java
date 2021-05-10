@@ -181,7 +181,7 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
         mEntryManager = new NotificationEntryManager(
                 mock(NotificationEntryManagerLogger.class),
                 mGroupMembershipManager,
-                new NotificationRankingManager(
+                () -> new NotificationRankingManager(
                         () -> mock(NotificationMediaManager.class),
                         mGroupMembershipManager,
                         mHeadsUpManager,
