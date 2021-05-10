@@ -20,7 +20,7 @@ import android.app.PendingIntent;
 import android.app.smartspace.SmartspaceAction;
 import android.app.smartspace.SmartspaceTarget;
 import android.content.Intent;
-import android.graphics.drawable.Icon;
+import android.graphics.drawable.Drawable;
 import android.os.Parcelable;
 import android.view.View;
 import android.view.ViewGroup;
@@ -93,9 +93,14 @@ public interface BcSmartspaceDataPlugin extends Plugin {
         void setFalsingManager(com.android.systemui.plugins.FalsingManager falsingManager);
 
         /**
-         * Set or clear any Do Not Disturb information.
+         * Set or clear Do Not Disturb information.
          */
-        void setDnd(@Nullable Icon dndIcon, @Nullable String description);
+        void setDnd(@Nullable Drawable image, @Nullable String description);
+
+        /**
+         * Set or clear next alarm information
+         */
+        void setNextAlarm(@Nullable Drawable image, @Nullable String description);
     }
 
     /** Interface for launching Intents, which can differ on the lockscreen */

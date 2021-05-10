@@ -28,7 +28,6 @@ import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.util.ViewController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
@@ -167,7 +166,6 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
         private final TelephonyManager mTelephonyManager;
         private final EmergencyButtonController.Factory mEmergencyButtonControllerFactory;
         private final FalsingCollector mFalsingCollector;
-        private final boolean mIsNewLayoutEnabled;
 
         @Inject
         public Factory(KeyguardUpdateMonitor keyguardUpdateMonitor,
@@ -177,8 +175,7 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
                 InputMethodManager inputMethodManager, @Main DelayableExecutor mainExecutor,
                 @Main Resources resources, LiftToActivateListener liftToActivateListener,
                 TelephonyManager telephonyManager, FalsingCollector falsingCollector,
-                EmergencyButtonController.Factory emergencyButtonControllerFactory,
-                FeatureFlags featureFlags) {
+                EmergencyButtonController.Factory emergencyButtonControllerFactory) {
             mKeyguardUpdateMonitor = keyguardUpdateMonitor;
             mLockPatternUtils = lockPatternUtils;
             mLatencyTracker = latencyTracker;
@@ -190,7 +187,6 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
             mTelephonyManager = telephonyManager;
             mEmergencyButtonControllerFactory = emergencyButtonControllerFactory;
             mFalsingCollector = falsingCollector;
-            mIsNewLayoutEnabled = featureFlags.isKeyguardLayoutEnabled();
         }
 
         /** Create a new {@link KeyguardInputViewController}. */
@@ -216,20 +212,19 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
                 return new KeyguardPinViewController((KeyguardPINView) keyguardInputView,
                         mKeyguardUpdateMonitor, securityMode, mLockPatternUtils,
                         keyguardSecurityCallback, mMessageAreaControllerFactory, mLatencyTracker,
-                        mLiftToActivateListener, emergencyButtonController, mFalsingCollector,
-                        mIsNewLayoutEnabled);
+                        mLiftToActivateListener, emergencyButtonController, mFalsingCollector);
             } else if (keyguardInputView instanceof KeyguardSimPinView) {
                 return new KeyguardSimPinViewController((KeyguardSimPinView) keyguardInputView,
                         mKeyguardUpdateMonitor, securityMode, mLockPatternUtils,
                         keyguardSecurityCallback, mMessageAreaControllerFactory, mLatencyTracker,
                         mLiftToActivateListener, mTelephonyManager, mFalsingCollector,
-                        emergencyButtonController, mIsNewLayoutEnabled);
+                        emergencyButtonController);
             } else if (keyguardInputView instanceof KeyguardSimPukView) {
                 return new KeyguardSimPukViewController((KeyguardSimPukView) keyguardInputView,
                         mKeyguardUpdateMonitor, securityMode, mLockPatternUtils,
                         keyguardSecurityCallback, mMessageAreaControllerFactory, mLatencyTracker,
                         mLiftToActivateListener, mTelephonyManager, mFalsingCollector,
-                        emergencyButtonController, mIsNewLayoutEnabled);
+                        emergencyButtonController);
             }
 
             throw new RuntimeException("Unable to find controller for " + keyguardInputView);
