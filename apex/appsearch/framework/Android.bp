@@ -24,11 +24,29 @@ package {
 filegroup {
     name: "framework-appsearch-sources",
     srcs: [
+        ":framework-appsearch-internal-sources",
+        ":framework-appsearch-external-sources",
+    ],
+    visibility: ["//frameworks/base"],
+}
+
+filegroup {
+    name: "framework-appsearch-internal-sources",
+    srcs: [
         "java/**/*.java",
         "java/**/*.aidl",
     ],
+    exclude_srcs: [":framework-appsearch-external-sources"],
     path: "java",
-    visibility: ["//frameworks/base"],
+}
+
+filegroup {
+    name: "framework-appsearch-external-sources",
+    srcs: [
+        "java/external/**/*.java",
+        "java/external/**/*.aidl",
+    ],
+    path: "java/external",
 }
 
 java_sdk_library {
