@@ -46,7 +46,7 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.navigationbar.NavigationModeController;
-import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -79,7 +79,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private @Mock NavigationModeController mNavigationModeController;
     private @Mock KeyguardDisplayManager mKeyguardDisplayManager;
     private @Mock DozeParameters mDozeParameters;
-    private @Mock StatusBarStateController mStatusBarStateController;
+    private @Mock SysuiStatusBarStateController mStatusBarStateController;
     private @Mock KeyguardStateController mKeyguardStateController;
     private @Mock KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
     private DeviceConfigProxy mDeviceConfig = new DeviceConfigProxyFake();
