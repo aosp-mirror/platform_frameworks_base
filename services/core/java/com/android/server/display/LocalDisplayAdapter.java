@@ -67,8 +67,6 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
     private static final int NO_DISPLAY_MODE_ID = 0;
 
-    private static final float NITS_INVALID = -1;
-
     private final LongSparseArray<LocalDisplayDevice> mDevices = new LongSparseArray<>();
 
     private final Injector mInjector;
@@ -770,48 +768,51 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                         }
                     }
 
-                    private void setDisplayBrightness(float brightness, float sdrBrightness) {
-                        // Ensure brightnessState is valid before processing and sending to
-                        // surface control
-                        if (Float.isNaN(brightness)) {
+                    private void setDisplayBrightness(float brightnessState,
+                            float sdrBrightnessState) {
+                        // brightnessState includes invalid, off and full range.
+                        if (Float.isNaN(brightnessState) || Float.isNaN(sdrBrightnessState)) {
                             return;
                         }
 
                         if (DEBUG) {
                             Slog.d(TAG, "setDisplayBrightness("
                                     + "id=" + physicalDisplayId
-                                    + ", brightness=" + brightness
-                                    + ", sdrBrightness=" + sdrBrightness + ")");
+                                    + ", brightnessState=" + brightnessState
+                                    + ", sdrBrightnessState=" + sdrBrightnessState + ")");
                         }
 
                         Trace.traceBegin(Trace.TRACE_TAG_POWER, "setDisplayBrightness("
-                                + "id=" + physicalDisplayId + ", brightness=" + brightness
-                                + ", sdrBrightness=" + sdrBrightness + ")");
+                                + "id=" + physicalDisplayId + ", brightnessState="
+                                + brightnessState + ", sdrBrightnessState=" + sdrBrightnessState
+                                + ")");
                         try {
-                            final float backlight = brightnessToBacklight(brightness);
-                            float nits = NITS_INVALID;
-                            float sdrBacklight = PowerManager.BRIGHTNESS_INVALID_FLOAT;
-                            float sdrNits = NITS_INVALID;
-                            if (getDisplayDeviceConfig().hasNitsMapping()
-                                    && sdrBrightness != PowerManager.BRIGHTNESS_INVALID_FLOAT) {
-                                nits = backlightToNits(backlight);
-                                sdrBacklight = brightnessToBacklight(sdrBrightness);
-                                sdrNits = backlightToNits(sdrBacklight);
-                            }
+                            final float backlight = brightnessToBacklight(brightnessState);
+                            final float sdrBacklight = brightnessToBacklight(sdrBrightnessState);
+
+                            final float nits = backlightToNits(backlight);
+                            final float sdrNits = backlightToNits(sdrBacklight);
+
                             mBacklightAdapter.setBacklight(sdrBacklight, sdrNits, backlight, nits);
                             Trace.traceCounter(Trace.TRACE_TAG_POWER,
                                     "ScreenBrightness",
-                                    BrightnessSynchronizer.brightnessFloatToInt(brightness));
+                                    BrightnessSynchronizer.brightnessFloatToInt(brightnessState));
                             Trace.traceCounter(Trace.TRACE_TAG_POWER,
                                     "SdrScreenBrightness",
-                                    BrightnessSynchronizer.brightnessFloatToInt(sdrBrightness));
+                                    BrightnessSynchronizer.brightnessFloatToInt(
+                                            sdrBrightnessState));
                         } finally {
                             Trace.traceEnd(Trace.TRACE_TAG_POWER);
                         }
                     }
 
                     private float brightnessToBacklight(float brightness) {
-                        return getDisplayDeviceConfig().getBacklightFromBrightness(brightness);
+                        if (BrightnessSynchronizer.floatEquals(
+                                brightness, PowerManager.BRIGHTNESS_OFF_FLOAT)) {
+                            return PowerManager.BRIGHTNESS_OFF_FLOAT;
+                        } else {
+                            return getDisplayDeviceConfig().getBacklightFromBrightness(brightness);
+                        }
                     }
 
                     private float backlightToNits(float backlight) {
