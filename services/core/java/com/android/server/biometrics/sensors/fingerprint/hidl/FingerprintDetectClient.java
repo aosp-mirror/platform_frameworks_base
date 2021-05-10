@@ -108,6 +108,11 @@ class FingerprintDetectClient extends AcquisitionClient<IBiometricsFingerprint>
     }
 
     @Override
+    public void onUiReady() {
+        // Unsupported in HIDL.
+    }
+
+    @Override
     public void onAuthenticated(BiometricAuthenticator.Identifier identifier, boolean authenticated,
             ArrayList<Byte> hardwareAuthToken) {
         logOnAuthenticated(getContext(), authenticated, false /* requireConfirmation */,
