@@ -272,18 +272,21 @@ void DamageAccumulator::finish(SkRect* totalDirty) {
 
 DamageAccumulator::StretchResult DamageAccumulator::findNearestStretchEffect() const {
     DirtyStack* frame = mHead;
+    const auto& headProperties = mHead->renderNode->properties();
+    float startWidth = headProperties.getWidth();
+    float startHeight = headProperties.getHeight();
     while (frame->prev != frame) {
         if (frame->type == TransformRenderNode) {
             const auto& renderNode = frame->renderNode;
             const auto& frameRenderNodeProperties = renderNode->properties();
             const auto& effect =
                     frameRenderNodeProperties.layerProperties().getStretchEffect();
-            const float width = (float) renderNode->getWidth();
-            const float height = (float) renderNode->getHeight();
+            const float width = (float) frameRenderNodeProperties.getWidth();
+            const float height = (float) frameRenderNodeProperties.getHeight();
             if (!effect.isEmpty()) {
                 Matrix4 stretchMatrix;
                 computeTransformImpl(mHead, frame, &stretchMatrix);
-                Rect stretchRect = Rect(0.f, 0.f, width, height);
+                Rect stretchRect = Rect(0.f, 0.f, startWidth, startHeight);
                 stretchMatrix.mapRect(stretchRect);
 
                 return StretchResult{
