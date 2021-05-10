@@ -1022,7 +1022,8 @@
     <string name="text_copied" msgid="2531420577879738860">"Текстът е копиран в буферната памет."</string>
     <string name="copied" msgid="4675902854553014676">"Копирано"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> постави данни от <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>"</string>
-    <string name="pasted_from_clipboard" msgid="6295556725844421812">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> постави данни от буферната памет"</string>
+    <!-- no translation found for pasted_from_clipboard (7355790625710831847) -->
+    <skip />
     <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> постави копиран от вас текст"</string>
     <string name="pasted_image" msgid="4729097394781491022">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> постави копирано от вас изображение"</string>
     <string name="pasted_content" msgid="646276353060777131">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> постави копирано от вас съдържание"</string>
@@ -1181,6 +1182,8 @@
     <string name="not_checked" msgid="7972320087569023342">"без отметка"</string>
     <string name="selected" msgid="6614607926197755875">"избрано"</string>
     <string name="not_selected" msgid="410652016565864475">"не е избрано"</string>
+    <!-- no translation found for in_progress (2149208189184319441) -->
+    <skip />
     <string name="whichApplication" msgid="5432266899591255759">"Изпълняване на действието чрез"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"Завършване на действието посредством %1$s"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"Изпълняване на действието"</string>
@@ -1259,6 +1262,14 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> се подготвя."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Приложенията се стартират."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Зареждането завършва."</string>
+    <!-- no translation found for fp_enrollment_powerbutton_intent_title (3385634173366119903) -->
+    <skip />
+    <!-- no translation found for fp_enrollment_powerbutton_intent_message (6582149052513682522) -->
+    <skip />
+    <!-- no translation found for fp_enrollment_powerbutton_intent_positive_button (5963520983910436791) -->
+    <skip />
+    <!-- no translation found for fp_enrollment_powerbutton_intent_negative_button (6465764183480190748) -->
+    <skip />
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> се изпълнява"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Докоснете, за да се върнете към играта"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Избиране на игра"</string>
@@ -1709,6 +1720,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Използване на пряк път"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Инвертиране на цветовете"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Коригиране на цветовете"</string>
+    <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Режим за работа с една ръка"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Допълнително затъмняване"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Задържахте бутоните за силата на звука. Услугата <xliff:g id="SERVICE_NAME">%1$s</xliff:g> е включена."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Задържахте бутоните за силата на звука. Услугата <xliff:g id="SERVICE_NAME">%1$s</xliff:g> е изключена."</string>
@@ -1864,8 +1876,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Актуализирано от администратора ви"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Изтрито от администратора ви"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ОК"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="750683025714899363">"Режимът за запазване на батерията включва тъмната тема и ограничава или изключва активността на заден план, някои визуални ефекти и определени функции.\n\n"<annotation id="url">"Научете повече"</annotation></string>
-    <string name="battery_saver_description" msgid="5693741424234005958">"Режимът за запазване на батерията включва тъмната тема и ограничава или изключва активността на заден план, някои визуални ефекти и определени функции."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (4877297130366222145) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (8518809702138617167) -->
+    <skip />
     <string name="data_saver_description" msgid="4995164271550590517">"С цел намаляване на преноса на данни функцията за икономия на данни не позволява на някои приложения да изпращат или получават данни на заден план. Понастоящем използвано от вас приложение може да използва данни, но по-рядко. Това например може да означава, че изображенията не се показват, докато не ги докоснете."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Включване на „Икономия на данни“?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Включване"</string>
@@ -1968,8 +1982,10 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"В момента няма достъп до <xliff:g id="APP_NAME_0">%1$s</xliff:g>. Това се управлява от <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Научете повече"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Отмяна на паузата за приложението"</string>
-    <string name="work_mode_off_title" msgid="5503291976647976560">"Вкл. на служ. потр. профил?"</string>
-    <string name="work_mode_off_message" msgid="8417484421098563803">"Служебните ви приложения, известия и данни, както и другите функции на служебния потребителски профил ще бъдат включени"</string>
+    <!-- no translation found for work_mode_off_title (961171256005852058) -->
+    <skip />
+    <!-- no translation found for work_mode_off_message (7319580997683623309) -->
+    <skip />
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Включване"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Приложението не е достъпно"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"В момента няма достъп до <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
