@@ -51977,6 +51977,7 @@ package android.view.inputmethod {
     method public int getSubtypeCount();
     method public android.graphics.drawable.Drawable loadIcon(android.content.pm.PackageManager);
     method public CharSequence loadLabel(android.content.pm.PackageManager);
+    method public boolean shouldShowInInputMethodPicker();
     method public boolean suppressesSpellChecker();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.view.inputmethod.InputMethodInfo> CREATOR;
