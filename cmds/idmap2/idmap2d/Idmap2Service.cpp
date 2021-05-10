@@ -262,16 +262,16 @@ Status Idmap2Service::createFabricatedOverlay(
                                     path.c_str(), uid));
   }
 
+  const auto frro = builder.Build();
+  if (!frro) {
+    return error(StringPrintf("failed to serialize '%s:%s': %s", overlay.packageName.c_str(),
+                              overlay.overlayName.c_str(), frro.GetErrorMessage().c_str()));
+  }
   // Persist the fabricated overlay.
   umask(kIdmapFilePermissionMask);
   std::ofstream fout(path);
   if (fout.fail()) {
     return error("failed to open frro path " + path);
-  }
-  const auto frro = builder.Build();
-  if (!frro) {
-    return error(StringPrintf("failed to serialize '%s:%s': %s", overlay.packageName.c_str(),
-                              overlay.overlayName.c_str(), frro.GetErrorMessage().c_str()));
   }
   auto result = frro->ToBinaryStream(fout);
   if (!result) {
