@@ -637,6 +637,8 @@
         <item name="android:background">@drawable/qs_media_light_source</item>
         <item name="android:tint">?android:attr/textColorPrimary</item>
         <item name="android:stateListAnimator">@anim/media_button_state_list_animator</item>
+        <item name="android:padding">12dp</item>
+        <item name="android:scaleType">fitCenter</item>
     </style>
 
     <style name="MediaPlayer.OutlineButton">
