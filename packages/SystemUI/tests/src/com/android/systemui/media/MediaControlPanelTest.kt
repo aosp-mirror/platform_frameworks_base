@@ -289,6 +289,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
         captor.value.onLongClick(holder.player)
         verify(mediaViewController, never()).openGuts()
+        verify(mediaViewController).closeGuts(false)
     }
 
     @Test

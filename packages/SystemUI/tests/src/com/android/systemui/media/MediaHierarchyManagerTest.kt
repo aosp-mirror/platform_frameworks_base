@@ -24,6 +24,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.controls.controller.ControlsControllerImplTest.Companion.eq
 import com.android.systemui.keyguard.WakefulnessLifecycle
+import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.SysuiStatusBarStateController
@@ -73,11 +74,15 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
     @Mock
     private lateinit var mediaCarouselController: MediaCarouselController
     @Mock
+    private lateinit var mediaCarouselScrollHandler: MediaCarouselScrollHandler
+    @Mock
     private lateinit var wakefulnessLifecycle: WakefulnessLifecycle
     @Mock
     private lateinit var statusBarKeyguardViewManager: StatusBarKeyguardViewManager
     @Captor
     private lateinit var wakefullnessObserver: ArgumentCaptor<(WakefulnessLifecycle.Observer)>
+    @Captor
+    private lateinit var statusBarCallback: ArgumentCaptor<(StatusBarStateController.StateListener)>
     @JvmField
     @Rule
     val mockito = MockitoJUnit.rule()
@@ -96,10 +101,13 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
                 wakefulnessLifecycle,
                 statusBarKeyguardViewManager)
         verify(wakefulnessLifecycle).addObserver(wakefullnessObserver.capture())
+        verify(statusBarStateController).addCallback(statusBarCallback.capture())
         setupHost(lockHost, MediaHierarchyManager.LOCATION_LOCKSCREEN)
         setupHost(qsHost, MediaHierarchyManager.LOCATION_QS)
         setupHost(qqsHost, MediaHierarchyManager.LOCATION_QQS)
         `when`(statusBarStateController.state).thenReturn(StatusBarState.SHADE)
+        `when`(mediaCarouselController.mediaCarouselScrollHandler)
+                .thenReturn(mediaCarouselScrollHandler)
         // We'll use the viewmanager to verify a few calls below, let's reset this.
         clearInvocations(mediaCarouselController)
     }
@@ -150,6 +158,13 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
     @Test
     fun testCloseGutsRelayToCarousel() {
         mediaHiearchyManager.closeGuts()
+
+        verify(mediaCarouselController).closeGuts()
+    }
+
+    @Test
+    fun testCloseGutsWhenDoze() {
+        statusBarCallback.value.onDozingChanged(true)
 
         verify(mediaCarouselController).closeGuts()
     }

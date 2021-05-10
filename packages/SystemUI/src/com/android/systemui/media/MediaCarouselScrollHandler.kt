@@ -59,7 +59,7 @@ class MediaCarouselScrollHandler(
     private val mainExecutor: DelayableExecutor,
     private val dismissCallback: () -> Unit,
     private var translationChangedListener: () -> Unit,
-    private val closeGuts: () -> Unit,
+    private val closeGuts: (immediate: Boolean) -> Unit,
     private val falsingCollector: FalsingCollector,
     private val falsingManager: FalsingManager,
     private val logSmartspaceImpression: () -> Unit
@@ -473,7 +473,7 @@ class MediaCarouselScrollHandler(
             if (oldIndex != visibleMediaIndex && visibleToUser) {
                 logSmartspaceImpression()
             }
-            closeGuts()
+            closeGuts(false)
             updatePlayerVisibilities()
         }
         val relativeLocation = visibleMediaIndex.toFloat() + if (playerWidthPlusPadding > 0)

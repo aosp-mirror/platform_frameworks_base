@@ -212,7 +212,8 @@ public class MediaControlPanel {
                 mMediaViewController.openGuts();
                 return true;
             } else {
-                return false;
+                closeGuts();
+                return true;
             }
         });
         mPlayerViewHolder.getCancel().setOnClickListener(v -> {

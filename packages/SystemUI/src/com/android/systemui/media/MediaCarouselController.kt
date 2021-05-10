@@ -520,12 +520,20 @@ class MediaCarouselController @Inject constructor(
             this.desiredLocation = desiredLocation
             this.desiredHostState = it
             currentlyExpanded = it.expansion > 0
+
+            val shouldCloseGuts = !currentlyExpanded && !mediaManager.hasActiveMedia() &&
+                    desiredHostState.showsOnlyActiveMedia
+
             for (mediaPlayer in MediaPlayerData.players()) {
                 if (animate) {
                     mediaPlayer.mediaViewController.animatePendingStateChange(
                             duration = duration,
                             delay = startDelay)
                 }
+                if (shouldCloseGuts && mediaPlayer.mediaViewController.isGutsVisible) {
+                    mediaPlayer.closeGuts(!animate)
+                }
+
                 mediaPlayer.mediaViewController.onLocationPreChange(desiredLocation)
             }
             mediaCarouselScrollHandler.showsSettingsButton = !it.showsOnlyActiveMedia
@@ -541,9 +549,9 @@ class MediaCarouselController @Inject constructor(
         }
     }
 
-    fun closeGuts() {
+    fun closeGuts(immediate: Boolean = true) {
         MediaPlayerData.players().forEach {
-            it.closeGuts(true)
+            it.closeGuts(immediate)
         }
     }
 
