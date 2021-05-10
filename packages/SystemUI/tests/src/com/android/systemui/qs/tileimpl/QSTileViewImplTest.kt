@@ -20,6 +20,7 @@ import android.content.Context
 import android.graphics.drawable.Drawable
 import android.service.quicksettings.Tile
 import android.testing.AndroidTestingRunner
+import android.testing.TestableLooper
 import android.text.TextUtils
 import android.view.View
 import androidx.test.filters.SmallTest
@@ -36,6 +37,7 @@ import org.mockito.MockitoAnnotations
 
 @RunWith(AndroidTestingRunner::class)
 @SmallTest
+@TestableLooper.RunWithLooper(setAsMainLooper = true)
 class QSTileViewImplTest : SysuiTestCase() {
 
     @Mock
