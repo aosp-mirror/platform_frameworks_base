@@ -329,7 +329,9 @@ AFont* _Nonnull AFontMatcher_match(
                 static_cast<minikin::FamilyVariant>(matcher->mFamilyVariant),
                 1  /* maxRun */);
 
-    const std::shared_ptr<minikin::Font>& font = runs[0].fakedFont.font;
+    const std::shared_ptr<minikin::Font>& font =
+            fc->getBestFont(minikin::U16StringPiece(text, textLength), runs[0], matcher->mFontStyle)
+                    .font;
     std::unique_ptr<AFont> result = std::make_unique<AFont>();
     const android::MinikinFontSkia* minikinFontSkia =
             reinterpret_cast<android::MinikinFontSkia*>(font->typeface().get());
