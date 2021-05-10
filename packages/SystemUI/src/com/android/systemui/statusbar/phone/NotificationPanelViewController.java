@@ -2574,16 +2574,19 @@ public class NotificationPanelViewController extends PanelViewController {
             // Small parallax as we pull down and clip QS
             startHeight = -mQsExpansionHeight * 0.2f;
         }
-        if (mKeyguardBypassController.getBypassEnabled() && isOnKeyguard()
-                && mNotificationStackScrollLayoutController.isPulseExpanding()) {
-            if (!mPulseExpansionHandler.isExpanding()
-                    && !mPulseExpansionHandler.getLeavingLockscreen()) {
-                // If we aborted the expansion we need to make sure the header doesn't reappear
-                // again after the header has animated away
-                appearAmount = 0;
+        if (mKeyguardBypassController.getBypassEnabled() && isOnKeyguard()) {
+            if (mNotificationStackScrollLayoutController.isPulseExpanding()) {
+                if (!mPulseExpansionHandler.isExpanding()
+                        && !mPulseExpansionHandler.getLeavingLockscreen()) {
+                    // If we aborted the expansion we need to make sure the header doesn't reappear
+                    // again after the header has animated away
+                    appearAmount = 0;
+                } else {
+                    appearAmount = mNotificationStackScrollLayoutController
+                            .calculateAppearFractionBypass();
+                }
             } else {
-                appearAmount = mNotificationStackScrollLayoutController
-                        .calculateAppearFractionBypass();
+                appearAmount = 0.0f;
             }
             startHeight = -mQs.getQsMinExpansionHeight();
         }
