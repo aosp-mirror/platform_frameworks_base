@@ -555,7 +555,7 @@ public class Instrument {
 
             // Start the process
             final Process process = new ProcessBuilder()
-                    .command("logcat", "-d", "-v threadtime,uid", "-T", timestamp)
+                    .command("logcat", "-d", "-v", "threadtime,uid", "-T", timestamp)
                     .start();
 
             // Nothing to write. Don't let the command accidentally block.
