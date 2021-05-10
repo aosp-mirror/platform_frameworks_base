@@ -61,6 +61,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.ProcessMap;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.IoThread;
 import com.android.server.LocalServices;
@@ -107,6 +108,13 @@ public final class AppExitInfoTracker {
     private static final int FOREACH_ACTION_STOP_ITERATION = 2;
 
     private static final int APP_EXIT_RAW_INFO_POOL_SIZE = 8;
+
+    /**
+     * How long we're going to hold before logging an app exit info into statsd;
+     * we do this is because there could be multiple sources signaling an app exit, we'd like to
+     * gather the most accurate information before logging into statsd.
+     */
+    private static final long APP_EXIT_INFO_STATSD_LOG_DEBOUNCE = TimeUnit.SECONDS.toMillis(15);
 
     @VisibleForTesting
     static final String APP_EXIT_STORE_DIR = "procexitstore";
@@ -384,6 +392,8 @@ public final class AppExitInfoTracker {
                         ApplicationExitInfo.REASON_LOW_MEMORY);
             } else if (zygote != null) {
                 updateExistingExitInfoRecordLocked(info, (Integer) zygote.second, null);
+            } else {
+                scheduleLogToStatsdLocked(info, false);
             }
         }
     }
@@ -398,7 +408,7 @@ public final class AppExitInfoTracker {
                 raw.getPackageName(), raw.getPackageUid(), raw.getPid());
 
         if (info == null) {
-            addExitInfoLocked(raw);
+            info = addExitInfoLocked(raw);
         } else {
             // always override the existing info since we are now more informational.
             info.setReason(raw.getReason());
@@ -407,6 +417,7 @@ public final class AppExitInfoTracker {
             info.setTimestamp(System.currentTimeMillis());
             info.setDescription(raw.getDescription());
         }
+        scheduleLogToStatsdLocked(info, true);
     }
 
     @GuardedBy("mLock")
@@ -438,22 +449,29 @@ public final class AppExitInfoTracker {
             // if the record is way outdated, don't update it then (because of potential pid reuse)
             return;
         }
+        boolean immediateLog = false;
         if (status != null) {
             if (OsConstants.WIFEXITED(status)) {
                 info.setReason(ApplicationExitInfo.REASON_EXIT_SELF);
                 info.setStatus(OsConstants.WEXITSTATUS(status));
+                immediateLog = true;
             } else if (OsConstants.WIFSIGNALED(status)) {
                 if (info.getReason() == ApplicationExitInfo.REASON_UNKNOWN) {
                     info.setReason(ApplicationExitInfo.REASON_SIGNALED);
                     info.setStatus(OsConstants.WTERMSIG(status));
                 } else if (info.getReason() == ApplicationExitInfo.REASON_CRASH_NATIVE) {
                     info.setStatus(OsConstants.WTERMSIG(status));
+                    immediateLog = true;
                 }
             }
         }
         if (reason != null) {
             info.setReason(reason);
+            if (reason == ApplicationExitInfo.REASON_LOW_MEMORY) {
+                immediateLog = true;
+            }
         }
+        scheduleLogToStatsdLocked(info, immediateLog);
     }
 
     /**
@@ -834,6 +852,40 @@ public final class AppExitInfoTracker {
             mData.put(packageName, userId, container);
         }
         container.addExitInfoLocked(info);
+    }
+
+    @GuardedBy("mLock")
+    private void scheduleLogToStatsdLocked(ApplicationExitInfo info, boolean immediate) {
+        if (info.isLoggedInStatsd()) {
+            return;
+        }
+        if (immediate) {
+            mKillHandler.removeMessages(KillHandler.MSG_STATSD_LOG, info);
+            performLogToStatsdLocked(info);
+        } else if (!mKillHandler.hasMessages(KillHandler.MSG_STATSD_LOG, info)) {
+            mKillHandler.sendMessageDelayed(mKillHandler.obtainMessage(
+                    KillHandler.MSG_STATSD_LOG, info), APP_EXIT_INFO_STATSD_LOG_DEBOUNCE);
+        }
+    }
+
+    @GuardedBy("mLock")
+    private void performLogToStatsdLocked(ApplicationExitInfo info) {
+        if (info.isLoggedInStatsd()) {
+            return;
+        }
+        info.setLoggedInStatsd(true);
+        final String pkgName = info.getPackageName();
+        String processName = info.getProcessName();
+        if (TextUtils.equals(pkgName, processName)) {
+            // Omit the process name here to save space
+            processName = null;
+        } else if (processName != null && processName.startsWith(pkgName)) {
+            // Strip the prefix to save space
+            processName = processName.substring(pkgName.length());
+        }
+        FrameworkStatsLog.write(FrameworkStatsLog.APP_PROCESS_DIED,
+                info.getPackageUid(), processName, info.getReason(), info.getSubReason(),
+                info.getImportance(), (int) info.getPss(), (int) info.getRss());
     }
 
     @GuardedBy("mLock")
@@ -1532,6 +1584,7 @@ public final class AppExitInfoTracker {
         static final int MSG_CHILD_PROC_DIED = 4102;
         static final int MSG_PROC_DIED = 4103;
         static final int MSG_APP_KILL = 4104;
+        static final int MSG_STATSD_LOG = 4105;
 
         KillHandler(Looper looper) {
             super(looper, null, true);
@@ -1562,6 +1615,12 @@ public final class AppExitInfoTracker {
                         handleNoteAppKillLocked(raw);
                     }
                     recycleRawRecord(raw);
+                }
+                break;
+                case MSG_STATSD_LOG: {
+                    synchronized (mLock) {
+                        performLogToStatsdLocked((ApplicationExitInfo) msg.obj);
+                    }
                 }
                 break;
                 default:
