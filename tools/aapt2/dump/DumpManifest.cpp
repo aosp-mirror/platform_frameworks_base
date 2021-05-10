@@ -135,7 +135,8 @@ class ManifestExtractor {
     template <typename Predicate>
     void Filter(Predicate&& func) {
       children_.erase(std::remove_if(children_.begin(), children_.end(),
-                                     [&](const auto& e) { return func(e.get()); }));
+                                     [&](const auto& e) { return func(e.get()); }),
+                      children_.end());
     }
 
     /** Retrieves the list of children of the element. */
