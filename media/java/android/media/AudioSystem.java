@@ -115,6 +115,18 @@ public class AudioSystem
     public static final int OUT_CHANNEL_COUNT_MAX = native_getMaxChannelCount();
     private static native int native_getMaxChannelCount();
 
+    /** Maximum value for sample rate, used by AudioFormat.
+     * @hide
+     */
+    public static final int SAMPLE_RATE_HZ_MAX = native_getMaxSampleRate();
+    private static native int native_getMaxSampleRate();
+
+    /** Minimum value for sample rate, used by AudioFormat.
+     * @hide
+     */
+    public static final int SAMPLE_RATE_HZ_MIN = native_getMinSampleRate();
+    private static native int native_getMinSampleRate();
+
     // Expose only the getter method publicly so we can change it in the future
     private static final int NUM_STREAM_TYPES = 12;
 

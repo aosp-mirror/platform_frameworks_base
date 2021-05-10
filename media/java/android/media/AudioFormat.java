@@ -518,13 +518,13 @@ public final class AudioFormat implements Parcelable {
      * @hide
      */
     // never unhide
-    public static final int SAMPLE_RATE_HZ_MIN = 4000;
+    public static final int SAMPLE_RATE_HZ_MIN = AudioSystem.SAMPLE_RATE_HZ_MIN;
     /** Maximum value for sample rate,
      *  assuming AudioTrack and AudioRecord share the same limitations.
      * @hide
      */
     // never unhide
-    public static final int SAMPLE_RATE_HZ_MAX = 192000;
+    public static final int SAMPLE_RATE_HZ_MAX = AudioSystem.SAMPLE_RATE_HZ_MAX;
     /** Sample rate will be a route-dependent value.
      * For AudioTrack, it is usually the sink sample rate,
      * and for AudioRecord it is usually the source sample rate.
