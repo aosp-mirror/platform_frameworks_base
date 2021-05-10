@@ -22,6 +22,8 @@ import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
+import com.android.systemui.shared.system.smartspace.SmartspaceTransitionController;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -50,6 +52,10 @@ public class KeyguardStatusViewControllerTest extends SysuiTestCase {
     ConfigurationController mConfigurationController;
     @Mock
     DozeParameters mDozeParameters;
+    @Mock
+    KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
+    @Mock
+    SmartspaceTransitionController mSmartSpaceTransitionController;
 
     private KeyguardStatusViewController mController;
 
@@ -64,7 +70,9 @@ public class KeyguardStatusViewControllerTest extends SysuiTestCase {
                 mKeyguardStateController,
                 mKeyguardUpdateMonitor,
                 mConfigurationController,
-                mDozeParameters);
+                mDozeParameters,
+                mKeyguardUnlockAnimationController,
+                mSmartSpaceTransitionController);
     }
 
     @Test

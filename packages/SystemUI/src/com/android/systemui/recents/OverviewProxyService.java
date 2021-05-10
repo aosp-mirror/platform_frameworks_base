@@ -29,6 +29,7 @@ import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SHE
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SHELL_SHELL_TRANSITIONS;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SHELL_SPLIT_SCREEN;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SHELL_STARTING_WINDOW;
+import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SMARTSPACE_TRANSITION_CONTROLLER;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SUPPORTS_WINDOW_CORNERS;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SYSUI_PROXY;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_WINDOW_CORNER_RADIUS;
@@ -88,6 +89,7 @@ import com.android.systemui.shared.recents.ISystemUiProxy;
 import com.android.systemui.shared.recents.model.Task;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
+import com.android.systemui.shared.system.smartspace.SmartspaceTransitionController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -148,6 +150,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
     private final CommandQueue mCommandQueue;
     private final ShellTransitions mShellTransitions;
     private final Optional<StartingSurface> mStartingSurface;
+    private final SmartspaceTransitionController mSmartspaceTransitionController;
 
     private Region mActiveNavBarRegion;
 
@@ -540,6 +543,9 @@ public class OverviewProxyService extends CurrentUserTracker implements
             mStartingSurface.ifPresent((startingwindow) -> params.putBinder(
                     KEY_EXTRA_SHELL_STARTING_WINDOW,
                     startingwindow.createExternalInterface().asBinder()));
+            params.putBinder(
+                    KEY_EXTRA_SMARTSPACE_TRANSITION_CONTROLLER,
+                    mSmartspaceTransitionController.createExternalInterface().asBinder());
 
             try {
                 Log.d(TAG_OPS + " b/182478748", "OverviewProxyService.onInitialize: curUser="
@@ -601,7 +607,8 @@ public class OverviewProxyService extends CurrentUserTracker implements
             Optional<OneHanded> oneHandedOptional,
             BroadcastDispatcher broadcastDispatcher,
             ShellTransitions shellTransitions,
-            Optional<StartingSurface> startingSurface) {
+            Optional<StartingSurface> startingSurface,
+            SmartspaceTransitionController smartspaceTransitionController) {
         super(broadcastDispatcher);
         mContext = context;
         mPipOptional = pipOptional;
@@ -663,6 +670,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
         updateEnabledState();
         startConnectionToCurrentUser();
         mStartingSurface = startingSurface;
+        mSmartspaceTransitionController = smartspaceTransitionController;
     }
 
     @Override

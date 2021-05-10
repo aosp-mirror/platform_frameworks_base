@@ -32,8 +32,10 @@ import com.android.keyguard.clock.ClockManager;
 import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
+import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.plugins.ClockPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.shared.system.smartspace.SmartspaceTransitionController;
 import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
@@ -44,7 +46,9 @@ import com.android.systemui.statusbar.phone.NotificationIconContainer;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.util.ViewController;
 
+import java.util.HashSet;
 import java.util.Locale;
+import java.util.Set;
 import java.util.TimeZone;
 
 import javax.inject.Inject;
@@ -92,6 +96,9 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     // If set, will replace keyguard_status_area
     private View mSmartspaceView;
 
+    private final KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
+    private SmartspaceTransitionController mSmartspaceTransitionController;
+
     @Inject
     public KeyguardClockSwitchController(
             KeyguardClockSwitch keyguardClockSwitch,
@@ -104,7 +111,9 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             BatteryController batteryController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             KeyguardBypassController bypassController,
-            LockscreenSmartspaceController smartspaceController) {
+            LockscreenSmartspaceController smartspaceController,
+            KeyguardUnlockAnimationController keyguardUnlockAnimationController,
+            SmartspaceTransitionController smartspaceTransitionController) {
         super(keyguardClockSwitch);
         mStatusBarStateController = statusBarStateController;
         mColorExtractor = colorExtractor;
@@ -116,6 +125,9 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mBypassController = bypassController;
         mSmartspaceController = smartspaceController;
+
+        mKeyguardUnlockAnimationController = keyguardUnlockAnimationController;
+        mSmartspaceTransitionController = smartspaceTransitionController;
     }
 
     /**
@@ -187,6 +199,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             nic.setLayoutParams(lp);
 
             mView.setSmartspaceView(mSmartspaceView);
+            mSmartspaceTransitionController.setLockscreenSmartspace(mSmartspaceView);
         }
     }
 
@@ -282,10 +295,42 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         if (mSmartspaceView != null) {
             PropertyAnimator.setProperty(mSmartspaceView, AnimatableProperty.TRANSLATION_X,
                     x, props, animate);
+
+            // If we're unlocking with the SmartSpace shared element transition, let the controller
+            // know that it should re-position our SmartSpace.
+            if (mKeyguardUnlockAnimationController.isUnlockingWithSmartSpaceTransition()) {
+                mKeyguardUnlockAnimationController.updateLockscreenSmartSpacePosition();
+            } else {
+                // Otherwise, reset Y translation in case it's still offset from a previous shared
+                // element transition.
+                ((View) mSmartspaceView).setTranslationY(0f);
+            }
         }
 
         mKeyguardSliceViewController.updatePosition(x, props, animate);
         mNotificationIconAreaController.updatePosition(x, props, animate);
+    }
+
+    /** Sets an alpha value on every child view except for the smartspace. */
+    public void setChildrenAlphaExcludingSmartspace(float alpha) {
+        final Set<View> excludedViews = new HashSet<>();
+
+        if (mSmartspaceView != null) {
+            excludedViews.add(mSmartspaceView);
+        }
+
+        setChildrenAlphaExcluding(alpha, excludedViews);
+    }
+
+    /** Sets an alpha value on every child view except for the views in the provided set. */
+    public void setChildrenAlphaExcluding(float alpha, Set<View> excludedViews) {
+        for (int i = 0; i < mView.getChildCount(); i++) {
+            final View child = mView.getChildAt(i);
+
+            if (!excludedViews.contains(child)) {
+                child.setAlpha(alpha);
+            }
+        }
     }
 
     void updateTimeZone(TimeZone timeZone) {

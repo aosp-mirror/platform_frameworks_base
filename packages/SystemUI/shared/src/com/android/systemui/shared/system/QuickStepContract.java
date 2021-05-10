@@ -36,6 +36,9 @@ import java.util.StringJoiner;
  * Various shared constants between Launcher and SysUI as part of quickstep
  */
 public class QuickStepContract {
+    // Fully qualified name of the Launcher activity.
+    public static final String LAUNCHER_ACTIVITY_CLASS_NAME =
+            "com.google.android.apps.nexuslauncher.NexusLauncherActivity";
 
     public static final String KEY_EXTRA_SYSUI_PROXY = "extra_sysui_proxy";
     public static final String KEY_EXTRA_WINDOW_CORNER_RADIUS = "extra_window_corner_radius";
@@ -52,6 +55,8 @@ public class QuickStepContract {
     // See IStartingWindow.aidl
     public static final String KEY_EXTRA_SHELL_STARTING_WINDOW =
             "extra_shell_starting_window";
+    // See ISmartspaceTransitionController.aidl
+    public static final String KEY_EXTRA_SMARTSPACE_TRANSITION_CONTROLLER = "smartspace_transition";
 
     public static final String NAV_BAR_MODE_2BUTTON_OVERLAY =
             WindowManagerPolicyConstants.NAV_BAR_MODE_2BUTTON_OVERLAY;

@@ -28,6 +28,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.GridLayout;
 import android.widget.TextView;
 
@@ -39,6 +40,7 @@ import com.android.systemui.statusbar.CrossFadeHelper;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.Set;
 
 /**
  * View consisting of:
@@ -55,6 +57,7 @@ public class KeyguardStatusView extends GridLayout {
     private final LockPatternUtils mLockPatternUtils;
     private final IActivityManager mIActivityManager;
 
+    private ViewGroup mStatusViewContainer;
     private TextView mLogoutView;
     private KeyguardClockSwitch mClockView;
     private TextView mOwnerInfo;
@@ -66,6 +69,7 @@ public class KeyguardStatusView extends GridLayout {
 
     private float mDarkAmount = 0;
     private int mTextColor;
+    private float mChildrenAlphaExcludingSmartSpace = 1f;
 
     /**
      * Bottom margin that defines the margin between bottom of smart space and top of notification
@@ -132,6 +136,7 @@ public class KeyguardStatusView extends GridLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
+        mStatusViewContainer = findViewById(R.id.status_view_container);
         mLogoutView = findViewById(R.id.logout);
         if (mLogoutView != null) {
             mLogoutView.setOnClickListener(this::onLogoutClicked);
@@ -249,6 +254,27 @@ public class KeyguardStatusView extends GridLayout {
         final int blendedTextColor = ColorUtils.blendARGB(mTextColor, Color.WHITE, mDarkAmount);
         mKeyguardSlice.setDarkAmount(mDarkAmount);
         mClockView.setTextColor(blendedTextColor);
+    }
+
+    public void setChildrenAlphaExcludingClockView(float alpha) {
+        setChildrenAlphaExcluding(alpha, Set.of(mClockView));
+    }
+
+    /** Sets an alpha value on every view except for the views in the provided set. */
+    public void setChildrenAlphaExcluding(float alpha, Set<View> excludedViews) {
+        mChildrenAlphaExcludingSmartSpace = alpha;
+
+        for (int i = 0; i < mStatusViewContainer.getChildCount(); i++) {
+            final View child = mStatusViewContainer.getChildAt(i);
+
+            if (!excludedViews.contains(child)) {
+                child.setAlpha(alpha);
+            }
+        }
+    }
+
+    public float getChildrenAlphaExcludingSmartSpace() {
+        return mChildrenAlphaExcludingSmartSpace;
     }
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {

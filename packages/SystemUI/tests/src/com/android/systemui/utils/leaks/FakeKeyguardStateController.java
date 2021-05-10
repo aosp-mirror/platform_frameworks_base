@@ -127,4 +127,9 @@ public class FakeKeyguardStateController implements KeyguardStateController {
     public void notifyPanelFlingEnd() {
 
     }
+
+    @Override
+    public boolean canPerformSmartSpaceTransition() {
+        return false;
+    }
 }
