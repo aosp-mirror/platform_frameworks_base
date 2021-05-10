@@ -289,11 +289,9 @@
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"Mobilný hotspot je vypnutý."</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"Mobilný hotspot je zapnutý."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"Prenášanie bolo zastavené."</string>
-    <!-- no translation found for accessibility_quick_settings_work_mode_off (9106217884005620744) -->
-    <skip />
+    <string name="accessibility_quick_settings_work_mode_off" msgid="9106217884005620744">"Pracovný režim je pozastavený."</string>
     <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"Pracovný režim zapnutý"</string>
-    <!-- no translation found for accessibility_quick_settings_work_mode_changed_off (2653550342355027441) -->
-    <skip />
+    <string name="accessibility_quick_settings_work_mode_changed_off" msgid="2653550342355027441">"Pracovný režim bol pozastavený."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"Pracovný režim je zapnutý."</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"Šetrič dát bol vypnutý."</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"Šetrič dát bol zapnutý."</string>
@@ -416,8 +414,7 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"Limit: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"Upozornenie pri <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"Pracovný profil"</string>
-    <!-- no translation found for quick_settings_work_mode_paused (4841109346916998613) -->
-    <skip />
+    <string name="quick_settings_work_mode_paused" msgid="4841109346916998613">"Pozastavené"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Nočný režim"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Zapne sa pri západe slnka"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Do východu slnka"</string>
@@ -477,14 +474,10 @@
     <string name="interruption_level_none_twoline" msgid="8579382742855486372">"Úplné\nticho"</string>
     <string name="interruption_level_priority_twoline" msgid="8523482736582498083">"Iba\nprioritné"</string>
     <string name="interruption_level_alarms_twoline" msgid="2045067991335708767">"Iba\nbudíky"</string>
-    <!-- no translation found for keyguard_indication_charging_time_wireless (577856646141738675) -->
-    <skip />
-    <!-- no translation found for keyguard_indication_charging_time (6492711711891071502) -->
-    <skip />
-    <!-- no translation found for keyguard_indication_charging_time_fast (8390311020603859480) -->
-    <skip />
-    <!-- no translation found for keyguard_indication_charging_time_slowly (301936949731705417) -->
-    <skip />
+    <string name="keyguard_indication_charging_time_wireless" msgid="577856646141738675">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Nabíja sa bezdrôtovo • Do úplného nabitia zostáva <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
+    <string name="keyguard_indication_charging_time" msgid="6492711711891071502">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Nabíja sa • Do úplného nabitia zostáva <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Nabíja sa rýchlo • Do úplného nabitia zostáva <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Nabíja sa pomaly • Do úplného nabitia zostáva <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Prepnutie používateľa"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="5759855008166759399">"Prepnúť používateľa (súčasný používateľ: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>)"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="383168614528618402">"Aktuálny používateľ <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -682,12 +675,10 @@
     <string name="wallet_title" msgid="5369767670735827105">"Peňaženka"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Zobraziť všetko"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Odomknúť a zaplatiť"</string>
-    <!-- no translation found for wallet_secondary_label_no_card (1282609666895946317) -->
-    <skip />
+    <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"Nenastavené"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Odomknúť a použiť"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Pri načítavaní kariet sa vyskytol problém. Skúste to neskôr."</string>
-    <!-- no translation found for wallet_lockscreen_settings_label (3539105300870383570) -->
-    <skip />
+    <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Nastavenia uzamknutej obrazovky"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Pracovný profil"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Režim v lietadle"</string>
     <string name="add_tile" msgid="6239678623873086686">"Pridať dlaždicu"</string>
@@ -881,8 +872,7 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"Zapnuté"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"Vypnuté"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"Nedostupné"</string>
-    <!-- no translation found for tile_disabled (373212051546573069) -->
-    <skip />
+    <string name="tile_disabled" msgid="373212051546573069">"Deaktivované"</string>
     <string name="nav_bar" msgid="4642708685386136807">"Navigačný panel"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"Rozloženie"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"Dodatočný typ ľavého tlačidla"</string>

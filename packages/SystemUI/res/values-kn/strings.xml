@@ -289,11 +289,9 @@
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"ಮೊಬೈಲ್ ಹಾಟ್‌ಸ್ಪಾಟ್ ಆಫ್ ಮಾಡಲಾಗಿದೆ."</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"ಮೊಬೈಲ್ ಹಾಟ್‌ಸ್ಪಾಟ್ ಆನ್ ಮಾಡಲಾಗಿದೆ."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"ಸ್ಕ್ರೀನ್ ಪ್ರಸಾರವನ್ನು ನಿಲ್ಲಿಸಲಾಗಿದೆ."</string>
-    <!-- no translation found for accessibility_quick_settings_work_mode_off (9106217884005620744) -->
-    <skip />
+    <string name="accessibility_quick_settings_work_mode_off" msgid="9106217884005620744">"ಕೆಲಸದ ಮೋಡ್ ವಿರಾಮಗೊಳಿಸಲಾಗಿದೆ."</string>
     <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"ಕೆಲಸದ ಮೋಡ್ ಆನ್ ಆಗಿದೆ."</string>
-    <!-- no translation found for accessibility_quick_settings_work_mode_changed_off (2653550342355027441) -->
-    <skip />
+    <string name="accessibility_quick_settings_work_mode_changed_off" msgid="2653550342355027441">"ಕೆಲಸದ ಮೋಡ್ ಅನ್ನು ವಿರಾಮಗೊಳಿಸಲಾಗಿದೆ."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"ಕೆಲಸದ ಮೋಡ್ ಆನ್ ಮಾಡಲಾಗಿದೆ."</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"ಡೇಟಾ ಸೇವರ್ ಆಫ್ ಮಾಡಲಾಗಿದೆ."</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"ಡೇಟಾ ಸೇವರ್ ಆನ್ ಮಾಡಲಾಗಿದೆ."</string>
@@ -412,8 +410,7 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"<xliff:g id="DATA_LIMIT">%s</xliff:g> ಮಿತಿ"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"<xliff:g id="DATA_LIMIT">%s</xliff:g> ಎಚ್ಚರಿಕೆ"</string>
     <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"ಕೆಲಸದ ಪ್ರೊಫೈಲ್"</string>
-    <!-- no translation found for quick_settings_work_mode_paused (4841109346916998613) -->
-    <skip />
+    <string name="quick_settings_work_mode_paused" msgid="4841109346916998613">"ವಿರಾಮಗೊಳಿಸಲಾಗಿದೆ"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"ನೈಟ್ ಲೈಟ್"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"ಸೂರ್ಯಾಸ್ತದಲ್ಲಿ"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"ಸೂರ್ಯೋದಯದವರೆಗೆ"</string>
@@ -676,12 +673,10 @@
     <string name="wallet_title" msgid="5369767670735827105">"ವಾಲೆಟ್"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"ಎಲ್ಲವನ್ನೂ ತೋರಿಸಿ"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"ಪಾವತಿಸಲು ಅನ್‌ಲಾಕ್ ಮಾಡಿ"</string>
-    <!-- no translation found for wallet_secondary_label_no_card (1282609666895946317) -->
-    <skip />
+    <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"ಇನ್ನೂ ಸೆಟಪ್‌ ಮಾಡಿಲ್ಲ"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"ಬಳಸಲು ಅನ್‌ಲಾಕ್ ಮಾಡಿ"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"ನಿಮ್ಮ ಕಾರ್ಡ್‌ಗಳನ್ನು ಪಡೆಯುವಾಗ ಸಮಸ್ಯೆ ಉಂಟಾಗಿದೆ, ನಂತರ ಪುನಃ ಪ್ರಯತ್ನಿಸಿ"</string>
-    <!-- no translation found for wallet_lockscreen_settings_label (3539105300870383570) -->
-    <skip />
+    <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"ಲಾಕ್ ಸ್ಕ್ರ್ರೀನ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"ಕೆಲಸದ ಪ್ರೊಫೈಲ್"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"ಏರ್‌ಪ್ಲೇನ್ ಮೋಡ್"</string>
     <string name="add_tile" msgid="6239678623873086686">"ಟೈಲ್ ಸೇರಿಸಿ"</string>
@@ -871,8 +866,7 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"ಆನ್"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"ಆಫ್"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"ಲಭ್ಯವಿಲ್ಲ"</string>
-    <!-- no translation found for tile_disabled (373212051546573069) -->
-    <skip />
+    <string name="tile_disabled" msgid="373212051546573069">"ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>
     <string name="nav_bar" msgid="4642708685386136807">"ನ್ಯಾವಿಗೇಷನ್ ಬಾರ್"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"ಲೇಔಟ್"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"ಹೆಚ್ಚುವರಿ ಎಡ ಬಟನ್ ವಿಧ"</string>

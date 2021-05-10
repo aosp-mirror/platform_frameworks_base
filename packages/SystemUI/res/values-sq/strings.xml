@@ -473,14 +473,10 @@
     <string name="interruption_level_none_twoline" msgid="8579382742855486372">"Heshtje\ne plotë"</string>
     <string name="interruption_level_priority_twoline" msgid="8523482736582498083">"Vetëm\nme prioritet"</string>
     <string name="interruption_level_alarms_twoline" msgid="2045067991335708767">"Vetëm\nalarmet"</string>
-    <!-- no translation found for keyguard_indication_charging_time_wireless (577856646141738675) -->
-    <skip />
-    <!-- no translation found for keyguard_indication_charging_time (6492711711891071502) -->
-    <skip />
-    <!-- no translation found for keyguard_indication_charging_time_fast (8390311020603859480) -->
-    <skip />
-    <!-- no translation found for keyguard_indication_charging_time_slowly (301936949731705417) -->
-    <skip />
+    <string name="keyguard_indication_charging_time_wireless" msgid="577856646141738675">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Po karikohet me valë • Plot për <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
+    <string name="keyguard_indication_charging_time" msgid="6492711711891071502">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Po karikohet • Plot për <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Po karikohet shpejt • Plot për <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Po karikohet ngadalë • Plot për <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Ndërro përdorues"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="5759855008166759399">"Ndërro përdoruesin. Përdoruesi aktual është <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="383168614528618402">"Përdoruesi aktual <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -750,14 +746,10 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Statusi:&lt;/b&gt; Ulur në nivel si në heshtje"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Statusi:&lt;/b&gt; Renditur më lart"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Statusi:&lt;/b&gt; Renditur më poshtë"</string>
-    <!-- no translation found for notification_channel_summary_priority_baseline (46674690072551234) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_priority_bubble (1275413109619074576) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_priority_dnd (6665395023264154361) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_priority_all (7151752959650048285) -->
-    <skip />
+    <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Shfaqet në krye të njoftimeve të bisedës dhe si fotografia e profilit në ekranin e kyçjes"</string>
+    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Shfaqet në krye të njoftimeve të bisedës, shfaqet si fotografia e profilit në ekranin e kyçjes dhe shfaqet si flluskë"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Shfaqet në krye të njoftimeve të bisedës, shfaqet si fotografia e profilit në ekranin e kyçjes dhe ndërpret modalitetin \"Mos shqetëso\""</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Shfaqet në krye të njoftimeve të bisedës dhe si fotografia e profilit në ekranin e kyçjes, shfaqet si flluskë dhe ndërpret modalitetin \"Mos shqetëso\""</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Cilësimet"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Përparësia"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> nuk mbështet veçoritë e bisedës"</string>
