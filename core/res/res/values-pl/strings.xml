@@ -1028,8 +1028,7 @@
     <string name="text_copied" msgid="2531420577879738860">"Tekst został skopiowany do schowka."</string>
     <string name="copied" msgid="4675902854553014676">"Skopiowano"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"Aplikacja <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> wkleiła dane z aplikacji <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>"</string>
-    <!-- no translation found for pasted_from_clipboard (7355790625710831847) -->
-    <skip />
+    <string name="pasted_from_clipboard" msgid="7355790625710831847">"Aplikacja <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> skopiowała dane ze schowka"</string>
     <string name="pasted_text" msgid="4298871641549173733">"Aplikacja <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> wkleiła skopiowany tekst"</string>
     <string name="pasted_image" msgid="4729097394781491022">"Aplikacja <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> wkleiła skopiowany obraz"</string>
     <string name="pasted_content" msgid="646276353060777131">"Aplikacja <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> wkleiła skopiowane treści"</string>
@@ -1302,14 +1301,10 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"Przygotowuję aplikację <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Uruchamianie aplikacji."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Kończenie uruchamiania."</string>
-    <!-- no translation found for fp_enrollment_powerbutton_intent_title (3385634173366119903) -->
-    <skip />
-    <!-- no translation found for fp_enrollment_powerbutton_intent_message (6582149052513682522) -->
-    <skip />
-    <!-- no translation found for fp_enrollment_powerbutton_intent_positive_button (5963520983910436791) -->
-    <skip />
-    <!-- no translation found for fp_enrollment_powerbutton_intent_negative_button (6465764183480190748) -->
-    <skip />
+    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"Wyłączyć ekran?"</string>
+    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"Podczas konfigurowania odcisku palca naciśnięto przycisk zasilania.\n\nZwykle powoduje to wyłączenie ekranu."</string>
+    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"Wyłącz"</string>
+    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"Anuluj"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"Działa <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Kliknij, by wrócić do gry"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Wybierz grę"</string>
@@ -1764,8 +1759,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Użyj skrótu"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Odwrócenie kolorów"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Korekcja kolorów"</string>
-    <!-- no translation found for one_handed_mode_feature_name (2334330034828094891) -->
-    <skip />
+    <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Tryb jednej ręki"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Dodatkowe przyciemnienie"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Przytrzymano klawisze głośności. Usługa <xliff:g id="SERVICE_NAME">%1$s</xliff:g> została włączona."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Przytrzymano klawisze głośności. Usługa <xliff:g id="SERVICE_NAME">%1$s</xliff:g> została wyłączona."</string>

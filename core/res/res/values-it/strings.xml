@@ -1022,8 +1022,7 @@
     <string name="text_copied" msgid="2531420577879738860">"Testo copiato negli appunti."</string>
     <string name="copied" msgid="4675902854553014676">"Copia eseguita"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"Dati dell\'app <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> incollati dall\'app <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>"</string>
-    <!-- no translation found for pasted_from_clipboard (7355790625710831847) -->
-    <skip />
+    <string name="pasted_from_clipboard" msgid="7355790625710831847">"L\'app <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ha incollato dati dagli appunti"</string>
     <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ha incollato il testo che hai copiato"</string>
     <string name="pasted_image" msgid="4729097394781491022">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ha incollato un\'immagine che hai copiato"</string>
     <string name="pasted_content" msgid="646276353060777131">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ha incollato i contenuti che hai copiato"</string>
@@ -1262,14 +1261,10 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> in preparazione."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Avvio app."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Conclusione dell\'avvio."</string>
-    <!-- no translation found for fp_enrollment_powerbutton_intent_title (3385634173366119903) -->
-    <skip />
-    <!-- no translation found for fp_enrollment_powerbutton_intent_message (6582149052513682522) -->
-    <skip />
-    <!-- no translation found for fp_enrollment_powerbutton_intent_positive_button (5963520983910436791) -->
-    <skip />
-    <!-- no translation found for fp_enrollment_powerbutton_intent_negative_button (6465764183480190748) -->
-    <skip />
+    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"Vuoi disattivare lo schermo?"</string>
+    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"Durante la configurazione della tua impronta hai premuto il tasto di accensione.\n\nGeneralmente questa azione comporta la disattivazione dello schermo."</string>
+    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"Disattiva"</string>
+    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"Annulla"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> in esecuzione"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Tocca per tornare al gioco"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Scegli gioco"</string>
