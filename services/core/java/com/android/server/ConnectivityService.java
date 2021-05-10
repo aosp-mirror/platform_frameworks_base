@@ -4769,6 +4769,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                             (Pair<ProfileNetworkPreferences.Preference, IOnCompleteListener>)
                                     msg.obj;
                     handleSetProfileNetworkPreference(arg.first, arg.second);
+                    break;
                 }
                 case EVENT_REPORT_NETWORK_ACTIVITY:
                     mNetworkActivityTracker.handleReportNetworkActivity();
