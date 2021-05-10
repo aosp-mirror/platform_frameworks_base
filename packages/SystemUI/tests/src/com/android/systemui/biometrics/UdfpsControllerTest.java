@@ -232,12 +232,14 @@ public class UdfpsControllerTest extends SysuiTestCase {
         MotionEvent moveEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, 0, 0, 0);
         mTouchListenerCaptor.getValue().onTouch(mUdfpsView, moveEvent);
         moveEvent.recycle();
-        // THEN illumination begins
-        // AND onIlluminatedRunnable that notifies FingerprintManager is set
-        verify(mUdfpsView).startIllumination(mOnIlluminatedRunnableCaptor.capture());
-        mOnIlluminatedRunnableCaptor.getValue().run();
+        // THEN FingerprintManager is notified about onPointerDown
         verify(mFingerprintManager).onPointerDown(eq(mUdfpsController.mSensorProps.sensorId), eq(0),
                 eq(0), eq(0f), eq(0f));
+        // AND illumination begins
+        verify(mUdfpsView).startIllumination(mOnIlluminatedRunnableCaptor.capture());
+        // AND onIlluminatedRunnable notifies FingerprintManager about onUiReady
+        mOnIlluminatedRunnableCaptor.getValue().run();
+        verify(mFingerprintManager).onUiReady(eq(mUdfpsController.mSensorProps.sensorId));
     }
 
     @Test

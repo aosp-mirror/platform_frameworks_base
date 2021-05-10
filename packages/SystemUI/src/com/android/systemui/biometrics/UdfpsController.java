@@ -345,7 +345,7 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
                 }
                 if (isWithinSensorArea(udfpsView, event.getX(), event.getY(), fromUdfpsView)) {
                     Trace.beginAsyncSection(
-                            "UdfpsController.mOnTouchListener#isWithinSensorArea", 1);
+                            "UdfpsController#ACTION_DOWN", 1);
                     // The pointer that causes ACTION_DOWN is always at index 0.
                     // We need to persist its ID to track it during ACTION_MOVE that could include
                     // data for many other pointers because of multi-touch support.
@@ -382,8 +382,6 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
                                 minor, major, v, exceedsVelocityThreshold);
                         final long sinceLastLog = SystemClock.elapsedRealtime() - mTouchLogTime;
                         if (!isFingerDown && !exceedsVelocityThreshold) {
-                            Trace.endAsyncSection(
-                                    "UdfpsController.mOnTouchListener#isWithinSensorArea", 1);
                             onFingerDown((int) x, (int) y, minor, major);
                             Log.v(TAG, "onTouch | finger down: " + touchInfo);
                             mTouchLogTime = SystemClock.elapsedRealtime();
@@ -761,10 +759,13 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
             Log.w(TAG, "Null view in onFingerDown");
             return;
         }
+        mFingerprintManager.onPointerDown(mSensorProps.sensorId, x, y, minor, major);
+        Trace.endAsyncSection(
+                "UdfpsController#ACTION_DOWN", 1);
         Trace.beginAsyncSection("UdfpsController#startIllumination", 1);
         mView.startIllumination(() -> {
+            mFingerprintManager.onUiReady(mSensorProps.sensorId);
             Trace.endAsyncSection("UdfpsController#startIllumination", 1);
-            mFingerprintManager.onPointerDown(mSensorProps.sensorId, x, y, minor, major);
         });
     }
 

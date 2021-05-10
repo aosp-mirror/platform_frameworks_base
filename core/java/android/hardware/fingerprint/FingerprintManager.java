@@ -926,6 +926,23 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     }
 
     /**
+     * @hide
+     */
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+    public void onUiReady(int sensorId) {
+        if (mService == null) {
+            Slog.w(TAG, "onUiReady: no fingerprint service");
+            return;
+        }
+
+        try {
+            mService.onUiReady(sensorId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Determine if there is at least one fingerprint enrolled.
      *
      * @return true if at least one fingerprint is enrolled, false otherwise
@@ -1450,7 +1467,6 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
         @Override // binder call
         public void onUdfpsPointerUp(int sensorId) {
             mHandler.obtainMessage(MSG_UDFPS_POINTER_UP, sensorId, 0).sendToTarget();
-
         }
     };
 
