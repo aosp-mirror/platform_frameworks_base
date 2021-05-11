@@ -2254,24 +2254,6 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     @Override
-    public AndroidFuture updateShortcutVisibility(String callingPkg, String packageName,
-            byte[] certificate, boolean visible, int userId) {
-        final AndroidFuture<Void> ret = new AndroidFuture<>();
-        injectPostToHandlerIfAppSearch(() -> {
-            try {
-                synchronized (mLock) {
-                    getPackageShortcutsForPublisherLocked(callingPkg, userId)
-                            .updateVisibility(packageName, certificate, visible);
-                }
-                ret.complete(null);
-            } catch (Exception e) {
-                ret.completeExceptionally(e);
-            }
-        });
-        return ret;
-    }
-
-    @Override
     public AndroidFuture requestPinShortcut(String packageName, ShortcutInfo shortcut,
             IntentSender resultIntent, int userId) {
         final AndroidFuture<Boolean> ret = new AndroidFuture<>();
