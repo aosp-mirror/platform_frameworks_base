@@ -47,7 +47,6 @@ import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
-import android.provider.Settings;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -237,9 +236,6 @@ public class HdmiControlServiceTest {
         mHdmiPortInfo[3] =
             new HdmiPortInfo(4, HdmiPortInfo.PORT_INPUT, 0x3000, true, false, false);
         mNativeWrapper.setPortInfo(mHdmiPortInfo);
-        mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
-                HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED,
-                HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
         mHdmiControlServiceSpy.initService();
         mHdmiControlServiceSpy.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
 
@@ -358,23 +354,6 @@ public class HdmiControlServiceTest {
                 HdmiControlManager.VOLUME_CONTROL_ENABLED);
         assertThat(mHdmiControlServiceSpy.getHdmiCecConfig().getIntValue(
                 HdmiControlManager.CEC_SETTING_NAME_VOLUME_CONTROL_MODE)).isEqualTo(
-                HdmiControlManager.VOLUME_CONTROL_ENABLED);
-    }
-
-    @Test
-    public void setAndGetCecVolumeControlEnabled_changesSetting() {
-        mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
-                HdmiControlManager.CEC_SETTING_NAME_VOLUME_CONTROL_MODE,
-                HdmiControlManager.VOLUME_CONTROL_DISABLED);
-        assertThat(mHdmiControlServiceSpy.readIntSetting(
-                Settings.Global.HDMI_CONTROL_VOLUME_CONTROL_ENABLED, -1)).isEqualTo(
-                HdmiControlManager.VOLUME_CONTROL_DISABLED);
-
-        mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
-                HdmiControlManager.CEC_SETTING_NAME_VOLUME_CONTROL_MODE,
-                HdmiControlManager.VOLUME_CONTROL_ENABLED);
-        assertThat(mHdmiControlServiceSpy.readIntSetting(
-                Settings.Global.HDMI_CONTROL_VOLUME_CONTROL_ENABLED, -1)).isEqualTo(
                 HdmiControlManager.VOLUME_CONTROL_ENABLED);
     }
 
