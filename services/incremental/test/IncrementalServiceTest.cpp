@@ -56,10 +56,10 @@ public:
     MOCK_CONST_METHOD1(unmountIncFs, binder::Status(const std::string& dir));
     MOCK_CONST_METHOD2(bindMount,
                        binder::Status(const std::string& sourceDir, const std::string& argetDir));
-    MOCK_CONST_METHOD3(
+    MOCK_CONST_METHOD4(
             setIncFsMountOptions,
             binder::Status(const ::android::os::incremental::IncrementalFileSystemControlParcel&,
-                           bool, bool));
+                           bool, bool, const std::string&));
 
     void mountIncFsFails() {
         ON_CALL(*this, mountIncFs(_, _, _, _, _))
@@ -83,12 +83,12 @@ public:
         ON_CALL(*this, bindMount(_, _)).WillByDefault(Return(binder::Status::ok()));
     }
     void setIncFsMountOptionsFails() const {
-        ON_CALL(*this, setIncFsMountOptions(_, _, _))
+        ON_CALL(*this, setIncFsMountOptions(_, _, _, _))
                 .WillByDefault(Return(
                         binder::Status::fromExceptionCode(1, String8("failed to set options"))));
     }
     void setIncFsMountOptionsSuccess() {
-        ON_CALL(*this, setIncFsMountOptions(_, _, _))
+        ON_CALL(*this, setIncFsMountOptions(_, _, _, _))
                 .WillByDefault(Invoke(this, &MockVoldService::setIncFsMountOptionsOk));
     }
     binder::Status getInvalidControlParcel(const std::string& imagePath,
@@ -108,7 +108,7 @@ public:
     }
     binder::Status setIncFsMountOptionsOk(
             const ::android::os::incremental::IncrementalFileSystemControlParcel& control,
-            bool enableReadLogs, bool enableReadTimeouts) {
+            bool enableReadLogs, bool enableReadTimeouts, const std::string& sysfsName) {
         mReadLogsEnabled = enableReadLogs;
         mReadTimeoutsEnabled = enableReadTimeouts;
         return binder::Status::ok();
@@ -1451,9 +1451,9 @@ TEST_F(IncrementalServiceTest, testSetIncFsMountOptionsSuccess) {
     EXPECT_CALL(*mDataLoaderManager, unbindFromDataLoader(_));
     EXPECT_CALL(*mVold, unmountIncFs(_)).Times(2);
     // on startLoading
-    EXPECT_CALL(*mVold, setIncFsMountOptions(_, false, _)).Times(1);
+    EXPECT_CALL(*mVold, setIncFsMountOptions(_, false, _, _)).Times(1);
     // We are calling setIncFsMountOptions(true).
-    EXPECT_CALL(*mVold, setIncFsMountOptions(_, true, _)).Times(1);
+    EXPECT_CALL(*mVold, setIncFsMountOptions(_, true, _, _)).Times(1);
     // After setIncFsMountOptions succeeded expecting to start watching.
     EXPECT_CALL(*mAppOpsManager, startWatchingMode(_, _, _)).Times(1);
     // Not expecting callback removal.
@@ -1475,8 +1475,8 @@ TEST_F(IncrementalServiceTest, testSetIncFsMountOptionsSuccessAndDisabled) {
     EXPECT_CALL(*mDataLoaderManager, unbindFromDataLoader(_));
     EXPECT_CALL(*mVold, unmountIncFs(_)).Times(2);
     // Enabling and then disabling readlogs.
-    EXPECT_CALL(*mVold, setIncFsMountOptions(_, true, _)).Times(1);
-    EXPECT_CALL(*mVold, setIncFsMountOptions(_, false, _)).Times(2);
+    EXPECT_CALL(*mVold, setIncFsMountOptions(_, true, _, _)).Times(1);
+    EXPECT_CALL(*mVold, setIncFsMountOptions(_, false, _, _)).Times(2);
     // After setIncFsMountOptions succeeded expecting to start watching.
     EXPECT_CALL(*mAppOpsManager, startWatchingMode(_, _, _)).Times(1);
     // Not expecting callback removal.
@@ -1503,8 +1503,8 @@ TEST_F(IncrementalServiceTest, testSetIncFsMountOptionsSuccessAndTimedOut) {
     EXPECT_CALL(*mDataLoaderManager, unbindFromDataLoader(_));
     EXPECT_CALL(*mVold, unmountIncFs(_)).Times(2);
     // Enabling and then disabling readlogs.
-    EXPECT_CALL(*mVold, setIncFsMountOptions(_, true, _)).Times(2);
-    EXPECT_CALL(*mVold, setIncFsMountOptions(_, false, _)).Times(2);
+    EXPECT_CALL(*mVold, setIncFsMountOptions(_, true, _, _)).Times(2);
+    EXPECT_CALL(*mVold, setIncFsMountOptions(_, false, _, _)).Times(2);
     // After setIncFsMountOptions succeeded expecting to start watching.
     EXPECT_CALL(*mAppOpsManager, startWatchingMode(_, _, _)).Times(1);
     // Not expecting callback removal.
@@ -1544,8 +1544,8 @@ TEST_F(IncrementalServiceTest, testSetIncFsMountOptionsSuccessAndNoTimedOutForSy
     EXPECT_CALL(*mDataLoaderManager, unbindFromDataLoader(_));
     EXPECT_CALL(*mVold, unmountIncFs(_)).Times(2);
     // Enabling and then disabling readlogs.
-    EXPECT_CALL(*mVold, setIncFsMountOptions(_, true, _)).Times(3);
-    EXPECT_CALL(*mVold, setIncFsMountOptions(_, false, _)).Times(1);
+    EXPECT_CALL(*mVold, setIncFsMountOptions(_, true, _, _)).Times(3);
+    EXPECT_CALL(*mVold, setIncFsMountOptions(_, false, _, _)).Times(1);
     // After setIncFsMountOptions succeeded expecting to start watching.
     EXPECT_CALL(*mAppOpsManager, startWatchingMode(_, _, _)).Times(1);
     // Not expecting callback removal.
@@ -1585,8 +1585,8 @@ TEST_F(IncrementalServiceTest, testSetIncFsMountOptionsSuccessAndNewInstall) {
     EXPECT_CALL(*mDataLoaderManager, unbindFromDataLoader(_)).Times(2);
     EXPECT_CALL(*mVold, unmountIncFs(_)).Times(2);
     // Enabling and then disabling readlogs.
-    EXPECT_CALL(*mVold, setIncFsMountOptions(_, true, _)).Times(5);
-    EXPECT_CALL(*mVold, setIncFsMountOptions(_, false, _)).Times(3);
+    EXPECT_CALL(*mVold, setIncFsMountOptions(_, true, _, _)).Times(5);
+    EXPECT_CALL(*mVold, setIncFsMountOptions(_, false, _, _)).Times(3);
     // After setIncFsMountOptions succeeded expecting to start watching.
     EXPECT_CALL(*mAppOpsManager, startWatchingMode(_, _, _)).Times(1);
     // Not expecting callback removal.
@@ -1660,9 +1660,9 @@ TEST_F(IncrementalServiceTest, testSetIncFsMountOptionsSuccessAndPermissionChang
     EXPECT_CALL(*mDataLoaderManager, unbindFromDataLoader(_));
     EXPECT_CALL(*mVold, unmountIncFs(_)).Times(2);
     // We are calling setIncFsMountOptions(true).
-    EXPECT_CALL(*mVold, setIncFsMountOptions(_, true, _)).Times(1);
+    EXPECT_CALL(*mVold, setIncFsMountOptions(_, true, _, _)).Times(1);
     // setIncFsMountOptions(false) is called on the callback.
-    EXPECT_CALL(*mVold, setIncFsMountOptions(_, false, _)).Times(2);
+    EXPECT_CALL(*mVold, setIncFsMountOptions(_, false, _, _)).Times(2);
     // After setIncFsMountOptions succeeded expecting to start watching.
     EXPECT_CALL(*mAppOpsManager, startWatchingMode(_, _, _)).Times(1);
     // After callback is called, disable read logs and remove callback.
@@ -1685,8 +1685,8 @@ TEST_F(IncrementalServiceTest, testSetIncFsMountOptionsCheckPermissionFails) {
     EXPECT_CALL(*mDataLoaderManager, unbindFromDataLoader(_));
     EXPECT_CALL(*mVold, unmountIncFs(_)).Times(2);
     // checkPermission fails, no calls to set opitions,  start or stop WatchingMode.
-    EXPECT_CALL(*mVold, setIncFsMountOptions(_, true, _)).Times(0);
-    EXPECT_CALL(*mVold, setIncFsMountOptions(_, false, _)).Times(1);
+    EXPECT_CALL(*mVold, setIncFsMountOptions(_, true, _, _)).Times(0);
+    EXPECT_CALL(*mVold, setIncFsMountOptions(_, false, _, _)).Times(1);
     EXPECT_CALL(*mAppOpsManager, startWatchingMode(_, _, _)).Times(0);
     EXPECT_CALL(*mAppOpsManager, stopWatchingMode(_)).Times(0);
     TemporaryDir tempDir;
@@ -1705,8 +1705,8 @@ TEST_F(IncrementalServiceTest, testSetIncFsMountOptionsCheckPermissionNoCrossUse
     EXPECT_CALL(*mDataLoaderManager, unbindFromDataLoader(_));
     EXPECT_CALL(*mVold, unmountIncFs(_)).Times(2);
     // checkPermission fails, no calls to set opitions,  start or stop WatchingMode.
-    EXPECT_CALL(*mVold, setIncFsMountOptions(_, true, _)).Times(0);
-    EXPECT_CALL(*mVold, setIncFsMountOptions(_, false, _)).Times(1);
+    EXPECT_CALL(*mVold, setIncFsMountOptions(_, true, _, _)).Times(0);
+    EXPECT_CALL(*mVold, setIncFsMountOptions(_, false, _, _)).Times(1);
     EXPECT_CALL(*mAppOpsManager, startWatchingMode(_, _, _)).Times(0);
     EXPECT_CALL(*mAppOpsManager, stopWatchingMode(_)).Times(0);
     TemporaryDir tempDir;
@@ -1726,8 +1726,8 @@ TEST_F(IncrementalServiceTest, testSetIncFsMountOptionsFails) {
     EXPECT_CALL(*mDataLoaderManager, unbindFromDataLoader(_));
     EXPECT_CALL(*mVold, unmountIncFs(_)).Times(2);
     // We are calling setIncFsMountOptions.
-    EXPECT_CALL(*mVold, setIncFsMountOptions(_, true, _)).Times(1);
-    EXPECT_CALL(*mVold, setIncFsMountOptions(_, false, _)).Times(1);
+    EXPECT_CALL(*mVold, setIncFsMountOptions(_, true, _, _)).Times(1);
+    EXPECT_CALL(*mVold, setIncFsMountOptions(_, false, _, _)).Times(1);
     // setIncFsMountOptions fails, no calls to start or stop WatchingMode.
     EXPECT_CALL(*mAppOpsManager, startWatchingMode(_, _, _)).Times(0);
     EXPECT_CALL(*mAppOpsManager, stopWatchingMode(_)).Times(0);
