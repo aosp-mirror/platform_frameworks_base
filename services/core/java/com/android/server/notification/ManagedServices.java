@@ -101,6 +101,7 @@ abstract public class ManagedServices {
     protected static final String ENABLED_SERVICES_SEPARATOR = ":";
     private static final String DB_VERSION_1 = "1";
     private static final String DB_VERSION_2 = "2";
+    private static final String DB_VERSION_3 = "3";
 
 
     /**
@@ -113,8 +114,9 @@ abstract public class ManagedServices {
     static final String ATT_VERSION = "version";
     static final String ATT_DEFAULTS = "defaults";
     static final String ATT_USER_SET = "user_set_services";
+    static final String ATT_USER_CHANGED = "user_changed";
 
-    static final int DB_VERSION = 3;
+    static final int DB_VERSION = 4;
 
     static final int APPROVAL_BY_PACKAGE = 0;
     static final int APPROVAL_BY_COMPONENT = 1;
@@ -159,6 +161,8 @@ abstract public class ManagedServices {
     // explicitly by the user
     @GuardedBy("mApproved")
     protected ArrayMap<Integer, ArraySet<String>> mUserSetServices = new ArrayMap<>();
+
+    protected ArrayMap<Integer, Boolean> mIsUserChanged = new ArrayMap<>();
 
     // True if approved services are stored in xml, not settings.
     private boolean mUseXml;
@@ -338,6 +342,7 @@ abstract public class ManagedServices {
             for (int i = 0; i < N; i++) {
                 final int userId = mApproved.keyAt(i);
                 final ArrayMap<Boolean, ArraySet<String>> approvedByType = mApproved.valueAt(i);
+                final Boolean userChanged = mIsUserChanged.get(userId);
                 if (approvedByType != null) {
                     final int M = approvedByType.size();
                     for (int j = 0; j < M; j++) {
@@ -345,16 +350,20 @@ abstract public class ManagedServices {
                         final ArraySet<String> approved = approvedByType.valueAt(j);
                         if (approvedByType != null && approvedByType.size() > 0) {
                             pw.println("      " + String.join(ENABLED_SERVICES_SEPARATOR, approved)
-                                    + " (user: " + userId + " isPrimary: " + isPrimary + ")");
+                                    + " (user: " + userId + " isPrimary: " + isPrimary
+                                    + (userChanged == null ? "" : " isUserChanged: "
+                                    + userChanged) + ")");
                         }
                     }
                 }
             }
-
             pw.println("    Has user set:");
             Set<Integer> userIds = mUserSetServices.keySet();
             for (int userId : userIds) {
-                pw.println("      userId=" + userId + " value=" + mUserSetServices.get(userId));
+                if (mIsUserChanged.get(userId) == null) {
+                    pw.println("      userId=" + userId + " value="
+                            + (mUserSetServices.get(userId)));
+                }
             }
         }
 
@@ -489,13 +498,14 @@ abstract public class ManagedServices {
                     continue;
                 }
                 final ArrayMap<Boolean, ArraySet<String>> approvedByType = mApproved.valueAt(i);
+                final Boolean isUserChanged = mIsUserChanged.get(approvedUserId);
                 if (approvedByType != null) {
                     final int M = approvedByType.size();
                     for (int j = 0; j < M; j++) {
                         final boolean isPrimary = approvedByType.keyAt(j);
                         final Set<String> approved = approvedByType.valueAt(j);
                         final Set<String> userSet = mUserSetServices.get(approvedUserId);
-                        if (approved != null || userSet != null) {
+                        if (approved != null || userSet != null || isUserChanged != null) {
                             String allowedItems = approved == null
                                     ? ""
                                     : String.join(ENABLED_SERVICES_SEPARATOR, approved);
@@ -503,7 +513,9 @@ abstract public class ManagedServices {
                             out.attribute(null, ATT_APPROVED_LIST, allowedItems);
                             out.attributeInt(null, ATT_USER_ID, approvedUserId);
                             out.attributeBoolean(null, ATT_IS_PRIMARY, isPrimary);
-                            if (userSet != null) {
+                            if (isUserChanged != null) {
+                                out.attributeBoolean(null, ATT_USER_CHANGED, isUserChanged);
+                            } else if (userSet != null) {
                                 String userSetItems =
                                         String.join(ENABLED_SERVICES_SEPARATOR, userSet);
                                 out.attribute(null, ATT_USER_SET, userSetItems);
@@ -618,12 +630,21 @@ abstract public class ManagedServices {
                             ? userId : parser.getAttributeInt(null, ATT_USER_ID, 0);
                     final boolean isPrimary =
                             parser.getAttributeBoolean(null, ATT_IS_PRIMARY, true);
-                    final String userSet = XmlUtils.readStringAttribute(parser, ATT_USER_SET);
+
+                    final String isUserChanged = XmlUtils.readStringAttribute(parser,
+                            ATT_USER_CHANGED);
+                    String userSetComponent = null;
+                    if (isUserChanged == null) {
+                        userSetComponent = XmlUtils.readStringAttribute(parser, ATT_USER_SET);
+                    } else {
+                        mIsUserChanged.put(resolvedUserId, Boolean.valueOf(isUserChanged));
+                    }
                     readExtraAttributes(tag, parser, resolvedUserId);
                     if (allowedManagedServicePackages == null || allowedManagedServicePackages.test(
-                            getPackageName(approved), resolvedUserId, getRequiredPermission())) {
+                            getPackageName(approved), resolvedUserId, getRequiredPermission())
+                            || approved.isEmpty()) {
                         if (mUm.getUserInfo(resolvedUserId) != null) {
-                            addApprovedList(approved, resolvedUserId, isPrimary, userSet);
+                            addApprovedList(approved, resolvedUserId, isPrimary, userSetComponent);
                         }
                         mUseXml = true;
                     }
@@ -634,10 +655,16 @@ abstract public class ManagedServices {
         }
         boolean isOldVersion = TextUtils.isEmpty(version)
                 || DB_VERSION_1.equals(version)
-                || DB_VERSION_2.equals(version);
+                || DB_VERSION_2.equals(version)
+                || DB_VERSION_3.equals(version);
+        boolean needUpgradeUserset = DB_VERSION_3.equals(version);
         if (isOldVersion) {
             upgradeDefaultsXmlVersion();
         }
+        if (needUpgradeUserset) {
+            upgradeUserSet();
+        }
+
         rebindServices(false, USER_ALL);
     }
 
@@ -665,6 +692,8 @@ abstract public class ManagedServices {
             loadDefaultsFromConfig();
         }
     }
+
+    protected void upgradeUserSet() {};
 
     /**
      * Read extra attributes in the {@link #TAG_MANAGED_SERVICES} tag.
