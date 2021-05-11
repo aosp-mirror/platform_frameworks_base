@@ -26,12 +26,16 @@ import android.content.res.Resources;
 
 import com.android.internal.R;
 
+import java.util.HashMap;
+
 /**
  * Fake class which stubs default system configuration with user-configurable
  * settings (useful for testing).
  */
 final class FakeHdmiCecConfig extends HdmiCecConfig {
     private static final String TAG = "FakeHdmiCecConfig";
+
+    private final HashMap<String, String> mSettings = new HashMap<>();
 
     public static Context buildContext(Context context) {
         Context contextSpy = spy(new ContextWrapper(context));
@@ -217,5 +221,16 @@ final class FakeHdmiCecConfig extends HdmiCecConfig {
 
     FakeHdmiCecConfig(@NonNull Context context) {
         super(buildContext(context), new StorageAdapter(context));
+    }
+
+    @Override
+    protected String retrieveValue(@NonNull Setting setting, @NonNull String defaultValue) {
+        return mSettings.getOrDefault(setting.getName(), defaultValue);
+    }
+
+    @Override
+    protected void storeValue(@NonNull Setting setting, @NonNull String value) {
+        mSettings.put(setting.getName(), value);
+        notifySettingChanged(setting);
     }
 }
