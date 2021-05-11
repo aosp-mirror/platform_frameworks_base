@@ -104,6 +104,7 @@ import com.android.systemui.keyguard.dagger.KeyguardModule;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.system.QuickStepContract;
+import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
@@ -229,6 +230,7 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
     private AlarmManager mAlarmManager;
     private AudioManager mAudioManager;
     private StatusBarManager mStatusBarManager;
+    private final SysuiStatusBarStateController mStatusBarStateController;
     private final Executor mUiBgExecutor;
 
     private boolean mSystemReady;
@@ -779,7 +781,7 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
             NavigationModeController navigationModeController,
             KeyguardDisplayManager keyguardDisplayManager,
             DozeParameters dozeParameters,
-            StatusBarStateController statusBarStateController,
+            SysuiStatusBarStateController statusBarStateController,
             KeyguardStateController keyguardStateController,
             Lazy<KeyguardUnlockAnimationController> keyguardUnlockAnimationControllerLazy) {
         super(context);
@@ -808,6 +810,7 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
                     mInGestureNavigationMode = QuickStepContract.isGesturalMode(mode);
                 }));
         mDozeParameters = dozeParameters;
+        mStatusBarStateController = statusBarStateController;
         statusBarStateController.addCallback(this);
 
         mKeyguardStateController = keyguardStateController;
@@ -2100,19 +2103,17 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
                 playSounds(false);
             }
 
-            if (KeyguardService.sEnableRemoteKeyguardAnimation) {
+            // When remaining on the shade, there's no need to do a fancy remote animation,
+            // it will dismiss the panel in that case.
+            if (KeyguardService.sEnableRemoteKeyguardAnimation
+                    && !mStatusBarStateController.leaveOpenOnKeyguardHide()
+                    && apps != null && apps.length > 0) {
                 mSurfaceBehindRemoteAnimationFinishedCallback = finishedCallback;
                 mSurfaceBehindRemoteAnimationRunning = true;
 
-                if (apps != null && apps.length > 0) {
-                    // Pass the surface and metadata to the unlock animation controller.
-                    mKeyguardUnlockAnimationControllerLazy.get().notifyStartKeyguardExitAnimation(
-                            apps[0], startTime, mSurfaceBehindRemoteAnimationRequested);
-                } else {
-                    // We weren't given any surfaces to animate, so just finish.
-                    onKeyguardExitRemoteAnimationFinished();
-                    return;
-                }
+                // Pass the surface and metadata to the unlock animation controller.
+                mKeyguardUnlockAnimationControllerLazy.get().notifyStartKeyguardExitAnimation(
+                        apps[0], startTime, mSurfaceBehindRemoteAnimationRequested);
             } else {
                 setShowingLocked(false);
                 mWakeAndUnlocking = false;

@@ -78,6 +78,10 @@ public abstract class SettingsTransitionActivity extends FragmentActivity {
             super.startActivity(intent, options);
             return;
         }
+        if (options != null) {
+            super.startActivity(intent, getMergedBundleForTransition(options));
+            return;
+        }
         super.startActivity(intent, getActivityOptionsBundle(toolbar));
     }
 
@@ -110,6 +114,11 @@ public abstract class SettingsTransitionActivity extends FragmentActivity {
             super.startActivityForResult(intent, requestCode, options);
             return;
         }
+        if (options != null) {
+            super.startActivityForResult(intent, requestCode,
+                    getMergedBundleForTransition(options));
+            return;
+        }
         super.startActivityForResult(intent, requestCode, getActivityOptionsBundle(toolbar));
     }
 
@@ -132,5 +141,16 @@ public abstract class SettingsTransitionActivity extends FragmentActivity {
     private Bundle getActivityOptionsBundle(Toolbar toolbar) {
         return ActivityOptions.makeSceneTransitionAnimation(this, toolbar,
                 "shared_element_view").toBundle();
+    }
+
+    private Bundle getMergedBundleForTransition(@NonNull Bundle options) {
+        final Toolbar toolbar = getToolbar();
+        final Bundle mergedBundle = new Bundle();
+        mergedBundle.putAll(options);
+        final Bundle activityOptionsBundle = getActivityOptionsBundle(toolbar);
+        if (activityOptionsBundle != null) {
+            mergedBundle.putAll(activityOptionsBundle);
+        }
+        return mergedBundle;
     }
 }

@@ -190,7 +190,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         mEntryManager = new NotificationEntryManager(
                 mLogger,
                 mGroupManager,
-                new NotificationRankingManager(
+                () -> new NotificationRankingManager(
                         () -> mNotificationMediaManager,
                         mGroupManager,
                         mHeadsUpManager,

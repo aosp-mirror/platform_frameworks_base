@@ -40,7 +40,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.5" />
+        app:layout_constraintGuide_begin="48dp" />
 
     <!-- As per Material Design on Biderectionality, this is forced to LTR in code -->
     <FrameLayout

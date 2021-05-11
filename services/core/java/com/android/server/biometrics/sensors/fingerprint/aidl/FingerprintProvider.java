@@ -514,6 +514,18 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
     }
 
     @Override
+    public void onUiReady(int sensorId) {
+        final BaseClientMonitor client =
+                mSensors.get(sensorId).getScheduler().getCurrentClient();
+        if (!(client instanceof Udfps)) {
+            Slog.e(getTag(), "onUiReady received during client: " + client);
+            return;
+        }
+        final Udfps udfps = (Udfps) client;
+        udfps.onUiReady();
+    }
+
+    @Override
     public void setUdfpsOverlayController(@NonNull IUdfpsOverlayController controller) {
         mUdfpsOverlayController = controller;
     }

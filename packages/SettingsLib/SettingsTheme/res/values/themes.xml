@@ -17,7 +17,9 @@
 
 <resources>
     <!-- Only using in Settings application -->
-    <style name="Theme.SettingsBase" parent="@android:style/Theme.DeviceDefault.Settings" />
+    <style name="Theme.SettingsBase" parent="@android:style/Theme.DeviceDefault.Settings">
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
+    </style>
 
     <!-- Using in SubSettings page including injected settings page -->
     <style name="Theme.SubSettingsBase" parent="Theme.SettingsBase">

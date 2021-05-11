@@ -32,7 +32,7 @@ import android.app.smartspace.SmartspaceTarget;
 import android.content.Context;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
-import android.graphics.drawable.Icon;
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.UserHandle;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -394,6 +394,8 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
 
         public void setFalsingManager(FalsingManager falsingManager) { }
 
-        public void setDnd(@Nullable Icon dndIcon, @Nullable String description) { }
+        public void setDnd(@Nullable Drawable dndIcon, @Nullable String description) { }
+
+        public void setNextAlarm(@Nullable Drawable dndIcon, @Nullable String description) { }
     }
 }
