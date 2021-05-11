@@ -19,6 +19,8 @@ package com.android.server.display;
 import static com.android.server.wm.utils.RotationAnimationUtils.hasProtectedContent;
 
 import android.content.Context;
+import android.graphics.BLASTBufferQueue;
+import android.graphics.PixelFormat;
 import android.graphics.SurfaceTexture;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.display.DisplayManagerInternal.DisplayTransactionListener;
@@ -91,6 +93,7 @@ final class ColorFade {
     private int mDisplayHeight;     // real height, not rotated
     private SurfaceControl mSurfaceControl;
     private Surface mSurface;
+    private BLASTBufferQueue mBLASTBufferQueue;
     private NaturalSurfaceLayout mSurfaceLayout;
     private EGLDisplay mEglDisplay;
     private EGLConfig mEglConfig;
@@ -165,21 +168,30 @@ final class ColorFade {
                     "Failed to take screenshot because internal display is disconnected");
             return false;
         }
-        boolean isWideColor = SurfaceControl.getDynamicDisplayInfo(token).activeColorMode
+        final boolean isWideColor = SurfaceControl.getDynamicDisplayInfo(token).activeColorMode
                 == Display.COLOR_MODE_DISPLAY_P3;
 
         // Set mPrepared here so if initialization fails, resources can be cleaned up.
         mPrepared = true;
 
-        SurfaceControl.ScreenshotHardwareBuffer hardwareBuffer = captureScreen();
+        final SurfaceControl.ScreenshotHardwareBuffer hardwareBuffer = captureScreen();
         if (hardwareBuffer == null) {
             dismiss();
             return false;
         }
 
-        boolean isProtected = hasProtectedContent(hardwareBuffer.getHardwareBuffer());
-        if (!(createSurfaceControl(hardwareBuffer.containsSecureLayers())
-                && createEglContext(isProtected) && createEglSurface(isProtected, isWideColor)
+        final boolean isProtected = hasProtectedContent(hardwareBuffer.getHardwareBuffer());
+        if (!createSurfaceControl(hardwareBuffer.containsSecureLayers())) {
+            dismiss();
+            return false;
+        }
+
+        // MODE_FADE use ColorLayer to implement.
+        if (mMode == MODE_FADE) {
+            return true;
+        }
+
+        if (!(createEglContext(isProtected) && createEglSurface(isProtected, isWideColor)
                 && setScreenshotTextureAndSetViewport(hardwareBuffer))) {
             dismiss();
             return false;
@@ -190,7 +202,7 @@ final class ColorFade {
             return false;
         }
         try {
-            if(!initGLShaders(context) || !initGLBuffers() || checkGlErrors("prepare")) {
+            if (!initGLShaders(context) || !initGLBuffers() || checkGlErrors("prepare")) {
                 detachEglContext();
                 dismiss();
                 return false;
@@ -564,7 +576,7 @@ final class ColorFade {
             if (mMode == MODE_FADE) {
                 builder.setColorLayer();
             } else {
-                builder.setBufferSize(mDisplayWidth, mDisplayHeight);
+                builder.setBLASTLayer();
             }
             mSurfaceControl = builder.build();
         } catch (OutOfResourcesException ex) {
@@ -579,9 +591,11 @@ final class ColorFade {
         mSurfaceLayout.onDisplayTransaction(mTransaction);
         mTransaction.apply();
 
-        mSurface = new Surface();
-        mSurface.copyFrom(mSurfaceControl);
-
+        if (mMode != MODE_FADE) {
+            mBLASTBufferQueue = new BLASTBufferQueue("ColorFade", mSurfaceControl,
+                    mDisplayWidth, mDisplayHeight, PixelFormat.TRANSLUCENT);
+            mSurface = mBLASTBufferQueue.createSurface();
+        }
         return true;
     }
 
@@ -707,7 +721,12 @@ final class ColorFade {
             mSurfaceLayout.dispose();
             mSurfaceLayout = null;
             mTransaction.remove(mSurfaceControl).apply();
-            mSurface.release();
+            if (mSurface != null) {
+                mSurface.release();
+                mBLASTBufferQueue.destroy();
+                mSurface = null;
+                mBLASTBufferQueue = null;
+            }
             mSurfaceControl = null;
             mSurfaceVisible = false;
             mSurfaceAlpha = 0f;
