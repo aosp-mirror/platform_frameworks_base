@@ -20,6 +20,9 @@ import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.app.appsearch.aidl.AppSearchResultParcel;
+import android.app.appsearch.aidl.IAppSearchManager;
+import android.app.appsearch.aidl.IAppSearchResultCallback;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.Log;
@@ -139,18 +142,20 @@ public class SearchResults implements Closeable {
             @NonNull @CallbackExecutor Executor executor,
             @NonNull Consumer<AppSearchResult<List<SearchResult>>> callback) {
         return new IAppSearchResultCallback.Stub() {
-            public void onResult(AppSearchResult result) {
-                executor.execute(() -> invokeCallback(result, callback));
+            @Override
+            public void onResult(AppSearchResultParcel resultParcel) {
+                executor.execute(() -> invokeCallback(resultParcel.getResult(), callback));
             }
         };
     }
 
-    private void invokeCallback(AppSearchResult result,
+    private void invokeCallback(
+            @NonNull AppSearchResult<Bundle> searchResultPageResult,
             @NonNull Consumer<AppSearchResult<List<SearchResult>>> callback) {
-        if (result.isSuccess()) {
+        if (searchResultPageResult.isSuccess()) {
             try {
                 SearchResultPage searchResultPage =
-                        new SearchResultPage((Bundle) result.getResultValue());
+                        new SearchResultPage(searchResultPageResult.getResultValue());
                 mNextPageToken = searchResultPage.getNextPageToken();
                 callback.accept(AppSearchResult.newSuccessfulResult(
                         searchResultPage.getResults()));
@@ -158,7 +163,7 @@ public class SearchResults implements Closeable {
                 callback.accept(AppSearchResult.throwableToFailedResult(t));
             }
         } else {
-            callback.accept(result);
+            callback.accept(AppSearchResult.newFailedResult(searchResultPageResult));
         }
     }
 }

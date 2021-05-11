@@ -29,14 +29,16 @@ import android.app.appsearch.AppSearchResult;
 import android.app.appsearch.AppSearchSchema;
 import android.app.appsearch.GenericDocument;
 import android.app.appsearch.GetSchemaResponse;
-import android.app.appsearch.IAppSearchBatchResultCallback;
-import android.app.appsearch.IAppSearchManager;
-import android.app.appsearch.IAppSearchResultCallback;
 import android.app.appsearch.PackageIdentifier;
 import android.app.appsearch.SearchResultPage;
 import android.app.appsearch.SearchSpec;
 import android.app.appsearch.SetSchemaResponse;
 import android.app.appsearch.StorageInfo;
+import android.app.appsearch.aidl.AppSearchBatchResultParcel;
+import android.app.appsearch.aidl.AppSearchResultParcel;
+import android.app.appsearch.aidl.IAppSearchBatchResultCallback;
+import android.app.appsearch.aidl.IAppSearchManager;
+import android.app.appsearch.aidl.IAppSearchResultCallback;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -869,7 +871,7 @@ public class AppSearchManagerService extends SystemService {
         private void invokeCallbackOnResult(
                 IAppSearchResultCallback callback, AppSearchResult<?> result) {
             try {
-                callback.onResult(result);
+                callback.onResult(new AppSearchResultParcel<>(result));
             } catch (RemoteException e) {
                 Log.e(TAG, "Unable to send result to the callback", e);
             }
@@ -877,9 +879,9 @@ public class AppSearchManagerService extends SystemService {
 
         /** Invokes the {@link IAppSearchBatchResultCallback} with the result. */
         private void invokeCallbackOnResult(
-                IAppSearchBatchResultCallback callback, AppSearchBatchResult<?, ?> result) {
+                IAppSearchBatchResultCallback callback, AppSearchBatchResult<String, ?> result) {
             try {
-                callback.onResult(result);
+                callback.onResult(new AppSearchBatchResultParcel<>(result));
             } catch (RemoteException e) {
                 Log.e(TAG, "Unable to send result to the callback", e);
             }
@@ -891,8 +893,9 @@ public class AppSearchManagerService extends SystemService {
          * <p>The throwable is convert to a {@link AppSearchResult};
          */
         private void invokeCallbackOnError(IAppSearchResultCallback callback, Throwable throwable) {
+            AppSearchResult<?> result = throwableToFailedResult(throwable);
             try {
-                callback.onResult(throwableToFailedResult(throwable));
+                callback.onResult(new AppSearchResultParcel<>(result));
             } catch (RemoteException e) {
                 Log.e(TAG, "Unable to send result to the callback", e);
             }
@@ -905,8 +908,9 @@ public class AppSearchManagerService extends SystemService {
          */
         private void invokeCallbackOnError(
                 @NonNull IAppSearchBatchResultCallback callback, @NonNull Throwable throwable) {
+            AppSearchResult<?> result = throwableToFailedResult(throwable);
             try {
-                callback.onSystemError(throwableToFailedResult(throwable));
+                callback.onSystemError(new AppSearchResultParcel<>(result));
             } catch (RemoteException e) {
                 Log.e(TAG, "Unable to send error to the callback", e);
             }

@@ -17,6 +17,7 @@ package android.app.appsearch;
 
 import android.annotation.SystemApi;
 import android.app.SystemServiceRegistry;
+import android.app.appsearch.aidl.IAppSearchManager;
 import android.content.Context;
 
 /**
