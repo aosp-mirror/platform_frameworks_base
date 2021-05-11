@@ -28,6 +28,7 @@ import android.location.LocationManager;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.telephony.PhoneNumberUtils;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
@@ -160,7 +161,7 @@ public class GpsNetInitiatedHandler {
                        be set to true when the phone is having emergency call, and then will
                        be set to false by mPhoneStateListener when the emergency call ends.
                 */
-                mIsInEmergencyCall = mTelephonyManager.isEmergencyNumber(phoneNumber);
+                mIsInEmergencyCall = PhoneNumberUtils.isEmergencyNumber(phoneNumber);
                 if (DEBUG) Log.v(TAG, "ACTION_NEW_OUTGOING_CALL - " + getInEmergency());
             } else if (action.equals(LocationManager.MODE_CHANGED_ACTION)) {
                 updateLocationMode();
