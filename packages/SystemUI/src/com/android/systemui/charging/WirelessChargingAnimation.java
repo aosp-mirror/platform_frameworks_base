@@ -34,7 +34,7 @@ import android.view.WindowManager;
  */
 public class WirelessChargingAnimation {
 
-    public static final long DURATION = 1133;
+    public static final long DURATION = 1500;
     private static final String TAG = "WirelessChargingView";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
