@@ -19,8 +19,6 @@ package android.app.appsearch;
 import android.annotation.NonNull;
 import android.os.Bundle;
 
-import com.android.internal.util.Preconditions;
-
 import java.util.Objects;
 
 /** The response class of {@code AppSearchSession#getStorageInfo}. */
@@ -74,39 +72,39 @@ public class StorageInfo {
 
     /** Builder for {@link StorageInfo} objects. */
     public static final class Builder {
-        private final Bundle mBundle = new Bundle();
-        private boolean mBuilt = false;
+        private long mSizeBytes;
+        private int mAliveDocumentsCount;
+        private int mAliveNamespacesCount;
 
         /** Sets the size in bytes. */
         @NonNull
         public StorageInfo.Builder setSizeBytes(long sizeBytes) {
-            Preconditions.checkState(!mBuilt, "Builder has already been used");
-            mBundle.putLong(SIZE_BYTES_FIELD, sizeBytes);
+            mSizeBytes = sizeBytes;
             return this;
         }
 
         /** Sets the number of alive documents. */
         @NonNull
-        public StorageInfo.Builder setAliveDocumentsCount(int numAliveDocuments) {
-            Preconditions.checkState(!mBuilt, "Builder has already been used");
-            mBundle.putInt(ALIVE_DOCUMENTS_COUNT, numAliveDocuments);
+        public StorageInfo.Builder setAliveDocumentsCount(int aliveDocumentsCount) {
+            mAliveDocumentsCount = aliveDocumentsCount;
             return this;
         }
 
         /** Sets the number of alive namespaces. */
         @NonNull
-        public StorageInfo.Builder setAliveNamespacesCount(int numAliveNamespaces) {
-            Preconditions.checkState(!mBuilt, "Builder has already been used");
-            mBundle.putInt(ALIVE_NAMESPACES_COUNT, numAliveNamespaces);
+        public StorageInfo.Builder setAliveNamespacesCount(int aliveNamespacesCount) {
+            mAliveNamespacesCount = aliveNamespacesCount;
             return this;
         }
 
         /** Builds a {@link StorageInfo} object. */
         @NonNull
         public StorageInfo build() {
-            Preconditions.checkState(!mBuilt, "Builder has already been used");
-            mBuilt = true;
-            return new StorageInfo(mBundle);
+            Bundle bundle = new Bundle();
+            bundle.putLong(SIZE_BYTES_FIELD, mSizeBytes);
+            bundle.putInt(ALIVE_DOCUMENTS_COUNT, mAliveDocumentsCount);
+            bundle.putInt(ALIVE_NAMESPACES_COUNT, mAliveNamespacesCount);
+            return new StorageInfo(bundle);
         }
     }
 }

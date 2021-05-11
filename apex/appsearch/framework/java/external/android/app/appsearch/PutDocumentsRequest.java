@@ -19,8 +19,6 @@ package android.app.appsearch;
 
 import android.annotation.NonNull;
 
-import com.android.internal.util.Preconditions;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -46,50 +44,41 @@ public final class PutDocumentsRequest {
         return Collections.unmodifiableList(mDocuments);
     }
 
-    /**
-     * Builder for {@link PutDocumentsRequest} objects.
-     *
-     * <p>Once {@link #build} is called, the instance can no longer be used.
-     */
+    /** Builder for {@link PutDocumentsRequest} objects. */
     public static final class Builder {
-        private final List<GenericDocument> mDocuments = new ArrayList<>();
+        private ArrayList<GenericDocument> mDocuments = new ArrayList<>();
         private boolean mBuilt = false;
 
-        /**
-         * Adds one or more {@link GenericDocument} objects to the request.
-         *
-         * @throws IllegalStateException if the builder has already been used.
-         */
+        /** Adds one or more {@link GenericDocument} objects to the request. */
         @NonNull
         public Builder addGenericDocuments(@NonNull GenericDocument... documents) {
             Objects.requireNonNull(documents);
+            resetIfBuilt();
             return addGenericDocuments(Arrays.asList(documents));
         }
 
-        /**
-         * Adds a collection of {@link GenericDocument} objects to the request.
-         *
-         * @throws IllegalStateException if the builder has already been used.
-         */
+        /** Adds a collection of {@link GenericDocument} objects to the request. */
         @NonNull
         public Builder addGenericDocuments(
                 @NonNull Collection<? extends GenericDocument> documents) {
-            Preconditions.checkState(!mBuilt, "Builder has already been used");
             Objects.requireNonNull(documents);
+            resetIfBuilt();
             mDocuments.addAll(documents);
             return this;
         }
 
-        /**
-         * Creates a new {@link PutDocumentsRequest} object.
-         *
-         * @throws IllegalStateException if the builder has already been used.
-         */
+        /** Creates a new {@link PutDocumentsRequest} object. */
         @NonNull
         public PutDocumentsRequest build() {
-            Preconditions.checkState(!mBuilt, "Builder has already been used");
             mBuilt = true;
             return new PutDocumentsRequest(mDocuments);
+        }
+
+        private void resetIfBuilt() {
+            if (mBuilt) {
+                mDocuments = new ArrayList<>(mDocuments);
+                mBuilt = false;
+            }
         }
     }
 }
