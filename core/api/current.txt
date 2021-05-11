@@ -11154,6 +11154,7 @@ package android.content {
     field public static final String ACTION_VIEW = "android.intent.action.VIEW";
     field public static final String ACTION_VIEW_LOCUS = "android.intent.action.VIEW_LOCUS";
     field @RequiresPermission(android.Manifest.permission.START_VIEW_PERMISSION_USAGE) public static final String ACTION_VIEW_PERMISSION_USAGE = "android.intent.action.VIEW_PERMISSION_USAGE";
+    field @RequiresPermission(android.Manifest.permission.START_VIEW_PERMISSION_USAGE) public static final String ACTION_VIEW_PERMISSION_USAGE_FOR_PERIOD = "android.intent.action.VIEW_PERMISSION_USAGE_FOR_PERIOD";
     field public static final String ACTION_VOICE_COMMAND = "android.intent.action.VOICE_COMMAND";
     field @Deprecated public static final String ACTION_WALLPAPER_CHANGED = "android.intent.action.WALLPAPER_CHANGED";
     field public static final String ACTION_WEB_SEARCH = "android.intent.action.WEB_SEARCH";
@@ -11206,6 +11207,7 @@ package android.content {
     field public static final String EXTRA_ASSIST_INPUT_HINT_KEYBOARD = "android.intent.extra.ASSIST_INPUT_HINT_KEYBOARD";
     field public static final String EXTRA_ASSIST_PACKAGE = "android.intent.extra.ASSIST_PACKAGE";
     field public static final String EXTRA_ASSIST_UID = "android.intent.extra.ASSIST_UID";
+    field public static final String EXTRA_ATTRIBUTION_TAGS = "android.intent.extra.ATTRIBUTION_TAGS";
     field public static final String EXTRA_AUTO_LAUNCH_SINGLE_CHOICE = "android.intent.extra.AUTO_LAUNCH_SINGLE_CHOICE";
     field public static final String EXTRA_BCC = "android.intent.extra.BCC";
     field public static final String EXTRA_BUG_REPORT = "android.intent.extra.BUG_REPORT";
@@ -11231,6 +11233,7 @@ package android.content {
     field public static final String EXTRA_DONT_KILL_APP = "android.intent.extra.DONT_KILL_APP";
     field public static final String EXTRA_DURATION_MILLIS = "android.intent.extra.DURATION_MILLIS";
     field public static final String EXTRA_EMAIL = "android.intent.extra.EMAIL";
+    field public static final String EXTRA_END_TIME = "android.intent.extra.END_TIME";
     field public static final String EXTRA_EXCLUDE_COMPONENTS = "android.intent.extra.EXCLUDE_COMPONENTS";
     field public static final String EXTRA_FROM_STORAGE = "android.intent.extra.FROM_STORAGE";
     field public static final String EXTRA_HTML_TEXT = "android.intent.extra.HTML_TEXT";
@@ -11245,6 +11248,7 @@ package android.content {
     field public static final String EXTRA_NOT_UNKNOWN_SOURCE = "android.intent.extra.NOT_UNKNOWN_SOURCE";
     field public static final String EXTRA_ORIGINATING_URI = "android.intent.extra.ORIGINATING_URI";
     field public static final String EXTRA_PACKAGE_NAME = "android.intent.extra.PACKAGE_NAME";
+    field public static final String EXTRA_PERMISSION_GROUP_NAME = "android.intent.extra.PERMISSION_GROUP_NAME";
     field public static final String EXTRA_PHONE_NUMBER = "android.intent.extra.PHONE_NUMBER";
     field public static final String EXTRA_PROCESS_TEXT = "android.intent.extra.PROCESS_TEXT";
     field public static final String EXTRA_PROCESS_TEXT_READONLY = "android.intent.extra.PROCESS_TEXT_READONLY";
@@ -11267,6 +11271,7 @@ package android.content {
     field @Deprecated public static final String EXTRA_SHORTCUT_NAME = "android.intent.extra.shortcut.NAME";
     field public static final String EXTRA_SHUTDOWN_USERSPACE_ONLY = "android.intent.extra.SHUTDOWN_USERSPACE_ONLY";
     field public static final String EXTRA_SPLIT_NAME = "android.intent.extra.SPLIT_NAME";
+    field public static final String EXTRA_START_TIME = "android.intent.extra.START_TIME";
     field public static final String EXTRA_STREAM = "android.intent.extra.STREAM";
     field public static final String EXTRA_SUBJECT = "android.intent.extra.SUBJECT";
     field public static final String EXTRA_SUSPENDED_PACKAGE_EXTRAS = "android.intent.extra.SUSPENDED_PACKAGE_EXTRAS";
