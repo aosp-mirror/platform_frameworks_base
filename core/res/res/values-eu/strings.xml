@@ -334,7 +334,7 @@
     <string name="permlab_statusBarService" msgid="2523421018081437981">"bihurtu egoera-barra"</string>
     <string name="permdesc_statusBarService" msgid="6652917399085712557">"Egoera-barra izatea baimentzen die aplikazioei."</string>
     <string name="permlab_expandStatusBar" msgid="1184232794782141698">"zabaldu/tolestu egoera-barra"</string>
-    <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Egoera-barra zabaltzeko edo tolesteko aukera ematen die aplikazioei."</string>
+    <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Egoera-barra zabaltzeko edo tolesteko baimena ematen die aplikazioei."</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"instalatu lasterbideak"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Erabiltzaileak ezer egin gabe hasierako pantailan lasterbideak gehitzeko aukera ematen die aplikazioei."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"desinstalatu lasterbideak"</string>
@@ -428,11 +428,11 @@
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"atzitu kokapena atzeko planoan"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"Aplikazioak kokapena atzi dezake, baita aplikazioa erabiltzen ari ez zarenean ere."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"aldatu audio-ezarpenak"</string>
-    <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Audio-ezarpen orokorrak aldatzeko baimena ematen dio; besteak beste, bolumena eta irteerarako zer bozgorailu erabiltzen den."</string>
+    <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Audio-ezarpen orokorrak aldatzeko baimena ematen die aplikazioei; besteak beste, bolumena eta irteerarako zer bozgorailu erabiltzen den."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"grabatu audioa"</string>
     <string name="permdesc_recordAudio" msgid="3976213377904701093">"Aplikazioak edonoiz erabil dezake mikrofonoa audioa grabatzeko."</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"bidali aginduak SIM txartelera"</string>
-    <string name="permdesc_sim_communication" msgid="4179799296415957960">"SIM txartelera aginduak bidaltzeko aukera ematen die aplikazioei. Oso arriskutsua da."</string>
+    <string name="permdesc_sim_communication" msgid="4179799296415957960">"SIM txartelera aginduak bidaltzeko baimena ematen die aplikazioei. Oso arriskutsua da."</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"hauteman jarduera fisikoa"</string>
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Aplikazioak jarduera fisikoa hauteman dezake."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"atera argazkiak eta grabatu bideoak"</string>
@@ -442,7 +442,7 @@
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"eman jakinarazpenak jasotzeko baimena aplikazioari edo zerbitzuari kamerak ireki edo ixten direnean."</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Kamera ireki edo itxi dela (eta zer aplikaziorekin) dioten jakinarazpenak jaso ditzake aplikazio honek."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"kontrolatu dardara"</string>
-    <string name="permdesc_vibrate" msgid="8733343234582083721">"Bibragailua kontrolatzeko aukera ematen die aplikazioei."</string>
+    <string name="permdesc_vibrate" msgid="8733343234582083721">"Bibragailua kontrolatzeko baimena ematen die aplikazioei."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Dardara-egoera atzitzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"deitu zuzenean telefono-zenbakietara"</string>
     <string name="permdesc_callPhone" msgid="5439809516131609109">"Telefono-zenbakietara zuk esku hartu gabe deitzeko baimena ematen die aplikazioei. Horrela, ustekabeko gastuak edo deiak eragin daitezke. Asmo txarreko aplikazioek erabil dezakete zuk berretsi gabeko deiak eginda gastuak eragiteko."</string>
@@ -469,9 +469,9 @@
     <string name="permdesc_wakeLock" product="tv" msgid="2329298966735118796">"Android TV gailua inaktibo ezartzea eragozteko baimena ematen die aplikazioei."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"Telefonoa inaktibo ezartzea galaraztea baimentzen die aplikazioei."</string>
     <string name="permlab_transmitIr" msgid="8077196086358004010">"transmititu infragorriak"</string>
-    <string name="permdesc_transmitIr" product="tablet" msgid="5884738958581810253">"Tabletaren infragorri-igorlea erabiltzeko aukera ematen die aplikazioei."</string>
+    <string name="permdesc_transmitIr" product="tablet" msgid="5884738958581810253">"Tabletaren infragorri-igorlea erabiltzeko baimena ematen die aplikazioei."</string>
     <string name="permdesc_transmitIr" product="tv" msgid="3278506969529173281">"Android TV gailuaren infragorri-igorlea erabiltzeko baimena ematen die aplikazioei."</string>
-    <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"Telefonoaren infragorri-igorlea erabiltzeko aukera ematen die aplikazioei."</string>
+    <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"Telefonoaren infragorri-igorlea erabiltzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"ezarri horma-papera"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"Sistemaren horma-papera aldatzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"doitu horma-paperaren tamaina"</string>
@@ -515,13 +515,13 @@
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Android TV gailuaren Bluetooth bidezko konexioaren konfigurazioa ikusteko eta parekatutako gailuekin konexioak sortzeko eta onartzeko baimena ematen die aplikazioei."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Telefonoaren Bluetooth konfigurazioa ikusteko eta parekatutako gailuekin konexioak egiteko eta onartzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"NFC bidezko ordainketa-zerbitzu lehenetsiari buruzko informazioa"</string>
-    <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Aplikazioari baimena ematen dio NFC bidezko ordainketa-zerbitzu lehenetsiari buruzko informazioa jasotzeko, hala nola erregistratutako laguntzaileak eta ibilbidearen helmuga."</string>
+    <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"NFC bidezko ordainketa-zerbitzu lehenetsiari buruzko informazioa jasotzeko baimena ematen die aplikazioei, hala nola erregistratutako laguntzaileak eta ibilbidearen helmuga."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kontrolatu Near Field Communication komunikazioa"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Near Field Communication (NFC) etiketekin, txartelekin eta irakurgailuekin komunikatzea baimentzen die aplikazioei."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"desgaitu pantailaren blokeoa"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Teklen blokeoa eta erlazionatutako pasahitz-segurtasuna desgaitzeko baimena ematen die aplikazioei. Adibidez, telefonoak teklen blokeoa desgaitzen du telefono-deiak jasotzen dituenean, eta berriro gaitzen du deiak amaitzean."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"eskatu pantailaren blokeoa konplexua izatea"</string>
-    <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Pantailaren blokeoaren konplexutasun-maila (handia, ertaina, txikia edo bat ere ez) jakiteko aukera ematen dio aplikazioari. Informazio horrekin, pantailaren blokeoaren luzera-barruti edo mota posiblea ondoriozta liteke. Halaber, pantailaren blokeoa maila jakin batera igotzeko iradoki diezaieke aplikazioak erabiltzaileei, baina horri ez ikusi egin eta aplikazioa erabiltzen jarraitzeko aukera dute erabiltzaileek. Kontuan izan pantailaren blokeoa ez dela gordetzen testu arrunt gisa; beraz, aplikazioak ez du jakingo pasahitz zehatza zein den."</string>
+    <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Pantailaren blokeoaren konplexutasun-maila (handia, ertaina, txikia edo bat ere ez) jakiteko baimena ematen die aplikazioei. Informazio horrekin, pantailaren blokeoaren luzera-barruti edo mota posiblea ondoriozta liteke. Halaber, pantailaren blokeoa maila jakin batera igotzeko iradoki diezaiekete aplikazioek erabiltzaileei, baina horri ez ikusi egin eta aplikazioak erabiltzen jarraitzeko aukera dute erabiltzaileek. Kontuan izan pantailaren blokeoa ez dela gordetzen testu arrunt gisa; beraz, aplikazioek ez dute jakingo pasahitz zehatza zein den."</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"erabili hardware biometrikoa"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Autentifikatzeko hardware biometrikoa erabiltzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"kudeatu hatz-marken hardwarea"</string>
@@ -630,7 +630,7 @@
     <string name="permlab_connection_manager" msgid="3179365584691166915">"kudeatu telekomunikabideekiko konexioak"</string>
     <string name="permdesc_connection_manager" msgid="1426093604238937733">"Telekomunikabideekiko konexioak kudeatzea baimentzen die aplikazioei."</string>
     <string name="permlab_bind_incall_service" msgid="5990625112603493016">"erabili pantaila deiak abian direnean"</string>
-    <string name="permdesc_bind_incall_service" msgid="4124917526967765162">"Erabiltzaileak deiaren pantaila noiz eta nola ikusten duen kontrolatzeko aukera ematen die aplikazioei."</string>
+    <string name="permdesc_bind_incall_service" msgid="4124917526967765162">"Erabiltzaileak deiaren pantaila noiz eta nola ikusten duen kontrolatzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_bind_connection_service" msgid="5409268245525024736">"jardun interakzioan telefono-zerbitzuekin"</string>
     <string name="permdesc_bind_connection_service" msgid="6261796725253264518">"Deiak egiteko eta jasotzeko telefonia-zerbitzuekin interakzioan aritzea baimentzen die aplikazioei."</string>
     <string name="permlab_control_incall_experience" msgid="6436863486094352987">"eskaini erabiltzaileentzako aukerak deiak abian direnean"</string>
@@ -642,7 +642,7 @@
     <string name="permlab_modifyNetworkAccounting" msgid="7448790834938749041">"aldatu sare-erabileraren kalkuluak"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5076042642247205390">"Aplikazioen sare-erabilera kalkulatzeko modua aldatzeko baimena ematen die aplikazioei. Aplikazio normalek ez lukete beharko."</string>
     <string name="permlab_accessNotifications" msgid="7130360248191984741">"atzitu jakinarazpenak"</string>
-    <string name="permdesc_accessNotifications" msgid="761730149268789668">"Jakinarazpenak berreskuratu, aztertu eta garbitzeko aukera ematen die aplikazioei, beste aplikazioek argitaratutako jakinarazpenak barne."</string>
+    <string name="permdesc_accessNotifications" msgid="761730149268789668">"Jakinarazpenak berreskuratu, aztertu eta garbitzeko baimena ematen die aplikazioei, beste aplikazioek argitaratutako jakinarazpenak barne."</string>
     <string name="permlab_bindNotificationListenerService" msgid="5848096702733262458">"lotu jakinarazpen-hautemaile bati"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="4970553694467137126">"Jakinarazpen-hautemaile baten goi-mailako interfazera lotzeko aukera ematen dio titularrari. Aplikazio normalek ez dute baimen hau behar."</string>
     <string name="permlab_bindConditionProviderService" msgid="5245421224814878483">"lotu baldintza-hornitzaileen zerbitzuei"</string>
