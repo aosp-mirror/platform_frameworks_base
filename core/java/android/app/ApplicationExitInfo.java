@@ -325,6 +325,15 @@ public final class ApplicationExitInfo implements Parcelable {
      */
     public static final int SUBREASON_ISOLATED_NOT_NEEDED = 17;
 
+    /**
+     * The process was killed because it's in forced-app-standby state, and it's cached and
+     * its uid state is idle; this would be set only when the reason is {@link #REASON_OTHER}.
+     *
+     * For internal use only.
+     * @hide
+     */
+    public static final int SUBREASON_CACHED_IDLE_FORCED_APP_STANDBY = 18;
+
     // If there is any OEM code which involves additional app kill reasons, it should
     // be categorized in {@link #REASON_OTHER}, with subreason code starting from 1000.
 
