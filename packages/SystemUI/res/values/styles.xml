@@ -660,9 +660,12 @@
         <item name="android:tint">?android:attr/colorAccent</item>
     </style>
 
+    <style name="MediaPlayer.AppIcon.Recommendation" parent="MediaPlayer.AppIcon">
+        <item name="android:tint">@color/transparent</item>
+    </style>
+
     <style name="MediaPlayer.Album">
         <item name="android:backgroundTint">@color/media_player_album_bg</item>
-
     </style>
 
     <!-- Used to style charging animation AVD animation -->

@@ -25,7 +25,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
-import android.graphics.PorterDuff;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
@@ -515,8 +516,9 @@ public class MediaControlPanel {
                 // Get the logo from app's package name when applicable.
                 String packageName = extras.getString(EXTRAS_MEDIA_SOURCE_PACKAGE_NAME);
                 try {
-                    icon = mContext.getPackageManager().getApplicationIcon(
+                    Drawable drawable = mContext.getPackageManager().getApplicationIcon(
                             packageName);
+                    icon = convertToGrayscale(drawable);
                 } catch (PackageManager.NameNotFoundException e) {
                     Log.w(TAG, "No media source icon can be fetched via package name", e);
                 }
@@ -528,8 +530,6 @@ public class MediaControlPanel {
             // Set up media source app's logo.
             ImageView mediaSourceLogoImageView = mediaLogoItems.get(uiComponentIndex);
             mediaSourceLogoImageView.setImageDrawable(icon);
-            // TODO(b/186699032): Tint the app logo using the accent color.
-            mediaSourceLogoImageView.setColorFilter(backgroundColor, PorterDuff.Mode.XOR);
 
             // Set up media item cover.
             ImageView mediaCoverImageView = mediaCoverItems.get(uiComponentIndex);
@@ -649,6 +649,15 @@ public class MediaControlPanel {
         }
 
         return (state.getState() == PlaybackState.STATE_PLAYING);
+    }
+
+    /** Convert the pass-in source drawable to a grayscale one. */
+    private Drawable convertToGrayscale(Drawable drawable) {
+        ColorMatrix matrix = new ColorMatrix();
+        matrix.setSaturation(0);
+        ColorMatrixColorFilter filter = new ColorMatrixColorFilter(matrix);
+        drawable.setColorFilter(filter);
+        return drawable;
     }
 
     private void setVisibleAndAlpha(ConstraintSet set, int actionId, boolean visible) {
