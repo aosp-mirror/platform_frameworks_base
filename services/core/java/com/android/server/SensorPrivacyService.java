@@ -469,7 +469,7 @@ public final class SensorPrivacyService extends SystemService {
         @Override
         public void setIndividualSensorPrivacy(@UserIdInt int userId, int sensor, boolean enable) {
             enforceManageSensorPrivacyPermission();
-            if (!canChangeIndividualSensorPrivacy(sensor)) {
+            if (!canChangeIndividualSensorPrivacy(userId, sensor)) {
                 return;
             }
 
@@ -500,14 +500,14 @@ public final class SensorPrivacyService extends SystemService {
             mHandler.onSensorPrivacyChanged(userId, sensor, enable);
         }
 
-        private boolean canChangeIndividualSensorPrivacy(int sensor) {
+        private boolean canChangeIndividualSensorPrivacy(@UserIdInt int userId, int sensor) {
             if (sensor == MICROPHONE && mEmergencyCallHelper.isInEmergencyCall()) {
                 // During emergency call the microphone toggle managed automatically
                 Log.i(TAG, "Can't change mic toggle during an emergency call");
                 return false;
             }
 
-            if (mKeyguardManager != null && mKeyguardManager.isDeviceLocked()) {
+            if (mKeyguardManager != null && mKeyguardManager.isDeviceLocked(userId)) {
                 Log.i(TAG, "Can't change mic/cam toggle while device is locked");
                 return false;
             }
