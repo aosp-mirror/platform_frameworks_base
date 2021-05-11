@@ -336,6 +336,8 @@
     <string name="accessibility_phone_button">Phone</string>
     <!-- Content description of the phone button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_voice_assist_button">Voice Assist</string>
+    <!-- Content description of the wallet button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_wallet_button">Wallet</string>
     <!-- Content description of the unlock button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_unlock_button">Unlock</string>
     <!-- Content description of the lock icon for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
@@ -2965,7 +2967,9 @@
     <!-- Accessibility action for tapping on an affordance on an unlocked lock screen (ie: "Double
      tap to enter device") [CHAR LIMIT=NONE] -->
     <string name="accessibility_enter_hint">enter device</string>
-    <!-- Message shown to suggest authentication using [CHAR LIMIT=60]-->
+    <!-- Message shown to suggest authentication using fingerprint [CHAR LIMIT=60]-->
     <string name="keyguard_try_fingerprint">Use fingerprint to open</string>
+    <!-- Accessibility announcement to inform user to unlock using the fingerprint sensor [CHAR LIMIT=NONE] -->
+    <string name="accessibility_fingerprint_bouncer">Authentication required. Touch the fingerprint sensor to authenticate.</string>
 
 </resources>
