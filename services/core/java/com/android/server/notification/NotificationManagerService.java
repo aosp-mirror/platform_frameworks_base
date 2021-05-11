@@ -803,7 +803,7 @@ public class NotificationManagerService extends SystemService {
                 learnNASPendingIntent).build();
 
 
-        return new Notification.Builder(getContext(), SystemNotificationChannels.ALERTS)
+        return new Notification.Builder(getContext(), SystemNotificationChannels.SYSTEM_CHANGES)
                 .setAutoCancel(false)
                 .setOngoing(true)
                 .setTicker(getContext().getResources().getString(title))
