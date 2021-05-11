@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.app.appsearch;
+package android.app.appsearch.aidl;
 
 import android.os.Bundle;
 
-import android.app.appsearch.IAppSearchBatchResultCallback;
-import android.app.appsearch.IAppSearchResultCallback;
+import android.app.appsearch.aidl.IAppSearchBatchResultCallback;
+import android.app.appsearch.aidl.IAppSearchResultCallback;
 import android.os.ParcelFileDescriptor;
 
 /** {@hide} */
@@ -200,7 +200,7 @@ interface IAppSearchManager {
     * @param searchSpecBundle SearchSpec bundle.
     * @param userId Id of the calling user.
     * @param callback {@link IAppSearchResultCallback#onResult} will be called with an
-    *        {@link AppSearchResult}&lt;{@code null}&gt;.
+    *        {@link AppSearchResult}&lt;{@code Void}&gt;.
     */
     void writeQueryResultsToFile(
         in String packageName,

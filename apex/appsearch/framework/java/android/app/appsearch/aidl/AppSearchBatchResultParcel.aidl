@@ -1,5 +1,5 @@
 /**
- * Copyright 2020, The Android Open Source Project
+ * Copyright 2021, The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,13 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.app.appsearch;
-
-import android.app.appsearch.AppSearchBatchResult;
-import android.app.appsearch.AppSearchResult;
+package android.app.appsearch.aidl;
 
 /** {@hide} */
-oneway interface IAppSearchBatchResultCallback {
-    void onResult(in AppSearchBatchResult result);
-    void onSystemError(in AppSearchResult result);
-}
+parcelable AppSearchBatchResultParcel<ValueType>;
