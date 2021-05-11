@@ -70,6 +70,7 @@ import org.mockito.junit.MockitoRule;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -93,6 +94,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
     private FingerprintManager mFingerprintManager;
     @Mock
     private WindowManager mWindowManager;
+    @Mock
+    private UdfpsHbmCallback mHbmCallback;
     @Mock
     private StatusBarStateController mStatusBarStateController;
     @Mock
@@ -174,7 +177,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mPowerManager,
                 mAccessibilityManager,
                 mScreenLifecycle,
-                mVibrator);
+                mVibrator,
+                Optional.of(mHbmCallback));
         verify(mFingerprintManager).setUdfpsOverlayController(mOverlayCaptor.capture());
         mOverlayController = mOverlayCaptor.getValue();
         verify(mScreenLifecycle).addObserver(mScreenObserverCaptor.capture());
