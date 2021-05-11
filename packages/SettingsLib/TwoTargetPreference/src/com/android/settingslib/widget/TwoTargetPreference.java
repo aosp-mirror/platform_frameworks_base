@@ -72,9 +72,9 @@ public class TwoTargetPreference extends Preference {
     private void init(Context context) {
         setLayoutResource(R.layout.preference_two_target);
         mSmallIconSize = context.getResources().getDimensionPixelSize(
-                resourceId(context, "dimen", "two_target_pref_small_icon_size"));
+                R.dimen.two_target_pref_small_icon_size);
         mMediumIconSize = context.getResources().getDimensionPixelSize(
-                resourceId(context, "dimen", "two_target_pref_medium_icon_size"));
+                R.dimen.two_target_pref_medium_icon_size);
         final int secondTargetResId = getSecondTargetResId();
         if (secondTargetResId != 0) {
             setWidgetLayoutResource(secondTargetResId);
@@ -115,9 +115,5 @@ public class TwoTargetPreference extends Preference {
 
     protected int getSecondTargetResId() {
         return 0;
-    }
-
-    private int resourceId(Context context, String type, String name) {
-        return context.getResources().getIdentifier(name, type, context.getPackageName());
     }
 }
