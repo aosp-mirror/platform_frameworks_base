@@ -33,9 +33,6 @@
     <!-- Allow PIP to resize via dragging the corner of PiP. -->
     <bool name="config_pipEnableDragCornerResize">false</bool>
 
-    <!-- Allow PIP to enable round corner, see also R.dimen.pip_corner_radius -->
-    <bool name="config_pipEnableRoundCorner">false</bool>
-
     <!-- Animation duration when using long press on recents to dock -->
     <integer name="long_press_dock_anim_duration">250</integer>
 
