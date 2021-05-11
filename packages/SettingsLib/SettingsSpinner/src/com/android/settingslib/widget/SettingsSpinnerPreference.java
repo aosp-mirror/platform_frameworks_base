@@ -36,6 +36,7 @@ public class SettingsSpinnerPreference extends Preference {
     private SettingsSpinnerAdapter mAdapter;
     private AdapterView.OnItemSelectedListener mListener;
     private int mPosition; //Default 0 for internal shard storage.
+    private boolean mIsClickable = true;
 
     /**
      * Perform inflation from XML and apply a class-specific base style.
@@ -50,6 +51,7 @@ public class SettingsSpinnerPreference extends Preference {
     public SettingsSpinnerPreference(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         setLayoutResource(R.layout.settings_spinner_preference);
+        setSelectable(false);
     }
 
     /**
@@ -62,6 +64,7 @@ public class SettingsSpinnerPreference extends Preference {
     public SettingsSpinnerPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
         setLayoutResource(R.layout.settings_spinner_preference);
+        setSelectable(false);
     }
 
     /**
@@ -98,10 +101,21 @@ public class SettingsSpinnerPreference extends Preference {
         notifyChanged();
     }
 
+    /** Set clickable of the spinner. */
+    public void setClickable(boolean isClickable) {
+        if (mIsClickable == isClickable) {
+            return;
+        }
+        mIsClickable = isClickable;
+        notifyChanged();
+    }
+
     @Override
     public void onBindViewHolder(PreferenceViewHolder holder) {
         super.onBindViewHolder(holder);
         final SettingsSpinner spinner = (SettingsSpinner) holder.findViewById(R.id.spinner);
+        spinner.setEnabled(mIsClickable);
+        spinner.setClickable(mIsClickable);
         spinner.setAdapter(mAdapter);
         spinner.setSelection(mPosition);
         spinner.setOnItemSelectedListener(mOnSelectedListener);
