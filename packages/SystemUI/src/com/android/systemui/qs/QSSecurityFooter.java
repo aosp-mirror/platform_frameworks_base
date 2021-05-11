@@ -190,6 +190,16 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
                 || vpnName != null || vpnNameWorkProfile != null
                 || isProfileOwnerOfOrganizationOwnedDevice || isParentalControlsEnabled
                 || (hasWorkProfile && isNetworkLoggingEnabled);
+        // Update the view to be untappable if the device is an organization-owned device with a
+        // managed profile and there is no policy set which requires a privacy disclosure.
+        if (mIsVisible && isProfileOwnerOfOrganizationOwnedDevice && !isNetworkLoggingEnabled
+                && !hasCACertsInWorkProfile && vpnNameWorkProfile == null) {
+            mRootView.setClickable(false);
+            mRootView.findViewById(R.id.footer_icon).setVisibility(View.GONE);
+        } else {
+            mRootView.setClickable(true);
+            mRootView.findViewById(R.id.footer_icon).setVisibility(View.VISIBLE);
+        }
         // Update the string
         mFooterTextContent = getFooterText(isDeviceManaged, hasWorkProfile,
                 hasCACerts, hasCACertsInWorkProfile, isNetworkLoggingEnabled, vpnName,
@@ -345,19 +355,14 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
 
     private View createOrganizationDialogView() {
         final boolean isDeviceManaged = mSecurityController.isDeviceManaged();
-        boolean isProfileOwnerOfOrganizationOwnedDevice =
-                mSecurityController.isProfileOwnerOfOrganizationOwnedDevice();
         final boolean hasWorkProfile = mSecurityController.hasWorkProfile();
         final CharSequence deviceOwnerOrganization =
                 mSecurityController.getDeviceOwnerOrganizationName();
-        final CharSequence workProfileOrganizationName =
-                mSecurityController.getWorkProfileOrganizationName();
         final boolean hasCACerts = mSecurityController.hasCACertInCurrentUser();
         final boolean hasCACertsInWorkProfile = mSecurityController.hasCACertInWorkProfile();
         final boolean isNetworkLoggingEnabled = mSecurityController.isNetworkLoggingEnabled();
         final String vpnName = mSecurityController.getPrimaryVpnName();
         final String vpnNameWorkProfile = mSecurityController.getWorkProfileVpnName();
-
 
         View dialogView = LayoutInflater.from(mContext)
                 .inflate(R.layout.quick_settings_footer_dialog, null, false);
@@ -368,8 +373,7 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
         deviceManagementSubtitle.setText(getManagementTitle(deviceOwnerOrganization));
 
         CharSequence managementMessage = getManagementMessage(isDeviceManaged,
-                deviceOwnerOrganization, isProfileOwnerOfOrganizationOwnedDevice,
-                workProfileOrganizationName);
+                deviceOwnerOrganization);
         if (managementMessage == null) {
             dialogView.findViewById(R.id.device_management_disclosures).setVisibility(View.GONE);
         } else {
@@ -377,11 +381,7 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
             TextView deviceManagementWarning =
                     (TextView) dialogView.findViewById(R.id.device_management_warning);
             deviceManagementWarning.setText(managementMessage);
-            // Don't show the policies button for profile owner of org owned device, because there
-            // is no policies settings screen for it
-            if (!isProfileOwnerOfOrganizationOwnedDevice) {
-                mDialog.setButton(DialogInterface.BUTTON_NEGATIVE, getSettingsButton(), this);
-            }
+            mDialog.setButton(DialogInterface.BUTTON_NEGATIVE, getSettingsButton(), this);
         }
 
         // ca certificate section
@@ -496,12 +496,11 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
     }
 
     protected CharSequence getManagementMessage(boolean isDeviceManaged,
-            CharSequence organizationName, boolean isProfileOwnerOfOrganizationOwnedDevice,
-            CharSequence workProfileOrganizationName) {
-        if (!isDeviceManaged && !isProfileOwnerOfOrganizationOwnedDevice) {
+            CharSequence organizationName) {
+        if (!isDeviceManaged) {
             return null;
         }
-        if (isDeviceManaged && organizationName != null) {
+        if (organizationName != null) {
             if (isFinancedDevice()) {
                 return mContext.getString(R.string.monitoring_financed_description_named_management,
                         organizationName, organizationName);
@@ -509,9 +508,6 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
                 return mContext.getString(
                         R.string.monitoring_description_named_management, organizationName);
             }
-        } else if (isProfileOwnerOfOrganizationOwnedDevice && workProfileOrganizationName != null) {
-            return mContext.getString(
-                    R.string.monitoring_description_named_management, workProfileOrganizationName);
         }
         return mContext.getString(R.string.monitoring_description_management);
     }
