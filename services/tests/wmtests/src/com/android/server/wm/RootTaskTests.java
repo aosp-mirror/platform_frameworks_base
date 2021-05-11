@@ -38,6 +38,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_FREE_RESIZE;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_WINDOWING_MODE_RESIZE;
+import static com.android.server.wm.Task.ActivityState.DESTROYED;
 import static com.android.server.wm.Task.ActivityState.DESTROYING;
 import static com.android.server.wm.Task.ActivityState.FINISHING;
 import static com.android.server.wm.Task.ActivityState.PAUSING;
@@ -1204,6 +1205,9 @@ public class RootTaskTests extends WindowTestsBase {
         // See {@link ActivityStack#destroyActivityLocked}.
         activity.app = null;
         overlayActivity.app = null;
+        // Simulate the process is dead
+        activity.mVisibleRequested = false;
+        activity.setState(DESTROYED, "Test");
 
         assertEquals(2, task.getChildCount());
 
