@@ -26,7 +26,7 @@ interface UdfpsIlluminator {
     /**
      * @param callback Invoked when HBM should be enabled or disabled.
      */
-    void setHbmCallback(@Nullable HbmCallback callback);
+    void setHbmCallback(@Nullable UdfpsHbmCallback callback);
 
     /**
      * Invoked when illumination should start.
