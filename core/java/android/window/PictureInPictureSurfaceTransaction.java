@@ -24,6 +24,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.SurfaceControl;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -37,10 +38,11 @@ public final class PictureInPictureSurfaceTransaction implements Parcelable {
     public final float mPositionX;
     public final float mPositionY;
 
-    public final float mScaleX;
-    public final float mScaleY;
+    public final float[] mFloat9;
 
+    // Though this can be determined by mFloat9, it's easier to set the value directly
     public final float mRotation;
+
     public final float mCornerRadius;
 
     private final Rect mWindowCrop = new Rect();
@@ -48,21 +50,19 @@ public final class PictureInPictureSurfaceTransaction implements Parcelable {
     public PictureInPictureSurfaceTransaction(Parcel in) {
         mPositionX = in.readFloat();
         mPositionY = in.readFloat();
-        mScaleX = in.readFloat();
-        mScaleY = in.readFloat();
+        mFloat9 = new float[9];
+        in.readFloatArray(mFloat9);
         mRotation = in.readFloat();
         mCornerRadius = in.readFloat();
         mWindowCrop.set(Objects.requireNonNull(in.readTypedObject(Rect.CREATOR)));
     }
 
     public PictureInPictureSurfaceTransaction(float positionX, float positionY,
-            float scaleX, float scaleY,
-            float rotation, float cornerRadius,
+            float[] float9, float rotation, float cornerRadius,
             @Nullable Rect windowCrop) {
         mPositionX = positionX;
         mPositionY = positionY;
-        mScaleX = scaleX;
-        mScaleY = scaleY;
+        mFloat9 = Arrays.copyOf(float9, 9);
         mRotation = rotation;
         mCornerRadius = cornerRadius;
         if (windowCrop != null) {
@@ -72,13 +72,14 @@ public final class PictureInPictureSurfaceTransaction implements Parcelable {
 
     public PictureInPictureSurfaceTransaction(PictureInPictureSurfaceTransaction other) {
         this(other.mPositionX, other.mPositionY,
-                other.mScaleX, other.mScaleY,
-                other.mRotation, other.mCornerRadius,
-                other.mWindowCrop);
+                other.mFloat9, other.mRotation, other.mCornerRadius, other.mWindowCrop);
     }
 
-    public Rect getWindowCrop() {
-        return new Rect(mWindowCrop);
+    /** @return {@link Matrix} from {@link #mFloat9} */
+    public Matrix getMatrix() {
+        final Matrix matrix = new Matrix();
+        matrix.setValues(mFloat9);
+        return matrix;
     }
 
     @Override
@@ -88,8 +89,7 @@ public final class PictureInPictureSurfaceTransaction implements Parcelable {
         PictureInPictureSurfaceTransaction that = (PictureInPictureSurfaceTransaction) o;
         return Objects.equals(mPositionX, that.mPositionX)
                 && Objects.equals(mPositionY, that.mPositionY)
-                && Objects.equals(mScaleX, that.mScaleX)
-                && Objects.equals(mScaleY, that.mScaleY)
+                && Arrays.equals(mFloat9, that.mFloat9)
                 && Objects.equals(mRotation, that.mRotation)
                 && Objects.equals(mCornerRadius, that.mCornerRadius)
                 && Objects.equals(mWindowCrop, that.mWindowCrop);
@@ -97,7 +97,7 @@ public final class PictureInPictureSurfaceTransaction implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mPositionX, mPositionY, mScaleX, mScaleY,
+        return Objects.hash(mPositionX, mPositionY, Arrays.hashCode(mFloat9),
                 mRotation, mCornerRadius, mWindowCrop);
     }
 
@@ -110,8 +110,7 @@ public final class PictureInPictureSurfaceTransaction implements Parcelable {
     public void writeToParcel(Parcel out, int flags) {
         out.writeFloat(mPositionX);
         out.writeFloat(mPositionY);
-        out.writeFloat(mScaleX);
-        out.writeFloat(mScaleY);
+        out.writeFloatArray(mFloat9);
         out.writeFloat(mRotation);
         out.writeFloat(mCornerRadius);
         out.writeTypedObject(mWindowCrop, 0 /* flags */);
@@ -119,11 +118,11 @@ public final class PictureInPictureSurfaceTransaction implements Parcelable {
 
     @Override
     public String toString() {
+        final Matrix matrix = getMatrix();
         return "PictureInPictureSurfaceTransaction("
                 + " posX=" + mPositionX
                 + " posY=" + mPositionY
-                + " scaleX=" + mScaleX
-                + " scaleY=" + mScaleY
+                + " matrix=" + matrix.toShortString()
                 + " rotation=" + mRotation
                 + " cornerRadius=" + mCornerRadius
                 + " crop=" + mWindowCrop
@@ -134,15 +133,11 @@ public final class PictureInPictureSurfaceTransaction implements Parcelable {
     public static void apply(@NonNull PictureInPictureSurfaceTransaction surfaceTransaction,
             @NonNull SurfaceControl surfaceControl,
             @NonNull SurfaceControl.Transaction tx) {
-        final Matrix matrix = new Matrix();
-        matrix.setScale(surfaceTransaction.mScaleX, surfaceTransaction.mScaleY);
-        if (surfaceTransaction.mRotation != 0) {
-            matrix.postRotate(surfaceTransaction.mRotation);
-        }
+        final Matrix matrix = surfaceTransaction.getMatrix();
         tx.setMatrix(surfaceControl, matrix, new float[9])
                 .setPosition(surfaceControl,
                         surfaceTransaction.mPositionX, surfaceTransaction.mPositionY)
-                .setWindowCrop(surfaceControl, surfaceTransaction.getWindowCrop())
+                .setWindowCrop(surfaceControl, surfaceTransaction.mWindowCrop)
                 .setCornerRadius(surfaceControl, surfaceTransaction.mCornerRadius);
     }
 
