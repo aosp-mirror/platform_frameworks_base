@@ -89,7 +89,7 @@ public class PlatformLoggerTest {
                 CallStats.CALL_TYPE_INITIALIZE).mSamplingRatio).isEqualTo(
                 TEST_DEFAULT_SAMPLING_RATIO);
         assertThat(logger.createExtraStatsLocked(TEST_PACKAGE_NAME,
-                CallStats.CALL_TYPE_QUERY).mSamplingRatio).isEqualTo(
+                CallStats.CALL_TYPE_SEARCH).mSamplingRatio).isEqualTo(
                 TEST_DEFAULT_SAMPLING_RATIO);
         assertThat(logger.createExtraStatsLocked(TEST_PACKAGE_NAME,
                 CallStats.CALL_TYPE_FLUSH).mSamplingRatio).isEqualTo(
@@ -103,7 +103,7 @@ public class PlatformLoggerTest {
         int querySamplingRatio = 2;
         final SparseIntArray samplingRatios = new SparseIntArray();
         samplingRatios.put(CallStats.CALL_TYPE_PUT_DOCUMENT, putDocumentSamplingRatio);
-        samplingRatios.put(CallStats.CALL_TYPE_QUERY, querySamplingRatio);
+        samplingRatios.put(CallStats.CALL_TYPE_SEARCH, querySamplingRatio);
         PlatformLogger logger = new PlatformLogger(
                 ApplicationProvider.getApplicationContext(),
                 UserHandle.USER_NULL,
@@ -127,7 +127,7 @@ public class PlatformLoggerTest {
                 CallStats.CALL_TYPE_PUT_DOCUMENT).mSamplingRatio).isEqualTo(
                 putDocumentSamplingRatio);
         assertThat(logger.createExtraStatsLocked(TEST_PACKAGE_NAME,
-                CallStats.CALL_TYPE_QUERY).mSamplingRatio).isEqualTo(
+                CallStats.CALL_TYPE_SEARCH).mSamplingRatio).isEqualTo(
                 querySamplingRatio);
     }
 
