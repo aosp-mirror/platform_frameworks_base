@@ -1951,6 +1951,13 @@
          See the <a href="{@docRoot}about/versions/12/backup-restore">Changes in backup and restore</a>
          document for the format of the XML file.-->
         <attr name="dataExtractionRules" format="reference"/>
+
+        <!-- @hide Request exemption from the foreground service restrictions introduced in S
+        (https://developer.android.com/about/versions/12/foreground-services)
+        Note the framework <b>ignores</b> this attribute at this time. Once apps target S or above,
+        there's no way to be exempted (without using a privileged permission).
+        -->
+        <attr name="requestForegroundServiceExemption" format="boolean" />
     </declare-styleable>
 
     <!-- An attribution is a logical part of an app and is identified by a tag.

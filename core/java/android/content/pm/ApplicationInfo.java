@@ -778,9 +778,18 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     public static final int PRIVATE_FLAG_EXT_PROFILEABLE = 1 << 0;
 
+    /**
+     * Value for {@link #privateFlagsExt}: whether this application has requested
+     * exemption from the foreground service restriction introduced in S
+     * (https://developer.android.com/about/versions/12/foreground-services).
+     * @hide
+     */
+    public static final int PRIVATE_FLAG_EXT_REQUEST_FOREGROUND_SERVICE_EXEMPTION = 1 << 1;
+
     /** @hide */
     @IntDef(flag = true, prefix = { "PRIVATE_FLAG_EXT_" }, value = {
             PRIVATE_FLAG_EXT_PROFILEABLE,
+            PRIVATE_FLAG_EXT_REQUEST_FOREGROUND_SERVICE_EXEMPTION,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ApplicationInfoPrivateFlagsExt {}
@@ -2442,6 +2451,17 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     public boolean isResourceOverlay() {
         return (privateFlags & ApplicationInfo.PRIVATE_FLAG_IS_RESOURCE_OVERLAY) != 0;
+    }
+
+    /**
+     * @return whether the app has requested exemption from the foreground service restrictions.
+     * This does not take any affect for now.
+     * @hide
+     */
+    @TestApi
+    public boolean hasRequestForegroundServiceExemption() {
+        return (privateFlagsExt
+                & ApplicationInfo.PRIVATE_FLAG_EXT_REQUEST_FOREGROUND_SERVICE_EXEMPTION) != 0;
     }
 
     /**
