@@ -3930,7 +3930,6 @@ public abstract class BatteryStats implements Parcelable {
                 getStartClockTime(),
                 whichBatteryScreenOffRealtime / 1000, whichBatteryScreenOffUptime / 1000,
                 getEstimatedBatteryCapacity(),
-                getLearnedBatteryCapacity(),
                 getMinLearnedBatteryCapacity(),
                 getMaxLearnedBatteryCapacity(),
                 screenDozeTime / 1000);
