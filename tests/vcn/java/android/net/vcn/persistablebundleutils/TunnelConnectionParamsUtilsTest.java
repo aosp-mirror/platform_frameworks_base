@@ -18,6 +18,7 @@ package android.net.vcn.persistablebundleutils;
 
 import static org.junit.Assert.assertEquals;
 
+import android.net.ipsec.ike.IkeSessionParams;
 import android.net.ipsec.ike.IkeTunnelConnectionParams;
 
 import androidx.test.filters.SmallTest;
@@ -31,9 +32,13 @@ import org.junit.runner.RunWith;
 public class TunnelConnectionParamsUtilsTest {
     // Public for use in VcnGatewayConnectionConfigTest
     public static IkeTunnelConnectionParams buildTestParams() {
+        return buildTestParams(IkeSessionParamsUtilsTest.createBuilderMinimum().build());
+    }
+
+    // Public for use in VcnGatewayConnectionConfigTest
+    public static IkeTunnelConnectionParams buildTestParams(IkeSessionParams params) {
         return new IkeTunnelConnectionParams(
-                IkeSessionParamsUtilsTest.createBuilderMinimum().build(),
-                TunnelModeChildSessionParamsUtilsTest.createBuilderMinimum().build());
+                params, TunnelModeChildSessionParamsUtilsTest.createBuilderMinimum().build());
     }
 
     @Test
