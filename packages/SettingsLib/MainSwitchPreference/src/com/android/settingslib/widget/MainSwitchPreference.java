@@ -63,7 +63,7 @@ public class MainSwitchPreference extends TwoStatePreference {
     public void onBindViewHolder(PreferenceViewHolder holder) {
         super.onBindViewHolder(holder);
 
-        holder.setDividerAllowedAbove(true);
+        holder.setDividerAllowedAbove(false);
         holder.setDividerAllowedBelow(false);
 
         mMainSwitchBar = (MainSwitchBar) holder.findViewById(R.id.main_switch_bar);

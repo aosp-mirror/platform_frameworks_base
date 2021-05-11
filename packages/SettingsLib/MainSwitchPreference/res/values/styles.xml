@@ -19,6 +19,8 @@
 
     <style name="MainSwitchText">
         <item name="android:textSize">20sp</item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
+        <item name="android:textColor">@android:color/black</item>
     </style>
 
     <style name="Settings.MainSwitch" parent="@android:style/Widget.Material.CompoundButton.Switch">

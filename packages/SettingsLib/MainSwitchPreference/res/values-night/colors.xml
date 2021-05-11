@@ -15,11 +15,10 @@
   limitations under the License.
   -->
 
-<resources>
-
-    <color name="thumb_off">#BFFFFFFF</color>
-    <color name="track_off">@*android:color/material_grey_600</color>
-
+<resources xmlns:androidprv="http://schemas.android.com/apk/prv/res/android">
     <color name="switchbar_switch_track_tint">#82000000</color>
     <color name="switchbar_switch_thumb_tint">@android:color/black</color>
+
+    <!-- Material next track on color-->
+    <color name="track_on_color">?androidprv:attr/colorSurfaceHighlight</color>
 </resources>

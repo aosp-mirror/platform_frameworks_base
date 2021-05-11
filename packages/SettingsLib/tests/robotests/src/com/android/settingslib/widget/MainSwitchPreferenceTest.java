@@ -59,15 +59,6 @@ public class MainSwitchPreferenceTest {
     }
 
     @Test
-    public void shouldAllowDividerBelow() {
-        mPreference.onBindViewHolder(mHolder);
-
-        View divider = mRootView.findViewById(R.id.below_divider);
-
-        assertThat(divider.getVisibility()).isEqualTo(View.VISIBLE);
-    }
-
-    @Test
     public void updateStatus_shouldMatchTheStatus() {
         mPreference.onBindViewHolder(mHolder);
         mPreference.updateStatus(true);

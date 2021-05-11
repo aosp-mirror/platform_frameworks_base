@@ -19,6 +19,10 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_height="wrap_content"
     android:layout_width="match_parent"
+    android:paddingStart="?android:attr/listPreferredItemPaddingStart"
+    android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
+    android:paddingLeft="?android:attr/listPreferredItemPaddingLeft"
+    android:paddingRight="?android:attr/listPreferredItemPaddingRight"
     android:background="?android:attr/colorBackground"
     android:orientation="vertical">
 
@@ -27,7 +31,6 @@
         android:minHeight="@dimen/min_switch_bar_height"
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
-        android:background="?android:attr/selectableItemBackground"
         android:paddingLeft="@dimen/switchbar_margin_start"
         android:paddingRight="@dimen/switchbar_margin_end">
 
@@ -41,7 +44,6 @@
             android:maxLines="2"
             android:ellipsize="end"
             android:textAppearance="?android:attr/textAppearanceListItem"
-            android:textAlignment="viewStart"
             style="@style/MainSwitchText" />
 
         <ImageView
@@ -58,18 +60,13 @@
         <Switch
             android:id="@android:id/switch_widget"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
             android:layout_gravity="center_vertical"
             android:track="@drawable/track_selector"
             android:thumb="@drawable/thumb_selector"
             android:theme="@style/Settings.MainSwitch"/>
     </LinearLayout>
 
-    <View
-        android:id="@+id/below_divider"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="?android:attr/listDivider" />
 </LinearLayout>
 
 
