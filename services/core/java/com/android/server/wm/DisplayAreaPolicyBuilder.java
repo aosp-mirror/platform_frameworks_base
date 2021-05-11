@@ -756,7 +756,14 @@ class DisplayAreaPolicyBuilder {
         @VisibleForTesting
         DisplayArea.Tokens findAreaForToken(WindowToken token) {
             return mSelectRootForWindowFunc.apply(token.windowType, token.mOptions)
-                    .findAreaForToken(token);
+                    .findAreaForTokenInLayer(token);
+        }
+
+        @Override
+        public DisplayArea.Tokens findAreaForWindowType(int type, Bundle options,
+                boolean ownerCanManageAppTokens, boolean roundedCornerOverlay) {
+            return mSelectRootForWindowFunc.apply(type, options).findAreaForWindowTypeInLayer(type,
+                    ownerCanManageAppTokens, roundedCornerOverlay);
         }
 
         @VisibleForTesting
@@ -793,13 +800,6 @@ class DisplayAreaPolicyBuilder {
         @Override
         public TaskDisplayArea getDefaultTaskDisplayArea() {
             return mDefaultTaskDisplayArea;
-        }
-
-        @Override
-        public DisplayArea.Tokens getDisplayAreaForWindowToken(int type, Bundle options,
-                boolean ownerCanManageAppTokens, boolean roundedCornerOverlay) {
-            return mSelectRootForWindowFunc.apply(type, options).findAreaForToken(type,
-                    ownerCanManageAppTokens, roundedCornerOverlay);
         }
     }
 
