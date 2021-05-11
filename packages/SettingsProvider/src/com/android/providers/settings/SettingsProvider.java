@@ -34,8 +34,11 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.app.backup.BackupManager;
+import android.app.compat.CompatChanges;
 import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentProvider;
@@ -350,6 +353,9 @@ public class SettingsProvider extends ContentProvider {
     public static String keyToString(int key) {
         return SettingsState.keyToString(key);
     }
+    @ChangeId
+    @EnabledSince(targetSdkVersion=android.os.Build.VERSION_CODES.S)
+    private static final long ENFORCE_READ_PERMISSION_FOR_MULTI_SIM_DATA_CALL = 172670679L;
 
     @Override
     public boolean onCreate() {
@@ -1949,6 +1955,25 @@ public class SettingsProvider extends ContentProvider {
         if ((ai.flags & ApplicationInfo.FLAG_TEST_ONLY) == 0) {
             // Skip checking readable annotations for test_only apps
             checkReadableAnnotation(settingsType, settingName);
+        }
+        /**
+         * some settings need additional permission check, this is to have a matching security
+         * control from other API alternatives returning the same settings values.
+         * note, the permission enforcement should be based on app's targetSDKlevel to better handle
+         * app-compat.
+         */
+        switch (settingName) {
+            // missing READ_PRIVILEGED_PHONE_STATE permission protection
+            // see alternative API {@link SubscriptionManager#getPreferredDataSubscriptionId()
+            case Settings.Global.MULTI_SIM_DATA_CALL_SUBSCRIPTION:
+                // app-compat handling, not break apps targeting on previous SDKs.
+                if (CompatChanges.isChangeEnabled(
+                        ENFORCE_READ_PERMISSION_FOR_MULTI_SIM_DATA_CALL)) {
+                    getContext().enforceCallingOrSelfPermission(
+                            Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+                            "access global settings MULTI_SIM_DATA_CALL_SUBSCRIPTION");
+                }
+                break;
         }
         if (!ai.isInstantApp()) {
             return;
