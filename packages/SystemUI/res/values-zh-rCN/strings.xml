@@ -473,10 +473,14 @@
     <string name="interruption_level_none_twoline" msgid="8579382742855486372">"完全\n静音"</string>
     <string name="interruption_level_priority_twoline" msgid="8523482736582498083">"仅限\n优先打扰"</string>
     <string name="interruption_level_alarms_twoline" msgid="2045067991335708767">"仅限\n闹钟"</string>
-    <string name="keyguard_indication_charging_time_wireless" msgid="7343602278805644915">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • 正在无线充电（还需 <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>充满）"</string>
-    <string name="keyguard_indication_charging_time" msgid="4927557805886436909">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • 正在充电（还需 <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>充满）"</string>
-    <string name="keyguard_indication_charging_time_fast" msgid="7895986003578341126">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • 正在快速充电（还需 <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>充满）"</string>
-    <string name="keyguard_indication_charging_time_slowly" msgid="245442950133408398">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • 正在慢速充电（还需 <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>充满）"</string>
+    <!-- no translation found for keyguard_indication_charging_time_wireless (577856646141738675) -->
+    <skip />
+    <!-- no translation found for keyguard_indication_charging_time (6492711711891071502) -->
+    <skip />
+    <!-- no translation found for keyguard_indication_charging_time_fast (8390311020603859480) -->
+    <skip />
+    <!-- no translation found for keyguard_indication_charging_time_slowly (301936949731705417) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"切换用户"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="5759855008166759399">"切换用户，当前用户为<xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="383168614528618402">"当前用户为<xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -746,14 +750,10 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;状态&lt;/b&gt;：已降低为“静音”"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;状态&lt;/b&gt;：已调高顺序"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;状态&lt;/b&gt;：已调低顺序"</string>
-    <!-- no translation found for notification_channel_summary_priority_baseline (46674690072551234) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_priority_bubble (1275413109619074576) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_priority_dnd (6665395023264154361) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_priority_all (7151752959650048285) -->
-    <skip />
+    <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"显示在对话通知顶部（屏幕锁定时显示为个人资料照片）"</string>
+    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"以气泡形式显示在对话通知顶部（屏幕锁定时显示为个人资料照片）"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"显示在对话通知顶部（屏幕锁定时显示为个人资料照片），并且会中断勿扰模式"</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"以气泡形式显示在对话通知顶部（屏幕锁定时显示为个人资料照片），并且会中断勿扰模式"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"设置"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"优先"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g>不支持对话功能"</string>

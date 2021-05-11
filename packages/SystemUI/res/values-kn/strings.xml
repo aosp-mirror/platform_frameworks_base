@@ -473,10 +473,14 @@
     <string name="interruption_level_none_twoline" msgid="8579382742855486372">"ಸಂಪೂರ್ಣ\nನಿಶ್ಯಬ್ಧ"</string>
     <string name="interruption_level_priority_twoline" msgid="8523482736582498083">"ಆದ್ಯತೆ\nಮಾತ್ರ"</string>
     <string name="interruption_level_alarms_twoline" msgid="2045067991335708767">"ಅಲಾರಮ್‌ಗಳು\nಮಾತ್ರ"</string>
-    <string name="keyguard_indication_charging_time_wireless" msgid="7343602278805644915">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ವೈರ್‌ಲೆಸ್ ಆಗಿ ಚಾರ್ಜ್ ಆಗುತ್ತಿದೆ (ಪೂರ್ಣಗೊಳ್ಳಲು <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> ಸಮಯ ಬಾಕಿ ಉಳಿದಿದೆ)"</string>
-    <string name="keyguard_indication_charging_time" msgid="4927557805886436909">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ಚಾರ್ಜ್‌ಆಗುತ್ತಿದೆ (ಪೂರ್ಣಗೊಳ್ಳಲು <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> ಸಮಯ ಬಾಕಿ)"</string>
-    <string name="keyguard_indication_charging_time_fast" msgid="7895986003578341126">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ವೇಗವಾಗಿ ಚಾರ್ಜ್ ಆಗುತ್ತಿದೆ (ಪೂರ್ಣಗೊಳ್ಳಲು <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> ಸಮಯ ಬಾಕಿ)"</string>
-    <string name="keyguard_indication_charging_time_slowly" msgid="245442950133408398">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ನಿಧಾನವಾಗಿ ಚಾರ್ಜ್‌ಆಗುತ್ತಿದೆ (ಪೂರ್ಣವಾಗಲು <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> ಸಮಯ ಬಾಕಿ)"</string>
+    <!-- no translation found for keyguard_indication_charging_time_wireless (577856646141738675) -->
+    <skip />
+    <!-- no translation found for keyguard_indication_charging_time (6492711711891071502) -->
+    <skip />
+    <!-- no translation found for keyguard_indication_charging_time_fast (8390311020603859480) -->
+    <skip />
+    <!-- no translation found for keyguard_indication_charging_time_slowly (301936949731705417) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"ಬಳಕೆದಾರರನ್ನು ಬದಲಿಸಿ"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="5759855008166759399">"ಬಳಕೆದಾರರನ್ನು ಬದಲಿಸಿ, ಪ್ರಸ್ತುತ ಬಳಕೆದಾರ <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="383168614528618402">"<xliff:g id="CURRENT_USER_NAME">%s</xliff:g> ಪ್ರಸ್ತುತ ಬಳಕೆದಾರ"</string>
@@ -746,14 +750,10 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;ಸ್ಥಿತಿ:&lt;/b&gt; ಸೈಲೆಂಟ್‌ಗೆ ಕೆಳದರ್ಜೆಗೆ ಇಳಿದಿದೆ"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;ಸ್ಥಿತಿ:&lt;/b&gt; ಉನ್ನತ ಸ್ಥಾನವನ್ನು ಹೊಂದಿದೆ"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;ಸ್ಥಿತಿ:&lt;/b&gt; ಕಡಿಮೆ ಸ್ಥಾನವನ್ನು ಹೊಂದಿದೆ"</string>
-    <!-- no translation found for notification_channel_summary_priority_baseline (46674690072551234) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_priority_bubble (1275413109619074576) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_priority_dnd (6665395023264154361) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_priority_all (7151752959650048285) -->
-    <skip />
+    <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"ಸಂಭಾಷಣೆ ಅಧಿಸೂಚನೆಗಳ ಮೇಲ್ಭಾಗದಲ್ಲಿ ಹಾಗೂ ಲಾಕ್ ಸ್ಕ್ರೀನ್‌ನ ಮೇಲೆ ಪ್ರೊಫೈಲ್ ಚಿತ್ರವಾಗಿ ತೋರಿಸುತ್ತದೆ"</string>
+    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"ಸಂಭಾಷಣೆ ಅಧಿಸೂಚನೆಗಳ ಮೇಲ್ಭಾಗದಲ್ಲಿ ಹಾಗೂ ಲಾಕ್ ಸ್ಕ್ರೀನ್‌ನ ಮೇಲೆ ಪ್ರೊಫೈಲ್ ಚಿತ್ರವಾಗಿ ತೋರಿಸುತ್ತದೆ, ಬಬಲ್‌ನಂತೆ ಗೋಚರಿಸುತ್ತದೆ"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"ಸಂಭಾಷಣೆ ಅಧಿಸೂಚನೆಗಳ ಮೇಲ್ಭಾಗದಲ್ಲಿ ಹಾಗೂ ಲಾಕ್ ಸ್ಕ್ರೀನ್‌ನ ಮೇಲೆ ಪ್ರೊಫೈಲ್ ಚಿತ್ರವಾಗಿ ತೋರಿಸುತ್ತದೆ, ಅಡಚಣೆ ಮಾಡಬೇಡ ಮೋಡ್‌ಗೆ ಅಡ್ಡಿಯುಂಟುಮಾಡುತ್ತದೆ"</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"ಸಂಭಾಷಣೆ ಅಧಿಸೂಚನೆಗಳ ಮೇಲ್ಭಾಗದಲ್ಲಿ ಹಾಗೂ ಲಾಕ್ ಸ್ಕ್ರೀನ್‌ನ ಮೇಲೆ ಪ್ರೊಫೈಲ್ ಚಿತ್ರವಾಗಿ ತೋರಿಸುತ್ತದೆ, ಬಬಲ್‌ನಂತೆ ಗೋಚರಿಸುತ್ತದೆ, ಅಡಚಣೆ ಮಾಡಬೇಡ ಮೋಡ್‌ಗೆ ಅಡ್ಡಿಯುಂಟುಮಾಡುತ್ತದೆ"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"ಆದ್ಯತೆ"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"ಸಂವಾದ ಫೀಚರ್‌ಗಳನ್ನು <xliff:g id="APP_NAME">%1$s</xliff:g> ಬೆಂಬಲಿಸುವುದಿಲ್ಲ"</string>

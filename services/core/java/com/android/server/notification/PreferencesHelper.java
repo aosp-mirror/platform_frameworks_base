@@ -330,7 +330,8 @@ public class PreferencesHelper implements RankingConfig {
                                             }
                                         }
 
-                                        if (isShortcutOk(channel) && isDeletionOk(channel)) {
+                                        if (isShortcutOk(channel) && isDeletionOk(channel)
+                                                && !channel.isSoundMissing()) {
                                             r.channels.put(id, channel);
                                         }
                                     }

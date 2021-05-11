@@ -1022,7 +1022,8 @@
     <string name="text_copied" msgid="2531420577879738860">"テキストをクリップボードにコピーしました。"</string>
     <string name="copied" msgid="4675902854553014676">"コピーしました"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> から <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> に貼り付けました"</string>
-    <string name="pasted_from_clipboard" msgid="6295556725844421812">"クリップボードから <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> に貼り付けました"</string>
+    <!-- no translation found for pasted_from_clipboard (7355790625710831847) -->
+    <skip />
     <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> がクリップボード内のテキストを貼り付けました"</string>
     <string name="pasted_image" msgid="4729097394781491022">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> がクリップボード内の画像を貼り付けました"</string>
     <string name="pasted_content" msgid="646276353060777131">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> がクリップボード内のコンテンツを貼り付けました"</string>
@@ -1181,6 +1182,8 @@
     <string name="not_checked" msgid="7972320087569023342">"OFF"</string>
     <string name="selected" msgid="6614607926197755875">"選択済み"</string>
     <string name="not_selected" msgid="410652016565864475">"未選択"</string>
+    <!-- no translation found for in_progress (2149208189184319441) -->
+    <skip />
     <string name="whichApplication" msgid="5432266899591255759">"アプリケーションを選択"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"%1$sを使用してアクションを完了"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"アクションを実行"</string>
@@ -1259,6 +1262,14 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g>をペア設定しています。"</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"アプリを起動しています。"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"ブートを終了しています。"</string>
+    <!-- no translation found for fp_enrollment_powerbutton_intent_title (3385634173366119903) -->
+    <skip />
+    <!-- no translation found for fp_enrollment_powerbutton_intent_message (6582149052513682522) -->
+    <skip />
+    <!-- no translation found for fp_enrollment_powerbutton_intent_positive_button (5963520983910436791) -->
+    <skip />
+    <!-- no translation found for fp_enrollment_powerbutton_intent_negative_button (6465764183480190748) -->
+    <skip />
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g>を実行中"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"タップするとゲームに戻ります"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"ゲームの選択"</string>
@@ -1709,6 +1720,8 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"ショートカットを使用"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"色反転"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"色補正"</string>
+    <!-- no translation found for one_handed_mode_feature_name (2334330034828094891) -->
+    <skip />
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"さらに輝度を下げる"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"音量ボタンを長押ししました。<xliff:g id="SERVICE_NAME">%1$s</xliff:g> が ON になりました。"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"音量ボタンを長押ししました。<xliff:g id="SERVICE_NAME">%1$s</xliff:g> が OFF になりました。"</string>
@@ -1864,8 +1877,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"管理者により更新されています"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"管理者により削除されています"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="750683025714899363">"バッテリー セーバーを有効にすると、ダークテーマが ON になり、バックグラウンド アクティビティ、一部の視覚効果、特定の機能が制限されるか OFF になります。\n\n"<annotation id="url">"詳細"</annotation></string>
-    <string name="battery_saver_description" msgid="5693741424234005958">"バッテリー セーバーを有効にすると、ダークテーマが ON になり、バックグラウンド アクティビティ、一部の視覚効果、特定の機能が制限されるか OFF になります。"</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (4877297130366222145) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (8518809702138617167) -->
+    <skip />
     <string name="data_saver_description" msgid="4995164271550590517">"データセーバーは、一部のアプリによるバックグラウンドでのデータ送受信を停止することでデータ使用量を抑制します。使用中のアプリからデータを送受信することはできますが、その頻度は低くなる場合があります。この影響として、たとえば画像はタップしないと表示されないようになります。"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"データセーバーを ON にしますか？"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ON にする"</string>
@@ -1968,8 +1983,10 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"現在、<xliff:g id="APP_NAME_0">%1$s</xliff:g> は使用できません。このアプリの使用は [<xliff:g id="APP_NAME_1">%2$s</xliff:g>] で管理されています。"</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"詳細"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"アプリの一時停止を解除"</string>
-    <string name="work_mode_off_title" msgid="5503291976647976560">"仕事用プロファイルを ON にしますか？"</string>
-    <string name="work_mode_off_message" msgid="8417484421098563803">"仕事用のアプリ、通知、データなど、仕事用プロファイルの機能が ON になります"</string>
+    <!-- no translation found for work_mode_off_title (961171256005852058) -->
+    <skip />
+    <!-- no translation found for work_mode_off_message (7319580997683623309) -->
+    <skip />
     <string name="work_mode_turn_on" msgid="3662561662475962285">"ON にする"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"アプリの利用不可"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"現在 <xliff:g id="APP_NAME">%1$s</xliff:g> はご利用になれません。"</string>

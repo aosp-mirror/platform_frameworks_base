@@ -62,7 +62,7 @@ public final class SearchContext implements Parcelable {
      * @param resultTypes {@link SearchTarget.SearchResultType}s combined using bit OR operation
      * @param timeoutMillis timeout before client renders its own fallback result
      */
-    public SearchContext(int resultTypes, int timeoutMillis) {
+    public SearchContext(@SearchTarget.SearchResultType int resultTypes, int timeoutMillis) {
         this(resultTypes, timeoutMillis, new Bundle());
     }
 

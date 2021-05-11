@@ -925,6 +925,18 @@ public class FingerprintService extends SystemService {
         }
 
         @Override
+        public void onUiReady(int sensorId) {
+            Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
+
+            final ServiceProvider provider = getProviderForSensor(sensorId);
+            if (provider == null) {
+                Slog.w(TAG, "No matching provider for onUiReady, sensorId: " + sensorId);
+                return;
+            }
+            provider.onUiReady(sensorId);
+        }
+
+        @Override
         public void setUdfpsOverlayController(@NonNull IUdfpsOverlayController controller) {
             Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
 
