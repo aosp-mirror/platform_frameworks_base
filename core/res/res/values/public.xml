@@ -3099,6 +3099,8 @@
     <public name="durationBetweenRequestsMillis" />
     <public name="showInInputMethodPicker" />
     <public name="effectColor" />
+    <!-- @hide @TestApi -->
+    <public name="requestForegroundServiceExemption" />
   </staging-public-group>
 
   <staging-public-group type="drawable" first-id="0x010800b5">
