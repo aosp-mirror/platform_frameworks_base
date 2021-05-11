@@ -22,6 +22,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.translation.TranslationResponseValue;
+import android.view.translation.ViewTranslationRequest;
 import android.view.translation.ViewTranslationResponse;
 import android.widget.TextView;
 
@@ -67,7 +68,8 @@ public class TranslationTransformationMethod implements TransformationMethod2 {
             Log.w(TAG, "Caller did not enable length changes; not transforming to translated text");
             return source;
         }
-        TranslationResponseValue value = mTranslationResponse.getValue("text");
+        TranslationResponseValue value = mTranslationResponse.getValue(
+                ViewTranslationRequest.ID_TEXT);
         CharSequence translatedText;
         if (value.getStatusCode() == TranslationResponseValue.STATUS_SUCCESS) {
             translatedText = value.getText();
