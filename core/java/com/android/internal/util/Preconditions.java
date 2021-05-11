@@ -158,7 +158,7 @@ public class Preconditions {
      *     be converted to a string using {@link String#valueOf(Object)}
      * @return the non-null reference that was validated
      * @throws NullPointerException if {@code reference} is null
-     * @deprecated - use {@link java.util.Objects.requireNonNull} instead.
+     * @deprecated - use {@link java.util.Objects#requireNonNull} instead.
      */
     @Deprecated
     @UnsupportedAppUsage
