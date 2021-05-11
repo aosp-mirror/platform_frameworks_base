@@ -101,15 +101,24 @@ class RootDisplayArea extends DisplayArea.Dimmable {
                 "There is no FEATURE_IME_PLACEHOLDER in this root to place the IME container");
     }
 
-    /** Finds the {@link DisplayArea.Tokens} that this type of window should be attached to. */
+    /**
+     * Finds the {@link DisplayArea.Tokens} in {@code mAreaForLayer} that this type of window
+     * should be attached to.
+     * <p>
+     * Note that in most cases, users are expected to call
+     * {@link DisplayContent#findAreaForToken(WindowToken)} to find a {@link DisplayArea} in
+     * {@link DisplayContent} level instead of calling this inner method.
+     * </p>
+     */
     @Nullable
-    DisplayArea.Tokens findAreaForToken(WindowToken token) {
-        return findAreaForToken(token.windowType, token.mOwnerCanManageAppTokens,
+    DisplayArea.Tokens findAreaForTokenInLayer(WindowToken token) {
+        return findAreaForWindowTypeInLayer(token.windowType, token.mOwnerCanManageAppTokens,
                 token.mRoundedCornerOverlay);
     }
 
+    /** @see #findAreaForTokenInLayer(WindowToken)  */
     @Nullable
-    DisplayArea.Tokens findAreaForToken(int windowType, boolean ownerCanManageAppTokens,
+    DisplayArea.Tokens findAreaForWindowTypeInLayer(int windowType, boolean ownerCanManageAppTokens,
             boolean roundedCornerOverlay) {
         int windowLayerFromType = mWmService.mPolicy.getWindowLayerFromTypeLw(windowType,
                 ownerCanManageAppTokens, roundedCornerOverlay);
