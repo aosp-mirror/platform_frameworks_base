@@ -29,7 +29,7 @@ package {
 java_sdk_library {
     name: "android.test.runner",
 
-    srcs: ["src/**/*.java"],
+    srcs: [":android-test-runner-sources"],
 
     errorprone: {
         javacflags: ["-Xep:DepAnn:ERROR"],
@@ -76,7 +76,7 @@ java_library {
 java_library_static {
     name: "repackaged.android.test.runner",
 
-    srcs: ["src/**/*.java"],
+    srcs: [":android-test-runner-sources"],
     exclude_srcs: [
         "src/android/test/ActivityUnitTestCase.java",
         "src/android/test/ApplicationTestCase.java",
@@ -107,4 +107,10 @@ filegroup {
     srcs: [
         "api/current.txt",
     ],
+}
+
+filegroup {
+    name: "android-test-runner-sources",
+    srcs: ["src/**/*.java"],
+    path: "src",
 }
