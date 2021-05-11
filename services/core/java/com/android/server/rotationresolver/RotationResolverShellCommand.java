@@ -23,7 +23,6 @@ import android.os.CancellationSignal;
 import android.os.ShellCommand;
 import android.rotationresolver.RotationResolverInternal.RotationResolverCallbackInternal;
 import android.service.rotationresolver.RotationResolutionRequest;
-import android.text.TextUtils;
 import android.view.Surface;
 
 import java.io.PrintWriter;
@@ -75,12 +74,10 @@ final class RotationResolverShellCommand extends ShellCommand {
                 return runResolveRotation();
             case "get-last-resolution":
                 return getLastResolution();
-            case "set-testing-package":
-                return setTestRotationResolverPackage(getNextArgRequired());
             case "get-bound-package":
                 return getBoundPackageName();
-            case "clear-testing-package":
-                return resetTestRotationResolverPackage();
+            case "set-temporary-service":
+                return setTemporaryService(getNextArgRequired());
             default:
                 return handleDefaultCommands(cmd);
         }
@@ -93,17 +90,18 @@ final class RotationResolverShellCommand extends ShellCommand {
         return 0;
     }
 
-    private int setTestRotationResolverPackage(String testingPackage) {
-        if (!TextUtils.isEmpty((testingPackage))) {
-            mService.setTestingPackage(testingPackage);
-            sTestableRotationCallbackInternal.reset();
+    private int setTemporaryService(String serviceName) {
+        final PrintWriter out = getOutPrintWriter();
+        if (serviceName == null) {
+            mService.getMaster().resetTemporaryService(mService.getUserId());
+            out.println("RotationResolverService temporary reset. ");
+            return 0;
         }
-        return 0;
-    }
 
-    private int resetTestRotationResolverPackage() {
-        mService.setTestingPackage("");
-        sTestableRotationCallbackInternal.reset();
+        final int duration = Integer.parseInt(getNextArgRequired());
+        mService.getMaster().setTemporaryService(mService.getUserId(), serviceName, duration);
+        out.println("RotationResolverService temporarily set to " + serviceName
+                + " for " + duration + "ms");
         return 0;
     }
 
@@ -130,8 +128,9 @@ final class RotationResolverShellCommand extends ShellCommand {
         pw.println();
         pw.println("  resolve-rotation: request a rotation resolution.");
         pw.println("  get-last-resolution: show the last rotation resolution result.");
-        pw.println("  set-testing-package: Set the testing package that implements the service.");
         pw.println("  get-bound-package: print the bound package that implements the service.");
-        pw.println("  clear-testing-package: reset the testing package.");
+        pw.println("  set-temporary-service [COMPONENT_NAME DURATION]");
+        pw.println("    Temporarily (for DURATION ms) changes the service implementation.");
+        pw.println("    To reset, call with no argument.");
     }
 }
