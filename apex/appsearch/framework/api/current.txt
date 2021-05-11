@@ -290,14 +290,12 @@ package android.app.appsearch {
     method @NonNull public String getDatabaseName();
     method @NonNull public android.app.appsearch.GenericDocument getGenericDocument();
     method @NonNull public java.util.List<android.app.appsearch.SearchResult.MatchInfo> getMatchInfos();
-    method @Deprecated @NonNull public java.util.List<android.app.appsearch.SearchResult.MatchInfo> getMatches();
     method @NonNull public String getPackageName();
     method public double getRankingSignal();
   }
 
   public static final class SearchResult.Builder {
     ctor public SearchResult.Builder(@NonNull String, @NonNull String);
-    method @Deprecated @NonNull public android.app.appsearch.SearchResult.Builder addMatch(@NonNull android.app.appsearch.SearchResult.MatchInfo);
     method @NonNull public android.app.appsearch.SearchResult.Builder addMatchInfo(@NonNull android.app.appsearch.SearchResult.MatchInfo);
     method @NonNull public android.app.appsearch.SearchResult build();
     method @NonNull public android.app.appsearch.SearchResult.Builder setGenericDocument(@NonNull android.app.appsearch.GenericDocument);

@@ -18,6 +18,7 @@ package android.app.appsearch;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Bundle;
 
 import com.android.internal.util.Preconditions;
@@ -82,8 +83,12 @@ public final class SearchResult {
         return mDocument;
     }
 
-    /** @deprecated This method exists only for dogfooder transition and must be removed. */
+    /**
+     * @deprecated TODO(b/181887768): Exists for dogfood transition; must be removed.
+     * @hide
+     */
     @Deprecated
+    @UnsupportedAppUsage
     @NonNull
     public List<MatchInfo> getMatches() {
         return getMatchInfos();
@@ -191,8 +196,12 @@ public final class SearchResult {
             return this;
         }
 
-        /** @deprecated This method exists only for dogfooder transition and must be removed. */
+        /**
+         * @deprecated TODO(b/181887768): Exists for dogfood transition; must be removed.
+         * @hide
+         */
         @Deprecated
+        @UnsupportedAppUsage
         @NonNull
         public Builder addMatch(@NonNull MatchInfo matchInfo) {
             return addMatchInfo(matchInfo);
