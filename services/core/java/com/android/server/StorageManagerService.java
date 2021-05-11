@@ -444,12 +444,6 @@ class StorageManagerService extends IStorageManager.Stub
             "(?i)(^/storage/[^/]+/(?:([0-9]+)/)?Android/(?:data|media|obb|sandbox)/)([^/]+)(/.*)?");
 
 
-    /** Automotive device unlockes users before system boot complete and this requires special
-     * handling as vold reset can lead into race conditions. When this is set, all users unlocked
-     * in {@code UserManager} level are unlocked after vold reset.
-     */
-    private final boolean mIsAutomotive;
-
     private VolumeInfo findVolumeByIdOrThrow(String id) {
         synchronized (mLock) {
             final VolumeInfo vol = mVolumes.get(id);
@@ -1122,9 +1116,7 @@ class StorageManagerService extends IStorageManager.Stub
                     mVold.onUserStarted(userId);
                     mStoraged.onUserStarted(userId);
                 }
-                if (mIsAutomotive) {
-                    restoreSystemUnlockedUsers(userManager, users, systemUnlockedUsers);
-                }
+                restoreSystemUnlockedUsers(userManager, users, systemUnlockedUsers);
                 mVold.onSecureKeyguardStateChanged(mSecureKeyguardShowing);
                 mStorageManagerInternal.onReset(mVold);
             } catch (Exception e) {
@@ -1204,13 +1196,11 @@ class StorageManagerService extends IStorageManager.Stub
         // Record user as started so newly mounted volumes kick off events
         // correctly, then synthesize events for any already-mounted volumes.
         synchronized (mLock) {
-            if (mIsAutomotive) {
-                for (int unlockedUser : mSystemUnlockedUsers) {
-                    if (unlockedUser == userId) {
-                        // This can happen as restoreAllUnlockedUsers can double post the message.
-                        Log.i(TAG, "completeUnlockUser called for already unlocked user:" + userId);
-                        return;
-                    }
+            for (int unlockedUser : mSystemUnlockedUsers) {
+                if (unlockedUser == userId) {
+                    // This can happen as restoreAllUnlockedUsers can double post the message.
+                    Log.i(TAG, "completeUnlockUser called for already unlocked user:" + userId);
+                    return;
                 }
             }
             for (int i = 0; i < mVolumes.size(); i++) {
@@ -1906,9 +1896,6 @@ class StorageManagerService extends IStorageManager.Stub
         if (WATCHDOG_ENABLE) {
             Watchdog.getInstance().addMonitor(this);
         }
-
-        mIsAutomotive = context.getPackageManager().hasSystemFeature(
-                PackageManager.FEATURE_AUTOMOTIVE);
     }
 
     private void start() {
@@ -4581,7 +4568,6 @@ class StorageManagerService extends IStorageManager.Stub
             pw.println();
             pw.println("Local unlocked users: " + mLocalUnlockedUsers);
             pw.println("System unlocked users: " + Arrays.toString(mSystemUnlockedUsers));
-            pw.println("isAutomotive:" + mIsAutomotive);
         }
 
         synchronized (mObbMounts) {
