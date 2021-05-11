@@ -212,10 +212,11 @@ static jlong NativeLoad(JNIEnv* env, jclass /*clazz*/, const format_type_t forma
   std::unique_ptr<ApkAssets> apk_assets;
   switch (format) {
     case FORMAT_APK: {
-      auto assets = MultiAssetsProvider::Create(std::move(loader_assets),
-                                                ZipAssetsProvider::Create(path.c_str()));
-      apk_assets = ApkAssets::Load(std::move(assets), property_flags);
-      break;
+        auto assets = MultiAssetsProvider::Create(std::move(loader_assets),
+                                                  ZipAssetsProvider::Create(path.c_str(),
+                                                                            property_flags));
+        apk_assets = ApkAssets::Load(std::move(assets), property_flags);
+        break;
     }
     case FORMAT_IDMAP:
       apk_assets = ApkAssets::LoadOverlay(path.c_str(), property_flags);
@@ -271,11 +272,13 @@ static jlong NativeLoadFromFd(JNIEnv* env, jclass /*clazz*/, const format_type_t
   std::unique_ptr<const ApkAssets> apk_assets;
   switch (format) {
     case FORMAT_APK: {
-      auto assets = MultiAssetsProvider::Create(
-          std::move(loader_assets),
-          ZipAssetsProvider::Create(std::move(dup_fd), friendly_name_utf8.c_str()));
-      apk_assets = ApkAssets::Load(std::move(assets), property_flags);
-      break;
+        auto assets =
+                MultiAssetsProvider::Create(std::move(loader_assets),
+                                            ZipAssetsProvider::Create(std::move(dup_fd),
+                                                                      friendly_name_utf8.c_str(),
+                                                                      property_flags));
+        apk_assets = ApkAssets::Load(std::move(assets), property_flags);
+        break;
     }
     case FORMAT_ARSC:
       apk_assets = ApkAssets::LoadTable(
@@ -336,12 +339,16 @@ static jlong NativeLoadFromFdOffset(JNIEnv* env, jclass /*clazz*/, const format_
   std::unique_ptr<const ApkAssets> apk_assets;
   switch (format) {
     case FORMAT_APK: {
-      auto assets = MultiAssetsProvider::Create(
-          std::move(loader_assets),
-          ZipAssetsProvider::Create(std::move(dup_fd), friendly_name_utf8.c_str(),
-                                    static_cast<off64_t>(offset), static_cast<off64_t>(length)));
-      apk_assets = ApkAssets::Load(std::move(assets), property_flags);
-      break;
+        auto assets =
+                MultiAssetsProvider::Create(std::move(loader_assets),
+                                            ZipAssetsProvider::Create(std::move(dup_fd),
+                                                                      friendly_name_utf8.c_str(),
+                                                                      property_flags,
+                                                                      static_cast<off64_t>(offset),
+                                                                      static_cast<off64_t>(
+                                                                              length)));
+        apk_assets = ApkAssets::Load(std::move(assets), property_flags);
+        break;
     }
     case FORMAT_ARSC:
       apk_assets = ApkAssets::LoadTable(
