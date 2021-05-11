@@ -473,10 +473,14 @@
     <string name="interruption_level_none_twoline" msgid="8579382742855486372">"पूरै\nशान्त"</string>
     <string name="interruption_level_priority_twoline" msgid="8523482736582498083">"प्राथमिकता \nमात्र"</string>
     <string name="interruption_level_alarms_twoline" msgid="2045067991335708767">"अलार्महरू \nमात्र"</string>
-    <string name="keyguard_indication_charging_time_wireless" msgid="7343602278805644915">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • तारविनै चार्ज गर्दै (चार्ज पूरा हुन<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> बाँकी)"</string>
-    <string name="keyguard_indication_charging_time" msgid="4927557805886436909">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • चार्ज गरिँदै (चार्ज पूरा हुन <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> बाँकी)"</string>
-    <string name="keyguard_indication_charging_time_fast" msgid="7895986003578341126">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • द्रुत गतिमा चार्ज गरिँदै (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> समय बाँकी)"</string>
-    <string name="keyguard_indication_charging_time_slowly" msgid="245442950133408398">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • मन्द गतिमा चार्ज गरिँदै (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> समय बाँकी)"</string>
+    <!-- no translation found for keyguard_indication_charging_time_wireless (577856646141738675) -->
+    <skip />
+    <!-- no translation found for keyguard_indication_charging_time (6492711711891071502) -->
+    <skip />
+    <!-- no translation found for keyguard_indication_charging_time_fast (8390311020603859480) -->
+    <skip />
+    <!-- no translation found for keyguard_indication_charging_time_slowly (301936949731705417) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"प्रयोगकर्ता फेर्नुहोस्"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="5759855008166759399">"प्रयोगकर्ता, हालको प्रयोगकर्ता <xliff:g id="CURRENT_USER_NAME">%s</xliff:g> मा स्विच गर्नुहोस्"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="383168614528618402">"हालको प्रयोगकर्ता <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -746,14 +750,10 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;स्थिति:&lt;/b&gt; सूचनालाई कम महत्त्वपूर्ण ठानी साइलेन्ट मोडमा सेट गरिएको छ"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;स्थिति:&lt;/b&gt; धेरै महत्त्वपूर्ण सूचनाका रूपमा सेट गरिएको छ"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;स्थिति:&lt;/b&gt; कम महत्त्वपूर्ण सूचनाका रूपमा सेट गरिएको छ"</string>
-    <!-- no translation found for notification_channel_summary_priority_baseline (46674690072551234) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_priority_bubble (1275413109619074576) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_priority_dnd (6665395023264154361) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_priority_all (7151752959650048285) -->
-    <skip />
+    <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"यो वार्तालापका सूचनाहरूको सिरानमा र लक स्क्रिनमा प्रोफाइल फोटोका रूपमा देखिन्छ"</string>
+    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"यो वार्तालापका सूचनाहरूको सिरानमा, बबलका रूपमा र लक स्क्रिनमा प्रोफाइल फोटोका रूपमा देखिन्छ"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"यो वार्तालापका सूचनाहरूको सिरानमा र लक स्क्रिनमा प्रोफाइल फोटोका रूपमा देखिन्छ। साथै, यसले गर्दा \'बाधा नपुऱ्याउनुहोस्\' नामक सुविधामा अवरोध आउँछ"</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"यो वार्तालापका सूचनाहरूको सिरानमा, बबलका रूपमा र लक स्क्रिनमा प्रोफाइल फोटोका रूपमा देखिन्छ। साथै, यसले गर्दा \'बाधा नपुऱ्याउनुहोस्\' नामक सुविधामा अवरोध आउँछ"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"सेटिङ"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"प्राथमिकता"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> मा वार्तालापसम्बन्धी सुविधा प्रयोग गर्न मिल्दैन"</string>
@@ -869,7 +869,7 @@
     <string name="accessibility_data_saver_on" msgid="5394743820189757731">"डेटा सेभर सक्रिय छ"</string>
     <string name="accessibility_data_saver_off" msgid="58339669022107171">"डेटा सेभर बन्द छ"</string>
     <string name="switch_bar_on" msgid="1770868129120096114">"अन छ"</string>
-    <string name="switch_bar_off" msgid="5669805115416379556">"अफ"</string>
+    <string name="switch_bar_off" msgid="5669805115416379556">"अफ छ"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"उपलब्ध छैन"</string>
     <!-- no translation found for tile_disabled (373212051546573069) -->
     <skip />

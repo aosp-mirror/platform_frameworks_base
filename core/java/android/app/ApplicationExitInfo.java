@@ -444,6 +444,13 @@ public final class ApplicationExitInfo implements Parcelable {
      */
     private IParcelFileDescriptorRetriever mNativeTombstoneRetriever;
 
+    /**
+     * Whether or not we've logged this into the statsd.
+     *
+     * for system internal use only, will not retain across processes.
+     */
+    private boolean mLoggedInStatsd;
+
     /** @hide */
     @IntDef(prefix = { "REASON_" }, value = {
         REASON_UNKNOWN,
@@ -888,6 +895,24 @@ public final class ApplicationExitInfo implements Parcelable {
      */
     public void setNativeTombstoneRetriever(final IParcelFileDescriptorRetriever retriever) {
         mNativeTombstoneRetriever = retriever;
+    }
+
+    /**
+     * @see #mLoggedInStatsd
+     *
+     * @hide
+     */
+    public boolean isLoggedInStatsd() {
+        return mLoggedInStatsd;
+    }
+
+    /**
+     * @see #mLoggedInStatsd
+     *
+     * @hide
+     */
+    public void setLoggedInStatsd(boolean loggedInStatsd) {
+        mLoggedInStatsd = loggedInStatsd;
     }
 
     @Override

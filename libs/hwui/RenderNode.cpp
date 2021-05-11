@@ -477,6 +477,14 @@ void RenderNode::applyViewPropertyTransforms(mat4& matrix, bool true3dTransform)
             }
         }
     }
+
+    if (Properties::stretchEffectBehavior == StretchEffectBehavior::LinearScale) {
+        const StretchEffect& stretch = properties().layerProperties().getStretchEffect();
+        if (!stretch.isEmpty()) {
+            matrix.multiply(
+                    stretch.makeLinearStretch(properties().getWidth(), properties().getHeight()));
+        }
+    }
 }
 
 const SkPath* RenderNode::getClippedOutline(const SkRect& clipRect) const {

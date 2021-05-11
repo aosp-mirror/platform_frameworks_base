@@ -140,7 +140,7 @@ public class NotificationEntryManager implements
 
     private final KeyguardEnvironment mKeyguardEnvironment;
     private final NotificationGroupManagerLegacy mGroupManager;
-    private final NotificationRankingManager mRankingManager;
+    private final Lazy<NotificationRankingManager> mRankingManager;
     private final FeatureFlags mFeatureFlags;
     private final ForegroundServiceDismissalFeatureController mFgsFeatureController;
 
@@ -200,7 +200,7 @@ public class NotificationEntryManager implements
     public NotificationEntryManager(
             NotificationEntryManagerLogger logger,
             NotificationGroupManagerLegacy groupManager,
-            NotificationRankingManager rankingManager,
+            Lazy<NotificationRankingManager> rankingManager,
             KeyguardEnvironment keyguardEnvironment,
             FeatureFlags featureFlags,
             Lazy<NotificationRowBinder> notificationRowBinderLazy,
@@ -419,7 +419,7 @@ public class NotificationEntryManager implements
 
         mActiveNotifications.put(entry.getKey(), entry);
         mGroupManager.onEntryAdded(entry);
-        updateRankingAndSort(mRankingManager.getRankingMap(), "addEntryInternalInternal");
+        updateRankingAndSort(mRankingManager.get().getRankingMap(), "addEntryInternalInternal");
     }
 
     /**
@@ -886,13 +886,13 @@ public class NotificationEntryManager implements
 
     /** Resorts / filters the current notification set with the current RankingMap */
     public void reapplyFilterAndSort(String reason) {
-        updateRankingAndSort(mRankingManager.getRankingMap(), reason);
+        updateRankingAndSort(mRankingManager.get().getRankingMap(), reason);
     }
 
     /** Calls to NotificationRankingManager and updates mSortedAndFiltered */
     private void updateRankingAndSort(@NonNull RankingMap rankingMap, String reason) {
         mSortedAndFiltered.clear();
-        mSortedAndFiltered.addAll(mRankingManager.updateRanking(
+        mSortedAndFiltered.addAll(mRankingManager.get().updateRanking(
                 rankingMap, mActiveNotifications.values(), reason));
     }
 

@@ -30,6 +30,7 @@ import static android.app.AlarmManager.INTERVAL_HOUR;
 import static android.app.AlarmManager.RTC;
 import static android.app.AlarmManager.RTC_WAKEUP;
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
+import static android.os.PowerExemptionManager.REASON_SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED;
 import static android.os.PowerExemptionManager.TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
 import static android.os.PowerWhitelistManager.REASON_ALARM_MANAGER_WHILE_IDLE;
 import static android.os.PowerWhitelistManager.TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
@@ -1704,6 +1705,11 @@ public class AlarmManagerService extends SystemService {
                                 if (!hasScheduleExactAlarmInternal(packageName, uid)) {
                                     mHandler.obtainMessage(AlarmHandler.REMOVE_EXACT_ALARMS,
                                             uid, 0, packageName).sendToTarget();
+                                } else {
+                                    // TODO(b/187206399) Make sure this won't be sent, if the app
+                                    // already had the appop previously.
+                                    sendScheduleExactAlarmPermissionStateChangedBroadcast(
+                                            packageName, UserHandle.getUserId(uid));
                                 }
                             }
                         });
@@ -4814,6 +4820,30 @@ public class AlarmManagerService extends SystemService {
         } else {
             mAlarmsPerUid.put(uid, 1);
         }
+    }
+
+    /**
+     * Send {@link AlarmManager#ACTION_SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED} to
+     * the app that is just granted the permission.
+     */
+    private void sendScheduleExactAlarmPermissionStateChangedBroadcast(
+            String packageName, int userId) {
+        final Intent i = new Intent(
+                AlarmManager.ACTION_SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED);
+        i.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING
+                | Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT
+                | Intent.FLAG_RECEIVER_FOREGROUND);
+        i.setPackage(packageName);
+
+        // We need to allow the app to start a foreground service.
+        // This broadcast is very rare, so we do not cache the BroadcastOptions.
+        final BroadcastOptions opts = BroadcastOptions.makeBasic();
+        opts.setTemporaryAppAllowlist(
+                mActivityManagerInternal.getBootTimeTempAllowListDuration(),
+                TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
+                REASON_SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED, "");
+        getContext().sendBroadcastAsUser(i, UserHandle.of(userId), /*permission*/ null,
+                opts.toBundle());
     }
 
     private void decrementAlarmCount(int uid, int decrement) {

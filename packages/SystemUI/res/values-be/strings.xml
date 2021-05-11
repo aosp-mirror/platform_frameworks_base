@@ -477,10 +477,14 @@
     <string name="interruption_level_none_twoline" msgid="8579382742855486372">"Поўная\nцішыня"</string>
     <string name="interruption_level_priority_twoline" msgid="8523482736582498083">"Толькі\nпрыярытэтныя"</string>
     <string name="interruption_level_alarms_twoline" msgid="2045067991335708767">"Толькі\nбудзільнікі"</string>
-    <string name="keyguard_indication_charging_time_wireless" msgid="7343602278805644915">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Ідзе бесправадная зарадка (да поўнага зараду засталося <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
-    <string name="keyguard_indication_charging_time" msgid="4927557805886436909">"Ідзе зарадка (<xliff:g id="PERCENTAGE">%2$s</xliff:g>, яшчэ <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
-    <string name="keyguard_indication_charging_time_fast" msgid="7895986003578341126">"Ідзе хуткая зарадка (<xliff:g id="PERCENTAGE">%2$s</xliff:g>, яшчэ <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
-    <string name="keyguard_indication_charging_time_slowly" msgid="245442950133408398">"Ідзе павольная зарадка (<xliff:g id="PERCENTAGE">%2$s</xliff:g>, <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> да канца)"</string>
+    <!-- no translation found for keyguard_indication_charging_time_wireless (577856646141738675) -->
+    <skip />
+    <!-- no translation found for keyguard_indication_charging_time (6492711711891071502) -->
+    <skip />
+    <!-- no translation found for keyguard_indication_charging_time_fast (8390311020603859480) -->
+    <skip />
+    <!-- no translation found for keyguard_indication_charging_time_slowly (301936949731705417) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Перайсці да іншага карыстальніка"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="5759855008166759399">"Перайсці да іншага карыстальніка, бягучы карыстальнік <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="383168614528618402">"Бягучы карыстальнік <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
