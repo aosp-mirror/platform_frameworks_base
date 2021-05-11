@@ -110,6 +110,7 @@ final class ActivityManagerConstants extends ContentObserver {
     static final String KEY_FGS_START_FOREGROUND_TIMEOUT = "fgs_start_foreground_timeout";
     static final String KEY_FGS_ATOM_SAMPLE_RATE = "fgs_atom_sample_rate";
     static final String KEY_KILL_FAS_CACHED_IDLE = "kill_fas_cached_idle";
+    static final String KEY_FGS_ALLOW_OPT_OUT = "fgs_allow_opt_out";
 
     private static final int DEFAULT_MAX_CACHED_PROCESSES = 32;
     private static final long DEFAULT_FGSERVICE_MIN_SHOWN_TIME = 2*1000;
@@ -161,6 +162,7 @@ final class ActivityManagerConstants extends ContentObserver {
      */
     private static final int
             DEFAULT_PUSH_MESSAGING_OVER_QUOTA_BEHAVIOR = 1;
+    private static final boolean DEFAULT_FGS_ALLOW_OPT_OUT = false;
 
     // Flag stored in the DeviceConfig API.
     /**
@@ -493,6 +495,12 @@ final class ActivityManagerConstants extends ContentObserver {
      */
     volatile boolean mKillForceAppStandByAndCachedIdle = DEFAULT_KILL_FAS_CACHED_IDLE;
 
+    /**
+     * Whether to allow "opt-out" from the foreground service restrictions.
+     * (https://developer.android.com/about/versions/12/foreground-services)
+     */
+    volatile boolean mFgsAllowOptOut = DEFAULT_FGS_ALLOW_OPT_OUT;
+
     private final ActivityManagerService mService;
     private ContentResolver mResolver;
     private final KeyValueListParser mParser = new KeyValueListParser(',');
@@ -700,6 +708,9 @@ final class ActivityManagerConstants extends ContentObserver {
                                 break;
                             case KEY_KILL_FAS_CACHED_IDLE:
                                 updateKillFasCachedIdle();
+                                break;
+                            case KEY_FGS_ALLOW_OPT_OUT:
+                                updateFgsAllowOptOut();
                                 break;
                             default:
                                 break;
@@ -1040,6 +1051,13 @@ final class ActivityManagerConstants extends ContentObserver {
                 DEFAULT_KILL_FAS_CACHED_IDLE);
     }
 
+    private void updateFgsAllowOptOut() {
+        mFgsAllowOptOut = DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_FGS_ALLOW_OPT_OUT,
+                DEFAULT_FGS_ALLOW_OPT_OUT);
+    }
+
     private void updateImperceptibleKillExemptions() {
         IMPERCEPTIBLE_KILL_EXEMPT_PACKAGES.clear();
         IMPERCEPTIBLE_KILL_EXEMPT_PACKAGES.addAll(mDefaultImperceptibleKillExemptPackages);
@@ -1260,6 +1278,8 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.print("="); pw.println(mFgsAtomSampleRate);
         pw.print("  "); pw.print(KEY_PUSH_MESSAGING_OVER_QUOTA_BEHAVIOR);
         pw.print("="); pw.println(mPushMessagingOverQuotaBehavior);
+        pw.print("  "); pw.print(KEY_FGS_ALLOW_OPT_OUT);
+        pw.print("="); pw.println(mFgsAllowOptOut);
 
         pw.println();
         if (mOverrideMaxCachedProcesses >= 0) {
