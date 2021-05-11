@@ -16,9 +16,6 @@
 
 package com.android.systemui.shared.pip;
 
-import static android.graphics.Matrix.MSCALE_X;
-import static android.graphics.Matrix.MSCALE_Y;
-
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -52,8 +49,7 @@ public class PipSurfaceTransactionHelper {
                 .setCornerRadius(leash, mCornerRadius);
         return new PictureInPictureSurfaceTransaction(
                 mTmpDestinationRectF.left, mTmpDestinationRectF.top,
-                mTmpFloat9[MSCALE_X], mTmpFloat9[MSCALE_Y],
-                0 /* rotation*/, mCornerRadius, sourceBounds);
+                mTmpFloat9, 0 /* rotation */, mCornerRadius, sourceBounds);
     }
 
     public PictureInPictureSurfaceTransaction scale(
@@ -68,9 +64,7 @@ public class PipSurfaceTransactionHelper {
                 .setPosition(leash, positionX, positionY)
                 .setCornerRadius(leash, mCornerRadius);
         return new PictureInPictureSurfaceTransaction(
-                positionX, positionY,
-                mTmpFloat9[MSCALE_X], mTmpFloat9[MSCALE_Y],
-                degree, mCornerRadius, sourceBounds);
+                positionX, positionY, mTmpFloat9, degree, mCornerRadius, sourceBounds);
     }
 
     public PictureInPictureSurfaceTransaction scaleAndCrop(
@@ -92,7 +86,7 @@ public class PipSurfaceTransactionHelper {
                 .setPosition(leash, left, top)
                 .setCornerRadius(leash, mCornerRadius);
         return new PictureInPictureSurfaceTransaction(
-                left, top, scale, scale, 0 /* rotation */, mCornerRadius, mTmpDestinationRect);
+                left, top, mTmpFloat9, 0 /* rotation */, mCornerRadius, mTmpDestinationRect);
     }
 
     public PictureInPictureSurfaceTransaction scaleAndRotate(
@@ -114,7 +108,7 @@ public class PipSurfaceTransactionHelper {
                 .setPosition(leash, positionX, positionY)
                 .setCornerRadius(leash, mCornerRadius);
         return new PictureInPictureSurfaceTransaction(
-                positionX, positionY, scale, scale, degree, mCornerRadius, mTmpDestinationRect);
+                positionX, positionY, mTmpFloat9, degree, mCornerRadius, mTmpDestinationRect);
     }
 
     /** @return {@link SurfaceControl.Transaction} instance with vsync-id */
