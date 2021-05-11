@@ -1199,7 +1199,7 @@
         0
     </item>
     <!-- Ending text size in sp of batteryLevel for wireless charging animation -->
-    <item name="wireless_charging_anim_battery_level_text_size_end" format="float" type="dimen">24
+    <item name="wireless_charging_anim_battery_level_text_size_end" format="float" type="dimen">48
     </item>
     <!-- time until battery info is at full opacity-->
     <integer name="wireless_charging_anim_opacity_offset">80</integer>
