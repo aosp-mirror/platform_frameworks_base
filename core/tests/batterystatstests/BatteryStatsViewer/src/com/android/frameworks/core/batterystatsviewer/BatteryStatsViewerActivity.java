@@ -36,6 +36,7 @@ import androidx.loader.app.LoaderManager.LoaderCallbacks;
 import androidx.loader.content.Loader;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.android.settingslib.utils.AsyncLoaderCompat;
 
@@ -48,10 +49,10 @@ public class BatteryStatsViewerActivity extends ComponentActivity {
 
     private static final int BATTERY_STATS_REFRESH_RATE_MILLIS = 60 * 1000;
     private static final int MILLIS_IN_MINUTE = 60000;
-    private static final int LOADER_BATTERY_USAGE_STATS = 1;
+    private static final String FORCE_FRESH_STATS = "force_fresh_stats";
 
     private BatteryStatsDataAdapter mBatteryStatsDataAdapter;
-    private final Runnable mBatteryStatsRefresh = this::loadBatteryStats;
+    private final Runnable mBatteryStatsRefresh = this::refreshPeriodically;
     private String mBatteryConsumerId;
     private TextView mTitleView;
     private TextView mDetailsView;
@@ -59,7 +60,8 @@ public class BatteryStatsViewerActivity extends ComponentActivity {
     private TextView mPackagesView;
     private View mHeadingsView;
     private RecyclerView mBatteryConsumerDataView;
-    private View mLoadingView;
+    private SwipeRefreshLayout mSwipeRefreshLayout;
+    private View mCardView;
     private View mEmptyView;
     private List<BatteryUsageStats> mBatteryUsageStats;
 
@@ -71,6 +73,12 @@ public class BatteryStatsViewerActivity extends ComponentActivity {
 
         setContentView(R.layout.battery_stats_viewer_layout);
 
+        mSwipeRefreshLayout = findViewById(R.id.swipe_refresh);
+        mSwipeRefreshLayout.setColorSchemeResources(android.R.color.holo_green_light);
+        mSwipeRefreshLayout.setRefreshing(true);
+        mSwipeRefreshLayout.setOnRefreshListener(this::onRefresh);
+
+        mCardView = findViewById(R.id.app_card);
         mTitleView = findViewById(android.R.id.title);
         mDetailsView = findViewById(R.id.details);
         mIconView = findViewById(android.R.id.icon);
@@ -82,18 +90,13 @@ public class BatteryStatsViewerActivity extends ComponentActivity {
         mBatteryStatsDataAdapter = new BatteryStatsDataAdapter();
         mBatteryConsumerDataView.setAdapter(mBatteryStatsDataAdapter);
 
-        mLoadingView = findViewById(R.id.loading_view);
         mEmptyView = findViewById(R.id.empty_view);
-
-        LoaderManager loaderManager = LoaderManager.getInstance(this);
-        loaderManager.restartLoader(LOADER_BATTERY_USAGE_STATS, null,
-                new BatteryUsageStatsLoaderCallbacks());
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        loadBatteryStats();
+        refreshPeriodically();
     }
 
     @Override
@@ -102,32 +105,46 @@ public class BatteryStatsViewerActivity extends ComponentActivity {
         getMainThreadHandler().removeCallbacks(mBatteryStatsRefresh);
     }
 
-    private void loadBatteryStats() {
-        LoaderManager loaderManager = LoaderManager.getInstance(this);
-        loaderManager.restartLoader(LOADER_BATTERY_USAGE_STATS, null,
-                new BatteryUsageStatsLoaderCallbacks());
+    private void refreshPeriodically() {
+        loadBatteryUsageStats(false);
         getMainThreadHandler().postDelayed(mBatteryStatsRefresh, BATTERY_STATS_REFRESH_RATE_MILLIS);
+    }
+
+    private void onRefresh() {
+        loadBatteryUsageStats(true);
+    }
+
+    private void loadBatteryUsageStats(boolean forceFreshStats) {
+        Bundle args = new Bundle();
+        args.putBoolean(FORCE_FRESH_STATS, forceFreshStats);
+        LoaderManager.getInstance(this).restartLoader(0, args,
+                new BatteryUsageStatsLoaderCallbacks());
     }
 
     private static class BatteryUsageStatsLoader extends
             AsyncLoaderCompat<List<BatteryUsageStats>> {
         private final BatteryStatsManager mBatteryStatsManager;
+        private final boolean mForceFreshStats;
 
-        BatteryUsageStatsLoader(Context context) {
+        BatteryUsageStatsLoader(Context context, boolean forceFreshStats) {
             super(context);
             mBatteryStatsManager = context.getSystemService(BatteryStatsManager.class);
+            mForceFreshStats = forceFreshStats;
         }
 
         @Override
         public List<BatteryUsageStats> loadInBackground() {
+            final int maxStatsAgeMs = mForceFreshStats ? 0 : BATTERY_STATS_REFRESH_RATE_MILLIS;
             final BatteryUsageStatsQuery queryDefault =
                     new BatteryUsageStatsQuery.Builder()
                             .includePowerModels()
+                            .setMaxStatsAgeMs(maxStatsAgeMs)
                             .build();
             final BatteryUsageStatsQuery queryPowerProfileModeledOnly =
                     new BatteryUsageStatsQuery.Builder()
                             .powerProfileModeledOnly()
                             .includePowerModels()
+                            .setMaxStatsAgeMs(maxStatsAgeMs)
                             .build();
             return mBatteryStatsManager.getBatteryUsageStats(
                     List.of(queryDefault, queryPowerProfileModeledOnly));
@@ -143,7 +160,8 @@ public class BatteryStatsViewerActivity extends ComponentActivity {
         @NonNull
         @Override
         public Loader<List<BatteryUsageStats>> onCreateLoader(int id, Bundle args) {
-            return new BatteryUsageStatsLoader(BatteryStatsViewerActivity.this);
+            return new BatteryUsageStatsLoader(BatteryStatsViewerActivity.this,
+                    args.getBoolean(FORCE_FRESH_STATS));
         }
 
         @Override
@@ -194,7 +212,8 @@ public class BatteryStatsViewerActivity extends ComponentActivity {
                 mPackagesView.setVisibility(View.GONE);
             }
 
-            if (batteryConsumerInfo.isSystemBatteryConsumer) {
+            if (batteryConsumerInfo.consumerType
+                    == BatteryConsumerData.ConsumerType.DEVICE_POWER_COMPONENT) {
                 mHeadingsView.setVisibility(View.VISIBLE);
             } else {
                 mHeadingsView.setVisibility(View.GONE);
@@ -210,7 +229,8 @@ public class BatteryStatsViewerActivity extends ComponentActivity {
             mBatteryConsumerDataView.setVisibility(View.VISIBLE);
         }
 
-        mLoadingView.setVisibility(View.GONE);
+        mCardView.setVisibility(View.VISIBLE);
+        mSwipeRefreshLayout.setRefreshing(false);
     }
 
     private static class BatteryStatsDataAdapter extends
@@ -218,16 +238,16 @@ public class BatteryStatsViewerActivity extends ComponentActivity {
         public static class ViewHolder extends RecyclerView.ViewHolder {
             public ImageView iconImageView;
             public TextView titleTextView;
-            public TextView amountTextView;
-            public TextView percentTextView;
+            public TextView value1TextView;
+            public TextView value2TextView;
 
             ViewHolder(View itemView) {
                 super(itemView);
 
                 iconImageView = itemView.findViewById(R.id.icon);
                 titleTextView = itemView.findViewById(R.id.title);
-                amountTextView = itemView.findViewById(R.id.amount);
-                percentTextView = itemView.findViewById(R.id.percent);
+                value1TextView = itemView.findViewById(R.id.value1);
+                value2TextView = itemView.findViewById(R.id.value2);
             }
         }
 
@@ -255,57 +275,108 @@ public class BatteryStatsViewerActivity extends ComponentActivity {
         @Override
         public void onBindViewHolder(@NonNull ViewHolder viewHolder, int position) {
             BatteryConsumerData.Entry entry = mEntries.get(position);
+
             switch (entry.entryType) {
-                case POWER_MODELED:
-                    viewHolder.titleTextView.setText(entry.title);
-                    viewHolder.amountTextView.setText(
-                            String.format(Locale.getDefault(), "%.1f mAh", entry.value));
-                    viewHolder.iconImageView.setImageResource(R.drawable.gm_calculate_24);
-                    viewHolder.itemView.setBackgroundResource(
+                case UID_TOTAL_POWER:
+                    setTitleIconAndBackground(viewHolder, entry.title,
+                            R.drawable.gm_sum_24, 0);
+                    setPowerText(viewHolder.value1TextView, entry.value1);
+                    setProportionText(viewHolder.value2TextView, entry);
+                    break;
+                case UID_POWER_MODELED:
+                    setTitleIconAndBackground(viewHolder, entry.title,
+                            R.drawable.gm_calculate_24,
                             R.color.battery_consumer_bg_power_profile);
+                    setPowerText(viewHolder.value1TextView, entry.value1);
+                    setProportionText(viewHolder.value2TextView, entry);
                     break;
-                case POWER_MEASURED:
-                    viewHolder.titleTextView.setText(entry.title);
-                    viewHolder.amountTextView.setText(
-                            String.format(Locale.getDefault(), "%.1f mAh", entry.value));
-                    viewHolder.iconImageView.setImageResource(R.drawable.gm_amp_24);
-                    viewHolder.itemView.setBackgroundResource(
+                case UID_POWER_MEASURED:
+                    setTitleIconAndBackground(viewHolder, entry.title,
+                            R.drawable.gm_amp_24,
                             R.color.battery_consumer_bg_measured_energy);
+                    setPowerText(viewHolder.value1TextView, entry.value1);
+                    setProportionText(viewHolder.value2TextView, entry);
                     break;
-                case POWER_CUSTOM:
-                    viewHolder.titleTextView.setText(entry.title);
-                    viewHolder.amountTextView.setText(
-                            String.format(Locale.getDefault(), "%.1f mAh", entry.value));
-                    viewHolder.iconImageView.setImageResource(R.drawable.gm_custom_24);
-                    viewHolder.itemView.setBackgroundResource(
+                case UID_POWER_CUSTOM:
+                    setTitleIconAndBackground(viewHolder, entry.title,
+                            R.drawable.gm_custom_24,
                             R.color.battery_consumer_bg_measured_energy);
+                    setPowerText(viewHolder.value1TextView, entry.value1);
+                    setProportionText(viewHolder.value2TextView, entry);
                     break;
-                case DURATION:
-                    viewHolder.titleTextView.setText(entry.title);
-                    final long durationMs = (long) entry.value;
-                    CharSequence text;
-                    if (durationMs < MILLIS_IN_MINUTE) {
-                        text = String.format(Locale.getDefault(), "%,d ms", durationMs);
-                    } else {
-                        text = String.format(Locale.getDefault(), "%,d m %d s",
-                                durationMs / MILLIS_IN_MINUTE,
-                                (durationMs % MILLIS_IN_MINUTE) / 1000);
-                    }
-
-                    viewHolder.amountTextView.setText(text);
-                    viewHolder.iconImageView.setImageResource(R.drawable.gm_timer_24);
-                    viewHolder.itemView.setBackground(null);
+                case UID_DURATION:
+                    setTitleIconAndBackground(viewHolder, entry.title,
+                            R.drawable.gm_timer_24, 0);
+                    setDurationText(viewHolder.value1TextView, (long) entry.value1);
+                    setProportionText(viewHolder.value2TextView, entry);
+                    break;
+                case DEVICE_TOTAL_POWER:
+                    setTitleIconAndBackground(viewHolder, entry.title,
+                            R.drawable.gm_sum_24, 0);
+                    setPowerText(viewHolder.value1TextView, entry.value1);
+                    setPowerText(viewHolder.value2TextView, entry.value2);
+                    break;
+                case DEVICE_POWER_MODELED:
+                    setTitleIconAndBackground(viewHolder, entry.title,
+                            R.drawable.gm_calculate_24,
+                            R.color.battery_consumer_bg_power_profile);
+                    setPowerText(viewHolder.value1TextView, entry.value1);
+                    setPowerText(viewHolder.value2TextView, entry.value2);
+                    break;
+                case DEVICE_POWER_MEASURED:
+                    setTitleIconAndBackground(viewHolder, entry.title,
+                            R.drawable.gm_amp_24,
+                            R.color.battery_consumer_bg_measured_energy);
+                    setPowerText(viewHolder.value1TextView, entry.value1);
+                    setPowerText(viewHolder.value2TextView, entry.value2);
+                    break;
+                case DEVICE_POWER_CUSTOM:
+                    setTitleIconAndBackground(viewHolder, entry.title,
+                            R.drawable.gm_custom_24,
+                            R.color.battery_consumer_bg_measured_energy);
+                    setPowerText(viewHolder.value1TextView, entry.value1);
+                    setPowerText(viewHolder.value2TextView, entry.value2);
+                    break;
+                case DEVICE_DURATION:
+                    setTitleIconAndBackground(viewHolder, entry.title,
+                            R.drawable.gm_timer_24, 0);
+                    setDurationText(viewHolder.value1TextView, (long) entry.value1);
+                    viewHolder.value2TextView.setVisibility(View.GONE);
                     break;
             }
+        }
 
-            double proportion;
-            if (entry.isSystemBatteryConsumer) {
-                proportion = entry.value != 0 ? entry.total * 100 / entry.value : 0;
-            } else {
-                proportion = entry.total != 0 ? entry.value * 100 / entry.total : 0;
-            }
-            viewHolder.percentTextView.setText(
+        private void setTitleIconAndBackground(ViewHolder viewHolder, String title, int icon,
+                int background) {
+            viewHolder.titleTextView.setText(title);
+            viewHolder.iconImageView.setImageResource(icon);
+            viewHolder.itemView.setBackgroundResource(background);
+        }
+
+        private void setProportionText(TextView textView, BatteryConsumerData.Entry entry) {
+            final double proportion = entry.value2 != 0 ? entry.value1 * 100 / entry.value2 : 0;
+            textView.setText(
                     String.format(Locale.getDefault(), "%.1f%%", proportion));
+            textView.setVisibility(View.VISIBLE);
+        }
+
+        private void setPowerText(TextView textView, double powerMah) {
+            textView.setText(String.format(Locale.getDefault(), "%.1f", powerMah));
+            textView.setVisibility(View.VISIBLE);
+        }
+
+        private void setDurationText(TextView textView, long durationMs) {
+            CharSequence text;
+            if (durationMs < MILLIS_IN_MINUTE) {
+                text = String.format(Locale.getDefault(), "%,d ms", durationMs);
+            } else {
+                text = String.format(Locale.getDefault(), "%,d m %d s",
+                        durationMs / MILLIS_IN_MINUTE,
+                        (durationMs % MILLIS_IN_MINUTE) / 1000);
+            }
+
+            textView.setText(text);
+            textView.setVisibility(View.VISIBLE);
         }
     }
 }
