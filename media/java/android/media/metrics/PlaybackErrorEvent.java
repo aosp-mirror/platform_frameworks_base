@@ -39,70 +39,94 @@ public final class PlaybackErrorEvent extends Event implements Parcelable {
     /** Error code for runtime errors */
     public static final int ERROR_RUNTIME = 2;
 
-    /** No network */
-    public static final int ERROR_NETWORK_OFFLINE = 3;
-    /** Connection opening error */
-    public static final int ERROR_NETWORK_CONNECT = 4;
-    /** Bad HTTP status code */
-    public static final int ERROR_NETWORK_BAD_STATUS = 5;
-    /** DNS resolution error */
-    public static final int ERROR_NETWORK_DNS = 6;
-    /** Network socket timeout */
-    public static final int ERROR_NETWORK_TIMEOUT = 7;
-    /** Connection closed */
-    public static final int ERROR_NETWORK_CLOSED = 8;
-    /** Other network errors */
-    public static final int ERROR_NETWORK_OTHER = 9;
-
-    /** Manifest parsing error */
-    public static final int ERROR_MEDIA_MANIFEST = 10;
+    /** Error code for lack of network connectivity while trying to access a network resource */
+    public static final int ERROR_IO_NETWORK_UNAVAILABLE = 3;
+    /** Error code for a failure while establishing a network connection */
+    public static final int ERROR_IO_NETWORK_CONNECTION_FAILED = 4;
+    /** Error code for an HTTP server returning an unexpected HTTP response status code */
+    public static final int ERROR_IO_BAD_HTTP_STATUS = 5;
+    /** Error code for failing to resolve a hostname */
+    public static final int ERROR_IO_DNS_FAILED = 6;
     /**
-     * Media bitstream (audio, video, text, metadata) parsing error, either malformed or
-     * unsupported.
+     * Error code for a network timeout, meaning the server is taking too long to fulfill
+     * a request
      */
-    public static final int ERROR_MEDIA_PARSER = 11;
-    /** Other media errors */
-    public static final int ERROR_MEDIA_OTHER = 12;
+    public static final int ERROR_IO_CONNECTION_TIMEOUT = 7;
+    /** Error code for an existing network connection being unexpectedly closed */
+    public static final int ERROR_IO_CONNECTION_CLOSED = 8;
+    /** Error code for other Input/Output errors */
+    public static final int ERROR_IO_OTHER = 9;
 
-    /** Codec initialization failed */
-    public static final int ERROR_DECODER_INIT = 13;
-    /** Decoding failed */
-    public static final int ERROR_DECODER_DECODE = 14;
-    /** Out of memory */
-    public static final int ERROR_DECODER_OOM = 15;
-    /** Other decoder errors */
-    public static final int ERROR_DECODER_OTHER = 16;
+    /** Error code for a parsing error associated to a media manifest */
+    public static final int ERROR_PARSING_MANIFEST_MALFORMED = 10;
+    /** Error code for a parsing error associated to a media container format bitstream */
+    public static final int ERROR_PARSING_CONTAINER_MALFORMED = 11;
+    /** Error code for other media parsing errors */
+    public static final int ERROR_PARSING_OTHER = 12;
 
-    /** AudioTrack initialization failed */
-    public static final int ERROR_AUDIOTRACK_INIT = 17;
-    /** AudioTrack writing failed */
-    public static final int ERROR_AUDIOTRACK_WRITE = 18;
-    /** Other AudioTrack errors */
-    public static final int ERROR_AUDIOTRACK_OTHER = 19;
+    /** Error code for a decoder initialization failure */
+    public static final int ERROR_DECODER_INIT_FAILED = 13;
+    /** Error code for a failure while trying to decode media samples */
+    public static final int ERROR_DECODING_FAILED = 14;
+    /**
+     * Error code for trying to decode content whose format exceeds the capabilities of the device.
+     */
+    public static final int ERROR_DECODING_FORMAT_EXCEEDS_CAPABILITIES = 15;
+    /** Error code for other decoding errors */
+    public static final int ERROR_DECODING_OTHER = 16;
 
-    /** Exception in remote controller or player */
+    /** Error code for an AudioTrack initialization failure */
+    public static final int ERROR_AUDIO_TRACK_INIT_FAILED = 17;
+    /** Error code for an AudioTrack write operation failure */
+    public static final int ERROR_AUDIO_TRACK_WRITE_FAILED = 18;
+    /** Error code for other AudioTrack errors */
+    public static final int ERROR_AUDIO_TRACK_OTHER = 19;
+
+    /** Error code for an unidentified error in a remote controller or player */
     public static final int ERROR_PLAYER_REMOTE = 20;
-    /** Error when a Live playback falls behind the Live DVR window. */
+    /**
+     * Error code for the loading position falling behind the sliding window of available live
+     * content.
+     */
     public static final int ERROR_PLAYER_BEHIND_LIVE_WINDOW = 21;
-    /** Other player errors */
+    /** Error code for other player errors */
     public static final int ERROR_PLAYER_OTHER = 22;
 
-    /** Scheme unsupported by device */
-    public static final int ERROR_DRM_UNAVAILABLE = 23;
-    /** Provisioning failed */
+    /** Error code for a chosen DRM protection scheme not being supported by the device */
+    public static final int ERROR_DRM_SCHEME_UNSUPPORTED = 23;
+    /** Error code for a failure while provisioning the device */
     public static final int ERROR_DRM_PROVISIONING_FAILED = 24;
-    /** Failed to acquire license */
-    public static final int ERROR_DRM_LICENSE_ERROR = 25;
-    /** Operation prevented by license policy */
-    public static final int ERROR_DRM_DISALLOWED = 26;
-    /** Failure in the DRM system */
+    /** Error code for a failure while trying to obtain a license */
+    public static final int ERROR_DRM_LICENSE_ACQUISITION_FAILED = 25;
+    /** Error code an operation being disallowed by a license policy */
+    public static final int ERROR_DRM_DISALLOWED_OPERATION = 26;
+    /** Error code for an error in the DRM system */
     public static final int ERROR_DRM_SYSTEM_ERROR = 27;
-    /** Incompatible content */
+    /** Error code for attempting to play incompatible DRM-protected content */
     public static final int ERROR_DRM_CONTENT_ERROR = 28;
-    /** Device has been revoked */
-    public static final int ERROR_DRM_REVOKED = 29;
-    /** Other drm errors */
+    /** Error code for the device having revoked DRM privileges */
+    public static final int ERROR_DRM_DEVICE_REVOKED = 29;
+    /** Error code for other DRM errors */
     public static final int ERROR_DRM_OTHER = 30;
+
+    /** Error code for a non-existent file */
+    public static final int ERROR_IO_FILE_NOT_FOUND = 31;
+    /**
+     * Error code for lack of permission to perform an IO operation, for example, lack of permission
+     * to access internet or external storage.
+     */
+    public static final int ERROR_IO_NO_PERMISSION = 32;
+
+    /** Error code for an unsupported feature in a media manifest */
+    public static final int ERROR_PARSING_MANIFEST_UNSUPPORTED = 33;
+    /**
+     * Error code for attempting to extract a file with an unsupported media container format, or an
+     * unsupported media container feature
+     */
+    public static final int ERROR_PARSING_CONTAINER_UNSUPPORTED = 34;
+
+    /** Error code for trying to decode content whose format is not supported */
+    public static final int ERROR_DECODING_FORMAT_UNSUPPORTED = 35;
 
 
     private final @Nullable String mExceptionStack;
@@ -116,34 +140,39 @@ public final class PlaybackErrorEvent extends Event implements Parcelable {
         ERROR_UNKNOWN,
         ERROR_OTHER,
         ERROR_RUNTIME,
-        ERROR_NETWORK_OFFLINE,
-        ERROR_NETWORK_CONNECT,
-        ERROR_NETWORK_BAD_STATUS,
-        ERROR_NETWORK_DNS,
-        ERROR_NETWORK_TIMEOUT,
-        ERROR_NETWORK_CLOSED,
-        ERROR_NETWORK_OTHER,
-        ERROR_MEDIA_MANIFEST,
-        ERROR_MEDIA_PARSER,
-        ERROR_MEDIA_OTHER,
-        ERROR_DECODER_INIT,
-        ERROR_DECODER_DECODE,
-        ERROR_DECODER_OOM,
-        ERROR_DECODER_OTHER,
-        ERROR_AUDIOTRACK_INIT,
-        ERROR_AUDIOTRACK_WRITE,
-        ERROR_AUDIOTRACK_OTHER,
+        ERROR_IO_NETWORK_UNAVAILABLE,
+        ERROR_IO_NETWORK_CONNECTION_FAILED,
+        ERROR_IO_BAD_HTTP_STATUS,
+        ERROR_IO_DNS_FAILED,
+        ERROR_IO_CONNECTION_TIMEOUT,
+        ERROR_IO_CONNECTION_CLOSED,
+        ERROR_IO_OTHER,
+        ERROR_PARSING_MANIFEST_MALFORMED,
+        ERROR_PARSING_CONTAINER_MALFORMED,
+        ERROR_PARSING_OTHER,
+        ERROR_DECODER_INIT_FAILED,
+        ERROR_DECODING_FAILED,
+        ERROR_DECODING_FORMAT_EXCEEDS_CAPABILITIES,
+        ERROR_DECODING_OTHER,
+        ERROR_AUDIO_TRACK_INIT_FAILED,
+        ERROR_AUDIO_TRACK_WRITE_FAILED,
+        ERROR_AUDIO_TRACK_OTHER,
         ERROR_PLAYER_REMOTE,
         ERROR_PLAYER_BEHIND_LIVE_WINDOW,
         ERROR_PLAYER_OTHER,
-        ERROR_DRM_UNAVAILABLE,
+        ERROR_DRM_SCHEME_UNSUPPORTED,
         ERROR_DRM_PROVISIONING_FAILED,
-        ERROR_DRM_LICENSE_ERROR,
-        ERROR_DRM_DISALLOWED,
+        ERROR_DRM_LICENSE_ACQUISITION_FAILED,
+        ERROR_DRM_DISALLOWED_OPERATION,
         ERROR_DRM_SYSTEM_ERROR,
         ERROR_DRM_CONTENT_ERROR,
-        ERROR_DRM_REVOKED,
+        ERROR_DRM_DEVICE_REVOKED,
         ERROR_DRM_OTHER,
+        ERROR_IO_FILE_NOT_FOUND,
+        ERROR_IO_NO_PERMISSION,
+        ERROR_PARSING_MANIFEST_UNSUPPORTED,
+        ERROR_PARSING_CONTAINER_UNSUPPORTED,
+        ERROR_DECODING_FORMAT_UNSUPPORTED,
     })
     @Retention(java.lang.annotation.RetentionPolicy.SOURCE)
     public @interface ErrorCode {}
