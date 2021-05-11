@@ -50,12 +50,14 @@ import android.app.appsearch.AppSearchBatchResult;
 import android.app.appsearch.AppSearchManager;
 import android.app.appsearch.AppSearchResult;
 import android.app.appsearch.GenericDocument;
-import android.app.appsearch.IAppSearchBatchResultCallback;
-import android.app.appsearch.IAppSearchManager;
-import android.app.appsearch.IAppSearchResultCallback;
 import android.app.appsearch.PackageIdentifier;
 import android.app.appsearch.SearchResultPage;
 import android.app.appsearch.SetSchemaResponse;
+import android.app.appsearch.aidl.AppSearchBatchResultParcel;
+import android.app.appsearch.aidl.AppSearchResultParcel;
+import android.app.appsearch.aidl.IAppSearchBatchResultCallback;
+import android.app.appsearch.aidl.IAppSearchManager;
+import android.app.appsearch.aidl.IAppSearchResultCallback;
 import android.app.role.OnRoleHoldersChangedListener;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.ActivityNotFoundException;
@@ -675,7 +677,9 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
                 }
             }
             final SetSchemaResponse response = new SetSchemaResponse.Builder().build();
-            callback.onResult(AppSearchResult.newSuccessfulResult(response.getBundle()));
+            callback.onResult(
+                    new AppSearchResultParcel(
+                            AppSearchResult.newSuccessfulResult(response.getBundle())));
         }
 
         @Override
@@ -711,7 +715,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
                 }
                 docMap.put(doc.getId(), doc);
             }
-            callback.onResult(builder.build());
+            callback.onResult(new AppSearchBatchResultParcel<>(builder.build()));
         }
 
         @Override
@@ -737,7 +741,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
                     }
                 }
             }
-            callback.onResult(builder.build());
+            callback.onResult(new AppSearchBatchResultParcel<>(builder.build()));
         }
 
         @Override
@@ -749,7 +753,8 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
                 final Bundle page = new Bundle();
                 page.putLong(SearchResultPage.NEXT_PAGE_TOKEN_FIELD, 1);
                 page.putParcelableArrayList(SearchResultPage.RESULTS_FIELD, new ArrayList<>());
-                callback.onResult(AppSearchResult.newSuccessfulResult(page));
+                callback.onResult(
+                        new AppSearchResultParcel<>(AppSearchResult.newSuccessfulResult(page)));
                 return;
             }
             final List<GenericDocument> documents = new ArrayList<>(mDocumentMap.get(key).values());
@@ -765,7 +770,8 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
                 resultBundles.add(resultBundle);
             }
             page.putParcelableArrayList(SearchResultPage.RESULTS_FIELD, resultBundles);
-            callback.onResult(AppSearchResult.newSuccessfulResult(page));
+            callback.onResult(
+                    new AppSearchResultParcel<>(AppSearchResult.newSuccessfulResult(page)));
         }
 
         @Override
@@ -780,7 +786,8 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
             final Bundle page = new Bundle();
             page.putLong(SearchResultPage.NEXT_PAGE_TOKEN_FIELD, 1);
             page.putParcelableArrayList(SearchResultPage.RESULTS_FIELD, new ArrayList<>());
-            callback.onResult(AppSearchResult.newSuccessfulResult(page));
+            callback.onResult(
+                    new AppSearchResultParcel<>(AppSearchResult.newSuccessfulResult(page)));
         }
 
         @Override
@@ -835,7 +842,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
                     }
                 }
             }
-            callback.onResult(builder.build());
+            callback.onResult(new AppSearchBatchResultParcel<>(builder.build()));
         }
 
         @Override
@@ -844,11 +851,13 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
                 throws RemoteException {
             final String key = getKey(userId, databaseName);
             if (!mDocumentMap.containsKey(key)) {
-                callback.onResult(AppSearchResult.newSuccessfulResult(null));
+                callback.onResult(
+                        new AppSearchResultParcel<>(AppSearchResult.newSuccessfulResult(null)));
                 return;
             }
             mDocumentMap.get(key).clear();
-            callback.onResult(AppSearchResult.newSuccessfulResult(null));
+            callback.onResult(
+                    new AppSearchResultParcel<>(AppSearchResult.newSuccessfulResult(null)));
         }
 
         @Override
@@ -878,7 +887,8 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         }
 
         private void ignore(IAppSearchResultCallback callback) throws RemoteException {
-            callback.onResult(AppSearchResult.newSuccessfulResult(null));
+            callback.onResult(
+                    new AppSearchResultParcel<>(AppSearchResult.newSuccessfulResult(null)));
         }
     }
 
