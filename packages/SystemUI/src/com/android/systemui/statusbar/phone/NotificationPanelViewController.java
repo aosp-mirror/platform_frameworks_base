@@ -2067,14 +2067,13 @@ public class NotificationPanelViewController extends PanelViewController {
         final int qsPanelBottomY = calculateQsBottomPosition(getQsExpansionFraction());
         final boolean visible = (getQsExpansionFraction() > 0 || qsPanelBottomY > 0)
                 && !mShouldUseSplitNotificationShade;
-        final float notificationTop = mAmbientState.getStackY()
-                - mNotificationScrimPadding
-                - mAmbientState.getScrollY();
+        final float notificationTop = mAmbientState.getStackY() - mAmbientState.getScrollY();
         setQsExpansionEnabled(mAmbientState.getScrollY() == 0);
 
         int radius = mScrimCornerRadius;
         if (!mShouldUseSplitNotificationShade) {
-            top = (int) Math.min(qsPanelBottomY, notificationTop);
+            top = (int) (isOnKeyguard() ? Math.min(qsPanelBottomY, notificationTop)
+                    : notificationTop);
             bottom = getView().getBottom();
             left = getView().getLeft();
             right = getView().getRight();
