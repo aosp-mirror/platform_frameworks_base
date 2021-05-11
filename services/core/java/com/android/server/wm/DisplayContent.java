@@ -1569,6 +1569,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             // If the transition has not started yet, the activity must be the top.
             return false;
         }
+        if (mLastWallpaperVisible && r.windowsCanBeWallpaperTarget()) {
+            // Use normal rotation animation for orientation change of visible wallpaper.
+            return false;
+        }
         final int rotation = rotationForActivityInDifferentOrientation(r);
         if (rotation == ROTATION_UNDEFINED) {
             // The display rotation won't be changed by current top activity. The client side
