@@ -19,6 +19,7 @@ package android.os;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 
+import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -27,7 +28,7 @@ import java.lang.annotation.RetentionPolicy;
  *
  * @hide
  */
-public class BatteryConsumer {
+public abstract class BatteryConsumer {
 
     /**
      * Power usage component, describing the particular part of the system
@@ -85,12 +86,37 @@ public class BatteryConsumer {
     public static final int FIRST_CUSTOM_POWER_COMPONENT_ID = 1000;
     public static final int LAST_CUSTOM_POWER_COMPONENT_ID = 9999;
 
+    private static final String[] sPowerComponentNames = new String[POWER_COMPONENT_COUNT];
+
+    static {
+        // Assign individually to avoid future mismatch
+        sPowerComponentNames[POWER_COMPONENT_SCREEN] = "screen";
+        sPowerComponentNames[POWER_COMPONENT_CPU] = "cpu";
+        sPowerComponentNames[POWER_COMPONENT_BLUETOOTH] = "bluetooth";
+        sPowerComponentNames[POWER_COMPONENT_CAMERA] = "camera";
+        sPowerComponentNames[POWER_COMPONENT_AUDIO] = "audio";
+        sPowerComponentNames[POWER_COMPONENT_VIDEO] = "video";
+        sPowerComponentNames[POWER_COMPONENT_FLASHLIGHT] = "flashlight";
+        sPowerComponentNames[POWER_COMPONENT_SYSTEM_SERVICES] = "system_services";
+        sPowerComponentNames[POWER_COMPONENT_MOBILE_RADIO] = "mobile_radio";
+        sPowerComponentNames[POWER_COMPONENT_SENSORS] = "sensors";
+        sPowerComponentNames[POWER_COMPONENT_GNSS] = "gnss";
+        sPowerComponentNames[POWER_COMPONENT_WIFI] = "wifi";
+        sPowerComponentNames[POWER_COMPONENT_WAKELOCK] = "wakelock";
+        sPowerComponentNames[POWER_COMPONENT_MEMORY] = "memory";
+        sPowerComponentNames[POWER_COMPONENT_PHONE] = "phone";
+        sPowerComponentNames[POWER_COMPONENT_AMBIENT_DISPLAY] = "ambient_display";
+        sPowerComponentNames[POWER_COMPONENT_IDLE] = "idle";
+        sPowerComponentNames[POWER_COMPONENT_REATTRIBUTED_TO_OTHER_CONSUMERS] = "reattributed";
+    }
+
     /**
      * Identifiers of models used for power estimation.
      *
      * @hide
      */
     @IntDef(prefix = {"POWER_MODEL_"}, value = {
+            POWER_MODEL_UNDEFINED,
             POWER_MODEL_POWER_PROFILE,
             POWER_MODEL_MEASURED_ENERGY,
     })
@@ -99,15 +125,20 @@ public class BatteryConsumer {
     }
 
     /**
+     * Unspecified power model.
+     */
+    public static final int POWER_MODEL_UNDEFINED = 0;
+
+    /**
      * Power model that is based on average consumption rates that hardware components
      * consume in various states.
      */
-    public static final int POWER_MODEL_POWER_PROFILE = 0;
+    public static final int POWER_MODEL_POWER_PROFILE = 1;
 
     /**
      * Power model that is based on energy consumption measured by on-device power monitors.
      */
-    public static final int POWER_MODEL_MEASURED_ENERGY = 1;
+    public static final int POWER_MODEL_MEASURED_ENERGY = 2;
 
     protected final PowerComponents mPowerComponents;
 
@@ -196,6 +227,41 @@ public class BatteryConsumer {
     protected void writeToParcel(Parcel dest, int flags) {
         mPowerComponents.writeToParcel(dest, flags);
     }
+
+    /**
+     * Returns the name of the specified component.  Intended for logging and debugging.
+     */
+    public static String powerComponentIdToString(@BatteryConsumer.PowerComponent int componentId) {
+        return sPowerComponentNames[componentId];
+    }
+
+    /**
+     * Returns the name of the specified power model.  Intended for logging and debugging.
+     */
+    public static String powerModelToString(@BatteryConsumer.PowerModel int powerModel) {
+        switch (powerModel) {
+            case BatteryConsumer.POWER_MODEL_MEASURED_ENERGY:
+                return "measured energy";
+            case BatteryConsumer.POWER_MODEL_POWER_PROFILE:
+                return "power profile";
+            default:
+                return "";
+        }
+    }
+
+    /**
+     * Prints the stats in a human-readable format.
+     */
+    public void dump(PrintWriter pw) {
+        dump(pw, true);
+    }
+
+    /**
+     * Prints the stats in a human-readable format.
+     *
+     * @param skipEmptyComponents if true, omit any power components with a zero amount.
+     */
+    public abstract void dump(PrintWriter pw, boolean skipEmptyComponents);
 
     protected abstract static class BaseBuilder<T extends BaseBuilder<?>> {
         final PowerComponents.Builder mPowerComponentsBuilder;
