@@ -6053,11 +6053,13 @@ public class Notification implements Parcelable
                     .viewType(StandardTemplateParams.VIEW_TYPE_MINIMIZED)
                     .highlightExpander(false)
                     .fillTextsFrom(this);
-            if (!useRegularSubtext || TextUtils.isEmpty(mParams.summaryText)) {
+            if (!useRegularSubtext || TextUtils.isEmpty(p.summaryText)) {
                 p.summaryText(createSummaryText());
             }
             RemoteViews header = makeNotificationHeader(p);
             header.setBoolean(R.id.notification_header, "setAcceptAllTouches", true);
+            // The low priority header has no app name and shows the text
+            header.setBoolean(R.id.notification_header, "styleTextAsTitle", true);
             return header;
         }
 
