@@ -19,8 +19,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.util.ArrayMap;
 
-import com.android.internal.util.Preconditions;
-
 import java.util.Map;
 import java.util.Objects;
 
@@ -117,30 +115,26 @@ public final class AppSearchBatchResult<KeyType, ValueType> {
     /**
      * Builder for {@link AppSearchBatchResult} objects.
      *
-     * <p>Once {@link #build} is called, the instance can no longer be used.
-     *
      * @param <KeyType> The type of the keys for which the results will be reported.
      * @param <ValueType> The type of the result objects for successful results.
      */
     public static final class Builder<KeyType, ValueType> {
-        private final Map<KeyType, ValueType> mSuccesses = new ArrayMap<>();
-        private final Map<KeyType, AppSearchResult<ValueType>> mFailures = new ArrayMap<>();
-        private final Map<KeyType, AppSearchResult<ValueType>> mAll = new ArrayMap<>();
+        private ArrayMap<KeyType, ValueType> mSuccesses = new ArrayMap<>();
+        private ArrayMap<KeyType, AppSearchResult<ValueType>> mFailures = new ArrayMap<>();
+        private ArrayMap<KeyType, AppSearchResult<ValueType>> mAll = new ArrayMap<>();
         private boolean mBuilt = false;
 
         /**
          * Associates the {@code key} with the provided successful return value.
          *
          * <p>Any previous mapping for a key, whether success or failure, is deleted.
-         *
-         * @throws IllegalStateException if the builder has already been used.
          */
         @SuppressWarnings("MissingGetterMatchingBuilder") // See getSuccesses
         @NonNull
         public Builder<KeyType, ValueType> setSuccess(
                 @NonNull KeyType key, @Nullable ValueType result) {
-            Preconditions.checkState(!mBuilt, "Builder has already been used");
             Objects.requireNonNull(key);
+            resetIfBuilt();
             return setResult(key, AppSearchResult.newSuccessfulResult(result));
         }
 
@@ -148,8 +142,6 @@ public final class AppSearchBatchResult<KeyType, ValueType> {
          * Associates the {@code key} with the provided failure code and error message.
          *
          * <p>Any previous mapping for a key, whether success or failure, is deleted.
-         *
-         * @throws IllegalStateException if the builder has already been used.
          */
         @SuppressWarnings("MissingGetterMatchingBuilder") // See getFailures
         @NonNull
@@ -157,8 +149,8 @@ public final class AppSearchBatchResult<KeyType, ValueType> {
                 @NonNull KeyType key,
                 @AppSearchResult.ResultCode int resultCode,
                 @Nullable String errorMessage) {
-            Preconditions.checkState(!mBuilt, "Builder has already been used");
             Objects.requireNonNull(key);
+            resetIfBuilt();
             return setResult(key, AppSearchResult.newFailedResult(resultCode, errorMessage));
         }
 
@@ -166,16 +158,14 @@ public final class AppSearchBatchResult<KeyType, ValueType> {
          * Associates the {@code key} with the provided {@code result}.
          *
          * <p>Any previous mapping for a key, whether success or failure, is deleted.
-         *
-         * @throws IllegalStateException if the builder has already been used.
          */
         @SuppressWarnings("MissingGetterMatchingBuilder") // See getAll
         @NonNull
         public Builder<KeyType, ValueType> setResult(
                 @NonNull KeyType key, @NonNull AppSearchResult<ValueType> result) {
-            Preconditions.checkState(!mBuilt, "Builder has already been used");
             Objects.requireNonNull(key);
             Objects.requireNonNull(result);
+            resetIfBuilt();
             if (result.isSuccess()) {
                 mSuccesses.put(key, result.getResultValue());
                 mFailures.remove(key);
@@ -189,14 +179,21 @@ public final class AppSearchBatchResult<KeyType, ValueType> {
 
         /**
          * Builds an {@link AppSearchBatchResult} object from the contents of this {@link Builder}.
-         *
-         * @throws IllegalStateException if the builder has already been used.
          */
         @NonNull
         public AppSearchBatchResult<KeyType, ValueType> build() {
-            Preconditions.checkState(!mBuilt, "Builder has already been used");
             mBuilt = true;
-            return new AppSearchBatchResult<>(mSuccesses, mFailures, mAll);
+            return new AppSearchBatchResult<>(
+                    new ArrayMap<>(mSuccesses), new ArrayMap<>(mFailures), new ArrayMap<>(mAll));
+        }
+
+        private void resetIfBuilt() {
+            if (mBuilt) {
+                mSuccesses = new ArrayMap<>(mSuccesses);
+                mFailures = new ArrayMap<>(mFailures);
+                mAll = new ArrayMap<>(mAll);
+                mBuilt = false;
+            }
         }
     }
 }
