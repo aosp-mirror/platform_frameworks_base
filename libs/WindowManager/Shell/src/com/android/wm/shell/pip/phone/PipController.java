@@ -36,6 +36,7 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Log;
@@ -50,6 +51,7 @@ import androidx.annotation.BinderThread;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.wm.shell.R;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.common.DisplayChangeController;
 import com.android.wm.shell.common.DisplayController;
@@ -428,6 +430,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
 
     private void onDensityOrFontScaleChanged() {
         mPipTaskOrganizer.onDensityOrFontScaleChanged(mContext);
+        onPipCornerRadiusChanged();
     }
 
     private void onOverlayChanged() {
@@ -488,10 +491,6 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         mTouchHandler.getMotionHelper().expandLeavePip(false /* skipAnimation */);
     }
 
-    private PipTouchHandler getPipTouchHandler() {
-        return mTouchHandler;
-    }
-
     /**
      * Hides the PIP menu.
      */
@@ -531,6 +530,21 @@ public class PipController implements PipTransitionController.PipTransitionCallb
 
     private void setPinnedStackAnimationListener(IPipAnimationListener callback) {
         mPinnedStackAnimationRecentsCallback = callback;
+        onPipCornerRadiusChanged();
+    }
+
+    private void onPipCornerRadiusChanged() {
+        if (mPinnedStackAnimationRecentsCallback != null) {
+            final boolean enableCornerRadius =
+                    SystemProperties.getBoolean("debug.sf.enable_hole_punch_pip", false);
+            final int cornerRadius = enableCornerRadius
+                    ? mContext.getResources().getDimensionPixelSize(R.dimen.pip_corner_radius) : 0;
+            try {
+                mPinnedStackAnimationRecentsCallback.onPipCornerRadiusChanged(cornerRadius);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to call onPipCornerRadiusChanged", e);
+            }
+        }
     }
 
     private Rect startSwipePipToHome(ComponentName componentName, ActivityInfo activityInfo,
