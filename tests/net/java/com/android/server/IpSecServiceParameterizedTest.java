@@ -16,9 +16,14 @@
 
 package com.android.server;
 
+import static android.content.pm.PackageManager.PERMISSION_DENIED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.net.INetd.IF_STATE_DOWN;
 import static android.net.INetd.IF_STATE_UP;
+import static android.net.IpSecManager.DIRECTION_FWD;
+import static android.net.IpSecManager.DIRECTION_IN;
+import static android.net.IpSecManager.DIRECTION_OUT;
+import static android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK;
 import static android.system.OsConstants.AF_INET;
 import static android.system.OsConstants.AF_INET6;
 
@@ -56,6 +61,7 @@ import android.os.Binder;
 import android.os.ParcelFileDescriptor;
 import android.system.Os;
 import android.test.mock.MockContext;
+import android.util.ArraySet;
 
 import androidx.test.filters.SmallTest;
 
@@ -71,6 +77,7 @@ import java.net.Inet4Address;
 import java.net.Socket;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Set;
 
 /** Unit tests for {@link IpSecService}. */
 @SmallTest
@@ -119,7 +126,18 @@ public class IpSecServiceParameterizedTest {
     AppOpsManager mMockAppOps = mock(AppOpsManager.class);
     ConnectivityManager mMockConnectivityMgr = mock(ConnectivityManager.class);
 
-    MockContext mMockContext = new MockContext() {
+    TestContext mTestContext = new TestContext();
+
+    private class TestContext extends MockContext {
+        private Set<String> mAllowedPermissions = new ArraySet<>(Arrays.asList(
+                android.Manifest.permission.MANAGE_IPSEC_TUNNELS,
+                android.Manifest.permission.NETWORK_STACK,
+                PERMISSION_MAINLINE_NETWORK_STACK));
+
+        private void setAllowedPermissions(String... permissions) {
+            mAllowedPermissions = new ArraySet<>(permissions);
+        }
+
         @Override
         public Object getSystemService(String name) {
             switch(name) {
@@ -147,20 +165,22 @@ public class IpSecServiceParameterizedTest {
 
         @Override
         public void enforceCallingOrSelfPermission(String permission, String message) {
-            if (permission == android.Manifest.permission.MANAGE_IPSEC_TUNNELS) {
+            if (mAllowedPermissions.contains(permission)) {
                 return;
+            } else {
+                throw new SecurityException("Unavailable permission requested");
             }
-            throw new SecurityException("Unavailable permission requested");
         }
 
         @Override
         public int checkCallingOrSelfPermission(String permission) {
-            if (android.Manifest.permission.NETWORK_STACK.equals(permission)) {
+            if (mAllowedPermissions.contains(permission)) {
                 return PERMISSION_GRANTED;
+            } else {
+                return PERMISSION_DENIED;
             }
-            throw new UnsupportedOperationException();
         }
-    };
+    }
 
     INetd mMockNetd;
     PackageManager mMockPkgMgr;
@@ -194,7 +214,7 @@ public class IpSecServiceParameterizedTest {
         mMockNetd = mock(INetd.class);
         mMockPkgMgr = mock(PackageManager.class);
         mMockIpSecSrvConfig = mock(IpSecService.IpSecServiceConfiguration.class);
-        mIpSecService = new IpSecService(mMockContext, mMockIpSecSrvConfig);
+        mIpSecService = new IpSecService(mTestContext, mMockIpSecSrvConfig);
 
         // Injecting mock netd
         when(mMockIpSecSrvConfig.getNetdInstance()).thenReturn(mMockNetd);
@@ -664,6 +684,21 @@ public class IpSecServiceParameterizedTest {
 
         assertNotNull(createTunnelResp);
         assertEquals(IpSecManager.Status.OK, createTunnelResp.status);
+        for (int direction : new int[] {DIRECTION_IN, DIRECTION_OUT, DIRECTION_FWD}) {
+            for (int selAddrFamily : ADDRESS_FAMILIES) {
+                verify(mMockNetd).ipSecAddSecurityPolicy(
+                        eq(mUid),
+                        eq(selAddrFamily),
+                        eq(direction),
+                        anyString(),
+                        anyString(),
+                        eq(0),
+                        anyInt(), // iKey/oKey
+                        anyInt(), // mask
+                        eq(createTunnelResp.resourceId));
+            }
+        }
+
         return createTunnelResp;
     }
 
@@ -798,16 +833,51 @@ public class IpSecServiceParameterizedTest {
     }
 
     @Test
-    public void testApplyTunnelModeTransform() throws Exception {
-        verifyApplyTunnelModeTransformCommon(false);
+    public void testApplyTunnelModeTransformOutbound() throws Exception {
+        verifyApplyTunnelModeTransformCommon(false /* closeSpiBeforeApply */, DIRECTION_OUT);
     }
 
     @Test
-    public void testApplyTunnelModeTransformReleasedSpi() throws Exception {
-        verifyApplyTunnelModeTransformCommon(true);
+    public void testApplyTunnelModeTransformOutboundNonNetworkStack() throws Exception {
+        mTestContext.setAllowedPermissions(android.Manifest.permission.MANAGE_IPSEC_TUNNELS);
+        verifyApplyTunnelModeTransformCommon(false /* closeSpiBeforeApply */, DIRECTION_OUT);
     }
 
-    public void verifyApplyTunnelModeTransformCommon(boolean closeSpiBeforeApply) throws Exception {
+    @Test
+    public void testApplyTunnelModeTransformOutboundReleasedSpi() throws Exception {
+        verifyApplyTunnelModeTransformCommon(true /* closeSpiBeforeApply */, DIRECTION_OUT);
+    }
+
+    @Test
+    public void testApplyTunnelModeTransformInbound() throws Exception {
+        verifyApplyTunnelModeTransformCommon(true /* closeSpiBeforeApply */, DIRECTION_IN);
+    }
+
+    @Test
+    public void testApplyTunnelModeTransformInboundNonNetworkStack() throws Exception {
+        mTestContext.setAllowedPermissions(android.Manifest.permission.MANAGE_IPSEC_TUNNELS);
+        verifyApplyTunnelModeTransformCommon(true /* closeSpiBeforeApply */, DIRECTION_IN);
+    }
+
+    @Test
+    public void testApplyTunnelModeTransformForward() throws Exception {
+        verifyApplyTunnelModeTransformCommon(true /* closeSpiBeforeApply */, DIRECTION_FWD);
+    }
+
+    @Test
+    public void testApplyTunnelModeTransformForwardNonNetworkStack() throws Exception {
+        mTestContext.setAllowedPermissions(android.Manifest.permission.MANAGE_IPSEC_TUNNELS);
+
+        try {
+            verifyApplyTunnelModeTransformCommon(true /* closeSpiBeforeApply */, DIRECTION_FWD);
+            fail("Expected security exception due to use of forward policies without NETWORK_STACK"
+                     + " or MAINLINE_NETWORK_STACK permission");
+        } catch (SecurityException expected) {
+        }
+    }
+
+    public void verifyApplyTunnelModeTransformCommon(boolean closeSpiBeforeApply, int direction)
+            throws Exception {
         IpSecConfig ipSecConfig = new IpSecConfig();
         ipSecConfig.setMode(IpSecTransform.MODE_TUNNEL);
         addDefaultSpisAndRemoteAddrToIpSecConfig(ipSecConfig);
@@ -825,17 +895,17 @@ public class IpSecServiceParameterizedTest {
         int transformResourceId = createTransformResp.resourceId;
         int tunnelResourceId = createTunnelResp.resourceId;
         mIpSecService.applyTunnelModeTransform(
-                tunnelResourceId, IpSecManager.DIRECTION_OUT, transformResourceId, BLESSED_PACKAGE);
+                tunnelResourceId, direction, transformResourceId, BLESSED_PACKAGE);
 
         for (int selAddrFamily : ADDRESS_FAMILIES) {
             verify(mMockNetd)
                     .ipSecUpdateSecurityPolicy(
                             eq(mUid),
                             eq(selAddrFamily),
-                            eq(IpSecManager.DIRECTION_OUT),
+                            eq(direction),
                             anyString(),
                             anyString(),
-                            eq(TEST_SPI),
+                            eq(direction == DIRECTION_OUT ? TEST_SPI : 0),
                             anyInt(), // iKey/oKey
                             anyInt(), // mask
                             eq(tunnelResourceId));
