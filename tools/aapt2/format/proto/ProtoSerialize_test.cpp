@@ -928,4 +928,27 @@ TEST(ProtoSerializeTest, SerializeMacro) {
   EXPECT_THAT(deserialized->alias_namespaces, Eq(original->alias_namespaces));
 }
 
+TEST(ProtoSerializeTest, StagedId) {
+  CloningValueTransformer cloner(nullptr);
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
+  std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
+                                             .Add(NewResourceBuilder("com.app.a:string/foo")
+                                                      .SetStagedId(StagedId{.id = 0x01ff0001})
+                                                      .Build())
+                                             .Build();
+
+  ResourceTable new_table;
+  pb::ResourceTable pb_table;
+  MockFileCollection files;
+  std::string error;
+  SerializeTableToPb(*table, &pb_table, context->GetDiagnostics());
+  ASSERT_TRUE(DeserializeTableFromPb(pb_table, &files, &new_table, &error));
+  EXPECT_THAT(error, IsEmpty());
+
+  auto result = new_table.FindResource(test::ParseNameOrDie("com.app.a:string/foo"));
+  ASSERT_TRUE(result);
+  ASSERT_TRUE(result.value().entry->staged_id);
+  EXPECT_THAT(result.value().entry->staged_id.value().id, Eq(ResourceId(0x01ff0001)));
+}
+
 }  // namespace aapt

@@ -498,8 +498,18 @@ static bool DeserializePackageFromPb(const pb::Package& pb_package, const ResStr
                                               out_error)) {
           return false;
         }
-
         entry->overlayable_item = std::move(overlayable_item);
+      }
+
+      if (pb_entry.has_staged_id()) {
+        const pb::StagedId& pb_staged_id = pb_entry.staged_id();
+
+        StagedId staged_id;
+        if (pb_staged_id.has_source()) {
+          DeserializeSourceFromPb(pb_staged_id.source(), src_pool, &staged_id.source);
+        }
+        staged_id.id = pb_staged_id.staged_id();
+        entry->staged_id = std::move(staged_id);
       }
 
       ResourceId resid(pb_package.package_id().id(), pb_type.type_id().id(),

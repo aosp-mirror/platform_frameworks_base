@@ -97,15 +97,15 @@ static bool IsIdDiff(const Visibility::Level& level_a, const Maybe<Id>& id_a,
 
 static bool EmitResourceConfigValueDiff(
     IAaptContext* context, LoadedApk* apk_a, const ResourceTablePackageView& pkg_a,
-    const ResourceTableTypeView& type_a, const ResourceEntry* entry_a,
+    const ResourceTableTypeView& type_a, const ResourceTableEntryView& entry_a,
     const ResourceConfigValue* config_value_a, LoadedApk* apk_b,
     const ResourceTablePackageView& pkg_b, const ResourceTableTypeView& type_b,
-    const ResourceEntry* entry_b, const ResourceConfigValue* config_value_b) {
+    const ResourceTableEntryView& entry_b, const ResourceConfigValue* config_value_b) {
   Value* value_a = config_value_a->value.get();
   Value* value_b = config_value_b->value.get();
   if (!value_a->Equals(value_b)) {
     std::stringstream str_stream;
-    str_stream << "value " << pkg_a.name << ":" << type_a.type << "/" << entry_a->name
+    str_stream << "value " << pkg_a.name << ":" << type_a.type << "/" << entry_a.name
                << " config=" << config_value_a->config << " does not match:\n";
     value_a->Print(&str_stream);
     str_stream << "\n vs \n";
@@ -118,32 +118,32 @@ static bool EmitResourceConfigValueDiff(
 
 static bool EmitResourceEntryDiff(IAaptContext* context, LoadedApk* apk_a,
                                   const ResourceTablePackageView& pkg_a,
-                                  const ResourceTableTypeView& type_a, const ResourceEntry* entry_a,
-                                  LoadedApk* apk_b, const ResourceTablePackageView& pkg_b,
+                                  const ResourceTableTypeView& type_a,
+                                  const ResourceTableEntryView& entry_a, LoadedApk* apk_b,
+                                  const ResourceTablePackageView& pkg_b,
                                   const ResourceTableTypeView& type_b,
-                                  const ResourceEntry* entry_b) {
+                                  const ResourceTableEntryView& entry_b) {
   bool diff = false;
-  for (const std::unique_ptr<ResourceConfigValue>& config_value_a : entry_a->values) {
-    auto config_value_b = entry_b->FindValue(config_value_a->config);
+  for (const ResourceConfigValue* config_value_a : entry_a.values) {
+    auto config_value_b = entry_b.FindValue(config_value_a->config);
     if (!config_value_b) {
       std::stringstream str_stream;
-      str_stream << "missing " << pkg_a.name << ":" << type_a.type << "/" << entry_a->name
+      str_stream << "missing " << pkg_a.name << ":" << type_a.type << "/" << entry_a.name
                  << " config=" << config_value_a->config;
       EmitDiffLine(apk_b->GetSource(), str_stream.str());
       diff = true;
     } else {
-      diff |=
-          EmitResourceConfigValueDiff(context, apk_a, pkg_a, type_a, entry_a, config_value_a.get(),
-                                      apk_b, pkg_b, type_b, entry_b, config_value_b);
+      diff |= EmitResourceConfigValueDiff(context, apk_a, pkg_a, type_a, entry_a, config_value_a,
+                                          apk_b, pkg_b, type_b, entry_b, config_value_b);
     }
   }
 
   // Check for any newly added config values.
-  for (const std::unique_ptr<ResourceConfigValue>& config_value_b : entry_b->values) {
-    auto config_value_a = entry_a->FindValue(config_value_b->config);
+  for (const ResourceConfigValue* config_value_b : entry_b.values) {
+    auto config_value_a = entry_a.FindValue(config_value_b->config);
     if (!config_value_a) {
       std::stringstream str_stream;
-      str_stream << "new config " << pkg_b.name << ":" << type_b.type << "/" << entry_b->name
+      str_stream << "new config " << pkg_b.name << ":" << type_b.type << "/" << entry_b.name
                  << " config=" << config_value_b->config;
       EmitDiffLine(apk_b->GetSource(), str_stream.str());
       diff = true;
@@ -164,36 +164,35 @@ static bool EmitResourceTypeDiff(IAaptContext* context, LoadedApk* apk_a,
     if (entry_b_iter == type_b.entries.end()) {
       // Type A contains a type that type B does not have.
       std::stringstream str_stream;
-      str_stream << "missing " << pkg_a.name << ":" << type_a.type << "/" << (*entry_a_iter)->name;
+      str_stream << "missing " << pkg_a.name << ":" << type_a.type << "/" << entry_a_iter->name;
       EmitDiffLine(apk_a->GetSource(), str_stream.str());
       diff = true;
     } else if (entry_a_iter == type_a.entries.end()) {
       // Type B contains a type that type A does not have.
       std::stringstream str_stream;
-      str_stream << "new entry " << pkg_b.name << ":" << type_b.type << "/"
-                 << (*entry_b_iter)->name;
+      str_stream << "new entry " << pkg_b.name << ":" << type_b.type << "/" << entry_b_iter->name;
       EmitDiffLine(apk_b->GetSource(), str_stream.str());
       diff = true;
     } else {
       const auto& entry_a = *entry_a_iter;
       const auto& entry_b = *entry_b_iter;
-      if (IsSymbolVisibilityDifferent(entry_a->visibility, entry_b->visibility)) {
+      if (IsSymbolVisibilityDifferent(entry_a.visibility, entry_b.visibility)) {
         std::stringstream str_stream;
-        str_stream << pkg_a.name << ":" << type_a.type << "/" << entry_a->name
+        str_stream << pkg_a.name << ":" << type_a.type << "/" << entry_a.name
                    << " has different visibility (";
-        if (entry_b->visibility.staged_api) {
+        if (entry_b.visibility.staged_api) {
           str_stream << "STAGED ";
         }
-        if (entry_b->visibility.level == Visibility::Level::kPublic) {
+        if (entry_b.visibility.level == Visibility::Level::kPublic) {
           str_stream << "PUBLIC";
         } else {
           str_stream << "PRIVATE";
         }
         str_stream << " vs ";
-        if (entry_a->visibility.staged_api) {
+        if (entry_a.visibility.staged_api) {
           str_stream << "STAGED ";
         }
-        if (entry_a->visibility.level == Visibility::Level::kPublic) {
+        if (entry_a.visibility.level == Visibility::Level::kPublic) {
           str_stream << "PUBLIC";
         } else {
           str_stream << "PRIVATE";
@@ -201,19 +200,19 @@ static bool EmitResourceTypeDiff(IAaptContext* context, LoadedApk* apk_a,
         str_stream << ")";
         EmitDiffLine(apk_b->GetSource(), str_stream.str());
         diff = true;
-      } else if (IsIdDiff(entry_a->visibility.level, entry_a->id, entry_b->visibility.level,
-                          entry_b->id)) {
+      } else if (IsIdDiff(entry_a.visibility.level, entry_a.id, entry_b.visibility.level,
+                          entry_b.id)) {
         std::stringstream str_stream;
-        str_stream << pkg_a.name << ":" << type_a.type << "/" << entry_a->name
+        str_stream << pkg_a.name << ":" << type_a.type << "/" << entry_a.name
                    << " has different public ID (";
-        if (entry_b->id) {
-          str_stream << "0x" << std::hex << entry_b->id.value();
+        if (entry_b.id) {
+          str_stream << "0x" << std::hex << entry_b.id.value();
         } else {
           str_stream << "none";
         }
         str_stream << " vs ";
-        if (entry_a->id) {
-          str_stream << "0x " << std::hex << entry_a->id.value();
+        if (entry_a.id) {
+          str_stream << "0x " << std::hex << entry_a.id.value();
         } else {
           str_stream << "none";
         }
