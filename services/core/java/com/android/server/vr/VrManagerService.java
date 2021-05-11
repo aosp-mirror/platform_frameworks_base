@@ -66,7 +66,6 @@ import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemConfig;
 import com.android.server.SystemService;
-import com.android.server.SystemService.TargetUser;
 import com.android.server.utils.ManagedApplicationService;
 import com.android.server.utils.ManagedApplicationService.BinderChecker;
 import com.android.server.utils.ManagedApplicationService.LogEvent;
@@ -86,6 +85,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -856,12 +856,15 @@ public class VrManagerService extends SystemService
         // If user changed drop restrictions for the old user.
         if (oldUserId != newUserId) {
             appOpsManager.setUserRestrictionForUser(AppOpsManager.OP_SYSTEM_ALERT_WINDOW,
-                    false, mOverlayToken, null, oldUserId);
+                    false, mOverlayToken, (Map<String, String[]>) null, oldUserId);
         }
 
         // Apply the restrictions for the current user based on vr state
-        String[] exemptions = (exemptedPackage == null) ? new String[0] :
-                new String[] { exemptedPackage };
+        ArrayMap<String, String[]> exemptions = null;
+        if (exemptedPackage != null) {
+            exemptions = new ArrayMap<>(1);
+            exemptions.put(exemptedPackage, new String[0]);
+        }
 
         appOpsManager.setUserRestrictionForUser(AppOpsManager.OP_SYSTEM_ALERT_WINDOW,
                 mVrModeEnabled, mOverlayToken, exemptions, newUserId);
