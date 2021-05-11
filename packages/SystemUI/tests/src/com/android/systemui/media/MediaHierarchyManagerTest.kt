@@ -30,6 +30,7 @@ import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
+import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.animation.UniqueObjectHostView
 import org.junit.Assert.assertNotNull
@@ -79,6 +80,8 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
     private lateinit var wakefulnessLifecycle: WakefulnessLifecycle
     @Mock
     private lateinit var statusBarKeyguardViewManager: StatusBarKeyguardViewManager
+    @Mock
+    private lateinit var configurationController: ConfigurationController
     @Captor
     private lateinit var wakefullnessObserver: ArgumentCaptor<(WakefulnessLifecycle.Observer)>
     @Captor
@@ -98,6 +101,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
                 bypassController,
                 mediaCarouselController,
                 notificationLockscreenUserManager,
+                configurationController,
                 wakefulnessLifecycle,
                 statusBarKeyguardViewManager)
         verify(wakefulnessLifecycle).addObserver(wakefullnessObserver.capture())

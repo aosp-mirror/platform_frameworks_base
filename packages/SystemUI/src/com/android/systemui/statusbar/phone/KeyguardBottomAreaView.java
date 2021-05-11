@@ -251,7 +251,6 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         super.onFinishInflate();
         mPreviewInflater = new PreviewInflater(mContext, new LockPatternUtils(mContext),
                 new ActivityIntentHelper(mContext));
-        mPreviewContainer = findViewById(R.id.preview_container);
         mOverlayContainer = findViewById(R.id.overlay_container);
         mRightAffordanceView = findViewById(R.id.camera_button);
         mLeftAffordanceView = findViewById(R.id.left_button);
@@ -268,7 +267,6 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mKeyguardStateController.addCallback(this);
         setClipChildren(false);
         setClipToPadding(false);
-        inflateCameraPreview();
         mRightAffordanceView.setOnClickListener(this);
         mLeftAffordanceView.setOnClickListener(this);
         initAccessibility();
@@ -276,11 +274,19 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mFlashlightController = Dependency.get(FlashlightController.class);
         mAccessibilityController = Dependency.get(AccessibilityController.class);
         mActivityIntentHelper = new ActivityIntentHelper(getContext());
-        updateLeftAffordance();
 
         mIndicationPadding = getResources().getDimensionPixelSize(
                 R.dimen.keyguard_indication_area_padding);
         updateWalletVisibility();
+    }
+
+    /**
+     * Set the container where the previews are rendered.
+     */
+    public void setPreviewContainer(ViewGroup previewContainer) {
+        mPreviewContainer = previewContainer;
+        inflateCameraPreview();
+        updateLeftAffordance();
     }
 
     @Override
@@ -680,6 +686,9 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     }
 
     private void inflateCameraPreview() {
+        if (mPreviewContainer == null) {
+            return;
+        }
         View previewBefore = mCameraPreview;
         boolean visibleBefore = false;
         if (previewBefore != null) {
@@ -697,6 +706,9 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     }
 
     private void updateLeftPreview() {
+        if (mPreviewContainer == null) {
+            return;
+        }
         View previewBefore = mLeftPreview;
         if (previewBefore != null) {
             mPreviewContainer.removeView(previewBefore);
