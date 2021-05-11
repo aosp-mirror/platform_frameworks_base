@@ -120,7 +120,7 @@ class ControlsUiControllerImpl @Inject constructor (
     private val onSeedingComplete = Consumer<Boolean> {
         accepted ->
             if (accepted) {
-                selectedStructure = controlsController.get().getFavorites().maxBy {
+                selectedStructure = controlsController.get().getFavorites().maxByOrNull {
                     it.controls.size
                 } ?: EMPTY_STRUCTURE
                 updatePreferences(selectedStructure)
