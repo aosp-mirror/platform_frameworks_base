@@ -11974,15 +11974,14 @@ public class DevicePolicyManager {
 
     /**
      * @hide
-     * Force update user setup completed status.
+     * Force update user setup completed status for the given {@code userId}.
      * @throws {@link SecurityException} if the caller has no
-     *         {@code android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS} or the caller is
-     *         not {@link UserHandle#SYSTEM_USER}
+     *         {@code android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS}.
      */
     @TestApi
-    public void forceUpdateUserSetupComplete() {
+    public void forceUpdateUserSetupComplete(@UserIdInt int userId) {
         try {
-            mService.forceUpdateUserSetupComplete();
+            mService.forceUpdateUserSetupComplete(userId);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
