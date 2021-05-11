@@ -66,13 +66,13 @@ public class MainSwitchPreference extends TwoStatePreference {
         holder.setDividerAllowedAbove(false);
         holder.setDividerAllowedBelow(false);
 
-        mMainSwitchBar = (MainSwitchBar) holder.findViewById(R.id.main_switch_bar);
+        mMainSwitchBar = (MainSwitchBar) holder.findViewById(R.id.settingslib_main_switch_bar);
         updateStatus(isChecked());
         registerListenerToSwitchBar();
     }
 
     private void init(Context context, AttributeSet attrs) {
-        setLayoutResource(R.layout.main_switch_layout);
+        setLayoutResource(R.layout.settingslib_main_switch_layout);
 
         if (attrs != null) {
             final TypedArray a = context.obtainStyledAttributes(attrs,

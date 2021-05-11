@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Copyright (C) 2020 The Android Open Source Project
+  Copyright (C) 2021 The Android Open Source Project
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -15,17 +15,12 @@
   limitations under the License.
   -->
 
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item
-        android:top="@dimen/switch_thumb_margin"
-        android:left="@dimen/switch_thumb_margin"
-        android:right="@dimen/switch_thumb_margin"
-        android:bottom="@dimen/switch_thumb_margin">
-        <shape android:shape="oval">
-            <size
-                android:height="@dimen/switch_thumb_size"
-                android:width="@dimen/switch_thumb_size"/>
-            <solid android:color="@color/state_on_color"/>
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="?android:attr/colorControlHighlight">
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/settingslib_state_off_color"/>
+            <corners android:radius="@dimen/settingslib_switch_bar_radius"/>
         </shape>
     </item>
-</layer-list>
+</ripple>
