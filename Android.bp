@@ -483,6 +483,19 @@ metalava_framework_docs_args = "--manifest $(location core/res/AndroidManifest.x
     "--api-lint-ignore-prefix junit. " +
     "--api-lint-ignore-prefix org. "
 
+packages_to_document = [
+    "android",
+    "dalvik",
+    "java",
+    "javax",
+    "junit",
+    "org.apache.http",
+    "org.json",
+    "org.w3c.dom",
+    "org.xml.sax",
+    "org.xmlpull",
+]
+
 filegroup {
     name: "android-non-updatable-stub-sources",
     srcs: [
@@ -544,6 +557,7 @@ stubs_defaults {
         // NOTE: The below can be removed once the prebuilt stub contains IKE.
         "sdk_system_current_android.net.ipsec.ike",
     ],
+    filter_packages: packages_to_document,
     high_mem: true, // Lots of sources => high memory use, see b/170701554
     installable: false,
     annotations_enabled: true,
