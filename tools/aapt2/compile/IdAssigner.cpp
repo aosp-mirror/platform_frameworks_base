@@ -129,11 +129,16 @@ bool IdAssigner::Consume(IAaptContext* context, ResourceTable* table) {
     for (auto& type : package->types) {
       for (auto& entry : type->entries) {
         const ResourceName name(package->name, type->type, entry->name);
-        if (entry->id) {
-          if (!assigned_ids.ReserveId(name, entry->id.value(), entry->visibility,
-                                      context->GetDiagnostics())) {
-            return false;
-          }
+        if (entry->id && !assigned_ids.ReserveId(name, entry->id.value(), entry->visibility,
+                                                 context->GetDiagnostics())) {
+          return false;
+        }
+
+        auto v = entry->visibility;
+        v.staged_api = true;
+        if (entry->staged_id && !assigned_ids.ReserveId(name, entry->staged_id.value().id, v,
+                                                        context->GetDiagnostics())) {
+          return false;
         }
 
         if (assigned_id_map_) {
@@ -237,7 +242,7 @@ Result<std::monostate> TypeGroup::ReserveId(const ResourceName& name, ResourceId
   if (type_id_ != id.type_id()) {
     // Currently there cannot be multiple type ids for a single type.
     std::stringstream error;
-    error << "type '" << name.type << "' already has ID " << std::hex << (int)id.type_id();
+    error << "type '" << name.type << "' already has ID " << std::hex << (int)type_id_;
     return unexpected(error.str());
   }
 
