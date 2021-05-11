@@ -276,7 +276,7 @@ public class MediaControlPanel {
                 if (mMediaViewController.isGutsVisible()) return;
 
                 logSmartspaceCardReported(760, // SMARTSPACE_CARD_CLICK
-                        false);
+                        /* isRecommendationCard */ false);
                 mActivityStarter.postStartActivityDismissingKeyguard(clickIntent,
                         buildLaunchAnimatorController(mPlayerViewHolder.getPlayer()));
             });
@@ -384,7 +384,7 @@ public class MediaControlPanel {
                 button.setEnabled(true);
                 button.setOnClickListener(v -> {
                     logSmartspaceCardReported(760, // SMARTSPACE_CARD_CLICK
-                            false);
+                            /* isRecommendationCard */ false);
                     action.run();
                 });
             }
@@ -418,7 +418,7 @@ public class MediaControlPanel {
         mPlayerViewHolder.getDismiss().setEnabled(isDismissible);
         mPlayerViewHolder.getDismiss().setOnClickListener(v -> {
             logSmartspaceCardReported(761, // SMARTSPACE_CARD_DISMISS
-                    false);
+                    /* isRecommendationCard */ false);
 
             if (mKey != null) {
                 closeGuts();
@@ -563,7 +563,7 @@ public class MediaControlPanel {
         // Set up long press to show guts setting panel.
         mRecommendationViewHolder.getDismiss().setOnClickListener(v -> {
             logSmartspaceCardReported(761, // SMARTSPACE_CARD_DISMISS
-                    true);
+                    /* isRecommendationCard */ true);
             closeGuts();
             mKeyguardDismissUtil.executeWhenUnlocked(() -> {
                 mMediaDataManagerLazy.get().dismissSmartspaceRecommendation(
@@ -668,7 +668,7 @@ public class MediaControlPanel {
         view.setOnClickListener(v -> {
             // When media recommendation card is shown, it will always be the top card.
             logSmartspaceCardReported(760, // SMARTSPACE_CARD_CLICK
-                    true);
+                    /* isRecommendationCard */ true);
 
             if (shouldSmartspaceRecItemOpenInForeground(action)) {
                 // Request to unlock the device if the activity needs to be opened in foreground.
