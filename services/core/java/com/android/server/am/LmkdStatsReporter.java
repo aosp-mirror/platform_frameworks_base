@@ -23,10 +23,8 @@ import android.util.Slog;
 
 import com.android.internal.util.FrameworkStatsLog;
 
-import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 
 /**
  * Activity manager communication with lmkd data handling and statsd atom logging
@@ -51,13 +49,8 @@ public final class LmkdStatsReporter {
      * Logs the event when LMKD kills a process to reduce memory pressure.
      * Code: LMK_KILL_OCCURRED = 51
      */
-    public static void logKillOccurred(ByteBuffer dataReceived) {
-        DataInputStream inputData = new DataInputStream(
-                new ByteArrayInputStream(dataReceived.array()));
-
+    public static void logKillOccurred(DataInputStream inputData) {
         try {
-            //read first int which denotes the message type
-            final int msgType = inputData.readInt();
             final long pgFault = inputData.readLong();
             final long pgMajFault = inputData.readLong();
             final long rssInBytes = inputData.readLong();
