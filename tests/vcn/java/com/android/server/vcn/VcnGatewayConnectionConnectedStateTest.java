@@ -16,8 +16,11 @@
 
 package com.android.server.vcn;
 
+import static android.net.IpSecManager.DIRECTION_FWD;
 import static android.net.IpSecManager.DIRECTION_IN;
 import static android.net.IpSecManager.DIRECTION_OUT;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_DUN;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.net.ipsec.ike.exceptions.IkeProtocolException.ERROR_TYPE_AUTHENTICATION_FAILED;
@@ -54,6 +57,8 @@ import android.net.ipsec.ike.ChildSaProposal;
 import android.net.ipsec.ike.exceptions.IkeException;
 import android.net.ipsec.ike.exceptions.IkeInternalException;
 import android.net.ipsec.ike.exceptions.IkeProtocolException;
+import android.net.vcn.VcnGatewayConnectionConfig;
+import android.net.vcn.VcnGatewayConnectionConfigTest;
 import android.net.vcn.VcnManager.VcnErrorCode;
 
 import androidx.test.filters.SmallTest;
@@ -143,8 +148,9 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
         assertEquals(mGatewayConnection.mConnectedState, mGatewayConnection.getCurrentState());
     }
 
-    @Test
-    public void testCreatedTransformsAreApplied() throws Exception {
+    private void verifyVcnTransformsApplied(
+            VcnGatewayConnection vcnGatewayConnection, boolean expectForwardTransform)
+            throws Exception {
         for (int direction : new int[] {DIRECTION_IN, DIRECTION_OUT}) {
             getChildSessionCallback().onIpSecTransformCreated(makeDummyIpSecTransform(), direction);
             mTestLooper.dispatchAll();
@@ -154,7 +160,40 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
                             eq(TEST_IPSEC_TUNNEL_RESOURCE_ID), eq(direction), anyInt(), any());
         }
 
-        assertEquals(mGatewayConnection.mConnectedState, mGatewayConnection.getCurrentState());
+        verify(mIpSecSvc, expectForwardTransform ? times(1) : never())
+                .applyTunnelModeTransform(
+                        eq(TEST_IPSEC_TUNNEL_RESOURCE_ID), eq(DIRECTION_FWD), anyInt(), any());
+
+        assertEquals(vcnGatewayConnection.mConnectedState, vcnGatewayConnection.getCurrentState());
+    }
+
+    @Test
+    public void testCreatedTransformsAreApplied() throws Exception {
+        verifyVcnTransformsApplied(mGatewayConnection, false /* expectForwardTransform */);
+    }
+
+    @Test
+    public void testCreatedTransformsAreAppliedWithDun() throws Exception {
+        VcnGatewayConnectionConfig gatewayConfig =
+                VcnGatewayConnectionConfigTest.buildTestConfigWithExposedCaps(
+                        NET_CAPABILITY_INTERNET, NET_CAPABILITY_DUN);
+        VcnGatewayConnection gatewayConnection =
+                new VcnGatewayConnection(
+                        mVcnContext,
+                        TEST_SUB_GRP,
+                        TEST_SUBSCRIPTION_SNAPSHOT,
+                        gatewayConfig,
+                        mGatewayStatusCallback,
+                        true /* isMobileDataEnabled */,
+                        mDeps);
+        gatewayConnection.setUnderlyingNetwork(TEST_UNDERLYING_NETWORK_RECORD_1);
+        final VcnIkeSession session =
+                gatewayConnection.buildIkeSession(TEST_UNDERLYING_NETWORK_RECORD_1.network);
+        gatewayConnection.setIkeSession(session);
+        gatewayConnection.transitionTo(gatewayConnection.mConnectedState);
+        mTestLooper.dispatchAll();
+
+        verifyVcnTransformsApplied(gatewayConnection, true /* expectForwardTransform */);
     }
 
     @Test
