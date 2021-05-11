@@ -152,7 +152,7 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
         UdfpsHelper.onFingerDown(getFreshDaemon(), x, y, minor, major);
         if (getListener() != null) {
             try {
-                getListener().onUdfpsPointerDown(getSensorId(), getCookie());
+                getListener().onUdfpsPointerDown(getSensorId());
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote exception", e);
             }
@@ -164,10 +164,15 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
         UdfpsHelper.onFingerUp(getFreshDaemon());
         if (getListener() != null) {
             try {
-                getListener().onUdfpsPointerUp(getSensorId(), getCookie());
+                getListener().onUdfpsPointerUp(getSensorId());
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote exception", e);
             }
         }
+    }
+
+    @Override
+    public void onUiReady() {
+        // Unsupported in HIDL.
     }
 }
