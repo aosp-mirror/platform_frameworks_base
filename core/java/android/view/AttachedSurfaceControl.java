@@ -22,16 +22,19 @@ import android.annotation.UiThread;
 /**
  * Provides an interface to the root-Surface of a View Hierarchy or Window. This
  * is used in combination with the {@link android.view.SurfaceControl} API to enable
- * attaching app created SurfaceControl to the ViewRoot's surface hierarchy, and enable
- * SurfaceTransactions to be performed in sync with the ViewRoot drawing. This object
- * is obtained from {@link android.view.View#getViewRoot} and
- * {@link android.view.Window#getViewRoot}. It must be used from the UI thread of
+ * attaching app created SurfaceControl to the SurfaceControl hierarchy used
+ * by the app, and enable SurfaceTransactions to be performed in sync with the
+ * View hierarchy drawing.
+ *
+ * This object is obtained from {@link android.view.View#getRootSurfaceControl} and
+ * {@link android.view.Window#getRootSurfaceControl}. It must be used from the UI thread of
  * the object it was obtained from.
  */
 @UiThread
-public interface ViewRoot {
+public interface AttachedSurfaceControl {
     /**
-     * Create a transaction which will reparent {@param child} to the ViewRoot. See
+     * Create a transaction which will reparent {@param child} to the View hierarchy
+     * root SurfaceControl. See
      * {@link SurfaceControl.Transaction#reparent}. This transacton must be applied
      * or merged in to another transaction by the caller, otherwise it will have
      * no effect.
@@ -42,9 +45,9 @@ public interface ViewRoot {
     @Nullable SurfaceControl.Transaction buildReparentTransaction(@NonNull SurfaceControl child);
 
     /**
-     * Consume the passed in transaction, and request the ViewRoot to apply it with the
-     * next draw. This transaction will be merged with the buffer transaction from the ViewRoot
-     * and they will show up on-screen atomically synced.
+     * Consume the passed in transaction, and request the View hierarchy to apply it atomically
+     * with the next draw. This transaction will be merged with the buffer transaction from the
+     * ViewRoot and they will show up on-screen atomically synced.
      *
      * This will not cause a draw to be scheduled, and if there are no other changes
      * to the View hierarchy you may need to call {@link android.view.View#invalidate}
