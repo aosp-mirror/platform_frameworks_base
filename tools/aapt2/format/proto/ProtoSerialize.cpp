@@ -364,43 +364,52 @@ void SerializeTableToPb(const ResourceTable& table, pb::ResourceTable* out_table
       static const char* obfuscated_resource_name = "0_resource_name_obfuscated";
       for (const auto& entry : type.entries) {
         pb::Entry* pb_entry = pb_type->add_entry();
-        if (entry->id) {
-          pb_entry->mutable_entry_id()->set_id(entry->id.value().entry_id());
+        if (entry.id) {
+          pb_entry->mutable_entry_id()->set_id(entry.id.value());
         }
-        ResourceName resource_name({}, type.type, entry->name);
+        ResourceName resource_name({}, type.type, entry.name);
         if (options.collapse_key_stringpool &&
             options.name_collapse_exemptions.find(resource_name) ==
             options.name_collapse_exemptions.end()) {
           pb_entry->set_name(obfuscated_resource_name);
         } else {
-          pb_entry->set_name(entry->name);
+          pb_entry->set_name(entry.name);
         }
 
         // Write the Visibility struct.
         pb::Visibility* pb_visibility = pb_entry->mutable_visibility();
-        pb_visibility->set_staged_api(entry->visibility.staged_api);
-        pb_visibility->set_level(SerializeVisibilityToPb(entry->visibility.level));
+        pb_visibility->set_staged_api(entry.visibility.staged_api);
+        pb_visibility->set_level(SerializeVisibilityToPb(entry.visibility.level));
         if (source_pool != nullptr) {
-          SerializeSourceToPb(entry->visibility.source, source_pool.get(),
+          SerializeSourceToPb(entry.visibility.source, source_pool.get(),
                               pb_visibility->mutable_source());
         }
-        pb_visibility->set_comment(entry->visibility.comment);
+        pb_visibility->set_comment(entry.visibility.comment);
 
-        if (entry->allow_new) {
+        if (entry.allow_new) {
           pb::AllowNew* pb_allow_new = pb_entry->mutable_allow_new();
           if (source_pool != nullptr) {
-            SerializeSourceToPb(entry->allow_new.value().source, source_pool.get(),
+            SerializeSourceToPb(entry.allow_new.value().source, source_pool.get(),
                                 pb_allow_new->mutable_source());
           }
-          pb_allow_new->set_comment(entry->allow_new.value().comment);
+          pb_allow_new->set_comment(entry.allow_new.value().comment);
         }
 
-        if (entry->overlayable_item) {
-          SerializeOverlayableItemToPb(entry->overlayable_item.value(), overlayables,
+        if (entry.overlayable_item) {
+          SerializeOverlayableItemToPb(entry.overlayable_item.value(), overlayables,
                                        source_pool.get(), pb_entry, out_table);
         }
 
-        for (const std::unique_ptr<ResourceConfigValue>& config_value : entry->values) {
+        if (entry.staged_id) {
+          pb::StagedId* pb_staged_id = pb_entry->mutable_staged_id();
+          if (source_pool != nullptr) {
+            SerializeSourceToPb(entry.staged_id.value().source, source_pool.get(),
+                                pb_staged_id->mutable_source());
+          }
+          pb_staged_id->set_staged_id(entry.staged_id.value().id.id);
+        }
+
+        for (const ResourceConfigValue* config_value : entry.values) {
           pb::ConfigValue* pb_config_value = pb_entry->add_config_value();
           SerializeConfig(config_value->config, pb_config_value->mutable_config());
           pb_config_value->mutable_config()->set_product(config_value->product);
