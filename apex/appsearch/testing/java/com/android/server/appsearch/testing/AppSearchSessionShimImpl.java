@@ -17,6 +17,7 @@
 package com.android.server.appsearch.testing;
 
 import android.annotation.NonNull;
+import android.annotation.UserIdInt;
 import android.app.appsearch.AppSearchBatchResult;
 import android.app.appsearch.AppSearchManager;
 import android.app.appsearch.AppSearchResult;
@@ -37,6 +38,7 @@ import android.app.appsearch.SetSchemaResponse;
 import android.app.appsearch.StorageInfo;
 import android.app.appsearch.exceptions.AppSearchException;
 import android.content.Context;
+import android.os.UserHandle;
 
 import androidx.test.core.app.ApplicationProvider;
 
@@ -58,18 +60,29 @@ public class AppSearchSessionShimImpl implements AppSearchSessionShim {
     private final AppSearchSession mAppSearchSession;
     private final ExecutorService mExecutor;
 
+    /** Creates the SearchSessionShim with given SearchContext. */
     @NonNull
     public static ListenableFuture<AppSearchSessionShim> createSearchSession(
             @NonNull AppSearchManager.SearchContext searchContext) {
-        return createSearchSession(searchContext, Executors.newCachedThreadPool());
+        Context context = ApplicationProvider.getApplicationContext();
+        return createSearchSession(context, searchContext, Executors.newCachedThreadPool());
     }
 
-    /**  Creates the SearchSession with given ExecutorService. */
+    /** Creates the SearchSessionShim with given SearchContext for the given user. */
     @NonNull
     public static ListenableFuture<AppSearchSessionShim> createSearchSession(
+            @NonNull AppSearchManager.SearchContext searchContext, @UserIdInt int userId) {
+        Context context = ApplicationProvider.getApplicationContext()
+                .createContextAsUser(new UserHandle(userId), /*flags=*/ 0);
+        return createSearchSession(context, searchContext, Executors.newCachedThreadPool());
+    }
+
+    /**  Creates the SearchSession with given Context and ExecutorService. */
+    @NonNull
+    public static ListenableFuture<AppSearchSessionShim> createSearchSession(
+            @NonNull Context context,
             @NonNull AppSearchManager.SearchContext searchContext,
             @NonNull ExecutorService executor) {
-        Context context = ApplicationProvider.getApplicationContext();
         AppSearchManager appSearchManager = context.getSystemService(AppSearchManager.class);
         SettableFuture<AppSearchResult<AppSearchSession>> future = SettableFuture.create();
         appSearchManager.createSearchSession(searchContext, executor, future::set);
