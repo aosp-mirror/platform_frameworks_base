@@ -270,7 +270,28 @@ static void CameraMetadata_update(JNIEnv *env, jclass thiz, jlong dst, jlong src
             metadataSrc->unlock(metaBuffer);
             return;
         }
-        metadataDst->update(entry.tag, entry.data.u8, entry.count);
+        switch (entry.type) {
+            case TYPE_BYTE:
+                metadataDst->update(entry.tag, entry.data.u8, entry.count);
+                break;
+            case TYPE_INT32:
+                metadataDst->update(entry.tag, entry.data.i32, entry.count);
+                break;
+            case TYPE_FLOAT:
+                metadataDst->update(entry.tag, entry.data.f, entry.count);
+                break;
+            case TYPE_INT64:
+                metadataDst->update(entry.tag, entry.data.i64, entry.count);
+                break;
+            case TYPE_DOUBLE:
+                metadataDst->update(entry.tag, entry.data.d, entry.count);
+                break;
+            case TYPE_RATIONAL:
+                metadataDst->update(entry.tag, entry.data.r, entry.count);
+                break;
+            default:
+                ALOGE("%s: Unsupported tag type: %d!", __func__, entry.type);
+        }
     }
     metadataSrc->unlock(metaBuffer);
 }
