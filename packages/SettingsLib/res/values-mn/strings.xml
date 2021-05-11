@@ -117,7 +117,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Цуцлах"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Хослуулснаар холбогдсон үед таны харилцагчид болон дуудлагын түүхэд хандах боломжтой."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>-тай хослуулж чадсангүй."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Буруу PIN эсхүл дамжих түлхүүрээс шалтгаалан <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-тай хослуулж чадсангүй."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Буруу ПИН эсхүл дамжих түлхүүрээс шалтгаалан <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-тай хослуулж чадсангүй."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>-тай холбоо барих боломжгүй."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Хослуулахаас <xliff:g id="DEVICE_NAME">%1$s</xliff:g> татгалзсан."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Компьютер"</string>
