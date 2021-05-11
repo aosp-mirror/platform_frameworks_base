@@ -406,7 +406,7 @@ interface IDevicePolicyManager {
     boolean isDeviceProvisioningConfigApplied();
     void setDeviceProvisioningConfigApplied();
 
-    void forceUpdateUserSetupComplete();
+    void forceUpdateUserSetupComplete(int userId);
 
     void setBackupServiceEnabled(in ComponentName admin, boolean enabled);
     boolean isBackupServiceEnabled(in ComponentName admin);
