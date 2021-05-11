@@ -68,6 +68,8 @@ final class UpdatableFontDir {
         String buildFontFileName(File file) throws IOException;
 
         long getRevision(File file) throws IOException;
+
+        void tryToCreateTypeface(File file) throws IOException;
     }
 
     /** Interface to mock fs-verity in tests. */
@@ -372,6 +374,16 @@ final class UpdatableFontDir {
                         "Failed to change mode to 711", e);
             }
             FontFileInfo fontFileInfo = validateFontFile(newFontFile);
+
+            // Try to create Typeface and treat as failure something goes wrong.
+            try {
+                mParser.tryToCreateTypeface(fontFileInfo.getFile());
+            } catch (IOException e) {
+                throw new SystemFontException(
+                        FontManager.RESULT_ERROR_INVALID_FONT_FILE,
+                        "Failed to create Typeface from file", e);
+            }
+
             FontConfig fontConfig = getSystemFontConfig();
             if (!addFileToMapIfSameOrNewer(fontFileInfo, fontConfig, false)) {
                 throw new SystemFontException(
