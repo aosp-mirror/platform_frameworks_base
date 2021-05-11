@@ -750,14 +750,10 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;ਸਥਿਤੀ:&lt;/b&gt; ਦਰਜਾ ਘਟਾ ਕੇ ਸ਼ਾਂਤ \'ਤੇ ਸੈੱਟ ਕੀਤਾ ਗਿਆ"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;ਸਥਿਤੀ:&lt;/b&gt; ਦਰਜਾ ਵਧਾਇਆ ਗਿਆ"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;ਸਥਿਤੀ:&lt;/b&gt; ਦਰਜਾ ਘਟਾਇਆ ਗਿਆ"</string>
-    <!-- no translation found for notification_channel_summary_priority_baseline (46674690072551234) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_priority_bubble (1275413109619074576) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_priority_dnd (6665395023264154361) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_priority_all (7151752959650048285) -->
-    <skip />
+    <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"ਗੱਲਬਾਤ ਸੂਚਨਾਵਾਂ ਦੇ ਸਿਖਰ \'ਤੇ ਅਤੇ ਲਾਕ ਸਕ੍ਰੀਨ \'ਤੇ ਪ੍ਰੋਫਾਈਲ ਤਸਵੀਰ ਵਜੋਂ ਦਿਖਾਉਂਦਾ ਹੈ"</string>
+    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"ਗੱਲਬਾਤ ਸੂਚਨਾਵਾਂ ਦੇ ਸਿਖਰ \'ਤੇ ਅਤੇ ਲਾਕ ਸਕ੍ਰੀਨ \'ਤੇ ਪ੍ਰੋਫਾਈਲ ਤਸਵੀਰ, ਬਬਲ ਵਜੋਂ ਦਿਖਾਉਂਦਾ ਹੈ"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"ਗੱਲਬਾਤ ਸੂਚਨਾਵਾਂ ਦੇ ਸਿਖਰ \'ਤੇ ਅਤੇ ਲਾਕ ਸਕ੍ਰੀਨ \'ਤੇ ਪ੍ਰੋਫਾਈਲ ਤਸਵੀਰ ਵਜੋਂ ਦਿਖਾਉਂਦਾ ਹੈ, \'ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ\' ਸੁਵਿਧਾ ਵਿੱਚ ਵੀ ਵਿਘਨ ਪੈ ਸਕਦਾ ਹੈ"</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"ਗੱਲਬਾਤ ਸੂਚਨਾਵਾਂ ਦੇ ਸਿਖਰ \'ਤੇ ਅਤੇ ਲਾਕ ਸਕ੍ਰੀਨ \'ਤੇ ਪ੍ਰੋਫਾਈਲ ਤਸਵੀਰ, ਬਬਲ ਵਜੋਂ ਦਿਖਾਉਂਦਾ ਹੈ, \'ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ\' ਸੁਵਿਧਾ ਵਿੱਚ ਵੀ ਵਿਘਨ ਪੈ ਸਕਦਾ ਹੈ"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"ਸੈਟਿੰਗਾਂ"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"ਤਰਜੀਹ"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਐਪ ਗੱਲਬਾਤ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਦਾ ਸਮਰਥਨ ਨਹੀਂ ਕਰਦੀ"</string>
