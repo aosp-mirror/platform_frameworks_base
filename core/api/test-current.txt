@@ -537,6 +537,10 @@ package android.content.pm {
     field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.ProviderInfoList> CREATOR;
   }
 
+  public final class SharedLibraryInfo implements android.os.Parcelable {
+    method @NonNull public java.util.List<java.lang.String> getAllCodePaths();
+  }
+
   public final class ShortcutInfo implements android.os.Parcelable {
     method public boolean isVisibleToPublisher();
   }
