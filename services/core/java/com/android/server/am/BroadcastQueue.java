@@ -828,6 +828,7 @@ public final class BroadcastQueue {
             } else {
                 r.receiverTime = SystemClock.uptimeMillis();
                 maybeAddAllowBackgroundActivityStartsToken(filter.receiverList.app, r);
+                maybeScheduleTempAllowlistLocked(filter.owningUid, r, r.options);
                 performReceiveLocked(filter.receiverList.app, filter.receiverList.receiver,
                         new Intent(r.intent), r.resultCode, r.resultData,
                         r.resultExtras, r.ordered, r.initialSticky, r.userId);
@@ -911,9 +912,16 @@ public final class BroadcastQueue {
         return false;
     }
 
-    final void scheduleTempAllowlistLocked(int uid, long duration, BroadcastRecord r,
-            @TempAllowListType int type, @ReasonCode int reasonCode,
-            @Nullable String reason) {
+    void maybeScheduleTempAllowlistLocked(int uid, BroadcastRecord r,
+            @Nullable BroadcastOptions brOptions) {
+        if (brOptions == null || brOptions.getTemporaryAppAllowlistDuration() <= 0) {
+            return;
+        }
+        long duration = brOptions.getTemporaryAppAllowlistDuration();
+        final @TempAllowListType int type = brOptions.getTemporaryAppAllowlistType();
+        final @ReasonCode int reasonCode = brOptions.getTemporaryAppAllowlistReasonCode();
+        final String reason = brOptions.getTemporaryAppAllowlistReason();
+
         if (duration > Integer.MAX_VALUE) {
             duration = Integer.MAX_VALUE;
         }
@@ -1344,13 +1352,6 @@ public final class BroadcastQueue {
                     // r is guaranteed ordered at this point, so we know finishReceiverLocked()
                     // will get a callback and handle the activity start token lifecycle.
                 }
-                if (brOptions != null && brOptions.getTemporaryAppAllowlistDuration() > 0) {
-                    scheduleTempAllowlistLocked(filter.owningUid,
-                            brOptions.getTemporaryAppAllowlistDuration(), r,
-                            brOptions.getTemporaryAppAllowlistType(),
-                            brOptions.getTemporaryAppAllowlistReasonCode(),
-                            brOptions.getTemporaryAppAllowlistReason());
-                }
             }
             return;
         }
@@ -1646,16 +1647,9 @@ public final class BroadcastQueue {
                     + info.activityInfo + ", callingUid = " + r.callingUid + ", uid = "
                     + receiverUid);
         }
-
         final boolean isActivityCapable =
                 (brOptions != null && brOptions.getTemporaryAppAllowlistDuration() > 0);
-        if (isActivityCapable) {
-            scheduleTempAllowlistLocked(receiverUid,
-                    brOptions.getTemporaryAppAllowlistDuration(), r,
-                    brOptions.getTemporaryAppAllowlistType(),
-                    brOptions.getTemporaryAppAllowlistReasonCode(),
-                    brOptions.getTemporaryAppAllowlistReason());
-        }
+        maybeScheduleTempAllowlistLocked(receiverUid, r, brOptions);
 
         // Report that a component is used for explicit broadcasts.
         if (!r.intent.isExcludingStopped() && r.curComponent != null
