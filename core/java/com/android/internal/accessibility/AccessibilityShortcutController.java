@@ -32,6 +32,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.media.AudioAttributes;
 import android.media.Ringtone;
@@ -597,7 +598,11 @@ public class AccessibilityShortcutController {
         }
 
         public AlertDialog.Builder getAlertDialogBuilder(Context context) {
-            return new AlertDialog.Builder(context);
+            final boolean inNightMode = (context.getResources().getConfiguration().uiMode
+                    & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
+            final int themeId = inNightMode ? R.style.Theme_DeviceDefault_Dialog_Alert :
+                    R.style.Theme_DeviceDefault_Light_Dialog_Alert;
+            return new AlertDialog.Builder(context, themeId);
         }
 
         public Toast makeToastFromText(Context context, CharSequence charSequence, int duration) {
