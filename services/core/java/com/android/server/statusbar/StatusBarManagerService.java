@@ -71,6 +71,7 @@ import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.statusbar.RegisterStatusBarResult;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.DumpUtils;
+import com.android.internal.util.GcUtils;
 import com.android.internal.view.AppearanceRegion;
 import com.android.server.LocalServices;
 import com.android.server.UiThread;
@@ -649,6 +650,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     // ================================================================================
     // From IStatusBarService
     // ================================================================================
+
     @Override
     public void expandNotificationsPanel() {
         enforceExpandStatusBar();
@@ -969,6 +971,22 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         }
 
         return new int[] {disable1, disable2};
+    }
+
+    void runGcForTest() {
+        if (!Build.IS_DEBUGGABLE) {
+            throw new SecurityException("runGcForTest requires a debuggable build");
+        }
+
+        // Gc the system along the way
+        GcUtils.runGcAndFinalizersSync();
+
+        if (mBar != null) {
+            try {
+                mBar.runGcForTest();
+            } catch (RemoteException ex) {
+            }
+        }
     }
 
     @Override
