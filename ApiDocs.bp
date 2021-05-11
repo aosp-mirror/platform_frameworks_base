@@ -96,6 +96,7 @@ stubs_defaults {
     libs: framework_docs_only_libs,
     create_doc_stubs: true,
     annotations_enabled: true,
+    filter_packages: packages_to_document,
     api_levels_annotations_enabled: true,
     api_levels_annotations_dirs: [
         "sdk-dir",
