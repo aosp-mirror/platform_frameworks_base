@@ -21,6 +21,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.BatteryStatsManager;
 import android.os.BatteryUsageStats;
+import android.os.BatteryUsageStatsQuery;
 import android.os.Bundle;
 import android.os.UidBatteryConsumer;
 import android.view.LayoutInflater;
@@ -35,10 +36,12 @@ import androidx.loader.app.LoaderManager;
 import androidx.loader.content.Loader;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.android.settingslib.utils.AsyncLoaderCompat;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
@@ -50,10 +53,11 @@ import java.util.Locale;
 public class BatteryConsumerPickerActivity extends ComponentActivity {
     private static final String PREF_SELECTED_BATTERY_CONSUMER = "batteryConsumerId";
     private static final int BATTERY_STATS_REFRESH_RATE_MILLIS = 60 * 1000;
+    private static final String FORCE_FRESH_STATS = "force_fresh_stats";
     private BatteryConsumerListAdapter mBatteryConsumerListAdapter;
     private RecyclerView mAppList;
-    private View mLoadingView;
-    private final Runnable mBatteryStatsRefresh = this::loadBatteryStats;
+    private SwipeRefreshLayout mSwipeRefreshLayout;
+    private final Runnable mBatteryStatsRefresh = this::refreshPeriodically;
 
     private interface OnBatteryConsumerSelectedListener {
         void onBatteryConsumerSelected(String batteryConsumerId);
@@ -64,8 +68,11 @@ public class BatteryConsumerPickerActivity extends ComponentActivity {
         super.onCreate(icicle);
 
         setContentView(R.layout.battery_consumer_picker_layout);
-        mLoadingView = findViewById(R.id.loading_view);
 
+        mSwipeRefreshLayout = findViewById(R.id.swipe_refresh);
+        mSwipeRefreshLayout.setColorSchemeResources(android.R.color.holo_green_light);
+        mSwipeRefreshLayout.setRefreshing(true);
+        mSwipeRefreshLayout.setOnRefreshListener(this::onRefresh);
         mAppList = findViewById(R.id.list_view);
         mAppList.setLayoutManager(new LinearLayoutManager(this));
         mBatteryConsumerListAdapter =
@@ -97,7 +104,7 @@ public class BatteryConsumerPickerActivity extends ComponentActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        loadBatteryStats();
+        refreshPeriodically();
     }
 
     @Override
@@ -106,42 +113,54 @@ public class BatteryConsumerPickerActivity extends ComponentActivity {
         getMainThreadHandler().removeCallbacks(mBatteryStatsRefresh);
     }
 
-    private void loadBatteryStats() {
-        LoaderManager.getInstance(this).restartLoader(0, null,
-                new BatteryConsumerListLoaderCallbacks());
+    private void refreshPeriodically() {
+        loadBatteryUsageStats(false);
         getMainThreadHandler().postDelayed(mBatteryStatsRefresh, BATTERY_STATS_REFRESH_RATE_MILLIS);
+    }
+
+    private void onRefresh() {
+        loadBatteryUsageStats(true);
+    }
+
+    private void loadBatteryUsageStats(boolean forceFreshStats) {
+        Bundle args = new Bundle();
+        args.putBoolean(FORCE_FRESH_STATS, forceFreshStats);
+        LoaderManager.getInstance(this).restartLoader(0, args,
+                new BatteryConsumerListLoaderCallbacks());
     }
 
     private static class BatteryConsumerListLoader extends
             AsyncLoaderCompat<List<BatteryConsumerInfoHelper.BatteryConsumerInfo>> {
         private final BatteryStatsManager mBatteryStatsManager;
         private final PackageManager mPackageManager;
+        private final boolean mForceFreshStats;
 
-        BatteryConsumerListLoader(Context context) {
+        BatteryConsumerListLoader(Context context, boolean forceFreshStats) {
             super(context);
             mBatteryStatsManager = context.getSystemService(BatteryStatsManager.class);
             mPackageManager = context.getPackageManager();
+            mForceFreshStats = forceFreshStats;
         }
 
         @Override
         public List<BatteryConsumerInfoHelper.BatteryConsumerInfo> loadInBackground() {
-            final BatteryUsageStats batteryUsageStats = mBatteryStatsManager.getBatteryUsageStats();
+            final BatteryUsageStatsQuery query = mForceFreshStats
+                    ? new BatteryUsageStatsQuery.Builder().setMaxStatsAgeMs(0).build()
+                    : BatteryUsageStatsQuery.DEFAULT;
+            final BatteryUsageStats batteryUsageStats =
+                    mBatteryStatsManager.getBatteryUsageStats(query);
             List<BatteryConsumerInfoHelper.BatteryConsumerInfo> batteryConsumerList =
                     new ArrayList<>();
 
-            for (int scope = 0;
-                    scope < BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_COUNT;
-                    scope++) {
-                batteryConsumerList.add(
-                        BatteryConsumerInfoHelper.makeBatteryConsumerInfo(
-                                batteryUsageStats.getAggregateBatteryConsumer(scope),
-                                BatteryConsumerData.batteryConsumerId(scope),
-                                mPackageManager));
-            }
+            batteryConsumerList.add(
+                    BatteryConsumerInfoHelper.makeBatteryConsumerInfo(
+                            batteryUsageStats,
+                            BatteryConsumerData.AGGREGATE_BATTERY_CONSUMER_ID,
+                            mPackageManager));
 
             for (UidBatteryConsumer consumer : batteryUsageStats.getUidBatteryConsumers()) {
                 batteryConsumerList.add(
-                        BatteryConsumerInfoHelper.makeBatteryConsumerInfo(consumer,
+                        BatteryConsumerInfoHelper.makeBatteryConsumerInfo(batteryUsageStats,
                                 BatteryConsumerData.batteryConsumerId(consumer),
                                 mPackageManager));
             }
@@ -166,7 +185,8 @@ public class BatteryConsumerPickerActivity extends ComponentActivity {
         @Override
         public Loader<List<BatteryConsumerInfoHelper.BatteryConsumerInfo>> onCreateLoader(int id,
                 Bundle args) {
-            return new BatteryConsumerListLoader(BatteryConsumerPickerActivity.this);
+            return new BatteryConsumerListLoader(BatteryConsumerPickerActivity.this,
+                    args.getBoolean(FORCE_FRESH_STATS));
         }
 
         @Override
@@ -174,8 +194,7 @@ public class BatteryConsumerPickerActivity extends ComponentActivity {
                 @NonNull Loader<List<BatteryConsumerInfoHelper.BatteryConsumerInfo>> loader,
                 List<BatteryConsumerInfoHelper.BatteryConsumerInfo> batteryConsumerList) {
             mBatteryConsumerListAdapter.setBatteryConsumerList(batteryConsumerList);
-            mAppList.setVisibility(View.VISIBLE);
-            mLoadingView.setVisibility(View.GONE);
+            mSwipeRefreshLayout.setRefreshing(false);
         }
 
         @Override
@@ -187,7 +206,8 @@ public class BatteryConsumerPickerActivity extends ComponentActivity {
     public class BatteryConsumerListAdapter
             extends RecyclerView.Adapter<BatteryConsumerViewHolder> {
         private final OnBatteryConsumerSelectedListener mListener;
-        private List<BatteryConsumerInfoHelper.BatteryConsumerInfo> mBatteryConsumerList;
+        private List<BatteryConsumerInfoHelper.BatteryConsumerInfo> mBatteryConsumerList =
+                Collections.emptyList();
 
         public BatteryConsumerListAdapter(OnBatteryConsumerSelectedListener listener) {
             mListener = listener;
