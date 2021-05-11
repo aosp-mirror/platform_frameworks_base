@@ -35,7 +35,8 @@ namespace test {
 class TestScene {
 public:
     struct Options {
-        int count = 0;
+        int frameCount = 150;
+        int repeatCount = 1;
         int reportFrametimeWeight = 0;
         bool renderOffscreen = true;
     };
