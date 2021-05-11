@@ -567,7 +567,11 @@ public class BrightnessTracker {
                 out.attributeLong(null, ATTR_TIMESTAMP, toWrite[i].timeStamp);
                 out.attribute(null, ATTR_PACKAGE_NAME, toWrite[i].packageName);
                 out.attributeInt(null, ATTR_USER, userSerialNo);
-                out.attribute(null, ATTR_UNIQUE_DISPLAY_ID, toWrite[i].uniqueDisplayId);
+                String uniqueDisplayId = toWrite[i].uniqueDisplayId;
+                if (uniqueDisplayId == null) {
+                    uniqueDisplayId = "";
+                }
+                out.attribute(null, ATTR_UNIQUE_DISPLAY_ID, uniqueDisplayId);
                 out.attributeFloat(null, ATTR_BATTERY_LEVEL, toWrite[i].batteryLevel);
                 out.attributeBoolean(null, ATTR_NIGHT_MODE, toWrite[i].nightMode);
                 out.attributeInt(null, ATTR_COLOR_TEMPERATURE,
