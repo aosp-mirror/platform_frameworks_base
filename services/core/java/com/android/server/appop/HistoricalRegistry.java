@@ -555,8 +555,6 @@ final class HistoricalRegistry {
                     }
                     if (mMode == AppOpsManager.HISTORICAL_MODE_ENABLED_PASSIVE) {
                         mDiscreteRegistry.setDebugMode(true);
-                    } else {
-                        mDiscreteRegistry.setDebugMode(false);
                     }
                 }
                 if (mBaseSnapshotInterval != baseSnapshotInterval) {
@@ -627,6 +625,7 @@ final class HistoricalRegistry {
         }
         setHistoryParameters(DEFAULT_MODE, DEFAULT_SNAPSHOT_INTERVAL_MILLIS,
                 DEFAULT_COMPRESSION_STEP);
+        mDiscreteRegistry.setDebugMode(false);
     }
 
     void clearHistory(int uid, String packageName) {
