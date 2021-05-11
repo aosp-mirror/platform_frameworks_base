@@ -137,9 +137,10 @@ private:
     int mCaptureSequence = 0;
 
     // Multi frame serialization stream and writer used when serializing more than one frame.
+    std::unique_ptr<SkSharingSerialContext> mSerialContext;  // Must be declared before any other
+                                                             // serializing member
     std::unique_ptr<SkFILEWStream> mOpenMultiPicStream;
     sk_sp<SkDocument> mMultiPic;
-    std::unique_ptr<SkSharingSerialContext> mSerialContext;
 
     /**
      * mRecorder holds the current picture recorder when serializing in either SingleFrameSKP or
