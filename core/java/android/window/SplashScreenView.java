@@ -17,6 +17,8 @@ package android.window;
 
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
+import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION;
+import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
 
 import android.annotation.ColorInt;
 import android.annotation.NonNull;
@@ -40,11 +42,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.WindowInsetsController;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
 import com.android.internal.R;
 import com.android.internal.policy.DecorView;
+import com.android.internal.util.ContrastColorUtil;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -69,6 +73,12 @@ public final class SplashScreenView extends FrameLayout {
     private static final String TAG = SplashScreenView.class.getSimpleName();
     private static final boolean DEBUG = false;
 
+    private static final int LIGHT_BARS_MASK =
+            WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS
+                    | WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
+    private static final int WINDOW_FLAG_MASK = FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
+                    | FLAG_TRANSLUCENT_NAVIGATION | FLAG_TRANSLUCENT_STATUS;
+
     private boolean mNotCopyable;
     private boolean mRevealAnimationSupported = true;
     private int mInitBackgroundColor;
@@ -84,10 +94,14 @@ public final class SplashScreenView extends FrameLayout {
     private Activity mHostActivity;
     // cache original window and status
     private Window mWindow;
-    private boolean mDrawBarBackground;
+    private int mAppWindowFlags;
     private int mStatusBarColor;
     private int mNavigationBarColor;
+    private int mSystemBarsAppearance;
     private boolean mHasRemoved;
+    private boolean mNavigationContrastEnforced;
+    private boolean mStatusContrastEnforced;
+    private boolean mDecorFitsSystemWindows;
 
     /**
      * Internal builder to create a SplashScreenView object.
@@ -347,54 +361,63 @@ public final class SplashScreenView extends FrameLayout {
             mWindow = null;
         }
         if (mHostActivity != null) {
-            mHostActivity.detachSplashScreenView();
+            mHostActivity.setSplashScreenView(null);
+            mHostActivity = null;
         }
         mHasRemoved = true;
     }
 
     /**
-     * Called when this view is attached to an activity.
+     * Called when this view is attached to an activity. This also makes SystemUI colors
+     * transparent so the content of splash screen view can draw fully.
      * @hide
      */
-    public void attachHostActivity(Activity activity) {
+    public void attachHostActivityAndSetSystemUIColors(Activity activity, Window window) {
+        activity.setSplashScreenView(this);
         mHostActivity = activity;
-    }
-
-    /**
-     * Cache the root window.
-     * @hide
-     */
-    public void cacheRootWindow(Window window) {
         mWindow = window;
+        final WindowManager.LayoutParams attr = window.getAttributes();
+        mAppWindowFlags = attr.flags;
+        mStatusBarColor = window.getStatusBarColor();
+        mNavigationBarColor = window.getNavigationBarColor();
+        mSystemBarsAppearance = window.getInsetsController().getSystemBarsAppearance();
+        mNavigationContrastEnforced = window.isNavigationBarContrastEnforced();
+        mStatusContrastEnforced = window.isStatusBarContrastEnforced();
+        mDecorFitsSystemWindows = window.decorFitsSystemWindows();
+
+        applySystemBarsContrastColor(window.getInsetsController(), mInitBackgroundColor);
+        // Let app draw the background of bars.
+        window.addFlags(FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+        // Use specified bar colors instead of window background.
+        window.clearFlags(FLAG_TRANSLUCENT_STATUS | FLAG_TRANSLUCENT_NAVIGATION);
+        window.setStatusBarColor(Color.TRANSPARENT);
+        window.setNavigationBarColor(Color.TRANSPARENT);
+        window.setDecorFitsSystemWindows(false);
+        window.setStatusBarContrastEnforced(false);
+        window.setNavigationBarContrastEnforced(false);
+    }
+
+    /** Called when this view is removed from the host activity. */
+    private void restoreSystemUIColors() {
+        mWindow.setFlags(mAppWindowFlags, WINDOW_FLAG_MASK);
+        mWindow.setStatusBarColor(mStatusBarColor);
+        mWindow.setNavigationBarColor(mNavigationBarColor);
+        mWindow.getInsetsController().setSystemBarsAppearance(mSystemBarsAppearance,
+                LIGHT_BARS_MASK);
+        mWindow.setDecorFitsSystemWindows(mDecorFitsSystemWindows);
+        mWindow.setStatusBarContrastEnforced(mStatusContrastEnforced);
+        mWindow.setNavigationBarContrastEnforced(mNavigationContrastEnforced);
     }
 
     /**
-     * Called after SplashScreenView has added on the root window.
+     * Makes the icon color of system bars contrast.
      * @hide
      */
-    public void makeSystemUIColorsTransparent() {
-        if (mWindow != null) {
-            final WindowManager.LayoutParams attr = mWindow.getAttributes();
-            mDrawBarBackground = (attr.flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0;
-            mWindow.addFlags(FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-            mStatusBarColor = mWindow.getStatusBarColor();
-            mNavigationBarColor = mWindow.getNavigationBarDividerColor();
-            mWindow.setStatusBarColor(Color.TRANSPARENT);
-            mWindow.setNavigationBarColor(Color.TRANSPARENT);
-        }
-        setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
-    }
-
-    private void restoreSystemUIColors() {
-        if (mWindow != null) {
-            if (!mDrawBarBackground) {
-                mWindow.clearFlags(FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-            }
-            mWindow.setStatusBarColor(mStatusBarColor);
-            mWindow.setNavigationBarColor(mNavigationBarColor);
-        }
+    public static void applySystemBarsContrastColor(WindowInsetsController windowInsetsController,
+            int backgroundColor) {
+        final int lightBarAppearance = ContrastColorUtil.isColorLight(backgroundColor)
+                ? LIGHT_BARS_MASK : 0;
+        windowInsetsController.setSystemBarsAppearance(lightBarAppearance, LIGHT_BARS_MASK);
     }
 
     /**
