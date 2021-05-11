@@ -2722,11 +2722,12 @@ public abstract class Window {
 
     /**
      * This will be null before a content view is added, e.g. via
-     * {@link #setContentView} or {@link #addContentView}.
+     * {@link #setContentView} or {@link #addContentView}. See
+     * {@link android.view.View#getRootSurfaceControl}.
      *
-     * @return The {@link android.view.ViewRoot} interface for this Window
+     * @return The {@link android.view.AttachedSurfaceControl} interface for this Window
      */
-    public @Nullable ViewRoot getViewRoot() {
+    public @Nullable AttachedSurfaceControl getRootSurfaceControl() {
         return null;
     }
 }
