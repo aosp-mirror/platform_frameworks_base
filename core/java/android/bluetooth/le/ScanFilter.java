@@ -587,6 +587,10 @@ public final class ScanFilter implements Parcelable {
          * @throws IllegalArgumentException If the {@code deviceAddress} is invalid.
          */
         public Builder setDeviceAddress(String deviceAddress) {
+            if (deviceAddress == null) {
+                mDeviceAddress = deviceAddress;
+                return this;
+            }
             return setDeviceAddress(deviceAddress, BluetoothDevice.ADDRESS_TYPE_PUBLIC);
         }
 
