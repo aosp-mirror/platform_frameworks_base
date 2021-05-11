@@ -206,21 +206,25 @@ static bool isValidMountTarget(std::string_view path) {
     return path::isAbsolute(path) && path::isEmptyDir(path).value_or(true);
 }
 
-std::string makeBindMdName() {
+std::string makeUniqueName(std::string_view prefix) {
     static constexpr auto uuidStringSize = 36;
 
     uuid_t guid;
     uuid_generate(guid);
 
     std::string name;
-    const auto prefixSize = constants().mountpointMdPrefix.size();
+    const auto prefixSize = prefix.size();
     name.reserve(prefixSize + uuidStringSize);
 
-    name = constants().mountpointMdPrefix;
+    name = prefix;
     name.resize(prefixSize + uuidStringSize);
     uuid_unparse(guid, name.data() + prefixSize);
 
     return name;
+}
+
+std::string makeBindMdName() {
+    return makeUniqueName(constants().mountpointMdPrefix);
 }
 
 static bool checkReadLogsDisabledMarker(std::string_view root) {
@@ -422,7 +426,7 @@ void IncrementalService::onDump(int fd) {
         } else {
             dprintf(fd, "    mountId: %d\n", mnt.mountId);
             dprintf(fd, "    root: %s\n", mnt.root.c_str());
-            const auto metricsInstanceName = path::basename(ifs->root);
+            const auto& metricsInstanceName = ifs->metricsKey;
             dprintf(fd, "    metrics instance name: %s\n", path::c_str(metricsInstanceName).get());
             dprintf(fd, "    nextStorageDirNo: %d\n", mnt.nextStorageDirNo.load());
             dprintf(fd, "    flags: %d\n", int(mnt.flags));
@@ -615,6 +619,7 @@ StorageId IncrementalService::createStorage(std::string_view mountPoint,
         return kInvalidStorageId;
     }
 
+    std::string metricsKey;
     IncFsMount::Control control;
     {
         std::lock_guard l(mMountOperationLock);
@@ -630,7 +635,8 @@ StorageId IncrementalService::createStorage(std::string_view mountPoint,
         if (!mkdirOrLog(path::join(backing, ".incomplete"), 0777)) {
             return kInvalidStorageId;
         }
-        auto status = mVold->mountIncFs(backing, mountTarget, 0, mountKey, &controlParcel);
+        metricsKey = makeUniqueName(mountKey);
+        auto status = mVold->mountIncFs(backing, mountTarget, 0, metricsKey, &controlParcel);
         if (!status.isOk()) {
             LOG(ERROR) << "Vold::mountIncFs() failed: " << status.toString8();
             return kInvalidStorageId;
@@ -653,8 +659,8 @@ StorageId IncrementalService::createStorage(std::string_view mountPoint,
     const auto mountId = mountIt->first;
     l.unlock();
 
-    auto ifs =
-            std::make_shared<IncFsMount>(std::move(mountRoot), mountId, std::move(control), *this);
+    auto ifs = std::make_shared<IncFsMount>(std::move(mountRoot), std::move(metricsKey), mountId,
+                                            std::move(control), *this);
     // Now it's the |ifs|'s responsibility to clean up after itself, and the only cleanup we need
     // is the removal of the |ifs|.
     (void)firstCleanupOnFailure.release();
@@ -1483,8 +1489,11 @@ std::unordered_set<std::string_view> IncrementalService::adoptMountedInstances()
             dataLoaderParams.arguments = loader.arguments();
         }
 
-        auto ifs = std::make_shared<IncFsMount>(std::string(expectedRoot), mountId,
-                                                std::move(control), *this);
+        // Not way to obtain a real sysfs key at this point - metrics will stop working after "soft"
+        // reboot.
+        std::string metricsKey{};
+        auto ifs = std::make_shared<IncFsMount>(std::string(expectedRoot), std::move(metricsKey),
+                                                mountId, std::move(control), *this);
         (void)cleanupFiles.release(); // ifs will take care of that now
 
         // Check if marker file present.
@@ -1641,7 +1650,8 @@ bool IncrementalService::mountExistingImage(std::string_view root) {
     std::string mountKey(path::basename(path::dirname(mountTarget)));
 
     IncrementalFileSystemControlParcel controlParcel;
-    auto status = mVold->mountIncFs(backing, mountTarget, 0, mountKey, &controlParcel);
+    auto metricsKey = makeUniqueName(mountKey);
+    auto status = mVold->mountIncFs(backing, mountTarget, 0, metricsKey, &controlParcel);
     if (!status.isOk()) {
         LOG(ERROR) << "Vold::mountIncFs() failed: " << status.toString8();
         return false;
@@ -1654,7 +1664,8 @@ bool IncrementalService::mountExistingImage(std::string_view root) {
             controlParcel.blocksWritten ? controlParcel.blocksWritten->release().release() : -1;
     IncFsMount::Control control = mIncFs->createControl(cmd, pendingReads, logs, blocksWritten);
 
-    auto ifs = std::make_shared<IncFsMount>(std::string(root), -1, std::move(control), *this);
+    auto ifs = std::make_shared<IncFsMount>(std::string(root), std::move(metricsKey), -1,
+                                            std::move(control), *this);
 
     auto mount = parseFromIncfs<metadata::Mount>(mIncFs.get(), ifs->control,
                                                  path::join(mountTarget, constants().infoMdName));
@@ -2455,7 +2466,7 @@ void IncrementalService::getMetrics(StorageId storageId, android::os::Persistabl
     const auto& kMetricsReadLogsEnabled =
             os::incremental::BnIncrementalService::METRICS_READ_LOGS_ENABLED();
     result->putBoolean(String16(kMetricsReadLogsEnabled.c_str()), ifs->readLogsEnabled() != 0);
-    const auto incfsMetrics = mIncFs->getMetrics(path::basename(ifs->root));
+    const auto incfsMetrics = mIncFs->getMetrics(ifs->metricsKey);
     if (incfsMetrics) {
         const auto& kMetricsTotalDelayedReads =
                 os::incremental::BnIncrementalService::METRICS_TOTAL_DELAYED_READS();
