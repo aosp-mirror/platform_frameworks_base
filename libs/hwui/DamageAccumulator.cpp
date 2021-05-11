@@ -150,9 +150,19 @@ static inline void applyMatrix(const SkMatrix* transform, SkRect* rect) {
     }
 }
 
+static inline void applyMatrix(const SkMatrix& transform, SkRect* rect) {
+    return applyMatrix(&transform, rect);
+}
+
 static inline void mapRect(const RenderProperties& props, const SkRect& in, SkRect* out) {
     if (in.isEmpty()) return;
     SkRect temp(in);
+    if (Properties::stretchEffectBehavior == StretchEffectBehavior::LinearScale) {
+        const StretchEffect& stretch = props.layerProperties().getStretchEffect();
+        if (!stretch.isEmpty()) {
+            applyMatrix(stretch.makeLinearStretch(props.getWidth(), props.getHeight()), &temp);
+        }
+    }
     applyMatrix(props.getTransformMatrix(), &temp);
     if (props.getStaticMatrix()) {
         applyMatrix(props.getStaticMatrix(), &temp);

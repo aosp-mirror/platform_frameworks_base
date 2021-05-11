@@ -84,6 +84,8 @@ float Properties::defaultSdrWhitePoint = 200.f;
 bool Properties::useHintManager = true;
 int Properties::targetCpuTimePercentage = 70;
 
+StretchEffectBehavior Properties::stretchEffectBehavior = StretchEffectBehavior::Shader;
+
 bool Properties::load() {
     bool prevDebugLayersUpdates = debugLayersUpdates;
     bool prevDebugOverdraw = debugOverdraw;
@@ -134,6 +136,10 @@ bool Properties::load() {
     useHintManager = base::GetBoolProperty(PROPERTY_USE_HINT_MANAGER, true);
     targetCpuTimePercentage = base::GetIntProperty(PROPERTY_TARGET_CPU_TIME_PERCENTAGE, 70);
     if (targetCpuTimePercentage <= 0 || targetCpuTimePercentage > 100) targetCpuTimePercentage = 70;
+
+    int stretchType = base::GetIntProperty(PROPERTY_STRETCH_EFFECT_TYPE, 0);
+    stretchType = std::clamp(stretchType, 0, static_cast<int>(StretchEffectBehavior::LinearScale));
+    stretchEffectBehavior = static_cast<StretchEffectBehavior>(stretchType);
 
     return (prevDebugLayersUpdates != debugLayersUpdates) || (prevDebugOverdraw != debugOverdraw);
 }
