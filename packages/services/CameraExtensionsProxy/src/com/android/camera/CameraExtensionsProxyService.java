@@ -25,19 +25,36 @@ import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraExtensionCharacteristics;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CaptureRequest;
+import android.hardware.camera2.CaptureResult;
+import android.hardware.camera2.extension.CameraOutputConfig;
+import android.hardware.camera2.extension.CameraSessionConfig;
 import android.hardware.camera2.extension.CaptureBundle;
+import android.hardware.camera2.extension.CaptureFailure;
 import android.hardware.camera2.extension.CaptureStageImpl;
+import android.hardware.camera2.extension.IAdvancedExtenderImpl;
 import android.hardware.camera2.extension.ICameraExtensionsProxyService;
+import android.hardware.camera2.extension.ICaptureCallback;
 import android.hardware.camera2.extension.ICaptureProcessorImpl;
 import android.hardware.camera2.extension.IPreviewExtenderImpl;
 import android.hardware.camera2.extension.IPreviewImageProcessorImpl;
+import android.hardware.camera2.extension.IRequestCallback;
+import android.hardware.camera2.extension.IRequestProcessorImpl;
 import android.hardware.camera2.extension.IRequestUpdateProcessorImpl;
-import android.hardware.camera2.extension.ParcelImage;
 import android.hardware.camera2.extension.IImageCaptureExtenderImpl;
+import android.hardware.camera2.extension.IImageProcessorImpl;
+import android.hardware.camera2.extension.ISessionProcessorImpl;
+import android.hardware.camera2.extension.LatencyRange;
+import android.hardware.camera2.extension.OutputConfigId;
+import android.hardware.camera2.extension.OutputSurface;
+import android.hardware.camera2.extension.ParcelCaptureResult;
+import android.hardware.camera2.extension.ParcelImage;
+import android.hardware.camera2.extension.ParcelTotalCaptureResult;
+import android.hardware.camera2.extension.Request;
 import android.hardware.camera2.extension.SizeList;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.HardwareBuffer;
+import android.hardware.camera2.impl.PhysicalCaptureResultInfo;
 import android.media.Image;
 import android.media.ImageReader;
 import android.os.ConditionVariable;
@@ -45,9 +62,11 @@ import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.Pair;
+import android.util.Range;
 import android.util.Size;
 import android.view.Surface;
 
@@ -69,10 +88,26 @@ import androidx.camera.extensions.impl.PreviewExtenderImpl;
 import androidx.camera.extensions.impl.PreviewExtenderImpl.ProcessorType;
 import androidx.camera.extensions.impl.PreviewImageProcessorImpl;
 import androidx.camera.extensions.impl.RequestUpdateProcessorImpl;
+import androidx.camera.extensions.impl.advanced.AdvancedExtenderImpl;
+import androidx.camera.extensions.impl.advanced.AutoAdvancedExtenderImpl;
+import androidx.camera.extensions.impl.advanced.BeautyAdvancedExtenderImpl;
+import androidx.camera.extensions.impl.advanced.BokehAdvancedExtenderImpl;
+import androidx.camera.extensions.impl.advanced.Camera2OutputConfigImpl;
+import androidx.camera.extensions.impl.advanced.Camera2SessionConfigImpl;
+import androidx.camera.extensions.impl.advanced.HdrAdvancedExtenderImpl;
+import androidx.camera.extensions.impl.advanced.ImageProcessorImpl;
+import androidx.camera.extensions.impl.advanced.ImageReaderOutputConfigImpl;
+import androidx.camera.extensions.impl.advanced.MultiResolutionImageReaderOutputConfigImpl;
+import androidx.camera.extensions.impl.advanced.NightAdvancedExtenderImpl;
+import androidx.camera.extensions.impl.advanced.OutputSurfaceImpl;
+import androidx.camera.extensions.impl.advanced.RequestProcessorImpl;
+import androidx.camera.extensions.impl.advanced.SessionProcessorImpl;
+import androidx.camera.extensions.impl.advanced.SurfaceOutputConfigImpl;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -83,13 +118,20 @@ public class CameraExtensionsProxyService extends Service {
 
     private static final String CAMERA_EXTENSION_VERSION_NAME =
             "androidx.camera.extensions.impl.ExtensionVersionImpl";
-    private static final String LATEST_VERSION = "1.1.0";
-    private static final String[] SUPPORTED_VERSION_PREFIXES = {"1.1.", "1.0."};
+    private static final String LATEST_VERSION = "1.2.0";
+    private static final String LEGACY_VERSION_PREFIX = "1.1";
+    private static final String ADVANCED_VERSION_PREFIX = "1.2";
+    private static final String[] SUPPORTED_VERSION_PREFIXES = {ADVANCED_VERSION_PREFIX,
+            LEGACY_VERSION_PREFIX, "1.0."};
     private static final boolean EXTENSIONS_PRESENT = checkForExtensions();
     private static final String EXTENSIONS_VERSION = EXTENSIONS_PRESENT ?
             (new ExtensionVersionImpl()).checkApiVersion(LATEST_VERSION) : null;
-    private static final boolean LATEST_VERSION_SUPPORTED =
-            EXTENSIONS_PRESENT && EXTENSIONS_VERSION.startsWith(SUPPORTED_VERSION_PREFIXES[0]);
+    private static final boolean LEGACY_VERSION_SUPPORTED =
+            EXTENSIONS_PRESENT && EXTENSIONS_VERSION.startsWith(LEGACY_VERSION_PREFIX);
+    private static final boolean ADVANCED_VERSION_SUPPORTED =
+            EXTENSIONS_PRESENT && EXTENSIONS_VERSION.startsWith(ADVANCED_VERSION_PREFIX);
+
+    private HashMap<String, CameraCharacteristics> mCharacteristicsHashMap = new HashMap<>();
 
     private static boolean checkForExtensions() {
         try {
@@ -223,7 +265,7 @@ public class CameraExtensionsProxyService extends Service {
 
         public long registerClient(Context ctx) {
             synchronized (mLock) {
-                if (LATEST_VERSION_SUPPORTED) {
+                if (LEGACY_VERSION_SUPPORTED) {
                     if (mActiveClients.isEmpty()) {
                         InitializerFuture status = new InitializerFuture();
                         InitializerImpl.init(EXTENSIONS_VERSION, ctx, new InitializeHandler(status),
@@ -257,7 +299,7 @@ public class CameraExtensionsProxyService extends Service {
         public void unregisterClient(long clientId) {
             synchronized (mLock) {
                 if (mActiveClients.remove(clientId) && mActiveClients.isEmpty() &&
-                        LATEST_VERSION_SUPPORTED) {
+                        LEGACY_VERSION_SUPPORTED) {
                     InitializerFuture status = new InitializerFuture();
                     InitializerImpl.deinit(new ReleaseHandler(status),
                             new HandlerExecutor(mHandler));
@@ -321,17 +363,39 @@ public class CameraExtensionsProxyService extends Service {
         }
     }
 
+    /**
+     * @hide
+     */
+    public static AdvancedExtenderImpl initializeAdvancedExtensionImpl(int extensionType) {
+        switch (extensionType) {
+            case CameraExtensionCharacteristics.EXTENSION_AUTOMATIC:
+                return new AutoAdvancedExtenderImpl();
+            case CameraExtensionCharacteristics.EXTENSION_BEAUTY:
+                return new BeautyAdvancedExtenderImpl();
+            case CameraExtensionCharacteristics.EXTENSION_BOKEH:
+                return new BokehAdvancedExtenderImpl();
+            case CameraExtensionCharacteristics.EXTENSION_HDR:
+                return new HdrAdvancedExtenderImpl();
+            case CameraExtensionCharacteristics.EXTENSION_NIGHT:
+                return new NightAdvancedExtenderImpl();
+            default:
+                throw new IllegalArgumentException("Unknown extension: " + extensionType);
+        }
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
         // This will setup the camera vendor tag descriptor in the service process
+        // along with all camera characteristics.
         try {
             CameraManager manager = getSystemService(CameraManager.class);
 
             String [] cameraIds = manager.getCameraIdListNoLazy();
             if (cameraIds != null) {
                 for (String cameraId : cameraIds) {
-                    CameraCharacteristics ch = manager.getCameraCharacteristics(cameraId);
+                    mCharacteristicsHashMap.put(cameraId,
+                            manager.getCameraCharacteristics(cameraId));
                 }
             }
         } catch (CameraAccessException e) {
@@ -372,6 +436,29 @@ public class CameraExtensionsProxyService extends Service {
         return ret;
     }
 
+    private static List<SizeList> initializeParcelable(
+            Map<Integer, List<android.util.Size>> sizes) {
+        if (sizes == null) {
+            return null;
+        }
+        ArrayList<SizeList> ret = new ArrayList<>(sizes.size());
+        for (Map.Entry<Integer, List<android.util.Size>> entry : sizes.entrySet()) {
+            SizeList sizeList = new SizeList();
+            sizeList.format = entry.getKey();
+            sizeList.sizes = new ArrayList<>();
+            for (android.util.Size size : entry.getValue()) {
+                android.hardware.camera2.extension.Size sz =
+                        new android.hardware.camera2.extension.Size();
+                sz.width = size.getWidth();
+                sz.height = size.getHeight();
+                sizeList.sizes.add(sz);
+            }
+            ret.add(sizeList);
+        }
+
+        return ret;
+    }
+
     private static CameraMetadataNative initializeParcelableMetadata(
             List<Pair<CaptureRequest.Key, Object>> paramList) {
         if (paramList == null) {
@@ -381,6 +468,20 @@ public class CameraExtensionsProxyService extends Service {
         CameraMetadataNative ret = new CameraMetadataNative();
         for (Pair<CaptureRequest.Key, Object> param : paramList) {
             ret.set(param.first, param.second);
+        }
+
+        return ret;
+    }
+
+    private static CameraMetadataNative initializeParcelableMetadata(
+            Map<CaptureRequest.Key<?>, Object> paramMap) {
+        if (paramMap == null) {
+            return null;
+        }
+
+        CameraMetadataNative ret = new CameraMetadataNative();
+        for (Map.Entry<CaptureRequest.Key<?>, Object> param : paramMap.entrySet()) {
+            ret.set(((CaptureRequest.Key) param.getKey()), param.getValue());
         }
 
         return ret;
@@ -400,6 +501,20 @@ public class CameraExtensionsProxyService extends Service {
         return ret;
     }
 
+    private Request initializeParcelable(RequestProcessorImpl.Request request, int requestId) {
+        Request ret = new Request();
+        ret.targetOutputConfigIds = new ArrayList<>();
+        for (int id : request.getTargetOutputConfigIds()) {
+            OutputConfigId configId = new OutputConfigId();
+            configId.id = id;
+            ret.targetOutputConfigIds.add(configId);
+        }
+        ret.templateId = request.getTemplateId();
+        ret.parameters = initializeParcelableMetadata(request.getParameters());
+        ret.requestId = requestId;
+        return ret;
+    }
+
     private class CameraExtensionsProxyServiceStub extends ICameraExtensionsProxyService.Stub {
         @Override
         public long registerClient() {
@@ -409,6 +524,23 @@ public class CameraExtensionsProxyService extends Service {
         @Override
         public void unregisterClient(long clientId) {
             CameraExtensionsProxyService.unregisterClient(clientId);
+        }
+
+        @Override
+        public boolean advancedExtensionsSupported() {
+            return ADVANCED_VERSION_SUPPORTED;
+        }
+
+        @Override
+        public IAdvancedExtenderImpl initializeAdvancedExtension(int extensionType) {
+            AdvancedExtenderImpl extension;
+            try {
+                extension = initializeAdvancedExtensionImpl(extensionType);
+            } catch (IllegalArgumentException e) {
+                return null;
+            }
+
+            return new AdvancedExtenderImplStub(extension);
         }
 
         @Override
@@ -433,6 +565,475 @@ public class CameraExtensionsProxyService extends Service {
             }
 
             return new ImageCaptureExtenderImplStub(extension.second);
+        }
+    }
+
+    private class AdvancedExtenderImplStub extends IAdvancedExtenderImpl.Stub {
+        private final AdvancedExtenderImpl mAdvancedExtender;
+
+        public AdvancedExtenderImplStub(AdvancedExtenderImpl advancedExtender) {
+            mAdvancedExtender = advancedExtender;
+        }
+
+        @Override
+        public boolean isExtensionAvailable(String cameraId) {
+            return mAdvancedExtender.isExtensionAvailable(cameraId, mCharacteristicsHashMap);
+        }
+
+        @Override
+        public void init(String cameraId) {
+            mAdvancedExtender.init(cameraId, mCharacteristicsHashMap);
+        }
+
+        @Override
+        public List<SizeList> getSupportedPreviewOutputResolutions(String cameraId) {
+            Map<Integer, List<Size>> supportedSizesMap =
+                    mAdvancedExtender.getSupportedPreviewOutputResolutions(cameraId);
+            if (supportedSizesMap != null) {
+                return initializeParcelable(supportedSizesMap);
+            }
+
+            return null;
+        }
+
+        @Override
+        public List<SizeList> getSupportedCaptureOutputResolutions(String cameraId) {
+            Map<Integer, List<Size>> supportedSizesMap =
+                    mAdvancedExtender.getSupportedCaptureOutputResolutions(cameraId);
+            if (supportedSizesMap != null) {
+                return initializeParcelable(supportedSizesMap);
+            }
+
+            return null;
+        }
+
+        @Override
+        public LatencyRange getEstimatedCaptureLatencyRange(String cameraId,
+                android.hardware.camera2.extension.Size outputSize, int format) {
+            Size sz = new Size(outputSize.width, outputSize.height);
+            Range<Long> latencyRange = mAdvancedExtender.getEstimatedCaptureLatencyRange(cameraId,
+                    sz, format);
+            if (latencyRange != null) {
+                LatencyRange ret = new LatencyRange();
+                ret.min = latencyRange.getLower();
+                ret.max = latencyRange.getUpper();
+                return ret;
+            }
+
+            return null;
+        }
+
+        @Override
+        public ISessionProcessorImpl getSessionProcessor() {
+            return new SessionProcessorImplStub(mAdvancedExtender.createSessionProcessor());
+        }
+    }
+
+    private class CaptureCallbackStub implements SessionProcessorImpl.CaptureCallback {
+        private final ICaptureCallback mCaptureCallback;
+
+        private CaptureCallbackStub(ICaptureCallback captureCallback) {
+            mCaptureCallback = captureCallback;
+        }
+
+        @Override
+        public void onCaptureStarted(int captureSequenceId, long timestamp) {
+            if (mCaptureCallback != null) {
+                try {
+                    mCaptureCallback.onCaptureStarted(captureSequenceId, timestamp);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Failed to notify capture start due to remote " +
+                            "exception!");
+                }
+            }
+        }
+
+        @Override
+        public void onCaptureProcessStarted(int captureSequenceId) {
+            if (mCaptureCallback != null) {
+                try {
+                    mCaptureCallback.onCaptureProcessStarted(captureSequenceId);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Failed to notify capture process start due to remote " +
+                            "exception!");
+                }
+            }
+        }
+
+        @Override
+        public void onCaptureFailed(int captureSequenceId) {
+            if (mCaptureCallback != null) {
+                try {
+                    mCaptureCallback.onCaptureFailed(captureSequenceId);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Failed to notify capture failure due to remote " +
+                            "exception!");
+                }
+            }
+        }
+
+        @Override
+        public void onCaptureSequenceCompleted(int captureSequenceId) {
+            if (mCaptureCallback != null) {
+                try {
+                    mCaptureCallback.onCaptureSequenceCompleted(captureSequenceId);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Failed to notify capture sequence end due to remote " +
+                            "exception!");
+                }
+            }
+        }
+
+        @Override
+        public void onCaptureSequenceAborted(int captureSequenceId) {
+            if (mCaptureCallback != null) {
+                try {
+                    mCaptureCallback.onCaptureSequenceAborted(captureSequenceId);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Failed to notify capture sequence abort due to remote " +
+                            "exception!");
+                }
+            }
+        }
+    }
+
+    private class RequestCallbackStub extends IRequestCallback.Stub {
+        private final List<RequestProcessorImpl.Request> mRequests;
+        private final RequestProcessorImpl.Callback mCallback;
+
+        public RequestCallbackStub(List<RequestProcessorImpl.Request> requests,
+                RequestProcessorImpl.Callback callback) {
+            mCallback = callback;
+            if (mCallback != null) {
+                mRequests = requests;
+            } else {
+                Log.w(TAG, "No valid request callbacks!");
+                mRequests = new ArrayList<>();
+            }
+        }
+
+        @Override
+        public void onCaptureStarted(int requestId, long frameNumber, long timestamp) {
+            if (mCallback != null) {
+                if (mRequests.get(requestId) != null) {
+                    mCallback.onCaptureStarted(mRequests.get(requestId), frameNumber, timestamp);
+                } else {
+                    Log.e(TAG,"Request id: " + requestId + " not found!");
+                }
+            }
+        }
+
+        @Override
+        public void onCaptureProgressed(int requestId, ParcelCaptureResult partialResult) {
+            if (mCallback != null) {
+                if (mRequests.get(requestId) != null) {
+                    CaptureResult result = new CaptureResult(partialResult.cameraId,
+                            partialResult.results, partialResult.parent, partialResult.sequenceId,
+                            partialResult.frameNumber);
+                    mCallback.onCaptureProgressed(mRequests.get(requestId), result);
+                } else {
+                    Log.e(TAG,"Request id: " + requestId + " not found!");
+                }
+            }
+        }
+
+        @Override
+        public void onCaptureCompleted(int requestId, ParcelTotalCaptureResult totalCaptureResult) {
+            if (mCallback != null) {
+                if (mRequests.get(requestId) != null) {
+                    PhysicalCaptureResultInfo[] physicalResults = new PhysicalCaptureResultInfo[0];
+                    if ((totalCaptureResult.physicalResult != null) &&
+                            (!totalCaptureResult.physicalResult.isEmpty())) {
+                        int count = totalCaptureResult.physicalResult.size();
+                        physicalResults = new PhysicalCaptureResultInfo[count];
+                        physicalResults = totalCaptureResult.physicalResult.toArray(
+                                physicalResults);
+                    }
+                    ArrayList<CaptureResult> partials = new ArrayList<>(
+                            totalCaptureResult.partials.size());
+                    for (ParcelCaptureResult parcelResult : totalCaptureResult.partials) {
+                        partials.add(new CaptureResult(parcelResult.cameraId, parcelResult.results,
+                                parcelResult.parent, parcelResult.sequenceId,
+                                parcelResult.frameNumber));
+                    }
+                    TotalCaptureResult result = new TotalCaptureResult(
+                            totalCaptureResult.logicalCameraId, totalCaptureResult.results,
+                            totalCaptureResult.parent, totalCaptureResult.sequenceId,
+                            totalCaptureResult.frameNumber, partials, totalCaptureResult.sessionId,
+                            physicalResults);
+                    mCallback.onCaptureCompleted(mRequests.get(requestId), result);
+                } else {
+                    Log.e(TAG,"Request id: " + requestId + " not found!");
+                }
+            }
+        }
+
+        @Override
+        public void onCaptureFailed(int requestId, CaptureFailure captureFailure) {
+            if (mCallback != null) {
+                if (mRequests.get(requestId) != null) {
+                    android.hardware.camera2.CaptureFailure failure =
+                            new android.hardware.camera2.CaptureFailure(captureFailure.request,
+                                    captureFailure.reason, captureFailure.dropped,
+                                    captureFailure.sequenceId, captureFailure.frameNumber,
+                                    captureFailure.errorPhysicalCameraId);
+                    mCallback.onCaptureFailed(mRequests.get(requestId), failure);
+                } else {
+                    Log.e(TAG,"Request id: " + requestId + " not found!");
+                }
+            }
+        }
+
+        @Override
+        public void onCaptureBufferLost(int requestId, long frameNumber, int outputStreamId) {
+            if (mCallback != null) {
+                if (mRequests.get(requestId) != null) {
+                    mCallback.onCaptureBufferLost(mRequests.get(requestId), frameNumber,
+                            outputStreamId);
+                } else {
+                    Log.e(TAG,"Request id: " + requestId + " not found!");
+                }
+            }
+        }
+
+        @Override
+        public void onCaptureSequenceCompleted(int sequenceId, long frameNumber) {
+            if (mCallback != null) {
+                mCallback.onCaptureSequenceCompleted(sequenceId, frameNumber);
+            }
+        }
+
+        @Override
+        public void onCaptureSequenceAborted(int sequenceId) {
+            if (mCallback != null) {
+                mCallback.onCaptureSequenceAborted(sequenceId);
+            }
+        }
+    }
+
+    private class ImageProcessorImplStub extends IImageProcessorImpl.Stub {
+        private final ImageProcessorImpl mImageProcessor;
+
+        public ImageProcessorImplStub(ImageProcessorImpl imageProcessor) {
+            mImageProcessor = imageProcessor;
+        }
+
+        @Override
+        public void onNextImageAvailable(OutputConfigId outputConfigId, ParcelImage img) {
+            if (mImageProcessor != null) {
+                mImageProcessor.onNextImageAvailable(outputConfigId.id, img.timestamp,
+                        new ImageReferenceImpl(img));
+            }
+        }
+    }
+
+    private class RequestProcessorStub implements RequestProcessorImpl {
+        private final IRequestProcessorImpl mRequestProcessor;
+
+        public RequestProcessorStub(IRequestProcessorImpl requestProcessor) {
+            mRequestProcessor = requestProcessor;
+        }
+
+        @Override
+        public void setImageProcessor(int outputConfigId,
+                ImageProcessorImpl imageProcessor) {
+            OutputConfigId  configId = new OutputConfigId();
+            configId.id = outputConfigId;
+            try {
+                mRequestProcessor.setImageProcessor(configId,
+                        new ImageProcessorImplStub(imageProcessor));
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to set image processor due to remote exception!");
+            }
+        }
+
+        @Override
+        public boolean submit(Request request, Callback callback) {
+            ArrayList<Request> requests = new ArrayList<>();
+            requests.add(request);
+            return submit(requests, callback);
+        }
+
+        @Override
+        public boolean submit(List<Request> requests, Callback callback) {
+            ArrayList<android.hardware.camera2.extension.Request> captureRequests =
+                    new ArrayList<>();
+            int requestId = 0;
+            for (Request request : requests) {
+                captureRequests.add(initializeParcelable(request, requestId));
+                requestId++;
+            }
+
+            try {
+                return mRequestProcessor.submitBurst(captureRequests,
+                        new RequestCallbackStub(requests, callback));
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to submit request due to remote exception!");
+            }
+            return false;
+        }
+
+        @Override
+        public boolean setRepeating(Request request, Callback callback) {
+            try {
+                ArrayList<Request> requests = new ArrayList<>();
+                requests.add(request);
+                return mRequestProcessor.setRepeating(initializeParcelable(request, 0),
+                        new RequestCallbackStub(requests, callback));
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to submit repeating request due to remote exception!");
+            }
+
+            return false;
+        }
+
+        @Override
+        public void abortCaptures() {
+            try {
+                mRequestProcessor.abortCaptures();
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to abort requests due to remote exception!");
+            }
+        }
+
+        @Override
+        public void stopRepeating() {
+            try {
+                mRequestProcessor.stopRepeating();
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to stop repeating request due to remote exception!");
+            }
+        }
+    }
+
+    private class SessionProcessorImplStub extends ISessionProcessorImpl.Stub {
+        private final SessionProcessorImpl mSessionProcessor;
+
+        public SessionProcessorImplStub(SessionProcessorImpl sessionProcessor) {
+            mSessionProcessor = sessionProcessor;
+        }
+
+        @Override
+        public CameraSessionConfig initSession(String cameraId, OutputSurface previewSurface,
+                OutputSurface burstSurface) {
+            OutputSurfaceImplStub outputPreviewSurfaceImpl =
+                    new OutputSurfaceImplStub(previewSurface);
+            OutputSurfaceImplStub outputBurstSurfaceImpl =
+                    new OutputSurfaceImplStub(burstSurface);
+
+            Camera2SessionConfigImpl sessionConfig = mSessionProcessor.initSession(cameraId,
+                    mCharacteristicsHashMap, getApplicationContext(), outputPreviewSurfaceImpl,
+                    outputBurstSurfaceImpl, null /*imageAnalysisSurfaceConfig*/);
+
+            List<Camera2OutputConfigImpl> outputConfigs = sessionConfig.getOutputConfigs();
+            CameraSessionConfig ret = new CameraSessionConfig();
+            ret.outputConfigs = new ArrayList<>();
+            for (Camera2OutputConfigImpl output : outputConfigs) {
+                CameraOutputConfig entry = new CameraOutputConfig();
+                entry.outputId = new OutputConfigId();
+                entry.outputId.id = output.getId();
+                entry.physicalCameraId = output.getPhysicalCameraId();
+                entry.surfaceGroupId = output.getSurfaceGroupId();
+                if (output instanceof SurfaceOutputConfigImpl) {
+                    SurfaceOutputConfigImpl surfaceConfig = (SurfaceOutputConfigImpl) output;
+                    entry.type = CameraOutputConfig.TYPE_SURFACE;
+                    entry.surface = surfaceConfig.getSurface();
+                } else if (output instanceof ImageReaderOutputConfigImpl) {
+                    ImageReaderOutputConfigImpl imageReaderOutputConfig =
+                            (ImageReaderOutputConfigImpl) output;
+                    entry.type = CameraOutputConfig.TYPE_IMAGEREADER;
+                    entry.size = new android.hardware.camera2.extension.Size();
+                    entry.size.width = imageReaderOutputConfig.getSize().getWidth();
+                    entry.size.height = imageReaderOutputConfig.getSize().getHeight();
+                    entry.imageFormat = imageReaderOutputConfig.getImageFormat();
+                    entry.capacity = imageReaderOutputConfig.getMaxImages();
+                } else if (output instanceof MultiResolutionImageReaderOutputConfigImpl) {
+                    MultiResolutionImageReaderOutputConfigImpl multiResReaderConfig =
+                            (MultiResolutionImageReaderOutputConfigImpl) output;
+                    entry.type = CameraOutputConfig.TYPE_MULTIRES_IMAGEREADER;
+                    entry.imageFormat = multiResReaderConfig.getImageFormat();
+                    entry.capacity = multiResReaderConfig.getMaxImages();
+                } else {
+                    throw new IllegalStateException("Unknown output config type!");
+                }
+                List<Camera2OutputConfigImpl> sharedOutputs =
+                        output.getSurfaceSharingOutputConfigs();
+                if ((sharedOutputs != null) && (!sharedOutputs.isEmpty())) {
+                    entry.surfaceSharingOutputConfigs = new ArrayList<>();
+                    for (Camera2OutputConfigImpl sharedOutput : sharedOutputs) {
+                        OutputConfigId outputId = new OutputConfigId();
+                        outputId.id = sharedOutput.getId();
+                        entry.surfaceSharingOutputConfigs.add(outputId);
+                    }
+                }
+                ret.outputConfigs.add(entry);
+            }
+            ret.sessionTemplateId = sessionConfig.getSessionTemplateId();
+            ret.sessionParameter = initializeParcelableMetadata(
+                    sessionConfig.getSessionParameters());
+
+            return ret;
+        }
+
+        @Override
+        public void deInitSession() {
+            mSessionProcessor.deInitSession();
+        }
+
+        @Override
+        public void onCaptureSessionStart(IRequestProcessorImpl requestProcessor) {
+            mSessionProcessor.onCaptureSessionStart(new RequestProcessorStub(requestProcessor));
+        }
+
+        @Override
+        public void onCaptureSessionEnd() {
+            mSessionProcessor.onCaptureSessionEnd();
+        }
+
+        @Override
+        public int startRepeating(ICaptureCallback callback) {
+            return mSessionProcessor.startRepeating(new CaptureCallbackStub(callback));
+        }
+
+        @Override
+        public void stopRepeating() {
+            mSessionProcessor.stopRepeating();
+        }
+
+        @Override
+        public int startCapture(ICaptureCallback callback, int jpegRotation, int jpegQuality) {
+            HashMap<CaptureRequest.Key<?>, Object> paramMap = new HashMap<>();
+            paramMap.put(CaptureRequest.JPEG_ORIENTATION, jpegRotation);
+            paramMap.put(CaptureRequest.JPEG_QUALITY, jpegQuality);
+            mSessionProcessor.setParameters(paramMap);
+            return mSessionProcessor.startCapture(new CaptureCallbackStub(callback));
+        }
+    }
+
+    private class OutputSurfaceImplStub implements OutputSurfaceImpl {
+        private final Surface mSurface;
+        private final Size mSize;
+        private final int mImageFormat;
+
+        public OutputSurfaceImplStub(OutputSurface outputSurface) {
+            mSurface = outputSurface.surface;
+            mSize = new Size(outputSurface.size.width, outputSurface.size.height);
+            mImageFormat = outputSurface.imageFormat;
+        }
+
+        @Override
+        public Surface getSurface() {
+            return mSurface;
+        }
+
+        @Override
+        public Size getSize() {
+            return mSize;
+        }
+
+        @Override
+        public int getImageFormat() {
+            return mImageFormat;
         }
     }
 
@@ -471,7 +1072,7 @@ public class CameraExtensionsProxyService extends Service {
 
         @Override
         public void init(String cameraId, CameraMetadataNative chars) {
-            if (LATEST_VERSION_SUPPORTED) {
+            if (LEGACY_VERSION_SUPPORTED) {
                 mPreviewExtender.init(cameraId, new CameraCharacteristics(chars));
             }
         }
@@ -535,7 +1136,7 @@ public class CameraExtensionsProxyService extends Service {
 
         @Override
         public List<SizeList> getSupportedResolutions() {
-            if (LATEST_VERSION_SUPPORTED) {
+            if (LEGACY_VERSION_SUPPORTED) {
                 List<Pair<Integer, android.util.Size[]>> sizes =
                         mPreviewExtender.getSupportedResolutions();
                 if ((sizes != null) && !sizes.isEmpty()) {
@@ -581,7 +1182,7 @@ public class CameraExtensionsProxyService extends Service {
 
         @Override
         public void init(String cameraId, CameraMetadataNative chars) {
-            if (LATEST_VERSION_SUPPORTED) {
+            if (LEGACY_VERSION_SUPPORTED) {
                 mImageExtender.init(cameraId, new CameraCharacteristics(chars));
             }
         }
@@ -627,7 +1228,7 @@ public class CameraExtensionsProxyService extends Service {
 
         @Override
         public List<SizeList> getSupportedResolutions() {
-            if (LATEST_VERSION_SUPPORTED) {
+            if (LEGACY_VERSION_SUPPORTED) {
                 List<Pair<Integer, android.util.Size[]>> sizes =
                         mImageExtender.getSupportedResolutions();
                 if ((sizes != null) && !sizes.isEmpty()) {
@@ -734,6 +1335,51 @@ public class CameraExtensionsProxyService extends Service {
         public CaptureStageImpl process(CameraMetadataNative result, int sequenceId) {
             return initializeParcelable(
                     mProcessor.process(new TotalCaptureResult(result, sequenceId)));
+        }
+    }
+
+    private class ImageReferenceImpl extends ExtensionImage
+            implements androidx.camera.extensions.impl.advanced.ImageReferenceImpl {
+
+        private final Object mImageLock = new Object();
+        private int mReferenceCount;
+
+        private ImageReferenceImpl(ParcelImage parcelImage) {
+            super(parcelImage);
+            mReferenceCount = 1;
+        }
+
+        @Override
+        public boolean increment() {
+            synchronized (mImageLock) {
+                if (mReferenceCount <= 0) {
+                    return false;
+                }
+                mReferenceCount++;
+            }
+
+            return true;
+        }
+
+        @Override
+        public boolean decrement() {
+            synchronized (mImageLock) {
+                if (mReferenceCount <= 0) {
+                    return false;
+                }
+                mReferenceCount--;
+
+                if (mReferenceCount <= 0) {
+                    close();
+                }
+            }
+
+            return true;
+        }
+
+        @Override
+        public Image get() {
+            return this;
         }
     }
 
