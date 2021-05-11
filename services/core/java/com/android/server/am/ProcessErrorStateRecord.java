@@ -400,7 +400,8 @@ class ProcessErrorStateRecord {
                 loadingProgress = incrementalStatesInfo.getProgress();
             }
             final String codePath = mApp.info.getCodePath();
-            if (IncrementalManager.isIncrementalPath(codePath)) {
+            if (codePath != null && !codePath.isEmpty()
+                    && IncrementalManager.isIncrementalPath(codePath)) {
                 // Report in the main log that the incremental package is still loading
                 Slog.e(TAG, "App ANR on incremental package " + mApp.info.packageName
                         + " which is " + ((int) (loadingProgress * 100)) + "% loaded.");
