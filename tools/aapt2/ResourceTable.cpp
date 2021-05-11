@@ -83,6 +83,20 @@ T* FindElementsRunAction(const android::StringPiece& name, Elements& entries, Fu
   return action(found, iter);
 }
 
+struct ConfigKey {
+  const ConfigDescription* config;
+  const StringPiece& product;
+};
+
+template <typename T>
+bool lt_config_key_ref(const T& lhs, const ConfigKey& rhs) {
+  int cmp = lhs->config.compare(*rhs.config);
+  if (cmp == 0) {
+    cmp = StringPiece(lhs->product).compare(rhs.product);
+  }
+  return cmp < 0;
+}
+
 }  // namespace
 
 ResourceTable::ResourceTable(ResourceTable::Validation validation) : validation_(validation) {
@@ -134,23 +148,10 @@ ResourceEntry* ResourceTableType::FindOrCreateEntry(const android::StringPiece& 
   });
 }
 
-struct ConfigKey {
-  const ConfigDescription* config;
-  const StringPiece& product;
-};
-
-bool lt_config_key_ref(const std::unique_ptr<ResourceConfigValue>& lhs, const ConfigKey& rhs) {
-  int cmp = lhs->config.compare(*rhs.config);
-  if (cmp == 0) {
-    cmp = StringPiece(lhs->product).compare(rhs.product);
-  }
-  return cmp < 0;
-}
-
 ResourceConfigValue* ResourceEntry::FindValue(const ConfigDescription& config,
                                               android::StringPiece product) {
   auto iter = std::lower_bound(values.begin(), values.end(), ConfigKey{&config, product},
-                               lt_config_key_ref);
+                               lt_config_key_ref<std::unique_ptr<ResourceConfigValue>>);
   if (iter != values.end()) {
     ResourceConfigValue* value = iter->get();
     if (value->config == config && StringPiece(value->product) == product) {
@@ -163,7 +164,7 @@ ResourceConfigValue* ResourceEntry::FindValue(const ConfigDescription& config,
 const ResourceConfigValue* ResourceEntry::FindValue(const android::ConfigDescription& config,
                                                     android::StringPiece product) const {
   auto iter = std::lower_bound(values.begin(), values.end(), ConfigKey{&config, product},
-                               lt_config_key_ref);
+                               lt_config_key_ref<std::unique_ptr<ResourceConfigValue>>);
   if (iter != values.end()) {
     ResourceConfigValue* value = iter->get();
     if (value->config == config && StringPiece(value->product) == product) {
@@ -176,7 +177,7 @@ const ResourceConfigValue* ResourceEntry::FindValue(const android::ConfigDescrip
 ResourceConfigValue* ResourceEntry::FindOrCreateValue(const ConfigDescription& config,
                                                       const StringPiece& product) {
   auto iter = std::lower_bound(values.begin(), values.end(), ConfigKey{&config, product},
-                               lt_config_key_ref);
+                               lt_config_key_ref<std::unique_ptr<ResourceConfigValue>>);
   if (iter != values.end()) {
     ResourceConfigValue* value = iter->get();
     if (value->config == config && StringPiece(value->product) == product) {
@@ -296,6 +297,7 @@ ResourceTable::CollisionResult ResourceTable::ResolveValueCollision(Value* exist
   return CollisionResult::kConflict;
 }
 
+namespace {
 template <typename T, typename Comparer>
 struct SortedVectorInserter : public Comparer {
   std::pair<bool, typename std::vector<T>::iterator> LowerBound(std::vector<T>& el,
@@ -313,7 +315,7 @@ struct SortedVectorInserter : public Comparer {
     if (found) {
       return &*it;
     }
-    return &*el.insert(it, std::move(value));
+    return &*el.insert(it, std::forward<T>(value));
   }
 };
 
@@ -331,35 +333,77 @@ struct TypeViewComparer {
 };
 
 struct EntryViewComparer {
-  bool operator()(const ResourceEntry* lhs, const ResourceEntry* rhs) {
-    return less_than_struct_with_name_and_id<ResourceEntry, ResourceId>(
-        *lhs, std::make_pair(rhs->name, rhs->id));
+  bool operator()(const ResourceTableEntryView& lhs, const ResourceTableEntryView& rhs) {
+    return less_than_struct_with_name_and_id<ResourceTableEntryView, uint16_t>(
+        lhs, std::make_pair(rhs.name, rhs.id));
   }
 };
 
-ResourceTableView ResourceTable::GetPartitionedView() const {
-  ResourceTableView view;
+void InsertEntryIntoTableView(ResourceTableView& table, const ResourceTablePackage* package,
+                              const ResourceTableType* type, const std::string& entry_name,
+                              const Maybe<ResourceId>& id, const Visibility& visibility,
+                              const Maybe<AllowNew>& allow_new,
+                              const Maybe<OverlayableItem>& overlayable_item,
+                              const Maybe<StagedId>& staged_id,
+                              const std::vector<std::unique_ptr<ResourceConfigValue>>& values) {
   SortedVectorInserter<ResourceTablePackageView, PackageViewComparer> package_inserter;
   SortedVectorInserter<ResourceTableTypeView, TypeViewComparer> type_inserter;
-  SortedVectorInserter<const ResourceEntry*, EntryViewComparer> entry_inserter;
+  SortedVectorInserter<ResourceTableEntryView, EntryViewComparer> entry_inserter;
 
+  ResourceTablePackageView new_package{package->name,
+                                       id ? id.value().package_id() : Maybe<uint8_t>{}};
+  auto view_package = package_inserter.Insert(table.packages, std::move(new_package));
+
+  ResourceTableTypeView new_type{type->type, id ? id.value().type_id() : Maybe<uint8_t>{}};
+  auto view_type = type_inserter.Insert(view_package->types, std::move(new_type));
+
+  if (visibility.level == Visibility::Level::kPublic) {
+    // Only mark the type visibility level as public, it doesn't care about being private.
+    view_type->visibility_level = Visibility::Level::kPublic;
+  }
+
+  ResourceTableEntryView new_entry{.name = entry_name,
+                                   .id = id ? id.value().entry_id() : Maybe<uint16_t>{},
+                                   .visibility = visibility,
+                                   .allow_new = allow_new,
+                                   .overlayable_item = overlayable_item,
+                                   .staged_id = staged_id};
+  for (auto& value : values) {
+    new_entry.values.emplace_back(value.get());
+  }
+
+  entry_inserter.Insert(view_type->entries, std::move(new_entry));
+}
+}  // namespace
+
+const ResourceConfigValue* ResourceTableEntryView::FindValue(const ConfigDescription& config,
+                                                             android::StringPiece product) const {
+  auto iter = std::lower_bound(values.begin(), values.end(), ConfigKey{&config, product},
+                               lt_config_key_ref<const ResourceConfigValue*>);
+  if (iter != values.end()) {
+    const ResourceConfigValue* value = *iter;
+    if (value->config == config && StringPiece(value->product) == product) {
+      return value;
+    }
+  }
+  return nullptr;
+}
+
+ResourceTableView ResourceTable::GetPartitionedView(const ResourceTableViewOptions& options) const {
+  ResourceTableView view;
   for (const auto& package : packages) {
     for (const auto& type : package->types) {
       for (const auto& entry : type->entries) {
-        ResourceTablePackageView new_package{
-            package->name, entry->id ? entry->id.value().package_id() : Maybe<uint8_t>{}};
-        auto view_package = package_inserter.Insert(view.packages, std::move(new_package));
+        InsertEntryIntoTableView(view, package.get(), type.get(), entry->name, entry->id,
+                                 entry->visibility, entry->allow_new, entry->overlayable_item,
+                                 entry->staged_id, entry->values);
 
-        ResourceTableTypeView new_type{type->type,
-                                       entry->id ? entry->id.value().type_id() : Maybe<uint8_t>{}};
-        auto view_type = type_inserter.Insert(view_package->types, std::move(new_type));
-
-        if (entry->visibility.level == Visibility::Level::kPublic) {
-          // Only mark the type visibility level as public, it doesn't care about being private.
-          view_type->visibility_level = Visibility::Level::kPublic;
+        if (options.create_alias_entries && entry->staged_id) {
+          auto alias_id = entry->staged_id.value().id;
+          InsertEntryIntoTableView(view, package.get(), type.get(), entry->name, alias_id,
+                                   entry->visibility, entry->allow_new, entry->overlayable_item, {},
+                                   entry->values);
         }
-
-        entry_inserter.Insert(view_type->entries, entry.get());
       }
     }
   }
@@ -368,6 +412,8 @@ ResourceTableView ResourceTable::GetPartitionedView() const {
   // for the same resource type within the same package. For this reason, if there are types with
   // multiple type ids, each type needs to exist in its own package in order to be queried by name.
   std::vector<ResourceTablePackageView> new_packages;
+  SortedVectorInserter<ResourceTablePackageView, PackageViewComparer> package_inserter;
+  SortedVectorInserter<ResourceTableTypeView, TypeViewComparer> type_inserter;
   for (auto& package : view.packages) {
     // If a new package was already created for a different type within this package, then
     // we can reuse those packages for other types that need to be extracted from this package.
@@ -498,6 +544,10 @@ bool ResourceTable::AddResource(NewResource&& res, IDiagnostics* diag) {
     entry->allow_new = res.allow_new.value();
   }
 
+  if (res.staged_id.has_value()) {
+    entry->staged_id = res.staged_id.value();
+  }
+
   if (res.value != nullptr) {
     auto config_value = entry->FindOrCreateValue(res.config, res.product);
     if (!config_value->value) {
@@ -575,6 +625,28 @@ Maybe<ResourceTable::SearchResult> ResourceTable::FindResource(const ResourceNam
   return {};
 }
 
+bool ResourceTable::RemoveResource(const ResourceNameRef& name, ResourceId id) const {
+  ResourceTablePackage* package = FindPackage(name.package);
+  if (package == nullptr) {
+    return {};
+  }
+
+  ResourceTableType* type = package->FindType(name.type);
+  if (type == nullptr) {
+    return {};
+  }
+
+  auto entry_it = std::equal_range(type->entries.begin(), type->entries.end(), name.entry,
+                                   NameEqualRange<ResourceEntry>{});
+  for (auto it = entry_it.first; it != entry_it.second; ++it) {
+    if ((*it)->id == id) {
+      type->entries.erase(it);
+      return true;
+    }
+  }
+  return false;
+}
+
 std::unique_ptr<ResourceTable> ResourceTable::Clone() const {
   std::unique_ptr<ResourceTable> new_table = util::make_unique<ResourceTable>();
   CloningValueTransformer cloner(&new_table->string_pool);
@@ -637,6 +709,11 @@ NewResourceBuilder& NewResourceBuilder::SetOverlayable(OverlayableItem overlayab
 }
 NewResourceBuilder& NewResourceBuilder::SetAllowNew(AllowNew allow_new) {
   res_.allow_new = std::move(allow_new);
+  return *this;
+}
+
+NewResourceBuilder& NewResourceBuilder::SetStagedId(StagedId staged_alias) {
+  res_.staged_id = std::move(staged_alias);
   return *this;
 }
 
