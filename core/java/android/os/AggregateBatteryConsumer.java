@@ -18,6 +18,8 @@ package android.os;
 
 import android.annotation.NonNull;
 
+import java.io.PrintWriter;
+
 /**
  * Contains power consumption data across the entire device.
  *
@@ -35,6 +37,11 @@ public final class AggregateBatteryConsumer extends BatteryConsumer implements P
     private AggregateBatteryConsumer(@NonNull Parcel source) {
         super(new PowerComponents(source));
         mConsumedPowerMah = source.readDouble();
+    }
+
+    @Override
+    public void dump(PrintWriter pw, boolean skipEmptyComponents) {
+        mPowerComponents.dump(pw, skipEmptyComponents);
     }
 
     @Override
