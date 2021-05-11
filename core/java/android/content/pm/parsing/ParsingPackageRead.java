@@ -906,9 +906,14 @@ public interface ParsingPackageRead extends Parcelable {
      */
     @ApplicationInfo.NativeHeapZeroInitialized
     int getNativeHeapZeroInitialized();
-
     @Nullable
     Boolean hasRequestRawExternalStorageAccess();
+
+    /**
+     * @see ApplicationInfo#hasRequestForegroundServiceExemption()
+     * @see R.styleable#AndroidManifest_requestForegroundServiceExemption
+     */
+    boolean hasRequestForegroundServiceExemption();
 
     // TODO(b/135203078): Hide and enforce going through PackageInfoUtils
     ApplicationInfo toAppInfoWithoutState();
