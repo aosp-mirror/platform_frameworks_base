@@ -1672,11 +1672,24 @@ public class VcnGatewayConnection extends StateMachine {
                 @NonNull Network underlyingNetwork,
                 @NonNull IpSecTransform transform,
                 int direction) {
+            if (direction != IpSecManager.DIRECTION_IN && direction != IpSecManager.DIRECTION_OUT) {
+                Slog.wtf(TAG, "Applying transform for unexpected direction: " + direction);
+            }
+
             try {
                 tunnelIface.setUnderlyingNetwork(underlyingNetwork);
 
                 // Transforms do not need to be persisted; the IkeSession will keep them alive
                 mIpSecManager.applyTunnelModeTransform(tunnelIface, direction, transform);
+
+                // For inbound transforms, additionally allow forwarded traffic to bridge to DUN (as
+                // needed)
+                final Set<Integer> exposedCaps = mConnectionConfig.getAllExposedCapabilities();
+                if (direction == IpSecManager.DIRECTION_IN
+                        && exposedCaps.contains(NET_CAPABILITY_DUN)) {
+                    mIpSecManager.applyTunnelModeTransform(
+                            tunnelIface, IpSecManager.DIRECTION_FWD, transform);
+                }
             } catch (IOException e) {
                 Slog.d(TAG, "Transform application failed for network " + token, e);
                 sessionLost(token, e);
