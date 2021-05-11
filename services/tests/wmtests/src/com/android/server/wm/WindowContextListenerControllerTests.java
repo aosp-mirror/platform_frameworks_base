@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -38,6 +39,7 @@ import androidx.test.filters.SmallTest;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 
 /**
  * Build/Install/Run:
@@ -183,6 +185,41 @@ public class WindowContextListenerControllerTests extends WindowTestsBase {
         windowContextCreatedToken.removeImmediately();
 
         assertThat(mController.getContainer(mClientToken)).isEqualTo(da);
+    }
+
+    @Test
+    public void testImeSwitchDialogWindowTokenRemovedOnDualDisplayContent_ListenToImeContainer() {
+        // Let the Display to be created with the DualDisplay policy.
+        final DisplayAreaPolicy.Provider policyProvider =
+                new DualDisplayAreaGroupPolicyTest.DualDisplayTestPolicyProvider();
+        Mockito.doReturn(policyProvider).when(mWm).getDisplayAreaPolicyProvider();
+        // Create a DisplayContent with dual RootDisplayArea
+        DualDisplayAreaGroupPolicyTest.DualDisplayContent dualDisplayContent =
+                new DualDisplayAreaGroupPolicyTest.DualDisplayContent
+                 .Builder(mAtm, 1000, 1000).build();
+        final DisplayArea.Tokens imeContainer = dualDisplayContent.getImeContainer();
+        // Put the ImeContainer to the first sub-RootDisplayArea
+        dualDisplayContent.mFirstRoot.placeImeContainer(imeContainer);
+
+        assertThat(imeContainer.getRootDisplayArea()).isEqualTo(dualDisplayContent.mFirstRoot);
+
+        // Simulate the behavior to show IME switch dialog: its context switches to register to
+        // context created WindowToken.
+        WindowToken windowContextCreatedToken = new WindowToken.Builder(mWm, mClientToken,
+                TYPE_INPUT_METHOD_DIALOG)
+                .setDisplayContent(dualDisplayContent)
+                .setFromClientToken(true)
+                .build();
+        mController.registerWindowContainerListener(mClientToken, windowContextCreatedToken,
+                TEST_UID, TYPE_INPUT_METHOD_DIALOG, null /* options */);
+
+        assertThat(mController.getContainer(mClientToken)).isEqualTo(windowContextCreatedToken);
+
+        // Remove WindowToken
+        windowContextCreatedToken.removeImmediately();
+
+        // Now context should listen to ImeContainer.
+        assertThat(mController.getContainer(mClientToken)).isEqualTo(imeContainer);
     }
 
     private class TestWindowTokenClient extends IWindowToken.Stub {
