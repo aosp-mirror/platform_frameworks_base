@@ -838,7 +838,7 @@ public final class CachedAppOptimizer {
                 KEY_FREEZER_DEBOUNCE_TIMEOUT, DEFAULT_FREEZER_DEBOUNCE_TIMEOUT);
 
         if (mFreezerDebounceTimeout < 0) {
-            mFullDeltaRssThrottleKb = DEFAULT_FREEZER_DEBOUNCE_TIMEOUT;
+            mFreezerDebounceTimeout = DEFAULT_FREEZER_DEBOUNCE_TIMEOUT;
         }
     }
 

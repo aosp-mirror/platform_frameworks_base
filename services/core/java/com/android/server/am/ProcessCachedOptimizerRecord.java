@@ -171,7 +171,7 @@ final class ProcessCachedOptimizerRecord {
         return mFreezeExempt;
     }
 
-    @GuardedBy("mPreLock")
+    @GuardedBy("mProcLock")
     void setFreezeExempt(boolean exempt) {
         mFreezeExempt = exempt;
     }
