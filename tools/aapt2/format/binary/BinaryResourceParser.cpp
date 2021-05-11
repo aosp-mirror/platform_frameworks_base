@@ -255,7 +255,7 @@ bool BinaryResourceParser::ParsePackage(const ResChunk_header* chunk) {
         break;
 
       case android::RES_TABLE_STAGED_ALIAS_TYPE:
-        if (!ParseOverlayable(parser.chunk())) {
+        if (!ParseStagedAliases(parser.chunk())) {
           return false;
         }
         break;
@@ -518,7 +518,7 @@ bool BinaryResourceParser::ParseStagedAliases(const ResChunk_header* chunk) {
       return false;
     }
 
-    // Set the staged if of the finalized resource.
+    // Set the staged id of the finalized resource.
     const auto& resource_name = iter->second;
     const StagedId staged_id_def{.id = staged_id};
     if (!table_->AddResource(NewResourceBuilder(resource_name)
