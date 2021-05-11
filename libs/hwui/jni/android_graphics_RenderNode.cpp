@@ -573,8 +573,9 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
             const RenderProperties& props = node.properties();
 
             uirenderer::Rect bounds(props.getWidth(), props.getHeight());
-            if (Properties::stretchEffectBehavior == StretchEffectBehavior::Shader &&
-                info.stretchEffectCount) {
+            bool useStretchShader = Properties::stretchEffectBehavior !=
+                StretchEffectBehavior::LinearScale;
+            if (useStretchShader && info.stretchEffectCount) {
                 handleStretchEffect(info, bounds);
             }
 
@@ -679,30 +680,32 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
             stretchTargetBounds(*effect, result.width, result.height,
                                 childRelativeBounds,targetBounds);
 
-            JNIEnv* env = jnienv();
+            if (Properties::stretchEffectBehavior == StretchEffectBehavior::Shader) {
+                JNIEnv* env = jnienv();
 
-            jobject localref = env->NewLocalRef(mWeakRef);
-            if (CC_UNLIKELY(!localref)) {
-                env->DeleteWeakGlobalRef(mWeakRef);
-                mWeakRef = nullptr;
-                return;
-            }
+                jobject localref = env->NewLocalRef(mWeakRef);
+                if (CC_UNLIKELY(!localref)) {
+                    env->DeleteWeakGlobalRef(mWeakRef);
+                    mWeakRef = nullptr;
+                    return;
+                }
 #ifdef __ANDROID__  // Layoutlib does not support CanvasContext
-            SkVector stretchDirection = effect->getStretchDirection();
-            env->CallVoidMethod(localref, gPositionListener_ApplyStretchMethod,
-                                info.canvasContext.getFrameNumber(),
-                                result.width,
-                                result.height,
-                                stretchDirection.fX,
-                                stretchDirection.fY,
-                                effect->maxStretchAmountX,
-                                effect->maxStretchAmountY,
-                                childRelativeBounds.left(),
-                                childRelativeBounds.top(),
-                                childRelativeBounds.right(),
-                                childRelativeBounds.bottom());
+                SkVector stretchDirection = effect->getStretchDirection();
+                env->CallVoidMethod(localref, gPositionListener_ApplyStretchMethod,
+                                    info.canvasContext.getFrameNumber(),
+                                    result.width,
+                                    result.height,
+                                    stretchDirection.fX,
+                                    stretchDirection.fY,
+                                    effect->maxStretchAmountX,
+                                    effect->maxStretchAmountY,
+                                    childRelativeBounds.left(),
+                                    childRelativeBounds.top(),
+                                    childRelativeBounds.right(),
+                                    childRelativeBounds.bottom());
 #endif
-            env->DeleteLocalRef(localref);
+                env->DeleteLocalRef(localref);
+            }
         }
 
         void doUpdatePositionAsync(jlong frameNumber, jint left, jint top,
