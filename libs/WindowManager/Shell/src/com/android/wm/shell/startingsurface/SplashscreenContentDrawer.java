@@ -66,7 +66,7 @@ public class SplashscreenContentDrawer {
     // For example, an icon with the foreground 108*108 opaque pixels and it's background
     // also 108*108 pixels, then do not enlarge this icon if only need to show foreground icon.
     private static final float ENLARGE_FOREGROUND_ICON_THRESHOLD = (72f * 72f) / (108f * 108f);
-    private static final float NO_BACKGROUND_SCALE = 1.3f;
+    private static final float NO_BACKGROUND_SCALE = 192f / 160;
     private final Context mContext;
     private final IconProvider mIconProvider;
 
@@ -283,7 +283,8 @@ public class SplashscreenContentDrawer {
             } else {
                 final float iconScale = (float) mIconSize / (float) mDefaultIconSize;
                 final int densityDpi = mContext.getResources().getDisplayMetrics().densityDpi;
-                final int scaledIconDpi = (int) (0.5f + iconScale * densityDpi);
+                final int scaledIconDpi =
+                        (int) (0.5f + iconScale * densityDpi * NO_BACKGROUND_SCALE);
                 iconDrawable = mIconProvider.getIcon(mActivityInfo, scaledIconDpi);
                 if (iconDrawable == null) {
                     iconDrawable = mContext.getPackageManager().getDefaultActivityIcon();
@@ -356,7 +357,7 @@ public class SplashscreenContentDrawer {
                     Slog.d(TAG, "makeSplashScreenContentView: choose fg icon");
                 }
                 // Reference AdaptiveIcon description, outer is 108 and inner is 72, so we
-                // should enlarge the size 108/72 if we only draw adaptiveIcon's foreground.
+                // scale by 192/160 if we only draw adaptiveIcon's foreground.
                 final float noBgScale =
                         foreIconTester.nonTransparentRatio() < ENLARGE_FOREGROUND_ICON_THRESHOLD
                                 ? NO_BACKGROUND_SCALE : 1f;
