@@ -31,7 +31,7 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
-import com.android.systemui.biometrics.HbmTypes.HbmType;
+import com.android.systemui.biometrics.UdfpsHbmTypes.HbmType;
 
 /**
  * Under-display fingerprint sensor Surface View. The surface should be used for HBM-specific things
@@ -41,7 +41,7 @@ public class UdfpsSurfaceView extends SurfaceView implements UdfpsIlluminator {
     private static final String TAG = "UdfpsSurfaceView";
     private static final String SETTING_HBM_TYPE =
             "com.android.systemui.biometrics.UdfpsSurfaceView.hbmType";
-    private static final @HbmType int DEFAULT_HBM_TYPE = HbmTypes.GLOBAL_HBM;
+    private static final @HbmType int DEFAULT_HBM_TYPE = UdfpsHbmTypes.GLOBAL_HBM;
 
     /**
      * This is used instead of {@link android.graphics.drawable.Drawable}, because the latter has
@@ -57,7 +57,7 @@ public class UdfpsSurfaceView extends SurfaceView implements UdfpsIlluminator {
     private final @HbmType int mHbmType;
 
     @NonNull private RectF mSensorRect;
-    @Nullable private HbmCallback mHbmCallback;
+    @Nullable private UdfpsHbmCallback mHbmCallback;
 
     public UdfpsSurfaceView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -90,7 +90,7 @@ public class UdfpsSurfaceView extends SurfaceView implements UdfpsIlluminator {
     }
 
     @Override
-    public void setHbmCallback(@Nullable HbmCallback callback) {
+    public void setHbmCallback(@Nullable UdfpsHbmCallback callback) {
         mHbmCallback = callback;
     }
 
@@ -102,7 +102,7 @@ public class UdfpsSurfaceView extends SurfaceView implements UdfpsIlluminator {
             Log.e(TAG, "startIllumination | mHbmCallback is null");
         }
 
-        if (mHbmType == HbmTypes.GLOBAL_HBM) {
+        if (mHbmType == UdfpsHbmTypes.GLOBAL_HBM) {
             drawImmediately(mIlluminationDotDrawable);
         }
 

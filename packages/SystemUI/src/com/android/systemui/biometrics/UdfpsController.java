@@ -59,7 +59,6 @@ import android.view.accessibility.AccessibilityManager;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.R;
-import com.android.systemui.biometrics.HbmTypes.HbmType;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.DozeReceiver;
@@ -71,6 +70,8 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.util.concurrency.DelayableExecutor;
+
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -87,7 +88,7 @@ import javax.inject.Inject;
  */
 @SuppressWarnings("deprecation")
 @SysUISingleton
-public class UdfpsController implements DozeReceiver, HbmCallback {
+public class UdfpsController implements DozeReceiver {
     private static final String TAG = "UdfpsController";
     private static final long AOD_INTERRUPT_TIMEOUT_MILLIS = 1000;
 
@@ -110,6 +111,7 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
     @NonNull private final FalsingManager mFalsingManager;
     @NonNull private final PowerManager mPowerManager;
     @NonNull private final AccessibilityManager mAccessibilityManager;
+    @Nullable private final UdfpsHbmCallback mHbmCallback;
     // Currently the UdfpsController supports a single UDFPS sensor. If devices have multiple
     // sensors, this, in addition to a lot of the code here, will be updated.
     @VisibleForTesting final FingerprintSensorPropertiesInternal mSensorProps;
@@ -466,7 +468,8 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
             @NonNull PowerManager powerManager,
             @NonNull AccessibilityManager accessibilityManager,
             @NonNull ScreenLifecycle screenLifecycle,
-            @Nullable Vibrator vibrator) {
+            @Nullable Vibrator vibrator,
+            @NonNull Optional<UdfpsHbmCallback> hbmCallback) {
         mContext = context;
         // TODO (b/185124905): inject main handler and vibrator once done prototyping
         mMainHandler = new Handler(Looper.getMainLooper());
@@ -486,6 +489,7 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
         mFalsingManager = falsingManager;
         mPowerManager = powerManager;
         mAccessibilityManager = accessibilityManager;
+        mHbmCallback = hbmCallback.orElse(null);
         screenLifecycle.addObserver(mScreenObserver);
         mScreenOn = screenLifecycle.getScreenState() == ScreenLifecycle.SCREEN_ON;
 
@@ -619,7 +623,7 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
                     Log.v(TAG, "showUdfpsOverlay | adding window reason=" + reason);
                     mView = (UdfpsView) mInflater.inflate(R.layout.udfps_view, null, false);
                     mView.setSensorProperties(mSensorProps);
-                    mView.setHbmCallback(this);
+                    mView.setHbmCallback(mHbmCallback);
                     UdfpsAnimationViewController animation = inflateUdfpsAnimation(reason);
                     animation.init();
                     mView.setAnimationViewController(animation);
@@ -791,17 +795,6 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
         mView.stopIllumination();
     }
 
-    @Override
-    public void enableHbm(@HbmType int hbmType, @Nullable Surface surface) {
-        // Do nothing. This method can be implemented for devices that require the high-brightness
-        // mode for fingerprint illumination.
-    }
-
-    @Override
-    public void disableHbm(@HbmType int hbmType, @Nullable Surface surface) {
-        // Do nothing. This method can be implemented for devices that require the high-brightness
-        // mode for fingerprint illumination.
-    }
 
     private VibrationEffect getVibration(String effect, VibrationEffect defaultEffect) {
         if (TextUtils.isEmpty(effect)) {

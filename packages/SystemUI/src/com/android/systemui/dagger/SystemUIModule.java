@@ -29,6 +29,7 @@ import com.android.systemui.BootCompleteCacheImpl;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.appops.dagger.AppOpsModule;
 import com.android.systemui.assist.AssistModule;
+import com.android.systemui.biometrics.UdfpsHbmCallback;
 import com.android.systemui.classifier.FalsingModule;
 import com.android.systemui.controls.dagger.ControlsModule;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -159,6 +160,9 @@ public abstract class SystemUIModule {
 
     @BindsOptionalOf
     abstract StatusBar optionalStatusBar();
+
+    @BindsOptionalOf
+    abstract UdfpsHbmCallback optionalUdfpsHbmCallback();
 
     @SysUISingleton
     @Binds
