@@ -30,6 +30,7 @@ import static android.app.AppOpsManager.KEY_FG_SERVICE_STATE_SETTLE_TIME;
 import static android.app.AppOpsManager.KEY_TOP_STATE_SETTLE_TIME;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_DEFAULT;
+import static android.app.AppOpsManager.MODE_ERRORED;
 import static android.app.AppOpsManager.MODE_FOREGROUND;
 import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.app.AppOpsManager.NoteOpEvent;
@@ -827,6 +828,14 @@ public class AppOpsService extends IAppOpsService.Stub {
         @GuardedBy("AppOpsService.this")
         private @Nullable ArrayMap<IBinder, InProgressStartOpEvent> mInProgressEvents;
 
+        /**
+         * Currently paused startOp events
+         *
+         * <p>Key is clientId
+         */
+        @GuardedBy("AppOpsService.this")
+        private @Nullable ArrayMap<IBinder, InProgressStartOpEvent> mPausedInProgressEvents;
+
         AttributedOp(@Nullable String tag, @NonNull Op parent) {
             this.tag = tag;
             this.parent = parent;
@@ -944,23 +953,36 @@ public class AppOpsService extends IAppOpsService.Stub {
                 @Nullable String proxyPackageName, @Nullable String proxyAttributionTag,
                 @AppOpsManager.UidState int uidState, @OpFlags int flags,
                 boolean triggerCallbackIfNeeded) throws RemoteException {
-            if (triggerCallbackIfNeeded && !parent.isRunning()) {
+            startedOrPaused(clientId, proxyUid, proxyPackageName, proxyAttributionTag,
+                    uidState, flags, triggerCallbackIfNeeded, true);
+        }
+
+        private void startedOrPaused(@NonNull IBinder clientId, int proxyUid,
+                @Nullable String proxyPackageName, @Nullable String proxyAttributionTag,
+                @AppOpsManager.UidState int uidState, @OpFlags int flags,
+                boolean triggerCallbackIfNeeded, boolean isStarted) throws RemoteException {
+            if (triggerCallbackIfNeeded && !parent.isRunning() && isStarted) {
                 scheduleOpActiveChangedIfNeededLocked(parent.op, parent.uid,
                         parent.packageName, true);
             }
 
-            if (mInProgressEvents == null) {
+
+            if (isStarted && mInProgressEvents == null) {
                 mInProgressEvents = new ArrayMap<>(1);
+            } else if (mPausedInProgressEvents == null) {
+                mPausedInProgressEvents = new ArrayMap<>(1);
             }
+            ArrayMap<IBinder, InProgressStartOpEvent> events = isStarted
+                    ? mInProgressEvents : mPausedInProgressEvents;
 
             long startTime = System.currentTimeMillis();
-            InProgressStartOpEvent event = mInProgressEvents.get(clientId);
+            InProgressStartOpEvent event = events.get(clientId);
             if (event == null) {
                 event = mInProgressStartOpEventPool.acquire(startTime,
                         SystemClock.elapsedRealtime(), clientId,
                         PooledLambda.obtainRunnable(AppOpsService::onClientDeath, this, clientId),
                         proxyUid, proxyPackageName, proxyAttributionTag, uidState, flags);
-                mInProgressEvents.put(clientId, event);
+                events.put(clientId, event);
             } else {
                 if (uidState != event.mUidState) {
                     onUidStateChanged(uidState);
@@ -969,12 +991,15 @@ public class AppOpsService extends IAppOpsService.Stub {
 
             event.numUnfinishedStarts++;
 
-            mHistoricalRegistry.incrementOpAccessedCount(parent.op, parent.uid, parent.packageName,
-                    tag, uidState, flags, startTime);
+            if (isStarted) {
+                mHistoricalRegistry.incrementOpAccessedCount(parent.op, parent.uid,
+                        parent.packageName, tag, uidState, flags, startTime);
+            }
+
         }
 
         /**
-         * Update state when finishOp was called
+         * Update state when finishOp was called. Will finish started ops, and delete paused ops.
          *
          * @param clientId Id of the finishOp caller
          */
@@ -983,22 +1008,32 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
 
         private void finished(@NonNull IBinder clientId, boolean triggerCallbackIfNeeded) {
-            if (mInProgressEvents == null) {
-                Slog.wtf(TAG, "No ops running");
-                return;
-            }
+            finishOrPause(clientId, triggerCallbackIfNeeded, false);
+        }
 
-            int indexOfToken = mInProgressEvents.indexOfKey(clientId);
+        /**
+         * Update state when paused or finished is called. If pausing, it records the op as
+         * stopping in the HistoricalRegistry, but does not delete it.
+         */
+        private void finishOrPause(@NonNull IBinder clientId, boolean triggerCallbackIfNeeded,
+                boolean isPausing) {
+            int indexOfToken = mInProgressEvents != null
+                    ? mInProgressEvents.indexOfKey(clientId) : -1;
             if (indexOfToken < 0) {
-                Slog.wtf(TAG, "No op running for the client");
+                finishPossiblyPaused(clientId, isPausing);
                 return;
             }
 
             InProgressStartOpEvent event = mInProgressEvents.valueAt(indexOfToken);
-            event.numUnfinishedStarts--;
-            if (event.numUnfinishedStarts == 0) {
-                event.finish();
-                mInProgressEvents.removeAt(indexOfToken);
+            if (!isPausing) {
+                event.numUnfinishedStarts--;
+            }
+            // If we are pausing, create a NoteOpEvent, but don't change the InProgress event
+            if (event.numUnfinishedStarts == 0 || isPausing) {
+                if (!isPausing) {
+                    event.finish();
+                    mInProgressEvents.removeAt(indexOfToken);
+                }
 
                 if (mAccessEvents == null) {
                     mAccessEvents = new LongSparseArray<>(1);
@@ -1018,18 +1053,110 @@ public class AppOpsService extends IAppOpsService.Stub {
                         parent.packageName, tag, event.getUidState(),
                         event.getFlags(), finishedEvent.getNoteTime(), finishedEvent.getDuration());
 
-                mInProgressStartOpEventPool.release(event);
+                if (!isPausing) {
+                    mInProgressStartOpEventPool.release(event);
+                    if (mInProgressEvents.isEmpty()) {
+                        mInProgressEvents = null;
 
-                if (mInProgressEvents.isEmpty()) {
-                    mInProgressEvents = null;
-
-                    // TODO moltmann: Also callback for single attribution tag activity changes
-                    if (triggerCallbackIfNeeded && !parent.isRunning()) {
-                        scheduleOpActiveChangedIfNeededLocked(parent.op, parent.uid,
-                                parent.packageName, false);
+                        // TODO ntmyren: Also callback for single attribution tag activity changes
+                        if (triggerCallbackIfNeeded && !parent.isRunning()) {
+                            scheduleOpActiveChangedIfNeededLocked(parent.op, parent.uid,
+                                    parent.packageName, false);
+                        }
                     }
                 }
             }
+        }
+
+        // Finish or pause (no-op) an already paused op
+        private void finishPossiblyPaused(@NonNull IBinder clientId, boolean isPausing) {
+            if (mPausedInProgressEvents == null) {
+                Slog.wtf(TAG, "No ops running or paused");
+                return;
+            }
+
+            int indexOfToken = mPausedInProgressEvents.indexOfKey(clientId);
+            if (indexOfToken < 0) {
+                Slog.wtf(TAG, "No op running or paused for the client");
+                return;
+            } else if (isPausing) {
+                // already paused
+                return;
+            }
+
+            // no need to record a paused event finishing.
+            InProgressStartOpEvent event = mInProgressEvents.valueAt(indexOfToken);
+            event.numUnfinishedStarts--;
+            if (event.numUnfinishedStarts == 0) {
+                mPausedInProgressEvents.removeAt(indexOfToken);
+                mInProgressStartOpEventPool.release(event);
+                if (mPausedInProgressEvents.isEmpty()) {
+                    mPausedInProgressEvents = null;
+                }
+            }
+        }
+
+        /**
+         * Create an event that will be started, if the op is unpaused.
+         */
+        public void createPaused(@NonNull IBinder clientId, int proxyUid,
+                @Nullable String proxyPackageName, @Nullable String proxyAttributionTag,
+                @AppOpsManager.UidState int uidState, @OpFlags int flags) throws RemoteException {
+            startedOrPaused(clientId, proxyUid, proxyPackageName, proxyAttributionTag,
+                    uidState, flags, true, false);
+        }
+
+        /**
+         * Pause all currently started ops. This will create a HistoricalRegistry
+         */
+        public void pause() {
+            if (mInProgressEvents == null) {
+                return;
+            }
+
+            if (mPausedInProgressEvents == null) {
+                mPausedInProgressEvents = new ArrayMap<>(1);
+            }
+
+            for (int i = 0; i < mInProgressEvents.size(); i++) {
+                InProgressStartOpEvent event = mInProgressEvents.valueAt(i);
+                mPausedInProgressEvents.put(event.mClientId, event);
+                finishOrPause(event.mClientId, true, true);
+            }
+            scheduleOpActiveChangedIfNeededLocked(parent.op, parent.uid,
+                    parent.packageName, false);
+            mInProgressEvents = null;
+        }
+
+        /**
+         * Unpause all currently paused ops. This will reinitialize their start and duration
+         * times, but keep all other values the same
+         */
+        public void resume() {
+            if (mPausedInProgressEvents == null) {
+                return;
+            }
+
+            if (mInProgressEvents == null) {
+                mInProgressEvents = new ArrayMap<>(mPausedInProgressEvents.size());
+            }
+            boolean shouldSendActive = !mPausedInProgressEvents.isEmpty()
+                    && mInProgressEvents.isEmpty();
+
+            long startTime = System.currentTimeMillis();
+            for (int i = 0; i < mPausedInProgressEvents.size(); i++) {
+                InProgressStartOpEvent event = mPausedInProgressEvents.valueAt(i);
+                mInProgressEvents.put(event.mClientId, event);
+                event.mStartElapsedTime = SystemClock.elapsedRealtime();
+                event.mStartTime = startTime;
+                mHistoricalRegistry.incrementOpAccessedCount(parent.op, parent.uid,
+                        parent.packageName, tag, event.mUidState, event.mFlags, startTime);
+            }
+            if (shouldSendActive) {
+                scheduleOpActiveChangedIfNeededLocked(parent.op, parent.uid,
+                        parent.packageName, true);
+            }
+            mPausedInProgressEvents = null;
         }
 
         /**
@@ -2303,6 +2430,9 @@ public class AppOpsService extends IAppOpsService.Stub {
                 scheduleWriteLocked();
             }
             uidState.evalForegroundOps(mOpModeWatchers);
+            if (mode != MODE_ERRORED && mode != previousMode) {
+                updateStartedOpModeForUidLocked(code, mode == MODE_IGNORED, uid);
+            }
         }
 
         notifyOpChangedForAllPkgsInUid(code, uid, false, permissionPolicyCallback);
@@ -2556,6 +2686,9 @@ public class AppOpsService extends IAppOpsService.Stub {
                         pruneOpLocked(op, uid, packageName);
                     }
                     scheduleFastWriteLocked();
+                    if (mode != MODE_ERRORED) {
+                        updateStartedOpModeForUidLocked(code, mode == MODE_IGNORED, uid);
+                    }
                 }
             }
         }
@@ -3660,6 +3793,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     packageName);
         }
 
+        boolean isRestricted = false;
         synchronized (this) {
             final Ops ops = getOpsLocked(uid, packageName, attributionTag, bypass, true /* edit */);
             if (ops == null) {
@@ -3673,18 +3807,10 @@ public class AppOpsService extends IAppOpsService.Stub {
                         packageName);
             }
             final Op op = getOpLocked(ops, code, uid, true);
-            if (isOpRestrictedLocked(uid, code, packageName, bypass)) {
-                if (!dryRun) {
-                    scheduleOpStartedIfNeededLocked(code, uid, packageName, attributionTag,
-                            flags, AppOpsManager.MODE_IGNORED);
-                }
-                return new SyncNotedAppOp(AppOpsManager.MODE_IGNORED, code, attributionTag,
-                        packageName);
-            }
-
             final AttributedOp attributedOp = op.getOrCreateAttribution(op, attributionTag);
-            final int switchCode = AppOpsManager.opToSwitch(code);
             final UidState uidState = ops.uidState;
+            isRestricted = isOpRestrictedLocked(uid, code, packageName, bypass);
+            final int switchCode = AppOpsManager.opToSwitch(code);
             // If there is a non-default per UID policy (we set UID op mode only if
             // non-default) it takes over, otherwise use the per package policy.
             if (uidState.opModes != null && uidState.opModes.indexOfKey(switchCode) >= 0) {
@@ -3720,25 +3846,30 @@ public class AppOpsService extends IAppOpsService.Stub {
                 }
             }
             if (DEBUG) Slog.d(TAG, "startOperation: allowing code " + code + " uid " + uid
-                    + " package " + packageName);
+                    + " package " + packageName + " restricted: " + isRestricted);
             if (!dryRun) {
-                scheduleOpStartedIfNeededLocked(code, uid, packageName, attributionTag, flags,
-                        AppOpsManager.MODE_ALLOWED);
                 try {
-                    attributedOp.started(clientId, proxyUid, proxyPackageName, proxyAttributionTag,
-                            uidState.state, flags);
+                    if (isRestricted) {
+                        attributedOp.createPaused(clientId, proxyUid, proxyPackageName,
+                                proxyAttributionTag, uidState.state, flags);
+                    } else {
+                        attributedOp.started(clientId, proxyUid, proxyPackageName,
+                                proxyAttributionTag, uidState.state, flags);
+                    }
                 } catch (RemoteException e) {
                     throw new RuntimeException(e);
                 }
+                scheduleOpStartedIfNeededLocked(code, uid, packageName, attributionTag, flags,
+                        isRestricted ? MODE_IGNORED : MODE_ALLOWED);
             }
         }
 
-        if (shouldCollectAsyncNotedOp && !dryRun) {
+        if (shouldCollectAsyncNotedOp && !dryRun && !isRestricted) {
             collectAsyncNotedOp(uid, packageName, code, attributionTag, AppOpsManager.OP_FLAG_SELF,
                     message, shouldCollectMessage);
         }
 
-        return new SyncNotedAppOp(AppOpsManager.MODE_ALLOWED, code, attributionTag,
+        return new SyncNotedAppOp(isRestricted ? MODE_IGNORED : MODE_ALLOWED, code, attributionTag,
                 packageName);
     }
 
@@ -6116,11 +6247,52 @@ public class AppOpsService extends IAppOpsService.Stub {
             if (restrictionState.setRestriction(code, restricted, exceptionPackages, userHandle)) {
                 mHandler.sendMessage(PooledLambda.obtainMessage(
                         AppOpsService::notifyWatchersOfChange, this, code, UID_ANY));
+                mHandler.sendMessage(PooledLambda.obtainMessage(
+                        AppOpsService::updateStartedOpModeForUser, this, code, restricted,
+                        userHandle));
             }
 
             if (restrictionState.isDefault()) {
                 mOpUserRestrictions.remove(token);
                 restrictionState.destroy();
+            }
+        }
+    }
+
+    private void updateStartedOpModeForUser(int code, boolean restricted, int userId) {
+        synchronized (AppOpsService.this) {
+            int numUids = mUidStates.size();
+            for (int uidNum = 0; uidNum < numUids; uidNum++) {
+                int uid = mUidStates.keyAt(uidNum);
+                if (userId != UserHandle.USER_ALL && UserHandle.getUserId(uid) != userId) {
+                    continue;
+                }
+                updateStartedOpModeForUidLocked(code, restricted, uid);
+            }
+        }
+    }
+
+    private void updateStartedOpModeForUidLocked(int code, boolean restricted, int uid) {
+        UidState uidState = mUidStates.get(uid);
+        if (uidState == null || uidState.pkgOps == null) {
+            return;
+        }
+
+        int numPkgOps = uidState.pkgOps.size();
+        for (int pkgNum = 0; pkgNum < numPkgOps; pkgNum++) {
+            Ops ops = uidState.pkgOps.valueAt(pkgNum);
+            Op op = ops != null ? ops.get(code) : null;
+            if (op == null || (op.mode != MODE_ALLOWED && op.mode != MODE_FOREGROUND)) {
+                continue;
+            }
+            int numAttrTags = op.mAttributions.size();
+            for (int attrNum = 0; attrNum < numAttrTags; attrNum++) {
+                AttributedOp attrOp = op.mAttributions.valueAt(attrNum);
+                if (restricted) {
+                    attrOp.pause();
+                } else {
+                    attrOp.resume();
+                }
             }
         }
     }
