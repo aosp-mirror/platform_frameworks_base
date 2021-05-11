@@ -226,9 +226,9 @@ void AssetManager2::BuildDynamicRefTable() {
       // staging aliases can only be defined by the framework package (which is not a shared
       // library), the compile-time package id of the framework is the same across all packages
       // that compile against the framework.
-      for (const auto& package : iter2->packages_) {
+      for (const auto& package : iter->packages_) {
         for (const auto& entry : package.loaded_package_->GetAliasResourceIdMap()) {
-          iter->dynamic_ref_table->addAlias(entry.first, entry.second);
+          iter2->dynamic_ref_table->addAlias(entry.first, entry.second);
         }
       }
     }
