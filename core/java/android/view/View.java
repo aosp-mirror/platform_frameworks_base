@@ -29599,7 +29599,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             return mScrollCaptureInternal;
         }
 
-        ViewRoot getViewRoot() {
+        AttachedSurfaceControl getRootSurfaceControl() {
             return mViewRootImpl;
         }
 
@@ -31043,17 +31043,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * @return The {@link android.view.ViewRoot} interface for this View. This will only
-     * return a non-null value when called between {@link #onAttachedToWindow} and
-     * {@link #onDetachedFromWindow}.
-     *
-     * The ViewRoot itself is not a View, it is just the interface to the windowing-system
-     * object that contains the entire view hierarchy. For the root View of a given hierarchy
-     * see {@link #getRootView}.
+     * The AttachedSurfaceControl itself is not a View, it is just the interface to the
+     * windowing-system object that contains the entire view hierarchy.
+     * For the root View of a given hierarchy see {@link #getRootView}.
+
+     * @return The {@link android.view.AttachedSurfaceControl} interface for this View.
+     * This will only return a non-null value when called between {@link #onAttachedToWindow}
+     * and {@link #onDetachedFromWindow}.
      */
-    public @Nullable ViewRoot getViewRoot() {
+    public @Nullable AttachedSurfaceControl getRootSurfaceControl() {
         if (mAttachInfo != null) {
-            return mAttachInfo.getViewRoot();
+          return mAttachInfo.getRootSurfaceControl();
         }
         return null;
     }
