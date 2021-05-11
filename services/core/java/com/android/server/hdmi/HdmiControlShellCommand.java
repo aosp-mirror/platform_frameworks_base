@@ -86,6 +86,8 @@ final class HdmiControlShellCommand extends ShellCommand {
         pw.println("      Send a Vendor Command to the given target device");
         pw.println("  setsystemaudiomode, setsam [on|off]");
         pw.println("      Sets the System Audio Mode feature on or off on TV devices");
+        pw.println("  setarc [on|off]");
+        pw.println("      Sets the ARC feature on or off on TV devices");
     }
 
     private int handleShellCommand(String cmd) throws RemoteException {
@@ -100,6 +102,8 @@ final class HdmiControlShellCommand extends ShellCommand {
             case "setsystemaudiomode":
             case "setsam":
                 return setSystemAudioMode(pw);
+            case "setarc":
+                return setArcMode(pw);
         }
 
         getErrPrintWriter().println("Unhandled command: " + cmd);
@@ -186,6 +190,27 @@ final class HdmiControlShellCommand extends ShellCommand {
         }
 
         return mCecResult.get() == HdmiControlManager.RESULT_SUCCESS ? 0 : 1;
+    }
+
+    private int setArcMode(PrintWriter pw) throws RemoteException {
+        if (1 > getRemainingArgsCount()) {
+            throw new IllegalArgumentException(
+                    "Please indicate if ARC mode should be turned \"on\" or \"off\".");
+        }
+
+        String arg = getNextArg();
+        if (arg.equals("on")) {
+            pw.println("Setting ARC mode on");
+            mBinderService.setArcMode(true);
+        } else if (arg.equals("off")) {
+            pw.println("Setting ARC mode off");
+            mBinderService.setArcMode(false);
+        } else {
+            throw new IllegalArgumentException(
+                    "Please indicate if ARC mode should be turned \"on\" or \"off\".");
+        }
+
+        return 0;
     }
 
     private boolean receiveCallback(String command) {
