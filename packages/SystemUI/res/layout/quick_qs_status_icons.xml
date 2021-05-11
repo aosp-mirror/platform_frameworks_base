@@ -28,7 +28,7 @@
 
     <com.android.systemui.statusbar.policy.Clock
         android:id="@+id/clock"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="match_parent"
         android:minWidth="48dp"
         android:minHeight="48dp"
@@ -49,17 +49,35 @@
         android:layout_gravity="end|center_vertical"
         android:focusable="false"/>
 
-    <com.android.systemui.statusbar.phone.StatusIconContainer
-        android:id="@+id/statusIcons"
-        android:layout_width="wrap_content"
+    <View
+        android:id="@+id/separator"
+        android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:paddingEnd="@dimen/signal_cluster_battery_padding" />
+        android:layout_gravity="center"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:visibility="gone"
+        />
 
-    <com.android.systemui.BatteryMeterView
-        android:id="@+id/batteryRemainingIcon"
+    <LinearLayout
+        android:id="@+id/rightLayout"
+        android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_width="wrap_content"
-        systemui:textAppearance="@style/TextAppearance.QS.Status"
-        android:paddingEnd="2dp" />
+        android:layout_weight="1"
+        >
+        <com.android.systemui.statusbar.phone.StatusIconContainer
+            android:id="@+id/statusIcons"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:paddingEnd="@dimen/signal_cluster_battery_padding" />
 
+        <com.android.systemui.BatteryMeterView
+            android:id="@+id/batteryRemainingIcon"
+            android:layout_height="match_parent"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            systemui:textAppearance="@style/TextAppearance.QS.Status"
+            android:paddingEnd="2dp" />
+
+    </LinearLayout>
 </LinearLayout>
