@@ -81,7 +81,4 @@ interface IShortcutService {
     AndroidFuture<ParceledListSlice> getShortcuts(String packageName, int matchFlags, int userId);
 
     AndroidFuture pushDynamicShortcut(String packageName, in ShortcutInfo shortcut, int userId);
-
-    AndroidFuture updateShortcutVisibility(String callingPkg, String packageName,
-            in byte[] certificate, in boolean visible, int userId);
 }
