@@ -15,16 +15,17 @@
   limitations under the License.
   -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_height="wrap_content"
-    android:layout_width="match_parent" >
-
-    <com.android.settingslib.widget.MainSwitchBar
-        android:id="@+id/main_switch_bar"
-        android:visibility="gone"
-        android:layout_height="wrap_content"
-        android:layout_width="match_parent" />
-
-</LinearLayout>
-
-
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:top="@dimen/settingslib_switch_thumb_margin"
+        android:left="@dimen/settingslib_switch_thumb_margin"
+        android:right="@dimen/settingslib_switch_thumb_margin"
+        android:bottom="@dimen/settingslib_switch_thumb_margin">
+        <shape android:shape="oval">
+            <size
+                android:height="@dimen/settingslib_switch_thumb_size"
+                android:width="@dimen/settingslib_switch_thumb_size"/>
+            <solid android:color="@color/settingslib_state_off_color"/>
+        </shape>
+    </item>
+</layer-list>

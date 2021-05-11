@@ -41,7 +41,8 @@ public class MainSwitchPreferenceTest {
     @Before
     public void setUp() {
         mContext = RuntimeEnvironment.application;
-        mRootView = View.inflate(mContext, R.layout.main_switch_layout, null /* parent */);
+        mRootView = View.inflate(mContext, R.layout.settingslib_main_switch_layout,
+                null /* parent */);
         mHolder = PreferenceViewHolder.createInstanceForTests(mRootView);
         mPreference = new MainSwitchPreference(mContext);
     }

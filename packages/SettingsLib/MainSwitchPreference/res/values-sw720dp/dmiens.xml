@@ -18,6 +18,6 @@
 <resources>
 
     <!-- SwitchBar sub settings margin start / end -->
-    <dimen name="switchbar_subsettings_margin_start">80dp</dimen>
-    <dimen name="switchbar_subsettings_margin_end">80dp</dimen>
+    <dimen name="settingslib_switchbar_subsettings_margin_start">80dp</dimen>
+    <dimen name="settingslib_switchbar_subsettings_margin_end">80dp</dimen>
 </resources>
