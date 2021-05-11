@@ -17,11 +17,11 @@
 package com.android.internal.widget;
 
 import android.annotation.DimenRes;
+import android.app.Notification;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.RippleDrawable;
 import android.util.AttributeSet;
-import android.util.Pair;
 import android.view.Gravity;
 import android.view.RemotableViewMethod;
 import android.view.View;
@@ -43,10 +43,9 @@ public class NotificationActionListLayout extends LinearLayout {
     private final int mGravity;
     private int mTotalWidth = 0;
     private int mExtraStartPadding = 0;
-    private ArrayList<Pair<Integer, TextView>> mMeasureOrderTextViews = new ArrayList<>();
+    private ArrayList<TextViewInfo> mMeasureOrderTextViews = new ArrayList<>();
     private ArrayList<View> mMeasureOrderOther = new ArrayList<>();
     private boolean mEmphasizedMode;
-    private boolean mPrioritizedWrapMode;
     private int mDefaultPaddingBottom;
     private int mDefaultPaddingTop;
     private int mEmphasizedHeight;
@@ -70,16 +69,18 @@ public class NotificationActionListLayout extends LinearLayout {
         ta.recycle();
     }
 
+    private static boolean isPriority(View actionView) {
+        return actionView instanceof EmphasizedNotificationButton
+                && ((EmphasizedNotificationButton) actionView).isPriority();
+    }
+
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        if (mEmphasizedMode && !mPrioritizedWrapMode) {
-            super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-            return;
-        }
         final int N = getChildCount();
         int textViews = 0;
         int otherViews = 0;
         int notGoneChildren = 0;
+        int priorityChildren = 0;
 
         for (int i = 0; i < N; i++) {
             View c = getChildAt(i);
@@ -90,6 +91,9 @@ public class NotificationActionListLayout extends LinearLayout {
             }
             if (c.getVisibility() != GONE) {
                 notGoneChildren++;
+                if (isPriority(c)) {
+                    priorityChildren++;
+                }
             }
         }
 
@@ -103,9 +107,9 @@ public class NotificationActionListLayout extends LinearLayout {
         if (!needRebuild) {
             final int size = mMeasureOrderTextViews.size();
             for (int i = 0; i < size; i++) {
-                Pair<Integer, TextView> pair = mMeasureOrderTextViews.get(i);
-                if (pair.first != pair.second.getText().length()) {
+                if (mMeasureOrderTextViews.get(i).needsRebuild()) {
                     needRebuild = true;
+                    break;
                 }
             }
         }
@@ -122,14 +126,19 @@ public class NotificationActionListLayout extends LinearLayout {
         int usedWidth = 0;
 
         int measuredChildren = 0;
+        int measuredPriorityChildren = 0;
         for (int i = 0; i < N; i++) {
             // Measure shortest children first. To avoid measuring twice, we approximate by looking
             // at the text length.
-            View c;
+            final boolean isPriority;
+            final View c;
             if (i < otherSize) {
                 c = mMeasureOrderOther.get(i);
+                isPriority = false;
             } else {
-                c = mMeasureOrderTextViews.get(i - otherSize).second;
+                TextViewInfo info = mMeasureOrderTextViews.get(i - otherSize);
+                c = info.mTextView;
+                isPriority = info.mIsPriority;
             }
             if (c.getVisibility() == GONE) {
                 continue;
@@ -143,7 +152,18 @@ public class NotificationActionListLayout extends LinearLayout {
                 // measure in the order of (approx.) size, a large view can still take more than its
                 // share if the others are small.
                 int availableWidth = innerWidth - usedWidth;
-                int maxWidthForChild = availableWidth / (notGoneChildren - measuredChildren);
+                int unmeasuredChildren = notGoneChildren - measuredChildren;
+                int maxWidthForChild = availableWidth / unmeasuredChildren;
+                if (isPriority) {
+                    // Priority children get a larger maximum share of the total space:
+                    //  maximum priority share = (nPriority + 1) / (MAX + 1)
+                    int unmeasuredPriorityChildren = priorityChildren - measuredPriorityChildren;
+                    int unmeasuredOtherChildren = unmeasuredChildren - unmeasuredPriorityChildren;
+                    int widthReservedForOtherChildren = innerWidth * unmeasuredOtherChildren
+                            / (Notification.MAX_ACTION_BUTTONS + 1);
+                    int widthAvailableForPriority = availableWidth - widthReservedForOtherChildren;
+                    maxWidthForChild = widthAvailableForPriority / unmeasuredPriorityChildren;
+                }
 
                 usedWidthForChild = innerWidth - maxWidthForChild;
             }
@@ -153,6 +173,9 @@ public class NotificationActionListLayout extends LinearLayout {
 
             usedWidth += c.getMeasuredWidth() + lp.rightMargin + lp.leftMargin;
             measuredChildren++;
+            if (isPriority) {
+                measuredPriorityChildren++;
+            }
         }
 
         int collapsibleIndent = mCollapsibleIndentDimen == 0 ? 0
@@ -175,13 +198,8 @@ public class NotificationActionListLayout extends LinearLayout {
         final int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
             View c = getChildAt(i);
-            if (c instanceof EmphasizedNotificationButton
-                    && ((EmphasizedNotificationButton) c).isPriority()) {
-                // add with 0 length to ensure that this view is measured before others.
-                mMeasureOrderTextViews.add(Pair.create(0, (TextView) c));
-            } else if (c instanceof TextView && ((TextView) c).getText().length() > 0) {
-                mMeasureOrderTextViews.add(Pair.create(((TextView) c).getText().length(),
-                        (TextView)c));
+            if (c instanceof TextView && ((TextView) c).getText().length() > 0) {
+                mMeasureOrderTextViews.add(new TextViewInfo((TextView) c));
             } else {
                 mMeasureOrderOther.add(c);
             }
@@ -213,10 +231,6 @@ public class NotificationActionListLayout extends LinearLayout {
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        if (mEmphasizedMode && !mPrioritizedWrapMode) {
-            super.onLayout(changed, left, top, right, bottom);
-            return;
-        }
         final boolean isLayoutRtl = isLayoutRtl();
         final int paddingTop = mPaddingTop;
         final boolean centerAligned = (mGravity & Gravity.CENTER_HORIZONTAL) != 0;
@@ -293,16 +307,6 @@ public class NotificationActionListLayout extends LinearLayout {
     }
 
     /**
-     * When used with emphasizedMode, changes the button sizing behavior to prioritize certain
-     * buttons (which are system generated) to not scrunch, and leave the remaining space for
-     * custom actions.
-     */
-    @RemotableViewMethod
-    public void setPrioritizedWrapMode(boolean prioritizedWrapMode) {
-        mPrioritizedWrapMode = prioritizedWrapMode;
-    }
-
-    /**
      * When buttons are in wrap mode, this is a padding that will be applied at the start of the
      * layout of the actions, but only when those actions would fit with the entire padding
      * visible.  Otherwise, this padding will be omitted entirely.
@@ -353,6 +357,28 @@ public class NotificationActionListLayout extends LinearLayout {
         return 0;
     }
 
-    public static final Comparator<Pair<Integer, TextView>> MEASURE_ORDER_COMPARATOR
-            = (a, b) -> a.first.compareTo(b.first);
+    public static final Comparator<TextViewInfo> MEASURE_ORDER_COMPARATOR = (a, b) -> {
+        int priorityComparison = -Boolean.compare(a.mIsPriority, b.mIsPriority);
+        return priorityComparison != 0
+                ? priorityComparison
+                : Integer.compare(a.mTextLength, b.mTextLength);
+    };
+
+    private static final class TextViewInfo {
+        final boolean mIsPriority;
+        final int mTextLength;
+        final TextView mTextView;
+
+        TextViewInfo(TextView textView) {
+            this.mIsPriority = isPriority(textView);
+            this.mTextLength = textView.getText().length();
+            this.mTextView = textView;
+        }
+
+        boolean needsRebuild() {
+            return mTextView.getText().length() != mTextLength
+                    || isPriority(mTextView) != mIsPriority;
+        }
+    }
+
 }
