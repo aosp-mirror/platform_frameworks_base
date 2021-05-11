@@ -3609,10 +3609,16 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         boolean visibleNotOccluded = mStatusBarKeyguardViewManager.isShowing()
                 && !mStatusBarKeyguardViewManager.isOccluded();
+        // If we're dozing and we'll be animating the screen off, the keyguard isn't currently
+        // visible but will be shortly for the animation, so we should proceed as if it's visible.
+        boolean visibleNotOccludedOrWillBe =
+                visibleNotOccluded || (mDozing && mDozeParameters.shouldControlUnlockedScreenOff());
+
         boolean wakeAndUnlock = mBiometricUnlockController.getMode()
                 == BiometricUnlockController.MODE_WAKE_AND_UNLOCK;
         boolean animate = (!mDozing && mDozeServiceHost.shouldAnimateWakeup() && !wakeAndUnlock)
-                || (mDozing && mDozeServiceHost.shouldAnimateScreenOff() && visibleNotOccluded);
+                || (mDozing && mDozeServiceHost.shouldAnimateScreenOff()
+                && visibleNotOccludedOrWillBe);
 
         mNotificationPanelViewController.setDozing(mDozing, animate, mWakeUpTouchLocation);
         updateQsExpansionEnabled();
