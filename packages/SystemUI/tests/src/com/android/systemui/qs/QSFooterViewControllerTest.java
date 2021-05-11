@@ -21,6 +21,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -35,6 +36,7 @@ import android.widget.TextView;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.testing.FakeMetricsLogger;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
@@ -82,6 +84,7 @@ public class QSFooterViewControllerTest extends LeakCheckedTest {
     private QuickQSPanelController mQuickQSPanelController;
     private FakeTunerService mFakeTunerService;
     private MetricsLogger mMetricsLogger = new FakeMetricsLogger();
+    private FalsingManagerFake mFalsingManager;
 
     @Mock
     private SettingsButton mSettingsButton;
@@ -95,12 +98,15 @@ public class QSFooterViewControllerTest extends LeakCheckedTest {
     private View mPowerMenuLiteView;
     @Mock
     private GlobalActionsDialogLite mGlobalActionsDialog;
+    @Mock
+    private UiEventLogger mUiEventLogger;
 
     private QSFooterViewController mController;
 
     @Before
     public void setup() throws Exception {
         MockitoAnnotations.initMocks(this);
+        mFalsingManager = new FalsingManagerFake();
 
         injectLeakCheckedDependencies(ALL_SUPPORTED_CLASSES);
 
@@ -121,7 +127,8 @@ public class QSFooterViewControllerTest extends LeakCheckedTest {
         mController = new QSFooterViewController(mView, mUserManager, mUserInfoController,
                 mActivityStarter, mDeviceProvisionedController, mUserTracker, mQSPanelController,
                 mMultiUserSwitchController, mQuickQSPanelController, mFakeTunerService,
-                mMetricsLogger, new FalsingManagerFake(), false, mGlobalActionsDialog);
+                mMetricsLogger, mFalsingManager, false, mGlobalActionsDialog,
+                mUiEventLogger);
 
         mController.init();
     }
@@ -153,5 +160,28 @@ public class QSFooterViewControllerTest extends LeakCheckedTest {
         onClickCaptor.getValue().onClick(mSettingsButton);
         // Verify Settings wasn't launched.
         verify(mActivityStarter, never()).startActivity(any(), anyBoolean());
+    }
+
+    @Test
+    public void testLogPowerMenuClick() {
+        // Enable power menu button
+        mController = new QSFooterViewController(mView, mUserManager, mUserInfoController,
+                mActivityStarter, mDeviceProvisionedController, mUserTracker, mQSPanelController,
+                mMultiUserSwitchController, mQuickQSPanelController, mFakeTunerService,
+                mMetricsLogger, new FalsingManagerFake(), true, mGlobalActionsDialog,
+                mUiEventLogger);
+        mController.init();
+        mController.setExpanded(true);
+        mFalsingManager.setFalseTap(false);
+
+        ArgumentCaptor<View.OnClickListener> onClickCaptor =
+                ArgumentCaptor.forClass(View.OnClickListener.class);
+        verify(mPowerMenuLiteView).setOnClickListener(onClickCaptor.capture());
+
+        onClickCaptor.getValue().onClick(mPowerMenuLiteView);
+
+        // Verify clicks are logged
+        verify(mUiEventLogger, times(1))
+                .log(GlobalActionsDialogLite.GlobalActionsEvent.GA_OPEN_QS);
     }
 }
