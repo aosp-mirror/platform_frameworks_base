@@ -25,7 +25,7 @@ import java.lang.annotation.RetentionPolicy;
 /**
  * Different high-brightness mode (HBM) types that are relevant to this package.
  */
-public final class HbmTypes {
+public final class UdfpsHbmTypes {
     /** HBM that applies to the whole screen. */
     public static final int GLOBAL_HBM = IUdfpsHbmListener.GLOBAL_HBM;
 

@@ -35,7 +35,7 @@ oneway interface IUdfpsHbmListener {
      * UdfpsController will call this method when the HBM is enabled.
      *
      * @param hbmType The type of HBM that was enabled. See
-     *        {@link com.android.systemui.biometrics.HbmTypes}.
+     *        {@link com.android.systemui.biometrics.UdfpsHbmTypes}.
      * @param displayId The displayId for which the HBM is enabled. See
      *        {@link android.view.Display#getDisplayId()}.
      */
@@ -45,7 +45,7 @@ oneway interface IUdfpsHbmListener {
      * UdfpsController will call this method when the HBM is disabled.
      *
      * @param hbmType The type of HBM that was disabled. See
-     *        {@link com.android.systemui.biometrics.HbmTypes}.
+     *        {@link com.android.systemui.biometrics.UdfpsHbmTypes}.
      * @param displayId The displayId for which the HBM is disabled. See
      *        {@link android.view.Display#getDisplayId()}.
      */
