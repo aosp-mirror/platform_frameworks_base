@@ -15,6 +15,7 @@
  */
 package android.hardware.camera2.extension;
 
+import android.hardware.camera2.extension.IAdvancedExtenderImpl;
 import android.hardware.camera2.extension.IPreviewExtenderImpl;
 import android.hardware.camera2.extension.IImageCaptureExtenderImpl;
 
@@ -23,6 +24,8 @@ interface ICameraExtensionsProxyService
 {
     long registerClient();
     void unregisterClient(long clientId);
+    boolean advancedExtensionsSupported();
     @nullable IPreviewExtenderImpl initializePreviewExtension(int extensionType);
     @nullable IImageCaptureExtenderImpl initializeImageExtension(int extensionType);
+    @nullable IAdvancedExtenderImpl initializeAdvancedExtension(int extensionType);
 }
