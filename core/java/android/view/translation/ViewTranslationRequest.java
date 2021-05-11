@@ -43,7 +43,7 @@ public final class ViewTranslationRequest implements Parcelable {
      * Constant id for the default view text to be translated. This is used by
      * {@link Builder#setValue(String, TranslationRequestValue)}.
      */
-    public static final String ID_TEXT = "text";
+    public static final String ID_TEXT = "android:text";
 
     /**
      * The {@link AutofillId} of the view associated with this request.
@@ -303,7 +303,7 @@ public final class ViewTranslationRequest implements Parcelable {
     };
 
     @DataClass.Generated(
-            time = 1617119791798L,
+            time = 1620259482911L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/view/translation/ViewTranslationRequest.java",
             inputSignatures = "public static final  java.lang.String ID_TEXT\nprivate final @android.annotation.NonNull android.view.autofill.AutofillId mAutofillId\nprivate final @android.annotation.NonNull @com.android.internal.util.DataClass.PluralOf(\"translationRequestValue\") java.util.Map<java.lang.String,android.view.translation.TranslationRequestValue> mTranslationRequestValues\npublic @android.annotation.NonNull android.view.translation.TranslationRequestValue getValue(java.lang.String)\npublic @android.annotation.NonNull java.util.Set<java.lang.String> getKeys()\npublic @android.annotation.NonNull android.view.autofill.AutofillId getAutofillId()\nprivate static  java.util.Map<java.lang.String,android.view.translation.TranslationRequestValue> defaultTranslationRequestValues()\nclass ViewTranslationRequest extends java.lang.Object implements [android.os.Parcelable]\nprivate @android.annotation.NonNull android.view.autofill.AutofillId mAutofillId\nprivate @android.annotation.NonNull java.util.Map<java.lang.String,android.view.translation.TranslationRequestValue> mTranslationRequestValues\nprivate  long mBuilderFieldsSet\npublic @android.annotation.SuppressLint @android.annotation.NonNull android.view.translation.ViewTranslationRequest.Builder setValue(java.lang.String,android.view.translation.TranslationRequestValue)\npublic @android.annotation.NonNull android.view.translation.ViewTranslationRequest build()\n  android.view.translation.ViewTranslationRequest.Builder setTranslationRequestValues(java.util.Map<java.lang.String,android.view.translation.TranslationRequestValue>)\nprivate  void checkNotUsed()\nclass Builder extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genBuilder=false, genToString=true, genEqualsHashCode=true, genGetters=false, genHiddenConstructor=true)")
