@@ -1123,15 +1123,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             token.mDisplayContent = this;
             // Add non-app token to container hierarchy on the display. App tokens are added through
             // the parent container managing them (e.g. Tasks).
-            switch (token.windowType) {
-                case TYPE_INPUT_METHOD:
-                case TYPE_INPUT_METHOD_DIALOG:
-                    mImeWindowsContainer.addChild(token);
-                    break;
-                default:
-                    mDisplayAreaPolicy.addWindow(token);
-                    break;
-            }
+            final DisplayArea.Tokens da = findAreaForToken(token).asTokens();
+            da.addChild(token);
         }
     }
 
@@ -5982,7 +5975,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         return mMagnificationSpec;
     }
 
-    DisplayArea getAreaForWindowToken(int windowType, Bundle options,
+    DisplayArea findAreaForWindowType(int windowType, Bundle options,
             boolean ownerCanManageAppToken, boolean roundedCornerOverlay) {
         // TODO(b/159767464): figure out how to find an appropriate TDA.
         if (windowType >= FIRST_APPLICATION_WINDOW && windowType <= LAST_APPLICATION_WINDOW) {
@@ -5994,8 +5987,26 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         if (windowType == TYPE_INPUT_METHOD || windowType == TYPE_INPUT_METHOD_DIALOG) {
             return getImeContainer();
         }
-        return mDisplayAreaPolicy.getDisplayAreaForWindowToken(windowType, options,
+        return mDisplayAreaPolicy.findAreaForWindowType(windowType, options,
                 ownerCanManageAppToken, roundedCornerOverlay);
+    }
+
+    /**
+     * Finds the {@link DisplayArea} for the {@link WindowToken} to attach to.
+     * <p>
+     * Note that the differences between this API and
+     * {@link RootDisplayArea#findAreaForTokenInLayer(WindowToken)} is that this API finds a
+     * {@link DisplayArea} in {@link DisplayContent} level, which may find a {@link DisplayArea}
+     * from multiple {@link RootDisplayArea RootDisplayAreas} under this {@link DisplayContent}'s
+     * hierarchy, while {@link RootDisplayArea#findAreaForTokenInLayer(WindowToken)} finds a
+     * {@link DisplayArea.Tokens} from a {@link DisplayArea.Tokens} list mapped to window layers.
+     * </p>
+     *
+     * @see DisplayContent#findAreaForTokenInLayer(WindowToken)
+     */
+    DisplayArea findAreaForToken(WindowToken windowToken) {
+        return findAreaForWindowType(windowToken.getWindowType(), windowToken.mOptions,
+                windowToken.mOwnerCanManageAppTokens, windowToken.mRoundedCornerOverlay);
     }
 
     @Override

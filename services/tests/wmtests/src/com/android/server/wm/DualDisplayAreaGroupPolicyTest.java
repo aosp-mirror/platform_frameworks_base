@@ -268,7 +268,7 @@ public class DualDisplayAreaGroupPolicyTest extends WindowTestsBase {
 
         // By default, the ime container is attached to DC as defined in DAPolicy.
         assertThat(imeContainer.getRootDisplayArea()).isEqualTo(mDisplay);
-        assertThat(mDisplay.findAreaForToken(imeToken)).isEqualTo(imeContainer);
+        assertThat(mDisplay.findAreaForTokenInLayer(imeToken)).isEqualTo(imeContainer);
 
         final WindowState firstActivityWin =
                 createWindow(null /* parent */, TYPE_APPLICATION_STARTING, mFirstActivity,
@@ -290,9 +290,9 @@ public class DualDisplayAreaGroupPolicyTest extends WindowTestsBase {
         assertThat(imeContainer.getRootDisplayArea()).isEqualTo(mFirstRoot);
         assertThat(imeContainer.getParent().asDisplayArea().mFeatureId)
                 .isEqualTo(FEATURE_IME_PLACEHOLDER);
-        assertThat(mDisplay.findAreaForToken(imeToken)).isNull();
-        assertThat(mFirstRoot.findAreaForToken(imeToken)).isEqualTo(imeContainer);
-        assertThat(mSecondRoot.findAreaForToken(imeToken)).isNull();
+        assertThat(mDisplay.findAreaForTokenInLayer(imeToken)).isNull();
+        assertThat(mFirstRoot.findAreaForTokenInLayer(imeToken)).isEqualTo(imeContainer);
+        assertThat(mSecondRoot.findAreaForTokenInLayer(imeToken)).isNull();
 
         // secondActivityWin should be the target
         doReturn(false).when(firstActivityWin).canBeImeTarget();
@@ -305,9 +305,9 @@ public class DualDisplayAreaGroupPolicyTest extends WindowTestsBase {
         assertThat(imeContainer.getRootDisplayArea()).isEqualTo(mSecondRoot);
         assertThat(imeContainer.getParent().asDisplayArea().mFeatureId)
                 .isEqualTo(FEATURE_IME_PLACEHOLDER);
-        assertThat(mDisplay.findAreaForToken(imeToken)).isNull();
-        assertThat(mFirstRoot.findAreaForToken(imeToken)).isNull();
-        assertThat(mSecondRoot.findAreaForToken(imeToken)).isEqualTo(imeContainer);
+        assertThat(mDisplay.findAreaForTokenInLayer(imeToken)).isNull();
+        assertThat(mFirstRoot.findAreaForTokenInLayer(imeToken)).isNull();
+        assertThat(mSecondRoot.findAreaForTokenInLayer(imeToken)).isEqualTo(imeContainer);
     }
 
     @Test
