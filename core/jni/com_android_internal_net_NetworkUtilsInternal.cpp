@@ -31,7 +31,7 @@ static jboolean android_net_utils_protectFromVpn(JNIEnv *env, jobject thiz, jint
 }
 
 static jboolean android_net_utils_protectFromVpnWithFd(JNIEnv *env, jobject thiz, jobject javaFd) {
-    return android_net_utils_protectFromVpn(env, thiz, AFileDescriptor_getFD(env, javaFd));
+    return android_net_utils_protectFromVpn(env, thiz, AFileDescriptor_getFd(env, javaFd));
 }
 
 static const JNINativeMethod gNetworkUtilMethods[] = {
