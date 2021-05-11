@@ -189,6 +189,7 @@ public class SecurityLog {
      * detected.
      * <li> {@code eio} indicates that an I/O error will be returned for an attempt to read
      * corrupted data blocks.
+     * <li> {@code disabled} indicates that integrity check is disabled.
      * For details see Verified Boot documentation.
      */
     public static final int TAG_OS_STARTUP = SecurityLogTags.SECURITY_OS_STARTUP;
@@ -344,7 +345,7 @@ public class SecurityLog {
     public static final int TAG_WIPE_FAILURE = SecurityLogTags.SECURITY_WIPE_FAILED;
 
     /**
-     * Indicates that an authentication key was generated. The log entry contains the following
+     * Indicates that a cryptographic key was generated. The log entry contains the following
      * information about the event, encapsulated in an {@link Object} array and accessible via
      * {@link SecurityEvent#getData()}:
      * <li> [0] result ({@code Integer}, 0 if operation failed, 1 if succeeded)
