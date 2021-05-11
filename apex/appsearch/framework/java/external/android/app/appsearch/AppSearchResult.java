@@ -13,15 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package android.app.appsearch;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.appsearch.exceptions.AppSearchException;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.util.Log;
 
 import com.android.internal.util.Preconditions;
@@ -36,24 +33,26 @@ import java.util.Objects;
  *
  * @param <ValueType> The type of result object for successful calls.
  */
-public final class AppSearchResult<ValueType> implements Parcelable {
+public final class AppSearchResult<ValueType> {
     private static final String TAG = "AppSearchResult";
 
     /**
      * Result codes from {@link AppSearchSession} methods.
+     *
      * @hide
      */
-    @IntDef(value = {
-            RESULT_OK,
-            RESULT_UNKNOWN_ERROR,
-            RESULT_INTERNAL_ERROR,
-            RESULT_INVALID_ARGUMENT,
-            RESULT_IO_ERROR,
-            RESULT_OUT_OF_SPACE,
-            RESULT_NOT_FOUND,
-            RESULT_INVALID_SCHEMA,
-            RESULT_SECURITY_ERROR,
-    })
+    @IntDef(
+            value = {
+                RESULT_OK,
+                RESULT_UNKNOWN_ERROR,
+                RESULT_INTERNAL_ERROR,
+                RESULT_INVALID_ARGUMENT,
+                RESULT_IO_ERROR,
+                RESULT_OUT_OF_SPACE,
+                RESULT_NOT_FOUND,
+                RESULT_INVALID_SCHEMA,
+                RESULT_SECURITY_ERROR,
+            })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ResultCode {}
 
@@ -109,20 +108,6 @@ public final class AppSearchResult<ValueType> implements Parcelable {
         mErrorMessage = errorMessage;
     }
 
-    private AppSearchResult(@NonNull Parcel in) {
-        mResultCode = in.readInt();
-        mResultValue = (ValueType) in.readValue(/*loader=*/ null);
-        mErrorMessage = in.readString();
-    }
-
-    /** @hide */
-    @Override
-    public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeInt(mResultCode);
-        dest.writeValue(mResultValue);
-        dest.writeString(mErrorMessage);
-    }
-
     /** Returns {@code true} if {@link #getResultCode} equals {@link AppSearchResult#RESULT_OK}. */
     public boolean isSuccess() {
         return getResultCode() == RESULT_OK;
@@ -154,8 +139,8 @@ public final class AppSearchResult<ValueType> implements Parcelable {
      *
      * <p>If {@link #isSuccess} is {@code true}, the error message is always {@code null}. The error
      * message may be {@code null} even if {@link #isSuccess} is {@code false}. See the
-     * documentation of the particular {@link AppSearchSession} call producing this
-     * {@link AppSearchResult} for what is returned by {@link #getErrorMessage}.
+     * documentation of the particular {@link AppSearchSession} call producing this {@link
+     * AppSearchResult} for what is returned by {@link #getErrorMessage}.
      */
     @Nullable
     public String getErrorMessage() {
@@ -190,40 +175,14 @@ public final class AppSearchResult<ValueType> implements Parcelable {
         return "[FAILURE(" + mResultCode + ")]: " + mErrorMessage;
     }
 
-    /** @hide */
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    /** @hide */
-    @NonNull
-    public static final Creator<AppSearchResult> CREATOR = new Creator<AppSearchResult>() {
-        @NonNull
-        @Override
-        public AppSearchResult createFromParcel(@NonNull Parcel in) {
-            return new AppSearchResult(in);
-        }
-
-        @NonNull
-        @Override
-        public AppSearchResult[] newArray(int size) {
-            return new AppSearchResult[size];
-        }
-    };
-
-    /**
-     * Creates a new successful {@link AppSearchResult}.
-     */
+    /** Creates a new successful {@link AppSearchResult}. */
     @NonNull
     public static <ValueType> AppSearchResult<ValueType> newSuccessfulResult(
             @Nullable ValueType value) {
         return new AppSearchResult<>(RESULT_OK, value, /*errorMessage=*/ null);
     }
 
-    /**
-     * Creates a new failed {@link AppSearchResult}.
-     */
+    /** Creates a new failed {@link AppSearchResult}. */
     @NonNull
     public static <ValueType> AppSearchResult<ValueType> newFailedResult(
             @ResultCode int resultCode, @Nullable String errorMessage) {
@@ -238,7 +197,8 @@ public final class AppSearchResult<ValueType> implements Parcelable {
     @NonNull
     public static <ValueType> AppSearchResult<ValueType> newFailedResult(
             @NonNull AppSearchResult<?> otherFailedResult) {
-        Preconditions.checkState(!otherFailedResult.isSuccess(),
+        Preconditions.checkState(
+                !otherFailedResult.isSuccess(),
                 "Cannot convert a success result to a failed result");
         return AppSearchResult.newFailedResult(
                 otherFailedResult.getResultCode(), otherFailedResult.getErrorMessage());
