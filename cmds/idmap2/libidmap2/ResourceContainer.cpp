@@ -16,6 +16,11 @@
 
 #include "idmap2/ResourceContainer.h"
 
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include "androidfw/ApkAssets.h"
 #include "androidfw/AssetManager.h"
 #include "androidfw/Util.h"

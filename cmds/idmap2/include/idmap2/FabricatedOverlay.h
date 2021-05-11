@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-#ifndef IDMAP2_INCLUDE_IDMAP2_FABRICATEDOVERLAY_H
-#define IDMAP2_INCLUDE_IDMAP2_FABRICATEDOVERLAY_H
+#ifndef IDMAP2_INCLUDE_IDMAP2_FABRICATEDOVERLAY_H_
+#define IDMAP2_INCLUDE_IDMAP2_FABRICATEDOVERLAY_H_
 
 #include <libidmap2/proto/fabricated_v1.pb.h>
 
 #include <iostream>
 #include <map>
 #include <memory>
+#include <string>
 #include <unordered_map>
+#include <vector>
 
 #include "idmap2/ResourceContainer.h"
 #include "idmap2/Result.h"
@@ -68,7 +70,8 @@ struct FabricatedOverlay {
   Result<SerializedData*> InitializeData() const;
   Result<uint32_t> GetCrc() const;
 
-  FabricatedOverlay(pb::FabricatedOverlay&& overlay, std::optional<uint32_t> crc_from_disk = {});
+  explicit FabricatedOverlay(pb::FabricatedOverlay&& overlay,
+                             std::optional<uint32_t> crc_from_disk = {});
 
   pb::FabricatedOverlay overlay_pb_;
   std::optional<uint32_t> crc_from_disk_;
@@ -102,4 +105,4 @@ struct FabricatedOverlayContainer : public OverlayResourceContainer {
 
 }  // namespace android::idmap2
 
-#endif  // IDMAP2_INCLUDE_IDMAP2_FABRICATEDOVERLAY_H
+#endif  // IDMAP2_INCLUDE_IDMAP2_FABRICATEDOVERLAY_H_

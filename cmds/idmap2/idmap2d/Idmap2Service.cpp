@@ -26,6 +26,8 @@
 #include <memory>
 #include <ostream>
 #include <string>
+#include <utility>
+#include <vector>
 
 #include "android-base/macros.h"
 #include "android-base/stringprintf.h"

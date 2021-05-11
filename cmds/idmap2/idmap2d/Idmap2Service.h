@@ -24,7 +24,9 @@
 #include <idmap2/ResourceContainer.h>
 #include <idmap2/Result.h>
 
+#include <memory>
 #include <string>
+#include <vector>
 
 namespace android::os {
 
