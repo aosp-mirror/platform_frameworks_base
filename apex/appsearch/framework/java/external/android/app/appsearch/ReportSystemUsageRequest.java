@@ -19,8 +19,6 @@ package android.app.appsearch;
 import android.annotation.CurrentTimeMillisLong;
 import android.annotation.NonNull;
 
-import com.android.internal.util.Preconditions;
-
 import java.util.Objects;
 
 /**
@@ -94,7 +92,6 @@ public final class ReportSystemUsageRequest {
         private final String mNamespace;
         private final String mDocumentId;
         private Long mUsageTimestampMillis;
-        private boolean mBuilt = false;
 
         /** Creates a {@link ReportSystemUsageRequest.Builder} instance. */
         public Builder(
@@ -116,29 +113,20 @@ public final class ReportSystemUsageRequest {
          *
          * <p>If unset, this defaults to the current timestamp at the time that the {@link
          * ReportSystemUsageRequest} is constructed.
-         *
-         * @throws IllegalStateException if the builder has already been used
          */
         @NonNull
         public ReportSystemUsageRequest.Builder setUsageTimestampMillis(
                 @CurrentTimeMillisLong long usageTimestampMillis) {
-            Preconditions.checkState(!mBuilt, "Builder has already been used");
             mUsageTimestampMillis = usageTimestampMillis;
             return this;
         }
 
-        /**
-         * Builds a new {@link ReportSystemUsageRequest}.
-         *
-         * @throws IllegalStateException if the builder has already been used
-         */
+        /** Builds a new {@link ReportSystemUsageRequest}. */
         @NonNull
         public ReportSystemUsageRequest build() {
-            Preconditions.checkState(!mBuilt, "Builder has already been used");
             if (mUsageTimestampMillis == null) {
                 mUsageTimestampMillis = System.currentTimeMillis();
             }
-            mBuilt = true;
             return new ReportSystemUsageRequest(
                     mPackageName, mDatabase, mNamespace, mDocumentId, mUsageTimestampMillis);
         }

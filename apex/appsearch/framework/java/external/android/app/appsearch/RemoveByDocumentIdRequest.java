@@ -19,8 +19,6 @@ package android.app.appsearch;
 import android.annotation.NonNull;
 import android.util.ArraySet;
 
-import com.android.internal.util.Preconditions;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -54,14 +52,10 @@ public final class RemoveByDocumentIdRequest {
         return Collections.unmodifiableSet(mIds);
     }
 
-    /**
-     * Builder for {@link RemoveByDocumentIdRequest} objects.
-     *
-     * <p>Once {@link #build} is called, the instance can no longer be used.
-     */
+    /** Builder for {@link RemoveByDocumentIdRequest} objects. */
     public static final class Builder {
         private final String mNamespace;
-        private final Set<String> mIds = new ArraySet<>();
+        private ArraySet<String> mIds = new ArraySet<>();
         private boolean mBuilt = false;
 
         /** Creates a {@link RemoveByDocumentIdRequest.Builder} instance. */
@@ -69,40 +63,35 @@ public final class RemoveByDocumentIdRequest {
             mNamespace = Objects.requireNonNull(namespace);
         }
 
-        /**
-         * Adds one or more document IDs to the request.
-         *
-         * @throws IllegalStateException if the builder has already been used.
-         */
+        /** Adds one or more document IDs to the request. */
         @NonNull
         public Builder addIds(@NonNull String... ids) {
             Objects.requireNonNull(ids);
+            resetIfBuilt();
             return addIds(Arrays.asList(ids));
         }
 
-        /**
-         * Adds a collection of IDs to the request.
-         *
-         * @throws IllegalStateException if the builder has already been used.
-         */
+        /** Adds a collection of IDs to the request. */
         @NonNull
         public Builder addIds(@NonNull Collection<String> ids) {
-            Preconditions.checkState(!mBuilt, "Builder has already been used");
             Objects.requireNonNull(ids);
+            resetIfBuilt();
             mIds.addAll(ids);
             return this;
         }
 
-        /**
-         * Builds a new {@link RemoveByDocumentIdRequest}.
-         *
-         * @throws IllegalStateException if the builder has already been used.
-         */
+        /** Builds a new {@link RemoveByDocumentIdRequest}. */
         @NonNull
         public RemoveByDocumentIdRequest build() {
-            Preconditions.checkState(!mBuilt, "Builder has already been used");
             mBuilt = true;
             return new RemoveByDocumentIdRequest(mNamespace, mIds);
+        }
+
+        private void resetIfBuilt() {
+            if (mBuilt) {
+                mIds = new ArraySet<>(mIds);
+                mBuilt = false;
+            }
         }
     }
 }
