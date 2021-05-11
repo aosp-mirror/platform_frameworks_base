@@ -32,7 +32,7 @@ package {
 java_sdk_library {
     name: "android.test.base",
 
-    srcs: ["src/**/*.java"],
+    srcs: [":android-test-base-sources"],
 
     errorprone: {
         javacflags: ["-Xep:DepAnn:ERROR"],
@@ -66,7 +66,7 @@ java_library_static {
     name: "android.test.base_static",
     installable: false,
 
-    srcs: ["src/**/*.java"],
+    srcs: [":android-test-base-sources"],
 
     errorprone: {
         javacflags: ["-Xep:DepAnn:ERROR"],
@@ -112,6 +112,12 @@ java_library_static {
     libs: [
         "junit",
     ],
+}
+
+filegroup {
+    name: "android-test-base-sources",
+    srcs: ["src/**/*.java"],
+    path: "src",
 }
 
 // Make the current.txt available for use by the cts/tests/signature tests.
