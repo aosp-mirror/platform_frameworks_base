@@ -2412,14 +2412,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         if (startingWindow && StartingSurfaceController.DEBUG_ENABLE_SHELL_DRAWER) {
-            // cancel the remove starting window animation on shell
+            // Cancel the remove starting window animation on shell. The main window might changed
+            // during animating, checking for all windows would be safer.
             if (mActivityRecord != null) {
-                final WindowState mainWindow =
-                        mActivityRecord.findMainWindow(false/* includeStartingApp */);
-                if (mainWindow != null && mainWindow.isSelfAnimating(0 /* flags */,
-                        ANIMATION_TYPE_STARTING_REVEAL)) {
-                    mainWindow.cancelAnimation();
-                }
+                mActivityRecord.forAllWindows(w -> {
+                    if (w.isSelfAnimating(0, ANIMATION_TYPE_STARTING_REVEAL)) {
+                        w.cancelAnimation();
+                    }
+                }, true);
             }
         }
 
