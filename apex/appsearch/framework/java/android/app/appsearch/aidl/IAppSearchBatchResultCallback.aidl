@@ -13,7 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.app.appsearch;
+package android.app.appsearch.aidl;
+
+import android.app.appsearch.aidl.AppSearchBatchResultParcel;
+import android.app.appsearch.aidl.AppSearchResultParcel;
 
 /** {@hide} */
-parcelable AppSearchResult<ValueType>;
+oneway interface IAppSearchBatchResultCallback {
+    void onResult(in AppSearchBatchResultParcel resultParcel);
+    void onSystemError(in AppSearchResultParcel resultParcel);
+}
