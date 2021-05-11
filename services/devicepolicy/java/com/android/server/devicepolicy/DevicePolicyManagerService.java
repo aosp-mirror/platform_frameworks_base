@@ -14513,14 +14513,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      * apps.
      */
     @Override
-    public void forceUpdateUserSetupComplete() {
-        final CallerIdentity caller = getCallerIdentity();
+    public void forceUpdateUserSetupComplete(@UserIdInt int userId) {
         Preconditions.checkCallAuthorization(
                 hasCallingOrSelfPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS));
-        Preconditions.checkCallAuthorization(caller.getUserHandle().isSystem(),
-                "Caller has to be in user 0");
 
-        final int userId = UserHandle.USER_SYSTEM;
         boolean isUserCompleted = mInjector.settingsSecureGetIntForUser(
                 Settings.Secure.USER_SETUP_COMPLETE, 0, userId) != 0;
         DevicePolicyData policy = getUserData(userId);
