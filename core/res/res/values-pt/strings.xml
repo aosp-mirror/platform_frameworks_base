@@ -1022,8 +1022,7 @@
     <string name="text_copied" msgid="2531420577879738860">"Texto copiado para a área de transferência."</string>
     <string name="copied" msgid="4675902854553014676">"Copiado"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"Dados do app <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> colados no app <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for pasted_from_clipboard (7355790625710831847) -->
-    <skip />
+    <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> colou conteúdo da sua área de transferência"</string>
     <string name="pasted_text" msgid="4298871641549173733">"O app <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> colou o texto copiado"</string>
     <string name="pasted_image" msgid="4729097394781491022">"O app <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> colou uma imagem copiada"</string>
     <string name="pasted_content" msgid="646276353060777131">"O app <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> colou o conteúdo copiado"</string>
@@ -1260,14 +1259,10 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"Preparando <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Iniciando apps."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Concluindo a inicialização."</string>
-    <!-- no translation found for fp_enrollment_powerbutton_intent_title (3385634173366119903) -->
-    <skip />
-    <!-- no translation found for fp_enrollment_powerbutton_intent_message (6582149052513682522) -->
-    <skip />
-    <!-- no translation found for fp_enrollment_powerbutton_intent_positive_button (5963520983910436791) -->
-    <skip />
-    <!-- no translation found for fp_enrollment_powerbutton_intent_negative_button (6465764183480190748) -->
-    <skip />
+    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"Desligar a tela?"</string>
+    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"Durante a configuração da sua impressão digital, você pressionou o botão liga/desliga.\n\nNormalmente, essa ação desliga a tela."</string>
+    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"Desligar"</string>
+    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"Cancelar"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> em execução"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Toque para voltar ao jogo"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Escolha o jogo"</string>
@@ -1874,10 +1869,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Atualizado pelo seu administrador"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Excluído pelo seu administrador"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (4877297130366222145) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (8518809702138617167) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"A Economia de bateria ativa o tema escuro e limita ou desativa atividades em segundo plano, alguns efeitos visuais, recursos específicos e algumas conexões de rede.\n\n"<annotation id="url">"Saiba mais"</annotation></string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"A Economia de bateria ativa o tema escuro e limita ou desativa atividades em segundo plano, alguns efeitos visuais, recursos específicos e algumas conexões de rede."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Para ajudar a reduzir o uso de dados, a Economia de dados impede que alguns apps enviem ou recebam dados em segundo plano. Um app que você esteja usando no momento pode acessar dados, mas com menos frequência. Isso pode fazer com que imagens não sejam exibidas até que você toque nelas."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Ativar \"Economia de dados\"?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Ativar"</string>
@@ -1980,10 +1973,8 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"O app <xliff:g id="APP_NAME_0">%1$s</xliff:g> não está disponível no momento. Isso é gerenciado pelo app <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Saiba mais"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Retomar app"</string>
-    <!-- no translation found for work_mode_off_title (961171256005852058) -->
-    <skip />
-    <!-- no translation found for work_mode_off_message (7319580997683623309) -->
-    <skip />
+    <string name="work_mode_off_title" msgid="961171256005852058">"Ativar apps de trabalho?"</string>
+    <string name="work_mode_off_message" msgid="7319580997683623309">"Acesse seus apps e notificações de trabalho"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Ativar"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"O app não está disponível"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"O app <xliff:g id="APP_NAME">%1$s</xliff:g> não está disponível no momento."</string>
