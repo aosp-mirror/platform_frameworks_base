@@ -27,24 +27,10 @@
 // Common metalava configs
 /////////////////////////////////////////////////////////////////////
 
-packages_to_document = [
-    "android",
-    "dalvik",
-    "java",
-    "javax",
-    "junit",
-    "org.apache.http",
-    "org.json",
-    "org.w3c.dom",
-    "org.xml.sax",
-    "org.xmlpull",
-]
-
 stubs_defaults {
     name: "metalava-non-updatable-api-stubs-default",
     defaults: ["android-non-updatable-stubs-defaults"],
     api_levels_annotations_enabled: false,
-    filter_packages: packages_to_document,
     defaults_visibility: ["//visibility:private"],
 }
 
