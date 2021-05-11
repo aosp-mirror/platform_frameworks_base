@@ -275,7 +275,7 @@ void RenderThread::requireVkContext() {
 void RenderThread::initGrContextOptions(GrContextOptions& options) {
     options.fPreferExternalImagesOverES3 = true;
     options.fDisableDistanceFieldPaths = true;
-    if (android::base::GetBoolProperty(PROPERTY_REDUCE_OPS_TASK_SPLITTING, false)) {
+    if (android::base::GetBoolProperty(PROPERTY_REDUCE_OPS_TASK_SPLITTING, true)) {
         options.fReduceOpsTaskSplitting = GrContextOptions::Enable::kYes;
     } else {
         options.fReduceOpsTaskSplitting = GrContextOptions::Enable::kNo;

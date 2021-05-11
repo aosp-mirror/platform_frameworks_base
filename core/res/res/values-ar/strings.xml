@@ -1034,7 +1034,8 @@
     <string name="text_copied" msgid="2531420577879738860">"تم نسخ النص إلى الحافظة."</string>
     <string name="copied" msgid="4675902854553014676">"تم النسخ."</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"تم لصق محتوى في <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> من <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>."</string>
-    <string name="pasted_from_clipboard" msgid="6295556725844421812">"تم لصق محتوى في <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> من الحافظة."</string>
+    <!-- no translation found for pasted_from_clipboard (7355790625710831847) -->
+    <skip />
     <string name="pasted_text" msgid="4298871641549173733">"لصق تطبيق <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> النص الذي نسخته."</string>
     <string name="pasted_image" msgid="4729097394781491022">"لصق تطبيق <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> الصورة التي نسختها."</string>
     <string name="pasted_content" msgid="646276353060777131">"لصق تطبيق <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> المحتوى الذي نسخته."</string>
@@ -1339,6 +1340,14 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"جارٍ تحضير <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"بدء التطبيقات."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"جارٍ إعادة التشغيل."</string>
+    <!-- no translation found for fp_enrollment_powerbutton_intent_title (3385634173366119903) -->
+    <skip />
+    <!-- no translation found for fp_enrollment_powerbutton_intent_message (6582149052513682522) -->
+    <skip />
+    <!-- no translation found for fp_enrollment_powerbutton_intent_positive_button (5963520983910436791) -->
+    <skip />
+    <!-- no translation found for fp_enrollment_powerbutton_intent_negative_button (6465764183480190748) -->
+    <skip />
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> يعمل"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"انقر للعودة إلى اللعبة"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"اختيار اللعبة"</string>
@@ -1797,6 +1806,8 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"استخدام الاختصار"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"قلب الألوان"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"تصحيح الألوان"</string>
+    <!-- no translation found for one_handed_mode_feature_name (2334330034828094891) -->
+    <skip />
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"زيادة تعتيم الشاشة"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"تم الضغط مع الاستمرار على مفتاحَي التحكّم في مستوى الصوت. تم تفعيل <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"تم الضغط مع الاستمرار على مفتاحَي التحكّم في مستوى الصوت. تم إيقاف <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
@@ -1956,8 +1967,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"تم التحديث بواسطة المشرف"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"تم الحذف بواسطة المشرف"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"حسنًا"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="750683025714899363">"يؤدي استخدام خيار \"توفير شحن البطارية\" إلى تفعيل \"المظهر الداكن\" وتقييد أو إيقاف الأنشطة في الخلفية وبعض التأثيرات المرئية وميزات معيّنة.\n\n"<annotation id="url">"مزيد من المعلومات"</annotation></string>
-    <string name="battery_saver_description" msgid="5693741424234005958">"يؤدي استخدام خيار \"توفير شحن البطارية\" إلى تفعيل \"المظهر الداكن\" وتقييد أو إيقاف الأنشطة في الخلفية وبعض التأثيرات المرئية وميزات معيّنة."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (4877297130366222145) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (8518809702138617167) -->
+    <skip />
     <string name="data_saver_description" msgid="4995164271550590517">"للمساعدة في خفض استخدام البيانات، تمنع ميزة \"توفير البيانات\" بعض التطبيقات من إرسال البيانات وتلقّيها في الخلفية. يمكن للتطبيقات المتاحة لديك الآن استخدام البيانات، ولكن لا يمكنها الإكثار من ذلك. وهذا يعني أن الصور مثلاً لا تظهر حتى تنقر عليها."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"هل تريد تفعيل توفير البيانات؟"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"تفعيل"</string>
@@ -2096,8 +2109,10 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"التطبيق <xliff:g id="APP_NAME_0">%1$s</xliff:g> غير متاح الآن، وهو مُدار بواسطة <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"مزيد من المعلومات"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"استئناف تشغيل التطبيق"</string>
-    <string name="work_mode_off_title" msgid="5503291976647976560">"هل تريد تفعيل الملف الشخصي للعمل؟"</string>
-    <string name="work_mode_off_message" msgid="8417484421098563803">"سيتم تفعيل تطبيقات العمل التي تستخدمها والإشعارات والبيانات وغيرها من ميزات الملف الشخصي للعمل"</string>
+    <!-- no translation found for work_mode_off_title (961171256005852058) -->
+    <skip />
+    <!-- no translation found for work_mode_off_message (7319580997683623309) -->
+    <skip />
     <string name="work_mode_turn_on" msgid="3662561662475962285">"تفعيل"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"التطبيق غير متاح"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"تطبيق <xliff:g id="APP_NAME">%1$s</xliff:g> غير متاح الآن."</string>

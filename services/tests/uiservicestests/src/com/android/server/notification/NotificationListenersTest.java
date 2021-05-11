@@ -207,6 +207,22 @@ public class NotificationListenersTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testEnsureFilters_newServiceWithMetadata_namesNotNumbers() {
+        ServiceInfo si = new ServiceInfo();
+        si.packageName = "new";
+        si.name = "comp";
+        si.metaData = new Bundle();
+        si.metaData.putString(NotificationListenerService.META_DATA_DEFAULT_FILTER_TYPES,
+                "conversations,ALERTING");
+
+        mListeners.ensureFilters(si, 0);
+
+        assertThat(mListeners.getNotificationListenerFilter(
+                Pair.create(si.getComponentName(), 0)).getTypes())
+                .isEqualTo(FLAG_FILTER_TYPE_CONVERSATIONS | FLAG_FILTER_TYPE_ALERTING);
+    }
+
+    @Test
     public void testEnsureFilters_newServiceWithMetadata_onlyOneListed() {
         ServiceInfo si = new ServiceInfo();
         si.packageName = "new";
@@ -228,6 +244,22 @@ public class NotificationListenersTest extends UiServiceTestCase {
         si.name = "comp";
         si.metaData = new Bundle();
         si.metaData.putString(NotificationListenerService.META_DATA_DISABLED_FILTER_TYPES, "1,2");
+
+        mListeners.ensureFilters(si, 0);
+
+        assertThat(mListeners.getNotificationListenerFilter(
+                Pair.create(si.getComponentName(), 0)).getTypes())
+                .isEqualTo(FLAG_FILTER_TYPE_SILENT | FLAG_FILTER_TYPE_ONGOING);
+    }
+
+    @Test
+    public void testEnsureFilters_newServiceWithMetadata_disabledTypes_mixedText() {
+        ServiceInfo si = new ServiceInfo();
+        si.packageName = "new";
+        si.name = "comp";
+        si.metaData = new Bundle();
+        si.metaData.putString(NotificationListenerService.META_DATA_DISABLED_FILTER_TYPES,
+                "1,alerting");
 
         mListeners.ensureFilters(si, 0);
 

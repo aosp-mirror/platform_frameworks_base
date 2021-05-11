@@ -20,6 +20,7 @@
 
 #include <SkImage.h>
 #include <SkImageFilter.h>
+#include <SkMatrix.h>
 #include <SkPoint.h>
 #include <SkRect.h>
 #include <SkRuntimeEffect.h>
@@ -75,6 +76,22 @@ public:
         maxStretchAmountY = std::max(maxStretchAmountY, other.maxStretchAmountY);
     }
 
+    /**
+     * Return the stretched x position given the normalized x position with
+     * the current horizontal stretch direction
+     * @param normalizedX x position on the input texture from 0 to 1
+     * @return x position when the horizontal stretch direction applied
+     */
+    float computeStretchedPositionX(float normalizedX) const;
+
+    /**
+     * Return the stretched y position given the normalized y position with
+     * the current horizontal stretch direction
+     * @param normalizedX y position on the input texture from 0 to 1
+     * @return y position when the horizontal stretch direction applied
+     */
+    float computeStretchedPositionY(float normalizedY) const;
+
     sk_sp<SkShader> getShader(float width, float height,
                               const sk_sp<SkImage>& snapshotImage) const;
 
@@ -82,6 +99,14 @@ public:
     float maxStretchAmountY = 0;
 
     const SkVector getStretchDirection() const { return mStretchDirection; }
+
+    SkMatrix makeLinearStretch(float width, float height) const {
+        SkMatrix matrix;
+        auto [sX, sY] = getStretchDirection();
+        matrix.setScale(1 + std::abs(sX), 1 + std::abs(sY), sX > 0 ? 0 : width,
+                        sY > 0 ? 0 : height);
+        return matrix;
+    }
 
 private:
     static sk_sp<SkRuntimeEffect> getStretchEffect();
