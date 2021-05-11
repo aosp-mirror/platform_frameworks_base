@@ -152,9 +152,8 @@ public class PipMenuView extends FrameLayout {
         mAccessibilityManager = context.getSystemService(AccessibilityManager.class);
         inflate(context, R.layout.pip_menu, this);
 
-        final boolean enableCornerRadius = mContext.getResources()
-                .getBoolean(R.bool.config_pipEnableRoundCorner)
-                || SystemProperties.getBoolean("debug.sf.enable_hole_punch_pip", false);
+        final boolean enableCornerRadius =
+                SystemProperties.getBoolean("debug.sf.enable_hole_punch_pip", false);
         mBackgroundDrawable = enableCornerRadius
                 ? mContext.getDrawable(R.drawable.pip_menu_background)
                 : new ColorDrawable(Color.BLACK);
