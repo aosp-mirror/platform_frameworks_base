@@ -79,6 +79,16 @@ public final class IpSecManager {
     public static final int DIRECTION_OUT = 1;
 
     /**
+     * Used when applying a transform to direct traffic through an {@link IpSecTransform} for
+     * forwarding between interfaces.
+     *
+     * <p>See {@link #applyTransportModeTransform(Socket, int, IpSecTransform)}.
+     *
+     * @hide
+     */
+    public static final int DIRECTION_FWD = 2;
+
+    /**
      * The Security Parameter Index (SPI) 0 indicates an unknown or invalid index.
      *
      * <p>No IPsec packet may contain an SPI of 0.
