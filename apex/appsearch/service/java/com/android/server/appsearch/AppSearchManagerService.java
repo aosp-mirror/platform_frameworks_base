@@ -43,6 +43,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageStats;
@@ -58,14 +59,15 @@ import android.util.ArraySet;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.server.LocalManagerRegistry;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.appsearch.external.localstorage.AppSearchImpl;
 import com.android.server.appsearch.external.localstorage.stats.CallStats;
 import com.android.server.appsearch.stats.LoggerInstanceManager;
 import com.android.server.appsearch.stats.PlatformLogger;
-import com.android.server.usage.StorageStatsManagerInternal;
-import com.android.server.usage.StorageStatsManagerInternal.StorageStatsAugmenter;
+import com.android.server.usage.StorageStatsManagerLocal;
+import com.android.server.usage.StorageStatsManagerLocal.StorageStatsAugmenter;
 
 import com.google.android.icing.proto.PersistType;
 
@@ -122,7 +124,7 @@ public class AppSearchManagerService extends SystemService {
         mUserManager = mContext.getSystemService(UserManager.class);
         mLoggerInstanceManager = LoggerInstanceManager.getInstance();
         registerReceivers();
-        LocalServices.getService(StorageStatsManagerInternal.class)
+        LocalManagerRegistry.getManager(StorageStatsManagerLocal.class)
                 .registerStorageStatsAugmenter(new AppSearchStorageStatsAugmenter(), TAG);
     }
 
@@ -935,13 +937,15 @@ public class AppSearchManagerService extends SystemService {
     // TODO(b/179160886): Cache the previous storage stats.
     private class AppSearchStorageStatsAugmenter implements StorageStatsAugmenter {
         @Override
-        public void augmentStatsForPackage(
+        public void augmentStatsForPackageForUser(
                 @NonNull PackageStats stats,
                 @NonNull String packageName,
-                @UserIdInt int userId,
-                boolean callerHasStatsPermission) {
+                @NonNull UserHandle userHandle,
+                boolean canCallerAccessAllStats) {
             Objects.requireNonNull(stats);
             Objects.requireNonNull(packageName);
+            Objects.requireNonNull(userHandle);
+            int userId = userHandle.getIdentifier();
             try {
                 verifyUserUnlocked(userId);
                 AppSearchImpl impl = mImplInstanceManager.getOrCreateAppSearchImpl(mContext,
@@ -960,7 +964,7 @@ public class AppSearchManagerService extends SystemService {
 
         @Override
         public void augmentStatsForUid(
-                @NonNull PackageStats stats, int uid, boolean callerHasStatsPermission) {
+                @NonNull PackageStats stats, int uid, boolean canCallerAccessAllStats) {
             Objects.requireNonNull(stats);
             int userId = UserHandle.getUserId(uid);
             try {
@@ -971,11 +975,39 @@ public class AppSearchManagerService extends SystemService {
                 }
                 AppSearchImpl impl = mImplInstanceManager.getOrCreateAppSearchImpl(mContext,
                         userId);
-                for (String packageName : packagesForUid) {
-                    stats.dataSize += impl.getStorageInfoForPackage(packageName).getSizeBytes();
+                for (int i = 0; i < packagesForUid.length; i++) {
+                    stats.dataSize +=
+                            impl.getStorageInfoForPackage(packagesForUid[i]).getSizeBytes();
                 }
             } catch (Throwable t) {
                 Log.e(TAG, "Unable to augment storage stats for uid " + uid, t);
+            }
+        }
+
+        @Override
+        public void augmentStatsForUser(
+                @NonNull PackageStats stats, @NonNull UserHandle userHandle) {
+            // TODO(b/179160886): this implementation could incur many jni calls and a lot of
+            //  in-memory processing from getStorageInfoForPackage. Instead, we can just compute the
+            //  size of the icing dir (or use the overall StorageInfo without interpolating it).
+            Objects.requireNonNull(stats);
+            Objects.requireNonNull(userHandle);
+            int userId = userHandle.getIdentifier();
+            try {
+                verifyUserUnlocked(userId);
+                List<PackageInfo> packagesForUser =
+                        mPackageManager.getInstalledPackagesAsUser(/*flags=*/0, userId);
+                if (packagesForUser == null) {
+                    return;
+                }
+                AppSearchImpl impl =
+                        mImplInstanceManager.getOrCreateAppSearchImpl(mContext, userId);
+                for (int i = 0; i < packagesForUser.size(); i++) {
+                    String packageName = packagesForUser.get(i).packageName;
+                    stats.dataSize += impl.getStorageInfoForPackage(packageName).getSizeBytes();
+                }
+            } catch (Throwable t) {
+                Log.e(TAG, "Unable to augment storage stats for user " + userId, t);
             }
         }
     }
