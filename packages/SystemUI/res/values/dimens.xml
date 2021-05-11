@@ -1147,15 +1147,14 @@
     <!-- Smart reply button. Total height 48dp, visible height 32dp. -->
     <dimen name="smart_reply_button_spacing">8dp</dimen>
     <dimen name="smart_reply_button_padding_vertical">14dp</dimen>
-    <!-- Note: The following two paddings need to be different until b/78876518 is fixed. -->
-    <dimen name="smart_reply_button_padding_horizontal_single_line">20dp</dimen>
-    <dimen name="smart_reply_button_padding_horizontal_double_line">19dp</dimen>
+    <dimen name="smart_reply_button_padding_horizontal">16dp</dimen>
+    <dimen name="smart_reply_button_action_padding_left">8dp</dimen>
     <dimen name="smart_reply_button_min_height">48dp</dimen>
     <dimen name="smart_reply_button_stroke_width">1dp</dimen>
     <dimen name="smart_reply_button_font_size">14sp</dimen>
     <dimen name="smart_reply_button_line_spacing_extra">6sp</dimen> <!-- Total line height 20sp. -->
     <!-- Corner radius = half of min_height to create rounded sides. -->
-    <dimen name="smart_reply_button_corner_radius">24dp</dimen>
+    <dimen name="smart_reply_button_corner_radius">8dp</dimen>
     <dimen name="smart_action_button_icon_size">18dp</dimen>
     <dimen name="smart_action_button_icon_padding">8dp</dimen>
 
