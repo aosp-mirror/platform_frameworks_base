@@ -74,16 +74,14 @@ public class SplashscreenContentDrawer {
     private int mDefaultIconSize;
     private int mBrandingImageWidth;
     private int mBrandingImageHeight;
-    private final int mAppRevealDuration;
     private int mMainWindowShiftLength;
     private final TransactionPool mTransactionPool;
     private final SplashScreenWindowAttrs mTmpAttrs = new SplashScreenWindowAttrs();
     private final Handler mSplashscreenWorkerHandler;
 
-    SplashscreenContentDrawer(Context context, int appRevealAnimDuration, TransactionPool pool) {
+    SplashscreenContentDrawer(Context context, TransactionPool pool) {
         mContext = context;
         mIconProvider = new IconProvider(context);
-        mAppRevealDuration = appRevealAnimDuration;
         mTransactionPool = pool;
 
         // Initialize Splashscreen worker thread
@@ -671,9 +669,8 @@ public class SplashscreenContentDrawer {
      */
     void applyExitAnimation(SplashScreenView view, SurfaceControl leash,
             Rect frame, Runnable finishCallback) {
-        final SplashScreenExitAnimation animation = new SplashScreenExitAnimation(view, leash,
-                frame, mAppRevealDuration, mMainWindowShiftLength, mTransactionPool,
-                finishCallback);
+        final SplashScreenExitAnimation animation = new SplashScreenExitAnimation(mContext, view,
+                leash, frame, mMainWindowShiftLength, mTransactionPool, finishCallback);
         animation.startAnimations();
     }
 }

@@ -150,4 +150,13 @@ class FingerprintEnrollClient extends EnrollClient<ISession> implements Udfps {
             Slog.e(TAG, "Unable to send pointer up", e);
         }
     }
+
+    @Override
+    public void onUiReady() {
+        try {
+            getFreshDaemon().onUiReady();
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Unable to send UI ready", e);
+        }
+    }
 }

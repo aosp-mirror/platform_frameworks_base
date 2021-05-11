@@ -16,6 +16,8 @@
 
 package com.android.server.wm.flicker.rotation
 
+import android.platform.test.annotations.Postsubmit
+import android.platform.test.annotations.Presubmit
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
@@ -57,7 +59,7 @@ class ChangeAppRotationTest(
         super.focusDoesNotChange()
     }
 
-    @FlakyTest
+    @Postsubmit
     @Test
     override fun noUncoveredRegions() {
         super.noUncoveredRegions()
@@ -73,6 +75,36 @@ class ChangeAppRotationTest(
                 .then()
                 .isVisible(testApp.getPackage())
         }
+    }
+
+    @Postsubmit
+    @Test
+    override fun appLayerRotates_EndingPos() {
+        super.appLayerRotates_EndingPos()
+    }
+
+    @Postsubmit
+    @Test
+    override fun appLayerRotates_StartingPos() {
+        super.appLayerRotates_StartingPos()
+    }
+
+    @Presubmit
+    @Test
+    override fun navBarWindowIsAlwaysVisible() {
+        super.navBarWindowIsAlwaysVisible()
+    }
+
+    @Postsubmit
+    @Test
+    override fun statusBarLayerIsAlwaysVisible() {
+        super.statusBarLayerIsAlwaysVisible()
+    }
+
+    @Postsubmit
+    @Test
+    override fun statusBarWindowIsAlwaysVisible() {
+        super.statusBarWindowIsAlwaysVisible()
     }
 
     companion object {

@@ -21,7 +21,6 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.drawable.GradientDrawable;
-import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.RippleDrawable;
 import android.view.ContextThemeWrapper;
 
@@ -40,17 +39,14 @@ class NumPadAnimator {
     private ValueAnimator mContractAnimator;
     private GradientDrawable mBackground;
     private RippleDrawable mRipple;
-    private GradientDrawable mRippleMask;
     private int mNormalColor;
     private int mHighlightColor;
     private int mStyle;
 
-    NumPadAnimator(Context context, LayerDrawable drawable, @StyleRes int style) {
-        LayerDrawable ld = (LayerDrawable) drawable.mutate();
-        mBackground = (GradientDrawable) ld.findDrawableByLayerId(R.id.background);
-        mRipple = (RippleDrawable) ld.findDrawableByLayerId(R.id.ripple);
-        mRippleMask = (GradientDrawable) mRipple.findDrawableByLayerId(android.R.id.mask);
+    NumPadAnimator(Context context, final RippleDrawable drawable, @StyleRes int style) {
         mStyle = style;
+        mRipple = (RippleDrawable) drawable.mutate();
+        mBackground = (GradientDrawable) mRipple.findDrawableByLayerId(R.id.background);
 
         reloadColors(context);
 
@@ -62,7 +58,7 @@ class NumPadAnimator {
         mExpandAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                 public void onAnimationUpdate(ValueAnimator anim) {
                     mBackground.setCornerRadius((float) anim.getAnimatedValue());
-                    mRippleMask.setCornerRadius((float) anim.getAnimatedValue());
+                    mRipple.invalidateSelf();
                 }
         });
 
@@ -73,7 +69,7 @@ class NumPadAnimator {
         mContractAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                 public void onAnimationUpdate(ValueAnimator anim) {
                     mBackground.setCornerRadius((float) anim.getAnimatedValue());
-                    mRippleMask.setCornerRadius((float) anim.getAnimatedValue());
+                    mRipple.invalidateSelf();
                 }
         });
         mAnimator.playSequentially(mExpandAnimator, mContractAnimator);
