@@ -83,11 +83,11 @@ import java.util.Objects;
  *     &lt;/intent-filter>
  *     &lt;meta-data
  *               android:name="android.service.notification.default_filter_types"
- *               android:value="1,2">
+ *               android:value="conversations,alerting">
  *           &lt;/meta-data>
  *     &lt;meta-data
  *               android:name="android.service.notification.disabled_filter_types"
- *               android:value="2">
+ *               android:value="ongoing,silent">
  *           &lt;/meta-data>
  * &lt;/service></pre>
  *

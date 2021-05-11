@@ -74,6 +74,8 @@ public class DisplayDeviceConfig {
     // so -2 is used instead
     private static final float INVALID_BRIGHTNESS_IN_CONFIG = -2f;
 
+    private static final float NITS_INVALID = -1;
+
     private final Context mContext;
 
     // The details of the ambient light sensor associated with this display.
@@ -230,7 +232,7 @@ public class DisplayDeviceConfig {
     public float getNitsFromBacklight(float backlight) {
         if (mBacklightToNitsSpline == null) {
             Slog.wtf(TAG, "requesting nits when no mapping exists.");
-            return -1;
+            return NITS_INVALID;
         }
         backlight = Math.max(backlight, mBacklightMinimum);
         return mBacklightToNitsSpline.interpolate(backlight);
@@ -277,13 +279,6 @@ public class DisplayDeviceConfig {
 
     SensorIdentifier getProximitySensor() {
         return mProximitySensor;
-    }
-
-    /**
-     * @return true if a nits to backlight mapping is defined in this config, false otherwise.
-     */
-    public boolean hasNitsMapping() {
-        return mBacklightToNitsSpline != null;
     }
 
     /**
