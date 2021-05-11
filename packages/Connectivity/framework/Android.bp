@@ -102,7 +102,7 @@ java_sdk_library {
         // Tests using hidden APIs
         "//cts/tests/netlegacy22.api",
         "//external/sl4a:__subpackages__",
-        "//frameworks/base/tests/net:__subpackages__",
+        "//frameworks/base/packages/Connectivity/tests:__subpackages__",
         "//frameworks/libs/net/common/testutils",
         "//frameworks/libs/net/common/tests:__subpackages__",
         "//frameworks/opt/telephony/tests/telephonytests",
