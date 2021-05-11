@@ -22,8 +22,8 @@
     android:layout_height="wrap_content"
     android:gravity="center_vertical"
     android:orientation="vertical"
-    android:layout_marginStart="16dp"
-    android:layout_marginEnd="16dp"
+    android:layout_marginStart="?android:attr/listPreferredItemPaddingStart"
+    android:layout_marginEnd="?android:attr/listPreferredItemPaddingEnd"
     android:paddingBottom="16dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -70,6 +70,7 @@
         android:id="@+id/bottom_summary"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
         android:visibility="gone"
         android:ellipsize="marquee"
         android:textAppearance="@*android:style/TextAppearance.DeviceDefault.Body1"
