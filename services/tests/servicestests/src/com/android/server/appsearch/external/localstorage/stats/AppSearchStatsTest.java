@@ -265,4 +265,36 @@ public class AppSearchStatsTest {
         assertThat(sStats.getDocumentRetrievingLatencyMillis())
                 .isEqualTo(nativeDocumentRetrievingLatencyMillis);
     }
+
+    @Test
+    public void testAppSearchStats_SetSchemaStats() {
+        int nativeLatencyMillis = 1;
+        int newTypeCount = 2;
+        int compatibleTypeChangeCount = 3;
+        int indexIncompatibleTypeChangeCount = 4;
+        int backwardsIncompatibleTypeChangeCount = 5;
+        final SetSchemaStats sStats =
+                new SetSchemaStats.Builder(TEST_PACKAGE_NAME, TEST_DATA_BASE)
+                        .setStatusCode(TEST_STATUS_CODE)
+                        .setTotalLatencyMillis(TEST_TOTAL_LATENCY_MILLIS)
+                        .setNativeLatencyMillis(nativeLatencyMillis)
+                        .setNewTypeCount(newTypeCount)
+                        .setCompatibleTypeChangeCount(compatibleTypeChangeCount)
+                        .setIndexIncompatibleTypeChangeCount(indexIncompatibleTypeChangeCount)
+                        .setBackwardsIncompatibleTypeChangeCount(
+                                backwardsIncompatibleTypeChangeCount)
+                        .build();
+
+        assertThat(sStats.getPackageName()).isEqualTo(TEST_PACKAGE_NAME);
+        assertThat(sStats.getDatabase()).isEqualTo(TEST_DATA_BASE);
+        assertThat(sStats.getStatusCode()).isEqualTo(TEST_STATUS_CODE);
+        assertThat(sStats.getTotalLatencyMillis()).isEqualTo(TEST_TOTAL_LATENCY_MILLIS);
+        assertThat(sStats.getNativeLatencyMillis()).isEqualTo(nativeLatencyMillis);
+        assertThat(sStats.getNewTypeCount()).isEqualTo(newTypeCount);
+        assertThat(sStats.getCompatibleTypeChangeCount()).isEqualTo(compatibleTypeChangeCount);
+        assertThat(sStats.getIndexIncompatibleTypeChangeCount())
+                .isEqualTo(indexIncompatibleTypeChangeCount);
+        assertThat(sStats.getBackwardsIncompatibleTypeChangeCount())
+                .isEqualTo(backwardsIncompatibleTypeChangeCount);
+    }
 }
