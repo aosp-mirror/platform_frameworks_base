@@ -126,6 +126,12 @@ void SkiaMemoryTracer::dumpNumericValue(const char* dumpName, const char* valueN
     mCurrentValues.insert({valueName, {units, value}});
 }
 
+bool SkiaMemoryTracer::hasOutput() {
+    // process any remaining elements
+    processElement();
+    return mResults.size() > 0;
+}
+
 void SkiaMemoryTracer::logOutput(String8& log) {
     // process any remaining elements
     processElement();
