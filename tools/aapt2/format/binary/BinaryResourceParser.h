@@ -57,6 +57,7 @@ class BinaryResourceParser {
                  uint8_t package_id);
   bool ParseLibrary(const android::ResChunk_header* chunk);
   bool ParseOverlayable(const android::ResChunk_header* chunk);
+  bool ParseStagedAliases(const android::ResChunk_header* chunk);
 
   std::unique_ptr<Item> ParseValue(const ResourceNameRef& name,
                                    const android::ConfigDescription& config,

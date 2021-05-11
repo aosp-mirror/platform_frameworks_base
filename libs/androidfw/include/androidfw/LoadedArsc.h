@@ -17,6 +17,7 @@
 #ifndef LOADEDARSC_H_
 #define LOADEDARSC_H_
 
+#include <map>
 #include <memory>
 #include <set>
 #include <vector>
@@ -171,51 +172,51 @@ class LoadedPackage {
       incfs::verified_map_ptr<ResTable_type> type_chunk, uint32_t offset);
 
   // Returns the string pool where type names are stored.
-  inline const ResStringPool* GetTypeStringPool() const {
+  const ResStringPool* GetTypeStringPool() const {
     return &type_string_pool_;
   }
 
   // Returns the string pool where the names of resource entries are stored.
-  inline const ResStringPool* GetKeyStringPool() const {
+  const ResStringPool* GetKeyStringPool() const {
     return &key_string_pool_;
   }
 
-  inline const std::string& GetPackageName() const {
+  const std::string& GetPackageName() const {
     return package_name_;
   }
 
-  inline int GetPackageId() const {
+  int GetPackageId() const {
     return package_id_;
   }
 
   // Returns true if this package is dynamic (shared library) and needs to have an ID assigned.
-  inline bool IsDynamic() const {
+  bool IsDynamic() const {
     return (property_flags_ & PROPERTY_DYNAMIC) != 0;
   }
 
   // Returns true if this package is a Runtime Resource Overlay.
-  inline bool IsOverlay() const {
+  bool IsOverlay() const {
     return (property_flags_ & PROPERTY_OVERLAY) != 0;
   }
 
   // Returns true if this package originates from a system provided resource.
-  inline bool IsSystem() const {
+  bool IsSystem() const {
     return (property_flags_ & PROPERTY_SYSTEM) != 0;
   }
 
   // Returns true if this package is a custom loader and should behave like an overlay.
-  inline bool IsCustomLoader() const {
+  bool IsCustomLoader() const {
     return (property_flags_ & PROPERTY_LOADER) != 0;
   }
 
-  inline package_property_t GetPropertyFlags() const {
+  package_property_t GetPropertyFlags() const {
     return property_flags_;
   }
 
   // Returns the map of package name to package ID used in this LoadedPackage. At runtime, a
   // package could have been assigned a different package ID than what this LoadedPackage was
   // compiled with. AssetManager rewrites the package IDs so that they are compatible at runtime.
-  inline const std::vector<DynamicPackageEntry>& GetDynamicPackageMap() const {
+  const std::vector<DynamicPackageEntry>& GetDynamicPackageMap() const {
     return dynamic_package_map_;
   }
 
@@ -270,6 +271,10 @@ class LoadedPackage {
     return overlayable_map_;
   }
 
+  const std::map<uint32_t, uint32_t>& GetAliasResourceIdMap() const {
+    return alias_id_map_;
+  }
+
  private:
   DISALLOW_COPY_AND_ASSIGN(LoadedPackage);
 
@@ -287,6 +292,7 @@ class LoadedPackage {
   ByteBucketArray<uint32_t> resource_ids_;
   std::vector<DynamicPackageEntry> dynamic_package_map_;
   std::vector<const std::pair<OverlayableInfo, std::unordered_set<uint32_t>>> overlayable_infos_;
+  std::map<uint32_t, uint32_t> alias_id_map_;
 
   // A map of overlayable name to actor
   std::unordered_map<std::string, std::string> overlayable_map_;
