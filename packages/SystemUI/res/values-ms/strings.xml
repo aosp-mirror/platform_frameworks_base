@@ -289,11 +289,9 @@
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"Tempat liputan mudah alih bergerak dimatikan."</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"Tempat liputan mudah alih bergerak dihidupkan."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"Penghantaran skrin dihentikan."</string>
-    <!-- no translation found for accessibility_quick_settings_work_mode_off (9106217884005620744) -->
-    <skip />
+    <string name="accessibility_quick_settings_work_mode_off" msgid="9106217884005620744">"Mod kerja dijeda."</string>
     <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"Mod kerja hidup."</string>
-    <!-- no translation found for accessibility_quick_settings_work_mode_changed_off (2653550342355027441) -->
-    <skip />
+    <string name="accessibility_quick_settings_work_mode_changed_off" msgid="2653550342355027441">"Mod kerja dijeda."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"Mod kerja dihidupkan."</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"Penjimat Data dimatikan."</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"Penjimat Data dihidupkan."</string>
@@ -412,8 +410,7 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"<xliff:g id="DATA_LIMIT">%s</xliff:g> had"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"Amaran <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"Profil kerja"</string>
-    <!-- no translation found for quick_settings_work_mode_paused (4841109346916998613) -->
-    <skip />
+    <string name="quick_settings_work_mode_paused" msgid="4841109346916998613">"Dijeda"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Cahaya Malam"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Dihidupkan pd senja"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Hingga matahari terbit"</string>
@@ -676,12 +673,10 @@
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Tunjukkan semua"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Buka kunci untuk membayar"</string>
-    <!-- no translation found for wallet_secondary_label_no_card (1282609666895946317) -->
-    <skip />
+    <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"Tidak disediakan"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Buka kunci untuk menggunakan"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Terdapat masalah sewaktu mendapatkan kad anda. Sila cuba sebentar lagi"</string>
-    <!-- no translation found for wallet_lockscreen_settings_label (3539105300870383570) -->
-    <skip />
+    <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Tetapan skrin kunci"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Profil kerja"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Mod pesawat"</string>
     <string name="add_tile" msgid="6239678623873086686">"Tambahkan jubin"</string>
@@ -871,8 +866,7 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"Hidup"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"Mati"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"Tidak tersedia"</string>
-    <!-- no translation found for tile_disabled (373212051546573069) -->
-    <skip />
+    <string name="tile_disabled" msgid="373212051546573069">"Dilumpuhkan"</string>
     <string name="nav_bar" msgid="4642708685386136807">"Bar navigasi"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"Reka letak"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"Jenis butang kiri tambahan"</string>

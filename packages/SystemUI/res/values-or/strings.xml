@@ -473,14 +473,10 @@
     <string name="interruption_level_none_twoline" msgid="8579382742855486372">"ସମ୍ପୂର୍ଣ୍ଣ\nନୀରବ"</string>
     <string name="interruption_level_priority_twoline" msgid="8523482736582498083">"କେବଳ\nପ୍ରାଥମିକତା"</string>
     <string name="interruption_level_alarms_twoline" msgid="2045067991335708767">"କେବଳ\nଆଲାର୍ମ"</string>
-    <!-- no translation found for keyguard_indication_charging_time_wireless (577856646141738675) -->
-    <skip />
-    <!-- no translation found for keyguard_indication_charging_time (6492711711891071502) -->
-    <skip />
-    <!-- no translation found for keyguard_indication_charging_time_fast (8390311020603859480) -->
-    <skip />
-    <!-- no translation found for keyguard_indication_charging_time_slowly (301936949731705417) -->
-    <skip />
+    <string name="keyguard_indication_charging_time_wireless" msgid="577856646141738675">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ୱାୟାରଲେସ୍ ଭାବେ ଚାର୍ଜ ହେଉଛି • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>ରେ ସମ୍ପୂର୍ଣ୍ଣ ହେବ"</string>
+    <string name="keyguard_indication_charging_time" msgid="6492711711891071502">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ଚାର୍ଜ ହେଉଛି • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>ରେ ସମ୍ପୂର୍ଣ୍ଣ ହେବ"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ଶୀଘ୍ର ଚାର୍ଜ ହେଉଛି • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>ରେ ସମ୍ପୂର୍ଣ୍ଣ ହେବ"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ଧୀରେ ଚାର୍ଜ ହେଉଛି • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>ରେ ସମ୍ପୂର୍ଣ୍ଣ ହେବ"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"ୟୁଜର୍‍ ବଦଳାନ୍ତୁ"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="5759855008166759399">"ୟୁଜର୍‍ ବଦଳାନ୍ତୁ, ବର୍ତ୍ତମାନର ୟୁଜର୍‍ ହେଉଛନ୍ତି <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="383168614528618402">"ବର୍ତ୍ତମାନର ୟୁଜର୍‍ ହେଉଛନ୍ତି <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -750,14 +746,10 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;ସ୍ଥିତି:&lt;/b&gt; ନୀରବକୁ ଡିମୋଟ୍ କରାଯାଇଛି"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;ସ୍ଥିତି:&lt;/b&gt; ରେଙ୍କ ଉପରକୁ କରାଯାଇଛି"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;ସ୍ଥିତି:&lt;/b&gt; ରେଙ୍କ ତଳକୁ କରାଯାଇଛି"</string>
-    <!-- no translation found for notification_channel_summary_priority_baseline (46674690072551234) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_priority_bubble (1275413109619074576) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_priority_dnd (6665395023264154361) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_priority_all (7151752959650048285) -->
-    <skip />
+    <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"ବାର୍ତ୍ତାଳାପ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକର ଶୀର୍ଷରେ ଏବଂ ଲକ୍ ସ୍କ୍ରିନରେ ଏକ ପ୍ରୋଫାଇଲ୍ ଛବି ଭାବେ ଦେଖାଏ"</string>
+    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"ବାର୍ତ୍ତାଳାପ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକର ଶୀର୍ଷରେ ଏବଂ ଲକ୍ ସ୍କ୍ରିନରେ ଏକ ପ୍ରୋଫାଇଲ୍ ଛବି ଭାବେ ଦେଖାଏ, ଏକ ବବଲ୍ ଭାବେ ଦେଖାଯାଏ"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"ବାର୍ତ୍ତାଳାପ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକର ଶୀର୍ଷରେ ଏବଂ ଲକ୍ ସ୍କ୍ରିନରେ ଏକ ପ୍ରୋଫାଇଲ୍ ଛବି ଭାବେ ଦେଖାଏ, \'ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ\'କୁ ବାଧା ଦିଏ"</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"ବାର୍ତ୍ତାଳାପ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକର ଶୀର୍ଷରେ ଏବଂ ଲକ୍ ସ୍କ୍ରିନରେ ଏକ ପ୍ରୋଫାଇଲ୍ ଛବି ଭାବେ ଦେଖାଏ, ଏକ ବବଲ୍ ଭାବେ ଦେଖାଯାଏ, \'ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ\'କୁ ବାଧା ଦିଏ"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"ସେଟିଂସ୍"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"ପ୍ରାଥମିକତା"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> ବାର୍ତ୍ତାଳାପ ଫିଚରଗୁଡ଼ିକୁ ସମର୍ଥନ କରେ ନାହିଁ"</string>
