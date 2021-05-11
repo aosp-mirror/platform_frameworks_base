@@ -7,7 +7,7 @@
         errorLine1="        android:id=&quot;@android:id/switch_widget&quot;"
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="frameworks/base/packages/SettingsLib/MainSwitchPreference/res/layout/main_switch_bar.xml"
+            file="frameworks/base/packages/SettingsLib/MainSwitchPreference/res/layout/settingslib_main_switch_bar.xml"
             line="49"
             column="9"/>
     </issue>
@@ -15,7 +15,7 @@
     <issue
         id="NewApi"
         message="`@android:style/Widget.Material.CompoundButton.Switch` requires API level 24 (current min is 21)"
-        errorLine1="    &lt;style name=&quot;Settings.MainSwitch&quot; parent=&quot;@android:style/Widget.Material.CompoundButton.Switch&quot;>"
+        errorLine1="    &lt;style name=&quot;MainSwitch.Settingslib&quot; parent=&quot;@android:style/Widget.Material.CompoundButton.Switch&quot;>"
         errorLine2="                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="frameworks/base/packages/SettingsLib/MainSwitchPreference/res/values/styles.xml"
@@ -26,7 +26,7 @@
     <issue
         id="NewApi"
         message="`@android:style/Widget.Material.CompoundButton.Switch` requires API level 24 (current min is 21)"
-        errorLine1="    &lt;style name=&quot;Widget.SwitchBar.Switch&quot; parent=&quot;@android:style/Widget.Material.CompoundButton.Switch&quot;>"
+        errorLine1="    &lt;style name=&quot;SwitchBar.Switch.Settingslib&quot; parent=&quot;@android:style/Widget.Material.CompoundButton.Switch&quot;>"
         errorLine2="                                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="frameworks/base/packages/SettingsLib/MainSwitchPreference/res/values/styles.xml"
@@ -37,7 +37,7 @@
     <issue
         id="NewApi"
         message="`android:trackTint` requires API level 23 (current min is 21)"
-        errorLine1="        &lt;item name=&quot;android:trackTint&quot;>@color/switchbar_switch_track_tint&lt;/item>"
+        errorLine1="        &lt;item name=&quot;android:trackTint&quot;>@color/settingslib_switchbar_switch_track_tint&lt;/item>"
         errorLine2="              ~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="frameworks/base/packages/SettingsLib/MainSwitchPreference/res/values/styles.xml"

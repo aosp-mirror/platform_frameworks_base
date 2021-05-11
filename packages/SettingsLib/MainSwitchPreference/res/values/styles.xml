@@ -17,19 +17,19 @@
 
 <resources>
 
-    <style name="MainSwitchText">
+    <style name="MainSwitchText.Settingslib" parent="@android:style/TextAppearance.DeviceDefault.Widget.ActionBar.Title">
         <item name="android:textSize">20sp</item>
         <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
         <item name="android:textColor">@android:color/black</item>
     </style>
 
-    <style name="Settings.MainSwitch" parent="@android:style/Widget.Material.CompoundButton.Switch">
-        <item name="android:switchMinWidth">@dimen/min_switch_width</item>
+    <style name="MainSwitch.Settingslib" parent="@android:style/Widget.Material.CompoundButton.Switch">
+        <item name="android:switchMinWidth">@dimen/settingslib_min_switch_width</item>
     </style>
 
-    <style name="Widget.SwitchBar.Switch" parent="@android:style/Widget.Material.CompoundButton.Switch">
-        <item name="android:trackTint">@color/switchbar_switch_track_tint</item>
-        <item name="android:thumbTint">@color/switchbar_switch_thumb_tint</item>
+    <style name="SwitchBar.Switch.Settingslib" parent="@android:style/Widget.Material.CompoundButton.Switch">
+        <item name="android:trackTint">@color/settingslib_switchbar_switch_track_tint</item>
+        <item name="android:thumbTint">@color/settingslib_switchbar_switch_thumb_tint</item>
         <item name="android:minHeight">48dp</item>
         <item name="android:minWidth">48dp</item>
     </style>

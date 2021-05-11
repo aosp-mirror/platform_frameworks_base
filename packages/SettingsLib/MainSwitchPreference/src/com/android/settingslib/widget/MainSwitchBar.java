@@ -72,14 +72,15 @@ public class MainSwitchBar extends LinearLayout implements CompoundButton.OnChec
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
 
-        LayoutInflater.from(context).inflate(resourceId(context, "layout", "main_switch_bar"),
+        LayoutInflater.from(context).inflate(
+                resourceId(context, "layout", "settingslib_main_switch_bar"),
                 this);
 
         if (!BuildCompat.isAtLeastS()) {
             final TypedArray a = context.obtainStyledAttributes(
                     new int[]{android.R.attr.colorAccent});
             mBackgroundActivatedColor = a.getColor(0, 0);
-            mBackgroundColor = context.getColor(R.color.switchbar_background_color);
+            mBackgroundColor = context.getColor(R.color.settingslib_switchbar_background_color);
             a.recycle();
         }
 
@@ -89,9 +90,12 @@ public class MainSwitchBar extends LinearLayout implements CompoundButton.OnChec
         mFrameView = findViewById(R.id.frame);
         mTextView = (TextView) findViewById(R.id.switch_text);
         mSwitch = (Switch) findViewById(android.R.id.switch_widget);
-        mBackgroundOn = getContext().getDrawable(R.drawable.switch_bar_bg_on);
-        mBackgroundOff = getContext().getDrawable(R.drawable.switch_bar_bg_off);
-        mBackgroundDisabled = getContext().getDrawable(R.drawable.switch_bar_bg_disabled);
+        mBackgroundOn = getContext().getDrawable(
+                resourceId(context, "drawable", "settingslib_switch_bar_bg_on"));
+        mBackgroundOff = getContext().getDrawable(
+                resourceId(context, "drawable", "settingslib_switch_bar_bg_off"));
+        mBackgroundDisabled = getContext().getDrawable(
+                resourceId(context, "drawable", "settingslib_switch_bar_bg_disabled"));
 
         addOnSwitchChangeListener((switchView, isChecked) -> setChecked(isChecked));
 
