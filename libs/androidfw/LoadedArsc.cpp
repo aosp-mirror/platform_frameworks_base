@@ -41,6 +41,7 @@ using android::base::StringPrintf;
 
 namespace android {
 
+constexpr const static int kFrameworkPackageId = 0x01;
 constexpr const static int kAppPackageId = 0x7f;
 
 namespace {
@@ -670,6 +671,42 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
           LOG(ERROR) << StringPrintf("Error parsing RES_TABLE_OVERLAYABLE_TYPE: %s",
                                      overlayable_iter.GetLastError().c_str());
           if (overlayable_iter.HadFatalError()) {
+            return {};
+          }
+        }
+      } break;
+
+      case RES_TABLE_STAGED_ALIAS_TYPE: {
+        if (loaded_package->package_id_ != kFrameworkPackageId) {
+          LOG(WARNING) << "Alias chunk ignored for non-framework package '"
+                       << loaded_package->package_name_ << "'";
+          break;
+        }
+
+        std::unordered_set<uint32_t> finalized_ids;
+        const auto lib_alias = child_chunk.header<ResTable_staged_alias_header>();
+        if (!lib_alias) {
+          return {};
+        }
+        const auto entry_begin = child_chunk.data_ptr().convert<ResTable_staged_alias_entry>();
+        const auto entry_end = entry_begin + dtohl(lib_alias->count);
+        for (auto entry_iter = entry_begin; entry_iter != entry_end; ++entry_iter) {
+          if (!entry_iter) {
+            return {};
+          }
+          auto finalized_id = dtohl(entry_iter->finalizedResId);
+          if (!finalized_ids.insert(finalized_id).second) {
+            LOG(ERROR) << StringPrintf("Repeated finalized resource id '%08x' in staged aliases.",
+                                       finalized_id);
+            return {};
+          }
+
+          auto staged_id = dtohl(entry_iter->stagedResId);
+          auto [_, success] = loaded_package->alias_id_map_.insert(std::make_pair(staged_id,
+                                                                                  finalized_id));
+          if (!success) {
+            LOG(ERROR) << StringPrintf("Repeated staged resource id '%08x' in staged aliases.",
+                                       staged_id);
             return {};
           }
         }

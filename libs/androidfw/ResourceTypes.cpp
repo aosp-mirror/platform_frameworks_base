@@ -7079,6 +7079,10 @@ void DynamicRefTable::addMapping(uint8_t buildPackageId, uint8_t runtimePackageI
     mLookupTable[buildPackageId] = runtimePackageId;
 }
 
+void DynamicRefTable::addAlias(uint32_t stagedId, uint32_t finalizedId) {
+  mAliasId[stagedId] = finalizedId;
+}
+
 status_t DynamicRefTable::lookupResourceId(uint32_t* resId) const {
     uint32_t res = *resId;
     size_t packageId = Res_GETPACKAGE(res) + 1;
@@ -7088,8 +7092,16 @@ status_t DynamicRefTable::lookupResourceId(uint32_t* resId) const {
         return NO_ERROR;
     }
 
-    if (packageId == APP_PACKAGE_ID && !mAppAsLib) {
-        // No lookup needs to be done, app package IDs are absolute.
+    auto alias_id = mAliasId.find(res);
+    if (alias_id != mAliasId.end()) {
+      // Rewrite the resource id to its alias resource id. Since the alias resource id is a
+      // compile-time id, it still needs to be resolved further.
+      res = alias_id->second;
+    }
+
+    if (packageId == SYS_PACKAGE_ID || (packageId == APP_PACKAGE_ID && !mAppAsLib)) {
+        // No lookup needs to be done, app and framework package IDs are absolute.
+        *resId = res;
         return NO_ERROR;
     }
 
