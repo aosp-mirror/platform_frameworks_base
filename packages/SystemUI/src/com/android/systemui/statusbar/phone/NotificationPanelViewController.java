@@ -122,6 +122,7 @@ import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.VibratorHelper;
+import com.android.systemui.statusbar.events.PrivacyDotViewController;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.ConversationNotificationManager;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
@@ -306,6 +307,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private final QSDetailDisplayer mQSDetailDisplayer;
     private final FeatureFlags mFeatureFlags;
     private final ScrimController mScrimController;
+    private final PrivacyDotViewController mPrivacyDotViewController;
 
     // Maximum # notifications to show on Keyguard; extras will be collapsed in an overflow card.
     // If there are exactly 1 + mMaxKeyguardNotifications, then still shows all notifications
@@ -602,6 +604,7 @@ public class NotificationPanelViewController extends PanelViewController {
             FeatureFlags featureFlags,
             QuickAccessWalletClient quickAccessWalletClient,
             KeyguardMediaController keyguardMediaController,
+            PrivacyDotViewController privacyDotViewController,
             @Main Executor uiExecutor) {
         super(view, falsingManager, dozeLog, keyguardStateController,
                 (SysuiStatusBarStateController) statusBarStateController, vibratorHelper,
@@ -610,6 +613,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mView = view;
         mVibratorHelper = vibratorHelper;
         mKeyguardMediaController = keyguardMediaController;
+        mPrivacyDotViewController = privacyDotViewController;
         mMetricsLogger = metricsLogger;
         mActivityManager = activityManager;
         mConfigurationController = configurationController;
@@ -1895,6 +1899,7 @@ public class NotificationPanelViewController extends PanelViewController {
             mKeyguardBypassController.setQSExpanded(expanded);
             mStatusBarKeyguardViewManager.setQsExpanded(expanded);
             mLockIconViewController.setQsExpanded(expanded);
+            mPrivacyDotViewController.setQsExpanded(expanded);
         }
     }
 
