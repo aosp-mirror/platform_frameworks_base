@@ -401,8 +401,9 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
 
         int totalFramesCount = 0;
         long maxFrameTimeNanos = 0;
+        int missedFramesCount = 0;
         int missedAppFramesCount = 0;
-        int missedSfFramesCounts = 0;
+        int missedSfFramesCount = 0;
 
         for (int i = 0; i <= indexOnOrAfterEnd; i++) {
             JankInfo info = mJankInfos.valueAt(i);
@@ -411,17 +412,23 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
             }
             if (info.surfaceControlCallbackFired) {
                 totalFramesCount++;
+                boolean missedFrame = false;
                 if ((info.jankType & PREDICTION_ERROR) != 0
                         || ((info.jankType & JANK_APP_DEADLINE_MISSED) != 0)) {
                     Log.w(TAG, "Missed App frame:" + info.jankType);
                     missedAppFramesCount++;
+                    missedFrame = true;
                 }
                 if ((info.jankType & DISPLAY_HAL) != 0
                         || (info.jankType & JANK_SURFACEFLINGER_DEADLINE_MISSED) != 0
                         || (info.jankType & JANK_SURFACEFLINGER_GPU_DEADLINE_MISSED) != 0
                         || (info.jankType & SURFACE_FLINGER_SCHEDULING) != 0) {
                     Log.w(TAG, "Missed SF frame:" + info.jankType);
-                    missedSfFramesCounts++;
+                    missedSfFramesCount++;
+                    missedFrame = true;
+                }
+                if (missedFrame) {
+                    missedFramesCount++;
                 }
                 // TODO (b/174755489): Early latch currently gets fired way too often, so we have
                 // to ignore it for now.
@@ -438,10 +445,12 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
         }
 
         // Log the frame stats as counters to make them easily accessible in traces.
+        Trace.traceCounter(Trace.TRACE_TAG_APP, mSession.getName() + "#missedFrames",
+                missedFramesCount);
         Trace.traceCounter(Trace.TRACE_TAG_APP, mSession.getName() + "#missedAppFrames",
                 missedAppFramesCount);
         Trace.traceCounter(Trace.TRACE_TAG_APP, mSession.getName() + "#missedSfFrames",
-                missedSfFramesCounts);
+                missedSfFramesCount);
         Trace.traceCounter(Trace.TRACE_TAG_APP, mSession.getName() + "#totalFrames",
                 totalFramesCount);
         Trace.traceCounter(Trace.TRACE_TAG_APP, mSession.getName() + "#maxFrameTimeMillis",
@@ -449,7 +458,7 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
 
         // Trigger perfetto if necessary.
         boolean overMissedFramesThreshold = mTraceThresholdMissedFrames != -1
-                && missedAppFramesCount + missedSfFramesCounts >= mTraceThresholdMissedFrames;
+                && missedFramesCount >= mTraceThresholdMissedFrames;
         boolean overFrameTimeThreshold = mTraceThresholdFrameTimeMillis != -1
                 && maxFrameTimeNanos >= mTraceThresholdFrameTimeMillis * NANOS_IN_MILLISECOND;
         if (overMissedFramesThreshold || overFrameTimeThreshold) {
@@ -460,9 +469,10 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
                     FrameworkStatsLog.UI_INTERACTION_FRAME_INFO_REPORTED,
                     mSession.getStatsdInteractionType(),
                     totalFramesCount,
-                    missedAppFramesCount + missedSfFramesCounts,
+                    missedFramesCount,
                     maxFrameTimeNanos,
-                    missedSfFramesCounts);
+                    missedSfFramesCount,
+                    missedAppFramesCount);
             if (mListener != null) {
                 mListener.onCujEvents(mSession, ACTION_METRICS_LOGGED);
             }
@@ -472,7 +482,8 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
                     + " (" + mBeginVsyncId + "," + mEndVsyncId + ")"
                     + " totalFrames=" + totalFramesCount
                     + " missedAppFrames=" + missedAppFramesCount
-                    + " missedSfFrames=" + missedSfFramesCounts
+                    + " missedSfFrames=" + missedSfFramesCount
+                    + " missedFrames=" + missedFramesCount
                     + " maxFrameTimeMillis=" + maxFrameTimeNanos / NANOS_IN_MILLISECOND);
         }
     }
