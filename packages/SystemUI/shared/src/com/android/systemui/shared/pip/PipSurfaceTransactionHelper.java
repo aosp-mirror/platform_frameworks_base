@@ -29,14 +29,16 @@ import android.window.PictureInPictureSurfaceTransaction;
  * source of truth on enabling/disabling and the actual value of corner radius.
  */
 public class PipSurfaceTransactionHelper {
-    /** corner radius is currently disabled. */
-    private final float mCornerRadius = 0f;
-
+    private final int mCornerRadius;
     private final Matrix mTmpTransform = new Matrix();
     private final float[] mTmpFloat9 = new float[9];
     private final RectF mTmpSourceRectF = new RectF();
     private final RectF mTmpDestinationRectF = new RectF();
     private final Rect mTmpDestinationRect = new Rect();
+
+    public PipSurfaceTransactionHelper(int cornerRadius) {
+        mCornerRadius = cornerRadius;
+    }
 
     public PictureInPictureSurfaceTransaction scale(
             SurfaceControl.Transaction tx, SurfaceControl leash,
