@@ -7068,15 +7068,7 @@ public class AudioManager {
 
     /**
      * Set a certain surround format as enabled or not.
-     * @param audioFormat a surround format, the value is one of
-     *        {@link AudioFormat#ENCODING_AC3}, {@link AudioFormat#ENCODING_E_AC3},
-     *        {@link AudioFormat#ENCODING_DTS}, {@link AudioFormat#ENCODING_DTS_HD},
-     *        {@link AudioFormat#ENCODING_AAC_LC}, {@link AudioFormat#ENCODING_DOLBY_TRUEHD},
-     *        {@link AudioFormat#ENCODING_E_AC3_JOC}. Once {@link AudioFormat#ENCODING_AAC_LC} is
-     *        set as enabled, {@link AudioFormat#ENCODING_AAC_LC},
-     *        {@link AudioFormat#ENCODING_AAC_HE_V1}, {@link AudioFormat#ENCODING_AAC_HE_V2},
-     *        {@link AudioFormat#ENCODING_AAC_ELD}, {@link AudioFormat#ENCODING_AAC_XHE} are
-     *        all enabled.
+     *
      * @param enabled the required surround format state, true for enabled, false for disabled
      * @return true if successful, otherwise false
      */
