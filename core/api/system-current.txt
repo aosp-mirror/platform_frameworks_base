@@ -14916,6 +14916,7 @@ package android.webkit {
 
   public static interface WebViewProvider.ViewDelegate {
     method public default void autofill(android.util.SparseArray<android.view.autofill.AutofillValue>);
+    method public default void dispatchCreateViewTranslationRequest(@NonNull java.util.Map<android.view.autofill.AutofillId,long[]>, @NonNull int[], @Nullable android.view.translation.TranslationCapability, @NonNull java.util.List<android.view.translation.ViewTranslationRequest>);
     method public boolean dispatchKeyEvent(android.view.KeyEvent);
     method public android.view.View findFocus(android.view.View);
     method public android.view.accessibility.AccessibilityNodeProvider getAccessibilityNodeProvider();
