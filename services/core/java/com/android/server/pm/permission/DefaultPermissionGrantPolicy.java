@@ -37,6 +37,7 @@ import android.content.pm.PermissionInfo;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.media.RingtoneManager;
+import android.media.midi.MidiManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -866,6 +867,11 @@ final class DefaultPermissionGrantPolicy {
             grantPermissionsToSystemPackage(pm, systemCaptionsServicePackageName, userId,
                     MICROPHONE_PERMISSIONS);
         }
+
+        // Bluetooth MIDI Service
+        grantSystemFixedPermissionsToSystemPackage(pm,
+                MidiManager.BLUETOOTH_MIDI_SERVICE_PACKAGE, userId,
+                NEARBY_DEVICES_PERMISSIONS);
     }
 
     private String getDefaultSystemHandlerActivityPackageForCategory(PackageManagerWrapper pm,
