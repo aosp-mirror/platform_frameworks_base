@@ -113,7 +113,7 @@ class MagnificationGestureDetector {
         final float rawX = event.getRawX();
         final float rawY = event.getRawY();
         boolean handled = false;
-        switch (event.getAction()) {
+        switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
                 mPointerDown.set(rawX, rawY);
                 mHandler.postAtTime(mCancelTapGestureRunnable,
