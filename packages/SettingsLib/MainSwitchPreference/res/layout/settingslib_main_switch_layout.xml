@@ -15,10 +15,16 @@
   limitations under the License.
   -->
 
-<shape xmlns:android="http://schemas.android.com/apk/res/android"
-    android:shape="rectangle"
-    android:width="@dimen/switch_track_width"
-    android:height="@dimen/switch_track_height">
-    <solid android:color="@color/track_off_color"/>
-    <corners android:radius="@dimen/switch_track_radius"/>
-</shape>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="wrap_content"
+    android:layout_width="match_parent" >
+
+    <com.android.settingslib.widget.MainSwitchBar
+        android:id="@+id/settingslib_main_switch_bar"
+        android:visibility="gone"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent" />
+
+</LinearLayout>
+
+

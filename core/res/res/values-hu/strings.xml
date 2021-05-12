@@ -1022,8 +1022,7 @@
     <string name="text_copied" msgid="2531420577879738860">"A szöveg bemásolva a vágólapra."</string>
     <string name="copied" msgid="4675902854553014676">"Átmásolva"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"A(z) <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> tartalmat másolt vágólapra a(z) <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> appból"</string>
-    <!-- no translation found for pasted_from_clipboard (7355790625710831847) -->
-    <skip />
+    <string name="pasted_from_clipboard" msgid="7355790625710831847">"A(z) <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> beillesztett a vágólapról"</string>
     <string name="pasted_text" msgid="4298871641549173733">"A(z) <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> beillesztette a másolt szöveget"</string>
     <string name="pasted_image" msgid="4729097394781491022">"A(z) <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> beillesztette a másolt képet"</string>
     <string name="pasted_content" msgid="646276353060777131">"A(z) <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> beillesztette a másolt tartalmat"</string>
@@ -1262,14 +1261,10 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"A(z) <xliff:g id="APPNAME">%1$s</xliff:g> előkészítése."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Kezdő alkalmazások."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Rendszerindítás befejezése."</string>
-    <!-- no translation found for fp_enrollment_powerbutton_intent_title (3385634173366119903) -->
-    <skip />
-    <!-- no translation found for fp_enrollment_powerbutton_intent_message (6582149052513682522) -->
-    <skip />
-    <!-- no translation found for fp_enrollment_powerbutton_intent_positive_button (5963520983910436791) -->
-    <skip />
-    <!-- no translation found for fp_enrollment_powerbutton_intent_negative_button (6465764183480190748) -->
-    <skip />
+    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"Kikapcsolja a képernyőt?"</string>
+    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"Ujjlenyomata beállítása közben megnyomta a bekapcsológombot.\n\nEz általában kikapcsolja a képernyőt."</string>
+    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"Kikapcsolás"</string>
+    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"Mégse"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> fut"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Koppintson ide a játékhoz való visszatéréshez"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Játék kiválasztása"</string>

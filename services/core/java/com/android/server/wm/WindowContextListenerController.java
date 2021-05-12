@@ -201,7 +201,9 @@ class WindowContextListenerController {
             return mContainer;
         }
 
-        private void updateContainer(WindowContainer newContainer) {
+        private void updateContainer(@NonNull WindowContainer newContainer) {
+            Objects.requireNonNull(newContainer);
+
             if (mContainer.equals(newContainer)) {
                 return;
             }

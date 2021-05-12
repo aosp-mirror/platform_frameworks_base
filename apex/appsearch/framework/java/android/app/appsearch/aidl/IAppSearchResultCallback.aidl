@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.app.appsearch;
+package android.app.appsearch.aidl;
 
-import android.app.appsearch.AppSearchResult;
+import android.app.appsearch.aidl.AppSearchResultParcel;
 
 /** {@hide} */
 oneway interface IAppSearchResultCallback {
-    void onResult(in AppSearchResult result);
+    void onResult(in AppSearchResultParcel resultParcel);
 }

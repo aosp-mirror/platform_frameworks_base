@@ -8545,9 +8545,10 @@ public final class Settings {
                 "one_handed_tutorial_show_count";
 
         /**
-         * Indicates whether ui translation is enabled.
+         * Toggle to enable/disable for the apps to use the Ui translation for Views. The value
+         * indicates whether the Ui translation is enabled by the user.
          * <p>
-         * Type: int (0 for false, 1 for true)
+         * Type: {@code int} ({@code 0} for disabled, {@code 1} for enabled)
          *
          * @hide
          */
@@ -14754,6 +14755,22 @@ public final class Settings {
         @Readable
         public static final String MAX_SOUND_TRIGGER_DETECTION_SERVICE_OPS_PER_DAY =
                 "max_sound_trigger_detection_service_ops_per_day";
+
+        /**
+         * Setting indicating the name of the Wear OS app package containing the device's sysui.
+         *
+         * @hide
+         */
+        public static final String CLOCKWORK_SYSUI_PACKAGE_NAME =
+                "clockwork_sysui_package_name";
+
+        /**
+         * Setting indicating the name of the main activity of the Wear OS sysui.
+         *
+         * @hide
+         */
+        public static final String CLOCKWORK_SYSUI_MAIN_ACTIVITY_NAME =
+                "clockwork_sysui_main_activity_name";
 
         /**
          * Indicates whether aware is available in the current location.

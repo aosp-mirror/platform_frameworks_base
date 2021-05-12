@@ -15,6 +15,7 @@ android_app {
         "androidx.appcompat_appcompat",
         "androidx.cardview_cardview",
         "androidx.recyclerview_recyclerview",
+        "androidx.swiperefreshlayout_swiperefreshlayout",
         "com.google.android.material_material",
     ],
     platform_apis: true,

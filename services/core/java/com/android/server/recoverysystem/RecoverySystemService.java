@@ -27,6 +27,7 @@ import static android.os.UserHandle.USER_SYSTEM;
 import static android.ota.nano.OtaPackageMetadata.ApexMetadata;
 
 import static com.android.internal.widget.LockSettingsInternal.ARM_REBOOT_ERROR_NONE;
+import static com.android.internal.widget.LockSettingsInternal.ARM_REBOOT_ERROR_NO_PROVIDER;
 
 import android.annotation.IntDef;
 import android.apex.CompressedApexInfo;
@@ -398,7 +399,13 @@ public class RecoverySystemService extends IRecoverySystem.Stub implements Reboo
 
     @VisibleForTesting
     void onSystemServicesReady() {
-        mInjector.getLockSettingsService().setRebootEscrowListener(this);
+        LockSettingsInternal lockSettings = mInjector.getLockSettingsService();
+        if (lockSettings == null) {
+            Slog.e(TAG, "Failed to get lock settings service, skipping set"
+                    + " RebootEscrowListener");
+            return;
+        }
+        lockSettings.setRebootEscrowListener(this);
     }
 
     @Override // Binder call
@@ -564,12 +571,18 @@ public class RecoverySystemService extends IRecoverySystem.Stub implements Reboo
             case ROR_NEED_PREPARATION:
                 final long origId = Binder.clearCallingIdentity();
                 try {
-                    boolean result = mInjector.getLockSettingsService().prepareRebootEscrow();
-                    // Clear the RoR preparation state if lock settings reports an failure.
-                    if (!result) {
-                        clearRoRPreparationState();
+                    LockSettingsInternal lockSettings = mInjector.getLockSettingsService();
+                    if (lockSettings == null) {
+                        Slog.e(TAG, "Failed to get lock settings service, skipping"
+                                + " prepareRebootEscrow");
+                        return false;
                     }
-                    return result;
+                    // Clear the RoR preparation state if lock settings reports an failure.
+                    if (!lockSettings.prepareRebootEscrow()) {
+                        clearRoRPreparationState();
+                        return false;
+                    }
+                    return true;
                 } finally {
                     Binder.restoreCallingIdentity(origId);
                 }
@@ -684,7 +697,14 @@ public class RecoverySystemService extends IRecoverySystem.Stub implements Reboo
             case ROR_REQUESTED_NEED_CLEAR:
                 final long origId = Binder.clearCallingIdentity();
                 try {
-                    return mInjector.getLockSettingsService().clearRebootEscrow();
+                    LockSettingsInternal lockSettings = mInjector.getLockSettingsService();
+                    if (lockSettings == null) {
+                        Slog.e(TAG, "Failed to get lock settings service, skipping"
+                                + " clearRebootEscrow");
+                        return false;
+                    }
+
+                    return lockSettings.clearRebootEscrow();
                 } finally {
                     Binder.restoreCallingIdentity(origId);
                 }
@@ -778,7 +798,15 @@ public class RecoverySystemService extends IRecoverySystem.Stub implements Reboo
         final long origId = Binder.clearCallingIdentity();
         int providerErrorCode;
         try {
-            providerErrorCode = mInjector.getLockSettingsService().armRebootEscrow();
+            LockSettingsInternal lockSettings = mInjector.getLockSettingsService();
+            if (lockSettings == null) {
+                Slog.e(TAG, "Failed to get lock settings service, skipping"
+                        + " armRebootEscrow");
+                return new RebootPreparationError(
+                        RESUME_ON_REBOOT_REBOOT_ERROR_PROVIDER_PREPARATION_FAILURE,
+                        ARM_REBOOT_ERROR_NO_PROVIDER);
+            }
+            providerErrorCode = lockSettings.armRebootEscrow();
         } finally {
             Binder.restoreCallingIdentity(origId);
         }

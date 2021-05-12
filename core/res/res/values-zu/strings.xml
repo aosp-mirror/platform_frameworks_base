@@ -1182,8 +1182,7 @@
     <string name="not_checked" msgid="7972320087569023342">"akuhloliwe"</string>
     <string name="selected" msgid="6614607926197755875">"okukhethiwe"</string>
     <string name="not_selected" msgid="410652016565864475">"akukhethiwe"</string>
-    <!-- no translation found for in_progress (2149208189184319441) -->
-    <skip />
+    <string name="in_progress" msgid="2149208189184319441">"kuyaqhubeka"</string>
     <string name="whichApplication" msgid="5432266899591255759">"Qedela isenzo usebenzisa"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"Qedela isenzo usebenzisa i-%1$s"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"Qedela isenzo"</string>
@@ -1877,10 +1876,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Kubuyekezwe umlawuli wakho"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Kususwe umlawuli wakho"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"KULUNGILE"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (4877297130366222145) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (8518809702138617167) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"Isilondolozi Sebhethri sivula itimu emnyama futhi sikhawulele noma sivale umsebenzi ongemuva, imiphumela ethile yokubuka, izakhi ezithile, nokuxhumeka kwenethiwekhi ethile.\n\n"<annotation id="url">"Funda kabanzi"</annotation></string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"Isilondolozi Sebhethri sivula ingqikithi emnyama futhi sibeke umkhawulo noma sivale umsebenzi ongemuva, imiphumela ethile yokubuka, izici ezithile, nokuxhumeka okuthile kwenethiwekhi."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Ukusiza ukwehlisa ukusetshenziswa kwedatha, iseva yedatha igwema ezinye izinhlelo zokusebenza ukuthi zithumele noma zamukele idatha ngasemuva. Uhlelo lokusebenza olisebenzisa okwamanje lingafinyelela idatha, kodwa lingenza kanjalo kancane. Lokhu kungachaza, isibonelo, ukuthi izithombe azibonisi uze uzithephe."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Vula iseva yedatha?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Vula"</string>
@@ -1983,10 +1980,8 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"I-<xliff:g id="APP_NAME_0">%1$s</xliff:g> ayitholakali okwamanje. Lokhu kuphethwe i-<xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Funda kabanzi"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Susa ukuphumuza uhlelo lokusebenza"</string>
-    <!-- no translation found for work_mode_off_title (961171256005852058) -->
-    <skip />
-    <!-- no translation found for work_mode_off_message (7319580997683623309) -->
-    <skip />
+    <string name="work_mode_off_title" msgid="961171256005852058">"Vula ama-app okusebenza womsebenzi?"</string>
+    <string name="work_mode_off_message" msgid="7319580997683623309">"Thola ukufinyelela kuma-app akho womsebenzi kanye nezaziso"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Vula"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Uhlelo lokusebenza alutholakali"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"I-<xliff:g id="APP_NAME">%1$s</xliff:g> ayitholakali khona manje."</string>

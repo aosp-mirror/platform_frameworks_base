@@ -190,6 +190,12 @@ message OverlayableItem {
   uint32 overlayable_idx = 4;
 }
 
+// The staged resource ID definition of a finalized resource.
+message StagedId {
+  Source source = 1;
+  uint32 staged_id = 2;
+}
+
 // An entry ID in the range [0x0000, 0xffff].
 message EntryId {
   uint32 id = 1;
@@ -222,6 +228,9 @@ message Entry {
   // The set of values defined for this entry, each corresponding to a different
   // configuration/variant.
   repeated ConfigValue config_value = 6;
+
+  // The staged resource ID of this finalized resource.
+  StagedId staged_id = 7;
 }
 
 // A Configuration/Value pair.

@@ -85,6 +85,11 @@ public final class VcnUnderlyingNetworkPolicy implements Parcelable {
         return mVcnNetworkPolicyResult.equals(that.mVcnNetworkPolicyResult);
     }
 
+    @Override
+    public String toString() {
+        return mVcnNetworkPolicyResult.toString();
+    }
+
     /** {@inheritDoc} */
     @Override
     public int describeContents() {

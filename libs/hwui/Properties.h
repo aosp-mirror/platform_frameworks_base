@@ -171,6 +171,8 @@ enum DebugLevel {
  */
 #define PROPERTY_TARGET_CPU_TIME_PERCENTAGE "debug.hwui.target_cpu_time_percent"
 
+#define PROPERTY_STRETCH_EFFECT_TYPE "debug.hwui.stretch_mode"
+
 /**
  * Property for whether this is running in the emulator.
  */
@@ -196,6 +198,12 @@ enum class ProfileType { None, Console, Bars };
 enum class OverdrawColorSet { Default = 0, Deuteranomaly };
 
 enum class RenderPipelineType { SkiaGL, SkiaVulkan, NotInitialized = 128 };
+
+enum class StretchEffectBehavior {
+    ShaderHWUI, // Stretch shader in HWUI only, matrix scale in SF
+    Shader, // Stretch shader in both HWUI and SF
+    LinearScale // Linear stretch everywhere
+};
 
 /**
  * Renderthread-only singleton which manages several static rendering properties. Most of these
@@ -269,6 +277,8 @@ public:
 
     static bool useHintManager;
     static int targetCpuTimePercentage;
+
+    static StretchEffectBehavior stretchEffectBehavior;
 
 private:
     static ProfileType sProfileType;
