@@ -35,6 +35,7 @@ public class FooterPreference extends Preference {
 
     public static final String KEY_FOOTER = "footer_preference";
     static final int ORDER_FOOTER = Integer.MAX_VALUE - 1;
+    private CharSequence mContentDescription;
 
     public FooterPreference(Context context, AttributeSet attrs) {
         super(context, attrs, R.attr.footerPreferenceStyle);
@@ -52,6 +53,7 @@ public class FooterPreference extends Preference {
         title.setMovementMethod(new LinkMovementMethod());
         title.setClickable(false);
         title.setLongClickable(false);
+        title.setContentDescription(mContentDescription);
     }
 
     @Override
@@ -67,6 +69,26 @@ public class FooterPreference extends Preference {
     @Override
     public CharSequence getSummary() {
         return getTitle();
+    }
+
+    /**
+     * To set content description of the {@link FooterPreference}. This can use for talkback
+     * environment if developer wants to have a customization content.
+     *
+     * @param contentDescription The resource id of the content description.
+     */
+    public void setContentDescription(CharSequence contentDescription) {
+        if (!TextUtils.equals(mContentDescription, contentDescription)) {
+            mContentDescription = contentDescription;
+            notifyChanged();
+        }
+    }
+
+    /**
+     * Return the content description of footer preference.
+     */
+    public CharSequence getContentDescription() {
+        return mContentDescription;
     }
 
     private void init() {
@@ -87,6 +109,7 @@ public class FooterPreference extends Preference {
         private Context mContext;
         private String mKey;
         private CharSequence mTitle;
+        private CharSequence mContentDescription;
 
         public Builder(@NonNull Context context) {
             mContext = context;
@@ -94,6 +117,7 @@ public class FooterPreference extends Preference {
 
         /**
          * To set the key value of the {@link FooterPreference}.
+         *
          * @param key The key value.
          */
         public Builder setKey(@NonNull String key) {
@@ -103,6 +127,7 @@ public class FooterPreference extends Preference {
 
         /**
          * To set the title of the {@link FooterPreference}.
+         *
          * @param title The title.
          */
         public Builder setTitle(CharSequence title) {
@@ -112,10 +137,33 @@ public class FooterPreference extends Preference {
 
         /**
          * To set the title of the {@link FooterPreference}.
+         *
          * @param titleResId The resource id of the title.
          */
         public Builder setTitle(@StringRes int titleResId) {
             mTitle = mContext.getText(titleResId);
+            return this;
+        }
+
+        /**
+         * To set content description of the {@link FooterPreference}. This can use for talkback
+         * environment if developer wants to have a customization content.
+         *
+         * @param contentDescription The resource id of the content description.
+         */
+        public Builder setContentDescription(CharSequence contentDescription) {
+            mContentDescription = contentDescription;
+            return this;
+        }
+
+        /**
+         * To set content description of the {@link FooterPreference}. This can use for talkback
+         * environment if developer wants to have a customization content.
+         *
+         * @param contentDescriptionResId The resource id of the content description.
+         */
+        public Builder setContentDescription(@StringRes int contentDescriptionResId) {
+            mContentDescription = mContext.getText(contentDescriptionResId);
             return this;
         }
 
@@ -131,6 +179,10 @@ public class FooterPreference extends Preference {
             footerPreference.setTitle(mTitle);
             if (!TextUtils.isEmpty(mKey)) {
                 footerPreference.setKey(mKey);
+            }
+
+            if (!TextUtils.isEmpty(mContentDescription)) {
+                footerPreference.setContentDescription(mContentDescription);
             }
             return footerPreference;
         }
