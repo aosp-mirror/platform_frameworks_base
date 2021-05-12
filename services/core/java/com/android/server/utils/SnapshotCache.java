@@ -19,6 +19,9 @@ package com.android.server.utils;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 
+import java.util.WeakHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
  * A class that caches snapshots.  Instances are instantiated on a {@link Watchable}; when the
  * {@link Watchable} reports a change, the cache is cleared.  The snapshot() method fetches the
@@ -35,25 +38,65 @@ public abstract class SnapshotCache<T> extends Watcher{
      */
     private static final boolean ENABLED = true;
 
+    /**
+     * The statistics for a single cache.  The object records the number of times a
+     * snapshot was reused and the number of times a snapshot was rebuilt.
+     */
+    private static class Statistics {
+        final String mName;
+        private final AtomicInteger mReused = new AtomicInteger(0);
+        private final AtomicInteger mRebuilt = new AtomicInteger(0);
+        Statistics(@NonNull String n) {
+            mName = n;
+        }
+    }
+
     // The source object from which snapshots are created.  This may be null if createSnapshot()
     // does not require it.
     protected final T mSource;
 
     // The cached snapshot
-    private T mSnapshot = null;
+    private volatile T mSnapshot = null;
 
     // True if the snapshot is sealed and may not be modified.
-    private boolean mSealed = false;
+    private volatile boolean mSealed = false;
+
+    // The statistics for this cache.  This may be null.
+    private final Statistics mStatistics;
+
+    /**
+     * The global list of caches.
+     */
+    private static final WeakHashMap<SnapshotCache, Void> sCaches = new WeakHashMap<>();
 
     /**
      * Create a cache with a source object for rebuilding snapshots and a
-     * {@link Watchable} that notifies when the cache is invalid.
+     * {@link Watchable} that notifies when the cache is invalid.  If the name is null
+     * then statistics are not collected for this cache.
+     * @param source Source data for rebuilding snapshots.
+     * @param watchable The object that notifies when the cache is invalid.
+     * @param name The name of the cache, for statistics reporting.
+     */
+    public SnapshotCache(@Nullable T source, @NonNull Watchable watchable, @Nullable String name) {
+        mSource = source;
+        watchable.registerObserver(this);
+        if (name != null) {
+            mStatistics = new Statistics(name);
+            sCaches.put(this, null);
+        } else {
+            mStatistics = null;
+        }
+    }
+
+    /**
+     * Create a cache with a source object for rebuilding snapshots and a
+     * {@link Watchable} that notifies when the cache is invalid.  The name is null in
+     * this API.
      * @param source Source data for rebuilding snapshots.
      * @param watchable The object that notifies when the cache is invalid.
      */
     public SnapshotCache(@Nullable T source, @NonNull Watchable watchable) {
-        mSource = source;
-        watchable.registerObserver(this);
+        this(source, watchable, null);
     }
 
     /**
@@ -63,13 +106,14 @@ public abstract class SnapshotCache<T> extends Watcher{
     public SnapshotCache() {
         mSource = null;
         mSealed = true;
+        mStatistics = null;
     }
 
     /**
      * Notify the object that the source object has changed.  If the local object is sealed then
      * IllegalStateException is thrown.  Otherwise, the cache is cleared.
      */
-    public void onChange(@Nullable Watchable what) {
+    public final void onChange(@Nullable Watchable what) {
         if (mSealed) {
             throw new IllegalStateException("attempt to change a sealed object");
         }
@@ -79,7 +123,7 @@ public abstract class SnapshotCache<T> extends Watcher{
     /**
      * Seal the cache.  Attempts to modify the cache will generate an exception.
      */
-    public void seal() {
+    public final void seal() {
         mSealed = true;
     }
 
@@ -88,11 +132,14 @@ public abstract class SnapshotCache<T> extends Watcher{
      * new snapshot and saves it in the cache.
      * @return A snapshot as returned by createSnapshot() and possibly cached.
      */
-    public T snapshot() {
+    public final T snapshot() {
         T s = mSnapshot;
         if (s == null || !ENABLED) {
             s = createSnapshot();
             mSnapshot = s;
+            if (mStatistics != null) mStatistics.mRebuilt.incrementAndGet();
+        } else {
+            if (mStatistics != null) mStatistics.mReused.incrementAndGet();
         }
         return s;
     }
@@ -123,4 +170,25 @@ public abstract class SnapshotCache<T> extends Watcher{
             throw new UnsupportedOperationException("cannot snapshot a sealed snaphot");
         }
     }
+
+    /**
+     * A snapshot cache suitable for Snappable types.  The key is that Snappable types
+     * have a known implementation of createSnapshot() so that this class is concrete.
+     * @param <T> The class whose snapshot is being cached.
+     */
+    public static class Auto<T extends Snappable<T>> extends SnapshotCache<T> {
+        public Auto(@NonNull T source, @NonNull Watchable watchable, @Nullable String name) {
+            super(source, watchable, name);
+        }
+        public Auto(@NonNull T source, @NonNull Watchable watchable) {
+            this(source, watchable, null);
+        }
+        /**
+         * Concrete createSnapshot() using the snapshot() method of <T>.
+         */
+        public T createSnapshot() {
+            return mSource.snapshot();
+        }
+    }
+
 }

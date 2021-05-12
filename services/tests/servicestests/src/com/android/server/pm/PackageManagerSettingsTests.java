@@ -47,7 +47,6 @@ import android.os.BaseBundle;
 import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.UserHandle;
-import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.Log;
@@ -64,6 +63,7 @@ import com.android.server.pm.parsing.pkg.ParsedPackage;
 import com.android.server.pm.permission.LegacyPermissionDataProvider;
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
 import com.android.server.utils.WatchableTester;
+import com.android.server.utils.WatchedArrayMap;
 
 import com.google.common.truth.Truth;
 
@@ -1202,9 +1202,8 @@ public class PackageManagerSettingsTests {
 
     private void verifyKeySetMetaData(Settings settings)
             throws ReflectiveOperationException, IllegalAccessException {
-        ArrayMap<String, PackageSetting> packages =
-                settings.mPackages.untrackedStorage();
-        KeySetManagerService ksms = settings.mKeySetManagerService;
+        WatchedArrayMap<String, PackageSetting> packages = settings.mPackages;
+        KeySetManagerService ksms = settings.getKeySetManagerService();
 
         /* verify keyset and public key ref counts */
         assertThat(KeySetUtils.getKeySetRefCount(ksms, 1), is(2));
