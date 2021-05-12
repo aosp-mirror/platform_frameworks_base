@@ -10,7 +10,6 @@ package android.net {
     method @NonNull @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_STACK, android.Manifest.permission.NETWORK_SETTINGS}) public java.util.List<android.net.NetworkStateSnapshot> getAllNetworkStateSnapshots();
     method @Nullable public android.net.ProxyInfo getGlobalProxy();
     method @NonNull public static android.util.Range<java.lang.Integer> getIpSecNetIdRange();
-    method @NonNull public static String getPrivateDnsMode(@NonNull android.content.Context);
     method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_SETTINGS}) public void registerDefaultNetworkCallbackForUid(int, @NonNull android.net.ConnectivityManager.NetworkCallback, @NonNull android.os.Handler);
     method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_SETTINGS}) public void registerSystemDefaultNetworkCallback(@NonNull android.net.ConnectivityManager.NetworkCallback, @NonNull android.os.Handler);
     method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_STACK, android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK}) public void requestBackgroundNetwork(@NonNull android.net.NetworkRequest, @NonNull android.net.ConnectivityManager.NetworkCallback, @NonNull android.os.Handler);
@@ -20,7 +19,6 @@ package android.net {
     method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD, android.Manifest.permission.NETWORK_STACK, android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK}) public void setAvoidUnvalidated(@NonNull android.net.Network);
     method @RequiresPermission(android.Manifest.permission.NETWORK_STACK) public void setGlobalProxy(@Nullable android.net.ProxyInfo);
     method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_STACK, android.Manifest.permission.NETWORK_SETTINGS}) public void setLegacyLockdownVpnEnabled(boolean);
-    method public static void setPrivateDnsMode(@NonNull android.content.Context, @NonNull String);
     method @RequiresPermission(android.Manifest.permission.NETWORK_STACK) public void setProfileNetworkPreference(@NonNull android.os.UserHandle, int, @Nullable java.util.concurrent.Executor, @Nullable Runnable);
     method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_STACK, android.Manifest.permission.NETWORK_SETTINGS}) public void setRequireVpnForUids(boolean, @NonNull java.util.Collection<android.util.Range<java.lang.Integer>>);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_TEST_NETWORKS, android.Manifest.permission.NETWORK_STACK}) public void simulateDataStall(int, long, @NonNull android.net.Network, @NonNull android.os.PersistableBundle);
@@ -40,9 +38,6 @@ package android.net {
     field public static final int BLOCKED_REASON_LOCKDOWN_VPN = 16; // 0x10
     field public static final int BLOCKED_REASON_NONE = 0; // 0x0
     field public static final int BLOCKED_REASON_RESTRICTED_MODE = 8; // 0x8
-    field public static final String PRIVATE_DNS_MODE_OFF = "off";
-    field public static final String PRIVATE_DNS_MODE_OPPORTUNISTIC = "opportunistic";
-    field public static final String PRIVATE_DNS_MODE_PROVIDER_HOSTNAME = "hostname";
     field public static final int PROFILE_NETWORK_PREFERENCE_DEFAULT = 0; // 0x0
     field public static final int PROFILE_NETWORK_PREFERENCE_ENTERPRISE = 1; // 0x1
   }
@@ -69,6 +64,7 @@ package android.net {
     method @NonNull public static java.time.Duration getNetworkSwitchNotificationRateDuration(@NonNull android.content.Context, @NonNull java.time.Duration);
     method @NonNull public static String getPrivateDnsDefaultMode(@NonNull android.content.Context);
     method @Nullable public static String getPrivateDnsHostname(@NonNull android.content.Context);
+    method public static int getPrivateDnsMode(@NonNull android.content.Context);
     method public static boolean getWifiAlwaysRequested(@NonNull android.content.Context, boolean);
     method @NonNull public static java.time.Duration getWifiDataActivityTimeout(@NonNull android.content.Context, @NonNull java.time.Duration);
     method public static void setCaptivePortalHttpUrl(@NonNull android.content.Context, @Nullable String);
@@ -85,8 +81,9 @@ package android.net {
     method public static void setNetworkMeteredMultipathPreference(@NonNull android.content.Context, @NonNull String);
     method public static void setNetworkSwitchNotificationMaximumDailyCount(@NonNull android.content.Context, @IntRange(from=0) int);
     method public static void setNetworkSwitchNotificationRateDuration(@NonNull android.content.Context, @NonNull java.time.Duration);
-    method public static void setPrivateDnsDefaultMode(@NonNull android.content.Context, @NonNull String);
+    method public static void setPrivateDnsDefaultMode(@NonNull android.content.Context, @NonNull int);
     method public static void setPrivateDnsHostname(@NonNull android.content.Context, @Nullable String);
+    method public static void setPrivateDnsMode(@NonNull android.content.Context, int);
     method public static void setWifiAlwaysRequested(@NonNull android.content.Context, boolean);
     method public static void setWifiDataActivityTimeout(@NonNull android.content.Context, @NonNull java.time.Duration);
     field public static final int CAPTIVE_PORTAL_MODE_AVOID = 2; // 0x2
@@ -95,6 +92,9 @@ package android.net {
     field public static final int NETWORK_AVOID_BAD_WIFI_AVOID = 2; // 0x2
     field public static final int NETWORK_AVOID_BAD_WIFI_IGNORE = 0; // 0x0
     field public static final int NETWORK_AVOID_BAD_WIFI_PROMPT = 1; // 0x1
+    field public static final int PRIVATE_DNS_MODE_OFF = 1; // 0x1
+    field public static final int PRIVATE_DNS_MODE_OPPORTUNISTIC = 2; // 0x2
+    field public static final int PRIVATE_DNS_MODE_PROVIDER_HOSTNAME = 3; // 0x3
   }
 
   public final class NetworkAgentConfig implements android.os.Parcelable {
