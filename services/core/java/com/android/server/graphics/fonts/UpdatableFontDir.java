@@ -69,7 +69,7 @@ final class UpdatableFontDir {
 
         long getRevision(File file) throws IOException;
 
-        void tryToCreateTypeface(File file) throws IOException;
+        void tryToCreateTypeface(File file) throws Throwable;
     }
 
     /** Interface to mock fs-verity in tests. */
@@ -378,10 +378,10 @@ final class UpdatableFontDir {
             // Try to create Typeface and treat as failure something goes wrong.
             try {
                 mParser.tryToCreateTypeface(fontFileInfo.getFile());
-            } catch (IOException e) {
+            } catch (Throwable t) {
                 throw new SystemFontException(
                         FontManager.RESULT_ERROR_INVALID_FONT_FILE,
-                        "Failed to create Typeface from file", e);
+                        "Failed to create Typeface from file", t);
             }
 
             FontConfig fontConfig = getSystemFontConfig();
