@@ -64,6 +64,12 @@ struct AllowNew {
   std::string comment;
 };
 
+// Represents the staged resource id of a finalized resource.
+struct StagedId {
+  ResourceId id;
+  Source source;
+};
+
 struct Overlayable {
   Overlayable() = default;
    Overlayable(const android::StringPiece& name, const android::StringPiece& actor)
@@ -123,6 +129,9 @@ class ResourceEntry {
 
   // The declarations of this resource as overlayable for RROs
   Maybe<OverlayableItem> overlayable_item;
+
+  // The staged resource id for a finalized resource.
+  Maybe<StagedId> staged_id;
 
   // The resource's values for each configuration.
   std::vector<std::unique_ptr<ResourceConfigValue>> values;
@@ -194,14 +203,27 @@ class ResourceTablePackage {
   DISALLOW_COPY_AND_ASSIGN(ResourceTablePackage);
 };
 
+struct ResourceTableEntryView {
+  std::string name;
+  Maybe<uint16_t> id;
+  Visibility visibility;
+  Maybe<AllowNew> allow_new;
+  Maybe<OverlayableItem> overlayable_item;
+  Maybe<StagedId> staged_id;
+  std::vector<const ResourceConfigValue*> values;
+
+  const ResourceConfigValue* FindValue(const android::ConfigDescription& config,
+                                       android::StringPiece product = {}) const;
+};
+
 struct ResourceTableTypeView {
   ResourceType type;
   Maybe<uint8_t> id;
   Visibility::Level visibility_level = Visibility::Level::kUndefined;
 
   // Entries sorted in ascending entry id order. If ids have not been assigned, the entries are
-  //  // sorted lexicographically.
-  std::vector<const ResourceEntry*> entries;
+  // sorted lexicographically.
+  std::vector<ResourceTableEntryView> entries;
 };
 
 struct ResourceTablePackageView {
@@ -210,6 +232,10 @@ struct ResourceTablePackageView {
   // Types sorted in ascending type id order. If ids have not been assigned, the types are sorted by
   // their declaration order in the ResourceType enum.
   std::vector<ResourceTableTypeView> types;
+};
+
+struct ResourceTableViewOptions {
+  bool create_alias_entries = false;
 };
 
 struct ResourceTableView {
@@ -237,6 +263,7 @@ struct NewResource {
   std::optional<Visibility> visibility;
   std::optional<OverlayableItem> overlayable;
   std::optional<AllowNew> allow_new;
+  std::optional<StagedId> staged_id;
   bool allow_mangled = false;
 };
 
@@ -249,6 +276,7 @@ struct NewResourceBuilder {
   NewResourceBuilder& SetVisibility(Visibility id);
   NewResourceBuilder& SetOverlayable(OverlayableItem overlayable);
   NewResourceBuilder& SetAllowNew(AllowNew allow_new);
+  NewResourceBuilder& SetStagedId(StagedId id);
   NewResourceBuilder& SetAllowMangled(bool allow_mangled);
   NewResource Build();
 
@@ -273,7 +301,7 @@ class ResourceTable {
 
   // Retrieves a sorted a view of the packages, types, and entries sorted in ascending resource id
   // order.
-  ResourceTableView GetPartitionedView() const;
+  ResourceTableView GetPartitionedView(const ResourceTableViewOptions& options = {}) const;
 
   struct SearchResult {
     ResourceTablePackage* package;
@@ -283,6 +311,7 @@ class ResourceTable {
 
   Maybe<SearchResult> FindResource(const ResourceNameRef& name) const;
   Maybe<SearchResult> FindResource(const ResourceNameRef& name, ResourceId id) const;
+  bool RemoveResource(const ResourceNameRef& name, ResourceId id) const;
 
   // Returns the package struct with the given name, or nullptr if such a package does not
   // exist. The empty string is a valid package and typically is used to represent the

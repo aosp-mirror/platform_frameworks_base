@@ -80,9 +80,6 @@ void TestDirectoryFixture::TearDown() {
 }
 
 void TestDirectoryFixture::WriteFile(const std::string& path, const std::string& contents) {
-  CHECK(util::StartsWith(path, temp_dir_))
-      << "Attempting to create a file outside of test temporary directory.";
-
   // Create any intermediate directories specified in the path
   auto pos = std::find(path.rbegin(), path.rend(), file::sDirSep);
   if (pos != path.rend()) {

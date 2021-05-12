@@ -1147,8 +1147,8 @@
     <string name="battery_info_status_charging_wireless">Charging wirelessly</string>
     <!-- Battery Info screen. Value for a status item.  Used for diagnostic info screens, precise translation isn't needed -->
     <string name="battery_info_status_discharging">Not charging</string>
-    <!-- Battery Info screen. Value for a status item.  Used for diagnostic info screens, precise translation isn't needed -->
-    <string name="battery_info_status_not_charging">Plugged in, can\'t charge right now</string>
+    <!-- Battery Info screen. Value for a status item. A state which device is connected with any charger(e.g. USB, Adapter or Wireless) but not charging yet. Used for diagnostic info screens, precise translation isn't needed -->
+    <string name="battery_info_status_not_charging">Connected, not charging</string>
     <!-- Battery Info screen. Value for a status item.  Used for diagnostic info screens, precise translation isn't needed -->
     <string name="battery_info_status_full">Charged</string>
 
@@ -1422,7 +1422,7 @@
     <string name="user_set_lock_button">Set lock</string>
     <!-- Label for switching to other user in the user switcher [CHAR LIMIT=35] -->
     <string name="user_switch_to_user">Switch to <xliff:g id="user_name" example="John Doe">%s</xliff:g></string>
-    <!-- Dialog message when creating a new user [CHAR LIMIT=40] -->
+    <!-- Dialog message when creating a new user [CHAR LIMIT=NONE] -->
     <string name="creating_new_user_dialog_message">Creating new user…</string>
     <!-- Text shown to notify that the creation of new user has failed. [CHAR LIMIT=40] -->
     <string name="add_user_failed">Failed to create a new user</string>

@@ -68,7 +68,7 @@ public class PipAnimationControllerTest extends ShellTestCase {
     @Before
     public void setUp() throws Exception {
         mPipAnimationController = new PipAnimationController(
-                new PipSurfaceTransactionHelper(mContext));
+                new PipSurfaceTransactionHelper());
         mLeash = new SurfaceControl.Builder()
                 .setContainerLayer()
                 .setName("FakeLeash")

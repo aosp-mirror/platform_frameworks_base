@@ -41,6 +41,7 @@ import static com.android.internal.widget.LockPatternUtils.EscrowTokenStateChang
 import static com.android.server.devicepolicy.DevicePolicyManagerService.ACTION_PROFILE_OFF_DEADLINE;
 import static com.android.server.devicepolicy.DevicePolicyManagerService.ACTION_TURN_PROFILE_ON_NOTIFICATION;
 import static com.android.server.devicepolicy.DpmMockContext.CALLER_USER_HANDLE;
+import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 import static com.android.server.testutils.TestUtils.assertExpectException;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -82,6 +83,7 @@ import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.app.admin.FactoryResetProtectionPolicy;
 import android.app.admin.PasswordMetrics;
+import android.app.admin.SystemUpdatePolicy;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -3888,37 +3890,28 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     public void testForceUpdateUserSetupComplete_permission() {
         // GIVEN the permission MANAGE_PROFILE_AND_DEVICE_OWNERS is not granted
         assertExpectException(SecurityException.class, /* messageRegex =*/ null,
-                () -> dpm.forceUpdateUserSetupComplete());
-    }
-
-    @Test
-    public void testForceUpdateUserSetupComplete_systemUser() {
-        mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
-        // GIVEN calling from user 20
-        mContext.binder.callingUid = DpmMockContext.CALLER_UID;
-        assertExpectException(SecurityException.class, /* messageRegex =*/ null,
-                () -> dpm.forceUpdateUserSetupComplete());
+                () -> dpm.forceUpdateUserSetupComplete(UserHandle.USER_SYSTEM));
     }
 
     @Test
     public void testForceUpdateUserSetupComplete_forcesUpdate() {
         mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+        final int userId = UserHandle.getUserId(mContext.binder.callingUid);
 
-        final int userId = UserHandle.USER_SYSTEM;
         // GIVEN userComplete is false in SettingsProvider
         setUserSetupCompleteForUser(false, userId);
 
         // GIVEN userComplete is true in DPM
         DevicePolicyData userData = new DevicePolicyData(userId);
         userData.mUserSetupComplete = true;
-        dpms.mUserData.put(UserHandle.USER_SYSTEM, userData);
+        dpms.mUserData.put(userId, userData);
 
         assertThat(dpms.hasUserSetupCompleted()).isTrue();
 
-        dpm.forceUpdateUserSetupComplete();
+        dpm.forceUpdateUserSetupComplete(userId);
 
-        // THEN the state in dpms is not changed
+        // THEN the state in dpms is changed
         assertThat(dpms.hasUserSetupCompleted()).isFalse();
     }
 
@@ -3948,10 +3941,9 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         // Enabling logging should not change the timestamp.
         dpm.setSecurityLoggingEnabled(admin1, true);
-        verify(getServices().settings)
-                .securityLogSetLoggingEnabledProperty(true);
-        when(getServices().settings.securityLogGetLoggingEnabledProperty())
-                .thenReturn(true);
+        verify(getServices().settings).securityLogSetLoggingEnabledProperty(true);
+
+        when(getServices().settings.securityLogGetLoggingEnabledProperty()).thenReturn(true);
         assertThat(dpm.getLastSecurityLogRetrievalTime()).isEqualTo(-1);
 
         // Retrieving the logs should update the timestamp.
@@ -4776,12 +4768,74 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         when(getServices().iactivityManager.getCurrentUser())
                 .thenReturn(new UserInfo(UserHandle.USER_SYSTEM, "user system", 0));
         // Get mock reason string since we throw an IAE with empty string input.
-        when(mContext.getResources().getString(R.string.work_profile_deleted_description_dpm_wipe)).
-                thenReturn("Just a test string.");
+        when(mContext.getResources().getString(R.string.work_profile_deleted_description_dpm_wipe))
+                .thenReturn("Just a test string.");
 
         dpm.wipeData(0);
         verify(getServices().userManagerInternal).removeUserEvenWhenDisallowed(
                 MANAGED_PROFILE_USER_ID);
+    }
+
+    @Test
+    public void testWipeDataManagedProfileOnOrganizationOwnedDevice() throws Exception {
+        setupProfileOwner();
+        configureProfileOwnerOfOrgOwnedDevice(admin1, CALLER_USER_HANDLE);
+
+        // Even if the caller is the managed profile, the current user is the user 0
+        when(getServices().iactivityManager.getCurrentUser())
+                .thenReturn(new UserInfo(UserHandle.USER_SYSTEM, "user system", 0));
+        // Get mock reason string since we throw an IAE with empty string input.
+        when(mContext.getResources().getString(R.string.work_profile_deleted_description_dpm_wipe))
+                .thenReturn("Just a test string.");
+        when(getServices().userManager.getProfileParent(CALLER_USER_HANDLE))
+                .thenReturn(new UserInfo(UserHandle.USER_SYSTEM, "user system", 0));
+        when(getServices().userManager.getPrimaryUser())
+                .thenReturn(new UserInfo(UserHandle.USER_SYSTEM, "user system", 0));
+
+        // Set some device-wide policies:
+        // Security logging
+        when(getServices().settings.securityLogGetLoggingEnabledProperty()).thenReturn(true);
+        // System update policy
+        dpms.mOwners.setSystemUpdatePolicy(SystemUpdatePolicy.createAutomaticInstallPolicy());
+        // Make it look as if FRP agent is present.
+        when(dpms.mMockInjector.getPersistentDataBlockManagerInternal().getAllowedUid())
+                .thenReturn(12345 /* some UID in user 0 */);
+        // Make personal apps look suspended
+        dpms.getUserData(UserHandle.USER_SYSTEM).mAppsSuspended = true;
+
+        clearInvocations(getServices().iwindowManager);
+
+        dpm.wipeData(0);
+        verify(getServices().userManagerInternal).removeUserEvenWhenDisallowed(CALLER_USER_HANDLE);
+
+        // Make sure COPE restrictions are lifted:
+        verify(getServices().userManager).setUserRestriction(
+                UserManager.DISALLOW_REMOVE_MANAGED_PROFILE, false, UserHandle.SYSTEM);
+        verify(getServices().userManager).setUserRestriction(
+                UserManager.DISALLOW_ADD_USER, false, UserHandle.SYSTEM);
+
+        // Some device-wide policies are getting cleaned-up after the user is removed.
+        mContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
+        sendBroadcastWithUser(dpms, Intent.ACTION_USER_REMOVED, CALLER_USER_HANDLE);
+
+        // Screenlock info should be removed
+        verify(getServices().lockPatternUtils).setDeviceOwnerInfo(null);
+        // Wifi config lockdown should be lifted
+        verify(getServices().settings).settingsGlobalPutInt(
+                Settings.Global.WIFI_DEVICE_OWNER_CONFIGS_LOCKDOWN, 0);
+        // System update policy should be removed
+        assertThat(dpms.mOwners.getSystemUpdatePolicy()).isNull();
+        // FRP agent should be notified
+        verify(mContext.spiedContext, times(0)).sendBroadcastAsUser(
+                MockUtils.checkIntentAction(
+                        DevicePolicyManager.ACTION_RESET_PROTECTION_POLICY_CHANGED),
+                MockUtils.checkUserHandle(UserHandle.USER_SYSTEM));
+        // Refresh strong auth timeout and screen capture
+        verify(getServices().lockSettingsInternal).refreshStrongAuthTimeout(UserHandle.USER_SYSTEM);
+        verify(getServices().iwindowManager).refreshScreenCaptureDisabled(UserHandle.USER_SYSTEM);
+        // Unsuspend personal apps
+        verify(getServices().packageManagerInternal)
+                .unsuspendForSuspendingPackage(PLATFORM_PACKAGE_NAME, UserHandle.USER_SYSTEM);
     }
 
     @Test

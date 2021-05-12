@@ -16,19 +16,19 @@
   -->
 
 <resources xmlns:androidprv="http://schemas.android.com/apk/prv/res/android">
-    <color name="switchbar_background_color">@*android:color/material_grey_600</color>
-    <color name="switchbar_switch_track_tint">#BFFFFFFF</color>
-    <color name="switchbar_switch_thumb_tint">@android:color/white</color>
+    <color name="settingslib_switchbar_background_color">@*android:color/material_grey_600</color>
+    <color name="settingslib_switchbar_switch_track_tint">#BFFFFFFF</color>
+    <color name="settingslib_switchbar_switch_thumb_tint">@android:color/white</color>
 
     <!-- Material next state on color-->
-    <color name="state_on_color">?androidprv:attr/colorAccentPrimary</color>
+    <color name="settingslib_state_on_color">?androidprv:attr/colorAccentPrimary</color>
 
     <!-- Material next state off color-->
-    <color name="state_off_color">?androidprv:attr/colorAccentSecondary</color>
+    <color name="settingslib_state_off_color">?androidprv:attr/colorAccentSecondary</color>
 
     <!-- Material next track on color-->
-    <color name="track_on_color">?androidprv:attr/colorAccentPrimaryVariant</color>
+    <color name="settingslib_track_on_color">?androidprv:attr/colorAccentPrimaryVariant</color>
 
     <!-- Material next track off color-->
-    <color name="track_off_color">?androidprv:attr/colorAccentSecondaryVariant</color>
+    <color name="settingslib_track_off_color">?androidprv:attr/colorAccentSecondaryVariant</color>
 </resources>

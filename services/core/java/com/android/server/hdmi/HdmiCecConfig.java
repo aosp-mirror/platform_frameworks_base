@@ -221,7 +221,7 @@ public class HdmiCecConfig {
         }
     }
 
-    private class Setting {
+    protected class Setting {
         @NonNull private final Context mContext;
         @NonNull private final @CecSettingName String mName;
         private final boolean mUserConfigurable;
@@ -566,7 +566,7 @@ public class HdmiCecConfig {
         }
     }
 
-    private String retrieveValue(@NonNull Setting setting, @NonNull String defaultValue) {
+    protected String retrieveValue(@NonNull Setting setting, @NonNull String defaultValue) {
         @Storage int storage = getStorage(setting);
         String storageKey = getStorageKey(setting);
         if (storage == STORAGE_SYSPROPS) {
@@ -582,7 +582,7 @@ public class HdmiCecConfig {
         return null;
     }
 
-    private void storeValue(@NonNull Setting setting, @NonNull String value) {
+    protected void storeValue(@NonNull Setting setting, @NonNull String value) {
         @Storage int storage = getStorage(setting);
         String storageKey = getStorageKey(setting);
         if (storage == STORAGE_SYSPROPS) {
@@ -626,7 +626,7 @@ public class HdmiCecConfig {
         notifySettingChanged(setting);
     }
 
-    private void notifySettingChanged(@NonNull Setting setting) {
+    protected void notifySettingChanged(@NonNull Setting setting) {
         synchronized (mLock) {
             ArrayMap<SettingChangeListener, Executor> listeners =
                     mSettingChangeListeners.get(setting);

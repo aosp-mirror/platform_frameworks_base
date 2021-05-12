@@ -220,7 +220,7 @@ public class VcnGatewayConnectionTestBase {
     protected VcnChildSessionCallback getChildSessionCallback() {
         ArgumentCaptor<ChildSessionCallback> captor =
                 ArgumentCaptor.forClass(ChildSessionCallback.class);
-        verify(mDeps).newIkeSession(any(), any(), any(), any(), captor.capture());
+        verify(mDeps, atLeastOnce()).newIkeSession(any(), any(), any(), any(), captor.capture());
         return (VcnChildSessionCallback) captor.getValue();
     }
 

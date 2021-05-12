@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Typeface;
+import android.graphics.fonts.Font;
 import android.graphics.fonts.FontFamily;
 import android.graphics.fonts.FontFileUtil;
 import android.graphics.fonts.FontManager;
@@ -192,6 +193,13 @@ public final class FontManagerService extends IFontManager.Stub {
             } finally {
                 NioUtils.freeDirectBuffer(buffer);
             }
+        }
+
+        @Override
+        public void tryToCreateTypeface(File file) throws IOException {
+            Font font = new Font.Builder(file).build();
+            FontFamily family = new FontFamily.Builder(font).build();
+            new Typeface.CustomFallbackBuilder(family).build();
         }
 
         private static ByteBuffer mmap(File file) throws IOException {

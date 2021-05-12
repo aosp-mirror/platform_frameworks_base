@@ -51,6 +51,7 @@ import android.view.Display;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BatterySipper;
 import com.android.internal.os.BatteryStatsHelper;
+import com.android.internal.os.BatteryUsageStatsProvider;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -3930,7 +3931,6 @@ public abstract class BatteryStats implements Parcelable {
                 getStartClockTime(),
                 whichBatteryScreenOffRealtime / 1000, whichBatteryScreenOffUptime / 1000,
                 getEstimatedBatteryCapacity(),
-                getLearnedBatteryCapacity(),
                 getMinLearnedBatteryCapacity(),
                 getMaxLearnedBatteryCapacity(),
                 screenDozeTime / 1000);
@@ -5299,154 +5299,19 @@ public abstract class BatteryStats implements Parcelable {
         pw.println(getDischargeAmountScreenDozeSinceCharge());
         pw.println();
 
+        final BatteryUsageStatsProvider provider = new BatteryUsageStatsProvider(context, this);
+        final BatteryUsageStats stats = provider.getBatteryUsageStats(
+                new BatteryUsageStatsQuery.Builder()
+                        .setMaxStatsAgeMs(0)
+                        .includePowerModels()
+                        .build());
+        stats.dump(pw, prefix);
+
         final BatteryStatsHelper helper = new BatteryStatsHelper(context, false, wifiOnly);
         helper.create(this);
         helper.refreshStats(which, UserHandle.USER_ALL);
-        List<BatterySipper> sippers = helper.getUsageList();
-        if (sippers != null && sippers.size() > 0) {
-            pw.print(prefix); pw.println("  Estimated power use (mAh):");
-            pw.print(prefix); pw.print("    Capacity: ");
-                    printmAh(pw, helper.getPowerProfile().getBatteryCapacity());
-                    pw.print(", Computed drain: "); printmAh(pw, helper.getComputedPower());
-                    pw.print(", actual drain: "); printmAh(pw, helper.getMinDrainedPower());
-                    if (helper.getMinDrainedPower() != helper.getMaxDrainedPower()) {
-                        pw.print("-"); printmAh(pw, helper.getMaxDrainedPower());
-                    }
-                    pw.println();
-            for (int i=0; i<sippers.size(); i++) {
-                final BatterySipper bs = sippers.get(i);
-                pw.print(prefix);
-                switch (bs.drainType) {
-                    case AMBIENT_DISPLAY:
-                        pw.print("    Ambient display: ");
-                        break;
-                    case IDLE:
-                        pw.print("    Idle: ");
-                        break;
-                    case CELL:
-                        pw.print("    Cell standby: ");
-                        break;
-                    case PHONE:
-                        pw.print("    Phone calls: ");
-                        break;
-                    case WIFI:
-                        pw.print("    Wifi: ");
-                        break;
-                    case BLUETOOTH:
-                        pw.print("    Bluetooth: ");
-                        break;
-                    case SCREEN:
-                        pw.print("    Screen: ");
-                        break;
-                    case FLASHLIGHT:
-                        pw.print("    Flashlight: ");
-                        break;
-                    case APP:
-                        pw.print("    Uid ");
-                        UserHandle.formatUid(pw, bs.uidObj.getUid());
-                        pw.print(": ");
-                        break;
-                    case USER:
-                        pw.print("    User "); pw.print(bs.userId);
-                        pw.print(": ");
-                        break;
-                    case UNACCOUNTED:
-                        pw.print("    Unaccounted: ");
-                        break;
-                    case OVERCOUNTED:
-                        pw.print("    Over-counted: ");
-                        break;
-                    case CAMERA:
-                        pw.print("    Camera: ");
-                        break;
-                    default:
-                        pw.print("    ???: ");
-                        break;
-                }
-                printmAh(pw, bs.totalPowerMah);
 
-                if (bs.usagePowerMah != bs.totalPowerMah) {
-                    // If the usage (generic power) isn't the whole amount, we list out
-                    // what components are involved in the calculation.
-
-                    pw.print(" (");
-                    if (bs.usagePowerMah != 0) {
-                        pw.print(" usage=");
-                        printmAh(pw, bs.usagePowerMah);
-                    }
-                    if (bs.cpuPowerMah != 0) {
-                        pw.print(" cpu=");
-                        printmAh(pw, bs.cpuPowerMah);
-                    }
-                    if (bs.wakeLockPowerMah != 0) {
-                        pw.print(" wake=");
-                        printmAh(pw, bs.wakeLockPowerMah);
-                    }
-                    if (bs.mobileRadioPowerMah != 0) {
-                        pw.print(" radio=");
-                        printmAh(pw, bs.mobileRadioPowerMah);
-                    }
-                    if (bs.wifiPowerMah != 0) {
-                        pw.print(" wifi=");
-                        printmAh(pw, bs.wifiPowerMah);
-                    }
-                    if (bs.bluetoothPowerMah != 0) {
-                        pw.print(" bt=");
-                        printmAh(pw, bs.bluetoothPowerMah);
-                    }
-                    if (bs.gpsPowerMah != 0) {
-                        pw.print(" gps=");
-                        printmAh(pw, bs.gpsPowerMah);
-                    }
-                    if (bs.sensorPowerMah != 0) {
-                        pw.print(" sensor=");
-                        printmAh(pw, bs.sensorPowerMah);
-                    }
-                    if (bs.cameraPowerMah != 0) {
-                        pw.print(" camera=");
-                        printmAh(pw, bs.cameraPowerMah);
-                    }
-                    if (bs.flashlightPowerMah != 0) {
-                        pw.print(" flash=");
-                        printmAh(pw, bs.flashlightPowerMah);
-                    }
-                    if (bs.customMeasuredPowerMah != null) {
-                        for (int idx = 0; idx < bs.customMeasuredPowerMah.length; idx++) {
-                            final double customPowerMah = bs.customMeasuredPowerMah[idx];
-                            if (customPowerMah != 0) {
-                                pw.print(" custom[" + idx + "]=");
-                                printmAh(pw, customPowerMah);
-                            }
-                        }
-                    }
-                    pw.print(" )");
-                }
-
-                // If there is additional smearing information, include it.
-                if (bs.totalSmearedPowerMah != bs.totalPowerMah) {
-                    pw.print(" Including smearing: ");
-                    printmAh(pw, bs.totalSmearedPowerMah);
-                    pw.print(" (");
-                    if (bs.screenPowerMah != 0) {
-                        pw.print(" screen=");
-                        printmAh(pw, bs.screenPowerMah);
-                    }
-                    if (bs.proportionalSmearMah != 0) {
-                        pw.print(" proportional=");
-                        printmAh(pw, bs.proportionalSmearMah);
-                    }
-                    pw.print(" )");
-                }
-                if (bs.shouldHide) {
-                    pw.print(" Excluded from smearing");
-                }
-
-                pw.println();
-            }
-            pw.println();
-        }
-
-        sippers = helper.getMobilemsppList();
+        final List<BatterySipper> sippers = helper.getMobilemsppList();
         if (sippers != null && sippers.size() > 0) {
             pw.print(prefix); pw.println("  Per-app mobile ms per packet:");
             long totalTime = 0;
