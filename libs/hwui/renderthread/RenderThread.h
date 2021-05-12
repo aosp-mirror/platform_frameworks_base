@@ -151,6 +151,7 @@ public:
 
     sk_sp<Bitmap> allocateHardwareBitmap(SkBitmap& skBitmap);
     void dumpGraphicsMemory(int fd, bool includeProfileData);
+    void getMemoryUsage(size_t* cpuUsage, size_t* gpuUsage);
 
     void requireGlContext();
     void requireVkContext();
