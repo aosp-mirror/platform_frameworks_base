@@ -53,7 +53,7 @@ class FingerprintGenerateChallengeClient extends GenerateChallengeClient<ISessio
 
     void onChallengeGenerated(int sensorId, int userId, long challenge) {
         try {
-            getListener().onChallengeGenerated(sensorId, challenge);
+            getListener().onChallengeGenerated(sensorId, userId, challenge);
             mCallback.onClientFinished(this, true /* success */);
         } catch (RemoteException e) {
             Slog.e(TAG, "Unable to send challenge", e);
