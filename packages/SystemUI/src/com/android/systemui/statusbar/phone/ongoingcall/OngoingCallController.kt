@@ -23,7 +23,7 @@ import android.app.Notification
 import android.app.Notification.CallStyle.CALL_TYPE_ONGOING
 import android.content.Intent
 import android.util.Log
-import android.view.ViewGroup
+import android.view.View
 import android.widget.Chronometer
 import com.android.systemui.R
 import com.android.systemui.animation.ActivityLaunchAnimator
@@ -57,7 +57,7 @@ class OngoingCallController @Inject constructor(
     private var ongoingCallInfo: OngoingCallInfo? = null
     /** True if the application managing the call is visible to the user. */
     private var isCallAppVisible: Boolean = true
-    private var chipView: ViewGroup? = null
+    private var chipView: View? = null
     private var uidObserver: IUidObserver.Stub? = null
 
     private val mListeners: MutableList<OngoingCallListener> = mutableListOf()
@@ -105,7 +105,7 @@ class OngoingCallController @Inject constructor(
      *
      * Should only be called from [CollapsedStatusBarFragment].
      */
-    fun setChipView(chipView: ViewGroup) {
+    fun setChipView(chipView: View) {
         this.chipView = chipView
         if (hasOngoingCall()) {
             updateChip()
