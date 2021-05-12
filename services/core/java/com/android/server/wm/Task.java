@@ -1977,32 +1977,46 @@ class Task extends WindowContainer<WindowContainer> {
 
     @Override
     public boolean supportsSplitScreenWindowingMode() {
-        final Task topTask = getTopMostTask();
-        return super.supportsSplitScreenWindowingMode()
-                && (topTask == null || topTask.supportsSplitScreenWindowingModeInner());
+        return supportsSplitScreenWindowingModeInDisplayArea(getDisplayArea());
     }
 
-    private boolean supportsSplitScreenWindowingModeInner() {
+    boolean supportsSplitScreenWindowingModeInDisplayArea(@Nullable TaskDisplayArea tda) {
+        final Task topTask = getTopMostTask();
+        return super.supportsSplitScreenWindowingMode()
+                && (topTask == null || topTask.supportsSplitScreenWindowingModeInner(tda));
+    }
+
+    private boolean supportsSplitScreenWindowingModeInner(@Nullable TaskDisplayArea tda) {
         return super.supportsSplitScreenWindowingMode()
                 && mAtmService.mSupportsSplitScreenMultiWindow
-                && supportsMultiWindow();
+                && supportsMultiWindowInDisplayArea(tda);
     }
 
     boolean supportsFreeform() {
-        return mAtmService.mSupportsFreeformWindowManagement && supportsMultiWindow();
+        return supportsFreeformInDisplayArea(getDisplayArea());
+    }
+
+    /**
+     * @return whether this task supports freeform multi-window if it is in the given
+     *         {@link TaskDisplayArea}.
+     */
+    boolean supportsFreeformInDisplayArea(@Nullable TaskDisplayArea tda) {
+        return mAtmService.mSupportsFreeformWindowManagement
+                && supportsMultiWindowInDisplayArea(tda);
     }
 
     boolean supportsMultiWindow() {
-        return mAtmService.mSupportsMultiWindow
-                && (isResizeable() || mAtmService.mDevEnableNonResizableMultiWindow);
+        return supportsMultiWindowInDisplayArea(getDisplayArea());
     }
 
-    // TODO(b/176061101) replace supportsMultiWindow() after fixing tests.
-    boolean supportsMultiWindow2() {
+    /**
+     * @return whether this task supports multi-window if it is in the given
+     *         {@link TaskDisplayArea}.
+     */
+    boolean supportsMultiWindowInDisplayArea(@Nullable TaskDisplayArea tda) {
         if (!mAtmService.mSupportsMultiWindow) {
             return false;
         }
-        final TaskDisplayArea tda = getDisplayArea();
         if (tda == null) {
             return false;
         }
