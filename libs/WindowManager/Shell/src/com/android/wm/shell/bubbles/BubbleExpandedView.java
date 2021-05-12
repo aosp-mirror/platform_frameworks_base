@@ -651,11 +651,12 @@ public class BubbleExpandedView extends LinearLayout {
                 // Remove top insets back here because availableRect.height would account for that
                 ? mExpandedViewContainerLocation[1] - mPositioner.getInsets().top
                 : 0;
+        int settingsHeight = mIsOverflow ? 0 : mSettingsIconHeight;
         return mPositioner.getAvailableRect().height()
                 - expandedContainerY
                 - getPaddingTop()
                 - getPaddingBottom()
-                - mSettingsIconHeight
+                - settingsHeight
                 - mPointerHeight
                 - mPointerMargin;
     }
