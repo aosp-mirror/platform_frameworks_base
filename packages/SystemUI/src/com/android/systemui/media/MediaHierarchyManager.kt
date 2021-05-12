@@ -273,6 +273,7 @@ class MediaHierarchyManager @Inject constructor(
                 } else {
                     updateDesiredLocation()
                     qsExpanded = false
+                    closeGuts()
                 }
                 mediaCarouselController.mediaCarouselScrollHandler.visibleToUser = isVisibleToUser()
             }
