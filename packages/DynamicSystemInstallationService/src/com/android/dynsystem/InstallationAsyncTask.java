@@ -320,20 +320,21 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
         }
     }
 
-    private void installScratch() throws IOException {
-        final long scratchSize = mDynSystem.suggestScratchSize();
+    private void installWritablePartition(final String partitionName, final long partitionSize)
+            throws IOException {
+        Log.d(TAG, "Creating writable partition: " + partitionName + ", size: " + partitionSize);
+
         Thread thread = new Thread() {
             @Override
             public void run() {
                 mInstallationSession =
-                        mDynSystem.createPartition("scratch", scratchSize, /* readOnly= */ false);
+                        mDynSystem.createPartition(
+                                partitionName, partitionSize, /* readOnly= */ false);
             }
         };
 
-        Log.d(TAG, "Creating partition: scratch, size = " + scratchSize);
         thread.start();
-
-        Progress progress = new Progress("scratch", scratchSize, mNumInstalledPartitions++);
+        Progress progress = new Progress(partitionName, partitionSize, mNumInstalledPartitions++);
 
         while (thread.isAlive()) {
             if (isCancelled()) {
@@ -356,53 +357,22 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
 
         if (mInstallationSession == null) {
             throw new IOException(
-                    "Failed to start installation with requested size: " + scratchSize);
+                    "Failed to start installation with requested size: " + partitionSize);
         }
+
         // Reset installation session and verify that installation completes successfully.
         mInstallationSession = null;
         if (!mDynSystem.closePartition()) {
-            throw new IOException("Failed to complete partition installation: scratch");
+            throw new IOException("Failed to complete partition installation: " + partitionName);
         }
     }
 
+    private void installScratch() throws IOException {
+        installWritablePartition("scratch", mDynSystem.suggestScratchSize());
+    }
+
     private void installUserdata() throws IOException {
-        Thread thread = new Thread(() -> {
-            mInstallationSession = mDynSystem.createPartition("userdata", mUserdataSize, false);
-        });
-
-        Log.d(TAG, "Creating partition: userdata, size = " + mUserdataSize);
-        thread.start();
-
-        Progress progress = new Progress("userdata", mUserdataSize, mNumInstalledPartitions++);
-
-        while (thread.isAlive()) {
-            if (isCancelled()) {
-                return;
-            }
-
-            final long installedSize = mDynSystem.getInstallationProgress().bytes_processed;
-
-            if (installedSize > progress.installedSize + MIN_PROGRESS_TO_PUBLISH) {
-                progress.installedSize = installedSize;
-                publishProgress(progress);
-            }
-
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                // Ignore the error.
-            }
-        }
-
-        if (mInstallationSession == null) {
-            throw new IOException(
-                    "Failed to start installation with requested size: " + mUserdataSize);
-        }
-        // Reset installation session and verify that installation completes successfully.
-        mInstallationSession = null;
-        if (!mDynSystem.closePartition()) {
-            throw new IOException("Failed to complete partition installation: userdata");
-        }
+        installWritablePartition("userdata", mUserdataSize);
     }
 
     private void installImages() throws IOException, ImageValidationException {
