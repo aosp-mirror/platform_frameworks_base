@@ -3096,8 +3096,6 @@
     <!-- @hide @SystemApi -->
     <public name="playHomeTransitionSound" />
     <public name="lStar" />
-    <!-- @hide @SystemApi -->
-    <public name="durationBetweenRequestsMillis" />
     <public name="showInInputMethodPicker" />
     <public name="effectColor" />
     <!-- @hide @TestApi -->
