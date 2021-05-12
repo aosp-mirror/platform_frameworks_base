@@ -40,10 +40,10 @@ public abstract class SnapshotCache<T> extends Watcher{
     protected final T mSource;
 
     // The cached snapshot
-    private T mSnapshot = null;
+    private volatile T mSnapshot = null;
 
     // True if the snapshot is sealed and may not be modified.
-    private boolean mSealed = false;
+    private volatile boolean mSealed = false;
 
     /**
      * Create a cache with a source object for rebuilding snapshots and a
@@ -69,7 +69,7 @@ public abstract class SnapshotCache<T> extends Watcher{
      * Notify the object that the source object has changed.  If the local object is sealed then
      * IllegalStateException is thrown.  Otherwise, the cache is cleared.
      */
-    public void onChange(@Nullable Watchable what) {
+    public final void onChange(@Nullable Watchable what) {
         if (mSealed) {
             throw new IllegalStateException("attempt to change a sealed object");
         }
@@ -79,7 +79,7 @@ public abstract class SnapshotCache<T> extends Watcher{
     /**
      * Seal the cache.  Attempts to modify the cache will generate an exception.
      */
-    public void seal() {
+    public final void seal() {
         mSealed = true;
     }
 
@@ -88,7 +88,7 @@ public abstract class SnapshotCache<T> extends Watcher{
      * new snapshot and saves it in the cache.
      * @return A snapshot as returned by createSnapshot() and possibly cached.
      */
-    public T snapshot() {
+    public final T snapshot() {
         T s = mSnapshot;
         if (s == null || !ENABLED) {
             s = createSnapshot();
