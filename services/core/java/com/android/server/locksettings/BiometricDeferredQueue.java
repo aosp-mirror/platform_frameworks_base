@@ -98,19 +98,7 @@ public class BiometricDeferredQueue {
         }
 
         @Override
-        public void onChallengeInterrupted(int sensorId) {
-            Slog.w(TAG, "Challenge interrupted, sensor: " + sensorId);
-            // Consider re-attempting generateChallenge/resetLockout/revokeChallenge
-            // when onChallengeInterruptFinished is invoked
-        }
-
-        @Override
-        public void onChallengeInterruptFinished(int sensorId) {
-            Slog.w(TAG, "Challenge interrupt finished, sensor: " + sensorId);
-        }
-
-        @Override
-        public void onGenerateChallengeResult(int sensorId, long challenge) {
+        public void onGenerateChallengeResult(int sensorId, int userId, long challenge) {
             if (!sensorIds.contains(sensorId)) {
                 Slog.e(TAG, "Unknown sensorId received: " + sensorId);
                 return;
@@ -128,10 +116,6 @@ public class BiometricDeferredQueue {
             }
 
             sensorIds.remove(sensorId);
-            // Challenge is only required for IBiometricsFace@1.0 (and not IFace AIDL). The
-            // IBiometricsFace@1.0 HAL does not require userId to revokeChallenge, so passing
-            // in 0 is OK.
-            final int userId = 0;
             faceManager.revokeChallenge(sensorId, userId, challenge);
 
             if (sensorIds.isEmpty()) {
@@ -234,18 +218,12 @@ public class BiometricDeferredQueue {
         }
     }
 
-    /**
-     * For devices on {@link android.hardware.biometrics.face.V1_0} which only support a single
-     * in-flight challenge, we generate a single challenge to reset lockout for all profiles. This
-     * hopefully reduces/eliminates issues such as overwritten challenge, incorrectly revoked
-     * challenge, or other race conditions.
-     */
     private void processPendingLockoutsForFace(List<UserAuthInfo> pendingResetLockouts) {
         if (mFaceManager != null) {
             if (mFaceResetLockoutTask != null) {
                 // This code will need to be updated if this problem ever occurs.
-                Slog.w(TAG, "mFaceGenerateChallengeCallback not null, previous operation may be"
-                        + " stuck");
+                Slog.w(TAG,
+                        "mFaceGenerateChallengeCallback not null, previous operation may be stuck");
             }
             final List<FaceSensorPropertiesInternal> faceSensorProperties =
                     mFaceManager.getSensorPropertiesInternal();
@@ -258,12 +236,13 @@ public class BiometricDeferredQueue {
                     mSpManager, sensorIds, pendingResetLockouts);
             for (final FaceSensorPropertiesInternal prop : faceSensorProperties) {
                 if (prop.resetLockoutRequiresHardwareAuthToken) {
-                    if (prop.resetLockoutRequiresChallenge) {
-                        // Generate a challenge for each sensor. The challenge does not need to be
-                        // per-user, since the HAT returned by gatekeeper contains userId.
-                        mFaceManager.generateChallenge(prop.sensorId, mFaceResetLockoutTask);
-                    } else {
-                        for (UserAuthInfo user : pendingResetLockouts) {
+                    for (UserAuthInfo user : pendingResetLockouts) {
+                        if (prop.resetLockoutRequiresChallenge) {
+                            Slog.d(TAG, "Generating challenge for sensor: " + prop.sensorId
+                                    + ", user: " + user.userId);
+                            mFaceManager.generateChallenge(prop.sensorId, user.userId,
+                                    mFaceResetLockoutTask);
+                        } else {
                             Slog.d(TAG, "Resetting face lockout for sensor: " + prop.sensorId
                                     + ", user: " + user.userId);
                             final byte[] hat = requestHatFromGatekeeperPassword(mSpManager, user,

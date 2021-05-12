@@ -72,17 +72,8 @@ public class FaceServiceReceiver extends IFaceServiceReceiver.Stub {
     }
 
     @Override
-    public void onChallengeGenerated(int sensorId, long challenge) throws RemoteException {
-
-    }
-
-    @Override
-    public void onChallengeInterrupted(int sensorId) throws RemoteException {
-
-    }
-
-    @Override
-    public void onChallengeInterruptFinished(int sensorId) throws RemoteException {
+    public void onChallengeGenerated(int sensorId, int userId, long challenge)
+            throws RemoteException {
 
     }
 
