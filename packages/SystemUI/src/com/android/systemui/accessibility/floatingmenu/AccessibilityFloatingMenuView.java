@@ -19,6 +19,8 @@ package com.android.systemui.accessibility.floatingmenu;
 import static android.util.MathUtils.constrain;
 import static android.util.MathUtils.sq;
 
+import static java.util.Objects.requireNonNull;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
@@ -43,7 +45,9 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
+import android.view.animation.Animation;
 import android.view.animation.OvershootInterpolator;
+import android.view.animation.TranslateAnimation;
 import android.widget.FrameLayout;
 
 import androidx.annotation.DimenRes;
@@ -60,6 +64,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Accessibility floating menu is used for the actions of accessibility features, it's also the
@@ -77,6 +82,10 @@ public class AccessibilityFloatingMenuView extends FrameLayout
     private static final int MIN_WINDOW_X = 0;
     private static final int MIN_WINDOW_Y = 0;
     private static final float LOCATION_Y_PERCENTAGE = 0.8f;
+
+    private static final int ANIMATION_START_OFFSET = 600;
+    private static final int ANIMATION_DURATION_MS = 600;
+    private static final float ANIMATION_TO_X_VALUE = 0.5f;
 
     private boolean mIsFadeEffectEnabled;
     private boolean mIsShowing;
@@ -107,6 +116,7 @@ public class AccessibilityFloatingMenuView extends FrameLayout
     private float mPercentageY = LOCATION_Y_PERCENTAGE;
     private float mSquareScaledTouchSlop;
     private final Configuration mLastConfiguration;
+    private Optional<OnDragEndListener> mOnDragEndListener = Optional.empty();
     private final RecyclerView mListView;
     private final AccessibilityTargetAdapter mAdapter;
     private float mFadeOutValue;
@@ -161,6 +171,17 @@ public class AccessibilityFloatingMenuView extends FrameLayout
         int RIGHT = 1;
     }
 
+    /**
+     * Interface for a callback to be invoked when the floating menu was dragging.
+     */
+    interface OnDragEndListener {
+
+        /**
+         * Invoked when the floating menu has dragged end.
+         */
+        void onDragEnd();
+    }
+
     public AccessibilityFloatingMenuView(Context context) {
         this(context, new RecyclerView(context));
     }
@@ -201,6 +222,8 @@ public class AccessibilityFloatingMenuView extends FrameLayout
                 updateRadiusWith(mSizeType, mRadiusType, mTargets.size());
 
                 fadeOut();
+
+                mOnDragEndListener.ifPresent(OnDragEndListener::onDragEnd);
             }
         });
 
@@ -266,7 +289,7 @@ public class AccessibilityFloatingMenuView extends FrameLayout
 
                 // Must switch the oval shape type before tapping the corresponding item in the
                 // list view, otherwise it can't work on it.
-                if (mShapeType == ShapeType.HALF_OVAL) {
+                if (!isOvalShape()) {
                     setShapeType(ShapeType.OVAL);
 
                     return true;
@@ -363,6 +386,10 @@ public class AccessibilityFloatingMenuView extends FrameLayout
         return mIsShowing;
     }
 
+    boolean isOvalShape() {
+        return mShapeType == ShapeType.OVAL;
+    }
+
     void onTargetsChanged(List<AccessibilityTarget> newTargets) {
         fadeIn();
 
@@ -403,6 +430,35 @@ public class AccessibilityFloatingMenuView extends FrameLayout
                 newShapeType == ShapeType.OVAL
                         ? null
                         : (view, event) -> onTouched(event));
+
+        fadeOut();
+    }
+
+    public void setOnDragEndListener(OnDragEndListener onDragListener) {
+        mOnDragEndListener = Optional.ofNullable(onDragListener);
+    }
+
+    void startTranslateXAnimation() {
+        fadeIn();
+
+        final float toXValue = mAlignment == Alignment.RIGHT
+                ? ANIMATION_TO_X_VALUE
+                : -ANIMATION_TO_X_VALUE;
+        final TranslateAnimation animation =
+                new TranslateAnimation(Animation.RELATIVE_TO_SELF, 0,
+                        Animation.RELATIVE_TO_SELF, toXValue,
+                        Animation.RELATIVE_TO_SELF, 0,
+                        Animation.RELATIVE_TO_SELF, 0);
+        animation.setDuration(ANIMATION_DURATION_MS);
+        animation.setRepeatMode(Animation.REVERSE);
+        animation.setInterpolator(new OvershootInterpolator());
+        animation.setRepeatCount(Animation.INFINITE);
+        animation.setStartOffset(ANIMATION_START_OFFSET);
+        mListView.startAnimation(animation);
+    }
+
+    void stopTranslateXAnimation() {
+        mListView.clearAnimation();
 
         fadeOut();
     }
@@ -536,11 +592,7 @@ public class AccessibilityFloatingMenuView extends FrameLayout
     }
 
     private Handler createUiHandler() {
-        final Looper looper = Looper.myLooper();
-        if (looper == null) {
-            throw new IllegalArgumentException("looper must not be null");
-        }
-        return new Handler(looper);
+        return new Handler(requireNonNull(Looper.myLooper(), "looper must not be null"));
     }
 
     private void updateDimensions() {
