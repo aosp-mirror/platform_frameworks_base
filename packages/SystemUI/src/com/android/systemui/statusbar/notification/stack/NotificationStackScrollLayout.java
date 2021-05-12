@@ -1149,8 +1149,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             mOnStackYChanged.run();
         }
         if (mQsExpansionFraction <= 0) {
+            final float scrimTopPadding = mAmbientState.isOnKeyguard() ? 0 : mSidePaddings;
             final float stackEndHeight = Math.max(0f,
-                    getHeight() - getEmptyBottomMargin() - stackY - mSidePaddings);
+                    getHeight() - getEmptyBottomMargin() - stackY - scrimTopPadding);
             mAmbientState.setStackEndHeight(stackEndHeight);
             mAmbientState.setStackHeight(
                     MathUtils.lerp(stackEndHeight * StackScrollAlgorithm.START_FRACTION,
