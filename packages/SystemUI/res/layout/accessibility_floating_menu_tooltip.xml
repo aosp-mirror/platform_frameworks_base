@@ -22,6 +22,14 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal">
 
+    <View
+        android:id="@+id/arrow_left"
+        android:layout_width="@dimen/accessibility_floating_tooltip_arrow_width"
+        android:layout_height="@dimen/accessibility_floating_tooltip_arrow_height"
+        android:layout_marginRight="@dimen/accessibility_floating_tooltip_arrow_margin"
+        android:visibility="gone"
+        android:layout_gravity="center_vertical"/>
+
     <TextView
         android:id="@+id/text"
         android:layout_width="wrap_content"
@@ -35,9 +43,10 @@
         android:textSize="@dimen/accessibility_floating_tooltip_font_size"/>
 
     <View
-        android:id="@+id/arrow"
+        android:id="@+id/arrow_right"
         android:layout_width="@dimen/accessibility_floating_tooltip_arrow_width"
         android:layout_height="@dimen/accessibility_floating_tooltip_arrow_height"
         android:layout_marginLeft="@dimen/accessibility_floating_tooltip_arrow_margin"
+        android:visibility="gone"
         android:layout_gravity="center_vertical"/>
 </LinearLayout>

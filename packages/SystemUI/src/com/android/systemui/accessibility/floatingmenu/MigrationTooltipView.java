@@ -37,6 +37,7 @@ class MigrationTooltipView extends BaseTooltipView {
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra(Intent.EXTRA_COMPONENT_NAME,
                 ACCESSIBILITY_BUTTON_COMPONENT_NAME.flattenToShortString());
+
         final AnnotationLinkSpan.LinkInfo linkInfo = new AnnotationLinkSpan.LinkInfo(
                 AnnotationLinkSpan.LinkInfo.DEFAULT_ANNOTATION,
                 v -> {
