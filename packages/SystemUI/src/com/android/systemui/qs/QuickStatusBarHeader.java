@@ -23,6 +23,7 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.util.FeatureFlagUtils;
 import android.util.Pair;
 import android.view.DisplayCutout;
 import android.view.View;
@@ -87,13 +88,21 @@ public class QuickStatusBarHeader extends FrameLayout {
     private int mTopViewMeasureHeight;
 
     private final String mMobileSlotName;
+    private final String mNoCallingSlotName;
     private final String mCallStrengthSlotName;
+    private final boolean mProviderModel;
 
     public QuickStatusBarHeader(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mMobileSlotName = context.getString(com.android.internal.R.string.status_bar_no_calling);
+        mMobileSlotName = context.getString(com.android.internal.R.string.status_bar_mobile);
+        mNoCallingSlotName = context.getString(com.android.internal.R.string.status_bar_no_calling);
         mCallStrengthSlotName =
                 context.getString(com.android.internal.R.string.status_bar_call_strength);
+        if (FeatureFlagUtils.isEnabled(context, FeatureFlagUtils.SETTINGS_PROVIDER_MODEL)) {
+            mProviderModel = true;
+        } else {
+            mProviderModel = false;
+        }
     }
 
     /**
@@ -242,14 +251,24 @@ public class QuickStatusBarHeader extends FrameLayout {
                 .setListener(new TouchAnimator.ListenerAdapter() {
                     @Override
                     public void onAnimationAtEnd() {
-                        mIconContainer.addIgnoredSlot(mMobileSlotName);
-                        mIconContainer.addIgnoredSlot(mCallStrengthSlotName);
+                        // TODO(b/185580157): Remove the mProviderModel if the mobile slot can be
+                        // hidden in Provider model.
+                        if (mProviderModel) {
+                            mIconContainer.addIgnoredSlot(mNoCallingSlotName);
+                            mIconContainer.addIgnoredSlot(mCallStrengthSlotName);
+                        } else {
+                            mIconContainer.addIgnoredSlot(mMobileSlotName);
+                        }
                     }
 
                     @Override
                     public void onAnimationStarted() {
-                        mIconContainer.addIgnoredSlot(mMobileSlotName);
-                        mIconContainer.addIgnoredSlot(mCallStrengthSlotName);
+                        if (mProviderModel) {
+                            mIconContainer.addIgnoredSlot(mNoCallingSlotName);
+                            mIconContainer.addIgnoredSlot(mCallStrengthSlotName);
+                        } else {
+                            mIconContainer.addIgnoredSlot(mMobileSlotName);
+                        }
 
                         setSeparatorVisibility(false);
                     }
@@ -257,8 +276,12 @@ public class QuickStatusBarHeader extends FrameLayout {
                     @Override
                     public void onAnimationAtStart() {
                         super.onAnimationAtStart();
-                        mIconContainer.removeIgnoredSlot(mMobileSlotName);
-                        mIconContainer.removeIgnoredSlot(mCallStrengthSlotName);
+                        if (mProviderModel) {
+                            mIconContainer.removeIgnoredSlot(mNoCallingSlotName);
+                            mIconContainer.removeIgnoredSlot(mCallStrengthSlotName);
+                        } else {
+                            mIconContainer.removeIgnoredSlot(mMobileSlotName);
+                        }
 
                         setSeparatorVisibility(mShowClockIconsSeparator);
                     }
