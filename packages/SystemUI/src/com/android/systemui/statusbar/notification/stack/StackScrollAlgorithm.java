@@ -58,6 +58,7 @@ public class StackScrollAlgorithm {
     private int mStatusBarHeight;
     private float mHeadsUpInset;
     private int mPinnedZTranslationExtra;
+    private float mNotificationScrimPadding;
 
     public StackScrollAlgorithm(
             Context context,
@@ -82,6 +83,7 @@ public class StackScrollAlgorithm {
         mPinnedZTranslationExtra = res.getDimensionPixelSize(
                 R.dimen.heads_up_pinned_elevation);
         mGapHeight = res.getDimensionPixelSize(R.dimen.notification_section_divider_height);
+        mNotificationScrimPadding = res.getDimensionPixelSize(R.dimen.notification_side_paddings);
     }
 
     /**
@@ -258,6 +260,9 @@ public class StackScrollAlgorithm {
         // expanded. Consider updating these states in updateContentView instead so that we don't
         // have to recalculate in every frame.
         float currentY = -scrollY;
+        if (!ambientState.isOnKeyguard()) {
+            currentY += mNotificationScrimPadding;
+        }
         float previousY = 0;
         state.firstViewInShelf = null;
         state.viewHeightBeforeShelf = -1;
@@ -318,6 +323,9 @@ public class StackScrollAlgorithm {
             AmbientState ambientState) {
         // The y coordinate of the current child.
         float currentYPosition = -algorithmState.scrollY;
+        if (!ambientState.isOnKeyguard()) {
+            currentYPosition += mNotificationScrimPadding;
+        }
         int childCount = algorithmState.visibleChildren.size();
         for (int i = 0; i < childCount; i++) {
             currentYPosition = updateChild(i, algorithmState, ambientState, currentYPosition);
