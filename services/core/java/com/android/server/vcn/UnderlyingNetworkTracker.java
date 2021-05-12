@@ -219,10 +219,9 @@ public class UnderlyingNetworkTracker {
 
     /** Builds and returns a NetworkRequest for the given subIds to match Test Networks. */
     private NetworkRequest getTestNetworkRequest(@NonNull Set<Integer> subIds) {
-        return getBaseNetworkRequestBuilder()
+        return new NetworkRequest.Builder()
+                .clearCapabilities()
                 .addTransportType(NetworkCapabilities.TRANSPORT_TEST)
-                .removeCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-                .removeCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)
                 .setSubscriptionIds(subIds)
                 .build();
     }
