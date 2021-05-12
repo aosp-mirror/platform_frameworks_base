@@ -1705,23 +1705,15 @@ public class Editor {
     }
 
     private void updateFloatingToolbarVisibility(MotionEvent event) {
-        if (mTextActionMode == null) {
-            return;
-        }
-        switch (event.getActionMasked()) {
-            case MotionEvent.ACTION_MOVE:
-                hideFloatingToolbar(ActionMode.DEFAULT_HIDE_DURATION);
-                break;
-            case MotionEvent.ACTION_UP:  // fall through
-            case MotionEvent.ACTION_CANCEL:
-                final SelectionModifierCursorController selectionController =
-                        getSelectionController();
-                final InsertionPointCursorController insertionController = getInsertionController();
-                if ((selectionController != null && selectionController.isCursorBeingModified())
-                        || (insertionController != null
-                        && insertionController.isCursorBeingModified())) {
+        if (mTextActionMode != null) {
+            switch (event.getActionMasked()) {
+                case MotionEvent.ACTION_MOVE:
+                    hideFloatingToolbar(ActionMode.DEFAULT_HIDE_DURATION);
+                    break;
+                case MotionEvent.ACTION_UP:  // fall through
+                case MotionEvent.ACTION_CANCEL:
                     showFloatingToolbar();
-                }
+            }
         }
     }
 
