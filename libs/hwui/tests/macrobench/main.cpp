@@ -23,6 +23,7 @@
 #include "renderthread/RenderProxy.h"
 
 #include <benchmark/benchmark.h>
+#include <fnmatch.h>
 #include <getopt.h>
 #include <pthread.h>
 #include <stdio.h>
@@ -70,6 +71,7 @@ OPTIONS:
   --benchmark_format   Set output format. Possible values are tabular, json, csv
   --renderer=TYPE      Sets the render pipeline to use. May be skiagl or skiavk
   --skip-leak-check    Skips the memory leak check
+  --report-gpu-memory  Dumps the GPU memory usage after each test run
 )");
 }
 
@@ -172,6 +174,7 @@ enum {
     Offscreen,
     Renderer,
     SkipLeakCheck,
+    ReportGpuMemory,
 };
 }
 
@@ -188,6 +191,7 @@ static const struct option LONG_OPTIONS[] = {
         {"offscreen", no_argument, nullptr, LongOpts::Offscreen},
         {"renderer", required_argument, nullptr, LongOpts::Renderer},
         {"skip-leak-check", no_argument, nullptr, LongOpts::SkipLeakCheck},
+        {"report-gpu-memory", no_argument, nullptr, LongOpts::ReportGpuMemory},
         {0, 0, 0, 0}};
 
 static const char* SHORT_OPTIONS = "c:r:h";
@@ -290,6 +294,10 @@ void parseOptions(int argc, char* argv[]) {
                 gRunLeakCheck = false;
                 break;
 
+            case LongOpts::ReportGpuMemory:
+                gOpts.reportGpuMemoryUsage = true;
+                break;
+
             case 'h':
                 printHelp();
                 exit(EXIT_SUCCESS);
@@ -313,12 +321,21 @@ void parseOptions(int argc, char* argv[]) {
     if (optind < argc) {
         do {
             const char* test = argv[optind++];
-            auto pos = TestScene::testMap().find(test);
-            if (pos == TestScene::testMap().end()) {
-                fprintf(stderr, "Unknown test '%s'\n", test);
-                exit(EXIT_FAILURE);
+            if (strchr(test, '*')) {
+                // Glob match
+                for (auto& iter : TestScene::testMap()) {
+                    if (!fnmatch(test, iter.first.c_str(), 0)) {
+                        gRunTests.push_back(iter.second);
+                    }
+                }
             } else {
-                gRunTests.push_back(pos->second);
+                auto pos = TestScene::testMap().find(test);
+                if (pos == TestScene::testMap().end()) {
+                    fprintf(stderr, "Unknown test '%s'\n", test);
+                    exit(EXIT_FAILURE);
+                } else {
+                    gRunTests.push_back(pos->second);
+                }
             }
         } while (optind < argc);
     } else {
