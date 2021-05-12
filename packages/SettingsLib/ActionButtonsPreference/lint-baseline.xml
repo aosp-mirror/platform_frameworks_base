@@ -23,4 +23,15 @@
             column="15"/>
     </issue>
 
+    <issue
+        id="NewApi"
+        message="`?android:attr/dialogCornerRadius` requires API level 28 (current min is 21)"
+        errorLine1="        android:radius=&quot;?android:attr/dialogCornerRadius&quot;"
+        errorLine2="              ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SettingsLib/ActionButtonsPreference/res/drawable/settingslib_rounded_background.xml"
+            line="23"
+            column="9"/>
+    </issue>
+
 </issues>
