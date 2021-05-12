@@ -326,11 +326,13 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         // Show the ongoing call chip only if there is an ongoing call *and* notification icons
         // are allowed. (The ongoing call chip occupies the same area as the notification icons,
         // so if the icons are disabled then the call chip should be, too.)
-        if (hasOngoingCall && !disableNotifications) {
+        boolean showOngoingCallChip = hasOngoingCall && !disableNotifications;
+        if (showOngoingCallChip) {
             showOngoingCallChip(animate);
         } else {
             hideOngoingCallChip(animate);
         }
+        mOngoingCallController.notifyChipVisibilityChanged(showOngoingCallChip);
     }
 
     private boolean shouldHideNotificationIcons() {
