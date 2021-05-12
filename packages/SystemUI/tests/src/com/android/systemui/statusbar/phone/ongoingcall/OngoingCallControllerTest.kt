@@ -29,6 +29,7 @@ import android.testing.TestableLooper
 import android.view.LayoutInflater
 import android.widget.LinearLayout
 import androidx.test.filters.SmallTest
+import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.plugins.ActivityStarter
@@ -70,6 +71,7 @@ class OngoingCallControllerTest : SysuiTestCase() {
 
     private val clock = FakeSystemClock()
     private val mainExecutor = FakeExecutor(clock)
+    private val uiEventLoggerFake = UiEventLoggerFake()
 
     private lateinit var controller: OngoingCallController
     private lateinit var notifCollectionListener: NotifCollectionListener
@@ -99,7 +101,8 @@ class OngoingCallControllerTest : SysuiTestCase() {
                 clock,
                 mockActivityStarter,
                 mainExecutor,
-                mockIActivityManager)
+                mockIActivityManager,
+                OngoingCallLogger(uiEventLoggerFake))
         controller.init()
         controller.addCallback(mockOngoingCallListener)
         controller.setChipView(chipView)
@@ -255,6 +258,28 @@ class OngoingCallControllerTest : SysuiTestCase() {
         verify(mockOngoingCallListener, times(2))
                 .onOngoingCallStateChanged(anyBoolean())
     }
+
+    @Test
+    fun chipClicked_clickEventLogged() {
+        notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
+
+        chipView.performClick()
+
+        assertThat(uiEventLoggerFake.numLogs()).isEqualTo(1)
+        assertThat(uiEventLoggerFake.eventId(0))
+                .isEqualTo(OngoingCallLogger.OngoingCallEvents.ONGOING_CALL_CLICKED.id)
+    }
+
+    @Test
+    fun notifyChipVisibilityChanged_visibleEventLogged() {
+        controller.notifyChipVisibilityChanged(true)
+
+        assertThat(uiEventLoggerFake.numLogs()).isEqualTo(1)
+        assertThat(uiEventLoggerFake.eventId(0))
+                .isEqualTo(OngoingCallLogger.OngoingCallEvents.ONGOING_CALL_VISIBLE.id)
+    }
+    // Other tests for notifyChipVisibilityChanged are in [OngoingCallLogger], since
+    // [OngoingCallController.notifyChipVisibilityChanged] just delegates to that class.
 
     private fun createOngoingCallNotifEntry(): NotificationEntry {
         val notificationEntryBuilder = NotificationEntryBuilder()
