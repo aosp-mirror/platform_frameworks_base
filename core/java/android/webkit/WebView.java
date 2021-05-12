@@ -60,11 +60,13 @@ import android.view.WindowInsets;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeProvider;
+import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillValue;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inspector.InspectableProperty;
 import android.view.textclassifier.TextClassifier;
+import android.view.translation.TranslationCapability;
 import android.view.translation.TranslationSpec.DataFormat;
 import android.view.translation.ViewTranslationRequest;
 import android.view.translation.ViewTranslationResponse;
@@ -2866,6 +2868,16 @@ public class WebView extends AbsoluteLayout
             @NonNull Consumer<ViewTranslationRequest> requestsCollector) {
         mProvider.getViewDelegate().onCreateVirtualViewTranslationRequests(virtualIds,
                 supportedFormats, requestsCollector);
+    }
+
+    @Override
+    public void dispatchCreateViewTranslationRequest(@NonNull Map<AutofillId, long[]> viewIds,
+            @NonNull @DataFormat int[] supportedFormats,
+            @Nullable TranslationCapability capability,
+            @NonNull List<ViewTranslationRequest> requests) {
+        super.dispatchCreateViewTranslationRequest(viewIds, supportedFormats, capability, requests);
+        mProvider.getViewDelegate().dispatchCreateViewTranslationRequest(viewIds, supportedFormats,
+                capability, requests);
     }
 
     @Override
