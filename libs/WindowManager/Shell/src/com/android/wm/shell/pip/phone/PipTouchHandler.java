@@ -129,8 +129,13 @@ public class PipTouchHandler {
      */
     private class PipMenuListener implements PhonePipMenuController.Listener {
         @Override
-        public void onPipMenuStateChanged(int menuState, boolean resize, Runnable callback) {
-            setMenuState(menuState, resize, callback);
+        public void onPipMenuStateChangeStart(int menuState, boolean resize, Runnable callback) {
+            PipTouchHandler.this.onPipMenuStateChangeStart(menuState, resize, callback);
+        }
+
+        @Override
+        public void onPipMenuStateChangeFinish(int menuState) {
+            setMenuState(menuState);
         }
 
         @Override
@@ -646,9 +651,9 @@ public class PipTouchHandler {
     }
 
     /**
-     * Sets the menu visibility.
+     * Called when the PiP menu state is in the process of animating/changing from one to another.
      */
-    private void setMenuState(int menuState, boolean resize, Runnable callback) {
+    private void onPipMenuStateChangeStart(int menuState, boolean resize, Runnable callback) {
         if (mMenuState == menuState && !resize) {
             return;
         }
@@ -686,6 +691,9 @@ public class PipTouchHandler {
                 mSavedSnapFraction = -1f;
             }
         }
+    }
+
+    private void setMenuState(int menuState) {
         mMenuState = menuState;
         updateMovementBounds();
         // If pip menu has dismissed, we should register the A11y ActionReplacingConnection for pip
