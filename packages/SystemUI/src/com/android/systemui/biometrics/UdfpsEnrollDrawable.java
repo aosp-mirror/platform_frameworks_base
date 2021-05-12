@@ -96,11 +96,6 @@ public class UdfpsEnrollDrawable extends UdfpsDrawable {
             return;
         }
 
-        if (mSensorRect != null) {
-            canvas.drawOval(mSensorRect, mSensorOutlinePaint);
-        }
-        mFingerprintDrawable.draw(canvas);
-
         // Draw moving target
         if (mEnrollHelper.isCenterEnrollmentComplete()) {
             mFingerprintDrawable.setAlpha(mAlpha == 255 ? 64 : mAlpha);
@@ -117,6 +112,10 @@ public class UdfpsEnrollDrawable extends UdfpsDrawable {
             mMovingTargetFpIcon.draw(canvas);
             canvas.restore();
         } else {
+            if (mSensorRect != null) {
+                canvas.drawOval(mSensorRect, mSensorOutlinePaint);
+            }
+            mFingerprintDrawable.draw(canvas);
             mFingerprintDrawable.setAlpha(mAlpha);
             mSensorOutlinePaint.setAlpha(mAlpha);
         }
