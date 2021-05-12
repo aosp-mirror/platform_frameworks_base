@@ -429,4 +429,14 @@ public interface NotificationRecordLogger {
         return NotificationChannelLogger.getLoggingImportance(channel, importance);
     }
 
+    /**
+     * @param r NotificationRecord
+     * @return Whether the notification is a foreground service notification.
+     */
+    static boolean isForegroundService(@NonNull NotificationRecord r) {
+        if (r.getSbn() == null || r.getSbn().getNotification() == null) {
+            return false;
+        }
+        return (r.getSbn().getNotification().flags & Notification.FLAG_FOREGROUND_SERVICE) != 0;
+    }
 }

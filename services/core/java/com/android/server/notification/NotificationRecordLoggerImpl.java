@@ -63,7 +63,12 @@ public class NotificationRecordLoggerImpl implements NotificationRecordLogger {
                 /* android.stats.sysui.NotificationImportance importance_asst = 19 */
                 r.getAssistantImportance(),
                 /* int32 assistant_hash = 20 */ p.getAssistantHash(),
-                /* float assistant_ranking_score = 21 */ r.getRankingScore()
+                /* float assistant_ranking_score = 21 */ r.getRankingScore(),
+                /* bool is_ongoing = 22 */ r.getSbn().isOngoing(),
+                /* bool is_foreground_service = 23 */
+                NotificationRecordLogger.isForegroundService(r),
+                /* optional int64 timeout_millis = 24 */
+                r.getSbn().getNotification().getTimeoutAfter()
         );
     }
 
