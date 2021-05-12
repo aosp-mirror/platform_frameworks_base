@@ -55,10 +55,8 @@ abstract class AbstractHotwordDetector implements HotwordDetector {
     /**
      * Detect hotword from an externally supplied stream of data.
      *
-     * @return a writeable file descriptor that clients can start writing data in the given format.
-     * In order to stop detection, clients can close the given stream.
+     * @return true if the request to start recognition succeeded
      */
-    @Nullable
     @Override
     public boolean startRecognition(
             @NonNull ParcelFileDescriptor audioStream,

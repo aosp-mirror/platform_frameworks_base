@@ -160,7 +160,7 @@ public interface HotwordDetector {
          * @param result Info about the second stage detection result, provided by the
          *         {@link HotwordDetectionService}.
          */
-        void onRejected(@Nullable HotwordRejectedResult result);
+        void onRejected(@NonNull HotwordRejectedResult result);
 
         /**
          * Called when the {@link HotwordDetectionService} is created by the system and given a
