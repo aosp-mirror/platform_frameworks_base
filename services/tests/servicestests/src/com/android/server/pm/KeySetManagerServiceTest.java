@@ -25,6 +25,7 @@ import android.util.ArraySet;
 import android.util.LongSparseArray;
 
 import com.android.internal.util.ArrayUtils;
+import com.android.server.utils.WatchedArrayMap;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,7 +34,7 @@ import java.security.cert.CertificateException;
 
 public class KeySetManagerServiceTest extends AndroidTestCase {
 
-    private ArrayMap<String, PackageSetting> mPackagesMap;
+    private WatchedArrayMap<String, PackageSetting> mPackagesMap;
     private KeySetManagerService mKsms;
 
     public PackageSetting generateFakePackageSetting(String name) {
@@ -46,7 +47,7 @@ public class KeySetManagerServiceTest extends AndroidTestCase {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        mPackagesMap = new ArrayMap<String, PackageSetting>();
+        mPackagesMap = new WatchedArrayMap<String, PackageSetting>();
         mKsms = new KeySetManagerService(mPackagesMap);
     }
 
@@ -94,7 +95,8 @@ public class KeySetManagerServiceTest extends AndroidTestCase {
     }
 
     public void testEncodePublicKey() throws IOException {
-        ArrayMap<String, PackageSetting> packagesMap = new ArrayMap<String, PackageSetting>();
+        WatchedArrayMap<String, PackageSetting> packagesMap =
+                new WatchedArrayMap<String, PackageSetting>();
         KeySetManagerService ksms = new KeySetManagerService(packagesMap);
 
         PublicKey keyA = PackageParser.parsePublicKey(KeySetStrings.ctsKeySetPublicKeyA);
