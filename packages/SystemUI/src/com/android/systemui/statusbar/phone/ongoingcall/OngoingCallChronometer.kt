@@ -56,6 +56,7 @@ class OngoingCallChronometer @JvmOverloads constructor(
         // call starts.
         minimumTextWidth = 0
         shouldHideText = false
+        visibility = VISIBLE
         super.setBase(base)
     }
 
@@ -76,6 +77,9 @@ class OngoingCallChronometer @JvmOverloads constructor(
 
         if (desiredTextWidth > enforcedTextWidth) {
             shouldHideText = true
+            // Changing visibility ensures that the content description is not read aloud when the
+            // time isn't displayed.
+            visibility = GONE
             setMeasuredDimension(0, 0)
         } else {
             // It's possible that the current text could fit in a smaller width, but we don't want
