@@ -58,4 +58,13 @@ oneway interface IDisplayHashingService {
      * @param callback The callback invoked to send back the map of algorithms to DisplayHashParams.
      */
     void getDisplayHashAlgorithms(in RemoteCallback callback);
+
+    /**
+     * Call to get the interval required between display hash requests. Requests made faster than
+     * this will be throttled. The result will be sent in the callback as an int with the key
+     * {@link #EXTRA_INTERVAL_BETWEEN_REQUESTS}.
+     *
+     * @param callback The callback invoked to send back the interval duration.
+     */
+    void getIntervalBetweenRequestsMillis(in RemoteCallback callback);
 }
