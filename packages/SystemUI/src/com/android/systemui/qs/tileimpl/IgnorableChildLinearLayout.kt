@@ -45,13 +45,15 @@ class IgnorableChildLinearLayout @JvmOverloads constructor(
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
         if (ignoreLastView && childCount > 0) {
             val lastView = getChildAt(childCount - 1)
-            val lp = lastView.layoutParams as MarginLayoutParams
-            if (orientation == VERTICAL) {
-                val height = lastView.measuredHeight + lp.bottomMargin + lp.topMargin
-                setMeasuredDimension(measuredWidth, measuredHeight - height)
-            } else {
-                val width = lastView.measuredWidth + lp.leftMargin + lp.rightMargin
-                setMeasuredDimension(measuredWidth - width, measuredHeight)
+            if (lastView.visibility != GONE) {
+                val lp = lastView.layoutParams as MarginLayoutParams
+                if (orientation == VERTICAL) {
+                    val height = lastView.measuredHeight + lp.bottomMargin + lp.topMargin
+                    setMeasuredDimension(measuredWidth, measuredHeight - height)
+                } else {
+                    val width = lastView.measuredWidth + lp.leftMargin + lp.rightMargin
+                    setMeasuredDimension(measuredWidth - width, measuredHeight)
+                }
             }
         }
     }
