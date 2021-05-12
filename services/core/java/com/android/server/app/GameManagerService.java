@@ -268,7 +268,8 @@ public final class GameManagerService extends IGameManagerService.Stub {
                     mAllowDownscale = true;
                 }
             } catch (PackageManager.NameNotFoundException e) {
-                Slog.e(TAG, "Failed to get package metadata", e);
+                // Not all packages are installed, hence ignore those that are not installed yet.
+                Slog.v(TAG, "Failed to get package metadata");
             }
             final String configString = DeviceConfig.getProperty(
                     DeviceConfig.NAMESPACE_GAME_OVERLAY, packageName);
@@ -509,9 +510,8 @@ public final class GameManagerService extends IGameManagerService.Stub {
             final ApplicationInfo applicationInfo = mPackageManager
                     .getApplicationInfoAsUser(packageName, PackageManager.MATCH_ALL, userId);
             if (applicationInfo.category != ApplicationInfo.CATEGORY_GAME) {
-                Slog.e(TAG, "Ignoring attempt to get the Game Mode for '" + packageName
-                        + "' which is not categorized as a game: applicationInfo.flags = "
-                        + applicationInfo.flags + ", category = " + applicationInfo.category);
+                // The game mode for applications that are not identified as game is always
+                // UNSUPPORTED. See {@link PackageManager#setApplicationCategoryHint(String, int)}
                 return GameManager.GAME_MODE_UNSUPPORTED;
             }
         } catch (PackageManager.NameNotFoundException e) {
@@ -549,9 +549,8 @@ public final class GameManagerService extends IGameManagerService.Stub {
             final ApplicationInfo applicationInfo = mPackageManager
                     .getApplicationInfoAsUser(packageName, PackageManager.MATCH_ALL, userId);
             if (applicationInfo.category != ApplicationInfo.CATEGORY_GAME) {
-                Slog.e(TAG, "Ignoring attempt to set the Game Mode for '" + packageName
-                        + "' which is not categorized as a game: applicationInfo.flags = "
-                        + applicationInfo.flags + ", category = " + applicationInfo.category);
+                // Ignore attempt to set the game mode for applications that are not identified
+                // as game. See {@link PackageManager#setApplicationCategoryHint(String, int)}
                 return;
             }
         } catch (PackageManager.NameNotFoundException e) {
