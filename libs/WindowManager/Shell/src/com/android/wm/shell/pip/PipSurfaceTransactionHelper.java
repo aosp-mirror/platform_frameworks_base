@@ -20,7 +20,6 @@ import android.content.Context;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.os.SystemProperties;
 import android.view.SurfaceControl;
 
 import com.android.wm.shell.R;
@@ -44,10 +43,7 @@ public class PipSurfaceTransactionHelper {
      * @param context the current context
      */
     public void onDensityOrFontScaleChanged(Context context) {
-        final boolean enableCornerRadius =
-                SystemProperties.getBoolean("debug.sf.enable_hole_punch_pip", false);
-        mCornerRadius = enableCornerRadius
-                ? context.getResources().getDimensionPixelSize(R.dimen.pip_corner_radius) : 0;
+        mCornerRadius = context.getResources().getDimensionPixelSize(R.dimen.pip_corner_radius);
     }
 
     /**
