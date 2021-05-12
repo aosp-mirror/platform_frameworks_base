@@ -143,6 +143,7 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
      * unable to resume target root task properly when there are other focusable always-on-top
      * root tasks.
      */
+    @VisibleForTesting
     Task mPreferredTopFocusableRootTask;
 
     /**
@@ -2126,6 +2127,10 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         // request.
         return !mIgnoreOrientationRequest
                 && mDisplayContent.getOrientationRequestingTaskDisplayArea() == this;
+    }
+
+    void clearPreferredTopFocusableRootTask() {
+        mPreferredTopFocusableRootTask = null;
     }
 
     @Override

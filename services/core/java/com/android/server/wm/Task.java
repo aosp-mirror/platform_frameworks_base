@@ -3080,6 +3080,11 @@ class Task extends WindowContainer<WindowContainer> {
             focusableTask = mRootWindowContainer.getNextFocusableRootTask(this, !allowFocusSelf);
         }
         if (focusableTask == null) {
+            final TaskDisplayArea taskDisplayArea = getDisplayArea();
+            if (taskDisplayArea != null) {
+                // Clear the recorded task since there is no next focusable task.
+                taskDisplayArea.clearPreferredTopFocusableRootTask();
+            }
             return null;
         }
 
