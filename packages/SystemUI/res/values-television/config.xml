@@ -33,6 +33,7 @@
         <item>com.android.systemui.statusbar.tv.notifications.TvNotificationPanel</item>
         <item>com.android.systemui.statusbar.tv.notifications.TvNotificationHandler</item>
         <item>com.android.systemui.statusbar.tv.VpnStatusObserver</item>
+        <item>com.android.systemui.globalactions.GlobalActionsComponent</item>
         <item>com.android.systemui.usb.StorageNotification</item>
         <item>com.android.systemui.power.PowerUI</item>
         <item>com.android.systemui.media.RingtonePlayer</item>

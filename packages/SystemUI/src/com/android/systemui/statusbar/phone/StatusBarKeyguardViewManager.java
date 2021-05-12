@@ -879,6 +879,9 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     };
 
     protected void updateStates() {
+        if (mContainer == null ) {
+            return;
+        }
         int vis = mContainer.getSystemUiVisibility();
         boolean showing = mShowing;
         boolean occluded = mOccluded;
