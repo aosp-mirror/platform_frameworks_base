@@ -34,6 +34,7 @@ public:
     SkiaMemoryTracer(const char* categoryKey, bool itemizeType);
     ~SkiaMemoryTracer() override {}
 
+    bool hasOutput();
     void logOutput(String8& log);
     void logTotals(String8& log);
 
