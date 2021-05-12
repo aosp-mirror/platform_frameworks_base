@@ -29,6 +29,7 @@ import android.os.Build;
 import android.util.AttributeSet;
 import android.widget.RelativeLayout;
 import android.widget.RemoteViews;
+import android.widget.TextView;
 
 import com.android.internal.R;
 import com.android.internal.widget.CachingIconView;
@@ -172,6 +173,28 @@ public class NotificationHeaderView extends RelativeLayout {
     public void setTopLineExtraMarginEndDp(float extraMarginEndDp) {
         setTopLineExtraMarginEnd(
                 (int) (extraMarginEndDp * getResources().getDisplayMetrics().density));
+    }
+
+    /**
+     * This is used to make the low-priority header show the bolded text of a title.
+     *
+     * @param styleTextAsTitle true if this header's text is to have the style of a title
+     */
+    @RemotableViewMethod
+    public void styleTextAsTitle(boolean styleTextAsTitle) {
+        int styleResId = styleTextAsTitle
+                ? R.style.TextAppearance_DeviceDefault_Notification_Title
+                : R.style.TextAppearance_DeviceDefault_Notification_Info;
+        // Most of the time, we're showing text in the minimized state
+        View headerText = findViewById(R.id.header_text);
+        if (headerText instanceof TextView) {
+            ((TextView) headerText).setTextAppearance(styleResId);
+        }
+        // If there's no summary or text, we show the app name instead of nothing
+        View appNameText = findViewById(R.id.app_name_text);
+        if (appNameText instanceof TextView) {
+            ((TextView) appNameText).setTextAppearance(styleResId);
+        }
     }
 
     /**
