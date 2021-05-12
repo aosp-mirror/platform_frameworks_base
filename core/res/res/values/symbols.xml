@@ -3167,6 +3167,8 @@
   <java-symbol type="dimen" name="notification_action_disabled_alpha" />
   <java-symbol type="id" name="tag_margin_end_when_icon_visible" />
   <java-symbol type="id" name="tag_margin_end_when_icon_gone" />
+  <java-symbol type="id" name="tag_uses_right_icon_drawable" />
+  <java-symbol type="id" name="tag_keep_when_showing_left_icon" />
 
   <!-- Override Wake Key Behavior When Screen is Off -->
   <java-symbol type="bool" name="config_wakeOnDpadKeyPress" />

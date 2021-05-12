@@ -430,7 +430,6 @@ public class NotificationGroupingUtil {
     private static class LeftIconApplicator implements ResultApplicator {
 
         public static final int[] MARGIN_ADJUSTED_VIEWS = {
-                R.id.notification_headerless_view_column,
                 R.id.text,
                 R.id.big_text,
                 R.id.title,
@@ -438,22 +437,31 @@ public class NotificationGroupingUtil {
                 R.id.notification_header};
 
         @Override
-        public void apply(View parent, View child, boolean apply, boolean reset) {
-            ImageView rightIcon = child.findViewById(com.android.internal.R.id.right_icon);
+        public void apply(View parent, View child, boolean showLeftIcon, boolean reset) {
             ImageView leftIcon = child.findViewById(com.android.internal.R.id.left_icon);
-            if (rightIcon == null || leftIcon == null) {
+            if (leftIcon == null) {
                 return;
             }
-            Drawable iconDrawable = rightIcon.getDrawable();
-            if (iconDrawable == null) {
-                return;
+            ImageView rightIcon = child.findViewById(com.android.internal.R.id.right_icon);
+            boolean keepRightIcon = rightIcon != null && Integer.valueOf(1).equals(
+                    rightIcon.getTag(R.id.tag_keep_when_showing_left_icon));
+            boolean leftIconUsesRightIconDrawable = Integer.valueOf(1).equals(
+                    leftIcon.getTag(R.id.tag_uses_right_icon_drawable));
+            if (leftIconUsesRightIconDrawable) {
+                // Use the right drawable when showing the left, unless the right is being kept
+                Drawable rightDrawable = rightIcon == null ? null : rightIcon.getDrawable();
+                leftIcon.setImageDrawable(showLeftIcon && !keepRightIcon ? rightDrawable : null);
             }
-            rightIcon.setVisibility(apply ? View.GONE : View.VISIBLE);
-            leftIcon.setVisibility(apply ? View.VISIBLE : View.GONE);
-            leftIcon.setImageDrawable(apply ? iconDrawable : null);
+            leftIcon.setVisibility(showLeftIcon ? View.VISIBLE : View.GONE);
 
-            for (int viewId : MARGIN_ADJUSTED_VIEWS) {
-                adjustMargins(!apply, child.findViewById(viewId));
+            // update the right icon as well
+            if (rightIcon != null) {
+                boolean showRightIcon = (keepRightIcon || !showLeftIcon)
+                        && rightIcon.getDrawable() != null;
+                rightIcon.setVisibility(showRightIcon ? View.VISIBLE : View.GONE);
+                for (int viewId : MARGIN_ADJUSTED_VIEWS) {
+                    adjustMargins(showRightIcon, child.findViewById(viewId));
+                }
             }
         }
 
