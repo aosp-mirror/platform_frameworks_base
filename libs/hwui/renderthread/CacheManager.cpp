@@ -140,7 +140,6 @@ void CacheManager::dumpMemoryUsage(String8& log, const RenderState* renderState)
     log.appendFormat("  Size: %.2f kB \n", SkGraphics::GetFontCacheUsed() / 1024.0f);
     log.appendFormat("  Glyph Count: %d \n", SkGraphics::GetFontCacheCountUsed());
 
-    log.appendFormat("CPU Caches:\n");
     std::vector<skiapipeline::ResourcePair> cpuResourceMap = {
             {"skia/sk_resource_cache/bitmap_", "Bitmaps"},
             {"skia/sk_resource_cache/rrect-blur_", "Masks"},
@@ -149,20 +148,20 @@ void CacheManager::dumpMemoryUsage(String8& log, const RenderState* renderState)
     };
     skiapipeline::SkiaMemoryTracer cpuTracer(cpuResourceMap, false);
     SkGraphics::DumpMemoryStatistics(&cpuTracer);
-    cpuTracer.logOutput(log);
+    if (cpuTracer.hasOutput()) {
+        log.appendFormat("CPU Caches:\n");
+        cpuTracer.logOutput(log);
+    }
 
-    log.appendFormat("GPU Caches:\n");
     skiapipeline::SkiaMemoryTracer gpuTracer("category", true);
     mGrContext->dumpMemoryStatistics(&gpuTracer);
-    gpuTracer.logOutput(log);
+    if (gpuTracer.hasOutput()) {
+        log.appendFormat("GPU Caches:\n");
+        gpuTracer.logOutput(log);
+    }
 
-    log.appendFormat("Other Caches:\n");
-    log.appendFormat("                         Current / Maximum\n");
-
-    if (renderState) {
-        if (renderState->mActiveLayers.size() > 0) {
-            log.appendFormat("  Layer Info:\n");
-        }
+    if (renderState && renderState->mActiveLayers.size() > 0) {
+        log.appendFormat("Layer Info:\n");
 
         const char* layerType = Properties::getRenderPipelineType() == RenderPipelineType::SkiaGL
                                         ? "GlLayer"
