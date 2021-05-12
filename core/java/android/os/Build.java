@@ -309,7 +309,7 @@ public class Build {
          * booted, but it may increase when the hardware manufacturer provides an OTA update.
          * <p>
          * Possible non-zero values are defined in {@link Build.VERSION_CODES} starting with
-         * {@link Build.VERSION_CODES#S}.
+         * {@link Build.VERSION_CODES#R}.
          */
         public static final int MEDIA_PERFORMANCE_CLASS =
                 DeviceProperties.media_performance_class().orElse(0);
@@ -437,7 +437,8 @@ public class Build {
          * Magic version number for a current development build, which has
          * not yet turned into an official release.
          */
-        public static final int CUR_DEVELOPMENT = VMRuntime.SDK_VERSION_CUR_DEVELOPMENT;
+        // This must match VMRuntime.SDK_VERSION_CUR_DEVELOPMENT.
+        public static final int CUR_DEVELOPMENT = 10000;
 
         /**
          * October 2008: The original, first, version of Android.  Yay!
@@ -1324,6 +1325,7 @@ public class Build {
      * selinux into "permissive" mode in particular.
      * @hide
      */
+    @UnsupportedAppUsage
     public static final boolean IS_DEBUGGABLE =
             SystemProperties.getInt("ro.debuggable", 0) == 1;
 

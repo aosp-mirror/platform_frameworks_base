@@ -73,6 +73,7 @@ import android.location.provider.IProviderRequestListener;
 import android.location.provider.ProviderProperties;
 import android.location.util.identity.CallerIdentity;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.ICancellationSignal;
 import android.os.ParcelFileDescriptor;
@@ -178,6 +179,7 @@ public class LocationManagerService extends ILocationManager.Stub {
             if (phase == PHASE_SYSTEM_SERVICES_READY) {
                 // the location service must be functioning after this boot phase
                 mSystemInjector.onSystemReady();
+                mService.onSystemReady();
             } else if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
                 // some providers rely on third party code, so we wait to initialize
                 // providers until third party code is allowed to run
@@ -267,6 +269,13 @@ public class LocationManagerService extends ILocationManager.Stub {
 
         mInjector.getSettingsHelper().addOnLocationEnabledChangedListener(
                 this::onLocationModeChanged);
+        mInjector.getSettingsHelper().addOnIgnoreSettingsPackageWhitelistChangedListener(
+                () -> refreshAppOpsRestrictions(UserHandle.USER_ALL));
+        mInjector.getUserInfoHelper().addListener((userId, change) -> {
+            if (change == UserInfoHelper.UserListener.USER_STARTED) {
+                refreshAppOpsRestrictions(userId);
+            }
+        });
 
         // set up passive provider first since it will be required for all other location providers,
         // which are loaded later once the system is ready.
@@ -349,6 +358,24 @@ public class LocationManagerService extends ILocationManager.Stub {
             manager.setMockProvider(null);
             manager.setRealProvider(null);
             manager.stopManager();
+        }
+    }
+
+    void onSystemReady() {
+        if (Build.IS_DEBUGGABLE) {
+            // on debug builds, watch for location noteOps while location is off. there are some
+            // scenarios (emergency location) where this is expected, but generally this should
+            // rarely occur, and may indicate bugs. dump occurrences to logs for further evaluation
+            AppOpsManager appOps = Objects.requireNonNull(
+                    mContext.getSystemService(AppOpsManager.class));
+            appOps.startWatchingNoted(
+                    new int[]{AppOpsManager.OP_FINE_LOCATION, AppOpsManager.OP_COARSE_LOCATION},
+                    (code, uid, packageName, attributionTag, flags, result) -> {
+                        if (!isLocationEnabledForUser(UserHandle.getUserId(uid))) {
+                            Log.w(TAG, "location noteOp with location off - "
+                                    + CallerIdentity.forTest(uid, 0, packageName, attributionTag));
+                        }
+                    });
         }
     }
 
@@ -462,6 +489,8 @@ public class LocationManagerService extends ILocationManager.Stub {
                 .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY)
                 .addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
         mContext.sendBroadcastAsUser(intent, UserHandle.of(userId));
+
+        refreshAppOpsRestrictions(userId);
     }
 
     @Override
@@ -1325,6 +1354,43 @@ public class LocationManagerService extends ILocationManager.Stub {
         ipw.increaseIndent();
         EVENT_LOG.iterate(ipw::println);
         ipw.decreaseIndent();
+    }
+
+    private void refreshAppOpsRestrictions(int userId) {
+        if (userId == UserHandle.USER_ALL) {
+            final int[] runningUserIds = mInjector.getUserInfoHelper().getRunningUserIds();
+            for (int i = 0; i < runningUserIds.length; i++) {
+                refreshAppOpsRestrictions(runningUserIds[i]);
+            }
+            return;
+        }
+
+        Preconditions.checkArgument(userId >= 0);
+
+        ArraySet<String> packages = new ArraySet<>();
+        for (LocationProviderManager manager : mProviderManagers) {
+            packages.add(manager.getIdentity().getPackageName());
+        }
+        packages.add(mContext.getPackageName());
+        packages.addAll(mInjector.getSettingsHelper().getIgnoreSettingsPackageWhitelist());
+        String[] allowedPackages = packages.toArray(new String[0]);
+
+        boolean enabled = mInjector.getSettingsHelper().isLocationEnabled(userId);
+
+        AppOpsManager appOpsManager = Objects.requireNonNull(
+                mContext.getSystemService(AppOpsManager.class));
+        appOpsManager.setUserRestrictionForUser(
+                AppOpsManager.OP_COARSE_LOCATION,
+                enabled,
+                LocationManagerService.this,
+                allowedPackages,
+                userId);
+        appOpsManager.setUserRestrictionForUser(
+                AppOpsManager.OP_FINE_LOCATION,
+                enabled,
+                LocationManagerService.this,
+                allowedPackages,
+                userId);
     }
 
     private class LocalService extends LocationManagerInternal {

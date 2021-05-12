@@ -165,43 +165,37 @@ public class AppSearchEmail extends GenericDocument {
         /** Sets the from address of {@link AppSearchEmail} */
         @NonNull
         public Builder setFrom(@NonNull String from) {
-            setPropertyString(KEY_FROM, from);
-            return this;
+            return setPropertyString(KEY_FROM, from);
         }
 
         /** Sets the destination address of {@link AppSearchEmail} */
         @NonNull
         public Builder setTo(@NonNull String... to) {
-            setPropertyString(KEY_TO, to);
-            return this;
+            return setPropertyString(KEY_TO, to);
         }
 
         /** Sets the CC list of {@link AppSearchEmail} */
         @NonNull
         public Builder setCc(@NonNull String... cc) {
-            setPropertyString(KEY_CC, cc);
-            return this;
+            return setPropertyString(KEY_CC, cc);
         }
 
         /** Sets the BCC list of {@link AppSearchEmail} */
         @NonNull
         public Builder setBcc(@NonNull String... bcc) {
-            setPropertyString(KEY_BCC, bcc);
-            return this;
+            return setPropertyString(KEY_BCC, bcc);
         }
 
         /** Sets the subject of {@link AppSearchEmail} */
         @NonNull
         public Builder setSubject(@NonNull String subject) {
-            setPropertyString(KEY_SUBJECT, subject);
-            return this;
+            return setPropertyString(KEY_SUBJECT, subject);
         }
 
         /** Sets the body of {@link AppSearchEmail} */
         @NonNull
         public Builder setBody(@NonNull String body) {
-            setPropertyString(KEY_BODY, body);
-            return this;
+            return setPropertyString(KEY_BODY, body);
         }
 
         /** Builds the {@link AppSearchEmail} object. */

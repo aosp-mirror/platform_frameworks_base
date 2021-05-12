@@ -16,10 +16,12 @@
 
 package android.app.appsearch;
 
-
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
+import android.app.appsearch.aidl.AppSearchResultParcel;
+import android.app.appsearch.aidl.IAppSearchManager;
+import android.app.appsearch.aidl.IAppSearchResultCallback;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -71,13 +73,15 @@ public class GlobalSearchSession implements Closeable {
             @NonNull Consumer<AppSearchResult<GlobalSearchSession>> callback) {
         try {
             mService.initialize(mUserId, new IAppSearchResultCallback.Stub() {
-                public void onResult(AppSearchResult result) {
+                @Override
+                public void onResult(AppSearchResultParcel resultParcel) {
                     executor.execute(() -> {
+                        AppSearchResult<Void> result = resultParcel.getResult();
                         if (result.isSuccess()) {
                             callback.accept(
                                     AppSearchResult.newSuccessfulResult(GlobalSearchSession.this));
                         } else {
-                            callback.accept(result);
+                            callback.accept(AppSearchResult.newFailedResult(result));
                         }
                     });
                 }
@@ -159,8 +163,9 @@ public class GlobalSearchSession implements Closeable {
                     /*systemUsage=*/ true,
                     mUserId,
                     new IAppSearchResultCallback.Stub() {
-                        public void onResult(AppSearchResult result) {
-                            executor.execute(() -> callback.accept(result));
+                        @Override
+                        public void onResult(AppSearchResultParcel resultParcel) {
+                            executor.execute(() -> callback.accept(resultParcel.getResult()));
                         }
                     });
             mIsMutated = true;

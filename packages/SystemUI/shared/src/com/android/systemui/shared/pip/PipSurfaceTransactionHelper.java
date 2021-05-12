@@ -16,9 +16,6 @@
 
 package com.android.systemui.shared.pip;
 
-import static android.graphics.Matrix.MSCALE_X;
-import static android.graphics.Matrix.MSCALE_Y;
-
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -32,14 +29,16 @@ import android.window.PictureInPictureSurfaceTransaction;
  * source of truth on enabling/disabling and the actual value of corner radius.
  */
 public class PipSurfaceTransactionHelper {
-    /** corner radius is currently disabled. */
-    private final float mCornerRadius = 0f;
-
+    private final int mCornerRadius;
     private final Matrix mTmpTransform = new Matrix();
     private final float[] mTmpFloat9 = new float[9];
     private final RectF mTmpSourceRectF = new RectF();
     private final RectF mTmpDestinationRectF = new RectF();
     private final Rect mTmpDestinationRect = new Rect();
+
+    public PipSurfaceTransactionHelper(int cornerRadius) {
+        mCornerRadius = cornerRadius;
+    }
 
     public PictureInPictureSurfaceTransaction scale(
             SurfaceControl.Transaction tx, SurfaceControl leash,
@@ -52,8 +51,7 @@ public class PipSurfaceTransactionHelper {
                 .setCornerRadius(leash, mCornerRadius);
         return new PictureInPictureSurfaceTransaction(
                 mTmpDestinationRectF.left, mTmpDestinationRectF.top,
-                mTmpFloat9[MSCALE_X], mTmpFloat9[MSCALE_Y],
-                0 /* rotation*/, mCornerRadius, sourceBounds);
+                mTmpFloat9, 0 /* rotation */, mCornerRadius, sourceBounds);
     }
 
     public PictureInPictureSurfaceTransaction scale(
@@ -68,9 +66,7 @@ public class PipSurfaceTransactionHelper {
                 .setPosition(leash, positionX, positionY)
                 .setCornerRadius(leash, mCornerRadius);
         return new PictureInPictureSurfaceTransaction(
-                positionX, positionY,
-                mTmpFloat9[MSCALE_X], mTmpFloat9[MSCALE_Y],
-                degree, mCornerRadius, sourceBounds);
+                positionX, positionY, mTmpFloat9, degree, mCornerRadius, sourceBounds);
     }
 
     public PictureInPictureSurfaceTransaction scaleAndCrop(
@@ -92,7 +88,7 @@ public class PipSurfaceTransactionHelper {
                 .setPosition(leash, left, top)
                 .setCornerRadius(leash, mCornerRadius);
         return new PictureInPictureSurfaceTransaction(
-                left, top, scale, scale, 0 /* rotation */, mCornerRadius, mTmpDestinationRect);
+                left, top, mTmpFloat9, 0 /* rotation */, mCornerRadius, mTmpDestinationRect);
     }
 
     public PictureInPictureSurfaceTransaction scaleAndRotate(
@@ -114,7 +110,7 @@ public class PipSurfaceTransactionHelper {
                 .setPosition(leash, positionX, positionY)
                 .setCornerRadius(leash, mCornerRadius);
         return new PictureInPictureSurfaceTransaction(
-                positionX, positionY, scale, scale, degree, mCornerRadius, mTmpDestinationRect);
+                positionX, positionY, mTmpFloat9, degree, mCornerRadius, mTmpDestinationRect);
     }
 
     /** @return {@link SurfaceControl.Transaction} instance with vsync-id */

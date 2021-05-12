@@ -254,6 +254,12 @@ bool BinaryResourceParser::ParsePackage(const ResChunk_header* chunk) {
         }
         break;
 
+      case android::RES_TABLE_STAGED_ALIAS_TYPE:
+        if (!ParseStagedAliases(parser.chunk())) {
+          return false;
+        }
+        break;
+
       default:
         diag_->Warn(DiagMessage(source_)
                     << "unexpected chunk type "
@@ -486,6 +492,52 @@ bool BinaryResourceParser::ParseOverlayable(const ResChunk_header* chunk) {
     }
   }
 
+  return true;
+}
+
+bool BinaryResourceParser::ParseStagedAliases(const ResChunk_header* chunk) {
+  auto header = ConvertTo<ResTable_staged_alias_header>(chunk);
+  if (!header) {
+    diag_->Error(DiagMessage(source_) << "corrupt ResTable_staged_alias_header chunk");
+    return false;
+  }
+
+  const auto ref_begin = reinterpret_cast<const ResTable_staged_alias_entry*>(
+      ((uint8_t*)header) + util::DeviceToHost32(header->header.headerSize));
+  const auto ref_end = ref_begin + util::DeviceToHost32(header->count);
+  for (auto ref_iter = ref_begin; ref_iter != ref_end; ++ref_iter) {
+    const auto staged_id = ResourceId(util::DeviceToHost32(ref_iter->stagedResId));
+    const auto finalized_id = ResourceId(util::DeviceToHost32(ref_iter->finalizedResId));
+
+    // If the staged alias chunk comes before the type chunks, the resource ids and resource name
+    // pairing will not exist at this point.
+    const auto iter = id_index_.find(finalized_id);
+    if (iter == id_index_.cend()) {
+      diag_->Error(DiagMessage(source_) << "failed to find resource name for finalized"
+                                        << " resource ID " << finalized_id);
+      return false;
+    }
+
+    // Set the staged id of the finalized resource.
+    const auto& resource_name = iter->second;
+    const StagedId staged_id_def{.id = staged_id};
+    if (!table_->AddResource(NewResourceBuilder(resource_name)
+                                 .SetId(finalized_id, OnIdConflict::CREATE_ENTRY)
+                                 .SetStagedId(staged_id_def)
+                                 .SetAllowMangled(true)
+                                 .Build(),
+                             diag_)) {
+      return false;
+    }
+
+    // Since a the finalized resource entry is cloned and added to the resource table under the
+    // staged resource id, remove the cloned resource entry from the table.
+    if (!table_->RemoveResource(resource_name, staged_id)) {
+      diag_->Error(DiagMessage(source_) << "failed to find resource entry for staged "
+                                        << " resource ID " << staged_id);
+      return false;
+    }
+  }
   return true;
 }
 

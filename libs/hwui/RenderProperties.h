@@ -553,7 +553,7 @@ public:
     bool promotedToLayer() const {
         return mLayerProperties.mType == LayerType::None && fitsOnLayer() &&
                (mComputedFields.mNeedLayerForFunctors || mLayerProperties.mImageFilter != nullptr ||
-                !mLayerProperties.getStretchEffect().isEmpty() ||
+                mLayerProperties.getStretchEffect().requiresLayer() ||
                 (!MathUtils::isZero(mPrimitiveFields.mAlpha) && mPrimitiveFields.mAlpha < 1 &&
                  mPrimitiveFields.mHasOverlappingRendering));
     }

@@ -37,7 +37,8 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams.WindowType;
 
-import com.android.internal.util.Preconditions;
+import java.util.Objects;
+
 /**
  * Base class for presentations.
  * <p>
@@ -153,7 +154,7 @@ public class Presentation extends Dialog {
 
     private final Display mDisplay;
     private final DisplayManager mDisplayManager;
-    private final Handler mHandler = new Handler(Preconditions.checkNotNull(Looper.myLooper(),
+    private final Handler mHandler = new Handler(Objects.requireNonNull(Looper.myLooper(),
             "Presentation must be constructed on a looper thread."));
 
     /**

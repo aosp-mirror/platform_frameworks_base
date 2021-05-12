@@ -58,7 +58,7 @@ public:
                                      const std::string& targetDir) const = 0;
     virtual binder::Status setIncFsMountOptions(
             const os::incremental::IncrementalFileSystemControlParcel& control, bool enableReadLogs,
-            bool enableReadTimeouts) const = 0;
+            bool enableReadTimeouts, const std::string& sysfsName) const = 0;
 };
 
 class DataLoaderManagerWrapper {

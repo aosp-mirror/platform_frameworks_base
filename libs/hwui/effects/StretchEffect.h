@@ -16,10 +16,12 @@
 
 #pragma once
 
+#include "Properties.h"
 #include "utils/MathUtils.h"
 
 #include <SkImage.h>
 #include <SkImageFilter.h>
+#include <SkMatrix.h>
 #include <SkPoint.h>
 #include <SkRect.h>
 #include <SkRuntimeEffect.h>
@@ -98,6 +100,19 @@ public:
     float maxStretchAmountY = 0;
 
     const SkVector getStretchDirection() const { return mStretchDirection; }
+
+    SkMatrix makeLinearStretch(float width, float height) const {
+        SkMatrix matrix;
+        auto [sX, sY] = getStretchDirection();
+        matrix.setScale(1 + std::abs(sX), 1 + std::abs(sY), sX > 0 ? 0 : width,
+                        sY > 0 ? 0 : height);
+        return matrix;
+    }
+
+    bool requiresLayer() const {
+        return !(isEmpty() ||
+                 Properties::stretchEffectBehavior == StretchEffectBehavior::LinearScale);
+    }
 
 private:
     static sk_sp<SkRuntimeEffect> getStretchEffect();

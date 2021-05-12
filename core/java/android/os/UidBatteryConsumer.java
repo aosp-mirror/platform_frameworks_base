@@ -20,6 +20,9 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 
+import com.android.internal.os.PowerCalculator;
+
+import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -110,6 +113,18 @@ public final class UidBatteryConsumer extends BatteryConsumer implements Parcela
         dest.writeString(mPackageWithHighestDrain);
         dest.writeLong(mTimeInForegroundMs);
         dest.writeLong(mTimeInBackgroundMs);
+    }
+
+    @Override
+    public void dump(PrintWriter pw, boolean skipEmptyComponents) {
+        final double consumedPower = getConsumedPower();
+        pw.print("UID ");
+        UserHandle.formatUid(pw, getUid());
+        pw.print(": ");
+        PowerCalculator.printPowerMah(pw, consumedPower);
+        pw.print(" ( ");
+        mPowerComponents.dump(pw, skipEmptyComponents  /* skipTotalPowerComponent */);
+        pw.print(" ) ");
     }
 
     @NonNull

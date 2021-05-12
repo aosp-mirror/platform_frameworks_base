@@ -35,6 +35,7 @@ import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.hardware.fingerprint.IUdfpsOverlayControllerCallback;
 import android.os.PowerManager;
 import android.os.RemoteException;
+import android.os.Vibrator;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.LayoutInflater;
@@ -69,6 +70,7 @@ import org.mockito.junit.MockitoRule;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -93,6 +95,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
     @Mock
     private WindowManager mWindowManager;
     @Mock
+    private UdfpsHbmCallback mHbmCallback;
+    @Mock
     private StatusBarStateController mStatusBarStateController;
     @Mock
     private StatusBar mStatusBar;
@@ -114,6 +118,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
     private AccessibilityManager mAccessibilityManager;
     @Mock
     private ScreenLifecycle mScreenLifecycle;
+    @Mock
+    private Vibrator mVibrator;
 
     private FakeExecutor mFgExecutor;
 
@@ -170,7 +176,9 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mFalsingManager,
                 mPowerManager,
                 mAccessibilityManager,
-                mScreenLifecycle);
+                mScreenLifecycle,
+                mVibrator,
+                Optional.of(mHbmCallback));
         verify(mFingerprintManager).setUdfpsOverlayController(mOverlayCaptor.capture());
         mOverlayController = mOverlayCaptor.getValue();
         verify(mScreenLifecycle).addObserver(mScreenObserverCaptor.capture());
@@ -301,5 +309,30 @@ public class UdfpsControllerTest extends SysuiTestCase {
 
         // THEN no illumination because screen is off
         verify(mUdfpsView, never()).startIllumination(any());
+    }
+
+    @Test
+    public void playHapticOnTouchUdfpsArea() throws RemoteException {
+        // Configure UdfpsView to accept the ACTION_DOWN event
+        when(mUdfpsView.isIlluminationRequested()).thenReturn(false);
+        when(mUdfpsView.isWithinSensorArea(anyFloat(), anyFloat())).thenReturn(true);
+
+        // GIVEN that the overlay is showing
+        mOverlayController.showUdfpsOverlay(TEST_UDFPS_SENSOR_ID,
+                IUdfpsOverlayController.REASON_AUTH_FPM_KEYGUARD, mUdfpsOverlayControllerCallback);
+        mFgExecutor.runAllReady();
+
+        // WHEN ACTION_DOWN is received
+        verify(mUdfpsView).setOnTouchListener(mTouchListenerCaptor.capture());
+        MotionEvent downEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0, 0, 0);
+        mTouchListenerCaptor.getValue().onTouch(mUdfpsView, downEvent);
+        downEvent.recycle();
+        MotionEvent moveEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, 0, 0, 0);
+        mTouchListenerCaptor.getValue().onTouch(mUdfpsView, moveEvent);
+        moveEvent.recycle();
+
+        // THEN click haptic is played
+        verify(mVibrator).vibrate(mUdfpsController.mEffectClick,
+                UdfpsController.VIBRATION_SONIFICATION_ATTRIBUTES);
     }
 }

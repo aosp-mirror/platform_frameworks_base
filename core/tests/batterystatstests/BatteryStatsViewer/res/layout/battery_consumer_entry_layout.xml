@@ -30,7 +30,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
-        android:layout_marginEnd="8dp"/>
+        android:layout_marginEnd="8dp"
+        android:paddingBottom="8dp"/>
 
     <TextView
         android:id="@+id/title"
@@ -40,7 +41,7 @@
         android:textAppearance="@style/TextAppearanceBody"/>
 
     <TextView
-        android:id="@+id/amount"
+        android:id="@+id/value1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -49,7 +50,7 @@
         android:textAppearance="@style/TextAppearanceBody"/>
 
     <TextView
-        android:id="@+id/percent"
+        android:id="@+id/value2"
         android:layout_width="76dp"
         android:layout_height="wrap_content"
         android:gravity="right"

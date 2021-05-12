@@ -1022,8 +1022,7 @@
     <string name="text_copied" msgid="2531420577879738860">"ଟେକ୍ସଟ୍‍ କ୍ଲିପବୋର୍ଡକୁ କପୀ ହୋଇଯାଇଛି"</string>
     <string name="copied" msgid="4675902854553014676">"କପି କରାଗଲା"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>ରୁ ପେଷ୍ଟ କରିଛି"</string>
-    <!-- no translation found for pasted_from_clipboard (7355790625710831847) -->
-    <skip />
+    <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ଆପଣଙ୍କ କ୍ଲିପବୋର୍ଡରୁ ପେଷ୍ଟ କରିଛି"</string>
     <string name="pasted_text" msgid="4298871641549173733">"ଆପଣ କପି କରିଥିବା ଟେକ୍ସଟକୁ <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ପେଷ୍ଟ କରିଛି"</string>
     <string name="pasted_image" msgid="4729097394781491022">"ଆପଣ କପି କରିଥିବା ଏକ ଛବିକୁ <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ପେଷ୍ଟ କରିଛି"</string>
     <string name="pasted_content" msgid="646276353060777131">"ଆପଣ କପି କରିଥିବା ବିଷୟବସ୍ତୁକୁ <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ପେଷ୍ଟ କରିଛି"</string>
@@ -1262,14 +1261,10 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> ପ୍ରସ୍ତୁତ କରାଯାଉଛି।"</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"ଆପ୍‍ ଆରମ୍ଭ କରାଯାଉଛି।"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"ବୁଟ୍‍ ସମାପ୍ତ କରୁଛି।"</string>
-    <!-- no translation found for fp_enrollment_powerbutton_intent_title (3385634173366119903) -->
-    <skip />
-    <!-- no translation found for fp_enrollment_powerbutton_intent_message (6582149052513682522) -->
-    <skip />
-    <!-- no translation found for fp_enrollment_powerbutton_intent_positive_button (5963520983910436791) -->
-    <skip />
-    <!-- no translation found for fp_enrollment_powerbutton_intent_negative_button (6465764183480190748) -->
-    <skip />
+    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"ସ୍କ୍ରିନ୍ ବନ୍ଦ କରିବେ?"</string>
+    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"ଆପଣଙ୍କ ଟିପଚିହ୍ନ ସେଟ୍ ଅପ୍ କରିବା ସମୟରେ, ଆପଣ ପାୱାର ବଟନ୍ ଦବାଇଛନ୍ତି।\n\nଏହା ସାଧାରଣତଃ ଆପଣଙ୍କ ସ୍କ୍ରିନକୁ ବନ୍ଦ କରେ।"</string>
+    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"ବନ୍ଦ କରନ୍ତୁ"</string>
+    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"ବାତିଲ୍ କରନ୍ତୁ"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> ଚାଲୁଛି"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"ଗେମ୍‌କୁ ଫେରିଆସିବା ପାଇଁ ଟାପ୍ କରନ୍ତୁ"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"ଗେମ୍ ଚୟନ କରନ୍ତୁ"</string>

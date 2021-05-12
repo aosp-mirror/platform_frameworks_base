@@ -15,20 +15,11 @@
  */
 package com.android.server.pm;
 
-import static android.provider.DeviceConfig.NAMESPACE_SYSTEMUI;
-
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.list;
 
 import android.app.PendingIntent;
-import android.app.appsearch.PackageIdentifier;
-import android.content.pm.AppSearchShortcutInfo;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.provider.DeviceConfig;
-
-import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
-
-import java.util.Random;
 
 /**
  * Tests for {@link android.app.appsearch.AppSearchManager} and relevant APIs in ShortcutManager.
@@ -36,26 +27,6 @@ import java.util.Random;
  atest -c com.android.server.pm.ShortcutManagerTest12
  */
 public class ShortcutManagerTest12 extends BaseShortcutManagerTest {
-
-    public void testUpdateShortcutVisibility_updatesShortcutSchema() {
-        if (!DeviceConfig.getBoolean(NAMESPACE_SYSTEMUI,
-                SystemUiDeviceConfigFlags.DARK_LAUNCH_REMOTE_PREDICTION_SERVICE_ENABLED,
-                false)) {
-            // no-op if app-search integration is disabled.
-            return;
-        }
-        final byte[] cert = new byte[20];
-        new Random().nextBytes(cert);
-
-        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
-            mManager.updateShortcutVisibility(CALLING_PACKAGE_2, cert, true);
-            assertTrue(mMockAppSearchManager.mSchemasPackageAccessible.containsKey(
-                    AppSearchShortcutInfo.SCHEMA_TYPE));
-            assertTrue(mMockAppSearchManager.mSchemasPackageAccessible.get(
-                    AppSearchShortcutInfo.SCHEMA_TYPE).get(0).equals(
-                            new PackageIdentifier(CALLING_PACKAGE_2, cert)));
-        });
-    }
 
     public void testGetShortcutIntents_ReturnsMutablePendingIntents() throws RemoteException {
         setDefaultLauncher(USER_0, LAUNCHER_1);

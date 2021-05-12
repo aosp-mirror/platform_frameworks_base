@@ -1022,8 +1022,7 @@
     <string name="text_copied" msgid="2531420577879738860">"បាន​ចម្លង​អត្ថបទ​ទៅ​ក្ដារ​តម្បៀត​ខ្ទាស់។"</string>
     <string name="copied" msgid="4675902854553014676">"បា​នចម្លង"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> បានដាក់ចូលពី <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>"</string>
-    <!-- no translation found for pasted_from_clipboard (7355790625710831847) -->
-    <skip />
+    <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> បានដាក់ចូល​ពីឃ្លីបបត​របស់អ្នក"</string>
     <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> បានដាក់ចូល​អត្ថបទ​ដែលអ្នក​បានចម្លង"</string>
     <string name="pasted_image" msgid="4729097394781491022">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> បានដាក់ចូល​រូបភាព​ដែលអ្នក​បានចម្លង"</string>
     <string name="pasted_content" msgid="646276353060777131">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> បានដាក់ចូល​ខ្លឹមសារ​ដែលអ្នក​បានចម្លង"</string>
@@ -1262,14 +1261,10 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"កំពុងរៀបចំ <xliff:g id="APPNAME">%1$s</xliff:g>។"</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"ចាប់ផ្ដើម​កម្មវិធី។"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"បញ្ចប់​ការ​ចាប់ផ្ដើម។"</string>
-    <!-- no translation found for fp_enrollment_powerbutton_intent_title (3385634173366119903) -->
-    <skip />
-    <!-- no translation found for fp_enrollment_powerbutton_intent_message (6582149052513682522) -->
-    <skip />
-    <!-- no translation found for fp_enrollment_powerbutton_intent_positive_button (5963520983910436791) -->
-    <skip />
-    <!-- no translation found for fp_enrollment_powerbutton_intent_negative_button (6465764183480190748) -->
-    <skip />
+    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"បិទ​អេក្រង់ឬ?"</string>
+    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"នៅពេលរៀបចំ​ស្នាមម្រាមដៃ​របស់អ្នក អ្នកបានចុច​ប៊ូតុងថាមពល។\n\nជាធម្មតា ការធ្វើបែបនេះ​បិទអេក្រង់​របស់អ្នក។"</string>
+    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"បិទ"</string>
+    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"បោះបង់"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> កំពុង​ដំណើរការ"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"ចុច​ដើម្បី​ត្រឡប់​ទៅ​ហ្គេមវិញ"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"ជ្រើសរើស​ហ្គេម"</string>
