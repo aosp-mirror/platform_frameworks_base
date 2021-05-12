@@ -3812,7 +3812,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             final NativeNetworkConfig config;
             if (nai.isVPN()) {
                 if (getVpnType(nai) == VpnManager.TYPE_VPN_NONE) {
-                    Log.wtf(TAG, "Unable to get VPN type from network " + nai.network.getNetId());
+                    Log.wtf(TAG, "Unable to get VPN type from network " + nai.toShortString());
                     return false;
                 }
                 config = new NativeNetworkConfig(nai.network.getNetId(), NativeNetworkType.VIRTUAL,
@@ -3830,7 +3830,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     nai.networkCapabilities.getTransportTypes());
             return true;
         } catch (RemoteException | ServiceSpecificException e) {
-            loge("Error creating network " + nai.network.getNetId() + ": " + e.getMessage());
+            loge("Error creating network " + nai.toShortString() + ": " + e.getMessage());
             return false;
         }
     }
