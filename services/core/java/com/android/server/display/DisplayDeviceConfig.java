@@ -689,6 +689,8 @@ public class DisplayDeviceConfig {
         if (sensorDetails != null) {
             mAmbientLightSensor.type = sensorDetails.getType();
             mAmbientLightSensor.name = sensorDetails.getName();
+        } else {
+            loadAmbientLightSensorFromConfigXml();
         }
     }
 
