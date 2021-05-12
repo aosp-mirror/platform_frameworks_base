@@ -475,10 +475,13 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     }
 
     /**
+     * Callbacks for generate challenge operations.
+     *
      * @hide
      */
     public interface GenerateChallengeCallback {
-        void onChallengeGenerated(int sensorId, long challenge);
+        /** Called when a challenged has been generated. */
+        void onChallengeGenerated(int sensorId, int userId, long challenge);
     }
 
     /**
@@ -1124,7 +1127,8 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
                     sendRemovedResult((Fingerprint) msg.obj, msg.arg1 /* remaining */);
                     break;
                 case MSG_CHALLENGE_GENERATED:
-                    sendChallengeGenerated(msg.arg1 /* sensorId */, (long) msg.obj /* challenge */);
+                    sendChallengeGenerated(msg.arg1 /* sensorId */, msg.arg2 /* userId */,
+                            (long) msg.obj /* challenge */);
                     break;
                 case MSG_FINGERPRINT_DETECTED:
                     sendFingerprintDetected(msg.arg1 /* sensorId */, msg.arg2 /* userId */,
@@ -1233,12 +1237,12 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
         }
     }
 
-    private void sendChallengeGenerated(int sensorId, long challenge) {
+    private void sendChallengeGenerated(int sensorId, int userId, long challenge) {
         if (mGenerateChallengeCallback == null) {
             Slog.e(TAG, "sendChallengeGenerated, callback null");
             return;
         }
-        mGenerateChallengeCallback.onChallengeGenerated(sensorId, challenge);
+        mGenerateChallengeCallback.onChallengeGenerated(sensorId, userId, challenge);
     }
 
     private void sendFingerprintDetected(int sensorId, int userId, boolean isStrongBiometric) {
@@ -1454,8 +1458,8 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
         }
 
         @Override // binder call
-        public void onChallengeGenerated(int sensorId, long challenge) {
-            mHandler.obtainMessage(MSG_CHALLENGE_GENERATED, sensorId, 0, challenge)
+        public void onChallengeGenerated(int sensorId, int userId, long challenge) {
+            mHandler.obtainMessage(MSG_CHALLENGE_GENERATED, sensorId, userId, challenge)
                     .sendToTarget();
         }
 
