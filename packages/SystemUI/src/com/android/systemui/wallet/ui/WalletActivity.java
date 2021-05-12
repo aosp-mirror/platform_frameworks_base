@@ -17,6 +17,7 @@
 package com.android.systemui.wallet.ui;
 
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.service.quickaccesswallet.QuickAccessWalletClient;
@@ -95,7 +96,7 @@ public class WalletActivity extends LifecycleActivity {
         }
         setTitle("");
         getActionBar().setDisplayHomeAsUpEnabled(true);
-        getActionBar().setHomeAsUpIndicator(R.drawable.ic_close);
+        getActionBar().setHomeAsUpIndicator(getHomeIndicatorDrawable());
         getActionBar().setHomeActionContentDescription(R.string.accessibility_desc_close);
         WalletView walletView = requireViewById(R.id.wallet_view);
         mWalletScreenController = new WalletScreenController(
@@ -174,5 +175,11 @@ public class WalletActivity extends LifecycleActivity {
         mKeyguardStateController.removeCallback(mWalletScreenController);
         mWalletScreenController.onDismissed();
         super.onDestroy();
+    }
+
+    private Drawable getHomeIndicatorDrawable() {
+        Drawable drawable = getDrawable(R.drawable.ic_close);
+        drawable.setTint(getColor(com.android.internal.R.color.system_neutral1_300));
+        return drawable;
     }
 }
