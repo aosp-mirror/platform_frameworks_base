@@ -163,27 +163,30 @@ public class UnderlyingNetworkTrackerTest {
 
     @Test
     public void testNetworkCallbacksRegisteredOnStartupForTestMode() {
-        resetVcnContext();
-        when(mVcnContext.isInTestMode()).thenReturn(true);
-        reset(mConnectivityManager);
+        final VcnContext vcnContext =
+                spy(
+                        new VcnContext(
+                                mContext,
+                                mTestLooper.getLooper(),
+                                mVcnNetworkProvider,
+                                true /* isInTestMode */));
 
         mUnderlyingNetworkTracker =
                 new UnderlyingNetworkTracker(
-                        mVcnContext,
+                        vcnContext,
                         SUB_GROUP,
                         mSubscriptionSnapshot,
                         Collections.singleton(NetworkCapabilities.NET_CAPABILITY_INTERNET),
                         mNetworkTrackerCb);
 
-        verifyNetworkRequestsRegistered(INITIAL_SUB_IDS, true /* expectTestMode */);
+        verify(mConnectivityManager)
+                .requestBackgroundNetwork(
+                        eq(getTestNetworkRequest(INITIAL_SUB_IDS)),
+                        any(RouteSelectionCallback.class),
+                        any());
     }
 
     private void verifyNetworkRequestsRegistered(Set<Integer> expectedSubIds) {
-        verifyNetworkRequestsRegistered(expectedSubIds, false /* expectTestMode */);
-    }
-
-    private void verifyNetworkRequestsRegistered(
-            Set<Integer> expectedSubIds, boolean expectTestMode) {
         verify(mConnectivityManager)
                 .requestBackgroundNetwork(
                         eq(getWifiRequest(expectedSubIds)),
@@ -196,14 +199,9 @@ public class UnderlyingNetworkTrackerTest {
                             any(NetworkBringupCallback.class), any());
         }
 
-        final NetworkRequest expectedRouteSelectionRequest =
-                expectTestMode
-                        ? getTestNetworkRequest(expectedSubIds)
-                        : getRouteSelectionRequest(expectedSubIds);
-
         verify(mConnectivityManager)
                 .requestBackgroundNetwork(
-                        eq(expectedRouteSelectionRequest),
+                        eq(getRouteSelectionRequest(expectedSubIds)),
                         any(RouteSelectionCallback.class),
                         any());
     }
@@ -245,10 +243,9 @@ public class UnderlyingNetworkTrackerTest {
     }
 
     private NetworkRequest getTestNetworkRequest(Set<Integer> netCapsSubIds) {
-        return getExpectedRequestBase()
+        return new NetworkRequest.Builder()
+                .clearCapabilities()
                 .addTransportType(NetworkCapabilities.TRANSPORT_TEST)
-                .removeCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-                .removeCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)
                 .setSubscriptionIds(netCapsSubIds)
                 .build();
     }
