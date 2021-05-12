@@ -16,17 +16,11 @@
 
 package android.app.appsearch;
 
-
 import static com.google.common.truth.Truth.assertThat;
 
 import android.os.Bundle;
 
-import com.google.common.collect.ImmutableList;
-
 import org.junit.Test;
-
-import java.util.List;
-import java.util.Map;
 
 public class SearchSpecTest {
 
@@ -62,33 +56,5 @@ public class SearchSpecTest {
         assertThat(bundle.getInt(SearchSpec.ORDER_FIELD)).isEqualTo(SearchSpec.ORDER_ASCENDING);
         assertThat(bundle.getInt(SearchSpec.RANKING_STRATEGY_FIELD))
                 .isEqualTo(SearchSpec.RANKING_STRATEGY_DOCUMENT_SCORE);
-    }
-
-    @Test
-    public void testGetProjectionTypePropertyMasks() {
-        SearchSpec searchSpec =
-                new SearchSpec.Builder()
-                        .setTermMatch(SearchSpec.TERM_MATCH_PREFIX)
-                        .addProjection("TypeA", ImmutableList.of("field1", "field2.subfield2"))
-                        .addProjection("TypeB", ImmutableList.of("field7"))
-                        .addProjection("TypeC", ImmutableList.of())
-                        .build();
-
-        Map<String, List<String>> typePropertyPathMap = searchSpec.getProjections();
-        assertThat(typePropertyPathMap.keySet()).containsExactly("TypeA", "TypeB", "TypeC");
-        assertThat(typePropertyPathMap.get("TypeA")).containsExactly("field1", "field2.subfield2");
-        assertThat(typePropertyPathMap.get("TypeB")).containsExactly("field7");
-        assertThat(typePropertyPathMap.get("TypeC")).isEmpty();
-    }
-
-    @Test
-    public void testGetRankingStrategy() {
-        SearchSpec searchSpec =
-                new SearchSpec.Builder()
-                        .setTermMatch(SearchSpec.TERM_MATCH_PREFIX)
-                        .setRankingStrategy(SearchSpec.RANKING_STRATEGY_RELEVANCE_SCORE)
-                        .build();
-        assertThat(searchSpec.getRankingStrategy())
-                .isEqualTo(SearchSpec.RANKING_STRATEGY_RELEVANCE_SCORE);
     }
 }

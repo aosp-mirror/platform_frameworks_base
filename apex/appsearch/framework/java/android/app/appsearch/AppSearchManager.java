@@ -18,6 +18,7 @@ package android.app.appsearch;
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.SystemService;
+import android.app.appsearch.aidl.IAppSearchManager;
 import android.content.Context;
 
 import com.android.internal.util.Preconditions;

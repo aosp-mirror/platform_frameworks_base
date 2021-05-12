@@ -230,6 +230,33 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
     }
 
     /**
+     * Takes ownership of the passed-in properties object
+     *
+     * <p>For internal use only</p>
+     * @hide
+     */
+    public CaptureResult(String cameraId, CameraMetadataNative results, CaptureRequest parent,
+            int requestId, long frameNumber) {
+        if (results == null) {
+            throw new IllegalArgumentException("results was null");
+        }
+
+        if (parent == null) {
+            throw new IllegalArgumentException("parent was null");
+        }
+
+        mResults = CameraMetadataNative.move(results);
+        if (mResults.isEmpty()) {
+            throw new AssertionError("Results must not be empty");
+        }
+        setNativeInstance(mResults);
+        mCameraId = cameraId;
+        mRequest = parent;
+        mSequenceId = requestId;
+        mFrameNumber = frameNumber;
+    }
+
+    /**
      * Returns a copy of the underlying {@link CameraMetadataNative}.
      * @hide
      */

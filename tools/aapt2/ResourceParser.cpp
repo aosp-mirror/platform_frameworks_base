@@ -45,6 +45,7 @@ namespace aapt {
 namespace {
 constexpr const char* kPublicGroupTag = "public-group";
 constexpr const char* kStagingPublicGroupTag = "staging-public-group";
+constexpr const char* kStagingPublicGroupFinalTag = "staging-public-group-final";
 }  // namespace
 
 constexpr const char* sXliffNamespaceUri = "urn:oasis:names:tc:xliff:document:1.2";
@@ -109,6 +110,7 @@ struct ParsedResource {
   bool staged_api = false;
   bool allow_new = false;
   Maybe<OverlayableItem> overlayable_item;
+  Maybe<StagedId> staged_alias;
 
   std::string comment;
   std::unique_ptr<Value> value;
@@ -153,6 +155,10 @@ static bool AddResourcesToTable(ResourceTable* table, IDiagnostics* diag, Parsed
     res->value->SetComment(std::move(res->comment));
     res->value->SetSource(std::move(res->source));
     res_builder.SetValue(std::move(res->value), res->config, res->product);
+  }
+
+  if (res->staged_alias) {
+    res_builder.SetStagedId(res->staged_alias.value());
   }
 
   bool error = false;
@@ -532,6 +538,7 @@ bool ResourceParser::ParseResource(xml::XmlPullParser* parser,
       {"public", std::mem_fn(&ResourceParser::ParsePublic)},
       {"public-group", std::mem_fn(&ResourceParser::ParsePublicGroup)},
       {"staging-public-group", std::mem_fn(&ResourceParser::ParseStagingPublicGroup)},
+      {"staging-public-group-final", std::mem_fn(&ResourceParser::ParseStagingPublicGroupFinal)},
       {"string-array", std::mem_fn(&ResourceParser::ParseStringArray)},
       {"style", std::bind(&ResourceParser::ParseStyle, std::placeholders::_1, ResourceType::kStyle,
                           std::placeholders::_2, std::placeholders::_3)},
@@ -671,7 +678,7 @@ bool ResourceParser::ParseResource(xml::XmlPullParser* parser,
     if (bag_iter != elToBagMap.end()) {
       // Ensure we have a name (unless this is a <public-group> or <overlayable>).
       if (resource_type != kPublicGroupTag && resource_type != kStagingPublicGroupTag &&
-          resource_type != "overlayable") {
+          resource_type != kStagingPublicGroupFinalTag && resource_type != "overlayable") {
         if (!maybe_name) {
           diag_->Error(DiagMessage(out_resource->source)
                        << "<" << parser->element_name() << "> missing 'name' attribute");
@@ -1034,7 +1041,6 @@ bool static ParseGroupImpl(xml::XmlPullParser* parser, ParsedResource* out_resou
       ParsedResource& entry_res = out_resource->child_resources.emplace_back(ParsedResource{
           .name = ResourceName{{}, *parsed_type, maybe_name.value().to_string()},
           .source = item_source,
-          .id = next_id,
           .comment = std::move(comment),
       });
 
@@ -1057,6 +1063,14 @@ bool ResourceParser::ParseStagingPublicGroup(xml::XmlPullParser* parser,
                           parsed_entry.id = id;
                           parsed_entry.staged_api = true;
                           parsed_entry.visibility_level = Visibility::Level::kPublic;
+                        });
+}
+
+bool ResourceParser::ParseStagingPublicGroupFinal(xml::XmlPullParser* parser,
+                                                  ParsedResource* out_resource) {
+  return ParseGroupImpl(parser, out_resource, kStagingPublicGroupFinalTag, diag_,
+                        [](ParsedResource& parsed_entry, ResourceId id) {
+                          parsed_entry.staged_alias = StagedId{id, parsed_entry.source};
                         });
 }
 

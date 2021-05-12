@@ -1121,8 +1121,8 @@ int doDump(Bundle* bundle)
 
                 // Skip all "uses-sdk" tags besides the very last tag. The android runtime only uses
                 // the attribute values from the last defined tag.
-                for (size_t i = 0; i < usesSdkTagPositions.size() - 1; i++) {
-                    tagsToSkip.emplace_back(usesSdkTagPositions[i]);
+                for (size_t i = 1; i < usesSdkTagPositions.size(); i++) {
+                    tagsToSkip.emplace_back(usesSdkTagPositions[i - 1]);
                 }
 
                 // Reset the position before parsing.

@@ -1028,8 +1028,7 @@
     <string name="text_copied" msgid="2531420577879738860">"Text byl zkopírován do schránky."</string>
     <string name="copied" msgid="4675902854553014676">"Zkopírováno"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"Aplikace <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> vložila data z aplikace <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>"</string>
-    <!-- no translation found for pasted_from_clipboard (7355790625710831847) -->
-    <skip />
+    <string name="pasted_from_clipboard" msgid="7355790625710831847">"Aplikace <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> vložila obsah ze schránky"</string>
     <string name="pasted_text" msgid="4298871641549173733">"Aplikace <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> vložila zkopírovaný text"</string>
     <string name="pasted_image" msgid="4729097394781491022">"Aplikace <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> vložila zkopírovaný obrázek"</string>
     <string name="pasted_content" msgid="646276353060777131">"Aplikace <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> vložila zkopírovaný obsah"</string>
@@ -1300,14 +1299,10 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"Příprava aplikace <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Spouštění aplikací."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Dokončování inicializace."</string>
-    <!-- no translation found for fp_enrollment_powerbutton_intent_title (3385634173366119903) -->
-    <skip />
-    <!-- no translation found for fp_enrollment_powerbutton_intent_message (6582149052513682522) -->
-    <skip />
-    <!-- no translation found for fp_enrollment_powerbutton_intent_positive_button (5963520983910436791) -->
-    <skip />
-    <!-- no translation found for fp_enrollment_powerbutton_intent_negative_button (6465764183480190748) -->
-    <skip />
+    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"Vypnout obrazovku?"</string>
+    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"Při nastavování otisku prstu jste stiskli vypínač.\n\nTen obvykle vypne obrazovku."</string>
+    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"Vypnout"</string>
+    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"Zrušit"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"Běží aplikace <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Klepnutím se vrátíte do hry"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Vyberte hru"</string>

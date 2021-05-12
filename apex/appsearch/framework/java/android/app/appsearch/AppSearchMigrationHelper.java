@@ -23,6 +23,9 @@ import static android.os.ParcelFileDescriptor.MODE_WRITE_ONLY;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.annotation.WorkerThread;
+import android.app.appsearch.aidl.AppSearchResultParcel;
+import android.app.appsearch.aidl.IAppSearchManager;
+import android.app.appsearch.aidl.IAppSearchResultCallback;
 import android.app.appsearch.exceptions.AppSearchException;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -105,8 +108,8 @@ public class AppSearchMigrationHelper implements Closeable {
                     mUserId,
                     new IAppSearchResultCallback.Stub() {
                         @Override
-                        public void onResult(AppSearchResult result) {
-                            future.complete(result);
+                        public void onResult(AppSearchResultParcel resultParcel) {
+                            future.complete(resultParcel.getResult());
                         }
                     });
             AppSearchResult<Void> result = future.get();
@@ -145,8 +148,8 @@ public class AppSearchMigrationHelper implements Closeable {
             mService.putDocumentsFromFile(mPackageName, mDatabaseName, fileDescriptor, mUserId,
                     new IAppSearchResultCallback.Stub() {
                         @Override
-                        public void onResult(AppSearchResult result) {
-                            future.complete(result);
+                        public void onResult(AppSearchResultParcel resultParcel) {
+                            future.complete(resultParcel.getResult());
                         }
                     });
             AppSearchResult<List<Bundle>> result = future.get();

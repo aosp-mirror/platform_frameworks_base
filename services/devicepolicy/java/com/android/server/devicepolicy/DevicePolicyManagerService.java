@@ -28,6 +28,7 @@ import static android.app.admin.DevicePolicyManager.ACTION_CHECK_POLICY_COMPLIAN
 import static android.app.admin.DevicePolicyManager.ACTION_PROVISION_MANAGED_DEVICE;
 import static android.app.admin.DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE;
 import static android.app.admin.DevicePolicyManager.ACTION_PROVISION_MANAGED_USER;
+import static android.app.admin.DevicePolicyManager.ACTION_SYSTEM_UPDATE_POLICY_CHANGED;
 import static android.app.admin.DevicePolicyManager.CODE_ACCOUNTS_NOT_EMPTY;
 import static android.app.admin.DevicePolicyManager.CODE_CANNOT_ADD_MANAGED_PROFILE;
 import static android.app.admin.DevicePolicyManager.CODE_DEVICE_ADMIN_NOT_SUPPORTED;
@@ -883,12 +884,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 synchronized (getLockObject()) {
                     // Check whether the user is affiliated, *before* removing its data.
                     boolean isRemovedUserAffiliated = isUserAffiliatedWithDeviceLocked(userHandle);
-                    if (isProfileOwnerOfOrganizationOwnedDevice(userHandle)) {
-                        // Disable network and security logging
-                        mInjector.securityLogSetLoggingEnabledProperty(false);
-                        mSecurityLogMonitor.stop();
-                        setNetworkLoggingActiveInternal(false);
-                    }
                     removeUserData(userHandle);
                     if (!isRemovedUserAffiliated) {
                         // We discard the logs when unaffiliated users are deleted (so that the
@@ -1779,6 +1774,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     void removeUserData(int userHandle) {
+        final boolean isOrgOwned;
         synchronized (getLockObject()) {
             if (userHandle == UserHandle.USER_SYSTEM) {
                 Slogf.w(LOG_TAG, "Tried to remove device policy file for user 0! Ignoring.");
@@ -1786,6 +1782,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
             updatePasswordQualityCacheForUserGroup(userHandle);
             mPolicyCache.onUserRemoved(userHandle);
+
+            isOrgOwned = mOwners.isProfileOwnerOfOrganizationOwnedDevice(userHandle);
+
             mOwners.removeProfileOwner(userHandle);
             mOwners.writeProfileOwner(userHandle);
 
@@ -1798,6 +1797,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     DEVICE_POLICIES_XML);
             policyFile.delete();
             Slogf.i(LOG_TAG, "Removed device policy file " + policyFile.getAbsolutePath());
+        }
+        if (isOrgOwned) {
+            final UserInfo primaryUser = mUserManager.getPrimaryUser();
+            if (primaryUser != null) {
+                clearOrgOwnedProfileOwnerDeviceWidePolicies(primaryUser.id);
+            } else {
+                Slogf.wtf(LOG_TAG, "Was unable to get primary user.");
+            }
         }
     }
 
@@ -3537,6 +3544,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 "Caller must be shell or hold MANAGE_PROFILE_AND_DEVICE_OWNERS to call "
                         + "forceRemoveActiveAdmin");
         mInjector.binderWithCleanCallingIdentity(() -> {
+            boolean isOrgOwnedProfile = false;
             synchronized (getLockObject()) {
                 if (!isAdminTestOnlyLocked(adminReceiver, userHandle)) {
                     throw new SecurityException("Attempt to remove non-test admin "
@@ -3548,13 +3556,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     clearDeviceOwnerLocked(getDeviceOwnerAdminLocked(), userHandle);
                 }
                 if (isProfileOwner(adminReceiver, userHandle)) {
-                    if (isProfileOwnerOfOrganizationOwnedDevice(userHandle)) {
-                        UserHandle parentUserHandle = UserHandle.of(getProfileParentId(userHandle));
-                        mUserManager.setUserRestriction(UserManager.DISALLOW_REMOVE_MANAGED_PROFILE,
-                                false, parentUserHandle);
-                        mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_USER,
-                                false, parentUserHandle);
-                    }
+                    isOrgOwnedProfile = isProfileOwnerOfOrganizationOwnedDevice(userHandle);
                     final ActiveAdmin admin = getActiveAdminUncheckedLocked(adminReceiver,
                             userHandle, /* parent */ false);
                     clearProfileOwnerLocked(admin, userHandle);
@@ -3562,11 +3564,26 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
             // Remove the admin skipping sending the broadcast.
             removeAdminArtifacts(adminReceiver, userHandle);
+
+            // In case of PO on org owned device, clean device-wide policies and restrictions.
+            if (isOrgOwnedProfile) {
+                final UserHandle parentUser = UserHandle.of(getProfileParentId(userHandle));
+                clearOrgOwnedProfileOwnerUserRestrictions(parentUser);
+                clearOrgOwnedProfileOwnerDeviceWidePolicies(parentUser.getIdentifier());
+            }
+
             Slogf.i(LOG_TAG, "Admin " + adminReceiver + " removed from user " + userHandle);
         });
     }
 
-    private void clearDeviceOwnerUserRestrictionLocked(UserHandle userHandle) {
+    private void clearOrgOwnedProfileOwnerUserRestrictions(UserHandle parentUserHandle) {
+        mUserManager.setUserRestriction(
+                UserManager.DISALLOW_REMOVE_MANAGED_PROFILE, false, parentUserHandle);
+        mUserManager.setUserRestriction(
+                UserManager.DISALLOW_ADD_USER, false, parentUserHandle);
+    }
+
+    private void clearDeviceOwnerUserRestriction(UserHandle userHandle) {
         // ManagedProvisioning/DPC sets DISALLOW_ADD_USER. Clear to recover to the original state
         if (mUserManager.hasUserRestriction(UserManager.DISALLOW_ADD_USER, userHandle)) {
             mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_USER, false, userHandle);
@@ -6710,25 +6727,16 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 // when wipeData is _not_ called on the parent instance, it implies relinquishing
                 // control over the device, wiping only the work profile. So the user restriction
                 // on profile removal needs to be removed first.
-
-                mInjector.binderWithCleanCallingIdentity(() -> {
-                    // Clear restriction as user.
-                    mUserManager.setUserRestriction(
-                            UserManager.DISALLOW_REMOVE_MANAGED_PROFILE, false,
-                            UserHandle.SYSTEM);
-                    mUserManager.setUserRestriction(
-                            UserManager.DISALLOW_ADD_USER, false, UserHandle.SYSTEM);
-
-                    // Device-wide policies set by the profile owner need to be cleaned up here.
-                    mLockPatternUtils.setDeviceOwnerInfo(null);
-                });
+                final UserHandle parentUser = UserHandle.of(getProfileParentId(userId));
+                mInjector.binderWithCleanCallingIdentity(
+                        () -> clearOrgOwnedProfileOwnerUserRestrictions(parentUser));
             }
         }
         DevicePolicyEventLogger event = DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.WIPE_DATA_WITH_REASON)
                 .setInt(flags)
-                .setStrings(calledOnParentInstance ? CALLED_FROM_PARENT : NOT_CALLED_FROM_PARENT)
-                ;
+                .setStrings(calledOnParentInstance ? CALLED_FROM_PARENT : NOT_CALLED_FROM_PARENT);
+
         final String adminName;
         final ComponentName adminComp;
         if (admin != null) {
@@ -6753,6 +6761,55 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 adminName, calledByProfileOwnerOnOrgOwnedDevice);
 
         wipeDataNoLock(adminComp, flags, internalReason, wipeReasonForUser, userId);
+    }
+
+    /**
+     * Clears device wide policies enforced by COPE PO when relinquishing the device. This method
+     * should be invoked once the admin is gone, so that all methods that rely on calculating
+     * aggregate policy (e.g. strong auth timeout) from all admins aren't affected by its policies.
+     * This method assumes that there is no other device or profile owners left on the device.
+     * Shouldn't be called from binder thread without clearing identity.
+     */
+    private void clearOrgOwnedProfileOwnerDeviceWidePolicies(@UserIdInt int parentId) {
+        Slogf.i(LOG_TAG, "Cleaning up device-wide policies left over from org-owned profile...");
+        // Lockscreen message
+        mLockPatternUtils.setDeviceOwnerInfo(null);
+        // Wifi config lockdown
+        mInjector.settingsGlobalPutInt(Global.WIFI_DEVICE_OWNER_CONFIGS_LOCKDOWN, 0);
+        // Security logging
+        if (mInjector.securityLogGetLoggingEnabledProperty()) {
+            mSecurityLogMonitor.stop();
+            mInjector.securityLogSetLoggingEnabledProperty(false);
+        }
+        // Network logging
+        setNetworkLoggingActiveInternal(false);
+
+        // System update policy.
+        final boolean hasSystemUpdatePolicy;
+        synchronized (getLockObject()) {
+            hasSystemUpdatePolicy = mOwners.getSystemUpdatePolicy() != null;
+            if (hasSystemUpdatePolicy) {
+                mOwners.clearSystemUpdatePolicy();
+                mOwners.writeDeviceOwner();
+            }
+        }
+        if (hasSystemUpdatePolicy) {
+            mContext.sendBroadcastAsUser(
+                    new Intent(ACTION_SYSTEM_UPDATE_POLICY_CHANGED), UserHandle.SYSTEM);
+        }
+
+        // Unsuspend personal apps if needed.
+        suspendPersonalAppsInternal(parentId, false);
+
+        // Notify FRP agent, LSS and WindowManager to ensure they don't hold on to stale policies.
+        final int frpAgentUid = getFrpManagementAgentUid();
+        if (frpAgentUid > 0) {
+            notifyResetProtectionPolicyChanged(frpAgentUid);
+        }
+        mLockSettingsInternal.refreshStrongAuthTimeout(parentId);
+        updateScreenCaptureDisabled(parentId, getScreenCaptureDisabled(null, parentId, false));
+
+        Slogf.i(LOG_TAG, "Cleaning up device-wide policies done.");
     }
 
     private void wipeDataNoLock(ComponentName admin, int flags, String internalReason,
@@ -6822,18 +6879,23 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             saveSettingsLocked(caller.getUserId());
         }
 
-        final Intent intent = new Intent(
-                DevicePolicyManager.ACTION_RESET_PROTECTION_POLICY_CHANGED).addFlags(
-                Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND | Intent.FLAG_RECEIVER_FOREGROUND);
-
-        mInjector.binderWithCleanCallingIdentity(() -> mContext.sendBroadcastAsUser(intent,
-                UserHandle.getUserHandleForUid(frpManagementAgentUid),
-                android.Manifest.permission.MANAGE_FACTORY_RESET_PROTECTION));
+        mInjector.binderWithCleanCallingIdentity(
+                () -> notifyResetProtectionPolicyChanged(frpManagementAgentUid));
 
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_FACTORY_RESET_PROTECTION)
                 .setAdmin(who)
                 .write();
+    }
+
+    // Shouldn't be called from binder thread without clearing identity.
+    private void notifyResetProtectionPolicyChanged(int frpManagementAgentUid) {
+        final Intent intent = new Intent(
+                DevicePolicyManager.ACTION_RESET_PROTECTION_POLICY_CHANGED).addFlags(
+                Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND | Intent.FLAG_RECEIVER_FOREGROUND);
+        mContext.sendBroadcastAsUser(intent,
+                UserHandle.getUserHandleForUid(frpManagementAgentUid),
+                permission.MANAGE_FACTORY_RESET_PROTECTION);
     }
 
     @Override
@@ -8506,7 +8568,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         mOwners.writeDeviceOwner();
         updateDeviceOwnerLocked();
 
-        clearDeviceOwnerUserRestrictionLocked(UserHandle.of(userId));
+        clearDeviceOwnerUserRestriction(UserHandle.of(userId));
         mInjector.securityLogSetLoggingEnabledProperty(false);
         mSecurityLogMonitor.stop();
         setNetworkLoggingActiveInternal(false);
@@ -12936,8 +12998,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             mOwners.writeDeviceOwner();
         }
         mInjector.binderWithCleanCallingIdentity(() -> mContext.sendBroadcastAsUser(
-                new Intent(DevicePolicyManager.ACTION_SYSTEM_UPDATE_POLICY_CHANGED),
-                UserHandle.SYSTEM));
+                new Intent(ACTION_SYSTEM_UPDATE_POLICY_CHANGED), UserHandle.SYSTEM));
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_SYSTEM_UPDATE_POLICY)
                 .setAdmin(who)
@@ -14513,14 +14574,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      * apps.
      */
     @Override
-    public void forceUpdateUserSetupComplete() {
-        final CallerIdentity caller = getCallerIdentity();
+    public void forceUpdateUserSetupComplete(@UserIdInt int userId) {
         Preconditions.checkCallAuthorization(
                 hasCallingOrSelfPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS));
-        Preconditions.checkCallAuthorization(caller.getUserHandle().isSystem(),
-                "Caller has to be in user 0");
 
-        final int userId = UserHandle.USER_SYSTEM;
         boolean isUserCompleted = mInjector.settingsSecureGetIntForUser(
                 Settings.Secure.USER_SETUP_COMPLETE, 0, userId) != 0;
         DevicePolicyData policy = getUserData(userId);

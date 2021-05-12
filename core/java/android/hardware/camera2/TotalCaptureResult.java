@@ -94,6 +94,36 @@ public final class TotalCaptureResult extends CaptureResult {
     }
 
     /**
+     * Takes ownership of the passed-in camera metadata and the partial results
+     *
+     * @param partials a list of partial results; {@code null} will be substituted for an empty list
+     * @hide
+     */
+    public TotalCaptureResult(String logicalCameraId, CameraMetadataNative results,
+            CaptureRequest parent, int requestId, long frameNumber, List<CaptureResult> partials,
+            int sessionId, PhysicalCaptureResultInfo[] physicalResults) {
+        super(logicalCameraId, results, parent, requestId, frameNumber);
+
+        if (partials == null) {
+            mPartialResults = new ArrayList<>();
+        } else {
+            mPartialResults = partials;
+        }
+
+        mSessionId = sessionId;
+
+        mPhysicalCaptureResults = new HashMap<String, TotalCaptureResult>();
+        for (PhysicalCaptureResultInfo onePhysicalResult : physicalResults) {
+            TotalCaptureResult physicalResult = new TotalCaptureResult(
+                    onePhysicalResult.getCameraId(), onePhysicalResult.getCameraMetadata(),
+                    parent, requestId, frameNumber, /*partials*/null, sessionId,
+                    new PhysicalCaptureResultInfo[0]);
+            mPhysicalCaptureResults.put(onePhysicalResult.getCameraId(),
+                    physicalResult);
+        }
+    }
+
+    /**
      * Creates a request-less result.
      *
      * <p><strong>For testing only.</strong></p>
