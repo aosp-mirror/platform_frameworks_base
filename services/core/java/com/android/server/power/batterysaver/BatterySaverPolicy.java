@@ -179,7 +179,7 @@ public class BatterySaverPolicy extends ContentObserver implements
             true, /* enableQuickDoze */
             true, /* forceAllAppsStandby */
             true, /* forceBackgroundCheck */
-            PowerManager.LOCATION_MODE_ALL_DISABLED_WHEN_SCREEN_OFF, /* locationMode */
+            PowerManager.LOCATION_MODE_FOREGROUND_ONLY, /* locationMode */
             PowerManager.SOUND_TRIGGER_MODE_CRITICAL_ONLY /* soundTriggerMode */
     );
 
