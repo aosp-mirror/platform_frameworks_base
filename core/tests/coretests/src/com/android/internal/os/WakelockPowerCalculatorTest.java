@@ -79,8 +79,8 @@ public class WakelockPowerCalculatorTest {
         assertThat(deviceConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_WAKELOCK))
                 .isWithin(PRECISION).of(0.6);
 
-        BatteryConsumer appConsumer = mStatsRule.getDeviceBatteryConsumer();
+        BatteryConsumer appConsumer = mStatsRule.getAppsBatteryConsumer();
         assertThat(appConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_WAKELOCK))
-                .isWithin(PRECISION).of(0.6);
+                .isWithin(PRECISION).of(0.1);
     }
 }
