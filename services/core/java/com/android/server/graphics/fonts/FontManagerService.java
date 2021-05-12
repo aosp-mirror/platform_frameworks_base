@@ -20,6 +20,8 @@ import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Typeface;
 import android.graphics.fonts.Font;
 import android.graphics.fonts.FontFamily;
@@ -32,6 +34,9 @@ import android.os.SharedMemory;
 import android.os.ShellCallback;
 import android.system.ErrnoException;
 import android.text.FontConfig;
+import android.text.Layout;
+import android.text.StaticLayout;
+import android.text.TextPaint;
 import android.text.TextUtils;
 import android.util.AndroidException;
 import android.util.IndentingPrintWriter;
@@ -196,10 +201,32 @@ public final class FontManagerService extends IFontManager.Stub {
         }
 
         @Override
-        public void tryToCreateTypeface(File file) throws IOException {
+        public void tryToCreateTypeface(File file) throws Throwable {
             Font font = new Font.Builder(file).build();
             FontFamily family = new FontFamily.Builder(font).build();
-            new Typeface.CustomFallbackBuilder(family).build();
+            Typeface typeface = new Typeface.CustomFallbackBuilder(family).build();
+
+            TextPaint p = new TextPaint();
+            p.setTextSize(24f);
+            p.setTypeface(typeface);
+
+            // Test string to try with the passed font.
+            // TODO: Good to extract from font file.
+            String testTextToDraw = "abcXYZ@- "
+                    + "\uD83E\uDED6" // Emoji E13.0
+                    + "\uD83C\uDDFA\uD83C\uDDF8" // Emoji Flags
+                    + "\uD83D\uDC8F\uD83C\uDFFB" // Emoji Skin tone Sequence
+                    // ZWJ Sequence
+                    + "\uD83D\uDC68\uD83C\uDFFC\u200D\u2764\uFE0F\u200D\uD83D\uDC8B\u200D"
+                    + "\uD83D\uDC68\uD83C\uDFFF";
+
+            int width = (int) Math.ceil(Layout.getDesiredWidth(testTextToDraw, p));
+            StaticLayout layout = StaticLayout.Builder.obtain(
+                    testTextToDraw, 0, testTextToDraw.length(), p, width).build();
+            Bitmap bmp = Bitmap.createBitmap(
+                    layout.getWidth(), layout.getHeight(), Bitmap.Config.ALPHA_8);
+            Canvas canvas = new Canvas(bmp);
+            layout.draw(canvas);
         }
 
         private static ByteBuffer mmap(File file) throws IOException {
