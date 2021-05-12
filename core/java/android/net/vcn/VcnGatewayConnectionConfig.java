@@ -15,6 +15,8 @@
  */
 package android.net.vcn;
 
+import static android.net.ipsec.ike.IkeSessionParams.IKE_OPTION_MOBIKE;
+
 import static com.android.internal.annotations.VisibleForTesting.Visibility;
 
 import android.annotation.IntDef;
@@ -433,6 +435,8 @@ public final class VcnGatewayConnectionConfig {
          *     distinguish between VcnGatewayConnectionConfigs configured on a single {@link
          *     VcnConfig}. This will be used as the identifier in VcnStatusCallback invocations.
          * @param tunnelConnectionParams the IKE tunnel connection configuration
+         * @throws IllegalArgumentException if the provided IkeTunnelConnectionParams is not
+         *     configured to support MOBIKE
          * @see IkeTunnelConnectionParams
          * @see VcnManager.VcnStatusCallback#onGatewayConnectionError
          */
@@ -441,6 +445,10 @@ public final class VcnGatewayConnectionConfig {
                 @NonNull IkeTunnelConnectionParams tunnelConnectionParams) {
             Objects.requireNonNull(gatewayConnectionName, "gatewayConnectionName was null");
             Objects.requireNonNull(tunnelConnectionParams, "tunnelConnectionParams was null");
+            if (!tunnelConnectionParams.getIkeSessionParams().hasIkeOption(IKE_OPTION_MOBIKE)) {
+                throw new IllegalArgumentException(
+                        "MOBIKE must be configured for the provided IkeSessionParams");
+            }
 
             mGatewayConnectionName = gatewayConnectionName;
             mTunnelConnectionParams = tunnelConnectionParams;

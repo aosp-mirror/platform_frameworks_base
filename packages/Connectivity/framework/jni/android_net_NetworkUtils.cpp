@@ -30,13 +30,13 @@
 
 #include <DnsProxydProtocol.h> // NETID_USE_LOCAL_NAMESERVERS
 #include <cutils/properties.h>
+#include <nativehelper/JNIHelp.h>
 #include <nativehelper/JNIPlatformHelp.h>
 #include <nativehelper/ScopedLocalRef.h>
 #include <utils/Log.h>
 #include <utils/misc.h>
 
 #include "NetdClient.h"
-#include "core_jni_helpers.h"
 #include "jni.h"
 
 extern "C" {
@@ -51,6 +51,19 @@ namespace android {
 constexpr int MAXPACKETSIZE = 8 * 1024;
 // FrameworkListener limits the size of commands to 4096 bytes.
 constexpr int MAXCMDSIZE = 4096;
+
+static inline jclass FindClassOrDie(JNIEnv* env, const char* class_name) {
+    jclass clazz = env->FindClass(class_name);
+    LOG_ALWAYS_FATAL_IF(clazz == NULL, "Unable to find class %s", class_name);
+    return clazz;
+}
+
+template <typename T>
+static inline T MakeGlobalRefOrDie(JNIEnv* env, T in) {
+    jobject res = env->NewGlobalRef(in);
+    LOG_ALWAYS_FATAL_IF(res == NULL, "Unable to create global reference.");
+    return static_cast<T>(res);
+}
 
 static void android_net_utils_attachDropAllBPFFilter(JNIEnv *env, jobject clazz, jobject javaFd)
 {
@@ -254,8 +267,8 @@ static const JNINativeMethod gNetworkUtilMethods[] = {
 
 int register_android_net_NetworkUtils(JNIEnv* env)
 {
-    return RegisterMethodsOrDie(env, NETUTILS_PKG_NAME, gNetworkUtilMethods,
-                                NELEM(gNetworkUtilMethods));
+    return jniRegisterNativeMethods(env, NETUTILS_PKG_NAME, gNetworkUtilMethods,
+                                    NELEM(gNetworkUtilMethods));
 }
 
 }; // namespace android

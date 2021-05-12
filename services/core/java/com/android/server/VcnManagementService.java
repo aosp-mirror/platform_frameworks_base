@@ -167,7 +167,6 @@ public class VcnManagementService extends IVcnManagementService.Stub {
     @NonNull private final VcnNetworkProvider mNetworkProvider;
     @NonNull private final TelephonySubscriptionTrackerCallback mTelephonySubscriptionTrackerCb;
     @NonNull private final TelephonySubscriptionTracker mTelephonySubscriptionTracker;
-    @NonNull private final VcnContext mVcnContext;
     @NonNull private final BroadcastReceiver mPkgChangeReceiver;
 
     @NonNull
@@ -212,7 +211,6 @@ public class VcnManagementService extends IVcnManagementService.Stub {
                 mContext, mLooper, mTelephonySubscriptionTrackerCb);
 
         mConfigDiskRwHelper = mDeps.newPersistableBundleLockingReadWriteHelper(VCN_CONFIG_FILE);
-        mVcnContext = mDeps.newVcnContext(mContext, mLooper, mNetworkProvider);
 
         mPkgChangeReceiver = new BroadcastReceiver() {
             @Override
@@ -336,8 +334,9 @@ public class VcnManagementService extends IVcnManagementService.Stub {
         public VcnContext newVcnContext(
                 @NonNull Context context,
                 @NonNull Looper looper,
-                @NonNull VcnNetworkProvider vcnNetworkProvider) {
-            return new VcnContext(context, looper, vcnNetworkProvider);
+                @NonNull VcnNetworkProvider vcnNetworkProvider,
+                boolean getIsInTestMode) {
+            return new VcnContext(context, looper, vcnNetworkProvider, getIsInTestMode);
         }
 
         /** Creates a new Vcn instance using the provided configuration */
@@ -419,6 +418,14 @@ public class VcnManagementService extends IVcnManagementService.Stub {
 
         throw new SecurityException(
                 "Carrier privilege required for subscription group to set VCN Config");
+    }
+
+    private void enforceManageTestNetworksForTestMode(@NonNull VcnConfig vcnConfig) {
+        if (vcnConfig.isTestModeProfile()) {
+            mContext.enforceCallingPermission(
+                    android.Manifest.permission.MANAGE_TEST_NETWORKS,
+                    "Test-mode require the MANAGE_TEST_NETWORKS permission");
+        }
     }
 
     private class VcnSubscriptionTrackerCallback implements TelephonySubscriptionTrackerCallback {
@@ -544,8 +551,11 @@ public class VcnManagementService extends IVcnManagementService.Stub {
 
         final VcnCallbackImpl vcnCallback = new VcnCallbackImpl(subscriptionGroup);
 
+        final VcnContext vcnContext =
+                mDeps.newVcnContext(
+                        mContext, mLooper, mNetworkProvider, config.isTestModeProfile());
         final Vcn newInstance =
-                mDeps.newVcn(mVcnContext, subscriptionGroup, config, mLastSnapshot, vcnCallback);
+                mDeps.newVcn(vcnContext, subscriptionGroup, config, mLastSnapshot, vcnCallback);
         mVcns.put(subscriptionGroup, newInstance);
 
         // Now that a new VCN has started, notify all registered listeners to refresh their
@@ -589,6 +599,7 @@ public class VcnManagementService extends IVcnManagementService.Stub {
 
         mContext.getSystemService(AppOpsManager.class)
                 .checkPackage(mDeps.getBinderCallingUid(), config.getProvisioningPackageName());
+        enforceManageTestNetworksForTestMode(config);
         enforceCallingUserAndCarrierPrivilege(subscriptionGroup, opPkgName);
 
         Binder.withCleanCallingIdentity(() -> {
