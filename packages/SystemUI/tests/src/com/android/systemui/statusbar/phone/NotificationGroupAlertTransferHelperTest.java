@@ -74,6 +74,7 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
     private HeadsUpManager mHeadsUpManager;
     @Mock private NotificationEntryManager mNotificationEntryManager;
     @Mock private RowContentBindStage mBindStage;
+    @Mock PeopleNotificationIdentifier mPeopleNotificationIdentifier;
     @Captor private ArgumentCaptor<NotificationEntryListener> mListenerCaptor;
     private NotificationEntryListener mNotificationEntryListener;
     private final HashMap<String, NotificationEntry> mPendingEntries = new HashMap<>();
@@ -91,7 +92,7 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
 
         mGroupManager = new NotificationGroupManagerLegacy(
                 mock(StatusBarStateController.class),
-                () -> mock(PeopleNotificationIdentifier.class),
+                () -> mPeopleNotificationIdentifier,
                 Optional.of(mock(Bubbles.class)));
         mDependency.injectTestDependency(NotificationGroupManagerLegacy.class, mGroupManager);
         mGroupManager.setHeadsUpManager(mHeadsUpManager);
@@ -107,15 +108,31 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
         mHeadsUpManager.addListener(mGroupAlertTransferHelper);
     }
 
+    private void mockHasHeadsUpContentView(NotificationEntry entry,
+            boolean hasHeadsUpContentView) {
+        RowContentBindParams params = new RowContentBindParams();
+        if (hasHeadsUpContentView) {
+            params.requireContentViews(FLAG_CONTENT_VIEW_HEADS_UP);
+        }
+        when(mBindStage.getStageParams(eq(entry))).thenReturn(params);
+    }
+
+    private void mockHasHeadsUpContentView(NotificationEntry entry) {
+        mockHasHeadsUpContentView(entry, true);
+    }
+
+    private void mockIsPriority(NotificationEntry priorityEntry) {
+        when(mPeopleNotificationIdentifier.getPeopleNotificationType(eq(priorityEntry)))
+                .thenReturn(PeopleNotificationIdentifier.TYPE_IMPORTANT_PERSON);
+    }
+
     @Test
     public void testSuppressedSummaryHeadsUpTransfersToChild() {
         NotificationEntry summaryEntry = mGroupTestHelper.createSummaryNotification();
         mHeadsUpManager.showNotification(summaryEntry);
         NotificationEntry childEntry = mGroupTestHelper.createChildNotification();
 
-        RowContentBindParams params = new RowContentBindParams();
-        params.requireContentViews(FLAG_CONTENT_VIEW_HEADS_UP);
-        when(mBindStage.getStageParams(eq(childEntry))).thenReturn(params);
+        mockHasHeadsUpContentView(childEntry);
 
         // Summary will be suppressed because there is only one child.
         mGroupManager.onEntryAdded(summaryEntry);
@@ -180,8 +197,7 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
         NotificationEntry summaryEntry = mGroupTestHelper.createSummaryNotification();
         mHeadsUpManager.showNotification(summaryEntry);
         NotificationEntry childEntry = mGroupTestHelper.createChildNotification();
-        RowContentBindParams params = new RowContentBindParams();
-        when(mBindStage.getStageParams(eq(childEntry))).thenReturn(params);
+        mockHasHeadsUpContentView(childEntry, false);
 
         mGroupManager.onEntryAdded(summaryEntry);
         mGroupManager.onEntryAdded(childEntry);
@@ -198,8 +214,7 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
         NotificationEntry summaryEntry = mGroupTestHelper.createSummaryNotification();
         mHeadsUpManager.showNotification(summaryEntry);
         NotificationEntry childEntry = mGroupTestHelper.createChildNotification();
-        RowContentBindParams params = new RowContentBindParams();
-        when(mBindStage.getStageParams(eq(childEntry))).thenReturn(params);
+        mockHasHeadsUpContentView(childEntry, false);
 
         mGroupManager.onEntryAdded(summaryEntry);
         mGroupManager.onEntryAdded(childEntry);
@@ -250,8 +265,7 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
                 mGroupTestHelper.createSummaryNotification(Notification.GROUP_ALERT_SUMMARY);
         NotificationEntry childEntry =
                 mGroupTestHelper.createChildNotification(Notification.GROUP_ALERT_SUMMARY);
-        RowContentBindParams params = new RowContentBindParams();
-        when(mBindStage.getStageParams(eq(childEntry))).thenReturn(params);
+        mockHasHeadsUpContentView(childEntry, false);
 
         mHeadsUpManager.showNotification(summaryEntry);
         // Trigger a transfer of alert state from summary to child.
@@ -270,8 +284,7 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
                 mGroupTestHelper.createSummaryNotification(Notification.GROUP_ALERT_SUMMARY);
         NotificationEntry childEntry =
                 mGroupTestHelper.createChildNotification(Notification.GROUP_ALERT_SUMMARY);
-        RowContentBindParams params = new RowContentBindParams();
-        when(mBindStage.getStageParams(eq(childEntry))).thenReturn(params);
+        mockHasHeadsUpContentView(childEntry, false);
 
         mHeadsUpManager.showNotification(summaryEntry);
         // Trigger a transfer of alert state from summary to child.
@@ -294,8 +307,7 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
                 mGroupTestHelper.createSummaryNotification(Notification.GROUP_ALERT_SUMMARY);
         NotificationEntry childEntry =
                 mGroupTestHelper.createChildNotification(Notification.GROUP_ALERT_SUMMARY, 47);
-        RowContentBindParams params = new RowContentBindParams();
-        when(mBindStage.getStageParams(eq(childEntry))).thenReturn(params);
+        mockHasHeadsUpContentView(childEntry, false);
 
         mHeadsUpManager.showNotification(summaryEntry);
         // Trigger a transfer of alert state from summary to child.
@@ -311,4 +323,160 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
 
         assertFalse(mGroupAlertTransferHelper.isAlertTransferPending(childEntry));
     }
+
+    @Test
+    public void testOverriddenSummaryHeadsUpTransfersToPriority() {
+        // Creation order is oldest to newest, meaning the priority will be deemed newest
+        int groupAlert = Notification.GROUP_ALERT_SUMMARY;
+        NotificationEntry summaryEntry = mGroupTestHelper.createSummaryNotification(groupAlert);
+        NotificationEntry childEntry = mGroupTestHelper.createChildNotification(groupAlert);
+        NotificationEntry priorityEntry = mGroupTestHelper.createChildNotification(groupAlert);
+        mockIsPriority(priorityEntry);
+
+        // summary gets heads up
+        mHeadsUpManager.showNotification(summaryEntry);
+
+        mockHasHeadsUpContentView(summaryEntry);
+        mockHasHeadsUpContentView(priorityEntry);
+        mockHasHeadsUpContentView(childEntry);
+
+        // Summary will have an alertOverride.
+        mGroupManager.onEntryAdded(summaryEntry);
+        mGroupManager.onEntryAdded(priorityEntry);
+        mGroupManager.onEntryAdded(childEntry);
+
+        // An overridden summary should transfer its alert state to the priority.
+        assertFalse(mHeadsUpManager.isAlerting(summaryEntry.getKey()));
+        assertFalse(mHeadsUpManager.isAlerting(childEntry.getKey()));
+        assertTrue(mHeadsUpManager.isAlerting(priorityEntry.getKey()));
+    }
+
+    @Test
+    public void testOverriddenSummaryHeadsUpTransferDoesNotAlertPriorityIfUninflated() {
+        // Creation order is oldest to newest, meaning the priority will be deemed newest
+        int groupAlert = Notification.GROUP_ALERT_SUMMARY;
+        NotificationEntry summaryEntry = mGroupTestHelper.createSummaryNotification(groupAlert);
+        NotificationEntry childEntry = mGroupTestHelper.createChildNotification(groupAlert);
+        NotificationEntry priorityEntry = mGroupTestHelper.createChildNotification(groupAlert);
+        mockIsPriority(priorityEntry);
+
+        // summary gets heads up
+        mHeadsUpManager.showNotification(summaryEntry);
+
+        mockHasHeadsUpContentView(summaryEntry);
+        mockHasHeadsUpContentView(priorityEntry, false);
+        mockHasHeadsUpContentView(childEntry);
+
+        // Summary will have an alertOverride.
+        mGroupManager.onEntryAdded(summaryEntry);
+        mGroupManager.onEntryAdded(priorityEntry);
+        mGroupManager.onEntryAdded(childEntry);
+
+        // Alert is immediately removed from summary, but we do not show priority yet either as its
+        // content is not inflated.
+        assertFalse(mHeadsUpManager.isAlerting(summaryEntry.getKey()));
+        assertFalse(mHeadsUpManager.isAlerting(childEntry.getKey()));
+        assertFalse(mHeadsUpManager.isAlerting(priorityEntry.getKey()));
+        assertTrue(mGroupAlertTransferHelper.isAlertTransferPending(priorityEntry));
+    }
+
+    @Test
+    public void testOverriddenSummaryHeadsUpTransfersToPriorityButBackAgain() {
+        // Creation order is oldest to newest, meaning the child2 will ultimately be deemed newest
+        int groupAlert = Notification.GROUP_ALERT_SUMMARY;
+        NotificationEntry summaryEntry = mGroupTestHelper.createSummaryNotification(groupAlert);
+        NotificationEntry childEntry = mGroupTestHelper.createChildNotification(groupAlert);
+        NotificationEntry priorityEntry = mGroupTestHelper.createChildNotification(groupAlert);
+        NotificationEntry childEntry2 = mGroupTestHelper.createChildNotification(groupAlert);
+        mockIsPriority(priorityEntry);
+
+        // summary gets heads up
+        mHeadsUpManager.showNotification(summaryEntry);
+
+        mockHasHeadsUpContentView(summaryEntry);
+        mockHasHeadsUpContentView(priorityEntry);
+        mockHasHeadsUpContentView(childEntry);
+        mockHasHeadsUpContentView(childEntry2);
+
+        // Summary will have an alertOverride.
+        mGroupManager.onEntryAdded(summaryEntry);
+        mGroupManager.onEntryAdded(priorityEntry);
+        mGroupManager.onEntryAdded(childEntry);
+
+        // An overridden summary should transfer its alert state to the priority.
+        assertFalse(mHeadsUpManager.isAlerting(summaryEntry.getKey()));
+        assertFalse(mHeadsUpManager.isAlerting(childEntry.getKey()));
+        assertTrue(mHeadsUpManager.isAlerting(priorityEntry.getKey()));
+
+        mGroupManager.onEntryAdded(childEntry2);
+
+        // An overridden summary should transfer its alert state to the priority.
+        assertTrue(mHeadsUpManager.isAlerting(summaryEntry.getKey()));
+        assertFalse(mHeadsUpManager.isAlerting(childEntry.getKey()));
+        assertFalse(mHeadsUpManager.isAlerting(childEntry2.getKey()));
+        assertFalse(mHeadsUpManager.isAlerting(priorityEntry.getKey()));
+    }
+
+    @Test
+    public void testOverriddenSuppressedSummaryHeadsUpTransfersToChildThenToPriority() {
+        // Creation order is oldest to newest, meaning the priority will ultimately be deemed newest
+        int groupAlert = Notification.GROUP_ALERT_SUMMARY;
+        NotificationEntry summaryEntry = mGroupTestHelper.createSummaryNotification(groupAlert);
+        NotificationEntry childEntry = mGroupTestHelper.createChildNotification(groupAlert);
+        NotificationEntry priorityEntry = mGroupTestHelper.createChildNotification(groupAlert);
+        mockIsPriority(priorityEntry);
+
+        // summary gets heads up
+        mHeadsUpManager.showNotification(summaryEntry);
+
+        mockHasHeadsUpContentView(summaryEntry);
+        mockHasHeadsUpContentView(priorityEntry);
+        mockHasHeadsUpContentView(childEntry);
+
+        // Summary will be suppressed, and the child will receive the alert
+        mGroupManager.onEntryAdded(summaryEntry);
+        mGroupManager.onEntryAdded(childEntry);
+
+        assertFalse(mHeadsUpManager.isAlerting(summaryEntry.getKey()));
+        assertTrue(mHeadsUpManager.isAlerting(childEntry.getKey()));
+
+        // Alert should be transferred "back" from the child to the priority
+        mGroupManager.onEntryAdded(priorityEntry);
+
+        assertFalse(mHeadsUpManager.isAlerting(summaryEntry.getKey()));
+        assertFalse(mHeadsUpManager.isAlerting(childEntry.getKey()));
+        assertTrue(mHeadsUpManager.isAlerting(priorityEntry.getKey()));
+    }
+
+    @Test
+    public void testOverriddenSuppressedSummaryHeadsUpTransfersToPriorityThenToChild() {
+        // Creation order is oldest to newest, meaning the child will ultimately be deemed newest
+        int groupAlert = Notification.GROUP_ALERT_SUMMARY;
+        NotificationEntry summaryEntry = mGroupTestHelper.createSummaryNotification(groupAlert);
+        NotificationEntry priorityEntry = mGroupTestHelper.createChildNotification(groupAlert);
+        NotificationEntry childEntry = mGroupTestHelper.createChildNotification(groupAlert);
+        mockIsPriority(priorityEntry);
+
+        // summary gets heads up
+        mHeadsUpManager.showNotification(summaryEntry);
+
+        mockHasHeadsUpContentView(summaryEntry);
+        mockHasHeadsUpContentView(priorityEntry);
+        mockHasHeadsUpContentView(childEntry);
+
+        // Summary will have alert override of the priority
+        mGroupManager.onEntryAdded(summaryEntry);
+        mGroupManager.onEntryAdded(priorityEntry);
+
+        assertFalse(mHeadsUpManager.isAlerting(summaryEntry.getKey()));
+        assertTrue(mHeadsUpManager.isAlerting(priorityEntry.getKey()));
+
+        // Alert should be transferred "back" from the priority to the child (which is newer)
+        mGroupManager.onEntryAdded(childEntry);
+
+        assertFalse(mHeadsUpManager.isAlerting(summaryEntry.getKey()));
+        assertTrue(mHeadsUpManager.isAlerting(childEntry.getKey()));
+        assertFalse(mHeadsUpManager.isAlerting(priorityEntry.getKey()));
+    }
+
 }
