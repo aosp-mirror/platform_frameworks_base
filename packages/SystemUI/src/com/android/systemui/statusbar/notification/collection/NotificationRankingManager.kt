@@ -23,9 +23,11 @@ import android.service.notification.NotificationListenerService.Ranking
 import android.service.notification.NotificationListenerService.RankingMap
 import android.service.notification.StatusBarNotification
 import com.android.systemui.statusbar.NotificationMediaManager
+import com.android.systemui.statusbar.notification.NotificationEntryManager.KeyguardEnvironment
 import com.android.systemui.statusbar.notification.NotificationEntryManagerLogger
 import com.android.systemui.statusbar.notification.NotificationFilter
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager
+import com.android.systemui.statusbar.notification.collection.legacy.LegacyNotificationRanker
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy
 import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier
@@ -39,7 +41,6 @@ import com.android.systemui.statusbar.policy.HeadsUpManager
 import dagger.Lazy
 import java.util.Objects
 import javax.inject.Inject
-import kotlin.Comparator
 
 private const val TAG = "NotifRankingManager"
 
@@ -60,10 +61,11 @@ open class NotificationRankingManager @Inject constructor(
     private val logger: NotificationEntryManagerLogger,
     private val sectionsFeatureManager: NotificationSectionsFeatureManager,
     private val peopleNotificationIdentifier: PeopleNotificationIdentifier,
-    private val highPriorityProvider: HighPriorityProvider
-) {
+    private val highPriorityProvider: HighPriorityProvider,
+    private val keyguardEnvironment: KeyguardEnvironment
+) : LegacyNotificationRanker {
 
-    var rankingMap: RankingMap? = null
+    override var rankingMap: RankingMap? = null
         protected set
     private val mediaManager by lazy {
         mediaManagerLazy.get()
@@ -115,7 +117,7 @@ open class NotificationRankingManager @Inject constructor(
         }
     }
 
-    fun updateRanking(
+    override fun updateRanking(
         newRankingMap: RankingMap?,
         entries: Collection<NotificationEntry>,
         reason: String
@@ -129,6 +131,12 @@ open class NotificationRankingManager @Inject constructor(
         return synchronized(this) {
             filterAndSortLocked(entries, reason)
         }
+    }
+
+    override fun isNotificationForCurrentProfiles(
+        entry: NotificationEntry
+    ): Boolean {
+        return keyguardEnvironment.isNotificationForCurrentProfiles(entry.sbn)
     }
 
     /** Uses the [rankingComparator] to sort notifications which aren't filtered */
