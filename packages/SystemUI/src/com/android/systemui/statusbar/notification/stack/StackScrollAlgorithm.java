@@ -556,7 +556,7 @@ public class StackScrollAlgorithm {
                 continue;
             }
             ExpandableNotificationRow row = (ExpandableNotificationRow) child;
-            if (!row.isHeadsUp()) {
+            if (!(row.isHeadsUp() || row.isHeadsUpAnimatingAway())) {
                 continue;
             }
             ExpandableViewState childState = row.getViewState();
@@ -603,6 +603,7 @@ public class StackScrollAlgorithm {
                 }
             }
             if (row.isHeadsUpAnimatingAway()) {
+                childState.yTranslation = Math.max(childState.yTranslation, mHeadsUpInset);
                 childState.hidden = false;
             }
         }
