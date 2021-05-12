@@ -5310,8 +5310,7 @@ public class Notification implements Parcelable
         // the change's state in NotificationManagerService were very complex. These behavior
         // changes are entirely visual, and should otherwise be undetectable by apps.
         @SuppressWarnings("AndroidFrameworkCompatChange")
-        private void calculateLargeIconDimens(boolean largeIconShown,
-                @NonNull StandardTemplateParams p,
+        private void calculateRightIconDimens(Icon rightIcon, boolean isPromotedPicture,
                 @NonNull TemplateBindResult result) {
             final Resources resources = mContext.getResources();
             final float density = resources.getDisplayMetrics().density;
@@ -5324,9 +5323,9 @@ public class Notification implements Parcelable
             final float viewHeightDp = resources.getDimension(
                     R.dimen.notification_right_icon_size) / density;
             float viewWidthDp = viewHeightDp;  // icons are 1:1 by default
-            if (largeIconShown && (p.mPromotePicture
+            if (rightIcon != null && (isPromotedPicture
                     || mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.S)) {
-                Drawable drawable = mN.mLargeIcon.loadDrawable(mContext);
+                Drawable drawable = rightIcon.loadDrawable(mContext);
                 if (drawable != null) {
                     int iconWidth = drawable.getIntrinsicWidth();
                     int iconHeight = drawable.getIntrinsicHeight();
@@ -5338,7 +5337,7 @@ public class Notification implements Parcelable
                 }
             }
             final float extraMarginEndDpIfVisible = viewWidthDp + iconMarginDp;
-            result.setRightIconState(largeIconShown, viewWidthDp,
+            result.setRightIconState(rightIcon != null /* visible */, viewWidthDp,
                     extraMarginEndDpIfVisible, expanderSizeDp);
         }
 
@@ -5350,19 +5349,43 @@ public class Notification implements Parcelable
             if (mN.mLargeIcon == null && mN.largeIcon != null) {
                 mN.mLargeIcon = Icon.createWithBitmap(mN.largeIcon);
             }
-            boolean showLargeIcon = mN.mLargeIcon != null && !p.hideLargeIcon;
-            calculateLargeIconDimens(showLargeIcon, p, result);
-            if (showLargeIcon) {
+
+            // Determine the left and right icons
+            Icon leftIcon = p.mHideLeftIcon ? null : mN.mLargeIcon;
+            Icon rightIcon = p.mHideRightIcon ? null
+                    : (p.mPromotedPicture != null ? p.mPromotedPicture : mN.mLargeIcon);
+
+            // Apply the left icon (without duplicating the bitmap)
+            if (leftIcon != rightIcon || leftIcon == null) {
+                // If the leftIcon is explicitly hidden or different from the rightIcon, then set it
+                // explicitly and make sure it won't take the right_icon drawable.
+                contentView.setImageViewIcon(R.id.left_icon, leftIcon);
+                contentView.setIntTag(R.id.left_icon, R.id.tag_uses_right_icon_drawable, 0);
+            } else {
+                // If the leftIcon equals the rightIcon, just set the flag to use the right_icon
+                // drawable.  This avoids the view having two copies of the same bitmap.
+                contentView.setIntTag(R.id.left_icon, R.id.tag_uses_right_icon_drawable, 1);
+            }
+
+            // Always calculate dimens to populate `result` for the GONE case
+            boolean isPromotedPicture = p.mPromotedPicture != null;
+            calculateRightIconDimens(rightIcon, isPromotedPicture, result);
+
+            // Bind the right icon
+            if (rightIcon != null) {
                 contentView.setViewLayoutWidth(R.id.right_icon,
                         result.mRightIconWidthDp, TypedValue.COMPLEX_UNIT_DIP);
                 contentView.setViewVisibility(R.id.right_icon, View.VISIBLE);
-                contentView.setImageViewIcon(R.id.right_icon, mN.mLargeIcon);
-                processLargeLegacyIcon(mN.mLargeIcon, contentView, p);
+                contentView.setImageViewIcon(R.id.right_icon, rightIcon);
+                contentView.setIntTag(R.id.right_icon, R.id.tag_keep_when_showing_left_icon,
+                        isPromotedPicture ? 1 : 0);
+                processLargeLegacyIcon(rightIcon, contentView, p);
             } else {
                 // The "reset" doesn't clear the drawable, so we do it here.  This clear is
                 // important because the presence of a drawable in this view (regardless of the
                 // visibility) is used by NotificationGroupingUtil to set the visibility.
                 contentView.setImageViewIcon(R.id.right_icon, null);
+                contentView.setIntTag(R.id.right_icon, R.id.tag_keep_when_showing_left_icon, 0);
             }
         }
 
@@ -7400,25 +7423,11 @@ public class Notification implements Parcelable
                 return super.makeContentView(increasedHeight);
             }
 
-            Icon oldLargeIcon = mBuilder.mN.mLargeIcon;
-            mBuilder.mN.mLargeIcon = mPictureIcon;
-            // The legacy largeIcon might not allow us to clear the image, as it's taken in
-            // replacement if the other one is null. Because we're restoring these legacy icons
-            // for old listeners, this is in general non-null.
-            Bitmap largeIconLegacy = mBuilder.mN.largeIcon;
-            mBuilder.mN.largeIcon = null;
-
             StandardTemplateParams p = mBuilder.mParams.reset()
                     .viewType(StandardTemplateParams.VIEW_TYPE_NORMAL)
                     .fillTextsFrom(mBuilder)
-                    .promotePicture(true);
-            RemoteViews contentView = getStandardView(mBuilder.getBaseLayoutResource(),
-                    p, null /* result */);
-
-            mBuilder.mN.mLargeIcon = oldLargeIcon;
-            mBuilder.mN.largeIcon = largeIconLegacy;
-
-            return contentView;
+                    .promotedPicture(mPictureIcon);
+            return getStandardView(mBuilder.getBaseLayoutResource(), p, null /* result */);
         }
 
         /**
@@ -7430,25 +7439,11 @@ public class Notification implements Parcelable
                 return super.makeHeadsUpContentView(increasedHeight);
             }
 
-            Icon oldLargeIcon = mBuilder.mN.mLargeIcon;
-            mBuilder.mN.mLargeIcon = mPictureIcon;
-            // The legacy largeIcon might not allow us to clear the image, as it's taken in
-            // replacement if the other one is null. Because we're restoring these legacy icons
-            // for old listeners, this is in general non-null.
-            Bitmap largeIconLegacy = mBuilder.mN.largeIcon;
-            mBuilder.mN.largeIcon = null;
-
             StandardTemplateParams p = mBuilder.mParams.reset()
                     .viewType(StandardTemplateParams.VIEW_TYPE_HEADS_UP)
                     .fillTextsFrom(mBuilder)
-                    .promotePicture(true);
-            RemoteViews contentView = getStandardView(mBuilder.getHeadsUpBaseLayoutResource(),
-                    p, null /* result */);
-
-            mBuilder.mN.mLargeIcon = oldLargeIcon;
-            mBuilder.mN.largeIcon = largeIconLegacy;
-
-            return contentView;
+                    .promotedPicture(mPictureIcon);
+            return getStandardView(mBuilder.getHeadsUpBaseLayoutResource(), p, null /* result */);
         }
 
         /**
@@ -7543,14 +7538,21 @@ public class Notification implements Parcelable
 
             mShowBigPictureWhenCollapsed = extras.getBoolean(EXTRA_SHOW_BIG_PICTURE_WHEN_COLLAPSED);
 
+            mPictureIcon = getPictureIcon(extras);
+        }
+
+        /** @hide */
+        @Nullable
+        public static Icon getPictureIcon(@Nullable Bundle extras) {
+            if (extras == null) return null;
             // When this style adds a picture, we only add one of the keys.  If both were added,
             // it would most likely be a legacy app trying to override the picture in some way.
             // Because of that case it's better to give precedence to the legacy field.
             Bitmap bitmapPicture = extras.getParcelable(EXTRA_PICTURE);
             if (bitmapPicture != null) {
-                mPictureIcon = Icon.createWithBitmap(bitmapPicture);
+                return Icon.createWithBitmap(bitmapPicture);
             } else {
-                mPictureIcon = extras.getParcelable(EXTRA_PICTURE_ICON);
+                return extras.getParcelable(EXTRA_PICTURE_ICON);
             }
         }
 
@@ -8326,7 +8328,8 @@ public class Notification implements Parcelable
                     .hideProgress(true)
                     .title(isHeaderless ? conversationTitle : null)
                     .text(null)
-                    .hideLargeIcon(hideRightIcons || isOneToOne)
+                    .hideLeftIcon(isOneToOne)
+                    .hideRightIcon(hideRightIcons || isOneToOne)
                     .headerTextSecondary(isHeaderless ? null : conversationTitle);
             RemoteViews contentView = mBuilder.applyStandardTemplateWithActions(
                     isConversationLayout
@@ -9124,9 +9127,10 @@ public class Notification implements Parcelable
 
             StandardTemplateParams p = mBuilder.mParams.reset()
                     .viewType(StandardTemplateParams.VIEW_TYPE_NORMAL)
-                    .hideTime(numActionsToShow > 1)    // hide if actions wider than a large icon
-                    .hideSubText(numActionsToShow > 1) // hide if actions wider than a large icon
-                    .hideLargeIcon(numActionsToShow > 0)  // large icon or actions; not both
+                    .hideTime(numActionsToShow > 1)       // hide if actions wider than a right icon
+                    .hideSubText(numActionsToShow > 1)    // hide if actions wider than a right icon
+                    .hideLeftIcon(false)                  // allow large icon on left when grouped
+                    .hideRightIcon(numActionsToShow > 0)  // right icon or actions; not both
                     .hideProgress(true)
                     .fillTextsFrom(mBuilder);
             TemplateBindResult result = new TemplateBindResult();
@@ -9530,7 +9534,8 @@ public class Notification implements Parcelable
                     .viewType(viewType)
                     .callStyleActions(true)
                     .allowTextWithProgress(true)
-                    .hideLargeIcon(true)
+                    .hideLeftIcon(true)
+                    .hideRightIcon(true)
                     .hideAppName(isCollapsed)
                     .titleViewId(R.id.conversation_text)
                     .title(title)
@@ -12240,7 +12245,9 @@ public class Notification implements Parcelable
         boolean mHideActions;
         boolean mHideProgress;
         boolean mHideSnoozeButton;
-        boolean mPromotePicture;
+        boolean mHideLeftIcon;
+        boolean mHideRightIcon;
+        Icon mPromotedPicture;
         boolean mCallStyleActions;
         boolean mAllowTextWithProgress;
         int mTitleViewId;
@@ -12250,7 +12257,6 @@ public class Notification implements Parcelable
         CharSequence headerTextSecondary;
         CharSequence summaryText;
         int maxRemoteInputHistory = Style.MAX_REMOTE_INPUT_HISTORY_LINES;
-        boolean hideLargeIcon;
         boolean allowColorization  = true;
         boolean mHighlightExpander = false;
 
@@ -12264,7 +12270,9 @@ public class Notification implements Parcelable
             mHideActions = false;
             mHideProgress = false;
             mHideSnoozeButton = false;
-            mPromotePicture = false;
+            mHideLeftIcon = false;
+            mHideRightIcon = false;
+            mPromotedPicture = null;
             mCallStyleActions = false;
             mAllowTextWithProgress = false;
             mTitleViewId = R.id.title;
@@ -12274,7 +12282,6 @@ public class Notification implements Parcelable
             summaryText = null;
             headerTextSecondary = null;
             maxRemoteInputHistory = Style.MAX_REMOTE_INPUT_HISTORY_LINES;
-            hideLargeIcon = false;
             allowColorization = true;
             mHighlightExpander = false;
             return this;
@@ -12339,8 +12346,8 @@ public class Notification implements Parcelable
             return this;
         }
 
-        final StandardTemplateParams promotePicture(boolean promotePicture) {
-            this.mPromotePicture = promotePicture;
+        final StandardTemplateParams promotedPicture(Icon promotedPicture) {
+            this.mPromotedPicture = promotedPicture;
             return this;
         }
 
@@ -12374,8 +12381,14 @@ public class Notification implements Parcelable
             return this;
         }
 
-        final StandardTemplateParams hideLargeIcon(boolean hideLargeIcon) {
-            this.hideLargeIcon = hideLargeIcon;
+
+        final StandardTemplateParams hideLeftIcon(boolean hideLeftIcon) {
+            this.mHideLeftIcon = hideLeftIcon;
+            return this;
+        }
+
+        final StandardTemplateParams hideRightIcon(boolean hideRightIcon) {
+            this.mHideRightIcon = hideRightIcon;
             return this;
         }
 
@@ -12412,7 +12425,8 @@ public class Notification implements Parcelable
             // Minimally decorated custom views do not show certain pieces of chrome that have
             // always been shown when using DecoratedCustomViewStyle.
             boolean hideOtherFields = decorationType <= DECORATION_MINIMAL;
-            hideLargeIcon(hideOtherFields);
+            hideLeftIcon(false);  // The left icon decoration is better than showing nothing.
+            hideRightIcon(hideOtherFields);
             hideProgress(hideOtherFields);
             hideActions(hideOtherFields);
             return this;
