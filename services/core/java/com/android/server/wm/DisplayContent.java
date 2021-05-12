@@ -724,6 +724,16 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             return false;
         }
 
+        // When switching the app task, we keep the IME window visibility for better
+        // transitioning experiences.
+        // However, in case IME created a child window without dismissing during the task
+        // switching to keep the window focus because IME window has higher window hierarchy,
+        // we don't give it focus if the next IME layering target doesn't request IME visible.
+        if (w.mIsImWindow && w.isChildWindow() && (mImeLayeringTarget == null
+                || !mImeLayeringTarget.getRequestedVisibility(ITYPE_IME))) {
+            return false;
+        }
+
         final ActivityRecord activity = w.mActivityRecord;
 
         if (focusedApp == null) {
