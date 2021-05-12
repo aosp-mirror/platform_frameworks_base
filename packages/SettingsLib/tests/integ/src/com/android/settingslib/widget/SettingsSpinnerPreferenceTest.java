@@ -89,4 +89,24 @@ public class SettingsSpinnerPreferenceTest {
         assertThat(mSpinnerPreference.getSelectedItem())
                 .isEqualTo(mSpinner.getAdapter().getItem(1));
     }
+
+    @Test
+    public void onBindViewHolder_setClickableTrue_isClickableTrue() {
+        mSpinnerPreference.setClickable(true);
+
+        mSpinnerPreference.onBindViewHolder(mViewHolder);
+
+        assertThat(mSpinner.isClickable()).isTrue();
+        assertThat(mSpinner.isEnabled()).isTrue();
+    }
+
+    @Test
+    public void onBindViewHolder_setClickableFalse_isClickableFalse() {
+        mSpinnerPreference.setClickable(false);
+
+        mSpinnerPreference.onBindViewHolder(mViewHolder);
+
+        assertThat(mSpinner.isClickable()).isFalse();
+        assertThat(mSpinner.isEnabled()).isFalse();
+    }
 }
