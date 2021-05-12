@@ -39,7 +39,6 @@ import android.telephony.SubscriptionManager.OnSubscriptionsChangedListener;
 import android.telephony.TelephonyManager;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.annotations.VisibleForTesting.Visibility;
@@ -222,12 +221,10 @@ public class TelephonySubscriptionTracker extends BroadcastReceiver {
         if (SubscriptionManager.isValidSubscriptionId(subId)) {
             final PersistableBundle carrierConfigs = mCarrierConfigManager.getConfigForSubId(subId);
             if (mDeps.isConfigForIdentifiedCarrier(carrierConfigs)) {
-                Slog.v(TAG, String.format("SubId %s ready for SlotId %s", subId, slotId));
                 mReadySubIdsBySlotId.put(slotId, subId);
                 handleSubscriptionsChanged();
             }
         } else {
-            Slog.v(TAG, "Slot unloaded: " + slotId);
             mReadySubIdsBySlotId.remove(slotId);
             handleSubscriptionsChanged();
         }
