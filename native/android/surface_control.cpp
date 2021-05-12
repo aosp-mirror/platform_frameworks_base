@@ -454,28 +454,7 @@ void ASurfaceTransaction_setGeometry(ASurfaceTransaction* aSurfaceTransaction,
         sourceRect.makeInvalid();
     }
     transaction->setBufferCrop(surfaceControl, sourceRect);
-
-    int destW = destRect.width();
-    int destH = destRect.height();
-    if (destRect.left < 0) {
-        destRect.left = 0;
-        destRect.right = destW;
-    }
-    if (destRect.top < 0) {
-        destRect.top = 0;
-        destRect.bottom = destH;
-    }
-
-    if (!sourceRect.isEmpty()) {
-        float sx = destW / static_cast<float>(sourceRect.width());
-        float sy = destH / static_cast<float>(sourceRect.height());
-        transaction->setPosition(surfaceControl, destRect.left - (sourceRect.left * sx),
-                                 destRect.top - (sourceRect.top * sy));
-        transaction->setMatrix(surfaceControl, sx, 0, 0, sy);
-    } else {
-        transaction->setPosition(surfaceControl, destRect.left, destRect.top);
-    }
-
+    transaction->setDestinationFrame(surfaceControl, destRect);
     transaction->setTransform(surfaceControl, transform);
     bool transformToInverseDisplay = (NATIVE_WINDOW_TRANSFORM_INVERSE_DISPLAY & transform) ==
             NATIVE_WINDOW_TRANSFORM_INVERSE_DISPLAY;
