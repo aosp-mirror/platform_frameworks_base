@@ -20,13 +20,10 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
-import android.text.TextPaint;
 import android.util.MathUtils;
 import android.view.View;
-import android.widget.TextView;
 
 import androidx.annotation.ColorInt;
-import androidx.core.content.ContextCompat;
 import androidx.core.graphics.ColorUtils;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -39,12 +36,10 @@ final class DotIndicatorDecoration extends RecyclerView.ItemDecoration {
     @ColorInt private final int mUnselectedColor;
     @ColorInt private final int mSelectedColor;
     private final Paint mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-    private final TextPaint mTextPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
     private WalletCardCarousel mCardCarousel;
 
     DotIndicatorDecoration(Context context) {
         super();
-
         mUnselectedRadius =
                 context.getResources().getDimensionPixelSize(
                         R.dimen.card_carousel_dot_unselected_radius);
@@ -53,13 +48,8 @@ final class DotIndicatorDecoration extends RecyclerView.ItemDecoration {
                         R.dimen.card_carousel_dot_selected_radius);
         mDotMargin = context.getResources().getDimensionPixelSize(R.dimen.card_carousel_dot_margin);
 
-        TextView textView = new TextView(context);
-        mTextPaint.set(textView.getPaint());
-        // Text color is not copied from text appearance.
-        mTextPaint.setColor(ContextCompat.getColor(context, R.color.GM2_blue_600));
-
-        mUnselectedColor = ContextCompat.getColor(context, R.color.GM2_grey_300);
-        mSelectedColor = ContextCompat.getColor(context, R.color.GM2_blue_600);
+        mUnselectedColor = context.getColor(com.android.internal.R.color.system_neutral1_300);
+        mSelectedColor = context.getColor(com.android.internal.R.color.system_neutral1_0);
     }
 
     @Override
@@ -107,9 +97,9 @@ final class DotIndicatorDecoration extends RecyclerView.ItemDecoration {
             int i = isLayoutLtr() ? itemsDrawn : itemCount - itemsDrawn - 1;
 
             if (isSelectedItem(i)) {
-                drawSelectedDot(canvas, interpolatedProgress, i);
+                drawSelectedDot(canvas, interpolatedProgress);
             } else if (isNextItemInScrollingDirection(i)) {
-                drawFadingUnselectedDot(canvas, interpolatedProgress, i);
+                drawFadingUnselectedDot(canvas, interpolatedProgress);
             } else {
                 drawUnselectedDot(canvas);
             }
@@ -121,7 +111,7 @@ final class DotIndicatorDecoration extends RecyclerView.ItemDecoration {
         this.mCardCarousel = null; // No need to hold a reference.
     }
 
-    private void drawSelectedDot(Canvas canvas, float progress, int position) {
+    private void drawSelectedDot(Canvas canvas, float progress) {
         // Divide progress by 2 because the other half of the animation is done by
         // drawFadingUnselectedDot.
         mPaint.setColor(
@@ -132,13 +122,13 @@ final class DotIndicatorDecoration extends RecyclerView.ItemDecoration {
         canvas.translate(radius * 2, 0);
     }
 
-    private void drawFadingUnselectedDot(Canvas canvas, float progress, int position) {
+    private void drawFadingUnselectedDot(Canvas canvas, float progress) {
         // Divide progress by 2 because the first half of the animation is done by drawSelectedDot.
         int blendedColor =
                 ColorUtils.blendARGB(
                         mUnselectedColor, mSelectedColor, progress / 2);
         mPaint.setColor(getTransitionAdjustedColor(blendedColor));
-        float radius = MathUtils.lerp(mSelectedRadius, mUnselectedRadius, progress / 2);
+        float radius = MathUtils.lerp(mUnselectedRadius, mSelectedColor, progress / 2);
         canvas.drawCircle(radius, 0, radius, mPaint);
         canvas.translate(radius * 2, 0);
     }

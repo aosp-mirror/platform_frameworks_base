@@ -37,6 +37,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.settingslib.Utils;
 import com.android.systemui.R;
 
 import java.util.List;
@@ -100,7 +101,7 @@ public class WalletView extends FrameLayout implements WalletCardCarousel.OnCard
     public void onCardScroll(WalletCardViewInfo centerCard, WalletCardViewInfo nextCard,
             float percentDistanceFromCenter) {
         CharSequence centerCardText = getLabelText(centerCard);
-        Drawable centerCardIcon = centerCard.getIcon();
+        Drawable centerCardIcon = getHeaderIcon(mContext, centerCard);
         if (!TextUtils.equals(mCenterCardText, centerCardText)) {
             mCenterCardText = centerCardText;
             mCardLabel.setText(centerCardText);
@@ -221,9 +222,25 @@ public class WalletView extends FrameLayout implements WalletCardCarousel.OnCard
     }
 
     private void renderHeaderIconAndActionButton(WalletCardViewInfo walletCard, boolean isLocked) {
-        mIcon.setImageDrawable(walletCard.getIcon());
-        mIcon.setVisibility(VISIBLE);
+        Drawable icon = getHeaderIcon(mContext, walletCard);
+        if (icon != null) {
+            mIcon.setImageDrawable(walletCard.getIcon());
+            mIcon.setVisibility(VISIBLE);
+        } else {
+            mIcon.setVisibility(INVISIBLE);
+        }
         renderActionButton(walletCard, isLocked);
+    }
+
+    @Nullable
+    private static Drawable getHeaderIcon(Context context, WalletCardViewInfo walletCard) {
+        Drawable icon = walletCard.getIcon();
+        if (icon != null) {
+            icon.setTint(
+                    Utils.getColorAttrDefaultColor(
+                            context, com.android.internal.R.attr.colorAccentPrimary));
+        }
+        return icon;
     }
 
     private void renderActionButton(WalletCardViewInfo walletCard, boolean isDeviceLocked) {
