@@ -15,7 +15,7 @@
   ~ limitations under the License.
   -->
 <ripple xmlns:android="http://schemas.android.com/apk/res/android"
-    android:color="?android:attr/colorControlHighlight">
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android">
     <item android:id="@android:id/mask">
     <shape android:shape="rectangle">
         <solid android:color="#DADCE0" />
@@ -26,7 +26,7 @@
         <shape>
         <stroke
             android:width="1dp"
-            android:color="@color/GM2_grey_900" />
+            android:color="?androidprv:attr/colorAccentPrimary" />
         <corners android:radius="@dimen/wallet_empty_state_corner_radius" />
         </shape>
     </item>
