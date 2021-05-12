@@ -24,6 +24,7 @@ import android.os.UidBatteryConsumer;
 import android.os.UserHandle;
 import android.util.SparseArray;
 
+import java.io.PrintWriter;
 import java.util.List;
 import java.util.Locale;
 
@@ -157,6 +158,12 @@ public abstract class PowerCalculator {
         }
     }
 
+    /**
+     * Prints formatted amount of power in milli-amp-hours.
+     */
+    public static void printPowerMah(PrintWriter pw, double powerMah) {
+        pw.print(formatCharge(powerMah));
+    }
 
     /**
      * Converts charge in mAh to string.

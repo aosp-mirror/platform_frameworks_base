@@ -221,6 +221,16 @@ void AssetManager2::BuildDynamicRefTable() {
     for (auto iter2 = package_groups_.begin(); iter2 != package_groups_end; ++iter2) {
       iter2->dynamic_ref_table->addMapping(String16(package_name.c_str(), package_name.size()),
                                            iter->dynamic_ref_table->mAssignedPackageId);
+
+      // Add the alias resources to the dynamic reference table of every package group. Since
+      // staging aliases can only be defined by the framework package (which is not a shared
+      // library), the compile-time package id of the framework is the same across all packages
+      // that compile against the framework.
+      for (const auto& package : iter->packages_) {
+        for (const auto& entry : package.loaded_package_->GetAliasResourceIdMap()) {
+          iter2->dynamic_ref_table->addAlias(entry.first, entry.second);
+        }
+      }
     }
   }
 }

@@ -75,6 +75,8 @@ public class StatusBarShellCommand extends ShellCommand {
                     return runSendDisableFlag();
                 case "tracing":
                     return runTracing();
+                case "run-gc":
+                    return runGc();
                 // Handle everything that would be handled in `handleDefaultCommand()` explicitly,
                 // so the default can be to pass all args to StatusBar
                 case "-h":
@@ -210,6 +212,11 @@ public class StatusBarShellCommand extends ShellCommand {
                 mInterface.stopTracing();
                 break;
         }
+        return 0;
+    }
+
+    private int runGc() {
+        mInterface.runGcForTest();
         return 0;
     }
 

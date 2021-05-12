@@ -20,8 +20,6 @@ import android.annotation.NonNull;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 
-import com.android.internal.util.Preconditions;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -102,15 +100,11 @@ public final class GetByDocumentIdRequest {
         return mTypePropertyPathsMap;
     }
 
-    /**
-     * Builder for {@link GetByDocumentIdRequest} objects.
-     *
-     * <p>Once {@link #build} is called, the instance can no longer be used.
-     */
+    /** Builder for {@link GetByDocumentIdRequest} objects. */
     public static final class Builder {
         private final String mNamespace;
-        private final Set<String> mIds = new ArraySet<>();
-        private final Map<String, List<String>> mProjectionTypePropertyPaths = new ArrayMap<>();
+        private ArraySet<String> mIds = new ArraySet<>();
+        private ArrayMap<String, List<String>> mProjectionTypePropertyPaths = new ArrayMap<>();
         private boolean mBuilt = false;
 
         /** Creates a {@link GetByDocumentIdRequest.Builder} instance. */
@@ -118,26 +112,19 @@ public final class GetByDocumentIdRequest {
             mNamespace = Objects.requireNonNull(namespace);
         }
 
-        /**
-         * Adds one or more document IDs to the request.
-         *
-         * @throws IllegalStateException if the builder has already been used.
-         */
+        /** Adds one or more document IDs to the request. */
         @NonNull
         public Builder addIds(@NonNull String... ids) {
             Objects.requireNonNull(ids);
+            resetIfBuilt();
             return addIds(Arrays.asList(ids));
         }
 
-        /**
-         * Adds a collection of IDs to the request.
-         *
-         * @throws IllegalStateException if the builder has already been used.
-         */
+        /** Adds a collection of IDs to the request. */
         @NonNull
         public Builder addIds(@NonNull Collection<String> ids) {
-            Preconditions.checkState(!mBuilt, "Builder has already been used");
             Objects.requireNonNull(ids);
+            resetIfBuilt();
             mIds.addAll(ids);
             return this;
         }
@@ -156,15 +143,14 @@ public final class GetByDocumentIdRequest {
          * apply to all results, excepting any types that have their own, specific property paths
          * set.
          *
-         * @throws IllegalStateException if the builder has already been used.
          * @see SearchSpec.Builder#addProjection
          */
         @NonNull
         public Builder addProjection(
                 @NonNull String schemaType, @NonNull Collection<String> propertyPaths) {
-            Preconditions.checkState(!mBuilt, "Builder has already been used");
             Objects.requireNonNull(schemaType);
             Objects.requireNonNull(propertyPaths);
+            resetIfBuilt();
             List<String> propertyPathsList = new ArrayList<>(propertyPaths.size());
             for (String propertyPath : propertyPaths) {
                 Objects.requireNonNull(propertyPath);
@@ -174,16 +160,23 @@ public final class GetByDocumentIdRequest {
             return this;
         }
 
-        /**
-         * Builds a new {@link GetByDocumentIdRequest}.
-         *
-         * @throws IllegalStateException if the builder has already been used.
-         */
+        /** Builds a new {@link GetByDocumentIdRequest}. */
         @NonNull
         public GetByDocumentIdRequest build() {
-            Preconditions.checkState(!mBuilt, "Builder has already been used");
             mBuilt = true;
-            return new GetByDocumentIdRequest(mNamespace, mIds, mProjectionTypePropertyPaths);
+            return new GetByDocumentIdRequest(
+                    mNamespace, new ArraySet<>(mIds), new ArrayMap<>(mProjectionTypePropertyPaths));
+        }
+
+        private void resetIfBuilt() {
+            if (mBuilt) {
+                mIds = new ArraySet<>(mIds);
+                // No need to clone each propertyPathsList inside mProjectionTypePropertyPaths since
+                // the builder only replaces it, never adds to it. So even if the builder is used
+                // again, the previous one will remain with the object.
+                mProjectionTypePropertyPaths = new ArrayMap<>(mProjectionTypePropertyPaths);
+                mBuilt = false;
+            }
         }
     }
 }

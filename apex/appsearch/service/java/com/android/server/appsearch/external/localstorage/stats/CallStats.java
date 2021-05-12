@@ -43,13 +43,16 @@ public class CallStats {
                 CALL_TYPE_SET_SCHEMA,
                 CALL_TYPE_PUT_DOCUMENTS,
                 CALL_TYPE_GET_DOCUMENTS,
-                CALL_TYPE_REMOVE_DOCUMENTS,
+                CALL_TYPE_REMOVE_DOCUMENTS_BY_ID,
                 CALL_TYPE_PUT_DOCUMENT,
                 CALL_TYPE_GET_DOCUMENT,
-                CALL_TYPE_REMOVE_DOCUMENT,
-                CALL_TYPE_QUERY,
+                CALL_TYPE_REMOVE_DOCUMENT_BY_ID,
+                CALL_TYPE_SEARCH,
                 CALL_TYPE_OPTIMIZE,
                 CALL_TYPE_FLUSH,
+                CALL_TYPE_GLOBAL_SEARCH,
+                CALL_TYPE_REMOVE_DOCUMENTS_BY_SEARCH,
+                CALL_TYPE_REMOVE_DOCUMENT_BY_SEARCH,
             })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CallType {}
@@ -59,13 +62,16 @@ public class CallStats {
     public static final int CALL_TYPE_SET_SCHEMA = 2;
     public static final int CALL_TYPE_PUT_DOCUMENTS = 3;
     public static final int CALL_TYPE_GET_DOCUMENTS = 4;
-    public static final int CALL_TYPE_REMOVE_DOCUMENTS = 5;
+    public static final int CALL_TYPE_REMOVE_DOCUMENTS_BY_ID = 5;
     public static final int CALL_TYPE_PUT_DOCUMENT = 6;
     public static final int CALL_TYPE_GET_DOCUMENT = 7;
-    public static final int CALL_TYPE_REMOVE_DOCUMENT = 8;
-    public static final int CALL_TYPE_QUERY = 9;
+    public static final int CALL_TYPE_REMOVE_DOCUMENT_BY_ID = 8;
+    public static final int CALL_TYPE_SEARCH = 9;
     public static final int CALL_TYPE_OPTIMIZE = 10;
     public static final int CALL_TYPE_FLUSH = 11;
+    public static final int CALL_TYPE_GLOBAL_SEARCH = 12;
+    public static final int CALL_TYPE_REMOVE_DOCUMENTS_BY_SEARCH = 13;
+    public static final int CALL_TYPE_REMOVE_DOCUMENT_BY_SEARCH = 14;
 
     @NonNull private final GeneralStats mGeneralStats;
     @CallType private final int mCallType;

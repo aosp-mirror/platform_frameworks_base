@@ -24711,32 +24711,37 @@ package android.media.metrics {
     method @IntRange(from=java.lang.Integer.MIN_VALUE, to=java.lang.Integer.MAX_VALUE) public int getSubErrorCode();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.media.metrics.PlaybackErrorEvent> CREATOR;
-    field public static final int ERROR_AUDIOTRACK_INIT = 17; // 0x11
-    field public static final int ERROR_AUDIOTRACK_OTHER = 19; // 0x13
-    field public static final int ERROR_AUDIOTRACK_WRITE = 18; // 0x12
-    field public static final int ERROR_DECODER_DECODE = 14; // 0xe
-    field public static final int ERROR_DECODER_INIT = 13; // 0xd
-    field public static final int ERROR_DECODER_OOM = 15; // 0xf
-    field public static final int ERROR_DECODER_OTHER = 16; // 0x10
+    field public static final int ERROR_AUDIO_TRACK_INIT_FAILED = 17; // 0x11
+    field public static final int ERROR_AUDIO_TRACK_OTHER = 19; // 0x13
+    field public static final int ERROR_AUDIO_TRACK_WRITE_FAILED = 18; // 0x12
+    field public static final int ERROR_DECODER_INIT_FAILED = 13; // 0xd
+    field public static final int ERROR_DECODING_FAILED = 14; // 0xe
+    field public static final int ERROR_DECODING_FORMAT_EXCEEDS_CAPABILITIES = 15; // 0xf
+    field public static final int ERROR_DECODING_FORMAT_UNSUPPORTED = 35; // 0x23
+    field public static final int ERROR_DECODING_OTHER = 16; // 0x10
     field public static final int ERROR_DRM_CONTENT_ERROR = 28; // 0x1c
-    field public static final int ERROR_DRM_DISALLOWED = 26; // 0x1a
-    field public static final int ERROR_DRM_LICENSE_ERROR = 25; // 0x19
+    field public static final int ERROR_DRM_DEVICE_REVOKED = 29; // 0x1d
+    field public static final int ERROR_DRM_DISALLOWED_OPERATION = 26; // 0x1a
+    field public static final int ERROR_DRM_LICENSE_ACQUISITION_FAILED = 25; // 0x19
     field public static final int ERROR_DRM_OTHER = 30; // 0x1e
     field public static final int ERROR_DRM_PROVISIONING_FAILED = 24; // 0x18
-    field public static final int ERROR_DRM_REVOKED = 29; // 0x1d
+    field public static final int ERROR_DRM_SCHEME_UNSUPPORTED = 23; // 0x17
     field public static final int ERROR_DRM_SYSTEM_ERROR = 27; // 0x1b
-    field public static final int ERROR_DRM_UNAVAILABLE = 23; // 0x17
-    field public static final int ERROR_MEDIA_MANIFEST = 10; // 0xa
-    field public static final int ERROR_MEDIA_OTHER = 12; // 0xc
-    field public static final int ERROR_MEDIA_PARSER = 11; // 0xb
-    field public static final int ERROR_NETWORK_BAD_STATUS = 5; // 0x5
-    field public static final int ERROR_NETWORK_CLOSED = 8; // 0x8
-    field public static final int ERROR_NETWORK_CONNECT = 4; // 0x4
-    field public static final int ERROR_NETWORK_DNS = 6; // 0x6
-    field public static final int ERROR_NETWORK_OFFLINE = 3; // 0x3
-    field public static final int ERROR_NETWORK_OTHER = 9; // 0x9
-    field public static final int ERROR_NETWORK_TIMEOUT = 7; // 0x7
+    field public static final int ERROR_IO_BAD_HTTP_STATUS = 5; // 0x5
+    field public static final int ERROR_IO_CONNECTION_CLOSED = 8; // 0x8
+    field public static final int ERROR_IO_CONNECTION_TIMEOUT = 7; // 0x7
+    field public static final int ERROR_IO_DNS_FAILED = 6; // 0x6
+    field public static final int ERROR_IO_FILE_NOT_FOUND = 31; // 0x1f
+    field public static final int ERROR_IO_NETWORK_CONNECTION_FAILED = 4; // 0x4
+    field public static final int ERROR_IO_NETWORK_UNAVAILABLE = 3; // 0x3
+    field public static final int ERROR_IO_NO_PERMISSION = 32; // 0x20
+    field public static final int ERROR_IO_OTHER = 9; // 0x9
     field public static final int ERROR_OTHER = 1; // 0x1
+    field public static final int ERROR_PARSING_CONTAINER_MALFORMED = 11; // 0xb
+    field public static final int ERROR_PARSING_CONTAINER_UNSUPPORTED = 34; // 0x22
+    field public static final int ERROR_PARSING_MANIFEST_MALFORMED = 10; // 0xa
+    field public static final int ERROR_PARSING_MANIFEST_UNSUPPORTED = 33; // 0x21
+    field public static final int ERROR_PARSING_OTHER = 12; // 0xc
     field public static final int ERROR_PLAYER_BEHIND_LIVE_WINDOW = 21; // 0x15
     field public static final int ERROR_PLAYER_OTHER = 22; // 0x16
     field public static final int ERROR_PLAYER_REMOTE = 20; // 0x14
@@ -46809,6 +46814,11 @@ package android.view {
     method public void onActionProviderVisibilityChanged(boolean);
   }
 
+  @UiThread public interface AttachedSurfaceControl {
+    method public boolean applyTransactionOnDraw(@NonNull android.view.SurfaceControl.Transaction);
+    method @Nullable public android.view.SurfaceControl.Transaction buildReparentTransaction(@NonNull android.view.SurfaceControl);
+  }
+
   public final class Choreographer {
     method public static android.view.Choreographer getInstance();
     method public void postFrameCallback(android.view.Choreographer.FrameCallback);
@@ -48709,6 +48719,7 @@ package android.view {
     method public final int getRight();
     method protected float getRightFadingEdgeStrength();
     method protected int getRightPaddingOffset();
+    method @Nullable public android.view.AttachedSurfaceControl getRootSurfaceControl();
     method public android.view.View getRootView();
     method public android.view.WindowInsets getRootWindowInsets();
     method public float getRotation();
@@ -48753,7 +48764,6 @@ package android.view {
     method @Nullable public android.graphics.drawable.Drawable getVerticalScrollbarThumbDrawable();
     method @Nullable public android.graphics.drawable.Drawable getVerticalScrollbarTrackDrawable();
     method public int getVerticalScrollbarWidth();
-    method @Nullable public android.view.ViewRoot getViewRoot();
     method @Nullable public android.view.translation.ViewTranslationResponse getViewTranslationResponse();
     method public android.view.ViewTreeObserver getViewTreeObserver();
     method public int getVisibility();
@@ -49829,11 +49839,6 @@ package android.view {
     method public android.view.ViewPropertyAnimator zBy(float);
   }
 
-  @UiThread public interface ViewRoot {
-    method public boolean applyTransactionOnDraw(@NonNull android.view.SurfaceControl.Transaction);
-    method @Nullable public android.view.SurfaceControl.Transaction buildReparentTransaction(@NonNull android.view.SurfaceControl);
-  }
-
   public abstract class ViewStructure {
     ctor public ViewStructure();
     method public abstract int addChildCount(int);
@@ -50020,6 +50025,7 @@ package android.view {
     method @ColorInt public int getNavigationBarDividerColor();
     method public android.transition.Transition getReenterTransition();
     method public android.transition.Transition getReturnTransition();
+    method @Nullable public android.view.AttachedSurfaceControl getRootSurfaceControl();
     method public android.transition.Transition getSharedElementEnterTransition();
     method public android.transition.Transition getSharedElementExitTransition();
     method public android.transition.Transition getSharedElementReenterTransition();
@@ -50029,7 +50035,6 @@ package android.view {
     method @NonNull public java.util.List<android.graphics.Rect> getSystemGestureExclusionRects();
     method public long getTransitionBackgroundFadeDuration();
     method public android.transition.TransitionManager getTransitionManager();
-    method @Nullable public android.view.ViewRoot getViewRoot();
     method public abstract int getVolumeControlStream();
     method public android.view.WindowManager getWindowManager();
     method public final android.content.res.TypedArray getWindowStyle();
@@ -52983,7 +52988,7 @@ package android.view.translation {
     method @NonNull public android.view.translation.TranslationRequestValue getValue(@NonNull String);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.view.translation.ViewTranslationRequest> CREATOR;
-    field public static final String ID_TEXT = "text";
+    field public static final String ID_TEXT = "android:text";
   }
 
   public static final class ViewTranslationRequest.Builder {
