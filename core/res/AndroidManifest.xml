@@ -5782,6 +5782,11 @@
     <permission android:name="android.permission.CAPTURE_BLACKOUT_CONTENT"
         android:protectionLevel="signature" />
 
+      <!-- @SystemApi Allows an application to query over global data in AppSearch.
+           @hide -->
+    <permission android:name="android.permission.READ_GLOBAL_APP_SEARCH_DATA"
+                android:protectionLevel="internal|role" />
+
     <!-- Attribution for Geofencing service. -->
     <attribution android:tag="GeofencingService" android:label="@string/geofencing_service"/>
     <!-- Attribution for Country Detector. -->
