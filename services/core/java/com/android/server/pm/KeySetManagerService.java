@@ -30,6 +30,7 @@ import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
 
 import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.utils.WatchedArrayMap;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -65,7 +66,7 @@ public class KeySetManagerService {
 
     protected final LongSparseArray<ArraySet<Long>> mKeySetMapping;
 
-    private final ArrayMap<String, PackageSetting> mPackages;
+    private final WatchedArrayMap<String, PackageSetting> mPackages;
 
     private long lastIssuedKeySetId = 0;
 
@@ -114,7 +115,7 @@ public class KeySetManagerService {
         }
     }
 
-    public KeySetManagerService(ArrayMap<String, PackageSetting> packages) {
+    public KeySetManagerService(WatchedArrayMap<String, PackageSetting> packages) {
         mKeySets = new LongSparseArray<KeySetHandle>();
         mPublicKeys = new LongSparseArray<PublicKeyHandle>();
         mKeySetMapping = new LongSparseArray<ArraySet<Long>>();

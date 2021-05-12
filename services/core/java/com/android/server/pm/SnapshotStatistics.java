@@ -23,6 +23,7 @@ import android.os.Message;
 import android.os.SystemClock;
 import android.text.TextUtils;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.server.EventLogTags;
 
 import java.io.PrintWriter;
@@ -239,6 +240,11 @@ public class SnapshotStatistics {
         public int mTotalUsed = 0;
 
         /**
+         * The total number of times a snapshot was bypassed because corking was in effect.
+         */
+        public int mTotalCorked = 0;
+
+        /**
          * The total number of builds that count as big, which means they took longer than
          * SNAPSHOT_BIG_BUILD_TIME_NS.
          */
@@ -291,6 +297,13 @@ public class SnapshotStatistics {
             }
         }
 
+        /**
+         * Record a cork.
+         */
+        private void corked() {
+            mTotalCorked++;
+        }
+
         private Stats(long now) {
             mStartTimeUs = now;
             mTimes = new int[mTimeBins.count()];
@@ -308,6 +321,7 @@ public class SnapshotStatistics {
             mUsed = Arrays.copyOf(orig.mUsed, orig.mUsed.length);
             mTotalBuilds = orig.mTotalBuilds;
             mTotalUsed = orig.mTotalUsed;
+            mTotalCorked = orig.mTotalCorked;
             mBigBuilds = orig.mBigBuilds;
             mShortLived = orig.mShortLived;
             mTotalTimeUs = orig.mTotalTimeUs;
@@ -365,6 +379,7 @@ public class SnapshotStatistics {
          * Dump the summary statistics record.  Choose the header or the data.
          *    number of builds
          *    number of uses
+         *    number of corks
          *    number of big builds
          *    number of short lifetimes
          *    cumulative build time, in seconds
@@ -373,13 +388,13 @@ public class SnapshotStatistics {
         private void dumpStats(PrintWriter pw, String indent, long now, boolean header) {
             dumpPrefix(pw, indent, now, header, "Summary stats");
             if (header) {
-                pw.format(Locale.US, "  %10s  %10s  %10s  %10s  %10s  %10s",
-                          "TotBlds", "TotUsed", "BigBlds", "ShortLvd",
+                pw.format(Locale.US, "  %10s  %10s  %10s  %10s  %10s  %10s  %10s",
+                          "TotBlds", "TotUsed", "TotCork", "BigBlds", "ShortLvd",
                           "TotTime", "MaxTime");
             } else {
                 pw.format(Locale.US,
-                        "  %10d  %10d  %10d  %10d  %10d  %10d",
-                        mTotalBuilds, mTotalUsed, mBigBuilds, mShortLived,
+                        "  %10d  %10d  %10d  %10d  %10d  %10d  %10d",
+                        mTotalBuilds, mTotalUsed, mTotalCorked, mBigBuilds, mShortLived,
                         mTotalTimeUs / 1000, mMaxBuildTimeUs / 1000);
             }
             pw.println();
@@ -516,7 +531,7 @@ public class SnapshotStatistics {
      * @param done The time at which the snapshot rebuild completed, in ns.
      * @param hits The number of times the previous snapshot was used.
      */
-    public void rebuild(long now, long done, int hits) {
+    public final void rebuild(long now, long done, int hits) {
         // The duration has a span of about 2000s
         final int duration = (int) (done - now);
         boolean reportEvent = false;
@@ -544,9 +559,20 @@ public class SnapshotStatistics {
     }
 
     /**
+     * Record a corked snapshot request.
+     */
+    public final void corked() {
+        synchronized (mLock) {
+            mShort[0].corked();
+            mLong[0].corked();
+        }
+    }
+
+    /**
      * Roll a stats array.  Shift the elements up an index and create a new element at
      * index zero.  The old element zero is completed with the specified time.
      */
+    @GuardedBy("mLock")
     private void shift(Stats[] s, long now) {
         s[0].complete(now);
         for (int i = s.length - 1; i > 0; i--) {
@@ -598,7 +624,8 @@ public class SnapshotStatistics {
      * Dump the statistics.  The format is compatible with the PackageManager dumpsys
      * output.
      */
-    public void dump(PrintWriter pw, String indent, long now, int unrecorded, boolean full) {
+    public void dump(PrintWriter pw, String indent, long now, int unrecorded,
+                     int corkLevel, boolean full) {
         // Grab the raw statistics under lock, but print them outside of the lock.
         Stats[] l;
         Stats[] s;
@@ -608,7 +635,8 @@ public class SnapshotStatistics {
             s = Arrays.copyOf(mShort, mShort.length);
             s[0] = new Stats(s[0]);
         }
-        pw.format(Locale.US, "%s Unrecorded hits %d", indent, unrecorded);
+        pw.format(Locale.US, "%s Unrecorded-hits: %d  Cork-level: %d", indent,
+                  unrecorded, corkLevel);
         pw.println();
         dump(pw, indent, now, l, s, "stats");
         if (!full) {
