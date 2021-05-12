@@ -488,6 +488,7 @@ public class SystemServicesTestRule implements TestRule {
             mLargeScreenSmallestScreenWidthDp = 600;
             mSupportsNonResizableMultiWindow = 0;
             mRespectsActivityMinWidthHeightMultiWindow = 0;
+            mForceResizableActivities = false;
 
             doReturn(mock(IPackageManager.class)).when(this).getPackageManager();
             // allow background activity starts by default
