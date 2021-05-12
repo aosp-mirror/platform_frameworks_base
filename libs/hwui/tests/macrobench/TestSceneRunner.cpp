@@ -162,6 +162,11 @@ static void doRun(const TestScene::Info& info, const TestScene::Options& opts, i
 
 void run(const TestScene::Info& info, const TestScene::Options& opts,
          benchmark::BenchmarkReporter* reporter) {
+    if (opts.reportGpuMemoryUsage) {
+        // If we're reporting GPU memory usage we need to first start with a clean slate
+        // All repetitions of the same test will share a single memory usage report
+        RenderProxy::trimMemory(100);
+    }
     BenchmarkResults results;
     for (int i = 0; i < opts.repeatCount; i++) {
         doRun(info, opts, i, reporter ? &results : nullptr);
@@ -171,5 +176,8 @@ void run(const TestScene::Info& info, const TestScene::Options& opts,
         if (results.size() > 1) {
             // TODO: Report summary
         }
+    }
+    if (opts.reportGpuMemoryUsage) {
+        RenderProxy::dumpGraphicsMemory(STDOUT_FILENO, false);
     }
 }
