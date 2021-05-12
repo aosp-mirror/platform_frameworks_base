@@ -9473,6 +9473,19 @@ public class NotificationManagerService extends SystemService {
             }
         }
 
+        @Override
+        protected void addApprovedList(String approved, int userId, boolean isPrimary,
+                String userSet) {
+            if (!TextUtils.isEmpty(approved)) {
+                String[] approvedArray = approved.split(ENABLED_SERVICES_SEPARATOR);
+                if (approvedArray.length > 1) {
+                    Slog.d(TAG, "More than one approved assistants");
+                    approved = approvedArray[0];
+                }
+            }
+            super.addApprovedList(approved, userId, isPrimary, userSet);
+        }
+
         public NotificationAssistants(Context context, Object lock, UserProfiles up,
                 IPackageManager pm) {
             super(context, lock, up, pm);
