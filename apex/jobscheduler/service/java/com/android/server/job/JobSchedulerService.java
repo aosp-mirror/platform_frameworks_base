@@ -2629,8 +2629,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                 }
             } catch (NameNotFoundException e) {
                 throw new IllegalArgumentException(
-                        "Tried to schedule job for non-existent package: "
-                                + service.getPackageName());
+                        "Tried to schedule job for non-existent component: " + service);
             }
         }
 

@@ -4775,8 +4775,7 @@ public abstract class PackageManager {
      * @param flags Additional option flags to modify the data returned.
      * @return A {@link ServiceInfo} object containing information about the
      *         service.
-     * @throws NameNotFoundException if a package with the given name cannot be
-     *             found on the system.
+     * @throws NameNotFoundException if the component cannot be found on the system.
      */
     @NonNull
     public abstract ServiceInfo getServiceInfo(@NonNull ComponentName component,
