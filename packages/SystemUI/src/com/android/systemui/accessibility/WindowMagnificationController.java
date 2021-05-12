@@ -16,9 +16,10 @@
 
 package com.android.systemui.accessibility;
 
+import static android.view.WindowInsets.Type.systemGestures;
 import static android.view.WindowManager.LayoutParams;
-import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_2BUTTON;
-import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
+
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_MAGNIFICATION_OVERLAP;
 
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
@@ -28,6 +29,7 @@ import android.annotation.UiContext;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Resources;
+import android.graphics.Insets;
 import android.graphics.Matrix;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
@@ -52,14 +54,17 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
+import android.view.WindowMetrics;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.systemui.R;
+import com.android.systemui.model.SysUiState;
 import com.android.systemui.shared.system.WindowManagerWrapper;
 
+import java.io.PrintWriter;
 import java.text.NumberFormat;
 import java.util.Locale;
 
@@ -111,6 +116,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     private final View.OnLayoutChangeListener mMirrorSurfaceViewLayoutChangeListener;
     private final Runnable mMirrorViewRunnable;
     private final Runnable mUpdateStateDescriptionRunnable;
+    private final Runnable mWindowInsetChangeRunnable;
     private View mMirrorView;
     private SurfaceView mMirrorSurfaceView;
     private int mMirrorSurfaceMargin;
@@ -119,9 +125,8 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     private int mOuterBorderSize;
     // The boundary of magnification frame.
     private final Rect mMagnificationFrameBoundary = new Rect();
-
-    private int mNavBarMode;
-    private int mNavGestureHeight;
+    // The top Y of the system gesture rect at the bottom. Set to -1 if it is invalid.
+    private int mSystemGestureTop = -1;
 
     private final SfVsyncFrameCallbackProvider mSfVsyncFrameProvider;
     private final MagnificationGestureDetector mGestureDetector;
@@ -130,6 +135,9 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     private Locale mLocale;
     private NumberFormat mPercentFormat;
     private float mBounceEffectAnimationScale;
+    private SysUiState mSysUiState;
+    // Set it to true when the view is overlapped with the gesture insets at the bottom.
+    private boolean mOverlapWithGestureInsets;
 
     @Nullable
     private MirrorWindowControl mMirrorWindowControl;
@@ -137,11 +145,12 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     WindowMagnificationController(@UiContext Context context, @NonNull Handler handler,
             SfVsyncFrameCallbackProvider sfVsyncFrameProvider,
             MirrorWindowControl mirrorWindowControl, SurfaceControl.Transaction transaction,
-            @NonNull WindowMagnifierCallback callback) {
+            @NonNull WindowMagnifierCallback callback, SysUiState sysUiState) {
         mContext = context;
         mHandler = handler;
         mSfVsyncFrameProvider = sfVsyncFrameProvider;
         mWindowMagnifierCallback = callback;
+        mSysUiState = sysUiState;
 
         final Display display = mContext.getDisplay();
         mDisplayId = mContext.getDisplayId();
@@ -170,13 +179,18 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         mMirrorViewRunnable = () -> {
             if (mMirrorView != null) {
                 mMirrorView.getBoundsOnScreen(mMirrorViewBounds);
+                updateSystemUIStateIfNeeded();
                 mWindowMagnifierCallback.onWindowMagnifierBoundsChanged(
                         mDisplayId, mMirrorViewBounds);
             }
         };
         mMirrorViewLayoutChangeListener =
-                (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) ->
+                (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+                    if (!mHandler.hasCallbacks(mMirrorViewRunnable)) {
                         mHandler.post(mMirrorViewRunnable);
+                    }
+                };
+
         mMirrorSurfaceViewLayoutChangeListener =
                 (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom)
                         -> applyTapExcludeRegion();
@@ -199,6 +213,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
                 mMirrorView.setStateDescription(formatStateDescription(mScale));
             }
         };
+        mWindowInsetChangeRunnable = this::onWindowInsetChanged;
     }
 
     private void updateDimensions() {
@@ -210,7 +225,6 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
                 R.dimen.magnification_drag_view_size);
         mOuterBorderSize = mResources.getDimensionPixelSize(
                 R.dimen.magnification_outer_border_margin);
-        updateNavigationBarDimensions();
     }
 
     private void computeBounceAnimationScale() {
@@ -220,16 +234,16 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         mBounceEffectAnimationScale = Math.min(animationScaleMax, ANIMATION_BOUNCE_EFFECT_SCALE);
     }
 
-    private void updateNavigationBarDimensions() {
-        if (!supportsSwipeUpGesture()) {
-            mNavGestureHeight = 0;
-            return;
+    private boolean updateSystemGestureInsetsTop() {
+        final WindowMetrics windowMetrics = mWm.getCurrentWindowMetrics();
+        final Insets insets = windowMetrics.getWindowInsets().getInsets(systemGestures());
+        final int gestureTop =
+                insets.bottom != 0 ? windowMetrics.getBounds().bottom - insets.bottom : -1;
+        if (gestureTop != mSystemGestureTop) {
+            mSystemGestureTop = gestureTop;
+            return true;
         }
-        mNavGestureHeight = (mWindowBounds.width() > mWindowBounds.height())
-                ? mResources.getDimensionPixelSize(
-                com.android.internal.R.dimen.navigation_bar_height_landscape)
-                : mResources.getDimensionPixelSize(
-                        com.android.internal.R.dimen.navigation_bar_gesture_height);
+        return false;
     }
 
     /**
@@ -255,6 +269,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         if (mMirrorWindowControl != null) {
             mMirrorWindowControl.destroyControl();
         }
+        updateSystemUIStateIfNeeded();
     }
 
     /**
@@ -277,18 +292,15 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         }
     }
 
+    private void updateSystemUIStateIfNeeded() {
+        updateSysUIState(false);
+    }
+
     private void updateAccessibilityWindowTitleIfNeeded() {
         if (!isWindowVisible()) return;
         LayoutParams params = (LayoutParams) mMirrorView.getLayoutParams();
         params.accessibilityTitle = getAccessibilityWindowTitle();
         mWm.updateViewLayout(mMirrorView, params);
-    }
-
-    /** Handles MirrorWindow position when the navigation bar mode changed. */
-    public void onNavigationModeChanged(int mode) {
-        mNavBarMode = mode;
-        updateNavigationBarDimensions();
-        updateMirrorViewLayout();
     }
 
     /** Handles MirrorWindow position when the device rotation changed. */
@@ -299,7 +311,6 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
 
         setMagnificationFrameBoundary();
         mRotation = display.getRotation();
-        updateNavigationBarDimensions();
 
         if (!isWindowVisible()) {
             return;
@@ -351,6 +362,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         params.x = mMagnificationFrame.left - mMirrorSurfaceMargin;
         params.y = mMagnificationFrame.top - mMirrorSurfaceMargin;
         params.layoutInDisplayCutoutMode = LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+        params.receiveInsetsIgnoringZOrder = true;
         params.setTitle(mContext.getString(R.string.magnification_window_title));
         params.accessibilityTitle = getAccessibilityWindowTitle();
 
@@ -368,6 +380,12 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
                 | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
         mMirrorView.addOnLayoutChangeListener(mMirrorViewLayoutChangeListener);
         mMirrorView.setAccessibilityDelegate(new MirrorWindowA11yDelegate());
+        mMirrorView.setOnApplyWindowInsetsListener((v, insets) -> {
+            if (!mHandler.hasCallbacks(mWindowInsetChangeRunnable)) {
+                mHandler.post(mWindowInsetChangeRunnable);
+            }
+            return v.onApplyWindowInsets(insets);
+        });
 
         mWm.addView(mMirrorView, params);
 
@@ -375,6 +393,12 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         holder.addCallback(this);
         holder.setFormat(PixelFormat.RGBA_8888);
         addDragTouchListeners();
+    }
+
+    private void onWindowInsetChanged() {
+        if (updateSystemGestureInsetsTop()) {
+            updateSystemUIStateIfNeeded();
+        }
     }
 
     private void applyTapExcludeRegion() {
@@ -464,17 +488,12 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
             return;
         }
         final int maxMirrorViewX = mWindowBounds.width() - mMirrorView.getWidth();
-        final int maxMirrorViewY =
-                mWindowBounds.height() - mMirrorView.getHeight() - mNavGestureHeight;
+        final int maxMirrorViewY = mWindowBounds.height() - mMirrorView.getHeight();
+
         LayoutParams params =
                 (LayoutParams) mMirrorView.getLayoutParams();
         params.x = mMagnificationFrame.left - mMirrorSurfaceMargin;
         params.y = mMagnificationFrame.top - mMirrorSurfaceMargin;
-        // If nav bar mode supports swipe-up gesture, the Y position of mirror view should not
-        // overlap nav bar window to prevent window-dragging obscured.
-        if (supportsSwipeUpGesture()) {
-            params.y = Math.min(params.y, maxMirrorViewY);
-        }
 
         // Translates MirrorView position to make MirrorSurfaceView that is inside MirrorView
         // able to move close to the screen edges.
@@ -506,6 +525,10 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
             return mGestureDetector.onTouch(event);
         }
         return false;
+    }
+
+    public void updateSysUIStateFlag() {
+        updateSysUIState(true);
     }
 
     /**
@@ -567,6 +590,16 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
             return true;
         }
         return false;
+    }
+
+    private void updateSysUIState(boolean force) {
+        final boolean overlap = isWindowVisible() && mSystemGestureTop > 0
+                && mMirrorViewBounds.bottom > mSystemGestureTop;
+        if (force || overlap != mOverlapWithGestureInsets) {
+            mOverlapWithGestureInsets = overlap;
+            mSysUiState.setFlag(SYSUI_STATE_MAGNIFICATION_OVERLAP, mOverlapWithGestureInsets)
+                    .commitUpdate(mDisplayId);
+        }
     }
 
     @Override
@@ -676,10 +709,6 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         return mMirrorView != null;
     }
 
-    private boolean supportsSwipeUpGesture() {
-        return mNavBarMode == NAV_BAR_MODE_2BUTTON || mNavBarMode == NAV_BAR_MODE_GESTURAL;
-    }
-
     private CharSequence formatStateDescription(float scale) {
         // Cache the locale-appropriate NumberFormat.  Configuration locale is guaranteed
         // non-null, so the first time this is called we will always get the appropriate
@@ -720,6 +749,14 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
                 PropertyValuesHolder.ofFloat(View.SCALE_Y, 1, mBounceEffectAnimationScale, 1));
         scaleAnimator.setDuration(mBounceEffectDuration);
         scaleAnimator.start();
+    }
+
+    public void dump(PrintWriter pw) {
+        pw.println("WindowMagnificationController (displayId=" + mDisplayId + "):");
+        pw.println("      mOverlapWithGestureInsets:" + mOverlapWithGestureInsets);
+        pw.println("      mScale:" + mScale);
+        pw.println("      mMirrorViewBounds:" + (isWindowVisible() ? mMirrorViewBounds : "empty"));
+        pw.println("      mSystemGestureTop:" + mSystemGestureTop);
     }
 
     private class MirrorWindowA11yDelegate extends View.AccessibilityDelegate {
