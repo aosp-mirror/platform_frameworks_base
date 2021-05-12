@@ -36,7 +36,7 @@ import com.android.systemui.R;
 public class UdfpsEnrollDrawable extends UdfpsDrawable {
     private static final String TAG = "UdfpsAnimationEnroll";
 
-    static final float PROGRESS_BAR_RADIUS = 180.f;
+    static final float PROGRESS_BAR_RADIUS = 360.f;
 
     @NonNull private final Drawable mMovingTargetFpIcon;
     @NonNull private final Paint mSensorOutlinePaint;
