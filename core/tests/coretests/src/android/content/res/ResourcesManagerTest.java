@@ -166,7 +166,7 @@ public class ResourcesManagerTest extends TestCase {
 
         Configuration newConfig = new Configuration();
         newConfig.orientation = Configuration.ORIENTATION_LANDSCAPE;
-        mResourcesManager.applyConfigurationToResourcesLocked(newConfig, null);
+        mResourcesManager.applyConfigurationToResources(newConfig, null);
 
         final Configuration expectedConfig = new Configuration();
         expectedConfig.setToDefaults();
