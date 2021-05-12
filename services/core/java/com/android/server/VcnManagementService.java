@@ -335,8 +335,8 @@ public class VcnManagementService extends IVcnManagementService.Stub {
                 @NonNull Context context,
                 @NonNull Looper looper,
                 @NonNull VcnNetworkProvider vcnNetworkProvider,
-                boolean getIsInTestMode) {
-            return new VcnContext(context, looper, vcnNetworkProvider, getIsInTestMode);
+                boolean isInTestMode) {
+            return new VcnContext(context, looper, vcnNetworkProvider, isInTestMode);
         }
 
         /** Creates a new Vcn instance using the provided configuration */
