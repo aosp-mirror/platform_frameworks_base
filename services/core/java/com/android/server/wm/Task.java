@@ -1854,12 +1854,16 @@ class Task extends WindowContainer<WindowContainer> {
         return autoRemoveRecents || (!hasChild() && !getHasBeenVisible());
     }
 
-    /** Completely remove all activities associated with an existing task. */
-    void performClearTask(String reason) {
+    private void clearPinnedTaskIfNeed() {
         // The original task is to be removed, try remove also the pinned task.
         if (mChildPipActivity != null && mChildPipActivity.getTask() != null) {
             mTaskSupervisor.removeRootTask(mChildPipActivity.getTask());
         }
+    }
+
+    /** Completely remove all activities associated with an existing task. */
+    void performClearTask(String reason) {
+        clearPinnedTaskIfNeed();
         // Broken down into to cases to avoid object create due to capturing mStack.
         if (getRootTask() == null) {
             forAllActivities((r) -> {
@@ -3246,7 +3250,7 @@ class Task extends WindowContainer<WindowContainer> {
         mRemoving = true;
 
         EventLogTags.writeWmTaskRemoved(mTaskId, reason);
-
+        clearPinnedTaskIfNeed();
         // If applicable let the TaskOrganizer know the Task is vanishing.
         setTaskOrganizer(null);
 
@@ -5449,10 +5453,12 @@ class Task extends WindowContainer<WindowContainer> {
                     // force hidden flag.
                     if (!isForceHidden()) {
                         final Task lastParentBeforePip = topActivity.getLastParentBeforePip();
-                        topActivity.reparent(lastParentBeforePip,
-                                lastParentBeforePip.getChildCount() /* top */,
-                                "movePinnedActivityToOriginalTask");
-                        lastParentBeforePip.moveToFront("movePinnedActivityToOriginalTask");
+                        if (lastParentBeforePip.isAttached()) {
+                            topActivity.reparent(lastParentBeforePip,
+                                    lastParentBeforePip.getChildCount() /* top */,
+                                    "movePinnedActivityToOriginalTask");
+                            lastParentBeforePip.moveToFront("movePinnedActivityToOriginalTask");
+                        }
                     }
                 }
             }
