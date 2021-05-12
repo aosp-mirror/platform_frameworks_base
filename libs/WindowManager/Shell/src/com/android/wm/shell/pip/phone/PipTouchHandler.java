@@ -614,7 +614,7 @@ public class PipTouchHandler {
             }
         }
 
-        shouldDeliverToMenu |= !mPipBoundsState.isStashed();
+        shouldDeliverToMenu &= !mPipBoundsState.isStashed();
 
         // Deliver the event to PipMenuActivity to handle button click if the menu has shown.
         if (shouldDeliverToMenu) {
