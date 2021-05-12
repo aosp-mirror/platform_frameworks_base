@@ -92,4 +92,8 @@ public class FeatureFlags {
     public boolean isSmartspaceEnabled() {
         return mFlagReader.isEnabled(R.bool.flag_smartspace);
     }
+
+    public boolean isSmartspaceDedupingEnabled() {
+        return isSmartspaceEnabled() && mFlagReader.isEnabled(R.bool.flag_smartspace_deduping);
+    }
 }
