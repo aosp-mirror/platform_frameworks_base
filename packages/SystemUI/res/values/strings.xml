@@ -2968,4 +2968,6 @@
     <!-- Message shown to suggest authentication using [CHAR LIMIT=60]-->
     <string name="keyguard_try_fingerprint">Use fingerprint to open</string>
 
+    <!-- Content description for a chip in the status bar showing that the user is currently on a phone call. [CHAR LIMIT=NONE] -->
+    <string name="ongoing_phone_call_content_description">Ongoing phone call</string>
 </resources>
