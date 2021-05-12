@@ -1549,6 +1549,8 @@ class ActivityStarter {
         mService.getTransitionController().collect(r);
         try {
             mService.deferWindowLayout();
+            // Allow to skip layout because it may be done by the window of the starting activity.
+            mService.addWindowLayoutReasons(ActivityTaskManagerService.SKIP_LAYOUT_REASON_ALLOWED);
             Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "startActivityInner");
             result = startActivityInner(r, sourceRecord, voiceSession, voiceInteractor,
                     startFlags, doResume, options, inTask, restrictedBgActivity, intentGrants);

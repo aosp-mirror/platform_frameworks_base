@@ -657,14 +657,27 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     @IntDef({
             LAYOUT_REASON_CONFIG_CHANGED,
             LAYOUT_REASON_VISIBILITY_CHANGED,
+            SKIP_LAYOUT_REASON_ALLOWED,
+            SKIP_LAYOUT_REASON_EXPECT_NEXT_RELAYOUT,
     })
     @interface LayoutReason {
     }
 
+    static final int LAYOUT_REASON_MASK = 0x0000ffff;
     static final int LAYOUT_REASON_CONFIG_CHANGED = 0x1;
     static final int LAYOUT_REASON_VISIBILITY_CHANGED = 0x2;
+    static final int SKIP_LAYOUT_REASON_MASK = 0xfffe0000;
 
-    /** The reasons to perform surface placement. */
+    /**
+     * Allow to call {@link WindowSurfacePlacer#endDeferAndSkipLayout} if there is a reason
+     * included in {@link #SKIP_LAYOUT_REASON_MASK} was added.
+     */
+    static final int SKIP_LAYOUT_REASON_ALLOWED = 1 << 16;
+
+    /** Used when the client is scheduled to call relayout. */
+    static final int SKIP_LAYOUT_REASON_EXPECT_NEXT_RELAYOUT = 1 << 17;
+
+    /** The reasons to perform or skip surface placement. */
     @LayoutReason
     private int mLayoutReasons;
 
@@ -4187,18 +4200,35 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         mWindowManager.mWindowPlacerLocked.deferLayout();
     }
 
-    /** @see WindowSurfacePlacer#continueLayout */
+    /**
+     * @see WindowSurfacePlacer#continueLayout
+     * @see WindowSurfacePlacer#endDeferAndSkipLayout
+     */
     void continueWindowLayout() {
-        mWindowManager.mWindowPlacerLocked.continueLayout(mLayoutReasons != 0);
-        if (DEBUG_ALL && !mWindowManager.mWindowPlacerLocked.isLayoutDeferred()) {
-            Slog.i(TAG, "continueWindowLayout reason=" + mLayoutReasons);
+        if ((mLayoutReasons & SKIP_LAYOUT_REASON_ALLOWED) != 0) {
+            final int skipReasons = mLayoutReasons & SKIP_LAYOUT_REASON_MASK;
+            if (skipReasons != 0) {
+                if (DEBUG_ALL) {
+                    Slog.i(TAG, "continueWindowLayout skip-reasons="
+                            + Integer.toHexString(skipReasons));
+                }
+                mWindowManager.mWindowPlacerLocked.endDeferAndSkipLayout();
+                return;
+            }
+        }
+
+        final int reasons = mLayoutReasons & LAYOUT_REASON_MASK;
+        mWindowManager.mWindowPlacerLocked.continueLayout(reasons != 0);
+        if (DEBUG_ALL && reasons != 0 && !mWindowManager.mWindowPlacerLocked.isLayoutDeferred()) {
+            Slog.i(TAG, "continueWindowLayout reasons=" + Integer.toHexString(reasons));
         }
     }
 
     /**
-     * If a reason is added between {@link #deferWindowLayout} and {@link #continueWindowLayout},
-     * it will make sure {@link WindowSurfacePlacer#performSurfacePlacement} is called when the last
-     * defer count is gone.
+     * If a reason within {@link #LAYOUT_REASON_MASK} is added between {@link #deferWindowLayout}
+     * and {@link #continueWindowLayout}, {@link WindowSurfacePlacer#performSurfacePlacement} will
+     * be called when the last defer count is gone. Note that the {@link #SKIP_LAYOUT_REASON_MASK}
+     * has higher priority to determine whether to perform layout.
      */
     void addWindowLayoutReasons(@LayoutReason int reasons) {
         mLayoutReasons |= reasons;
