@@ -17,8 +17,8 @@
 package com.android.systemui.statusbar.policy;
 
 import com.android.settingslib.AccessibilityContentDescriptions;
+import com.android.settingslib.R;
 import com.android.settingslib.SignalIcon.IconGroup;
-import com.android.systemui.R;
 
 public class WifiIcons {
 
@@ -31,11 +31,11 @@ public class WifiIcons {
     };
 
     private static final int[] WIFI_NO_INTERNET_ICONS = {
-            R.drawable.ic_qs_wifi_0,
-            R.drawable.ic_qs_wifi_1,
-            R.drawable.ic_qs_wifi_2,
-            R.drawable.ic_qs_wifi_3,
-            R.drawable.ic_qs_wifi_4
+            R.drawable.ic_no_internet_wifi_signal_0,
+            R.drawable.ic_no_internet_wifi_signal_1,
+            R.drawable.ic_no_internet_wifi_signal_2,
+            R.drawable.ic_no_internet_wifi_signal_3,
+            R.drawable.ic_no_internet_wifi_signal_4
     };
 
     public static final int[][] QS_WIFI_SIGNAL_STRENGTH = {
