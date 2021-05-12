@@ -158,8 +158,15 @@ public class UnderlyingNetworkTracker {
      * carrier owned networks may be selected, as the request specifies only subIds in the VCN's
      * subscription group, while the VCN networks are excluded by virtue of not having subIds set on
      * the VCN-exposed networks.
+     *
+     * <p>If the VCN that this UnderlyingNetworkTracker belongs to is in test-mode, this will return
+     * a NetworkRequest that only matches Test Networks.
      */
     private NetworkRequest getRouteSelectionRequest() {
+        if (mVcnContext.isInTestMode()) {
+            return getTestNetworkRequest(mLastSnapshot.getAllSubIdsInGroup(mSubscriptionGroup));
+        }
+
         return getBaseNetworkRequestBuilder()
                 .setSubscriptionIds(mLastSnapshot.getAllSubIdsInGroup(mSubscriptionGroup))
                 .build();
@@ -208,6 +215,16 @@ public class UnderlyingNetworkTracker {
                 .removeCapability(NetworkCapabilities.NET_CAPABILITY_TRUSTED)
                 .removeCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED)
                 .removeCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VCN_MANAGED);
+    }
+
+    /** Builds and returns a NetworkRequest for the given subIds to match Test Networks. */
+    private NetworkRequest getTestNetworkRequest(@NonNull Set<Integer> subIds) {
+        return getBaseNetworkRequestBuilder()
+                .addTransportType(NetworkCapabilities.TRANSPORT_TEST)
+                .removeCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                .removeCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)
+                .setSubscriptionIds(subIds)
+                .build();
     }
 
     /**
