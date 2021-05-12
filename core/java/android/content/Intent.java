@@ -2022,12 +2022,9 @@ public class Intent implements Parcelable, Cloneable {
      * <p>
      * Output: Nothing.
      * </p>
-     *
-     * @hide
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     @RequiresPermission(android.Manifest.permission.START_VIEW_PERMISSION_USAGE)
-    @SystemApi
     public static final String ACTION_VIEW_PERMISSION_USAGE_FOR_PERIOD =
             "android.intent.action.VIEW_PERMISSION_USAGE_FOR_PERIOD";
 
@@ -2188,12 +2185,7 @@ public class Intent implements Parcelable, Cloneable {
      * <p>
      * Type: String
      * </p>
-     *
-     * E.g. {@link android.Manifest.permission_group.CONTACTS}
-     *
-     * @hide
      */
-    @SystemApi
     public static final String EXTRA_PERMISSION_GROUP_NAME =
             "android.intent.extra.PERMISSION_GROUP_NAME";
 
@@ -5342,28 +5334,19 @@ public class Intent implements Parcelable, Cloneable {
      * {@link #ACTION_VIEW_PERMISSION_USAGE_FOR_PERIOD}
      *
      * E.g. an attribution tag could be location_provider, com.google.android.gms.*, etc.
-     *
-     * @hide
      */
-    @SystemApi
     public static final String EXTRA_ATTRIBUTION_TAGS = "android.intent.extra.ATTRIBUTION_TAGS";
 
     /**
      * A long representing the start timestamp (epoch time in millis) of the permission usage
      * when used with {@link #ACTION_VIEW_PERMISSION_USAGE_FOR_PERIOD}
-     *
-     * @hide
      */
-    @SystemApi
     public static final String EXTRA_START_TIME = "android.intent.extra.START_TIME";
 
     /**
      * A long representing the end timestamp (epoch time in millis) of the permission usage when
      * used with {@link #ACTION_VIEW_PERMISSION_USAGE_FOR_PERIOD}
-     *
-     * @hide
      */
-    @SystemApi
     public static final String EXTRA_END_TIME = "android.intent.extra.END_TIME";
 
     /**
