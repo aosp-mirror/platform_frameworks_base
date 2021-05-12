@@ -174,6 +174,7 @@ public class Notification implements Parcelable
      */
     public static final @ServiceNotificationPolicy int FOREGROUND_SERVICE_DEFERRED = 2;
 
+    @ServiceNotificationPolicy
     private int mFgsDeferBehavior;
 
     /**
@@ -4614,9 +4615,9 @@ public class Notification implements Parcelable
          * foreground service.  By default, the system can choose to defer
          * visibility of the notification for a short time after the service is
          * started.  Pass
-         * {@link Notification#FOREGROUND_SERVICE_IMMEDIATE BEHAVIOR_IMMEDIATE_DISPLAY}
+         * {@link Notification#FOREGROUND_SERVICE_IMMEDIATE FOREGROUND_SERVICE_IMMEDIATE}
          * to this method in order to guarantee that visibility is never deferred.  Pass
-         * {@link Notification#FOREGROUND_SERVICE_DEFERRED BEHAVIOR_DEFERRED_DISPLAY}
+         * {@link Notification#FOREGROUND_SERVICE_DEFERRED FOREGROUND_SERVICE_DEFERRED}
          * to request that visibility is deferred whenever possible.
          *
          * <p class="note">Note that deferred visibility is not guaranteed.  There
@@ -4624,13 +4625,13 @@ public class Notification implements Parcelable
          * service's associated Notification immediately even when the app has used
          * this method to explicitly request deferred display.</p>
          * @param behavior One of
-         * {@link Notification#FOREGROUND_SERVICE_DEFAULT BEHAVIOR_DEFAULT},
-         * {@link Notification#FOREGROUND_SERVICE_IMMEDIATE BEHAVIOR_IMMEDIATE_DISPLAY},
-         * or {@link Notification#FOREGROUND_SERVICE_DEFERRED BEHAVIOR_DEFERRED_DISPLAY}
+         * {@link Notification#FOREGROUND_SERVICE_DEFAULT FOREGROUND_SERVICE_DEFAULT},
+         * {@link Notification#FOREGROUND_SERVICE_IMMEDIATE FOREGROUND_SERVICE_IMMEDIATE},
+         * or {@link Notification#FOREGROUND_SERVICE_DEFERRED FOREGROUND_SERVICE_DEFERRED}
          * @return
          */
         @NonNull
-        public Builder setForegroundServiceBehavior(int behavior) {
+        public Builder setForegroundServiceBehavior(@ServiceNotificationPolicy int behavior) {
             mN.mFgsDeferBehavior = behavior;
             return this;
         }
