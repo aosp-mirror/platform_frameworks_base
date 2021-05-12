@@ -57,6 +57,7 @@ import androidx.annotation.NonNull;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.statusbar.IStatusBar;
 import com.android.internal.statusbar.StatusBarIcon;
+import com.android.internal.util.GcUtils;
 import com.android.internal.view.AppearanceRegion;
 import com.android.systemui.statusbar.CommandQueue.Callbacks;
 import com.android.systemui.statusbar.commandline.CommandRegistry;
@@ -1084,6 +1085,12 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
             }
         };
         thr.start();
+    }
+
+    @Override
+    public void runGcForTest() {
+        // Gc sysui
+        GcUtils.runGcAndFinalizersSync();
     }
 
     private final class H extends Handler {

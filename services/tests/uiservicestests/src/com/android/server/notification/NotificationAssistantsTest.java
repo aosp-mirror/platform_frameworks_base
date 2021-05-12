@@ -16,6 +16,7 @@
 package com.android.server.notification;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 
 import static org.junit.Assert.assertNull;
@@ -41,11 +42,13 @@ import android.content.pm.UserInfo;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.testing.TestableContext;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.IntArray;
 import android.util.TypedXmlPullParser;
 import android.util.Xml;
 
+import com.android.internal.util.function.TriPredicate;
 import com.android.server.UiServiceTestCase;
 import com.android.server.notification.NotificationManagerService.NotificationAssistants;
 
@@ -129,6 +132,49 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
 
         //once per user
         verify(mNm, times(mUm.getUsers().size())).setDefaultAssistantForUser(anyInt());
+    }
+
+    @Test
+    public void testReadXml_userDisabled() throws Exception {
+        String xml = "<enabled_assistants version=\"4\" defaults=\"b/b\">"
+                + "<service_listing approved=\"\" user=\"0\" primary=\"true\""
+                + "user_changed=\"true\"/>"
+                + "</enabled_assistants>";
+
+        final TypedXmlPullParser parser = Xml.newFastPullParser();
+        parser.setInput(new BufferedInputStream(
+                new ByteArrayInputStream(xml.toString().getBytes())), null);
+        TriPredicate<String, Integer, String> allowedManagedServicePackages =
+                mNm::canUseManagedServices;
+
+        parser.nextTag();
+        mAssistants.readXml(parser, allowedManagedServicePackages, false, UserHandle.USER_ALL);
+
+        ArrayMap<Boolean, ArraySet<String>> approved = mAssistants.mApproved.get(0);
+
+        // approved should not be null
+        assertNotNull(approved);
+        assertEquals(new ArraySet<>(), approved.get(true));
+    }
+
+    @Test
+    public void testReadXml_upgradeUserSet() throws Exception {
+        String xml = "<enabled_assistants version=\"3\" defaults=\"b/b\">"
+                + "<service_listing approved=\"\" user=\"0\" primary=\"true\""
+                + "user_set_services=\"b/b\"/>"
+                + "</enabled_assistants>";
+
+        final TypedXmlPullParser parser = Xml.newFastPullParser();
+        parser.setInput(new BufferedInputStream(
+                new ByteArrayInputStream(xml.toString().getBytes())), null);
+        TriPredicate<String, Integer, String> allowedManagedServicePackages =
+                mNm::canUseManagedServices;
+
+        parser.nextTag();
+        mAssistants.readXml(parser, allowedManagedServicePackages, false, UserHandle.USER_ALL);
+
+        verify(mAssistants, times(1)).upgradeUserSet();
+        assertTrue(mAssistants.mIsUserChanged.get(0));
     }
 
     @Test

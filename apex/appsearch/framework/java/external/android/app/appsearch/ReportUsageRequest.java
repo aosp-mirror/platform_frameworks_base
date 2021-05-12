@@ -20,8 +20,6 @@ import android.annotation.CurrentTimeMillisLong;
 import android.annotation.NonNull;
 import android.compat.annotation.UnsupportedAppUsage;
 
-import com.android.internal.util.Preconditions;
-
 import java.util.Objects;
 
 /**
@@ -72,7 +70,6 @@ public final class ReportUsageRequest {
         // TODO(b/181887768): Make this final
         private String mDocumentId;
         private Long mUsageTimestampMillis;
-        private boolean mBuilt = false;
 
         /** Creates a {@link ReportUsageRequest.Builder} instance. */
         public Builder(@NonNull String namespace, @NonNull String documentId) {
@@ -122,29 +119,20 @@ public final class ReportUsageRequest {
          *
          * <p>If unset, this defaults to the current timestamp at the time that the {@link
          * ReportUsageRequest} is constructed.
-         *
-         * @throws IllegalStateException if the builder has already been used
          */
         @NonNull
         public ReportUsageRequest.Builder setUsageTimestampMillis(
                 @CurrentTimeMillisLong long usageTimestampMillis) {
-            Preconditions.checkState(!mBuilt, "Builder has already been used");
             mUsageTimestampMillis = usageTimestampMillis;
             return this;
         }
 
-        /**
-         * Builds a new {@link ReportUsageRequest}.
-         *
-         * @throws IllegalStateException if the builder has already been used
-         */
+        /** Builds a new {@link ReportUsageRequest}. */
         @NonNull
         public ReportUsageRequest build() {
-            Preconditions.checkState(!mBuilt, "Builder has already been used");
             if (mUsageTimestampMillis == null) {
                 mUsageTimestampMillis = System.currentTimeMillis();
             }
-            mBuilt = true;
             return new ReportUsageRequest(mNamespace, mDocumentId, mUsageTimestampMillis);
         }
     }

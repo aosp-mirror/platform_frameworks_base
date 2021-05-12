@@ -806,7 +806,9 @@ public class PackageInfoWithoutStateUtils {
     public static int appInfoPrivateFlagsExt(ParsingPackageRead pkg) {
         // @formatter:off
         int privateFlagsExt =
-                flag(pkg.isProfileable(), ApplicationInfo.PRIVATE_FLAG_EXT_PROFILEABLE);
+                flag(pkg.isProfileable(), ApplicationInfo.PRIVATE_FLAG_EXT_PROFILEABLE)
+                | flag(pkg.hasRequestForegroundServiceExemption(),
+                        ApplicationInfo.PRIVATE_FLAG_EXT_REQUEST_FOREGROUND_SERVICE_EXEMPTION);
         // @formatter:on
         return privateFlagsExt;
     }

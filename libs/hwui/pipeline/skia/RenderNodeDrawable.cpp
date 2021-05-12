@@ -171,16 +171,11 @@ void RenderNodeDrawable::forceDraw(SkCanvas* canvas) const {
     displayList->mProjectedOutline = nullptr;
 }
 
-static bool stretchNeedsLayer(const LayerProperties& properties) {
-    return Properties::stretchEffectBehavior == StretchEffectBehavior::Shader &&
-           !properties.getStretchEffect().isEmpty();
-}
-
 static bool layerNeedsPaint(const sk_sp<SkImage>& snapshotImage, const LayerProperties& properties,
                             float alphaMultiplier, SkPaint* paint) {
     if (alphaMultiplier < 1.0f || properties.alpha() < 255 ||
         properties.xferMode() != SkBlendMode::kSrcOver || properties.getColorFilter() != nullptr ||
-        properties.getImageFilter() != nullptr || stretchNeedsLayer(properties)) {
+        properties.getImageFilter() != nullptr || properties.getStretchEffect().requiresLayer()) {
         paint->setAlpha(properties.alpha() * alphaMultiplier);
         paint->setBlendMode(properties.xferMode());
         paint->setColorFilter(sk_ref_sp(properties.getColorFilter()));
@@ -253,7 +248,7 @@ void RenderNodeDrawable::drawContent(SkCanvas* canvas) const {
 
             const StretchEffect& stretch = properties.layerProperties().getStretchEffect();
             if (stretch.isEmpty() ||
-                Properties::stretchEffectBehavior != StretchEffectBehavior::Shader) {
+                Properties::stretchEffectBehavior == StretchEffectBehavior::LinearScale) {
                 // If we don't have any stretch effects, issue the filtered
                 // canvas draw calls to make sure we still punch a hole
                 // with the same canvas transformation + clip into the target

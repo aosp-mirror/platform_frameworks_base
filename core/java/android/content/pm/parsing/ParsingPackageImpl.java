@@ -464,6 +464,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
                 CROSS_PROFILE,
                 ENABLED,
                 DISALLOW_PROFILING,
+                REQUEST_FOREGROUND_SERVICE_EXEMPTION,
         })
         public @interface Values {}
         private static final long EXTERNAL_STORAGE = 1L;
@@ -512,6 +513,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         private static final long CROSS_PROFILE = 1L << 43;
         private static final long ENABLED = 1L << 44;
         private static final long DISALLOW_PROFILING = 1L << 45;
+        private static final long REQUEST_FOREGROUND_SERVICE_EXEMPTION = 1L << 46;
     }
 
     private ParsingPackageImpl setBoolean(@Booleans.Values long flag, boolean value) {
@@ -2199,6 +2201,11 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     }
 
     @Override
+    public boolean hasRequestForegroundServiceExemption() {
+        return getBoolean(Booleans.REQUEST_FOREGROUND_SERVICE_EXEMPTION);
+    }
+
+    @Override
     public ParsingPackageImpl setBaseRevisionCode(int value) {
         baseRevisionCode = value;
         return this;
@@ -2417,6 +2424,11 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     public ParsingPackageImpl setTheme(int value) {
         theme = value;
         return this;
+    }
+
+    @Override
+    public ParsingPackageImpl setRequestForegroundServiceExemption(boolean value) {
+        return setBoolean(Booleans.REQUEST_FOREGROUND_SERVICE_EXEMPTION, value);
     }
 
     @Override

@@ -879,7 +879,7 @@ public final class AppExitInfoTracker {
         if (TextUtils.equals(pkgName, processName)) {
             // Omit the process name here to save space
             processName = null;
-        } else if (processName != null && processName.startsWith(pkgName)) {
+        } else if (processName != null && pkgName != null && processName.startsWith(pkgName)) {
             // Strip the prefix to save space
             processName = processName.substring(pkgName.length());
         }

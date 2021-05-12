@@ -1022,8 +1022,7 @@
     <string name="text_copied" msgid="2531420577879738860">"ক্লিপবোর্ডে পাঠ্য অনুলিপি করা হয়েছে৷"</string>
     <string name="copied" msgid="4675902854553014676">"কপি করা হয়েছে"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> থেকে কপি করা ডেটা <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>-এ পেস্ট করা হয়েছে"</string>
-    <!-- no translation found for pasted_from_clipboard (7355790625710831847) -->
-    <skip />
+    <string name="pasted_from_clipboard" msgid="7355790625710831847">"আপনার ক্লিপবোর্ড থেকে <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> পেস্ট করা হয়েছে"</string>
     <string name="pasted_text" msgid="4298871641549173733">"আপনার কপি করা টেক্সট <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> অ্যাপ পেস্ট করেছে"</string>
     <string name="pasted_image" msgid="4729097394781491022">"আপনার কপি করা ছবি <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> অ্যাপ পেস্ট করেছে"</string>
     <string name="pasted_content" msgid="646276353060777131">"আপনার কপি করা কন্টেন্ট <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> অ্যাপ পেস্ট করেছে"</string>
@@ -1260,14 +1259,10 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> প্রস্তুত করা হচ্ছে৷"</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"অ্যাপ্লিকেশানগুলি শুরু করা হচ্ছে৷"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"চালু করা সম্পূর্ণ হচ্ছে৷"</string>
-    <!-- no translation found for fp_enrollment_powerbutton_intent_title (3385634173366119903) -->
-    <skip />
-    <!-- no translation found for fp_enrollment_powerbutton_intent_message (6582149052513682522) -->
-    <skip />
-    <!-- no translation found for fp_enrollment_powerbutton_intent_positive_button (5963520983910436791) -->
-    <skip />
-    <!-- no translation found for fp_enrollment_powerbutton_intent_negative_button (6465764183480190748) -->
-    <skip />
+    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"স্ক্রিন বন্ধ করবেন?"</string>
+    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"আপনার আঙ্গুলের ছাপ সেট আপ করার সময়, পাওয়ার বোতাম প্রেস করেছিলেন।\n\nএর ফলে সাধারণত আপনার স্ক্রিন বন্ধ হয়ে যায়।"</string>
+    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"বন্ধ করুন"</string>
+    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"বাতিল করুন"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> চলছে"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"গেমে ফিরে আসতে ট্যাপ করুন"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"গেম বেছে নিন"</string>

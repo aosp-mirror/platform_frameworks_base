@@ -110,77 +110,8 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
     // Lock to synchronize cross-thread access to device public interface
     final Object mInterfaceLock = new Object(); // access from this class and Session only!
 
-    private static class SurfaceInfo {
-        public int mWidth = 0;
-        public int mHeight = 0;
-        public int mFormat = PixelFormat.RGBA_8888;
-        public long mUsage = 0;
-    }
-
-    private static final int SUPPORTED_CAPTURE_OUTPUT_FORMATS[] = {
-        CameraExtensionCharacteristics.PROCESSING_INPUT_FORMAT,
-        ImageFormat.JPEG
-    };
-
-    private static int nativeGetSurfaceWidth(Surface surface) {
-        return SurfaceUtils.getSurfaceSize(surface).getWidth();
-    }
-
-    private static int nativeGetSurfaceHeight(Surface surface) {
-        return SurfaceUtils.getSurfaceSize(surface).getHeight();
-    }
-
     private static int nativeGetSurfaceFormat(Surface surface) {
         return SurfaceUtils.getSurfaceFormat(surface);
-    }
-
-    private static Surface getBurstCaptureSurface(
-            @NonNull List<OutputConfiguration> outputConfigs,
-            @NonNull HashMap<Integer, List<Size>> supportedCaptureSizes) {
-        for (OutputConfiguration config : outputConfigs) {
-            SurfaceInfo surfaceInfo = querySurface(config.getSurface());
-            for (int supportedFormat : SUPPORTED_CAPTURE_OUTPUT_FORMATS) {
-                if (surfaceInfo.mFormat == supportedFormat) {
-                    Size captureSize = new Size(surfaceInfo.mWidth, surfaceInfo.mHeight);
-                    if (supportedCaptureSizes.containsKey(supportedFormat)) {
-                        if (supportedCaptureSizes.get(surfaceInfo.mFormat).contains(captureSize)) {
-                            return config.getSurface();
-                        } else {
-                            throw new IllegalArgumentException("Capture size not supported!");
-                        }
-                    }
-                    return config.getSurface();
-                }
-            }
-        }
-
-        return null;
-    }
-
-    private static @Nullable Surface getRepeatingRequestSurface(
-            @NonNull List<OutputConfiguration> outputConfigs,
-            @Nullable List<Size> supportedPreviewSizes) {
-        for (OutputConfiguration config : outputConfigs) {
-            SurfaceInfo surfaceInfo = querySurface(config.getSurface());
-            if ((surfaceInfo.mFormat ==
-                    CameraExtensionCharacteristics.NON_PROCESSING_INPUT_FORMAT) ||
-                    // The default RGBA_8888 is also implicitly supported because camera will
-                    // internally override it to
-                    // 'CameraExtensionCharacteristics.NON_PROCESSING_INPUT_FORMAT'
-                    (surfaceInfo.mFormat == PixelFormat.RGBA_8888)) {
-                Size repeatingRequestSurfaceSize = new Size(surfaceInfo.mWidth,
-                        surfaceInfo.mHeight);
-                if ((supportedPreviewSizes == null) ||
-                        (!supportedPreviewSizes.contains(repeatingRequestSurfaceSize))) {
-                    throw new IllegalArgumentException("Repeating request surface size " +
-                            repeatingRequestSurfaceSize + " not supported!");
-                }
-
-                return config.getSurface();
-            }
-        }
-
-        return null;
     }
 
     /**
@@ -221,22 +152,22 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
         int suitableSurfaceCount = 0;
         List<Size> supportedPreviewSizes = extensionChars.getExtensionSupportedSizes(
                 config.getExtension(), SurfaceTexture.class);
-        Surface repeatingRequestSurface = getRepeatingRequestSurface(
+        Surface repeatingRequestSurface = CameraExtensionUtils.getRepeatingRequestSurface(
                 config.getOutputConfigurations(), supportedPreviewSizes);
         if (repeatingRequestSurface != null) {
             suitableSurfaceCount++;
         }
 
         HashMap<Integer, List<Size>> supportedCaptureSizes = new HashMap<>();
-        for (int format : SUPPORTED_CAPTURE_OUTPUT_FORMATS) {
+        for (int format : CameraExtensionUtils.SUPPORTED_CAPTURE_OUTPUT_FORMATS) {
             List<Size> supportedSizes = extensionChars.getExtensionSupportedSizes(
                     config.getExtension(), format);
             if (supportedSizes != null) {
                 supportedCaptureSizes.put(format, supportedSizes);
             }
         }
-        Surface burstCaptureSurface = getBurstCaptureSurface(config.getOutputConfigurations(),
-                supportedCaptureSizes);
+        Surface burstCaptureSurface = CameraExtensionUtils.getBurstCaptureSurface(
+                config.getOutputConfigurations(), supportedCaptureSizes);
         if (burstCaptureSurface != null) {
             suitableSurfaceCount++;
         }
@@ -266,15 +197,15 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
         return session;
     }
 
-    private CameraExtensionSessionImpl(@NonNull IImageCaptureExtenderImpl imageExtender,
-                                       @NonNull IPreviewExtenderImpl previewExtender,
-                                       @NonNull List<Size> previewSizes,
-                                       long extensionClientId,
-                                       @NonNull CameraDevice cameraDevice,
-                                       @Nullable Surface repeatingRequestSurface,
-                                       @Nullable Surface burstCaptureSurface,
-                                       @NonNull StateCallback callback,
-                                       @NonNull Executor executor) {
+    public CameraExtensionSessionImpl(@NonNull IImageCaptureExtenderImpl imageExtender,
+            @NonNull IPreviewExtenderImpl previewExtender,
+            @NonNull List<Size> previewSizes,
+            long extensionClientId,
+            @NonNull CameraDevice cameraDevice,
+            @Nullable Surface repeatingRequestSurface,
+            @Nullable Surface burstCaptureSurface,
+            @NonNull StateCallback callback,
+            @NonNull Executor executor) {
         mExtensionClientId = extensionClientId;
         mImageExtender = imageExtender;
         mPreviewExtender = previewExtender;
@@ -290,57 +221,17 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
         mInitialized = false;
     }
 
-    private static @NonNull SurfaceInfo querySurface(@NonNull Surface s) {
-        ImageWriter writer = null;
-        Image img = null;
-        SurfaceInfo surfaceInfo = new SurfaceInfo();
-        int nativeFormat = nativeGetSurfaceFormat(s);
-        int dataspace = SurfaceUtils.getSurfaceDataspace(s);
-        // Jpeg surfaces cannot be queried for their usage and other parameters
-        // in the usual way below. A buffer can only be de-queued after the
-        // producer overrides the surface dimensions to (width*height) x 1.
-        if ((nativeFormat == StreamConfigurationMap.HAL_PIXEL_FORMAT_BLOB) &&
-                (dataspace == StreamConfigurationMap.HAL_DATASPACE_V0_JFIF)) {
-            surfaceInfo.mFormat = ImageFormat.JPEG;
-            surfaceInfo.mWidth = nativeGetSurfaceWidth(s);
-            surfaceInfo.mHeight = nativeGetSurfaceHeight(s);
-            return surfaceInfo;
-        }
-
-        HardwareBuffer buffer = null;
-        try {
-            writer = ImageWriter.newInstance(s, 1);
-            img = writer.dequeueInputImage();
-            buffer = img.getHardwareBuffer();
-            surfaceInfo.mFormat = buffer.getFormat();
-            surfaceInfo.mWidth = buffer.getWidth();
-            surfaceInfo.mHeight = buffer.getHeight();
-            surfaceInfo.mUsage = buffer.getUsage();
-        } catch (Exception e) {
-            Log.e(TAG, "Failed to query surface, returning defaults!");
-        } finally {
-            if (buffer != null) {
-                buffer.close();
-            }
-            if (img != null) {
-                img.close();
-            }
-            if (writer != null) {
-                writer.close();
-            }
-        }
-
-        return surfaceInfo;
-    }
-
     private void initializeRepeatingRequestPipeline() throws RemoteException {
-        SurfaceInfo repeatingSurfaceInfo = new SurfaceInfo();
+        CameraExtensionUtils.SurfaceInfo repeatingSurfaceInfo =
+                new CameraExtensionUtils.SurfaceInfo();
         mPreviewProcessorType = mPreviewExtender.getProcessorType();
         if (mClientRepeatingRequestSurface != null) {
-            repeatingSurfaceInfo = querySurface(mClientRepeatingRequestSurface);
+            repeatingSurfaceInfo = CameraExtensionUtils.querySurface(
+                    mClientRepeatingRequestSurface);
         } else {
             // Make the intermediate surface behave as any regular 'SurfaceTexture'
-            SurfaceInfo captureSurfaceInfo = querySurface(mClientCaptureSurface);
+            CameraExtensionUtils.SurfaceInfo captureSurfaceInfo = CameraExtensionUtils.querySurface(
+                    mClientCaptureSurface);
             Size captureSize = new Size(captureSurfaceInfo.mWidth, captureSurfaceInfo.mHeight);
             Size previewSize = findSmallestAspectMatchedSize(mSupportedPreviewSizes, captureSize);
             repeatingSurfaceInfo.mWidth = previewSize.getWidth();
@@ -418,7 +309,8 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
 
         if (mImageProcessor != null) {
             if (mClientCaptureSurface != null) {
-                SurfaceInfo surfaceInfo = querySurface(mClientCaptureSurface);
+                CameraExtensionUtils.SurfaceInfo surfaceInfo = CameraExtensionUtils.querySurface(
+                        mClientCaptureSurface);
                 if (surfaceInfo.mFormat == ImageFormat.JPEG) {
                     mImageJpegProcessor = new CameraExtensionJpegProcessor(mImageProcessor);
                     mImageProcessor = mImageJpegProcessor;
@@ -501,7 +393,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
         SessionConfiguration sessionConfig = new SessionConfiguration(
                 SessionConfiguration.SESSION_REGULAR,
                 outputList,
-                new HandlerExecutor(mHandler),
+                new CameraExtensionUtils.HandlerExecutor(mHandler),
                 new SessionStateHandler());
 
         if (!sessionParamsList.isEmpty()) {
@@ -656,7 +548,8 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
             throw new UnsupportedOperationException("Failed to create still capture burst request");
         }
 
-        return mCaptureSession.captureBurstRequests(burstRequest, new HandlerExecutor(mHandler),
+        return mCaptureSession.captureBurstRequests(burstRequest,
+                new CameraExtensionUtils.HandlerExecutor(mHandler),
                 new BurstRequestHandler(request, executor, listener, requestMap,
                         mBurstCaptureImageCallback));
     }
@@ -724,7 +617,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
         CaptureRequest repeatingRequest = createRequest(mCameraDevice,
                 captureStageList, mCameraRepeatingSurface, CameraDevice.TEMPLATE_PREVIEW);
         return mCaptureSession.setSingleRepeatingRequest(repeatingRequest,
-                new HandlerExecutor(mHandler), requestHandler);
+                new CameraExtensionUtils.HandlerExecutor(mHandler), requestHandler);
     }
 
     /** @hide */
@@ -1703,23 +1596,6 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
         }
 
         return ret;
-    }
-
-    private final class HandlerExecutor implements Executor {
-        private final Handler mHandler;
-
-        public HandlerExecutor(Handler handler) {
-            mHandler = handler;
-        }
-
-        @Override
-        public void execute(Runnable runCmd) {
-            try {
-                mHandler.post(runCmd);
-            } catch (RejectedExecutionException e) {
-                Log.w(TAG, "Handler thread unavailable, skipping message!");
-            }
-        }
     }
 
     private static ParcelImage initializeParcelImage(Image img) {

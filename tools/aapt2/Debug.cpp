@@ -278,17 +278,19 @@ void Debug::PrintTable(const ResourceTable& table, const DebugPrintTableOptions&
       printer->Println(StringPrintf(" entryCount=%zd", type.entries.size()));
 
       printer->Indent();
-      for (const ResourceEntry* entry : type.entries) {
+      for (const ResourceTableEntryView& entry : type.entries) {
         printer->Print("resource ");
-        printer->Print(entry->id.value_or_default(0).to_string());
+        printer->Print(ResourceId(package.id.value_or_default(0), type.id.value_or_default(0),
+                                  entry.id.value_or_default(0))
+                           .to_string());
         printer->Print(" ");
 
         // Write the name without the package (this is obvious and too verbose).
         printer->Print(to_string(type.type));
         printer->Print("/");
-        printer->Print(entry->name);
+        printer->Print(entry.name);
 
-        switch (entry->visibility.level) {
+        switch (entry.visibility.level) {
           case Visibility::Level::kPublic:
             printer->Print(" PUBLIC");
             break;
@@ -300,19 +302,24 @@ void Debug::PrintTable(const ResourceTable& table, const DebugPrintTableOptions&
             break;
         }
 
-        if (entry->visibility.staged_api) {
+        if (entry.visibility.staged_api) {
           printer->Print(" STAGED");
         }
 
-        if (entry->overlayable_item) {
+        if (entry.overlayable_item) {
           printer->Print(" OVERLAYABLE");
+        }
+
+        if (entry.staged_id) {
+          printer->Print(" STAGED_ID=");
+          printer->Print(entry.staged_id.value().id.to_string());
         }
 
         printer->Println();
 
         if (options.show_values) {
           printer->Indent();
-          for (const auto& value : entry->values) {
+          for (const auto& value : entry.values) {
             printer->Print("(");
             printer->Print(value->config.to_string());
             printer->Print(") ");
