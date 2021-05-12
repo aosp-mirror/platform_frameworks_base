@@ -43,7 +43,7 @@
     <dimen name="pip_bottom_offset_buffer">1dp</dimen>
 
     <!-- The corner radius for PiP window. -->
-    <dimen name="pip_corner_radius">8dp</dimen>
+    <dimen name="pip_corner_radius">16dp</dimen>
 
     <!-- The bottom margin of the PIP drag to dismiss info text shown when moving a PIP. -->
     <dimen name="pip_dismiss_text_bottom_margin">24dp</dimen>
