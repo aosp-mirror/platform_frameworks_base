@@ -134,7 +134,8 @@ public class WalletView extends FrameLayout implements WalletCardCarousel.OnCard
         mCardCarouselContainer.setVisibility(VISIBLE);
         mErrorView.setVisibility(GONE);
         mEmptyStateView.setVisibility(GONE);
-        renderHeaderIconAndActionButton(data.get(selectedIndex), isDeviceLocked);
+        mIcon.setImageDrawable(getHeaderIcon(mContext, data.get(selectedIndex)));
+        renderActionButton(data.get(selectedIndex), isDeviceLocked);
         if (shouldAnimate) {
             animateViewsShown(mIcon, mCardLabel, mActionButton);
         }
@@ -219,17 +220,6 @@ public class WalletView extends FrameLayout implements WalletCardCarousel.OnCard
     @VisibleForTesting
     TextView getCardLabel() {
         return mCardLabel;
-    }
-
-    private void renderHeaderIconAndActionButton(WalletCardViewInfo walletCard, boolean isLocked) {
-        Drawable icon = getHeaderIcon(mContext, walletCard);
-        if (icon != null) {
-            mIcon.setImageDrawable(walletCard.getIcon());
-            mIcon.setVisibility(VISIBLE);
-        } else {
-            mIcon.setVisibility(INVISIBLE);
-        }
-        renderActionButton(walletCard, isLocked);
     }
 
     @Nullable
