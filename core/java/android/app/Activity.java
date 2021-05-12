@@ -136,6 +136,7 @@ import android.view.contentcapture.ContentCaptureManager;
 import android.view.contentcapture.ContentCaptureManager.ContentCaptureClient;
 import android.view.translation.TranslationSpec;
 import android.view.translation.UiTranslationController;
+import android.view.translation.UiTranslationSpec;
 import android.widget.AdapterView;
 import android.widget.Toast;
 import android.widget.Toolbar;
@@ -8815,11 +8816,13 @@ public class Activity extends ContextThemeWrapper
      * @hide
      */
     public void updateUiTranslationState(int state, TranslationSpec sourceSpec,
-            TranslationSpec targetSpec, List<AutofillId> viewIds) {
+            TranslationSpec targetSpec, List<AutofillId> viewIds,
+            UiTranslationSpec uiTranslationSpec) {
         if (mUiTranslationController == null) {
             mUiTranslationController = new UiTranslationController(this, getApplicationContext());
         }
-        mUiTranslationController.updateUiTranslationState(state, sourceSpec, targetSpec, viewIds);
+        mUiTranslationController.updateUiTranslationState(
+                state, sourceSpec, targetSpec, viewIds, uiTranslationSpec);
     }
 
     class HostCallbacks extends FragmentHostCallback<Activity> {
