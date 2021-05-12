@@ -16,13 +16,17 @@
 
 package android.net.vcn;
 
+import static android.net.ipsec.ike.IkeSessionParams.IKE_OPTION_MOBIKE;
+
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import android.net.NetworkCapabilities;
+import android.net.ipsec.ike.IkeSessionParams;
 import android.net.ipsec.ike.IkeTunnelConnectionParams;
+import android.net.vcn.persistablebundleutils.IkeSessionParamsUtilsTest;
 import android.net.vcn.persistablebundleutils.TunnelConnectionParamsUtilsTest;
 
 import androidx.test.filters.SmallTest;
@@ -116,6 +120,21 @@ public class VcnGatewayConnectionConfigTest {
 
             fail("Expected exception due to the absence of tunnel connection parameters");
         } catch (NullPointerException e) {
+        }
+    }
+
+    @Test
+    public void testBuilderRequiresMobikeEnabled() {
+        try {
+            final IkeSessionParams ikeParams =
+                    IkeSessionParamsUtilsTest.createBuilderMinimum()
+                            .removeIkeOption(IKE_OPTION_MOBIKE)
+                            .build();
+            final IkeTunnelConnectionParams tunnelParams =
+                    TunnelConnectionParamsUtilsTest.buildTestParams(ikeParams);
+            new VcnGatewayConnectionConfig.Builder(GATEWAY_CONNECTION_NAME_PREFIX, tunnelParams);
+            fail("Expected exception due to MOBIKE not enabled");
+        } catch (IllegalArgumentException e) {
         }
     }
 
