@@ -136,12 +136,8 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
         if (!mService.isControlEnabled()) {
             return;
         }
-        if (isActiveSource()) {
-            mService.sendCecCommand(HdmiCecMessageBuilder.buildInactiveSource(
-                    mAddress, mService.getPhysicalAddress()));
-        }
         boolean wasActiveSource = isActiveSource();
-        // Invalidate the internal active source record when goes to standby
+        // Invalidate the internal active source record when going to standby
         mService.setActiveSource(Constants.ADDR_INVALID, Constants.INVALID_PHYSICAL_ADDRESS,
                 "HdmiCecLocalDevicePlayback#onStandby()");
         boolean mTvSendStandbyOnSleep = mService.getHdmiCecConfig().getIntValue(
@@ -167,6 +163,9 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
                                         Constants.ADDR_BROADCAST));
                         break;
                     case HdmiControlManager.POWER_CONTROL_MODE_NONE:
+                        mService.sendCecCommand(
+                                HdmiCecMessageBuilder.buildInactiveSource(mAddress,
+                                        mService.getPhysicalAddress()));
                         break;
                 }
                 break;
