@@ -299,10 +299,6 @@ public class AccessibilityFloatingMenuView extends FrameLayout
 
     @Override
     public boolean performAccessibilityAction(int action, Bundle arguments) {
-        if (super.performAccessibilityAction(action, arguments)) {
-            return true;
-        }
-
         fadeIn();
 
         final Rect bounds = getAvailableBounds();
@@ -340,7 +336,7 @@ public class AccessibilityFloatingMenuView extends FrameLayout
             return true;
         }
 
-        return false;
+        return super.performAccessibilityAction(action, arguments);
     }
 
     void show() {
@@ -409,6 +405,12 @@ public class AccessibilityFloatingMenuView extends FrameLayout
                         : (view, event) -> onTouched(event));
 
         fadeOut();
+    }
+
+    Rect getWindowLocationOnScreen() {
+        final int left = mCurrentLayoutParams.x;
+        final int top = mCurrentLayoutParams.y;
+        return new Rect(left, top, left + getWindowWidth(), top + getWindowHeight());
     }
 
     void updateOpacityWith(boolean isFadeEffectEnabled, float newOpacityValue) {
