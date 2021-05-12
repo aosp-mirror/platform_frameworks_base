@@ -61,7 +61,8 @@ public class FingerprintServiceReceiver extends IFingerprintServiceReceiver.Stub
     }
 
     @Override
-    public void onChallengeGenerated(int sensorId, long challenge) throws RemoteException {
+    public void onChallengeGenerated(int sensorId, int userId, long challenge)
+            throws RemoteException {
 
     }
 
