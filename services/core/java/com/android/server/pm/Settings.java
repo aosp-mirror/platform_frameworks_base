@@ -365,19 +365,21 @@ public final class Settings implements Watchable, Snappable {
     /** Map from package name to settings */
     @Watched
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
-    final WatchedArrayMap<String, PackageSetting> mPackages = new WatchedArrayMap<>();
+    final WatchedArrayMap<String, PackageSetting> mPackages;
+    private final SnapshotCache<WatchedArrayMap<String, PackageSetting>> mPackagesSnapshot;
 
     /**
      * List of packages that were involved in installing other packages, i.e. are listed
      * in at least one app's InstallSource.
      */
     @Watched
-    private final WatchedArraySet<String> mInstallerPackages = new WatchedArraySet<>();
+    private final WatchedArraySet<String> mInstallerPackages;
+    private final SnapshotCache<WatchedArraySet<String>> mInstallerPackagesSnapshot;
 
     /** Map from package name to appId and excluded userids */
     @Watched
-    private final WatchedArrayMap<String, KernelPackageState> mKernelMapping =
-            new WatchedArrayMap<>();
+    private final WatchedArrayMap<String, KernelPackageState> mKernelMapping;
+    private final SnapshotCache<WatchedArrayMap<String, KernelPackageState>> mKernelMappingSnapshot;
 
     // List of replaced system applications
     @Watched
@@ -398,7 +400,7 @@ public final class Settings implements Watchable, Snappable {
 
     /** Map from volume UUID to {@link VersionInfo} */
     @Watched
-    private WatchedArrayMap<String, VersionInfo> mVersion = new WatchedArrayMap<>();
+    private final WatchedArrayMap<String, VersionInfo> mVersion = new WatchedArrayMap<>();
 
     /**
      * Version details for a storage volume that may hold apps.
@@ -504,8 +506,7 @@ public final class Settings implements Watchable, Snappable {
 
     private final File mSystemDir;
 
-    private final KeySetManagerService mKeySetManagerService =
-            new KeySetManagerService(mPackages);
+    private final KeySetManagerService mKeySetManagerService;
 
     /** Settings and other information about permissions */
     @Watched(manual = true)
@@ -561,8 +562,21 @@ public final class Settings implements Watchable, Snappable {
         mKeySetRefs.registerObserver(mObserver);
     }
 
+    // CONSTRUCTOR
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
     public Settings(Map<String, PackageSetting> pkgSettings) {
+        mPackages = new WatchedArrayMap<>();
+        mPackagesSnapshot =
+                new SnapshotCache.Auto<>(mPackages, mPackages, "Settings.mPackages");
+        mKernelMapping = new WatchedArrayMap<>();
+        mKernelMappingSnapshot =
+                new SnapshotCache.Auto<>(mKernelMapping, mKernelMapping, "Settings.mKernelMapping");
+        mInstallerPackages = new WatchedArraySet<>();
+        mInstallerPackagesSnapshot =
+                new SnapshotCache.Auto<>(mInstallerPackages, mInstallerPackages,
+                                         "Settings.mInstallerPackages");
+        mKeySetManagerService = new KeySetManagerService(mPackages);
+
         mLock = new PackageManagerTracedLock();
         mPackages.putAll(pkgSettings);
         mAppIds = new WatchedArrayList<>();
@@ -589,6 +603,18 @@ public final class Settings implements Watchable, Snappable {
             LegacyPermissionDataProvider permissionDataProvider,
             @NonNull DomainVerificationManagerInternal domainVerificationManager,
             @NonNull PackageManagerTracedLock lock)  {
+        mPackages = new WatchedArrayMap<>();
+        mPackagesSnapshot  =
+                new SnapshotCache.Auto<>(mPackages, mPackages, "Settings.mPackages");
+        mKernelMapping = new WatchedArrayMap<>();
+        mKernelMappingSnapshot =
+                new SnapshotCache.Auto<>(mKernelMapping, mKernelMapping, "Settings.mKernelMapping");
+        mInstallerPackages = new WatchedArraySet<>();
+        mInstallerPackagesSnapshot =
+                new SnapshotCache.Auto<>(mInstallerPackages, mInstallerPackages,
+                                         "Settings.mInstallerPackages");
+        mKeySetManagerService = new KeySetManagerService(mPackages);
+
         mLock = lock;
         mAppIds = new WatchedArrayList<>();
         mOtherAppIds = new WatchedSparseArray<>();
@@ -629,7 +655,13 @@ public final class Settings implements Watchable, Snappable {
      * are changed by PackageManagerService APIs are deep-copied
      */
     private Settings(Settings r) {
-        mPackages.putAll(r.mPackages);
+        mPackages = r.mPackagesSnapshot.snapshot();
+        mPackagesSnapshot  = new SnapshotCache.Sealed<>();
+        mKernelMapping = r.mKernelMappingSnapshot.snapshot();
+        mKernelMappingSnapshot = new SnapshotCache.Sealed<>();
+        mInstallerPackages = r.mInstallerPackagesSnapshot.snapshot();
+        mInstallerPackagesSnapshot = new SnapshotCache.Sealed<>();
+        mKeySetManagerService = new KeySetManagerService(mPackages);
 
         // The following assignments satisfy Java requirements but are not
         // needed by the read-only methods.  Note especially that the lock
@@ -646,9 +678,7 @@ public final class Settings implements Watchable, Snappable {
 
         mDomainVerificationManager = r.mDomainVerificationManager;
 
-        mInstallerPackages.addAll(r.mInstallerPackages);
-        mKernelMapping.putAll(r.mKernelMapping);
-        mDisabledSysPackages.putAll(r.mDisabledSysPackages);
+        mDisabledSysPackages.snapshot(r.mDisabledSysPackages);
         mBlockUninstallPackages.snapshot(r.mBlockUninstallPackages);
         mVersion.putAll(r.mVersion);
         mVerifierDeviceIdentity = r.mVerifierDeviceIdentity;
@@ -658,7 +688,7 @@ public final class Settings implements Watchable, Snappable {
                 mPersistentPreferredActivities, r.mPersistentPreferredActivities);
         WatchedSparseArray.snapshot(
                 mCrossProfileIntentResolvers, r.mCrossProfileIntentResolvers);
-        mSharedUsers.putAll(r.mSharedUsers);
+        mSharedUsers.snapshot(r.mSharedUsers);
         mAppIds = r.mAppIds.snapshot();
         mOtherAppIds = r.mOtherAppIds.snapshot();
         WatchedArrayList.snapshot(

@@ -404,6 +404,7 @@ import com.android.server.pm.verify.domain.proxy.DomainVerificationProxyV2;
 import com.android.server.rollback.RollbackManagerInternal;
 import com.android.server.storage.DeviceStorageMonitorInternal;
 import com.android.server.uri.UriGrantsManagerInternal;
+import com.android.server.utils.SnapshotCache;
 import com.android.server.utils.TimingsTraceAndSlog;
 import com.android.server.utils.Watchable;
 import com.android.server.utils.Watched;
@@ -871,12 +872,17 @@ public class PackageManagerService extends IPackageManager.Stub
     @Watched
     @GuardedBy("mLock")
     final WatchedArrayMap<String, AndroidPackage> mPackages = new WatchedArrayMap<>();
+    private final SnapshotCache<WatchedArrayMap<String, AndroidPackage>> mPackagesSnapshot =
+            new SnapshotCache.Auto(mPackages, mPackages, "PackageManagerService.mPackages");
 
     // Keys are isolated uids and values are the uid of the application
     // that created the isolated process.
     @Watched
     @GuardedBy("mLock")
     final WatchedSparseIntArray mIsolatedOwners = new WatchedSparseIntArray();
+    private final SnapshotCache<WatchedSparseIntArray> mIsolatedOwnersSnapshot =
+            new SnapshotCache.Auto(mIsolatedOwners, mIsolatedOwners,
+                                   "PackageManagerService.mIsolatedOwners");
 
     /**
      * Tracks new system packages [received in an OTA] that we expect to
@@ -1398,14 +1404,27 @@ public class PackageManagerService extends IPackageManager.Stub
     @Watched
     final WatchedArrayMap<String, WatchedLongSparseArray<SharedLibraryInfo>>
             mSharedLibraries = new WatchedArrayMap<>();
+    private final SnapshotCache<WatchedArrayMap<String, WatchedLongSparseArray<SharedLibraryInfo>>>
+            mSharedLibrariesSnapshot =
+            new SnapshotCache.Auto<>(mSharedLibraries, mSharedLibraries,
+                                     "PackageManagerService.mSharedLibraries");
     @Watched
     final WatchedArrayMap<String, WatchedLongSparseArray<SharedLibraryInfo>>
             mStaticLibsByDeclaringPackage = new WatchedArrayMap<>();
+    private final SnapshotCache<WatchedArrayMap<String, WatchedLongSparseArray<SharedLibraryInfo>>>
+            mStaticLibsByDeclaringPackageSnapshot =
+            new SnapshotCache.Auto<>(mSharedLibraries, mSharedLibraries,
+                                     "PackageManagerService.mSharedLibraries");
 
     // Mapping from instrumentation class names to info about them.
     @Watched
     final WatchedArrayMap<ComponentName, ParsedInstrumentation> mInstrumentation =
             new WatchedArrayMap<>();
+    private final SnapshotCache<WatchedArrayMap<ComponentName, ParsedInstrumentation>>
+            mInstrumentationSnapshot =
+            new SnapshotCache.Auto<>(mInstrumentation, mInstrumentation,
+                                     "PackageManagerService.mInstrumentation");
+
 
     // Packages whose data we have transfered into another package, thus
     // should no longer exist.
@@ -1838,11 +1857,11 @@ public class PackageManagerService extends IPackageManager.Stub
         Snapshot(int type) {
             if (type == Snapshot.SNAPPED) {
                 settings = mSettings.snapshot();
-                isolatedOwners = mIsolatedOwners.snapshot();
-                packages = mPackages.snapshot();
-                sharedLibs = mSharedLibraries.snapshot();
-                staticLibs = mStaticLibsByDeclaringPackage.snapshot();
-                instrumentation = mInstrumentation.snapshot();
+                isolatedOwners = mIsolatedOwnersSnapshot.snapshot();
+                packages = mPackagesSnapshot.snapshot();
+                sharedLibs = mSharedLibrariesSnapshot.snapshot();
+                staticLibs = mStaticLibsByDeclaringPackageSnapshot.snapshot();
+                instrumentation = mInstrumentationSnapshot.snapshot();
                 resolveComponentName = mResolveComponentName.clone();
                 resolveActivity = new ActivityInfo(mResolveActivity);
                 instantAppInstallerActivity =
