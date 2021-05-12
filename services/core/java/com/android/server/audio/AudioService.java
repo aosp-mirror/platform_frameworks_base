@@ -7647,8 +7647,12 @@ public class AudioService extends IAudioService.Stub
         // address is not used for now, but may be used when multiple a2dp devices are supported
         sVolumeLogger.log(new AudioEventLogger.StringEvent("avrcpSupportsAbsoluteVolume addr="
                 + address + " support=" + support));
-        mAvrcpAbsVolSupported = support;
         mDeviceBroker.setAvrcpAbsoluteVolumeSupported(support);
+        setAvrcpAbsoluteVolumeSupported(support);
+    }
+
+    /*package*/ void setAvrcpAbsoluteVolumeSupported(boolean support) {
+        mAvrcpAbsVolSupported = support;
         sendMsg(mAudioHandler, MSG_SET_DEVICE_VOLUME, SENDMSG_QUEUE,
                     AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, 0,
                     mStreamStates[AudioSystem.STREAM_MUSIC], 0);
