@@ -524,7 +524,7 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
          * @param result Info about the second stage detection result, provided by the
          *         {@link HotwordDetectionService}.
          */
-        public void onRejected(@Nullable HotwordRejectedResult result) {
+        public void onRejected(@NonNull HotwordRejectedResult result) {
         }
 
         /**
@@ -1164,7 +1164,7 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
         }
 
         @Override
-        public void onRejected(HotwordRejectedResult result) {
+        public void onRejected(@NonNull HotwordRejectedResult result) {
             if (DBG) {
                 Slog.d(TAG, "onRejected(" + result + ")");
             } else {
