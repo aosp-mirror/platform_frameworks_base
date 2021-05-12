@@ -150,7 +150,7 @@ public:
     VulkanManager& vulkanManager();
 
     sk_sp<Bitmap> allocateHardwareBitmap(SkBitmap& skBitmap);
-    void dumpGraphicsMemory(int fd);
+    void dumpGraphicsMemory(int fd, bool includeProfileData);
 
     void requireGlContext();
     void requireVkContext();
