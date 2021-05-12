@@ -416,9 +416,8 @@ public class PeopleSpaceUtils {
                 && birthdayString == null;
         boolean addBirthdayStatus = !hasBirthdayStatus(storedTile, context)
                 && birthdayString != null;
-        boolean shouldUpdate =
-                storedTile.getContactAffinity() != affinity || outdatedBirthdayStatus
-                        || addBirthdayStatus;
+        boolean shouldUpdate = storedTile.getContactAffinity() != affinity || outdatedBirthdayStatus
+                || addBirthdayStatus;
         if (shouldUpdate) {
             if (DEBUG) Log.d(TAG, "Update " + storedTile.getUserName() + " from contacts");
             manager.updateAppWidgetOptionsAndView(appWidgetId,
