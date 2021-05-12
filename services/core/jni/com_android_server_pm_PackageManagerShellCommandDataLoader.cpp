@@ -293,8 +293,8 @@ static inline InputDescs openInputs(JNIEnv* env, const JniIds& jni, jobject shel
     auto mode = read<int8_t>(metadata).value_or(STDIN);
     if (mode == LOCAL_FILE) {
         // local file and possibly signature
-        return openLocalFile(env, jni, shellCommand, size,
-                             std::string(metadata.data, metadata.size));
+        auto dataSize = le32toh(read<int32_t>(metadata).value_or(0));
+        return openLocalFile(env, jni, shellCommand, size, std::string(metadata.data, dataSize));
     }
 
     if (!shellCommand) {
