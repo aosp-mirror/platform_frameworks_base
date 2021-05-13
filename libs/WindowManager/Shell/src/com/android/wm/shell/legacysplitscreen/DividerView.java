@@ -685,9 +685,9 @@ public class DividerView extends FrameLayout implements OnTouchListener,
 
         mTmpRect.set(mHandle.getLeft(), mHandle.getTop(), mHandle.getRight(), mHandle.getBottom());
         if (isHorizontalDivision()) {
-            mTmpRect.offsetTo(0, mDividerPositionY);
+            mTmpRect.offsetTo(mHandle.getLeft(), mDividerPositionY);
         } else {
-            mTmpRect.offsetTo(mDividerPositionX, 0);
+            mTmpRect.offsetTo(mDividerPositionX, mHandle.getTop());
         }
         mWindowManagerProxy.setTouchRegion(mTmpRect);
 
