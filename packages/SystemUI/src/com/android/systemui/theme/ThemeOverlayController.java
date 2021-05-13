@@ -15,8 +15,11 @@
  */
 package com.android.systemui.theme;
 
+import static com.android.systemui.theme.ThemeOverlayApplier.COLOR_SOURCE_PRESET;
 import static com.android.systemui.theme.ThemeOverlayApplier.OVERLAY_CATEGORY_ACCENT_COLOR;
 import static com.android.systemui.theme.ThemeOverlayApplier.OVERLAY_CATEGORY_SYSTEM_PALETTE;
+import static com.android.systemui.theme.ThemeOverlayApplier.OVERLAY_COLOR_SOURCE;
+import static com.android.systemui.theme.ThemeOverlayApplier.TIMESTAMP_FIELD;
 
 import android.annotation.Nullable;
 import android.app.WallpaperColors;
@@ -90,12 +93,12 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
     private final UserManager mUserManager;
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final Executor mBgExecutor;
-    private final SecureSettings mSecureSettings;
+    private SecureSettings mSecureSettings;
     private final Executor mMainExecutor;
     private final Handler mBgHandler;
     private final WallpaperManager mWallpaperManager;
     private final boolean mIsMonetEnabled;
-    private final UserTracker mUserTracker;
+    private UserTracker mUserTracker;
     private DeviceProvisionedController mDeviceProvisionedController;
     private WallpaperColors mSystemColors;
     // If fabricated overlays were already created for the current theme.
@@ -112,6 +115,8 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
     private boolean mAcceptColorEvents = true;
     // Defers changing themes until Setup Wizard is done.
     private boolean mDeferredThemeEvaluation;
+    // Determines if we should ignore THEME_CUSTOMIZATION_OVERLAY_PACKAGES setting changes.
+    private boolean mSkipSettingChange;
 
     private final DeviceProvisionedListener mDeviceProvisionedListener =
             new DeviceProvisionedListener() {
@@ -160,6 +165,35 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
                     Log.i(TAG, "During user setup, but allowing first color event: had? "
                             + hadWallpaperColors + " has? " + (mSystemColors != null));
                 }
+            }
+        }
+        // Check if we need to reset to default colors (if a color override was set that is sourced
+        // from the wallpaper)
+        int currentUser = mUserTracker.getUserId();
+        String overlayPackageJson = mSecureSettings.getStringForUser(
+                Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES,
+                currentUser);
+        if (!TextUtils.isEmpty(overlayPackageJson)) {
+            try {
+                JSONObject jsonObject = new JSONObject(overlayPackageJson);
+                if ((jsonObject.has(OVERLAY_CATEGORY_ACCENT_COLOR)
+                        || jsonObject.has(OVERLAY_CATEGORY_SYSTEM_PALETTE))
+                        && !COLOR_SOURCE_PRESET.equals(
+                        jsonObject.optString(OVERLAY_COLOR_SOURCE))) {
+                    mSkipSettingChange = true;
+                    jsonObject.remove(OVERLAY_CATEGORY_ACCENT_COLOR);
+                    jsonObject.remove(OVERLAY_CATEGORY_SYSTEM_PALETTE);
+                    jsonObject.remove(OVERLAY_COLOR_SOURCE);
+                    jsonObject.put(TIMESTAMP_FIELD, System.currentTimeMillis());
+                    if (DEBUG) {
+                        Log.d(TAG, "Updating theme setting from "
+                                + overlayPackageJson + " to " + jsonObject.toString());
+                    }
+                    mSecureSettings.putString(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES,
+                            jsonObject.toString());
+                }
+            } catch (JSONException e) {
+                Log.i(TAG, "Failed to parse THEME_CUSTOMIZATION_OVERLAY_PACKAGES.", e);
             }
         }
         reevaluateSystemTheme(false /* forceReload */);
@@ -230,6 +264,11 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
                         if (!mDeviceProvisionedController.isUserSetup(userId)) {
                             Log.i(TAG, "Theme application deferred when setting changed.");
                             mDeferredThemeEvaluation = true;
+                            return;
+                        }
+                        if (mSkipSettingChange) {
+                            if (DEBUG) Log.d(TAG, "Skipping setting change");
+                            mSkipSettingChange = false;
                             return;
                         }
                         reevaluateSystemTheme(true /* forceReload */);

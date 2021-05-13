@@ -49,7 +49,8 @@ class OngoingCallController @Inject constructor(
     private val systemClock: SystemClock,
     private val activityStarter: ActivityStarter,
     @Main private val mainExecutor: Executor,
-    private val iActivityManager: IActivityManager
+    private val iActivityManager: IActivityManager,
+    private val logger: OngoingCallLogger
 ) : CallbackController<OngoingCallListener> {
 
     /** Null if there's no ongoing call. */
@@ -104,13 +105,23 @@ class OngoingCallController @Inject constructor(
     /**
      * Sets the chip view that will contain ongoing call information.
      *
-     * Should only be called from [CollapedStatusBarFragment].
+     * Should only be called from [CollapsedStatusBarFragment].
      */
     fun setChipView(chipView: ViewGroup) {
         this.chipView = chipView
         if (hasOngoingCall()) {
             updateChip()
         }
+    }
+
+
+    /**
+     * Called when the chip's visibility may have changed.
+     *
+     * Should only be called from [CollapsedStatusBarFragment].
+     */
+    fun notifyChipVisibilityChanged(chipIsVisible: Boolean) {
+        logger.logChipVisibilityChanged(chipIsVisible)
     }
 
     /**
@@ -150,6 +161,7 @@ class OngoingCallController @Inject constructor(
             timeView.start()
 
             currentChipView.setOnClickListener {
+                logger.logChipClicked()
                 activityStarter.postStartActivityDismissingKeyguard(
                         currentOngoingCallInfo.intent, 0,
                         ActivityLaunchAnimator.Controller.fromView(it))

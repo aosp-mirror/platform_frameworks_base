@@ -30,6 +30,7 @@ import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewStub;
+import android.view.WindowInsets;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -153,9 +154,16 @@ public class QSDetail extends LinearLayout {
         MarginLayoutParams lp = (MarginLayoutParams) getLayoutParams();
         lp.topMargin = mContext.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.quick_qs_offset_height);
-        lp.bottomMargin = mContext.getResources().getDimensionPixelSize(
-                R.dimen.qs_container_bottom_padding);
         setLayoutParams(lp);
+    }
+
+    @Override
+    public WindowInsets onApplyWindowInsets(WindowInsets insets) {
+        int bottomNavBar = insets.getInsets(WindowInsets.Type.navigationBars()).bottom;
+        MarginLayoutParams lp = (MarginLayoutParams) getLayoutParams();
+        lp.bottomMargin = bottomNavBar;
+        setLayoutParams(lp);
+        return super.onApplyWindowInsets(insets);
     }
 
     public boolean isClosingDetail() {

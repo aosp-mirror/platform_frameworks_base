@@ -623,8 +623,6 @@
 
     <dimen name="qs_notif_collapsed_space">64dp</dimen>
 
-    <dimen name="qs_container_bottom_padding">24dp</dimen>
-
     <!-- Desired qs icon overlay size. -->
     <dimen name="qs_detail_icon_overlay_size">24dp</dimen>
 
@@ -1292,9 +1290,9 @@
     <dimen name="magnification_mirror_surface_margin">20dp</dimen>
     <dimen name="magnification_frame_move_short">5dp</dimen>
     <dimen name="magnification_frame_move_long">25dp</dimen>
-    <dimen name="magnification_drag_view_size">38dp</dimen>
+    <dimen name="magnification_drag_view_size">36dp</dimen>
     <dimen name="magnification_controls_size">90dp</dimen>
-    <dimen name="magnification_switch_button_size">60dp</dimen>
+    <dimen name="magnification_switch_button_size">48dp</dimen>
     <dimen name="magnification_switch_button_padding">6dp</dimen>
     <dimen name="magnifier_left_right_controls_width">35dp</dimen>
     <dimen name="magnifier_left_right_controls_height">45dp</dimen>
@@ -1492,7 +1490,8 @@
 
     <!-- Wallet activity screen specs -->
     <dimen name="wallet_icon_size">36sp</dimen>
-    <dimen name="wallet_view_header_icon_size">56dp</dimen>
+    <dimen name="wallet_screen_header_icon_size">56dp</dimen>
+    <dimen name="wallet_screen_header_view_size">80dp</dimen>
     <dimen name="card_margin">16dp</dimen>
     <dimen name="card_carousel_dot_offset">24dp</dimen>
     <dimen name="card_carousel_dot_unselected_radius">2dp</dimen>

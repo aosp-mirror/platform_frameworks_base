@@ -92,6 +92,7 @@ import static android.view.WindowManagerPolicyConstants.NAV_BAR_BOTTOM;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_INVALID;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_LEFT;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_RIGHT;
+import static android.window.DisplayAreaOrganizer.FEATURE_UNDEFINED;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_SCREEN_ON;
 import static com.android.server.policy.PhoneWindowManager.TOAST_WINDOW_TIMEOUT;
@@ -2667,7 +2668,8 @@ public class DisplayPolicy {
         if (oldImmersiveMode != newImmersiveMode) {
             mLastImmersiveMode = newImmersiveMode;
             // The immersive confirmation window should be attached to the immersive window root.
-            final int rootDisplayAreaId = win.getRootDisplayArea().mFeatureId;
+            final RootDisplayArea root = win.getRootDisplayArea();
+            final int rootDisplayAreaId = root == null ? FEATURE_UNDEFINED : root.mFeatureId;
             mImmersiveModeConfirmation.immersiveModeChangedLw(rootDisplayAreaId, newImmersiveMode,
                     mService.mPolicy.isUserSetupComplete(),
                     isNavBarEmpty(disableFlags));

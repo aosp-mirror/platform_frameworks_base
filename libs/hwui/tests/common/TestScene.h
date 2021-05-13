@@ -40,6 +40,7 @@ public:
         int reportFrametimeWeight = 0;
         bool renderOffscreen = true;
         bool reportGpuMemoryUsage = false;
+        bool reportGpuMemoryUsageVerbose = false;
     };
 
     template <class T>

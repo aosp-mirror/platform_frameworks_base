@@ -149,7 +149,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
                     prop.supportsDetectInteraction, prop.halControlsPreview,
                     false /* resetLockoutRequiresChallenge */);
             final Sensor sensor = new Sensor(getTag() + "/" + sensorId, this, mContext, mHandler,
-                    internalProp);
+                    internalProp, lockoutResetDispatcher);
 
             mSensors.put(sensorId, sensor);
             Slog.d(getTag(), "Added: " + internalProp);

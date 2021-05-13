@@ -320,8 +320,8 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
                 .build();
         final Task task = activity.getTask();
 
-        assertTrue(activity.supportsMultiWindow2());
-        assertTrue(task.supportsMultiWindow2());
+        assertTrue(activity.supportsMultiWindow());
+        assertTrue(task.supportsMultiWindow());
     }
 
     @Test
@@ -336,14 +336,14 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         // Device config as not support.
         mAtm.mSupportsNonResizableMultiWindow = -1;
 
-        assertFalse(activity.supportsMultiWindow2());
-        assertFalse(task.supportsMultiWindow2());
+        assertFalse(activity.supportsMultiWindow());
+        assertFalse(task.supportsMultiWindow());
 
         // Device config as always support.
         mAtm.mSupportsNonResizableMultiWindow = 1;
 
-        assertTrue(activity.supportsMultiWindow2());
-        assertTrue(task.supportsMultiWindow2());
+        assertTrue(activity.supportsMultiWindow());
+        assertTrue(task.supportsMultiWindow());
 
         // The default config is relying on the screen size.
         mAtm.mSupportsNonResizableMultiWindow = 0;
@@ -351,14 +351,14 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         // Supports on large screen.
         tda.getConfiguration().smallestScreenWidthDp = mAtm.mLargeScreenSmallestScreenWidthDp;
 
-        assertTrue(activity.supportsMultiWindow2());
-        assertTrue(task.supportsMultiWindow2());
+        assertTrue(activity.supportsMultiWindow());
+        assertTrue(task.supportsMultiWindow());
 
         // Not supports on small screen.
         tda.getConfiguration().smallestScreenWidthDp = mAtm.mLargeScreenSmallestScreenWidthDp - 1;
 
-        assertFalse(activity.supportsMultiWindow2());
-        assertFalse(task.supportsMultiWindow2());
+        assertFalse(activity.supportsMultiWindow());
+        assertFalse(task.supportsMultiWindow());
     }
 
     @Test
@@ -381,14 +381,14 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         // Ignore the activity min width/height for determine multi window eligibility.
         mAtm.mRespectsActivityMinWidthHeightMultiWindow = -1;
 
-        assertTrue(activity.supportsMultiWindow2());
-        assertTrue(task.supportsMultiWindow2());
+        assertTrue(activity.supportsMultiWindow());
+        assertTrue(task.supportsMultiWindow());
 
         // Always check the activity min width/height.
         mAtm.mRespectsActivityMinWidthHeightMultiWindow = 1;
 
-        assertFalse(activity.supportsMultiWindow2());
-        assertFalse(task.supportsMultiWindow2());
+        assertFalse(activity.supportsMultiWindow());
+        assertFalse(task.supportsMultiWindow());
 
         // The default config is relying on the screen size.
         mAtm.mRespectsActivityMinWidthHeightMultiWindow = 0;
@@ -396,14 +396,14 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         // Ignore on large screen.
         tda.getConfiguration().smallestScreenWidthDp = mAtm.mLargeScreenSmallestScreenWidthDp;
 
-        assertTrue(activity.supportsMultiWindow2());
-        assertTrue(task.supportsMultiWindow2());
+        assertTrue(activity.supportsMultiWindow());
+        assertTrue(task.supportsMultiWindow());
 
         // Check on small screen.
         tda.getConfiguration().smallestScreenWidthDp = mAtm.mLargeScreenSmallestScreenWidthDp - 1;
 
-        assertFalse(activity.supportsMultiWindow2());
-        assertFalse(task.supportsMultiWindow2());
+        assertFalse(activity.supportsMultiWindow());
+        assertFalse(task.supportsMultiWindow());
     }
 
     @Test
@@ -429,14 +429,14 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         // Always check the activity min width/height.
         mAtm.mSupportsNonResizableMultiWindow = 1;
 
-        assertTrue(activity.supportsMultiWindow2());
-        assertTrue(task.supportsMultiWindow2());
+        assertTrue(activity.supportsMultiWindow());
+        assertTrue(task.supportsMultiWindow());
 
         // The default config is relying on the screen size. Check for small screen
         mAtm.mSupportsNonResizableMultiWindow = 0;
 
-        assertTrue(activity.supportsMultiWindow2());
-        assertTrue(task.supportsMultiWindow2());
+        assertTrue(activity.supportsMultiWindow());
+        assertTrue(task.supportsMultiWindow());
     }
 }
 
