@@ -460,7 +460,7 @@
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Mengisi daya lambat"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Mengisi daya nirkabel"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Tidak mengisi daya"</string>
-    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Tercolok, tidak dapat mengisi baterai sekarang"</string>
+    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Terhubung, tidak mengisi daya"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Terisi"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Dikontrol oleh admin"</string>
     <string name="disabled" msgid="8017887509554714950">"Dinonaktifkan"</string>
