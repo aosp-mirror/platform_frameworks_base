@@ -26,6 +26,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UiContext;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.AttributionSource;
 import android.content.AutofillOptions;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -47,6 +48,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.ApplicationInfoFlags;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.AssetManager;
 import android.content.res.CompatResources;
@@ -60,7 +62,6 @@ import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.content.AttributionSource;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -2492,6 +2493,13 @@ class ContextImpl extends Context {
     @Override
     public Context createPackageContextAsUser(String packageName, int flags, UserHandle user)
             throws NameNotFoundException {
+        return createPackageContextAsUser(packageName, flags, user, 0 /* packageFlags */);
+    }
+
+    @Override
+    public Context createPackageContextAsUser(
+            @NonNull String packageName, @CreatePackageOptions int flags, @NonNull UserHandle user,
+            @ApplicationInfoFlags int packageFlags) throws PackageManager.NameNotFoundException {
         if (packageName.equals("system") || packageName.equals("android")) {
             // The system resources are loaded in every application, so we can safely copy
             // the context without reloading Resources.
@@ -2502,7 +2510,7 @@ class ContextImpl extends Context {
         }
 
         LoadedApk pi = mMainThread.getPackageInfo(packageName, mResources.getCompatibilityInfo(),
-                flags | CONTEXT_REGISTER_PACKAGE, user.getIdentifier());
+                flags | CONTEXT_REGISTER_PACKAGE, user.getIdentifier(), packageFlags);
         if (pi != null) {
             ContextImpl c = new ContextImpl(this, mMainThread, pi, mParams,
                     mAttributionSource.getAttributionTag(),

@@ -33,6 +33,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.Trace;
+import android.os.UserHandle;
 import android.util.AndroidRuntimeException;
 import android.util.ArraySet;
 import android.util.Log;
@@ -416,9 +417,12 @@ public final class WebViewFactory {
             sTimestamps[CREATE_CONTEXT_START] = SystemClock.uptimeMillis();
             try {
                 // Construct an app context to load the Java code into the current app.
-                Context webViewContext = initialApplication.createApplicationContext(
-                        ai,
-                        Context.CONTEXT_INCLUDE_CODE | Context.CONTEXT_IGNORE_SECURITY);
+                Context webViewContext = initialApplication.createPackageContextAsUser(
+                        ai.packageName,
+                        Context.CONTEXT_INCLUDE_CODE | Context.CONTEXT_IGNORE_SECURITY,
+                        UserHandle.getUserHandleForUid(ai.uid),
+                        PackageManager.MATCH_UNINSTALLED_PACKAGES
+                                | PackageManager.MATCH_DEBUG_TRIAGED_MISSING);
                 sPackageInfo = newPackageInfo;
                 return webViewContext;
             } finally {

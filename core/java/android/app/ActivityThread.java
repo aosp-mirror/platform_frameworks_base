@@ -36,6 +36,7 @@ import static com.android.internal.annotations.VisibleForTesting.Visibility.PACK
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.assist.AssistContent;
 import android.app.assist.AssistStructure;
 import android.app.backup.BackupAgent;
@@ -61,6 +62,7 @@ import android.content.ContentCaptureOptions;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Context.CreatePackageOptions;
 import android.content.IContentProvider;
 import android.content.IIntentReceiver;
 import android.content.Intent;
@@ -72,6 +74,7 @@ import android.content.pm.InstrumentationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.PackageManager.ApplicationInfoFlags;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.PermissionInfo;
 import android.content.pm.ProviderInfo;
@@ -2364,16 +2367,22 @@ public final class ActivityThread extends ClientTransactionHandler
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public final LoadedApk getPackageInfo(String packageName, CompatibilityInfo compatInfo,
-            int flags) {
+            @CreatePackageOptions int flags) {
         return getPackageInfo(packageName, compatInfo, flags, UserHandle.myUserId());
     }
 
     public final LoadedApk getPackageInfo(String packageName, CompatibilityInfo compatInfo,
-            int flags, int userId) {
+            @CreatePackageOptions int flags, @UserIdInt int userId) {
+        return getPackageInfo(packageName, compatInfo, flags, userId, 0 /* packageFlags */);
+    }
+
+    public final LoadedApk getPackageInfo(String packageName, CompatibilityInfo compatInfo,
+            @CreatePackageOptions int flags, @UserIdInt int userId,
+            @ApplicationInfoFlags int packageFlags) {
         final boolean differentUser = (UserHandle.myUserId() != userId);
         ApplicationInfo ai = PackageManager.getApplicationInfoAsUserCached(
                 packageName,
-                PackageManager.GET_SHARED_LIBRARY_FILES
+                packageFlags | PackageManager.GET_SHARED_LIBRARY_FILES
                 | PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
                 (userId < 0) ? UserHandle.myUserId() : userId);
         synchronized (mResourcesManager) {
@@ -2416,7 +2425,7 @@ public final class ActivityThread extends ClientTransactionHandler
 
     @UnsupportedAppUsage(trackingBug = 171933273)
     public final LoadedApk getPackageInfo(ApplicationInfo ai, CompatibilityInfo compatInfo,
-            int flags) {
+            @CreatePackageOptions int flags) {
         boolean includeCode = (flags&Context.CONTEXT_INCLUDE_CODE) != 0;
         boolean securityViolation = includeCode && ai.uid != 0
                 && ai.uid != Process.SYSTEM_UID && (mBoundApplication != null
