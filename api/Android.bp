@@ -24,12 +24,17 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
+metalava_cmd = "$(location metalava)"
+// Silence reflection warnings. See b/168689341
+metalava_cmd += " -J--add-opens=java.base/java.util=ALL-UNNAMED "
+metalava_cmd += " --no-banner --format=v2 "
+
 genrule {
     name: "current-api-xml",
     tools: ["metalava"],
     srcs: [":frameworks-base-api-current.txt"],
     out: ["current.api"],
-    cmd: "$(location metalava) --no-banner -convert2xmlnostrip $(in) $(out)",
+    cmd: metalava_cmd + "-convert2xmlnostrip $(in) $(out)",
     visibility: ["//visibility:public"],
 }
 
@@ -56,7 +61,7 @@ genrule {
     ],
     out: ["current.txt"],
     tools: ["metalava"],
-    cmd: "$(location metalava) --no-banner --format=v2 $(in) --api $(out)",
+    cmd: metalava_cmd + "$(in) --api $(out)",
     dists: [
         {
             targets: ["droidcore"],
@@ -81,7 +86,7 @@ genrule {
     ],
     out: ["stdout.txt"],
     tools: ["metalava"],
-    cmd: "$(location metalava) --no-banner --format=v2 " +
+    cmd: metalava_cmd +
         "--check-compatibility:api:released $(location :android.api.public.latest) " +
         "--baseline:compatibility:released $(location :android-incompatibilities.api.public.latest) " +
         "$(location :frameworks-base-api-current.txt) " +
@@ -138,7 +143,7 @@ genrule {
     ],
     out: ["removed.txt"],
     tools: ["metalava"],
-    cmd: "$(location metalava) --no-banner --format=v2 $(in) --api $(out)",
+    cmd: metalava_cmd + "$(in) --api $(out)",
     dists: [
         {
             targets: ["droidcore"],
@@ -174,7 +179,7 @@ genrule {
     ],
     out: ["system-current.txt"],
     tools: ["metalava"],
-    cmd: "$(location metalava) --no-banner --format=v2 $(in) --api $(out)",
+    cmd: metalava_cmd + "$(in) --api $(out)",
     dists: [
         {
             targets: ["droidcore"],
@@ -200,7 +205,7 @@ genrule {
     ],
     out: ["stdout.txt"],
     tools: ["metalava"],
-    cmd: "$(location metalava) --no-banner --format=v2 " +
+    cmd: metalava_cmd +
         "--check-compatibility:api:released $(location :android.api.system.latest) " +
         "--check-compatibility:base $(location :frameworks-base-api-current.txt) " +
         "--baseline:compatibility:released $(location :android-incompatibilities.api.system.latest) " +
@@ -229,7 +234,7 @@ genrule {
     ],
     out: ["system-removed.txt"],
     tools: ["metalava"],
-    cmd: "$(location metalava) --no-banner --format=v2 $(in) --api $(out)",
+    cmd: metalava_cmd + "$(in) --api $(out)",
     dists: [
         {
             targets: ["droidcore"],
@@ -266,7 +271,7 @@ genrule {
     ],
     out: ["module-lib-current.txt"],
     tools: ["metalava"],
-    cmd: "$(location metalava) --no-banner --format=v2 $(in) --api $(out)",
+    cmd: metalava_cmd + "$(in) --api $(out)",
     dists: [
         {
             targets: ["droidcore"],
@@ -291,7 +296,7 @@ genrule {
     ],
     out: ["stdout.txt"],
     tools: ["metalava"],
-    cmd: "$(location metalava) --no-banner --format=v2 " +
+    cmd: metalava_cmd +
         "--check-compatibility:api:released $(location :android.api.module-lib.latest) " +
         // Note: having "public" be the base of module-lib is not perfect -- it should
         // ideally be a merged public+system), but this will  help when migrating from
@@ -323,7 +328,7 @@ genrule {
     ],
     out: ["module-lib-removed.txt"],
     tools: ["metalava"],
-    cmd: "$(location metalava) --no-banner --format=v2 $(in) --api $(out)",
+    cmd: metalava_cmd + "$(in) --api $(out)",
     dists: [
         {
             targets: ["droidcore"],
@@ -364,7 +369,7 @@ genrule {
     ],
     out: ["system-server-current.txt"],
     tools: ["metalava"],
-    cmd: "$(location metalava) --no-banner --format=v2 $(in) --api $(out)",
+    cmd: metalava_cmd + "$(in) --api $(out)",
     dists: [
         {
             targets: ["droidcore"],
@@ -388,7 +393,7 @@ genrule {
     ],
     out: ["system-server-removed.txt"],
     tools: ["metalava"],
-    cmd: "$(location metalava) --no-banner --format=v2 $(in) --api $(out)",
+    cmd: metalava_cmd + "$(in) --api $(out)",
     dists: [
         {
             targets: ["droidcore"],
