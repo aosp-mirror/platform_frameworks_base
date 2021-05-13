@@ -292,7 +292,7 @@
     <!-- no translation found for accessibility_quick_settings_work_mode_off (9106217884005620744) -->
     <skip />
     <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"কাজের মোড চালু আছে"</string>
-    <!-- no translation found for accessibility_quick_settings_work_mode_changed_off (2653550342355027441) -->
+    <!-- no translation found for accessibility_quick_settings_work_mode_changed_off (6422896967647049692) -->
     <skip />
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"কাজের মোড চালু আছে"</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"ডেটা সেভার বন্ধ আছে।"</string>
@@ -1123,9 +1123,9 @@
     <string name="priority_conversations" msgid="3967482288896653039">"গুরুত্বপূর্ণ কথোপকথন"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"সাম্প্রতিক কথোপকথন"</string>
     <string name="okay" msgid="6490552955618608554">"ঠিক আছে"</string>
-    <string name="timestamp" msgid="6577851592534538533">"<xliff:g id="DURATION">%1$s</xliff:g> ঘণ্টা আগে"</string>
+    <string name="timestamp" msgid="6577851592534538533">"<xliff:g id="DURATION">%1$s</xliff:g> আগে"</string>
     <string name="less_than_timestamp" msgid="6598972791137724517">"<xliff:g id="DURATION">%1$s</xliff:g> থেকে কিছু কম সময় আগে"</string>
-    <string name="over_timestamp" msgid="4765793502859358634">"<xliff:g id="DURATION">%1$s</xliff:g> সপ্তাহেরও আগে"</string>
+    <string name="over_timestamp" msgid="4765793502859358634">"এই সময়েরও বেশি আগে: <xliff:g id="DURATION">%1$s</xliff:g>"</string>
     <string name="birthday_status" msgid="2596961629465396761">"জন্মদিন"</string>
     <string name="birthday_status_content_description" msgid="682836371128282925">"এটি হল <xliff:g id="NAME">%1$s</xliff:g>-এর জন্মদিন"</string>
     <string name="upcoming_birthday_status" msgid="2005452239256870351">"জন্মদিন শীঘ্রই আসছে"</string>
@@ -1156,4 +1156,6 @@
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"যাচাই করিয়ে নিন"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"ডিভাইস আনলক করুন"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"খুলতে ফিঙ্গারপ্রিন্ট ব্যবহার করুন"</string>
+    <!-- no translation found for ongoing_phone_call_content_description (5332334388483099947) -->
+    <skip />
 </resources>

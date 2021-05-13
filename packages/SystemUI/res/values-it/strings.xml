@@ -289,11 +289,9 @@
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"Hotspot mobile disattivato."</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"Hotspot mobile attivato."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"Trasmissione dello schermo interrotta."</string>
-    <!-- no translation found for accessibility_quick_settings_work_mode_off (9106217884005620744) -->
-    <skip />
+    <string name="accessibility_quick_settings_work_mode_off" msgid="9106217884005620744">"Modalità Lavoro in pausa."</string>
     <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"Modalità Lavoro attiva."</string>
-    <!-- no translation found for accessibility_quick_settings_work_mode_changed_off (2653550342355027441) -->
-    <skip />
+    <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6422896967647049692">"Modalità Lavoro messa in pausa."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"Modalità Lavoro attivata."</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"Funzione Risparmio dati disattivata."</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"Funzione Risparmio dati attivata."</string>
@@ -412,8 +410,7 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"Limite di <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"Avviso <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"Profilo di lavoro"</string>
-    <!-- no translation found for quick_settings_work_mode_paused (4841109346916998613) -->
-    <skip />
+    <string name="quick_settings_work_mode_paused" msgid="4841109346916998613">"In pausa"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Luminosità notturna"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Attivata al tramonto"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Fino all\'alba"</string>
@@ -672,12 +669,10 @@
     <string name="wallet_title" msgid="5369767670735827105">"Portafoglio"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Espandi"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Sblocca per pagare"</string>
-    <!-- no translation found for wallet_secondary_label_no_card (1282609666895946317) -->
-    <skip />
+    <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"Nessuna configurazione"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Sblocca per usare"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Si è verificato un problema durante il recupero delle tue carte. Riprova più tardi."</string>
-    <!-- no translation found for wallet_lockscreen_settings_label (3539105300870383570) -->
-    <skip />
+    <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Impostazioni schermata di blocco"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Profilo di lavoro"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Modalità aereo"</string>
     <string name="add_tile" msgid="6239678623873086686">"Aggiungi riquadro"</string>
@@ -867,8 +862,7 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"On"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"Off"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"Non disponibile"</string>
-    <!-- no translation found for tile_disabled (373212051546573069) -->
-    <skip />
+    <string name="tile_disabled" msgid="373212051546573069">"Riquadro disattivato"</string>
     <string name="nav_bar" msgid="4642708685386136807">"Barra di navigazione"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"Layout"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"Tipo di pulsante extra sinistra"</string>
@@ -1119,7 +1113,7 @@
     <string name="basic_status" msgid="2315371112182658176">"Apri conversazione"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Widget di conversazione"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Tocca una conversazione per aggiungerla alla schermata Home"</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"Torna qui dopo aver ricevuto qualche messaggio"</string>
+    <string name="no_conversations_text" msgid="7362374212649891057">"Torna qui quando avrai ricevuto qualche messaggio"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Conversazioni prioritarie"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Conversazioni recenti"</string>
     <string name="okay" msgid="6490552955618608554">"OK"</string>
@@ -1156,4 +1150,6 @@
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"effettuare l\'autenticazione"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"accedere al dispositivo"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Usa l\'impronta per aprire"</string>
+    <!-- no translation found for ongoing_phone_call_content_description (5332334388483099947) -->
+    <skip />
 </resources>
