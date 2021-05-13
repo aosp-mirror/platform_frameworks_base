@@ -130,27 +130,43 @@ void CacheManager::trimStaleResources() {
     mGrContext->purgeResourcesNotUsedInMs(std::chrono::seconds(30));
 }
 
+void CacheManager::getMemoryUsage(size_t* cpuUsage, size_t* gpuUsage) {
+    *cpuUsage = 0;
+    *gpuUsage = 0;
+    if (!mGrContext) {
+        return;
+    }
+
+    skiapipeline::SkiaMemoryTracer cpuTracer("category", true);
+    SkGraphics::DumpMemoryStatistics(&cpuTracer);
+    *cpuUsage += cpuTracer.total();
+
+    skiapipeline::SkiaMemoryTracer gpuTracer("category", true);
+    mGrContext->dumpMemoryStatistics(&gpuTracer);
+    *gpuUsage += gpuTracer.total();
+}
+
 void CacheManager::dumpMemoryUsage(String8& log, const RenderState* renderState) {
     if (!mGrContext) {
         log.appendFormat("No valid cache instance.\n");
         return;
     }
 
-    log.appendFormat("Font Cache (CPU):\n");
-    log.appendFormat("  Size: %.2f kB \n", SkGraphics::GetFontCacheUsed() / 1024.0f);
-    log.appendFormat("  Glyph Count: %d \n", SkGraphics::GetFontCacheCountUsed());
-
     std::vector<skiapipeline::ResourcePair> cpuResourceMap = {
             {"skia/sk_resource_cache/bitmap_", "Bitmaps"},
             {"skia/sk_resource_cache/rrect-blur_", "Masks"},
             {"skia/sk_resource_cache/rects-blur_", "Masks"},
             {"skia/sk_resource_cache/tessellated", "Shadows"},
+            {"skia/sk_glyph_cache", "Glyph Cache"},
     };
     skiapipeline::SkiaMemoryTracer cpuTracer(cpuResourceMap, false);
     SkGraphics::DumpMemoryStatistics(&cpuTracer);
     if (cpuTracer.hasOutput()) {
         log.appendFormat("CPU Caches:\n");
         cpuTracer.logOutput(log);
+        log.appendFormat("  Glyph Count: %d \n", SkGraphics::GetFontCacheCountUsed());
+        log.appendFormat("Total CPU memory usage:\n");
+        cpuTracer.logTotals(log);
     }
 
     skiapipeline::SkiaMemoryTracer gpuTracer("category", true);
