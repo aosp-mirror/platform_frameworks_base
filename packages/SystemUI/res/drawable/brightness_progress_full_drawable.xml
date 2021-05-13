@@ -34,7 +34,7 @@
         android:right="@dimen/rounded_slider_icon_inset">
         <com.android.systemui.util.AlphaTintDrawableWrapper
             android:drawable="@drawable/ic_brightness"
-            android:tint="?android:attr/colorBackground"
-            android:alpha="0.8"/>
+            android:tint="?android:attr/textColorPrimaryInverse"
+        />
     </item>
 </layer-list>

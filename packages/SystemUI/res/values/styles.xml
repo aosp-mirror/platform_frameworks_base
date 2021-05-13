@@ -235,7 +235,7 @@
     </style>
 
     <style name="TextAppearance.QS.Status.NoCarrierText">
-        <item name="android:textColor">?android:attr/textColorTertiary</item>
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
     </style>
 
     <style name="TextAppearance.QS.Build">
