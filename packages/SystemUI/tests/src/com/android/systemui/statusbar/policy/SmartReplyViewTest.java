@@ -120,7 +120,7 @@ public class SmartReplyViewTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         mReceiver = new BlockingQueueIntentReceiver();
         mContext.registerReceiver(mReceiver, new IntentFilter(TEST_ACTION));
-        mKeyguardDismissUtil.setDismissHandler((action, unused) -> action.onDismiss());
+        mKeyguardDismissUtil.setDismissHandler((action, unused, afterKgGone) -> action.onDismiss());
         mDependency.injectMockDependency(KeyguardUpdateMonitor.class);
         mDependency.injectMockDependency(ShadeController.class);
         mDependency.injectMockDependency(NotificationRemoteInputManager.class);
@@ -183,7 +183,7 @@ public class SmartReplyViewTest extends SysuiTestCase {
 
     @Test
     public void testSendSmartReply_keyguardCancelled() throws InterruptedException {
-        mKeyguardDismissUtil.setDismissHandler((action, unused) -> { });
+        mKeyguardDismissUtil.setDismissHandler((action, unused, afterKgGone) -> { });
         setSmartReplies(TEST_CHOICES);
 
         mView.getChildAt(2).performClick();
@@ -195,7 +195,8 @@ public class SmartReplyViewTest extends SysuiTestCase {
     public void testSendSmartReply_waitsForKeyguard() throws InterruptedException {
         AtomicReference<OnDismissAction> actionRef = new AtomicReference<>();
 
-        mKeyguardDismissUtil.setDismissHandler((action, unused) -> actionRef.set(action));
+        mKeyguardDismissUtil.setDismissHandler((action, unused, afterKgGone)
+                -> actionRef.set(action));
         setSmartReplies(TEST_CHOICES);
 
         mView.getChildAt(2).performClick();
