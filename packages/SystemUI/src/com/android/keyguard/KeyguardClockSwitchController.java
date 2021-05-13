@@ -185,6 +185,8 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             lp = (RelativeLayout.LayoutParams) nic.getLayoutParams();
             lp.addRule(RelativeLayout.BELOW, mSmartspaceView.getId());
             nic.setLayoutParams(lp);
+
+            mView.setSmartspaceView(mSmartspaceView);
         }
     }
 
@@ -220,7 +222,9 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
      * Set whether or not the lock screen is showing notifications.
      */
     public void setHasVisibleNotifications(boolean hasVisibleNotifications) {
-        mView.setHasVisibleNotifications(hasVisibleNotifications);
+        if (mView.willSwitchToLargeClock(hasVisibleNotifications)) {
+            mLargeClockViewController.animateAppear();
+        }
     }
 
     /**
