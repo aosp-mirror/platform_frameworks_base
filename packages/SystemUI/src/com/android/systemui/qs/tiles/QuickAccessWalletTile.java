@@ -152,7 +152,8 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
 
     @Override
     protected void handleUpdateState(State state, Object arg) {
-        state.label = mLabel;
+        CharSequence label = mQuickAccessWalletClient.getServiceLabel();
+        state.label = label == null ? mLabel : label;
         state.contentDescription = state.label;
         state.icon = ResourceIcon.get(R.drawable.ic_wallet_lockscreen);
         boolean isDeviceLocked = !mKeyguardStateController.isUnlocked();
@@ -197,7 +198,8 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
 
     @Override
     public CharSequence getTileLabel() {
-        return mLabel;
+        CharSequence label = mQuickAccessWalletClient.getServiceLabel();
+        return label == null ? mLabel : label;
     }
 
     private void queryWalletCards() {
@@ -227,7 +229,9 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
             }
             int selectedIndex = response.getSelectedIndex();
             if (selectedIndex >= cards.size()) {
-                Log.d(TAG, "Selected card index out of bounds.");
+                Log.w(TAG, "Error retrieving cards: Invalid selected card index.");
+                mSelectedCard = null;
+                mCardViewDrawable = null;
                 return;
             }
             mSelectedCard = cards.get(selectedIndex);
