@@ -131,6 +131,9 @@ public class AudioSystem
     public static final int SAMPLE_RATE_HZ_MIN = native_getMinSampleRate();
     private static native int native_getMinSampleRate();
 
+    /** @hide */
+    public static final int FCC_24 = 24; // fixed channel count 24; do not change.
+
     // Expose only the getter method publicly so we can change it in the future
     private static final int NUM_STREAM_TYPES = 12;
 

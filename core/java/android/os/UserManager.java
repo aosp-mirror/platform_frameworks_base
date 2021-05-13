@@ -2026,6 +2026,9 @@ public class UserManager {
             case USER_TYPE_SYSTEM_HEADLESS:
                 return FrameworkStatsLog
                         .USER_LIFECYCLE_JOURNEY_REPORTED__USER_TYPE__SYSTEM_HEADLESS;
+            case USER_TYPE_PROFILE_CLONE:
+                return FrameworkStatsLog
+                        .USER_LIFECYCLE_JOURNEY_REPORTED__USER_TYPE__PROFILE_CLONE;
             default:
                 return FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__USER_TYPE__TYPE_UNKNOWN;
         }

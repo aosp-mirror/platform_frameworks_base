@@ -466,8 +466,8 @@ public class UiTranslationController {
                 // traverse the hierarchy to collect ViewTranslationRequests
                 for (int rootNum = 0; rootNum < roots.size(); rootNum++) {
                     View rootView = roots.get(rootNum).getView();
-                    rootView.dispatchRequestTranslation(viewIds, supportedFormats, capability,
-                            requests);
+                    rootView.dispatchCreateViewTranslationRequest(viewIds, supportedFormats,
+                            capability, requests);
                 }
                 mWorkerHandler.sendMessage(PooledLambda.obtainMessage(
                         UiTranslationController::sendTranslationRequest,

@@ -23,6 +23,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ContrastColorUtil;
@@ -57,15 +58,6 @@ public class SmartReplyView extends ViewGroup {
 
     /** Spacing to be applied between views. */
     private final int mSpacing;
-
-    /** Horizontal padding of smart reply buttons if all of them use only one line of text. */
-    private final int mSingleLineButtonPaddingHorizontal;
-
-    /** Horizontal padding of smart reply buttons if at least one of them uses two lines of text. */
-    private final int mDoubleLineButtonPaddingHorizontal;
-
-    /** Increase in width of a smart reply button as a result of using two lines instead of one. */
-    private final int mSingleToDoubleLineButtonWidthIncrease;
 
     private final BreakIterator mBreakIterator;
 
@@ -114,8 +106,6 @@ public class SmartReplyView extends ViewGroup {
                 mDefaultBackgroundColor);
 
         int spacing = 0;
-        int singleLineButtonPaddingHorizontal = 0;
-        int doubleLineButtonPaddingHorizontal = 0;
         int strokeWidth = 0;
 
         final TypedArray arr = context.obtainStyledAttributes(attrs, R.styleable.SmartReplyView,
@@ -125,10 +115,6 @@ public class SmartReplyView extends ViewGroup {
             int attr = arr.getIndex(i);
             if (attr == R.styleable.SmartReplyView_spacing) {
                 spacing = arr.getDimensionPixelSize(i, 0);
-            } else if (attr == R.styleable.SmartReplyView_singleLineButtonPaddingHorizontal) {
-                singleLineButtonPaddingHorizontal = arr.getDimensionPixelSize(i, 0);
-            } else if (attr == R.styleable.SmartReplyView_doubleLineButtonPaddingHorizontal) {
-                doubleLineButtonPaddingHorizontal = arr.getDimensionPixelSize(i, 0);
             } else if (attr == R.styleable.SmartReplyView_buttonStrokeWidth) {
                 strokeWidth = arr.getDimensionPixelSize(i, 0);
             }
@@ -137,10 +123,6 @@ public class SmartReplyView extends ViewGroup {
 
         mStrokeWidth = strokeWidth;
         mSpacing = spacing;
-        mSingleLineButtonPaddingHorizontal = singleLineButtonPaddingHorizontal;
-        mDoubleLineButtonPaddingHorizontal = doubleLineButtonPaddingHorizontal;
-        mSingleToDoubleLineButtonWidthIncrease =
-                2 * (doubleLineButtonPaddingHorizontal - singleLineButtonPaddingHorizontal);
 
         mBreakIterator = BreakIterator.getLineInstance();
 
@@ -222,6 +204,12 @@ public class SmartReplyView extends ViewGroup {
         return new LayoutParams(params.width, params.height);
     }
 
+    private void clearLayoutLineCount(View view) {
+        if (view instanceof TextView) {
+            ((TextView) view).nullLayouts();
+        }
+    }
+
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         final int targetWidth = MeasureSpec.getMode(widthMeasureSpec) == MeasureSpec.UNSPECIFIED
@@ -237,8 +225,7 @@ public class SmartReplyView extends ViewGroup {
 
         SmartSuggestionMeasures accumulatedMeasures = new SmartSuggestionMeasures(
                 mPaddingLeft + mPaddingRight,
-                0 /* maxChildHeight */,
-                mSingleLineButtonPaddingHorizontal);
+                0 /* maxChildHeight */);
         int displayedChildCount = 0;
 
         // Set up a list of suggestions where actions come before replies. Note that the Buttons
@@ -268,8 +255,7 @@ public class SmartReplyView extends ViewGroup {
                 continue;
             }
 
-            child.setPadding(accumulatedMeasures.mButtonPaddingHorizontal, child.getPaddingTop(),
-                    accumulatedMeasures.mButtonPaddingHorizontal, child.getPaddingBottom());
+            clearLayoutLineCount(child);
             child.measure(MEASURE_SPEC_ANY_LENGTH, heightMeasureSpec);
 
             coveredSuggestions.add(child);
@@ -298,18 +284,6 @@ public class SmartReplyView extends ViewGroup {
             accumulatedMeasures.mMeasuredWidth += spacing + childWidth;
             accumulatedMeasures.mMaxChildHeight =
                     Math.max(accumulatedMeasures.mMaxChildHeight, childHeight);
-
-            // Do we need to increase the number of lines in smart reply buttons to two?
-            final boolean increaseToTwoLines =
-                    (accumulatedMeasures.mButtonPaddingHorizontal
-                            == mSingleLineButtonPaddingHorizontal)
-                    && (lineCount == 2 || accumulatedMeasures.mMeasuredWidth > targetWidth);
-            if (increaseToTwoLines) {
-                accumulatedMeasures.mMeasuredWidth +=
-                        (displayedChildCount + 1) * mSingleToDoubleLineButtonWidthIncrease;
-                accumulatedMeasures.mButtonPaddingHorizontal =
-                        mDoubleLineButtonPaddingHorizontal;
-            }
 
             // If the last button doesn't fit into the remaining width, try squeezing preceding
             // smart reply buttons.
@@ -372,17 +346,10 @@ public class SmartReplyView extends ViewGroup {
         mCandidateButtonQueueForSqueezing.clear();
 
         // Finally, we need to re-measure some buttons.
-        remeasureButtonsIfNecessary(accumulatedMeasures.mButtonPaddingHorizontal,
-                                    accumulatedMeasures.mMaxChildHeight);
+        remeasureButtonsIfNecessary(accumulatedMeasures.mMaxChildHeight);
 
         int buttonHeight = Math.max(getSuggestedMinimumHeight(), mPaddingTop
                 + accumulatedMeasures.mMaxChildHeight + mPaddingBottom);
-
-        // Set the corner radius to half the button height to make the side of the buttons look like
-        // a semicircle.
-        for (View smartSuggestionButton : smartSuggestions) {
-            setCornerRadius((Button) smartSuggestionButton, ((float) buttonHeight) / 2);
-        }
 
         setMeasuredDimension(
                 resolveSize(Math.max(getSuggestedMinimumWidth(),
@@ -411,18 +378,14 @@ public class SmartReplyView extends ViewGroup {
     private static class SmartSuggestionMeasures {
         int mMeasuredWidth = -1;
         int mMaxChildHeight = -1;
-        int mButtonPaddingHorizontal = -1;
 
-        SmartSuggestionMeasures(int measuredWidth, int maxChildHeight,
-                int buttonPaddingHorizontal) {
+        SmartSuggestionMeasures(int measuredWidth, int maxChildHeight) {
             this.mMeasuredWidth = measuredWidth;
             this.mMaxChildHeight = maxChildHeight;
-            this.mButtonPaddingHorizontal = buttonPaddingHorizontal;
         }
 
         public SmartSuggestionMeasures clone() {
-            return new SmartSuggestionMeasures(
-                    mMeasuredWidth, mMaxChildHeight, mButtonPaddingHorizontal);
+            return new SmartSuggestionMeasures(mMeasuredWidth, mMaxChildHeight);
         }
     }
 
@@ -553,17 +516,11 @@ public class SmartReplyView extends ViewGroup {
 
     private int squeezeButtonToTextWidth(Button button, int heightMeasureSpec, int textWidth) {
         int oldWidth = button.getMeasuredWidth();
-        if (button.getPaddingLeft() != mDoubleLineButtonPaddingHorizontal) {
-            // Correct for the fact that the button was laid out with single-line horizontal
-            // padding.
-            oldWidth += mSingleToDoubleLineButtonWidthIncrease;
-        }
 
         // Re-measure the squeezed smart reply button.
-        button.setPadding(mDoubleLineButtonPaddingHorizontal, button.getPaddingTop(),
-                mDoubleLineButtonPaddingHorizontal, button.getPaddingBottom());
+        clearLayoutLineCount(button);
         final int widthMeasureSpec = MeasureSpec.makeMeasureSpec(
-                2 * mDoubleLineButtonPaddingHorizontal + textWidth
+                button.getPaddingLeft() + button.getPaddingRight() + textWidth
                       + getLeftCompoundDrawableWidthWithPadding(button), MeasureSpec.AT_MOST);
         button.measure(widthMeasureSpec, heightMeasureSpec);
 
@@ -579,8 +536,7 @@ public class SmartReplyView extends ViewGroup {
         }
     }
 
-    private void remeasureButtonsIfNecessary(
-            int buttonPaddingHorizontal, int maxChildHeight) {
+    private void remeasureButtonsIfNecessary(int maxChildHeight) {
         final int maxChildHeightMeasure =
                 MeasureSpec.makeMeasureSpec(maxChildHeight, MeasureSpec.EXACTLY);
 
@@ -602,24 +558,7 @@ public class SmartReplyView extends ViewGroup {
                 newWidth = Integer.MAX_VALUE;
             }
 
-            // Re-measure reason 2: The button's horizontal padding is incorrect (because it was
-            // measured with the wrong number of lines).
-            if (child.getPaddingLeft() != buttonPaddingHorizontal) {
-                requiresNewMeasure = true;
-                if (newWidth != Integer.MAX_VALUE) {
-                    if (buttonPaddingHorizontal == mSingleLineButtonPaddingHorizontal) {
-                        // Change padding (2->1 line).
-                        newWidth -= mSingleToDoubleLineButtonWidthIncrease;
-                    } else {
-                        // Change padding (1->2 lines).
-                        newWidth += mSingleToDoubleLineButtonWidthIncrease;
-                    }
-                }
-                child.setPadding(buttonPaddingHorizontal, child.getPaddingTop(),
-                        buttonPaddingHorizontal, child.getPaddingBottom());
-            }
-
-            // Re-measure reason 3: The button's height is less than the max height of all buttons
+            // Re-measure reason 2: The button's height is less than the max height of all buttons
             // (all should have the same height).
             if (child.getMeasuredHeight() != maxChildHeight) {
                 requiresNewMeasure = true;
@@ -723,23 +662,6 @@ public class SmartReplyView extends ViewGroup {
             button.setBackground(drawable);
         }
         button.setTextColor(mCurrentTextColor);
-    }
-
-    private void setCornerRadius(Button button, float radius) {
-        Drawable drawable = button.getBackground();
-        if (drawable instanceof RippleDrawable) {
-            // Mutate in case other notifications are using this drawable.
-            drawable = drawable.mutate();
-            RippleDrawable ripple = (RippleDrawable) drawable;
-            Drawable inset = ripple.getDrawable(0);
-            if (inset instanceof InsetDrawable) {
-                Drawable background = ((InsetDrawable) inset).getDrawable();
-                if (background instanceof GradientDrawable) {
-                    GradientDrawable gradientDrawable = (GradientDrawable) background;
-                    gradientDrawable.setCornerRadius(radius);
-                }
-            }
-        }
     }
 
     enum SmartButtonType {

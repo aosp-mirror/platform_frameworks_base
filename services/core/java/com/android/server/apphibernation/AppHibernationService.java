@@ -296,9 +296,7 @@ public final class AppHibernationService extends SystemService {
                         FrameworkStatsLog.USER_LEVEL_HIBERNATION_STATE_CHANGED,
                         stateSnapshot.packageName,
                         userIdSnapshot,
-                        stateSnapshot.hibernated,
-                        // TODO(b/187224817): This isn't the expected value right now.
-                        stateSnapshot.lastUnhibernatedMs);
+                        stateSnapshot.hibernated);
             });
             List<UserLevelState> states = new ArrayList<>(mUserStates.get(userId).values());
             mUserDiskStores.get(userId).scheduleWriteHibernationStates(states);

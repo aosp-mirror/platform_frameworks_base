@@ -2682,6 +2682,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
     }
 
+    /**
+     * Move the touch gesture from the currently touched window on this display to this window.
+     */
+    public boolean transferTouch() {
+        return mWmService.mInputManager.transferTouch(mInputChannelToken);
+    }
+
     void disposeInputChannel() {
         if (mDeadWindowEventReceiver != null) {
             mDeadWindowEventReceiver.dispose();
