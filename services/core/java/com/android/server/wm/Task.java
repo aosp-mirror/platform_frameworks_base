@@ -61,6 +61,7 @@ import static android.provider.Settings.Secure.USER_SETUP_COMPLETE;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.SurfaceControl.METADATA_TASK_ID;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_APP_CRASHED;
@@ -1668,6 +1669,14 @@ class Task extends WindowContainer<WindowContainer> {
         final boolean isUidPresent = getActivity(p) != null;
         p.recycle();
         return isUidPresent;
+    }
+
+    ActivityRecord topActivityContainsStartingWindow() {
+        if (getParent() == null) {
+            return null;
+        }
+        return getActivity((r) -> r.getWindow(window ->
+                window.getBaseType() == TYPE_APPLICATION_STARTING) != null);
     }
 
     ActivityRecord topActivityWithStartingWindow() {
