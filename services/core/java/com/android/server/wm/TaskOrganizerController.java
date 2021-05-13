@@ -38,7 +38,6 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.RemoteException;
-import android.os.SystemProperties;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.SurfaceControl;
@@ -75,9 +74,6 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
      */
     private static final int REPORT_CONFIGS = CONTROLLABLE_CONFIGS;
     private static final int REPORT_WINDOW_CONFIGS = CONTROLLABLE_WINDOW_CONFIGS;
-
-    private static final boolean DEBUG_ENABLE_REVEAL_ANIMATION =
-            SystemProperties.getBoolean("persist.debug.enable_reveal_animation", false);
 
     // The set of modes that are currently supports
     // TODO: Remove once the task organizer can support all modes
@@ -187,8 +183,8 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
             SurfaceControl windowAnimationLeash = null;
             Rect mainFrame = null;
             final boolean playShiftUpAnimation = !task.inMultiWindowMode();
-            if (prepareAnimation && playShiftUpAnimation && DEBUG_ENABLE_REVEAL_ANIMATION) {
-                final ActivityRecord topActivity = task.topActivityWithStartingWindow();
+            if (prepareAnimation && playShiftUpAnimation) {
+                final ActivityRecord topActivity = task.topActivityContainsStartingWindow();
                 if (topActivity != null) {
                     final WindowState mainWindow =
                             topActivity.findMainWindow(false/* includeStartingApp */);
