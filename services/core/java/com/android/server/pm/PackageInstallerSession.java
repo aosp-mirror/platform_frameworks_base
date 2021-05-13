@@ -2678,12 +2678,20 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         final String packageNameToLog =
                 (params.installFlags & PackageManager.INSTALL_FROM_ADB) == 0 ? packageName : "";
         final long currentTimestamp = System.currentTimeMillis();
+        final int packageUid;
+        if (returnCode != INSTALL_SUCCEEDED) {
+            // Package didn't install; no valid uid
+            packageUid = Process.INVALID_UID;
+        } else {
+            packageUid = mPm.getPackageUid(packageName, 0, userId);
+        }
         FrameworkStatsLog.write(FrameworkStatsLog.PACKAGE_INSTALLER_V2_REPORTED,
                 isIncrementalInstallation(),
                 packageNameToLog,
                 currentTimestamp - createdMillis,
                 returnCode,
-                getApksSize(packageName));
+                getApksSize(packageName),
+                packageUid);
     }
 
     private long getApksSize(String packageName) {
