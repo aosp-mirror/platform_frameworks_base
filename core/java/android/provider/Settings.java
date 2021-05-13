@@ -16770,6 +16770,12 @@ public final class Settings {
              * @hide
              */
             public static final String BURN_IN_PROTECTION_ENABLED = "burn_in_protection";
+
+            /**
+             * Whether the device has combined location setting enabled.
+             * @hide
+             */
+            public static final String COMBINED_LOCATION_ENABLED = "combined_location_enable";
         }
     }
 
