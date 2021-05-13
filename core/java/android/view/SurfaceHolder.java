@@ -151,7 +151,7 @@ public interface SurfaceHolder {
     }
 
     /**
-     * Add a Callback interface for this holder.  There can several Callback
+     * Add a Callback interface for this holder.  There can be several Callback
      * interfaces associated with a holder.
      *
      * @param callback The new Callback interface.
