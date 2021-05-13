@@ -28,11 +28,13 @@ import static org.mockito.Mockito.when;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.test.mock.MockContext;
+import android.util.SparseArray;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.net.VpnProfile;
+import com.android.internal.util.MessageUtils;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -118,5 +120,19 @@ public class VpnManagerTest {
                 .setMetered(true)
                 .setAuthPsk(PSK_BYTES)
                 .build();
+    }
+
+    @Test
+    public void testVpnTypesEqual() throws Exception {
+        SparseArray<String> vmVpnTypes = MessageUtils.findMessageNames(
+                new Class[] { VpnManager.class }, new String[]{ "TYPE_VPN_" });
+        SparseArray<String> nativeVpnType = MessageUtils.findMessageNames(
+                new Class[] { NativeVpnType.class }, new String[]{ "" });
+
+        // TYPE_VPN_NONE = -1 is only defined in VpnManager.
+        assertEquals(vmVpnTypes.size() - 1, nativeVpnType.size());
+        for (int i = VpnManager.TYPE_VPN_SERVICE; i < vmVpnTypes.size(); i++) {
+            assertEquals(vmVpnTypes.get(i), "TYPE_VPN_" + nativeVpnType.get(i));
+        }
     }
 }
