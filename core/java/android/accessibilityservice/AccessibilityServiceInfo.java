@@ -373,7 +373,6 @@ public class AccessibilityServiceInfo implements Parcelable {
      * #FLAG_REQUEST_MULTI_FINGER_GESTURES} is disabled this flag has no effect.
      *
      * @see #FLAG_REQUEST_TOUCH_EXPLORATION_MODE
-     * @hide
      */
     public static final int FLAG_REQUEST_2_FINGER_PASSTHROUGH = 0x0002000;
 
