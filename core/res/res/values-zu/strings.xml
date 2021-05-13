@@ -1562,7 +1562,7 @@
     <string name="wireless_display_route_description" msgid="8297563323032966831">"Ukubonisa okungenazintambo"</string>
     <string name="media_route_button_content_description" msgid="2299223698196869956">"Abalingisi"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"Xhuma kudivayisi"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Lingisa isikrini kudivayisi"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Sakaza isikrini kudivayisi"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"Isesha amadivayisi…"</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"Izilungiselelo"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Nqamula"</string>
@@ -1875,7 +1875,7 @@
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Isaziso sohlelo lokusebenza olungokwezifiso"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"Vumela i-<xliff:g id="APP">%1$s</xliff:g> ukuthi idale umsebenzisi omusha nge-<xliff:g id="ACCOUNT">%2$s</xliff:g> (Umsebenzisi onale akhawunti usevele ukhona) ?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"Vumela i-<xliff:g id="APP">%1$s</xliff:g> ukuthi idale umsebenzisi omusha nge-<xliff:g id="ACCOUNT">%2$s</xliff:g> ?"</string>
-    <string name="language_selection_title" msgid="52674936078683285">"Engeza ulwimi"</string>
+    <string name="language_selection_title" msgid="52674936078683285">"Engeza ulimi"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"Okuncamelayo kwesifunda"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Thayipha igama lolimi"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Okuphakanyisiwe"</string>

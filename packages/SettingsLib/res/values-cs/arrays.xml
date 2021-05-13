@@ -217,7 +217,7 @@
     <item msgid="2464080977843960236">"Měřítko animace 10x"</item>
   </string-array>
   <string-array name="overlay_display_devices_entries">
-    <item msgid="4497393944195787240">"Žádný"</item>
+    <item msgid="4497393944195787240">"Žádná"</item>
     <item msgid="8461943978957133391">"480p"</item>
     <item msgid="6923083594932909205">"480p (zabezpečeno)"</item>
     <item msgid="1226941831391497335">"720p"</item>
