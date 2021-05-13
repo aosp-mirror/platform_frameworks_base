@@ -20,7 +20,7 @@
     <solid
         android:color="@color/privacy_chip_background"/>
     <size
-        android:width="6dp"
-        android:height="6dp"
+        android:width="@dimen/ongoing_appops_dot_diameter"
+        android:height="@dimen/ongoing_appops_dot_diameter"
         />
 </shape>

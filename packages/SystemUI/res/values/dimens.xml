@@ -1239,6 +1239,11 @@
     <dimen name="ongoing_appops_chip_icon_size">16dp</dimen>
     <!-- Radius of Ongoing App Ops chip corners -->
     <dimen name="ongoing_appops_chip_bg_corner_radius">28dp</dimen>
+    <!--  One or two privacy items  -->
+    <dimen name="ongoing_appops_chip_min_width">56dp</dimen>
+    <!--  Three privacy items. This value must not be exceeded  -->
+    <dimen name="ongoing_appops_chip_max_width">76dp</dimen>
+    <dimen name="ongoing_appops_dot_diameter">6dp</dimen>
 
     <dimen name="ongoing_appops_dialog_side_margins">@dimen/notification_shade_content_margin_horizontal</dimen>
 
