@@ -57,6 +57,7 @@ import com.android.server.biometrics.sensors.HalClientMonitor;
 import com.android.server.biometrics.sensors.Interruptable;
 import com.android.server.biometrics.sensors.LockoutCache;
 import com.android.server.biometrics.sensors.LockoutConsumer;
+import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.RemovalConsumer;
 import com.android.server.biometrics.sensors.StartUserClient;
 import com.android.server.biometrics.sensors.StopUserClient;
@@ -124,10 +125,16 @@ public class Sensor {
         private final int mSensorId;
         private final int mUserId;
         @NonNull
+        private final LockoutCache mLockoutCache;
+        @NonNull
+        private final LockoutResetDispatcher mLockoutResetDispatcher;
+        @NonNull
         private final Callback mCallback;
 
         HalSessionCallback(@NonNull Context context, @NonNull Handler handler, @NonNull String tag,
                 @NonNull UserAwareBiometricScheduler scheduler, int sensorId, int userId,
+                @NonNull LockoutCache lockoutTracker,
+                @NonNull LockoutResetDispatcher lockoutResetDispatcher,
                 @NonNull Callback callback) {
             mContext = context;
             mHandler = handler;
@@ -135,6 +142,8 @@ public class Sensor {
             mScheduler = scheduler;
             mSensorId = sensorId;
             mUserId = userId;
+            mLockoutCache = lockoutTracker;
+            mLockoutResetDispatcher = lockoutResetDispatcher;
             mCallback = callback;
         }
 
@@ -327,13 +336,15 @@ public class Sensor {
             mHandler.post(() -> {
                 final BaseClientMonitor client = mScheduler.getCurrentClient();
                 if (!(client instanceof FaceResetLockoutClient)) {
-                    Slog.e(mTag, "onLockoutCleared for non-resetLockout client: "
-                            + Utils.getClientName(client));
-                    return;
+                    Slog.d(mTag, "onLockoutCleared outside of resetLockout by HAL");
+                    FaceResetLockoutClient.resetLocalLockoutStateToNone(mSensorId, mUserId,
+                            mLockoutCache, mLockoutResetDispatcher);
+                } else {
+                    Slog.d(mTag, "onLockoutCleared after resetLockout");
+                    final FaceResetLockoutClient resetLockoutClient =
+                            (FaceResetLockoutClient) client;
+                    resetLockoutClient.onLockoutCleared();
                 }
-
-                final FaceResetLockoutClient resetLockoutClient = (FaceResetLockoutClient) client;
-                resetLockoutClient.onLockoutCleared();
             });
         }
 
@@ -465,7 +476,8 @@ public class Sensor {
     }
 
     Sensor(@NonNull String tag, @NonNull FaceProvider provider, @NonNull Context context,
-            @NonNull Handler handler, @NonNull FaceSensorPropertiesInternal sensorProperties) {
+            @NonNull Handler handler, @NonNull FaceSensorPropertiesInternal sensorProperties,
+            @NonNull LockoutResetDispatcher lockoutResetDispatcher) {
         mTag = tag;
         mProvider = provider;
         mContext = context;
@@ -493,7 +505,8 @@ public class Sensor {
                         final int sensorId = mSensorProperties.sensorId;
 
                         final HalSessionCallback resultController = new HalSessionCallback(mContext,
-                                mHandler, mTag, mScheduler, sensorId, newUserId, callback);
+                                mHandler, mTag, mScheduler, sensorId, newUserId, mLockoutCache,
+                                lockoutResetDispatcher, callback);
 
                         final StartUserClient.UserStartedCallback<ISession> userStartedCallback =
                                 (userIdStarted, newSession) -> {

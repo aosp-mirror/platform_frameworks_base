@@ -80,9 +80,24 @@ class FingerprintResetLockoutClient extends HalClientMonitor<ISession> implement
     }
 
     void onLockoutCleared() {
-        mLockoutCache.setLockoutModeForUser(getTargetUserId(), LockoutTracker.LOCKOUT_NONE);
-        mLockoutResetDispatcher.notifyLockoutResetCallbacks(getSensorId());
+        resetLocalLockoutStateToNone(getSensorId(), getTargetUserId(), mLockoutCache,
+                mLockoutResetDispatcher);
         mCallback.onClientFinished(this, true /* success */);
+    }
+
+    /**
+     * Reset the local lockout state and notify any listeners.
+     *
+     * This should only be called when the HAL sends a reset request directly to the
+     * framework (i.e. time based reset, etc.). When the HAL is responding to a
+     * resetLockout request from an instance of this client {@link #onLockoutCleared()} should
+     * be used instead.
+     */
+    static void resetLocalLockoutStateToNone(int sensorId, int userId,
+            @NonNull LockoutCache lockoutTracker,
+            @NonNull LockoutResetDispatcher lockoutResetDispatcher) {
+        lockoutTracker.setLockoutModeForUser(userId, LockoutTracker.LOCKOUT_NONE);
+        lockoutResetDispatcher.notifyLockoutResetCallbacks(sensorId);
     }
 
     @Override
