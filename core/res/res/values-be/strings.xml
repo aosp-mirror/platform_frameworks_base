@@ -1602,7 +1602,7 @@
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"Сістэма"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="4214648773120426288">"Bluetooth-аўдыё"</string>
     <string name="wireless_display_route_description" msgid="8297563323032966831">"Бесправадны дысплей"</string>
-    <string name="media_route_button_content_description" msgid="2299223698196869956">"Перадача"</string>
+    <string name="media_route_button_content_description" msgid="2299223698196869956">"Трансляцыя"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"Падключыцца да прылады"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Трансліраваць экран на прыладу"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"Пошук прылад..."</string>
@@ -1692,8 +1692,8 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Гатова"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Дэактываваць камбінацыю хуткага доступу"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Выкарыстоўваць камбінацыю хуткага доступу"</string>
-    <string name="color_inversion_feature_name" msgid="326050048927789012">"Інверсія колеру"</string>
-    <string name="color_correction_feature_name" msgid="3655077237805422597">"Карэкцыя колеру"</string>
+    <string name="color_inversion_feature_name" msgid="326050048927789012">"Інверсія колераў"</string>
+    <string name="color_correction_feature_name" msgid="3655077237805422597">"Карэкцыя колераў"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Клавішы гучнасці ўтрымліваліся націснутымі. Уключана служба \"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\"."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Клавішы гучнасці ўтрымліваліся націснутымі. Служба \"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\" выключана."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Каб карыстацца сэрвісам \"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\", націсніце і ўтрымлівайце на працягу трох секунд абедзве клавішы гучнасці"</string>
