@@ -28,6 +28,7 @@ import static com.android.server.appsearch.external.localstorage.util.PrefixUtil
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.WorkerThread;
+import android.app.appsearch.AppSearchResult;
 import android.app.appsearch.AppSearchSchema;
 import android.app.appsearch.GenericDocument;
 import android.app.appsearch.GetByDocumentIdRequest;
@@ -38,6 +39,7 @@ import android.app.appsearch.SearchSpec;
 import android.app.appsearch.SetSchemaResponse;
 import android.app.appsearch.StorageInfo;
 import android.app.appsearch.exceptions.AppSearchException;
+import android.app.appsearch.util.LogUtil;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -147,8 +149,11 @@ public final class AppSearchImpl implements Closeable {
 
     private final ReadWriteLock mReadWriteLock = new ReentrantReadWriteLock();
 
+    private final LogUtil mLogUtil = new LogUtil(TAG);
+
     @GuardedBy("mReadWriteLock")
-    private final IcingSearchEngine mIcingSearchEngineLocked;
+    @VisibleForTesting
+    final IcingSearchEngine mIcingSearchEngineLocked;
 
     @GuardedBy("mReadWriteLock")
     private final VisibilityStore mVisibilityStoreLocked;
@@ -216,7 +221,7 @@ public final class AppSearchImpl implements Closeable {
         appSearchImpl.initializeVisibilityStore();
         long prepareVisibilityStoreLatencyEndMillis = SystemClock.elapsedRealtime();
 
-        if (logger != null && initStatsBuilder != null) {
+        if (logger != null) {
             initStatsBuilder
                     .setTotalLatencyMillis(
                             (int) (SystemClock.elapsedRealtime() - totalLatencyStartMillis))
@@ -247,66 +252,91 @@ public final class AppSearchImpl implements Closeable {
                     IcingSearchEngineOptions.newBuilder()
                             .setBaseDir(icingDir.getAbsolutePath())
                             .build();
+            mLogUtil.piiTrace("Constructing IcingSearchEngine, request", options);
             mIcingSearchEngineLocked = new IcingSearchEngine(options);
+            mLogUtil.piiTrace(
+                    "Constructing IcingSearchEngine, response",
+                    Objects.hashCode(mIcingSearchEngineLocked));
+
             mVisibilityStoreLocked =
                     new VisibilityStore(this, context, userId, globalQuerierPackage);
-            InitializeResultProto initializeResultProto = mIcingSearchEngineLocked.initialize();
 
-            if (initStatsBuilder != null) {
-                initStatsBuilder
-                        .setStatusCode(
-                                statusProtoToAppSearchException(initializeResultProto.getStatus())
-                                        .getResultCode())
-                        // TODO(b/173532925) how to get DeSyncs value
-                        .setHasDeSync(false);
-                AppSearchLoggerHelper.copyNativeStats(
-                        initializeResultProto.getInitializeStats(), initStatsBuilder);
-            }
-
-            long prepareSchemaAndNamespacesLatencyStartMillis = SystemClock.elapsedRealtime();
-            SchemaProto schemaProto;
-            GetAllNamespacesResultProto getAllNamespacesResultProto = null;
+            // The core initialization procedure. If any part of this fails, we bail into
+            // resetLocked(), deleting all data (but hopefully allowing AppSearchImpl to come up).
             try {
-                checkSuccess(initializeResultProto.getStatus());
-                schemaProto = getSchemaProtoLocked();
-                getAllNamespacesResultProto = mIcingSearchEngineLocked.getAllNamespaces();
-                checkSuccess(getAllNamespacesResultProto.getStatus());
-            } catch (AppSearchException e) {
-                Log.w(TAG, "Error initializing, resetting IcingSearchEngine.", e);
-                if (initStatsBuilder != null && getAllNamespacesResultProto != null) {
+                mLogUtil.piiTrace("icingSearchEngine.initialize, request");
+                InitializeResultProto initializeResultProto = mIcingSearchEngineLocked.initialize();
+                mLogUtil.piiTrace(
+                        "icingSearchEngine.initialize, response",
+                        initializeResultProto.getStatus(),
+                        initializeResultProto);
+
+                if (initStatsBuilder != null) {
                     initStatsBuilder
                             .setStatusCode(
-                                    statusProtoToAppSearchException(
-                                                    getAllNamespacesResultProto.getStatus())
-                                            .getResultCode())
+                                    statusProtoToResultCode(initializeResultProto.getStatus()))
+                            // TODO(b/173532925) how to get DeSyncs value
+                            .setHasDeSync(false);
+                    AppSearchLoggerHelper.copyNativeStats(
+                            initializeResultProto.getInitializeStats(), initStatsBuilder);
+                }
+
+                checkSuccess(initializeResultProto.getStatus());
+
+                long prepareSchemaAndNamespacesLatencyStartMillis = SystemClock.elapsedRealtime();
+                SchemaProto schemaProto = getSchemaProtoLocked();
+
+                mLogUtil.piiTrace("init:getAllNamespaces, request");
+                GetAllNamespacesResultProto getAllNamespacesResultProto =
+                        mIcingSearchEngineLocked.getAllNamespaces();
+                mLogUtil.piiTrace(
+                        "init:getAllNamespaces, response",
+                        getAllNamespacesResultProto.getNamespacesCount(),
+                        getAllNamespacesResultProto);
+
+                if (initStatsBuilder != null) {
+                    initStatsBuilder
+                            .setStatusCode(
+                                    statusProtoToResultCode(
+                                            getAllNamespacesResultProto.getStatus()))
                             .setPrepareSchemaAndNamespacesLatencyMillis(
                                     (int)
                                             (SystemClock.elapsedRealtime()
                                                     - prepareSchemaAndNamespacesLatencyStartMillis));
                 }
+
+                checkSuccess(getAllNamespacesResultProto.getStatus());
+
+                // Populate schema map
+                for (SchemaTypeConfigProto schema : schemaProto.getTypesList()) {
+                    String prefixedSchemaType = schema.getSchemaType();
+                    addToMap(mSchemaMapLocked, getPrefix(prefixedSchemaType), schema);
+                }
+
+                // Populate namespace map
+                for (String prefixedNamespace : getAllNamespacesResultProto.getNamespacesList()) {
+                    addToMap(mNamespaceMapLocked, getPrefix(prefixedNamespace), prefixedNamespace);
+                }
+
+                // logging prepare_schema_and_namespaces latency
+                if (initStatsBuilder != null) {
+                    initStatsBuilder.setPrepareSchemaAndNamespacesLatencyMillis(
+                            (int)
+                                    (SystemClock.elapsedRealtime()
+                                            - prepareSchemaAndNamespacesLatencyStartMillis));
+                }
+
+                mLogUtil.piiTrace("Init completed successfully");
+
+            } catch (AppSearchException e) {
                 // Some error. Reset and see if it fixes it.
-                resetLocked();
-                return;
+                Log.e(TAG, "Error initializing, resetting IcingSearchEngine.", e);
+                if (initStatsBuilder != null) {
+                    initStatsBuilder.setStatusCode(e.getResultCode());
+                }
+                resetLocked(initStatsBuilder);
             }
 
-            // Populate schema map
-            for (SchemaTypeConfigProto schema : schemaProto.getTypesList()) {
-                String prefixedSchemaType = schema.getSchemaType();
-                addToMap(mSchemaMapLocked, getPrefix(prefixedSchemaType), schema);
-            }
-
-            // Populate namespace map
-            for (String prefixedNamespace : getAllNamespacesResultProto.getNamespacesList()) {
-                addToMap(mNamespaceMapLocked, getPrefix(prefixedNamespace), prefixedNamespace);
-            }
-
-            // logging prepare_schema_and_namespaces latency
-            if (initStatsBuilder != null) {
-                initStatsBuilder.setPrepareSchemaAndNamespacesLatencyMillis(
-                        (int)
-                                (SystemClock.elapsedRealtime()
-                                        - prepareSchemaAndNamespacesLatencyStartMillis));
-            }
         } finally {
             mReadWriteLock.writeLock().unlock();
         }
@@ -321,8 +351,9 @@ public final class AppSearchImpl implements Closeable {
         mReadWriteLock.writeLock().lock();
         try {
             throwIfClosedLocked();
-
+            mLogUtil.piiTrace("Initializing VisibilityStore, request");
             mVisibilityStoreLocked.initialize();
+            mLogUtil.piiTrace("Initializing VisibilityStore, response");
         } finally {
             mReadWriteLock.writeLock().unlock();
         }
@@ -348,9 +379,10 @@ public final class AppSearchImpl implements Closeable {
             if (mClosedLocked) {
                 return;
             }
-
             persistToDisk(PersistType.Code.FULL);
+            mLogUtil.piiTrace("icingSearchEngine.close, request");
             mIcingSearchEngineLocked.close();
+            mLogUtil.piiTrace("icingSearchEngine.close, response");
             mClosedLocked = true;
         } catch (AppSearchException e) {
             Log.w(TAG, "Error when closing AppSearchImpl.", e);
@@ -410,9 +442,12 @@ public final class AppSearchImpl implements Closeable {
                     rewriteSchema(prefix, existingSchemaBuilder, newSchemaBuilder.build());
 
             // Apply schema
+            SchemaProto finalSchema = existingSchemaBuilder.build();
+            mLogUtil.piiTrace("setSchema, request", finalSchema.getTypesCount(), finalSchema);
             SetSchemaResultProto setSchemaResultProto =
-                    mIcingSearchEngineLocked.setSchema(
-                            existingSchemaBuilder.build(), forceOverride);
+                    mIcingSearchEngineLocked.setSchema(finalSchema, forceOverride);
+            mLogUtil.piiTrace(
+                    "setSchema, response", setSchemaResultProto.getStatus(), setSchemaResultProto);
 
             // Determine whether it succeeded.
             try {
@@ -544,11 +579,16 @@ public final class AppSearchImpl implements Closeable {
         mReadWriteLock.readLock().lock();
         try {
             throwIfClosedLocked();
+            mLogUtil.piiTrace("getAllNamespaces, request");
             // We can't just use mNamespaceMap here because we have no way to prune namespaces from
             // mNamespaceMap when they have no more documents (e.g. after setting schema to empty or
             // using deleteByQuery).
             GetAllNamespacesResultProto getAllNamespacesResultProto =
                     mIcingSearchEngineLocked.getAllNamespaces();
+            mLogUtil.piiTrace(
+                    "getAllNamespaces, response",
+                    getAllNamespacesResultProto.getNamespacesCount(),
+                    getAllNamespacesResultProto);
             checkSuccess(getAllNamespacesResultProto.getStatus());
             String prefix = createPrefix(packageName, databaseName);
             List<String> results = new ArrayList<>();
@@ -601,17 +641,18 @@ public final class AppSearchImpl implements Closeable {
             String prefix = createPrefix(packageName, databaseName);
             addPrefixToDocument(documentBuilder, prefix);
             long rewriteDocumentTypeEndTimeMillis = SystemClock.elapsedRealtime();
+            DocumentProto finalDocument = documentBuilder.build();
 
+            mLogUtil.piiTrace("putDocument, request", finalDocument.getUri(), finalDocument);
             PutResultProto putResultProto = mIcingSearchEngineLocked.put(documentBuilder.build());
+            mLogUtil.piiTrace("putDocument, response", putResultProto.getStatus(), putResultProto);
             addToMap(mNamespaceMapLocked, prefix, documentBuilder.getNamespace());
 
             // Logging stats
-            if (logger != null && pStatsBuilder != null) {
+            if (pStatsBuilder != null) {
                 pStatsBuilder
                         .getGeneralStatsBuilder()
-                        .setStatusCode(
-                                statusProtoToAppSearchException(putResultProto.getStatus())
-                                        .getResultCode());
+                        .setStatusCode(statusProtoToResultCode(putResultProto.getStatus()));
                 pStatsBuilder
                         .setGenerateDocumentProtoLatencyMillis(
                                 (int)
@@ -629,7 +670,7 @@ public final class AppSearchImpl implements Closeable {
         } finally {
             mReadWriteLock.writeLock().unlock();
 
-            if (logger != null && pStatsBuilder != null) {
+            if (logger != null) {
                 long totalEndTimeMillis = SystemClock.elapsedRealtime();
                 pStatsBuilder
                         .getGeneralStatsBuilder()
@@ -685,8 +726,14 @@ public final class AppSearchImpl implements Closeable {
                             .addAllTypePropertyMasks(prefixedPropertyMasks)
                             .build();
 
+            String finalNamespace = createPrefix(packageName, databaseName) + namespace;
+            if (mLogUtil.isPiiTraceEnabled()) {
+                mLogUtil.piiTrace(
+                        "getDocument, request", finalNamespace + ", " + id + "," + getResultSpec);
+            }
             GetResultProto getResultProto =
-                    mIcingSearchEngineLocked.get(prefix + namespace, id, getResultSpec);
+                    mIcingSearchEngineLocked.get(finalNamespace, id, getResultSpec);
+            mLogUtil.piiTrace("getDocument, response", getResultProto.getStatus(), getResultProto);
             checkSuccess(getResultProto.getStatus());
 
             // The schema type map cannot be null at this point. It could only be null if no
@@ -754,7 +801,7 @@ public final class AppSearchImpl implements Closeable {
                     sStatsBuilder);
         } finally {
             mReadWriteLock.readLock().unlock();
-            if (logger != null && sStatsBuilder != null) {
+            if (logger != null) {
                 sStatsBuilder.setTotalLatencyMillis(
                         (int) (SystemClock.elapsedRealtime() - totalLatencyStartMillis));
                 logger.logStats(sStatsBuilder.build());
@@ -832,9 +879,10 @@ public final class AppSearchImpl implements Closeable {
                     }
                 } else {
                     // Client didn't specify certain schemas to search over, check all schemas
-                    Set<String> prefixedSchemas = mSchemaMapLocked.get(prefix).keySet();
+                    Map<String, SchemaTypeConfigProto> prefixedSchemas =
+                            mSchemaMapLocked.get(prefix);
                     if (prefixedSchemas != null) {
-                        for (String prefixedSchema : prefixedSchemas) {
+                        for (String prefixedSchema : prefixedSchemas.keySet()) {
                             if (packageName.equals(callerPackageName)
                                     || mVisibilityStoreLocked.isSchemaSearchableByCaller(
                                             prefix, prefixedSchema, callerUid)) {
@@ -854,7 +902,7 @@ public final class AppSearchImpl implements Closeable {
         } finally {
             mReadWriteLock.readLock().unlock();
 
-            if (logger != null && sStatsBuilder != null) {
+            if (logger != null) {
                 sStatsBuilder.setTotalLatencyMillis(
                         (int) (SystemClock.elapsedRealtime() - totalLatencyStartMillis));
                 logger.logStats(sStatsBuilder.build());
@@ -938,18 +986,25 @@ public final class AppSearchImpl implements Closeable {
 
         rewriteResultSpecForPrefixesLocked(resultSpecBuilder, prefixes, allowedPrefixedSchemas);
         ScoringSpecProto scoringSpec = SearchSpecToProtoConverter.toScoringSpecProto(searchSpec);
+        SearchSpecProto finalSearchSpec = searchSpecBuilder.build();
+        ResultSpecProto finalResultSpec = resultSpecBuilder.build();
 
         long rewriteSearchSpecLatencyEndMillis = SystemClock.elapsedRealtime();
 
+        if (mLogUtil.isPiiTraceEnabled()) {
+            mLogUtil.piiTrace(
+                    "search, request",
+                    finalSearchSpec.getQuery(),
+                    finalSearchSpec + ", " + scoringSpec + ", " + finalResultSpec);
+        }
         SearchResultProto searchResultProto =
-                mIcingSearchEngineLocked.search(
-                        searchSpecBuilder.build(), scoringSpec, resultSpecBuilder.build());
+                mIcingSearchEngineLocked.search(finalSearchSpec, scoringSpec, finalResultSpec);
+        mLogUtil.piiTrace(
+                "search, response", searchResultProto.getResultsCount(), searchResultProto);
 
         if (sStatsBuilder != null) {
             sStatsBuilder
-                    .setStatusCode(
-                            statusProtoToAppSearchException(searchResultProto.getStatus())
-                                    .getResultCode())
+                    .setStatusCode(statusProtoToResultCode(searchResultProto.getStatus()))
                     .setRewriteSearchSpecLatencyMillis(
                             (int)
                                     (rewriteSearchSpecLatencyEndMillis
@@ -985,8 +1040,13 @@ public final class AppSearchImpl implements Closeable {
         try {
             throwIfClosedLocked();
 
+            mLogUtil.piiTrace("getNextPage, request", nextPageToken);
             SearchResultProto searchResultProto =
                     mIcingSearchEngineLocked.getNextPage(nextPageToken);
+            mLogUtil.piiTrace(
+                    "getNextPage, response",
+                    searchResultProto.getResultsCount(),
+                    searchResultProto);
             checkSuccess(searchResultProto.getStatus());
             return rewriteSearchResultProto(searchResultProto, mSchemaMapLocked);
         } finally {
@@ -1007,6 +1067,7 @@ public final class AppSearchImpl implements Closeable {
         try {
             throwIfClosedLocked();
 
+            mLogUtil.piiTrace("invalidateNextPageToken, request", nextPageToken);
             mIcingSearchEngineLocked.invalidateNextPageToken(nextPageToken);
         } finally {
             mReadWriteLock.readLock().unlock();
@@ -1039,7 +1100,9 @@ public final class AppSearchImpl implements Closeable {
                             .setUsageType(usageType)
                             .build();
 
+            mLogUtil.piiTrace("reportUsage, request", report.getDocumentUri(), report);
             ReportUsageResultProto result = mIcingSearchEngineLocked.reportUsage(report);
+            mLogUtil.piiTrace("reportUsage, response", result.getStatus(), result);
             checkSuccess(result.getStatus());
         } finally {
             mReadWriteLock.writeLock().unlock();
@@ -1068,9 +1131,13 @@ public final class AppSearchImpl implements Closeable {
             throwIfClosedLocked();
 
             String prefixedNamespace = createPrefix(packageName, databaseName) + namespace;
+            if (mLogUtil.isPiiTraceEnabled()) {
+                mLogUtil.piiTrace("removeById, request", prefixedNamespace + ", " + id);
+            }
             DeleteResultProto deleteResultProto =
                     mIcingSearchEngineLocked.delete(prefixedNamespace, id);
-
+            mLogUtil.piiTrace(
+                    "removeById, response", deleteResultProto.getStatus(), deleteResultProto);
             checkSuccess(deleteResultProto.getStatus());
         } finally {
             mReadWriteLock.writeLock().unlock();
@@ -1121,8 +1188,12 @@ public final class AppSearchImpl implements Closeable {
                     searchSpecBuilder, Collections.singleton(prefix), allowedPrefixedSchemas)) {
                 return;
             }
+            SearchSpecProto finalSearchSpec = searchSpecBuilder.build();
+            mLogUtil.piiTrace("removeByQuery, request", finalSearchSpec);
             DeleteByQueryResultProto deleteResultProto =
-                    mIcingSearchEngineLocked.deleteByQuery(searchSpecBuilder.build());
+                    mIcingSearchEngineLocked.deleteByQuery(finalSearchSpec);
+            mLogUtil.piiTrace(
+                    "removeByQuery, response", deleteResultProto.getStatus(), deleteResultProto);
 
             // It seems that the caller wants to get success if the data matching the query is
             // not in the DB because it was not there or was successfully deleted.
@@ -1202,7 +1273,10 @@ public final class AppSearchImpl implements Closeable {
     @NonNull
     private StorageInfo getStorageInfoForNamespacesLocked(@NonNull Set<String> prefixedNamespaces)
             throws AppSearchException {
+        mLogUtil.piiTrace("getStorageInfo, request");
         StorageInfoResultProto storageInfoResult = mIcingSearchEngineLocked.getStorageInfo();
+        mLogUtil.piiTrace(
+                "getStorageInfo, response", storageInfoResult.getStatus(), storageInfoResult);
         checkSuccess(storageInfoResult.getStatus());
         if (!storageInfoResult.hasStorageInfo()
                 || !storageInfoResult.getStorageInfo().hasDocumentStorageInfo()) {
@@ -1277,8 +1351,13 @@ public final class AppSearchImpl implements Closeable {
         try {
             throwIfClosedLocked();
 
+            mLogUtil.piiTrace("persistToDisk, request", persistType);
             PersistToDiskResultProto persistToDiskResultProto =
                     mIcingSearchEngineLocked.persistToDisk(persistType);
+            mLogUtil.piiTrace(
+                    "persistToDisk, response",
+                    persistToDiskResultProto.getStatus(),
+                    persistToDiskResultProto);
             checkSuccess(persistToDiskResultProto.getStatus());
         } finally {
             mReadWriteLock.writeLock().unlock();
@@ -1305,12 +1384,21 @@ public final class AppSearchImpl implements Closeable {
                     newSchemaBuilder.addTypes(existingSchema.getTypes(i));
                 }
             }
+            SchemaProto finalSchema = newSchemaBuilder.build();
 
             // Apply schema, set force override to true to remove all schemas and documents under
             // that package.
+            mLogUtil.piiTrace(
+                    "clearPackageData.setSchema, request",
+                    finalSchema.getTypesCount(),
+                    finalSchema);
             SetSchemaResultProto setSchemaResultProto =
                     mIcingSearchEngineLocked.setSchema(
-                            newSchemaBuilder.build(), /*ignoreErrorsAndDeleteDocuments=*/ true);
+                            finalSchema, /*ignoreErrorsAndDeleteDocuments=*/ true);
+            mLogUtil.piiTrace(
+                    "clearPackageData.setSchema, response",
+                    setSchemaResultProto.getStatus(),
+                    setSchemaResultProto);
 
             // Determine whether it succeeded.
             checkSuccess(setSchemaResultProto.getStatus());
@@ -1330,11 +1418,23 @@ public final class AppSearchImpl implements Closeable {
      * @throws AppSearchException on IcingSearchEngine error.
      */
     @GuardedBy("mReadWriteLock")
-    private void resetLocked() throws AppSearchException {
+    private void resetLocked(@Nullable InitializeStats.Builder initStatsBuilder)
+            throws AppSearchException {
+        mLogUtil.piiTrace("icingSearchEngine.reset, request");
         ResetResultProto resetResultProto = mIcingSearchEngineLocked.reset();
+        mLogUtil.piiTrace(
+                "icingSearchEngine.reset, response",
+                resetResultProto.getStatus(),
+                resetResultProto);
         mOptimizeIntervalCountLocked = 0;
         mSchemaMapLocked.clear();
         mNamespaceMapLocked.clear();
+
+        if (initStatsBuilder != null) {
+            initStatsBuilder
+                    .setHasReset(true)
+                    .setResetStatusCode(statusProtoToResultCode(resetResultProto.getStatus()));
+        }
 
         // Must be called after everything else since VisibilityStore may repopulate
         // IcingSearchEngine with an initial schema.
@@ -1472,15 +1572,17 @@ public final class AppSearchImpl implements Closeable {
 
             // Empty namespaces on the search spec means to query over all namespaces.
             Set<String> existingNamespaces = mNamespaceMapLocked.get(prefix);
-            if (namespaceFilters.isEmpty()) {
-                // Include all namespaces
-                searchSpecBuilder.addAllNamespaceFilters(existingNamespaces);
-            } else {
-                // Prefix the given namespaces.
-                for (int i = 0; i < namespaceFilters.size(); i++) {
-                    String prefixedNamespace = prefix + namespaceFilters.get(i);
-                    if (existingNamespaces.contains(prefixedNamespace)) {
-                        searchSpecBuilder.addNamespaceFilters(prefixedNamespace);
+            if (existingNamespaces != null) {
+                if (namespaceFilters.isEmpty()) {
+                    // Include all namespaces
+                    searchSpecBuilder.addAllNamespaceFilters(existingNamespaces);
+                } else {
+                    // Prefix the given namespaces.
+                    for (int i = 0; i < namespaceFilters.size(); i++) {
+                        String prefixedNamespace = prefix + namespaceFilters.get(i);
+                        if (existingNamespaces.contains(prefixedNamespace)) {
+                            searchSpecBuilder.addNamespaceFilters(prefixedNamespace);
+                        }
                     }
                 }
             }
@@ -1581,6 +1683,9 @@ public final class AppSearchImpl implements Closeable {
         Map<String, List<String>> packageAndNamespaceToNamespaces = new ArrayMap<>();
         for (String prefix : existingPrefixes) {
             Set<String> prefixedNamespaces = mNamespaceMapLocked.get(prefix);
+            if (prefixedNamespaces == null) {
+                continue;
+            }
             String packageName = getPackageName(prefix);
             // Create a new prefix without the database name. This will allow us to group namespaces
             // that have the same name and package but a different database name together.
@@ -1636,6 +1741,9 @@ public final class AppSearchImpl implements Closeable {
         Map<String, List<String>> packageToNamespacesMap = new ArrayMap<>();
         for (String prefix : existingPrefixes) {
             Set<String> prefixedNamespaces = mNamespaceMapLocked.get(prefix);
+            if (prefixedNamespaces == null) {
+                continue;
+            }
             String packageName = getPackageName(prefix);
             List<String> packageNamespaceList = packageToNamespacesMap.get(packageName);
             if (packageNamespaceList == null) {
@@ -1677,6 +1785,9 @@ public final class AppSearchImpl implements Closeable {
         Map<String, List<String>> namespaceToPrefixedNamespaces = new ArrayMap<>();
         for (String prefix : existingPrefixes) {
             Set<String> prefixedNamespaces = mNamespaceMapLocked.get(prefix);
+            if (prefixedNamespaces == null) {
+                continue;
+            }
             for (String prefixedNamespace : prefixedNamespaces) {
                 String namespace;
                 try {
@@ -1707,7 +1818,9 @@ public final class AppSearchImpl implements Closeable {
     @VisibleForTesting
     @GuardedBy("mReadWriteLock")
     SchemaProto getSchemaProtoLocked() throws AppSearchException {
+        mLogUtil.piiTrace("getSchema, request");
         GetSchemaResultProto schemaProto = mIcingSearchEngineLocked.getSchema();
+        mLogUtil.piiTrace("getSchema, response", schemaProto.getStatus(), schemaProto);
         // TODO(b/161935693) check GetSchemaResultProto is success or not. Call reset() if it's not.
         // TODO(b/161935693) only allow GetSchemaResultProto NOT_FOUND on first run
         checkCodeOneOf(schemaProto.getStatus(), StatusProto.Code.OK, StatusProto.Code.NOT_FOUND);
@@ -1781,7 +1894,9 @@ public final class AppSearchImpl implements Closeable {
             return;
         }
 
-        throw statusProtoToAppSearchException(statusProto);
+        throw new AppSearchException(
+                ResultCodeToProtoConverter.toResultCode(statusProto.getCode()),
+                statusProto.getMessage());
     }
 
     /**
@@ -1849,7 +1964,10 @@ public final class AppSearchImpl implements Closeable {
     public void optimize() throws AppSearchException {
         mReadWriteLock.writeLock().lock();
         try {
+            mLogUtil.piiTrace("optimize, request");
             OptimizeResultProto optimizeResultProto = mIcingSearchEngineLocked.optimize();
+            mLogUtil.piiTrace(
+                    "optimize, response", optimizeResultProto.getStatus(), optimizeResultProto);
             checkSuccess(optimizeResultProto.getStatus());
         } finally {
             mReadWriteLock.writeLock().unlock();
@@ -1887,7 +2005,10 @@ public final class AppSearchImpl implements Closeable {
     @GuardedBy("mReadWriteLock")
     @VisibleForTesting
     GetOptimizeInfoResultProto getOptimizeInfoResultLocked() {
-        return mIcingSearchEngineLocked.getOptimizeInfo();
+        mLogUtil.piiTrace("getOptimizeInfo, request");
+        GetOptimizeInfoResultProto result = mIcingSearchEngineLocked.getOptimizeInfo();
+        mLogUtil.piiTrace("getOptimizeInfo, response", result.getStatus(), result);
+        return result;
     }
 
     @GuardedBy("mReadWriteLock")
@@ -1898,16 +2019,16 @@ public final class AppSearchImpl implements Closeable {
     }
 
     /**
-     * Converts an erroneous status code to an AppSearchException. Callers should ensure that the
-     * status code is not OK or WARNING_DATA_LOSS.
+     * Converts an erroneous status code from the Icing status enums to the AppSearchResult enums.
      *
-     * @param statusProto StatusProto with error code and message to translate into
-     *     AppSearchException.
-     * @return AppSearchException with the parallel error code.
+     * <p>Callers should ensure that the status code is not OK or WARNING_DATA_LOSS.
+     *
+     * @param statusProto StatusProto with error code to translate into an {@link AppSearchResult}
+     *     code.
+     * @return {@link AppSearchResult} error code
      */
-    private static AppSearchException statusProtoToAppSearchException(StatusProto statusProto) {
-        return new AppSearchException(
-                ResultCodeToProtoConverter.toResultCode(statusProto.getCode()),
-                statusProto.getMessage());
+    private static @AppSearchResult.ResultCode int statusProtoToResultCode(
+            @NonNull StatusProto statusProto) {
+        return ResultCodeToProtoConverter.toResultCode(statusProto.getCode());
     }
 }
