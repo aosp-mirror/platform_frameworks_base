@@ -10541,6 +10541,7 @@ package android.service.voice {
 
   public abstract class HotwordDetectionService extends android.app.Service {
     ctor public HotwordDetectionService();
+    method public static int getMaxCustomInitializationStatus();
     method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
     method @Deprecated public void onDetect(@NonNull android.os.ParcelFileDescriptor, @NonNull android.media.AudioFormat, long, @NonNull android.service.voice.HotwordDetectionService.Callback);
     method public void onDetect(@NonNull android.service.voice.AlwaysOnHotwordDetector.EventPayload, long, @NonNull android.service.voice.HotwordDetectionService.Callback);
@@ -10548,8 +10549,6 @@ package android.service.voice {
     method public void onDetect(@NonNull android.service.voice.HotwordDetectionService.Callback);
     method public void onDetect(@NonNull android.os.ParcelFileDescriptor, @NonNull android.media.AudioFormat, @Nullable android.os.PersistableBundle, @NonNull android.service.voice.HotwordDetectionService.Callback);
     method public void onUpdateState(@Nullable android.os.PersistableBundle, @Nullable android.os.SharedMemory, long, @Nullable java.util.function.IntConsumer);
-    field public static final int INITIALIZATION_STATUS_CUSTOM_ERROR_1 = 1; // 0x1
-    field public static final int INITIALIZATION_STATUS_CUSTOM_ERROR_2 = 2; // 0x2
     field public static final int INITIALIZATION_STATUS_SUCCESS = 0; // 0x0
     field public static final int INITIALIZATION_STATUS_UNKNOWN = 100; // 0x64
     field public static final String SERVICE_INTERFACE = "android.service.voice.HotwordDetectionService";
