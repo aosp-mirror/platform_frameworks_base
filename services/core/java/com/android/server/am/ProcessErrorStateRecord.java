@@ -55,7 +55,7 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
-
+import java.util.UUID;
 /**
  * The error state of the process, such as if it's crashing/ANR etc.
  */
@@ -235,6 +235,7 @@ class ProcessErrorStateRecord {
 
         final boolean isSilentAnr;
         final int pid = mApp.getPid();
+        final UUID errorId;
         synchronized (mService) {
             // PowerManager.reboot() can block for a long time, so ignore ANRs while shutting down.
             if (mService.mAtmInternal.isShuttingDown()) {
@@ -263,6 +264,13 @@ class ProcessErrorStateRecord {
             // Log the ANR to the event log.
             EventLog.writeEvent(EventLogTags.AM_ANR, mApp.userId, pid, mApp.processName,
                     mApp.info.flags, annotation);
+
+            if (mService.mTraceErrorLogger.isAddErrorIdEnabled()) {
+                errorId = mService.mTraceErrorLogger.generateErrorId();
+                mService.mTraceErrorLogger.addErrorIdToTrace(errorId);
+            } else {
+                errorId = null;
+            }
 
             // Dump thread traces as quickly as we can, starting with "interesting" processes.
             firstPids.add(pid);
@@ -314,6 +322,9 @@ class ProcessErrorStateRecord {
         if (parentShortComponentName != null
                 && parentShortComponentName.equals(activityShortComponentName)) {
             info.append("Parent: ").append(parentShortComponentName).append("\n");
+        }
+        if (errorId != null) {
+            info.append("ErrorId: ").append(errorId.toString()).append("\n");
         }
 
         // Retrieve controller with max ANR delay from AnrControllers
@@ -457,7 +468,7 @@ class ProcessErrorStateRecord {
                 ? (ProcessRecord) parentProcess.mOwner : null;
         mService.addErrorToDropBox("anr", mApp, mApp.processName, activityShortComponentName,
                 parentShortComponentName, parentPr, annotation, report.toString(), tracesFile,
-                null, new Float(loadingProgress), incrementalMetrics);
+                null, new Float(loadingProgress), incrementalMetrics, errorId);
 
         if (mApp.getWindowProcessController().appNotResponding(info.toString(),
                 () -> {
