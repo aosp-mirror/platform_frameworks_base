@@ -15,10 +15,16 @@
   limitations under the License.
   -->
 
-<resources xmlns:androidprv="http://schemas.android.com/apk/prv/res/android">
+<resources>
     <color name="settingslib_switchbar_switch_track_tint">#82000000</color>
     <color name="settingslib_switchbar_switch_thumb_tint">@android:color/black</color>
 
+    <!-- Material next thumb off color-->
+    <color name="settingslib_thumb_off_color">@android:color/system_neutral2_300</color>
+
     <!-- Material next track on color-->
-    <color name="settingslib_track_on_color">?androidprv:attr/colorSurfaceHighlight</color>
+    <color name="settingslib_track_on_color">@android:color/system_accent2_700</color>
+
+    <!-- Material next track off color-->
+    <color name="settingslib_track_off_color">@android:color/system_neutral1_700</color>
 </resources>

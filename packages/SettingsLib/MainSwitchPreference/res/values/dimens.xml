@@ -17,11 +17,14 @@
 
 <resources>
 
+    <!-- Size of layout margin -->
+    <dimen name="settingslib_switchbar_margin">16dp</dimen>
+
     <!-- Size of layout margin left -->
-    <dimen name="settingslib_switchbar_margin_start">24dp</dimen>
+    <dimen name="settingslib_switchbar_padding_left">24dp</dimen>
 
     <!-- Size of layout margin right -->
-    <dimen name="settingslib_switchbar_margin_end">16dp</dimen>
+    <dimen name="settingslib_switchbar_padding_right">16dp</dimen>
 
     <!-- Minimum width of switch -->
     <dimen name="settingslib_min_switch_width">52dp</dimen>
