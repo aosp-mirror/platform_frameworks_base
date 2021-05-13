@@ -19,6 +19,7 @@ package com.android.systemui.plugins;
 import android.app.PendingIntent;
 import android.app.smartspace.SmartspaceAction;
 import android.app.smartspace.SmartspaceTarget;
+import android.app.smartspace.SmartspaceTargetEvent;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Parcelable;
@@ -44,6 +45,18 @@ public interface BcSmartspaceDataPlugin extends Plugin {
 
     /** Unregister a listener. */
     void unregisterListener(SmartspaceTargetListener listener);
+
+    /** Register a SmartspaceEventNotifier. */
+    default void registerSmartspaceEventNotifier(SmartspaceEventNotifier notifier) {}
+
+    /** Push a SmartspaceTargetEvent to the SmartspaceEventNotifier. */
+    default void notifySmartspaceEvent(SmartspaceTargetEvent event) {}
+
+    /** Allows for notifying the SmartspaceSession of SmartspaceTargetEvents. */
+    interface SmartspaceEventNotifier {
+        /** Pushes a given SmartspaceTargetEvent to the SmartspaceSession. */
+        void notifySmartspaceEvent(SmartspaceTargetEvent event);
+    }
 
     /**
      * Create a view to be shown within the parent. Do not add the view, as the parent
