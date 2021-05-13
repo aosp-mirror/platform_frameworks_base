@@ -200,8 +200,9 @@ public class NetworkRequest implements Parcelable {
 
         private final NetworkCapabilities mNetworkCapabilities;
 
-        // A boolean that represents the user modified NOT_VCN_MANAGED capability.
-        private boolean mModifiedNotVcnManaged = false;
+        // A boolean that represents whether the NOT_VCN_MANAGED capability should be deduced when
+        // the NetworkRequest object is built.
+        private boolean mShouldDeduceNotVcnManaged = true;
 
         /**
          * Default constructor for Builder.
@@ -223,7 +224,7 @@ public class NetworkRequest implements Parcelable {
             // If the caller constructed the builder from a request, it means the user
             // might explicitly want the capabilities from the request. Thus, the NOT_VCN_MANAGED
             // capabilities should not be touched later.
-            mModifiedNotVcnManaged = true;
+            mShouldDeduceNotVcnManaged = false;
         }
 
         /**
@@ -254,7 +255,7 @@ public class NetworkRequest implements Parcelable {
         public Builder addCapability(@NetworkCapabilities.NetCapability int capability) {
             mNetworkCapabilities.addCapability(capability);
             if (capability == NetworkCapabilities.NET_CAPABILITY_NOT_VCN_MANAGED) {
-                mModifiedNotVcnManaged = true;
+                mShouldDeduceNotVcnManaged = false;
             }
             return this;
         }
@@ -268,7 +269,7 @@ public class NetworkRequest implements Parcelable {
         public Builder removeCapability(@NetworkCapabilities.NetCapability int capability) {
             mNetworkCapabilities.removeCapability(capability);
             if (capability == NetworkCapabilities.NET_CAPABILITY_NOT_VCN_MANAGED) {
-                mModifiedNotVcnManaged = true;
+                mShouldDeduceNotVcnManaged = false;
             }
             return this;
         }
@@ -352,7 +353,7 @@ public class NetworkRequest implements Parcelable {
             mNetworkCapabilities.clearAll();
             // If the caller explicitly clear all capabilities, the NOT_VCN_MANAGED capabilities
             // should not be add back later.
-            mModifiedNotVcnManaged = true;
+            mShouldDeduceNotVcnManaged = false;
             return this;
         }
 
@@ -453,6 +454,9 @@ public class NetworkRequest implements Parcelable {
                 throw new IllegalArgumentException("A MatchAllNetworkSpecifier is not permitted");
             }
             mNetworkCapabilities.setNetworkSpecifier(networkSpecifier);
+            // Do not touch NOT_VCN_MANAGED if the caller needs to access to a very specific
+            // Network.
+            mShouldDeduceNotVcnManaged = false;
             return this;
         }
 
@@ -486,12 +490,13 @@ public class NetworkRequest implements Parcelable {
          *      {@link #VCN_SUPPORTED_CAPABILITIES}, add the NET_CAPABILITY_NOT_VCN_MANAGED to
          *      allow the callers automatically utilize VCN networks if available.
          *   2. For the requests that explicitly add or remove NET_CAPABILITY_NOT_VCN_MANAGED,
+         *      or has clear intention of tracking specific network,
          *      do not alter them to allow user fire request that suits their need.
          *
          * @hide
          */
         private void deduceNotVcnManagedCapability(final NetworkCapabilities nc) {
-            if (mModifiedNotVcnManaged) return;
+            if (!mShouldDeduceNotVcnManaged) return;
             for (final int cap : nc.getCapabilities()) {
                 if (!VCN_SUPPORTED_CAPABILITIES.contains(cap)) return;
             }
