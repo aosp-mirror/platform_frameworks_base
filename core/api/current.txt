@@ -245,6 +245,7 @@ package android {
 
   public static final class R.attr {
     ctor public R.attr();
+    field public static final int __removed3;
     field public static final int absListViewStyle = 16842858; // 0x101006a
     field public static final int accessibilityEventTypes = 16843648; // 0x1010380
     field public static final int accessibilityFeedbackType = 16843650; // 0x1010382
