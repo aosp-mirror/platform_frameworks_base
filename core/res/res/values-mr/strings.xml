@@ -1544,7 +1544,7 @@
     <string name="activity_chooser_view_see_all" msgid="3917045206812726099">"सर्व पहा"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="8880731437191978314">"ॲक्टिव्हिटी निवडा"</string>
     <string name="share_action_provider_share_with" msgid="1904096863622941880">"यांच्यासह शेअर करा"</string>
-    <string name="sending" msgid="206925243621664438">"पाठवित आहे..."</string>
+    <string name="sending" msgid="206925243621664438">"पाठवत आहे..."</string>
     <string name="launchBrowserDefault" msgid="6328349989932924119">"ब्राउझर लाँच करायचा?"</string>
     <string name="SetupCallDefault" msgid="5581740063237175247">"कॉल स्वीकारायचा?"</string>
     <string name="activity_resolver_use_always" msgid="5575222334666843269">"नेहमी"</string>

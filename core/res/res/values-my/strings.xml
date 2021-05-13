@@ -211,7 +211,7 @@
     <string name="silent_mode" msgid="8796112363642579333">"အသံတိတ်စနစ်"</string>
     <string name="turn_on_radio" msgid="2961717788170634233">"wirelessအားဖွင့်မည်"</string>
     <string name="turn_off_radio" msgid="7222573978109933360">"wirelessအားပိတ်မည်"</string>
-    <string name="screen_lock" msgid="2072642720826409809">"ဖန်သားပြင် လော့ခ်ချခြင်း"</string>
+    <string name="screen_lock" msgid="2072642720826409809">"ဖန်သားပြင် လော့ခ်ချရန်"</string>
     <string name="power_off" msgid="4111692782492232778">"စက်ပိတ်ပါ"</string>
     <string name="silent_mode_silent" msgid="5079789070221150912">"ဖုန်းမြည်သံပိတ်ထားသည်"</string>
     <string name="silent_mode_vibrate" msgid="8821830448369552678">"တုန်ခါခြင်း ဖုန်းမြည်သံ"</string>
