@@ -17,8 +17,6 @@
 package android.net.vcn;
 
 import static android.net.NetworkCapabilities.REDACT_FOR_ACCESS_FINE_LOCATION;
-import static android.net.NetworkCapabilities.REDACT_FOR_LOCAL_MAC_ADDRESS;
-import static android.net.NetworkCapabilities.REDACT_FOR_NETWORK_SETTINGS;
 import static android.net.NetworkCapabilities.REDACT_NONE;
 import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
@@ -28,6 +26,7 @@ import static org.junit.Assert.assertNull;
 
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
+import android.os.Build;
 import android.os.Parcel;
 
 import org.junit.Test;
@@ -61,10 +60,14 @@ public class VcnTransportInfoTest {
                 SUB_ID,
                 ((VcnTransportInfo) CELL_UNDERLYING_INFO.makeCopy(REDACT_FOR_ACCESS_FINE_LOCATION))
                         .getSubId());
-        assertEquals(
-                WifiConfiguration.INVALID_NETWORK_ID,
-                ((VcnTransportInfo) WIFI_UNDERLYING_INFO.makeCopy(REDACT_FOR_ACCESS_FINE_LOCATION))
-                        .getWifiInfo().getNetworkId());
+
+        // TODO: remove the if statement when S pushes to AOSP.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            assertEquals(
+                    WifiConfiguration.INVALID_NETWORK_ID,
+                    ((VcnTransportInfo) WIFI_UNDERLYING_INFO.makeCopy(
+                            REDACT_FOR_ACCESS_FINE_LOCATION)).getWifiInfo().getNetworkId());
+        }
     }
 
     @Test
@@ -77,9 +80,9 @@ public class VcnTransportInfoTest {
     @Test
     public void testApplicableRedactions() {
         assertEquals(REDACT_NONE, CELL_UNDERLYING_INFO.getApplicableRedactions());
-        assertEquals(REDACT_FOR_ACCESS_FINE_LOCATION | REDACT_FOR_LOCAL_MAC_ADDRESS
-                        | REDACT_FOR_NETWORK_SETTINGS,
-                WIFI_UNDERLYING_INFO.getApplicableRedactions());
+
+        final long wifiRedactions = WIFI_INFO.getApplicableRedactions();
+        assertEquals(wifiRedactions, WIFI_UNDERLYING_INFO.getApplicableRedactions());
     }
 
     @Test
