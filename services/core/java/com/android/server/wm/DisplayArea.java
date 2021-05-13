@@ -586,7 +586,11 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
         };
 
         Tokens(WindowManagerService wms, Type type, String name) {
-            super(wms, type, name, FEATURE_WINDOW_TOKENS);
+            this(wms, type, name, FEATURE_WINDOW_TOKENS);
+        }
+
+        Tokens(WindowManagerService wms, Type type, String name, int featureId) {
+            super(wms, type, name, featureId);
         }
 
         void addChild(WindowToken token) {
