@@ -422,7 +422,7 @@ public class DisplayDeviceConfig {
             if (configBrightnessDefault != null) {
                 mBrightnessDefault = configBrightnessDefault.floatValue();
             } else {
-                mBrightnessDefault = BRIGHTNESS_DEFAULT;
+                loadBrightnessDefaultFromConfigXml();
             }
         }
     }
