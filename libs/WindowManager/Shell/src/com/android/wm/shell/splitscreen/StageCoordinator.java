@@ -116,7 +116,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     private final List<SplitScreen.SplitScreenListener> mListeners = new ArrayList<>();
     private final DisplayImeController mDisplayImeController;
     private final SplitScreenTransitions mSplitTransitions;
-    private boolean mExitSplitScreenOnHide = true;
+    private boolean mExitSplitScreenOnHide;
     private boolean mKeyguardOccluded;
 
     // TODO(b/187041611): remove this flag after totally deprecated legacy split
@@ -415,10 +415,13 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         // Divider is only visible if both the main stage and side stages are visible
         setDividerVisibility(isSplitScreenVisible());
 
-        if (mExitSplitScreenOnHide && !mainStageVisible && !sideStageVisible) {
-            // Exit split-screen if both stage are not visible.
-            // TODO: This is only a temporary request from UX and is likely to be removed soon...
-            exitSplitScreen();
+        if (!mainStageVisible && !sideStageVisible) {
+            if (mExitSplitScreenOnHide
+            // Don't dismiss staged split when both stages are not visible due to sleeping display,
+            // like the cases keyguard showing or screen off.
+            || (!mMainStage.mRootTaskInfo.isSleeping && !mSideStage.mRootTaskInfo.isSleeping)) {
+                exitSplitScreen();
+            }
         } else if (mKeyguardOccluded) {
             // At least one of the stages is visible while keyguard occluded. Dismiss split because
             // there's show-when-locked activity showing on top of keyguard. Also make sure the

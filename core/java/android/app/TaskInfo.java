@@ -239,6 +239,12 @@ public class TaskInfo {
      */
     public boolean isVisible;
 
+    /**
+     * Whether this task is sleeping due to sleeping display.
+     * @hide
+     */
+    public boolean isSleeping;
+
     TaskInfo() {
         // Do nothing
     }
@@ -342,7 +348,8 @@ public class TaskInfo {
                 && getWindowingMode() == that.getWindowingMode()
                 && Objects.equals(taskDescription, that.taskDescription)
                 && isFocused == that.isFocused
-                && isVisible == that.isVisible;
+                && isVisible == that.isVisible
+                && isSleeping == that.isSleeping;
     }
 
     /**
@@ -396,6 +403,7 @@ public class TaskInfo {
         parentTaskId = source.readInt();
         isFocused = source.readBoolean();
         isVisible = source.readBoolean();
+        isSleeping = source.readBoolean();
         topActivityToken = source.readStrongBinder();
         topActivityInSizeCompat = source.readBoolean();
         mTopActivityLocusId = source.readTypedObject(LocusId.CREATOR);
@@ -434,6 +442,7 @@ public class TaskInfo {
         dest.writeInt(parentTaskId);
         dest.writeBoolean(isFocused);
         dest.writeBoolean(isVisible);
+        dest.writeBoolean(isSleeping);
         dest.writeStrongBinder(topActivityToken);
         dest.writeBoolean(topActivityInSizeCompat);
         dest.writeTypedObject(mTopActivityLocusId, flags);
@@ -462,6 +471,7 @@ public class TaskInfo {
                 + " parentTaskId=" + parentTaskId
                 + " isFocused=" + isFocused
                 + " isVisible=" + isVisible
+                + " isSleeping=" + isSleeping
                 + " topActivityToken=" + topActivityToken
                 + " topActivityInSizeCompat=" + topActivityInSizeCompat
                 + " locusId= " + mTopActivityLocusId
