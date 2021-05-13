@@ -660,9 +660,12 @@
         <item name="android:tint">?android:attr/colorAccent</item>
     </style>
 
+    <style name="MediaPlayer.AppIcon.Recommendation" parent="MediaPlayer.AppIcon">
+        <item name="android:tint">@color/transparent</item>
+    </style>
+
     <style name="MediaPlayer.Album">
         <item name="android:backgroundTint">@color/media_player_album_bg</item>
-
     </style>
 
     <!-- Used to style charging animation AVD animation -->
@@ -875,12 +878,12 @@
 
     <style name="Wallet.TextAppearance">
       <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
-      <item name="android:textColor">@color/wallet_primary_text</item>
+      <item name="android:textColor">?android:attr/textColorPrimary</item>
       <item name="android:singleLine">true</item>
       <item name="android:textSize">14sp</item>
     </style>
 
-    <style name="Wallet.Theme">
-      <item name="android:colorControlHighlight">@*android:color/primary_text_material_dark</item>
+    <style name="Wallet.Theme" parent="@android:style/Theme.DeviceDefault">
+      <item name="android:colorBackground">@android:color/system_neutral1_900</item>
     </style>
 </resources>

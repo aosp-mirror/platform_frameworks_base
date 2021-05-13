@@ -55,6 +55,7 @@
         android:layout_marginStart="8dp"
         android:contentDescription="@null"
         android:src="@*android:drawable/ic_chevron_end"
+        android:autoMirrored="true"
         android:tint="?android:attr/textColorSecondary" />
 
 </com.android.systemui.util.DualHeightHorizontalLinearLayout>

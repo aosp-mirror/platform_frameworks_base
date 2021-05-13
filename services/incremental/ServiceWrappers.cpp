@@ -56,8 +56,10 @@ public:
     }
     binder::Status setIncFsMountOptions(
             const ::android::os::incremental::IncrementalFileSystemControlParcel& control,
-            bool enableReadLogs, bool enableReadTimeouts) const final {
-        return mInterface->setIncFsMountOptions(control, enableReadLogs, enableReadTimeouts);
+            bool enableReadLogs, bool enableReadTimeouts,
+            const std::string& sysfsName) const final {
+        return mInterface->setIncFsMountOptions(control, enableReadLogs, enableReadTimeouts,
+                                                sysfsName);
     }
 
 private:

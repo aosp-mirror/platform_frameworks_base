@@ -117,7 +117,25 @@ public final class ImplInstanceManager {
      */
     public void removeAppSearchImplForUser(@UserIdInt int userId) {
         synchronized (mInstancesLocked) {
+            // no need to close and persist data to disk since we are removing them now.
             mInstancesLocked.remove(userId);
+        }
+    }
+
+    /**
+     * Close and remove an instance of {@link AppSearchImpl} for the given user.
+     *
+     * <p>All mutation apply to this {@link AppSearchImpl} will be persisted to disk.
+     *
+     * @param userId The multi-user userId of the user that need to be removed.
+     */
+    public void closeAndRemoveAppSearchImplForUser(@UserIdInt int userId) {
+        synchronized (mInstancesLocked) {
+            AppSearchImpl appSearchImpl = mInstancesLocked.get(userId);
+            if (appSearchImpl != null) {
+                appSearchImpl.close();
+                mInstancesLocked.remove(userId);
+            }
         }
     }
 

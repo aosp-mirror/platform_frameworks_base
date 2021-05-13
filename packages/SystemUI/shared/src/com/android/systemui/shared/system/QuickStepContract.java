@@ -105,6 +105,8 @@ public class QuickStepContract {
     public static final int SYSUI_STATE_ALLOW_GESTURE_IGNORING_BAR_VISIBILITY = 1 << 17;
     // The IME is showing
     public static final int SYSUI_STATE_IME_SHOWING = 1 << 18;
+    // The window magnification is overlapped with system gesture insets at the bottom.
+    public static final int SYSUI_STATE_MAGNIFICATION_OVERLAP = 1 << 19;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({SYSUI_STATE_SCREEN_PINNING,
@@ -125,7 +127,8 @@ public class QuickStepContract {
             SYSUI_STATE_GLOBAL_ACTIONS_SHOWING,
             SYSUI_STATE_ONE_HANDED_ACTIVE,
             SYSUI_STATE_ALLOW_GESTURE_IGNORING_BAR_VISIBILITY,
-            SYSUI_STATE_IME_SHOWING
+            SYSUI_STATE_IME_SHOWING,
+            SYSUI_STATE_MAGNIFICATION_OVERLAP
     })
     public @interface SystemUiStateFlags {}
 
@@ -153,6 +156,7 @@ public class QuickStepContract {
         str.add((flags & SYSUI_STATE_ALLOW_GESTURE_IGNORING_BAR_VISIBILITY) != 0
                 ? "allow_gesture" : "");
         str.add((flags & SYSUI_STATE_IME_SHOWING) != 0 ? "ime_visible" : "");
+        str.add((flags & SYSUI_STATE_MAGNIFICATION_OVERLAP) != 0 ? "magnification_overlap" : "");
         return str.toString();
     }
 

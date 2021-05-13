@@ -16,6 +16,8 @@
 -->
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:clipChildren="false">
@@ -34,8 +36,8 @@
         android:orientation="vertical">
         <ImageView
             android:id="@+id/icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="@dimen/wallet_screen_header_view_size"
+            android:layout_height="@dimen/wallet_screen_header_view_size"
             android:layout_gravity="center_horizontal"
             android:layout_marginVertical="10dp"
             android:scaleType="center"
@@ -65,7 +67,7 @@
             android:paddingVertical="@dimen/wallet_button_vertical_padding"
             android:paddingHorizontal="@dimen/wallet_button_horizontal_padding"
             android:background="@drawable/wallet_action_button_bg"
-            android:textColor="@color/wallet_white"
+            android:textColor="?androidprv:attr/textColorPrimaryInverse"
             android:textAlignment="center"
             android:visibility="gone"/>
 
@@ -83,7 +85,7 @@
             android:paddingHorizontal="@dimen/wallet_button_horizontal_padding"
             android:background="@drawable/wallet_app_button_bg"
             android:text="@string/wallet_app_button_label"
-            android:textColor="@color/GM2_blue_600"
+            android:textColor="?androidprv:attr/colorAccentPrimary"
             android:textAlignment="center"
             android:layout_marginVertical="24dp"/>
 

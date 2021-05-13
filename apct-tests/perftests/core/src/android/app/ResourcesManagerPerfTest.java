@@ -144,7 +144,7 @@ public class ResourcesManagerPerfTest {
         while (state.keepRunning()) {
             state.pauseTiming();
             // Invalidate cache.
-            resourcesManager.applyConfigurationToResourcesLocked(
+            resourcesManager.applyConfigurationToResources(
                     resourcesManager.getConfiguration(), null);
             state.resumeTiming();
 

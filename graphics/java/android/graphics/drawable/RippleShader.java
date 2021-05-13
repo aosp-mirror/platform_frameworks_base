@@ -43,10 +43,10 @@ final class RippleShader extends RuntimeShader {
             + "uniform shader in_shader;\n";
     private static final String SHADER_LIB =
             "float triangleNoise(vec2 n) {\n"
-            + "    n  = fract(n * vec2(5.3987, 5.4421));\n"
-            + "    n += dot(n.yx, n.xy + vec2(21.5351, 14.3137));\n"
-            + "    float xy = n.x * n.y;\n"
-            + "    return fract(xy * 95.4307) + fract(xy * 75.04961) - 1.0;\n"
+            + "  n  = fract(n * vec2(5.3987, 5.4421));\n"
+            + "  n += dot(n.yx, n.xy + vec2(21.5351, 14.3137));\n"
+            + "  float xy = n.x * n.y;\n"
+            + "  return fract(xy * 95.4307) + fract(xy * 75.04961) - 1.0;\n"
             + "}"
             + "const float PI = 3.1415926535897932384626;\n"
             + "\n"
@@ -110,14 +110,16 @@ final class RippleShader extends RuntimeShader {
             + "    vec2 uv = p * in_resolutionScale;\n"
             + "    vec2 densityUv = uv - mod(uv, in_noiseScale);\n"
             + "    float turbulence = turbulence(uv, in_turbulencePhase);\n"
-            + "    float sparkle = sparkles(densityUv, in_noisePhase) * ring * alpha "
+            + "    float sparkleAlpha = sparkles(densityUv, in_noisePhase) * ring * alpha "
             + "* turbulence;\n"
             + "    float fade = min(fadeIn, 1. - fadeOutRipple);\n"
-            + "    float circleAlpha = softCircle(p, center, in_maxRadius * scaleIn, 0.2) * fade;\n"
-            + "    vec3 color = mix(in_color.rgb, in_sparkleColor.rgb, sparkle);\n"
+            + "    float waveAlpha = softCircle(p, center, in_maxRadius * scaleIn, 0.2) * fade "
+            + "* in_color.a;\n"
+            + "    vec4 waveColor = vec4(in_color.rgb * waveAlpha, waveAlpha);\n"
+            + "    vec4 sparkleColor = vec4(in_sparkleColor.rgb * in_sparkleColor.a, "
+            + "in_sparkleColor.a);\n"
             + "    float mask = in_hasMask == 1. ? sample(in_shader, p).a > 0. ? 1. : 0. : 1.;\n"
-            + "    float a = (in_color.a * circleAlpha + in_sparkleColor.a * sparkle) * mask;\n"
-            + "    return vec4(color * a, a);\n"
+            + "    return mix(waveColor, sparkleColor, sparkleAlpha) * mask;\n"
             + "}";
     private static final String SHADER = SHADER_UNIFORMS + SHADER_LIB + SHADER_MAIN;
     private static final double PI_ROTATE_RIGHT = Math.PI * 0.0078125;

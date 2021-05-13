@@ -17,7 +17,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/quick_settings_container"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:clipToPadding="false"
     android:clipChildren="false" >
 
@@ -25,7 +25,6 @@
         android:id="@+id/expanded_qs_scroll_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingBottom="@dimen/qs_container_bottom_padding"
         android:elevation="4dp"
         android:importantForAccessibility="no"
         android:scrollbars="none"

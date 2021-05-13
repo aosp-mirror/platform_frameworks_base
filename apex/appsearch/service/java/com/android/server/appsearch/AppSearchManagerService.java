@@ -234,6 +234,18 @@ public class AppSearchManagerService extends SystemService {
         }
     }
 
+    @Override
+    public void onUserStopping(@NonNull TargetUser user) {
+        synchronized (mUnlockedUserIdsLocked) {
+            mUnlockedUserIdsLocked.remove(user.getUserIdentifier());
+            try {
+                mImplInstanceManager.closeAndRemoveAppSearchImplForUser(user.getUserIdentifier());
+            } catch (Throwable t) {
+                Log.e(TAG, "Error handling user stopping.", t);
+            }
+        }
+    }
+
     private void verifyUserUnlocked(int callingUserId) {
         if (isUserLocked(callingUserId)) {
             throw new IllegalStateException("User " + callingUserId + " is locked or not running.");
