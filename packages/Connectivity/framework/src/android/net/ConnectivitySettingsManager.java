@@ -28,6 +28,8 @@ import android.annotation.SystemApi;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.net.ConnectivityManager.MultipathPreference;
+import android.os.Process;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArraySet;
@@ -334,12 +336,12 @@ public class ConnectivitySettingsManager {
             "network_metered_multipath_preference";
 
     /**
-     * A list of apps that should go on cellular networks in preference even when higher-priority
+     * A list of uids that should go on cellular networks in preference even when higher-priority
      * networks are connected.
      *
      * @hide
      */
-    public static final String MOBILE_DATA_PREFERRED_APPS = "mobile_data_preferred_apps";
+    public static final String MOBILE_DATA_PREFERRED_UIDS = "mobile_data_preferred_uids";
 
     /**
      * One of the private DNS modes that indicates the private DNS mode is off.
@@ -1002,28 +1004,46 @@ public class ConnectivitySettingsManager {
     }
 
     /**
-     * Get the list of apps(from {@link Settings}) that should go on cellular networks in preference
+     * Get the list of uids(from {@link Settings}) that should go on cellular networks in preference
      * even when higher-priority networks are connected.
      *
      * @param context The {@link Context} to query the setting.
-     * @return A list of apps that should go on cellular networks in preference even when
+     * @return A list of uids that should go on cellular networks in preference even when
      *         higher-priority networks are connected or null if no setting value.
      */
-    @Nullable
-    public static String getMobileDataPreferredApps(@NonNull Context context) {
-        return Settings.Secure.getString(context.getContentResolver(), MOBILE_DATA_PREFERRED_APPS);
+    @NonNull
+    public static Set<Integer> getMobileDataPreferredUids(@NonNull Context context) {
+        final String uidList = Settings.Secure.getString(
+                context.getContentResolver(), MOBILE_DATA_PREFERRED_UIDS);
+        final Set<Integer> uids = new ArraySet<>();
+        if (TextUtils.isEmpty(uidList)) {
+            return uids;
+        }
+        for (String uid : uidList.split(";")) {
+            uids.add(Integer.valueOf(uid));
+        }
+        return uids;
     }
 
     /**
-     * Set the list of apps(to {@link Settings}) that should go on cellular networks in preference
+     * Set the list of uids(to {@link Settings}) that should go on cellular networks in preference
      * even when higher-priority networks are connected.
      *
      * @param context The {@link Context} to set the setting.
-     * @param list A list of apps that should go on cellular networks in preference even when
+     * @param uidList A list of uids that should go on cellular networks in preference even when
      *             higher-priority networks are connected.
      */
-    public static void setMobileDataPreferredApps(@NonNull Context context, @Nullable String list) {
-        Settings.Secure.putString(context.getContentResolver(), MOBILE_DATA_PREFERRED_APPS, list);
+    public static void setMobileDataPreferredUids(@NonNull Context context,
+            @NonNull Set<Integer> uidList) {
+        final StringJoiner joiner = new StringJoiner(";");
+        for (Integer uid : uidList) {
+            if (uid < 0 || UserHandle.getAppId(uid) > Process.LAST_APPLICATION_UID) {
+                throw new IllegalArgumentException("Invalid uid");
+            }
+            joiner.add(uid.toString());
+        }
+        Settings.Secure.putString(
+                context.getContentResolver(), MOBILE_DATA_PREFERRED_UIDS, joiner.toString());
     }
 
     /**
