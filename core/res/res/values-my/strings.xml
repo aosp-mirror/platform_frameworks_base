@@ -219,7 +219,7 @@
     <string name="silent_mode" msgid="8796112363642579333">"အသံတိတ်စနစ်"</string>
     <string name="turn_on_radio" msgid="2961717788170634233">"wirelessအားဖွင့်မည်"</string>
     <string name="turn_off_radio" msgid="7222573978109933360">"wirelessအားပိတ်မည်"</string>
-    <string name="screen_lock" msgid="2072642720826409809">"ဖန်သားပြင် လော့ခ်ချခြင်း"</string>
+    <string name="screen_lock" msgid="2072642720826409809">"ဖန်သားပြင် လော့ခ်ချရန်"</string>
     <string name="power_off" msgid="4111692782492232778">"စက်ပိတ်ပါ"</string>
     <string name="silent_mode_silent" msgid="5079789070221150912">"ဖုန်းမြည်သံပိတ်ထားသည်"</string>
     <string name="silent_mode_vibrate" msgid="8821830448369552678">"တုန်ခါခြင်း ဖုန်းမြည်သံ"</string>
@@ -1022,8 +1022,7 @@
     <string name="text_copied" msgid="2531420577879738860">"clipboardထံ စာသားအားကူးယူမည်"</string>
     <string name="copied" msgid="4675902854553014676">"မိတ္တူကူးပြီးပါပြီ"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> မှ <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> သို့ ကူးထည့်ထားသည်"</string>
-    <!-- no translation found for pasted_from_clipboard (7355790625710831847) -->
-    <skip />
+    <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> က ဒေတာကို သင့်ကလစ်ဘုတ်မှ ကူးထည့်ထားသည်"</string>
     <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> က သင်မိတ္တူကူးထားသော စာသားကို ထည့်လိုက်သည်"</string>
     <string name="pasted_image" msgid="4729097394781491022">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> က သင်မိတ္တူကူးထားသော ပုံကို ထည့်လိုက်သည်"</string>
     <string name="pasted_content" msgid="646276353060777131">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> က သင်မိတ္တူကူးထားသော အကြောင်းအရာကို ထည့်လိုက်သည်"</string>
@@ -1260,14 +1259,10 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> အားပြင်ဆင်နေသည်။"</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"အက်ပ်များကို စတင်နေ"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"လုပ်ငန်းစနစ်ထည့်သွင်း၍ ပြန်လည်စတင်ရန် ပြီးပါပြီ"</string>
-    <!-- no translation found for fp_enrollment_powerbutton_intent_title (3385634173366119903) -->
-    <skip />
-    <!-- no translation found for fp_enrollment_powerbutton_intent_message (6582149052513682522) -->
-    <skip />
-    <!-- no translation found for fp_enrollment_powerbutton_intent_positive_button (5963520983910436791) -->
-    <skip />
-    <!-- no translation found for fp_enrollment_powerbutton_intent_negative_button (6465764183480190748) -->
-    <skip />
+    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"ဖန်သားပြင်ကို ပိတ်မလား။"</string>
+    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"သင့်လက်ဗွေကို စနစ်ထည့်သွင်းနေစဉ် ဖွင့်ပိတ်ခလုတ်ကို ဖိထားပါ။\n\n၎င်းက အများအားဖြင့် သင့်ဖန်သားပြင်ကို ပိတ်ပါသည်။"</string>
+    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"ပိတ်ရန်"</string>
+    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"မလုပ်တော့"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> က အလုပ်လုပ်နေသည်"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"ဂိမ်းသို့ ပြန်သွားရန် တို့ပါ"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"ဂိမ်းကို ရွေးခြင်း"</string>
@@ -1874,10 +1869,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"သင်၏ စီမံခန့်ခွဲသူက အပ်ဒိတ်လုပ်ထားသည်"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"သင်၏ စီမံခန့်ခွဲသူက ဖျက်လိုက်ပါပြီ"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (4877297130366222145) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (8518809702138617167) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"‘ဘက်ထရီ အားထိန်း’ က ‘မှောင်သည့် အပြင်အဆင်’ ကို ဖွင့်ပြီး နောက်ခံလုပ်ဆောင်ချက်၊ ပြသမှုဆိုင်ရာ အထူးပြုလုပ်ချက်အချို့၊ ဝန်ဆောင်မှုအချို့နှင့် ကွန်ရက်ချိတ်ဆက်မှုအချို့တို့ကို ကန့်သတ်သည် သို့မဟုတ် ပိတ်သည်။\n\n"<annotation id="url">"ပိုမိုလေ့လာရန်"</annotation></string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"‘ဘက်ထရီ အားထိန်း’ က ‘မှောင်သည့် အပြင်အဆင်’ ကို ဖွင့်ပြီး နောက်ခံလုပ်ဆောင်ချက်၊ ပြသမှုဆိုင်ရာ အထူးပြုလုပ်ချက်အချို့၊ ဝန်ဆောင်မှုအချို့နှင့် ကွန်ရက်ချိတ်ဆက်မှုအချို့တို့ကို ကန့်သတ်သည် သို့မဟုတ် ပိတ်သည်။"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"ဒေတာအသုံးလျှော့ချနိုင်ရန်အတွက် အက်ပ်များကို နောက်ခံတွင် ဒေတာပို့ခြင်းနှင့် လက်ခံခြင်းမပြုရန် \'ဒေတာချွေတာမှု\' စနစ်က တားဆီးထားပါသည်။ ယခုအက်ပ်ဖြင့် ဒေတာအသုံးပြုနိုင်သော်လည်း အကြိမ်လျှော့၍သုံးရပါမည်။ ဥပမာ၊ သင်က မတို့မချင်း ပုံများပေါ်လာမည် မဟုတ်ပါ။"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ဒေတာချွေတာမှုစနစ် ဖွင့်မလား။"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ဖွင့်ပါ"</string>
@@ -1980,10 +1973,8 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> ကို လောလောဆယ် မရနိုင်ပါ။ ၎င်းကို <xliff:g id="APP_NAME_1">%2$s</xliff:g> က စီမံထားပါသည်။"</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"ပိုမိုလေ့လာရန်"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"အက်ပ်ကို ခဏမရပ်တော့ရန်"</string>
-    <!-- no translation found for work_mode_off_title (961171256005852058) -->
-    <skip />
-    <!-- no translation found for work_mode_off_message (7319580997683623309) -->
-    <skip />
+    <string name="work_mode_off_title" msgid="961171256005852058">"အလုပ်သုံးအက်ပ်များ ဖွင့်မလား။"</string>
+    <string name="work_mode_off_message" msgid="7319580997683623309">"သင့်အလုပ်သုံးအက်ပ်နှင့် အကြောင်းကြားချက်များသုံးခွင့် ရယူပါ"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"ဖွင့်ပါ"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"အက်ပ်ကို မရနိုင်ပါ"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ကို ယခု မရနိုင်ပါ။"</string>
