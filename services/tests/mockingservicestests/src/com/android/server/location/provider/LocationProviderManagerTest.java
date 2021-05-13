@@ -61,8 +61,6 @@ import android.location.ILocationListener;
 import android.location.LastLocationRequest;
 import android.location.Location;
 import android.location.LocationManagerInternal;
-import android.location.LocationManagerInternal.LocationTagInfo;
-import android.location.LocationManagerInternal.OnProviderLocationTagsChangeListener;
 import android.location.LocationManagerInternal.ProviderEnabledListener;
 import android.location.LocationRequest;
 import android.location.LocationResult;
@@ -134,6 +132,8 @@ public class LocationProviderManagerTest {
     private Random mRandom;
 
     @Mock
+    private LocationProviderManager.StateChangedListener mStateChangedListener;
+    @Mock
     private LocationManagerInternal mInternal;
     @Mock
     private Context mContext;
@@ -167,14 +167,14 @@ public class LocationProviderManagerTest {
         mInjector.getUserInfoHelper().startUser(OTHER_USER);
 
         mPassive = new PassiveLocationProviderManager(mContext, mInjector);
-        mPassive.startManager();
+        mPassive.startManager(null);
         mPassive.setRealProvider(new PassiveLocationProvider(mContext));
 
         mProvider = new TestProvider(PROPERTIES, PROVIDER_IDENTITY);
         mProvider.setProviderAllowed(true);
 
         mManager = new LocationProviderManager(mContext, mInjector, NAME, mPassive);
-        mManager.startManager();
+        mManager.startManager(mStateChangedListener);
         mManager.setRealProvider(mProvider);
     }
 
@@ -219,18 +219,18 @@ public class LocationProviderManagerTest {
     }
 
     @Test
-    public void testAttributionTags() {
-        OnProviderLocationTagsChangeListener listener = mock(
-                OnProviderLocationTagsChangeListener.class);
-        mManager.setOnProviderLocationTagsChangeListener(listener);
-
+    public void testStateChangedListener() {
         mProvider.setExtraAttributionTags(Collections.singleton("extra"));
 
-        ArgumentCaptor<LocationTagInfo> captor = ArgumentCaptor.forClass(LocationTagInfo.class);
-        verify(listener, times(2)).onLocationTagsChanged(captor.capture());
+        ArgumentCaptor<AbstractLocationProvider.State> captorOld = ArgumentCaptor.forClass(
+                AbstractLocationProvider.State.class);
+        ArgumentCaptor<AbstractLocationProvider.State> captorNew = ArgumentCaptor.forClass(
+                AbstractLocationProvider.State.class);
+        verify(mStateChangedListener, timeout(TIMEOUT_MS).times(2)).onStateChanged(eq(NAME),
+                captorOld.capture(), captorNew.capture());
 
-        assertThat(captor.getAllValues().get(0).getTags()).isEmpty();
-        assertThat(captor.getAllValues().get(1).getTags()).containsExactly("extra", "attribution");
+        assertThat(captorOld.getAllValues().get(1).extraAttributionTags).isEmpty();
+        assertThat(captorNew.getAllValues().get(1).extraAttributionTags).containsExactly("extra");
     }
 
     @Test
