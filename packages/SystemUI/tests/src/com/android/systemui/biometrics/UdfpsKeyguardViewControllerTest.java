@@ -18,10 +18,12 @@ package com.android.systemui.biometrics;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.Context;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 
@@ -54,6 +56,8 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
     // Dependencies
     @Mock
     private UdfpsKeyguardView mView;
+    @Mock
+    private Context mResourceContext;
     @Mock
     private StatusBarStateController mStatusBarStateController;
     @Mock
@@ -90,6 +94,8 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        when(mView.getContext()).thenReturn(mResourceContext);
+        when(mResourceContext.getString(anyInt())).thenReturn("test string");
         when(mKeyguardViewMediator.isAnimatingScreenOff()).thenReturn(false);
         when(mKeyguardUpdateMonitor.isKeyguardVisible()).thenReturn(true);
         mController = new UdfpsKeyguardViewController(
