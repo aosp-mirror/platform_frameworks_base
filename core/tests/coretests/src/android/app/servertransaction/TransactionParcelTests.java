@@ -61,6 +61,7 @@ import android.view.DisplayCutout;
 import android.view.Surface;
 import android.view.autofill.AutofillId;
 import android.view.translation.TranslationSpec;
+import android.view.translation.UiTranslationSpec;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -693,8 +694,8 @@ public class TransactionParcelTests {
 
         @Override
         public void updateUiTranslationState(IBinder activityToken, int state,
-                TranslationSpec sourceSpec, TranslationSpec targetSpec, List<AutofillId> viewIds) {
-
+                TranslationSpec sourceSpec, TranslationSpec targetSpec, List<AutofillId> viewIds,
+                UiTranslationSpec uiTranslationSpec) {
         }
     }
 }
