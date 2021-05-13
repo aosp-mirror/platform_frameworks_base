@@ -57,7 +57,7 @@
                 android:id="@+id/row0"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingBottom="16dp"
+                android:paddingBottom="4dp"
                 >
             <com.android.keyguard.PasswordTextView
                     android:id="@+id/simPinEntry"
@@ -202,6 +202,7 @@
              android:orientation="vertical"
              android:layout_gravity="bottom|center_horizontal"
              android:layout_marginTop="@dimen/keyguard_eca_top_margin"
+             android:layout_marginBottom="2dp"
              android:gravity="center_horizontal"/>
 
 </com.android.keyguard.KeyguardSimPinView>
