@@ -10407,19 +10407,20 @@ package android.service.translation {
     method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
     method public void onConnected();
     method public void onCreateTranslationSession(@NonNull android.view.translation.TranslationContext, int, @NonNull java.util.function.Consumer<java.lang.Boolean>);
-    method @Deprecated public abstract void onCreateTranslationSession(@NonNull android.view.translation.TranslationContext, int);
+    method @Deprecated public void onCreateTranslationSession(@NonNull android.view.translation.TranslationContext, int);
     method public void onDisconnected();
     method public abstract void onFinishTranslationSession(int);
     method public abstract void onTranslationCapabilitiesRequest(int, int, @NonNull java.util.function.Consumer<java.util.Set<android.view.translation.TranslationCapability>>);
-    method public abstract void onTranslationRequest(@NonNull android.view.translation.TranslationRequest, int, @Nullable android.os.CancellationSignal, @NonNull android.service.translation.TranslationService.OnTranslationResultCallback);
+    method @Deprecated public void onTranslationRequest(@NonNull android.view.translation.TranslationRequest, int, @Nullable android.os.CancellationSignal, @NonNull android.service.translation.TranslationService.OnTranslationResultCallback);
+    method public void onTranslationRequest(@NonNull android.view.translation.TranslationRequest, int, @Nullable android.os.CancellationSignal, @NonNull java.util.function.Consumer<android.view.translation.TranslationResponse>);
     method public final void updateTranslationCapability(@NonNull android.view.translation.TranslationCapability);
     field public static final String SERVICE_INTERFACE = "android.service.translation.TranslationService";
     field public static final String SERVICE_META_DATA = "android.translation_service";
   }
 
-  public static interface TranslationService.OnTranslationResultCallback {
+  @Deprecated public static interface TranslationService.OnTranslationResultCallback {
     method @Deprecated public void onError();
-    method public void onTranslationSuccess(@NonNull android.view.translation.TranslationResponse);
+    method @Deprecated public void onTranslationSuccess(@NonNull android.view.translation.TranslationResponse);
   }
 
 }
