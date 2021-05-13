@@ -25,6 +25,9 @@ import static android.window.DisplayAreaOrganizer.FEATURE_WINDOW_TOKENS;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.internal.util.Preconditions.checkState;
+import static com.android.server.wm.DisplayAreaProto.FEATURE_ID;
+import static com.android.server.wm.DisplayAreaProto.IS_ORGANIZED;
+import static com.android.server.wm.DisplayAreaProto.IS_ROOT_DISPLAY_AREA;
 import static com.android.server.wm.DisplayAreaProto.IS_TASK_DISPLAY_AREA;
 import static com.android.server.wm.DisplayAreaProto.NAME;
 import static com.android.server.wm.DisplayAreaProto.WINDOW_CONTAINER;
@@ -273,6 +276,9 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
         super.dumpDebug(proto, WINDOW_CONTAINER, logLevel);
         proto.write(NAME, mName);
         proto.write(IS_TASK_DISPLAY_AREA, isTaskDisplayArea());
+        proto.write(IS_ROOT_DISPLAY_AREA, asRootDisplayArea() != null);
+        proto.write(FEATURE_ID, mFeatureId);
+        proto.write(IS_ORGANIZED, isOrganized());
         proto.end(token);
     }
 
@@ -515,7 +521,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
         return true;
     }
 
-    protected boolean isTaskDisplayArea() {
+    boolean isTaskDisplayArea() {
         return false;
     }
 
