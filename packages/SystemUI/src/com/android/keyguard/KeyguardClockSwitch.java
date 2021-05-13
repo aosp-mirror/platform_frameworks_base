@@ -35,6 +35,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
 
     private static final long CLOCK_OUT_MILLIS = 150;
     private static final long CLOCK_IN_MILLIS = 200;
+    private static final long SMARTSPACE_MOVE_MILLIS = 350;
 
     /**
      * Optional/alternative clock injected via plugin.
@@ -54,6 +55,8 @@ public class KeyguardClockSwitch extends RelativeLayout {
      * show it below the alternate clock.
      */
     private View mKeyguardStatusArea;
+    /** Mutually exclusive with mKeyguardStatusArea */
+    private View mSmartspaceView;
 
     /**
      * Maintain state so that a newly connected plugin can be initialized.
@@ -67,6 +70,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
 
     private AnimatorSet mClockInAnim = null;
     private AnimatorSet mClockOutAnim = null;
+    private ObjectAnimator mSmartspaceAnim = null;
 
     /**
      * If the Keyguard Slice has a header (big center-aligned text.)
@@ -177,17 +181,22 @@ public class KeyguardClockSwitch extends RelativeLayout {
     private void animateClockChange(boolean useLargeClock) {
         if (mClockInAnim != null) mClockInAnim.cancel();
         if (mClockOutAnim != null) mClockOutAnim.cancel();
+        if (mSmartspaceAnim != null) mSmartspaceAnim.cancel();
 
         View in, out;
         int direction = 1;
+        float smartspaceYTranslation;
         if (useLargeClock) {
             out = mClockFrame;
             in = mLargeClockFrame;
             if (indexOfChild(in) == -1) addView(in);
             direction = -1;
+            smartspaceYTranslation = mSmartspaceView == null ? 0
+                    : mClockFrame.getY() - mSmartspaceView.getY();
         } else {
             in = mClockFrame;
             out = mLargeClockFrame;
+            smartspaceYTranslation = 0f;
 
             // Must remove in order for notifications to appear in the proper place
             removeView(out);
@@ -222,6 +231,19 @@ public class KeyguardClockSwitch extends RelativeLayout {
 
         mClockInAnim.start();
         mClockOutAnim.start();
+
+        if (mSmartspaceView != null) {
+            mSmartspaceAnim = ObjectAnimator.ofFloat(mSmartspaceView, View.TRANSLATION_Y,
+                    smartspaceYTranslation);
+            mSmartspaceAnim.setDuration(SMARTSPACE_MOVE_MILLIS);
+            mSmartspaceAnim.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
+            mSmartspaceAnim.addListener(new AnimatorListenerAdapter() {
+                public void onAnimationEnd(Animator animation) {
+                    mSmartspaceAnim = null;
+                }
+            });
+            mSmartspaceAnim.start();
+        }
     }
 
     /**
@@ -237,15 +259,18 @@ public class KeyguardClockSwitch extends RelativeLayout {
     }
 
     /**
-     * Set whether or not the lock screen is showing notifications.
+     * Based upon whether notifications are showing or not, display/hide the large clock and
+     * the smaller version.
      */
-    void setHasVisibleNotifications(boolean hasVisibleNotifications) {
+    boolean willSwitchToLargeClock(boolean hasVisibleNotifications) {
         if (hasVisibleNotifications == mHasVisibleNotifications) {
-            return;
+            return false;
         }
-        animateClockChange(!hasVisibleNotifications);
+        boolean useLargeClock = !hasVisibleNotifications;
+        animateClockChange(useLargeClock);
 
         mHasVisibleNotifications = hasVisibleNotifications;
+        return useLargeClock;
     }
 
     public Paint getPaint() {
@@ -303,6 +328,10 @@ public class KeyguardClockSwitch extends RelativeLayout {
         }
     }
 
+    void setSmartspaceView(View smartspaceView) {
+        mSmartspaceView = smartspaceView;
+    }
+
     void updateColors(ColorExtractor.GradientColors colors) {
         mSupportsDarkText = colors.supportsDarkText();
         mColorPalette = colors.getColorPalette();
@@ -317,6 +346,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
         pw.println("  mClockFrame: " + mClockFrame);
         pw.println("  mLargeClockFrame: " + mLargeClockFrame);
         pw.println("  mKeyguardStatusArea: " + mKeyguardStatusArea);
+        pw.println("  mSmartspaceView: " + mSmartspaceView);
         pw.println("  mDarkAmount: " + mDarkAmount);
         pw.println("  mSupportsDarkText: " + mSupportsDarkText);
         pw.println("  mColorPalette: " + Arrays.toString(mColorPalette));
