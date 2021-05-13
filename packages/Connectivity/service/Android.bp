@@ -54,7 +54,7 @@ java_library {
     sdk_version: "system_server_current",
     min_sdk_version: "30",
     srcs: [
-        ":connectivity-service-srcs",
+        "src/**/*.java",
         ":framework-connectivity-shared-srcs",
         ":services-connectivity-shared-srcs",
         // TODO: move to net-utils-device-common, enable shrink optimization to avoid extra classes

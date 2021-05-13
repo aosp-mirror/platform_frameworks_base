@@ -21,7 +21,6 @@ filegroup {
     name: "services.core-sources",
     srcs: ["java/**/*.java"],
     exclude_srcs: [
-        ":connectivity-service-srcs",
         ":services.core-sources-am-wm"
     ],
     path: "java",
@@ -214,32 +213,3 @@ filegroup {
     ],
 }
 
-// TODO: Move connectivity service sources to independent directory.
-filegroup {
-    name: "connectivity-service-srcs",
-    srcs: [
-        "java/com/android/server/ConnectivityService.java",
-        "java/com/android/server/ConnectivityServiceInitializer.java",
-        "java/com/android/server/NetIdManager.java",
-        "java/com/android/server/TestNetworkService.java",
-        "java/com/android/server/connectivity/AutodestructReference.java",
-        "java/com/android/server/connectivity/DnsManager.java",
-        "java/com/android/server/connectivity/FullScore.java",
-        "java/com/android/server/connectivity/KeepaliveTracker.java",
-        "java/com/android/server/connectivity/LingerMonitor.java",
-        "java/com/android/server/connectivity/MockableSystemProperties.java",
-        "java/com/android/server/connectivity/Nat464Xlat.java",
-        "java/com/android/server/connectivity/NetworkAgentInfo.java",
-        "java/com/android/server/connectivity/NetworkDiagnostics.java",
-        "java/com/android/server/connectivity/NetworkNotificationManager.java",
-        "java/com/android/server/connectivity/NetworkOffer.java",
-        "java/com/android/server/connectivity/NetworkRanker.java",
-        "java/com/android/server/connectivity/OsCompat.java",
-        "java/com/android/server/connectivity/PermissionMonitor.java",
-        "java/com/android/server/connectivity/ProfileNetworkPreferences.java",
-        "java/com/android/server/connectivity/ProxyTracker.java",
-        "java/com/android/server/connectivity/QosCallbackAgentConnection.java",
-        "java/com/android/server/connectivity/QosCallbackTracker.java",
-        "java/com/android/server/connectivity/TcpKeepaliveController.java",
-    ],
-}
