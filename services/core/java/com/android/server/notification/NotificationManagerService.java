@@ -830,7 +830,7 @@ public class NotificationManagerService extends SystemService {
                 learnNASPendingIntent).build();
 
 
-        return new Notification.Builder(getContext(), SystemNotificationChannels.ALERTS)
+        return new Notification.Builder(getContext(), SystemNotificationChannels.SYSTEM_CHANGES)
                 .setAutoCancel(false)
                 .setOngoing(true)
                 .setTicker(getContext().getResources().getString(title))
@@ -9473,6 +9473,19 @@ public class NotificationManagerService extends SystemService {
                 ArraySet<String> userSetServices = mUserSetServices.get(userId);
                 mIsUserChanged.put(userId, (userSetServices != null && userSetServices.size() > 0));
             }
+        }
+
+        @Override
+        protected void addApprovedList(String approved, int userId, boolean isPrimary,
+                String userSet) {
+            if (!TextUtils.isEmpty(approved)) {
+                String[] approvedArray = approved.split(ENABLED_SERVICES_SEPARATOR);
+                if (approvedArray.length > 1) {
+                    Slog.d(TAG, "More than one approved assistants");
+                    approved = approvedArray[0];
+                }
+            }
+            super.addApprovedList(approved, userId, isPrimary, userSet);
         }
 
         public NotificationAssistants(Context context, Object lock, UserProfiles up,

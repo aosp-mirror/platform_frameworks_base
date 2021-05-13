@@ -208,6 +208,24 @@ public class PipAnimationController {
     }
 
     /**
+     * A handler class that could register itself to apply the transaction instead of the
+     * animation controller doing it. For example, the menu controller can be one such handler.
+     */
+    public static class PipTransactionHandler {
+
+        /**
+         * Called when the animation controller is about to apply a transaction. Allow a registered
+         * handler to apply the transaction instead.
+         *
+         * @return true if handled by the handler, false otherwise.
+         */
+        public boolean handlePipTransaction(SurfaceControl leash, SurfaceControl.Transaction tx,
+                Rect destinationBounds) {
+            return false;
+        }
+    }
+
+    /**
      * Animator for PiP transition animation which supports both alpha and bounds animation.
      * @param <T> Type of property to animate, either alpha (float) or bounds (Rect)
      */
@@ -225,6 +243,7 @@ public class PipAnimationController {
         private T mEndValue;
         private float mStartingAngle;
         private PipAnimationCallback mPipAnimationCallback;
+        private PipTransactionHandler mPipTransactionHandler;
         private PipSurfaceTransactionHelper.SurfaceControlTransactionFactory
                 mSurfaceControlTransactionFactory;
         private PipSurfaceTransactionHelper mSurfaceTransactionHelper;
@@ -293,6 +312,20 @@ public class PipAnimationController {
             mPipAnimationCallback = callback;
             return this;
         }
+
+        PipTransitionAnimator<T> setPipTransactionHandler(PipTransactionHandler handler) {
+            mPipTransactionHandler = handler;
+            return this;
+        }
+
+        boolean handlePipTransaction(SurfaceControl leash, SurfaceControl.Transaction tx,
+                Rect destinationBounds) {
+            if (mPipTransactionHandler != null) {
+                return mPipTransactionHandler.handlePipTransaction(leash, tx, destinationBounds);
+            }
+            return false;
+        }
+
         @VisibleForTesting
         @TransitionDirection public int getTransitionDirection() {
             return mTransitionDirection;
@@ -499,7 +532,9 @@ public class PipAnimationController {
                         getSurfaceTransactionHelper().scaleAndCrop(tx, leash,
                                 initialSourceValue, bounds, insets);
                     }
-                    tx.apply();
+                    if (!handlePipTransaction(leash, tx, bounds)) {
+                        tx.apply();
+                    }
                 }
 
                 private void applyRotation(SurfaceControl.Transaction tx, SurfaceControl leash,

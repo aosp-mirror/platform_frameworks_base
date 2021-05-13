@@ -42,12 +42,17 @@ public class NotificationBigPictureTemplateViewWrapper extends NotificationTempl
         updateImageTag(row.getEntry().getSbn());
     }
 
-    private void updateImageTag(StatusBarNotification notification) {
-        final Bundle extras = notification.getNotification().extras;
-        Icon overriddenIcon = extras.getParcelable(Notification.EXTRA_LARGE_ICON_BIG);
-        if (overriddenIcon != null) {
-            mRightIcon.setTag(ImageTransformState.ICON_TAG, overriddenIcon);
-            mLeftIcon.setTag(ImageTransformState.ICON_TAG, overriddenIcon);
+    private void updateImageTag(StatusBarNotification sbn) {
+        final Bundle extras = sbn.getNotification().extras;
+        boolean bigLargeIconSet = extras.containsKey(Notification.EXTRA_LARGE_ICON_BIG);
+        if (bigLargeIconSet) {
+            Icon bigLargeIcon = extras.getParcelable(Notification.EXTRA_LARGE_ICON_BIG);
+            mRightIcon.setTag(ImageTransformState.ICON_TAG, bigLargeIcon);
+            mLeftIcon.setTag(ImageTransformState.ICON_TAG, bigLargeIcon);
+        } else {
+            // Overwrite in case the superclass populated this tag with the promoted picture,
+            // which won't be right since this is the expanded state.
+            mRightIcon.setTag(ImageTransformState.ICON_TAG, getLargeIcon(sbn.getNotification()));
         }
     }
 }

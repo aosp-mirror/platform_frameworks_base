@@ -152,6 +152,8 @@ public class AlarmManager {
      * this broadcast will be sent. Applications can reschedule all the necessary alarms when
      * receiving it.
      *
+     * <p>This broadcast will <em>not</em> be sent when the user revokes the permission.
+     *
      * <p><em>Note:</em>
      * Applications are still required to check {@link #canScheduleExactAlarms()}
      * before using the above APIs after receiving this broadcast,

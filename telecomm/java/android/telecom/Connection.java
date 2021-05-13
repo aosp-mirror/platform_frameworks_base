@@ -806,6 +806,15 @@ public abstract class Connection extends Conferenceable {
      */
     public static final String EXTRA_AUDIO_CODEC_BANDWIDTH_KHZ =
             "android.telecom.extra.AUDIO_CODEC_BANDWIDTH_KHZ";
+
+    /**
+     * Boolean connection extra key used to indicate whether device to device communication is
+     * available for the current call.
+     * @hide
+     */
+    public static final String EXTRA_IS_DEVICE_TO_DEVICE_COMMUNICATION_AVAILABLE =
+            "android.telecom.extra.IS_DEVICE_TO_DEVICE_COMMUNICATION_AVAILABLE";
+
     /**
      * Connection event used to inform Telecom that it should play the on hold tone.  This is used
      * to play a tone when the peer puts the current call on hold.  Sent to Telecom via

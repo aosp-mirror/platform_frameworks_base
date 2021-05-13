@@ -9335,7 +9335,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             pw.println("  mFgsStartTempAllowList:");
             final long currentTimeNow = System.currentTimeMillis();
             final long elapsedRealtimeNow = SystemClock.elapsedRealtime();
-            final Set<Integer> uids = mFgsStartTempAllowList.keySet();
+            final Set<Integer> uids = new ArraySet<>(mFgsStartTempAllowList.keySet());
             for (Integer uid : uids) {
                 final Pair<Long, FgsTempAllowListItem> entry = mFgsStartTempAllowList.get(uid);
                 if (entry == null) {
@@ -14621,7 +14621,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             String reason, @TempAllowListType int type, int callingUid) {
         synchronized (mProcLock) {
             // The temp allowlist type could change according to the reasonCode.
-            type = mLocalDeviceIdleController.getTempAllowListType(reasonCode, type);
+            if (mLocalDeviceIdleController != null) {
+                type = mLocalDeviceIdleController.getTempAllowListType(reasonCode, type);
+            }
             if (type == TEMPORARY_ALLOW_LIST_TYPE_NONE) {
                 return;
             }

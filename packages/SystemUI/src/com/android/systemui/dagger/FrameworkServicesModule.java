@@ -29,6 +29,7 @@ import android.app.StatsManager;
 import android.app.WallpaperManager;
 import android.app.admin.DevicePolicyManager;
 import android.app.role.RoleManager;
+import android.app.smartspace.SmartspaceManager;
 import android.app.trust.TrustManager;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -399,5 +400,11 @@ public class FrameworkServicesModule {
     @Singleton
     static PermissionManager providePermissionManager(Context context) {
         return context.getSystemService(PermissionManager.class);
+    }
+
+    @Provides
+    @Singleton
+    static SmartspaceManager provideSmartspaceManager(Context context) {
+        return context.getSystemService(SmartspaceManager.class);
     }
 }

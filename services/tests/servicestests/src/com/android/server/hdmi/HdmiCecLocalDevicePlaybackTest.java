@@ -92,8 +92,6 @@ public class HdmiCecLocalDevicePlaybackTest {
 
         Context context = InstrumentationRegistry.getTargetContext();
         mMyLooper = mTestLooper.getLooper();
-        PowerManager powerManager = new PowerManager(context, mIPowerManagerMock,
-                mIThermalServiceMock, new Handler(mMyLooper));
 
         mHdmiControlService =
                 new HdmiControlService(InstrumentationRegistry.getTargetContext()) {
@@ -140,7 +138,8 @@ public class HdmiCecLocalDevicePlaybackTest {
 
                     @Override
                     protected PowerManager getPowerManager() {
-                        return powerManager;
+                        return new PowerManager(context, mIPowerManagerMock,
+                                mIThermalServiceMock, new Handler(mMyLooper));
                     }
                 };
 
@@ -168,6 +167,8 @@ public class HdmiCecLocalDevicePlaybackTest {
         mPlaybackLogicalAddress = mHdmiCecLocalDevicePlayback.getDeviceInfo().getLogicalAddress();
         mHdmiControlService.getHdmiCecNetwork().addCecDevice(INFO_TV);
         mNativeWrapper.clearResultMessages();
+        mHdmiCecLocalDevicePlayback.mPlaybackDeviceActionOnRoutingControl =
+                HdmiProperties.playback_device_action_on_routing_control_values.NONE;
     }
 
     @Test

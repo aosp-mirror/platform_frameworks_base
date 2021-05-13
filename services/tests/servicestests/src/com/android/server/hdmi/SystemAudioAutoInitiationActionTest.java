@@ -78,10 +78,12 @@ public class SystemAudioAutoInitiationActionTest {
         mContextSpy = spy(new ContextWrapper(InstrumentationRegistry.getTargetContext()));
 
         Looper myLooper = mTestLooper.getLooper();
-        PowerManager powerManager = new PowerManager(mContextSpy, mIPowerManagerMock,
-                mIThermalServiceMock, new Handler(myLooper));
-        when(mContextSpy.getSystemService(Context.POWER_SERVICE)).thenReturn(powerManager);
-        when(mContextSpy.getSystemService(PowerManager.class)).thenReturn(powerManager);
+        when(mContextSpy.getSystemService(Context.POWER_SERVICE)).thenAnswer(i ->
+                new PowerManager(mContextSpy, mIPowerManagerMock,
+                mIThermalServiceMock, new Handler(myLooper)));
+        when(mContextSpy.getSystemService(PowerManager.class)).thenAnswer(i ->
+                new PowerManager(mContextSpy, mIPowerManagerMock,
+                mIThermalServiceMock, new Handler(myLooper)));
         when(mIPowerManagerMock.isInteractive()).thenReturn(true);
 
         mHdmiControlService = new HdmiControlService(mContextSpy) {
@@ -107,7 +109,8 @@ public class SystemAudioAutoInitiationActionTest {
 
             @Override
             protected PowerManager getPowerManager() {
-                return powerManager;
+                return new PowerManager(mContextSpy, mIPowerManagerMock,
+                        mIThermalServiceMock, new Handler(myLooper));
             }
 
             @Override

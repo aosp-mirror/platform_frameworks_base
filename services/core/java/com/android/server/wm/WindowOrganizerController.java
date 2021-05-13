@@ -569,14 +569,15 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     if (newParent.asTaskDisplayArea() != null) {
                         // For now, reparenting to displayarea is different from other reparents...
                         as.reparent(newParent.asTaskDisplayArea(), hop.getToTop());
-                    } else {
+                    } else if (newParent.asTask() != null) {
                         if (newParent.inMultiWindowMode() && task.isLeafTask()) {
                             if (newParent.inPinnedWindowingMode()) {
                                 Slog.w(TAG, "Can't support moving a task to another PIP window..."
                                         + " newParent=" + newParent + " task=" + task);
                                 return 0;
                             }
-                            if (!task.supportsMultiWindow()) {
+                            if (!task.supportsMultiWindowInDisplayArea(
+                                    newParent.asTask().getDisplayArea())) {
                                 Slog.w(TAG, "Can't support task that doesn't support multi-window"
                                         + " mode in multi-window mode... newParent=" + newParent
                                         + " task=" + task);
@@ -586,6 +587,9 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                         task.reparent((Task) newParent,
                                 hop.getToTop() ? POSITION_TOP : POSITION_BOTTOM,
                                 false /*moveParents*/, "sanitizeAndApplyHierarchyOp");
+                    } else {
+                        throw new RuntimeException("Can only reparent task to another task or"
+                                + " taskDisplayArea, but not " + newParent);
                     }
                 } else {
                     final Task rootTask = (Task) (
@@ -641,6 +645,9 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         }
 
         final boolean newParentInMultiWindow = newParent.inMultiWindowMode();
+        final TaskDisplayArea newParentTda = newParent.asTask() != null
+                ? newParent.asTask().getDisplayArea()
+                : newParent.asTaskDisplayArea();
         final WindowContainer finalCurrentParent = currentParent;
         Slog.i(TAG, "reparentChildrenTasksHierarchyOp"
                 + " currentParent=" + currentParent + " newParent=" + newParent + " hop=" + hop);
@@ -656,7 +663,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 // are reparenting from.
                 return;
             }
-            if (newParentInMultiWindow && !task.supportsMultiWindow()) {
+            if (newParentInMultiWindow && !task.supportsMultiWindowInDisplayArea(newParentTda)) {
                 Slog.e(TAG, "reparentChildrenTasksHierarchyOp non-resizeable task to multi window,"
                         + " task=" + task);
                 return;

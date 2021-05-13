@@ -19,42 +19,22 @@ package com.android.keyguard;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
-import android.app.PendingIntent;
 import android.app.WallpaperManager;
-import android.app.smartspace.SmartspaceConfig;
-import android.app.smartspace.SmartspaceManager;
-import android.app.smartspace.SmartspaceSession;
-import android.app.smartspace.SmartspaceTarget;
-import android.content.Intent;
-import android.content.pm.UserInfo;
 import android.content.res.Resources;
-import android.database.ContentObserver;
-import android.net.Uri;
-import android.os.Handler;
-import android.os.UserHandle;
-import android.provider.Settings;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.colorextraction.ColorExtractor;
 import com.android.keyguard.clock.ClockManager;
-import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
-import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.plugins.ActivityStarter;
-import com.android.systemui.plugins.BcSmartspaceDataPlugin;
-import com.android.systemui.plugins.BcSmartspaceDataPlugin.IntentStarter;
 import com.android.systemui.plugins.ClockPlugin;
-import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.settings.UserTracker;
-import com.android.systemui.statusbar.FeatureFlags;
+import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
@@ -62,14 +42,10 @@ import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.NotificationIconContainer;
 import com.android.systemui.statusbar.policy.BatteryController;
-import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.ViewController;
-import com.android.systemui.util.settings.SecureSettings;
 
 import java.util.Locale;
-import java.util.Optional;
 import java.util.TimeZone;
-import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
@@ -85,9 +61,8 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     private final KeyguardSliceViewController mKeyguardSliceViewController;
     private final NotificationIconAreaController mNotificationIconAreaController;
     private final BroadcastDispatcher mBroadcastDispatcher;
-    private final Executor mUiExecutor;
     private final BatteryController mBatteryController;
-    private final FeatureFlags mFeatureFlags;
+    private final LockscreenSmartspaceController mSmartspaceController;
 
     /**
      * Clock for both small and large sizes
@@ -97,20 +72,8 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     private AnimatableClockController mLargeClockViewController;
     private FrameLayout mLargeClockFrame;
 
-    private SmartspaceSession mSmartspaceSession;
-    private SmartspaceSession.OnTargetsAvailableListener mSmartspaceCallback;
-    private ConfigurationController mConfigurationController;
-    private ActivityStarter mActivityStarter;
-    private FalsingManager mFalsingManager;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final KeyguardBypassController mBypassController;
-    private Handler mHandler;
-    private UserTracker mUserTracker;
-    private SecureSettings mSecureSettings;
-    private ContentObserver mSettingsObserver;
-    private boolean mShowSensitiveContentForCurrentUser;
-    private boolean mShowSensitiveContentForManagedUser;
-    private UserHandle mManagedUserHandle;
 
     /**
      * Listener for changes to the color palette.
@@ -118,59 +81,30 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
      * The color palette changes when the wallpaper is changed.
      */
     private final ColorExtractor.OnColorsChangedListener mColorsListener =
-            new ColorExtractor.OnColorsChangedListener() {
-        @Override
-        public void onColorsChanged(ColorExtractor extractor, int which) {
-            if ((which & WallpaperManager.FLAG_LOCK) != 0) {
-                mView.updateColors(getGradientColors());
-            }
-        }
-    };
-
-    private final ConfigurationController.ConfigurationListener mConfigurationListener =
-            new ConfigurationController.ConfigurationListener() {
-        @Override
-        public void onThemeChanged() {
-            updateWallpaperColor();
-        }
-    };
-
-    private ClockManager.ClockChangedListener mClockChangedListener = this::setClockPlugin;
-
-    private final StatusBarStateController.StateListener mStatusBarStateListener =
-            new StatusBarStateController.StateListener() {
-                @Override
-                public void onDozeAmountChanged(float linear, float eased) {
-                    if (mSmartspaceView != null) {
-                        mSmartspaceView.setDozeAmount(eased);
-                    }
+            (extractor, which) -> {
+                if ((which & WallpaperManager.FLAG_LOCK) != 0) {
+                    mView.updateColors(getGradientColors());
                 }
             };
 
+    private final ClockManager.ClockChangedListener mClockChangedListener = this::setClockPlugin;
+
     // If set, will replace keyguard_status_area
-    private BcSmartspaceDataPlugin.SmartspaceView mSmartspaceView;
-    private Optional<BcSmartspaceDataPlugin> mSmartspacePlugin;
+    private View mSmartspaceView;
 
     @Inject
     public KeyguardClockSwitchController(
             KeyguardClockSwitch keyguardClockSwitch,
             StatusBarStateController statusBarStateController,
-            SysuiColorExtractor colorExtractor, ClockManager clockManager,
+            SysuiColorExtractor colorExtractor,
+            ClockManager clockManager,
             KeyguardSliceViewController keyguardSliceViewController,
             NotificationIconAreaController notificationIconAreaController,
             BroadcastDispatcher broadcastDispatcher,
-            FeatureFlags featureFlags,
-            @Main Executor uiExecutor,
             BatteryController batteryController,
-            ConfigurationController configurationController,
-            ActivityStarter activityStarter,
-            FalsingManager falsingManager,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             KeyguardBypassController bypassController,
-            @Main Handler handler,
-            UserTracker userTracker,
-            SecureSettings secureSettings,
-            Optional<BcSmartspaceDataPlugin> smartspacePlugin) {
+            LockscreenSmartspaceController smartspaceController) {
         super(keyguardClockSwitch);
         mStatusBarStateController = statusBarStateController;
         mColorExtractor = colorExtractor;
@@ -178,18 +112,10 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mKeyguardSliceViewController = keyguardSliceViewController;
         mNotificationIconAreaController = notificationIconAreaController;
         mBroadcastDispatcher = broadcastDispatcher;
-        mFeatureFlags = featureFlags;
-        mUiExecutor = uiExecutor;
         mBatteryController = batteryController;
-        mConfigurationController = configurationController;
-        mActivityStarter = activityStarter;
-        mFalsingManager = falsingManager;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mBypassController = bypassController;
-        mHandler = handler;
-        mUserTracker = userTracker;
-        mSecureSettings = secureSettings;
-        mSmartspacePlugin = smartspacePlugin;
+        mSmartspaceController = smartspaceController;
     }
 
     /**
@@ -232,119 +158,33 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
                         mBypassController);
         mLargeClockViewController.init();
 
-        mStatusBarStateController.addCallback(mStatusBarStateListener);
-        mConfigurationController.addCallback(mConfigurationListener);
+        if (mSmartspaceController.isEnabled()) {
+            mSmartspaceView = mSmartspaceController.buildAndConnectView(mView);
 
-        if (mFeatureFlags.isSmartspaceEnabled() && mSmartspacePlugin.isPresent()) {
-            BcSmartspaceDataPlugin smartspaceDataPlugin = mSmartspacePlugin.get();
             View ksa = mView.findViewById(R.id.keyguard_status_area);
             int ksaIndex = mView.indexOfChild(ksa);
             ksa.setVisibility(View.GONE);
-
-            mSmartspaceView = smartspaceDataPlugin.getView(mView);
-            mSmartspaceView.registerDataProvider(smartspaceDataPlugin);
-            mSmartspaceView.setIntentStarter(new IntentStarter() {
-                public void startIntent(View v, Intent i) {
-                    mActivityStarter.startActivity(i, true /* dismissShade */);
-                }
-
-                public void startPendingIntent(PendingIntent pi) {
-                    mActivityStarter.startPendingIntentDismissingKeyguard(pi);
-                }
-            });
-            mSmartspaceView.setFalsingManager(mFalsingManager);
-            updateWallpaperColor();
-            View asView = (View) mSmartspaceView;
 
             // Place smartspace view below normal clock...
             RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
                     MATCH_PARENT, WRAP_CONTENT);
             lp.addRule(RelativeLayout.BELOW, R.id.lockscreen_clock_view);
 
-            mView.addView(asView, ksaIndex, lp);
+            mView.addView(mSmartspaceView, ksaIndex, lp);
             int padding = getContext().getResources()
                     .getDimensionPixelSize(R.dimen.below_clock_padding_start);
-            asView.setPadding(padding, 0, padding, 0);
+            mSmartspaceView.setPadding(padding, 0, padding, 0);
 
             // ... but above the large clock
             lp = new RelativeLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT);
-            lp.addRule(RelativeLayout.BELOW, asView.getId());
+            lp.addRule(RelativeLayout.BELOW, mSmartspaceView.getId());
             mLargeClockFrame.setLayoutParams(lp);
 
             View nic = mView.findViewById(
                     R.id.left_aligned_notification_icon_container);
             lp = (RelativeLayout.LayoutParams) nic.getLayoutParams();
-            lp.addRule(RelativeLayout.BELOW, asView.getId());
+            lp.addRule(RelativeLayout.BELOW, mSmartspaceView.getId());
             nic.setLayoutParams(lp);
-
-            mSmartspaceSession = getContext().getSystemService(SmartspaceManager.class)
-                    .createSmartspaceSession(
-                            new SmartspaceConfig.Builder(getContext(), "lockscreen").build());
-            mSmartspaceCallback = targets -> {
-                targets.removeIf(this::filterSmartspaceTarget);
-                smartspaceDataPlugin.onTargetsAvailable(targets);
-            };
-            mSmartspaceSession.addOnTargetsAvailableListener(mUiExecutor, mSmartspaceCallback);
-            mSettingsObserver = new ContentObserver(mHandler) {
-                @Override
-                public void onChange(boolean selfChange, Uri uri) {
-                    reloadSmartspace();
-                }
-            };
-
-            getContext().getContentResolver().registerContentObserver(
-                    Settings.Secure.getUriFor(
-                            Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS),
-                    true, mSettingsObserver, UserHandle.USER_ALL);
-            reloadSmartspace();
-        }
-
-        float dozeAmount = mStatusBarStateController.getDozeAmount();
-        mStatusBarStateListener.onDozeAmountChanged(dozeAmount, dozeAmount);
-    }
-
-    @VisibleForTesting
-    boolean filterSmartspaceTarget(SmartspaceTarget t) {
-        if (!t.isSensitive()) return false;
-
-        if (t.getUserHandle().equals(mUserTracker.getUserHandle())) {
-            return !mShowSensitiveContentForCurrentUser;
-        }
-        if (t.getUserHandle().equals(mManagedUserHandle)) {
-            return !mShowSensitiveContentForManagedUser;
-        }
-
-        return false;
-    }
-
-    private void reloadSmartspace() {
-        mManagedUserHandle = getWorkProfileUser();
-        final String setting = Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS;
-
-        mShowSensitiveContentForCurrentUser =
-                mSecureSettings.getIntForUser(setting, 0, mUserTracker.getUserId()) == 1;
-        if (mManagedUserHandle != null) {
-            int id = mManagedUserHandle.getIdentifier();
-            mShowSensitiveContentForManagedUser =
-                    mSecureSettings.getIntForUser(setting, 0, id) == 1;
-        }
-
-        mSmartspaceSession.requestSmartspaceUpdate();
-    }
-
-    private UserHandle getWorkProfileUser() {
-        for (UserInfo userInfo : mUserTracker.getUserProfiles()) {
-            if (userInfo.isManagedProfile()) {
-                return userInfo.getUserHandle();
-            }
-        }
-        return null;
-    }
-
-    private void updateWallpaperColor() {
-        if (mSmartspaceView != null) {
-            int color = Utils.getColorAttrDefaultColor(getContext(), R.attr.wallpaperTextColor);
-            mSmartspaceView.setPrimaryTextColor(color);
         }
     }
 
@@ -356,16 +196,16 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mColorExtractor.removeOnColorsChangedListener(mColorsListener);
         mView.setClockPlugin(null, mStatusBarStateController.getState());
 
-        if (mSmartspaceSession != null) {
-            mSmartspaceSession.removeOnTargetsAvailableListener(mSmartspaceCallback);
-            mSmartspaceSession.close();
-            mSmartspaceSession = null;
-        }
-        mStatusBarStateController.removeCallback(mStatusBarStateListener);
-        mConfigurationController.removeCallback(mConfigurationListener);
+        mSmartspaceController.disconnect();
 
-        if (mSettingsObserver != null) {
-            getContext().getContentResolver().unregisterContentObserver(mSettingsObserver);
+        // TODO: This is an unfortunate necessity since smartspace plugin retains a single instance
+        // of the smartspace view -- if we don't remove the view, it can't be reused by a later
+        // instance of this class. In order to fix this, we need to modify the plugin so that
+        // (a) we get a new view each time and (b) we can properly clean up an old view by making
+        // it unregister itself as a plugin listener.
+        if (mSmartspaceView != null) {
+            mView.removeView(mSmartspaceView);
+            mSmartspaceView = null;
         }
     }
 
@@ -436,7 +276,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
                 scale, props, animate);
 
         if (mSmartspaceView != null) {
-            PropertyAnimator.setProperty((View) mSmartspaceView, AnimatableProperty.TRANSLATION_X,
+            PropertyAnimator.setProperty(mSmartspaceView, AnimatableProperty.TRANSLATION_X,
                     x, props, animate);
         }
 
@@ -509,15 +349,5 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
 
     private int getCurrentLayoutDirection() {
         return TextUtils.getLayoutDirectionFromLocale(Locale.getDefault());
-    }
-
-    @VisibleForTesting
-    ConfigurationController.ConfigurationListener getConfigurationListener() {
-        return mConfigurationListener;
-    }
-
-    @VisibleForTesting
-    ContentObserver getSettingsObserver() {
-        return mSettingsObserver;
     }
 }

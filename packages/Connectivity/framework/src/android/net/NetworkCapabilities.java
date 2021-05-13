@@ -139,19 +139,13 @@ public final class NetworkCapabilities implements Parcelable {
      */
     private String mRequestorPackageName;
 
-    /**
-     * Indicates what fields should be redacted from this instance.
-     */
-    private final @RedactionType long mRedactions;
-
     public NetworkCapabilities() {
-        mRedactions = REDACT_ALL;
         clearAll();
         mNetworkCapabilities = DEFAULT_CAPABILITIES;
     }
 
     public NetworkCapabilities(NetworkCapabilities nc) {
-        this(nc, REDACT_ALL);
+        this(nc, REDACT_NONE);
     }
 
     /**
@@ -163,9 +157,11 @@ public final class NetworkCapabilities implements Parcelable {
      * @hide
      */
     public NetworkCapabilities(@Nullable NetworkCapabilities nc, @RedactionType long redactions) {
-        mRedactions = redactions;
         if (nc != null) {
             set(nc);
+        }
+        if (mTransportInfo != null) {
+            mTransportInfo = nc.mTransportInfo.makeCopy(redactions);
         }
     }
 
@@ -175,14 +171,6 @@ public final class NetworkCapabilities implements Parcelable {
      * @hide
      */
     public void clearAll() {
-        // Ensures that the internal copies maintained by the connectivity stack does not set it to
-        // anything other than |REDACT_ALL|.
-        if (mRedactions != REDACT_ALL) {
-            // This is needed because the current redaction mechanism relies on redaction while
-            // parceling.
-            throw new UnsupportedOperationException(
-                    "Cannot clear NetworkCapabilities when mRedactions is set");
-        }
         mNetworkCapabilities = mTransportTypes = mForbiddenNetworkCapabilities = 0;
         mLinkUpBandwidthKbps = mLinkDownBandwidthKbps = LINK_BANDWIDTH_UNSPECIFIED;
         mNetworkSpecifier = null;
@@ -211,7 +199,7 @@ public final class NetworkCapabilities implements Parcelable {
         mLinkDownBandwidthKbps = nc.mLinkDownBandwidthKbps;
         mNetworkSpecifier = nc.mNetworkSpecifier;
         if (nc.getTransportInfo() != null) {
-            setTransportInfo(nc.getTransportInfo().makeCopy(mRedactions));
+            setTransportInfo(nc.getTransportInfo());
         } else {
             setTransportInfo(null);
         }
@@ -839,8 +827,17 @@ public final class NetworkCapabilities implements Parcelable {
         final int[] originalAdministratorUids = getAdministratorUids();
         final TransportInfo originalTransportInfo = getTransportInfo();
         clearAll();
-        mTransportTypes = (originalTransportTypes & TEST_NETWORKS_ALLOWED_TRANSPORTS)
-                | (1 << TRANSPORT_TEST);
+        if (0 != (originalCapabilities & NET_CAPABILITY_NOT_RESTRICTED)) {
+            // If the test network is not restricted, then it is only allowed to declare some
+            // specific transports. This is to minimize impact on running apps in case an app
+            // run from the shell creates a test a network.
+            mTransportTypes =
+                    (originalTransportTypes & UNRESTRICTED_TEST_NETWORKS_ALLOWED_TRANSPORTS)
+                            | (1 << TRANSPORT_TEST);
+        } else {
+            // If the test transport is restricted, then it may declare any transport.
+            mTransportTypes = (originalTransportTypes | (1 << TRANSPORT_TEST));
+        }
         mNetworkCapabilities = originalCapabilities & TEST_NETWORKS_ALLOWED_CAPABILITIES;
         mNetworkSpecifier = originalSpecifier;
         mSignalStrength = originalSignalStrength;
@@ -951,9 +948,10 @@ public final class NetworkCapabilities implements Parcelable {
     };
 
     /**
-     * Allowed transports on a test network, in addition to TRANSPORT_TEST.
+     * Allowed transports on an unrestricted test network (in addition to TRANSPORT_TEST).
      */
-    private static final int TEST_NETWORKS_ALLOWED_TRANSPORTS = 1 << TRANSPORT_TEST
+    private static final int UNRESTRICTED_TEST_NETWORKS_ALLOWED_TRANSPORTS =
+            1 << TRANSPORT_TEST
             // Test ethernet networks can be created with EthernetManager#setIncludeTestInterfaces
             | 1 << TRANSPORT_ETHERNET
             // Test VPN networks can be created but their UID ranges must be empty.

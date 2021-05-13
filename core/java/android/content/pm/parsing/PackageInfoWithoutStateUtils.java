@@ -397,7 +397,7 @@ public class PackageInfoWithoutStateUtils {
         }
 
         // CompatibilityMode is global state.
-        if (!ParsingPackageUtils.sCompatibilityModeEnabled) {
+        if (!android.content.pm.PackageParser.sCompatibilityModeEnabled) {
             ai.disableCompatibilityMode();
         }
 

@@ -664,7 +664,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             mDebugPaint.setColor(Color.CYAN);
             canvas.drawLine(0, y, getWidth(), y, mDebugPaint);
 
-            y = (int) (mAmbientState.getStackY() + mAmbientState.getStackHeight());
+            y = (int) (mAmbientState.getStackY() + mSidePaddings + mAmbientState.getStackHeight());
             mDebugPaint.setColor(Color.BLUE);
             canvas.drawLine(0, y, getWidth(), y, mDebugPaint);
         }
@@ -1148,12 +1148,15 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         if (mOnStackYChanged != null) {
             mOnStackYChanged.run();
         }
-
-        final float stackEndHeight = getHeight() - getEmptyBottomMargin() - mTopPadding;
-        mAmbientState.setStackEndHeight(stackEndHeight);
-        mAmbientState.setStackHeight(
-                MathUtils.lerp(stackEndHeight * StackScrollAlgorithm.START_FRACTION,
-                        stackEndHeight, fraction));
+        if (mQsExpansionFraction <= 0) {
+            final float scrimTopPadding = mAmbientState.isOnKeyguard() ? 0 : mSidePaddings;
+            final float stackEndHeight = Math.max(0f,
+                    getHeight() - getEmptyBottomMargin() - stackY - scrimTopPadding);
+            mAmbientState.setStackEndHeight(stackEndHeight);
+            mAmbientState.setStackHeight(
+                    MathUtils.lerp(stackEndHeight * StackScrollAlgorithm.START_FRACTION,
+                            stackEndHeight, fraction));
+        }
     }
 
     void setOnStackYChanged(Runnable onStackYChanged) {
