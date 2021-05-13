@@ -250,7 +250,8 @@ public class NotificationMediaManager implements Dumpable {
 
             @Override
             public void onSmartspaceMediaDataLoaded(@NonNull String key,
-                    @NonNull SmartspaceTarget data) {
+                    @NonNull SmartspaceTarget data, boolean shouldPrioritize) {
+
             }
 
             @Override
@@ -323,7 +324,8 @@ public class NotificationMediaManager implements Dumpable {
 
             @Override
             public void onSmartspaceMediaDataLoaded(@NonNull String key,
-                    @NonNull SmartspaceTarget data) {
+                    @NonNull SmartspaceTarget data, boolean shouldPrioritize) {
+
             }
 
             @Override

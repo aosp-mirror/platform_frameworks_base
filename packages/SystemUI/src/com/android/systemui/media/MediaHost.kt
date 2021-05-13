@@ -56,7 +56,11 @@ class MediaHost constructor(
             updateViewVisibility()
         }
 
-        override fun onSmartspaceMediaDataLoaded(key: String, data: SmartspaceTarget) {
+        override fun onSmartspaceMediaDataLoaded(
+            key: String,
+            data: SmartspaceTarget,
+            shouldPrioritize: Boolean
+        ) {
             updateViewVisibility()
         }
 
