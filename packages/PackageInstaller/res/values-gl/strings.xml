@@ -46,7 +46,7 @@
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"Non se puido instalar a aplicación <xliff:g id="APP_NAME">%1$s</xliff:g>. Libera espazo e téntao de novo."</string>
     <string name="app_not_found_dlg_title" msgid="5107924008597470285">"Non se atopou a aplicación"</string>
     <string name="app_not_found_dlg_text" msgid="5219983779377811611">"Non se atopou a aplicación na lista de aplicacións instaladas."</string>
-    <string name="user_is_not_allowed_dlg_title" msgid="6915293433252210232">"Acción non-permitida"</string>
+    <string name="user_is_not_allowed_dlg_title" msgid="6915293433252210232">"Sen permiso"</string>
     <string name="user_is_not_allowed_dlg_text" msgid="3468447791330611681">"O usuario actual non pode realizar esta desinstalación."</string>
     <string name="generic_error_dlg_title" msgid="5863195085927067752">"Erro"</string>
     <string name="generic_error_dlg_text" msgid="5287861443265795232">"Non se puido desinstalar a aplicación."</string>
@@ -54,10 +54,10 @@
     <string name="uninstall_update_title" msgid="824411791011583031">"Desinstalar actualización"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> forma parte da seguinte aplicación:"</string>
     <string name="uninstall_application_text" msgid="3816830743706143980">"Queres desinstalar esta aplicación?"</string>
-    <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Queres desinstalar esta aplicación para "<b>"todos"</b>" os usuarios? A aplicación e os seus datos eliminaranse de "<b>"todos"</b>" os usuarios do dispositivo."</string>
+    <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Queres desinstalar esta aplicación para "<b>"todos"</b>" os usuarios? A aplicación e os seus datos quitaranse de "<b>"todos"</b>" os usuarios do dispositivo."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Queres desinstalar esta aplicación para o usuario que se chama <xliff:g id="USERNAME">%1$s</xliff:g>?"</string>
-    <string name="uninstall_update_text" msgid="863648314632448705">"Queres substituír esta aplicación pola versión que viña de fábrica? Eliminaranse todos os datos."</string>
-    <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Queres substituír esta aplicación pola versión que viña de fábrica? Eliminaranse todos os datos. Isto afectará a todos os usuarios do dispositivo, incluídos os que teñan perfís de traballo."</string>
+    <string name="uninstall_update_text" msgid="863648314632448705">"Queres substituír esta aplicación pola versión que viña de fábrica? Quitaranse todos os datos."</string>
+    <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Queres substituír esta aplicación pola versión que viña de fábrica? Quitaranse todos os datos. Isto afectará a todos os usuarios do dispositivo, incluídos os que teñan perfís de traballo."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Conservar os datos da aplicación, que ocupan <xliff:g id="SIZE">%1$s</xliff:g>."</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Desinstalacións en curso"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Erros nas desinstalacións"</string>
