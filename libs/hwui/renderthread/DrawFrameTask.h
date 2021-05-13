@@ -110,6 +110,7 @@ private:
     std::function<void(int64_t)> mFrameCallback;
     std::function<void(int64_t)> mFrameCompleteCallback;
 
+    nsecs_t mLastDequeueBufferDuration = 0;
     nsecs_t mLastTargetWorkDuration = 0;
     std::function<void(int64_t)> mUpdateTargetWorkDuration;
     std::function<void(int64_t)> mReportActualWorkDuration;

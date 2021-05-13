@@ -983,7 +983,8 @@ int IncrementalService::applyStorageParamsLocked(IncFsMount& ifs) {
     bool enableReadTimeouts = ifs.readTimeoutsRequested();
 
     std::lock_guard l(mMountOperationLock);
-    auto status = mVold->setIncFsMountOptions(control, enableReadLogs, enableReadTimeouts);
+    auto status = mVold->setIncFsMountOptions(control, enableReadLogs, enableReadTimeouts,
+                                              ifs.metricsKey);
     if (status.isOk()) {
         // Store states.
         ifs.setReadLogsEnabled(enableReadLogs);

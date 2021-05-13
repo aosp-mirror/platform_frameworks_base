@@ -929,7 +929,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         }
         GetWalletCardsRequest request =
                 new GetWalletCardsRequest(1 /* cardWidth */, 1 /* cardHeight */,
-                        1 /* iconSizePx */, 2 /* maxCards */);
+                        1 /* iconSizePx */, 1 /* maxCards */);
         mQuickAccessWalletClient.getWalletCards(mUiExecutor, request, mCardRetriever);
     }
 

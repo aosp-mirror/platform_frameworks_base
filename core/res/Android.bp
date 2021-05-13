@@ -100,8 +100,7 @@ genrule {
         + "RES_DIR=$$(dirname $$(dirname $${INPUTS[0]})) && "
         + "mkdir -p $$RES_DIR/values && "
         + "cp $${INPUTS[1]} $$RES_DIR/values && "
-        + "$(location soong_zip) -o $(out) -C $$RES_DIR -D $$RES_DIR && "
-        + "cp $(out) ."
+        + "$(location soong_zip) -o $(out) -C $$RES_DIR -D $$RES_DIR"
 }
 
 android_app {

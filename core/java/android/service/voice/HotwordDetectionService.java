@@ -16,6 +16,8 @@
 
 package android.service.voice;
 
+import static java.util.Objects.requireNonNull;
+
 import android.annotation.DurationMillisLong;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -414,11 +416,15 @@ public abstract class HotwordDetectionService extends Service {
         }
 
         /**
-         * Called when the detected result is valid.
+         * Informs the {@link HotwordDetector} that the keyphrase was detected.
+         *
+         * @param result Info about the detection result. This is provided to the
+         *         {@link HotwordDetector}.
          */
-        public void onDetected(@Nullable HotwordDetectedResult hotwordDetectedResult) {
+        public void onDetected(@NonNull HotwordDetectedResult result) {
+            requireNonNull(result);
             try {
-                mRemoteCallback.onDetected(hotwordDetectedResult);
+                mRemoteCallback.onDetected(result);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -433,7 +439,8 @@ public abstract class HotwordDetectionService extends Service {
          * @param result Info about the second stage detection result. This is provided to
          *         the {@link HotwordDetector}.
          */
-        public void onRejected(@Nullable HotwordRejectedResult result) {
+        public void onRejected(@NonNull HotwordRejectedResult result) {
+            requireNonNull(result);
             try {
                 mRemoteCallback.onRejected(result);
             } catch (RemoteException e) {

@@ -61,6 +61,7 @@ import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarIconControllerImpl;
 import com.android.systemui.statusbar.phone.StatusBarRemoteInputCallback;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
+import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallLogger;
 import com.android.systemui.statusbar.policy.RemoteInputUriController;
 import com.android.systemui.tracing.ProtoTracer;
 import com.android.systemui.util.DeviceConfigProxy;
@@ -243,11 +244,12 @@ public interface StatusBarDependenciesModule {
             SystemClock systemClock,
             ActivityStarter activityStarter,
             @Main Executor mainExecutor,
-            IActivityManager iActivityManager) {
+            IActivityManager iActivityManager,
+            OngoingCallLogger logger) {
         OngoingCallController ongoingCallController =
                 new OngoingCallController(
                         notifCollection, featureFlags, systemClock, activityStarter, mainExecutor,
-                        iActivityManager);
+                        iActivityManager, logger);
         ongoingCallController.init();
         return ongoingCallController;
     }

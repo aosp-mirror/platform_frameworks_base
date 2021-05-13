@@ -39,6 +39,9 @@
           "include-filter": "android.incrementalinstall.cts.IncrementalFeatureTest"
         }
       ]
+    },
+    {
+      "name": "CtsPackageManagerBootTestCases"
     }
   ],
   "postsubmit": [

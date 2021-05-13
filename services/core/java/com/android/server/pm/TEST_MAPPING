@@ -94,6 +94,9 @@
           "include-filter": "com.android.server.pm.test.OverlayActorVisibilityTest"
         }
       ]
+    },
+    {
+      "name": "CtsPackageManagerBootTestCases"
     }
   ],
   "postsubmit": [

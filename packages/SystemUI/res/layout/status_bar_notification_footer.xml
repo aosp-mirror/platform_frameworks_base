@@ -19,8 +19,8 @@
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingStart="4dp"
-        android:paddingEnd="4dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
         android:visibility="gone">
     <com.android.systemui.statusbar.AlphaOptimizedFrameLayout
         android:id="@+id/content"
