@@ -45,10 +45,12 @@ import android.view.WindowInsets;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeProvider;
+import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillValue;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.textclassifier.TextClassifier;
+import android.view.translation.TranslationCapability;
 import android.view.translation.TranslationSpec.DataFormat;
 import android.view.translation.ViewTranslationRequest;
 import android.view.translation.ViewTranslationResponse;
@@ -59,6 +61,7 @@ import android.webkit.WebView.VisualStateCallback;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
@@ -375,6 +378,14 @@ public interface WebViewProvider {
         default void onVirtualViewTranslationResponses(
                 @NonNull @SuppressWarnings("unused")
                         LongSparseArray<ViewTranslationResponse> response) {
+        }
+
+        default void dispatchCreateViewTranslationRequest(
+                @NonNull @SuppressWarnings("unused") Map<AutofillId, long[]> viewIds,
+                @NonNull @SuppressWarnings("unused") @DataFormat int[] supportedFormats,
+                @Nullable @SuppressWarnings("unused") TranslationCapability capability,
+                @NonNull @SuppressWarnings("unused") List<ViewTranslationRequest> requests) {
+
         }
 
         public AccessibilityNodeProvider getAccessibilityNodeProvider();

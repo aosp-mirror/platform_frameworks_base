@@ -18,11 +18,13 @@ package com.android.systemui.accessibility.floatingmenu;
 
 import static android.provider.Settings.Secure.ACCESSIBILITY_FLOATING_MENU_FADE_ENABLED;
 import static android.provider.Settings.Secure.ACCESSIBILITY_FLOATING_MENU_ICON_TYPE;
+import static android.provider.Settings.Secure.ACCESSIBILITY_FLOATING_MENU_MIGRATION_TOOLTIP_PROMPT;
 import static android.provider.Settings.Secure.ACCESSIBILITY_FLOATING_MENU_OPACITY;
 import static android.provider.Settings.Secure.ACCESSIBILITY_FLOATING_MENU_SIZE;
 import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_BUTTON;
 
 import static com.android.internal.accessibility.dialog.AccessibilityTargetHelper.getTargets;
+import static com.android.systemui.Prefs.Key.HAS_SEEN_ACCESSIBILITY_FLOATING_MENU_DOCK_TOOLTIP;
 import static com.android.systemui.accessibility.floatingmenu.AccessibilityFloatingMenuView.ShapeType;
 import static com.android.systemui.accessibility.floatingmenu.AccessibilityFloatingMenuView.SizeType;
 
@@ -34,15 +36,19 @@ import android.os.UserHandle;
 import android.provider.Settings;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.Prefs;
 
 /**
  * Contains logic for an accessibility floating menu view.
  */
 public class AccessibilityFloatingMenu implements IAccessibilityFloatingMenu {
-    private static final int DEFAULT_FADE_EFFECT_ENABLED = 1;
+    private static final int DEFAULT_FADE_EFFECT_IS_ENABLED = 1;
+    private static final int DEFAULT_MIGRATION_TOOLTIP_PROMPT_IS_DISABLED = 0;
     private static final float DEFAULT_OPACITY_VALUE = 0.55f;
     private final Context mContext;
     private final AccessibilityFloatingMenuView mMenuView;
+    private final MigrationTooltipView mMigrationTooltipView;
+    private final DockTooltipView mDockTooltipView;
     private final Handler mHandler = new Handler(Looper.getMainLooper());
 
     private final ContentObserver mContentObserver =
@@ -86,6 +92,8 @@ public class AccessibilityFloatingMenu implements IAccessibilityFloatingMenu {
     AccessibilityFloatingMenu(Context context, AccessibilityFloatingMenuView menuView) {
         mContext = context;
         mMenuView = menuView;
+        mMigrationTooltipView = new MigrationTooltipView(mContext, mMenuView);
+        mDockTooltipView = new DockTooltipView(mContext, mMenuView);
     }
 
     @Override
@@ -105,6 +113,9 @@ public class AccessibilityFloatingMenu implements IAccessibilityFloatingMenu {
                 getOpacityValue(mContext));
         mMenuView.setSizeType(getSizeType(mContext));
         mMenuView.setShapeType(getShapeType(mContext));
+        mMenuView.setOnDragEndListener(this::showDockTooltipIfNecessary);
+
+        showMigrationTooltipIfNecessary();
 
         registerContentObservers();
     }
@@ -116,14 +127,48 @@ public class AccessibilityFloatingMenu implements IAccessibilityFloatingMenu {
         }
 
         mMenuView.hide();
+        mMigrationTooltipView.hide();
+        mDockTooltipView.hide();
 
         unregisterContentObservers();
+    }
+
+    // Migration tooltip was the android S feature. It's just used on the Android version from R
+    // to S. In addition, it only shows once.
+    private void showMigrationTooltipIfNecessary() {
+        if (isMigrationTooltipPromptEnabled(mContext)) {
+            mMigrationTooltipView.show();
+
+            Settings.Secure.putInt(mContext.getContentResolver(),
+                    ACCESSIBILITY_FLOATING_MENU_MIGRATION_TOOLTIP_PROMPT, /* disabled */ 0);
+        }
+    }
+
+    private static boolean isMigrationTooltipPromptEnabled(Context context) {
+        return Settings.Secure.getInt(
+                context.getContentResolver(), ACCESSIBILITY_FLOATING_MENU_MIGRATION_TOOLTIP_PROMPT,
+                DEFAULT_MIGRATION_TOOLTIP_PROMPT_IS_DISABLED) == /* enabled */ 1;
+    }
+
+    /**
+     * Shows tooltip when user drags accessibility floating menu for the first time.
+     */
+    private void showDockTooltipIfNecessary() {
+        if (!Prefs.get(mContext).getBoolean(
+                HAS_SEEN_ACCESSIBILITY_FLOATING_MENU_DOCK_TOOLTIP, false)) {
+            // if the menu is an oval, the user has already dragged it out, so show the tooltip.
+            if (mMenuView.isOvalShape()) {
+                mDockTooltipView.show();
+            }
+
+            Prefs.putBoolean(mContext, HAS_SEEN_ACCESSIBILITY_FLOATING_MENU_DOCK_TOOLTIP, true);
+        }
     }
 
     private static boolean isFadeEffectEnabled(Context context) {
         return Settings.Secure.getInt(
                 context.getContentResolver(), ACCESSIBILITY_FLOATING_MENU_FADE_ENABLED,
-                DEFAULT_FADE_EFFECT_ENABLED) == /* enable */ 1;
+                DEFAULT_FADE_EFFECT_IS_ENABLED) == /* enabled */ 1;
     }
 
     private static float getOpacityValue(Context context) {

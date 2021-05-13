@@ -92,7 +92,7 @@ public final class UpdatableFontDirTest {
         }
 
         @Override
-        public void tryToCreateTypeface(File file) throws IOException {
+        public void tryToCreateTypeface(File file) throws Throwable {
         }
     }
 

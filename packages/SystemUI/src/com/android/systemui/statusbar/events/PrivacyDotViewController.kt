@@ -29,13 +29,11 @@ import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.statusbar.StatusBarState.SHADE
+import com.android.systemui.statusbar.StatusBarState.SHADE_LOCKED
 import com.android.systemui.statusbar.phone.StatusBarLocationPublisher
 import com.android.systemui.statusbar.phone.StatusBarMarginUpdatedListener
 import com.android.systemui.util.concurrency.DelayableExecutor
-import com.android.systemui.util.leak.RotationUtils.ROTATION_LANDSCAPE
-import com.android.systemui.util.leak.RotationUtils.ROTATION_NONE
-import com.android.systemui.util.leak.RotationUtils.ROTATION_SEASCAPE
-import com.android.systemui.util.leak.RotationUtils.ROTATION_UPSIDE_DOWN
 
 import java.lang.IllegalStateException
 import java.util.concurrent.Executor
@@ -50,7 +48,7 @@ import javax.inject.Inject
  * will have its gravity set towards the corner (i.e., top-right corner gets top|right gravity), and
  * the contained ImageView will be set to center_vertical and away from the corner horizontally. The
  * Views will match the status bar top padding and status bar height so that the dot can appear to
- * reside directly after the status bar system contents (basically to the right of the battery).
+ * reside directly after the status bar system contents (basically after the battery).
  *
  * NOTE: any operation that modifies views directly must run on the provided executor, because
  * these views are owned by ScreenDecorations and it runs in its own thread
@@ -85,27 +83,40 @@ class PrivacyDotViewController @Inject constructor(
 
     // Privacy dots are created in ScreenDecoration's UiThread, which is not the main thread
     private var uiExecutor: DelayableExecutor? = null
-    private var e: DelayableExecutor? = null
+
+    private val marginListener: StatusBarMarginUpdatedListener =
+            object : StatusBarMarginUpdatedListener {
+        override fun onStatusBarMarginUpdated(marginLeft: Int, marginRight: Int) {
+            setStatusBarMargins(marginLeft, marginRight)
+        }
+    }
 
     private val views: Sequence<View>
         get() = if (!this::tl.isInitialized) sequenceOf() else sequenceOf(tl, tr, br, bl)
 
     init {
-        locationPublisher.addCallback(object : StatusBarMarginUpdatedListener {
-            override fun onStatusBarMarginUpdated(marginLeft: Int, marginRight: Int) {
-                setStatusBarMargins(marginLeft, marginRight)
-            }
-        })
+        locationPublisher.addCallback(marginListener)
 
         stateController.addCallback(object : StatusBarStateController.StateListener {
             override fun onExpandedChanged(isExpanded: Boolean) {
-                setStatusBarExpanded(isExpanded)
+                updateStatusBarState()
+            }
+
+            override fun onStateChanged(newState: Int) {
+                updateStatusBarState()
             }
         })
     }
 
     fun setUiExecutor(e: DelayableExecutor) {
         uiExecutor = e
+    }
+
+    fun setQsExpanded(expanded: Boolean) {
+        dlog("setQsExpanded $expanded")
+        synchronized(lock) {
+            nextViewState = nextViewState.copy(qsExpanded = expanded)
+        }
     }
 
     @UiThread
@@ -125,8 +136,8 @@ class PrivacyDotViewController @Inject constructor(
         val index = newCorner.cornerIndex()
 
         val h = when (rot) {
-            ROTATION_NONE, ROTATION_UPSIDE_DOWN -> sbHeightPortrait
-            ROTATION_LANDSCAPE, ROTATION_SEASCAPE -> sbHeightLandscape
+            0, 2 -> sbHeightPortrait
+            1, 3 -> sbHeightLandscape
             else -> 0
         }
         synchronized(lock) {
@@ -326,13 +337,20 @@ class PrivacyDotViewController @Inject constructor(
         }
     }
 
-    /**
-     *  We won't show the dot when quick settings is showing
-     */
-    private fun setStatusBarExpanded(expanded: Boolean) {
+    private fun updateStatusBarState() {
         synchronized(lock) {
-            nextViewState = nextViewState.copy(hideDotForQuickSettings = expanded)
+            nextViewState = nextViewState.copy(shadeExpanded = isShadeInQs())
         }
+    }
+
+    /**
+     * If we are unlocked with an expanded shade, QS is showing. On keyguard, the shade is always
+     * expanded so we use other signals from the panel view controller to know if QS is expanded
+     */
+    @GuardedBy("lock")
+    private fun isShadeInQs(): Boolean {
+        return (stateController.isExpanded && stateController.state == SHADE) ||
+                (stateController.state == SHADE_LOCKED)
     }
 
     private fun scheduleUpdate() {
@@ -431,13 +449,20 @@ private fun dlog(s: String) {
     }
 }
 
+private fun vlog(s: String) {
+    if (DEBUG_VERBOSE) {
+        Log.d(TAG, s)
+    }
+}
+
 const val TOP_LEFT = 0
 const val TOP_RIGHT = 1
 const val BOTTOM_RIGHT = 2
 const val BOTTOM_LEFT = 3
 private const val DURATION = 160L
 private const val TAG = "PrivacyDotViewController"
-private const val DEBUG = false
+private const val DEBUG = true
+private const val DEBUG_VERBOSE = false
 
 private fun Int.toGravity(): Int {
     return when (this) {
@@ -460,10 +485,10 @@ private fun Int.innerGravity(): Int {
 }
 
 private data class ViewState(
-    // don't @ me with names
     val systemPrivacyEventIsActive: Boolean = false,
-    val hideDotForQuickSettings: Boolean = false,
-    val statusBarExpanded: Boolean = false,
+    val shadeExpanded: Boolean = false,
+    val qsExpanded: Boolean = false,
+
     val rotation: Int = 0,
     val height: Int = 0,
     val marginLeft: Int = 0,
@@ -472,7 +497,7 @@ private data class ViewState(
     val designatedCorner: View? = null
 ) {
     fun shouldShowDot(): Boolean {
-        return systemPrivacyEventIsActive && !hideDotForQuickSettings
+        return systemPrivacyEventIsActive && !shadeExpanded && !qsExpanded
     }
 
     fun needsLayout(other: ViewState): Boolean {

@@ -14,16 +14,17 @@
   ~ limitations under the License.
   -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/item"
     android:theme="@android:style/Theme.DeviceDefault.DayNight"
-    android:background="@drawable/people_space_tile_view_card"
+    android:background="@drawable/people_tile_empty_background"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <ImageView
-        android:id="@+id/item"
+        android:id="@+id/icon"
+        android:src="@drawable/ic_conversation_icon"
         android:gravity="center"
         android:layout_gravity="center"
-        android:padding="8dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_width="48dp"
+        android:layout_height="48dp"/>
 </FrameLayout>

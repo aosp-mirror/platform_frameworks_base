@@ -612,7 +612,7 @@ final class HotwordDetectionConnection {
                         options,
                         new IDspHotwordDetectionCallback.Stub() {
                             @Override
-                            public void onRejected(@Nullable HotwordRejectedResult result)
+                            public void onRejected(HotwordRejectedResult result)
                                     throws RemoteException {
                                 bestEffortClose(serviceAudioSink);
                                 bestEffortClose(serviceAudioSource);
@@ -622,7 +622,7 @@ final class HotwordDetectionConnection {
                             }
 
                             @Override
-                            public void onDetected(@Nullable HotwordDetectedResult triggerResult)
+                            public void onDetected(HotwordDetectedResult triggerResult)
                                     throws RemoteException {
                                 bestEffortClose(serviceAudioSink);
                                 bestEffortClose(serviceAudioSource);

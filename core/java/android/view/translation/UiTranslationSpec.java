@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.widget.TextView;
 
 import com.android.internal.util.DataClass;
 
@@ -35,36 +36,38 @@ import com.android.internal.util.DataClass;
 public final class UiTranslationSpec implements Parcelable {
 
     /**
-     * Whether the original content of the view should be directly modified to include padding that
-     * makes it the same size as the translated content. Defaults to {@code false}.
+     * Whether the original content of the view should be made to appear as if it is the same size
+     * as the translated content. Defaults to {@code false}.
      * <p>
-     * For {@link android.widget.TextView}, the system does not directly modify the original text,
-     * rather changes the displayed content using a
-     * {@link android.text.method.TransformationMethod}.
-     * This can cause issues in apps that do not account for TransformationMethods. For example, an
-     * app using DynamicLayout may use the calculated text offsets to operate on the original text,
-     * but this can be problematic when the layout was calculated on translated text with a
-     * different length.
+     * For {@link TextView}, the system does not directly modify the original text, rather
+     * changes the displayed content using a {@link android.text.method.TransformationMethod}. This
+     * can cause issues in apps that do not account for length-changing TransformationMethods. For
+     * example, an app using DynamicLayout may use the calculated line-offsets to operate on the
+     * original text, but this can cause crashes when the layout was calculated on translated text
+     * with a different length.
      * <p>
-     * If this is {@code true}, for a TextView the default implementation will append spaces to the
-     * text to make the length the same as the translated text.
+     * If this is {@code true}, for a TextView the default implementation appends spaces to the
+     * result of {@link TextView#getText()} to make the length the same as the translated text.
+     * <p>
+     * This only affects apps with target SDK R or lower.
      */
     private boolean mShouldPadContentForCompat = false;
 
     /**
-     * Whether the original content of the view should be directly modified to include padding that
-     * makes it the same size as the translated content.
+     * Whether the original content of the view should be made to appear as if it is the same size
+     * as the translated content.
      * <p>
-     * For {@link android.widget.TextView}, the system does not directly modify the original text,
-     * rather changes the displayed content using a
-     * {@link android.text.method.TransformationMethod}.
-     * This can cause issues in apps that do not account for TransformationMethods. For example, an
-     * app using DynamicLayout may use the calculated text offsets to operate on the original text,
-     * but this can be problematic when the layout was calculated on translated text with a
-     * different length.
+     * For {@link TextView}, the system does not directly modify the original text, rather
+     * changes the displayed content using a {@link android.text.method.TransformationMethod}. This
+     * can cause issues in apps that do not account for length-changing TransformationMethods. For
+     * example, an app using DynamicLayout may use the calculated line-offsets to operate on the
+     * original text, but this can cause crashes when the layout was calculated on translated text
+     * with a different length.
      * <p>
-     * If this is {@code true}, for a TextView the default implementation will append spaces to the
-     * text to make the length the same as the translated text.
+     * If this is {@code true}, for a TextView the default implementation appends spaces to the
+     * result of {@link TextView#getText()} to make the length the same as the translated text.
+     * <p>
+     * This only affects apps with target SDK R or lower.
      */
     public boolean shouldPadContentForCompat() {
         return mShouldPadContentForCompat;
@@ -190,19 +193,20 @@ public final class UiTranslationSpec implements Parcelable {
         }
 
         /**
-         * Whether the original content of the view should be directly modified to include padding that
-         * makes it the same size as the translated content. Defaults to {@code false}.
+         * Whether the original content of the view should be made to appear as if it is the same size
+         * as the translated content. Defaults to {@code false}.
          * <p>
-         * For {@link android.widget.TextView}, the system does not directly modify the original text,
-         * rather changes the displayed content using a
-         * {@link android.text.method.TransformationMethod}.
-         * This can cause issues in apps that do not account for TransformationMethods. For example, an
-         * app using DynamicLayout may use the calculated text offsets to operate on the original text,
-         * but this can be problematic when the layout was calculated on translated text with a
-         * different length.
+         * For {@link TextView}, the system does not directly modify the original text, rather
+         * changes the displayed content using a {@link android.text.method.TransformationMethod}. This
+         * can cause issues in apps that do not account for length-changing TransformationMethods. For
+         * example, an app using DynamicLayout may use the calculated line-offsets to operate on the
+         * original text, but this can cause crashes when the layout was calculated on translated text
+         * with a different length.
          * <p>
-         * If this is {@code true}, for a TextView the default implementation will append spaces to the
-         * text to make the length the same as the translated text.
+         * If this is {@code true}, for a TextView the default implementation appends spaces to the
+         * result of {@link TextView#getText()} to make the length the same as the translated text.
+         * <p>
+         * This only affects apps with target SDK R or lower.
          */
         @DataClass.Generated.Member
         public @NonNull Builder setShouldPadContentForCompat(boolean value) {
@@ -234,7 +238,7 @@ public final class UiTranslationSpec implements Parcelable {
     }
 
     @DataClass.Generated(
-            time = 1619034161701L,
+            time = 1620790033058L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/view/translation/UiTranslationSpec.java",
             inputSignatures = "private  boolean mShouldPadContentForCompat\npublic  boolean shouldPadContentForCompat()\nclass UiTranslationSpec extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genBuilder=true, genEqualsHashCode=true, genHiddenConstDefs=true, genToString=true)")

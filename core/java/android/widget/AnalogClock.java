@@ -24,7 +24,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.ColorStateList;
-import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.BlendMode;
 import android.graphics.Canvas;
@@ -40,8 +39,9 @@ import android.widget.RemoteViews.RemoteView;
 
 import java.time.Clock;
 import java.time.DateTimeException;
+import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.Formatter;
 import java.util.Locale;
@@ -61,8 +61,8 @@ import java.util.Locale;
 @Deprecated
 public class AnalogClock extends View {
     private static final String LOG_TAG = "AnalogClock";
-    /** How often the clock should refresh to make the seconds hand advance at ~15 FPS. */
-    private static final long SECONDS_TICK_FREQUENCY_MS = 1000 / 15;
+    /** How many times per second that the seconds hand advances. */
+    private static final long SECONDS_HAND_FPS = 30;
 
     private Clock mClock;
     @Nullable
@@ -106,7 +106,6 @@ public class AnalogClock extends View {
     public AnalogClock(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
 
-        final Resources r = context.getResources();
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, com.android.internal.R.styleable.AnalogClock, defStyleAttr, defStyleRes);
         saveAttributeDataForStyleable(context, com.android.internal.R.styleable.AnalogClock,
@@ -716,25 +715,34 @@ public class AnalogClock extends View {
     }
 
     private void onTimeChanged() {
-        long nowMillis = mClock.millis();
-        LocalDateTime localDateTime = toLocalDateTime(nowMillis, mClock.getZone());
+        Instant now = mClock.instant();
+        onTimeChanged(now.atZone(mClock.getZone()).toLocalTime(), now.toEpochMilli());
+    }
 
-        int hour = localDateTime.getHour();
-        int minute = localDateTime.getMinute();
-        int second = localDateTime.getSecond();
+    private void onTimeChanged(LocalTime localTime, long nowMillis) {
+        float previousHour = mHour;
+        float previousMinutes = mMinutes;
 
-        mSeconds = second + localDateTime.getNano() / 1_000_000_000f;
-        mMinutes = minute + second / 60.0f;
-        mHour = hour + mMinutes / 60.0f;
+        float rawSeconds = localTime.getSecond() + localTime.getNano() / 1_000_000_000f;
+        // We round the fraction of the second so that the seconds hand always occupies the same
+        // n positions between two given numbers, where n is the number of ticks per second. This
+        // ensures the second hand advances by a consistent distance despite our handler callbacks
+        // occurring at inconsistent frequencies.
+        mSeconds = Math.round(rawSeconds * SECONDS_HAND_FPS) / (float) SECONDS_HAND_FPS;
+        mMinutes = localTime.getMinute() + mSeconds / 60.0f;
+        mHour = localTime.getHour() + mMinutes / 60.0f;
         mChanged = true;
 
-        updateContentDescription(nowMillis);
+        // Update the content description only if the announced hours and minutes have changed.
+        if ((int) previousHour != (int) mHour || (int) previousMinutes != (int) mMinutes) {
+            updateContentDescription(nowMillis);
+        }
     }
 
     private final BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(Intent.ACTION_TIMEZONE_CHANGED)) {
+            if (Intent.ACTION_TIMEZONE_CHANGED.equals(intent.getAction())) {
                 createClock();
             }
 
@@ -747,15 +755,32 @@ public class AnalogClock extends View {
     private final Runnable mSecondsTick = new Runnable() {
         @Override
         public void run() {
+            removeCallbacks(this);
             if (!mVisible || mSecondHand == null) {
                 return;
             }
 
-            onTimeChanged();
+            Instant now = mClock.instant();
+            LocalTime localTime = now.atZone(mClock.getZone()).toLocalTime();
+            // How many milliseconds through the second we currently are.
+            long millisOfSecond = Duration.ofNanos(localTime.getNano()).toMillis();
+            // How many milliseconds there are between tick positions for the seconds hand.
+            double millisPerTick = 1000 / (double) SECONDS_HAND_FPS;
+            // How many milliseconds we are past the last tick position.
+            long millisPastLastTick = Math.round(millisOfSecond % millisPerTick);
+            // How many milliseconds there are until the next tick position.
+            long millisUntilNextTick = Math.round(millisPerTick - millisPastLastTick);
+            // If we are exactly at the tick position, this could be 0 milliseconds due to rounding.
+            // In this case, advance by the full amount of millis to the next position.
+            if (millisUntilNextTick <= 0) {
+                millisUntilNextTick = Math.round(millisPerTick);
+            }
+            // Schedule a callback for when the next tick should occur.
+            postDelayed(this, millisUntilNextTick);
+
+            onTimeChanged(localTime, now.toEpochMilli());
 
             invalidate();
-
-            postDelayed(this, SECONDS_TICK_FREQUENCY_MS);
         }
     };
 
@@ -780,14 +805,6 @@ public class AnalogClock extends View {
                         getTimeZone())
                         .toString();
         setContentDescription(contentDescription);
-    }
-
-    private static LocalDateTime toLocalDateTime(long timeMillis, ZoneId zoneId) {
-        // java.time types like LocalDateTime / Instant can support the full range of "long millis"
-        // with room to spare so we do not need to worry about overflow / underflow and the
-        // resulting exceptions while the input to this class is a long.
-        Instant instant = Instant.ofEpochMilli(timeMillis);
-        return LocalDateTime.ofInstant(instant, zoneId);
     }
 
     /**

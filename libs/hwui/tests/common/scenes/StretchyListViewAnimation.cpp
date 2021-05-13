@@ -22,8 +22,10 @@
 
 class StretchyListViewAnimation;
 class StretchyListViewHolePunch;
-class StretchyLinearListView;
-class StretchyLinearListViewHolePunch;
+class StretchyUniformListView;
+class StretchyUniformListViewHolePunch;
+class StretchyUniformLayerListView;
+class StretchyUniformLayerListViewHolePunch;
 
 static TestScene::Registrar _StretchyListViewAnimation(TestScene::Info{
         "stretchylistview",
@@ -36,21 +38,34 @@ static TestScene::Registrar _StretchyListViewHolePunch(TestScene::Info{
         "A mock ListView of scrolling content that's stretching. Includes a hole punch",
         TestScene::simpleCreateScene<StretchyListViewHolePunch>});
 
-static TestScene::Registrar _StretchyLinearListView(TestScene::Info{
-        "stretchylistview_linear",
-        "A mock ListView of scrolling content that's stretching using a linear stretch effect.",
-        TestScene::simpleCreateScene<StretchyLinearListView>});
+static TestScene::Registrar _StretchyUniformListView(TestScene::Info{
+        "stretchylistview_uniform",
+        "A mock ListView of scrolling content that's stretching using a uniform stretch effect.",
+        TestScene::simpleCreateScene<StretchyUniformListView>});
 
-static TestScene::Registrar _StretchyLinearListViewHolePunch(TestScene::Info{
-        "stretchylistview_linear_holepunch",
-        "A mock ListView of scrolling content that's stretching using a linear stretch effect. "
+static TestScene::Registrar _StretchyUniformListViewHolePunch(TestScene::Info{
+        "stretchylistview_uniform_holepunch",
+        "A mock ListView of scrolling content that's stretching using a uniform stretch effect. "
         "Includes a hole punch",
-        TestScene::simpleCreateScene<StretchyLinearListViewHolePunch>});
+        TestScene::simpleCreateScene<StretchyUniformListViewHolePunch>});
+
+static TestScene::Registrar _StretchyUniformLayerListView(TestScene::Info{
+        "stretchylistview_uniform_layer",
+        "A mock ListView of scrolling content that's stretching using a uniform stretch effect. "
+        "Uses a layer",
+        TestScene::simpleCreateScene<StretchyUniformLayerListView>});
+
+static TestScene::Registrar _StretchyUniformLayerListViewHolePunch(TestScene::Info{
+        "stretchylistview_uniform_layer_holepunch",
+        "A mock ListView of scrolling content that's stretching using a uniform stretch effect. "
+        "Uses a layer & includes a hole punch",
+        TestScene::simpleCreateScene<StretchyUniformLayerListViewHolePunch>});
 
 class StretchyListViewAnimation : public TestScene {
 protected:
     virtual StretchEffectBehavior stretchBehavior() { return StretchEffectBehavior::Shader; }
     virtual bool haveHolePunch() { return false; }
+    virtual bool forceLayer() { return false; }
 
 private:
     int mItemHeight;
@@ -172,6 +187,10 @@ private:
     void doFrame(int frameNr) override {
         if (frameNr == 0) {
             Properties::stretchEffectBehavior = stretchBehavior();
+            if (forceLayer()) {
+                mListView->mutateStagingProperties().mutateLayerProperties().setType(
+                        LayerType::RenderLayer);
+            }
         }
         auto& props = mListView->mutateStagingProperties();
         auto& stretch = props.mutateLayerProperties().mutableStretchEffect();
@@ -190,11 +209,22 @@ class StretchyListViewHolePunch : public StretchyListViewAnimation {
     bool haveHolePunch() override { return true; }
 };
 
-class StretchyLinearListView : public StretchyListViewAnimation {
-    StretchEffectBehavior stretchBehavior() override { return StretchEffectBehavior::LinearScale; }
+class StretchyUniformListView : public StretchyListViewAnimation {
+    StretchEffectBehavior stretchBehavior() override { return StretchEffectBehavior::UniformScale; }
 };
 
-class StretchyLinearListViewHolePunch : public StretchyListViewAnimation {
-    StretchEffectBehavior stretchBehavior() override { return StretchEffectBehavior::LinearScale; }
+class StretchyUniformListViewHolePunch : public StretchyListViewAnimation {
+    StretchEffectBehavior stretchBehavior() override { return StretchEffectBehavior::UniformScale; }
     bool haveHolePunch() override { return true; }
+};
+
+class StretchyUniformLayerListView : public StretchyListViewAnimation {
+    StretchEffectBehavior stretchBehavior() override { return StretchEffectBehavior::UniformScale; }
+    bool forceLayer() override { return true; }
+};
+
+class StretchyUniformLayerListViewHolePunch : public StretchyListViewAnimation {
+    StretchEffectBehavior stretchBehavior() override { return StretchEffectBehavior::UniformScale; }
+    bool haveHolePunch() override { return true; }
+    bool forceLayer() override { return true; }
 };

@@ -28,7 +28,7 @@
 
     <com.android.systemui.statusbar.policy.Clock
         android:id="@+id/clock"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:minWidth="48dp"
         android:minHeight="48dp"
@@ -61,9 +61,9 @@
 
     <LinearLayout
         android:id="@+id/rightLayout"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_weight="1"
+        android:gravity="center_vertical|end"
         >
         <com.android.systemui.statusbar.phone.StatusIconContainer
             android:id="@+id/statusIcons"

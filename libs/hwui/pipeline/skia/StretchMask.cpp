@@ -46,9 +46,16 @@ void StretchMask::draw(GrRecordingContext* context,
 
     if (mIsDirty) {
         SkCanvas* maskCanvas = mMaskSurface->getCanvas();
+        // Make sure to apply target transformation to the mask canvas
+        // to ensure the replayed drawing commands generate the same result
+        auto previousMatrix = displayList->mParentMatrix;
+        displayList->mParentMatrix = maskCanvas->getTotalMatrix();
+        maskCanvas->save();
         maskCanvas->drawColor(0, SkBlendMode::kClear);
         TransformCanvas transformCanvas(maskCanvas, SkBlendMode::kSrcOver);
         displayList->draw(&transformCanvas);
+        maskCanvas->restore();
+        displayList->mParentMatrix = previousMatrix;
     }
 
     sk_sp<SkImage> maskImage = mMaskSurface->makeImageSnapshot();

@@ -178,6 +178,25 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testReadXml_multiApproved() throws Exception {
+        String xml = "<enabled_assistants version=\"4\" defaults=\"b/b\">"
+                + "<service_listing approved=\"a/a:b/b\" user=\"0\" primary=\"true\""
+                + "user_changed=\"true\"/>"
+                + "</enabled_assistants>";
+
+        final TypedXmlPullParser parser = Xml.newFastPullParser();
+        parser.setInput(new BufferedInputStream(
+                new ByteArrayInputStream(xml.toString().getBytes())), null);
+
+        parser.nextTag();
+        mAssistants.readXml(parser, null, false, UserHandle.USER_ALL);
+
+        assertEquals(1, mAssistants.getAllowedComponents(0).size());
+        assertEquals(new ArrayList(Arrays.asList(new ComponentName("a", "a"))),
+                mAssistants.getAllowedComponents(0));
+    }
+
+    @Test
     public void testXmlUpgradeExistingApprovedComponents() throws Exception {
         String xml = "<enabled_assistants version=\"2\" defaults=\"b\\b\">"
                 + "<service_listing approved=\"b/b\" user=\"10\" primary=\"true\" />"

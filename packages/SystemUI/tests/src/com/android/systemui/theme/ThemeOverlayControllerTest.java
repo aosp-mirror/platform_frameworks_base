@@ -185,7 +185,8 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
                 Color.valueOf(Color.BLUE), null);
 
         String jsonString =
-                "{\"android.theme.customization.system_palette\":\"override.package.name\"}";
+                "{\"android.theme.customization.system_palette\":\"override.package.name\","
+                        + "\"android.theme.customization.color_source\":\"preset\"}";
         when(mSecureSettings.getStringForUser(
                 eq(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES), anyInt()))
                 .thenReturn(jsonString);
@@ -200,6 +201,32 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
         // Assert that we received the colors that we were expecting
         assertThat(themeOverlays.getValue().get(OVERLAY_CATEGORY_SYSTEM_PALETTE))
                 .isEqualTo(new OverlayIdentifier("override.package.name"));
+    }
+
+    @Test
+    public void onWallpaperColorsChanged_resetThemeIfNotPreset() {
+        // Should ask for a new theme when wallpaper colors change
+        WallpaperColors mainColors = new WallpaperColors(Color.valueOf(Color.RED),
+                Color.valueOf(Color.BLUE), null);
+
+        String jsonString =
+                "{\"android.theme.customization.system_palette\":\"override.package.name\","
+                        + "\"android.theme.customization.color_source\":\"home_wallpaper\"}";
+        when(mSecureSettings.getStringForUser(
+                eq(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES), anyInt()))
+                .thenReturn(jsonString);
+
+        mColorsListener.getValue().onColorsChanged(mainColors, WallpaperManager.FLAG_SYSTEM);
+
+        ArgumentCaptor<String> updatedSetting = ArgumentCaptor.forClass(String.class);
+        verify(mSecureSettings).putString(
+                eq(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES), updatedSetting.capture());
+
+        assertThat(updatedSetting.getValue().contains("android.theme.customization.system_palette"))
+                .isFalse();
+
+        verify(mThemeOverlayApplier)
+                .applyCurrentUserOverlays(any(), any(), anyInt(), any());
     }
 
     @Test
