@@ -62,11 +62,11 @@ class RotateOneLaunchedAppAndEnterSplitScreen(
             }
         }
 
-    @FlakyTest(bugId = 175687842)
+    @Presubmit
     @Test
     fun dockedStackDividerIsVisible() = testSpec.dockedStackDividerIsVisible()
 
-    @FlakyTest(bugId = 175687842)
+    @Presubmit
     @Test
     fun dockedStackPrimaryBoundsIsVisible() =
         testSpec.dockedStackPrimaryBoundsIsVisible(testSpec.config.startRotation,
