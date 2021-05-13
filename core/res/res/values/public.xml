@@ -3064,6 +3064,7 @@
     <public name="hotwordDetectionService" />
     <public name="previewLayout" />
     <public name="clipToOutline" />
+    <public name="__removed3" />
     <public name="knownCerts" />
     <public name="windowBackgroundBlurRadius"/>
     <public name="windowSplashScreenBackground"/>
