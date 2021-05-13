@@ -169,7 +169,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
             mView.announceForAccessibility(mView.getContext().getString(
                     R.string.accessibility_fingerprint_bouncer));
         } else {
-            mView.animateAwayUdfpsBouncer(() -> mKeyguardViewManager.cancelPostAuthActions());
+            mView.animateAwayUdfpsBouncer(null);
         }
         return true;
     }
@@ -231,8 +231,8 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
      */
     private void maybeShowInputBouncer() {
         if (mShowingUdfpsBouncer) {
-            mKeyguardViewManager.resetAlternateAuth(false);
             mKeyguardViewManager.showBouncer(true);
+            mKeyguardViewManager.resetAlternateAuth(false);
         }
     }
 

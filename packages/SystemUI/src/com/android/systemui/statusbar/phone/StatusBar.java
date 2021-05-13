@@ -2988,11 +2988,13 @@ public class StatusBar extends SystemUI implements DemoMode,
         mNotificationsController.resetUserExpandedStates();
     }
 
-    private void executeWhenUnlocked(OnDismissAction action, boolean requiresShadeOpen) {
+    private void executeWhenUnlocked(OnDismissAction action, boolean requiresShadeOpen,
+            boolean afterKeyguardGone) {
         if (mStatusBarKeyguardViewManager.isShowing() && requiresShadeOpen) {
             mStatusBarStateController.setLeaveOpenOnKeyguardHide(true);
         }
-        dismissKeyguardThenExecute(action, null /* cancelAction */, false /* afterKeyguardGone */);
+        dismissKeyguardThenExecute(action, null /* cancelAction */,
+                afterKeyguardGone /* afterKeyguardGone */);
     }
 
     protected void dismissKeyguardThenExecute(OnDismissAction action, boolean afterKeyguardGone) {

@@ -842,10 +842,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     @Test
     public void testStartUdfpsServiceBeginsOnKeyguard() {
         // GIVEN
-        // - bouncer isn't showing
         // - status bar state is on the keyguard
         // - user has authenticated since boot
-        setKeyguardBouncerVisibility(false /* isVisible */);
         mStatusBarStateListener.onStateChanged(StatusBarState.KEYGUARD);
         when(mStrongAuthTracker.hasUserAuthenticatedSinceBoot()).thenReturn(true);
 
@@ -854,11 +852,44 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     @Test
+    public void testOccludingAppFingerprintListeningState() {
+        // GIVEN keyguard isn't visible (app occluding)
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp();
+        mKeyguardUpdateMonitor.setKeyguardOccluded(true);
+        mKeyguardUpdateMonitor.onKeyguardVisibilityChanged(false);
+        when(mStrongAuthTracker.hasUserAuthenticatedSinceBoot()).thenReturn(true);
+
+        // THEN we shouldn't listen for fingerprints
+        assertThat(mKeyguardUpdateMonitor.shouldListenForFingerprint(false)).isEqualTo(false);
+
+        // THEN we should listen for udfps (hiding of mechanism to actually auth is
+        // controlled by UdfpsKeyguardViewController)
+        assertThat(mKeyguardUpdateMonitor.shouldListenForFingerprint(true)).isEqualTo(true);
+    }
+
+    @Test
+    public void testOccludingAppRequestsFingerprint() {
+        // GIVEN keyguard isn't visible (app occluding)
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp();
+        mKeyguardUpdateMonitor.setKeyguardOccluded(true);
+        mKeyguardUpdateMonitor.onKeyguardVisibilityChanged(false);
+
+        // WHEN an occluding app requests fp
+        mKeyguardUpdateMonitor.requestFingerprintAuthOnOccludingApp(true);
+
+        // THEN we should listen for fingerprints
+        assertThat(mKeyguardUpdateMonitor.shouldListenForFingerprint(false)).isEqualTo(true);
+
+        // WHEN an occluding app stops requesting fp
+        mKeyguardUpdateMonitor.requestFingerprintAuthOnOccludingApp(false);
+
+        // THEN we shouldn't listen for fingeprints
+        assertThat(mKeyguardUpdateMonitor.shouldListenForFingerprint(false)).isEqualTo(false);
+    }
+
+    @Test
     public void testStartUdfpsServiceNoAuthenticationSinceLastBoot() {
-        // GIVEN
-        // - bouncer isn't showing
-        // - status bar state is on the keyguard
-        setKeyguardBouncerVisibility(false /* isVisible */);
+        // GIVEN status bar state is on the keyguard
         mStatusBarStateListener.onStateChanged(StatusBarState.KEYGUARD);
 
         // WHEN user hasn't authenticated since last boot
@@ -871,7 +902,6 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     @Test
     public void testShouldNotListenForUdfps_whenTrustEnabled() {
         // GIVEN a "we should listen for udfps" state
-        setKeyguardBouncerVisibility(false /* isVisible */);
         mStatusBarStateListener.onStateChanged(StatusBarState.KEYGUARD);
         when(mStrongAuthTracker.hasUserAuthenticatedSinceBoot()).thenReturn(true);
 
@@ -886,7 +916,6 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     @Test
     public void testShouldNotListenForUdfps_whenFaceAuthenticated() {
         // GIVEN a "we should listen for udfps" state
-        setKeyguardBouncerVisibility(false /* isVisible */);
         mStatusBarStateListener.onStateChanged(StatusBarState.KEYGUARD);
         when(mStrongAuthTracker.hasUserAuthenticatedSinceBoot()).thenReturn(true);
 

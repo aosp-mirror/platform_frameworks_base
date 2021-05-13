@@ -178,6 +178,11 @@ public class WalletScreenController implements
     }
 
     @Override
+    public void onUnlockedChanged() {
+        queryWalletCards();
+    }
+
+    @Override
     public void onCardSelected(@NonNull WalletCardViewInfo card) {
         if (mIsDismissed) {
             return;
