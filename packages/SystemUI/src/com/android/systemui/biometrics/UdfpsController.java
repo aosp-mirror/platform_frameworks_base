@@ -338,7 +338,7 @@ public class UdfpsController implements DozeReceiver {
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_OUTSIDE:
                 udfpsView.onTouchOutsideView();
-                break;
+                return true;
             case MotionEvent.ACTION_DOWN:
             case MotionEvent.ACTION_HOVER_ENTER:
                 // To simplify the lifecycle of the velocity tracker, make sure it's never null
@@ -602,6 +602,8 @@ public class UdfpsController implements DozeReceiver {
             default:
                 // Do nothing to stay in portrait mode.
         }
+        // avoid announcing window title
+        mCoreLayoutParams.accessibilityTitle = " ";
         return mCoreLayoutParams;
     }
 

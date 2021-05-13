@@ -50,6 +50,7 @@ import com.android.systemui.util.ViewController;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -75,6 +76,9 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     @NonNull private final Drawable mButton;
     @NonNull private final Drawable mUnlockIcon;
     @NonNull private final Drawable mLockIcon;
+    @NonNull private final CharSequence mDisabledLabel;
+    @NonNull private final CharSequence mUnlockedLabel;
+    @NonNull private final CharSequence mLockedLabel;
 
     private boolean mIsDozing;
     private boolean mIsBouncerShowing;
@@ -121,6 +125,10 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
                 com.android.internal.R.drawable.ic_lock, context.getTheme()),
                 context.getResources().getDimensionPixelSize(
                         com.android.systemui.R.dimen.udfps_unlock_icon_inset));
+        mDisabledLabel = context.getResources().getString(
+                R.string.accessibility_udfps_disabled_button);
+        mUnlockedLabel = context.getResources().getString(R.string.accessibility_unlock_button);
+        mLockedLabel = context.getResources().getString(R.string.accessibility_lock_icon);
         dumpManager.registerDumpable("LockIconViewController", this);
     }
 
@@ -225,24 +233,26 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
             && mFaceAuthEnrolled;
 
         updateClickListener();
+        final CharSequence prevContentDescription = mView.getContentDescription();
         if (mShowButton) {
             mView.setImageDrawable(mButton);
             mView.setVisibility(View.VISIBLE);
-            mView.setContentDescription(getResources().getString(
-                    R.string.accessibility_udfps_disabled_button));
+            mView.setContentDescription(mDisabledLabel);
         } else if (mShowUnlockIcon) {
             mView.setImageDrawable(mUnlockIcon);
             mView.setVisibility(View.VISIBLE);
-            mView.setContentDescription(getResources().getString(
-                    R.string.accessibility_unlock_button));
+            mView.setContentDescription(mUnlockedLabel);
         } else if (mShowLockIcon) {
             mView.setImageDrawable(mLockIcon);
             mView.setVisibility(View.VISIBLE);
-            mView.setContentDescription(getResources().getString(
-                    R.string.accessibility_lock_icon));
+            mView.setContentDescription(mLockedLabel);
         } else {
             mView.setVisibility(View.INVISIBLE);
             mView.setContentDescription(null);
+        }
+        if (!Objects.equals(prevContentDescription, mView.getContentDescription())
+                && mView.getContentDescription() != null) {
+            mView.announceForAccessibility(mView.getContentDescription());
         }
     }
 
@@ -258,19 +268,11 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
                         getResources().getString(R.string.accessibility_enter_hint));
         public void onInitializeAccessibilityNodeInfo(View v, AccessibilityNodeInfo info) {
             super.onInitializeAccessibilityNodeInfo(v, info);
-            removeAllActions(info);
             if (mShowButton || mShowLockIcon) {
                 info.addAction(mAccessibilityAuthenticateHint);
             } else if (mShowUnlockIcon) {
                 info.addAction(mAccessibilityEnterHint);
             }
-        }
-
-        private void removeAllActions(AccessibilityNodeInfo info) {
-            info.removeAction(mAccessibilityAuthenticateHint);
-            info.removeAction(mAccessibilityEnterHint);
-            info.removeAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_LONG_CLICK);
-            mView.setLongClickable(false);
         }
     };
 
@@ -286,6 +288,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
             mView.setOnClickListener(v -> onAffordanceClick());
             if (mAccessibilityManager.isTouchExplorationEnabled()) {
                 mView.setOnLongClickListener(null);
+                mView.setLongClickable(false);
             } else {
                 mView.setOnLongClickListener(v -> onAffordanceClick());
             }
