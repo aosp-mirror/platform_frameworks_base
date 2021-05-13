@@ -1221,8 +1221,7 @@
     <string name="not_checked" msgid="7972320087569023342">"nevybráno"</string>
     <string name="selected" msgid="6614607926197755875">"vybráno"</string>
     <string name="not_selected" msgid="410652016565864475">"nevybráno"</string>
-    <!-- no translation found for in_progress (2149208189184319441) -->
-    <skip />
+    <string name="in_progress" msgid="2149208189184319441">"probíhá"</string>
     <string name="whichApplication" msgid="5432266899591255759">"Dokončit akci pomocí aplikace"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"Dokončit akci pomocí aplikace %1$s"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"Dokončit akci"</string>
@@ -1917,10 +1916,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Aktualizováno administrátorem"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Smazáno administrátorem"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (4877297130366222145) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (8518809702138617167) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"Spořič baterie zapíná tmavý motiv a omezuje či vypíná aktivitu na pozadí, některé vizuální efekty, některé funkce a připojení k některým sítím.\n\n"<annotation id="url">"Další informace"</annotation></string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"Spořič baterie zapíná tmavý motiv a omezuje či vypíná aktivitu na pozadí, některé vizuální efekty, některé funkce a připojení k některým sítím."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Z důvodu snížení využití dat brání spořič dat některým aplikacím v odesílání nebo příjmu dat na pozadí. Aplikace, kterou právě používáte, data přenášet může, ale může tak činit méně často. V důsledku toho se například obrázky nemusejí zobrazit, dokud na ně neklepnete."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Chcete zapnout Spořič dat?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Zapnout"</string>
@@ -2041,10 +2038,8 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"Aplikace <xliff:g id="APP_NAME_0">%1$s</xliff:g> momentálně není dostupná. Tato předvolba se spravuje v aplikaci <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Další informace"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Zrušit pozastavení aplikace"</string>
-    <!-- no translation found for work_mode_off_title (961171256005852058) -->
-    <skip />
-    <!-- no translation found for work_mode_off_message (7319580997683623309) -->
-    <skip />
+    <string name="work_mode_off_title" msgid="961171256005852058">"Zapnout pracovní aplikace?"</string>
+    <string name="work_mode_off_message" msgid="7319580997683623309">"Získejte přístup ke svým pracovním aplikacím a oznámením"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Zapnout"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplikace není k dispozici"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> v tuto chvíli není k dispozici."</string>

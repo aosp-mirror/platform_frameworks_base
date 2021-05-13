@@ -1181,8 +1181,7 @@
     <string name="not_checked" msgid="7972320087569023342">"nincs kiválasztva"</string>
     <string name="selected" msgid="6614607926197755875">"kiválasztva"</string>
     <string name="not_selected" msgid="410652016565864475">"nincs kiválasztva"</string>
-    <!-- no translation found for in_progress (2149208189184319441) -->
-    <skip />
+    <string name="in_progress" msgid="2149208189184319441">"folyamatban"</string>
     <string name="whichApplication" msgid="5432266899591255759">"Művelet végrehajtása a következővel:"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"Művelet elvégzése a(z) %1$s segítségével"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"Művelet végrehajtása"</string>
@@ -1715,8 +1714,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Billentyűparancs használata"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Színek invertálása"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Színkorrekció"</string>
-    <!-- no translation found for one_handed_mode_feature_name (2334330034828094891) -->
-    <skip />
+    <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Egykezes mód"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Extrasötét"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Nyomva tartotta a hangerőgombokat. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> bekapcsolva."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Nyomva tartotta a hangerőgombokat. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> kikapcsolva."</string>
@@ -1872,10 +1870,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"A rendszergazda által frissítve"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"A rendszergazda által törölve"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (4877297130366222145) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (8518809702138617167) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"Az Akkumulátorkímélő mód bekapcsolja a Sötét témát, és korlátozza vagy kikapcsolja a háttérbeli tevékenységeket, valamint bizonyos vizuális effekteket, funkciókat és hálózati kapcsolatokat.\n\n"<annotation id="url">"További információ"</annotation></string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"Az Akkumulátorkímélő mód bekapcsolja a Sötét témát, és korlátozza vagy kikapcsolja a háttérbeli tevékenységeket, valamint bizonyos vizuális effekteket, funkciókat és hálózati kapcsolatokat."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Az adatforgalom csökkentése érdekében az Adatforgalom-csökkentő megakadályozza, hogy egyes alkalmazások adatokat küldjenek vagy fogadjanak a háttérben. Az Ön által jelenleg használt alkalmazások hozzáférhetnek az adatokhoz, de csak ritkábban. Ez például azt jelentheti, hogy a képek csak rákoppintás után jelennek meg."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Bekapcsolja az Adatforgalom-csökkentőt?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Bekapcsolás"</string>
@@ -1978,10 +1974,8 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"A(z) <xliff:g id="APP_NAME_0">%1$s</xliff:g> alkalmazás jelenleg nem áll rendelkezésre. Ezt a(z) <xliff:g id="APP_NAME_1">%2$s</xliff:g> kezeli."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"További információ"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Alkalmazás szüneteltetésének feloldása"</string>
-    <!-- no translation found for work_mode_off_title (961171256005852058) -->
-    <skip />
-    <!-- no translation found for work_mode_off_message (7319580997683623309) -->
-    <skip />
+    <string name="work_mode_off_title" msgid="961171256005852058">"Bekapcsolja a munkaappokat?"</string>
+    <string name="work_mode_off_message" msgid="7319580997683623309">"Hozzáférést kaphat munkahelyi alkalmazásaihoz és értesítéseihez"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Bekapcsolás"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Az alkalmazás nem hozzáférhető"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"A(z) <xliff:g id="APP_NAME">%1$s</xliff:g> jelenleg nem hozzáférhető."</string>
