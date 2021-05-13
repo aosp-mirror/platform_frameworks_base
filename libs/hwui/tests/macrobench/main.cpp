@@ -71,7 +71,7 @@ OPTIONS:
   --benchmark_format   Set output format. Possible values are tabular, json, csv
   --renderer=TYPE      Sets the render pipeline to use. May be skiagl or skiavk
   --skip-leak-check    Skips the memory leak check
-  --report-gpu-memory  Dumps the GPU memory usage after each test run
+  --report-gpu-memory[=verbose]  Dumps the GPU memory usage after each test run
 )");
 }
 
@@ -142,7 +142,7 @@ static bool setBenchmarkFormat(const char* format) {
     } else if (!strcmp(format, "json")) {
         gBenchmarkReporter.reset(new benchmark::JSONReporter());
     } else {
-        fprintf(stderr, "Unknown format '%s'", format);
+        fprintf(stderr, "Unknown format '%s'\n", format);
         return false;
     }
     return true;
@@ -154,7 +154,7 @@ static bool setRenderer(const char* renderer) {
     } else if (!strcmp(renderer, "skiavk")) {
         Properties::overrideRenderPipelineType(RenderPipelineType::SkiaVulkan);
     } else {
-        fprintf(stderr, "Unknown format '%s'", renderer);
+        fprintf(stderr, "Unknown format '%s'\n", renderer);
         return false;
     }
     return true;
@@ -191,7 +191,7 @@ static const struct option LONG_OPTIONS[] = {
         {"offscreen", no_argument, nullptr, LongOpts::Offscreen},
         {"renderer", required_argument, nullptr, LongOpts::Renderer},
         {"skip-leak-check", no_argument, nullptr, LongOpts::SkipLeakCheck},
-        {"report-gpu-memory", no_argument, nullptr, LongOpts::ReportGpuMemory},
+        {"report-gpu-memory", optional_argument, nullptr, LongOpts::ReportGpuMemory},
         {0, 0, 0, 0}};
 
 static const char* SHORT_OPTIONS = "c:r:h";
@@ -296,6 +296,14 @@ void parseOptions(int argc, char* argv[]) {
 
             case LongOpts::ReportGpuMemory:
                 gOpts.reportGpuMemoryUsage = true;
+                if (optarg) {
+                    if (!strcmp("verbose", optarg)) {
+                        gOpts.reportGpuMemoryUsageVerbose = true;
+                    } else {
+                        fprintf(stderr, "Invalid report gpu memory option '%s'\n", optarg);
+                        error = true;
+                    }
+                }
                 break;
 
             case 'h':
@@ -313,7 +321,7 @@ void parseOptions(int argc, char* argv[]) {
     }
 
     if (error) {
-        fprintf(stderr, "Try 'hwuitest --help' for more information.\n");
+        fprintf(stderr, "Try '%s --help' for more information.\n", argv[0]);
         exit(EXIT_FAILURE);
     }
 

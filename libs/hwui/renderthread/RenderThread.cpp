@@ -323,6 +323,10 @@ void RenderThread::dumpGraphicsMemory(int fd, bool includeProfileData) {
     dprintf(fd, "\nPipeline=%s\n%s\n", pipelineToString(), cachesOutput.string());
 }
 
+void RenderThread::getMemoryUsage(size_t* cpuUsage, size_t* gpuUsage) {
+    mCacheManager->getMemoryUsage(cpuUsage, gpuUsage);
+}
+
 Readback& RenderThread::readback() {
     if (!mReadback) {
         mReadback = new Readback(*this);
