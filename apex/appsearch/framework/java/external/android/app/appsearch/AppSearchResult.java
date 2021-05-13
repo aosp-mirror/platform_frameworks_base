@@ -175,14 +175,24 @@ public final class AppSearchResult<ValueType> {
         return "[FAILURE(" + mResultCode + ")]: " + mErrorMessage;
     }
 
-    /** Creates a new successful {@link AppSearchResult}. */
+    /**
+     * Creates a new successful {@link AppSearchResult}.
+     *
+     * @param value An optional value to associate with the successful result of the operation being
+     *     performed.
+     */
     @NonNull
     public static <ValueType> AppSearchResult<ValueType> newSuccessfulResult(
             @Nullable ValueType value) {
         return new AppSearchResult<>(RESULT_OK, value, /*errorMessage=*/ null);
     }
 
-    /** Creates a new failed {@link AppSearchResult}. */
+    /**
+     * Creates a new failed {@link AppSearchResult}.
+     *
+     * @param resultCode One of the constants documented in {@link AppSearchResult#getResultCode}.
+     * @param errorMessage An optional string describing the reason or nature of the failure.
+     */
     @NonNull
     public static <ValueType> AppSearchResult<ValueType> newFailedResult(
             @ResultCode int resultCode, @Nullable String errorMessage) {

@@ -164,8 +164,7 @@ public final class GetByDocumentIdRequest {
         @NonNull
         public GetByDocumentIdRequest build() {
             mBuilt = true;
-            return new GetByDocumentIdRequest(
-                    mNamespace, new ArraySet<>(mIds), new ArrayMap<>(mProjectionTypePropertyPaths));
+            return new GetByDocumentIdRequest(mNamespace, mIds, mProjectionTypePropertyPaths);
         }
 
         private void resetIfBuilt() {

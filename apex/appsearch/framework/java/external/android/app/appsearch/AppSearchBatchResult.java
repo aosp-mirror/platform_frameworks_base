@@ -19,6 +19,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.util.ArrayMap;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 
@@ -48,9 +49,9 @@ public final class AppSearchBatchResult<KeyType, ValueType> {
             @NonNull Map<KeyType, ValueType> successes,
             @NonNull Map<KeyType, AppSearchResult<ValueType>> failures,
             @NonNull Map<KeyType, AppSearchResult<ValueType>> all) {
-        mSuccesses = successes;
-        mFailures = failures;
-        mAll = all;
+        mSuccesses = Objects.requireNonNull(successes);
+        mFailures = Objects.requireNonNull(failures);
+        mAll = Objects.requireNonNull(all);
     }
 
     /** Returns {@code true} if this {@link AppSearchBatchResult} has no failures. */
@@ -70,7 +71,7 @@ public final class AppSearchBatchResult<KeyType, ValueType> {
      */
     @NonNull
     public Map<KeyType, ValueType> getSuccesses() {
-        return mSuccesses;
+        return Collections.unmodifiableMap(mSuccesses);
     }
 
     /**
@@ -81,7 +82,7 @@ public final class AppSearchBatchResult<KeyType, ValueType> {
      */
     @NonNull
     public Map<KeyType, AppSearchResult<ValueType>> getFailures() {
-        return mFailures;
+        return Collections.unmodifiableMap(mFailures);
     }
 
     /**
@@ -92,7 +93,7 @@ public final class AppSearchBatchResult<KeyType, ValueType> {
      */
     @NonNull
     public Map<KeyType, AppSearchResult<ValueType>> getAll() {
-        return mAll;
+        return Collections.unmodifiableMap(mAll);
     }
 
     /**
@@ -128,20 +129,37 @@ public final class AppSearchBatchResult<KeyType, ValueType> {
          * Associates the {@code key} with the provided successful return value.
          *
          * <p>Any previous mapping for a key, whether success or failure, is deleted.
+         *
+         * <p>This is a convenience function which is equivalent to {@code setResult(key,
+         * AppSearchResult.newSuccessfulResult(value))}.
+         *
+         * @param key The key to associate the result with; usually corresponds to some identifier
+         *     from the input like an ID or name.
+         * @param value An optional value to associate with the successful result of the operation
+         *     being performed.
          */
         @SuppressWarnings("MissingGetterMatchingBuilder") // See getSuccesses
         @NonNull
         public Builder<KeyType, ValueType> setSuccess(
-                @NonNull KeyType key, @Nullable ValueType result) {
+                @NonNull KeyType key, @Nullable ValueType value) {
             Objects.requireNonNull(key);
             resetIfBuilt();
-            return setResult(key, AppSearchResult.newSuccessfulResult(result));
+            return setResult(key, AppSearchResult.newSuccessfulResult(value));
         }
 
         /**
          * Associates the {@code key} with the provided failure code and error message.
          *
          * <p>Any previous mapping for a key, whether success or failure, is deleted.
+         *
+         * <p>This is a convenience function which is equivalent to {@code setResult(key,
+         * AppSearchResult.newFailedResult(resultCode, errorMessage))}.
+         *
+         * @param key The key to associate the result with; usually corresponds to some identifier
+         *     from the input like an ID or name.
+         * @param resultCode One of the constants documented in {@link
+         *     AppSearchResult#getResultCode}.
+         * @param errorMessage An optional string describing the reason or nature of the failure.
          */
         @SuppressWarnings("MissingGetterMatchingBuilder") // See getFailures
         @NonNull
@@ -158,6 +176,10 @@ public final class AppSearchBatchResult<KeyType, ValueType> {
          * Associates the {@code key} with the provided {@code result}.
          *
          * <p>Any previous mapping for a key, whether success or failure, is deleted.
+         *
+         * @param key The key to associate the result with; usually corresponds to some identifier
+         *     from the input like an ID or name.
+         * @param result The result to associate with the key.
          */
         @SuppressWarnings("MissingGetterMatchingBuilder") // See getAll
         @NonNull
@@ -183,8 +205,7 @@ public final class AppSearchBatchResult<KeyType, ValueType> {
         @NonNull
         public AppSearchBatchResult<KeyType, ValueType> build() {
             mBuilt = true;
-            return new AppSearchBatchResult<>(
-                    new ArrayMap<>(mSuccesses), new ArrayMap<>(mFailures), new ArrayMap<>(mAll));
+            return new AppSearchBatchResult<>(mSuccesses, mFailures, mAll);
         }
 
         private void resetIfBuilt() {
