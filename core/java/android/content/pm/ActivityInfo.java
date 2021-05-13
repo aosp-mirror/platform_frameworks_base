@@ -1348,7 +1348,8 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     public boolean neverSandboxDisplayApis() {
         return CompatChanges.isChangeEnabled(NEVER_SANDBOX_DISPLAY_APIS,
                 applicationInfo.packageName,
-                UserHandle.getUserHandleForUid(applicationInfo.uid));
+                UserHandle.getUserHandleForUid(applicationInfo.uid))
+                || ConstrainDisplayApisConfig.neverConstrainDisplayApis(applicationInfo);
     }
 
     /**
