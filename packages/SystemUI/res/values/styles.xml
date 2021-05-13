@@ -649,19 +649,14 @@
     </style>
 
     <style name="MediaPlayer.SolidButton">
-        <item name="android:backgroundTint">?android:attr/colorAccent</item>
+        <item name="android:backgroundTint">@color/media_player_solid_button_bg</item>
         <item name="android:tint">?android:attr/colorPrimary</item>
-        <item name="android:textColor">?android:attr/colorPrimary</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style>
 
     <style name="MediaPlayer.AppIcon">
         <item name="android:background">@drawable/qs_media_icon_background</item>
-        <item name="android:backgroundTint">?android:attr/colorPrimary</item>
-        <item name="android:tint">?android:attr/colorAccent</item>
-    </style>
-
-    <style name="MediaPlayer.AppIcon.Recommendation" parent="MediaPlayer.AppIcon">
-        <item name="android:tint">@color/transparent</item>
+        <item name="android:backgroundTint">?android:attr/textColorPrimary</item>
     </style>
 
     <style name="MediaPlayer.Album">
