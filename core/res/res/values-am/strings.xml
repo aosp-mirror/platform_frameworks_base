@@ -1869,10 +1869,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"በእርስዎ አስተዳዳሪ ተዘምኗል"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"በእርስዎ አስተዳዳሪ ተሰርዟል"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"እሺ"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (4877297130366222145) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (8518809702138617167) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"የባትሪ ኃይል ቆጣቢ ጠቆር ያለ ገጽታን ያበራል እና የጀርባ እንቅስቃሴን፣ አንዳንድ ምስላዊ ተጽዕኖዎችን፣ የተወሰኑ ባህሪያትን እና አንዳንድ አውታረ መረብ ግንኙነቶችን ይገድባል ወይም ያጠፋል።\n\n"<annotation id="url">"የበለጠ ለመረዳት"</annotation></string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"ባትሪ ቆጣቢ ጠቆር ያለ ገጽታን ያበራል እና የጀርባ እንቅስቃሴን፣ አንዳንድ ዕይታዊ ውጤቶችን፣ አንዳንድ ባህሪዎችን፣ እና አንዳንድ የአውታረ መረብ ግንኙነቶችን ይገድባል ወይም ያጠፋል።"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"የውሂብ አጠቃቀም እንዲቀንስ ለማገዝ ውሂብ ቆጣቢ አንዳንድ መተግበሪያዎች ከበስተጀርባ ሆነው ውሂብ እንዳይልኩ ወይም እንዳይቀበሉ ይከለክላቸዋል። በአሁኑ ጊዜ እየተጠቀሙበት ያለ መተግበሪያ ውሂብ ሊደርስ ይችላል፣ ነገር ግን ባነሰ ተደጋጋሚነት ሊሆን ይችላል። ይሄ ማለት ለምሳሌ ምስሎችን መታ እስኪያደርጓቸው ድረስ ላይታዩ ይችላሉ ማለት ነው።"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ውሂብ ቆጣቢ ይጥፋ?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"አብራ"</string>
@@ -1975,10 +1973,8 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> አሁን ላይ አይገኝም። በ<xliff:g id="APP_NAME_1">%2$s</xliff:g> የሚተዳደር ነው።"</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"የበለጠ ለመረዳት"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"መተግበሪያን ላፍታ እንዳይቆም አድርግ"</string>
-    <!-- no translation found for work_mode_off_title (961171256005852058) -->
-    <skip />
-    <!-- no translation found for work_mode_off_message (7319580997683623309) -->
-    <skip />
+    <string name="work_mode_off_title" msgid="961171256005852058">"የሥራ መተግበሪያዎች ይብሩ?"</string>
+    <string name="work_mode_off_message" msgid="7319580997683623309">"የእርስዎን የሥራ መተግበሪያዎች እና ማሳወቂያዎች መዳረሻ ያግኙ"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"አብራ"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"መተግበሪያ አይገኝም"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> አሁን አይገኝም።"</string>
