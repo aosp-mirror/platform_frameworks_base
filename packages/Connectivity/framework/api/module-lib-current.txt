@@ -65,6 +65,7 @@ package android.net {
     method @NonNull public static String getPrivateDnsDefaultMode(@NonNull android.content.Context);
     method @Nullable public static String getPrivateDnsHostname(@NonNull android.content.Context);
     method public static int getPrivateDnsMode(@NonNull android.content.Context);
+    method @NonNull public static java.util.Set<java.lang.String> getRestrictedAllowedApps(@NonNull android.content.Context);
     method public static boolean getWifiAlwaysRequested(@NonNull android.content.Context, boolean);
     method @NonNull public static java.time.Duration getWifiDataActivityTimeout(@NonNull android.content.Context, @NonNull java.time.Duration);
     method public static void setCaptivePortalHttpUrl(@NonNull android.content.Context, @Nullable String);
@@ -84,6 +85,7 @@ package android.net {
     method public static void setPrivateDnsDefaultMode(@NonNull android.content.Context, @NonNull int);
     method public static void setPrivateDnsHostname(@NonNull android.content.Context, @Nullable String);
     method public static void setPrivateDnsMode(@NonNull android.content.Context, int);
+    method public static void setRestrictedAllowedApps(@NonNull android.content.Context, @NonNull java.util.Set<java.lang.String>);
     method public static void setWifiAlwaysRequested(@NonNull android.content.Context, boolean);
     method public static void setWifiDataActivityTimeout(@NonNull android.content.Context, @NonNull java.time.Duration);
     field public static final int CAPTIVE_PORTAL_MODE_AVOID = 2; // 0x2
