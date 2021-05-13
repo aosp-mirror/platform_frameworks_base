@@ -909,6 +909,8 @@ public class StatusBar extends SystemUI implements DemoMode,
             mBroadcastDispatcher.registerReceiver(mTaskbarChangeReceiver, filter);
         }
 
+        mKeyguardIndicationController.init();
+
         mColorExtractor.addOnColorsChangedListener(this);
         mStatusBarStateController.addCallback(this,
                 SysuiStatusBarStateController.RANK_STATUS_BAR);
