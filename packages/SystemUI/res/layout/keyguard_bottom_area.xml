@@ -95,6 +95,7 @@
         android:background="@drawable/wallet_lockscreen_bg"
         android:layout_marginEnd="@dimen/keyguard_affordance_horizontal_offset"
         android:layout_marginBottom="@dimen/keyguard_affordance_vertical_offset"
+        android:contentDescription="@string/accessibility_wallet_button"
         android:visibility="gone" />
 
     <FrameLayout

@@ -27,6 +27,7 @@ import androidx.annotation.Nullable;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
+import com.android.systemui.R;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -165,6 +166,8 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         updatePauseAuth();
         if (mShowingUdfpsBouncer) {
             mView.animateUdfpsBouncer();
+            mView.announceForAccessibility(mView.getContext().getString(
+                    R.string.accessibility_fingerprint_bouncer));
         } else {
             mView.animateAwayUdfpsBouncer(() -> mKeyguardViewManager.cancelPostAuthActions());
         }
