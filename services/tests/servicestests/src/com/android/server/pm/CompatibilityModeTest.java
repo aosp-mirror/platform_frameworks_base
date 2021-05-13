@@ -30,9 +30,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageParser;
 import android.content.pm.PackageUserState;
 import android.content.pm.parsing.PackageInfoWithoutStateUtils;
+import android.content.pm.parsing.ParsingPackageUtils;
 import android.os.Build;
 
 import com.android.server.pm.parsing.pkg.AndroidPackage;
@@ -49,7 +49,7 @@ public class CompatibilityModeTest {
 
     @Before
     public void setUp() {
-        mCompatibilityModeEnabled = PackageParser.sCompatibilityModeEnabled;
+        mCompatibilityModeEnabled = ParsingPackageUtils.sCompatibilityModeEnabled;
         mMockAndroidPackage = mock(AndroidPackage.class);
         mMockUserState = mock(PackageUserState.class);
         mMockUserState.installed = true;
@@ -226,9 +226,9 @@ public class CompatibilityModeTest {
     }
 
     private void setGlobalCompatibilityMode(boolean enabled) {
-        if (PackageParser.sCompatibilityModeEnabled == enabled) {
+        if (ParsingPackageUtils.sCompatibilityModeEnabled == enabled) {
             return;
         }
-        PackageParser.setCompatibilityModeEnabled(enabled);
+        ParsingPackageUtils.setCompatibilityModeEnabled(enabled);
     }
 }

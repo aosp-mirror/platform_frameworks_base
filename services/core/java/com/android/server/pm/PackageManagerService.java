@@ -242,6 +242,7 @@ import android.content.pm.dex.DexMetadataHelper;
 import android.content.pm.dex.IArtManager;
 import android.content.pm.overlay.OverlayPaths;
 import android.content.pm.parsing.ApkLiteParseUtils;
+import android.content.pm.parsing.PackageInfoWithoutStateUtils;
 import android.content.pm.parsing.PackageLite;
 import android.content.pm.parsing.ParsingPackageUtils;
 import android.content.pm.parsing.ParsingPackageUtils.ParseFlags;
@@ -2625,8 +2626,8 @@ public class PackageManagerService extends IPackageManager.Stub
                         a, flags, ps.readUserState(userId), userId, ps);
             }
             if (resolveComponentName().equals(component)) {
-                return PackageParser.generateActivityInfo(
-                        mResolveActivity, flags, new PackageUserState(), userId);
+                return PackageInfoWithoutStateUtils.generateDelegateActivityInfo(mResolveActivity,
+                        flags, new PackageUserState(), userId);
             }
             return null;
         }
@@ -3276,8 +3277,10 @@ public class PackageManagerService extends IPackageManager.Stub
                 return result;
             }
             final ResolveInfo ephemeralInstaller = new ResolveInfo(mInstantAppInstallerInfo);
-            ephemeralInstaller.activityInfo = PackageParser.generateActivityInfo(
-                    instantAppInstallerActivity(), 0, ps.readUserState(userId), userId);
+            ephemeralInstaller.activityInfo =
+                    PackageInfoWithoutStateUtils.generateDelegateActivityInfo(
+                            instantAppInstallerActivity(), 0 /*flags*/, ps.readUserState(userId),
+                            userId);
             ephemeralInstaller.match = IntentFilter.MATCH_CATEGORY_SCHEME_SPECIFIC_PART
                     | IntentFilter.MATCH_ADJUSTMENT_NORMAL;
             // add a non-generic filter
@@ -3360,8 +3363,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 ai.setVersionCode(ps.versionCode);
                 ai.flags = ps.pkgFlags;
                 ai.privateFlags = ps.pkgPrivateFlags;
-                pi.applicationInfo =
-                        PackageParser.generateApplicationInfo(ai, flags, state, userId);
+                pi.applicationInfo = PackageInfoWithoutStateUtils.generateDelegateApplicationInfo(
+                        ai, flags, state, userId);
 
                 if (DEBUG_PACKAGE_INFO) Log.v(TAG, "ps.pkg is n/a for ["
                         + ps.name + "]. Provides a minimum info.");
@@ -24445,7 +24448,7 @@ public class PackageManagerService extends IPackageManager.Stub
         boolean compatibilityModeEnabled = android.provider.Settings.Global.getInt(
                 mContext.getContentResolver(),
                 android.provider.Settings.Global.COMPATIBILITY_MODE, 1) == 1;
-        PackageParser.setCompatibilityModeEnabled(compatibilityModeEnabled);
+        ParsingPackageUtils.setCompatibilityModeEnabled(compatibilityModeEnabled);
 
         if (DEBUG_SETTINGS) {
             Log.d(TAG, "compatibility mode:" + compatibilityModeEnabled);

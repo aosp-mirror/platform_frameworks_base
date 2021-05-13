@@ -398,6 +398,13 @@ public class PackageInfoWithoutStateUtils {
             assignUserFields(pkg, ai, userId);
         }
 
+        updateApplicationInfo(ai, flags, state);
+
+        return ai;
+    }
+
+    private static void updateApplicationInfo(ApplicationInfo ai, int flags,
+            PackageUserState state) {
         if ((flags & PackageManager.GET_META_DATA) == 0) {
             ai.metaData = null;
         }
@@ -407,7 +414,7 @@ public class PackageInfoWithoutStateUtils {
         }
 
         // CompatibilityMode is global state.
-        if (!android.content.pm.PackageParser.sCompatibilityModeEnabled) {
+        if (!ParsingPackageUtils.sCompatibilityModeEnabled) {
             ai.disableCompatibilityMode();
         }
 
@@ -439,7 +446,37 @@ public class PackageInfoWithoutStateUtils {
             ai.resourceDirs = overlayPaths.getResourceDirs().toArray(new String[0]);
             ai.overlayPaths = overlayPaths.getOverlayPaths().toArray(new String[0]);
         }
+    }
 
+    @Nullable
+    public static ApplicationInfo generateDelegateApplicationInfo(@Nullable ApplicationInfo ai,
+            @PackageManager.ApplicationInfoFlags int flags, @NonNull PackageUserState state,
+            int userId) {
+        if (ai == null || !checkUseInstalledOrHidden(flags, state, ai)) {
+            return null;
+        }
+        // This is used to return the ResolverActivity or instantAppInstallerActivity;
+        // we will just always make a copy.
+        ai = new ApplicationInfo(ai);
+        ai.initForUser(userId);
+        ai.icon = (ParsingPackageUtils.sUseRoundIcon && ai.roundIconRes != 0) ? ai.roundIconRes
+                : ai.iconRes;
+        updateApplicationInfo(ai, flags, state);
+        return ai;
+    }
+
+    @Nullable
+    public static ActivityInfo generateDelegateActivityInfo(@Nullable ActivityInfo a,
+            @PackageManager.ComponentInfoFlags int flags, @NonNull PackageUserState state,
+            int userId) {
+        if (a == null || !checkUseInstalledOrHidden(flags, state, a.applicationInfo)) {
+            return null;
+        }
+        // This is used to return the ResolverActivity or instantAppInstallerActivity;
+        // we will just always make a copy.
+        final ActivityInfo ai = new ActivityInfo(a);
+        ai.applicationInfo =
+                generateDelegateApplicationInfo(ai.applicationInfo, flags, state, userId);
         return ai;
     }
 
@@ -714,6 +751,23 @@ public class PackageInfoWithoutStateUtils {
     public static Attribution generateAttribution(ParsedAttribution pa) {
         if (pa == null) return null;
         return new Attribution(pa.tag, pa.label);
+    }
+
+    private static boolean checkUseInstalledOrHidden(int flags, @NonNull PackageUserState state,
+            @Nullable ApplicationInfo appInfo) {
+        // Returns false if the package is hidden system app until installed.
+        if ((flags & PackageManager.MATCH_HIDDEN_UNTIL_INSTALLED_COMPONENTS) == 0
+                && !state.installed
+                && appInfo != null && appInfo.hiddenUntilInstalled) {
+            return false;
+        }
+
+        // If available for the target user, or trying to match uninstalled packages and it's
+        // a system app.
+        return state.isAvailable(flags)
+                || (appInfo != null && appInfo.isSystemApp()
+                && ((flags & PackageManager.MATCH_KNOWN_PACKAGES) != 0
+                || (flags & PackageManager.MATCH_HIDDEN_UNTIL_INSTALLED_COMPONENTS) != 0));
     }
 
     private static void assignSharedFieldsForComponentInfo(@NonNull ComponentInfo componentInfo,
