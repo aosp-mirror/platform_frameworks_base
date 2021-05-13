@@ -1127,11 +1127,10 @@ public class BinderCallsStats implements BinderInternal.Observer {
         private final int mProcessSource;
 
         public SettingsObserver(Context context, BinderCallsStats binderCallsStats,
-                    int processSource, int userHandle) {
+                    int processSource) {
             super(BackgroundThread.getHandler());
             mContext = context;
-            context.getContentResolver().registerContentObserver(mUri, false, this,
-                    userHandle);
+            context.getContentResolver().registerContentObserver(mUri, false, this);
             mBinderCallsStats = binderCallsStats;
             mProcessSource = processSource;
             // Always kick once to ensure that we match current state
