@@ -55,8 +55,6 @@ import android.location.LastLocationRequest;
 import android.location.Location;
 import android.location.LocationManager;
 import android.location.LocationManagerInternal;
-import android.location.LocationManagerInternal.LocationTagInfo;
-import android.location.LocationManagerInternal.OnProviderLocationTagsChangeListener;
 import android.location.LocationManagerInternal.ProviderEnabledListener;
 import android.location.LocationRequest;
 import android.location.LocationResult;
@@ -90,7 +88,6 @@ import android.util.TimeUtils;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
-import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.location.LocationPermissions;
@@ -122,7 +119,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Predicate;
@@ -170,6 +166,11 @@ public class LocationProviderManager extends
     private static final int STATE_STARTED = 0;
     private static final int STATE_STOPPING = 1;
     private static final int STATE_STOPPED = 2;
+
+    public interface StateChangedListener {
+        void onStateChanged(String provider, AbstractLocationProvider.State oldState,
+                AbstractLocationProvider.State newState);
+    }
 
     protected interface LocationTransport {
 
@@ -1315,7 +1316,7 @@ public class LocationProviderManager extends
     private @Nullable OnAlarmListener mDelayedRegister;
 
     @GuardedBy("mLock")
-    private @Nullable OnProviderLocationTagsChangeListener mOnLocationTagsChangeListener;
+    private @Nullable StateChangedListener mStateChangedListener;
 
     public LocationProviderManager(Context context, Injector injector,
             String name, @Nullable PassiveLocationProviderManager passiveManager) {
@@ -1354,10 +1355,11 @@ public class LocationProviderManager extends
         return TAG;
     }
 
-    public void startManager() {
+    public void startManager(@Nullable StateChangedListener listener) {
         synchronized (mLock) {
             Preconditions.checkState(mState == STATE_STOPPED);
             mState = STATE_STARTED;
+            mStateChangedListener = listener;
 
             mUserHelper.addListener(mUserChangedListener);
             mSettingsHelper.addOnLocationEnabledChangedListener(mLocationEnabledChangedListener);
@@ -1396,6 +1398,7 @@ public class LocationProviderManager extends
 
             mEnabled.clear();
             mLastLocations.clear();
+            mStateChangedListener = null;
             mState = STATE_STOPPED;
         }
     }
@@ -1473,19 +1476,6 @@ public class LocationProviderManager extends
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
-        }
-    }
-
-    /**
-     * Registers a listener for the location tags of the provider.
-     *
-     * @param listener The listener
-     */
-    public void setOnProviderLocationTagsChangeListener(
-            @Nullable OnProviderLocationTagsChangeListener listener) {
-        Preconditions.checkArgument(mOnLocationTagsChangeListener == null || listener == null);
-        synchronized (mLock) {
-            mOnLocationTagsChangeListener = listener;
         }
     }
 
@@ -2292,31 +2282,10 @@ public class LocationProviderManager extends
             updateRegistrations(Registration::onProviderPropertiesChanged);
         }
 
-        if (mOnLocationTagsChangeListener != null) {
-            if (!oldState.extraAttributionTags.equals(newState.extraAttributionTags)
-                    || !Objects.equals(oldState.identity, newState.identity)) {
-                if (oldState.identity != null) {
-                    FgThread.getHandler().sendMessage(PooledLambda.obtainMessage(
-                            OnProviderLocationTagsChangeListener::onLocationTagsChanged,
-                            mOnLocationTagsChangeListener, new LocationTagInfo(
-                                    oldState.identity.getUid(), oldState.identity.getPackageName(),
-                                    Collections.emptySet())
-                    ));
-                }
-                if (newState.identity != null) {
-                    ArraySet<String> attributionTags = new ArraySet<>(
-                            newState.extraAttributionTags.size() + 1);
-                    attributionTags.addAll(newState.extraAttributionTags);
-                    attributionTags.add(newState.identity.getAttributionTag());
-
-                    FgThread.getHandler().sendMessage(PooledLambda.obtainMessage(
-                            OnProviderLocationTagsChangeListener::onLocationTagsChanged,
-                            mOnLocationTagsChangeListener, new LocationTagInfo(
-                                    newState.identity.getUid(), newState.identity.getPackageName(),
-                                    attributionTags)
-                    ));
-                }
-            }
+        if (mStateChangedListener != null) {
+            StateChangedListener listener = mStateChangedListener;
+            FgThread.getExecutor().execute(
+                    () -> listener.onStateChanged(mName, oldState, newState));
         }
     }
 
