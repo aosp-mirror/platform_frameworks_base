@@ -169,6 +169,7 @@ filegroup {
 filegroup {
     name: "framework-jobscheduler-shared-srcs",
     srcs: [
+        ":modules-utils-preconditions-srcs",
         "com/android/internal/util/ArrayUtils.java",
         "com/android/internal/util/BitUtils.java",
         "com/android/internal/util/CollectionUtils.java",
@@ -178,7 +179,6 @@ filegroup {
         "com/android/internal/util/FastXmlSerializer.java",
         "com/android/internal/util/FunctionalUtils.java",
         "com/android/internal/util/ParseUtils.java",
-        "com/android/internal/util/Preconditions.java",
         "com/android/internal/util/RingBufferIndices.java",
         "com/android/internal/util/StatLogger.java",
         "com/android/internal/util/XmlUtils.java",
@@ -189,9 +189,9 @@ filegroup {
 filegroup {
     name: "framework-permission-s-shared-srcs",
     srcs: [
+        ":modules-utils-preconditions-srcs",
         "com/android/internal/infra/AndroidFuture.java",
         "com/android/internal/infra/ServiceConnector.java",
-        "com/android/internal/util/Preconditions.java",
         "com/android/internal/infra/AndroidFuture.aidl",
         "com/android/internal/infra/IAndroidFuture.aidl",
         "android/os/HandlerExecutor.java",
@@ -323,6 +323,7 @@ aidl_interface {
 filegroup {
     name: "framework-telephony-common-shared-srcs",
     srcs: [
+        ":modules-utils-preconditions-srcs",
         "android/os/RegistrantList.java",
         "android/os/Registrant.java",
         "android/util/IndentingPrintWriter.java",
@@ -336,7 +337,6 @@ filegroup {
         "com/android/internal/util/HexDump.java",
         "com/android/internal/util/IState.java",
         "com/android/internal/util/IndentingPrintWriter.java",
-        "com/android/internal/util/Preconditions.java",
         "com/android/internal/util/State.java",
         "com/android/internal/util/StateMachine.java",
         "com/android/internal/util/UserIcons.java",
@@ -348,10 +348,10 @@ filegroup {
 filegroup {
     name: "framework-cellbroadcast-shared-srcs",
     srcs: [
+        ":modules-utils-preconditions-srcs",
         "android/os/HandlerExecutor.java",
         "android/util/LocalLog.java",
         "com/android/internal/util/IState.java",
-        "com/android/internal/util/Preconditions.java",
         "com/android/internal/util/State.java",
         "com/android/internal/util/StateMachine.java",
     ],
@@ -360,10 +360,10 @@ filegroup {
 filegroup {
     name: "framework-ims-common-shared-srcs",
     srcs: [
+        ":modules-utils-preconditions-srcs",
         "android/os/RegistrantList.java",
         "android/os/Registrant.java",
         "com/android/internal/os/SomeArgs.java",
-        "com/android/internal/util/Preconditions.java",
     ],
 }
 
