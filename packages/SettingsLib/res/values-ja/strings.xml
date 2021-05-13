@@ -31,11 +31,11 @@
     <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"認証に問題"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"接続できません"</string>
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"「<xliff:g id="AP_NAME">%1$s</xliff:g>」に接続できません"</string>
-    <string name="wifi_check_password_try_again" msgid="8817789642851605628">"パスワードを確認して、もう一度お試しください"</string>
+    <string name="wifi_check_password_try_again" msgid="8817789642851605628">"パスワードを再確認してください"</string>
     <string name="wifi_not_in_range" msgid="1541760821805777772">"圏外"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"自動的に接続されません"</string>
     <string name="wifi_no_internet" msgid="1774198889176926299">"インターネット接続なし"</string>
-    <string name="saved_network" msgid="7143698034077223645">"<xliff:g id="NAME">%1$s</xliff:g>で保存"</string>
+    <string name="saved_network" msgid="7143698034077223645">"<xliff:g id="NAME">%1$s</xliff:g>により保存"</string>
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"%1$s 経由で自動的に接続しています"</string>
     <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"ネットワーク評価プロバイダ経由で自動的に接続しています"</string>
     <string name="connected_via_passpoint" msgid="7735442932429075684">"%1$s経由で接続"</string>
@@ -212,7 +212,7 @@
     <string name="adb_wireless_settings" msgid="2295017847215680229">"ワイヤレス デバッグ"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"利用可能なデバイスを確認して使用するには、ワイヤレス デバッグを ON にしてください"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"QR コードによるデバイスのペア設定"</string>
-    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"QR コードスキャナを使って新しいデバイスをペア設定します"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"QR コードをスキャンして新しいデバイスをペア設定します"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"ペア設定コードによるデバイスのペア設定"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"6 桁のコードを使って新しいデバイスをペア設定します"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"ペア設定済みのデバイス"</string>
@@ -284,7 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"ワイヤレス ディスプレイ認証のオプションを表示"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Wi-Fi ログレベルを上げて、Wi-Fi 選択ツールで SSID RSSI ごとに表示します"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"電池の消耗が軽減され、ネットワーク パフォーマンスが改善されます"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"このモードが有効な場合、このデバイスは、MAC アドレスのランダム化が有効なネットワークに接続するたびに MAC アドレスが変わる可能性があります。"</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"ON にすると、MAC アドレスのランダム化が有効なネットワークに接続するたびに、このデバイスの MAC アドレスが変わる可能性があります。"</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"従量制"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"定額制"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"ログバッファのサイズ"</string>
@@ -298,7 +298,7 @@
     <string name="allow_mock_location" msgid="2102650981552527884">"擬似ロケーションを許可"</string>
     <string name="allow_mock_location_summary" msgid="179780881081354579">"擬似ロケーションを許可する"</string>
     <string name="debug_view_attributes" msgid="3539609843984208216">"表示属性検査を有効にする"</string>
-    <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"Wi‑Fiが（ネットワークの自動切り替えで）ONのときでもモバイルデータが常にONになります。"</string>
+    <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"ネットワークの切替速度を向上させるため、Wi‑Fi の利用時でもモバイルデータを常に ON にします。"</string>
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"テザリング時にハードウェア アクセラレーションを使用します（使用可能な場合）"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"USB デバッグを許可しますか？"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"USB デバッグは開発専用に設計されています。パソコンとデバイスの間でデータをコピーする場合や、アプリを通知なしでデバイスにインストールする場合、ログデータを読み取る場合に使用できます。"</string>
@@ -307,7 +307,7 @@
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"以前に許可したすべてのパソコンからの USB デバッグへのアクセスを取り消しますか？"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"開発用の設定を許可しますか？"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"これらの設定は開発専用に設計されています。そのためデバイスやデバイス上のアプリが故障したり正常に動作しなくなったりするおそれがあります。"</string>
-    <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"USB経由のアプリを確認"</string>
+    <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"USB 経由のアプリも検証"</string>
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"ADB/ADT経由でインストールされたアプリに不正な動作がないかを確認する"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Bluetooth デバイスを名前なしで（MAC アドレスのみで）表示します"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"リモートデバイスで音量に関する問題（音量が大きすぎる、制御できないなど）が発生した場合に、Bluetooth の絶対音量の機能を無効にする"</string>
@@ -315,8 +315,8 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"接続強化機能を有効にします。"</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"ローカルターミナル"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"ローカルシェルアクセスを提供するターミナルアプリを有効にします"</string>
-    <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCPチェック"</string>
-    <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCPチェック動作を設定"</string>
+    <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP チェック"</string>
+    <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP チェック動作を設定"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"デバッグ"</string>
     <string name="debug_app" msgid="8903350241392391766">"デバッグアプリを選択"</string>
     <string name="debug_app_not_set" msgid="1934083001283807188">"デバッグアプリケーションが設定されていません"</string>
@@ -341,10 +341,10 @@
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"画面の更新を表示"</string>
     <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"描画時にウィンドウ内の表示を点滅させる"</string>
     <string name="show_hw_layers_updates" msgid="5268370750002509767">"ハードウェア層の更新を表示"</string>
-    <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"ハードウェア層が更新されると緑色に点滅する"</string>
+    <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"更新されたハードウェア層を緑で点滅させる"</string>
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"GPUオーバードローをデバッグ"</string>
-    <string name="disable_overlays" msgid="4206590799671557143">"HWオーバーレイを無効化"</string>
-    <string name="disable_overlays_summary" msgid="1954852414363338166">"画面合成に常にGPUを使用する"</string>
+    <string name="disable_overlays" msgid="4206590799671557143">"HW オーバーレイを無効化"</string>
+    <string name="disable_overlays_summary" msgid="1954852414363338166">"画面合成に常に GPU を使用する"</string>
     <string name="simulate_color_space" msgid="1206503300335835151">"色空間シミュレート"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"OpenGLトレースを有効化"</string>
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"USBオーディオルーティングを無効化"</string>
@@ -353,21 +353,21 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"クリップの境界線、マージンなどを表示"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"RTLレイアウト方向を使用"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"すべての言語/地域で画面レイアウト方向をRTLに設定"</string>
-    <string name="force_msaa" msgid="4081288296137775550">"4x MSAAを適用"</string>
-    <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0アプリで4x MSAAを有効にする"</string>
+    <string name="force_msaa" msgid="4081288296137775550">"4x MSAA を適用"</string>
+    <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 アプリで 4x MSAA を有効にする"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"非矩形クリップ操作をデバッグ"</string>
     <string name="track_frame_time" msgid="522674651937771106">"HWUI レンダリングのプロファイル作成"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"GPU デバッグレイヤの有効化"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"デバッグアプリに GPU デバッグレイヤの読み込みを許可"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"ベンダーの詳細なロギングを有効にする"</string>
-    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"バグレポートには、その他のデバイス固有のベンダーログが含まれます。これには、非公開の情報が含まれることがあります。また、電池やストレージの使用量が増えることもあります。"</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"バグレポートには、その他のデバイス固有のベンダーログが含まれます。これには、非公開の情報が含まれることがあります。また、バッテリーやストレージの使用量が増えることもあります。"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"ウィンドウアニメスケール"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"トランジションアニメスケール"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Animator再生時間スケール"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"2次画面シミュレート"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"アプリ"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"アクティビティを保持しない"</string>
-    <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"ユーザーが離れたアクティビティを直ちに破棄する"</string>
+    <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"ユーザーが離れたアクティビティをただちに破棄します"</string>
     <string name="app_process_limit_title" msgid="8361367869453043007">"バックグラウンドプロセスの上限"</string>
     <string name="show_all_anrs" msgid="9160563836616468726">"バックグラウンド ANR の表示"</string>
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"バックグラウンド アプリが応答しない場合にダイアログを表示"</string>

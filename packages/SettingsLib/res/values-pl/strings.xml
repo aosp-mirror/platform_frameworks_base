@@ -196,7 +196,7 @@
     <string name="choose_profile" msgid="343803890897657450">"Wybierz profil"</string>
     <string name="category_personal" msgid="6236798763159385225">"Osobiste"</string>
     <string name="category_work" msgid="4014193632325996115">"Służbowe"</string>
-    <string name="development_settings_title" msgid="140296922921597393">"Opcje programistyczne"</string>
+    <string name="development_settings_title" msgid="140296922921597393">"Opcje programisty"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Włącz opcje dla programistów"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Ustaw opcje związane z programowaniem aplikacji."</string>
     <string name="development_settings_not_available" msgid="355070198089140951">"Opcje programisty są niedostępne dla tego użytkownika"</string>
@@ -348,7 +348,7 @@
     <string name="simulate_color_space" msgid="1206503300335835151">"Symuluj przestrzeń kolorów"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"Włącz śledzenie OpenGL"</string>
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Wyłącz kierowanie dźwiękowe USB"</string>
-    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Wyłącz auto kierowanie do urządzeń peryferyjnych audio USB"</string>
+    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Wyłącz autokierowanie do urządzeń peryferyjnych audio USB"</string>
     <string name="debug_layout" msgid="1659216803043339741">"Pokaż granice układu"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"Pokaż granice przycięcia, marginesy itd."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Układ od prawej do lewej"</string>

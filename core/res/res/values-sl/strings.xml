@@ -1607,7 +1607,7 @@
     <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Predvajanje zaslona v napravo"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"Iskanje naprav …"</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"Nastavitve"</string>
-    <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Prekinitev povezave"</string>
+    <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Prekini povezavo"</string>
     <string name="media_route_status_scanning" msgid="8045156315309594482">"Pregledovanje ..."</string>
     <string name="media_route_status_connecting" msgid="5845597961412010540">"Vzpostavljanje povezave ..."</string>
     <string name="media_route_status_available" msgid="1477537663492007608">"Na voljo"</string>
@@ -1842,7 +1842,7 @@
     <string name="battery_saver_description" msgid="8587408568232177204">"Funkcija varčevanja z energijo baterije podaljša čas delovanja baterije tako:\n\n•Vklopi temno temo,\n•izklopi ali omeji izvajanje dejavnosti v ozadju, nekaterih vizualnih učinkov in drugih funkcij, kot je »Hey Google«."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Zaradi zmanjševanja prenesene količine podatkov funkcija varčevanja s podatki nekaterim aplikacijam preprečuje, da bi v ozadju pošiljale ali prejemale podatke. Aplikacija, ki jo trenutno uporabljate, lahko prenaša podatke, vendar to morda počne manj pogosto. To na primer pomeni, da se slike ne prikažejo, dokler se jih ne dotaknete."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Vklop varčevanja s podatki?"</string>
-    <string name="data_saver_enable_button" msgid="4399405762586419726">"Vklop"</string>
+    <string name="data_saver_enable_button" msgid="4399405762586419726">"Vklopi"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="one">%d minuto (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="two">%d minuti (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
@@ -2049,7 +2049,7 @@
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"VSEENO ODPRI"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Zaznana je bila škodljiva aplikacija"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"Aplikacija <xliff:g id="APP_0">%1$s</xliff:g> želi prikazati izreze aplikacije <xliff:g id="APP_2">%2$s</xliff:g>"</string>
-    <string name="screenshot_edit" msgid="7408934887203689207">"Urejanje"</string>
+    <string name="screenshot_edit" msgid="7408934887203689207">"Uredi"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Vibriranje bo vklopljeno za klice in obvestila"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Zvonjenje bo izklopljeno za klice in obvestila"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Sistemske spremembe"</string>

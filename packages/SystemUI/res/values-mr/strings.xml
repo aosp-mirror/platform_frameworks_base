@@ -503,7 +503,7 @@
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"कामगिरी आणि पार्श्वभूमीवरील डेटा कमी करते"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"बॅटरी सेव्हर बंद करा"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"तुमच्या स्क्रीनवर दृश्यमान असलेल्या किंवा रेकॉर्ड किंवा कास्ट करताना तुमच्या डिव्हाइसमधून प्ले केलेल्या सर्व माहितीचा अ‍ॅक्सेस <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ला असेल. यामध्ये पासवर्ड, पेमेंट तपशील, फोटो, मेसेज आणि तुम्ही प्ले केलेला ऑडिओ यासारख्या माहितीचा समावेश असतो."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"हे कार्य पुरवठा करणाऱ्या सेवेस तुमच्या स्क्रीनवर दृश्यमान असलेल्या किंवा रेकॉर्ड किंवा कास्ट करताना तुमच्या डिव्हाइसमधून प्ले केलेल्या सर्व माहितीचा अ‍ॅक्सेस असेल. यामध्ये पासवर्ड, पेमेंट तपशील, फोटो, मेसेज आणि तुम्ही प्ले केलेला ऑडिओ यासारख्या माहितीचा समावेश असतो."</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"हे कार्य पुरवणाऱ्या सेवेस तुमच्या स्क्रीनवर दृश्यमान असलेल्या किंवा रेकॉर्ड किंवा कास्ट करताना तुमच्या डिव्हाइसमधून प्ले केलेल्या सर्व माहितीचा अ‍ॅक्सेस असेल. यामध्ये पासवर्ड, पेमेंट तपशील, फोटो, मेसेज आणि तुम्ही प्ले केलेला ऑडिओ यासारख्या माहितीचा समावेश असतो."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"रेकॉर्ड करणे किंवा कास्ट करणे सुरू करायचे का ?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ने रेकॉर्ड करणे किंवा कास्ट करणे सुरू करायचे का?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"पुन्हा दर्शवू नका"</string>
@@ -595,7 +595,7 @@
     <string name="screen_pinning_title" msgid="9058007390337841305">"ॲप पिन केले आहे"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"तुम्ही अनपिन करेर्यंत हे यास दृश्यामध्ये ठेवते. अनपिन करण्‍यासाठी परत आणि विहंगावलोकनास स्पर्श करा आणि धरून ठेवा."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"तुम्ही अनपिन करेर्यंत हे त्याला दृश्यामध्ये ठेवते. अनपिन करण्‍यासाठी मागे आणि होम वर स्पर्श करा आणि धरून ठेवा."</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"हे तुम्ही अनपिन करेपर्यंत दृश्यमान ठेवते. वरती स्‍वाइप करा आणि अनपिन करण्यासाठी धरून ठेवा."</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"हे तुम्ही अनपिन करेपर्यंत दृश्यमान ठेवते. अनपिन करण्यासाठी वरती स्‍वाइप करा आणि धरून ठेवा."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"तुम्ही अनपिन करेर्यंत हे यास दृश्यामध्ये ठेवते. अनपिन करण्‍यासाठी विहंगावलोकनास स्पर्श करा आणि धरून ठेवा."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"तुम्ही अनपिन करेपर्यंत हे त्यास दृश्यामध्ये ठेवते. अनपिन करण्यासाठी होमला स्पर्श करा आणि धरून ठेवा."</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"वैयक्‍तिक डेटा अ‍ॅक्सेस केला जाऊ शकतो (जसे की संपर्क आणि ईमेल आशय)."</string>
@@ -605,8 +605,8 @@
     <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"हे ॲप अनपिन करण्यासाठी, वर स्‍वाइप करा आणि धरून ठेवा"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"समजले"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"नाही, नको"</string>
-    <string name="screen_pinning_start" msgid="7483998671383371313">"पिन केलेले ॲप"</string>
-    <string name="screen_pinning_exit" msgid="4553787518387346893">"अनपिन केलेले ॲप"</string>
+    <string name="screen_pinning_start" msgid="7483998671383371313">"ॲप पिन केले"</string>
+    <string name="screen_pinning_exit" msgid="4553787518387346893">"ॲप अनपिन केले"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> लपवायचे?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"तुम्ही सेटिंग्जमध्ये ते पुढील वेळी सुरू कराल तेव्हा ते पुन्हा दिसेल."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="3341477479055016776">"लपवा"</string>

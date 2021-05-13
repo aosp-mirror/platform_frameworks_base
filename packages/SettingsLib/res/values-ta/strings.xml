@@ -458,7 +458,7 @@
     <string name="disabled" msgid="8017887509554714950">"முடக்கப்பட்டது"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"அனுமதிக்கப்பட்டது"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"அனுமதிக்கப்படவில்லை"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"நிறுவுதல் (அறியாதவை)"</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"தெரியாத ஆப்ஸ்களை நிறுவுதல்"</string>
     <string name="home" msgid="973834627243661438">"அமைப்புகள் முகப்பு"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"0%"</item>

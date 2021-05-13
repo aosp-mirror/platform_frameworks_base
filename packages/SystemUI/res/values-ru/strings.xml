@@ -228,7 +228,7 @@
     <string name="data_connection_edge" msgid="6316755666481405762">"EDGE"</string>
     <string name="accessibility_data_connection_wifi" msgid="4422160347472742434">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="1140839832913084973">"SIM-карта отсутствует."</string>
-    <string name="accessibility_cell_data" msgid="172950885786007392">"Мобильный Интернет"</string>
+    <string name="accessibility_cell_data" msgid="172950885786007392">"Мобильный интернет"</string>
     <string name="accessibility_cell_data_on" msgid="691666434519443162">"Мобильный Интернет включен"</string>
     <string name="cell_data_off_content_description" msgid="9165555931499878044">"Мобильный Интернет отключен"</string>
     <string name="not_default_data_content_description" msgid="6757881730711522517">"Мобильный Интернет по умолчанию не используется."</string>
@@ -411,7 +411,7 @@
     <string name="quick_settings_notifications_label" msgid="3379631363952582758">"Уведомления"</string>
     <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"Фонарик"</string>
     <string name="quick_settings_flashlight_camera_in_use" msgid="4820591564526512571">"Используется камера"</string>
-    <string name="quick_settings_cellular_detail_title" msgid="792977203299358893">"Мобильный Интернет"</string>
+    <string name="quick_settings_cellular_detail_title" msgid="792977203299358893">"Мобильный интернет"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="6105969068871138427">"Передача данных"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="1136599216568805644">"Остается данных"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="4561921367680636235">"Ограничение превышено"</string>
@@ -509,7 +509,7 @@
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"Откл. фоновой передачи данных"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Отключить режим энергосбережения"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"Во время записи или трансляции у приложения \"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>\" будет доступ ко всей информации, которая видна на экране или воспроизводится с устройства, в том числе к паролям, сведениям о платежах, фотографиям, сообщениям и прослушиваемым аудиозаписям."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Во время записи или трансляции у сервиса, предоставляющего эту функцию, будет доступ ко всей информации, которая видна на экране или воспроизводится с устройства, в том числе к паролям, сведениям о платежах, фотографиям, сообщениям и прослушиваемым аудиозаписям."</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Во время записи или трансляции у сервиса, предоставляющего эту функцию, будет доступ ко всей информации, которая видна на экране или проигрывается на устройстве, включая пароли, сведения о платежах, фотографии, сообщения и воспроизводимые звуки."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Начать запись или трансляцию?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Начать запись или трансляцию через приложение \"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>\"?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"Больше не показывать"</string>
@@ -550,9 +550,9 @@
     <string name="monitoring_subtitle_ca_certificate" msgid="8588092029755175800">"Сертификаты ЦС"</string>
     <string name="disable_vpn" msgid="482685974985502922">"Отключить VPN"</string>
     <string name="disconnect_vpn" msgid="26286850045344557">"Отключить VPN"</string>
-    <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Просмотреть политику"</string>
-    <string name="monitoring_description_named_management" msgid="505833016545056036">"Это устройство принадлежит организации \"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>\".\n\nВаш системный администратор может управлять настройками, приложениями и параметрами доступа к корпоративным ресурсам на этом устройстве, а также связанными с ним данными (например, сведениями о местоположении).\n\nЗа подробной информацией обращайтесь к системному администратору."</string>
-    <string name="monitoring_description_management" msgid="4308879039175729014">"Это устройство принадлежит вашей организации.\n\nСистемный администратор может управлять настройками, приложениями и параметрами доступа к корпоративным ресурсам на этом устройстве, а также связанными с ним данными (например, сведениями о местоположении).\n\nЗа подробной информацией обращайтесь к системному администратору."</string>
+    <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Узнать больше"</string>
+    <string name="monitoring_description_named_management" msgid="505833016545056036">"Это устройство принадлежит организации \"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>\".\n\nСистемный администратор может просматривать и контролировать настройки, приложения и параметры доступа к корпоративным ресурсам на этом устройстве, а также связанные с ним данные (например, сведения о местоположении).\n\nЗа подробной информацией обращайтесь к системному администратору."</string>
+    <string name="monitoring_description_management" msgid="4308879039175729014">"Это устройство принадлежит вашей организации.\n\nСистемный администратор может просматривать и контролировать настройки, приложения и параметры доступа к корпоративным ресурсам на этом устройстве, а также связанные с ним данные (например, сведения о местоположении).\n\nЗа подробной информацией обращайтесь к системному администратору."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Ваша организация установила сертификат ЦС на устройство. Она может отслеживать и изменять защищенный сетевой трафик."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Ваша организация установила сертификат ЦС в рабочем профиле. Она может отслеживать и изменять защищенный сетевой трафик."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"На устройстве установлен сертификат ЦС. Ваш защищенный сетевой трафик могут отслеживать и изменять."</string>
@@ -604,11 +604,11 @@
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Оно будет показываться на экране, пока вы его не открепите (для этого нужно провести вверх и удерживать)."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Приложение останется активным, пока вы не отмените блокировку, нажав и удерживая кнопку \"Обзор\"."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Приложение останется активным, пока вы не отмените блокировку, нажав и удерживая кнопку \"Главный экран\"."</string>
-    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Может быть получен доступ к персональным данным (например, контактам и содержимому электронных писем)."</string>
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"На экране могут быть видны персональные данные (например, контакты и содержимое электронных писем)."</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Закрепленное приложение может открывать другие приложения."</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"Чтобы открепить это приложение, нажмите и удерживайте кнопки \"Назад\" и \"Обзор\"."</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Чтобы открепить это приложение, нажмите и удерживайте кнопки \"Назад\" и \"Главный экран\"."</string>
-    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Чтобы открепить это приложение, проведите по экрану вверх и задержите палец."</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Чтобы открепить приложение, проведите по экрану вверх и удерживайте."</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"ОК"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Нет, спасибо"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"Приложение закреплено."</string>
@@ -992,7 +992,7 @@
     <string name="slice_permission_deny" msgid="6870256451658176895">"Нет"</string>
     <string name="auto_saver_title" msgid="6873691178754086596">"Нажмите, чтобы настроить режим энергосбережения"</string>
     <string name="auto_saver_text" msgid="3214960308353838764">"Включать, если высока вероятность, что батарея скоро разрядится"</string>
-    <string name="no_auto_saver_action" msgid="7467924389609773835">"Отмена"</string>
+    <string name="no_auto_saver_action" msgid="7467924389609773835">"Нет, спасибо"</string>
     <string name="auto_saver_enabled_title" msgid="4294726198280286333">"Автоматический переход в режим энергосбережения включен"</string>
     <string name="auto_saver_enabled_text" msgid="7889491183116752719">"Режим энергосбережения активируется при заряде батареи ниже <xliff:g id="PERCENTAGE">%d</xliff:g> %%."</string>
     <string name="open_saver_setting_action" msgid="2111461909782935190">"Открыть настройки"</string>
