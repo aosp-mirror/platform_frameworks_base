@@ -428,7 +428,7 @@ public class MediaControlPanel {
                     mMediaDataManagerLazy.get().dismissMediaData(mKey,
                             MediaViewController.GUTS_ANIMATION_DURATION + 100);
                     return true;
-                }, /* requiresShadeOpen */ true);
+                }, /* requiresShadeOpen */ true, false);
             } else {
                 Log.w(TAG, "Dismiss media with null notification. Token uid="
                         + data.getToken().getUid());
@@ -564,7 +564,7 @@ public class MediaControlPanel {
                 mMediaDataManagerLazy.get().dismissSmartspaceRecommendation(
                         MediaViewController.GUTS_ANIMATION_DURATION + 100L);
                 return true;
-            }, true /* requiresShadeOpen */);
+            }, true /* requiresShadeOpen */, false);
         });
 
         mController = null;
