@@ -49,4 +49,6 @@
     <bool name="flag_ongoing_call_status_bar_chip">true</bool>
 
     <bool name="flag_smartspace">false</bool>
+
+    <bool name="flag_smartspace_deduping">true</bool>
 </resources>
