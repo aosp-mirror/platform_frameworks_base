@@ -88,6 +88,7 @@
 ?audio/x-mpeg mp3
 
 ?image/bmp bmp
+?image/gif gif
 ?image/heic heic
 ?image/heic-sequence heics
 ?image/heif heif hif
