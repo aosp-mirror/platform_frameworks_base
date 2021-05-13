@@ -3173,6 +3173,7 @@ package android.accessibilityservice {
     field public static final int FLAG_ENABLE_ACCESSIBILITY_VOLUME = 128; // 0x80
     field public static final int FLAG_INCLUDE_NOT_IMPORTANT_VIEWS = 2; // 0x2
     field public static final int FLAG_REPORT_VIEW_IDS = 16; // 0x10
+    field public static final int FLAG_REQUEST_2_FINGER_PASSTHROUGH = 8192; // 0x2000
     field public static final int FLAG_REQUEST_ACCESSIBILITY_BUTTON = 256; // 0x100
     field @Deprecated public static final int FLAG_REQUEST_ENHANCED_WEB_ACCESSIBILITY = 8; // 0x8
     field public static final int FLAG_REQUEST_FILTER_KEY_EVENTS = 32; // 0x20
