@@ -399,7 +399,7 @@ public abstract class Image implements AutoCloseable {
      * <p>The number and meaning of the planes in an Image are determined by the
      * format of the Image.</p>
      *
-     * <p>Once the Image has been closed, any access to the the plane's
+     * <p>Once the Image has been closed, any access to the plane's
      * ByteBuffer will fail.</p>
      *
      * @see #getFormat
