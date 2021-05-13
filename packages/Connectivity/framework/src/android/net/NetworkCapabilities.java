@@ -2418,6 +2418,11 @@ public final class NetworkCapabilities implements Parcelable {
         return mTransportInfo.getApplicableRedactions();
     }
 
+    private NetworkCapabilities removeDefaultCapabilites() {
+        mNetworkCapabilities &= ~DEFAULT_CAPABILITIES;
+        return this;
+    }
+
     /**
      * Builder class for NetworkCapabilities.
      *
@@ -2451,6 +2456,16 @@ public final class NetworkCapabilities implements Parcelable {
         public Builder(@NonNull final NetworkCapabilities nc) {
             Objects.requireNonNull(nc);
             mCaps = new NetworkCapabilities(nc);
+        }
+
+        /**
+         * Creates a new Builder without the default capabilities.
+         */
+        @NonNull
+        public static Builder withoutDefaultCapabilities() {
+            final NetworkCapabilities nc = new NetworkCapabilities();
+            nc.removeDefaultCapabilites();
+            return new Builder(nc);
         }
 
         /**
@@ -2509,17 +2524,6 @@ public final class NetworkCapabilities implements Parcelable {
         @NonNull
         public Builder removeCapability(@NetCapability final int capability) {
             mCaps.setCapability(capability, false);
-            return this;
-        }
-
-        /**
-         * Completely clears the contents of this object, removing even the capabilities that are
-         * set by default when the object is constructed.
-         * @return this builder
-         */
-        @NonNull
-        public Builder clearAll() {
-            mCaps.clearAll();
             return this;
         }
 
