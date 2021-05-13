@@ -5338,7 +5338,7 @@ public class Notification implements Parcelable
             }
             final float extraMarginEndDpIfVisible = viewWidthDp + iconMarginDp;
             result.setRightIconState(rightIcon != null /* visible */, viewWidthDp,
-                    extraMarginEndDpIfVisible, expanderSizeDp);
+                    viewHeightDp, extraMarginEndDpIfVisible, expanderSizeDp);
         }
 
         /**
@@ -5375,6 +5375,8 @@ public class Notification implements Parcelable
             if (rightIcon != null) {
                 contentView.setViewLayoutWidth(R.id.right_icon,
                         result.mRightIconWidthDp, TypedValue.COMPLEX_UNIT_DIP);
+                contentView.setViewLayoutHeight(R.id.right_icon,
+                        result.mRightIconHeightDp, TypedValue.COMPLEX_UNIT_DIP);
                 contentView.setViewVisibility(R.id.right_icon, View.VISIBLE);
                 contentView.setImageViewIcon(R.id.right_icon, rightIcon);
                 contentView.setIntTag(R.id.right_icon, R.id.tag_keep_when_showing_left_icon,
@@ -12119,6 +12121,7 @@ public class Notification implements Parcelable
     private static class TemplateBindResult {
         boolean mRightIconVisible;
         float mRightIconWidthDp;
+        float mRightIconHeightDp;
 
         /**
          * The margin end that needs to be added to the heading so that it won't overlap
@@ -12143,10 +12146,11 @@ public class Notification implements Parcelable
          */
         public final MarginSet mTitleMarginSet = new MarginSet();
 
-        public void setRightIconState(boolean visible, float widthDp,
+        public void setRightIconState(boolean visible, float widthDp, float heightDp,
                 float marginEndDpIfVisible, float expanderSizeDp) {
             mRightIconVisible = visible;
             mRightIconWidthDp = widthDp;
+            mRightIconHeightDp = heightDp;
             mHeadingExtraMarginSet.setValues(0, marginEndDpIfVisible);
             mHeadingFullMarginSet.setValues(expanderSizeDp, marginEndDpIfVisible + expanderSizeDp);
             mTitleMarginSet.setValues(0, marginEndDpIfVisible + expanderSizeDp);
