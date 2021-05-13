@@ -361,10 +361,13 @@ public class RescueParty {
         try {
             executeRescueLevelInternal(context, level, failedPackage);
             EventLogTags.writeRescueSuccess(level);
-            logCriticalInfo(Log.DEBUG,
-                    "Finished rescue level " + levelToString(level));
+            String successMsg = "Finished rescue level " + levelToString(level);
+            if (!TextUtils.isEmpty(failedPackage)) {
+                successMsg += " for package " + failedPackage;
+            }
+            logCriticalInfo(Log.DEBUG, successMsg);
         } catch (Throwable t) {
-            logRescueException(level, t);
+            logRescueException(level, failedPackage, t);
         }
     }
 
@@ -427,7 +430,7 @@ public class RescueParty {
                             pm.reboot(TAG);
                         }
                     } catch (Throwable t) {
-                        logRescueException(level, t);
+                        logRescueException(level, failedPackage, t);
                     }
                 };
                 thread = new Thread(runnable);
@@ -441,7 +444,7 @@ public class RescueParty {
                         try {
                             RecoverySystem.rebootPromptAndWipeUserData(context, TAG);
                         } catch (Throwable t) {
-                            logRescueException(level, t);
+                            logRescueException(level, failedPackage, t);
                         }
                     }
                 };
@@ -455,11 +458,15 @@ public class RescueParty {
         }
     }
 
-    private static void logRescueException(int level, Throwable t) {
+    private static void logRescueException(int level, @Nullable String failedPackageName,
+            Throwable t) {
         final String msg = ExceptionUtils.getCompleteMessage(t);
         EventLogTags.writeRescueFailure(level, msg);
-        logCriticalInfo(Log.ERROR,
-                "Failed rescue level " + levelToString(level) + ": " + msg);
+        String failureMsg = "Failed rescue level " + levelToString(level);
+        if (!TextUtils.isEmpty(failedPackageName)) {
+            failureMsg += " for package " + failedPackageName;
+        }
+        logCriticalInfo(Log.ERROR, failureMsg + ": " + msg);
     }
 
     private static int mapRescueLevelToUserImpact(int rescueLevel) {

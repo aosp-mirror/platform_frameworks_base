@@ -131,8 +131,6 @@
 
     <declare-styleable name="SmartReplyView">
         <attr name="spacing" format="dimension" />
-        <attr name="singleLineButtonPaddingHorizontal" format="dimension" />
-        <attr name="doubleLineButtonPaddingHorizontal" format="dimension" />
         <attr name="buttonStrokeWidth" format="dimension" />
     </declare-styleable>
 

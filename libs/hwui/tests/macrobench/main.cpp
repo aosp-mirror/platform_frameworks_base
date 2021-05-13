@@ -23,6 +23,7 @@
 #include "renderthread/RenderProxy.h"
 
 #include <benchmark/benchmark.h>
+#include <fnmatch.h>
 #include <getopt.h>
 #include <pthread.h>
 #include <stdio.h>
@@ -40,9 +41,9 @@ using namespace android;
 using namespace android::uirenderer;
 using namespace android::uirenderer::test;
 
-static int gRepeatCount = 1;
 static std::vector<TestScene::Info> gRunTests;
 static TestScene::Options gOpts;
+static bool gRunLeakCheck = true;
 std::unique_ptr<benchmark::BenchmarkReporter> gBenchmarkReporter;
 
 void run(const TestScene::Info& info, const TestScene::Options& opts,
@@ -69,6 +70,8 @@ OPTIONS:
                        are offscreen rendered
   --benchmark_format   Set output format. Possible values are tabular, json, csv
   --renderer=TYPE      Sets the render pipeline to use. May be skiagl or skiavk
+  --skip-leak-check    Skips the memory leak check
+  --report-gpu-memory  Dumps the GPU memory usage after each test run
 )");
 }
 
@@ -170,6 +173,8 @@ enum {
     Onscreen,
     Offscreen,
     Renderer,
+    SkipLeakCheck,
+    ReportGpuMemory,
 };
 }
 
@@ -185,6 +190,8 @@ static const struct option LONG_OPTIONS[] = {
         {"onscreen", no_argument, nullptr, LongOpts::Onscreen},
         {"offscreen", no_argument, nullptr, LongOpts::Offscreen},
         {"renderer", required_argument, nullptr, LongOpts::Renderer},
+        {"skip-leak-check", no_argument, nullptr, LongOpts::SkipLeakCheck},
+        {"report-gpu-memory", no_argument, nullptr, LongOpts::ReportGpuMemory},
         {0, 0, 0, 0}};
 
 static const char* SHORT_OPTIONS = "c:r:h";
@@ -214,20 +221,20 @@ void parseOptions(int argc, char* argv[]) {
                 break;
 
             case 'c':
-                gOpts.count = atoi(optarg);
-                if (!gOpts.count) {
+                gOpts.frameCount = atoi(optarg);
+                if (!gOpts.frameCount) {
                     fprintf(stderr, "Invalid frames argument '%s'\n", optarg);
                     error = true;
                 }
                 break;
 
             case 'r':
-                gRepeatCount = atoi(optarg);
-                if (!gRepeatCount) {
+                gOpts.repeatCount = atoi(optarg);
+                if (!gOpts.repeatCount) {
                     fprintf(stderr, "Invalid repeat argument '%s'\n", optarg);
                     error = true;
                 } else {
-                    gRepeatCount = (gRepeatCount > 0 ? gRepeatCount : INT_MAX);
+                    gOpts.repeatCount = (gOpts.repeatCount > 0 ? gOpts.repeatCount : INT_MAX);
                 }
                 break;
 
@@ -283,6 +290,14 @@ void parseOptions(int argc, char* argv[]) {
                 gOpts.renderOffscreen = true;
                 break;
 
+            case LongOpts::SkipLeakCheck:
+                gRunLeakCheck = false;
+                break;
+
+            case LongOpts::ReportGpuMemory:
+                gOpts.reportGpuMemoryUsage = true;
+                break;
+
             case 'h':
                 printHelp();
                 exit(EXIT_SUCCESS);
@@ -306,12 +321,21 @@ void parseOptions(int argc, char* argv[]) {
     if (optind < argc) {
         do {
             const char* test = argv[optind++];
-            auto pos = TestScene::testMap().find(test);
-            if (pos == TestScene::testMap().end()) {
-                fprintf(stderr, "Unknown test '%s'\n", test);
-                exit(EXIT_FAILURE);
+            if (strchr(test, '*')) {
+                // Glob match
+                for (auto& iter : TestScene::testMap()) {
+                    if (!fnmatch(test, iter.first.c_str(), 0)) {
+                        gRunTests.push_back(iter.second);
+                    }
+                }
             } else {
-                gRunTests.push_back(pos->second);
+                auto pos = TestScene::testMap().find(test);
+                if (pos == TestScene::testMap().end()) {
+                    fprintf(stderr, "Unknown test '%s'\n", test);
+                    exit(EXIT_FAILURE);
+                } else {
+                    gRunTests.push_back(pos->second);
+                }
             }
         } while (optind < argc);
     } else {
@@ -322,9 +346,6 @@ void parseOptions(int argc, char* argv[]) {
 }
 
 int main(int argc, char* argv[]) {
-    // set defaults
-    gOpts.count = 150;
-
     Typeface::setRobotoTypefaceForTest();
 
     parseOptions(argc, argv);
@@ -345,10 +366,8 @@ int main(int argc, char* argv[]) {
         gBenchmarkReporter->ReportContext(context);
     }
 
-    for (int i = 0; i < gRepeatCount; i++) {
-        for (auto&& test : gRunTests) {
-            run(test, gOpts, gBenchmarkReporter.get());
-        }
+    for (auto&& test : gRunTests) {
+        run(test, gOpts, gBenchmarkReporter.get());
     }
 
     if (gBenchmarkReporter) {
@@ -358,6 +377,8 @@ int main(int argc, char* argv[]) {
     renderthread::RenderProxy::trimMemory(100);
     HardwareBitmapUploader::terminate();
 
-    LeakChecker::checkForLeaks();
+    if (gRunLeakCheck) {
+        LeakChecker::checkForLeaks();
+    }
     return 0;
 }

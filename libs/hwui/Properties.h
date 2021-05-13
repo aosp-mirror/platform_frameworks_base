@@ -200,9 +200,9 @@ enum class OverdrawColorSet { Default = 0, Deuteranomaly };
 enum class RenderPipelineType { SkiaGL, SkiaVulkan, NotInitialized = 128 };
 
 enum class StretchEffectBehavior {
-    ShaderHWUI, // Stretch shader in HWUI only, matrix scale in SF
-    Shader, // Stretch shader in both HWUI and SF
-    LinearScale // Linear stretch everywhere
+    ShaderHWUI,   // Stretch shader in HWUI only, matrix scale in SF
+    Shader,       // Stretch shader in both HWUI and SF
+    UniformScale  // Uniform scale stretch everywhere
 };
 
 /**

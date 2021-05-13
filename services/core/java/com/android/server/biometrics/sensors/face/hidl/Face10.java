@@ -80,6 +80,7 @@ import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.time.Clock;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -93,7 +94,13 @@ import java.util.Map;
 public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
 
     private static final String TAG = "Face10";
+
     private static final int ENROLL_TIMEOUT_SEC = 75;
+    private static final int GENERATE_CHALLENGE_REUSE_INTERVAL_MILLIS = 60 * 1000;
+    private static final int GENERATE_CHALLENGE_COUNTER_TTL_MILLIS =
+            FaceGenerateChallengeClient.CHALLENGE_TIMEOUT_SEC * 1000;
+    @VisibleForTesting
+    public static Clock sSystemClock = Clock.systemUTC();
 
     private boolean mTestHalEnabled;
 
@@ -102,19 +109,15 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
     @NonNull private final BiometricScheduler mScheduler;
     @NonNull private final Handler mHandler;
     @NonNull private final HalClientMonitor.LazyDaemon<IBiometricsFace> mLazyDaemon;
-    @NonNull private final LockoutResetDispatcher mLockoutResetDispatcher;
     @NonNull private final LockoutHalImpl mLockoutTracker;
     @NonNull private final UsageStats mUsageStats;
     @NonNull private final Map<Integer, Long> mAuthenticatorIds;
     @Nullable private IBiometricsFace mDaemon;
     @NonNull private final HalResultController mHalResultController;
-    // If a challenge is generated, keep track of its owner. Since IBiometricsFace@1.0 only
-    // supports a single in-flight challenge, we must notify the interrupted owner that its
-    // challenge is no longer valid. The interrupted owner will be notified when the interrupter
-    // has finished.
-    @Nullable private FaceGenerateChallengeClient mCurrentChallengeOwner;
     private int mCurrentUserId = UserHandle.USER_NULL;
     private final int mSensorId;
+    private final List<Long> mGeneratedChallengeCount = new ArrayList<>();
+    private FaceGenerateChallengeClient mGeneratedChallengeCache = null;
 
     private final UserSwitchObserver mUserSwitchObserver = new SynchronousUserSwitchObserver() {
         @Override
@@ -335,7 +338,6 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
         mAuthenticatorIds = new HashMap<>();
         mLazyDaemon = Face10.this::getDaemon;
         mLockoutTracker = new LockoutHalImpl();
-        mLockoutResetDispatcher = lockoutResetDispatcher;
         mHalResultController = new HalResultController(sensorProps.sensorId, context, mHandler,
                 mScheduler, mLockoutTracker, lockoutResetDispatcher);
         mHalResultController.setCallback(() -> {
@@ -480,56 +482,56 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
         return getDaemon() != null;
     }
 
+    private boolean isGeneratedChallengeCacheValid() {
+        return mGeneratedChallengeCache != null
+                && sSystemClock.millis() - mGeneratedChallengeCache.getCreatedAt()
+                < GENERATE_CHALLENGE_REUSE_INTERVAL_MILLIS;
+    }
+
+    private void incrementChallengeCount() {
+        mGeneratedChallengeCount.add(0, sSystemClock.millis());
+    }
+
+    private int decrementChallengeCount() {
+        final long now = sSystemClock.millis();
+        // ignore values that are old in case generate/revoke calls are not matched
+        // this doesn't ensure revoke if calls are mismatched but it keeps the list from growing
+        mGeneratedChallengeCount.removeIf(x -> now - x > GENERATE_CHALLENGE_COUNTER_TTL_MILLIS);
+        if (!mGeneratedChallengeCount.isEmpty()) {
+            mGeneratedChallengeCount.remove(0);
+        }
+        return mGeneratedChallengeCount.size();
+    }
+
     /**
-     * {@link IBiometricsFace} only supports a single in-flight challenge. In cases where two
-     * callers both need challenges (e.g. resetLockout right before enrollment), we need to ensure
-     * that either:
-     * 1) generateChallenge/operation/revokeChallenge is complete before the next generateChallenge
-     *    is processed by the scheduler, or
-     * 2) the generateChallenge callback provides a mechanism for notifying the caller that its
-     *    challenge has been invalidated by a subsequent caller, as well as a mechanism for
-     *    notifying the previous caller that the interrupting operation is complete (e.g. the
-     *    interrupting client's challenge has been revoked, so that the interrupted client can
-     *    start retry logic if necessary). See
-     *    {@link
-     *android.hardware.face.FaceManager.GenerateChallengeCallback#onChallengeInterruptFinished(int)}
-     * The only case of conflicting challenges is currently resetLockout --> enroll. So, the second
-     * option seems better as it prioritizes the new operation, which is user-facing.
+     * {@link IBiometricsFace} only supports a single in-flight challenge but there are cases where
+     * two callers both need challenges (e.g. resetLockout right before enrollment).
      */
     @Override
     public void scheduleGenerateChallenge(int sensorId, int userId, @NonNull IBinder token,
             @NonNull IFaceServiceReceiver receiver, @NonNull String opPackageName) {
         mHandler.post(() -> {
-            if (mCurrentChallengeOwner != null) {
-                final ClientMonitorCallbackConverter listener =
-                        mCurrentChallengeOwner.getListener();
-                Slog.w(TAG, "Current challenge owner: " + mCurrentChallengeOwner
-                        + ", listener: " + listener
-                        + ", interrupted by: " + opPackageName);
-                if (listener != null) {
-                    try {
-                        listener.onChallengeInterrupted(mSensorId);
-                    } catch (RemoteException e) {
-                        Slog.e(TAG, "Unable to notify challenge interrupted", e);
-                    }
-                }
+            incrementChallengeCount();
+
+            if (isGeneratedChallengeCacheValid()) {
+                Slog.d(TAG, "Current challenge is cached and will be reused");
+                mGeneratedChallengeCache.reuseResult(receiver);
+                return;
             }
 
             scheduleUpdateActiveUserWithoutHandler(userId);
 
             final FaceGenerateChallengeClient client = new FaceGenerateChallengeClient(mContext,
                     mLazyDaemon, token, new ClientMonitorCallbackConverter(receiver), userId,
-                    opPackageName, mSensorId, mCurrentChallengeOwner);
+                    opPackageName, mSensorId, sSystemClock.millis());
+            mGeneratedChallengeCache = client;
             mScheduler.scheduleClientMonitor(client, new BaseClientMonitor.Callback() {
                 @Override
                 public void onClientStarted(@NonNull BaseClientMonitor clientMonitor) {
                     if (client != clientMonitor) {
                         Slog.e(TAG, "scheduleGenerateChallenge onClientStarted, mismatched client."
                                 + " Expecting: " + client + ", received: " + clientMonitor);
-                        return;
                     }
-                    Slog.d(TAG, "Current challenge owner: " + client);
-                    mCurrentChallengeOwner = client;
                 }
             });
         });
@@ -539,13 +541,15 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
     public void scheduleRevokeChallenge(int sensorId, int userId, @NonNull IBinder token,
             @NonNull String opPackageName, long challenge) {
         mHandler.post(() -> {
-            if (mCurrentChallengeOwner != null
-                    && !mCurrentChallengeOwner.getOwnerString().contentEquals(opPackageName)) {
-                Slog.e(TAG, "scheduleRevokeChallenge, package: " + opPackageName
-                        + " attempting to revoke challenge owned by: "
-                        + mCurrentChallengeOwner.getOwnerString());
+            final boolean shouldRevoke = decrementChallengeCount() == 0;
+            if (!shouldRevoke) {
+                Slog.w(TAG, "scheduleRevokeChallenge skipped - challenge still in use: "
+                        + mGeneratedChallengeCount);
                 return;
             }
+
+            Slog.d(TAG, "scheduleRevokeChallenge executing - no active clients");
+            mGeneratedChallengeCache = null;
 
             final FaceRevokeChallengeClient client = new FaceRevokeChallengeClient(mContext,
                     mLazyDaemon, token, userId, opPackageName, mSensorId);
@@ -556,33 +560,6 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
                     if (client != clientMonitor) {
                         Slog.e(TAG, "scheduleRevokeChallenge, mismatched client."
                                 + "Expecting: " + client + ", received: " + clientMonitor);
-                        return;
-                    }
-
-                    if (mCurrentChallengeOwner == null) {
-                        // Can happen if revoke is incorrectly called, for example without a
-                        // preceding generateChallenge
-                        Slog.w(TAG, "Current challenge owner is null");
-                        return;
-                    }
-
-                    final FaceGenerateChallengeClient previousChallengeOwner =
-                            mCurrentChallengeOwner.getInterruptedClient();
-                    mCurrentChallengeOwner = null;
-
-                    Slog.d(TAG, "Previous challenge owner: " + previousChallengeOwner);
-                    if (previousChallengeOwner != null) {
-                        final ClientMonitorCallbackConverter listener =
-                                previousChallengeOwner.getListener();
-                        if (listener == null) {
-                            Slog.w(TAG, "Listener is null");
-                        } else {
-                            try {
-                                listener.onChallengeInterruptFinished(mSensorId);
-                            } catch (RemoteException e) {
-                                Slog.e(TAG, "Unable to notify interrupt finished", e);
-                            }
-                        }
                     }
                 }
             });

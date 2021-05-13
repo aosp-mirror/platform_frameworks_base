@@ -58,6 +58,7 @@ public final class DumpState {
     private boolean mTitlePrinted;
     private boolean mFullPreferred;
     private boolean mCheckIn;
+    private boolean mBrief;
 
     private String mTargetPackageName;
 
@@ -127,5 +128,13 @@ public final class DumpState {
 
     public void setCheckIn(boolean checkIn) {
         mCheckIn = checkIn;
+    }
+
+    public boolean isBrief() {
+        return mBrief;
+    }
+
+    public void setBrief(boolean brief) {
+        mBrief = brief;
     }
 }

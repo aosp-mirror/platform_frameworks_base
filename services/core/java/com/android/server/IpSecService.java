@@ -1112,7 +1112,7 @@ public class IpSecService extends IIpSecService.Stub {
             case IpSecManager.DIRECTION_IN:
                 return;
             case IpSecManager.DIRECTION_FWD:
-                // Only NETWORK_STACK or PERMISSION_NETWORK_STACK allowed to use forward policies
+                // Only NETWORK_STACK or MAINLINE_NETWORK_STACK allowed to use forward policies
                 PermissionUtils.enforceNetworkStackPermission(mContext);
                 return;
         }
@@ -1358,6 +1358,16 @@ public class IpSecService extends IIpSecService.Stub {
                         ikey,
                         0xffffffff,
                         resourceId);
+
+                // Add a forwarding policy on the tunnel interface. In order to support forwarding
+                // the IpSecTunnelInterface must have a forwarding policy matching the incoming SA.
+                //
+                // Unless a IpSecTransform is also applied against this interface in DIRECTION_FWD,
+                // forwarding will be blocked by default (as would be the case if this policy was
+                // absent).
+                //
+                // This is necessary only on the tunnel interface, and not any the interface to
+                // which traffic will be forwarded to.
                 netd.ipSecAddSecurityPolicy(
                         callerUid,
                         selAddrFamily,

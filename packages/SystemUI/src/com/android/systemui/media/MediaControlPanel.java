@@ -25,7 +25,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
-import android.graphics.PorterDuff;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
@@ -212,7 +213,8 @@ public class MediaControlPanel {
                 mMediaViewController.openGuts();
                 return true;
             } else {
-                return false;
+                closeGuts();
+                return true;
             }
         });
         mPlayerViewHolder.getCancel().setOnClickListener(v -> {
@@ -276,7 +278,7 @@ public class MediaControlPanel {
                 if (mMediaViewController.isGutsVisible()) return;
 
                 logSmartspaceCardReported(760, // SMARTSPACE_CARD_CLICK
-                        false);
+                        /* isRecommendationCard */ false);
                 mActivityStarter.postStartActivityDismissingKeyguard(clickIntent,
                         buildLaunchAnimatorController(mPlayerViewHolder.getPlayer()));
             });
@@ -384,7 +386,7 @@ public class MediaControlPanel {
                 button.setEnabled(true);
                 button.setOnClickListener(v -> {
                     logSmartspaceCardReported(760, // SMARTSPACE_CARD_CLICK
-                            false);
+                            /* isRecommendationCard */ false);
                     action.run();
                 });
             }
@@ -418,7 +420,7 @@ public class MediaControlPanel {
         mPlayerViewHolder.getDismiss().setEnabled(isDismissible);
         mPlayerViewHolder.getDismiss().setOnClickListener(v -> {
             logSmartspaceCardReported(761, // SMARTSPACE_CARD_DISMISS
-                    false);
+                    /* isRecommendationCard */ false);
 
             if (mKey != null) {
                 closeGuts();
@@ -472,10 +474,7 @@ public class MediaControlPanel {
     }
 
     /** Bind this recommendation view based on the data given. */
-    public void bindRecommendation(
-            @NonNull SmartspaceTarget target,
-            @NonNull int backgroundColor,
-            @Nullable View.OnClickListener callback) {
+    public void bindRecommendation(@NonNull SmartspaceTarget target, @NonNull int backgroundColor) {
         if (mRecommendationViewHolder == null) {
             return;
         }
@@ -515,8 +514,9 @@ public class MediaControlPanel {
                 // Get the logo from app's package name when applicable.
                 String packageName = extras.getString(EXTRAS_MEDIA_SOURCE_PACKAGE_NAME);
                 try {
-                    icon = mContext.getPackageManager().getApplicationIcon(
+                    Drawable drawable = mContext.getPackageManager().getApplicationIcon(
                             packageName);
+                    icon = convertToGrayscale(drawable);
                 } catch (PackageManager.NameNotFoundException e) {
                     Log.w(TAG, "No media source icon can be fetched via package name", e);
                 }
@@ -528,18 +528,13 @@ public class MediaControlPanel {
             // Set up media source app's logo.
             ImageView mediaSourceLogoImageView = mediaLogoItems.get(uiComponentIndex);
             mediaSourceLogoImageView.setImageDrawable(icon);
-            // TODO(b/186699032): Tint the app logo using the accent color.
-            mediaSourceLogoImageView.setColorFilter(backgroundColor, PorterDuff.Mode.XOR);
 
             // Set up media item cover.
             ImageView mediaCoverImageView = mediaCoverItems.get(uiComponentIndex);
             mediaCoverImageView.setImageIcon(recommendation.getIcon());
 
             // Set up the click listener if applicable.
-            setSmartspaceRecItemOnClickListener(
-                    mediaCoverImageView,
-                    recommendation,
-                    callback);
+            setSmartspaceRecItemOnClickListener(mediaCoverImageView, recommendation);
 
             if (uiComponentIndex < MEDIA_RECOMMENDATION_ITEMS_PER_ROW) {
                 setVisibleAndAlpha(collapsedSet,
@@ -563,7 +558,7 @@ public class MediaControlPanel {
         // Set up long press to show guts setting panel.
         mRecommendationViewHolder.getDismiss().setOnClickListener(v -> {
             logSmartspaceCardReported(761, // SMARTSPACE_CARD_DISMISS
-                    true);
+                    /* isRecommendationCard */ true);
             closeGuts();
             mKeyguardDismissUtil.executeWhenUnlocked(() -> {
                 mMediaDataManagerLazy.get().dismissSmartspaceRecommendation(
@@ -651,6 +646,15 @@ public class MediaControlPanel {
         return (state.getState() == PlaybackState.STATE_PLAYING);
     }
 
+    /** Convert the pass-in source drawable to a grayscale one. */
+    private Drawable convertToGrayscale(Drawable drawable) {
+        ColorMatrix matrix = new ColorMatrix();
+        matrix.setSaturation(0);
+        ColorMatrixColorFilter filter = new ColorMatrixColorFilter(matrix);
+        drawable.setColorFilter(filter);
+        return drawable;
+    }
+
     private void setVisibleAndAlpha(ConstraintSet set, int actionId, boolean visible) {
         set.setVisibility(actionId, visible ? ConstraintSet.VISIBLE : ConstraintSet.GONE);
         set.setAlpha(actionId, visible ? 1.0f : 0.0f);
@@ -658,8 +662,7 @@ public class MediaControlPanel {
 
     private void setSmartspaceRecItemOnClickListener(
             @NonNull View view,
-            @NonNull SmartspaceAction action,
-            @Nullable View.OnClickListener callback) {
+            @NonNull SmartspaceAction action) {
         if (view == null || action == null || action.getIntent() == null) {
             Log.e(TAG, "No tap action can be set up");
             return;
@@ -668,7 +671,7 @@ public class MediaControlPanel {
         view.setOnClickListener(v -> {
             // When media recommendation card is shown, it will always be the top card.
             logSmartspaceCardReported(760, // SMARTSPACE_CARD_CLICK
-                    true);
+                    /* isRecommendationCard */ true);
 
             if (shouldSmartspaceRecItemOpenInForeground(action)) {
                 // Request to unlock the device if the activity needs to be opened in foreground.
@@ -682,9 +685,8 @@ public class MediaControlPanel {
                 view.getContext().startActivity(action.getIntent());
             }
 
-            if (callback != null) {
-                callback.onClick(v);
-            }
+            // Automatically scroll to the active player once the media is loaded.
+            mMediaCarouselController.setShouldScrollToActivePlayer(true);
         });
     }
 

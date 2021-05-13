@@ -351,6 +351,7 @@ public final class Settings implements Watchable, Snappable {
 
     private final PackageManagerTracedLock mLock;
 
+    @Watched(manual = true)
     private final RuntimePermissionPersistence mRuntimePermissionsPersistence;
 
     private final File mSettingsFilename;
@@ -364,19 +365,21 @@ public final class Settings implements Watchable, Snappable {
     /** Map from package name to settings */
     @Watched
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
-    final WatchedArrayMap<String, PackageSetting> mPackages = new WatchedArrayMap<>();
+    final WatchedArrayMap<String, PackageSetting> mPackages;
+    private final SnapshotCache<WatchedArrayMap<String, PackageSetting>> mPackagesSnapshot;
 
     /**
      * List of packages that were involved in installing other packages, i.e. are listed
      * in at least one app's InstallSource.
      */
     @Watched
-    private final WatchedArraySet<String> mInstallerPackages = new WatchedArraySet<>();
+    private final WatchedArraySet<String> mInstallerPackages;
+    private final SnapshotCache<WatchedArraySet<String>> mInstallerPackagesSnapshot;
 
     /** Map from package name to appId and excluded userids */
     @Watched
-    private final WatchedArrayMap<String, KernelPackageState> mKernelMapping =
-            new WatchedArrayMap<>();
+    private final WatchedArrayMap<String, KernelPackageState> mKernelMapping;
+    private final SnapshotCache<WatchedArrayMap<String, KernelPackageState>> mKernelMappingSnapshot;
 
     // List of replaced system applications
     @Watched
@@ -397,7 +400,7 @@ public final class Settings implements Watchable, Snappable {
 
     /** Map from volume UUID to {@link VersionInfo} */
     @Watched
-    private WatchedArrayMap<String, VersionInfo> mVersion = new WatchedArrayMap<>();
+    private final WatchedArrayMap<String, VersionInfo> mVersion = new WatchedArrayMap<>();
 
     /**
      * Version details for a storage volume that may hold apps.
@@ -435,6 +438,7 @@ public final class Settings implements Watchable, Snappable {
     }
 
     /** Device identity for the purpose of package verification. */
+    @Watched(manual = true)
     private VerifierDeviceIdentity mVerifierDeviceIdentity;
 
     // The user's preferred activities associated with particular intent
@@ -462,10 +466,12 @@ public final class Settings implements Watchable, Snappable {
     private final WatchedSparseArray<SettingBase> mOtherAppIds;
 
     // For reading/writing settings file.
-    private final ArrayList<Signature> mPastSignatures =
-            new ArrayList<Signature>();
-    private final ArrayMap<Long, Integer> mKeySetRefs =
-            new ArrayMap<Long, Integer>();
+    @Watched
+    private final WatchedArrayList<Signature> mPastSignatures =
+            new WatchedArrayList<Signature>();
+    @Watched
+    private final WatchedArrayMap<Long, Integer> mKeySetRefs =
+            new WatchedArrayMap<Long, Integer>();
 
     // Packages that have been renamed since they were first installed.
     // Keys are the new names of the packages, values are the original
@@ -495,18 +501,21 @@ public final class Settings implements Watchable, Snappable {
      * TODO: make this just a local variable that is passed in during package
      * scanning to make it less confusing.
      */
-    private final ArrayList<PackageSetting> mPendingPackages = new ArrayList<>();
+    @Watched
+    private final WatchedArrayList<PackageSetting> mPendingPackages = new WatchedArrayList<>();
 
     private final File mSystemDir;
 
-    public final KeySetManagerService mKeySetManagerService =
-            new KeySetManagerService(mPackages.untrackedStorage());
+    private final KeySetManagerService mKeySetManagerService;
 
     /** Settings and other information about permissions */
+    @Watched(manual = true)
     final LegacyPermissionSettings mPermissions;
 
+    @Watched(manual = true)
     private final LegacyPermissionDataProvider mPermissionDataProvider;
 
+    @Watched(manual = true)
     private final DomainVerificationManagerInternal mDomainVerificationManager;
 
     /**
@@ -532,23 +541,7 @@ public final class Settings implements Watchable, Snappable {
             }};
     }
 
-    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
-    public Settings(Map<String, PackageSetting> pkgSettings) {
-        mLock = new PackageManagerTracedLock();
-        mPackages.putAll(pkgSettings);
-        mAppIds = new WatchedArrayList<>();
-        mOtherAppIds = new WatchedSparseArray<>();
-        mSystemDir = null;
-        mPermissions = null;
-        mRuntimePermissionsPersistence = null;
-        mPermissionDataProvider = null;
-        mSettingsFilename = null;
-        mBackupSettingsFilename = null;
-        mPackageListFilename = null;
-        mStoppedPackagesFilename = null;
-        mBackupStoppedPackagesFilename = null;
-        mKernelMappingFilename = null;
-        mDomainVerificationManager = null;
+    private void registerObservers() {
         mPackages.registerObserver(mObserver);
         mInstallerPackages.registerObserver(mObserver);
         mKernelMapping.registerObserver(mObserver);
@@ -564,7 +557,43 @@ public final class Settings implements Watchable, Snappable {
         mRenamedPackages.registerObserver(mObserver);
         mNextAppLinkGeneration.registerObserver(mObserver);
         mDefaultBrowserApp.registerObserver(mObserver);
+        mPendingPackages.registerObserver(mObserver);
+        mPastSignatures.registerObserver(mObserver);
+        mKeySetRefs.registerObserver(mObserver);
+    }
 
+    // CONSTRUCTOR
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
+    public Settings(Map<String, PackageSetting> pkgSettings) {
+        mPackages = new WatchedArrayMap<>();
+        mPackagesSnapshot =
+                new SnapshotCache.Auto<>(mPackages, mPackages, "Settings.mPackages");
+        mKernelMapping = new WatchedArrayMap<>();
+        mKernelMappingSnapshot =
+                new SnapshotCache.Auto<>(mKernelMapping, mKernelMapping, "Settings.mKernelMapping");
+        mInstallerPackages = new WatchedArraySet<>();
+        mInstallerPackagesSnapshot =
+                new SnapshotCache.Auto<>(mInstallerPackages, mInstallerPackages,
+                                         "Settings.mInstallerPackages");
+        mKeySetManagerService = new KeySetManagerService(mPackages);
+
+        mLock = new PackageManagerTracedLock();
+        mPackages.putAll(pkgSettings);
+        mAppIds = new WatchedArrayList<>();
+        mOtherAppIds = new WatchedSparseArray<>();
+        mSystemDir = null;
+        mPermissions = null;
+        mRuntimePermissionsPersistence = null;
+        mPermissionDataProvider = null;
+        mSettingsFilename = null;
+        mBackupSettingsFilename = null;
+        mPackageListFilename = null;
+        mStoppedPackagesFilename = null;
+        mBackupStoppedPackagesFilename = null;
+        mKernelMappingFilename = null;
+        mDomainVerificationManager = null;
+
+        registerObservers();
         Watchable.verifyWatchedAttributes(this, mObserver);
 
         mSnapshot = makeCache();
@@ -574,6 +603,18 @@ public final class Settings implements Watchable, Snappable {
             LegacyPermissionDataProvider permissionDataProvider,
             @NonNull DomainVerificationManagerInternal domainVerificationManager,
             @NonNull PackageManagerTracedLock lock)  {
+        mPackages = new WatchedArrayMap<>();
+        mPackagesSnapshot  =
+                new SnapshotCache.Auto<>(mPackages, mPackages, "Settings.mPackages");
+        mKernelMapping = new WatchedArrayMap<>();
+        mKernelMappingSnapshot =
+                new SnapshotCache.Auto<>(mKernelMapping, mKernelMapping, "Settings.mKernelMapping");
+        mInstallerPackages = new WatchedArraySet<>();
+        mInstallerPackagesSnapshot =
+                new SnapshotCache.Auto<>(mInstallerPackages, mInstallerPackages,
+                                         "Settings.mInstallerPackages");
+        mKeySetManagerService = new KeySetManagerService(mPackages);
+
         mLock = lock;
         mAppIds = new WatchedArrayList<>();
         mOtherAppIds = new WatchedSparseArray<>();
@@ -602,22 +643,7 @@ public final class Settings implements Watchable, Snappable {
 
         mDomainVerificationManager = domainVerificationManager;
 
-        mPackages.registerObserver(mObserver);
-        mInstallerPackages.registerObserver(mObserver);
-        mKernelMapping.registerObserver(mObserver);
-        mDisabledSysPackages.registerObserver(mObserver);
-        mBlockUninstallPackages.registerObserver(mObserver);
-        mVersion.registerObserver(mObserver);
-        mPreferredActivities.registerObserver(mObserver);
-        mPersistentPreferredActivities.registerObserver(mObserver);
-        mCrossProfileIntentResolvers.registerObserver(mObserver);
-        mSharedUsers.registerObserver(mObserver);
-        mAppIds.registerObserver(mObserver);
-        mOtherAppIds.registerObserver(mObserver);
-        mRenamedPackages.registerObserver(mObserver);
-        mNextAppLinkGeneration.registerObserver(mObserver);
-        mDefaultBrowserApp.registerObserver(mObserver);
-
+        registerObservers();
         Watchable.verifyWatchedAttributes(this, mObserver);
 
         mSnapshot = makeCache();
@@ -629,8 +655,13 @@ public final class Settings implements Watchable, Snappable {
      * are changed by PackageManagerService APIs are deep-copied
      */
     private Settings(Settings r) {
-        final int mPackagesSize = r.mPackages.size();
-        mPackages.putAll(r.mPackages);
+        mPackages = r.mPackagesSnapshot.snapshot();
+        mPackagesSnapshot  = new SnapshotCache.Sealed<>();
+        mKernelMapping = r.mKernelMappingSnapshot.snapshot();
+        mKernelMappingSnapshot = new SnapshotCache.Sealed<>();
+        mInstallerPackages = r.mInstallerPackagesSnapshot.snapshot();
+        mInstallerPackagesSnapshot = new SnapshotCache.Sealed<>();
+        mKeySetManagerService = new KeySetManagerService(mPackages);
 
         // The following assignments satisfy Java requirements but are not
         // needed by the read-only methods.  Note especially that the lock
@@ -647,9 +678,7 @@ public final class Settings implements Watchable, Snappable {
 
         mDomainVerificationManager = r.mDomainVerificationManager;
 
-        mInstallerPackages.addAll(r.mInstallerPackages);
-        mKernelMapping.putAll(r.mKernelMapping);
-        mDisabledSysPackages.putAll(r.mDisabledSysPackages);
+        mDisabledSysPackages.snapshot(r.mDisabledSysPackages);
         mBlockUninstallPackages.snapshot(r.mBlockUninstallPackages);
         mVersion.putAll(r.mVersion);
         mVerifierDeviceIdentity = r.mVerifierDeviceIdentity;
@@ -659,23 +688,26 @@ public final class Settings implements Watchable, Snappable {
                 mPersistentPreferredActivities, r.mPersistentPreferredActivities);
         WatchedSparseArray.snapshot(
                 mCrossProfileIntentResolvers, r.mCrossProfileIntentResolvers);
-        mSharedUsers.putAll(r.mSharedUsers);
+        mSharedUsers.snapshot(r.mSharedUsers);
         mAppIds = r.mAppIds.snapshot();
         mOtherAppIds = r.mOtherAppIds.snapshot();
-        mPastSignatures.addAll(r.mPastSignatures);
-        mKeySetRefs.putAll(r.mKeySetRefs);
+        WatchedArrayList.snapshot(
+                mPastSignatures, r.mPastSignatures);
+        WatchedArrayMap.snapshot(
+                mKeySetRefs, r.mKeySetRefs);
         mRenamedPackages.snapshot(r.mRenamedPackages);
         mNextAppLinkGeneration.snapshot(r.mNextAppLinkGeneration);
         mDefaultBrowserApp.snapshot(r.mDefaultBrowserApp);
         // mReadMessages
-        mPendingPackages.addAll(r.mPendingPackages);
+        WatchedArrayList.snapshot(
+                mPendingPackages, r.mPendingPackages);
         mSystemDir = null;
         // mKeySetManagerService;
         mPermissions = r.mPermissions;
         mPermissionDataProvider = r.mPermissionDataProvider;
 
         // Do not register any Watchables and do not create a snapshot cache.
-        mSnapshot = null;
+        mSnapshot = new SnapshotCache.Sealed();
     }
 
     /**
@@ -2327,7 +2359,7 @@ public final class Settings implements Watchable, Snappable {
                 serializer.startTag(null, "shared-user");
                 serializer.attribute(null, ATTR_NAME, usr.name);
                 serializer.attributeInt(null, "userId", usr.userId);
-                usr.signatures.writeXml(serializer, "sigs", mPastSignatures);
+                usr.signatures.writeXml(serializer, "sigs", mPastSignatures.untrackedStorage());
                 serializer.endTag(null, "shared-user");
             }
 
@@ -2737,11 +2769,11 @@ public final class Settings implements Watchable, Snappable {
 
         writeUsesStaticLibLPw(serializer, pkg.usesStaticLibraries, pkg.usesStaticLibrariesVersions);
 
-        pkg.signatures.writeXml(serializer, "sigs", mPastSignatures);
+        pkg.signatures.writeXml(serializer, "sigs", mPastSignatures.untrackedStorage());
 
         if (installSource.initiatingPackageSignatures != null) {
             installSource.initiatingPackageSignatures.writeXml(
-                    serializer, "install-initiator-sigs", mPastSignatures);
+                    serializer, "install-initiator-sigs", mPastSignatures.untrackedStorage());
         }
 
         writeSigningKeySetLPr(serializer, pkg.keySetData);
@@ -2910,7 +2942,7 @@ public final class Settings implements Watchable, Snappable {
                 } else if (TAG_READ_EXTERNAL_STORAGE.equals(tagName)) {
                     // No longer used.
                 } else if (tagName.equals("keyset-settings")) {
-                    mKeySetManagerService.readKeySetsLPw(parser, mKeySetRefs);
+                    mKeySetManagerService.readKeySetsLPw(parser, mKeySetRefs.untrackedStorage());
                 } else if (TAG_VERSION.equals(tagName)) {
                     final String volumeUuid = XmlUtils.readStringAttribute(parser,
                             ATTR_VOLUME_UUID);
@@ -3709,7 +3741,7 @@ public final class Settings implements Watchable, Snappable {
                 } else if (tagName.equals(TAG_ENABLED_COMPONENTS)) {
                     readEnabledComponentsLPw(packageSetting, parser, 0);
                 } else if (tagName.equals("sigs")) {
-                    packageSetting.signatures.readXml(parser, mPastSignatures);
+                    packageSetting.signatures.readXml(parser, mPastSignatures.untrackedStorage());
                 } else if (tagName.equals(TAG_PERMISSIONS)) {
                     readInstallPermissionsLPr(parser,
                             packageSetting.getLegacyPermissionState(), users);
@@ -3740,7 +3772,7 @@ public final class Settings implements Watchable, Snappable {
                     packageSetting.keySetData.addDefinedKeySet(id, alias);
                 } else if (tagName.equals("install-initiator-sigs")) {
                     final PackageSignatures signatures = new PackageSignatures();
-                    signatures.readXml(parser, mPastSignatures);
+                    signatures.readXml(parser, mPastSignatures.untrackedStorage());
                     packageSetting.installSource =
                             packageSetting.installSource.setInitiatingPackageSignatures(signatures);
                 } else if (tagName.equals(TAG_DOMAIN_VERIFICATION)) {
@@ -3935,7 +3967,7 @@ public final class Settings implements Watchable, Snappable {
 
                 String tagName = parser.getName();
                 if (tagName.equals("sigs")) {
-                    su.signatures.readXml(parser, mPastSignatures);
+                    su.signatures.readXml(parser, mPastSignatures.untrackedStorage());
                 } else if (tagName.equals("perms")) {
                     readInstallPermissionsLPr(parser, su.getLegacyPermissionState(), users);
                 } else {

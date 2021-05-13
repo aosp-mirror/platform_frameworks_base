@@ -309,7 +309,7 @@ public class Build {
          * booted, but it may increase when the hardware manufacturer provides an OTA update.
          * <p>
          * Possible non-zero values are defined in {@link Build.VERSION_CODES} starting with
-         * {@link Build.VERSION_CODES#S}.
+         * {@link Build.VERSION_CODES#R}.
          */
         public static final int MEDIA_PERFORMANCE_CLASS =
                 DeviceProperties.media_performance_class().orElse(0);

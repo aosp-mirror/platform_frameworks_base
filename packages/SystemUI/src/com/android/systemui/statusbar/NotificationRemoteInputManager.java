@@ -169,7 +169,7 @@ public class NotificationRemoteInputManager implements Dumpable {
                     Pair<Intent, ActivityOptions> options = response.getLaunchOptions(view);
                     mLogger.logStartingIntentWithDefaultHandler(entry, pendingIntent);
                     boolean started = RemoteViews.startPendingIntent(view, pendingIntent, options);
-                    if (started) releaseNotificationIfKeptForRemoteInputHistory(entry.getKey());
+                    if (started) releaseNotificationIfKeptForRemoteInputHistory(entry);
                     return started;
             });
         }
@@ -608,7 +608,11 @@ public class NotificationRemoteInputManager implements Dumpable {
      * (after unlock, if applicable), and will then wait a short time to allow the app to update the
      * notification in response to the action.
      */
-    private void releaseNotificationIfKeptForRemoteInputHistory(String key) {
+    private void releaseNotificationIfKeptForRemoteInputHistory(NotificationEntry entry) {
+        if (entry == null) {
+            return;
+        }
+        final String key = entry.getKey();
         if (isNotificationKeptForRemoteInputHistory(key)) {
             mMainHandler.postDelayed(() -> {
                 if (isNotificationKeptForRemoteInputHistory(key)) {

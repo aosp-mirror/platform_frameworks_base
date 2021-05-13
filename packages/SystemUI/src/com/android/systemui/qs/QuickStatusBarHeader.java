@@ -23,7 +23,6 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.util.AttributeSet;
-import android.util.MathUtils;
 import android.util.Pair;
 import android.view.DisplayCutout;
 import android.view.View;
@@ -36,9 +35,7 @@ import android.widget.Space;
 import com.android.settingslib.Utils;
 import com.android.systemui.BatteryMeterView;
 import com.android.systemui.R;
-import com.android.systemui.animation.Interpolators;
 import com.android.systemui.qs.QSDetail.Callback;
-import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.phone.StatusBarIconController.TintedIconManager;
 import com.android.systemui.statusbar.phone.StatusBarWindowView;
 import com.android.systemui.statusbar.phone.StatusIconContainer;
@@ -67,7 +64,11 @@ public class QuickStatusBarHeader extends FrameLayout {
 
     private View mQSCarriers;
     private Clock mClockView;
-    private Space mSpace;
+    private Space mDatePrivacySeparator;
+    private View mClockIconsSeparator;
+    private boolean mShowClockIconsSeparator;
+    private ViewGroup mRightLayout;
+
     private BatteryMeterView mBatteryRemainingIcon;
     private StatusIconContainer mIconContainer;
     private View mPrivacyChip;
@@ -80,7 +81,7 @@ public class QuickStatusBarHeader extends FrameLayout {
     private int mWaterfallTopInset;
     private int mCutOutPaddingLeft;
     private int mCutOutPaddingRight;
-    private float mClockIconsAlpha = 1.0f;
+    private float mViewAlpha = 1.0f;
     private float mKeyguardExpansionFraction;
     private int mTextColorPrimary = Color.TRANSPARENT;
     private int mTopViewMeasureHeight;
@@ -117,9 +118,11 @@ public class QuickStatusBarHeader extends FrameLayout {
         mPrivacyChip = findViewById(R.id.privacy_chip);
         mDateView = findViewById(R.id.date);
         mSecurityHeaderView = findViewById(R.id.header_text_container);
+        mClockIconsSeparator = findViewById(R.id.separator);
+        mRightLayout = findViewById(R.id.rightLayout);
 
         mClockView = findViewById(R.id.clock);
-        mSpace = findViewById(R.id.space);
+        mDatePrivacySeparator = findViewById(R.id.space);
         // Tint for the battery icons are handled in setupHost()
         mBatteryRemainingIcon = findViewById(R.id.batteryRemainingIcon);
 
@@ -230,36 +233,36 @@ public class QuickStatusBarHeader extends FrameLayout {
     }
 
     private void updateAlphaAnimator() {
-        StatusBarIconView noCallingIcon =
-                ((StatusBarIconView) mIconContainer.getViewForSlot(mMobileSlotName));
-        StatusBarIconView callStrengthIcon =
-                ((StatusBarIconView) mIconContainer.getViewForSlot(mCallStrengthSlotName));
         TouchAnimator.Builder builder = new TouchAnimator.Builder()
                 // The following two views have to be hidden manually, so as not to hide the
                 // Privacy chip in QQS
                 .addFloat(mDateView, "alpha", 0, 1)
                 .addFloat(mSecurityHeaderView, "alpha", 0, 1)
-                .addFloat(mQSCarriers, "alpha", 0, 1);
-        builder.setListener(new TouchAnimator.ListenerAdapter() {
-            @Override
-            public void onAnimationAtEnd() {
-                mIconContainer.addIgnoredSlot(mMobileSlotName);
-                mIconContainer.addIgnoredSlot(mCallStrengthSlotName);
-            }
+                .addFloat(mQSCarriers, "alpha", 0, 1)
+                .setListener(new TouchAnimator.ListenerAdapter() {
+                    @Override
+                    public void onAnimationAtEnd() {
+                        mIconContainer.addIgnoredSlot(mMobileSlotName);
+                        mIconContainer.addIgnoredSlot(mCallStrengthSlotName);
+                    }
 
-            @Override
-            public void onAnimationStarted() {
-                mIconContainer.addIgnoredSlot(mMobileSlotName);
-                mIconContainer.addIgnoredSlot(mCallStrengthSlotName);
-            }
+                    @Override
+                    public void onAnimationStarted() {
+                        mIconContainer.addIgnoredSlot(mMobileSlotName);
+                        mIconContainer.addIgnoredSlot(mCallStrengthSlotName);
 
-            @Override
-            public void onAnimationAtStart() {
-                super.onAnimationAtStart();
-                mIconContainer.removeIgnoredSlot(mMobileSlotName);
-                mIconContainer.removeIgnoredSlot(mCallStrengthSlotName);
-            }
-        });
+                        setSeparatorVisibility(false);
+                    }
+
+                    @Override
+                    public void onAnimationAtStart() {
+                        super.onAnimationAtStart();
+                        mIconContainer.removeIgnoredSlot(mMobileSlotName);
+                        mIconContainer.removeIgnoredSlot(mCallStrengthSlotName);
+
+                        setSeparatorVisibility(mShowClockIconsSeparator);
+                    }
+                });
         mAlphaAnimator = builder.build();
     }
 
@@ -337,25 +340,61 @@ public class QuickStatusBarHeader extends FrameLayout {
                         cutout, cornerCutoutPadding, -1);
         mDatePrivacyView.setPadding(padding.first, 0, padding.second, 0);
         mClockIconsView.setPadding(padding.first, 0, padding.second, 0);
-        LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) mSpace.getLayoutParams();
+        LinearLayout.LayoutParams datePrivacySeparatorLayoutParams =
+                (LinearLayout.LayoutParams) mDatePrivacySeparator.getLayoutParams();
+        LinearLayout.LayoutParams mClockIconsSeparatorLayoutParams =
+                (LinearLayout.LayoutParams) mClockIconsSeparator.getLayoutParams();
         boolean cornerCutout = cornerCutoutPadding != null
                 && (cornerCutoutPadding.first == 0 || cornerCutoutPadding.second == 0);
         if (cutout != null) {
             Rect topCutout = cutout.getBoundingRectTop();
             if (topCutout.isEmpty() || cornerCutout) {
-                lp.width = 0;
-                mSpace.setVisibility(View.GONE);
+                datePrivacySeparatorLayoutParams.width = 0;
+                mDatePrivacySeparator.setVisibility(View.GONE);
+                mClockIconsSeparatorLayoutParams.width = 0;
+                setSeparatorVisibility(false);
+                mShowClockIconsSeparator = false;
             } else {
-                lp.width = topCutout.width();
-                mSpace.setVisibility(View.VISIBLE);
+                datePrivacySeparatorLayoutParams.width = topCutout.width();
+                mDatePrivacySeparator.setVisibility(View.VISIBLE);
+                mClockIconsSeparatorLayoutParams.width = topCutout.width();
+                mShowClockIconsSeparator = true;
+                setSeparatorVisibility(mKeyguardExpansionFraction == 0f);
             }
         }
-        mSpace.setLayoutParams(lp);
+        mDatePrivacySeparator.setLayoutParams(datePrivacySeparatorLayoutParams);
+        mClockIconsSeparator.setLayoutParams(mClockIconsSeparatorLayoutParams);
         mCutOutPaddingLeft = padding.first;
         mCutOutPaddingRight = padding.second;
         mWaterfallTopInset = cutout == null ? 0 : cutout.getWaterfallInsets().top;
         updateHeadersPadding();
         return super.onApplyWindowInsets(insets);
+    }
+
+    /**
+     * Sets the visibility of the separator between clock and icons.
+     *
+     * This separator is "visible" when there is a center cutout, to block that space. In that
+     * case, the clock and the layout on the right (containing the icons and the battery meter) are
+     * set to weight 1 to take the available space.
+     * @param visible whether the separator between clock and icons should be visible.
+     */
+    private void setSeparatorVisibility(boolean visible) {
+        int newVisibility = visible ? View.VISIBLE : View.GONE;
+        if (mClockIconsSeparator.getVisibility() == newVisibility) return;
+
+        mClockIconsSeparator.setVisibility(visible ? View.VISIBLE : View.GONE);
+        mQSCarriers.setVisibility(visible ? View.GONE : View.VISIBLE);
+
+        LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) mClockView.getLayoutParams();
+        lp.width = visible ? 0 : WRAP_CONTENT;
+        lp.weight = visible ? 1f : 0f;
+        mClockView.setLayoutParams(lp);
+
+        lp = (LinearLayout.LayoutParams) mRightLayout.getLayoutParams();
+        lp.width = visible ? 0 : WRAP_CONTENT;
+        lp.weight = visible ? 1f : 0f;
+        mRightLayout.setLayoutParams(lp);
     }
 
     private void updateHeadersPadding() {
@@ -408,35 +447,12 @@ public class QuickStatusBarHeader extends FrameLayout {
     }
 
     /**
-     * When QS is scrolling, mClockIconsAlpha should scroll away and fade out.
-     *
-     * For a given scroll level, this method does the following:
-     * <ol>
-     *     <li>Determine the alpha that {@code mClockIconsView} should have when the panel is fully
-     *         expanded.</li>
-     *     <li>Set the scroll of {@code mClockIconsView} to the same of {@code QSPanel}.</li>
-     *     <li>Set the alpha of {@code mClockIconsView} to that determined by the expansion of
-     *         the panel, interpolated between 1 (no expansion) and {@code mClockIconsAlpha} (fully
-     *         expanded), matching the animator.</li>
-     * </ol>
+     * Scroll the headers away.
      *
      * @param scrollY the scroll of the QSPanel container
      */
     public void setExpandedScrollAmount(int scrollY) {
-        // The scrolling of the expanded qs has changed. Since the header text isn't part of it,
-        // but would overlap content, we're fading it out.
-        float newAlpha = 1.0f;
-        if (mClockIconsView.getHeight() > 0) {
-            newAlpha = MathUtils.map(0, mClockIconsView.getHeight() / 2.0f, 1.0f, 0.0f,
-                    scrollY);
-            newAlpha = Interpolators.ALPHA_OUT.getInterpolation(newAlpha);
-        }
         mClockIconsView.setScrollY(scrollY);
-        if (newAlpha != mClockIconsAlpha) {
-            mClockIconsAlpha = newAlpha;
-            mClockIconsView.setAlpha(MathUtils.lerp(1.0f, mClockIconsAlpha,
-                    mKeyguardExpansionFraction));
-            updateAlphaAnimator();
-        }
+        mDatePrivacyView.setScrollY(scrollY);
     }
 }

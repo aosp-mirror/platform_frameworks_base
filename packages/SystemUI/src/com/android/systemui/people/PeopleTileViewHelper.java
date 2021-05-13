@@ -41,8 +41,6 @@ import android.app.people.ConversationStatus;
 import android.app.people.PeopleSpaceTile;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
@@ -57,13 +55,13 @@ import android.text.TextUtils;
 import android.util.IconDrawableFactory;
 import android.util.Log;
 import android.util.Pair;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.RemoteViews;
 import android.widget.TextView;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.launcher3.icons.FastBitmapDrawable;
-import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.people.widget.LaunchConversationActivity;
 import com.android.systemui.people.widget.PeopleSpaceWidgetProvider;
@@ -195,16 +193,10 @@ public class PeopleTileViewHelper {
      */
     private RemoteViews getViewForTile() {
         if (DEBUG) Log.d(TAG, "Creating view for tile key: " + mKey.toString());
-        if (mTile == null || mTile.isPackageSuspended() || mTile.isUserQuieted()) {
-            if (DEBUG) Log.d(TAG, "Create empty view: " + mTile);
-            return createEmptyView();
-        }
-
-        boolean dndBlockingTileData = isDndBlockingTileData(mTile);
-        if (dndBlockingTileData) {
-            if (DEBUG) Log.d(TAG, "Create DND view: " + mTile.getNotificationPolicyState());
-            // TODO: Create DND view.
-            return createEmptyView();
+        if (mTile == null || mTile.isPackageSuspended() || mTile.isUserQuieted()
+                || isDndBlockingTileData(mTile)) {
+            if (DEBUG) Log.d(TAG, "Create suppressed view: " + mTile);
+            return createSuppressedView();
         }
 
         if (Objects.equals(mTile.getNotificationCategory(), CATEGORY_MISSED_CALL)) {
@@ -265,34 +257,27 @@ public class PeopleTileViewHelper {
         return !tile.canBypassDnd();
     }
 
-    private RemoteViews createEmptyView() {
-        RemoteViews views = new RemoteViews(mContext.getPackageName(),
-                R.layout.people_tile_empty_layout);
-        Drawable appIcon = getAppBadge(mKey.getPackageName(), mKey.getUserId());
+    private RemoteViews createSuppressedView() {
+        RemoteViews views;
+        if (mTile.isUserQuieted()) {
+            views = new RemoteViews(mContext.getPackageName(),
+                    R.layout.people_tile_work_profile_quiet_layout);
+        } else {
+            views = new RemoteViews(mContext.getPackageName(),
+                    R.layout.people_tile_suppressed_layout);
+        }
+        Drawable appIcon = mContext.getDrawable(R.drawable.ic_conversation_icon);
         Bitmap appIconAsBitmap = convertDrawableToBitmap(appIcon);
-        FastBitmapDrawable drawable = new FastBitmapDrawable(
-                appIconAsBitmap);
+        FastBitmapDrawable drawable = new FastBitmapDrawable(appIconAsBitmap);
         drawable.setIsDisabled(true);
         Bitmap convertedBitmap = convertDrawableToBitmap(drawable);
-        views.setImageViewBitmap(R.id.item, convertedBitmap);
+        views.setImageViewBitmap(R.id.icon, convertedBitmap);
         return views;
-    }
-
-    private Drawable getAppBadge(String packageName, int userId) {
-        Drawable badge = null;
-        try {
-            final ApplicationInfo appInfo = mContext.getPackageManager().getApplicationInfoAsUser(
-                    packageName, PackageManager.GET_META_DATA, userId);
-            badge = Utils.getBadgedIcon(mContext, appInfo);
-        } catch (PackageManager.NameNotFoundException e) {
-            badge = mContext.getPackageManager().getDefaultActivityIcon();
-        }
-        return badge;
     }
 
     private void setMaxLines(RemoteViews views, boolean showSender) {
         int textSize = mLayoutSize == LAYOUT_LARGE ? getSizeInDp(
-                R.dimen.content_text_size_for_medium)
+                R.dimen.content_text_size_for_large)
                 : getSizeInDp(R.dimen.content_text_size_for_medium);
         int lineHeight = getLineHeight(textSize);
         int notificationContentHeight = getContentHeightForLayout(lineHeight);
@@ -422,9 +407,6 @@ public class PeopleTileViewHelper {
                 views.setViewVisibility(R.id.availability, View.GONE);
             }
 
-            if (mTile.getUserName() != null) {
-                views.setTextViewText(R.id.name, mTile.getUserName().toString());
-            }
             views.setBoolean(R.id.image, "setClipToOutline", true);
             views.setImageViewBitmap(R.id.person_icon,
                     getPersonIconBitmap(mContext, mTile, maxAvatarSize));
@@ -537,25 +519,31 @@ public class PeopleTileViewHelper {
             statusText = getStatusTextByType(status.getActivity());
         }
         views.setViewVisibility(R.id.predefined_icon, View.VISIBLE);
-        views.setViewVisibility(R.id.messages_count, View.GONE);
-        setMaxLines(views, false);
-        // Secondary text color for statuses.
-        views.setColorAttr(R.id.text_content, "setTextColor", android.R.attr.textColorSecondary);
         views.setTextViewText(R.id.text_content, statusText);
+        if (mLayoutSize == LAYOUT_LARGE) {
+            views.setInt(R.id.content, "setGravity", Gravity.BOTTOM);
+        }
 
         Icon statusIcon = status.getIcon();
         if (statusIcon != null) {
-            // No multi-line text with status images on medium layout.
-            views.setViewVisibility(R.id.text_content, View.GONE);
+            // No text content styled text on medium or large.
+            views.setViewVisibility(R.id.scrim_layout, View.VISIBLE);
+            views.setImageViewIcon(R.id.status_icon, statusIcon);
             // Show 1-line subtext on large layout with status images.
             if (mLayoutSize == LAYOUT_LARGE) {
-                views.setViewVisibility(R.id.subtext, View.VISIBLE);
-                views.setTextViewText(R.id.subtext, statusText);
+                if (DEBUG) Log.d(TAG, "Remove name for large");
+                views.setViewVisibility(R.id.name, View.GONE);
+                views.setColorAttr(R.id.text_content, "setTextColor",
+                        android.R.attr.textColorPrimary);
+            } else if (mLayoutSize == LAYOUT_MEDIUM) {
+                views.setViewVisibility(R.id.text_content, View.GONE);
+                views.setTextViewText(R.id.name, statusText);
             }
-            views.setViewVisibility(R.id.image, View.VISIBLE);
-            views.setImageViewIcon(R.id.image, statusIcon);
         } else {
-            views.setViewVisibility(R.id.image, View.GONE);
+            // Secondary text color for statuses without icons.
+            views.setColorAttr(R.id.text_content, "setTextColor",
+                    android.R.attr.textColorSecondary);
+            setMaxLines(views, false);
         }
         // TODO: Set status pre-defined icons
         views.setImageViewResource(R.id.predefined_icon, R.drawable.ic_person);
@@ -741,16 +729,23 @@ public class PeopleTileViewHelper {
             views.setViewVisibility(R.id.name, View.VISIBLE);
             views.setViewVisibility(R.id.text_content, View.VISIBLE);
             views.setViewVisibility(R.id.subtext, View.GONE);
+            views.setViewVisibility(R.id.image, View.GONE);
+            views.setViewVisibility(R.id.scrim_layout, View.GONE);
         }
 
         if (mLayoutSize == LAYOUT_MEDIUM) {
             if (DEBUG) Log.d(TAG, "Set vertical padding: " + mMediumVerticalPadding);
             int horizontalPadding = (int) Math.floor(MAX_MEDIUM_PADDING * mDensity);
             int verticalPadding = (int) Math.floor(mMediumVerticalPadding * mDensity);
-            views.setViewPadding(R.id.item, horizontalPadding, verticalPadding, horizontalPadding,
+            views.setViewPadding(R.id.content, horizontalPadding, verticalPadding,
+                    horizontalPadding,
                     verticalPadding);
         }
         views.setViewVisibility(R.id.messages_count, View.GONE);
+        if (mTile.getUserName() != null) {
+            views.setTextViewText(R.id.name, mTile.getUserName());
+        }
+
         return views;
     }
 
@@ -760,6 +755,9 @@ public class PeopleTileViewHelper {
             views.setViewVisibility(R.id.name, View.VISIBLE);
             views.setViewVisibility(R.id.predefined_icon, View.GONE);
             views.setViewVisibility(R.id.messages_count, View.GONE);
+        }
+        if (mTile.getUserName() != null) {
+            views.setTextViewText(R.id.name, mTile.getUserName());
         }
         String status = getLastInteractionString(mContext,
                 mTile.getLastInteractionTimestamp());

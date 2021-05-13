@@ -689,12 +689,12 @@
     <string name="accessibility_quick_settings_hotspot_changed_on">Mobile hotspot turned on.</string>
     <!-- Announcement made when the screen stopped casting (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_casting_turned_off">Screen casting stopped.</string>
-    <!-- Content description of the work mode title in quick settings when off (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <!-- Content description of the work mode title in quick settings when off (not shown on the screen). Paused is used as an adjective [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_work_mode_off">Work mode paused.</string>
     <!-- Content description of the work mode title in quick settings when on (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_work_mode_on">Work mode on.</string>
-    <!-- Announcement made when the work mode changes to off (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_work_mode_changed_off">Work mode turned paused.</string>
+    <!-- Announcement made when the work mode changes to off (not shown on the screen). Paused is used as a verb. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_work_mode_changed_off">Work mode paused.</string>
     <!-- Announcement made when the work mode changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_work_mode_changed_on">Work mode turned on.</string>
     <!-- Announcement made when the Data Saver changes to off (not shown on the screen). [CHAR LIMIT=NONE] -->
@@ -2828,7 +2828,7 @@
     <!-- Label for button to go to media control settings screen [CHAR_LIMIT=30] -->
     <string name="controls_media_settings_button">Settings</string>
 
-    <!-- Title for Smartspace recommendation card within media controls [CHAR_LIMIT=50] -->
+    <!-- Title for Smartspace recommendation card within media controls. The "Play" means the action to play a media [CHAR_LIMIT=10] -->
     <string name="controls_media_smartspace_rec_title">Play</string>
 
     <!-- Error message indicating that a control timed out while waiting for an update [CHAR_LIMIT=30] -->

@@ -75,10 +75,12 @@ public class HdmiCecPowerStatusControllerTest {
 
         Context contextSpy = spy(new ContextWrapper(InstrumentationRegistry.getTargetContext()));
         Looper myLooper = mTestLooper.getLooper();
-        PowerManager powerManager = new PowerManager(contextSpy, mIPowerManagerMock,
-                mIThermalServiceMock, new Handler(myLooper));
-        when(contextSpy.getSystemService(Context.POWER_SERVICE)).thenReturn(powerManager);
-        when(contextSpy.getSystemService(PowerManager.class)).thenReturn(powerManager);
+        when(contextSpy.getSystemService(Context.POWER_SERVICE)).thenAnswer(i ->
+                new PowerManager(contextSpy, mIPowerManagerMock,
+                mIThermalServiceMock, new Handler(myLooper)));
+        when(contextSpy.getSystemService(PowerManager.class)).thenAnswer(i ->
+                new PowerManager(contextSpy, mIPowerManagerMock,
+                mIThermalServiceMock, new Handler(myLooper)));
         when(mIPowerManagerMock.isInteractive()).thenReturn(true);
 
         mHdmiControlService = new HdmiControlService(contextSpy) {

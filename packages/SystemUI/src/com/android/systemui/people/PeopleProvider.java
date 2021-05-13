@@ -18,7 +18,9 @@ package com.android.systemui.people;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.pm.ProviderInfo;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Binder;
@@ -27,16 +29,19 @@ import android.os.UserHandle;
 import android.util.Log;
 import android.widget.RemoteViews;
 
+import com.android.systemui.SystemUIAppComponentFactory;
 import com.android.systemui.people.widget.PeopleSpaceWidgetManager;
 import com.android.systemui.shared.system.PeopleProviderUtils;
 
 import javax.inject.Inject;
 
 /** API that returns a People Tile preview. */
-public class PeopleProvider extends ContentProvider {
+public class PeopleProvider extends ContentProvider implements
+        SystemUIAppComponentFactory.ContextInitializer {
     private static final String TAG = "PeopleProvider";
     private static final boolean DEBUG = PeopleSpaceUtils.DEBUG;
     private static final String EMPTY_STRING = "";
+    private SystemUIAppComponentFactory.ContextAvailableCallback mCallback;
 
     @Inject
     PeopleSpaceWidgetManager mPeopleSpaceWidgetManager;
@@ -82,8 +87,8 @@ public class PeopleProvider extends ContentProvider {
             Log.e(TAG, "Could not initialize people widget manager");
             return null;
         }
-        RemoteViews view =
-                mPeopleSpaceWidgetManager.getPreview(shortcutId, userHandle, packageName, extras);
+        RemoteViews view = mPeopleSpaceWidgetManager.getPreview(shortcutId, userHandle, packageName,
+                extras);
         if (view == null) {
             if (DEBUG) Log.d(TAG, "No preview available for shortcutId: " + shortcutId);
             return null;
@@ -129,6 +134,18 @@ public class PeopleProvider extends ContentProvider {
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         throw new IllegalArgumentException("Invalid method");
+    }
+
+    @Override
+    public void attachInfo(Context context, ProviderInfo info) {
+        mCallback.onContextAvailable(context);
+        super.attachInfo(context, info);
+    }
+
+    @Override
+    public void setContextAvailableCallback(
+            SystemUIAppComponentFactory.ContextAvailableCallback callback) {
+        mCallback = callback;
     }
 }
 

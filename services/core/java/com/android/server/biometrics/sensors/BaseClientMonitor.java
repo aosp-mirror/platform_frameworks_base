@@ -46,6 +46,7 @@ public abstract class BaseClientMonitor extends LoggableMonitor
      * Interface that ClientMonitor holders should use to receive callbacks.
      */
     public interface Callback {
+
         /**
          * Invoked when the ClientMonitor operation has been started (e.g. reached the head of
          * the queue and becomes the current operation).
@@ -222,6 +223,7 @@ public abstract class BaseClientMonitor extends LoggableMonitor
                 + this.getClass().getSimpleName()
                 + ", " + getProtoEnum()
                 + ", " + getOwnerString()
-                + ", " + getCookie() + "}";
+                + ", " + getCookie()
+                + ", " + getTargetUserId() + "}";
     }
 }
