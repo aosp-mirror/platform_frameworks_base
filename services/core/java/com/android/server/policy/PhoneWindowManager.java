@@ -1072,6 +1072,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private void powerLongPress(long eventTime) {
         final int behavior = getResolvedLongPressOnPowerBehavior();
+        Slog.d(TAG, "powerLongPress: eventTime=" + eventTime
+                + " mLongPressOnPowerBehavior=" + mLongPressOnPowerBehavior);
 
         switch (behavior) {
             case LONG_PRESS_POWER_NOTHING:
