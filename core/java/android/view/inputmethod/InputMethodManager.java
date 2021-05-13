@@ -1519,17 +1519,25 @@ public final class InputMethodManager {
     }
 
     void setInputChannelLocked(InputChannel channel) {
-        if (mCurChannel != channel) {
-            if (mCurSender != null) {
-                flushPendingEventsLocked();
-                mCurSender.dispose();
-                mCurSender = null;
-            }
-            if (mCurChannel != null) {
-                mCurChannel.dispose();
-            }
-            mCurChannel = channel;
+        if (mCurChannel == channel) {
+            return;
         }
+        if (mCurChannel != null && channel != null
+                && mCurChannel.getToken() == channel.getToken()) {
+            // channel is a dupe of 'mCurChannel', because they have the same token, and represent
+            // the same connection. Ignore the incoming channel and keep using 'mCurChannel' to
+            // avoid confusing the InputEventReceiver.
+            return;
+        }
+        if (mCurSender != null) {
+            flushPendingEventsLocked();
+            mCurSender.dispose();
+            mCurSender = null;
+        }
+        if (mCurChannel != null) {
+            mCurChannel.dispose();
+        }
+        mCurChannel = channel;
     }
 
     /**
