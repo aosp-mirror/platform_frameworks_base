@@ -658,9 +658,7 @@ public class UiTranslationController {
             msg.append("text=").append(value.getText() == null
                     ? "null"
                     : "string[" + value.getText().length() + "], ");
-            msg.append("dict=").append(value.getDictionaryDescription() == null
-                    ? "null"
-                    : "string[" + value.getDictionaryDescription().length() + "], ");
+            //TODO: append dictionary results.
             msg.append("transliteration=").append(value.getTransliteration() == null
                     ? "null"
                     : "string[" + value.getTransliteration().length() + "]}, ");
