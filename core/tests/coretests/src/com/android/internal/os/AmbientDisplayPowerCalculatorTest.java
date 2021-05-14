@@ -40,6 +40,7 @@ public class AmbientDisplayPowerCalculatorTest {
 
     @Test
     public void testMeasuredEnergyBasedModel() {
+        mStatsRule.initMeasuredEnergyStatsLocked();
         BatteryStatsImpl stats = mStatsRule.getBatteryStats();
 
         stats.updateDisplayMeasuredEnergyStatsLocked(300_000_000, Display.STATE_ON, 0);

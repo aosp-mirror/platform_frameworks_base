@@ -252,7 +252,9 @@ public class AndroidKeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
                 blockModes,
                 userAuthenticationRequired,
                 (int) userAuthenticationValidityDurationSeconds,
-                keymasterHwEnforcedUserAuthenticators,
+                userAuthenticationRequirementEnforcedBySecureHardware
+                        ? keymasterHwEnforcedUserAuthenticators
+                        : keymasterSwEnforcedUserAuthenticators,
                 userAuthenticationRequirementEnforcedBySecureHardware,
                 userAuthenticationValidWhileOnBody,
                 trustedUserPresenceRequired,

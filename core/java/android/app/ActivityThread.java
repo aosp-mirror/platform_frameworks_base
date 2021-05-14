@@ -178,6 +178,7 @@ import android.view.autofill.AutofillId;
 import android.view.contentcapture.IContentCaptureManager;
 import android.view.contentcapture.IContentCaptureOptionsCallback;
 import android.view.translation.TranslationSpec;
+import android.view.translation.UiTranslationSpec;
 import android.webkit.WebView;
 import android.window.SizeConfigurationBuckets;
 import android.window.SplashScreen;
@@ -1843,13 +1844,15 @@ public final class ActivityThread extends ClientTransactionHandler
 
         @Override
         public void updateUiTranslationState(IBinder activityToken, int state,
-                TranslationSpec sourceSpec, TranslationSpec targetSpec, List<AutofillId> viewIds) {
+                TranslationSpec sourceSpec, TranslationSpec targetSpec, List<AutofillId> viewIds,
+                UiTranslationSpec uiTranslationSpec) {
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = activityToken;
             args.arg2 = state;
             args.arg3 = sourceSpec;
             args.arg4 = targetSpec;
             args.arg5 = viewIds;
+            args.arg6 = uiTranslationSpec;
             sendMessage(H.UPDATE_UI_TRANSLATION_STATE, args);
         }
     }
@@ -2212,7 +2215,7 @@ public final class ActivityThread extends ClientTransactionHandler
                     final SomeArgs args = (SomeArgs) msg.obj;
                     updateUiTranslationState((IBinder) args.arg1, (int) args.arg2,
                             (TranslationSpec) args.arg3, (TranslationSpec) args.arg4,
-                            (List<AutofillId>) args.arg5);
+                            (List<AutofillId>) args.arg5, (UiTranslationSpec) args.arg6);
                     break;
                 case SET_CONTENT_CAPTURE_OPTIONS_CALLBACK:
                     handleSetContentCaptureOptionsCallback((String) msg.obj);
@@ -4194,13 +4197,15 @@ public final class ActivityThread extends ClientTransactionHandler
     }
 
     private void updateUiTranslationState(IBinder activityToken, int state,
-            TranslationSpec sourceSpec, TranslationSpec targetSpec, List<AutofillId> viewIds) {
+            TranslationSpec sourceSpec, TranslationSpec targetSpec, List<AutofillId> viewIds,
+            UiTranslationSpec uiTranslationSpec) {
         final ActivityClientRecord r = mActivities.get(activityToken);
         if (r == null) {
             Log.w(TAG, "updateUiTranslationState(): no activity for " + activityToken);
             return;
         }
-        r.activity.updateUiTranslationState(state, sourceSpec, targetSpec, viewIds);
+        r.activity.updateUiTranslationState(
+                state, sourceSpec, targetSpec, viewIds, uiTranslationSpec);
     }
 
     private static final ThreadLocal<Intent> sCurrentBroadcastIntent = new ThreadLocal<Intent>();

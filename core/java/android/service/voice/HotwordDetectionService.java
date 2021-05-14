@@ -78,30 +78,17 @@ public abstract class HotwordDetectionService extends Service {
     /** @hide */
     public static final String KEY_INITIALIZATION_STATUS = "initialization_status";
 
-    /** @hide */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag = true, prefix = { "INITIALIZATION_STATUS_" }, value = {
-            INITIALIZATION_STATUS_SUCCESS,
-            INITIALIZATION_STATUS_CUSTOM_ERROR_1,
-            INITIALIZATION_STATUS_CUSTOM_ERROR_2,
-            INITIALIZATION_STATUS_UNKNOWN,
-    })
-    public @interface InitializationStatus {}
+    /**
+     * The maximum number of initialization status for some application specific failed reasons.
+     *
+     * @hide
+     */
+    public static final int MAXIMUM_NUMBER_OF_INITIALIZATION_STATUS_CUSTOM_ERROR = 2;
 
     /**
      * Indicates that the updated status is successful.
      */
     public static final int INITIALIZATION_STATUS_SUCCESS = 0;
-
-    /**
-     * Indicates that the updated status is failure for some application specific reasons.
-     */
-    public static final int INITIALIZATION_STATUS_CUSTOM_ERROR_1 = 1;
-
-    /**
-     * Indicates that the updated status is failure for some application specific reasons.
-     */
-    public static final int INITIALIZATION_STATUS_CUSTOM_ERROR_2 = 2;
 
     /**
      * Indicates that the callback wasn’t invoked within the timeout.
@@ -229,6 +216,19 @@ public abstract class HotwordDetectionService extends Service {
     }
 
     /**
+     * Returns the maximum number of initialization status for some application specific failed
+     * reasons.
+     *
+     * Note: The value 0 is reserved for success.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static int getMaxCustomInitializationStatus() {
+        return MAXIMUM_NUMBER_OF_INITIALIZATION_STATUS_CUSTOM_ERROR;
+    }
+
+    /**
      * Called when the device hardware (such as a DSP) detected the hotword, to request second stage
      * validation before handing over the audio to the {@link AlwaysOnHotwordDetector}.
      * <p>
@@ -298,9 +298,10 @@ public abstract class HotwordDetectionService extends Service {
      * such data to the trusted process.
      * @param callbackTimeoutMillis Timeout in milliseconds for the operation to invoke the
      * statusCallback.
-     * @param statusCallback Use this to return the updated result. This is non-null only when the
-     * {@link HotwordDetectionService} is being initialized; and it is null if the state is updated
-     * after that.
+     * @param statusCallback Use this to return the updated result; the allowed values are
+     * {@link #INITIALIZATION_STATUS_SUCCESS}, 1<->{@link #getMaxCustomInitializationStatus()}.
+     * This is non-null only when the {@link HotwordDetectionService} is being initialized; and it
+     * is null if the state is updated after that.
      *
      * @hide
      */
@@ -309,7 +310,7 @@ public abstract class HotwordDetectionService extends Service {
             @Nullable PersistableBundle options,
             @Nullable SharedMemory sharedMemory,
             @DurationMillisLong long callbackTimeoutMillis,
-            @Nullable @InitializationStatus IntConsumer statusCallback) {
+            @Nullable IntConsumer statusCallback) {
         // TODO: Handle the unimplemented case by throwing?
     }
 
@@ -389,6 +390,10 @@ public abstract class HotwordDetectionService extends Service {
         if (callback != null) {
             intConsumer =
                     value -> {
+                        if (value > getMaxCustomInitializationStatus()) {
+                            throw new IllegalArgumentException(
+                                    "The initialization status is invalid for " + value);
+                        }
                         try {
                             Bundle status = new Bundle();
                             status.putInt(KEY_INITIALIZATION_STATUS, value);

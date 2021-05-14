@@ -60,6 +60,7 @@ public class NotifCoordinators implements Dumpable {
             ConversationCoordinator conversationCoordinator,
             PreparationCoordinator preparationCoordinator,
             MediaCoordinator mediaCoordinator,
+            SmartspaceDedupingCoordinator smartspaceDedupingCoordinator,
             VisualStabilityCoordinator visualStabilityCoordinator) {
         dumpManager.registerDumpable(TAG, this);
 
@@ -70,9 +71,14 @@ public class NotifCoordinators implements Dumpable {
         mCoordinators.add(appOpsCoordinator);
         mCoordinators.add(deviceProvisionedCoordinator);
         mCoordinators.add(bubbleCoordinator);
-        mCoordinators.add(mediaCoordinator);
         mCoordinators.add(conversationCoordinator);
+        mCoordinators.add(mediaCoordinator);
         mCoordinators.add(visualStabilityCoordinator);
+
+        if (featureFlags.isSmartspaceDedupingEnabled()) {
+            mCoordinators.add(smartspaceDedupingCoordinator);
+        }
+
         if (featureFlags.isNewNotifPipelineRenderingEnabled()) {
             mCoordinators.add(headsUpCoordinator);
             mCoordinators.add(preparationCoordinator);

@@ -194,6 +194,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
                 }
             };
 
+            mKeyguardIndicationController.init();
             mViewHierarchyManager.setUpWithPresenter(this,
                     stackScrollerController.getNotificationListContainer());
             mEntryManager.setUpWithPresenter(this);

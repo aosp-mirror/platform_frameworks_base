@@ -106,6 +106,10 @@ public final class InitializeStats {
     private final int mNativeNumDocuments;
     /** Returns number of schema types currently in the schema store. */
     private final int mNativeNumSchemaTypes;
+    /** Whether we had to reset the index, losing all data, during initialization. */
+    private final boolean mHasReset;
+    /** If we had to reset, contains the status code of the reset operation. */
+    @AppSearchResult.ResultCode private final int mResetStatusCode;
 
     /** Returns the status of the initialization. */
     @AppSearchResult.ResultCode
@@ -214,6 +218,21 @@ public final class InitializeStats {
         return mNativeNumSchemaTypes;
     }
 
+    /** Returns whether we had to reset the index, losing all data, as part of initialization. */
+    public boolean hasReset() {
+        return mHasReset;
+    }
+
+    /**
+     * Returns the status of the reset, if one was performed according to {@link #hasReset}.
+     *
+     * <p>If no value has been set, the default value is {@link AppSearchResult#RESULT_OK}.
+     */
+    @AppSearchResult.ResultCode
+    public int getResetStatusCode() {
+        return mResetStatusCode;
+    }
+
     InitializeStats(@NonNull Builder builder) {
         Objects.requireNonNull(builder);
         mStatusCode = builder.mStatusCode;
@@ -232,11 +251,14 @@ public final class InitializeStats {
         mNativeDocumentStoreDataStatus = builder.mNativeDocumentStoreDataStatus;
         mNativeNumDocuments = builder.mNativeNumDocuments;
         mNativeNumSchemaTypes = builder.mNativeNumSchemaTypes;
+        mHasReset = builder.mHasReset;
+        mResetStatusCode = builder.mResetStatusCode;
     }
 
     /** Builder for {@link InitializeStats}. */
     public static class Builder {
         @AppSearchResult.ResultCode int mStatusCode;
+
         int mTotalLatencyMillis;
         boolean mHasDeSync;
         int mPrepareSchemaAndNamespacesLatencyMillis;
@@ -251,6 +273,8 @@ public final class InitializeStats {
         @DocumentStoreDataStatus int mNativeDocumentStoreDataStatus;
         int mNativeNumDocuments;
         int mNativeNumSchemaTypes;
+        boolean mHasReset;
+        @AppSearchResult.ResultCode int mResetStatusCode;
 
         /** Sets the status of the initialization. */
         @NonNull
@@ -389,6 +413,20 @@ public final class InitializeStats {
         @NonNull
         public Builder setSchemaTypeCount(int numSchemaTypes) {
             mNativeNumSchemaTypes = numSchemaTypes;
+            return this;
+        }
+
+        /** Sets whether we had to reset the index, losing all data, as part of initialization. */
+        @NonNull
+        public Builder setHasReset(boolean hasReset) {
+            mHasReset = hasReset;
+            return this;
+        }
+
+        /** Sets the status of the reset, if one was performed according to {@link #setHasReset}. */
+        @NonNull
+        public Builder setResetStatusCode(@AppSearchResult.ResultCode int resetStatusCode) {
+            mResetStatusCode = resetStatusCode;
             return this;
         }
 

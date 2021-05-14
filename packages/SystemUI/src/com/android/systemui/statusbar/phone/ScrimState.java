@@ -96,11 +96,14 @@ public enum ScrimState {
     AUTH_SCRIMMED {
         @Override
         public void prepare(ScrimState previousState) {
-            mFrontTint = Color.BLACK;
+            mNotifTint = previousState.mNotifTint;
+            mNotifAlpha = previousState.mNotifAlpha;
 
-            mBehindAlpha = 0f;
+            mBehindTint = previousState.mBehindTint;
+            mBehindAlpha = previousState.mBehindAlpha;
+
+            mFrontTint = Color.BLACK;
             mFrontAlpha = .66f;
-            mBubbleAlpha = 0f;
         }
     },
 

@@ -460,7 +460,7 @@
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"正在慢速充電"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"無線充電中"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"非充電中"</string>
-    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"已連接電源插頭，但目前無法充電"</string>
+    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"已連接，非充電中"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"已充滿電"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"已由管理員停用"</string>
     <string name="disabled" msgid="8017887509554714950">"已停用"</string>
