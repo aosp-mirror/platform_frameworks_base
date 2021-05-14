@@ -353,6 +353,7 @@ public final class AppSearchSession implements Closeable {
                     new ArrayList<>(request.getIds()),
                     request.getProjectionsInternal(),
                     mUserId,
+                    /*binderCallStartTimeMillis=*/ SystemClock.elapsedRealtime(),
                     new IAppSearchBatchResultCallback.Stub() {
                         @Override
                         public void onResult(AppSearchBatchResultParcel resultParcel) {
@@ -566,6 +567,7 @@ public final class AppSearchSession implements Closeable {
         try {
             mService.removeByDocumentId(mPackageName, mDatabaseName, request.getNamespace(),
                     new ArrayList<>(request.getIds()), mUserId,
+                    /*binderCallStartTimeMillis=*/ SystemClock.elapsedRealtime(),
                     new IAppSearchBatchResultCallback.Stub() {
                         @Override
                         public void onResult(AppSearchBatchResultParcel resultParcel) {
@@ -616,6 +618,7 @@ public final class AppSearchSession implements Closeable {
         try {
             mService.removeByQuery(mPackageName, mDatabaseName, queryExpression,
                     searchSpec.getBundle(), mUserId,
+                    /*binderCallStartTimeMillis=*/ SystemClock.elapsedRealtime(),
                     new IAppSearchResultCallback.Stub() {
                         @Override
                         public void onResult(AppSearchResultParcel resultParcel) {
@@ -675,7 +678,8 @@ public final class AppSearchSession implements Closeable {
     public void close() {
         if (mIsMutated && !mIsClosed) {
             try {
-                mService.persistToDisk(mUserId);
+                mService.persistToDisk(mUserId,
+                        /*binderCallStartTimeMillis=*/ SystemClock.elapsedRealtime());
                 mIsClosed = true;
             } catch (RemoteException e) {
                 Log.e(TAG, "Unable to close the AppSearchSession", e);
@@ -705,6 +709,7 @@ public final class AppSearchSession implements Closeable {
                     request.isForceOverride(),
                     request.getVersion(),
                     mUserId,
+                    /*binderCallStartTimeMillis=*/ SystemClock.elapsedRealtime(),
                     new IAppSearchResultCallback.Stub() {
                         @Override
                         public void onResult(AppSearchResultParcel resultParcel) {
@@ -792,6 +797,7 @@ public final class AppSearchSession implements Closeable {
                         /*forceOverride=*/ false,
                         request.getVersion(),
                         mUserId,
+                        /*binderCallStartTimeMillis=*/ SystemClock.elapsedRealtime(),
                         new IAppSearchResultCallback.Stub() {
                             @Override
                             public void onResult(AppSearchResultParcel resultParcel) {
@@ -843,6 +849,7 @@ public final class AppSearchSession implements Closeable {
                                 /*forceOverride=*/ true,
                                 request.getVersion(),
                                 mUserId,
+                                /*binderCallStartTimeMillis=*/ SystemClock.elapsedRealtime(),
                                 new IAppSearchResultCallback.Stub() {
                                     @Override
                                     public void onResult(AppSearchResultParcel resultParcel) {
