@@ -133,7 +133,7 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
 
     /** Animate the clock appearance */
     public void animateAppear() {
-        mView.animateAppear();
+        if (!mIsDozing) mView.animateAppearOnLockscreen();
     }
 
     /**

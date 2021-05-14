@@ -157,7 +157,7 @@ public class AnimatableClockView extends TextView {
         mLockScreenColor = lockScreenColor;
     }
 
-    void animateAppear() {
+    void animateAppearOnLockscreen() {
         if (mTextAnimator == null) {
             return;
         }
