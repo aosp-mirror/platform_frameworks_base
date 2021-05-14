@@ -116,7 +116,7 @@ class OngoingCallControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun onEntryUpdated_isOngoingCallNotif_listenerNotifiedWithRightCallTime() {
+    fun onEntryUpdated_isOngoingCallNotif_listenerNotified() {
         notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
 
         verify(mockOngoingCallListener).onOngoingCallStateChanged(anyBoolean())
@@ -127,6 +127,15 @@ class OngoingCallControllerTest : SysuiTestCase() {
         notifCollectionListener.onEntryUpdated(createNotCallNotifEntry())
 
         verify(mockOngoingCallListener, never()).onOngoingCallStateChanged(anyBoolean())
+    }
+
+    @Test
+    fun onEntryUpdated_ongoingCallNotifThenScreeningCallNotif_listenerNotifiedTwice() {
+        notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
+        notifCollectionListener.onEntryUpdated(createScreeningCallNotifEntry())
+
+        verify(mockOngoingCallListener, times(2))
+                .onOngoingCallStateChanged(anyBoolean())
     }
 
     @Test
@@ -186,6 +195,22 @@ class OngoingCallControllerTest : SysuiTestCase() {
         notifCollectionListener.onEntryRemoved(ongoingCallNotifEntry, REASON_USER_STOPPED)
 
         assertThat(controller.hasOngoingCall()).isFalse()
+    }
+
+    @Test
+    fun hasOngoingCall_ongoingCallNotifSentThenScreeningCallNotifSent_returnsFalse() {
+        notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
+        notifCollectionListener.onEntryUpdated(createScreeningCallNotifEntry())
+
+        assertThat(controller.hasOngoingCall()).isFalse()
+    }
+
+    @Test
+    fun hasOngoingCall_ongoingCallNotifSentThenUnrelatedNotifSent_returnsTrue() {
+        notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
+        notifCollectionListener.onEntryUpdated(createNotCallNotifEntry())
+
+        assertThat(controller.hasOngoingCall()).isTrue()
     }
 
     /**
@@ -281,9 +306,13 @@ class OngoingCallControllerTest : SysuiTestCase() {
     // Other tests for notifyChipVisibilityChanged are in [OngoingCallLogger], since
     // [OngoingCallController.notifyChipVisibilityChanged] just delegates to that class.
 
-    private fun createOngoingCallNotifEntry(): NotificationEntry {
+    private fun createOngoingCallNotifEntry() = createCallNotifEntry(ongoingCallStyle)
+
+    private fun createScreeningCallNotifEntry() = createCallNotifEntry(screeningCallStyle)
+
+    private fun createCallNotifEntry(callStyle: Notification.CallStyle): NotificationEntry {
         val notificationEntryBuilder = NotificationEntryBuilder()
-        notificationEntryBuilder.modifyNotification(context).style = ongoingCallStyle
+        notificationEntryBuilder.modifyNotification(context).style = callStyle
 
         val contentIntent = mock(PendingIntent::class.java)
         `when`(contentIntent.intent).thenReturn(mock(Intent::class.java))
@@ -295,6 +324,9 @@ class OngoingCallControllerTest : SysuiTestCase() {
     private fun createNotCallNotifEntry() = NotificationEntryBuilder().build()
 }
 
-private val ongoingCallStyle = Notification.CallStyle.forOngoingCall(
-        Person.Builder().setName("name").build(),
-        /* hangUpIntent= */ mock(PendingIntent::class.java))
+private val person = Person.Builder().setName("name").build()
+private val hangUpIntent = mock(PendingIntent::class.java)
+
+private val ongoingCallStyle = Notification.CallStyle.forOngoingCall(person, hangUpIntent)
+private val screeningCallStyle = Notification.CallStyle.forScreeningCall(
+        person, hangUpIntent, /* answerIntent= */ mock(PendingIntent::class.java))
