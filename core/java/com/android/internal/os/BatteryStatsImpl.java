@@ -5078,31 +5078,46 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     public void notePowerSaveModeLocked(boolean enabled) {
-        notePowerSaveModeLocked(enabled, mClocks.elapsedRealtime(), mClocks.uptimeMillis());
+        notePowerSaveModeLocked(enabled, mClocks.elapsedRealtime(), mClocks.uptimeMillis(), false);
     }
 
-    public void notePowerSaveModeLocked(boolean enabled, long elapsedRealtimeMs, long uptimeMs) {
+    /**
+     * Handles power save mode state changes.
+     */
+    public void notePowerSaveModeLocked(boolean enabled, long elapsedRealtimeMs, long uptimeMs,
+            boolean forceLog) {
         if (mPowerSaveModeEnabled != enabled) {
             int stepState = enabled ? STEP_LEVEL_MODE_POWER_SAVE : 0;
-            mModStepMode |= (mCurStepMode&STEP_LEVEL_MODE_POWER_SAVE) ^ stepState;
-            mCurStepMode = (mCurStepMode&~STEP_LEVEL_MODE_POWER_SAVE) | stepState;
+            mModStepMode |= (mCurStepMode & STEP_LEVEL_MODE_POWER_SAVE) ^ stepState;
+            mCurStepMode = (mCurStepMode & ~STEP_LEVEL_MODE_POWER_SAVE) | stepState;
             mPowerSaveModeEnabled = enabled;
             if (enabled) {
                 mHistoryCur.states2 |= HistoryItem.STATE2_POWER_SAVE_FLAG;
-                if (DEBUG_HISTORY) Slog.v(TAG, "Power save mode enabled to: "
-                        + Integer.toHexString(mHistoryCur.states2));
+                if (DEBUG_HISTORY) {
+                    Slog.v(TAG, "Power save mode enabled to: "
+                            + Integer.toHexString(mHistoryCur.states2));
+                }
                 mPowerSaveModeEnabledTimer.startRunningLocked(elapsedRealtimeMs);
             } else {
                 mHistoryCur.states2 &= ~HistoryItem.STATE2_POWER_SAVE_FLAG;
-                if (DEBUG_HISTORY) Slog.v(TAG, "Power save mode disabled to: "
-                        + Integer.toHexString(mHistoryCur.states2));
+                if (DEBUG_HISTORY) {
+                    Slog.v(TAG, "Power save mode disabled to: "
+                            + Integer.toHexString(mHistoryCur.states2));
+                }
                 mPowerSaveModeEnabledTimer.stopRunningLocked(elapsedRealtimeMs);
             }
             addHistoryRecordLocked(elapsedRealtimeMs, uptimeMs);
             FrameworkStatsLog.write(FrameworkStatsLog.BATTERY_SAVER_MODE_STATE_CHANGED,
                     enabled
-                        ? FrameworkStatsLog.BATTERY_SAVER_MODE_STATE_CHANGED__STATE__ON
-                        : FrameworkStatsLog.BATTERY_SAVER_MODE_STATE_CHANGED__STATE__OFF);
+                            ? FrameworkStatsLog.BATTERY_SAVER_MODE_STATE_CHANGED__STATE__ON
+                            : FrameworkStatsLog.BATTERY_SAVER_MODE_STATE_CHANGED__STATE__OFF);
+        } else if (forceLog) {
+            // Log an initial value for BATTERY_SAVER_MODE_STATE_CHANGED in order to
+            // allow the atom to read all future state changes.
+            FrameworkStatsLog.write(FrameworkStatsLog.BATTERY_SAVER_MODE_STATE_CHANGED,
+                    enabled
+                            ? FrameworkStatsLog.BATTERY_SAVER_MODE_STATE_CHANGED__STATE__ON
+                            : FrameworkStatsLog.BATTERY_SAVER_MODE_STATE_CHANGED__STATE__OFF);
         }
     }
 
