@@ -174,6 +174,7 @@ public class Notification implements Parcelable
      */
     public static final @ServiceNotificationPolicy int FOREGROUND_SERVICE_DEFERRED = 2;
 
+    @ServiceNotificationPolicy
     private int mFgsDeferBehavior;
 
     /**
@@ -4614,9 +4615,9 @@ public class Notification implements Parcelable
          * foreground service.  By default, the system can choose to defer
          * visibility of the notification for a short time after the service is
          * started.  Pass
-         * {@link Notification#FOREGROUND_SERVICE_IMMEDIATE BEHAVIOR_IMMEDIATE_DISPLAY}
+         * {@link Notification#FOREGROUND_SERVICE_IMMEDIATE FOREGROUND_SERVICE_IMMEDIATE}
          * to this method in order to guarantee that visibility is never deferred.  Pass
-         * {@link Notification#FOREGROUND_SERVICE_DEFERRED BEHAVIOR_DEFERRED_DISPLAY}
+         * {@link Notification#FOREGROUND_SERVICE_DEFERRED FOREGROUND_SERVICE_DEFERRED}
          * to request that visibility is deferred whenever possible.
          *
          * <p class="note">Note that deferred visibility is not guaranteed.  There
@@ -4624,13 +4625,13 @@ public class Notification implements Parcelable
          * service's associated Notification immediately even when the app has used
          * this method to explicitly request deferred display.</p>
          * @param behavior One of
-         * {@link Notification#FOREGROUND_SERVICE_DEFAULT BEHAVIOR_DEFAULT},
-         * {@link Notification#FOREGROUND_SERVICE_IMMEDIATE BEHAVIOR_IMMEDIATE_DISPLAY},
-         * or {@link Notification#FOREGROUND_SERVICE_DEFERRED BEHAVIOR_DEFERRED_DISPLAY}
+         * {@link Notification#FOREGROUND_SERVICE_DEFAULT FOREGROUND_SERVICE_DEFAULT},
+         * {@link Notification#FOREGROUND_SERVICE_IMMEDIATE FOREGROUND_SERVICE_IMMEDIATE},
+         * or {@link Notification#FOREGROUND_SERVICE_DEFERRED FOREGROUND_SERVICE_DEFERRED}
          * @return
          */
         @NonNull
-        public Builder setForegroundServiceBehavior(int behavior) {
+        public Builder setForegroundServiceBehavior(@ServiceNotificationPolicy int behavior) {
             mN.mFgsDeferBehavior = behavior;
             return this;
         }
@@ -5070,7 +5071,7 @@ public class Notification implements Parcelable
             if (profileBadge != null) {
                 contentView.setImageViewBitmap(R.id.profile_badge, profileBadge);
                 contentView.setViewVisibility(R.id.profile_badge, View.VISIBLE);
-                if (isColorized(p)) {
+                if (isBackgroundColorized(p)) {
                     contentView.setDrawableTint(R.id.profile_badge, false,
                             getPrimaryTextColor(p), PorterDuff.Mode.SRC_ATOP);
                 }
@@ -5257,7 +5258,7 @@ public class Notification implements Parcelable
 
         private void updateBackgroundColor(RemoteViews contentView,
                 StandardTemplateParams p) {
-            if (isColorized(p)) {
+            if (isBackgroundColorized(p)) {
                 contentView.setInt(R.id.status_bar_latest_event_content, "setBackgroundColor",
                         getBackgroundColor(p));
             } else {
@@ -5309,8 +5310,7 @@ public class Notification implements Parcelable
         // the change's state in NotificationManagerService were very complex. These behavior
         // changes are entirely visual, and should otherwise be undetectable by apps.
         @SuppressWarnings("AndroidFrameworkCompatChange")
-        private void calculateLargeIconDimens(boolean largeIconShown,
-                @NonNull StandardTemplateParams p,
+        private void calculateRightIconDimens(Icon rightIcon, boolean isPromotedPicture,
                 @NonNull TemplateBindResult result) {
             final Resources resources = mContext.getResources();
             final float density = resources.getDisplayMetrics().density;
@@ -5323,9 +5323,9 @@ public class Notification implements Parcelable
             final float viewHeightDp = resources.getDimension(
                     R.dimen.notification_right_icon_size) / density;
             float viewWidthDp = viewHeightDp;  // icons are 1:1 by default
-            if (largeIconShown && (p.mPromotePicture
+            if (rightIcon != null && (isPromotedPicture
                     || mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.S)) {
-                Drawable drawable = mN.mLargeIcon.loadDrawable(mContext);
+                Drawable drawable = rightIcon.loadDrawable(mContext);
                 if (drawable != null) {
                     int iconWidth = drawable.getIntrinsicWidth();
                     int iconHeight = drawable.getIntrinsicHeight();
@@ -5337,8 +5337,8 @@ public class Notification implements Parcelable
                 }
             }
             final float extraMarginEndDpIfVisible = viewWidthDp + iconMarginDp;
-            result.setRightIconState(largeIconShown, viewWidthDp,
-                    extraMarginEndDpIfVisible, expanderSizeDp);
+            result.setRightIconState(rightIcon != null /* visible */, viewWidthDp,
+                    viewHeightDp, extraMarginEndDpIfVisible, expanderSizeDp);
         }
 
         /**
@@ -5349,19 +5349,45 @@ public class Notification implements Parcelable
             if (mN.mLargeIcon == null && mN.largeIcon != null) {
                 mN.mLargeIcon = Icon.createWithBitmap(mN.largeIcon);
             }
-            boolean showLargeIcon = mN.mLargeIcon != null && !p.hideLargeIcon;
-            calculateLargeIconDimens(showLargeIcon, p, result);
-            if (showLargeIcon) {
+
+            // Determine the left and right icons
+            Icon leftIcon = p.mHideLeftIcon ? null : mN.mLargeIcon;
+            Icon rightIcon = p.mHideRightIcon ? null
+                    : (p.mPromotedPicture != null ? p.mPromotedPicture : mN.mLargeIcon);
+
+            // Apply the left icon (without duplicating the bitmap)
+            if (leftIcon != rightIcon || leftIcon == null) {
+                // If the leftIcon is explicitly hidden or different from the rightIcon, then set it
+                // explicitly and make sure it won't take the right_icon drawable.
+                contentView.setImageViewIcon(R.id.left_icon, leftIcon);
+                contentView.setIntTag(R.id.left_icon, R.id.tag_uses_right_icon_drawable, 0);
+            } else {
+                // If the leftIcon equals the rightIcon, just set the flag to use the right_icon
+                // drawable.  This avoids the view having two copies of the same bitmap.
+                contentView.setIntTag(R.id.left_icon, R.id.tag_uses_right_icon_drawable, 1);
+            }
+
+            // Always calculate dimens to populate `result` for the GONE case
+            boolean isPromotedPicture = p.mPromotedPicture != null;
+            calculateRightIconDimens(rightIcon, isPromotedPicture, result);
+
+            // Bind the right icon
+            if (rightIcon != null) {
                 contentView.setViewLayoutWidth(R.id.right_icon,
                         result.mRightIconWidthDp, TypedValue.COMPLEX_UNIT_DIP);
+                contentView.setViewLayoutHeight(R.id.right_icon,
+                        result.mRightIconHeightDp, TypedValue.COMPLEX_UNIT_DIP);
                 contentView.setViewVisibility(R.id.right_icon, View.VISIBLE);
-                contentView.setImageViewIcon(R.id.right_icon, mN.mLargeIcon);
-                processLargeLegacyIcon(mN.mLargeIcon, contentView, p);
+                contentView.setImageViewIcon(R.id.right_icon, rightIcon);
+                contentView.setIntTag(R.id.right_icon, R.id.tag_keep_when_showing_left_icon,
+                        isPromotedPicture ? 1 : 0);
+                processLargeLegacyIcon(rightIcon, contentView, p);
             } else {
                 // The "reset" doesn't clear the drawable, so we do it here.  This clear is
                 // important because the presence of a drawable in this view (regardless of the
                 // visibility) is used by NotificationGroupingUtil to set the visibility.
                 contentView.setImageViewIcon(R.id.right_icon, null);
+                contentView.setIntTag(R.id.right_icon, R.id.tag_keep_when_showing_left_icon, 0);
             }
         }
 
@@ -5541,8 +5567,14 @@ public class Notification implements Parcelable
             return true;
         }
 
-        private boolean isColorized(StandardTemplateParams p) {
-            return p.allowColorization && mN.isColorized();
+        /**
+         * Determines if the notification should be colorized *for the purposes of applying colors*.
+         * If this is the minimized view of a colorized notification, or if the app did not provide
+         * a color to colorize with, this will return false so that internal coloring logic can
+         * still render the notification normally.
+         */
+        private boolean isBackgroundColorized(StandardTemplateParams p) {
+            return p.allowColorization && mN.color != COLOR_DEFAULT && mN.isColorized();
         }
 
         private boolean isCallActionColorCustomizable() {
@@ -5550,7 +5582,8 @@ public class Notification implements Parcelable
             //  that is only used for disallowing colorization of headers for the minimized state,
             //  and neither of those conditions applies when showing actions.
             //  Not requiring StandardTemplateParams as an argument simplifies the creation process.
-            return mN.isColorized() && mContext.getResources().getBoolean(
+            return mN.color != COLOR_DEFAULT && mN.isColorized()
+                    && mContext.getResources().getBoolean(
                     R.bool.config_callNotificationActionColorsRequireColorized);
         }
 
@@ -5594,7 +5627,8 @@ public class Notification implements Parcelable
 
         private void bindSnoozeAction(RemoteViews big, StandardTemplateParams p) {
             boolean hideSnoozeButton = mN.isForegroundService() || mN.fullScreenIntent != null
-                    || isColorized(p) || p.mViewType == StandardTemplateParams.VIEW_TYPE_HEADS_UP;
+                    || isBackgroundColorized(p)
+                    || p.mViewType == StandardTemplateParams.VIEW_TYPE_HEADS_UP;
             big.setBoolean(R.id.snooze_button, "setEnabled", !hideSnoozeButton);
             if (hideSnoozeButton) {
                 // Only hide; NotificationContentView will show it when it adds the click listener
@@ -5654,11 +5688,6 @@ public class Notification implements Parcelable
                         R.dimen.call_notification_collapsible_indent);
             }
             big.setBoolean(R.id.actions, "setEmphasizedMode", emphazisedMode);
-            if (p.mCallStyleActions) {
-                // Use "wrap_content" (unlike normal emphasized mode) and allow prioritizing the
-                // required actions (Answer, Decline, and Hang Up).
-                big.setBoolean(R.id.actions, "setPrioritizedWrapMode", true);
-            }
             if (numActions > 0 && !p.mHideActions) {
                 big.setViewVisibility(R.id.actions_container, View.VISIBLE);
                 big.setViewVisibility(R.id.actions, View.VISIBLE);
@@ -5675,7 +5704,7 @@ public class Notification implements Parcelable
                         // Clear the drawable
                         button.setInt(R.id.action0, "setBackgroundResource", 0);
                     }
-                    if (p.mCallStyleActions && i > 0) {
+                    if (emphazisedMode && i > 0) {
                         // Clear start margin from non-first buttons to reduce the gap between them.
                         //  (8dp remaining gap is from all buttons' standard 4dp inset).
                         button.setViewLayoutMarginDimen(R.id.action0, RemoteViews.MARGIN_START, 0);
@@ -6045,11 +6074,13 @@ public class Notification implements Parcelable
                     .viewType(StandardTemplateParams.VIEW_TYPE_MINIMIZED)
                     .highlightExpander(false)
                     .fillTextsFrom(this);
-            if (!useRegularSubtext || TextUtils.isEmpty(mParams.summaryText)) {
+            if (!useRegularSubtext || TextUtils.isEmpty(p.summaryText)) {
                 p.summaryText(createSummaryText());
             }
             RemoteViews header = makeNotificationHeader(p);
             header.setBoolean(R.id.notification_header, "setAcceptAllTouches", true);
+            // The low priority header has no app name and shows the text
+            header.setBoolean(R.id.notification_header, "styleTextAsTitle", true);
             return header;
         }
 
@@ -6095,26 +6126,21 @@ public class Notification implements Parcelable
                 // change the background bgColor
                 CharSequence title = action.title;
                 ColorStateList[] outResultColor = new ColorStateList[1];
-                int background = getBackgroundColor(p);
+                int background = getSecondaryAccentColor(p);
                 if (isLegacy()) {
                     title = ContrastColorUtil.clearColorSpans(title);
                 } else {
                     title = ensureColorSpanContrast(title, background, outResultColor);
                 }
                 button.setTextViewText(R.id.action0, processTextSpans(title));
-                final int textColor;
                 boolean hasColorOverride = outResultColor[0] != null;
                 if (hasColorOverride) {
                     // There's a span spanning the full text, let's take it and use it as the
                     // background color
                     background = outResultColor[0].getDefaultColor();
-                    textColor = ContrastColorUtil.resolvePrimaryColor(mContext,
-                            background, mInNightMode);
-                } else if (mTintActionButtons && !mInNightMode && !isColorized(p)) {
-                    textColor = getAccentColor(p);
-                } else {
-                    textColor = getPrimaryTextColor(p);
                 }
+                final int textColor = ContrastColorUtil.resolvePrimaryColor(mContext,
+                        background, mInNightMode);
                 button.setTextColor(R.id.action0, textColor);
                 // We only want about 20% alpha for the ripple
                 final int rippleColor = (textColor & 0x00ffffff) | 0x33000000;
@@ -6122,11 +6148,10 @@ public class Notification implements Parcelable
                         ColorStateList.valueOf(rippleColor));
                 button.setColorStateList(R.id.action0, "setButtonBackground",
                         ColorStateList.valueOf(background));
-                button.setBoolean(R.id.action0, "setHasStroke", !hasColorOverride);
                 if (p.mCallStyleActions) {
                     button.setImageViewIcon(R.id.action0, action.getIcon());
                     boolean priority = action.getExtras().getBoolean(CallStyle.KEY_ACTION_PRIORITY);
-                    button.setBoolean(R.id.action0, "setWrapModePriority", priority);
+                    button.setBoolean(R.id.action0, "setIsPriority", priority);
                     int minWidthDimen =
                             priority ? R.dimen.call_notification_system_action_min_width : 0;
                     button.setIntDimen(R.id.action0, "setMinimumWidth", minWidthDimen);
@@ -6276,14 +6301,15 @@ public class Notification implements Parcelable
          * Gets the standard action button color
          */
         private @ColorInt int getStandardActionColor(Notification.StandardTemplateParams p) {
-            return mTintActionButtons || isColorized(p) ? getAccentColor(p) : getNeutralColor(p);
+            return mTintActionButtons || isBackgroundColorized(p)
+                    ? getAccentColor(p) : getNeutralColor(p);
         }
 
         /**
          * Gets a neutral color that can be used for icons or similar that should not stand out.
          */
         private @ColorInt int getHeaderIconColor(StandardTemplateParams p) {
-            return isColorized(p) ? getSecondaryTextColor(p) : getNeutralColor(p);
+            return isBackgroundColorized(p) ? getSecondaryTextColor(p) : getNeutralColor(p);
         }
 
         /**
@@ -6300,10 +6326,26 @@ public class Notification implements Parcelable
          * {@link #getSmallIconColor(StandardTemplateParams)}.
          */
         private @ColorInt int getAccentColor(StandardTemplateParams p) {
-            if (isColorized(p)) {
+            if (isBackgroundColorized(p)) {
                 return getPrimaryTextColor(p);
             }
             int color = obtainThemeColor(R.attr.colorAccent, COLOR_INVALID);
+            if (color != COLOR_INVALID) {
+                return color;
+            }
+            return getContrastColor(p);
+        }
+
+        /**
+         * Gets the secondary accent color for colored UI elements.  If we're tinting with the theme
+         * accent, this is the theme accent color, otherwise this would be identical to
+         * {@link #getSmallIconColor(StandardTemplateParams)}.
+         */
+        private @ColorInt int getSecondaryAccentColor(StandardTemplateParams p) {
+            if (isBackgroundColorized(p)) {
+                return getSecondaryTextColor(p);
+            }
+            int color = obtainThemeColor(R.attr.colorAccentSecondary, COLOR_INVALID);
             if (color != COLOR_INVALID) {
                 return color;
             }
@@ -6315,7 +6357,7 @@ public class Notification implements Parcelable
          * color when colorized, or when not using theme color tints.
          */
         private @ColorInt int getProtectionColor(StandardTemplateParams p) {
-            if (!isColorized(p)) {
+            if (!isBackgroundColorized(p)) {
                 int color = obtainThemeColor(R.attr.colorBackgroundFloating, COLOR_INVALID);
                 if (color != COLOR_INVALID) {
                     return color;
@@ -6329,7 +6371,7 @@ public class Notification implements Parcelable
          * Gets the theme's error color, or the primary text color for colorized notifications.
          */
         private @ColorInt int getErrorColor(StandardTemplateParams p) {
-            if (!isColorized(p)) {
+            if (!isBackgroundColorized(p)) {
                 int color = obtainThemeColor(R.attr.colorError, COLOR_INVALID);
                 if (color != COLOR_INVALID) {
                     return color;
@@ -6350,7 +6392,7 @@ public class Notification implements Parcelable
          * Gets the contrast-adjusted version of the color provided by the app.
          */
         private @ColorInt int getContrastColor(StandardTemplateParams p) {
-            if (isColorized(p)) {
+            if (isBackgroundColorized(p)) {
                 return getPrimaryTextColor(p);
             }
             int rawColor = getRawColor(p);
@@ -6493,7 +6535,6 @@ public class Notification implements Parcelable
                                 + " notification: " + mN.mShortcutId
                                 + " vs bubble: " + mN.mBubbleMetadata.getShortcutId());
             }
-            validateColorizedHasColor();
 
             // first, add any extras from the calling code
             if (mUserExtras != null) {
@@ -6545,21 +6586,6 @@ public class Notification implements Parcelable
             mN.allPendingIntents = null;
 
             return mN;
-        }
-
-        // This code is executed on behalf of other apps' notifications, sometimes even by 3p apps,
-        // a use case that is not supported by the Compat Framework library.
-        @SuppressWarnings("AndroidFrameworkCompatChange")
-        private void validateColorizedHasColor() {
-            if (mN.color == COLOR_DEFAULT && mN.extras.getBoolean(EXTRA_COLORIZED)) {
-                if (mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.S) {
-                    throw new IllegalArgumentException(
-                            "Colorized notifications must set a color (other than COLOR_DEFAULT).");
-                } else {
-                    Log.w(TAG, "Colorized notifications must set a color (other than "
-                            + "COLOR_DEFAULT).  This is required for apps targeting S.");
-                }
-            }
         }
 
         /**
@@ -6694,7 +6720,7 @@ public class Notification implements Parcelable
          * which must be resolved by the caller before being used.
          */
         private @ColorInt int getUnresolvedBackgroundColor(StandardTemplateParams p) {
-            return isColorized(p) ? getRawColor(p) : COLOR_DEFAULT;
+            return isBackgroundColorized(p) ? getRawColor(p) : COLOR_DEFAULT;
         }
 
         /**
@@ -6880,12 +6906,14 @@ public class Notification implements Parcelable
     }
 
     /**
-     * @return true if this notification is colorized.
+     * @return true if this notification is colorized *for the purposes of ranking*.  If the
+     * {@link #color} is {@link #COLOR_DEFAULT} this will be true, even though the actual
+     * appearance of the notification may not be "colorized".
      *
      * @hide
      */
     public boolean isColorized() {
-        return color != COLOR_DEFAULT && extras.getBoolean(EXTRA_COLORIZED)
+        return extras.getBoolean(EXTRA_COLORIZED)
                 && (hasColorizedPermission() || isForegroundService());
     }
 
@@ -7397,25 +7425,11 @@ public class Notification implements Parcelable
                 return super.makeContentView(increasedHeight);
             }
 
-            Icon oldLargeIcon = mBuilder.mN.mLargeIcon;
-            mBuilder.mN.mLargeIcon = mPictureIcon;
-            // The legacy largeIcon might not allow us to clear the image, as it's taken in
-            // replacement if the other one is null. Because we're restoring these legacy icons
-            // for old listeners, this is in general non-null.
-            Bitmap largeIconLegacy = mBuilder.mN.largeIcon;
-            mBuilder.mN.largeIcon = null;
-
             StandardTemplateParams p = mBuilder.mParams.reset()
                     .viewType(StandardTemplateParams.VIEW_TYPE_NORMAL)
                     .fillTextsFrom(mBuilder)
-                    .promotePicture(true);
-            RemoteViews contentView = getStandardView(mBuilder.getBaseLayoutResource(),
-                    p, null /* result */);
-
-            mBuilder.mN.mLargeIcon = oldLargeIcon;
-            mBuilder.mN.largeIcon = largeIconLegacy;
-
-            return contentView;
+                    .promotedPicture(mPictureIcon);
+            return getStandardView(mBuilder.getBaseLayoutResource(), p, null /* result */);
         }
 
         /**
@@ -7427,25 +7441,11 @@ public class Notification implements Parcelable
                 return super.makeHeadsUpContentView(increasedHeight);
             }
 
-            Icon oldLargeIcon = mBuilder.mN.mLargeIcon;
-            mBuilder.mN.mLargeIcon = mPictureIcon;
-            // The legacy largeIcon might not allow us to clear the image, as it's taken in
-            // replacement if the other one is null. Because we're restoring these legacy icons
-            // for old listeners, this is in general non-null.
-            Bitmap largeIconLegacy = mBuilder.mN.largeIcon;
-            mBuilder.mN.largeIcon = null;
-
             StandardTemplateParams p = mBuilder.mParams.reset()
                     .viewType(StandardTemplateParams.VIEW_TYPE_HEADS_UP)
                     .fillTextsFrom(mBuilder)
-                    .promotePicture(true);
-            RemoteViews contentView = getStandardView(mBuilder.getHeadsUpBaseLayoutResource(),
-                    p, null /* result */);
-
-            mBuilder.mN.mLargeIcon = oldLargeIcon;
-            mBuilder.mN.largeIcon = largeIconLegacy;
-
-            return contentView;
+                    .promotedPicture(mPictureIcon);
+            return getStandardView(mBuilder.getHeadsUpBaseLayoutResource(), p, null /* result */);
         }
 
         /**
@@ -7540,14 +7540,21 @@ public class Notification implements Parcelable
 
             mShowBigPictureWhenCollapsed = extras.getBoolean(EXTRA_SHOW_BIG_PICTURE_WHEN_COLLAPSED);
 
+            mPictureIcon = getPictureIcon(extras);
+        }
+
+        /** @hide */
+        @Nullable
+        public static Icon getPictureIcon(@Nullable Bundle extras) {
+            if (extras == null) return null;
             // When this style adds a picture, we only add one of the keys.  If both were added,
             // it would most likely be a legacy app trying to override the picture in some way.
             // Because of that case it's better to give precedence to the legacy field.
             Bitmap bitmapPicture = extras.getParcelable(EXTRA_PICTURE);
             if (bitmapPicture != null) {
-                mPictureIcon = Icon.createWithBitmap(bitmapPicture);
+                return Icon.createWithBitmap(bitmapPicture);
             } else {
-                mPictureIcon = extras.getParcelable(EXTRA_PICTURE_ICON);
+                return extras.getParcelable(EXTRA_PICTURE_ICON);
             }
         }
 
@@ -8323,7 +8330,8 @@ public class Notification implements Parcelable
                     .hideProgress(true)
                     .title(isHeaderless ? conversationTitle : null)
                     .text(null)
-                    .hideLargeIcon(hideRightIcons || isOneToOne)
+                    .hideLeftIcon(isOneToOne)
+                    .hideRightIcon(hideRightIcons || isOneToOne)
                     .headerTextSecondary(isHeaderless ? null : conversationTitle);
             RemoteViews contentView = mBuilder.applyStandardTemplateWithActions(
                     isConversationLayout
@@ -9121,9 +9129,10 @@ public class Notification implements Parcelable
 
             StandardTemplateParams p = mBuilder.mParams.reset()
                     .viewType(StandardTemplateParams.VIEW_TYPE_NORMAL)
-                    .hideTime(numActionsToShow > 1)    // hide if actions wider than a large icon
-                    .hideSubText(numActionsToShow > 1) // hide if actions wider than a large icon
-                    .hideLargeIcon(numActionsToShow > 0)  // large icon or actions; not both
+                    .hideTime(numActionsToShow > 1)       // hide if actions wider than a right icon
+                    .hideSubText(numActionsToShow > 1)    // hide if actions wider than a right icon
+                    .hideLeftIcon(false)                  // allow large icon on left when grouped
+                    .hideRightIcon(numActionsToShow > 0)  // right icon or actions; not both
                     .hideProgress(true)
                     .fillTextsFrom(mBuilder);
             TemplateBindResult result = new TemplateBindResult();
@@ -9527,7 +9536,8 @@ public class Notification implements Parcelable
                     .viewType(viewType)
                     .callStyleActions(true)
                     .allowTextWithProgress(true)
-                    .hideLargeIcon(true)
+                    .hideLeftIcon(true)
+                    .hideRightIcon(true)
                     .hideAppName(isCollapsed)
                     .titleViewId(R.id.conversation_text)
                     .title(title)
@@ -12111,6 +12121,7 @@ public class Notification implements Parcelable
     private static class TemplateBindResult {
         boolean mRightIconVisible;
         float mRightIconWidthDp;
+        float mRightIconHeightDp;
 
         /**
          * The margin end that needs to be added to the heading so that it won't overlap
@@ -12135,10 +12146,11 @@ public class Notification implements Parcelable
          */
         public final MarginSet mTitleMarginSet = new MarginSet();
 
-        public void setRightIconState(boolean visible, float widthDp,
+        public void setRightIconState(boolean visible, float widthDp, float heightDp,
                 float marginEndDpIfVisible, float expanderSizeDp) {
             mRightIconVisible = visible;
             mRightIconWidthDp = widthDp;
+            mRightIconHeightDp = heightDp;
             mHeadingExtraMarginSet.setValues(0, marginEndDpIfVisible);
             mHeadingFullMarginSet.setValues(expanderSizeDp, marginEndDpIfVisible + expanderSizeDp);
             mTitleMarginSet.setValues(0, marginEndDpIfVisible + expanderSizeDp);
@@ -12237,7 +12249,9 @@ public class Notification implements Parcelable
         boolean mHideActions;
         boolean mHideProgress;
         boolean mHideSnoozeButton;
-        boolean mPromotePicture;
+        boolean mHideLeftIcon;
+        boolean mHideRightIcon;
+        Icon mPromotedPicture;
         boolean mCallStyleActions;
         boolean mAllowTextWithProgress;
         int mTitleViewId;
@@ -12247,7 +12261,6 @@ public class Notification implements Parcelable
         CharSequence headerTextSecondary;
         CharSequence summaryText;
         int maxRemoteInputHistory = Style.MAX_REMOTE_INPUT_HISTORY_LINES;
-        boolean hideLargeIcon;
         boolean allowColorization  = true;
         boolean mHighlightExpander = false;
 
@@ -12261,7 +12274,9 @@ public class Notification implements Parcelable
             mHideActions = false;
             mHideProgress = false;
             mHideSnoozeButton = false;
-            mPromotePicture = false;
+            mHideLeftIcon = false;
+            mHideRightIcon = false;
+            mPromotedPicture = null;
             mCallStyleActions = false;
             mAllowTextWithProgress = false;
             mTitleViewId = R.id.title;
@@ -12271,7 +12286,6 @@ public class Notification implements Parcelable
             summaryText = null;
             headerTextSecondary = null;
             maxRemoteInputHistory = Style.MAX_REMOTE_INPUT_HISTORY_LINES;
-            hideLargeIcon = false;
             allowColorization = true;
             mHighlightExpander = false;
             return this;
@@ -12336,8 +12350,8 @@ public class Notification implements Parcelable
             return this;
         }
 
-        final StandardTemplateParams promotePicture(boolean promotePicture) {
-            this.mPromotePicture = promotePicture;
+        final StandardTemplateParams promotedPicture(Icon promotedPicture) {
+            this.mPromotedPicture = promotedPicture;
             return this;
         }
 
@@ -12371,8 +12385,14 @@ public class Notification implements Parcelable
             return this;
         }
 
-        final StandardTemplateParams hideLargeIcon(boolean hideLargeIcon) {
-            this.hideLargeIcon = hideLargeIcon;
+
+        final StandardTemplateParams hideLeftIcon(boolean hideLeftIcon) {
+            this.mHideLeftIcon = hideLeftIcon;
+            return this;
+        }
+
+        final StandardTemplateParams hideRightIcon(boolean hideRightIcon) {
+            this.mHideRightIcon = hideRightIcon;
             return this;
         }
 
@@ -12409,7 +12429,8 @@ public class Notification implements Parcelable
             // Minimally decorated custom views do not show certain pieces of chrome that have
             // always been shown when using DecoratedCustomViewStyle.
             boolean hideOtherFields = decorationType <= DECORATION_MINIMAL;
-            hideLargeIcon(hideOtherFields);
+            hideLeftIcon(false);  // The left icon decoration is better than showing nothing.
+            hideRightIcon(hideOtherFields);
             hideProgress(hideOtherFields);
             hideActions(hideOtherFields);
             return this;

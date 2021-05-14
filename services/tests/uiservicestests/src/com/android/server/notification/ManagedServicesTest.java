@@ -100,6 +100,7 @@ public class ManagedServicesTest extends UiServiceTestCase {
     private String mVersionString;
     private final Set<ComponentName> mDefaults = new ArraySet();
     private ManagedServices mService;
+    private String mUserSetString;
 
     private static final String SETTING = "setting";
     private static final String SECONDARY_SETTING = "secondary_setting";
@@ -138,7 +139,7 @@ public class ManagedServicesTest extends UiServiceTestCase {
         profileIds.add(13);
         when(mUserProfiles.getCurrentProfileIds()).thenReturn(profileIds);
 
-        mVersionString = "2";
+        mVersionString = "4";
         mExpectedPrimary = new ArrayMap<>();
         mExpectedSecondary = new ArrayMap<>();
         mExpectedPrimaryPackages = new ArrayMap<>();
@@ -1363,6 +1364,7 @@ public class ManagedServicesTest extends UiServiceTestCase {
     public void loadDefaults_noVersionWithDefaults() throws Exception {
         resetComponentsAndPackages();
         mDefaults.add(new ComponentName("default", "class"));
+        mVersionString = null;
         loadXml(mService);
         assertEquals(mService.getDefaultComponents(), mDefaults);
     }
@@ -1421,12 +1423,34 @@ public class ManagedServicesTest extends UiServiceTestCase {
         resetComponentsAndPackages();
         mDefaults.add(new ComponentName("default", "class"));
         mDefaultsString = "xml/class";
-        mVersionString = String.valueOf(mService.DB_VERSION);
         loadXml(mService);
         assertEquals(mService.getDefaultComponents(),
                 new ArraySet(Arrays.asList(new ComponentName("xml", "class"))));
     }
 
+    @Test
+    public void upgradeUserSet_versionThree() throws Exception {
+        resetComponentsAndPackages();
+
+        List<UserInfo> users = new ArrayList<>();
+        users.add(new UserInfo(98, "98", 0));
+        users.add(new UserInfo(99, "99", 0));
+        for (UserInfo user : users) {
+            when(mUm.getUserInfo(eq(user.id))).thenReturn(user);
+        }
+
+        mDefaultsString = "xml/class";
+        mVersionString = "3";
+        mUserSetString = "xml/class";
+        loadXml(mService);
+
+        //Test services without overriding upgradeUserSet() remain unchanged
+        assertEquals(new ArraySet(Arrays.asList(mUserSetString)),
+                mService.mUserSetServices.get(98));
+        assertEquals(new ArraySet(Arrays.asList(mUserSetString)),
+                mService.mUserSetServices.get(99));
+        assertEquals(new ArrayMap(), mService.mIsUserChanged);
+    }
 
     private void resetComponentsAndPackages() {
         ArrayMap<Integer, ArrayMap<Integer, String>> empty = new ArrayMap(1);
@@ -1468,11 +1492,17 @@ public class ManagedServicesTest extends UiServiceTestCase {
         xml.append("<" + ManagedServices.TAG_MANAGED_SERVICES + " "
                         + ManagedServices.ATT_USER_ID + "=\"99\" "
                         + ManagedServices.ATT_IS_PRIMARY + "=\"true\" "
-                        + ManagedServices.ATT_APPROVED_LIST + "=\"990\" />\n");
+                        + ManagedServices.ATT_APPROVED_LIST + "=\"990\" "
+                        + (mUserSetString != null ? ManagedServices.ATT_USER_SET + "=\""
+                        + mUserSetString + "\" " : "")
+                        + "/>\n");
         xml.append("<" + ManagedServices.TAG_MANAGED_SERVICES + " "
                 + ManagedServices.ATT_USER_ID + "=\"98\" "
                 + ManagedServices.ATT_IS_PRIMARY + "=\"false\" "
-                + ManagedServices.ATT_APPROVED_LIST + "=\"981\" />\n");
+                + ManagedServices.ATT_APPROVED_LIST + "=\"981\" "
+                + (mUserSetString != null ? ManagedServices.ATT_USER_SET + "=\""
+                + mUserSetString + "\" " : "")
+                + " />\n");
         xml.append("</" + xmlTag + ">");
 
         return xml.toString();

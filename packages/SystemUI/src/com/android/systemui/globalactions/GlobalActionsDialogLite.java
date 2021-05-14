@@ -249,7 +249,43 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         GA_SCREENSHOT_PRESS(347),
 
         @UiEvent(doc = "The global actions screenshot button was long pressed.")
-        GA_SCREENSHOT_LONG_PRESS(348);
+        GA_SCREENSHOT_LONG_PRESS(348),
+
+        @UiEvent(doc = "The global actions power off button was pressed.")
+        GA_SHUTDOWN_PRESS(802),
+
+        @UiEvent(doc = "The global actions power off button was long pressed.")
+        GA_SHUTDOWN_LONG_PRESS(803),
+
+        @UiEvent(doc = "The global actions reboot button was pressed.")
+        GA_REBOOT_PRESS(349),
+
+        @UiEvent(doc = "The global actions reboot button was long pressed.")
+        GA_REBOOT_LONG_PRESS(804),
+
+        @UiEvent(doc = "The global actions lockdown button was pressed.")
+        GA_LOCKDOWN_PRESS(354), // already created by cwren apparently
+
+        @UiEvent(doc = "Power menu was opened via quick settings button.")
+        GA_OPEN_QS(805),
+
+        @UiEvent(doc = "Power menu was opened via power + volume up.")
+        GA_OPEN_POWER_VOLUP(806),
+
+        @UiEvent(doc = "Power menu was opened via long press on power.")
+        GA_OPEN_LONG_PRESS_POWER(807),
+
+        @UiEvent(doc = "Power menu was closed via long press on power.")
+        GA_CLOSE_LONG_PRESS_POWER(808),
+
+        @UiEvent(doc = "Power menu was dismissed by back gesture.")
+        GA_CLOSE_BACK(809),
+
+        @UiEvent(doc = "Power menu was dismissed by tapping outside dialog.")
+        GA_CLOSE_TAP_OUTSIDE(810),
+
+        @UiEvent(doc = "Power menu was closed via power + volume up.")
+        GA_CLOSE_POWER_VOLUP(811);
 
         private final int mId;
 
@@ -347,6 +383,10 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
 
     protected Context getContext() {
         return mContext;
+    }
+
+    protected UiEventLogger getEventLogger() {
+        return mUiEventLogger;
     }
 
     /**
@@ -581,9 +621,8 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
                 mAdapter, mOverflowAdapter,
                 mDepthController, mSysuiColorExtractor,
                 mStatusBarService, mNotificationShadeWindowController,
-                mSysUiState, this::onRotate, mKeyguardShowing, mPowerAdapter);
+                mSysUiState, this::onRotate, mKeyguardShowing, mPowerAdapter, mUiEventLogger);
 
-        dialog.setCanceledOnTouchOutside(true);
         dialog.setOnDismissListener(this);
         dialog.setOnShowListener(this);
 
@@ -680,13 +719,14 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
 
     @VisibleForTesting
     final class ShutDownAction extends SinglePressAction implements LongPressAction {
-        private ShutDownAction() {
+        ShutDownAction() {
             super(R.drawable.ic_lock_power_off,
                     R.string.global_action_power_off);
         }
 
         @Override
         public boolean onLongPress() {
+            mUiEventLogger.log(GlobalActionsEvent.GA_SHUTDOWN_LONG_PRESS);
             if (!mUserManager.hasUserRestriction(UserManager.DISALLOW_SAFE_BOOT)) {
                 mWindowManagerFuncs.reboot(true);
                 return true;
@@ -706,6 +746,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
 
         @Override
         public void onPress() {
+            mUiEventLogger.log(GlobalActionsEvent.GA_SHUTDOWN_PRESS);
             // shutdown by making sure radio and power are handled accordingly.
             mWindowManagerFuncs.shutdown();
         }
@@ -808,12 +849,13 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
 
     @VisibleForTesting
     final class RestartAction extends SinglePressAction implements LongPressAction {
-        private RestartAction() {
+        RestartAction() {
             super(R.drawable.ic_restart, R.string.global_action_restart);
         }
 
         @Override
         public boolean onLongPress() {
+            mUiEventLogger.log(GlobalActionsEvent.GA_REBOOT_LONG_PRESS);
             if (!mUserManager.hasUserRestriction(UserManager.DISALLOW_SAFE_BOOT)) {
                 mWindowManagerFuncs.reboot(true);
                 return true;
@@ -833,6 +875,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
 
         @Override
         public void onPress() {
+            mUiEventLogger.log(GlobalActionsEvent.GA_REBOOT_PRESS);
             mWindowManagerFuncs.reboot(false);
         }
     }
@@ -1063,6 +1106,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         public void onPress() {
             mLockPatternUtils.requireStrongAuth(STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN,
                     UserHandle.USER_ALL);
+            mUiEventLogger.log(GlobalActionsEvent.GA_LOCKDOWN_PRESS);
             try {
                 mIWindowManager.lockNow(null);
                 // Lock profiles (if any) on the background thread.
@@ -2050,6 +2094,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         private ListPopupWindow mOverflowPopup;
         private Dialog mPowerOptionsDialog;
         protected final Runnable mOnRotateCallback;
+        private UiEventLogger mUiEventLogger;
 
         protected ViewGroup mContainer;
 
@@ -2059,7 +2104,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
                 SysuiColorExtractor sysuiColorExtractor, IStatusBarService statusBarService,
                 NotificationShadeWindowController notificationShadeWindowController,
                 SysUiState sysuiState, Runnable onRotateCallback, boolean keyguardShowing,
-                MyPowerOptionsAdapter powerAdapter) {
+                MyPowerOptionsAdapter powerAdapter, UiEventLogger uiEventLogger) {
             super(context, themeRes);
             mContext = context;
             mAdapter = adapter;
@@ -2072,6 +2117,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             mSysUiState = sysuiState;
             mOnRotateCallback = onRotateCallback;
             mKeyguardShowing = keyguardShowing;
+            mUiEventLogger = uiEventLogger;
 
             // Window initialization
             Window window = getWindow();
@@ -2080,7 +2126,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             window.getDecorView();
             window.getAttributes().systemUiVisibility |= View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                     | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
-            window.setLayout(MATCH_PARENT, WRAP_CONTENT);
+            window.setLayout(MATCH_PARENT, MATCH_PARENT);
             window.addFlags(
                     WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                             | WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR
@@ -2141,6 +2187,10 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             mGlobalActionsLayout.setRotationListener(this::onRotate);
             mGlobalActionsLayout.setAdapter(mAdapter);
             mContainer = findViewById(com.android.systemui.R.id.global_actions_container);
+            mContainer.setOnClickListener(v -> {
+                mUiEventLogger.log(GlobalActionsEvent.GA_CLOSE_TAP_OUTSIDE);
+                cancel();
+            });
 
             View overflowButton = findViewById(
                     com.android.systemui.R.id.global_actions_overflow_button);
@@ -2178,7 +2228,6 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
 
         @Override
         protected void onStart() {
-            super.setCanceledOnTouchOutside(true);
             super.onStart();
             mGlobalActionsLayout.updateList();
 
@@ -2213,6 +2262,12 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         protected void onStop() {
             super.onStop();
             mColorExtractor.removeOnColorsChangedListener(this);
+        }
+
+        @Override
+        public void onBackPressed() {
+            super.onBackPressed();
+            mUiEventLogger.log(GlobalActionsEvent.GA_CLOSE_BACK);
         }
 
         @Override

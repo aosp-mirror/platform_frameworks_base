@@ -33,7 +33,6 @@ import static com.android.systemui.plugins.FalsingManager.LOW_PENALTY;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.app.ActivityManager;
 import android.app.IActivityManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
@@ -147,6 +146,7 @@ public class KeyguardIndicationController implements KeyguardStateController.Cal
     private long mChargingTimeRemaining;
     private String mMessageToShowOnScreenOn;
     protected int mLockScreenMode;
+    private boolean mInited;
 
     private KeyguardUpdateMonitorCallback mUpdateMonitorCallback;
 
@@ -174,7 +174,9 @@ public class KeyguardIndicationController implements KeyguardStateController.Cal
             IBatteryStats iBatteryStats,
             UserManager userManager,
             @Main DelayableExecutor executor,
-            FalsingManager falsingManager) {
+            FalsingManager falsingManager,
+            LockPatternUtils lockPatternUtils,
+            IActivityManager iActivityManager) {
         mContext = context;
         mBroadcastDispatcher = broadcastDispatcher;
         mDevicePolicyManager = devicePolicyManager;
@@ -182,17 +184,26 @@ public class KeyguardIndicationController implements KeyguardStateController.Cal
         mStatusBarStateController = statusBarStateController;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mDockManager = dockManager;
-        mDockManager.addAlignmentStateListener(
-                alignState -> mHandler.post(() -> handleAlignStateChanged(alignState)));
         mWakeLock = new SettableWakeLock(
                 wakeLockBuilder.setTag("Doze:KeyguardIndication").build(), TAG);
         mBatteryInfo = iBatteryStats;
         mUserManager = userManager;
         mExecutor = executor;
-        mLockPatternUtils = new LockPatternUtils(context);
-        mIActivityManager = ActivityManager.getService();
+        mLockPatternUtils = lockPatternUtils;
+        mIActivityManager = iActivityManager;
         mFalsingManager = falsingManager;
 
+    }
+
+    /** Call this after construction to finish setting up the instance. */
+    public void init() {
+        if (mInited) {
+            return;
+        }
+        mInited = true;
+
+        mDockManager.addAlignmentStateListener(
+                alignState -> mHandler.post(() -> handleAlignStateChanged(alignState)));
         mKeyguardUpdateMonitor.registerCallback(getKeyguardCallback());
         mKeyguardUpdateMonitor.registerCallback(mTickReceiver);
         mStatusBarStateController.addCallback(mStatusBarStateListener);
@@ -492,8 +503,12 @@ public class KeyguardIndicationController implements KeyguardStateController.Cal
         return UserHandle.USER_NULL;
     }
 
-    @VisibleForTesting
-    protected void setVisible(boolean visible) {
+    /**
+     * Sets the visibility of keyguard bottom area, and if the indications are updatable.
+     *
+     * @param visible true to make the area visible and update the indication, false otherwise.
+     */
+    public void setVisible(boolean visible) {
         mVisible = visible;
         mIndicationArea.setVisibility(visible ? VISIBLE : GONE);
         if (visible) {

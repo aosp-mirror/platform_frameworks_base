@@ -2660,7 +2660,6 @@ public final class Settings {
     private static final class ContentProviderHolder {
         private final Object mLock = new Object();
 
-        @GuardedBy("mLock")
         private final Uri mUri;
         @GuardedBy("mLock")
         @UnsupportedAppUsage
@@ -8546,9 +8545,10 @@ public final class Settings {
                 "one_handed_tutorial_show_count";
 
         /**
-         * Indicates whether ui translation is enabled.
+         * Toggle to enable/disable for the apps to use the Ui translation for Views. The value
+         * indicates whether the Ui translation is enabled by the user.
          * <p>
-         * Type: int (0 for false, 1 for true)
+         * Type: {@code int} ({@code 0} for disabled, {@code 1} for enabled)
          *
          * @hide
          */
@@ -8636,7 +8636,6 @@ public final class Settings {
          */
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         @TestApi
-        @Readable
         public static final String NFC_PAYMENT_DEFAULT_COMPONENT = "nfc_payment_default_component";
 
         /**
@@ -9919,6 +9918,18 @@ public final class Settings {
          */
         public static final String ACCESSIBILITY_FLOATING_MENU_OPACITY =
                 "accessibility_floating_menu_opacity";
+
+        /**
+         * Prompts the user to the Accessibility button is replaced with the floating menu.
+         * <ul>
+         *    <li> 0 = disabled </li>
+         *    <li> 1 = enabled </li>
+         * </ul>
+         *
+         * @hide
+         */
+        public static final String ACCESSIBILITY_FLOATING_MENU_MIGRATION_TOOLTIP_PROMPT =
+                "accessibility_floating_menu_migration_tooltip_prompt";
 
         /**
          * Whether the Adaptive connectivity option is enabled.

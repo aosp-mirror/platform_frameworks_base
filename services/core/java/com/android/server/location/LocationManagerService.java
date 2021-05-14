@@ -146,7 +146,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * The service class that manages LocationProviders and issues location
  * updates and alerts.
  */
-public class LocationManagerService extends ILocationManager.Stub {
+public class LocationManagerService extends ILocationManager.Stub implements
+        LocationProviderManager.StateChangedListener {
 
     /**
      * Controls lifecycle of LocationManagerService.
@@ -228,7 +229,7 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     private static final String ATTRIBUTION_TAG = "LocationService";
 
-    private final Object mLock = new Object();
+    final Object mLock = new Object();
 
     private final Context mContext;
     private final Injector mInjector;
@@ -257,7 +258,7 @@ public class LocationManagerService extends ILocationManager.Stub {
             new CopyOnWriteArrayList<>();
 
     @GuardedBy("mLock")
-    private @Nullable OnProviderLocationTagsChangeListener mOnProviderLocationTagsChangeListener;
+    @Nullable OnProviderLocationTagsChangeListener mOnProviderLocationTagsChangeListener;
 
     LocationManagerService(Context context, Injector injector) {
         mContext = context.createAttributionContext(ATTRIBUTION_TAG);
@@ -269,6 +270,13 @@ public class LocationManagerService extends ILocationManager.Stub {
 
         mInjector.getSettingsHelper().addOnLocationEnabledChangedListener(
                 this::onLocationModeChanged);
+        mInjector.getSettingsHelper().addOnIgnoreSettingsPackageWhitelistChangedListener(
+                () -> refreshAppOpsRestrictions(UserHandle.USER_ALL));
+        mInjector.getUserInfoHelper().addListener((userId, change) -> {
+            if (change == UserInfoHelper.UserListener.USER_STARTED) {
+                refreshAppOpsRestrictions(userId);
+            }
+        });
 
         // set up passive provider first since it will be required for all other location providers,
         // which are loaded later once the system is ready.
@@ -324,9 +332,8 @@ public class LocationManagerService extends ILocationManager.Stub {
         synchronized (mProviderManagers) {
             Preconditions.checkState(getLocationProviderManager(manager.getName()) == null);
 
-            manager.startManager();
-            manager.setOnProviderLocationTagsChangeListener(
-                    mOnProviderLocationTagsChangeListener);
+            manager.startManager(this);
+
             if (realProvider != null) {
                 // custom logic wrapping all non-passive providers
                 if (manager != mPassiveManager) {
@@ -482,6 +489,8 @@ public class LocationManagerService extends ILocationManager.Stub {
                 .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY)
                 .addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
         mContext.sendBroadcastAsUser(intent, UserHandle.of(userId));
+
+        refreshAppOpsRestrictions(userId);
     }
 
     @Override
@@ -1347,6 +1356,88 @@ public class LocationManagerService extends ILocationManager.Stub {
         ipw.decreaseIndent();
     }
 
+    @Override
+    public void onStateChanged(String provider, AbstractLocationProvider.State oldState,
+            AbstractLocationProvider.State newState) {
+        if (!Objects.equals(oldState.identity, newState.identity)) {
+            refreshAppOpsRestrictions(UserHandle.USER_ALL);
+        }
+
+        OnProviderLocationTagsChangeListener listener;
+        synchronized (mLock) {
+            listener = mOnProviderLocationTagsChangeListener;
+        }
+
+        if (listener != null) {
+            if (!oldState.extraAttributionTags.equals(newState.extraAttributionTags)
+                    || !Objects.equals(oldState.identity, newState.identity)) {
+                if (oldState.identity != null) {
+                    listener.onLocationTagsChanged(
+                            new LocationManagerInternal.LocationTagInfo(
+                                    oldState.identity.getUid(),
+                                    oldState.identity.getPackageName(),
+                                    Collections.emptySet()));
+                }
+                if (newState.identity != null) {
+                    ArraySet<String> attributionTags = new ArraySet<>(
+                            newState.extraAttributionTags.size() + 1);
+                    attributionTags.addAll(newState.extraAttributionTags);
+                    attributionTags.add(newState.identity.getAttributionTag());
+
+                    listener.onLocationTagsChanged(
+                            new LocationManagerInternal.LocationTagInfo(
+                                    newState.identity.getUid(),
+                                    newState.identity.getPackageName(),
+                                    attributionTags));
+                }
+            }
+        }
+    }
+
+    private void refreshAppOpsRestrictions(int userId) {
+        if (userId == UserHandle.USER_ALL) {
+            final int[] runningUserIds = mInjector.getUserInfoHelper().getRunningUserIds();
+            for (int i = 0; i < runningUserIds.length; i++) {
+                refreshAppOpsRestrictions(runningUserIds[i]);
+            }
+            return;
+        }
+
+        Preconditions.checkArgument(userId >= 0);
+
+
+        boolean enabled = mInjector.getSettingsHelper().isLocationEnabled(userId);
+
+        String[] allowedPackages = null;
+        if (!enabled) {
+            ArraySet<String> packages = new ArraySet<>();
+            for (LocationProviderManager manager : mProviderManagers) {
+                CallerIdentity identity = manager.getIdentity();
+                if (identity != null) {
+                    packages.add(identity.getPackageName());
+                }
+            }
+            packages.add(mContext.getPackageName());
+            packages.addAll(mInjector.getSettingsHelper().getIgnoreSettingsPackageWhitelist());
+            allowedPackages = packages.toArray(new String[0]);
+        }
+
+        AppOpsManager appOpsManager = Objects.requireNonNull(
+                mContext.getSystemService(AppOpsManager.class));
+        appOpsManager.setUserRestrictionForUser(
+                AppOpsManager.OP_COARSE_LOCATION,
+                !enabled,
+                LocationManagerService.this,
+                allowedPackages,
+                userId);
+        appOpsManager.setUserRestrictionForUser(
+                AppOpsManager.OP_FINE_LOCATION,
+                !enabled,
+                LocationManagerService.this,
+                allowedPackages,
+                userId);
+    }
+
     private class LocalService extends LocationManagerInternal {
 
         LocalService() {}
@@ -1421,11 +1512,6 @@ public class LocationManagerService extends ILocationManager.Stub {
                 @Nullable OnProviderLocationTagsChangeListener listener) {
             synchronized (mLock) {
                 mOnProviderLocationTagsChangeListener = listener;
-                final int providerCount = mProviderManagers.size();
-                for (int i = 0; i < providerCount; i++) {
-                    final LocationProviderManager manager = mProviderManagers.get(i);
-                    manager.setOnProviderLocationTagsChangeListener(listener);
-                }
             }
         }
     }

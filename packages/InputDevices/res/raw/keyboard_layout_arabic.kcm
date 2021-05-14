@@ -171,15 +171,15 @@ key P {
 }
 
 key LEFT_BRACKET {
-    label:                              '['
+    label:                              ']'
     base, capslock:                     '\u062c'
-    shift:                              '<'
+    shift:                              '>'
 }
 
 key RIGHT_BRACKET {
-    label:                              ']'
+    label:                              '['
     base, capslock:                     '\u062f'
-    shift:                              '>'
+    shift:                              '<'
 }
 
 key BACKSLASH {

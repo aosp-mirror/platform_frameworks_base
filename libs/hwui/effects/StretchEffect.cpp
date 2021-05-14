@@ -68,9 +68,8 @@ static const SkString stretchShader = SkString(R"(
     // and the other way around.
     uniform float uInterpolationStrength;
 
-    float easeInCubic(float t, float d) {
-        float tmp = t * d;
-        return tmp * tmp * tmp;
+    float easeIn(float t, float d) {
+        return t * d;
     }
 
     float computeOverscrollStart(
@@ -83,7 +82,7 @@ static const SkString stretchShader = SkString(R"(
     ) {
         float offsetPos = uStretchAffectedDist - inPos;
         float posBasedVariation = mix(
-                1. ,easeInCubic(offsetPos, uInverseStretchAffectedDist), interpolationStrength);
+                1. ,easeIn(offsetPos, uInverseStretchAffectedDist), interpolationStrength);
         float stretchIntensity = overscroll * posBasedVariation;
         return distanceStretched - (offsetPos / (1. + stretchIntensity));
     }
@@ -99,7 +98,7 @@ static const SkString stretchShader = SkString(R"(
     ) {
         float offsetPos = inPos - reverseStretchDist;
         float posBasedVariation = mix(
-                1. ,easeInCubic(offsetPos, uInverseStretchAffectedDist), interpolationStrength);
+                1. ,easeIn(offsetPos, uInverseStretchAffectedDist), interpolationStrength);
         float stretchIntensity = (-overscroll) * posBasedVariation;
         return 1 - (distanceStretched - (offsetPos / (1. + stretchIntensity)));
     }
@@ -232,6 +231,82 @@ sk_sp<SkShader> StretchEffect::getShader(float width, float height,
 sk_sp<SkRuntimeEffect> StretchEffect::getStretchEffect() {
     const static SkRuntimeEffect::Result instance = SkRuntimeEffect::MakeForShader(stretchShader);
     return instance.effect;
+}
+
+/**
+ * Helper method that maps the input texture position to the stretch position
+ * based on the given overscroll value that represents an overscroll from
+ * either the top or left
+ * @param overscroll current overscroll value
+ * @param input normalized input position (can be x or y) on the input texture
+ * @return stretched position of the input normalized from 0 to 1
+ */
+float reverseMapStart(float overscroll, float input) {
+    float numerator = (-input * overscroll * overscroll) -
+        (2 * input * overscroll) - input;
+    float denominator = 1.f + (.3f * overscroll) +
+        (.7f * input * overscroll * overscroll) + (.7f * input * overscroll);
+    return -(numerator / denominator);
+}
+
+/**
+ * Helper method that maps the input texture position to the stretch position
+ * based on the given overscroll value that represents an overscroll from
+ * either the bottom or right
+ * @param overscroll current overscroll value
+ * @param input normalized input position (can be x or y) on the input texture
+ * @return stretched position of the input normalized from 0 to 1
+ */
+float reverseMapEnd(float overscroll, float input) {
+    float numerator = (.3f * overscroll * overscroll) -
+        (.3f * input * overscroll * overscroll) +
+        (1.3f * input * overscroll) - overscroll - input;
+    float denominator = (.7f * input * overscroll * overscroll) -
+        (.7f * input * overscroll) - (.7f * overscroll * overscroll) +
+        overscroll - 1.f;
+    return numerator / denominator;
+}
+
+/**
+  * Calculates the normalized stretch position given the normalized input
+  * position. This handles calculating the overscroll from either the
+  * top or left vs bottom or right depending on the sign of the given overscroll
+  * value
+  *
+  * @param overscroll unit vector of overscroll from -1 to 1 indicating overscroll
+  * from the bottom or right vs top or left respectively
+  * @param normalizedInput the
+  * @return
+  */
+float computeReverseOverscroll(float overscroll, float normalizedInput) {
+    float distanceStretched = 1.f / (1.f + abs(overscroll));
+    float distanceDiff = distanceStretched - 1.f;
+    if (overscroll > 0) {
+        float output = reverseMapStart(overscroll, normalizedInput);
+        if (output <= 1.0f) {
+            return output;
+        } else if (output >= distanceStretched){
+            return output - distanceDiff;
+        }
+    }
+
+    if (overscroll < 0) {
+        float output = reverseMapEnd(overscroll, normalizedInput);
+        if (output >= 0.f) {
+            return output;
+        } else if (output < 0.f){
+            return output + distanceDiff;
+        }
+    }
+    return normalizedInput;
+}
+
+float StretchEffect::computeStretchedPositionX(float normalizedX) const {
+  return computeReverseOverscroll(mStretchDirection.x(), normalizedX);
+}
+
+float StretchEffect::computeStretchedPositionY(float normalizedY) const {
+  return computeReverseOverscroll(mStretchDirection.y(), normalizedY);
 }
 
 } // namespace android::uirenderer

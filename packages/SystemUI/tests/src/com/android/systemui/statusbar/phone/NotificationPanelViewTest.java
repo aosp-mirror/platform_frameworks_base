@@ -89,6 +89,7 @@ import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.VibratorHelper;
+import com.android.systemui.statusbar.events.PrivacyDotViewController;
 import com.android.systemui.statusbar.notification.ConversationNotificationManager;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -101,6 +102,7 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.util.time.FakeSystemClock;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 
@@ -243,6 +245,10 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     private QuickAccessWalletClient mQuickAccessWalletClient;
     @Mock
     private KeyguardMediaController mKeyguardMediaController;
+    @Mock
+    private PrivacyDotViewController mPrivacyDotViewController;
+    @Mock
+    private SecureSettings mSecureSettings;
 
     private SysuiStatusBarStateController mStatusBarStateController;
     private NotificationPanelViewController mNotificationPanelViewController;
@@ -351,7 +357,9 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mFeatureFlags,
                 mQuickAccessWalletClient,
                 mKeyguardMediaController,
-                new FakeExecutor(new FakeSystemClock()));
+                mPrivacyDotViewController,
+                new FakeExecutor(new FakeSystemClock()),
+                mSecureSettings);
         mNotificationPanelViewController.initDependencies(
                 mStatusBar,
                 mNotificationShelfController);

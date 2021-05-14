@@ -2033,6 +2033,12 @@ public class ParsingPackageUtils {
                                 .AndroidManifestApplication_requestRawExternalStorageAccess,
                         false));
             }
+            if (sa.hasValue(
+                    R.styleable.AndroidManifestApplication_requestForegroundServiceExemption)) {
+                pkg.setRequestForegroundServiceExemption(sa.getBoolean(R.styleable
+                                .AndroidManifestApplication_requestForegroundServiceExemption,
+                        false));
+            }
         } finally {
             sa.recycle();
         }

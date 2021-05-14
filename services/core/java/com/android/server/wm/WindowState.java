@@ -751,11 +751,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     int mFrameRateSelectionPriority = RefreshRatePolicy.LAYER_PRIORITY_UNSET;
 
     /**
-     * This is the frame rate which is passed to SurfaceFlinger if the window is part of the
-     * high refresh rate deny list. The variable is cached, so we do not send too many updates to
-     * SF.
+     * This is the frame rate which is passed to SurfaceFlinger if the window set a
+     * preferredDisplayModeId or is part of the high refresh rate deny list.
+     * The variable is cached, so we do not send too many updates to SF.
      */
-    float mDenyListFrameRate = 0f;
+    float mAppPreferredFrameRate = 0f;
 
     static final int BLAST_TIMEOUT_DURATION = 5000; /* milliseconds */
 
@@ -2309,7 +2309,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // When the window configuration changed, we need to update the IME control target in
         // case the app may lose the IME inets control when exiting from split-screen mode, or the
         // IME parent may failed to attach to the app during rotating the screen.
-        // See DisplayContent#isImeAttachedToApp, DisplayContent#isImeControlledByApp
+        // See DisplayContent#shouldImeAttachedToApp, DisplayContent#isImeControlledByApp
         if (windowConfigChanged) {
             getDisplayContent().updateImeControlTarget();
         }
@@ -2412,14 +2412,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         if (startingWindow && StartingSurfaceController.DEBUG_ENABLE_SHELL_DRAWER) {
-            // cancel the remove starting window animation on shell
+            // Cancel the remove starting window animation on shell. The main window might changed
+            // during animating, checking for all windows would be safer.
             if (mActivityRecord != null) {
-                final WindowState mainWindow =
-                        mActivityRecord.findMainWindow(false/* includeStartingApp */);
-                if (mainWindow != null && mainWindow.isSelfAnimating(0 /* flags */,
-                        ANIMATION_TYPE_STARTING_REVEAL)) {
-                    mainWindow.cancelAnimation();
-                }
+                mActivityRecord.forAllWindows(w -> {
+                    if (w.isSelfAnimating(0, ANIMATION_TYPE_STARTING_REVEAL)) {
+                        w.cancelAnimation();
+                    }
+                }, true);
             }
         }
 
@@ -2680,6 +2680,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // Create fake event receiver that simply reports all events as handled.
             mDeadWindowEventReceiver = new DeadWindowEventReceiver(mInputChannel);
         }
+    }
+
+    /**
+     * Move the touch gesture from the currently touched window on this display to this window.
+     */
+    public boolean transferTouch() {
+        return mWmService.mInputManager.transferTouch(mInputChannelToken);
     }
 
     void disposeInputChannel() {
@@ -4842,7 +4849,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // directly above it. The exception is if we are in split screen
         // in which case we process the IME at the DisplayContent level to
         // ensure it is above the docked divider.
-        if (isImeLayeringTarget() && !inSplitScreenWindowingMode()) {
+        // (i.e. Like {@link DisplayContent.ImeContainer#skipImeWindowsDuringTraversal}, the IME
+        // window will be ignored to traverse when the IME target is still in split-screen mode).
+        if (isImeLayeringTarget()
+                && !getDisplayContent().getDefaultTaskDisplayArea().isSplitScreenModeActivated()) {
             if (getDisplayContent().forAllImeWindows(callback, traverseTopToBottom)) {
                 return true;
             }
@@ -5406,10 +5416,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         final float refreshRate = refreshRatePolicy.getPreferredRefreshRate(this);
-        if (mDenyListFrameRate != refreshRate) {
-            mDenyListFrameRate = refreshRate;
+        if (mAppPreferredFrameRate != refreshRate) {
+            mAppPreferredFrameRate = refreshRate;
             getPendingTransaction().setFrameRate(
-                    mSurfaceControl, mDenyListFrameRate, Surface.FRAME_RATE_COMPATIBILITY_EXACT);
+                    mSurfaceControl, mAppPreferredFrameRate,
+                    Surface.FRAME_RATE_COMPATIBILITY_EXACT, Surface.CHANGE_FRAME_RATE_ALWAYS);
         }
     }
 

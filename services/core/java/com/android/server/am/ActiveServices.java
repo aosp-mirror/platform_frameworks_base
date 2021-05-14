@@ -16,6 +16,8 @@
 
 package com.android.server.am;
 
+import static android.Manifest.permission.REQUEST_COMPANION_RUN_IN_BACKGROUND;
+import static android.Manifest.permission.REQUEST_COMPANION_START_FOREGROUND_SERVICES_FROM_BACKGROUND;
 import static android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND;
 import static android.Manifest.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND;
 import static android.app.ActivityManager.PROCESS_STATE_HEAVY_WEIGHT;
@@ -24,6 +26,7 @@ import static android.app.ActivityManager.PROCESS_STATE_TOP;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MANIFEST;
 import static android.os.PowerExemptionManager.REASON_ACTIVITY_VISIBILITY_GRACE_PERIOD;
+import static android.os.PowerExemptionManager.REASON_OPT_OUT_REQUESTED;
 import static android.os.PowerExemptionManager.REASON_OP_ACTIVATE_PLATFORM_VPN;
 import static android.os.PowerExemptionManager.REASON_OP_ACTIVATE_VPN;
 import static android.os.PowerExemptionManager.REASON_TEMP_ALLOWED_WHILE_IN_USE;
@@ -309,11 +312,23 @@ public final class ActiveServices {
      * Watch for apps being put into forced app standby, so we can step their fg
      * services down.
      */
-    class ForcedStandbyListener implements AppStateTracker.ServiceStateListener {
+    class ForcedStandbyListener implements AppStateTracker.ForcedAppStandbyListener {
         @Override
-        public void stopForegroundServicesForUidPackage(final int uid, final String packageName) {
+        public void updateForceAppStandbyForUidPackage(int uid, String packageName,
+                boolean standby) {
             synchronized (mAm) {
-                stopAllForegroundServicesLocked(uid, packageName);
+                if (standby) {
+                    stopAllForegroundServicesLocked(uid, packageName);
+                }
+                mAm.mProcessList.updateForceAppStandbyForUidPackageLocked(
+                        uid, packageName, standby);
+            }
+        }
+
+        @Override
+        public void updateForcedAppStandbyForAllApps() {
+            synchronized (mAm) {
+                mAm.mProcessList.updateForcedAppStandbyForAllAppsLocked();
             }
         }
     }
@@ -499,7 +514,7 @@ public final class ActiveServices {
 
     void systemServicesReady() {
         AppStateTracker ast = LocalServices.getService(AppStateTracker.class);
-        ast.addServiceStateListener(new ForcedStandbyListener());
+        ast.addForcedAppStandbyListener(new ForcedStandbyListener());
         mAppWidgetManagerInternal = LocalServices.getService(AppWidgetManagerInternal.class);
         setAllowListWhileInUsePermissionInFgs();
     }
@@ -5818,6 +5833,26 @@ public final class ActiveServices {
             }
         }
 
+        // Check for CDM apps with either REQUEST_COMPANION_RUN_IN_BACKGROUND or
+        // REQUEST_COMPANION_START_FOREGROUND_SERVICES_FROM_BACKGROUND.
+        // Note: When a CDM app has REQUEST_COMPANION_RUN_IN_BACKGROUND, the app is also put
+        // in the user-allowlist. However, in this case, we want to use the reason code
+        // REASON_COMPANION_DEVICE_MANAGER, so this check needs to be before the
+        // isAllowlistedForFgsStartLOSP check.
+        if (ret == REASON_DENIED) {
+            final boolean isCompanionApp = mAm.mInternal.isAssociatedCompanionApp(
+                    UserHandle.getUserId(callingUid), callingUid);
+            if (isCompanionApp) {
+                if (isPermissionGranted(
+                        REQUEST_COMPANION_START_FOREGROUND_SERVICES_FROM_BACKGROUND,
+                        callingPid, callingUid)
+                        || isPermissionGranted(REQUEST_COMPANION_RUN_IN_BACKGROUND,
+                        callingPid, callingUid)) {
+                    ret = REASON_COMPANION_DEVICE_MANAGER;
+                }
+            }
+        }
+
         if (ret == REASON_DENIED) {
             ActivityManagerService.FgsTempAllowListItem item =
                     mAm.isAllowlistedForFgsStartLOSP(callingUid);
@@ -5845,14 +5880,6 @@ public final class ActiveServices {
         }
 
         if (ret == REASON_DENIED) {
-            final boolean isCompanionApp = mAm.mInternal.isAssociatedCompanionApp(
-                    UserHandle.getUserId(callingUid), callingUid);
-            if (isCompanionApp) {
-                ret = REASON_COMPANION_DEVICE_MANAGER;
-            }
-        }
-
-        if (ret == REASON_DENIED) {
             final AppOpsManager appOpsManager = mAm.getAppOpsManager();
             if (appOpsManager.checkOpNoThrow(AppOpsManager.OP_ACTIVATE_VPN, callingUid,
                     callingPackage) == AppOpsManager.MODE_ALLOWED) {
@@ -5862,8 +5889,17 @@ public final class ActiveServices {
                 ret = REASON_OP_ACTIVATE_PLATFORM_VPN;
             }
         }
-
+        if (ret == REASON_DENIED) {
+            if (mAm.mConstants.mFgsAllowOptOut
+                    && targetService.appInfo.hasRequestForegroundServiceExemption()) {
+                ret = REASON_OPT_OUT_REQUESTED;
+            }
+        }
         return ret;
+    }
+
+    private boolean isPermissionGranted(String permission, int callingPid, int callingUid) {
+        return mAm.checkPermission(permission, callingPid, callingUid) == PERMISSION_GRANTED;
     }
 
     private static boolean isFgsBgStart(@ReasonCode int code) {
@@ -5939,7 +5975,7 @@ public final class ActiveServices {
         }
         FrameworkStatsLog.write(FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED,
                 r.appInfo.uid,
-                r.shortInstanceName,
+                null,
                 state,
                 r.mAllowWhileInUsePermissionInFgs,
                 r.mAllowStartForeground,

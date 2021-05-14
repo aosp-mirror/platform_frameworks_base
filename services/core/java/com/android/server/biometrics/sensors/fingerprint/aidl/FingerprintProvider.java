@@ -159,7 +159,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                             prop.sensorLocations[0].sensorLocationY,
                             prop.sensorLocations[0].sensorRadius);
             final Sensor sensor = new Sensor(getTag() + "/" + sensorId, this, mContext, mHandler,
-                    internalProp, gestureAvailabilityDispatcher);
+                    internalProp, lockoutResetDispatcher, gestureAvailabilityDispatcher);
 
             mSensors.put(sensorId, sensor);
             Slog.d(getTag(), "Added: " + internalProp);
@@ -511,6 +511,18 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
         }
         final Udfps udfps = (Udfps) client;
         udfps.onPointerUp();
+    }
+
+    @Override
+    public void onUiReady(int sensorId) {
+        final BaseClientMonitor client =
+                mSensors.get(sensorId).getScheduler().getCurrentClient();
+        if (!(client instanceof Udfps)) {
+            Slog.e(getTag(), "onUiReady received during client: " + client);
+            return;
+        }
+        final Udfps udfps = (Udfps) client;
+        udfps.onUiReady();
     }
 
     @Override

@@ -15,6 +15,6 @@
     limitations under the License.
   -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <bool name="config_icon_space_reserved">false</bool>
-    <bool name="config_allow_divider">false</bool>
+    <bool name="settingslib_config_icon_space_reserved">false</bool>
+    <bool name="settingslib_config_allow_divider">false</bool>
 </resources>

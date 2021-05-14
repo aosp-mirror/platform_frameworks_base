@@ -92,6 +92,7 @@ import static android.view.WindowManagerPolicyConstants.NAV_BAR_BOTTOM;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_INVALID;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_LEFT;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_RIGHT;
+import static android.window.DisplayAreaOrganizer.FEATURE_UNDEFINED;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_SCREEN_ON;
 import static com.android.server.policy.PhoneWindowManager.TOAST_WINDOW_TIMEOUT;
@@ -2423,6 +2424,15 @@ public class DisplayPolicy {
         } else {
             // Restore visibilities and positions of system bars.
             controlTarget.showInsets(Type.statusBars() | Type.navigationBars(), false);
+            // To further allow the pull-down-from-the-top gesture to pull down the notification
+            // shade as a consistent motion, we reroute the touch events here from the currently
+            // touched window to the status bar after making it visible.
+            if (swipeTarget == mStatusBar) {
+                final boolean transferred = mStatusBar.transferTouch();
+                if (!transferred) {
+                    Slog.i(TAG, "Could not transfer touch to the status bar");
+                }
+            }
         }
         mImmersiveModeConfirmation.confirmCurrentPrompt();
     }
@@ -2667,7 +2677,8 @@ public class DisplayPolicy {
         if (oldImmersiveMode != newImmersiveMode) {
             mLastImmersiveMode = newImmersiveMode;
             // The immersive confirmation window should be attached to the immersive window root.
-            final int rootDisplayAreaId = win.getRootDisplayArea().mFeatureId;
+            final RootDisplayArea root = win.getRootDisplayArea();
+            final int rootDisplayAreaId = root == null ? FEATURE_UNDEFINED : root.mFeatureId;
             mImmersiveModeConfirmation.immersiveModeChangedLw(rootDisplayAreaId, newImmersiveMode,
                     mService.mPolicy.isUserSetupComplete(),
                     isNavBarEmpty(disableFlags));
@@ -2859,6 +2870,10 @@ public class DisplayPolicy {
      */
     public void onLockTaskStateChangedLw(int lockTaskState) {
         mImmersiveModeConfirmation.onLockTaskModeChangedLw(lockTaskState);
+    }
+
+    boolean onSystemUiSettingsChanged() {
+        return mImmersiveModeConfirmation.onSettingChanged(mService.mCurrentUserId);
     }
 
     /**

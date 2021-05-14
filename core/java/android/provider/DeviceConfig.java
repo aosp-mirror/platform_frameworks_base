@@ -580,6 +580,13 @@ public final class DeviceConfig {
      */
     public static final String NAMESPACE_GAME_OVERLAY = "game_overlay";
 
+    /**
+     * Namespace for Constrain Display APIs related features.
+     *
+     * @hide
+     */
+    public static final String NAMESPACE_CONSTRAIN_DISPLAY_APIS = "constrain_display_apis";
+
     private static final Object sLock = new Object();
     @GuardedBy("sLock")
     private static ArrayMap<OnPropertiesChangedListener, Pair<String, Executor>> sListeners =

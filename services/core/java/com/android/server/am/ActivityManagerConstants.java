@@ -52,7 +52,8 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final String TAG = "ActivityManagerConstants";
 
     // Key names stored in the settings value.
-    private static final String KEY_BACKGROUND_SETTLE_TIME = "background_settle_time";
+    static final String KEY_BACKGROUND_SETTLE_TIME = "background_settle_time";
+
     private static final String KEY_FGSERVICE_MIN_SHOWN_TIME
             = "fgservice_min_shown_time";
     private static final String KEY_FGSERVICE_MIN_REPORT_TIME
@@ -108,9 +109,10 @@ final class ActivityManagerConstants extends ContentObserver {
     static final String KEY_FG_TO_BG_FGS_GRACE_DURATION = "fg_to_bg_fgs_grace_duration";
     static final String KEY_FGS_START_FOREGROUND_TIMEOUT = "fgs_start_foreground_timeout";
     static final String KEY_FGS_ATOM_SAMPLE_RATE = "fgs_atom_sample_rate";
+    static final String KEY_KILL_FAS_CACHED_IDLE = "kill_fas_cached_idle";
+    static final String KEY_FGS_ALLOW_OPT_OUT = "fgs_allow_opt_out";
 
     private static final int DEFAULT_MAX_CACHED_PROCESSES = 32;
-    private static final long DEFAULT_BACKGROUND_SETTLE_TIME = 60*1000;
     private static final long DEFAULT_FGSERVICE_MIN_SHOWN_TIME = 2*1000;
     private static final long DEFAULT_FGSERVICE_MIN_REPORT_TIME = 3*1000;
     private static final long DEFAULT_FGSERVICE_SCREEN_ON_BEFORE_TIME = 1*1000;
@@ -147,15 +149,20 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final int DEFAULT_MAX_PHANTOM_PROCESSES = 32;
     private static final int DEFAULT_PROCESS_CRASH_COUNT_RESET_INTERVAL = 12 * 60 * 60 * 1000;
     private static final int DEFAULT_PROCESS_CRASH_COUNT_LIMIT = 12;
-    private static final int DEFAULT_BOOT_TIME_TEMP_ALLOWLIST_DURATION = 10 * 1000;
+    private static final int DEFAULT_BOOT_TIME_TEMP_ALLOWLIST_DURATION = 20 * 1000;
     private static final long DEFAULT_FG_TO_BG_FGS_GRACE_DURATION = 5 * 1000;
     private static final int DEFAULT_FGS_START_FOREGROUND_TIMEOUT_MS = 10 * 1000;
     private static final float DEFAULT_FGS_ATOM_SAMPLE_RATE = 1; // 100 %
+
+    static final long DEFAULT_BACKGROUND_SETTLE_TIME = 60 * 1000;
+    static final boolean DEFAULT_KILL_FAS_CACHED_IDLE = true;
+
     /**
      * Same as {@link TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED}
      */
     private static final int
             DEFAULT_PUSH_MESSAGING_OVER_QUOTA_BEHAVIOR = 1;
+    private static final boolean DEFAULT_FGS_ALLOW_OPT_OUT = false;
 
     // Flag stored in the DeviceConfig API.
     /**
@@ -482,6 +489,18 @@ final class ActivityManagerConstants extends ContentObserver {
      */
     volatile float mFgsAtomSampleRate = DEFAULT_FGS_ATOM_SAMPLE_RATE;
 
+    /**
+     * Whether or not to kill apps in force-app-standby state and it's cached, its UID state is
+     * idle.
+     */
+    volatile boolean mKillForceAppStandByAndCachedIdle = DEFAULT_KILL_FAS_CACHED_IDLE;
+
+    /**
+     * Whether to allow "opt-out" from the foreground service restrictions.
+     * (https://developer.android.com/about/versions/12/foreground-services)
+     */
+    volatile boolean mFgsAllowOptOut = DEFAULT_FGS_ALLOW_OPT_OUT;
+
     private final ActivityManagerService mService;
     private ContentResolver mResolver;
     private final KeyValueListParser mParser = new KeyValueListParser(',');
@@ -686,6 +705,12 @@ final class ActivityManagerConstants extends ContentObserver {
                                 break;
                             case KEY_FGS_ATOM_SAMPLE_RATE:
                                 updateFgsAtomSamplePercent();
+                                break;
+                            case KEY_KILL_FAS_CACHED_IDLE:
+                                updateKillFasCachedIdle();
+                                break;
+                            case KEY_FGS_ALLOW_OPT_OUT:
+                                updateFgsAllowOptOut();
                                 break;
                             default:
                                 break;
@@ -1019,6 +1044,20 @@ final class ActivityManagerConstants extends ContentObserver {
                 DEFAULT_FGS_ATOM_SAMPLE_RATE);
     }
 
+    private void updateKillFasCachedIdle() {
+        mKillForceAppStandByAndCachedIdle = DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_KILL_FAS_CACHED_IDLE,
+                DEFAULT_KILL_FAS_CACHED_IDLE);
+    }
+
+    private void updateFgsAllowOptOut() {
+        mFgsAllowOptOut = DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_FGS_ALLOW_OPT_OUT,
+                DEFAULT_FGS_ALLOW_OPT_OUT);
+    }
+
     private void updateImperceptibleKillExemptions() {
         IMPERCEPTIBLE_KILL_EXEMPT_PACKAGES.clear();
         IMPERCEPTIBLE_KILL_EXEMPT_PACKAGES.addAll(mDefaultImperceptibleKillExemptPackages);
@@ -1239,6 +1278,8 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.print("="); pw.println(mFgsAtomSampleRate);
         pw.print("  "); pw.print(KEY_PUSH_MESSAGING_OVER_QUOTA_BEHAVIOR);
         pw.print("="); pw.println(mPushMessagingOverQuotaBehavior);
+        pw.print("  "); pw.print(KEY_FGS_ALLOW_OPT_OUT);
+        pw.print("="); pw.println(mFgsAllowOptOut);
 
         pw.println();
         if (mOverrideMaxCachedProcesses >= 0) {

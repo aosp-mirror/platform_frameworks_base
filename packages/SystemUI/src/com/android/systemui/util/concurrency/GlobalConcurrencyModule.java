@@ -24,6 +24,8 @@ import com.android.systemui.dagger.qualifiers.Main;
 
 import java.util.concurrent.Executor;
 
+import javax.inject.Singleton;
+
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
@@ -40,7 +42,7 @@ public abstract class GlobalConcurrencyModule {
     @Binds
     public abstract ThreadFactory bindExecutorFactory(ThreadFactoryImpl impl);
 
-     /** Main Looper */
+    /** Main Looper */
     @Provides
     @Main
     public static  Looper provideMainLooper() {
@@ -67,4 +69,8 @@ public abstract class GlobalConcurrencyModule {
         return context.getMainExecutor();
     }
 
+    /** */
+    @Binds
+    @Singleton
+    public abstract Execution provideExecution(ExecutionImpl execution);
 }

@@ -122,6 +122,7 @@ import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.VibratorHelper;
+import com.android.systemui.statusbar.events.PrivacyDotViewController;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.ConversationNotificationManager;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
@@ -150,6 +151,7 @@ import com.android.systemui.statusbar.policy.KeyguardUserSwitcherController;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcherView;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.util.Utils;
+import com.android.systemui.util.settings.SecureSettings;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 
 import java.io.FileDescriptor;
@@ -306,6 +308,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private final QSDetailDisplayer mQSDetailDisplayer;
     private final FeatureFlags mFeatureFlags;
     private final ScrimController mScrimController;
+    private final PrivacyDotViewController mPrivacyDotViewController;
 
     // Maximum # notifications to show on Keyguard; extras will be collapsed in an overflow card.
     // If there are exactly 1 + mMaxKeyguardNotifications, then still shows all notifications
@@ -528,6 +531,7 @@ public class NotificationPanelViewController extends PanelViewController {
 
     private final QuickAccessWalletClient mQuickAccessWalletClient;
     private final Executor mUiExecutor;
+    private final SecureSettings mSecureSettings;
 
     private int mLockScreenMode = KeyguardUpdateMonitor.LOCK_SCREEN_MODE_NORMAL;
     private KeyguardMediaController mKeyguardMediaController;
@@ -602,7 +606,9 @@ public class NotificationPanelViewController extends PanelViewController {
             FeatureFlags featureFlags,
             QuickAccessWalletClient quickAccessWalletClient,
             KeyguardMediaController keyguardMediaController,
-            @Main Executor uiExecutor) {
+            PrivacyDotViewController privacyDotViewController,
+            @Main Executor uiExecutor,
+            SecureSettings secureSettings) {
         super(view, falsingManager, dozeLog, keyguardStateController,
                 (SysuiStatusBarStateController) statusBarStateController, vibratorHelper,
                 statusBarKeyguardViewManager, latencyTracker, flingAnimationUtilsBuilder.get(),
@@ -610,6 +616,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mView = view;
         mVibratorHelper = vibratorHelper;
         mKeyguardMediaController = keyguardMediaController;
+        mPrivacyDotViewController = privacyDotViewController;
         mMetricsLogger = metricsLogger;
         mActivityManager = activityManager;
         mConfigurationController = configurationController;
@@ -653,6 +660,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mMediaDataManager = mediaDataManager;
         mQuickAccessWalletClient = quickAccessWalletClient;
         mUiExecutor = uiExecutor;
+        mSecureSettings = secureSettings;
         pulseExpansionHandler.setPulseExpandAbortListener(() -> {
             if (mQs != null) {
                 mQs.animateHeaderSlidingOut();
@@ -1029,8 +1037,10 @@ public class NotificationPanelViewController extends PanelViewController {
         mKeyguardBottomArea.setStatusBar(mStatusBar);
         mKeyguardBottomArea.setUserSetupComplete(mUserSetupComplete);
         mKeyguardBottomArea.setFalsingManager(mFalsingManager);
-        mKeyguardBottomArea.initWallet(mQuickAccessWalletClient, mUiExecutor,
-                mFeatureFlags.isQuickAccessWalletEnabled());
+
+        if (mFeatureFlags.isQuickAccessWalletEnabled()) {
+            mKeyguardBottomArea.initWallet(mQuickAccessWalletClient, mUiExecutor, mSecureSettings);
+        }
     }
 
     private void updateMaxDisplayedNotifications(boolean recompute) {
@@ -1895,6 +1905,7 @@ public class NotificationPanelViewController extends PanelViewController {
             mKeyguardBypassController.setQSExpanded(expanded);
             mStatusBarKeyguardViewManager.setQsExpanded(expanded);
             mLockIconViewController.setQsExpanded(expanded);
+            mPrivacyDotViewController.setQsExpanded(expanded);
         }
     }
 
@@ -2067,14 +2078,13 @@ public class NotificationPanelViewController extends PanelViewController {
         final int qsPanelBottomY = calculateQsBottomPosition(getQsExpansionFraction());
         final boolean visible = (getQsExpansionFraction() > 0 || qsPanelBottomY > 0)
                 && !mShouldUseSplitNotificationShade;
-        final float notificationTop = mAmbientState.getStackY()
-                - mNotificationScrimPadding
-                - mAmbientState.getScrollY();
+        final float notificationTop = mAmbientState.getStackY() - mAmbientState.getScrollY();
         setQsExpansionEnabled(mAmbientState.getScrollY() == 0);
 
         int radius = mScrimCornerRadius;
         if (!mShouldUseSplitNotificationShade) {
-            top = (int) Math.min(qsPanelBottomY, notificationTop);
+            top = (int) (isOnKeyguard() ? Math.min(qsPanelBottomY, notificationTop)
+                    : notificationTop);
             bottom = getView().getBottom();
             left = getView().getLeft();
             right = getView().getRight();
@@ -2574,16 +2584,19 @@ public class NotificationPanelViewController extends PanelViewController {
             // Small parallax as we pull down and clip QS
             startHeight = -mQsExpansionHeight * 0.2f;
         }
-        if (mKeyguardBypassController.getBypassEnabled() && isOnKeyguard()
-                && mNotificationStackScrollLayoutController.isPulseExpanding()) {
-            if (!mPulseExpansionHandler.isExpanding()
-                    && !mPulseExpansionHandler.getLeavingLockscreen()) {
-                // If we aborted the expansion we need to make sure the header doesn't reappear
-                // again after the header has animated away
-                appearAmount = 0;
+        if (mKeyguardBypassController.getBypassEnabled() && isOnKeyguard()) {
+            if (mNotificationStackScrollLayoutController.isPulseExpanding()) {
+                if (!mPulseExpansionHandler.isExpanding()
+                        && !mPulseExpansionHandler.getLeavingLockscreen()) {
+                    // If we aborted the expansion we need to make sure the header doesn't reappear
+                    // again after the header has animated away
+                    appearAmount = 0;
+                } else {
+                    appearAmount = mNotificationStackScrollLayoutController
+                            .calculateAppearFractionBypass();
+                }
             } else {
-                appearAmount = mNotificationStackScrollLayoutController
-                        .calculateAppearFractionBypass();
+                appearAmount = 0.0f;
             }
             startHeight = -mQs.getQsMinExpansionHeight();
         }
@@ -4064,6 +4077,7 @@ public class NotificationPanelViewController extends PanelViewController {
             // force a call to onThemeChanged
             mConfigurationListener.onThemeChanged();
             mFalsingManager.addTapListener(mFalsingTapListener);
+            mKeyguardIndicationController.init();
         }
 
         @Override

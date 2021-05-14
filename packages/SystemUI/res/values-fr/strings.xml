@@ -289,9 +289,9 @@
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"Point d\'accès mobile désactivé."</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"Point d\'accès mobile activé."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"Diffusion d\'écran interrompue."</string>
-    <string name="accessibility_quick_settings_work_mode_off" msgid="562749867895549696">"Mode Travail désactivé"</string>
+    <string name="accessibility_quick_settings_work_mode_off" msgid="9106217884005620744">"Le mode Travail est en pause."</string>
     <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"Mode Travail activé"</string>
-    <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6256690740556798683">"Le mode Travail est désactivé."</string>
+    <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6422896967647049692">"Le mode Travail est en pause."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"Le mode Travail est activé."</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"L\'économiseur de données est désactivé."</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"L\'économiseur de données est activé."</string>
@@ -410,6 +410,7 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"<xliff:g id="DATA_LIMIT">%s</xliff:g> au maximum"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"Avertissement : <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"Profil professionnel"</string>
+    <string name="quick_settings_work_mode_paused" msgid="4841109346916998613">"En pause"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Éclairage nocturne"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Activé la nuit"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Jusqu\'à l\'aube"</string>
@@ -469,10 +470,10 @@
     <string name="interruption_level_none_twoline" msgid="8579382742855486372">"Aucune\ninterruption"</string>
     <string name="interruption_level_priority_twoline" msgid="8523482736582498083">"Priorité\nuniquement"</string>
     <string name="interruption_level_alarms_twoline" msgid="2045067991335708767">"Alarmes\nuniquement"</string>
-    <string name="keyguard_indication_charging_time_wireless" msgid="7343602278805644915">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Recharge sans fil (à 100 %% dans <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
-    <string name="keyguard_indication_charging_time" msgid="4927557805886436909">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Recharge... (à 100 %% dans <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
-    <string name="keyguard_indication_charging_time_fast" msgid="7895986003578341126">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Recharge rapide… (à 100 %% dans <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
-    <string name="keyguard_indication_charging_time_slowly" msgid="245442950133408398">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Recharge lente… (à 100 %% dans <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
+    <string name="keyguard_indication_charging_time_wireless" msgid="577856646141738675">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Recharge sans fil • Chargé dans <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
+    <string name="keyguard_indication_charging_time" msgid="6492711711891071502">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Recharge • Chargé dans <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Recharge rapide • Chargé dans <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Recharge lente • Chargé dans <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Changer d\'utilisateur"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="5759855008166759399">"Changer d\'utilisateur (utilisateur actuel : <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>)"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="383168614528618402">"Utilisateur actuel : <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -514,7 +515,7 @@
     <string name="manage_notifications_text" msgid="6885645344647733116">"Gérer"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Historique"</string>
     <string name="notification_section_header_incoming" msgid="850925217908095197">"Nouvelles notifications"</string>
-    <string name="notification_section_header_gentle" msgid="6804099527336337197">"En mode silencieux"</string>
+    <string name="notification_section_header_gentle" msgid="6804099527336337197">"Notifications silencieuses"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Notifications"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Conversations"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Effacer toutes les notifications silencieuses"</string>
@@ -668,10 +669,10 @@
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Tout afficher"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Déverrouiller pour payer"</string>
-    <string name="wallet_secondary_label_active" msgid="4909706168969888137">"Prêt"</string>
-    <string name="wallet_secondary_label_no_card" msgid="1750103386908123401">"Configurer un mode de paiement"</string>
+    <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"Non configuré"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Déverrouiller pour utiliser"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Problème de récupération de vos cartes. Réessayez plus tard"</string>
+    <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Paramètres de l\'écran de verrouillage"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Profil professionnel"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Mode Avion"</string>
     <string name="add_tile" msgid="6239678623873086686">"Ajouter un bloc"</string>
@@ -740,9 +741,12 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;État :&lt;/b&gt; Abaissée à la catégorie \"Silencieux\""</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;État :&lt;/b&gt; Élevée d\'un niveau"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;État ::&lt;/b&gt; Abaissée d\'un niveau"</string>
-    <string name="notification_channel_summary_priority" msgid="4592979359953954258">"S\'affiche toujours en haut des notifications, même en mode Prioritaire"</string>
+    <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"S\'affiche en haut des notifications de conversation et en tant que photo de profil sur l\'écran de verrouillage"</string>
+    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"S\'affiche en haut des notifications de conversation et en tant que photo de profil sur l\'écran de verrouillage, apparaît sous forme de bulle"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"S\'affiche en haut des notifications de conversation et en tant que photo de profil sur l\'écran de verrouillage, interrompt le mode Ne pas déranger"</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"S\'affiche en haut des notifications de conversation et en tant que photo de profil sur l\'écran de verrouillage, apparaît sous forme de bulle, interrompt le mode Ne pas déranger"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Paramètres"</string>
-    <string name="notification_priority_title" msgid="5256226572739882190">"Conversations prioritaires"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"Prioritaire"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> n\'est pas compatible avec les fonctionnalités de conversation"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Impossible de modifier ces notifications."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Vous ne pouvez pas configurer ce groupe de notifications ici"</string>
@@ -858,6 +862,7 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"Activé"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"Désactivé"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"Indisponible"</string>
+    <string name="tile_disabled" msgid="373212051546573069">"Désactivé"</string>
     <string name="nav_bar" msgid="4642708685386136807">"Barre de navigation"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"Disposition"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"Type de bouton gauche supplémentaire"</string>
@@ -1016,14 +1021,6 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Navigation système mise à jour. Pour apporter des modifications, accédez aux paramètres."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Accédez aux paramètres pour mettre à jour la navigation système"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Mode Veille imminent"</string>
-    <string name="priority_onboarding_title" msgid="2893070698479227616">"Conversation définie comme prioritaire"</string>
-    <string name="priority_onboarding_behavior" msgid="636826237468953117">"Conversations prioritaires"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="3861580571311518785">"Ces conversations s\'affichent en haut de la liste et restent visibles en mode Prioritaire"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="1781653813573865071">"Les photos de profil s\'affichent sur l\'écran de verrouillage"</string>
-    <string name="priority_onboarding_appear_as_bubble_text" msgid="4359924720680083057">"Retrouvez facilement ces conversations dans des bulles sur l\'écran d\'accueil"</string>
-    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Interrompre Ne pas déranger"</string>
-    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"OK"</string>
-    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Paramètres"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Fenêtre d\'agrandissement"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Fenêtre des commandes d\'agrandissement"</string>
     <string name="accessibility_control_zoom_in" msgid="1189272315480097417">"Faire un zoom avant"</string>
@@ -1153,4 +1150,6 @@
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"s\'authentifier"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"accéder à l\'appareil"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Utilisez votre empreinte pour ouvrir"</string>
+    <!-- no translation found for ongoing_phone_call_content_description (5332334388483099947) -->
+    <skip />
 </resources>

@@ -141,6 +141,7 @@ package android {
     field public static final String REORDER_TASKS = "android.permission.REORDER_TASKS";
     field public static final String REQUEST_COMPANION_PROFILE_WATCH = "android.permission.REQUEST_COMPANION_PROFILE_WATCH";
     field public static final String REQUEST_COMPANION_RUN_IN_BACKGROUND = "android.permission.REQUEST_COMPANION_RUN_IN_BACKGROUND";
+    field public static final String REQUEST_COMPANION_START_FOREGROUND_SERVICES_FROM_BACKGROUND = "android.permission.REQUEST_COMPANION_START_FOREGROUND_SERVICES_FROM_BACKGROUND";
     field public static final String REQUEST_COMPANION_USE_DATA_IN_BACKGROUND = "android.permission.REQUEST_COMPANION_USE_DATA_IN_BACKGROUND";
     field public static final String REQUEST_DELETE_PACKAGES = "android.permission.REQUEST_DELETE_PACKAGES";
     field public static final String REQUEST_IGNORE_BATTERY_OPTIMIZATIONS = "android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS";
@@ -245,6 +246,7 @@ package android {
 
   public static final class R.attr {
     ctor public R.attr();
+    field public static final int __removed3;
     field public static final int absListViewStyle = 16842858; // 0x101006a
     field public static final int accessibilityEventTypes = 16843648; // 0x1010380
     field public static final int accessibilityFeedbackType = 16843650; // 0x1010382
@@ -3172,6 +3174,7 @@ package android.accessibilityservice {
     field public static final int FLAG_ENABLE_ACCESSIBILITY_VOLUME = 128; // 0x80
     field public static final int FLAG_INCLUDE_NOT_IMPORTANT_VIEWS = 2; // 0x2
     field public static final int FLAG_REPORT_VIEW_IDS = 16; // 0x10
+    field public static final int FLAG_REQUEST_2_FINGER_PASSTHROUGH = 8192; // 0x2000
     field public static final int FLAG_REQUEST_ACCESSIBILITY_BUTTON = 256; // 0x100
     field @Deprecated public static final int FLAG_REQUEST_ENHANCED_WEB_ACCESSIBILITY = 8; // 0x8
     field public static final int FLAG_REQUEST_FILTER_KEY_EVENTS = 32; // 0x20
@@ -4404,6 +4407,7 @@ package android.app {
     method public void setWindow(int, long, long, android.app.PendingIntent);
     method public void setWindow(int, long, long, String, android.app.AlarmManager.OnAlarmListener, android.os.Handler);
     field public static final String ACTION_NEXT_ALARM_CLOCK_CHANGED = "android.app.action.NEXT_ALARM_CLOCK_CHANGED";
+    field public static final String ACTION_SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED = "android.app.action.SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED";
     field public static final int ELAPSED_REALTIME = 3; // 0x3
     field public static final int ELAPSED_REALTIME_WAKEUP = 2; // 0x2
     field public static final long INTERVAL_DAY = 86400000L; // 0x5265c00L
@@ -11153,6 +11157,7 @@ package android.content {
     field public static final String ACTION_VIEW = "android.intent.action.VIEW";
     field public static final String ACTION_VIEW_LOCUS = "android.intent.action.VIEW_LOCUS";
     field @RequiresPermission(android.Manifest.permission.START_VIEW_PERMISSION_USAGE) public static final String ACTION_VIEW_PERMISSION_USAGE = "android.intent.action.VIEW_PERMISSION_USAGE";
+    field @RequiresPermission(android.Manifest.permission.START_VIEW_PERMISSION_USAGE) public static final String ACTION_VIEW_PERMISSION_USAGE_FOR_PERIOD = "android.intent.action.VIEW_PERMISSION_USAGE_FOR_PERIOD";
     field public static final String ACTION_VOICE_COMMAND = "android.intent.action.VOICE_COMMAND";
     field @Deprecated public static final String ACTION_WALLPAPER_CHANGED = "android.intent.action.WALLPAPER_CHANGED";
     field public static final String ACTION_WEB_SEARCH = "android.intent.action.WEB_SEARCH";
@@ -11205,6 +11210,7 @@ package android.content {
     field public static final String EXTRA_ASSIST_INPUT_HINT_KEYBOARD = "android.intent.extra.ASSIST_INPUT_HINT_KEYBOARD";
     field public static final String EXTRA_ASSIST_PACKAGE = "android.intent.extra.ASSIST_PACKAGE";
     field public static final String EXTRA_ASSIST_UID = "android.intent.extra.ASSIST_UID";
+    field public static final String EXTRA_ATTRIBUTION_TAGS = "android.intent.extra.ATTRIBUTION_TAGS";
     field public static final String EXTRA_AUTO_LAUNCH_SINGLE_CHOICE = "android.intent.extra.AUTO_LAUNCH_SINGLE_CHOICE";
     field public static final String EXTRA_BCC = "android.intent.extra.BCC";
     field public static final String EXTRA_BUG_REPORT = "android.intent.extra.BUG_REPORT";
@@ -11230,6 +11236,7 @@ package android.content {
     field public static final String EXTRA_DONT_KILL_APP = "android.intent.extra.DONT_KILL_APP";
     field public static final String EXTRA_DURATION_MILLIS = "android.intent.extra.DURATION_MILLIS";
     field public static final String EXTRA_EMAIL = "android.intent.extra.EMAIL";
+    field public static final String EXTRA_END_TIME = "android.intent.extra.END_TIME";
     field public static final String EXTRA_EXCLUDE_COMPONENTS = "android.intent.extra.EXCLUDE_COMPONENTS";
     field public static final String EXTRA_FROM_STORAGE = "android.intent.extra.FROM_STORAGE";
     field public static final String EXTRA_HTML_TEXT = "android.intent.extra.HTML_TEXT";
@@ -11244,6 +11251,7 @@ package android.content {
     field public static final String EXTRA_NOT_UNKNOWN_SOURCE = "android.intent.extra.NOT_UNKNOWN_SOURCE";
     field public static final String EXTRA_ORIGINATING_URI = "android.intent.extra.ORIGINATING_URI";
     field public static final String EXTRA_PACKAGE_NAME = "android.intent.extra.PACKAGE_NAME";
+    field public static final String EXTRA_PERMISSION_GROUP_NAME = "android.intent.extra.PERMISSION_GROUP_NAME";
     field public static final String EXTRA_PHONE_NUMBER = "android.intent.extra.PHONE_NUMBER";
     field public static final String EXTRA_PROCESS_TEXT = "android.intent.extra.PROCESS_TEXT";
     field public static final String EXTRA_PROCESS_TEXT_READONLY = "android.intent.extra.PROCESS_TEXT_READONLY";
@@ -11266,6 +11274,7 @@ package android.content {
     field @Deprecated public static final String EXTRA_SHORTCUT_NAME = "android.intent.extra.shortcut.NAME";
     field public static final String EXTRA_SHUTDOWN_USERSPACE_ONLY = "android.intent.extra.SHUTDOWN_USERSPACE_ONLY";
     field public static final String EXTRA_SPLIT_NAME = "android.intent.extra.SPLIT_NAME";
+    field public static final String EXTRA_START_TIME = "android.intent.extra.START_TIME";
     field public static final String EXTRA_STREAM = "android.intent.extra.STREAM";
     field public static final String EXTRA_SUBJECT = "android.intent.extra.SUBJECT";
     field public static final String EXTRA_SUSPENDED_PACKAGE_EXTRAS = "android.intent.extra.SUSPENDED_PACKAGE_EXTRAS";
@@ -13078,7 +13087,6 @@ package android.content.pm {
     method public void reportShortcutUsed(String);
     method @WorkerThread public boolean requestPinShortcut(@NonNull android.content.pm.ShortcutInfo, @Nullable android.content.IntentSender);
     method @WorkerThread public boolean setDynamicShortcuts(@NonNull java.util.List<android.content.pm.ShortcutInfo>);
-    method public void updateShortcutVisibility(@NonNull String, @Nullable byte[], boolean);
     method @WorkerThread public boolean updateShortcuts(@NonNull java.util.List<android.content.pm.ShortcutInfo>);
     field public static final int FLAG_MATCH_CACHED = 8; // 0x8
     field public static final int FLAG_MATCH_DYNAMIC = 2; // 0x2
@@ -24710,32 +24718,37 @@ package android.media.metrics {
     method @IntRange(from=java.lang.Integer.MIN_VALUE, to=java.lang.Integer.MAX_VALUE) public int getSubErrorCode();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.media.metrics.PlaybackErrorEvent> CREATOR;
-    field public static final int ERROR_AUDIOTRACK_INIT = 17; // 0x11
-    field public static final int ERROR_AUDIOTRACK_OTHER = 19; // 0x13
-    field public static final int ERROR_AUDIOTRACK_WRITE = 18; // 0x12
-    field public static final int ERROR_DECODER_DECODE = 14; // 0xe
-    field public static final int ERROR_DECODER_INIT = 13; // 0xd
-    field public static final int ERROR_DECODER_OOM = 15; // 0xf
-    field public static final int ERROR_DECODER_OTHER = 16; // 0x10
+    field public static final int ERROR_AUDIO_TRACK_INIT_FAILED = 17; // 0x11
+    field public static final int ERROR_AUDIO_TRACK_OTHER = 19; // 0x13
+    field public static final int ERROR_AUDIO_TRACK_WRITE_FAILED = 18; // 0x12
+    field public static final int ERROR_DECODER_INIT_FAILED = 13; // 0xd
+    field public static final int ERROR_DECODING_FAILED = 14; // 0xe
+    field public static final int ERROR_DECODING_FORMAT_EXCEEDS_CAPABILITIES = 15; // 0xf
+    field public static final int ERROR_DECODING_FORMAT_UNSUPPORTED = 35; // 0x23
+    field public static final int ERROR_DECODING_OTHER = 16; // 0x10
     field public static final int ERROR_DRM_CONTENT_ERROR = 28; // 0x1c
-    field public static final int ERROR_DRM_DISALLOWED = 26; // 0x1a
-    field public static final int ERROR_DRM_LICENSE_ERROR = 25; // 0x19
+    field public static final int ERROR_DRM_DEVICE_REVOKED = 29; // 0x1d
+    field public static final int ERROR_DRM_DISALLOWED_OPERATION = 26; // 0x1a
+    field public static final int ERROR_DRM_LICENSE_ACQUISITION_FAILED = 25; // 0x19
     field public static final int ERROR_DRM_OTHER = 30; // 0x1e
     field public static final int ERROR_DRM_PROVISIONING_FAILED = 24; // 0x18
-    field public static final int ERROR_DRM_REVOKED = 29; // 0x1d
+    field public static final int ERROR_DRM_SCHEME_UNSUPPORTED = 23; // 0x17
     field public static final int ERROR_DRM_SYSTEM_ERROR = 27; // 0x1b
-    field public static final int ERROR_DRM_UNAVAILABLE = 23; // 0x17
-    field public static final int ERROR_MEDIA_MANIFEST = 10; // 0xa
-    field public static final int ERROR_MEDIA_OTHER = 12; // 0xc
-    field public static final int ERROR_MEDIA_PARSER = 11; // 0xb
-    field public static final int ERROR_NETWORK_BAD_STATUS = 5; // 0x5
-    field public static final int ERROR_NETWORK_CLOSED = 8; // 0x8
-    field public static final int ERROR_NETWORK_CONNECT = 4; // 0x4
-    field public static final int ERROR_NETWORK_DNS = 6; // 0x6
-    field public static final int ERROR_NETWORK_OFFLINE = 3; // 0x3
-    field public static final int ERROR_NETWORK_OTHER = 9; // 0x9
-    field public static final int ERROR_NETWORK_TIMEOUT = 7; // 0x7
+    field public static final int ERROR_IO_BAD_HTTP_STATUS = 5; // 0x5
+    field public static final int ERROR_IO_CONNECTION_CLOSED = 8; // 0x8
+    field public static final int ERROR_IO_CONNECTION_TIMEOUT = 7; // 0x7
+    field public static final int ERROR_IO_DNS_FAILED = 6; // 0x6
+    field public static final int ERROR_IO_FILE_NOT_FOUND = 31; // 0x1f
+    field public static final int ERROR_IO_NETWORK_CONNECTION_FAILED = 4; // 0x4
+    field public static final int ERROR_IO_NETWORK_UNAVAILABLE = 3; // 0x3
+    field public static final int ERROR_IO_NO_PERMISSION = 32; // 0x20
+    field public static final int ERROR_IO_OTHER = 9; // 0x9
     field public static final int ERROR_OTHER = 1; // 0x1
+    field public static final int ERROR_PARSING_CONTAINER_MALFORMED = 11; // 0xb
+    field public static final int ERROR_PARSING_CONTAINER_UNSUPPORTED = 34; // 0x22
+    field public static final int ERROR_PARSING_MANIFEST_MALFORMED = 10; // 0xa
+    field public static final int ERROR_PARSING_MANIFEST_UNSUPPORTED = 33; // 0x21
+    field public static final int ERROR_PARSING_OTHER = 12; // 0xc
     field public static final int ERROR_PLAYER_BEHIND_LIVE_WINDOW = 21; // 0x15
     field public static final int ERROR_PLAYER_OTHER = 22; // 0x16
     field public static final int ERROR_PLAYER_REMOTE = 20; // 0x14
@@ -46808,6 +46821,11 @@ package android.view {
     method public void onActionProviderVisibilityChanged(boolean);
   }
 
+  @UiThread public interface AttachedSurfaceControl {
+    method public boolean applyTransactionOnDraw(@NonNull android.view.SurfaceControl.Transaction);
+    method @Nullable public android.view.SurfaceControl.Transaction buildReparentTransaction(@NonNull android.view.SurfaceControl);
+  }
+
   public final class Choreographer {
     method public static android.view.Choreographer getInstance();
     method public void postFrameCallback(android.view.Choreographer.FrameCallback);
@@ -48534,6 +48552,7 @@ package android.view {
     method public android.view.WindowInsets dispatchApplyWindowInsets(android.view.WindowInsets);
     method public boolean dispatchCapturedPointerEvent(android.view.MotionEvent);
     method public void dispatchConfigurationChanged(android.content.res.Configuration);
+    method public void dispatchCreateViewTranslationRequest(@NonNull java.util.Map<android.view.autofill.AutofillId,long[]>, @NonNull int[], @NonNull android.view.translation.TranslationCapability, @NonNull java.util.List<android.view.translation.ViewTranslationRequest>);
     method public void dispatchDisplayHint(int);
     method public boolean dispatchDragEvent(android.view.DragEvent);
     method protected void dispatchDraw(android.graphics.Canvas);
@@ -48555,7 +48574,6 @@ package android.view {
     method public boolean dispatchPopulateAccessibilityEvent(android.view.accessibility.AccessibilityEvent);
     method public void dispatchProvideAutofillStructure(@NonNull android.view.ViewStructure, int);
     method public void dispatchProvideStructure(android.view.ViewStructure);
-    method public void dispatchRequestTranslation(@NonNull java.util.Map<android.view.autofill.AutofillId,long[]>, @NonNull int[], @NonNull android.view.translation.TranslationCapability, @NonNull java.util.List<android.view.translation.ViewTranslationRequest>);
     method protected void dispatchRestoreInstanceState(android.util.SparseArray<android.os.Parcelable>);
     method protected void dispatchSaveInstanceState(android.util.SparseArray<android.os.Parcelable>);
     method public void dispatchScrollCaptureSearch(@NonNull android.graphics.Rect, @NonNull android.graphics.Point, @NonNull java.util.function.Consumer<android.view.ScrollCaptureTarget>);
@@ -48708,6 +48726,7 @@ package android.view {
     method public final int getRight();
     method protected float getRightFadingEdgeStrength();
     method protected int getRightPaddingOffset();
+    method @Nullable public android.view.AttachedSurfaceControl getRootSurfaceControl();
     method public android.view.View getRootView();
     method public android.view.WindowInsets getRootWindowInsets();
     method public float getRotation();
@@ -48752,7 +48771,6 @@ package android.view {
     method @Nullable public android.graphics.drawable.Drawable getVerticalScrollbarThumbDrawable();
     method @Nullable public android.graphics.drawable.Drawable getVerticalScrollbarTrackDrawable();
     method public int getVerticalScrollbarWidth();
-    method @Nullable public android.view.ViewRoot getViewRoot();
     method @Nullable public android.view.translation.ViewTranslationResponse getViewTranslationResponse();
     method public android.view.ViewTreeObserver getViewTreeObserver();
     method public int getVisibility();
@@ -49828,11 +49846,6 @@ package android.view {
     method public android.view.ViewPropertyAnimator zBy(float);
   }
 
-  @UiThread public interface ViewRoot {
-    method public boolean applyTransactionOnDraw(@NonNull android.view.SurfaceControl.Transaction);
-    method @Nullable public android.view.SurfaceControl.Transaction buildReparentTransaction(@NonNull android.view.SurfaceControl);
-  }
-
   public abstract class ViewStructure {
     ctor public ViewStructure();
     method public abstract int addChildCount(int);
@@ -50019,6 +50032,7 @@ package android.view {
     method @ColorInt public int getNavigationBarDividerColor();
     method public android.transition.Transition getReenterTransition();
     method public android.transition.Transition getReturnTransition();
+    method @Nullable public android.view.AttachedSurfaceControl getRootSurfaceControl();
     method public android.transition.Transition getSharedElementEnterTransition();
     method public android.transition.Transition getSharedElementExitTransition();
     method public android.transition.Transition getSharedElementReenterTransition();
@@ -50028,7 +50042,6 @@ package android.view {
     method @NonNull public java.util.List<android.graphics.Rect> getSystemGestureExclusionRects();
     method public long getTransitionBackgroundFadeDuration();
     method public android.transition.TransitionManager getTransitionManager();
-    method @Nullable public android.view.ViewRoot getViewRoot();
     method public abstract int getVolumeControlStream();
     method public android.view.WindowManager getWindowManager();
     method public final android.content.res.TypedArray getWindowStyle();
@@ -52877,8 +52890,8 @@ package android.view.translation {
 
   public static final class TranslationRequest.Builder {
     ctor public TranslationRequest.Builder();
-    method @NonNull public android.view.translation.TranslationRequest.Builder addTranslationRequestValue(@NonNull android.view.translation.TranslationRequestValue);
-    method @NonNull public android.view.translation.TranslationRequest.Builder addViewTranslationRequest(@NonNull android.view.translation.ViewTranslationRequest);
+    method @Deprecated @NonNull public android.view.translation.TranslationRequest.Builder addTranslationRequestValue(@NonNull android.view.translation.TranslationRequestValue);
+    method @Deprecated @NonNull public android.view.translation.TranslationRequest.Builder addViewTranslationRequest(@NonNull android.view.translation.ViewTranslationRequest);
     method @NonNull public android.view.translation.TranslationRequest build();
     method @NonNull public android.view.translation.TranslationRequest.Builder setFlags(int);
     method @NonNull public android.view.translation.TranslationRequest.Builder setTranslationRequestValues(@NonNull java.util.List<android.view.translation.TranslationRequestValue>);
@@ -52888,7 +52901,7 @@ package android.view.translation {
   public final class TranslationRequestValue implements android.os.Parcelable {
     method public int describeContents();
     method @NonNull public static android.view.translation.TranslationRequestValue forText(@NonNull CharSequence);
-    method @NonNull public CharSequence getText();
+    method @Nullable public CharSequence getText();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.view.translation.TranslationRequestValue> CREATOR;
   }
@@ -52982,7 +52995,7 @@ package android.view.translation {
     method @NonNull public android.view.translation.TranslationRequestValue getValue(@NonNull String);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.view.translation.ViewTranslationRequest> CREATOR;
-    field public static final String ID_TEXT = "text";
+    field public static final String ID_TEXT = "android:text";
   }
 
   public static final class ViewTranslationRequest.Builder {

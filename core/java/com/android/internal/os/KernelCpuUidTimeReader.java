@@ -477,18 +477,17 @@ public abstract class KernelCpuUidTimeReader<T> {
             }
             copyToCurTimes();
             boolean notify = false;
-            boolean valid = true;
             for (int i = 0; i < mFreqCount; i++) {
                 // Unit is 10ms.
                 mDeltaTimes[i] = mCurTimes[i] - lastTimes[i];
                 if (mDeltaTimes[i] < 0) {
                     Slog.e(mTag, "Negative delta from freq time for uid: " + uid
                             + ", delta: " + mDeltaTimes[i]);
-                    valid = false;
+                    return;
                 }
                 notify |= mDeltaTimes[i] > 0;
             }
-            if (notify && valid) {
+            if (notify) {
                 System.arraycopy(mCurTimes, 0, lastTimes, 0, mFreqCount);
                 if (cb != null) {
                     cb.onUidCpuTime(uid, mDeltaTimes);
@@ -826,11 +825,11 @@ public abstract class KernelCpuUidTimeReader<T> {
                 if (mDeltaTime[i] < 0) {
                     Slog.e(mTag, "Negative delta from cluster time for uid: " + uid
                             + ", delta: " + mDeltaTime[i]);
-                    valid = false;
+                    return;
                 }
                 notify |= mDeltaTime[i] > 0;
             }
-            if (notify && valid) {
+            if (notify) {
                 System.arraycopy(mCurTime, 0, lastTimes, 0, mNumClusters);
                 if (cb != null) {
                     cb.onUidCpuTime(uid, mDeltaTime);

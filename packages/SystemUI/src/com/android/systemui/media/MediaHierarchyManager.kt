@@ -171,16 +171,15 @@ class MediaHierarchyManager @Inject constructor(
             if (field != value) {
                 field = value
             }
-            // Pull down shade from lock screen (exclude the case when shade is brought out by
-            // tapping twice on lock screen)
-            if (value && isLockScreenShadeVisibleToUser()) {
+            // qs is expanded on LS shade and HS shade
+            if (value && (isLockScreenShadeVisibleToUser() || isHomeScreenShadeVisibleToUser())) {
                 mediaCarouselController.logSmartspaceImpression()
             }
             // Release shade and back to lock screen
             if (isLockScreenVisibleToUser()) {
                 mediaCarouselController.logSmartspaceImpression()
             }
-            mediaCarouselController.visibleToUser = isVisibleToUser()
+            mediaCarouselController.mediaCarouselScrollHandler.visibleToUser = isVisibleToUser()
         }
 
     /**
@@ -257,7 +256,7 @@ class MediaHierarchyManager @Inject constructor(
                 if (newState == StatusBarState.SHADE_LOCKED && isLockScreenShadeVisibleToUser()) {
                     mediaCarouselController.logSmartspaceImpression()
                 }
-                mediaCarouselController.visibleToUser = isVisibleToUser()
+                mediaCarouselController.mediaCarouselScrollHandler.visibleToUser = isVisibleToUser()
             }
 
             override fun onDozeAmountChanged(linear: Float, eased: Float) {
@@ -274,8 +273,9 @@ class MediaHierarchyManager @Inject constructor(
                 } else {
                     updateDesiredLocation()
                     qsExpanded = false
+                    closeGuts()
                 }
-                mediaCarouselController.visibleToUser = isVisibleToUser()
+                mediaCarouselController.mediaCarouselScrollHandler.visibleToUser = isVisibleToUser()
             }
 
             override fun onExpandedChanged(isExpanded: Boolean) {
@@ -287,7 +287,7 @@ class MediaHierarchyManager @Inject constructor(
                 if (isLockScreenVisibleToUser()) {
                     mediaCarouselController.logSmartspaceImpression()
                 }
-                mediaCarouselController.visibleToUser = isVisibleToUser()
+                mediaCarouselController.mediaCarouselScrollHandler.visibleToUser = isVisibleToUser()
             }
         })
 

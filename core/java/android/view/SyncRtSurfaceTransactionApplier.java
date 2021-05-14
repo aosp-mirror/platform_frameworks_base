@@ -54,20 +54,21 @@ public class SyncRtSurfaceTransactionApplier {
     /**
      * Schedules applying surface parameters on the next frame.
      *
-     * @param params The surface parameters to apply. DO NOT MODIFY the list after passing into
-     *               this method to avoid synchronization issues.
+     * @param params The surface parameters to apply.
      */
     public void scheduleApply(final SurfaceParams... params) {
         if (mTargetViewRootImpl == null) {
             return;
         }
         mTargetSc = mTargetViewRootImpl.getSurfaceControl();
+        final Transaction t = new Transaction();
+        applyParams(t, params);
+
         mTargetViewRootImpl.registerRtFrameCallback(frame -> {
             if (mTargetSc == null || !mTargetSc.isValid()) {
                 return;
             }
-            Transaction t = new Transaction();
-            applyParams(t, frame, params);
+            applyTransaction(t, frame);
         });
 
         // Make sure a frame gets scheduled.
@@ -78,15 +79,17 @@ public class SyncRtSurfaceTransactionApplier {
      * Applies surface parameters on the next frame.
      * @param t transaction to apply all parameters in.
      * @param frame frame to synchronize to. Set -1 when sync is not required.
-     * @param params The surface parameters to apply. DO NOT MODIFY the list after passing into
-     *               this method to avoid synchronization issues.
+     * @param params The surface parameters to apply.
      */
-     void applyParams(Transaction t, long frame, final SurfaceParams... params) {
+     void applyParams(Transaction t, final SurfaceParams... params) {
         for (int i = params.length - 1; i >= 0; i--) {
             SurfaceParams surfaceParams = params[i];
             SurfaceControl surface = surfaceParams.surface;
             applyParams(t, surfaceParams, mTmpFloat9);
         }
+    }
+
+    void applyTransaction(Transaction t, long frame) {
         if (mTargetViewRootImpl != null) {
             mTargetViewRootImpl.mergeWithNextTransaction(t, frame);
         } else {

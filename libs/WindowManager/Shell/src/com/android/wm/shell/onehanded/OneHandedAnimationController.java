@@ -113,20 +113,18 @@ public class OneHandedAnimationController {
 
     /**
      * Animator for OneHanded transition animation which supports both alpha and bounds animation.
-     *
-     * @param <T> Type of property to animate, either offset (float)
      */
     // TODO: Refactoring to use SpringAnimation and DynamicAnimation instead of using ValueAnimator
     //  to implement One-Handed transition animation. (b/185129031)
-    public abstract static class OneHandedTransitionAnimator<T> extends ValueAnimator implements
+    public abstract static class OneHandedTransitionAnimator extends ValueAnimator implements
             ValueAnimator.AnimatorUpdateListener,
             ValueAnimator.AnimatorListener {
 
         private final SurfaceControl mLeash;
         private final WindowContainerToken mToken;
-        private T mStartValue;
-        private T mEndValue;
-        private T mCurrentValue;
+        private float mStartValue;
+        private float mEndValue;
+        private float mCurrentValue;
 
         private final List<OneHandedAnimationCallback> mOneHandedAnimationCallbacks =
                 new ArrayList<>();
@@ -137,7 +135,7 @@ public class OneHandedAnimationController {
         private @TransitionDirection int mTransitionDirection;
 
         private OneHandedTransitionAnimator(WindowContainerToken token, SurfaceControl leash,
-                T startValue, T endValue) {
+                float startValue, float endValue) {
             mLeash = leash;
             mToken = token;
             mStartValue = startValue;
@@ -204,7 +202,7 @@ public class OneHandedAnimationController {
             mSurfaceTransactionHelper = helper;
         }
 
-        OneHandedTransitionAnimator<T> addOneHandedAnimationCallback(
+        OneHandedTransitionAnimator addOneHandedAnimationCallback(
                 OneHandedAnimationCallback callback) {
             mOneHandedAnimationCallbacks.add(callback);
             return this;
@@ -223,27 +221,27 @@ public class OneHandedAnimationController {
             return mTransitionDirection;
         }
 
-        OneHandedTransitionAnimator<T> setTransitionDirection(int direction) {
+        OneHandedTransitionAnimator setTransitionDirection(int direction) {
             mTransitionDirection = direction;
             return this;
         }
 
-        T getStartValue() {
+        float getStartValue() {
             return mStartValue;
         }
 
-        T getEndValue() {
+        float getEndValue() {
             return mEndValue;
         }
 
-        void setCurrentValue(T value) {
+        void setCurrentValue(float value) {
             mCurrentValue = value;
         }
 
         /**
          * Updates the {@link #mEndValue}.
          */
-        void updateEndValue(T endValue) {
+        void updateEndValue(float endValue) {
             mEndValue = endValue;
         }
 
@@ -252,10 +250,10 @@ public class OneHandedAnimationController {
         }
 
         @VisibleForTesting
-        static OneHandedTransitionAnimator<Float> ofYOffset(WindowContainerToken token,
+        static OneHandedTransitionAnimator ofYOffset(WindowContainerToken token,
                 SurfaceControl leash, float startValue, float endValue, Rect displayBounds) {
 
-            return new OneHandedTransitionAnimator<Float>(token, leash, startValue, endValue) {
+            return new OneHandedTransitionAnimator(token, leash, startValue, endValue) {
 
                 private final Rect mTmpRect = new Rect(displayBounds);
 

@@ -183,6 +183,7 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
         mView.onAttach(mIconManager, mQSExpansionPathInterpolator);
 
         mDemoModeController.addCallback(mDemoModeReceiver);
+        mHeaderQsPanelController.setContentMargins(0, 0);
     }
 
     @Override
@@ -258,11 +259,6 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
     private boolean getChipEnabled() {
         return mMicCameraIndicatorsEnabled || mLocationIndicatorsEnabled;
     }
-
-    public void setContentMargins(int contentPaddingStart, int contentPaddingEnd) {
-        mView.setContentMargins(contentPaddingStart, contentPaddingEnd, mHeaderQsPanelController);
-    }
-
 
     private static class ClockDemoModeReceiver implements DemoMode {
         private Clock mClockView;

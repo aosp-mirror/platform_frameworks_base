@@ -404,6 +404,7 @@ import com.android.server.pm.verify.domain.proxy.DomainVerificationProxyV2;
 import com.android.server.rollback.RollbackManagerInternal;
 import com.android.server.storage.DeviceStorageMonitorInternal;
 import com.android.server.uri.UriGrantsManagerInternal;
+import com.android.server.utils.SnapshotCache;
 import com.android.server.utils.TimingsTraceAndSlog;
 import com.android.server.utils.Watchable;
 import com.android.server.utils.Watched;
@@ -557,6 +558,7 @@ public class PackageManagerService extends IPackageManager.Stub
     private static final int SHELL_UID = Process.SHELL_UID;
     private static final int SE_UID = Process.SE_UID;
     private static final int NETWORKSTACK_UID = Process.NETWORK_STACK_UID;
+    private static final int UWB_UID = Process.UWB_UID;
 
     static final int SCAN_NO_DEX = 1 << 0;
     static final int SCAN_UPDATE_SIGNATURE = 1 << 1;
@@ -870,12 +872,17 @@ public class PackageManagerService extends IPackageManager.Stub
     @Watched
     @GuardedBy("mLock")
     final WatchedArrayMap<String, AndroidPackage> mPackages = new WatchedArrayMap<>();
+    private final SnapshotCache<WatchedArrayMap<String, AndroidPackage>> mPackagesSnapshot =
+            new SnapshotCache.Auto(mPackages, mPackages, "PackageManagerService.mPackages");
 
     // Keys are isolated uids and values are the uid of the application
     // that created the isolated process.
     @Watched
     @GuardedBy("mLock")
     final WatchedSparseIntArray mIsolatedOwners = new WatchedSparseIntArray();
+    private final SnapshotCache<WatchedSparseIntArray> mIsolatedOwnersSnapshot =
+            new SnapshotCache.Auto(mIsolatedOwners, mIsolatedOwners,
+                                   "PackageManagerService.mIsolatedOwners");
 
     /**
      * Tracks new system packages [received in an OTA] that we expect to
@@ -1308,14 +1315,17 @@ public class PackageManagerService extends IPackageManager.Stub
             // Avoid invalidation-thrashing by preventing cache invalidations from causing property
             // writes if the cache isn't enabled yet.  We re-enable writes later when we're
             // done initializing.
-            sSnapshotCorked = true;
+            sSnapshotCorked.incrementAndGet();
             PackageManager.corkPackageInfoCache();
         }
 
         @Override
         public void enablePackageCaches() {
             // Uncork cache invalidations and allow clients to cache package information.
-            sSnapshotCorked = false;
+            int corking = sSnapshotCorked.decrementAndGet();
+            if (TRACE_SNAPSHOTS && corking == 0) {
+                Log.i(TAG, "snapshot: corking returns to 0");
+            }
             PackageManager.uncorkPackageInfoCache();
         }
     }
@@ -1394,14 +1404,27 @@ public class PackageManagerService extends IPackageManager.Stub
     @Watched
     final WatchedArrayMap<String, WatchedLongSparseArray<SharedLibraryInfo>>
             mSharedLibraries = new WatchedArrayMap<>();
+    private final SnapshotCache<WatchedArrayMap<String, WatchedLongSparseArray<SharedLibraryInfo>>>
+            mSharedLibrariesSnapshot =
+            new SnapshotCache.Auto<>(mSharedLibraries, mSharedLibraries,
+                                     "PackageManagerService.mSharedLibraries");
     @Watched
     final WatchedArrayMap<String, WatchedLongSparseArray<SharedLibraryInfo>>
             mStaticLibsByDeclaringPackage = new WatchedArrayMap<>();
+    private final SnapshotCache<WatchedArrayMap<String, WatchedLongSparseArray<SharedLibraryInfo>>>
+            mStaticLibsByDeclaringPackageSnapshot =
+            new SnapshotCache.Auto<>(mSharedLibraries, mSharedLibraries,
+                                     "PackageManagerService.mSharedLibraries");
 
     // Mapping from instrumentation class names to info about them.
     @Watched
     final WatchedArrayMap<ComponentName, ParsedInstrumentation> mInstrumentation =
             new WatchedArrayMap<>();
+    private final SnapshotCache<WatchedArrayMap<ComponentName, ParsedInstrumentation>>
+            mInstrumentationSnapshot =
+            new SnapshotCache.Auto<>(mInstrumentation, mInstrumentation,
+                                     "PackageManagerService.mInstrumentation");
+
 
     // Packages whose data we have transfered into another package, thus
     // should no longer exist.
@@ -1587,6 +1610,7 @@ public class PackageManagerService extends IPackageManager.Stub
     static final int INTEGRITY_VERIFICATION_COMPLETE = 25;
     static final int CHECK_PENDING_INTEGRITY_VERIFICATION = 26;
     static final int DOMAIN_VERIFICATION = 27;
+    static final int SNAPSHOT_UNCORK = 28;
 
     static final int DEFERRED_NO_KILL_POST_DELETE_DELAY_MS = 3 * 1000;
     static final int DEFERRED_NO_KILL_INSTALL_OBSERVER_DELAY_MS = 500;
@@ -1833,11 +1857,11 @@ public class PackageManagerService extends IPackageManager.Stub
         Snapshot(int type) {
             if (type == Snapshot.SNAPPED) {
                 settings = mSettings.snapshot();
-                isolatedOwners = mIsolatedOwners.snapshot();
-                packages = mPackages.snapshot();
-                sharedLibs = mSharedLibraries.snapshot();
-                staticLibs = mStaticLibsByDeclaringPackage.snapshot();
-                instrumentation = mInstrumentation.snapshot();
+                isolatedOwners = mIsolatedOwnersSnapshot.snapshot();
+                packages = mPackagesSnapshot.snapshot();
+                sharedLibs = mSharedLibrariesSnapshot.snapshot();
+                staticLibs = mStaticLibsByDeclaringPackageSnapshot.snapshot();
+                instrumentation = mInstrumentationSnapshot.snapshot();
                 resolveComponentName = mResolveComponentName.clone();
                 resolveActivity = new ActivityInfo(mResolveActivity);
                 instantAppInstallerActivity =
@@ -4873,12 +4897,16 @@ public class PackageManagerService extends IPackageManager.Stub
     // A lock-free cache for frequently called functions.
     private volatile Computer mSnapshotComputer;
     // If true, the snapshot is invalid (stale).  The attribute is static since it may be
-    // set from outside classes.
-    private static volatile boolean sSnapshotInvalid = true;
+    // set from outside classes.  The attribute may be set to true anywhere, although it
+    // should only be set true while holding mLock.  However, the attribute id guaranteed
+    // to be set false only while mLock and mSnapshotLock are both held.
+    private static AtomicBoolean sSnapshotInvalid = new AtomicBoolean(true);
+    // The package manager that is using snapshots.
+    private static PackageManagerService sSnapshotConsumer = null;
     // If true, the snapshot is corked.  Do not create a new snapshot but use the live
     // computer.  This throttles snapshot creation during periods of churn in Package
     // Manager.
-    private static volatile boolean sSnapshotCorked = false;
+    private static AtomicInteger sSnapshotCorked = new AtomicInteger(0);
 
     /**
      * This lock is used to make reads from {@link #sSnapshotInvalid} and
@@ -4896,7 +4924,10 @@ public class PackageManagerService extends IPackageManager.Stub
 
     // The snapshot disable/enable switch.  An image with the flag set true uses snapshots
     // and an image with the flag set false does not use snapshots.
-    private static final boolean SNAPSHOT_ENABLED = false;
+    private static final boolean SNAPSHOT_ENABLED = true;
+
+    // The default auto-cork delay for snapshots.  This is 1s.
+    private static final long SNAPSHOT_AUTOCORK_DELAY_MS = TimeUnit.SECONDS.toMillis(1);
 
     // The per-instance snapshot disable/enable flag.  This is generally set to false in
     // test instances and set to SNAPSHOT_ENABLED in operational instances.
@@ -4921,15 +4952,16 @@ public class PackageManagerService extends IPackageManager.Stub
             // If the current thread holds mLock then it may have modified state but not
             // yet invalidated the snapshot.  Always give the thread the live computer.
             return mLiveComputer;
+        } else if (sSnapshotCorked.get() > 0) {
+            // Snapshots are corked, which means new ones should not be built right now.
+            mSnapshotStatistics.corked();
+            return mLiveComputer;
         }
         synchronized (mSnapshotLock) {
+            // This synchronization block serializes access to the snapshot computer and
+            // to the code that samples mSnapshotInvalid.
             Computer c = mSnapshotComputer;
-            if (sSnapshotCorked && (c != null)) {
-                // Snapshots are corked, which means new ones should not be built right now.
-                c.use();
-                return c;
-            }
-            if (sSnapshotInvalid || (c == null)) {
+            if (sSnapshotInvalid.getAndSet(false) || (c == null)) {
                 // The snapshot is invalid if it is marked as invalid or if it is null.  If it
                 // is null, then it is currently being rebuilt by rebuildSnapshot().
                 synchronized (mLock) {
@@ -4937,9 +4969,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     // invalidated as it is rebuilt.  However, the snapshot is still
                     // self-consistent (the lock is being held) and is current as of the time
                     // this function is entered.
-                    if (sSnapshotInvalid) {
-                        rebuildSnapshot();
-                    }
+                    rebuildSnapshot();
 
                     // Guaranteed to be non-null.  mSnapshotComputer is only be set to null
                     // temporarily in rebuildSnapshot(), which is guarded by mLock().  Since
@@ -4957,17 +4987,40 @@ public class PackageManagerService extends IPackageManager.Stub
      * Rebuild the cached computer.  mSnapshotComputer is temporarily set to null to block other
      * threads from using the invalid computer until it is rebuilt.
      */
-    @GuardedBy("mLock")
+    @GuardedBy({ "mLock", "mSnapshotLock"})
     private void rebuildSnapshot() {
         final long now = SystemClock.currentTimeMicro();
         final int hits = mSnapshotComputer == null ? -1 : mSnapshotComputer.getUsed();
         mSnapshotComputer = null;
-        sSnapshotInvalid = false;
         final Snapshot args = new Snapshot(Snapshot.SNAPPED);
         mSnapshotComputer = new ComputerEngine(args);
         final long done = SystemClock.currentTimeMicro();
 
         mSnapshotStatistics.rebuild(now, done, hits);
+    }
+
+    /**
+     * Create a new snapshot.  Used for testing only.  This does collect statistics or
+     * update the snapshot used by other actors.  It does not alter the invalidation
+     * flag.  This method takes the mLock internally.
+     */
+    private Computer createNewSnapshot() {
+        synchronized (mLock) {
+            final Snapshot args = new Snapshot(Snapshot.SNAPPED);
+            return new ComputerEngine(args);
+        }
+    }
+
+    /**
+     * Cork snapshots.  This times out after the programmed delay.
+     */
+    private void corkSnapshots(int multiplier) {
+        int corking = sSnapshotCorked.getAndIncrement();
+        if (TRACE_SNAPSHOTS && corking == 0) {
+            Log.i(TAG, "snapshot: corking goes positive");
+        }
+        Message message = mHandler.obtainMessage(SNAPSHOT_UNCORK);
+        mHandler.sendMessageDelayed(message, SNAPSHOT_AUTOCORK_DELAY_MS * multiplier);
     }
 
     /**
@@ -4985,9 +5038,9 @@ public class PackageManagerService extends IPackageManager.Stub
      */
     public static void onChange(@Nullable Watchable what) {
         if (TRACE_SNAPSHOTS) {
-            Log.e(TAG, "snapshot: onChange(" + what + ")");
+            Log.i(TAG, "snapshot: onChange(" + what + ")");
         }
-        sSnapshotInvalid = true;
+        sSnapshotInvalid.set(true);
     }
 
     /**
@@ -5364,6 +5417,13 @@ public class PackageManagerService extends IPackageManager.Stub
                     int messageCode = msg.arg1;
                     Object object = msg.obj;
                     mDomainVerificationManager.runMessage(messageCode, object);
+                    break;
+                }
+                case SNAPSHOT_UNCORK: {
+                    int corking = sSnapshotCorked.decrementAndGet();
+                    if (TRACE_SNAPSHOTS && corking == 0) {
+                        Log.e(TAG, "snapshot: corking goes to zero in message handler");
+                    }
                     break;
                 }
             }
@@ -6313,6 +6373,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 ApplicationInfo.FLAG_SYSTEM, ApplicationInfo.PRIVATE_FLAG_PRIVILEGED);
         mSettings.addSharedUserLPw("android.uid.networkstack", NETWORKSTACK_UID,
                 ApplicationInfo.FLAG_SYSTEM, ApplicationInfo.PRIVATE_FLAG_PRIVILEGED);
+        mSettings.addSharedUserLPw("android.uid.uwb", UWB_UID,
+                ApplicationInfo.FLAG_SYSTEM, ApplicationInfo.PRIVATE_FLAG_PRIVILEGED);
         t.traceEnd();
 
         String separateProcesses = SystemProperties.get("debug.separate_processes");
@@ -6380,12 +6442,13 @@ public class PackageManagerService extends IPackageManager.Stub
             // constructor, at which time the invalidation method updates it.  The cache is
             // corked initially to ensure a cached computer is not built until the end of the
             // constructor.
-            mSnapshotEnabled = SNAPSHOT_ENABLED;
-            sSnapshotCorked = true;
-            sSnapshotInvalid = true;
             mSnapshotStatistics = new SnapshotStatistics();
+            sSnapshotConsumer = this;
+            sSnapshotCorked.set(1);
+            sSnapshotInvalid.set(true);
             mLiveComputer = createLiveComputer();
             mSnapshotComputer = null;
+            mSnapshotEnabled = SNAPSHOT_ENABLED;
             registerObserver();
         }
 
@@ -12131,6 +12194,8 @@ public class PackageManagerService extends IPackageManager.Stub
     public boolean performDexOptMode(String packageName,
             boolean checkProfiles, String targetCompilerFilter, boolean force,
             boolean bootComplete, String splitName) {
+        enforceSystemOrRootOrShell("performDexOptMode");
+
         int flags = (checkProfiles ? DexoptOptions.DEXOPT_CHECK_FOR_PROFILES_UPDATES : 0) |
                 (force ? DexoptOptions.DEXOPT_FORCE : 0) |
                 (bootComplete ? DexoptOptions.DEXOPT_BOOT_COMPLETE : 0);
@@ -18516,7 +18581,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    @GuardedBy({"mInstallLock", "mLock"})
+    @GuardedBy("mInstallLock")
     private void installPackagesTracedLI(List<InstallRequest> requests) {
         try {
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "installPackages");
@@ -22005,7 +22070,7 @@ public class PackageManagerService extends IPackageManager.Stub
             pir.addFilter(new PreferredActivity(filter, match, set, activity, always));
             scheduleWritePackageRestrictionsLocked(userId);
         }
-        if (!updateDefaultHomeNotLocked(userId)) {
+        if (!(isHomeFilter(filter) && updateDefaultHomeNotLocked(userId))) {
             postPreferredActivityChangedBroadcast(userId);
         }
     }
@@ -22295,7 +22360,9 @@ public class PackageManagerService extends IPackageManager.Stub
                     new PersistentPreferredActivity(filter, activity, true));
             scheduleWritePackageRestrictionsLocked(userId);
         }
-        updateDefaultHomeNotLocked(userId);
+        if (isHomeFilter(filter)) {
+            updateDefaultHomeNotLocked(userId);
+        }
         postPreferredActivityChangedBroadcast(userId);
     }
 
@@ -22662,6 +22729,11 @@ public class PackageManagerService extends IPackageManager.Stub
         filter.addCategory(Intent.CATEGORY_HOME);
         filter.addCategory(Intent.CATEGORY_DEFAULT);
         return filter;
+    }
+
+    private boolean isHomeFilter(@NonNull WatchedIntentFilter filter) {
+        return filter.hasAction(Intent.ACTION_MAIN) && filter.hasCategory(Intent.CATEGORY_HOME)
+                && filter.hasCategory(CATEGORY_DEFAULT);
     }
 
     ComponentName getHomeActivitiesAsUser(List<ResolveInfo> allHomeCandidates,
@@ -24006,6 +24078,15 @@ public class PackageManagerService extends IPackageManager.Stub
                 dumpState.setDump(DumpState.DUMP_PER_UID_READ_TIMEOUTS);
             } else if ("snapshot".equals(cmd)) {
                 dumpState.setDump(DumpState.DUMP_SNAPSHOT_STATISTICS);
+                if (opti < args.length) {
+                    if ("--full".equals(args[opti])) {
+                        dumpState.setBrief(false);
+                        opti++;
+                    } else if ("--brief".equals(args[opti])) {
+                        dumpState.setBrief(true);
+                        opti++;
+                    }
+                }
             } else if ("write".equals(cmd)) {
                 synchronized (mLock) {
                     writeSettingsLPrTEMP();
@@ -24021,11 +24102,11 @@ public class PackageManagerService extends IPackageManager.Stub
             pw.println("vers,1");
         }
 
-        // reader
-        if (dumpState.isDumping(DumpState.DUMP_VERSION) && packageName == null) {
-            if (!checkin) {
-                dump(DumpState.DUMP_VERSION, fd, pw, dumpState);
-            }
+        if (!checkin
+                && dumpState.isDumping(DumpState.DUMP_VERSION)
+                && packageName == null) {
+            // dump version information for all volumes with installed packages
+            dump(DumpState.DUMP_VERSION, fd, pw, dumpState);
         }
 
         if (!checkin
@@ -24056,7 +24137,8 @@ public class PackageManagerService extends IPackageManager.Stub
             ipw.decreaseIndent();
         }
 
-        if (dumpState.isDumping(DumpState.DUMP_VERIFIERS) && packageName == null) {
+        if (dumpState.isDumping(DumpState.DUMP_VERIFIERS)
+                && packageName == null) {
             final String requiredVerifierPackage = mRequiredVerifierPackage;
             if (!checkin) {
                 if (dumpState.onTitlePrinted()) {
@@ -24077,7 +24159,8 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
 
-        if (dumpState.isDumping(DumpState.DUMP_DOMAIN_VERIFIER) && packageName == null) {
+        if (dumpState.isDumping(DumpState.DUMP_DOMAIN_VERIFIER)
+                && packageName == null) {
             final DomainVerificationProxy proxy = mDomainVerificationManager.getProxy();
             final ComponentName verifierComponent = proxy.getComponentName();
             if (verifierComponent != null) {
@@ -24104,11 +24187,13 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
 
-        if (dumpState.isDumping(DumpState.DUMP_LIBS) && packageName == null) {
+        if (dumpState.isDumping(DumpState.DUMP_LIBS)
+                && packageName == null) {
             dump(DumpState.DUMP_LIBS, fd, pw, dumpState);
         }
 
-        if (dumpState.isDumping(DumpState.DUMP_FEATURES) && packageName == null) {
+        if (dumpState.isDumping(DumpState.DUMP_FEATURES)
+                && packageName == null) {
             if (dumpState.onTitlePrinted()) {
                 pw.println();
             }
@@ -24118,12 +24203,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
             synchronized (mAvailableFeatures) {
                 for (FeatureInfo feat : mAvailableFeatures.values()) {
-                    if (checkin) {
-                        pw.print("feat,");
-                        pw.print(feat.name);
-                        pw.print(",");
-                        pw.println(feat.version);
-                    } else {
+                    if (!checkin) {
                         pw.print("  ");
                         pw.print(feat.name);
                         if (feat.version > 0) {
@@ -24131,55 +24211,73 @@ public class PackageManagerService extends IPackageManager.Stub
                             pw.print(feat.version);
                         }
                         pw.println();
+                    } else {
+                        pw.print("feat,");
+                        pw.print(feat.name);
+                        pw.print(",");
+                        pw.println(feat.version);
                     }
                 }
             }
         }
 
-        if (!checkin && dumpState.isDumping(DumpState.DUMP_ACTIVITY_RESOLVERS)) {
+        if (!checkin
+                && dumpState.isDumping(DumpState.DUMP_ACTIVITY_RESOLVERS)) {
             synchronized (mLock) {
                 mComponentResolver.dumpActivityResolvers(pw, dumpState, packageName);
             }
         }
-        if (!checkin && dumpState.isDumping(DumpState.DUMP_RECEIVER_RESOLVERS)) {
+        if (!checkin
+                && dumpState.isDumping(DumpState.DUMP_RECEIVER_RESOLVERS)) {
             synchronized (mLock) {
                 mComponentResolver.dumpReceiverResolvers(pw, dumpState, packageName);
             }
         }
-        if (!checkin && dumpState.isDumping(DumpState.DUMP_SERVICE_RESOLVERS)) {
+        if (!checkin
+                && dumpState.isDumping(DumpState.DUMP_SERVICE_RESOLVERS)) {
             synchronized (mLock) {
                 mComponentResolver.dumpServiceResolvers(pw, dumpState, packageName);
             }
         }
-        if (!checkin && dumpState.isDumping(DumpState.DUMP_CONTENT_RESOLVERS)) {
+        if (!checkin
+                && dumpState.isDumping(DumpState.DUMP_CONTENT_RESOLVERS)) {
             synchronized (mLock) {
                 mComponentResolver.dumpProviderResolvers(pw, dumpState, packageName);
             }
         }
 
-        if (!checkin && dumpState.isDumping(DumpState.DUMP_PREFERRED)) {
+        if (!checkin
+                && dumpState.isDumping(DumpState.DUMP_PREFERRED)
+                && packageName == null) {
             dump(DumpState.DUMP_PREFERRED, fd, pw, dumpState);
         }
 
-        if (!checkin && dumpState.isDumping(DumpState.DUMP_PREFERRED_XML)) {
+        if (!checkin
+                && dumpState.isDumping(DumpState.DUMP_PREFERRED_XML)
+                && packageName == null) {
             dump(DumpState.DUMP_PREFERRED_XML, fd, pw, dumpState);
         }
 
-        if (!checkin && dumpState.isDumping(DumpState.DUMP_DOMAIN_PREFERRED)) {
+        if (!checkin
+                && dumpState.isDumping(DumpState.DUMP_DOMAIN_PREFERRED)
+                && packageName == null) {
             dump(DumpState.DUMP_DOMAIN_PREFERRED, fd, pw, dumpState);
         }
 
-        if (!checkin && dumpState.isDumping(DumpState.DUMP_PERMISSIONS)) {
+        if (!checkin
+                && dumpState.isDumping(DumpState.DUMP_PERMISSIONS)) {
             mSettings.dumpPermissions(pw, packageName, permissionNames, dumpState);
         }
 
-        if (!checkin && dumpState.isDumping(DumpState.DUMP_PROVIDERS)) {
+        if (!checkin
+                && dumpState.isDumping(DumpState.DUMP_PROVIDERS)) {
             synchronized (mLock) {
                 mComponentResolver.dumpContentProviders(pw, dumpState, packageName);
             }
         }
 
-        if (!checkin && dumpState.isDumping(DumpState.DUMP_KEYSETS)) {
+        if (!checkin
+                && dumpState.isDumping(DumpState.DUMP_KEYSETS)) {
             synchronized (mLock) {
                 mSettings.getKeySetManagerService().dumpLPr(pw, packageName, dumpState);
             }
@@ -24194,11 +24292,15 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
 
-        if (dumpState.isDumping(DumpState.DUMP_QUERIES)) {
+        if (!checkin
+                && dumpState.isDumping(DumpState.DUMP_QUERIES)
+                && packageName == null) {
             dump(DumpState.DUMP_QUERIES, fd, pw, dumpState);
         }
 
-        if (dumpState.isDumping(DumpState.DUMP_SHARED_USERS)) {
+        if (!checkin
+                && dumpState.isDumping(DumpState.DUMP_SHARED_USERS)
+                && packageName == null) {
             // This cannot be moved to ComputerEngine since the set of packages in the
             // SharedUserSetting do not have a copy.
             synchronized (mLock) {
@@ -24206,7 +24308,9 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
 
-        if (dumpState.isDumping(DumpState.DUMP_CHANGES)) {
+        if (!checkin
+                && dumpState.isDumping(DumpState.DUMP_CHANGES)
+                && packageName == null) {
             if (dumpState.onTitlePrinted()) pw.println();
             pw.println("Package Changes:");
             synchronized (mLock) {
@@ -24233,7 +24337,9 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
 
-        if (!checkin && dumpState.isDumping(DumpState.DUMP_FROZEN) && packageName == null) {
+        if (!checkin
+                && dumpState.isDumping(DumpState.DUMP_FROZEN)
+                && packageName == null) {
             // XXX should handle packageName != null by dumping only install data that
             // the given package is involved with.
             if (dumpState.onTitlePrinted()) pw.println();
@@ -24254,7 +24360,9 @@ public class PackageManagerService extends IPackageManager.Stub
             ipw.decreaseIndent();
         }
 
-        if (!checkin && dumpState.isDumping(DumpState.DUMP_VOLUMES) && packageName == null) {
+        if (!checkin
+                && dumpState.isDumping(DumpState.DUMP_VOLUMES)
+                && packageName == null) {
             if (dumpState.onTitlePrinted()) pw.println();
 
             final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ", 120);
@@ -24273,50 +24381,61 @@ public class PackageManagerService extends IPackageManager.Stub
             ipw.decreaseIndent();
         }
 
-        if (!checkin && dumpState.isDumping(DumpState.DUMP_SERVICE_PERMISSIONS)
+        if (!checkin
+                && dumpState.isDumping(DumpState.DUMP_SERVICE_PERMISSIONS)
                 && packageName == null) {
             synchronized (mLock) {
                 mComponentResolver.dumpServicePermissions(pw, dumpState);
             }
         }
 
-        if (!checkin && dumpState.isDumping(DumpState.DUMP_DEXOPT)) {
+        if (!checkin
+                && dumpState.isDumping(DumpState.DUMP_DEXOPT)
+                && packageName == null) {
             if (dumpState.onTitlePrinted()) pw.println();
             dump(DumpState.DUMP_DEXOPT, fd, pw, dumpState);
         }
 
-        if (!checkin && dumpState.isDumping(DumpState.DUMP_COMPILER_STATS)) {
+        if (!checkin
+                && dumpState.isDumping(DumpState.DUMP_COMPILER_STATS)
+                && packageName == null) {
             if (dumpState.onTitlePrinted()) pw.println();
             dump(DumpState.DUMP_COMPILER_STATS, fd, pw, dumpState);
         }
 
-        if (!checkin && dumpState.isDumping(DumpState.DUMP_MESSAGES) && packageName == null) {
-            if (dumpState.onTitlePrinted()) pw.println();
-            synchronized (mLock) {
-                mSettings.dumpReadMessagesLPr(pw, dumpState);
+        if (dumpState.isDumping(DumpState.DUMP_MESSAGES)
+                && packageName == null) {
+            if (!checkin) {
+                if (dumpState.onTitlePrinted()) pw.println();
+                synchronized (mLock) {
+                    mSettings.dumpReadMessagesLPr(pw, dumpState);
+                }
+                pw.println();
+                pw.println("Package warning messages:");
+                dumpCriticalInfo(pw, null);
+            } else {
+                dumpCriticalInfo(pw, "msg,");
             }
-            pw.println();
-            pw.println("Package warning messages:");
-            dumpCriticalInfo(pw, null);
-        }
-
-        if (checkin && dumpState.isDumping(DumpState.DUMP_MESSAGES)) {
-            dumpCriticalInfo(pw, "msg,");
         }
 
         // PackageInstaller should be called outside of mPackages lock
-        if (!checkin && dumpState.isDumping(DumpState.DUMP_INSTALLS) && packageName == null) {
+        if (!checkin
+                && dumpState.isDumping(DumpState.DUMP_INSTALLS)
+                && packageName == null) {
             // XXX should handle packageName != null by dumping only install data that
             // the given package is involved with.
             if (dumpState.onTitlePrinted()) pw.println();
             mInstallerService.dump(new IndentingPrintWriter(pw, "  ", 120));
         }
 
-        if (!checkin && dumpState.isDumping(DumpState.DUMP_APEX)) {
+        if (!checkin
+                && dumpState.isDumping(DumpState.DUMP_APEX)
+                && packageName == null) {
             mApexManager.dump(pw, packageName);
         }
 
-        if (!checkin && dumpState.isDumping(DumpState.DUMP_PER_UID_READ_TIMEOUTS)
+        if (!checkin
+                && dumpState.isDumping(DumpState.DUMP_PER_UID_READ_TIMEOUTS)
                 && packageName == null) {
             pw.println();
             pw.println("Per UID read timeouts:");
@@ -24335,19 +24454,22 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
 
-        if (!checkin && dumpState.isDumping(DumpState.DUMP_SNAPSHOT_STATISTICS)) {
+        if (!checkin
+                && dumpState.isDumping(DumpState.DUMP_SNAPSHOT_STATISTICS)
+                && packageName == null) {
             pw.println("Snapshot statistics");
             if (!mSnapshotEnabled) {
                 pw.println("  Snapshots disabled");
             } else {
                 int hits = 0;
+                int level = sSnapshotCorked.get();
                 synchronized (mSnapshotLock) {
                     if (mSnapshotComputer != null) {
                         hits = mSnapshotComputer.getUsed();
                     }
                 }
                 final long now = SystemClock.currentTimeMicro();
-                mSnapshotStatistics.dump(pw, "  ", now, hits, true);
+                mSnapshotStatistics.dump(pw, "  ", now, hits, level, dumpState.isBrief());
             }
         }
     }

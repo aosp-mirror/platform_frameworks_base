@@ -42,6 +42,7 @@ public class GlobalActionsLayoutLite extends GlobalActionsLayout {
                 com.android.systemui.R.integer.power_menu_lite_max_columns);
         mMaxRows = getResources().getInteger(
                 com.android.systemui.R.integer.power_menu_lite_max_rows);
+        setOnClickListener(v -> { }); // Prevent parent onClickListener from triggering
     }
 
     @VisibleForTesting

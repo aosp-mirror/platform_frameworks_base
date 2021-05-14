@@ -167,7 +167,6 @@ public class VcnManagementService extends IVcnManagementService.Stub {
     @NonNull private final VcnNetworkProvider mNetworkProvider;
     @NonNull private final TelephonySubscriptionTrackerCallback mTelephonySubscriptionTrackerCb;
     @NonNull private final TelephonySubscriptionTracker mTelephonySubscriptionTracker;
-    @NonNull private final VcnContext mVcnContext;
     @NonNull private final BroadcastReceiver mPkgChangeReceiver;
 
     @NonNull
@@ -212,7 +211,6 @@ public class VcnManagementService extends IVcnManagementService.Stub {
                 mContext, mLooper, mTelephonySubscriptionTrackerCb);
 
         mConfigDiskRwHelper = mDeps.newPersistableBundleLockingReadWriteHelper(VCN_CONFIG_FILE);
-        mVcnContext = mDeps.newVcnContext(mContext, mLooper, mNetworkProvider);
 
         mPkgChangeReceiver = new BroadcastReceiver() {
             @Override
@@ -336,8 +334,9 @@ public class VcnManagementService extends IVcnManagementService.Stub {
         public VcnContext newVcnContext(
                 @NonNull Context context,
                 @NonNull Looper looper,
-                @NonNull VcnNetworkProvider vcnNetworkProvider) {
-            return new VcnContext(context, looper, vcnNetworkProvider);
+                @NonNull VcnNetworkProvider vcnNetworkProvider,
+                boolean isInTestMode) {
+            return new VcnContext(context, looper, vcnNetworkProvider, isInTestMode);
         }
 
         /** Creates a new Vcn instance using the provided configuration */
@@ -419,6 +418,14 @@ public class VcnManagementService extends IVcnManagementService.Stub {
                 "Carrier privilege required for subscription group to set VCN Config");
     }
 
+    private void enforceManageTestNetworksForTestMode(@NonNull VcnConfig vcnConfig) {
+        if (vcnConfig.isTestModeProfile()) {
+            mContext.enforceCallingPermission(
+                    android.Manifest.permission.MANAGE_TEST_NETWORKS,
+                    "Test-mode require the MANAGE_TEST_NETWORKS permission");
+        }
+    }
+
     private class VcnSubscriptionTrackerCallback implements TelephonySubscriptionTrackerCallback {
         /**
          * Handles subscription group changes, as notified by {@link TelephonySubscriptionTracker}
@@ -432,6 +439,7 @@ public class VcnManagementService extends IVcnManagementService.Stub {
             synchronized (mLock) {
                 final TelephonySubscriptionSnapshot oldSnapshot = mLastSnapshot;
                 mLastSnapshot = snapshot;
+                Slog.d(TAG, "new snapshot: " + mLastSnapshot);
 
                 // Start any VCN instances as necessary
                 for (Entry<ParcelUuid, VcnConfig> entry : mConfigs.entrySet()) {
@@ -534,15 +542,18 @@ public class VcnManagementService extends IVcnManagementService.Stub {
 
     @GuardedBy("mLock")
     private void startVcnLocked(@NonNull ParcelUuid subscriptionGroup, @NonNull VcnConfig config) {
-        Slog.v(TAG, "Starting VCN config for subGrp: " + subscriptionGroup);
+        Slog.d(TAG, "Starting VCN config for subGrp: " + subscriptionGroup);
 
         // TODO(b/176939047): Support multiple VCNs active at the same time, or limit to one active
         //                    VCN.
 
         final VcnCallbackImpl vcnCallback = new VcnCallbackImpl(subscriptionGroup);
 
+        final VcnContext vcnContext =
+                mDeps.newVcnContext(
+                        mContext, mLooper, mNetworkProvider, config.isTestModeProfile());
         final Vcn newInstance =
-                mDeps.newVcn(mVcnContext, subscriptionGroup, config, mLastSnapshot, vcnCallback);
+                mDeps.newVcn(vcnContext, subscriptionGroup, config, mLastSnapshot, vcnCallback);
         mVcns.put(subscriptionGroup, newInstance);
 
         // Now that a new VCN has started, notify all registered listeners to refresh their
@@ -556,7 +567,7 @@ public class VcnManagementService extends IVcnManagementService.Stub {
     @GuardedBy("mLock")
     private void startOrUpdateVcnLocked(
             @NonNull ParcelUuid subscriptionGroup, @NonNull VcnConfig config) {
-        Slog.v(TAG, "Starting or updating VCN config for subGrp: " + subscriptionGroup);
+        Slog.d(TAG, "Starting or updating VCN config for subGrp: " + subscriptionGroup);
 
         if (mVcns.containsKey(subscriptionGroup)) {
             final Vcn vcn = mVcns.get(subscriptionGroup);
@@ -582,10 +593,11 @@ public class VcnManagementService extends IVcnManagementService.Stub {
         if (!config.getProvisioningPackageName().equals(opPkgName)) {
             throw new IllegalArgumentException("Mismatched caller and VcnConfig creator");
         }
-        Slog.v(TAG, "VCN config updated for subGrp: " + subscriptionGroup);
+        Slog.d(TAG, "VCN config updated for subGrp: " + subscriptionGroup);
 
         mContext.getSystemService(AppOpsManager.class)
                 .checkPackage(mDeps.getBinderCallingUid(), config.getProvisioningPackageName());
+        enforceManageTestNetworksForTestMode(config);
         enforceCallingUserAndCarrierPrivilege(subscriptionGroup, opPkgName);
 
         Binder.withCleanCallingIdentity(() -> {
@@ -607,7 +619,7 @@ public class VcnManagementService extends IVcnManagementService.Stub {
     public void clearVcnConfig(@NonNull ParcelUuid subscriptionGroup, @NonNull String opPkgName) {
         requireNonNull(subscriptionGroup, "subscriptionGroup was null");
         requireNonNull(opPkgName, "opPkgName was null");
-        Slog.v(TAG, "VCN config cleared for subGrp: " + subscriptionGroup);
+        Slog.d(TAG, "VCN config cleared for subGrp: " + subscriptionGroup);
 
         mContext.getSystemService(AppOpsManager.class)
                 .checkPackage(mDeps.getBinderCallingUid(), opPkgName);
@@ -843,8 +855,14 @@ public class VcnManagementService extends IVcnManagementService.Stub {
             }
 
             final NetworkCapabilities result = ncBuilder.build();
-            return new VcnUnderlyingNetworkPolicy(
+            final VcnUnderlyingNetworkPolicy policy = new VcnUnderlyingNetworkPolicy(
                     mTrackingNetworkCallback.requiresRestartForCarrierWifi(result), result);
+
+            if (VDBG) {
+                Slog.d(TAG, "getUnderlyingNetworkPolicy() called for caps: " + networkCapabilities
+                        + "; and lp: " + linkProperties + "; result = " + policy);
+            }
+            return policy;
         });
     }
 

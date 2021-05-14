@@ -16,16 +16,27 @@
 
 package com.android.systemui.util.concurrency;
 
+import android.os.Handler;
+import android.os.Looper;
+
 import java.util.concurrent.Executor;
 
 /**
  * Factory for building Executors running on a unique named thread.
  *
  * Use this when our generally available @Main, @Background, @UiBackground, @LongRunning, or
- * similar global qualifiers don't quite cut it. Note that the methods here create entirely new
+ * similar global qualifiers don't quite cut it. Note that the methods here can create entirely new
  * threads; there are no singletons here. Use responsibly.
  */
 public interface ThreadFactory {
+    /**
+     * Returns a {@link Handler} running on a named thread.
+     *
+     * The thread is implicitly started and may be left running indefinitely, depending on the
+     * implementation. Assume this is the case and use responsibly.
+     */
+    Handler builderHandlerOnNewThread(String threadName);
+
     /**
      * Return an {@link java.util.concurrent.Executor} running on a named thread.
      *
@@ -41,4 +52,14 @@ public interface ThreadFactory {
      * implementation. Assume this is the case and use responsibly.
      **/
     DelayableExecutor buildDelayableExecutorOnNewThread(String threadName);
+
+    /**
+     * Return an {@link DelayableExecutor} running on the given HandlerThread.
+     **/
+    DelayableExecutor buildDelayableExecutorOnHandler(Handler handler);
+
+    /**
+     * Return an {@link DelayableExecutor} running the given Looper
+     **/
+    DelayableExecutor buildDelayableExecutorOnLooper(Looper looper);
 }

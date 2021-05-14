@@ -4573,27 +4573,6 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Determine whether the current profile password the user has set is sufficient
-     * to meet the policy requirements (e.g. quality, minimum length) that have been
-     * requested by the admins of the parent user and its profiles.
-     *
-     * @param userHandle the userId of the profile to check the password for.
-     * @return Returns true if the password would meet the current requirements, else false.
-     * @throws SecurityException if {@code userHandle} is not a managed profile.
-     * @hide
-     */
-    public boolean isProfileActivePasswordSufficientForParent(int userHandle) {
-        if (mService != null) {
-            try {
-                return mService.isProfileActivePasswordSufficientForParent(userHandle);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        }
-        return false;
-    }
-
-    /**
      * Returns whether the given user's credential will be sufficient for all password policy
      * requirement, once the user's profile has switched to unified challenge.
      *
@@ -11995,15 +11974,14 @@ public class DevicePolicyManager {
 
     /**
      * @hide
-     * Force update user setup completed status.
+     * Force update user setup completed status for the given {@code userId}.
      * @throws {@link SecurityException} if the caller has no
-     *         {@code android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS} or the caller is
-     *         not {@link UserHandle#SYSTEM_USER}
+     *         {@code android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS}.
      */
     @TestApi
-    public void forceUpdateUserSetupComplete() {
+    public void forceUpdateUserSetupComplete(@UserIdInt int userId) {
         try {
-            mService.forceUpdateUserSetupComplete();
+            mService.forceUpdateUserSetupComplete(userId);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }

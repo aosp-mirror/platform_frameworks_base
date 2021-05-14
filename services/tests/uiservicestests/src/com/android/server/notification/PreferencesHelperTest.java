@@ -375,19 +375,27 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         when(mPm.getPackageUidAsUser(eq(packageName), anyInt())).thenReturn(uid);
     }
 
+    private static NotificationChannel createNotificationChannel(String id, String name,
+            int importance) {
+        NotificationChannel channel = new NotificationChannel(id, name, importance);
+        channel.setSound(SOUND_URI, Notification.AUDIO_ATTRIBUTES_DEFAULT);
+        return channel;
+    }
+
     @Test
     public void testWriteXml_onlyBackupsTargetUser() throws Exception {
         // Setup package notifications.
         String package0 = "test.package.user0";
         int uid0 = 1001;
         setUpPackageWithUid(package0, uid0);
-        NotificationChannel channel0 = new NotificationChannel("id0", "name0", IMPORTANCE_HIGH);
+        NotificationChannel channel0 = createNotificationChannel("id0", "name0", IMPORTANCE_HIGH);
         assertTrue(mHelper.createNotificationChannel(package0, uid0, channel0, true, false));
 
         String package10 = "test.package.user10";
         int uid10 = 1001001;
         setUpPackageWithUid(package10, uid10);
-        NotificationChannel channel10 = new NotificationChannel("id10", "name10", IMPORTANCE_HIGH);
+        NotificationChannel channel10 = createNotificationChannel("id10", "name10",
+                IMPORTANCE_HIGH);
         assertTrue(mHelper.createNotificationChannel(package10, uid10, channel10, true, false));
 
         ByteArrayOutputStream baos = writeXmlAndPurge(package10, uid10, true, 10);
@@ -412,7 +420,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         String package0 = "test.package.user0";
         int uid0 = 1001;
         setUpPackageWithUid(package0, uid0);
-        NotificationChannel channel0 = new NotificationChannel("id0", "name0", IMPORTANCE_HIGH);
+        NotificationChannel channel0 = createNotificationChannel("id0", "name0", IMPORTANCE_HIGH);
         assertTrue(mHelper.createNotificationChannel(package0, uid0, channel0, true, false));
 
         ByteArrayOutputStream baos = writeXmlAndPurge(package0, uid0, true, 0);
@@ -505,9 +513,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         NotificationChannelGroup ncg = new NotificationChannelGroup("1", "bye");
         NotificationChannelGroup ncg2 = new NotificationChannelGroup("2", "hello");
         NotificationChannel channel1 =
-                new NotificationChannel("id1", "name1", NotificationManager.IMPORTANCE_HIGH);
-        NotificationChannel channel2 =
-                new NotificationChannel("id2", "name2", IMPORTANCE_LOW);
+                createNotificationChannel("id1", "name1", NotificationManager.IMPORTANCE_HIGH);
+        NotificationChannel channel2 = createNotificationChannel("id2", "name2", IMPORTANCE_LOW);
         channel2.setDescription("descriptions for all");
         channel2.setSound(SOUND_URI, mAudioAttributes);
         channel2.enableLights(true);
@@ -516,7 +523,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         channel2.enableVibration(false);
         channel2.setGroup(ncg.getId());
         channel2.setLightColor(Color.BLUE);
-        NotificationChannel channel3 = new NotificationChannel("id3", "NAM3", IMPORTANCE_HIGH);
+        NotificationChannel channel3 = createNotificationChannel("id3", "NAM3", IMPORTANCE_HIGH);
         channel3.enableVibration(true);
 
         mHelper.createNotificationChannelGroup(PKG_N_MR1, UID_N_MR1, ncg, true);
@@ -623,7 +630,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testRestoreXml_withNonExistentCanonicalizedSoundUri() throws Exception {
+    public void testRestoreXml_withNonExistentCanonicalizedSoundUri_ignoreChannel()
+            throws Exception {
         Thread.sleep(3000);
         doReturn(null)
                 .when(mTestIContentProvider).canonicalize(any(), eq(CANONICAL_SOUND_URI));
@@ -641,7 +649,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
         NotificationChannel actualChannel = mHelper.getNotificationChannel(
                 PKG_N_MR1, UID_N_MR1, channel.getId(), false);
-        assertEquals(Settings.System.DEFAULT_NOTIFICATION_URI, actualChannel.getSound());
+        assertNull(actualChannel);
     }
 
 
@@ -650,7 +658,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
      * handle its restore properly.
      */
     @Test
-    public void testRestoreXml_withUncanonicalizedNonLocalSoundUri() throws Exception {
+    public void testRestoreXml_withUncanonicalizedNonLocalSoundUri_ignoreChannel()
+            throws Exception {
         // Not a local uncanonicalized uri, simulating that it fails to exist locally
         doReturn(null)
                 .when(mTestIContentProvider).canonicalize(any(), eq(SOUND_URI));
@@ -669,7 +678,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 backupWithUncanonicalizedSoundUri.getBytes(), true, UserHandle.USER_SYSTEM);
 
         NotificationChannel actualChannel = mHelper.getNotificationChannel(PKG_N_MR1, UID_N_MR1, id, false);
-        assertEquals(Settings.System.DEFAULT_NOTIFICATION_URI, actualChannel.getSound());
+        assertNull(actualChannel);
     }
 
     @Test
@@ -693,11 +702,11 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         NotificationChannelGroup ncg = new NotificationChannelGroup("1", "bye");
         NotificationChannelGroup ncg2 = new NotificationChannelGroup("2", "hello");
         NotificationChannel channel1 =
-                new NotificationChannel("id1", "name1", NotificationManager.IMPORTANCE_HIGH);
+                createNotificationChannel("id1", "name1", NotificationManager.IMPORTANCE_HIGH);
         NotificationChannel channel2 =
-                new NotificationChannel("id2", "name2", IMPORTANCE_HIGH);
+                createNotificationChannel("id2", "name2", IMPORTANCE_HIGH);
         NotificationChannel channel3 =
-                new NotificationChannel("id3", "name3", IMPORTANCE_LOW);
+                createNotificationChannel("id3", "name3", IMPORTANCE_LOW);
         channel3.setGroup(ncg.getId());
 
         mHelper.createNotificationChannelGroup(PKG_N_MR1, UID_N_MR1, ncg, true);
@@ -3048,7 +3057,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     @Test
     public void testChannelXml_backupDefaultApp() throws Exception {
         NotificationChannel channel1 =
-                new NotificationChannel("id1", "name1", NotificationManager.IMPORTANCE_HIGH);
+                createNotificationChannel("id1", "name1", NotificationManager.IMPORTANCE_HIGH);
 
         mHelper.createNotificationChannel(PKG_O, UID_O, channel1, true, false);
 
@@ -3329,7 +3338,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 mAppOpsManager, mStatsEventBuilderFactory);
 
         mHelper.createNotificationChannel(
-                PKG_P, UID_P, new NotificationChannel("id", "id", 2), true, false);
+                PKG_P, UID_P, createNotificationChannel("id", "id", 2), true, false);
         mHelper.deleteNotificationChannel(PKG_P, UID_P, "id");
         NotificationChannel nc1 = mHelper.getNotificationChannel(PKG_P, UID_P, "id", true);
         assertTrue(DateUtils.isToday(nc1.getDeletedTimeMs()));

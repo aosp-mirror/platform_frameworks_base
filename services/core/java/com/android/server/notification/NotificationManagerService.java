@@ -106,7 +106,6 @@ import static android.service.notification.NotificationListenerService.TRIM_FULL
 import static android.service.notification.NotificationListenerService.TRIM_LIGHT;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 
-import static com.android.internal.util.CollectionUtils.emptyIfNull;
 import static com.android.internal.util.FrameworkStatsLog.DND_MODE_RULE;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_CHANNEL_GROUP_PREFERENCES;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_CHANNEL_PREFERENCES;
@@ -324,7 +323,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
@@ -832,7 +830,7 @@ public class NotificationManagerService extends SystemService {
                 learnNASPendingIntent).build();
 
 
-        return new Notification.Builder(getContext(), SystemNotificationChannels.ALERTS)
+        return new Notification.Builder(getContext(), SystemNotificationChannels.SYSTEM_CHANGES)
                 .setAutoCancel(false)
                 .setOngoing(true)
                 .setTicker(getContext().getResources().getString(title))
@@ -9467,6 +9465,27 @@ public class NotificationManagerService extends SystemService {
             return mDefaultFromConfig;
         }
 
+        @Override
+        protected void upgradeUserSet() {
+            for (int userId: mApproved.keySet()) {
+                ArraySet<String> userSetServices = mUserSetServices.get(userId);
+                mIsUserChanged.put(userId, (userSetServices != null && userSetServices.size() > 0));
+            }
+        }
+
+        @Override
+        protected void addApprovedList(String approved, int userId, boolean isPrimary,
+                String userSet) {
+            if (!TextUtils.isEmpty(approved)) {
+                String[] approvedArray = approved.split(ENABLED_SERVICES_SEPARATOR);
+                if (approvedArray.length > 1) {
+                    Slog.d(TAG, "More than one approved assistants");
+                    approved = approvedArray[0];
+                }
+            }
+            super.addApprovedList(approved, userId, isPrimary, userSet);
+        }
+
         public NotificationAssistants(Context context, Object lock, UserProfiles up,
                 IPackageManager pm) {
             super(context, lock, up, pm);
@@ -9641,47 +9660,12 @@ public class NotificationManagerService extends SystemService {
         }
 
         boolean hasUserSet(int userId) {
-            synchronized (mLock) {
-                ArraySet<String> userSetServices = mUserSetServices.get(userId);
-                if (userSetServices == null) {
-                    // Legacy case - no data means user-set, unless no assistant is set
-                    return !mApproved.isEmpty();
-                }
-                Map<Boolean, ArraySet<String>> approvedByType = emptyIfNull(mApproved.get(userId));
-                return userSetServices.containsAll(emptyIfNull(approvedByType.get(true)))
-                        && userSetServices.containsAll(emptyIfNull(approvedByType.get(false)));
-            }
+            Boolean userSet = mIsUserChanged.get(userId);
+            return (userSet != null && userSet);
         }
 
         void setUserSet(int userId, boolean set) {
-            synchronized (mLock) {
-                ArraySet<String> userSetServices = new ArraySet<>();
-                if (set) {
-                    ArrayMap<Boolean, ArraySet<String>> approvedByType = mApproved.get(userId);
-                    if (approvedByType != null) {
-                        for (int i = 0; i < approvedByType.size(); i++) {
-                            userSetServices.addAll(approvedByType.valueAt(i));
-                        }
-                    }
-                }
-                mUserSetServices.put(userId, userSetServices);
-            }
-        }
-
-        @Override
-        protected void readExtraAttributes(String tag, TypedXmlPullParser parser, int userId)
-                throws IOException {
-            // TODO: this logic looks broken, since it's trying to convert a
-            // list into a boolean; for now we preserve the old parsing behavior
-            // to avoid a performance regression, but someone should investigate
-            final String value = parser.getAttributeValue(null, ATT_USER_SET);
-            final boolean userSet;
-            if (TextUtils.isEmpty(value)) {
-                userSet = false;
-            } else {
-                userSet = Boolean.parseBoolean(value);
-            }
-            setUserSet(userId, userSet);
+            mIsUserChanged.put(userId, set);
         }
 
         private void notifyCapabilitiesChanged(final ManagedServiceInfo info) {
@@ -10000,6 +9984,7 @@ public class NotificationManagerService extends SystemService {
         static final String TAG_APPROVED = "allowed";
         static final String TAG_DISALLOWED= "disallowed";
         static final String XML_SEPARATOR = ",";
+        static final String FLAG_SEPARATOR = "\\|";
 
         private final ArraySet<ManagedServiceInfo> mLightTrimListeners = new ArraySet<>();
         ArrayMap<Pair<ComponentName, Integer>, NotificationListenerFilter>
@@ -10271,15 +10256,26 @@ public class NotificationManagerService extends SystemService {
         private int getTypesFromStringList(String typeList) {
             int types = 0;
             if (typeList != null) {
-                String[] typeStrings = typeList.split(XML_SEPARATOR);
+                String[] typeStrings = typeList.split(FLAG_SEPARATOR);
                 for (int i = 0; i < typeStrings.length; i++) {
-                    if (TextUtils.isEmpty(typeStrings[i])) {
+                    final String typeString = typeStrings[i];
+                    if (TextUtils.isEmpty(typeString)) {
                         continue;
                     }
-                    try {
-                        types |= Integer.parseInt(typeStrings[i]);
-                    } catch (NumberFormatException e) {
-                        // skip
+                    if (typeString.equalsIgnoreCase("ONGOING")) {
+                        types |= FLAG_FILTER_TYPE_ONGOING;
+                    } else if (typeString.equalsIgnoreCase("CONVERSATIONS")) {
+                        types |= FLAG_FILTER_TYPE_CONVERSATIONS;
+                    } else if (typeString.equalsIgnoreCase("SILENT")) {
+                        types |= FLAG_FILTER_TYPE_SILENT;
+                    } else if (typeString.equalsIgnoreCase("ALERTING")) {
+                        types |= FLAG_FILTER_TYPE_ALERTING;
+                    } else {
+                        try {
+                            types |= Integer.parseInt(typeString);
+                        } catch (NumberFormatException e) {
+                            // skip
+                        }
                     }
                 }
             }

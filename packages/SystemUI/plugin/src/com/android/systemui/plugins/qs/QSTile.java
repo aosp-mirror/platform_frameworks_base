@@ -148,9 +148,11 @@ public interface QSTile {
     @ProvidesInterface(version = State.VERSION)
     public static class State {
         public static final int VERSION = 1;
+        public static final int DEFAULT_STATE = Tile.STATE_ACTIVE;
+
         public Icon icon;
         public Supplier<Icon> iconSupplier;
-        public int state = Tile.STATE_ACTIVE;
+        public int state = DEFAULT_STATE;
         public CharSequence label;
         public CharSequence secondaryLabel;
         public CharSequence contentDescription;

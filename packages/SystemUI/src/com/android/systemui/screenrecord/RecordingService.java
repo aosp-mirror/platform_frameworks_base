@@ -189,7 +189,7 @@ public class RecordingService extends Service implements MediaRecorder.OnInfoLis
                     // Remove notification
                     mNotificationManager.cancelAsUser(null, NOTIFICATION_VIEW_ID, currentUser);
                     return false;
-                }, false);
+                }, false, false);
 
                 // Close quick shade
                 sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));

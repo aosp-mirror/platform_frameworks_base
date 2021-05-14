@@ -41,7 +41,8 @@ public class MainSwitchPreferenceTest {
     @Before
     public void setUp() {
         mContext = RuntimeEnvironment.application;
-        mRootView = View.inflate(mContext, R.layout.main_switch_layout, null /* parent */);
+        mRootView = View.inflate(mContext, R.layout.settingslib_main_switch_layout,
+                null /* parent */);
         mHolder = PreferenceViewHolder.createInstanceForTests(mRootView);
         mPreference = new MainSwitchPreference(mContext);
     }
@@ -56,15 +57,6 @@ public class MainSwitchPreferenceTest {
 
         assertThat(((TextView) mRootView.findViewById(R.id.switch_text)).getText())
                 .isEqualTo(defaultOnText);
-    }
-
-    @Test
-    public void shouldAllowDividerBelow() {
-        mPreference.onBindViewHolder(mHolder);
-
-        View divider = mRootView.findViewById(R.id.below_divider);
-
-        assertThat(divider.getVisibility()).isEqualTo(View.VISIBLE);
     }
 
     @Test

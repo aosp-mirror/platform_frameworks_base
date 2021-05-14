@@ -27,6 +27,7 @@ import androidx.annotation.Nullable;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
+import com.android.systemui.R;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -128,6 +129,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         mStatusBarStateController.removeCallback(mStateListener);
         mKeyguardViewManager.setAlternateAuthInterceptor(null);
         mTransitioningFromHome = false;
+        mKeyguardUpdateMonitor.requestFaceAuthOnOccludingApp(false);
 
         if (mCancelRunnable != null) {
             mCancelRunnable.run();
@@ -164,9 +166,13 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         mShowingUdfpsBouncer = show;
         updatePauseAuth();
         if (mShowingUdfpsBouncer) {
-            mView.animateUdfpsBouncer();
+            mView.animateUdfpsBouncer(() ->
+                    mKeyguardUpdateMonitor.requestFaceAuthOnOccludingApp(true));
+            mView.announceForAccessibility(mView.getContext().getString(
+                    R.string.accessibility_fingerprint_bouncer));
         } else {
-            mView.animateAwayUdfpsBouncer(() -> mKeyguardViewManager.cancelPostAuthActions());
+            mView.animateAwayUdfpsBouncer(null);
+            mKeyguardUpdateMonitor.requestFaceAuthOnOccludingApp(false);
         }
         return true;
     }
@@ -228,8 +234,8 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
      */
     private void maybeShowInputBouncer() {
         if (mShowingUdfpsBouncer) {
-            mKeyguardViewManager.resetAlternateAuth(false);
             mKeyguardViewManager.showBouncer(true);
+            mKeyguardViewManager.resetAlternateAuth(false);
         }
     }
 

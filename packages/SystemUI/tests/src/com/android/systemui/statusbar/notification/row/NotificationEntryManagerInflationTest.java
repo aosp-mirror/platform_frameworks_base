@@ -181,6 +181,14 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
         mEntryManager = new NotificationEntryManager(
                 mock(NotificationEntryManagerLogger.class),
                 mGroupMembershipManager,
+                mFeatureFlags,
+                () -> mRowBinder,
+                () -> mRemoteInputManager,
+                mLeakDetector,
+                mock(ForegroundServiceDismissalFeatureController.class),
+                mock(IStatusBarService.class)
+        );
+        mEntryManager.setRanker(
                 new NotificationRankingManager(
                         () -> mock(NotificationMediaManager.class),
                         mGroupMembershipManager,
@@ -189,15 +197,8 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
                         mock(NotificationEntryManagerLogger.class),
                         mock(NotificationSectionsFeatureManager.class),
                         mock(PeopleNotificationIdentifier.class),
-                        mock(HighPriorityProvider.class)),
-                mEnvironment,
-                mFeatureFlags,
-                () -> mRowBinder,
-                () -> mRemoteInputManager,
-                mLeakDetector,
-                mock(ForegroundServiceDismissalFeatureController.class),
-                mock(IStatusBarService.class)
-        );
+                        mock(HighPriorityProvider.class),
+                        mEnvironment));
 
         NotifRemoteViewCache cache = new NotifRemoteViewCacheImpl(mEntryManager);
         NotifBindPipeline pipeline = new NotifBindPipeline(

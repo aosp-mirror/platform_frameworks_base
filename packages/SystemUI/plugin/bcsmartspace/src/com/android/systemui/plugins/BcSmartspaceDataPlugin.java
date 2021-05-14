@@ -19,8 +19,9 @@ package com.android.systemui.plugins;
 import android.app.PendingIntent;
 import android.app.smartspace.SmartspaceAction;
 import android.app.smartspace.SmartspaceTarget;
+import android.app.smartspace.SmartspaceTargetEvent;
 import android.content.Intent;
-import android.graphics.drawable.Icon;
+import android.graphics.drawable.Drawable;
 import android.os.Parcelable;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,6 +45,18 @@ public interface BcSmartspaceDataPlugin extends Plugin {
 
     /** Unregister a listener. */
     void unregisterListener(SmartspaceTargetListener listener);
+
+    /** Register a SmartspaceEventNotifier. */
+    default void registerSmartspaceEventNotifier(SmartspaceEventNotifier notifier) {}
+
+    /** Push a SmartspaceTargetEvent to the SmartspaceEventNotifier. */
+    default void notifySmartspaceEvent(SmartspaceTargetEvent event) {}
+
+    /** Allows for notifying the SmartspaceSession of SmartspaceTargetEvents. */
+    interface SmartspaceEventNotifier {
+        /** Pushes a given SmartspaceTargetEvent to the SmartspaceSession. */
+        void notifySmartspaceEvent(SmartspaceTargetEvent event);
+    }
 
     /**
      * Create a view to be shown within the parent. Do not add the view, as the parent
@@ -93,9 +106,14 @@ public interface BcSmartspaceDataPlugin extends Plugin {
         void setFalsingManager(com.android.systemui.plugins.FalsingManager falsingManager);
 
         /**
-         * Set or clear any Do Not Disturb information.
+         * Set or clear Do Not Disturb information.
          */
-        void setDnd(@Nullable Icon dndIcon, @Nullable String description);
+        void setDnd(@Nullable Drawable image, @Nullable String description);
+
+        /**
+         * Set or clear next alarm information
+         */
+        void setNextAlarm(@Nullable Drawable image, @Nullable String description);
     }
 
     /** Interface for launching Intents, which can differ on the lockscreen */

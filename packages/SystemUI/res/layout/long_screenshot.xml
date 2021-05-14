@@ -126,8 +126,8 @@
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@id/save"
         app:layout_constraintStart_toStartOf="parent"
-        android:scaleType="matrix"
-        android:visibility="gone"
+        android:scaleType="centerCrop"
+        android:visibility="invisible"
         />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

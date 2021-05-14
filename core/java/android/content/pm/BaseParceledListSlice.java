@@ -75,16 +75,7 @@ abstract class BaseParceledListSlice<T> implements Parcelable {
             if (p.readInt() == 0) {
                 break;
             }
-
-            final T parcelable = readCreator(creator, p, loader);
-            if (listElementClass == null) {
-                listElementClass = parcelable.getClass();
-            } else {
-                verifySameType(listElementClass, parcelable.getClass());
-            }
-
-            mList.add(parcelable);
-
+            listElementClass = readVerifyAndAddElement(creator, p, loader, listElementClass);
             if (DEBUG) Log.d(TAG, "Read inline #" + i + ": " + mList.get(mList.size()-1));
             i++;
         }
@@ -104,17 +95,26 @@ abstract class BaseParceledListSlice<T> implements Parcelable {
                 return;
             }
             while (i < N && reply.readInt() != 0) {
-                final T parcelable = readCreator(creator, reply, loader);
-                verifySameType(listElementClass, parcelable.getClass());
-
-                mList.add(parcelable);
-
+                listElementClass = readVerifyAndAddElement(creator, reply, loader,
+                        listElementClass);
                 if (DEBUG) Log.d(TAG, "Read extra #" + i + ": " + mList.get(mList.size()-1));
                 i++;
             }
             reply.recycle();
             data.recycle();
         }
+    }
+
+    private Class<?> readVerifyAndAddElement(Parcelable.Creator<?> creator, Parcel p,
+            ClassLoader loader, Class<?> listElementClass) {
+        final T parcelable = readCreator(creator, p, loader);
+        if (listElementClass == null) {
+            listElementClass = parcelable.getClass();
+        } else {
+            verifySameType(listElementClass, parcelable.getClass());
+        }
+        mList.add(parcelable);
+        return listElementClass;
     }
 
     private T readCreator(Parcelable.Creator<?> creator, Parcel p, ClassLoader loader) {

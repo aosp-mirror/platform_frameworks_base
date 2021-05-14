@@ -1,2 +1,6 @@
 # soong-team@ as the platform_bootclasspath module is tightly coupled with Soong
 file:platform/build/soong:/OWNERS
+
+# art-team@ manages the boot image profiles for frameworks
+per-file boot-* = calin@google.com, yawanng@google.com, ngeoffray@google.com
+per-file preloaded-classes* = calin@google.com, yawanng@google.com, ngeoffray@google.com

@@ -23,10 +23,13 @@ import android.util.SparseArray;
 
 import com.android.internal.os.BatteryStatsHistory;
 import com.android.internal.os.BatteryStatsHistoryIterator;
+import com.android.internal.os.PowerCalculator;
 
+import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -72,7 +75,10 @@ public final class BatteryUsageStats implements Parcelable {
     public static final int AGGREGATE_BATTERY_CONSUMER_SCOPE_COUNT = 2;
 
     private final int mDischargePercentage;
+    private final double mBatteryCapacityMah;
     private final long mStatsStartTimestampMs;
+    private final long mStatsEndTimestampMs;
+    private final long mStatsDurationMs;
     private final double mDischargedPowerLowerBound;
     private final double mDischargedPowerUpperBound;
     private final long mBatteryTimeRemainingMs;
@@ -86,6 +92,13 @@ public final class BatteryUsageStats implements Parcelable {
 
     private BatteryUsageStats(@NonNull Builder builder) {
         mStatsStartTimestampMs = builder.mStatsStartTimestampMs;
+        mStatsEndTimestampMs = builder.mStatsEndTimestampMs;
+        if (builder.mStatsDurationMs != -1) {
+            mStatsDurationMs = builder.mStatsDurationMs;
+        } else {
+            mStatsDurationMs = mStatsEndTimestampMs - mStatsStartTimestampMs;
+        }
+        mBatteryCapacityMah = builder.mBatteryCapacityMah;
         mDischargePercentage = builder.mDischargePercentage;
         mDischargedPowerLowerBound = builder.mDischargedPowerLowerBoundMah;
         mDischargedPowerUpperBound = builder.mDischargedPowerUpperBoundMah;
@@ -136,12 +149,37 @@ public final class BatteryUsageStats implements Parcelable {
     }
 
     /**
+     * Timestamp (as returned by System.currentTimeMillis()) of when the stats snapshot was taken,
+     * in milliseconds.
+     */
+    public long getStatsEndTimestamp() {
+        return mStatsEndTimestampMs;
+    }
+
+    /**
+     * Returns the duration of the stats session captured by this BatteryUsageStats.
+     * In rare cases, statsDuration != statsEndTimestamp - statsStartTimestamp.  This may
+     * happen when BatteryUsageStats represents an accumulation of data across multiple
+     * non-contiguous sessions.
+     */
+    public long getStatsDuration() {
+        return mStatsDurationMs;
+    }
+
+    /**
      * Total amount of battery charge drained since BatteryStats reset (e.g. due to being fully
      * charged), in mAh
      */
     public double getConsumedPower() {
         return mAggregateBatteryConsumers[AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE]
                 .getConsumedPower();
+    }
+
+    /**
+     * Returns battery capacity in milli-amp-hours.
+     */
+    public double getBatteryCapacity() {
+        return mBatteryCapacityMah;
     }
 
     /**
@@ -217,6 +255,9 @@ public final class BatteryUsageStats implements Parcelable {
 
     private BatteryUsageStats(@NonNull Parcel source) {
         mStatsStartTimestampMs = source.readLong();
+        mStatsEndTimestampMs = source.readLong();
+        mStatsDurationMs = source.readLong();
+        mBatteryCapacityMah = source.readDouble();
         mDischargePercentage = source.readInt();
         mDischargedPowerLowerBound = source.readDouble();
         mDischargedPowerUpperBound = source.readDouble();
@@ -274,6 +315,9 @@ public final class BatteryUsageStats implements Parcelable {
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeLong(mStatsStartTimestampMs);
+        dest.writeLong(mStatsEndTimestampMs);
+        dest.writeLong(mStatsDurationMs);
+        dest.writeDouble(mBatteryCapacityMah);
         dest.writeInt(mDischargePercentage);
         dest.writeDouble(mDischargedPowerLowerBound);
         dest.writeDouble(mDischargedPowerUpperBound);
@@ -322,6 +366,104 @@ public final class BatteryUsageStats implements Parcelable {
     };
 
     /**
+     * Prints the stats in a human-readable format.
+     */
+    public void dump(PrintWriter pw, String prefix) {
+        pw.print(prefix);
+        pw.println("  Estimated power use (mAh):");
+        pw.print(prefix);
+        pw.print("    Capacity: ");
+        PowerCalculator.printPowerMah(pw, getBatteryCapacity());
+        pw.print(", Computed drain: ");
+        PowerCalculator.printPowerMah(pw, getConsumedPower());
+        final Range<Double> dischargedPowerRange = getDischargedPowerRange();
+        pw.print(", actual drain: ");
+        PowerCalculator.printPowerMah(pw, dischargedPowerRange.getLower());
+        if (!dischargedPowerRange.getLower().equals(dischargedPowerRange.getUpper())) {
+            pw.print("-");
+            PowerCalculator.printPowerMah(pw, dischargedPowerRange.getUpper());
+        }
+        pw.println();
+
+        pw.println("    Global");
+        final BatteryConsumer deviceConsumer = getAggregateBatteryConsumer(
+                AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE);
+        final BatteryConsumer appsConsumer = getAggregateBatteryConsumer(
+                AGGREGATE_BATTERY_CONSUMER_SCOPE_ALL_APPS);
+
+        for (int componentId = 0; componentId < BatteryConsumer.POWER_COMPONENT_COUNT;
+                componentId++) {
+            final double devicePowerMah = deviceConsumer.getConsumedPower(componentId);
+            final double appsPowerMah = appsConsumer.getConsumedPower(componentId);
+            if (devicePowerMah == 0 && appsPowerMah == 0) {
+                continue;
+            }
+
+            final String componentName = BatteryConsumer.powerComponentIdToString(componentId);
+            printPowerComponent(pw, prefix, componentName, devicePowerMah, appsPowerMah,
+                    deviceConsumer.getPowerModel(componentId),
+                    deviceConsumer.getUsageDurationMillis(componentId));
+        }
+
+        for (int componentId = BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID;
+                componentId < BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID
+                        + mCustomPowerComponentNames.length;
+                componentId++) {
+            final double devicePowerMah =
+                    deviceConsumer.getConsumedPowerForCustomComponent(componentId);
+            final double appsPowerMah =
+                    appsConsumer.getConsumedPowerForCustomComponent(componentId);
+            if (devicePowerMah == 0 && appsPowerMah == 0) {
+                continue;
+            }
+
+            printPowerComponent(pw, prefix, deviceConsumer.getCustomPowerComponentName(componentId),
+                    devicePowerMah, appsPowerMah,
+                    BatteryConsumer.POWER_MODEL_UNDEFINED,
+                    deviceConsumer.getUsageDurationForCustomComponentMillis(componentId));
+        }
+
+        dumpSortedBatteryConsumers(pw, prefix, getUidBatteryConsumers());
+        dumpSortedBatteryConsumers(pw, prefix, getUserBatteryConsumers());
+    }
+
+    private void printPowerComponent(PrintWriter pw, String prefix, String componentName,
+            double devicePowerMah, double appsPowerMah, int powerModel, long durationMs) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(prefix).append("      ").append(componentName).append(": ")
+                .append(PowerCalculator.formatCharge(devicePowerMah));
+        if (powerModel != BatteryConsumer.POWER_MODEL_UNDEFINED
+                && powerModel != BatteryConsumer.POWER_MODEL_POWER_PROFILE) {
+            sb.append(" [");
+            sb.append(BatteryConsumer.powerModelToString(powerModel));
+            sb.append("]");
+        }
+        sb.append(" apps: ").append(PowerCalculator.formatCharge(appsPowerMah));
+        if (durationMs != 0) {
+            sb.append(" duration: ");
+            BatteryStats.formatTimeMs(sb, durationMs);
+        }
+
+        pw.println(sb.toString());
+    }
+
+    private void dumpSortedBatteryConsumers(PrintWriter pw, String prefix,
+            List<? extends BatteryConsumer> batteryConsumers) {
+        batteryConsumers.sort(
+                Comparator.<BatteryConsumer>comparingDouble(BatteryConsumer::getConsumedPower)
+                        .reversed());
+        for (BatteryConsumer consumer : batteryConsumers) {
+            if (consumer.getConsumedPower() == 0) {
+                continue;
+            }
+            pw.print(prefix);
+            pw.print("    ");
+            consumer.dump(pw);
+            pw.println();
+        }
+    }
+
+    /**
      * Builder for BatteryUsageStats.
      */
     public static final class Builder {
@@ -329,6 +471,9 @@ public final class BatteryUsageStats implements Parcelable {
         private final String[] mCustomPowerComponentNames;
         private final boolean mIncludePowerModels;
         private long mStatsStartTimestampMs;
+        private long mStatsEndTimestampMs;
+        private long mStatsDurationMs = -1;
+        private double mBatteryCapacityMah;
         private int mDischargePercentage;
         private double mDischargedPowerLowerBoundMah;
         private double mDischargedPowerUpperBoundMah;
@@ -365,10 +510,35 @@ public final class BatteryUsageStats implements Parcelable {
         }
 
         /**
+         * Sets the battery capacity in milli-amp-hours.
+         */
+        public Builder setBatteryCapacity(double batteryCapacityMah) {
+            mBatteryCapacityMah = batteryCapacityMah;
+            return this;
+        }
+
+        /**
          * Sets the timestamp of the latest battery stats reset, in milliseconds.
          */
         public Builder setStatsStartTimestamp(long statsStartTimestampMs) {
             mStatsStartTimestampMs = statsStartTimestampMs;
+            return this;
+        }
+
+        /**
+         * Sets the timestamp of when the battery stats snapshot was taken, in milliseconds.
+         */
+        public Builder setStatsEndTimestamp(long statsEndTimestampMs) {
+            mStatsEndTimestampMs = statsEndTimestampMs;
+            return this;
+        }
+
+        /**
+         * Sets the duration of the stats session.  The default value of this field is
+         * statsEndTimestamp - statsStartTimestamp.
+         */
+        public Builder setStatsDuration(long statsDurationMs) {
+            mStatsDurationMs = statsDurationMs;
             return this;
         }
 

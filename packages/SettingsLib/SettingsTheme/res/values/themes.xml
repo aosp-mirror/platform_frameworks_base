@@ -17,11 +17,8 @@
 
 <resources>
     <!-- Only using in Settings application -->
-    <style name="Theme.SettingsBase" parent="@android:style/Theme.DeviceDefault.Settings" >
-        <item name="android:textAppearanceListItem">@style/TextAppearance.PreferenceTitle</item>
-        <item name="android:listPreferredItemPaddingStart">@dimen/preference_padding_start</item>
-        <item name="android:listPreferredItemPaddingEnd">@dimen/preference_padding_end</item>
-        <item name="preferenceTheme">@style/PreferenceTheme.SettingsBase</item>
+    <style name="Theme.SettingsBase" parent="@android:style/Theme.DeviceDefault.Settings">
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
     </style>
 
     <!-- Using in SubSettings page including injected settings page -->
@@ -29,8 +26,5 @@
         <!-- Suppress the built-in action bar -->
         <item name="android:windowActionBar">false</item>
         <item name="android:windowNoTitle">true</item>
-        <!-- Set up edge-to-edge configuration for top app bar -->
-        <item name="android:navigationBarColor">@android:color/transparent</item>
-        <item name="android:statusBarColor">@android:color/transparent</item>
     </style>
 </resources>

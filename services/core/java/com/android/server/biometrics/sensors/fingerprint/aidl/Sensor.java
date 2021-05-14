@@ -54,6 +54,7 @@ import com.android.server.biometrics.sensors.ErrorConsumer;
 import com.android.server.biometrics.sensors.HalClientMonitor;
 import com.android.server.biometrics.sensors.LockoutCache;
 import com.android.server.biometrics.sensors.LockoutConsumer;
+import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.RemovalConsumer;
 import com.android.server.biometrics.sensors.StartUserClient;
 import com.android.server.biometrics.sensors.StopUserClient;
@@ -116,16 +117,27 @@ class Sensor {
             void onHardwareUnavailable();
         }
 
-        @NonNull private final Context mContext;
-        @NonNull private final Handler mHandler;
-        @NonNull private final String mTag;
-        @NonNull private final UserAwareBiometricScheduler mScheduler;
+        @NonNull
+        private final Context mContext;
+        @NonNull
+        private final Handler mHandler;
+        @NonNull
+        private final String mTag;
+        @NonNull
+        private final UserAwareBiometricScheduler mScheduler;
         private final int mSensorId;
         private final int mUserId;
-        @NonNull private final Callback mCallback;
+        @NonNull
+        private final LockoutCache mLockoutCache;
+        @NonNull
+        private final LockoutResetDispatcher mLockoutResetDispatcher;
+        @NonNull
+        private final Callback mCallback;
 
         HalSessionCallback(@NonNull Context context, @NonNull Handler handler, @NonNull String tag,
                 @NonNull UserAwareBiometricScheduler scheduler, int sensorId, int userId,
+                @NonNull LockoutCache lockoutTracker,
+                @NonNull LockoutResetDispatcher lockoutResetDispatcher,
                 @NonNull Callback callback) {
             mContext = context;
             mHandler = handler;
@@ -133,6 +145,8 @@ class Sensor {
             mScheduler = scheduler;
             mSensorId = sensorId;
             mUserId = userId;
+            mLockoutCache = lockoutTracker;
+            mLockoutResetDispatcher = lockoutResetDispatcher;
             mCallback = callback;
         }
 
@@ -303,14 +317,15 @@ class Sensor {
             mHandler.post(() -> {
                 final BaseClientMonitor client = mScheduler.getCurrentClient();
                 if (!(client instanceof FingerprintResetLockoutClient)) {
-                    Slog.e(mTag, "onLockoutCleared for non-resetLockout client: "
-                            + Utils.getClientName(client));
-                    return;
+                    Slog.d(mTag, "onLockoutCleared outside of resetLockout by HAL");
+                    FingerprintResetLockoutClient.resetLocalLockoutStateToNone(mSensorId, mUserId,
+                            mLockoutCache, mLockoutResetDispatcher);
+                } else {
+                    Slog.d(mTag, "onLockoutCleared after resetLockout");
+                    final FingerprintResetLockoutClient resetLockoutClient =
+                            (FingerprintResetLockoutClient) client;
+                    resetLockoutClient.onLockoutCleared();
                 }
-
-                final FingerprintResetLockoutClient resetLockoutClient =
-                        (FingerprintResetLockoutClient) client;
-                resetLockoutClient.onLockoutCleared();
             });
         }
 
@@ -415,6 +430,7 @@ class Sensor {
 
     Sensor(@NonNull String tag, @NonNull FingerprintProvider provider, @NonNull Context context,
             @NonNull Handler handler, @NonNull FingerprintSensorPropertiesInternal sensorProperties,
+            @NonNull LockoutResetDispatcher lockoutResetDispatcher,
             @NonNull GestureAvailabilityDispatcher gestureAvailabilityDispatcher) {
         mTag = tag;
         mProvider = provider;
@@ -422,6 +438,7 @@ class Sensor {
         mToken = new Binder();
         mHandler = handler;
         mSensorProperties = sensorProperties;
+        mLockoutCache = new LockoutCache();
         mScheduler = new UserAwareBiometricScheduler(tag, gestureAvailabilityDispatcher,
                 () -> mCurrentSession != null ? mCurrentSession.mUserId : UserHandle.USER_NULL,
                 new UserAwareBiometricScheduler.UserSwitchCallback() {
@@ -443,7 +460,8 @@ class Sensor {
                         final int sensorId = mSensorProperties.sensorId;
 
                         final HalSessionCallback resultController = new HalSessionCallback(mContext,
-                                mHandler, mTag, mScheduler, sensorId, newUserId, callback);
+                                mHandler, mTag, mScheduler, sensorId, newUserId, mLockoutCache,
+                                lockoutResetDispatcher, callback);
 
                         final StartUserClient.UserStartedCallback<ISession> userStartedCallback =
                                 (userIdStarted, newSession) -> {
@@ -466,7 +484,6 @@ class Sensor {
                                 resultController, userStartedCallback);
                     }
                 });
-        mLockoutCache = new LockoutCache();
         mAuthenticatorIds = new HashMap<>();
         mLazySession = () -> mCurrentSession != null ? mCurrentSession.mSession : null;
     }
@@ -529,6 +546,9 @@ class Sensor {
 
         proto.write(SensorStateProto.SENSOR_ID, mSensorProperties.sensorId);
         proto.write(SensorStateProto.MODALITY, SensorStateProto.FINGERPRINT);
+        if (mSensorProperties.isAnyUdfpsType()) {
+            proto.write(SensorStateProto.MODALITY_FLAGS, SensorStateProto.FINGERPRINT_UDFPS);
+        }
         proto.write(SensorStateProto.CURRENT_STRENGTH,
                 Utils.getCurrentStrength(mSensorProperties.sensorId));
         proto.write(SensorStateProto.SCHEDULER, mScheduler.dumpProtoState(clearSchedulerBuffer));

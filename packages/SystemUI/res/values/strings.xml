@@ -336,6 +336,8 @@
     <string name="accessibility_phone_button">Phone</string>
     <!-- Content description of the phone button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_voice_assist_button">Voice Assist</string>
+    <!-- Content description of the wallet button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_wallet_button">Wallet</string>
     <!-- Content description of the unlock button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_unlock_button">Unlock</string>
     <!-- Content description of the lock icon for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
@@ -689,12 +691,12 @@
     <string name="accessibility_quick_settings_hotspot_changed_on">Mobile hotspot turned on.</string>
     <!-- Announcement made when the screen stopped casting (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_casting_turned_off">Screen casting stopped.</string>
-    <!-- Content description of the work mode title in quick settings when off (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <!-- Content description of the work mode title in quick settings when off (not shown on the screen). Paused is used as an adjective [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_work_mode_off">Work mode paused.</string>
     <!-- Content description of the work mode title in quick settings when on (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_work_mode_on">Work mode on.</string>
-    <!-- Announcement made when the work mode changes to off (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_work_mode_changed_off">Work mode turned paused.</string>
+    <!-- Announcement made when the work mode changes to off (not shown on the screen). Paused is used as a verb. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_work_mode_changed_off">Work mode paused.</string>
     <!-- Announcement made when the work mode changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_work_mode_changed_on">Work mode turned on.</string>
     <!-- Announcement made when the Data Saver changes to off (not shown on the screen). [CHAR LIMIT=NONE] -->
@@ -1115,16 +1117,16 @@
     <string name="interruption_level_alarms_twoline">Alarms\nonly</string>
 
     <!-- Indication on the keyguard that is shown when the device is wirelessly charging. [CHAR LIMIT=80]-->
-    <string name="keyguard_indication_charging_time_wireless"><xliff:g id="percentage" example="20%">%2$s</xliff:g> • Charging wirelessly (<xliff:g id="charging_time_left" example="4 hours and 2 minutes">%1$s</xliff:g> until full)</string>
+    <string name="keyguard_indication_charging_time_wireless"><xliff:g id="percentage" example="20%">%2$s</xliff:g> • Charging wirelessly • Full in <xliff:g id="charging_time_left" example="4 hr, 2 min">%1$s</xliff:g></string>
 
     <!-- Indication on the keyguard that is shown when the device is charging. [CHAR LIMIT=50]-->
-    <string name="keyguard_indication_charging_time"><xliff:g id="percentage">%2$s</xliff:g> • Charging (<xliff:g id="charging_time_left" example="4 hours and 2 minutes">%1$s</xliff:g> until full)</string>
+    <string name="keyguard_indication_charging_time"><xliff:g id="percentage">%2$s</xliff:g> • Charging • Full in <xliff:g id="charging_time_left" example="4 hr, 2 min">%1$s</xliff:g></string>
 
     <!-- Indication on the keyguard that is shown when the device is charging rapidly. Should match keyguard_plugged_in_charging_fast [CHAR LIMIT=50]-->
-    <string name="keyguard_indication_charging_time_fast"><xliff:g id="percentage">%2$s</xliff:g> • Charging rapidly (<xliff:g id="charging_time_left" example="4 hours and 2 minutes">%1$s</xliff:g> until full)</string>
+    <string name="keyguard_indication_charging_time_fast"><xliff:g id="percentage">%2$s</xliff:g> • Charging rapidly • Full in <xliff:g id="charging_time_left" example="4 hr, 2 min">%1$s</xliff:g></string>
 
     <!-- Indication on the keyguard that is shown when the device is charging slowly. Should match keyguard_plugged_in_charging_slowly [CHAR LIMIT=50]-->
-    <string name="keyguard_indication_charging_time_slowly"><xliff:g id="percentage">%2$s</xliff:g> • Charging slowly (<xliff:g id="charging_time_left" example="4 hours and 2 minutes">%1$s</xliff:g> until full)</string>
+    <string name="keyguard_indication_charging_time_slowly"><xliff:g id="percentage">%2$s</xliff:g> • Charging slowly • Full in <xliff:g id="charging_time_left" example="4 hr, 2 min">%1$s</xliff:g></string>
 
     <!-- Related to user switcher --><skip/>
 
@@ -2828,7 +2830,7 @@
     <!-- Label for button to go to media control settings screen [CHAR_LIMIT=30] -->
     <string name="controls_media_settings_button">Settings</string>
 
-    <!-- Title for Smartspace recommendation card within media controls [CHAR_LIMIT=50] -->
+    <!-- Title for Smartspace recommendation card within media controls. The "Play" means the action to play a media [CHAR_LIMIT=10] -->
     <string name="controls_media_smartspace_rec_title">Play</string>
 
     <!-- Error message indicating that a control timed out while waiting for an update [CHAR_LIMIT=30] -->
@@ -2965,7 +2967,11 @@
     <!-- Accessibility action for tapping on an affordance on an unlocked lock screen (ie: "Double
      tap to enter device") [CHAR LIMIT=NONE] -->
     <string name="accessibility_enter_hint">enter device</string>
-    <!-- Message shown to suggest authentication using [CHAR LIMIT=60]-->
+    <!-- Message shown to suggest authentication using fingerprint [CHAR LIMIT=60]-->
     <string name="keyguard_try_fingerprint">Use fingerprint to open</string>
+    <!-- Accessibility announcement to inform user to unlock using the fingerprint sensor [CHAR LIMIT=NONE] -->
+    <string name="accessibility_fingerprint_bouncer">Authentication required. Touch the fingerprint sensor to authenticate.</string>
 
+    <!-- Content description for a chip in the status bar showing that the user is currently on a phone call. [CHAR LIMIT=NONE] -->
+    <string name="ongoing_phone_call_content_description">Ongoing phone call</string>
 </resources>

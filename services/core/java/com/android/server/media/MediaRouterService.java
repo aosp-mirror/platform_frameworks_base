@@ -907,6 +907,8 @@ public final class MediaRouterService extends IMediaRouterService.Stub
                     mActiveBluetoothDevice = btDevice;
                     mGlobalBluetoothA2dpOn = btDevice != null;
                     if (wasA2dpOn != mGlobalBluetoothA2dpOn) {
+                        Slog.d(TAG, "GlobalBluetoothA2dpOn is changed to '"
+                                + mGlobalBluetoothA2dpOn + "'");
                         UserRecord userRecord = mUserRecords.get(mCurrentUserId);
                         if (userRecord != null) {
                             for (ClientRecord cr : userRecord.mClientRecords) {

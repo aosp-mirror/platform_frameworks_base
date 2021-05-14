@@ -20,6 +20,7 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.PointF;
 import android.util.AttributeSet;
 import android.util.TypedValue;
@@ -42,7 +43,9 @@ import java.text.NumberFormat;
  */
 public class WirelessChargingLayout extends FrameLayout {
     public static final int UNKNOWN_BATTERY_LEVEL = -1;
-    private static final long RIPPLE_ANIMATION_DURATION = 1133;
+    private static final long RIPPLE_ANIMATION_DURATION = 1500;
+    private static final int SCRIM_COLOR = 0x4C000000;
+    private static final int SCRIM_FADE_DURATION = 300;
     private ChargingRippleView mRippleView;
 
     public WirelessChargingLayout(Context context) {
@@ -120,6 +123,19 @@ public class WirelessChargingLayout extends FrameLayout {
         // play all animations together
         AnimatorSet animatorSet = new AnimatorSet();
         animatorSet.playTogether(textSizeAnimator, textOpacityAnimator, textFadeAnimator);
+
+        ValueAnimator scrimFadeInAnimator = ObjectAnimator.ofArgb(this,
+                "backgroundColor", Color.TRANSPARENT, SCRIM_COLOR);
+        scrimFadeInAnimator.setDuration(SCRIM_FADE_DURATION);
+        scrimFadeInAnimator.setInterpolator(Interpolators.LINEAR);
+        ValueAnimator scrimFadeOutAnimator = ObjectAnimator.ofArgb(this,
+                "backgroundColor", SCRIM_COLOR, Color.TRANSPARENT);
+        scrimFadeOutAnimator.setDuration(SCRIM_FADE_DURATION);
+        scrimFadeOutAnimator.setInterpolator(Interpolators.LINEAR);
+        scrimFadeOutAnimator.setStartDelay(RIPPLE_ANIMATION_DURATION - SCRIM_FADE_DURATION);
+        AnimatorSet animatorSetScrim = new AnimatorSet();
+        animatorSetScrim.playTogether(scrimFadeInAnimator, scrimFadeOutAnimator);
+        animatorSetScrim.start();
 
         mRippleView = findViewById(R.id.wireless_charging_ripple);
         OnAttachStateChangeListener listener = new OnAttachStateChangeListener() {

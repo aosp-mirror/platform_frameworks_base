@@ -164,6 +164,11 @@ final class HotwordDetectionConnection {
                                 KEY_INITIALIZATION_STATUS,
                                 INITIALIZATION_STATUS_UNKNOWN)
                                 : INITIALIZATION_STATUS_UNKNOWN;
+                        // Add the protection to avoid unexpected status
+                        if (status > HotwordDetectionService.getMaxCustomInitializationStatus()
+                                && status != INITIALIZATION_STATUS_UNKNOWN) {
+                            status = INITIALIZATION_STATUS_UNKNOWN;
+                        }
                         callback.onStatusReported(status);
                     } catch (RemoteException e) {
                         Slog.w(TAG, "Failed to report initialization status: " + e);
@@ -612,7 +617,7 @@ final class HotwordDetectionConnection {
                         options,
                         new IDspHotwordDetectionCallback.Stub() {
                             @Override
-                            public void onRejected(@Nullable HotwordRejectedResult result)
+                            public void onRejected(HotwordRejectedResult result)
                                     throws RemoteException {
                                 bestEffortClose(serviceAudioSink);
                                 bestEffortClose(serviceAudioSource);
@@ -622,7 +627,7 @@ final class HotwordDetectionConnection {
                             }
 
                             @Override
-                            public void onDetected(@Nullable HotwordDetectedResult triggerResult)
+                            public void onDetected(HotwordDetectedResult triggerResult)
                                     throws RemoteException {
                                 bestEffortClose(serviceAudioSink);
                                 bestEffortClose(serviceAudioSource);

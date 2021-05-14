@@ -7726,16 +7726,17 @@ public class ActivityManagerService extends IActivityManager.Stub
             ApplicationErrorReport.CrashInfo crashInfo) {
         float loadingProgress = 1;
         IncrementalMetrics incrementalMetrics = null;
-        // Notify package manager service to possibly update package state
+        // Obtain Incremental information if available
         if (r != null && r.info != null && r.info.packageName != null) {
-            final String codePath = r.info.getCodePath();
             IncrementalStatesInfo incrementalStatesInfo =
                     mPackageManagerInt.getIncrementalStatesInfo(r.info.packageName, r.uid,
                             r.userId);
             if (incrementalStatesInfo != null) {
                 loadingProgress = incrementalStatesInfo.getProgress();
             }
-            if (IncrementalManager.isIncrementalPath(codePath)) {
+            final String codePath = r.info.getCodePath();
+            if (codePath != null && !codePath.isEmpty()
+                    && IncrementalManager.isIncrementalPath(codePath)) {
                 // Report in the main log about the incremental package
                 Slog.e(TAG, "App crashed on incremental package " + r.info.packageName
                         + " which is " + ((int) (loadingProgress * 100)) + "% loaded.");
@@ -9334,7 +9335,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             pw.println("  mFgsStartTempAllowList:");
             final long currentTimeNow = System.currentTimeMillis();
             final long elapsedRealtimeNow = SystemClock.elapsedRealtime();
-            final Set<Integer> uids = mFgsStartTempAllowList.keySet();
+            final Set<Integer> uids = new ArraySet<>(mFgsStartTempAllowList.keySet());
             for (Integer uid : uids) {
                 final Pair<Long, FgsTempAllowListItem> entry = mFgsStartTempAllowList.get(uid);
                 if (entry == null) {
@@ -14267,6 +14268,10 @@ public class ActivityManagerService extends IActivityManager.Stub
         final int capability = uidRec != null ? uidRec.getSetCapability() : 0;
         final boolean ephemeral = uidRec != null ? uidRec.isEphemeral() : isEphemeralLocked(uid);
 
+        if (uidRec != null && uidRec.isIdle() && (change & UidRecord.CHANGE_IDLE) != 0) {
+            mProcessList.killAppIfForceStandbyAndCachedIdleLocked(uidRec);
+        }
+
         if (uidRec != null && !uidRec.isIdle() && (change & UidRecord.CHANGE_GONE) != 0) {
             // If this uid is going away, and we haven't yet reported it is gone,
             // then do so now.
@@ -14616,7 +14621,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             String reason, @TempAllowListType int type, int callingUid) {
         synchronized (mProcLock) {
             // The temp allowlist type could change according to the reasonCode.
-            type = mLocalDeviceIdleController.getTempAllowListType(reasonCode, type);
+            if (mLocalDeviceIdleController != null) {
+                type = mLocalDeviceIdleController.getTempAllowListType(reasonCode, type);
+            }
             if (type == TEMPORARY_ALLOW_LIST_TYPE_NONE) {
                 return;
             }

@@ -23,7 +23,7 @@ import android.app.Notification
 import android.app.Notification.CallStyle.CALL_TYPE_ONGOING
 import android.content.Intent
 import android.util.Log
-import android.view.ViewGroup
+import android.view.View
 import android.widget.Chronometer
 import com.android.systemui.R
 import com.android.systemui.animation.ActivityLaunchAnimator
@@ -49,14 +49,15 @@ class OngoingCallController @Inject constructor(
     private val systemClock: SystemClock,
     private val activityStarter: ActivityStarter,
     @Main private val mainExecutor: Executor,
-    private val iActivityManager: IActivityManager
+    private val iActivityManager: IActivityManager,
+    private val logger: OngoingCallLogger
 ) : CallbackController<OngoingCallListener> {
 
     /** Null if there's no ongoing call. */
     private var ongoingCallInfo: OngoingCallInfo? = null
     /** True if the application managing the call is visible to the user. */
     private var isCallAppVisible: Boolean = true
-    private var chipView: ViewGroup? = null
+    private var chipView: View? = null
     private var uidObserver: IUidObserver.Stub? = null
 
     private val mListeners: MutableList<OngoingCallListener> = mutableListOf()
@@ -81,16 +82,14 @@ class OngoingCallController @Inject constructor(
                     entry.sbn.notification.contentIntent.intent,
                     entry.sbn.uid)
                 updateChip()
+            } else if (isCallNotification(entry)) {
+                removeChip()
             }
         }
 
         override fun onEntryRemoved(entry: NotificationEntry, reason: Int) {
             if (isOngoingCallNotification(entry)) {
-                ongoingCallInfo = null
-                mListeners.forEach { l -> l.onOngoingCallStateChanged(animate = true) }
-                if (uidObserver != null) {
-                    iActivityManager.unregisterUidObserver(uidObserver)
-                }
+                removeChip()
             }
         }
     }
@@ -104,13 +103,23 @@ class OngoingCallController @Inject constructor(
     /**
      * Sets the chip view that will contain ongoing call information.
      *
-     * Should only be called from [CollapedStatusBarFragment].
+     * Should only be called from [CollapsedStatusBarFragment].
      */
-    fun setChipView(chipView: ViewGroup) {
+    fun setChipView(chipView: View) {
         this.chipView = chipView
         if (hasOngoingCall()) {
             updateChip()
         }
+    }
+
+
+    /**
+     * Called when the chip's visibility may have changed.
+     *
+     * Should only be called from [CollapsedStatusBarFragment].
+     */
+    fun notifyChipVisibilityChanged(chipIsVisible: Boolean) {
+        logger.logChipVisibilityChanged(chipIsVisible)
     }
 
     /**
@@ -150,6 +159,7 @@ class OngoingCallController @Inject constructor(
             timeView.start()
 
             currentChipView.setOnClickListener {
+                logger.logChipClicked()
                 activityStarter.postStartActivityDismissingKeyguard(
                         currentOngoingCallInfo.intent, 0,
                         ActivityLaunchAnimator.Controller.fromView(it))
@@ -212,6 +222,14 @@ class OngoingCallController @Inject constructor(
         return procState <= ActivityManager.PROCESS_STATE_TOP
     }
 
+    private fun removeChip() {
+        ongoingCallInfo = null
+        mListeners.forEach { l -> l.onOngoingCallStateChanged(animate = true) }
+        if (uidObserver != null) {
+            iActivityManager.unregisterUidObserver(uidObserver)
+        }
+    }
+
     private class OngoingCallInfo(
         val callStartTime: Long,
         val intent: Intent,
@@ -221,9 +239,14 @@ class OngoingCallController @Inject constructor(
 
 private fun isOngoingCallNotification(entry: NotificationEntry): Boolean {
     val extras = entry.sbn.notification.extras
-    val callStyleTemplateName = Notification.CallStyle::class.java.name
-    return extras.getString(Notification.EXTRA_TEMPLATE) == callStyleTemplateName &&
+    return isCallNotification(entry) &&
             extras.getInt(Notification.EXTRA_CALL_TYPE, -1) == CALL_TYPE_ONGOING
+}
+
+private fun isCallNotification(entry: NotificationEntry): Boolean {
+    val extras = entry.sbn.notification.extras
+    val callStyleTemplateName = Notification.CallStyle::class.java.name
+    return extras.getString(Notification.EXTRA_TEMPLATE) == callStyleTemplateName
 }
 
 private const val TAG = "OngoingCallController"

@@ -16,7 +16,7 @@
 
 package com.android.server.wm.flicker.launch
 
-import android.platform.test.annotations.Postsubmit
+import android.platform.test.annotations.Presubmit
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
@@ -63,12 +63,12 @@ class OpenAppFromOverviewTest(testSpec: FlickerTestParameter) : OpenAppTransitio
             }
         }
 
-    @Postsubmit
+    @Presubmit
     @Test
     override fun appWindowReplacesLauncherAsTopWindow() =
         super.appWindowReplacesLauncherAsTopWindow()
 
-    @Postsubmit
+    @Presubmit
     @Test
     override fun launcherWindowBecomesInvisible() {
         testSpec.launcherWindowBecomesInvisible()

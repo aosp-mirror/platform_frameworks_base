@@ -255,7 +255,7 @@ android_media_MediaProfiles_native_get_camcorder_profiles(JNIEnv *env, jobject /
 
     jclass audioProfileClazz = env->FindClass("android/media/EncoderProfiles$AudioProfile");
     jmethodID audioProfileConstructorMethodID =
-        env->GetMethodID(audioProfileClazz, "<init>", "(IIII)V");
+        env->GetMethodID(audioProfileClazz, "<init>", "(IIIII)V");
 
     jobjectArray videoCodecs = (jobjectArray)env->NewObjectArray(
             cp->getVideoCodecs().size(), videoProfileClazz, nullptr);
@@ -269,7 +269,7 @@ android_media_MediaProfiles_native_get_camcorder_profiles(JNIEnv *env, jobject /
                                                 vc->getFrameHeight(),
                                                 vc->getFrameRate(),
                                                 vc->getBitrate(),
-                                                -1 /* profile */);
+                                                vc->getProfile());
             env->SetObjectArrayElement(videoCodecs, i++, videoCodec);
         }
     }
@@ -289,7 +289,8 @@ android_media_MediaProfiles_native_get_camcorder_profiles(JNIEnv *env, jobject /
                                                 ac->getCodec(),
                                                 ac->getChannels(),
                                                 ac->getSampleRate(),
-                                                ac->getBitrate());
+                                                ac->getBitrate(),
+                                                ac->getProfile());
 
             env->SetObjectArrayElement(audioCodecs, i++, audioCodec);
         }

@@ -460,7 +460,8 @@
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"बिस्तारै चार्ज गरिँदै"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"वायरलेस तरिकाले चार्ज गरिँदै छ"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"चार्ज भइरहेको छैन"</string>
-    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"प्लगइन गरिएको छ, अहिले नै चार्ज गर्न सकिँदैन"</string>
+    <!-- no translation found for battery_info_status_not_charging (3371084153747234837) -->
+    <skip />
     <string name="battery_info_status_full" msgid="1339002294876531312">"चार्ज भयो"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"प्रशासकद्वारा नियन्त्रित"</string>
     <string name="disabled" msgid="8017887509554714950">"असक्षम पारियो"</string>
@@ -504,7 +505,7 @@
     <string name="cancel" msgid="5665114069455378395">"रद्द गर्नुहोस्"</string>
     <string name="okay" msgid="949938843324579502">"ठिक छ"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"अलार्म र रिमाइन्डरहरू"</string>
-    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"अलार्म तथा रिमाइन्डर सेट गर्न दिनुहोस्"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"अलार्म तथा रिमाइन्डर सेट गर्न दिइयोस्"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"घडी तथा रिमाइन्डरहरू"</string>
     <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"यो एपलाई अलार्म सेट गर्न तथा अन्य कार्यको समयतालिका तोक्न दिनुहोस्। तपाईंले आफ्नो फोन नचलाएका बेला पनि यो एप प्रयोग गरिन सक्छ। यसले गर्दा थप ब्याट्री खपत हुन सक्छ। यो अनुमति नदिइएका खण्डमा यो एप राम्ररी नचल्न सक्छ र यो एपका अलार्म पनि तोकिएको समयमा बज्ने छैनन्।"</string>
     <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"यो एपलाई अलार्म सेट गर्न तथा अन्य कार्यको समयतालिका तोक्न दिनुहोस्। तपाईंले आफ्नो ट्याब्लेट नचलाएका बेला पनि यो एप प्रयोग गरिन सक्छ। यसले गर्दा थप ब्याट्री खपत हुन सक्छ। यो अनुमति नदिइएका खण्डमा यो एप राम्ररी नचल्न सक्छ र यो एपका अलार्म पनि तोकिएको समयमा बज्ने छैनन्।"</string>

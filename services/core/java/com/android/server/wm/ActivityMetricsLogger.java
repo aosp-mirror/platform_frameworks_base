@@ -80,6 +80,7 @@ import android.content.pm.dex.ArtManagerInternal;
 import android.content.pm.dex.PackageOptimizationInfo;
 import android.metrics.LogMaker;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
 import android.os.Trace;
@@ -92,9 +93,9 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.function.pooled.PooledLambda;
+import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.apphibernation.AppHibernationManagerInternal;
 import com.android.server.apphibernation.AppHibernationService;
@@ -150,6 +151,7 @@ class ActivityMetricsLogger {
     private long mLastLogTimeSecs;
     private final ActivityTaskSupervisor mSupervisor;
     private final MetricsLogger mMetricsLogger = new MetricsLogger();
+    private final Handler mLoggerHandler = FgThread.getHandler();
 
     /** All active transitions. */
     private final ArrayList<TransitionInfo> mTransitionInfoList = new ArrayList<>();
@@ -897,11 +899,11 @@ class ActivityMetricsLogger {
         // This will avoid any races with other operations that modify the ActivityRecord.
         final TransitionInfoSnapshot infoSnapshot = new TransitionInfoSnapshot(info);
         if (info.isInterestingToLoggerAndObserver()) {
-            BackgroundThread.getHandler().post(() -> logAppTransition(
+            mLoggerHandler.post(() -> logAppTransition(
                     info.mCurrentTransitionDeviceUptime, info.mCurrentTransitionDelayMs,
                     infoSnapshot, isHibernating));
         }
-        BackgroundThread.getHandler().post(() -> logAppDisplayed(infoSnapshot));
+        mLoggerHandler.post(() -> logAppDisplayed(infoSnapshot));
         if (info.mPendingFullyDrawn != null) {
             info.mPendingFullyDrawn.run();
         }
@@ -909,7 +911,7 @@ class ActivityMetricsLogger {
         info.mLastLaunchedActivity.info.launchToken = null;
     }
 
-    // This gets called on a background thread without holding the activity manager lock.
+    // This gets called on another thread without holding the activity manager lock.
     private void logAppTransition(int currentTransitionDeviceUptime, int currentTransitionDelayMs,
             TransitionInfoSnapshot info, boolean isHibernating) {
         final LogMaker builder = new LogMaker(APP_TRANSITION);
@@ -1036,7 +1038,7 @@ class ActivityMetricsLogger {
                 : TimeUnit.NANOSECONDS.toMillis(currentTimestampNs - info.mTransitionStartTimeNs);
         final TransitionInfoSnapshot infoSnapshot =
                 new TransitionInfoSnapshot(info, r, (int) startupTimeMs);
-        BackgroundThread.getHandler().post(() -> logAppFullyDrawn(infoSnapshot));
+        mLoggerHandler.post(() -> logAppFullyDrawn(infoSnapshot));
         mLastTransitionInfo.remove(r);
 
         if (!info.isInterestingToLoggerAndObserver()) {

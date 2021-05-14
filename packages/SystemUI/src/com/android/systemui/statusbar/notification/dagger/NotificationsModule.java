@@ -44,7 +44,6 @@ import com.android.systemui.statusbar.notification.NotificationEntryManagerLogge
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifInflaterImpl;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
-import com.android.systemui.statusbar.notification.collection.NotificationRankingManager;
 import com.android.systemui.statusbar.notification.collection.coordinator.VisualStabilityCoordinator;
 import com.android.systemui.statusbar.notification.collection.inflation.NotifInflater;
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinder;
@@ -80,8 +79,6 @@ import com.android.systemui.wmshell.BubblesManager;
 import java.util.Optional;
 import java.util.concurrent.Executor;
 
-import javax.inject.Provider;
-
 import dagger.Binds;
 import dagger.Lazy;
 import dagger.Module;
@@ -102,8 +99,6 @@ public interface NotificationsModule {
     static NotificationEntryManager provideNotificationEntryManager(
             NotificationEntryManagerLogger logger,
             NotificationGroupManagerLegacy groupManager,
-            NotificationRankingManager rankingManager,
-            NotificationEntryManager.KeyguardEnvironment keyguardEnvironment,
             FeatureFlags featureFlags,
             Lazy<NotificationRowBinder> notificationRowBinderLazy,
             Lazy<NotificationRemoteInputManager> notificationRemoteInputManagerLazy,
@@ -113,8 +108,6 @@ public interface NotificationsModule {
         return new NotificationEntryManager(
                 logger,
                 groupManager,
-                rankingManager,
-                keyguardEnvironment,
                 featureFlags,
                 notificationRowBinderLazy,
                 notificationRemoteInputManagerLazy,

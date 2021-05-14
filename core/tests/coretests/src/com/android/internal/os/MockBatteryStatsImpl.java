@@ -48,13 +48,6 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
         setExternalStatsSyncLocked(new DummyExternalStatsSync());
         informThatAllExternalStatsAreFlushed();
 
-        final boolean[] supportedStandardBuckets =
-                new boolean[MeasuredEnergyStats.NUMBER_STANDARD_POWER_BUCKETS];
-        Arrays.fill(supportedStandardBuckets, true);
-        final String[] customBucketNames = {"FOO", "BAR"};
-        mGlobalMeasuredEnergyStats =
-                new MeasuredEnergyStats(supportedStandardBuckets, customBucketNames);
-
         // A no-op handler.
         mHandler = new Handler(Looper.getMainLooper()) {
         };
@@ -62,6 +55,15 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
 
     MockBatteryStatsImpl() {
         this(new MockClocks());
+    }
+
+    public void initMeasuredEnergyStats() {
+        final boolean[] supportedStandardBuckets =
+                new boolean[MeasuredEnergyStats.NUMBER_STANDARD_POWER_BUCKETS];
+        Arrays.fill(supportedStandardBuckets, true);
+        final String[] customBucketNames = {"FOO", "BAR"};
+        mGlobalMeasuredEnergyStats =
+                new MeasuredEnergyStats(supportedStandardBuckets, customBucketNames);
     }
 
     public TimeBase getOnBatteryTimeBase() {

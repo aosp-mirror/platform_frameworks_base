@@ -808,14 +808,14 @@ final class SettingsState {
                 for (int i = 0; i < settingCount; i++) {
                     Setting setting = settings.valueAt(i);
 
-                    writeSingleSetting(mVersion, serializer, setting.getId(), setting.getName(),
+                    if (writeSingleSetting(mVersion, serializer, setting.getId(), setting.getName(),
                             setting.getValue(), setting.getDefaultValue(), setting.getPackageName(),
                             setting.getTag(), setting.isDefaultFromSystem(),
-                            setting.isValuePreservedInRestore());
-
-                    if (DEBUG_PERSISTENCE) {
-                        Slog.i(LOG_TAG, "[PERSISTED]" + setting.getName() + "="
-                                + setting.getValue());
+                            setting.isValuePreservedInRestore())) {
+                        if (DEBUG_PERSISTENCE) {
+                            Slog.i(LOG_TAG, "[PERSISTED]" + setting.getName() + "="
+                                    + setting.getValue());
+                        }
                     }
                 }
                 serializer.endTag(null, TAG_SETTINGS);
@@ -824,10 +824,11 @@ final class SettingsState {
                 for (int i = 0; i < namespaceBannedHashes.size(); i++) {
                     String namespace = namespaceBannedHashes.keyAt(i);
                     String bannedHash = namespaceBannedHashes.get(namespace);
-                    writeSingleNamespaceHash(serializer, namespace, bannedHash);
-                    if (DEBUG_PERSISTENCE) {
-                        Slog.i(LOG_TAG, "[PERSISTED] namespace=" + namespace
-                                + ", bannedHash=" + bannedHash);
+                    if (writeSingleNamespaceHash(serializer, namespace, bannedHash)) {
+                        if (DEBUG_PERSISTENCE) {
+                            Slog.i(LOG_TAG, "[PERSISTED] namespace=" + namespace
+                                    + ", bannedHash=" + bannedHash);
+                        }
                     }
                 }
                 serializer.endTag(null, TAG_NAMESPACE_HASHES);
@@ -898,14 +899,20 @@ final class SettingsState {
         }
     }
 
-    static void writeSingleSetting(int version, TypedXmlSerializer serializer, String id,
+    static boolean writeSingleSetting(int version, TypedXmlSerializer serializer, String id,
             String name, String value, String defaultValue, String packageName,
             String tag, boolean defaultSysSet, boolean isValuePreservedInRestore)
             throws IOException {
         if (id == null || isBinary(id) || name == null || isBinary(name)
                 || packageName == null || isBinary(packageName)) {
-            // This shouldn't happen.
-            return;
+            if (DEBUG_PERSISTENCE) {
+                Slog.w(LOG_TAG, "Invalid arguments for writeSingleSetting: version=" + version
+                        + ", id=" + id + ", name=" + name + ", value=" + value
+                        + ", defaultValue=" + defaultValue + ", packageName=" + packageName
+                        + ", tag=" + tag + ", defaultSysSet=" + defaultSysSet
+                        + ", isValuePreservedInRestore=" + isValuePreservedInRestore);
+            }
+            return false;
         }
         serializer.startTag(null, TAG_SETTING);
         serializer.attribute(null, ATTR_ID, id);
@@ -924,6 +931,7 @@ final class SettingsState {
             serializer.attributeBoolean(null, ATTR_PRESERVE_IN_RESTORE, true);
         }
         serializer.endTag(null, TAG_SETTING);
+        return true;
     }
 
     static void setValueAttribute(String attr, String attrBase64, int version,
@@ -946,15 +954,20 @@ final class SettingsState {
         }
     }
 
-    private static void writeSingleNamespaceHash(TypedXmlSerializer serializer, String namespace,
+    private static boolean writeSingleNamespaceHash(TypedXmlSerializer serializer, String namespace,
             String bannedHashCode) throws IOException {
         if (namespace == null || bannedHashCode == null) {
-            return;
+            if (DEBUG_PERSISTENCE) {
+                Slog.w(LOG_TAG, "Invalid arguments for writeSingleNamespaceHash: namespace="
+                        + namespace + ", bannedHashCode=" + bannedHashCode);
+            }
+            return false;
         }
         serializer.startTag(null, TAG_NAMESPACE_HASH);
         serializer.attribute(null, ATTR_NAMESPACE, namespace);
         serializer.attribute(null, ATTR_BANNED_HASH, bannedHashCode);
         serializer.endTag(null, TAG_NAMESPACE_HASH);
+        return true;
     }
 
     private static String hashCode(Map<String, String> keyValues) {

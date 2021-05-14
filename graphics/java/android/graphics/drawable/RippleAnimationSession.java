@@ -19,6 +19,7 @@ package android.graphics.drawable;
 import android.animation.Animator;
 import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
+import android.annotation.ColorInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.Canvas;
@@ -211,6 +212,7 @@ public final class RippleAnimationSession {
                     CanvasProperty.createFloat(mProperties.getNoisePhase()),
                     CanvasProperty.createPaint(mProperties.getPaint()),
                     CanvasProperty.createFloat(mProperties.getProgress()),
+                    mProperties.getColor(),
                     mProperties.getShader());
         }
         return mCanvasProperties;
@@ -250,11 +252,12 @@ public final class RippleAnimationSession {
         private final FloatType mNoisePhase;
         private final PaintType mPaint;
         private final RippleShader mShader;
+        private final @ColorInt int mColor;
         private FloatType mX;
         private FloatType mY;
 
         AnimationProperties(FloatType x, FloatType y, FloatType maxRadius, FloatType noisePhase,
-                PaintType paint, FloatType progress, RippleShader shader) {
+                PaintType paint, FloatType progress, @ColorInt int color, RippleShader shader) {
             mY = y;
             mX = x;
             mMaxRadius = maxRadius;
@@ -262,6 +265,7 @@ public final class RippleAnimationSession {
             mPaint = paint;
             mShader = shader;
             mProgress = progress;
+            mColor = color;
         }
 
         FloatType getProgress() {
@@ -295,6 +299,10 @@ public final class RippleAnimationSession {
 
         FloatType getNoisePhase() {
             return mNoisePhase;
+        }
+
+        @ColorInt int getColor() {
+            return mColor;
         }
     }
 }

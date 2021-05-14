@@ -854,16 +854,6 @@ public class LockPatternUtils {
                 && getDevicePolicyManager().isSeparateProfileChallengeAllowed(userHandle);
     }
 
-    /**
-     * Retrieves whether the current profile and device locks can be unified.
-     * @param userHandle profile user handle.
-     */
-    public boolean isSeparateProfileChallengeAllowedToUnify(int userHandle) {
-        return getDevicePolicyManager().isProfileActivePasswordSufficientForParent(userHandle)
-                && !getUserManager().hasUserRestriction(
-                        UserManager.DISALLOW_UNIFIED_PASSWORD, UserHandle.of(userHandle));
-    }
-
     private boolean hasSeparateChallenge(int userHandle) {
         try {
             return getLockSettings().getSeparateProfileChallengeEnabled(userHandle);

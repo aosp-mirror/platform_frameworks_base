@@ -50,12 +50,14 @@ import android.app.appsearch.AppSearchBatchResult;
 import android.app.appsearch.AppSearchManager;
 import android.app.appsearch.AppSearchResult;
 import android.app.appsearch.GenericDocument;
-import android.app.appsearch.IAppSearchBatchResultCallback;
-import android.app.appsearch.IAppSearchManager;
-import android.app.appsearch.IAppSearchResultCallback;
 import android.app.appsearch.PackageIdentifier;
 import android.app.appsearch.SearchResultPage;
 import android.app.appsearch.SetSchemaResponse;
+import android.app.appsearch.aidl.AppSearchBatchResultParcel;
+import android.app.appsearch.aidl.AppSearchResultParcel;
+import android.app.appsearch.aidl.IAppSearchBatchResultCallback;
+import android.app.appsearch.aidl.IAppSearchManager;
+import android.app.appsearch.aidl.IAppSearchResultCallback;
 import android.app.role.OnRoleHoldersChangedListener;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.ActivityNotFoundException;
@@ -659,7 +661,8 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         public void setSchema(String packageName, String databaseName, List<Bundle> schemaBundles,
                 List<String> schemasNotPlatformSurfaceable,
                 Map<String, List<Bundle>> schemasPackageAccessibleBundles, boolean forceOverride,
-                int userId, int version, IAppSearchResultCallback callback) throws RemoteException {
+                int userId, int version, long binderCallStartTimeMillis,
+                IAppSearchResultCallback callback) throws RemoteException {
             for (Map.Entry<String, List<Bundle>> entry :
                     schemasPackageAccessibleBundles.entrySet()) {
                 final String key = entry.getKey();
@@ -675,7 +678,9 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
                 }
             }
             final SetSchemaResponse response = new SetSchemaResponse.Builder().build();
-            callback.onResult(AppSearchResult.newSuccessfulResult(response.getBundle()));
+            callback.onResult(
+                    new AppSearchResultParcel(
+                            AppSearchResult.newSuccessfulResult(response.getBundle())));
         }
 
         @Override
@@ -711,12 +716,13 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
                 }
                 docMap.put(doc.getId(), doc);
             }
-            callback.onResult(builder.build());
+            callback.onResult(new AppSearchBatchResultParcel<>(builder.build()));
         }
 
         @Override
         public void getDocuments(String packageName, String databaseName, String namespace,
                 List<String> ids, Map<String, List<String>> typePropertyPaths, int userId,
+                long binderCallStartTimeMillis,
                 IAppSearchBatchResultCallback callback) throws RemoteException {
             final AppSearchBatchResult.Builder<String, Bundle> builder =
                     new AppSearchBatchResult.Builder<>();
@@ -737,19 +743,21 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
                     }
                 }
             }
-            callback.onResult(builder.build());
+            callback.onResult(new AppSearchBatchResultParcel<>(builder.build()));
         }
 
         @Override
         public void query(String packageName, String databaseName, String queryExpression,
-                Bundle searchSpecBundle, int userId, IAppSearchResultCallback callback)
+                Bundle searchSpecBundle, int userId, long binderCallStartTimeMillis,
+                IAppSearchResultCallback callback)
                 throws RemoteException {
             final String key = getKey(userId, databaseName);
             if (!mDocumentMap.containsKey(key)) {
                 final Bundle page = new Bundle();
                 page.putLong(SearchResultPage.NEXT_PAGE_TOKEN_FIELD, 1);
                 page.putParcelableArrayList(SearchResultPage.RESULTS_FIELD, new ArrayList<>());
-                callback.onResult(AppSearchResult.newSuccessfulResult(page));
+                callback.onResult(
+                        new AppSearchResultParcel<>(AppSearchResult.newSuccessfulResult(page)));
                 return;
             }
             final List<GenericDocument> documents = new ArrayList<>(mDocumentMap.get(key).values());
@@ -765,12 +773,14 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
                 resultBundles.add(resultBundle);
             }
             page.putParcelableArrayList(SearchResultPage.RESULTS_FIELD, resultBundles);
-            callback.onResult(AppSearchResult.newSuccessfulResult(page));
+            callback.onResult(
+                    new AppSearchResultParcel<>(AppSearchResult.newSuccessfulResult(page)));
         }
 
         @Override
         public void globalQuery(String packageName, String queryExpression, Bundle searchSpecBundle,
-                int userId, IAppSearchResultCallback callback) throws RemoteException {
+                int userId, long binderCallStartTimeMillis, IAppSearchResultCallback callback)
+                throws RemoteException {
             ignore(callback);
         }
 
@@ -780,7 +790,8 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
             final Bundle page = new Bundle();
             page.putLong(SearchResultPage.NEXT_PAGE_TOKEN_FIELD, 1);
             page.putParcelableArrayList(SearchResultPage.RESULTS_FIELD, new ArrayList<>());
-            callback.onResult(AppSearchResult.newSuccessfulResult(page));
+            callback.onResult(
+                    new AppSearchResultParcel<>(AppSearchResult.newSuccessfulResult(page)));
         }
 
         @Override
@@ -813,7 +824,8 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
 
         @Override
         public void removeByDocumentId(String packageName, String databaseName, String namespace,
-                List<String> ids, int userId, IAppSearchBatchResultCallback callback)
+                List<String> ids, int userId, long binderCallStartTimeMillis,
+                IAppSearchBatchResultCallback callback)
                 throws RemoteException {
             final AppSearchBatchResult.Builder<String, Void> builder =
                     new AppSearchBatchResult.Builder<>();
@@ -835,20 +847,23 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
                     }
                 }
             }
-            callback.onResult(builder.build());
+            callback.onResult(new AppSearchBatchResultParcel<>(builder.build()));
         }
 
         @Override
         public void removeByQuery(String packageName, String databaseName, String queryExpression,
-                Bundle searchSpecBundle, int userId, IAppSearchResultCallback callback)
+                Bundle searchSpecBundle, int userId, long binderCallStartTimeMillis,
+                IAppSearchResultCallback callback)
                 throws RemoteException {
             final String key = getKey(userId, databaseName);
             if (!mDocumentMap.containsKey(key)) {
-                callback.onResult(AppSearchResult.newSuccessfulResult(null));
+                callback.onResult(
+                        new AppSearchResultParcel<>(AppSearchResult.newSuccessfulResult(null)));
                 return;
             }
             mDocumentMap.get(key).clear();
-            callback.onResult(AppSearchResult.newSuccessfulResult(null));
+            callback.onResult(
+                    new AppSearchResultParcel<>(AppSearchResult.newSuccessfulResult(null)));
         }
 
         @Override
@@ -858,12 +873,14 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         }
 
         @Override
-        public void persistToDisk(int userId) throws RemoteException {
+        public void persistToDisk(int userId, long binderCallStartTimeMillis)
+                throws RemoteException {
 
         }
 
         @Override
-        public void initialize(int userId, IAppSearchResultCallback callback)
+        public void initialize(int userId, long binderCallStartTimeMillis,
+                IAppSearchResultCallback callback)
                 throws RemoteException {
             ignore(callback);
         }
@@ -878,7 +895,8 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         }
 
         private void ignore(IAppSearchResultCallback callback) throws RemoteException {
-            callback.onResult(AppSearchResult.newSuccessfulResult(null));
+            callback.onResult(
+                    new AppSearchResultParcel<>(AppSearchResult.newSuccessfulResult(null)));
         }
     }
 

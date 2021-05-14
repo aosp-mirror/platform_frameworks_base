@@ -280,8 +280,8 @@ public abstract class WMShellBaseModule {
 
     @WMSingleton
     @Provides
-    static PipSurfaceTransactionHelper providePipSurfaceTransactionHelper(Context context) {
-        return new PipSurfaceTransactionHelper(context);
+    static PipSurfaceTransactionHelper providePipSurfaceTransactionHelper() {
+        return new PipSurfaceTransactionHelper();
     }
 
     @WMSingleton

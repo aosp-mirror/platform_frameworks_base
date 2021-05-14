@@ -3167,6 +3167,8 @@
   <java-symbol type="dimen" name="notification_action_disabled_alpha" />
   <java-symbol type="id" name="tag_margin_end_when_icon_visible" />
   <java-symbol type="id" name="tag_margin_end_when_icon_gone" />
+  <java-symbol type="id" name="tag_uses_right_icon_drawable" />
+  <java-symbol type="id" name="tag_keep_when_showing_left_icon" />
 
   <!-- Override Wake Key Behavior When Screen is Off -->
   <java-symbol type="bool" name="config_wakeOnDpadKeyPress" />
@@ -4084,15 +4086,15 @@
   <java-symbol type="id" name="conversation_image_message_container" />
   <java-symbol type="id" name="conversation_icon_container" />
   <java-symbol type="dimen" name="messaging_group_singleline_sender_padding_end" />
-  <java-symbol type="dimen" name="conversation_badge_side_margin" />
+  <java-symbol type="dimen" name="conversation_badge_protrusion" />
   <java-symbol type="dimen" name="conversation_avatar_size" />
   <java-symbol type="dimen" name="conversation_avatar_size_group_expanded" />
   <java-symbol type="dimen" name="conversation_face_pile_avatar_size" />
   <java-symbol type="dimen" name="conversation_face_pile_avatar_size_group_expanded" />
   <java-symbol type="dimen" name="conversation_face_pile_protection_width" />
   <java-symbol type="dimen" name="conversation_face_pile_protection_width_expanded" />
-  <java-symbol type="dimen" name="conversation_badge_side_margin_group_expanded" />
-  <java-symbol type="dimen" name="conversation_badge_side_margin_group_expanded_face_pile" />
+  <java-symbol type="dimen" name="conversation_badge_protrusion_group_expanded" />
+  <java-symbol type="dimen" name="conversation_badge_protrusion_group_expanded_face_pile" />
   <java-symbol type="dimen" name="conversation_content_start" />
   <java-symbol type="dimen" name="expanded_group_conversation_message_padding" />
   <java-symbol type="dimen" name="messaging_layout_icon_padding_start" />
@@ -4257,7 +4259,7 @@
 
   <java-symbol type="bool" name="config_voice_data_sms_auto_fallback" />
 
-  <java-symbol type="bool" name="config_enableOneHandedKeyguard" />
+  <java-symbol type="bool" name="config_enableDynamicKeyguardPositioning" />
 
   <java-symbol type="attr" name="colorAccentPrimary" />
   <java-symbol type="attr" name="colorAccentSecondary" />

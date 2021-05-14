@@ -251,6 +251,12 @@ public class PowerExemptionManager {
      * @hide
      */
     public static final int REASON_LOCALE_CHANGED = 206;
+    /**
+     * Broadcast
+     * {@link android.app.AlarmManager#ACTION_SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED}
+     * @hide
+     */
+    public static final int REASON_SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED = 207;
     /* Reason code range 300-399 are reserved for other internal reasons */
     /**
      * Device idle system allow list, including EXCEPT-IDLE
@@ -338,6 +344,9 @@ public class PowerExemptionManager {
      */
     public static final int REASON_MEDIA_SESSION_CALLBACK = 317;
 
+    /** @hide The app requests out-out. */
+    public static final int REASON_OPT_OUT_REQUESTED = 1000;
+
     /**
      * The list of BG-FGS-Launch and temp-allow-list reason code.
      * @hide
@@ -386,6 +395,7 @@ public class PowerExemptionManager {
             REASON_TIMEZONE_CHANGED,
             REASON_TIME_CHANGED,
             REASON_LOCALE_CHANGED,
+            REASON_SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED,
             REASON_SYSTEM_ALLOW_LISTED,
             REASON_ALARM_MANAGER_ALARM_CLOCK,
             REASON_ALARM_MANAGER_WHILE_IDLE,
@@ -404,6 +414,7 @@ public class PowerExemptionManager {
             REASON_EVENT_MMS,
             REASON_SHELL,
             REASON_MEDIA_SESSION_CALLBACK,
+            REASON_OPT_OUT_REQUESTED,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ReasonCode {}
@@ -664,6 +675,8 @@ public class PowerExemptionManager {
                 return "TIME_CHANGED";
             case REASON_LOCALE_CHANGED:
                 return "LOCALE_CHANGED";
+            case REASON_SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED:
+                return "REASON_SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED";
             case REASON_SYSTEM_ALLOW_LISTED:
                 return "SYSTEM_ALLOW_LISTED";
             case REASON_ALARM_MANAGER_ALARM_CLOCK:
@@ -700,6 +713,8 @@ public class PowerExemptionManager {
                 return "SHELL";
             case REASON_MEDIA_SESSION_CALLBACK:
                 return "MEDIA_SESSION_CALLBACK";
+            case REASON_OPT_OUT_REQUESTED:
+                return "REASON_OPT_OUT_REQUESTED";
             default:
                 return "(unknown:" + reasonCode + ")";
         }

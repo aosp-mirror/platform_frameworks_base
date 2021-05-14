@@ -40,7 +40,7 @@ public abstract class GenerateChallengeClient<T> extends HalClientMonitor<T> {
     @Override
     public void unableToStart() {
         try {
-            getListener().onChallengeGenerated(getSensorId(), 0L);
+            getListener().onChallengeGenerated(getSensorId(), getTargetUserId(), 0L);
         } catch (RemoteException e) {
             Slog.e(TAG, "Unable to send error", e);
         }

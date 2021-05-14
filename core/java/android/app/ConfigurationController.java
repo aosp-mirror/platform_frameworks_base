@@ -107,8 +107,7 @@ class ConfigurationController {
             mCompatConfiguration = new Configuration();
         }
         mCompatConfiguration.setTo(mConfiguration);
-        if (mResourcesManager.applyCompatConfigurationLocked(displayDensity,
-                mCompatConfiguration)) {
+        if (mResourcesManager.applyCompatConfiguration(displayDensity, mCompatConfiguration)) {
             config = mCompatConfiguration;
         }
         return config;
@@ -199,7 +198,7 @@ class ConfigurationController {
                 // configuration also needs to set to the adjustments for consistency.
                 appResources.getDisplayAdjustments().getConfiguration().updateFrom(config);
             }
-            mResourcesManager.applyConfigurationToResourcesLocked(config, compat,
+            mResourcesManager.applyConfigurationToResources(config, compat,
                     appResources.getDisplayAdjustments());
             updateLocaleListFromAppContext(app.getApplicationContext());
 

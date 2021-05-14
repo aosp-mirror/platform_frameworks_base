@@ -17,11 +17,9 @@
 package com.android.wm.shell.pip;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.os.SystemProperties;
 import android.view.SurfaceControl;
 
 import com.android.wm.shell.R;
@@ -30,10 +28,6 @@ import com.android.wm.shell.R;
  * Abstracts the common operations on {@link SurfaceControl.Transaction} for PiP transition.
  */
 public class PipSurfaceTransactionHelper {
-
-    private final boolean mEnableCornerRadius;
-    private int mCornerRadius;
-
     /** for {@link #scale(SurfaceControl.Transaction, SurfaceControl, Rect, Rect)} operation */
     private final Matrix mTmpTransform = new Matrix();
     private final float[] mTmpFloat9 = new float[9];
@@ -41,11 +35,7 @@ public class PipSurfaceTransactionHelper {
     private final RectF mTmpDestinationRectF = new RectF();
     private final Rect mTmpDestinationRect = new Rect();
 
-    public PipSurfaceTransactionHelper(Context context) {
-        final Resources res = context.getResources();
-        mEnableCornerRadius = res.getBoolean(R.bool.config_pipEnableRoundCorner)
-            || SystemProperties.getBoolean("debug.sf.enable_hole_punch_pip", false);
-    }
+    private int mCornerRadius;
 
     /**
      * Called when display size or font size of settings changed
@@ -53,10 +43,7 @@ public class PipSurfaceTransactionHelper {
      * @param context the current context
      */
     public void onDensityOrFontScaleChanged(Context context) {
-        if (mEnableCornerRadius) {
-            final Resources res = context.getResources();
-            mCornerRadius = res.getDimensionPixelSize(R.dimen.pip_corner_radius);
-        }
+        mCornerRadius = context.getResources().getDimensionPixelSize(R.dimen.pip_corner_radius);
     }
 
     /**
@@ -194,9 +181,7 @@ public class PipSurfaceTransactionHelper {
      */
     public PipSurfaceTransactionHelper round(SurfaceControl.Transaction tx, SurfaceControl leash,
             boolean applyCornerRadius) {
-        if (mEnableCornerRadius) {
-            tx.setCornerRadius(leash, applyCornerRadius ? mCornerRadius : 0);
-        }
+        tx.setCornerRadius(leash, applyCornerRadius ? mCornerRadius : 0);
         return this;
     }
 

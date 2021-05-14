@@ -20,6 +20,7 @@ import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 
 import android.util.ArraySet;
+import android.view.Display;
 import android.view.Display.Mode;
 import android.view.DisplayInfo;
 
@@ -95,16 +96,8 @@ class RefreshRatePolicy {
             return 0;
         }
 
-        // If app requests a certain refresh rate or mode, don't override it.
         if (w.mAttrs.preferredRefreshRate != 0 || w.mAttrs.preferredDisplayModeId != 0) {
             return w.mAttrs.preferredDisplayModeId;
-        }
-
-        final String packageName = w.getOwningPackage();
-
-        // If app is using Camera, force it to default (lower) refresh rate.
-        if (mNonHighRefreshRatePackages.contains(packageName)) {
-            return mLowRefreshRateMode.getModeId();
         }
 
         return 0;
@@ -145,6 +138,44 @@ class RefreshRatePolicy {
         if (mHighRefreshRateDenylist.isDenylisted(packageName)) {
             return mLowRefreshRateMode.getRefreshRate();
         }
+
+        final int preferredModeId = getPreferredModeId(w);
+        if (preferredModeId > 0) {
+            DisplayInfo info = w.getDisplayInfo();
+            if (info != null) {
+                for (Display.Mode mode : info.supportedModes) {
+                    if (preferredModeId == mode.getModeId()) {
+                        return mode.getRefreshRate();
+                    }
+                }
+            }
+        }
+
+        return 0;
+    }
+
+    float getPreferredMaxRefreshRate(WindowState w) {
+        // If app is animating, it's not able to control refresh rate because we want the animation
+        // to run in default refresh rate.
+        if (w.isAnimating(TRANSITION | PARENTS)) {
+            return 0;
+        }
+
+        // If app requests a certain refresh rate or mode, don't override it.
+        if (w.mAttrs.preferredDisplayModeId != 0) {
+            return 0;
+        }
+
+        if (w.mAttrs.preferredMaxDisplayRefreshRate > 0) {
+            return w.mAttrs.preferredMaxDisplayRefreshRate;
+        }
+
+        final String packageName = w.getOwningPackage();
+        // If app is using Camera, force it to default (lower) refresh rate.
+        if (mNonHighRefreshRatePackages.contains(packageName)) {
+            return mLowRefreshRateMode.getRefreshRate();
+        }
+
         return 0;
     }
 }

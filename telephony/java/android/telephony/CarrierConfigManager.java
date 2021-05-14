@@ -3473,6 +3473,21 @@ public class CarrierConfigManager {
             "additional_nr_advanced_bands_int_array";
 
     /**
+     * This configuration allows the framework to control the NR advanced capable by protocol
+     * configuration options(PCO).
+     *
+     * If this config is 0, then the nr advanced capable is enabled.
+     * If this config is not 0 and PCO container with this config's address is 1, then the nr
+     * advanced capable is enabled.
+     * If this config is not 0 and PCO container with this config's address is 0, then the nr
+     * advanced capable is disabled.
+     *
+     * @hide
+     */
+    public static final String KEY_NR_ADVANCED_CAPABLE_PCO_ID_INT =
+            "nr_advanced_capable_pco_id_int";
+
+    /**
      * Controls time in milliseconds until DcTracker reevaluates 5G connection state.
      * @hide
      */
@@ -4279,6 +4294,26 @@ public class CarrierConfigManager {
         public static final String KEY_RCS_FEATURE_TAG_ALLOWED_STRING_ARRAY =
                 KEY_PREFIX + "rcs_feature_tag_allowed_string_array";
 
+        /**
+         * Flag indicating whether or not carrier forbids device send the RCS request when the
+         * device receive the network response with the SIP code 489 BAD EVENT.
+         * <p>
+         * The default value for this key is {@code false}.
+         * @hide
+         */
+        public static final String KEY_RCS_REQUEST_FORBIDDEN_BY_SIP_489_BOOL =
+                KEY_PREFIX + "rcs_request_forbidden_by_sip_489_bool";
+
+        /**
+         * Indicates the interval that SUBSCRIBE requests from applications will be retried at when
+         * the carrier network has responded to a previous request with a forbidden error.
+         * <p>
+         * The default value for this key is 20 minutes.
+         * @hide
+         */
+        public static final String KEY_RCS_REQUEST_RETRY_INTERVAL_MILLIS_LONG =
+                KEY_PREFIX + "rcs_request_retry_interval_millis_long";
+
         private Ims() {}
 
         private static PersistableBundle getDefaults() {
@@ -4292,6 +4327,8 @@ public class CarrierConfigManager {
             defaults.putBoolean(KEY_RCS_BULK_CAPABILITY_EXCHANGE_BOOL, false);
             defaults.putBoolean(KEY_ENABLE_PRESENCE_GROUP_SUBSCRIBE_BOOL, true);
             defaults.putInt(KEY_NON_RCS_CAPABILITIES_CACHE_EXPIRATION_SEC_INT, 30 * 24 * 60 * 60);
+            defaults.putBoolean(KEY_RCS_REQUEST_FORBIDDEN_BY_SIP_489_BOOL, false);
+            defaults.putLong(KEY_RCS_REQUEST_RETRY_INTERVAL_MILLIS_LONG, 20 * 60 * 1000);
             defaults.putStringArray(KEY_RCS_FEATURE_TAG_ALLOWED_STRING_ARRAY, new String[]{
                     "+g.3gpp.icsi-ref=\"urn%3Aurn-7%3A3gpp-service.ims.icsi.oma.cpm.msg\"",
                     "+g.3gpp.icsi-ref=\"urn%3Aurn-7%3A3gpp-service.ims.icsi.oma.cpm.largemsg\"",
@@ -5414,6 +5451,7 @@ public class CarrierConfigManager {
         /* Default value is 1 hour. */
         sDefaults.putLong(KEY_5G_WATCHDOG_TIME_MS_LONG, 3600000);
         sDefaults.putIntArray(KEY_ADDITIONAL_NR_ADVANCED_BANDS_INT_ARRAY, new int[0]);
+        sDefaults.putInt(KEY_NR_ADVANCED_CAPABLE_PCO_ID_INT, 0);
         sDefaults.putBoolean(KEY_UNMETERED_NR_NSA_BOOL, false);
         sDefaults.putBoolean(KEY_UNMETERED_NR_NSA_MMWAVE_BOOL, false);
         sDefaults.putBoolean(KEY_UNMETERED_NR_NSA_SUB6_BOOL, false);

@@ -16,6 +16,7 @@
 
 package com.android.server.wm.flicker.rotation
 
+import android.platform.test.annotations.Postsubmit
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
@@ -90,6 +91,18 @@ class SeamlessAppRotationTest(
                 .then()
                 .coversExactly(endingPos, testApp.`package`)
         }
+    }
+
+    @Postsubmit
+    @Test
+    override fun navBarWindowIsAlwaysVisible() {
+        super.navBarWindowIsAlwaysVisible()
+    }
+
+    @Postsubmit
+    @Test
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
+        super.visibleLayersShownMoreThanOneConsecutiveEntry()
     }
 
     companion object {

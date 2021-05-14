@@ -267,14 +267,18 @@ public final class AudioPlaybackConfiguration implements Parcelable {
         final AudioPlaybackConfiguration anonymCopy = new AudioPlaybackConfiguration(in.mPlayerIId);
         anonymCopy.mPlayerState = in.mPlayerState;
         // do not reuse the full attributes: only usage, content type and public flags are allowed
-        anonymCopy.mPlayerAttr = new AudioAttributes.Builder()
-                .setUsage(in.mPlayerAttr.getUsage())
+        AudioAttributes.Builder builder = new AudioAttributes.Builder()
                 .setContentType(in.mPlayerAttr.getContentType())
                 .setFlags(in.mPlayerAttr.getFlags())
                 .setAllowedCapturePolicy(
                         in.mPlayerAttr.getAllowedCapturePolicy() == ALLOW_CAPTURE_BY_ALL
-                        ? ALLOW_CAPTURE_BY_ALL : ALLOW_CAPTURE_BY_NONE)
-                .build();
+                                ? ALLOW_CAPTURE_BY_ALL : ALLOW_CAPTURE_BY_NONE);
+        if (AudioAttributes.isSystemUsage(in.mPlayerAttr.getSystemUsage())) {
+            builder.setSystemUsage(in.mPlayerAttr.getSystemUsage());
+        } else {
+            builder.setUsage(in.mPlayerAttr.getUsage());
+        }
+        anonymCopy.mPlayerAttr = builder.build();
         anonymCopy.mDeviceId = in.mDeviceId;
         // anonymized data
         anonymCopy.mPlayerType = PLAYER_TYPE_UNKNOWN;

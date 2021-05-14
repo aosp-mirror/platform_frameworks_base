@@ -31,6 +31,7 @@
 
 using namespace android;
 using namespace android::uirenderer;
+using namespace android::uirenderer::skiapipeline;
 using namespace android::uirenderer::test;
 
 // We lazy
@@ -567,6 +568,33 @@ TEST(CanvasOp, simpleDrawPicture) {
     // instead of canvas->drawPicture.
     EXPECT_EQ(2, canvas.drawRectCount);
     EXPECT_EQ(2, canvas.sumTotalDrawCalls());
+}
+
+TEST(CanvasOp, simpleDrawRipple) {
+    CanvasOpBuffer buffer;
+    EXPECT_EQ(buffer.size(), 0);
+
+    const char* sksl =
+            "half4 main(float2 coord) {"
+            "  return half4(1.);"
+            "}";
+    auto [effect, error] = SkRuntimeEffect::MakeForShader(SkString(sksl));
+    auto params = RippleDrawableParams{
+            .x = sp<CanvasPropertyPrimitive>(new CanvasPropertyPrimitive(100)),
+            .y = sp<CanvasPropertyPrimitive>(new CanvasPropertyPrimitive(200)),
+            .radius = sp<CanvasPropertyPrimitive>(new CanvasPropertyPrimitive(50)),
+            .progress = sp<CanvasPropertyPrimitive>(new CanvasPropertyPrimitive(0.5)),
+            .turbulencePhase = sp<CanvasPropertyPrimitive>(new CanvasPropertyPrimitive(1)),
+            .color = 0xff00ff,
+            .paint = sp<CanvasPropertyPaint>(new CanvasPropertyPaint(SkPaint{})),
+            .effectBuilder = SkRuntimeShaderBuilder(effect)};
+    buffer.push<Op::DrawRippleDrawable>({.params = params});
+
+    CallCountingCanvas canvas;
+    EXPECT_EQ(0, canvas.sumTotalDrawCalls());
+    rasterizeCanvasBuffer(buffer, &canvas);
+    EXPECT_EQ(1, canvas.drawOvalCount);
+    EXPECT_EQ(1, canvas.sumTotalDrawCalls());
 }
 
 TEST(CanvasOp, immediateRendering) {

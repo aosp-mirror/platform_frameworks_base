@@ -195,6 +195,10 @@ void CanvasContext::setSurfaceControl(ASurfaceControl* surfaceControl) {
 
     auto funcs = mRenderThread.getASurfaceControlFunctions();
 
+    if (surfaceControl == nullptr) {
+        setASurfaceTransactionCallback(nullptr);
+    }
+
     if (mSurfaceControl != nullptr) {
         funcs.unregisterListenerFunc(this, &onSurfaceStatsAvailable);
         funcs.releaseFunc(mSurfaceControl);
@@ -467,11 +471,11 @@ void CanvasContext::notifyFramePending() {
     mRenderThread.pushBackFrameCallback(this);
 }
 
-void CanvasContext::draw() {
+nsecs_t CanvasContext::draw() {
     if (auto grContext = getGrContext()) {
         if (grContext->abandoned()) {
             LOG_ALWAYS_FATAL("GrContext is abandoned/device lost at start of CanvasContext::draw");
-            return;
+            return 0;
         }
     }
     SkRect dirty;
@@ -486,7 +490,7 @@ void CanvasContext::draw() {
             std::invoke(func, mFrameNumber);
         }
         mFrameCompleteCallbacks.clear();
-        return;
+        return 0;
     }
 
     ScopedActiveContext activeContext(this);
@@ -616,6 +620,7 @@ void CanvasContext::draw() {
     }
 
     mRenderThread.cacheManager().onFrameCompleted();
+    return mCurrentFrameInfo->get(FrameInfoIndex::DequeueBufferDuration);
 }
 
 void CanvasContext::reportMetricsWithPresentTime() {

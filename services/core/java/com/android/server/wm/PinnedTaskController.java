@@ -257,15 +257,16 @@ class PinnedTaskController {
             // be rotated.
             float dx = pipTx.mPositionX;
             float dy = pipTx.mPositionY;
+            final Matrix matrix = pipTx.getMatrix();
             if (pipTx.mRotation == 90) {
                 dx = pipTx.mPositionY;
                 dy = areaBounds.right - pipTx.mPositionX;
+                matrix.postRotate(-90);
             } else if (pipTx.mRotation == -90) {
                 dx = areaBounds.bottom - pipTx.mPositionY;
                 dy = pipTx.mPositionX;
+                matrix.postRotate(90);
             }
-            final Matrix matrix = new Matrix();
-            matrix.setScale(pipTx.mScaleX, pipTx.mScaleY);
             matrix.postTranslate(dx, dy);
             t.setMatrix(pinnedTask.getSurfaceControl(), matrix, new float[9]);
             Slog.i(TAG, "Seamless rotation PiP tx=" + pipTx + " pos=" + dx + "," + dy);

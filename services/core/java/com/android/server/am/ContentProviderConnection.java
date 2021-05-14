@@ -19,6 +19,7 @@ package com.android.server.am;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PROVIDER;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 
+import android.annotation.UserIdInt;
 import android.os.Binder;
 import android.os.SystemClock;
 import android.util.Slog;
@@ -52,15 +53,21 @@ public final class ContentProviderConnection extends Binder {
     // The provider of this connection is now dead.
     public boolean dead;
 
+    // The original user id when this connection was requested, it could be different from
+    // the client's user id because the client could request to access a content provider
+    // living in a different user if it has the permission.
+    @UserIdInt final int mExpectedUserId;
+
     // For debugging.
     private int mNumStableIncs;
     private int mNumUnstableIncs;
 
     public ContentProviderConnection(ContentProviderRecord _provider, ProcessRecord _client,
-            String _clientPackage) {
+            String _clientPackage, @UserIdInt int _expectedUserId) {
         provider = _provider;
         client = _client;
         clientPackage = _clientPackage;
+        mExpectedUserId = _expectedUserId;
         createTime = SystemClock.elapsedRealtime();
     }
 

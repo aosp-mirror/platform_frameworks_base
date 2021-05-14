@@ -738,6 +738,17 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
     }
 
     @Override
+    public void onUiReady(int sensorId) {
+        final BaseClientMonitor client = mScheduler.getCurrentClient();
+        if (!(client instanceof Udfps)) {
+            Slog.w(TAG, "onUiReady received during client: " + client);
+            return;
+        }
+        final Udfps udfps = (Udfps) client;
+        udfps.onUiReady();
+    }
+
+    @Override
     public void setUdfpsOverlayController(@NonNull IUdfpsOverlayController controller) {
         mUdfpsOverlayController = controller;
     }
@@ -749,6 +760,9 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
 
         proto.write(SensorStateProto.SENSOR_ID, mSensorProperties.sensorId);
         proto.write(SensorStateProto.MODALITY, SensorStateProto.FINGERPRINT);
+        if (mSensorProperties.isAnyUdfpsType()) {
+            proto.write(SensorStateProto.MODALITY_FLAGS, SensorStateProto.FINGERPRINT_UDFPS);
+        }
         proto.write(SensorStateProto.CURRENT_STRENGTH,
                 Utils.getCurrentStrength(mSensorProperties.sensorId));
         proto.write(SensorStateProto.SCHEDULER, mScheduler.dumpProtoState(clearSchedulerBuffer));

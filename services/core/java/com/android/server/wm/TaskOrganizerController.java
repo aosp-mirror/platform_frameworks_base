@@ -184,7 +184,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
             Rect mainFrame = null;
             final boolean playShiftUpAnimation = !task.inMultiWindowMode();
             if (prepareAnimation && playShiftUpAnimation) {
-                final ActivityRecord topActivity = task.topActivityWithStartingWindow();
+                final ActivityRecord topActivity = task.topActivityContainsStartingWindow();
                 if (topActivity != null) {
                     final WindowState mainWindow =
                             topActivity.findMainWindow(false/* includeStartingApp */);

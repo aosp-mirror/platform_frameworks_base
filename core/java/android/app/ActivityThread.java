@@ -178,6 +178,7 @@ import android.view.autofill.AutofillId;
 import android.view.contentcapture.IContentCaptureManager;
 import android.view.contentcapture.IContentCaptureOptionsCallback;
 import android.view.translation.TranslationSpec;
+import android.view.translation.UiTranslationSpec;
 import android.webkit.WebView;
 import android.window.SizeConfigurationBuckets;
 import android.window.SplashScreen;
@@ -1843,13 +1844,15 @@ public final class ActivityThread extends ClientTransactionHandler
 
         @Override
         public void updateUiTranslationState(IBinder activityToken, int state,
-                TranslationSpec sourceSpec, TranslationSpec targetSpec, List<AutofillId> viewIds) {
+                TranslationSpec sourceSpec, TranslationSpec targetSpec, List<AutofillId> viewIds,
+                UiTranslationSpec uiTranslationSpec) {
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = activityToken;
             args.arg2 = state;
             args.arg3 = sourceSpec;
             args.arg4 = targetSpec;
             args.arg5 = viewIds;
+            args.arg6 = uiTranslationSpec;
             sendMessage(H.UPDATE_UI_TRANSLATION_STATE, args);
         }
     }
@@ -2212,7 +2215,7 @@ public final class ActivityThread extends ClientTransactionHandler
                     final SomeArgs args = (SomeArgs) msg.obj;
                     updateUiTranslationState((IBinder) args.arg1, (int) args.arg2,
                             (TranslationSpec) args.arg3, (TranslationSpec) args.arg4,
-                            (List<AutofillId>) args.arg5);
+                            (List<AutofillId>) args.arg5, (UiTranslationSpec) args.arg6);
                     break;
                 case SET_CONTENT_CAPTURE_OPTIONS_CALLBACK:
                     handleSetContentCaptureOptionsCallback((String) msg.obj);
@@ -4194,13 +4197,15 @@ public final class ActivityThread extends ClientTransactionHandler
     }
 
     private void updateUiTranslationState(IBinder activityToken, int state,
-            TranslationSpec sourceSpec, TranslationSpec targetSpec, List<AutofillId> viewIds) {
+            TranslationSpec sourceSpec, TranslationSpec targetSpec, List<AutofillId> viewIds,
+            UiTranslationSpec uiTranslationSpec) {
         final ActivityClientRecord r = mActivities.get(activityToken);
         if (r == null) {
             Log.w(TAG, "updateUiTranslationState(): no activity for " + activityToken);
             return;
         }
-        r.activity.updateUiTranslationState(state, sourceSpec, targetSpec, viewIds);
+        r.activity.updateUiTranslationState(
+                state, sourceSpec, targetSpec, viewIds, uiTranslationSpec);
     }
 
     private static final ThreadLocal<Intent> sCurrentBroadcastIntent = new ThreadLocal<Intent>();
@@ -5887,7 +5892,7 @@ public final class ActivityThread extends ClientTransactionHandler
 
     public final void applyConfigurationToResources(Configuration config) {
         synchronized (mResourcesManager) {
-            mResourcesManager.applyConfigurationToResourcesLocked(config, null);
+            mResourcesManager.applyConfigurationToResources(config, null);
         }
     }
 
@@ -5975,7 +5980,7 @@ public final class ActivityThread extends ClientTransactionHandler
 
         synchronized (mResourcesManager) {
             // Update all affected Resources objects to use new ResourcesImpl
-            mResourcesManager.applyNewResourceDirsLocked(ai, oldResDirs);
+            mResourcesManager.applyNewResourceDirs(ai, oldResDirs);
         }
     }
 
@@ -6231,7 +6236,7 @@ public final class ActivityThread extends ClientTransactionHandler
 
                                 synchronized (mResourcesManager) {
                                     // Update affected Resources objects to use new ResourcesImpl
-                                    mResourcesManager.applyNewResourceDirsLocked(aInfo, oldResDirs);
+                                    mResourcesManager.applyNewResourceDirs(aInfo, oldResDirs);
                                 }
                             } catch (RemoteException e) {
                             }
@@ -6474,7 +6479,7 @@ public final class ActivityThread extends ClientTransactionHandler
              * reflect configuration changes. The configuration object passed
              * in AppBindData can be safely assumed to be up to date
              */
-            mResourcesManager.applyConfigurationToResourcesLocked(data.config, data.compatInfo);
+            mResourcesManager.applyConfigurationToResources(data.config, data.compatInfo);
             mCurDefaultDisplayDpi = data.config.densityDpi;
 
             // This calls mResourcesManager so keep it within the synchronized block.
@@ -7509,7 +7514,7 @@ public final class ActivityThread extends ClientTransactionHandler
 
                 // We need to apply this change to the resources immediately, because upon returning
                 // the view hierarchy will be informed about it.
-                if (mResourcesManager.applyConfigurationToResourcesLocked(globalConfig,
+                if (mResourcesManager.applyConfigurationToResources(globalConfig,
                         null /* compat */,
                         mInitialApplication.getResources().getDisplayAdjustments())) {
                     mConfigurationController.updateLocaleListFromAppContext(

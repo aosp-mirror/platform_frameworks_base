@@ -425,7 +425,7 @@ class TaskSnapshotController {
         final WindowState imeWindow = task.getDisplayContent().mInputMethodWindow;
         // Exclude IME window snapshot when IME isn't proper to attach to app.
         final boolean excludeIme = imeWindow != null && imeWindow.getSurfaceControl() != null
-                && !task.getDisplayContent().isImeAttachedToApp();
+                && !task.getDisplayContent().shouldImeAttachedToApp();
         final WindowState navWindow =
                 task.getDisplayContent().getDisplayPolicy().getNavigationBar();
         // If config_attachNavBarToAppDuringTransition is true, the nav bar will be reparent to the

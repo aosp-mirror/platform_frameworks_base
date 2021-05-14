@@ -88,7 +88,6 @@ interface IDevicePolicyManager {
 
     boolean isActivePasswordSufficient(int userHandle, boolean parent);
     boolean isActivePasswordSufficientForDeviceRequirement();
-    boolean isProfileActivePasswordSufficientForParent(int userHandle);
     boolean isPasswordSufficientAfterProfileUnification(int userHandle, int profileUser);
     int getPasswordComplexity(boolean parent);
     void setRequiredPasswordComplexity(int passwordComplexity, boolean parent);
@@ -407,7 +406,7 @@ interface IDevicePolicyManager {
     boolean isDeviceProvisioningConfigApplied();
     void setDeviceProvisioningConfigApplied();
 
-    void forceUpdateUserSetupComplete();
+    void forceUpdateUserSetupComplete(int userId);
 
     void setBackupServiceEnabled(in ComponentName admin, boolean enabled);
     boolean isBackupServiceEnabled(in ComponentName admin);

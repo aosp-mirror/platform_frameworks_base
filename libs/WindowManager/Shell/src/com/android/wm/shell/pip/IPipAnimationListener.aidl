@@ -24,4 +24,12 @@ oneway interface IPipAnimationListener {
      * Notifies the listener that the Pip animation is started.
      */
     void onPipAnimationStarted();
+
+    /**
+     * Notifies the listener about PiP round corner radius changes.
+     * Listener can expect an immediate callback the first time they attach.
+     *
+     * @param cornerRadius the pixel value of the corner radius, zero means it's disabled.
+     */
+    void onPipCornerRadiusChanged(int cornerRadius);
 }

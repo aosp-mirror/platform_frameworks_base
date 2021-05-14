@@ -38,7 +38,6 @@ import com.android.keyguard.KeyguardConstants;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.KeyguardViewController;
-import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -115,7 +114,8 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
     public static final int MODE_ONLY_WAKE = 4;
 
     /**
-     * Mode in which fingerprint unlocks the device.
+     * Mode in which fingerprint unlocks the device or passive auth (ie face auth) unlocks the
+     * device while being requested when keyguard is occluded.
      */
     public static final int MODE_UNLOCK_COLLAPSING = 5;
 
@@ -250,16 +250,20 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             @Main Resources resources,
             KeyguardBypassController keyguardBypassController, DozeParameters dozeParameters,
-            MetricsLogger metricsLogger, DumpManager dumpManager) {
+            MetricsLogger metricsLogger, DumpManager dumpManager,
+            PowerManager powerManager,
+            NotificationMediaManager notificationMediaManager,
+            WakefulnessLifecycle wakefulnessLifecycle,
+            ScreenLifecycle screenLifecycle) {
         mContext = context;
-        mPowerManager = context.getSystemService(PowerManager.class);
+        mPowerManager = powerManager;
         mShadeController = shadeController;
         mUpdateMonitor = keyguardUpdateMonitor;
         mDozeParameters = dozeParameters;
         mUpdateMonitor.registerCallback(this);
-        mMediaManager = Dependency.get(NotificationMediaManager.class);
-        Dependency.get(WakefulnessLifecycle.class).addObserver(mWakefulnessObserver);
-        Dependency.get(ScreenLifecycle.class).addObserver(mScreenObserver);
+        mMediaManager = notificationMediaManager;
+        wakefulnessLifecycle.addObserver(mWakefulnessObserver);
+        screenLifecycle.addObserver(mScreenObserver);
 
         mNotificationShadeWindowController = notificationShadeWindowController;
         mDozeScrimController = dozeScrimController;
@@ -352,8 +356,10 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         Optional.ofNullable(BiometricUiEvent.SUCCESS_EVENT_BY_SOURCE_TYPE.get(biometricSourceType))
                 .ifPresent(UI_EVENT_LOGGER::log);
 
-        boolean unlockAllowed = mKeyguardBypassController.onBiometricAuthenticated(
-                biometricSourceType, isStrongBiometric);
+        boolean unlockAllowed =
+                mKeyguardStateController.isOccluded()
+                        || mKeyguardBypassController.onBiometricAuthenticated(
+                                biometricSourceType, isStrongBiometric);
         if (unlockAllowed) {
             mKeyguardViewMediator.userActivity();
             startWakeAndUnlock(biometricSourceType, isStrongBiometric);
@@ -415,7 +421,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
                 if (!wasDeviceInteractive) {
                     mPendingShowBouncer = true;
                 } else {
-                    showBouncer();
+                    mPendingShowBouncer = false;
                     mKeyguardViewController.notifyKeyguardAuthenticated(
                             false /* strongAuth */);
                 }
@@ -577,6 +583,9 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         }
         if (unlockingAllowed && deviceDreaming) {
             return bypass ? MODE_WAKE_AND_UNLOCK_FROM_DREAM : MODE_ONLY_WAKE;
+        }
+        if (unlockingAllowed && mKeyguardStateController.isOccluded()) {
+            return MODE_UNLOCK_COLLAPSING;
         }
         if (mKeyguardViewController.isShowing()) {
             if (mKeyguardViewController.bouncerIsOrWillBeShowing() && unlockingAllowed) {

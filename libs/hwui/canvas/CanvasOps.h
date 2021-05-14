@@ -145,73 +145,13 @@ struct CanvasOp<CanvasOpType::DrawCircleProperty> {
     ASSERT_DRAWABLE()
 };
 
-template<>
-struct CanvasOp<CanvasOpType::DrawRippleProperty> {
-    sp<uirenderer::CanvasPropertyPrimitive> x;
-    sp<uirenderer::CanvasPropertyPrimitive> y;
-    sp<uirenderer::CanvasPropertyPrimitive> radius;
-    sp<uirenderer::CanvasPropertyPaint> paint;
-    sp<uirenderer::CanvasPropertyPrimitive> progress;
-    sp<uirenderer::CanvasPropertyPrimitive> turbulencePhase;
-    sk_sp<SkRuntimeEffect> effect;
-
-    const float PI = 3.1415926535897932384626;
-    const float PI_ROTATE_RIGHT = PI * 0.0078125;
-    const float PI_ROTATE_LEFT = PI * -0.0078125;
-    const float SCALE = 1.5;
-    const float CIRCLE_X_1 = 0.01 * cos(SCALE * 0.55);
-    const float CIRCLE_Y_1 = 0.01 * sin(SCALE * 0.55);
-    const float CIRCLE_X_2 = -0.0066 * cos(SCALE * 0.45);
-    const float CIRCLE_Y_2 = -0.0066 * sin(SCALE * 0.45);
-    const float CIRCLE_X_3 = -0.0066 * cos(SCALE * 0.35);
-    const float CIRCLE_Y_3 = -0.0066 * sin(SCALE * 0.35);
+template <>
+struct CanvasOp<CanvasOpType::DrawRippleDrawable> {
+    skiapipeline::RippleDrawableParams params;
 
     void draw(SkCanvas* canvas) const {
-        SkRuntimeShaderBuilder runtimeEffectBuilder(effect);
-
-        setUniform2f(runtimeEffectBuilder, "in_origin", x->value, y->value);
-        setUniform(runtimeEffectBuilder, "in_radius", radius);
-        setUniform(runtimeEffectBuilder, "in_progress", progress);
-        setUniform(runtimeEffectBuilder, "in_turbulencePhase", turbulencePhase);
-
-        //
-        // Keep in sync with:
-        // frameworks/base/graphics/java/android/graphics/drawable/RippleShader.java
-        //
-        const float turbulence = turbulencePhase->value;
-        setUniform2f(runtimeEffectBuilder, "in_tCircle1", SCALE * 0.5 + (turbulence * CIRCLE_X_1),
-                     SCALE * 0.5 + (turbulence * CIRCLE_Y_1));
-        setUniform2f(runtimeEffectBuilder, "in_tCircle2", SCALE * 0.2 + (turbulence * CIRCLE_X_2),
-                     SCALE * 0.2 + (turbulence * CIRCLE_Y_2));
-        setUniform2f(runtimeEffectBuilder, "in_tCircle3", SCALE + (turbulence * CIRCLE_X_3),
-                     SCALE + (turbulence * CIRCLE_Y_3));
-        const float rotation1 = turbulence * PI_ROTATE_RIGHT + 1.7 * PI;
-        setUniform2f(runtimeEffectBuilder, "in_tRotation1", cos(rotation1), sin(rotation1));
-        const float rotation2 = turbulence * PI_ROTATE_LEFT + 2 * PI;
-        setUniform2f(runtimeEffectBuilder, "in_tRotation2", cos(rotation2), sin(rotation2));
-        const float rotation3 = turbulence * PI_ROTATE_RIGHT + 2.75 * PI;
-        setUniform2f(runtimeEffectBuilder, "in_tRotation3", cos(rotation3), sin(rotation3));
-
-        SkPaint paintMod = paint->value;
-        paintMod.setShader(runtimeEffectBuilder.makeShader(nullptr, false));
-        canvas->drawCircle(x->value, y->value, radius->value, paintMod);
+        skiapipeline::AnimatedRippleDrawable::draw(canvas, params);
     }
-
-    void setUniform(SkRuntimeShaderBuilder& effect, std::string name,
-                    sp<uirenderer::CanvasPropertyPrimitive> property) const {
-        SkRuntimeShaderBuilder::BuilderUniform uniform = effect.uniform(name.c_str());
-        if (uniform.fVar != nullptr) {
-            uniform = property->value;
-        }
-    }
-
-    void setUniform2f(SkRuntimeShaderBuilder effect, std::string name, float a, float b) const {
-        SkRuntimeShaderBuilder::BuilderUniform uniform = effect.uniform(name.c_str());
-        if (uniform.fVar != nullptr) {
-            uniform = SkV2{a, b};
-        }
-    }
-
     ASSERT_DRAWABLE()
 };
 

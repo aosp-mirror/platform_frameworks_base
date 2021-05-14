@@ -20,7 +20,6 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.LayoutInflater
 import android.view.View
-import android.widget.LinearLayout
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
@@ -48,8 +47,7 @@ class OngoingCallChronometerTest : SysuiTestCase() {
     fun setUp() {
         allowTestableLooperAsMainThread()
         TestableLooper.get(this).runWithLooper {
-            val chipView = LayoutInflater.from(mContext)
-                    .inflate(R.layout.ongoing_call_chip, null) as LinearLayout
+            val chipView = LayoutInflater.from(mContext).inflate(R.layout.ongoing_call_chip, null)
             textView = chipView.findViewById(R.id.ongoing_call_chip_time)!!
             measureTextView()
             calculateDoesNotFixText()

@@ -128,14 +128,14 @@ public class SearchResultToProtoConverter {
         return new SearchResult.MatchInfo.Builder(propertyPath)
                 .setExactMatchRange(
                         new SearchResult.MatchRange(
-                                snippetMatchProto.getExactMatchPosition(),
-                                snippetMatchProto.getExactMatchPosition()
-                                        + snippetMatchProto.getExactMatchBytes()))
+                                snippetMatchProto.getExactMatchUtf16Position(),
+                                snippetMatchProto.getExactMatchUtf16Position()
+                                        + snippetMatchProto.getExactMatchUtf16Length()))
                 .setSnippetRange(
                         new SearchResult.MatchRange(
-                                snippetMatchProto.getWindowPosition(),
-                                snippetMatchProto.getWindowPosition()
-                                        + snippetMatchProto.getWindowBytes()))
+                                snippetMatchProto.getWindowUtf16Position(),
+                                snippetMatchProto.getWindowUtf16Position()
+                                        + snippetMatchProto.getWindowUtf16Length()))
                 .build();
     }
 }

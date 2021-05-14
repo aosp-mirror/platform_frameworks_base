@@ -1351,25 +1351,39 @@ public class ActivityRecordTests extends WindowTestsBase {
      * must ensure the visibilities of activities being updated.
      */
     @Test
-    public void testCompleteFinishing_ensureActivitiesVisible() {
+    public void testCompleteFinishing_ensureActivitiesVisible_withConditions() {
+        testCompleteFinishing_ensureActivitiesVisible(false, PAUSED);
+        testCompleteFinishing_ensureActivitiesVisible(false, STARTED);
+        testCompleteFinishing_ensureActivitiesVisible(true, PAUSED);
+        testCompleteFinishing_ensureActivitiesVisible(true, STARTED);
+    }
+
+    private void testCompleteFinishing_ensureActivitiesVisible(boolean diffTask,
+            ActivityState secondActivityState) {
         final ActivityRecord activity = createActivityWithTask();
         final Task task = activity.getTask();
         final ActivityRecord firstActivity = new ActivityBuilder(mAtm).setTask(task).build();
         firstActivity.mVisibleRequested = false;
         firstActivity.nowVisible = false;
-        firstActivity.setState(STOPPED, "true");
+        firstActivity.setState(STOPPED, "test");
 
         final ActivityRecord secondActivity = new ActivityBuilder(mAtm).setTask(task).build();
         secondActivity.mVisibleRequested = true;
         secondActivity.nowVisible = true;
-        secondActivity.setState(PAUSED, "true");
+        secondActivity.setState(secondActivityState, "test");
 
-        final ActivityRecord translucentActivity = new ActivityBuilder(mAtm).setTask(task).build();
+        ActivityRecord translucentActivity;
+        if (diffTask) {
+            translucentActivity = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        } else {
+            translucentActivity = new ActivityBuilder(mAtm).setTask(task).build();
+        }
         translucentActivity.mVisibleRequested = true;
         translucentActivity.nowVisible = true;
-        translucentActivity.setState(RESUMED, "true");
+        translucentActivity.setState(RESUMED, "test");
 
-        doReturn(false).when(translucentActivity).occludesParent();
+        doReturn(true).when(firstActivity).occludesParent(true);
+        doReturn(true).when(secondActivity).occludesParent(true);
 
         // Finish the second activity
         secondActivity.finishing = true;
@@ -1385,6 +1399,10 @@ public class ActivityRecordTests extends WindowTestsBase {
         verify(firstActivity.mDisplayContent, times(2)).ensureActivitiesVisible(null /* starting */,
                 0 /* configChanges */ , false /* preserveWindows */,
                 true /* notifyClients */);
+
+        // Remove the translucent activity and clear invocations for next test
+        translucentActivity.getTask().removeImmediately("test");
+        clearInvocations(mDefaultDisplay);
     }
 
     /**
@@ -2016,19 +2034,28 @@ public class ActivityRecordTests extends WindowTestsBase {
                 .setScreenOrientation(SCREEN_ORIENTATION_LANDSCAPE)
                 .build();
 
-        // Non-resizable
+        // Not allow non-resizable
         mAtm.mForceResizableActivities = false;
+        mAtm.mSupportsNonResizableMultiWindow = -1;
         mAtm.mDevEnableNonResizableMultiWindow = false;
         assertFalse(activity.supportsSplitScreenWindowingMode());
 
         // Force resizable
         mAtm.mForceResizableActivities = true;
+        mAtm.mSupportsNonResizableMultiWindow = -1;
         mAtm.mDevEnableNonResizableMultiWindow = false;
         assertTrue(activity.supportsSplitScreenWindowingMode());
 
-        // Allow non-resizable
+        // Use development option to allow non-resizable
         mAtm.mForceResizableActivities = false;
+        mAtm.mSupportsNonResizableMultiWindow = -1;
         mAtm.mDevEnableNonResizableMultiWindow = true;
+        assertTrue(activity.supportsSplitScreenWindowingMode());
+
+        // Always allow non-resizable
+        mAtm.mForceResizableActivities = false;
+        mAtm.mSupportsNonResizableMultiWindow = 1;
+        mAtm.mDevEnableNonResizableMultiWindow = false;
         assertTrue(activity.supportsSplitScreenWindowingMode());
     }
 
@@ -2040,19 +2067,28 @@ public class ActivityRecordTests extends WindowTestsBase {
                 .setScreenOrientation(SCREEN_ORIENTATION_LANDSCAPE)
                 .build();
 
-        // Non-resizable
+        // Not allow non-resizable
         mAtm.mForceResizableActivities = false;
+        mAtm.mSupportsNonResizableMultiWindow = -1;
         mAtm.mDevEnableNonResizableMultiWindow = false;
         assertFalse(activity.supportsFreeform());
 
         // Force resizable
         mAtm.mForceResizableActivities = true;
+        mAtm.mSupportsNonResizableMultiWindow = -1;
         mAtm.mDevEnableNonResizableMultiWindow = false;
         assertTrue(activity.supportsFreeform());
 
-        // Allow non-resizable
+        // Use development option to allow non-resizable
         mAtm.mForceResizableActivities = false;
+        mAtm.mSupportsNonResizableMultiWindow = -1;
         mAtm.mDevEnableNonResizableMultiWindow = true;
+        assertTrue(activity.supportsFreeform());
+
+        // Always allow non-resizable
+        mAtm.mForceResizableActivities = false;
+        mAtm.mSupportsNonResizableMultiWindow = 1;
+        mAtm.mDevEnableNonResizableMultiWindow = false;
         assertTrue(activity.supportsFreeform());
     }
 

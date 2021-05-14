@@ -131,8 +131,14 @@ public class WalletScreenController implements
             if (data.isEmpty()) {
                 showEmptyStateView();
             } else {
-                mWalletView.showCardCarousel(
-                        data, response.getSelectedIndex(), !mKeyguardStateController.isUnlocked());
+                int selectedIndex = response.getSelectedIndex();
+                if (selectedIndex >= data.size()) {
+                    Log.w(TAG, "Invalid selected card index, showing empty state.");
+                    showEmptyStateView();
+                } else {
+                    mWalletView.showCardCarousel(
+                            data, selectedIndex, !mKeyguardStateController.isUnlocked());
+                }
             }
             removeMinHeightAndRecordHeightOnLayout();
         });
@@ -174,6 +180,11 @@ public class WalletScreenController implements
 
     @Override
     public void onKeyguardFadingAwayChanged() {
+        queryWalletCards();
+    }
+
+    @Override
+    public void onUnlockedChanged() {
         queryWalletCards();
     }
 
@@ -234,7 +245,9 @@ public class WalletScreenController implements
         mWalletView.show();
         mWalletView.hideErrorMessage();
         int iconSizePx =
-                mContext.getResources().getDimensionPixelSize(R.dimen.wallet_view_header_icon_size);
+                mContext
+                        .getResources()
+                        .getDimensionPixelSize(R.dimen.wallet_screen_header_icon_size);
         GetWalletCardsRequest request =
                 new GetWalletCardsRequest(cardWidthPx, cardHeightPx, iconSizePx, MAX_CARDS);
         mWalletClient.getWalletCards(mExecutor, request, this);
@@ -340,7 +353,11 @@ public class WalletScreenController implements
 
         @Override
         public CharSequence getLabel() {
-            return mWalletCard.getCardLabel();
+            CharSequence label = mWalletCard.getCardLabel();
+            if (label == null) {
+                return "";
+            }
+            return label;
         }
 
         @Override

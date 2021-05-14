@@ -19,7 +19,7 @@
     <item>
         <shape android:shape="rectangle">
             <solid
-                android:color="@color/magnification_switch_button_color" />
+                android:color="@color/magnification_drag_handle_color" />
             <size
                 android:height="@dimen/magnification_drag_view_size"
                 android:width="@dimen/magnification_drag_view_size"/>
@@ -28,8 +28,8 @@
     <item
         android:gravity="center">
         <vector xmlns:android="http://schemas.android.com/apk/res/android"
-            android:width="24dp"
-            android:height="24dp"
+            android:width="30dp"
+            android:height="30dp"
             android:viewportWidth="24"
             android:viewportHeight="24">
             <path

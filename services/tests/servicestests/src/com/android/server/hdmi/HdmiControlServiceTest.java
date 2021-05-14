@@ -17,6 +17,7 @@ package com.android.server.hdmi;
 
 import static android.hardware.hdmi.HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM;
 import static android.hardware.hdmi.HdmiDeviceInfo.DEVICE_PLAYBACK;
+import static android.hardware.hdmi.HdmiDeviceInfo.DEVICE_TV;
 
 import static com.android.server.SystemService.PHASE_BOOT_COMPLETED;
 import static com.android.server.SystemService.PHASE_SYSTEM_SERVICES_READY;
@@ -47,7 +48,7 @@ import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
-import android.provider.Settings;
+import android.sysprop.HdmiProperties;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -193,10 +194,12 @@ public class HdmiControlServiceTest {
 
         mContextSpy = spy(new ContextWrapper(InstrumentationRegistry.getTargetContext()));
 
-        PowerManager powerManager = new PowerManager(mContextSpy, mIPowerManagerMock,
-                mIThermalServiceMock, null);
-        when(mContextSpy.getSystemService(Context.POWER_SERVICE)).thenReturn(powerManager);
-        when(mContextSpy.getSystemService(PowerManager.class)).thenReturn(powerManager);
+        when(mContextSpy.getSystemService(Context.POWER_SERVICE)).thenAnswer(i ->
+                new PowerManager(mContextSpy, mIPowerManagerMock,
+                mIThermalServiceMock, null));
+        when(mContextSpy.getSystemService(PowerManager.class)).thenAnswer(i ->
+                new PowerManager(mContextSpy, mIPowerManagerMock,
+                mIThermalServiceMock, null));
         when(mIPowerManagerMock.isInteractive()).thenReturn(true);
 
         HdmiCecConfig hdmiCecConfig = new FakeHdmiCecConfig(mContextSpy);
@@ -237,9 +240,6 @@ public class HdmiControlServiceTest {
         mHdmiPortInfo[3] =
             new HdmiPortInfo(4, HdmiPortInfo.PORT_INPUT, 0x3000, true, false, false);
         mNativeWrapper.setPortInfo(mHdmiPortInfo);
-        mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
-                HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED,
-                HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
         mHdmiControlServiceSpy.initService();
         mHdmiControlServiceSpy.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
 
@@ -358,23 +358,6 @@ public class HdmiControlServiceTest {
                 HdmiControlManager.VOLUME_CONTROL_ENABLED);
         assertThat(mHdmiControlServiceSpy.getHdmiCecConfig().getIntValue(
                 HdmiControlManager.CEC_SETTING_NAME_VOLUME_CONTROL_MODE)).isEqualTo(
-                HdmiControlManager.VOLUME_CONTROL_ENABLED);
-    }
-
-    @Test
-    public void setAndGetCecVolumeControlEnabled_changesSetting() {
-        mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
-                HdmiControlManager.CEC_SETTING_NAME_VOLUME_CONTROL_MODE,
-                HdmiControlManager.VOLUME_CONTROL_DISABLED);
-        assertThat(mHdmiControlServiceSpy.readIntSetting(
-                Settings.Global.HDMI_CONTROL_VOLUME_CONTROL_ENABLED, -1)).isEqualTo(
-                HdmiControlManager.VOLUME_CONTROL_DISABLED);
-
-        mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
-                HdmiControlManager.CEC_SETTING_NAME_VOLUME_CONTROL_MODE,
-                HdmiControlManager.VOLUME_CONTROL_ENABLED);
-        assertThat(mHdmiControlServiceSpy.readIntSetting(
-                Settings.Global.HDMI_CONTROL_VOLUME_CONTROL_ENABLED, -1)).isEqualTo(
                 HdmiControlManager.VOLUME_CONTROL_ENABLED);
     }
 
@@ -847,4 +830,71 @@ public class HdmiControlServiceTest {
         assertThat(mHdmiControlServiceSpy.dispatchMessageToLocalDevice(message))
                 .isEqualTo(Constants.ABORT_REFUSED);
     }
+
+    @Test
+    public void readDeviceTypes_readsIntegerDeviceTypes() {
+        doReturn(Arrays.asList(new Integer[]{DEVICE_PLAYBACK, DEVICE_AUDIO_SYSTEM}))
+                .when(mHdmiControlServiceSpy).getDeviceTypes();
+        doReturn(Arrays.asList(new HdmiProperties.cec_device_types_values[]{}))
+                .when(mHdmiControlServiceSpy).getCecDeviceTypes();
+
+        assertThat(mHdmiControlServiceSpy.readDeviceTypes())
+                .containsExactly(DEVICE_PLAYBACK, DEVICE_AUDIO_SYSTEM);
+    }
+
+    @Test
+    public void readDeviceTypes_readsEnumDeviceTypes() {
+        doReturn(Arrays.asList(new Integer[]{})).when(mHdmiControlServiceSpy).getDeviceTypes();
+        doReturn(Arrays.asList(
+                new HdmiProperties.cec_device_types_values[]{
+                        HdmiProperties.cec_device_types_values.PLAYBACK_DEVICE,
+                        HdmiProperties.cec_device_types_values.AUDIO_SYSTEM
+                }))
+                .when(mHdmiControlServiceSpy).getCecDeviceTypes();
+
+        assertThat(mHdmiControlServiceSpy.readDeviceTypes())
+                .containsExactly(DEVICE_PLAYBACK, DEVICE_AUDIO_SYSTEM);
+    }
+
+    @Test
+    public void readDeviceTypes_readsEnumOverIntegerDeviceTypes() {
+        doReturn(Arrays.asList(new Integer[]{DEVICE_TV}))
+                .when(mHdmiControlServiceSpy).getDeviceTypes();
+        doReturn(Arrays.asList(
+                new HdmiProperties.cec_device_types_values[]{
+                        HdmiProperties.cec_device_types_values.PLAYBACK_DEVICE,
+                        HdmiProperties.cec_device_types_values.AUDIO_SYSTEM
+                }))
+                .when(mHdmiControlServiceSpy).getCecDeviceTypes();
+
+        assertThat(mHdmiControlServiceSpy.readDeviceTypes())
+                .containsExactly(DEVICE_PLAYBACK, DEVICE_AUDIO_SYSTEM);
+    }
+
+    @Test
+    public void readDeviceTypes_doesNotReadNullEnumDeviceType() {
+        doReturn(Arrays.asList(new Integer[]{})).when(mHdmiControlServiceSpy).getDeviceTypes();
+        doReturn(Arrays.asList(
+                new HdmiProperties.cec_device_types_values[]{
+                        HdmiProperties.cec_device_types_values.PLAYBACK_DEVICE,
+                        HdmiProperties.cec_device_types_values.AUDIO_SYSTEM,
+                        null
+                }))
+                .when(mHdmiControlServiceSpy).getCecDeviceTypes();
+
+        assertThat(mHdmiControlServiceSpy.readDeviceTypes())
+                .containsExactly(DEVICE_PLAYBACK, DEVICE_AUDIO_SYSTEM);
+    }
+
+    @Test
+    public void readDeviceTypes_doesNotReadNullIntegerDeviceType() {
+        doReturn(Arrays.asList(new Integer[]{DEVICE_PLAYBACK, DEVICE_AUDIO_SYSTEM, null}))
+                .when(mHdmiControlServiceSpy).getDeviceTypes();
+        doReturn(Arrays.asList(new HdmiProperties.cec_device_types_values[]{}))
+                .when(mHdmiControlServiceSpy).getCecDeviceTypes();
+
+        assertThat(mHdmiControlServiceSpy.readDeviceTypes())
+                .containsExactly(DEVICE_PLAYBACK, DEVICE_AUDIO_SYSTEM);
+    }
+
 }

@@ -1282,6 +1282,7 @@ public final class DisplayManagerService extends SystemService {
         // this point.
         sendDisplayEventLocked(displayId, DisplayManagerGlobal.EVENT_DISPLAY_CHANGED);
         scheduleTraversalLocked(false);
+        mPersistentDataStore.saveIfNeeded();
     }
 
     private void handleLogicalDisplayFrameRateOverridesChangedLocked(
@@ -1497,8 +1498,8 @@ public final class DisplayManagerService extends SystemService {
     }
 
     private void setDisplayPropertiesInternal(int displayId, boolean hasContent,
-            float requestedRefreshRate, int requestedModeId, boolean preferMinimalPostProcessing,
-            boolean inTraversal) {
+            float requestedRefreshRate, int requestedModeId, float requestedMaxRefreshRate,
+            boolean preferMinimalPostProcessing, boolean inTraversal) {
         synchronized (mSyncRoot) {
             final LogicalDisplay display = mLogicalDisplayMapper.getDisplayLocked(displayId);
             if (display == null) {
@@ -1522,8 +1523,8 @@ public final class DisplayManagerService extends SystemService {
                 requestedModeId = display.getDisplayInfoLocked().findDefaultModeByRefreshRate(
                         requestedRefreshRate).getModeId();
             }
-            mDisplayModeDirector.getAppRequestObserver().setAppRequestedMode(
-                    displayId, requestedModeId);
+            mDisplayModeDirector.getAppRequestObserver().setAppRequest(
+                    displayId, requestedModeId, requestedMaxRefreshRate);
 
             if (display.getDisplayInfoLocked().minimalPostProcessingSupported) {
                 boolean mppRequest = mMinimalPostProcessingAllowed && preferMinimalPostProcessing;
@@ -2884,6 +2885,7 @@ public final class DisplayManagerService extends SystemService {
                     if (dpc != null) {
                         dpc.putScreenBrightnessSetting(brightness);
                     }
+                    mPersistentDataStore.saveIfNeeded();
                 }
             } finally {
                 Binder.restoreCallingIdentity(token);
@@ -3187,10 +3189,11 @@ public final class DisplayManagerService extends SystemService {
 
         @Override
         public void setDisplayProperties(int displayId, boolean hasContent,
-                float requestedRefreshRate, int requestedMode,
+                float requestedRefreshRate, int requestedMode, float requestedMaxRefreshRate,
                 boolean requestedMinimalPostProcessing, boolean inTraversal) {
             setDisplayPropertiesInternal(displayId, hasContent, requestedRefreshRate,
-                    requestedMode, requestedMinimalPostProcessing, inTraversal);
+                    requestedMode, requestedMaxRefreshRate, requestedMinimalPostProcessing,
+                    inTraversal);
         }
 
         @Override

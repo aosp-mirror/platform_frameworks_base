@@ -1015,7 +1015,7 @@ public class AudioDeviceInventory {
         }
 
         // device to remove was visible by APM, update APM
-        mDeviceBroker.setAvrcpAbsoluteVolumeSupported(false);
+        mDeviceBroker.clearAvrcpAbsoluteVolumeSupported();
         final int res = mAudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
                 AudioSystem.DEVICE_STATE_UNAVAILABLE, address, "", a2dpCodec);
 

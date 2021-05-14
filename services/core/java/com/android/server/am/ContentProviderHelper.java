@@ -150,6 +150,7 @@ public class ContentProviderHelper {
         ContentProviderConnection conn = null;
         ProviderInfo cpi = null;
         boolean providerRunning = false;
+        final int expectedUserId = userId;
         synchronized (mService) {
             long startTime = SystemClock.uptimeMillis();
 
@@ -239,7 +240,8 @@ public class ContentProviderHelper {
 
                     // Return the provider instance right away since it already exists.
                     conn = incProviderCountLocked(r, cpr, token, callingUid, callingPackage,
-                            callingTag, stable, true, startTime, mService.mProcessList);
+                            callingTag, stable, true, startTime, mService.mProcessList,
+                            expectedUserId);
 
                     checkTime(startTime, "getContentProviderImpl: before updateOomAdj");
                     final int verifiedAdj = cpr.proc.mState.getVerifiedAdj();
@@ -490,7 +492,7 @@ public class ContentProviderHelper {
 
                 mProviderMap.putProviderByName(name, cpr);
                 conn = incProviderCountLocked(r, cpr, token, callingUid, callingPackage, callingTag,
-                        stable, false, startTime, mService.mProcessList);
+                        stable, false, startTime, mService.mProcessList, expectedUserId);
                 if (conn != null) {
                     conn.waiting = true;
                 }
@@ -1286,7 +1288,7 @@ public class ContentProviderHelper {
     private ContentProviderConnection incProviderCountLocked(ProcessRecord r,
             final ContentProviderRecord cpr, IBinder externalProcessToken, int callingUid,
             String callingPackage, String callingTag, boolean stable, boolean updateLru,
-            long startTime, ProcessList processList) {
+            long startTime, ProcessList processList, @UserIdInt int expectedUserId) {
         if (r == null) {
             cpr.addExternalProcessHandleLocked(externalProcessToken, callingUid, callingTag);
             return null;
@@ -1303,7 +1305,8 @@ public class ContentProviderHelper {
         }
 
         // Create a new ContentProviderConnection.  The reference count is known to be 1.
-        ContentProviderConnection conn = new ContentProviderConnection(cpr, r, callingPackage);
+        ContentProviderConnection conn = new ContentProviderConnection(cpr, r, callingPackage,
+                expectedUserId);
         conn.startAssociationIfNeeded();
         conn.initializeCount(stable);
         cpr.connections.add(conn);

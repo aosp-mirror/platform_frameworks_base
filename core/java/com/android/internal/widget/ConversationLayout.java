@@ -116,13 +116,13 @@ public class ConversationLayout extends FrameLayout
     private ViewGroup mExpandButtonAndContentContainer;
     private NotificationExpandButton mExpandButton;
     private MessagingLinearLayout mImageMessageContainer;
-    private int mBadgedSideMargins;
+    private int mBadgeProtrusion;
     private int mConversationAvatarSize;
     private int mConversationAvatarSizeExpanded;
     private CachingIconView mIcon;
     private CachingIconView mImportanceRingView;
-    private int mExpandedGroupSideMargin;
-    private int mExpandedGroupSideMarginFacePile;
+    private int mExpandedGroupBadgeProtrusion;
+    private int mExpandedGroupBadgeProtrusionFacePile;
     private View mConversationFacePile;
     private int mNotificationBackgroundColor;
     private CharSequence mFallbackChatName;
@@ -251,8 +251,8 @@ public class ConversationLayout extends FrameLayout
                 R.dimen.conversation_header_expanded_padding_end);
         mContentMarginEnd = getResources().getDimensionPixelSize(
                 R.dimen.notification_content_margin_end);
-        mBadgedSideMargins = getResources().getDimensionPixelSize(
-                R.dimen.conversation_badge_side_margin);
+        mBadgeProtrusion = getResources().getDimensionPixelSize(
+                R.dimen.conversation_badge_protrusion);
         mConversationAvatarSize = getResources().getDimensionPixelSize(
                 R.dimen.conversation_avatar_size);
         mConversationAvatarSizeExpanded = getResources().getDimensionPixelSize(
@@ -263,10 +263,10 @@ public class ConversationLayout extends FrameLayout
                 R.dimen.conversation_icon_container_top_padding);
         mExpandedGroupMessagePadding = getResources().getDimensionPixelSize(
                 R.dimen.expanded_group_conversation_message_padding);
-        mExpandedGroupSideMargin = getResources().getDimensionPixelSize(
-                R.dimen.conversation_badge_side_margin_group_expanded);
-        mExpandedGroupSideMarginFacePile = getResources().getDimensionPixelSize(
-                R.dimen.conversation_badge_side_margin_group_expanded_face_pile);
+        mExpandedGroupBadgeProtrusion = getResources().getDimensionPixelSize(
+                R.dimen.conversation_badge_protrusion_group_expanded);
+        mExpandedGroupBadgeProtrusionFacePile = getResources().getDimensionPixelSize(
+                R.dimen.conversation_badge_protrusion_group_expanded_face_pile);
         mConversationFacePile = findViewById(R.id.conversation_face_pile);
         mFacePileAvatarSize = getResources().getDimensionPixelSize(
                 R.dimen.conversation_face_pile_avatar_size);
@@ -646,7 +646,7 @@ public class ConversationLayout extends FrameLayout
             facepileAvatarSize = mFacePileAvatarSizeExpandedGroup;
             facePileBackgroundSize = facepileAvatarSize + 2 * mFacePileProtectionWidthExpanded;
         }
-        LayoutParams layoutParams = (LayoutParams) mConversationIconView.getLayoutParams();
+        LayoutParams layoutParams = (LayoutParams) mConversationFacePile.getLayoutParams();
         layoutParams.width = conversationAvatarSize;
         layoutParams.height = conversationAvatarSize;
         mConversationFacePile.setLayoutParams(layoutParams);
@@ -679,28 +679,34 @@ public class ConversationLayout extends FrameLayout
      * update the icon position and sizing
      */
     private void updateIconPositionAndSize() {
-        int sidemargin;
+        int badgeProtrusion;
         int conversationAvatarSize;
         if (mIsOneToOne || mIsCollapsed) {
-            sidemargin = mBadgedSideMargins;
+            badgeProtrusion = mBadgeProtrusion;
             conversationAvatarSize = mConversationAvatarSize;
         } else {
-            sidemargin = mConversationFacePile.getVisibility() == VISIBLE
-                    ? mExpandedGroupSideMarginFacePile
-                    : mExpandedGroupSideMargin;
+            badgeProtrusion = mConversationFacePile.getVisibility() == VISIBLE
+                    ? mExpandedGroupBadgeProtrusionFacePile
+                    : mExpandedGroupBadgeProtrusion;
             conversationAvatarSize = mConversationAvatarSizeExpanded;
         }
-        LayoutParams layoutParams =
-                (LayoutParams) mConversationIconBadge.getLayoutParams();
-        layoutParams.topMargin = sidemargin;
-        layoutParams.setMarginStart(sidemargin);
-        mConversationIconBadge.setLayoutParams(layoutParams);
 
         if (mConversationIconView.getVisibility() == VISIBLE) {
-            layoutParams = (LayoutParams) mConversationIconView.getLayoutParams();
+            LayoutParams layoutParams = (LayoutParams) mConversationIconView.getLayoutParams();
             layoutParams.width = conversationAvatarSize;
             layoutParams.height = conversationAvatarSize;
+            layoutParams.leftMargin = badgeProtrusion;
+            layoutParams.rightMargin = badgeProtrusion;
+            layoutParams.bottomMargin = badgeProtrusion;
             mConversationIconView.setLayoutParams(layoutParams);
+        }
+
+        if (mConversationFacePile.getVisibility() == VISIBLE) {
+            LayoutParams layoutParams = (LayoutParams) mConversationFacePile.getLayoutParams();
+            layoutParams.leftMargin = badgeProtrusion;
+            layoutParams.rightMargin = badgeProtrusion;
+            layoutParams.bottomMargin = badgeProtrusion;
+            mConversationFacePile.setLayoutParams(layoutParams);
         }
     }
 
