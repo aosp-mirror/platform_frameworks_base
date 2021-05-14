@@ -139,6 +139,7 @@ interface IAppSearchManager {
      * @param queryExpression String to search for
      * @param searchSpecBundle SearchSpec bundle
      * @param userId Id of the calling user
+     * @param binderCallStartTimeMillis start timestamp of binder call in Millis
      * @param callback {@link AppSearchResult}&lt;{@link Bundle}&gt; of performing this
      *         operation.
      */
@@ -148,6 +149,7 @@ interface IAppSearchManager {
         in String queryExpression,
         in Bundle searchSpecBundle,
         in int userId,
+        in long binderCallStartTimeMillis,
         in IAppSearchResultCallback callback);
 
     /**
@@ -158,6 +160,7 @@ interface IAppSearchManager {
      * @param queryExpression String to search for
      * @param searchSpecBundle SearchSpec bundle
      * @param userId Id of the calling user
+     * @param binderCallStartTimeMillis start timestamp of binder call in Millis
      * @param callback {@link AppSearchResult}&lt;{@link Bundle}&gt; of performing this
      *         operation.
      */
@@ -166,6 +169,7 @@ interface IAppSearchManager {
         in String queryExpression,
         in Bundle searchSpecBundle,
         in int userId,
+        in long binderCallStartTimeMillis,
         in IAppSearchResultCallback callback);
 
     /**

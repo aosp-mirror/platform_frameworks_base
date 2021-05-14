@@ -25,6 +25,7 @@ import android.app.appsearch.aidl.IAppSearchManager;
 import android.app.appsearch.aidl.IAppSearchResultCallback;
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.util.Log;
 
 import com.android.internal.util.Preconditions;
@@ -109,14 +110,19 @@ public class SearchResults implements Closeable {
         try {
             if (mIsFirstLoad) {
                 mIsFirstLoad = false;
+                long binderCallStartTimeMillis = SystemClock.elapsedRealtime();
                 if (mDatabaseName == null) {
                     // Global query, there's no one package-database combination to check.
                     mService.globalQuery(mPackageName, mQueryExpression,
-                            mSearchSpec.getBundle(), mUserId, wrapCallback(executor, callback));
+                            mSearchSpec.getBundle(), mUserId,
+                            binderCallStartTimeMillis,
+                            wrapCallback(executor, callback));
                 } else {
                     // Normal local query, pass in specified database.
                     mService.query(mPackageName, mDatabaseName, mQueryExpression,
-                            mSearchSpec.getBundle(), mUserId, wrapCallback(executor, callback));
+                            mSearchSpec.getBundle(), mUserId,
+                            binderCallStartTimeMillis,
+                            wrapCallback(executor, callback));
                 }
             } else {
                 mService.getNextPage(mNextPageToken, mUserId, wrapCallback(executor, callback));
