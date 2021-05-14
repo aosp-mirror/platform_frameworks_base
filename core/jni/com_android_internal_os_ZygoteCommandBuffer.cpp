@@ -402,7 +402,7 @@ jboolean com_android_internal_os_ZygoteCommandBuffer_nativeForkRepeatedly(
   socklen_t cred_size = sizeof credentials;
   if (getsockopt(n_buffer->getFd(), SOL_SOCKET, SO_PEERCRED, &credentials, &cred_size) == -1
       || cred_size != sizeof credentials) {
-    fail_fn_1("ForkMany failed to get initial credentials, %s", strerror(errno));
+    fail_fn_1(CREATE_ERROR("ForkMany failed to get initial credentials, %s", strerror(errno)));
   }
 
   bool first_time = true;
@@ -453,7 +453,7 @@ jboolean com_android_internal_os_ZygoteCommandBuffer_nativeForkRepeatedly(
       close(session_socket);
       int new_fd = accept(zygote_socket_fd, nullptr, nullptr);
       if (new_fd == -1) {
-        fail_fn_z("Accept(%d) failed: %s", zygote_socket_fd, strerror(errno));
+        fail_fn_z(CREATE_ERROR("Accept(%d) failed: %s", zygote_socket_fd, strerror(errno)));
       }
       if (new_fd != session_socket) {
           // Move new_fd back to the old value, so that we don't have to change Java-level data
