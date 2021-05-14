@@ -6454,6 +6454,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 "offsetHistory");
         // Must not hold the appops lock
         mHistoricalRegistry.offsetHistory(offsetMillis);
+        mHistoricalRegistry.offsetDiscreteHistory(offsetMillis);
     }
 
     @Override
