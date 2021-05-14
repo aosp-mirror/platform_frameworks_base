@@ -1356,6 +1356,11 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
+    /**
+     * Register a callback to be executed when Webview overlay needs to merge a transaction.
+     * This callback will be executed on RenderThread worker thread, and released inside native code
+     * when CanvasContext is destroyed.
+     */
     private void addASurfaceTransactionCallback() {
         HardwareRenderer.ASurfaceTransactionCallback callback = (nativeTransactionObj,
                                                                  nativeSurfaceControlObj,
@@ -7710,6 +7715,7 @@ public final class ViewRootImpl implements ViewParent,
                 }
             }
             if (mAttachInfo.mThreadedRenderer != null) {
+                addASurfaceTransactionCallback();
                 mAttachInfo.mThreadedRenderer.setSurfaceControl(mSurfaceControl);
             }
         } else {
