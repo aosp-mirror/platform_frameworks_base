@@ -27,6 +27,7 @@ import android.service.notification.NotificationListenerService.REASON_USER_STOP
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.LayoutInflater
+import android.view.View
 import android.widget.LinearLayout
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.testing.UiEventLoggerFake
@@ -80,14 +81,13 @@ class OngoingCallControllerTest : SysuiTestCase() {
     @Mock private lateinit var mockActivityStarter: ActivityStarter
     @Mock private lateinit var mockIActivityManager: IActivityManager
 
-    private lateinit var chipView: LinearLayout
+    private lateinit var chipView: View
 
     @Before
     fun setUp() {
         allowTestableLooperAsMainThread()
         TestableLooper.get(this).runWithLooper {
-            chipView = LayoutInflater.from(mContext)
-                    .inflate(R.layout.ongoing_call_chip, null) as LinearLayout
+            chipView = LayoutInflater.from(mContext).inflate(R.layout.ongoing_call_chip, null)
         }
 
         MockitoAnnotations.initMocks(this)
@@ -225,10 +225,9 @@ class OngoingCallControllerTest : SysuiTestCase() {
         // Start an ongoing call.
         notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
 
-        lateinit var newChipView: LinearLayout
+        lateinit var newChipView: View
         TestableLooper.get(this).runWithLooper {
-            newChipView = LayoutInflater.from(mContext)
-                    .inflate(R.layout.ongoing_call_chip, null) as LinearLayout
+            newChipView = LayoutInflater.from(mContext).inflate(R.layout.ongoing_call_chip, null)
         }
 
         // Change the chip view associated with the controller.
