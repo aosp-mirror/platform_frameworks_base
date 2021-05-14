@@ -335,8 +335,12 @@ interface IAppSearchManager {
      * Creates and initializes AppSearchImpl for the calling app.
      *
      * @param userId Id of the calling user
+     * @param binderCallStartTimeMillis start timestamp of binder call in Millis
      * @param callback {@link IAppSearchResultCallback#onResult} will be called with an
      *     {@link AppSearchResult}&lt;{@link Void}&gt;.
      */
-    void initialize(in int userId, in IAppSearchResultCallback callback);
+    void initialize(
+        in int userId,
+        in long binderCallStartTimeMillis,
+        in IAppSearchResultCallback callback);
 }
