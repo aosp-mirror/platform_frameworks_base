@@ -40,6 +40,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
+import com.android.systemui.statusbar.policy.KeyguardStateController
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 
@@ -52,7 +53,8 @@ class DeviceControlsTile @Inject constructor(
     statusBarStateController: StatusBarStateController,
     activityStarter: ActivityStarter,
     qsLogger: QSLogger,
-    private val controlsComponent: ControlsComponent
+    private val controlsComponent: ControlsComponent,
+    private val keyguardStateController: KeyguardStateController
 ) : QSTileImpl<QSTile.State>(
         host,
         backgroundLooper,
@@ -101,11 +103,15 @@ class DeviceControlsTile @Inject constructor(
                     addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
                     putExtra(ControlsUiController.EXTRA_ANIMATE, true)
                 }
-
-                val animationController = view?.let {
-                    ActivityLaunchAnimator.Controller.fromView(it)
+                if (keyguardStateController.isUnlocked()) {
+                    val animationController = view?.let {
+                        ActivityLaunchAnimator.Controller.fromView(it)
+                    }
+                    mActivityStarter.startActivity(i, true /* dismissShade */, animationController)
+                } else {
+                    mHost.collapsePanels()
+                    mContext.startActivity(i)
                 }
-                mActivityStarter.startActivity(i, true /* dismissShade */, animationController)
             }
         }
     }
