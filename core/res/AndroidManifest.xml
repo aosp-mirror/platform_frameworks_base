@@ -5772,6 +5772,16 @@
                 android:protectionLevel="normal" />
     <uses-permission android:name="android.permission.UPDATE_PACKAGES_WITHOUT_USER_ACTION"/>
 
+    <!-- Allows an application to take screenshots of layers that normally would be blacked out when
+         a screenshot is taken. Specifically, layers that have the flag
+         {@link android.view.SurfaceControl#SECURE} will be screenshot if the caller requests to
+         capture secure layers. Normally those layers will be rendered black.
+         <p>Not for use by third-party applications.
+         @hide
+    -->
+    <permission android:name="android.permission.CAPTURE_BLACKOUT_CONTENT"
+        android:protectionLevel="signature" />
+
     <!-- Attribution for Geofencing service. -->
     <attribution android:tag="GeofencingService" android:label="@string/geofencing_service"/>
     <!-- Attribution for Country Detector. -->
