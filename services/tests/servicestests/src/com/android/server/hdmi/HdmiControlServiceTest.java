@@ -17,6 +17,7 @@ package com.android.server.hdmi;
 
 import static android.hardware.hdmi.HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM;
 import static android.hardware.hdmi.HdmiDeviceInfo.DEVICE_PLAYBACK;
+import static android.hardware.hdmi.HdmiDeviceInfo.DEVICE_TV;
 
 import static com.android.server.SystemService.PHASE_BOOT_COMPLETED;
 import static com.android.server.SystemService.PHASE_SYSTEM_SERVICES_READY;
@@ -47,6 +48,7 @@ import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
+import android.sysprop.HdmiProperties;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -828,4 +830,71 @@ public class HdmiControlServiceTest {
         assertThat(mHdmiControlServiceSpy.dispatchMessageToLocalDevice(message))
                 .isEqualTo(Constants.ABORT_REFUSED);
     }
+
+    @Test
+    public void readDeviceTypes_readsIntegerDeviceTypes() {
+        doReturn(Arrays.asList(new Integer[]{DEVICE_PLAYBACK, DEVICE_AUDIO_SYSTEM}))
+                .when(mHdmiControlServiceSpy).getDeviceTypes();
+        doReturn(Arrays.asList(new HdmiProperties.cec_device_types_values[]{}))
+                .when(mHdmiControlServiceSpy).getCecDeviceTypes();
+
+        assertThat(mHdmiControlServiceSpy.readDeviceTypes())
+                .containsExactly(DEVICE_PLAYBACK, DEVICE_AUDIO_SYSTEM);
+    }
+
+    @Test
+    public void readDeviceTypes_readsEnumDeviceTypes() {
+        doReturn(Arrays.asList(new Integer[]{})).when(mHdmiControlServiceSpy).getDeviceTypes();
+        doReturn(Arrays.asList(
+                new HdmiProperties.cec_device_types_values[]{
+                        HdmiProperties.cec_device_types_values.PLAYBACK_DEVICE,
+                        HdmiProperties.cec_device_types_values.AUDIO_SYSTEM
+                }))
+                .when(mHdmiControlServiceSpy).getCecDeviceTypes();
+
+        assertThat(mHdmiControlServiceSpy.readDeviceTypes())
+                .containsExactly(DEVICE_PLAYBACK, DEVICE_AUDIO_SYSTEM);
+    }
+
+    @Test
+    public void readDeviceTypes_readsEnumOverIntegerDeviceTypes() {
+        doReturn(Arrays.asList(new Integer[]{DEVICE_TV}))
+                .when(mHdmiControlServiceSpy).getDeviceTypes();
+        doReturn(Arrays.asList(
+                new HdmiProperties.cec_device_types_values[]{
+                        HdmiProperties.cec_device_types_values.PLAYBACK_DEVICE,
+                        HdmiProperties.cec_device_types_values.AUDIO_SYSTEM
+                }))
+                .when(mHdmiControlServiceSpy).getCecDeviceTypes();
+
+        assertThat(mHdmiControlServiceSpy.readDeviceTypes())
+                .containsExactly(DEVICE_PLAYBACK, DEVICE_AUDIO_SYSTEM);
+    }
+
+    @Test
+    public void readDeviceTypes_doesNotReadNullEnumDeviceType() {
+        doReturn(Arrays.asList(new Integer[]{})).when(mHdmiControlServiceSpy).getDeviceTypes();
+        doReturn(Arrays.asList(
+                new HdmiProperties.cec_device_types_values[]{
+                        HdmiProperties.cec_device_types_values.PLAYBACK_DEVICE,
+                        HdmiProperties.cec_device_types_values.AUDIO_SYSTEM,
+                        null
+                }))
+                .when(mHdmiControlServiceSpy).getCecDeviceTypes();
+
+        assertThat(mHdmiControlServiceSpy.readDeviceTypes())
+                .containsExactly(DEVICE_PLAYBACK, DEVICE_AUDIO_SYSTEM);
+    }
+
+    @Test
+    public void readDeviceTypes_doesNotReadNullIntegerDeviceType() {
+        doReturn(Arrays.asList(new Integer[]{DEVICE_PLAYBACK, DEVICE_AUDIO_SYSTEM, null}))
+                .when(mHdmiControlServiceSpy).getDeviceTypes();
+        doReturn(Arrays.asList(new HdmiProperties.cec_device_types_values[]{}))
+                .when(mHdmiControlServiceSpy).getCecDeviceTypes();
+
+        assertThat(mHdmiControlServiceSpy.readDeviceTypes())
+                .containsExactly(DEVICE_PLAYBACK, DEVICE_AUDIO_SYSTEM);
+    }
+
 }
