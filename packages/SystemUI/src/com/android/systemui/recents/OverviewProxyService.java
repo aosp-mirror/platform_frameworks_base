@@ -259,6 +259,21 @@ public class OverviewProxyService extends CurrentUserTracker implements
             }
         }
 
+        @Override
+        public void setHomeRotationEnabled(boolean enabled) {
+            if (!verifyCaller("setHomeRotationEnabled")) {
+                return;
+            }
+            final long token = Binder.clearCallingIdentity();
+            try {
+                mHandler.post(() -> {
+                    mHandler.post(() -> notifyHomeRotationEnabled(enabled));
+                });
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
         private boolean sendEvent(int action, int code) {
             long when = SystemClock.uptimeMillis();
             final KeyEvent ev = new KeyEvent(when, when, action, code, 0 /* repeat */,
@@ -847,6 +862,12 @@ public class OverviewProxyService extends CurrentUserTracker implements
         }
     }
 
+    private void notifyHomeRotationEnabled(boolean enabled) {
+        for (int i = mConnectionCallbacks.size() - 1; i >= 0; --i) {
+            mConnectionCallbacks.get(i).onHomeRotationEnabled(enabled);
+        }
+    }
+
     private void notifyConnectionChanged() {
         for (int i = mConnectionCallbacks.size() - 1; i >= 0; --i) {
             mConnectionCallbacks.get(i).onConnectionChanged(mOverviewProxy != null);
@@ -994,6 +1015,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
         default void onToggleRecentApps() {}
         /** Notify changes in the nav bar button alpha */
         default void onNavBarButtonAlphaChanged(float alpha, boolean animate) {}
+        default void onHomeRotationEnabled(boolean enabled) {}
         default void onSystemUiStateChanged(int sysuiStateFlags) {}
         default void onAssistantProgress(@FloatRange(from = 0.0, to = 1.0) float progress) {}
         default void onAssistantGestureCompletion(float velocity) {}

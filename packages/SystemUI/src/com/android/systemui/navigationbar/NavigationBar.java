@@ -364,6 +364,11 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         }
 
         @Override
+        public void onHomeRotationEnabled(boolean enabled) {
+            mNavigationBarView.getRotationButtonController().setHomeRotationEnabled(enabled);
+        }
+
+        @Override
         public void onOverviewShown(boolean fromHome) {
             // If the overview has fixed orientation that may change display to natural rotation,
             // we don't want the user rotation to be reset. So after user returns to application,
@@ -951,6 +956,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         if (running) {
             mNavbarOverlayController.setButtonState(/* visible */false, /* force */true);
         }
+        mNavigationBarView.getRotationButtonController().setRecentsAnimationRunning(running);
     }
 
     /** Restores the appearance and the transient saved state to {@link NavigationBar}. */
