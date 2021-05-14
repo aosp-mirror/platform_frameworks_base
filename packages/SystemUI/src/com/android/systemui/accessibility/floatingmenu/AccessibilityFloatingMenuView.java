@@ -544,9 +544,8 @@ public class AccessibilityFloatingMenuView extends FrameLayout
         final int currentX = (int) event.getX();
         final int currentY = (int) event.getY();
 
-        final int menuHalfWidth = getLayoutWidth() / 2;
         final Rect touchDelegateBounds =
-                new Rect(mMargin, mMargin, mMargin + menuHalfWidth, mMargin + getLayoutHeight());
+                new Rect(mMargin, mMargin, mMargin + getLayoutWidth(), mMargin + getLayoutHeight());
         if (action == MotionEvent.ACTION_DOWN
                 && touchDelegateBounds.contains(currentX, currentY)) {
             mIsDownInEnlargedTouchArea = true;
