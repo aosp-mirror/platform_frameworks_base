@@ -36,6 +36,7 @@ public class KeyguardVisibilityHelper {
     private final KeyguardStateController mKeyguardStateController;
     private final DozeParameters mDozeParameters;
     private boolean mKeyguardViewVisibilityAnimating;
+    private boolean mLastOccludedState = false;
 
     public KeyguardVisibilityHelper(View view, KeyguardStateController keyguardStateController,
             DozeParameters dozeParameters) {
@@ -57,6 +58,7 @@ public class KeyguardVisibilityHelper {
             boolean goingToFullShade,
             int oldStatusBarState) {
         mView.animate().cancel();
+        boolean isOccluded = mKeyguardStateController.isOccluded();
         mKeyguardViewVisibilityAnimating = false;
         if ((!keyguardFadingAway && oldStatusBarState == KEYGUARD
                 && statusBarState != KEYGUARD) || goingToFullShade) {
@@ -95,6 +97,17 @@ public class KeyguardVisibilityHelper {
                         .setStartDelay(0)
                         .withEndAction(mAnimateKeyguardStatusViewInvisibleEndRunnable)
                         .start();
+            } else if (mLastOccludedState && !isOccluded) {
+                // An activity was displayed over the lock screen, and has now gone away
+                mView.setVisibility(View.VISIBLE);
+                mView.setAlpha(0f);
+
+                mView.animate()
+                        .setDuration(StackStateAnimator.ANIMATION_DURATION_WAKEUP)
+                        .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
+                        .alpha(1f)
+                        .withEndAction(mAnimateKeyguardStatusViewVisibleEndRunnable)
+                        .start();
             } else if (mDozeParameters.shouldControlUnlockedScreenOff()) {
                 mKeyguardViewVisibilityAnimating = true;
 
@@ -119,6 +132,8 @@ public class KeyguardVisibilityHelper {
             mView.setVisibility(View.GONE);
             mView.setAlpha(1f);
         }
+
+        mLastOccludedState = isOccluded;
     }
 
     private final Runnable mAnimateKeyguardStatusViewInvisibleEndRunnable = () -> {

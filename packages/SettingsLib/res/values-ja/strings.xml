@@ -460,7 +460,7 @@
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"低速充電中"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"ワイヤレス充電中"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"充電していません"</string>
-    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"接続されていますが、現在、充電できません"</string>
+    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"接続済み、充電していません"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"充電が完了しました"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"管理者により管理されています"</string>
     <string name="disabled" msgid="8017887509554714950">"無効"</string>

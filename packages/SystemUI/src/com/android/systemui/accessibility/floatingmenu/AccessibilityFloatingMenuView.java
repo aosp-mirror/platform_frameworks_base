@@ -79,7 +79,6 @@ public class AccessibilityFloatingMenuView extends FrameLayout
     private static final int FADE_OUT_DURATION_MS = 1000;
     private static final int FADE_EFFECT_DURATION_MS = 3000;
     private static final int SNAP_TO_LOCATION_DURATION_MS = 150;
-    private static final int MIN_WINDOW_X = 0;
     private static final int MIN_WINDOW_Y = 0;
     private static final float LOCATION_Y_PERCENTAGE = 0.8f;
 
@@ -212,7 +211,6 @@ public class AccessibilityFloatingMenuView extends FrameLayout
                 mPercentageY = calculateCurrentPercentageY();
 
                 updateLocationWith(mAlignment, mPercentageY);
-                updateMarginsWith(mAlignment);
 
                 updateInsetWith(getResources().getConfiguration().uiMode, mAlignment);
 
@@ -265,7 +263,8 @@ public class AccessibilityFloatingMenuView extends FrameLayout
                                     : ShapeType.OVAL;
                     final int newWindowX = currentRawX + mRelativeToPointerDownX;
                     final int newWindowY = currentRawY + mRelativeToPointerDownY;
-                    mCurrentLayoutParams.x = constrain(newWindowX, MIN_WINDOW_X, getMaxWindowX());
+                    mCurrentLayoutParams.x =
+                            constrain(newWindowX, getMinWindowX(), getMaxWindowX());
                     mCurrentLayoutParams.y = constrain(newWindowY, MIN_WINDOW_Y, getMaxWindowY());
                     mWindowManager.updateViewLayout(this, mCurrentLayoutParams);
                 }
@@ -275,9 +274,10 @@ public class AccessibilityFloatingMenuView extends FrameLayout
                 if (mIsDragging) {
                     mIsDragging = false;
 
+                    final int minX = getMinWindowX();
                     final int maxX = getMaxWindowX();
-                    final int endX = mCurrentLayoutParams.x > ((MIN_WINDOW_X + maxX) / 2)
-                            ? maxX : MIN_WINDOW_X;
+                    final int endX = mCurrentLayoutParams.x > ((minX + maxX) / 2)
+                            ? maxX : minX;
                     final int endY = mCurrentLayoutParams.y;
                     snapToLocation(endX, endY);
 
@@ -631,6 +631,7 @@ public class AccessibilityFloatingMenuView extends FrameLayout
         final LayoutParams layoutParams =
                 new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
                         ViewGroup.LayoutParams.WRAP_CONTENT);
+        layoutParams.setMargins(mMargin, mMargin, mMargin, mMargin);
         mListView.setLayoutParams(layoutParams);
         final InstantInsetLayerDrawable layerDrawable =
                 new InstantInsetLayerDrawable(new Drawable[]{background});
@@ -648,8 +649,6 @@ public class AccessibilityFloatingMenuView extends FrameLayout
         final int elevation =
                 getResources().getDimensionPixelSize(R.dimen.accessibility_floating_menu_elevation);
         mListView.setElevation(elevation);
-
-        updateMarginsWith(mAlignment);
     }
 
     private WindowManager.LayoutParams createDefaultLayoutParams() {
@@ -657,7 +656,8 @@ public class AccessibilityFloatingMenuView extends FrameLayout
                 WindowManager.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                        | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
                 PixelFormat.TRANSLUCENT);
         params.windowAnimations = android.R.style.Animation_Translucent;
         params.gravity = Gravity.START | Gravity.TOP;
@@ -704,6 +704,10 @@ public class AccessibilityFloatingMenuView extends FrameLayout
         mWindowManager.updateViewLayout(this, mCurrentLayoutParams);
     }
 
+    private int getMinWindowX() {
+        return -mMargin;
+    }
+
     private int getMaxWindowX() {
         return mScreenWidth - mMargin - getLayoutWidth();
     }
@@ -724,7 +728,7 @@ public class AccessibilityFloatingMenuView extends FrameLayout
      * Updates the floating menu to be fixed at the side of the screen.
      */
     private void updateLocationWith(@Alignment int side, float percentageCurrentY) {
-        mCurrentLayoutParams.x = (side == Alignment.RIGHT) ? getMaxWindowX() : MIN_WINDOW_X;
+        mCurrentLayoutParams.x = (side == Alignment.RIGHT) ? getMaxWindowX() : getMinWindowX();
         mCurrentLayoutParams.y = (int) (percentageCurrentY * getMaxWindowY());
         mWindowManager.updateViewLayout(this, mCurrentLayoutParams);
     }
@@ -733,20 +737,6 @@ public class AccessibilityFloatingMenuView extends FrameLayout
         final float halfWidth = getLayoutWidth() / 2.0f;
         final float offset = (shapeType == ShapeType.OVAL) ? 0 : halfWidth;
         mListView.animate().translationX(side == Alignment.RIGHT ? offset : -offset);
-    }
-
-    private void updateMarginsWith(@Alignment int side) {
-        final LayoutParams layoutParams = (LayoutParams) mListView.getLayoutParams();
-        final int marginLeft = (side == Alignment.LEFT) ? 0 : mMargin;
-        final int marginRight = (side == Alignment.RIGHT) ? 0 : mMargin;
-
-        if (marginLeft == layoutParams.leftMargin
-                && marginRight == layoutParams.rightMargin) {
-            return;
-        }
-
-        layoutParams.setMargins(marginLeft, mMargin, marginRight, mMargin);
-        mListView.setLayoutParams(layoutParams);
     }
 
     private void updateScrollModeWith(boolean hasExceededMaxLayoutHeight) {
@@ -814,7 +804,7 @@ public class AccessibilityFloatingMenuView extends FrameLayout
 
     @Alignment
     private int calculateCurrentAlignment() {
-        return mCurrentLayoutParams.x >= ((MIN_WINDOW_X + getMaxWindowX()) / 2)
+        return mCurrentLayoutParams.x >= ((getMinWindowX() + getMaxWindowX()) / 2)
                 ? Alignment.RIGHT
                 : Alignment.LEFT;
     }
@@ -863,7 +853,7 @@ public class AccessibilityFloatingMenuView extends FrameLayout
     }
 
     private int getWindowWidth() {
-        return mMargin + getLayoutWidth();
+        return mMargin * 2 + getLayoutWidth();
     }
 
     private int getWindowHeight() {

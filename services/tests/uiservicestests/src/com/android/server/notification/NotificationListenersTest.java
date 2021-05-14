@@ -197,7 +197,7 @@ public class NotificationListenersTest extends UiServiceTestCase {
         si.packageName = "new";
         si.name = "comp";
         si.metaData = new Bundle();
-        si.metaData.putString(NotificationListenerService.META_DATA_DEFAULT_FILTER_TYPES, "1,2");
+        si.metaData.putString(NotificationListenerService.META_DATA_DEFAULT_FILTER_TYPES, "1|2");
 
         mListeners.ensureFilters(si, 0);
 
@@ -213,7 +213,7 @@ public class NotificationListenersTest extends UiServiceTestCase {
         si.name = "comp";
         si.metaData = new Bundle();
         si.metaData.putString(NotificationListenerService.META_DATA_DEFAULT_FILTER_TYPES,
-                "conversations,ALERTING");
+                "conversations|ALERTING");
 
         mListeners.ensureFilters(si, 0);
 
@@ -243,7 +243,7 @@ public class NotificationListenersTest extends UiServiceTestCase {
         si.packageName = "new";
         si.name = "comp";
         si.metaData = new Bundle();
-        si.metaData.putString(NotificationListenerService.META_DATA_DISABLED_FILTER_TYPES, "1,2");
+        si.metaData.putString(NotificationListenerService.META_DATA_DISABLED_FILTER_TYPES, "1|2");
 
         mListeners.ensureFilters(si, 0);
 
@@ -259,7 +259,7 @@ public class NotificationListenersTest extends UiServiceTestCase {
         si.name = "comp";
         si.metaData = new Bundle();
         si.metaData.putString(NotificationListenerService.META_DATA_DISABLED_FILTER_TYPES,
-                "1,alerting");
+                "1|alerting");
 
         mListeners.ensureFilters(si, 0);
 
@@ -274,7 +274,7 @@ public class NotificationListenersTest extends UiServiceTestCase {
         si.packageName = "new";
         si.name = "comp";
         si.metaData = new Bundle();
-        si.metaData.putString(NotificationListenerService.META_DATA_DEFAULT_FILTER_TYPES, "1,2");
+        si.metaData.putString(NotificationListenerService.META_DATA_DEFAULT_FILTER_TYPES, "1|2");
         si.metaData.putInt(NotificationListenerService.META_DATA_DISABLED_FILTER_TYPES, 1);
 
         mListeners.ensureFilters(si, 0);

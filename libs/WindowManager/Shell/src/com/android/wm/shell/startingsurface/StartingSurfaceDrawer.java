@@ -103,7 +103,7 @@ public class StartingSurfaceDrawer {
     private Choreographer mChoreographer;
 
     private static final boolean DEBUG_ENABLE_REVEAL_ANIMATION =
-            SystemProperties.getBoolean("persist.debug.enable_reveal_animation", false);
+            SystemProperties.getBoolean("persist.debug.enable_reveal_animation", true);
     /**
      * @param splashScreenExecutor The thread used to control add and remove starting window.
      */

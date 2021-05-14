@@ -14621,7 +14621,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             String reason, @TempAllowListType int type, int callingUid) {
         synchronized (mProcLock) {
             // The temp allowlist type could change according to the reasonCode.
-            type = mLocalDeviceIdleController.getTempAllowListType(reasonCode, type);
+            if (mLocalDeviceIdleController != null) {
+                type = mLocalDeviceIdleController.getTempAllowListType(reasonCode, type);
+            }
             if (type == TEMPORARY_ALLOW_LIST_TYPE_NONE) {
                 return;
             }

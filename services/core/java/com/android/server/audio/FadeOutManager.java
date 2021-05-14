@@ -18,6 +18,7 @@ package com.android.server.audio;
 
 import android.annotation.NonNull;
 import android.media.AudioAttributes;
+import android.media.AudioManager;
 import android.media.AudioPlaybackConfiguration;
 import android.media.VolumeShaper;
 import android.util.Log;
@@ -35,15 +36,15 @@ public final class FadeOutManager {
 
     public static final String TAG = "AudioService.FadeOutManager";
 
-    /*package*/ static final long FADE_OUT_DURATION_MS = 2500;
+    /*package*/ static final long FADE_OUT_DURATION_MS = 2000;
 
     private static final boolean DEBUG = PlaybackActivityMonitor.DEBUG;
 
     private static final VolumeShaper.Configuration FADEOUT_VSHAPE =
             new VolumeShaper.Configuration.Builder()
                     .setId(PlaybackActivityMonitor.VOLUME_SHAPER_SYSTEM_FADEOUT_ID)
-                    .setCurve(new float[]{0.f, 1.0f} /* times */,
-                            new float[]{1.f, 0.0f} /* volumes */)
+                    .setCurve(new float[]{0.f, 0.25f, 1.0f} /* times */,
+                            new float[]{1.f, 0.65f, 0.0f} /* volumes */)
                     .setOptionFlags(VolumeShaper.Configuration.OPTION_FLAG_CLOCK_TIME)
                     .setDuration(FADE_OUT_DURATION_MS)
                     .build();
@@ -69,6 +70,30 @@ public final class FadeOutManager {
     // like a PLAY_CREATE_IF_NEEDED operation but with a skip to the end of the ramp
     private static final VolumeShaper.Operation PLAY_SKIP_RAMP =
             new VolumeShaper.Operation.Builder(PLAY_CREATE_IF_NEEDED).setXOffset(1.0f).build();
+
+
+    // TODO explore whether a shorter fade out would be a better UX instead of not fading out at all
+    //      (legacy behavior)
+    /**
+     * Determine whether the focus request would trigger a fade out, given the parameters of the
+     * requester and those of the focus loser
+     * @param requester the parameters for the focus request
+     * @return true if there can be a fade out over the requester starting to play
+     */
+    static boolean canCauseFadeOut(@NonNull FocusRequester requester,
+            @NonNull FocusRequester loser) {
+        if (requester.getAudioAttributes().getContentType() == AudioAttributes.CONTENT_TYPE_SPEECH)
+        {
+            if (DEBUG) { Log.i(TAG, "not fading out: new focus is for speech"); }
+            return false;
+        }
+        if ((loser.getGrantFlags() & AudioManager.AUDIOFOCUS_FLAG_PAUSES_ON_DUCKABLE_LOSS) != 0) {
+            if (DEBUG) { Log.i(TAG, "not fading out: loser has PAUSES_ON_DUCKABLE_LOSS"); }
+            return false;
+        }
+
+        return true;
+    }
 
     /**
      * Evaluates whether the player associated with this configuration can and should be faded out

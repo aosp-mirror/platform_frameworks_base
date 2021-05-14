@@ -262,8 +262,14 @@ public final class SystemFonts {
      */
     @VisibleForTesting
     public static Map<String, FontFamily[]> buildSystemFallback(FontConfig fontConfig) {
+        return buildSystemFallback(fontConfig, new ArrayMap<>());
+    }
+
+    /** @hide */
+    @VisibleForTesting
+    public static Map<String, FontFamily[]> buildSystemFallback(FontConfig fontConfig,
+            ArrayMap<String, ByteBuffer> outBufferCache) {
         final Map<String, FontFamily[]> fallbackMap = new ArrayMap<>();
-        final ArrayMap<String, ByteBuffer> bufferCache = new ArrayMap<>();
         final List<FontConfig.FontFamily> xmlFamilies = fontConfig.getFontFamilies();
 
         final ArrayMap<String, ArrayList<FontFamily>> fallbackListMap = new ArrayMap<>();
@@ -273,7 +279,7 @@ public final class SystemFonts {
             if (familyName == null) {
                 continue;
             }
-            appendNamedFamily(xmlFamily, bufferCache, fallbackListMap);
+            appendNamedFamily(xmlFamily, outBufferCache, fallbackListMap);
         }
 
         // Then, add fallback fonts to the each fallback map.
@@ -282,7 +288,7 @@ public final class SystemFonts {
             // The first family (usually the sans-serif family) is always placed immediately
             // after the primary family in the fallback.
             if (i == 0 || xmlFamily.getName() == null) {
-                pushFamilyToFallback(xmlFamily, fallbackListMap, bufferCache);
+                pushFamilyToFallback(xmlFamily, fallbackListMap, outBufferCache);
             }
         }
 
