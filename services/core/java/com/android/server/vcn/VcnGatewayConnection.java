@@ -673,7 +673,6 @@ public class VcnGatewayConnection extends StateMachine {
                         mVcnContext,
                         subscriptionGroup,
                         mLastSnapshot,
-                        mConnectionConfig.getAllUnderlyingCapabilities(),
                         mUnderlyingNetworkTrackerCallback);
         mIpSecManager = mVcnContext.getContext().getSystemService(IpSecManager.class);
 
@@ -2274,13 +2273,11 @@ public class VcnGatewayConnection extends StateMachine {
                 VcnContext vcnContext,
                 ParcelUuid subscriptionGroup,
                 TelephonySubscriptionSnapshot snapshot,
-                Set<Integer> requiredUnderlyingNetworkCapabilities,
                 UnderlyingNetworkTrackerCallback callback) {
             return new UnderlyingNetworkTracker(
                     vcnContext,
                     subscriptionGroup,
                     snapshot,
-                    requiredUnderlyingNetworkCapabilities,
                     callback);
         }
 
