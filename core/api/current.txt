@@ -51004,6 +51004,7 @@ package android.view.accessibility {
     method public CharSequence getClassName();
     method public CharSequence getContentDescription();
     method public int getCurrentItemIndex();
+    method public int getDisplayId();
     method public int getFromIndex();
     method public int getItemCount();
     method public int getMaxScrollX();
