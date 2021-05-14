@@ -1394,7 +1394,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // arguments like the handler or the DnsResolver.
         // TODO : remove this ; it is probably better handled with a sentinel request.
         mNoServiceNetwork = new NetworkAgentInfo(null,
-                new Network(NO_SERVICE_NET_ID),
+                new Network(INetd.UNREACHABLE_NET_ID),
                 new NetworkInfo(TYPE_NONE, 0, "", ""),
                 new LinkProperties(), new NetworkCapabilities(),
                 new NetworkScore.Builder().setLegacyInt(0).build(), mContext, null,
@@ -6488,8 +6488,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
     // Request used to optionally keep vehicle internal network always active
     private final NetworkRequest mDefaultVehicleRequest;
 
-    // TODO replace with INetd.UNREACHABLE_NET_ID when available.
-    private static final int NO_SERVICE_NET_ID = 52;
     // Sentinel NAI used to direct apps with default networks that should have no connectivity to a
     // network with no service. This NAI should never be matched against, nor should any public API
     // ever return the associated network. For this reason, this NAI is not in the list of available
