@@ -195,6 +195,10 @@ void CanvasContext::setSurfaceControl(ASurfaceControl* surfaceControl) {
 
     auto funcs = mRenderThread.getASurfaceControlFunctions();
 
+    if (surfaceControl == nullptr) {
+        setASurfaceTransactionCallback(nullptr);
+    }
+
     if (mSurfaceControl != nullptr) {
         funcs.unregisterListenerFunc(this, &onSurfaceStatsAvailable);
         funcs.releaseFunc(mSurfaceControl);
