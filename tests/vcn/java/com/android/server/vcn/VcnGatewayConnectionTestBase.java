@@ -54,6 +54,7 @@ import android.net.vcn.VcnGatewayConnectionConfigTest;
 import android.os.ParcelUuid;
 import android.os.PowerManager;
 import android.os.test.TestLooper;
+import android.telephony.SubscriptionInfo;
 
 import com.android.internal.util.State;
 import com.android.internal.util.WakeupMessage;
@@ -73,6 +74,12 @@ import java.util.concurrent.TimeUnit;
 
 public class VcnGatewayConnectionTestBase {
     protected static final ParcelUuid TEST_SUB_GRP = new ParcelUuid(UUID.randomUUID());
+    protected static final SubscriptionInfo TEST_SUB_INFO = mock(SubscriptionInfo.class);
+
+    static {
+        doReturn(TEST_SUB_GRP).when(TEST_SUB_INFO).getGroupUuid();
+    }
+
     protected static final InetAddress TEST_DNS_ADDR =
             InetAddresses.parseNumericAddress("2001:DB8:0:1::");
     protected static final InetAddress TEST_DNS_ADDR_2 =
@@ -116,7 +123,7 @@ public class VcnGatewayConnectionTestBase {
 
     protected static final TelephonySubscriptionSnapshot TEST_SUBSCRIPTION_SNAPSHOT =
             new TelephonySubscriptionSnapshot(
-                    Collections.singletonMap(TEST_SUB_ID, TEST_SUB_GRP), Collections.EMPTY_MAP);
+                    Collections.singletonMap(TEST_SUB_ID, TEST_SUB_INFO), Collections.EMPTY_MAP);
 
     @NonNull protected final Context mContext;
     @NonNull protected final TestLooper mTestLooper;
