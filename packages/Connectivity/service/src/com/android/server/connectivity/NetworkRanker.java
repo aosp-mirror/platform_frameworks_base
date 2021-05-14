@@ -237,9 +237,9 @@ public class NetworkRanker {
         partitionInto(candidates, nai -> nai.getScore().hasPolicy(POLICY_TRANSPORT_PRIMARY),
                 accepted, rejected);
         if (accepted.size() > 0) {
-            // Some networks are primary. For each transport, keep only the primary, but also
-            // keep all networks for which there isn't a primary (which are now in the |rejected|
-            // array).
+            // Some networks are primary for their transport. For each transport, keep only the
+            // primary, but also keep all networks for which there isn't a primary (which are now
+            // in the |rejected| array).
             // So for each primary network, remove from |rejected| all networks with the same
             // transports as one of the primary networks. The remaining networks should be accepted.
             for (final T defaultSubNai : accepted) {
@@ -247,6 +247,8 @@ public class NetworkRanker {
                 rejected.removeIf(
                         nai -> Arrays.equals(transports, nai.getCapsNoCopy().getTransportTypes()));
             }
+            // Now the |rejected| list contains networks with transports for which there isn't
+            // a primary network. Add them back to the candidates.
             accepted.addAll(rejected);
             candidates = new ArrayList<>(accepted);
         }
