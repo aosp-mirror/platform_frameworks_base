@@ -19,6 +19,7 @@ package com.android.server.graphics.fonts;
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.content.Context;
 import android.graphics.Typeface;
 import android.graphics.fonts.FontFamily;
@@ -62,6 +63,7 @@ public final class FontManagerService extends IFontManager.Stub {
 
     private static final String FONT_FILES_DIR = "/data/fonts/files";
 
+    @RequiresPermission(Manifest.permission.UPDATE_FONTS)
     @Override
     public FontConfig getFontConfig() {
         getContext().enforceCallingPermission(Manifest.permission.UPDATE_FONTS,
@@ -69,28 +71,38 @@ public final class FontManagerService extends IFontManager.Stub {
         return getSystemFontConfig();
     }
 
+    @RequiresPermission(Manifest.permission.UPDATE_FONTS)
     @Override
     public int updateFontFamily(@NonNull List<FontUpdateRequest> requests, int baseVersion) {
-        Preconditions.checkArgumentNonnegative(baseVersion);
-        Objects.requireNonNull(requests);
-        getContext().enforceCallingPermission(Manifest.permission.UPDATE_FONTS,
-                "UPDATE_FONTS permission required.");
         try {
-            update(baseVersion, requests);
-            return FontManager.RESULT_SUCCESS;
-        } catch (SystemFontException e) {
-            Slog.e(TAG, "Failed to update font family", e);
-            return e.getErrorCode();
+            Preconditions.checkArgumentNonnegative(baseVersion);
+            Objects.requireNonNull(requests);
+            getContext().enforceCallingPermission(Manifest.permission.UPDATE_FONTS,
+                    "UPDATE_FONTS permission required.");
+            try {
+                update(baseVersion, requests);
+                return FontManager.RESULT_SUCCESS;
+            } catch (SystemFontException e) {
+                Slog.e(TAG, "Failed to update font family", e);
+                return e.getErrorCode();
+            }
         } finally {
-            for (FontUpdateRequest request : requests) {
-                ParcelFileDescriptor fd = request.getFd();
-                if (fd != null) {
-                    try {
-                        fd.close();
-                    } catch (IOException e) {
-                        Slog.w(TAG, "Failed to close fd", e);
-                    }
-                }
+            closeFileDescriptors(requests);
+        }
+    }
+
+    private static void closeFileDescriptors(@Nullable List<FontUpdateRequest> requests) {
+        // Make sure we close every passed FD, even if 'requests' is constructed incorrectly and
+        // some fields are null.
+        if (requests == null) return;
+        for (FontUpdateRequest request : requests) {
+            if (request == null) continue;
+            ParcelFileDescriptor fd = request.getFd();
+            if (fd == null) continue;
+            try {
+                fd.close();
+            } catch (IOException e) {
+                Slog.w(TAG, "Failed to close fd", e);
             }
         }
     }
