@@ -18,9 +18,12 @@ package com.android.wm.shell.apppairs;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
@@ -43,7 +46,11 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-/** Tests for {@link AppPair} */
+/**
+ * Tests for {@link AppPair}
+ * Build/Install/Run:
+ *  atest WMShellUnitTests:AppPairTests
+ */
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class AppPairTests extends ShellTestCase {
@@ -63,6 +70,7 @@ public class AppPairTests extends ShellTestCase {
                 mTaskOrganizer,
                 mSyncQueue,
                 mDisplayController);
+        spyOn(mController);
     }
 
     @After
@@ -96,5 +104,20 @@ public class AppPairTests extends ShellTestCase {
         pair.onTaskVanished(task1);
         assertThat(pair.contains(task1.taskId)).isFalse();
         assertThat(pair.contains(task2.taskId)).isFalse();
+    }
+
+    @Test
+    @UiThreadTest
+    public void testOnTaskInfoChanged_notSupportsMultiWindow() {
+        final ActivityManager.RunningTaskInfo task1 = new TestRunningTaskInfoBuilder().build();
+        final ActivityManager.RunningTaskInfo task2 = new TestRunningTaskInfoBuilder().build();
+
+        final AppPair pair = mController.pairInner(task1, task2);
+        assertThat(pair.contains(task1.taskId)).isTrue();
+        assertThat(pair.contains(task2.taskId)).isTrue();
+
+        task1.supportsMultiWindow = false;
+        pair.onTaskInfoChanged(task1);
+        verify(mController).unpair(pair.getRootTaskId());
     }
 }

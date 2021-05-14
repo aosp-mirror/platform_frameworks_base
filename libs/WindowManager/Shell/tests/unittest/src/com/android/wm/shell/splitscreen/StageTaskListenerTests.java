@@ -41,7 +41,11 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-/** Tests for {@link StageTaskListener} */
+/**
+ * Tests for {@link StageTaskListener}
+ * Build/Install/Run:
+ *  atest WMShellUnitTests:StageTaskListenerTests
+ */
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public final class StageTaskListenerTests {
@@ -100,5 +104,15 @@ public final class StageTaskListenerTests {
 
         mStageTaskListener.onTaskVanished(mRootTask);
         verify(mCallbacks).onRootTaskVanished();
+    }
+
+    @Test
+    public void testTaskInfoChanged_notSupportsMultiWindow() {
+        final ActivityManager.RunningTaskInfo childTask =
+                new TestRunningTaskInfoBuilder().setParentTaskId(mRootTask.taskId).build();
+        childTask.supportsMultiWindow = false;
+
+        mStageTaskListener.onTaskInfoChanged(childTask);
+        verify(mCallbacks).onNoLongerSupportMultiWindow();
     }
 }
