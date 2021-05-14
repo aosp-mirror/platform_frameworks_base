@@ -37,7 +37,6 @@ import java.io.PrintWriter;
 /**
  * Manages all the touch handling for One Handed on the Phone, including user tap outside region
  * to exit, reset timer when user is in one-handed mode.
- * Refer {@link OneHandedGestureHandler} to see start and stop one handed gesture
  */
 public class OneHandedTouchHandler implements OneHandedTransitionCallback {
     private static final String TAG = "OneHandedTouchHandler";
