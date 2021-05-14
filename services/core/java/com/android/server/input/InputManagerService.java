@@ -2479,15 +2479,12 @@ public class InputManagerService extends IInputManager.Stub
             Slog.d(TAG, "setLightStateInternal device " + deviceId + " light " + light
                     + "lightState " + lightState);
         }
-        if (light.getType() == Light.LIGHT_TYPE_INPUT_PLAYER_ID) {
+        if (light.getType() == Light.LIGHT_TYPE_PLAYER_ID) {
             nativeSetLightPlayerId(mPtr, deviceId, light.getId(), lightState.getPlayerId());
-        } else if (light.getType() == Light.LIGHT_TYPE_INPUT_SINGLE
-                || light.getType() == Light.LIGHT_TYPE_INPUT_RGB) {
+        } else {
             // Set ARGB format color to input device light
             // Refer to https://developer.android.com/reference/kotlin/android/graphics/Color
             nativeSetLightColor(mPtr, deviceId, light.getId(), lightState.getColor());
-        } else {
-            Slog.e(TAG, "setLightStates for unsupported light type " + light.getType());
         }
     }
 

@@ -163,7 +163,17 @@ public final class SystemLightsManager extends LightsManager {
             Preconditions.checkNotNull(request);
             if (!mClosed) {
                 try {
-                    mService.setLightStates(getToken(), request.mLightIds, request.mLightStates);
+                    List<Integer> idList = request.getLights();
+                    List<LightState> stateList = request.getLightStates();
+                    int[] ids = new int[idList.size()];
+                    for (int i = 0; i < idList.size(); i++) {
+                        ids[i] = idList.get(i);
+                    }
+                    LightState[] states = new LightState[stateList.size()];
+                    for (int i = 0; i < stateList.size(); i++) {
+                        states[i] = stateList.get(i);
+                    }
+                    mService.setLightStates(getToken(), ids, states);
                 } catch (RemoteException e) {
                     throw e.rethrowFromSystemServer();
                 }

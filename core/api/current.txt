@@ -18989,12 +18989,15 @@ package android.hardware.lights {
     method @NonNull public String getName();
     method public int getOrdinal();
     method public int getType();
+    method public boolean hasBrightnessControl();
+    method public boolean hasRgbControl();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.lights.Light> CREATOR;
-    field public static final int LIGHT_TYPE_INPUT_PLAYER_ID = 10002; // 0x2712
-    field public static final int LIGHT_TYPE_INPUT_RGB = 10003; // 0x2713
-    field public static final int LIGHT_TYPE_INPUT_SINGLE = 10001; // 0x2711
+    field public static final int LIGHT_CAPABILITY_BRIGHTNESS = 1; // 0x1
+    field public static final int LIGHT_CAPABILITY_RGB = 0; // 0x0
+    field public static final int LIGHT_TYPE_INPUT = 10001; // 0x2711
     field public static final int LIGHT_TYPE_MICROPHONE = 8; // 0x8
+    field public static final int LIGHT_TYPE_PLAYER_ID = 10002; // 0x2712
   }
 
   public final class LightState implements android.os.Parcelable {
@@ -19026,7 +19029,7 @@ package android.hardware.lights {
   public final class LightsRequest {
     method @NonNull public java.util.List<android.hardware.lights.LightState> getLightStates();
     method @NonNull public java.util.List<java.lang.Integer> getLights();
-    method @NonNull public java.util.Map<java.lang.Integer,android.hardware.lights.LightState> getLightsAndStates();
+    method @NonNull public java.util.Map<android.hardware.lights.Light,android.hardware.lights.LightState> getLightsAndStates();
   }
 
   public static final class LightsRequest.Builder {
