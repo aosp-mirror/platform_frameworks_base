@@ -68,7 +68,7 @@ public class AppSearchLoggerTest {
     }
 
     // Test only not thread safe.
-    public class TestLogger implements AppSearchLogger {
+    public static class TestLogger implements AppSearchLogger {
         @Nullable CallStats mCallStats;
         @Nullable PutDocumentStats mPutDocumentStats;
         @Nullable InitializeStats mInitializeStats;

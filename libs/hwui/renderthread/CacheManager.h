@@ -47,6 +47,7 @@ public:
     void trimMemory(TrimMemoryMode mode);
     void trimStaleResources();
     void dumpMemoryUsage(String8& log, const RenderState* renderState = nullptr);
+    void getMemoryUsage(size_t* cpuUsage, size_t* gpuUsage);
 
     size_t getCacheSize() const { return mMaxResourceBytes; }
     size_t getBackgroundCacheSize() const { return mBackgroundResourceBytes; }

@@ -16,9 +16,11 @@
 
 package com.android.systemui.statusbar;
 
+import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.content.Intent.ACTION_USER_SWITCHED;
 
+import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManagerKt.BUCKET_ALERTING;
 import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManagerKt.BUCKET_MEDIA_CONTROLS;
 import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManagerKt.BUCKET_PEOPLE;
 import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManagerKt.BUCKET_SILENT;
@@ -55,6 +57,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.NotificationLockscreenUserManager.KeyguardNotificationSuppressor;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
@@ -383,13 +386,44 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
         assertTrue(mLockscreenUserManager.shouldShowOnKeyguard(entry));
     }
 
+    @Test
+    public void testKeyguardNotificationSuppressors() {
+        // GIVEN a notification that should be shown on the lockscreen
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS, 1);
+        final NotificationEntry entry = new NotificationEntryBuilder()
+                .setImportance(IMPORTANCE_HIGH)
+                .build();
+        entry.setBucket(BUCKET_ALERTING);
+
+        // WHEN a suppressor is added that filters out all entries
+        FakeKeyguardSuppressor suppressor = new FakeKeyguardSuppressor();
+        mLockscreenUserManager.addKeyguardNotificationSuppressor(suppressor);
+
+        // THEN it's filtered out
+        assertFalse(mLockscreenUserManager.shouldShowOnKeyguard(entry));
+
+        // WHEN the suppressor no longer filters out entries
+        suppressor.setShouldSuppress(false);
+
+        // THEN it's no longer filtered out
+        assertTrue(mLockscreenUserManager.shouldShowOnKeyguard(entry));
+    }
+
     private class TestNotificationLockscreenUserManager
             extends NotificationLockscreenUserManagerImpl {
         public TestNotificationLockscreenUserManager(Context context) {
-            super(context, mBroadcastDispatcher, mDevicePolicyManager, mUserManager,
-                    mClickNotifier, NotificationLockscreenUserManagerTest.this.mKeyguardManager,
-                    mStatusBarStateController, Handler.createAsync(Looper.myLooper()),
-                    mDeviceProvisionedController, mKeyguardStateController);
+            super(
+                    context,
+                    mBroadcastDispatcher,
+                    mDevicePolicyManager,
+                    mUserManager,
+                    mClickNotifier,
+                    NotificationLockscreenUserManagerTest.this.mKeyguardManager,
+                    mStatusBarStateController,
+                    Handler.createAsync(Looper.myLooper()),
+                    mDeviceProvisionedController,
+                    mKeyguardStateController);
         }
 
         public BroadcastReceiver getBaseBroadcastReceiverForTest() {
@@ -402,6 +436,19 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
 
         public ContentObserver getSettingsObserverForTest() {
             return mSettingsObserver;
+        }
+    }
+
+    private static class FakeKeyguardSuppressor implements KeyguardNotificationSuppressor {
+        private boolean mShouldSuppress = true;
+
+        @Override
+        public boolean shouldSuppressOnKeyguard(NotificationEntry entry) {
+            return mShouldSuppress;
+        }
+
+        public void setShouldSuppress(boolean shouldSuppress) {
+            mShouldSuppress = shouldSuppress;
         }
     }
 }

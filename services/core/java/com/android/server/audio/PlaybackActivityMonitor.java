@@ -707,6 +707,9 @@ public final class PlaybackActivityMonitor
                 if (DEBUG) { Log.v(TAG, "no players to fade out"); }
                 return false;
             }
+            if (!FadeOutManager.canCauseFadeOut(winner, loser)) {
+                return false;
+            }
             // check if this UID needs to be faded out (return false if not), and gather list of
             // eligible players to fade out
             final Iterator<AudioPlaybackConfiguration> apcIterator = mPlayers.values().iterator();
