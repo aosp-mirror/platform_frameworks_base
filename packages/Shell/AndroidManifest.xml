@@ -527,6 +527,7 @@
 
     <!-- Permission required for hotword detection service CTS tests -->
     <uses-permission android:name="android.permission.MANAGE_HOTWORD_DETECTION" />
+    <uses-permission android:name="android.permission.BIND_HOTWORD_DETECTION_SERVICE" />
 
     <uses-permission android:name="android.permission.MANAGE_APP_HIBERNATION"/>
 
