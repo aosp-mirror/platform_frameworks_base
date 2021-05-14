@@ -874,7 +874,8 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         }
 
         @Override
-        public void initialize(int userId, IAppSearchResultCallback callback)
+        public void initialize(int userId, long binderCallStartTimeMillis,
+                IAppSearchResultCallback callback)
                 throws RemoteException {
             ignore(callback);
         }
