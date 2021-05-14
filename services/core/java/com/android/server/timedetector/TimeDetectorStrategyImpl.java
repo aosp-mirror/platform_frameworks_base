@@ -42,6 +42,7 @@ import com.android.server.timezonedetector.ArrayMapWithHistory;
 import com.android.server.timezonedetector.ConfigurationChangeListener;
 import com.android.server.timezonedetector.ReferenceWithHistory;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Objects;
@@ -321,12 +322,16 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         ipw.println("mLastAutoSystemClockTimeSet=" + mLastAutoSystemClockTimeSet);
         ipw.println("mEnvironment.isAutoTimeDetectionEnabled()="
                 + mEnvironment.isAutoTimeDetectionEnabled());
-        ipw.println("mEnvironment.elapsedRealtimeMillis()=" + mEnvironment.elapsedRealtimeMillis());
-        ipw.println("mEnvironment.systemClockMillis()=" + mEnvironment.systemClockMillis());
+        long elapsedRealtimeMillis = mEnvironment.elapsedRealtimeMillis();
+        ipw.printf("mEnvironment.elapsedRealtimeMillis()=%s (%s)\n",
+                Duration.ofMillis(elapsedRealtimeMillis), elapsedRealtimeMillis);
+        long systemClockMillis = mEnvironment.systemClockMillis();
+        ipw.printf("mEnvironment.systemClockMillis()=%s (%s)\n",
+                Instant.ofEpochMilli(systemClockMillis), systemClockMillis);
         ipw.println("mEnvironment.systemClockUpdateThresholdMillis()="
                 + mEnvironment.systemClockUpdateThresholdMillis());
         Instant autoTimeLowerBound = mEnvironment.autoTimeLowerBound();
-        ipw.printf("mEnvironment.autoTimeLowerBound()=%s(%s)\n",
+        ipw.printf("mEnvironment.autoTimeLowerBound()=%s (%s)\n",
                 autoTimeLowerBound, autoTimeLowerBound.toEpochMilli());
         String priorities =
                 Arrays.stream(mEnvironment.autoOriginPriorities())
