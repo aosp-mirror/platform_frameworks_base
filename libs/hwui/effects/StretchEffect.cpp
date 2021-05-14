@@ -115,38 +115,37 @@ static const SkString stretchShader = SkString(R"(
         float distanceDiff,
         float interpolationStrength
     ) {
-      float outPos = inPos;
       if (overscroll > 0) {
-            if (inPos <= uStretchAffectedDist) {
-                outPos = computeOverscrollStart(
-                  inPos,
-                  overscroll,
-                  uStretchAffectedDist,
-                  uInverseStretchAffectedDist,
-                  distanceStretched,
-                  interpolationStrength
-                );
-            } else if (inPos >= distanceStretched) {
-                outPos = distanceDiff + inPos;
-            }
+        if (inPos <= uStretchAffectedDist) {
+            return computeOverscrollStart(
+              inPos,
+              overscroll,
+              uStretchAffectedDist,
+              uInverseStretchAffectedDist,
+              distanceStretched,
+              interpolationStrength
+            );
+        } else {
+            return distanceDiff + inPos;
         }
-        if (overscroll < 0) {
-            float stretchAffectedDist = 1. - uStretchAffectedDist;
-            if (inPos >= stretchAffectedDist) {
-                outPos = computeOverscrollEnd(
-                  inPos,
-                  overscroll,
-                  stretchAffectedDist,
-                  uStretchAffectedDist,
-                  uInverseStretchAffectedDist,
-                  distanceStretched,
-                  interpolationStrength
-                );
-            } else if (inPos < stretchAffectedDist) {
-                outPos = -distanceDiff + inPos;
-            }
+      } else if (overscroll < 0) {
+        float stretchAffectedDist = 1. - uStretchAffectedDist;
+        if (inPos >= stretchAffectedDist) {
+            return computeOverscrollEnd(
+              inPos,
+              overscroll,
+              stretchAffectedDist,
+              uStretchAffectedDist,
+              uInverseStretchAffectedDist,
+              distanceStretched,
+              interpolationStrength
+            );
+        } else {
+            return -distanceDiff + inPos;
         }
-        return outPos;
+      } else {
+        return inPos;
+      }
     }
 
     vec4 main(vec2 coord) {
@@ -155,12 +154,9 @@ static const SkString stretchShader = SkString(R"(
         float inV = coord.y / viewportHeight;
         float outU;
         float outV;
-        float stretchIntensity;
         // Add the normalized scroll position within scrolling list
         inU += uScrollX;
         inV += uScrollY;
-        outU = inU;
-        outV = inV;
         outU = computeOverscroll(
             inU,
             uOverscrollX,
