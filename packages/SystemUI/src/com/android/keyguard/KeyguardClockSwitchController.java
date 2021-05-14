@@ -124,16 +124,6 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     @Override
     public void onInit() {
         mKeyguardSliceViewController.init();
-    }
-
-    @Override
-    protected void onViewAttached() {
-        if (CUSTOM_CLOCKS_ENABLED) {
-            mClockManager.addOnClockChangedListener(mClockChangedListener);
-        }
-        mColorExtractor.addOnColorsChangedListener(mColorsListener);
-        mView.updateColors(getGradientColors());
-        updateAodIcons();
 
         mClockFrame = mView.findViewById(R.id.lockscreen_clock_view);
         mLargeClockFrame = mView.findViewById(R.id.lockscreen_clock_view_large);
@@ -157,6 +147,16 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
                         mKeyguardUpdateMonitor,
                         mBypassController);
         mLargeClockViewController.init();
+    }
+
+    @Override
+    protected void onViewAttached() {
+        if (CUSTOM_CLOCKS_ENABLED) {
+            mClockManager.addOnClockChangedListener(mClockChangedListener);
+        }
+        mColorExtractor.addOnColorsChangedListener(mColorsListener);
+        mView.updateColors(getGradientColors());
+        updateAodIcons();
 
         if (mSmartspaceController.isEnabled()) {
             mSmartspaceView = mSmartspaceController.buildAndConnectView(mView);
