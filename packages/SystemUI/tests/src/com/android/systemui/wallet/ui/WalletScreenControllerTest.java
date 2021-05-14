@@ -182,6 +182,80 @@ public class WalletScreenControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void queryCards_hasCards_showCarousel_badCard_parseLabel_notCrash() {
+        GetWalletCardsResponse response =
+                new GetWalletCardsResponse(
+                        Collections.singletonList(createCrazyWalletCard(mContext, true)), 0);
+
+        mController.queryWalletCards();
+        mTestableLooper.processAllMessages();
+
+        verify(mWalletClient).getWalletCards(any(), any(), mCallbackCaptor.capture());
+
+        QuickAccessWalletClient.OnWalletCardsRetrievedCallback callback =
+                mCallbackCaptor.getValue();
+
+        assertEquals(mController, callback);
+
+        callback.onWalletCardsRetrieved(response);
+        mTestableLooper.processAllMessages();
+
+        assertEquals(VISIBLE, mWalletView.getCardCarouselContainer().getVisibility());
+        assertEquals("This\nis\ncrazy!!", mWalletView.getCardLabel().getText().toString());
+        assertEquals(GONE, mWalletView.getActionButton().getVisibility());
+        assertEquals(GONE, mWalletView.getErrorView().getVisibility());
+    }
+
+    @Test
+    public void queryCards_hasCards_showCarousel_badCard_noLabel_notCrash() {
+        GetWalletCardsResponse response =
+                new GetWalletCardsResponse(
+                        Collections.singletonList(createCrazyWalletCard(mContext, false)), 0);
+
+        mController.queryWalletCards();
+        mTestableLooper.processAllMessages();
+
+        verify(mWalletClient).getWalletCards(any(), any(), mCallbackCaptor.capture());
+
+        QuickAccessWalletClient.OnWalletCardsRetrievedCallback callback =
+                mCallbackCaptor.getValue();
+
+        assertEquals(mController, callback);
+
+        callback.onWalletCardsRetrieved(response);
+        mTestableLooper.processAllMessages();
+
+        assertEquals(VISIBLE, mWalletView.getCardCarouselContainer().getVisibility());
+        assertEquals("", mWalletView.getCardLabel().getText().toString());
+        assertEquals(GONE, mWalletView.getActionButton().getVisibility());
+        assertEquals(GONE, mWalletView.getErrorView().getVisibility());
+    }
+
+    @Test
+    public void queryCards_hasCards_showCarousel_invalidSelectedIndex_notCrash() {
+        GetWalletCardsResponse response =
+                new GetWalletCardsResponse(
+                        Collections.singletonList(createCrazyWalletCard(mContext, true)), 8);
+
+        mController.queryWalletCards();
+        mTestableLooper.processAllMessages();
+
+        verify(mWalletClient).getWalletCards(any(), any(), mCallbackCaptor.capture());
+
+        QuickAccessWalletClient.OnWalletCardsRetrievedCallback callback =
+                mCallbackCaptor.getValue();
+
+        assertEquals(mController, callback);
+
+        callback.onWalletCardsRetrieved(response);
+        mTestableLooper.processAllMessages();
+
+        assertEquals(GONE, mWalletView.getCardCarouselContainer().getVisibility());
+        assertEquals(VISIBLE, mWalletView.getEmptyStateView().getVisibility());
+        assertEquals(GONE, mWalletView.getErrorView().getVisibility());
+    }
+
+    @Test
     public void queryCards_noCards_showEmptyState() {
         GetWalletCardsResponse response = new GetWalletCardsResponse(Collections.EMPTY_LIST, 0);
 
@@ -326,6 +400,15 @@ public class WalletScreenControllerTest extends SysuiTestCase {
         return new WalletCard.Builder(CARD_ID_1, createIcon(), "•••• 1234", pendingIntent)
                 .setCardIcon(createIcon())
                 .setCardLabel("Hold to reader")
+                .build();
+    }
+
+    private WalletCard createCrazyWalletCard(Context context, boolean hasLabel) {
+        PendingIntent pendingIntent =
+                PendingIntent.getActivity(context, 0, mWalletIntent, PendingIntent.FLAG_IMMUTABLE);
+        return new WalletCard.Builder("BadCard", createIcon(), "•••• 1234", pendingIntent)
+                .setCardIcon(null)
+                .setCardLabel(hasLabel ? "This\nis\ncrazy!!" : null)
                 .build();
     }
 

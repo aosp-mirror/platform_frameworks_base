@@ -38,7 +38,8 @@ public class CustomMeasuredPowerCalculatorTest {
     private static final int APP_UID = Process.FIRST_APPLICATION_UID + 42;
 
     @Rule
-    public final BatteryUsageStatsRule mStatsRule = new BatteryUsageStatsRule();
+    public final BatteryUsageStatsRule mStatsRule = new BatteryUsageStatsRule()
+            .initMeasuredEnergyStatsLocked(new String[]{"CUSTOM_COMPONENT1", "CUSTOM_COMPONENT2"});
 
     @Test
     public void testMeasuredEnergyCopiedIntoBatteryConsumers() {

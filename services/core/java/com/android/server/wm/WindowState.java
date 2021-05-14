@@ -751,11 +751,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     int mFrameRateSelectionPriority = RefreshRatePolicy.LAYER_PRIORITY_UNSET;
 
     /**
-     * This is the frame rate which is passed to SurfaceFlinger if the window is part of the
-     * high refresh rate deny list. The variable is cached, so we do not send too many updates to
-     * SF.
+     * This is the frame rate which is passed to SurfaceFlinger if the window set a
+     * preferredDisplayModeId or is part of the high refresh rate deny list.
+     * The variable is cached, so we do not send too many updates to SF.
      */
-    float mDenyListFrameRate = 0f;
+    float mAppPreferredFrameRate = 0f;
 
     static final int BLAST_TIMEOUT_DURATION = 5000; /* milliseconds */
 
@@ -2412,14 +2412,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         if (startingWindow && StartingSurfaceController.DEBUG_ENABLE_SHELL_DRAWER) {
-            // cancel the remove starting window animation on shell
+            // Cancel the remove starting window animation on shell. The main window might changed
+            // during animating, checking for all windows would be safer.
             if (mActivityRecord != null) {
-                final WindowState mainWindow =
-                        mActivityRecord.findMainWindow(false/* includeStartingApp */);
-                if (mainWindow != null && mainWindow.isSelfAnimating(0 /* flags */,
-                        ANIMATION_TYPE_STARTING_REVEAL)) {
-                    mainWindow.cancelAnimation();
-                }
+                mActivityRecord.forAllWindows(w -> {
+                    if (w.isSelfAnimating(0, ANIMATION_TYPE_STARTING_REVEAL)) {
+                        w.cancelAnimation();
+                    }
+                }, true);
             }
         }
 
@@ -5416,10 +5416,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         final float refreshRate = refreshRatePolicy.getPreferredRefreshRate(this);
-        if (mDenyListFrameRate != refreshRate) {
-            mDenyListFrameRate = refreshRate;
+        if (mAppPreferredFrameRate != refreshRate) {
+            mAppPreferredFrameRate = refreshRate;
             getPendingTransaction().setFrameRate(
-                    mSurfaceControl, mDenyListFrameRate, Surface.FRAME_RATE_COMPATIBILITY_EXACT);
+                    mSurfaceControl, mAppPreferredFrameRate,
+                    Surface.FRAME_RATE_COMPATIBILITY_EXACT, Surface.CHANGE_FRAME_RATE_ALWAYS);
         }
     }
 

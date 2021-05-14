@@ -61,6 +61,7 @@ import static android.provider.Settings.Secure.USER_SETUP_COMPLETE;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.SurfaceControl.METADATA_TASK_ID;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_APP_CRASHED;
@@ -583,13 +584,6 @@ class Task extends WindowContainer<WindowContainer> {
      * when we normally hold the top activity paused.
      */
     ActivityRecord mLastPausedActivity = null;
-
-    /**
-     * Activities that specify No History must be removed once the user navigates away from them.
-     * If the device goes to sleep with such an activity in the paused state then we save it here
-     * and finish it later if another activity replaces it on wakeup.
-     */
-    ActivityRecord mLastNoHistoryActivity = null;
 
     /**
      * Current activity that is resumed, or null if there is none.
@@ -1668,6 +1662,14 @@ class Task extends WindowContainer<WindowContainer> {
         final boolean isUidPresent = getActivity(p) != null;
         p.recycle();
         return isUidPresent;
+    }
+
+    ActivityRecord topActivityContainsStartingWindow() {
+        if (getParent() == null) {
+            return null;
+        }
+        return getActivity((r) -> r.getWindow(window ->
+                window.getBaseType() == TYPE_APPLICATION_STARTING) != null);
     }
 
     ActivityRecord topActivityWithStartingWindow() {
@@ -4354,7 +4356,12 @@ class Task extends WindowContainer<WindowContainer> {
             case WINDOWING_MODE_FULLSCREEN:
                 if (gotTranslucentSplitScreenPrimary || gotTranslucentSplitScreenSecondary) {
                     // At least one of the split-screen stacks that covers this one is translucent.
-                    return TASK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT;
+                    // When in split mode, home task will be reparented to the secondary split while
+                    // leaving tasks not supporting split below. Due to
+                    // TaskDisplayArea#assignRootTaskOrdering always adjusts home surface layer to
+                    // the bottom, this makes sure tasks not in split roots won't occlude home task
+                    // unexpectedly.
+                    return TASK_VISIBILITY_INVISIBLE;
                 }
                 break;
             case WINDOWING_MODE_SPLIT_SCREEN_PRIMARY:
@@ -5747,7 +5754,9 @@ class Task extends WindowContainer<WindowContainer> {
         ProtoLog.v(WM_DEBUG_STATES, "Moving to PAUSING: %s", prev);
         mPausingActivity = prev;
         mLastPausedActivity = prev;
-        mLastNoHistoryActivity = prev.isNoHistory() ? prev : null;
+        if (prev.isNoHistory() && !mTaskSupervisor.mNoHistoryActivities.contains(prev)) {
+            mTaskSupervisor.mNoHistoryActivities.add(prev);
+        }
         prev.setState(PAUSING, "startPausingLocked");
         prev.getTask().touchActiveTime();
 
@@ -5793,13 +5802,13 @@ class Task extends WindowContainer<WindowContainer> {
                     Slog.w(TAG, "Exception thrown during pause", e);
                     mPausingActivity = null;
                     mLastPausedActivity = null;
-                    mLastNoHistoryActivity = null;
+                    mTaskSupervisor.mNoHistoryActivities.remove(prev);
                 }
             }
         } else {
             mPausingActivity = null;
             mLastPausedActivity = null;
-            mLastNoHistoryActivity = null;
+            mTaskSupervisor.mNoHistoryActivities.remove(prev);
         }
 
         // If we are not going to sleep, we want to ensure the device is
@@ -6310,13 +6319,8 @@ class Task extends WindowContainer<WindowContainer> {
         // If the most recent activity was noHistory but was only stopped rather
         // than stopped+finished because the device went to sleep, we need to make
         // sure to finish it as we're making a new activity topmost.
-        if (shouldSleepActivities() && mLastNoHistoryActivity != null
-                && !mLastNoHistoryActivity.finishing
-                && mLastNoHistoryActivity != next) {
-            ProtoLog.d(WM_DEBUG_STATES, "no-history finish of %s on new resume",
-                    mLastNoHistoryActivity);
-            mLastNoHistoryActivity.finishIfPossible("resume-no-history", false /* oomAdj */);
-            mLastNoHistoryActivity = null;
+        if (shouldSleepActivities()) {
+            mTaskSupervisor.finishNoHistoryActivitiesIfNeeded(next);
         }
 
         if (prev != null && prev != next && next.nowVisible) {
@@ -7325,8 +7329,10 @@ class Task extends WindowContainer<WindowContainer> {
             isPausingDied = true;
         }
         if (mLastPausedActivity != null && mLastPausedActivity.app == app) {
+            if (mLastPausedActivity.isNoHistory()) {
+                mTaskSupervisor.mNoHistoryActivities.remove(mLastPausedActivity);
+            }
             mLastPausedActivity = null;
-            mLastNoHistoryActivity = null;
         }
         return isPausingDied;
     }
@@ -7362,8 +7368,6 @@ class Task extends WindowContainer<WindowContainer> {
         if (dumpAll) {
             printed |= printThisActivity(pw, mLastPausedActivity, dumpPackage, false,
                     "    mLastPausedActivity: ", null);
-            printed |= printThisActivity(pw, mLastNoHistoryActivity, dumpPackage,
-                    false, "    mLastNoHistoryActivity: ", null);
         }
 
         printed |= dumpActivities(fd, pw, dumpAll, dumpClient, dumpPackage, false, headerPrinter);

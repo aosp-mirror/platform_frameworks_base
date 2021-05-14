@@ -460,7 +460,8 @@
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"నెమ్మదిగా ఛార్జింగ్"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"వైర్‌లెస్ ఛార్జింగ్"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"ఛార్జ్ కావడం లేదు"</string>
-    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"ప్లగ్ ఇన్ చేయబడింది, ప్రస్తుతం ఛార్జ్ చేయడం సాధ్యం కాదు"</string>
+    <!-- no translation found for battery_info_status_not_charging (3371084153747234837) -->
+    <skip />
     <string name="battery_info_status_full" msgid="1339002294876531312">"ఛార్జ్ చేయబడింది"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"నిర్వాహకుని ద్వారా నియంత్రించబడింది"</string>
     <string name="disabled" msgid="8017887509554714950">"డిజేబుల్ చేయబడింది"</string>
@@ -506,7 +507,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"అలారాలు, రిమైండర్‌లు"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"అలారాలు, రిమైండర్‌లను సెట్ చేయడానికి అనుమతించండి"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"అలారాలు &amp; రిమైండర్‌లు"</string>
-    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"అలారాలను సెట్ చేయడానికి, ఇతర చర్యలను షెడ్యూల్ చేయడానికి ఈ యాప్‌ను అనుమతించండి. మీరు మీ ఫోన్‌ను ఉపయోగించనప్పుడు ఈ యాప్ ఉపయోగించబడవచ్చు, ఇది ఎక్కువ బ్యాటరీని ఉపయోగించవచ్చు. ఈ అనుమతిని ఆఫ్ చేసినట్లైతే, ఈ యాప్ సాధారణంగా పనిచేయకపోవచ్చు అలాగే దాని అలారాలు షెడ్యూల్ ప్రకారం పనిచేయవు."</string>
+    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"అలారాలను సెట్ చేయడానికి, ఇతర చర్యలను షెడ్యూల్ చేయడానికి ఈ యాప్‌ను అనుమతించండి. మీ ఫోన్‌ను మీరు ఉపయోగించనప్పుడు కూడా ఈ యాప్ ఉపయోగించబడవచ్చు, తద్వారా ఎక్కువ బ్యాటరీని ఉపయోగించవచ్చు. ఈ అనుమతిని ఆఫ్ చేస్తే, ఈ యాప్ సాధారణ రీతిలో పనిచేయకపోవచ్చు, దాని అలారాలు షెడ్యూల్ ప్రకారం పనిచేయవు."</string>
     <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"అలారాలను సెట్ చేయడానికి, ఇతర చర్యలను షెడ్యూల్ చేయడానికి ఈ యాప్‌ను అనుమతించండి. మీరు మీ టాబ్లెట్‌ను ఉపయోగించనప్పుడు ఈ యాప్ ఉపయోగించబడవచ్చు, ఇది ఎక్కువ బ్యాటరీని ఉపయోగించవచ్చు. ఈ అనుమతిని ఆఫ్ చేసినట్లైతే, ఈ యాప్ సాధారణంగా పనిచేయకపోవచ్చు అలాగే దాని అలారాలు షెడ్యూల్ ప్రకారం పనిచేయవు."</string>
     <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"అలారాలను సెట్ చేయడానికి, ఇతర చర్యలను షెడ్యూల్ చేయడానికి ఈ యాప్‌ను అనుమతించండి. మీరు మీ పరికరాన్ని ఉపయోగించనప్పుడు ఈ యాప్ ఉపయోగించబడవచ్చు, ఇది ఎక్కువ బ్యాటరీని ఉపయోగించవచ్చు. ఈ అనుమతిని ఆఫ్ చేసినట్లైతే, ఈ యాప్ సాధారణంగా పనిచేయకపోవచ్చు అలాగే దాని అలారాలు షెడ్యూల్ ప్రకారం పనిచేయవు."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"షెడ్యూల్, అలారం, రిమైండర్, గడియారం"</string>

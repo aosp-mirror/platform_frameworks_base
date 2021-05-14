@@ -28,6 +28,7 @@ android_test {
     static_libs: [
         "androidx.test.rules",
         "hamcrest-library",
+        "mockito-target-minus-junit4",
     ],
     platform_apis: true,
     libs: ["android.test.runner"],

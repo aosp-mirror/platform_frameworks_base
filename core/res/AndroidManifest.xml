@@ -593,8 +593,6 @@
 
     <protected-broadcast android:name="android.intent.action.DYNAMIC_SENSOR_CHANGED" />
 
-    <protected-broadcast android:name="android.intent.action.ACTION_RADIO_OFF" />
-
     <protected-broadcast android:name="android.accounts.LOGIN_ACCOUNTS_CHANGED" />
     <protected-broadcast android:name="android.accounts.action.ACCOUNT_REMOVED" />
     <protected-broadcast android:name="android.accounts.action.VISIBLE_ACCOUNTS_CHANGED" />
@@ -2899,6 +2897,12 @@
                 android:label="@string/permlab_runInBackground"
                 android:description="@string/permdesc_runInBackground"
                 android:protectionLevel="normal" />
+
+    <!-- Allows a companion app to start a foreground service from the background.
+         {@see android.Manifest.permission#REQUEST_COMPANION_RUN_IN_BACKGROUND}
+         -->
+    <permission android:name="android.permission.REQUEST_COMPANION_START_FOREGROUND_SERVICES_FROM_BACKGROUND"
+        android:protectionLevel="normal"/>
 
     <!-- Allows a companion app to use data in the background.
          <p>Protection level: normal

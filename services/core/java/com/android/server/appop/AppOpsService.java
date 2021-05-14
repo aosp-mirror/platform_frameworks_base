@@ -1085,7 +1085,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             }
 
             // no need to record a paused event finishing.
-            InProgressStartOpEvent event = mInProgressEvents.valueAt(indexOfToken);
+            InProgressStartOpEvent event = mPausedInProgressEvents.valueAt(indexOfToken);
             event.numUnfinishedStarts--;
             if (event.numUnfinishedStarts == 0) {
                 mPausedInProgressEvents.removeAt(indexOfToken);
@@ -1280,6 +1280,10 @@ public class AppOpsService extends IAppOpsService.Stub {
 
         public boolean isRunning() {
             return mInProgressEvents != null;
+        }
+
+        public boolean isPaused() {
+            return mPausedInProgressEvents != null;
         }
 
         boolean hasAnyTime() {
@@ -3953,7 +3957,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 return;
             }
 
-            if (attributedOp.isRunning()) {
+            if (attributedOp.isRunning() || attributedOp.isPaused()) {
                 attributedOp.finished(clientId);
             } else {
                 Slog.e(TAG, "Operation not started: uid=" + uid + " pkg=" + packageName + "("

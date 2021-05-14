@@ -62,4 +62,11 @@ public class FooterPreferenceTest {
 
         assertThat(mFooterPreference.getTitle()).isEqualTo("summary");
     }
+
+    @Test
+    public void setContentDescription_contentSet_shouldGetSameContentDescription() {
+        mFooterPreference.setContentDescription("test");
+
+        assertThat(mFooterPreference.getContentDescription()).isEqualTo("test");
+    }
 }

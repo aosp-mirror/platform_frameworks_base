@@ -610,17 +610,31 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     public interface Clocks {
-        public long elapsedRealtime();
-        public long uptimeMillis();
+        /** Elapsed Realtime, see SystemClock.elapsedRealtime() */
+        long elapsedRealtime();
+
+        /** Uptime, see SystemClock.uptimeMillis() */
+        long uptimeMillis();
+
+        /** Wall-clock time as per System.currentTimeMillis() */
+        long currentTimeMillis();
     }
 
     public static class SystemClocks implements Clocks {
+
+        @Override
         public long elapsedRealtime() {
             return SystemClock.elapsedRealtime();
         }
 
+        @Override
         public long uptimeMillis() {
             return SystemClock.uptimeMillis();
+        }
+
+        @Override
+        public long currentTimeMillis() {
+            return System.currentTimeMillis();
         }
     }
 
@@ -1163,7 +1177,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
     public BatteryStatsImpl(Clocks clocks) {
         init(clocks);
-        mStartClockTimeMs = System.currentTimeMillis();
+        mStartClockTimeMs = clocks.currentTimeMillis();
         mStatsFile = null;
         mCheckinFile = null;
         mDailyFile = null;
@@ -3694,7 +3708,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
         if (dataSize == 0) {
             // The history is currently empty; we need it to start with a time stamp.
-            cur.currentTime = System.currentTimeMillis();
+            cur.currentTime = mClocks.currentTimeMillis();
             addHistoryBufferLocked(elapsedRealtimeMs, HistoryItem.CMD_RESET, cur);
         }
         addHistoryBufferLocked(elapsedRealtimeMs, HistoryItem.CMD_UPDATE, cur);
@@ -3914,7 +3928,7 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     public void noteCurrentTimeChangedLocked() {
-        final long currentTime = System.currentTimeMillis();
+        final long currentTime = mClocks.currentTimeMillis();
         final long elapsedRealtime = mClocks.elapsedRealtime();
         final long uptime = mClocks.uptimeMillis();
         noteCurrentTimeChangedLocked(currentTime, elapsedRealtime, uptime);
@@ -4237,7 +4251,7 @@ public class BatteryStatsImpl extends BatteryStats {
         if (mPretendScreenOff != pretendScreenOff) {
             mPretendScreenOff = pretendScreenOff;
             noteScreenStateLocked(pretendScreenOff ? Display.STATE_OFF : Display.STATE_ON,
-                    mClocks.elapsedRealtime(), mClocks.uptimeMillis(), System.currentTimeMillis());
+                    mClocks.elapsedRealtime(), mClocks.uptimeMillis(), mClocks.currentTimeMillis());
         }
     }
 
@@ -4827,7 +4841,7 @@ public class BatteryStatsImpl extends BatteryStats {
     @GuardedBy("this")
     public void noteScreenStateLocked(int state) {
         noteScreenStateLocked(state, mClocks.elapsedRealtime(), mClocks.uptimeMillis(),
-                System.currentTimeMillis());
+                mClocks.currentTimeMillis());
     }
 
     @GuardedBy("this")
@@ -6989,7 +7003,7 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     @Override public long getStartClockTime() {
-        final long currentTimeMs = System.currentTimeMillis();
+        final long currentTimeMs = mClocks.currentTimeMillis();
         if ((currentTimeMs > MILLISECONDS_IN_YEAR
                 && mStartClockTimeMs < (currentTimeMs - MILLISECONDS_IN_YEAR))
                 || (mStartClockTimeMs > currentTimeMs)) {
@@ -10752,7 +10766,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
     public void updateDailyDeadlineLocked() {
         // Get the current time.
-        long currentTimeMs = mDailyStartTimeMs = System.currentTimeMillis();
+        long currentTimeMs = mDailyStartTimeMs = mClocks.currentTimeMillis();
         Calendar calDeadline = Calendar.getInstance();
         calDeadline.setTimeInMillis(currentTimeMs);
 
@@ -10780,7 +10794,7 @@ public class BatteryStatsImpl extends BatteryStats {
     public void recordDailyStatsLocked() {
         DailyItem item = new DailyItem();
         item.mStartTime = mDailyStartTimeMs;
-        item.mEndTime = System.currentTimeMillis();
+        item.mEndTime = mClocks.currentTimeMillis();
         boolean hasData = false;
         if (mDailyDischargeStepTracker.mNumStepDurations > 0) {
             hasData = true;
@@ -11145,7 +11159,7 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     void initTimes(long uptimeUs, long realtimeUs) {
-        mStartClockTimeMs = System.currentTimeMillis();
+        mStartClockTimeMs = mClocks.currentTimeMillis();
         mOnBatteryTimeBase.init(uptimeUs, realtimeUs);
         mOnBatteryScreenOffTimeBase.init(uptimeUs, realtimeUs);
         mRealtimeUs = 0;
@@ -11211,7 +11225,7 @@ public class BatteryStatsImpl extends BatteryStats {
         final long elapsedRealtimeUs = elapsedRealtimeMillis * 1000;
         mStartCount = 0;
         initTimes(uptimeUs, elapsedRealtimeUs);
-        mScreenOnTimer.reset(false, uptimeUs);
+        mScreenOnTimer.reset(false, elapsedRealtimeUs);
         mScreenDozeTimer.reset(false, elapsedRealtimeUs);
         for (int i=0; i<NUM_SCREEN_BRIGHTNESS_BINS; i++) {
             mScreenBrightnessTimer[i].reset(false, elapsedRealtimeUs);
@@ -13579,7 +13593,7 @@ public class BatteryStatsImpl extends BatteryStats {
     private void startRecordingHistory(final long elapsedRealtimeMs, final long uptimeMs,
             boolean reset) {
         mRecordingHistory = true;
-        mHistoryCur.currentTime = System.currentTimeMillis();
+        mHistoryCur.currentTime = mClocks.currentTimeMillis();
         addHistoryBufferLocked(elapsedRealtimeMs,
                 reset ? HistoryItem.CMD_RESET : HistoryItem.CMD_CURRENT_TIME,
                 mHistoryCur);
@@ -13621,7 +13635,7 @@ public class BatteryStatsImpl extends BatteryStats {
             final int chargeFullUah, final long chargeTimeToFullSeconds) {
         setBatteryStateLocked(status, health, plugType, level, temp, voltageMv, chargeUah,
                 chargeFullUah, chargeTimeToFullSeconds,
-                mClocks.elapsedRealtime(), mClocks.uptimeMillis(), System.currentTimeMillis());
+                mClocks.elapsedRealtime(), mClocks.uptimeMillis(), mClocks.currentTimeMillis());
     }
 
     public void setBatteryStateLocked(final int status, final int health, final int plugType,
@@ -14406,7 +14420,7 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     public void shutdownLocked() {
-        recordShutdownLocked(System.currentTimeMillis(), mClocks.elapsedRealtime());
+        recordShutdownLocked(mClocks.currentTimeMillis(), mClocks.elapsedRealtime());
         writeSyncLocked();
         mShuttingDown = true;
     }
@@ -14955,7 +14969,7 @@ public class BatteryStatsImpl extends BatteryStats {
             startRecordingHistory(elapsedRealtimeMs, uptimeMs, false);
         }
 
-        recordDailyStatsIfNeededLocked(false, System.currentTimeMillis());
+        recordDailyStatsIfNeededLocked(false, mClocks.currentTimeMillis());
     }
 
     public int describeContents() {
