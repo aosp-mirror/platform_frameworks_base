@@ -138,13 +138,26 @@ public class QosSocketFilter extends QosFilter {
         if (mQosSocketInfo.getLocalSocketAddress() == null) {
             return false;
         }
-
-        return matchesLocalAddress(mQosSocketInfo.getLocalSocketAddress(), address, startPort,
+        return matchesAddress(mQosSocketInfo.getLocalSocketAddress(), address, startPort,
                 endPort);
     }
 
     /**
-     * Called from {@link QosSocketFilter#matchesLocalAddress(InetAddress, int, int)} with the
+     * @inheritDoc
+     */
+    @Override
+    public boolean matchesRemoteAddress(@NonNull final InetAddress address, final int startPort,
+            final int endPort) {
+        if (mQosSocketInfo.getRemoteSocketAddress() == null) {
+            return false;
+        }
+        return matchesAddress(mQosSocketInfo.getRemoteSocketAddress(), address, startPort,
+                endPort);
+    }
+
+    /**
+     * Called from {@link QosSocketFilter#matchesLocalAddress(InetAddress, int, int)}
+     * and {@link QosSocketFilter#matchesRemoteAddress(InetAddress, int, int)} with the
      * filterSocketAddress coming from {@link QosSocketInfo#getLocalSocketAddress()}.
      * <p>
      * This method exists for testing purposes since {@link QosSocketInfo} couldn't be mocked
@@ -156,7 +169,7 @@ public class QosSocketFilter extends QosFilter {
      * @param endPort the end of the port range to check
      */
     @VisibleForTesting
-    public static boolean matchesLocalAddress(@NonNull final InetSocketAddress filterSocketAddress,
+    public static boolean matchesAddress(@NonNull final InetSocketAddress filterSocketAddress,
             @NonNull final InetAddress address,
             final int startPort, final int endPort) {
         return startPort <= filterSocketAddress.getPort()
