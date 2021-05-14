@@ -36,6 +36,7 @@ import android.telephony.gba.UaSecurityProtocolIdentifier;
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.ImsRegistrationAttributes;
 import android.telephony.ims.ImsSsData;
+import android.telephony.ims.RcsUceAdapter;
 import android.telephony.ims.feature.MmTelFeature;
 import android.telephony.ims.feature.RcsFeature;
 
@@ -4071,6 +4072,9 @@ public class CarrierConfigManager {
          * If this flag is disabled, the capabilities cache will not be refreshed internally at all
          * and will only be updated if the cached capabilities are stale when an application
          * requests them.
+         *
+         * @see RcsUceAdapter#isUceSettingEnabled() more information about this feature and how
+         * it is enabled by the user.
          */
         public static final String KEY_RCS_BULK_CAPABILITY_EXCHANGE_BOOL =
                 KEY_PREFIX + "rcs_bulk_capability_exchange_bool";
