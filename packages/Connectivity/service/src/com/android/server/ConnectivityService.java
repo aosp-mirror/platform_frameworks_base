@@ -2210,7 +2210,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     @NonNull
     public List<NetworkStateSnapshot> getAllNetworkStateSnapshots() {
         // This contains IMSI details, so make sure the caller is privileged.
-        PermissionUtils.enforceNetworkStackPermission(mContext);
+        enforceNetworkStackOrSettingsPermission();
 
         final ArrayList<NetworkStateSnapshot> result = new ArrayList<>();
         for (Network network : getAllNetworks()) {
