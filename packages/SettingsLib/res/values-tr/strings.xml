@@ -460,7 +460,7 @@
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Yavaş şarj oluyor"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Kablosuz şarj oluyor"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Şarj olmuyor"</string>
-    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Prize takıldı, şu anda şarj olamıyor"</string>
+    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Bağlandı, şarj olmuyor"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Şarj oldu"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Yönetici tarafından denetleniyor"</string>
     <string name="disabled" msgid="8017887509554714950">"Devre dışı"</string>

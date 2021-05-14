@@ -460,7 +460,7 @@
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Lėtai įkraunama"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Kraunama be laidų"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Nekraunama"</string>
-    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Įjungta į maitinimo lizdą, bet šiuo metu įkrauti neįmanoma"</string>
+    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Prijungta, neįkraunama"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Įkrauta"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Valdo administratorius"</string>
     <string name="disabled" msgid="8017887509554714950">"Neleidžiama"</string>

@@ -142,20 +142,24 @@ public class StagingManager {
         void verifySession();
     }
 
-    StagingManager(Context context, Supplier<PackageParser2> packageParserSupplier) {
-        this(context, packageParserSupplier, ApexManager.getInstance());
+    StagingManager(Context context, Supplier<PackageParser2> packageParserSupplier, Looper looper) {
+        this(context, packageParserSupplier, ApexManager.getInstance(), looper);
     }
 
     @VisibleForTesting
     StagingManager(Context context, Supplier<PackageParser2> packageParserSupplier,
             ApexManager apexManager) {
+        this(context, packageParserSupplier, apexManager, BackgroundThread.get().getLooper());
+    }
+
+    StagingManager(Context context, Supplier<PackageParser2> packageParserSupplier,
+            ApexManager apexManager, Looper looper) {
         mContext = context;
         mPackageParserSupplier = packageParserSupplier;
 
         mApexManager = apexManager;
         mPowerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-        mPreRebootVerificationHandler = new PreRebootVerificationHandler(
-                BackgroundThread.get().getLooper());
+        mPreRebootVerificationHandler = new PreRebootVerificationHandler(looper);
 
         if (mFailureReasonFile.exists()) {
             try (BufferedReader reader = new BufferedReader(new FileReader(mFailureReasonFile))) {

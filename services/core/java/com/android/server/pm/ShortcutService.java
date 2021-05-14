@@ -86,6 +86,7 @@ import android.os.ServiceManager;
 import android.os.ShellCallback;
 import android.os.ShellCommand;
 import android.os.SystemClock;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.text.TextUtils;
@@ -598,6 +599,7 @@ public class ShortcutService extends IShortcutService.Stub {
         if (DEBUG_PROCSTATE) {
             Slog.d(TAG, "onUidStateChanged: uid=" + uid + " state=" + procState);
         }
+        Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "shortcutHandleOnUidStateChanged");
         synchronized (mLock) {
             mUidState.put(uid, procState);
 
@@ -608,6 +610,7 @@ public class ShortcutService extends IShortcutService.Stub {
                 mUidLastForegroundElapsedTime.put(uid, injectElapsedRealtime());
             }
         }
+        Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
     }
 
     private boolean isProcessStateForeground(int processState) {
@@ -703,10 +706,12 @@ public class ShortcutService extends IShortcutService.Stub {
         // or anything.
         final long start = getStatStartTime();
         injectRunOnNewThread(() -> {
+            Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "shortcutHandleUnlockUser");
             synchronized (mLock) {
                 logDurationStat(Stats.ASYNC_PRELOAD_USER_DELAY, start);
                 getUserShortcutsLocked(userId);
             }
+            Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
         });
     }
 
@@ -715,6 +720,7 @@ public class ShortcutService extends IShortcutService.Stub {
         if (DEBUG || DEBUG_REBOOT) {
             Slog.d(TAG, "handleStopUser: user=" + userId);
         }
+        Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "shortcutHandleStopUser");
         synchronized (mLock) {
             unloadUserLocked(userId);
 
@@ -722,6 +728,7 @@ public class ShortcutService extends IShortcutService.Stub {
                 mUnlockedUsers.put(userId, false);
             }
         }
+        Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
     }
 
     @GuardedBy("mLock")
@@ -1192,6 +1199,7 @@ public class ShortcutService extends IShortcutService.Stub {
             return;
         }
         try {
+            Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "shortcutSaveDirtyInfo");
             synchronized (mLock) {
                 for (int i = mDirtyUserIds.size() - 1; i >= 0; i--) {
                     final int userId = mDirtyUserIds.get(i);
@@ -1205,6 +1213,8 @@ public class ShortcutService extends IShortcutService.Stub {
             }
         } catch (Exception e) {
             wtf("Exception in saveDirtyInfo", e);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
         }
     }
 

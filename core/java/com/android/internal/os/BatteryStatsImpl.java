@@ -11211,7 +11211,7 @@ public class BatteryStatsImpl extends BatteryStats {
         final long elapsedRealtimeUs = elapsedRealtimeMillis * 1000;
         mStartCount = 0;
         initTimes(uptimeUs, elapsedRealtimeUs);
-        mScreenOnTimer.reset(false, uptimeUs);
+        mScreenOnTimer.reset(false, elapsedRealtimeUs);
         mScreenDozeTimer.reset(false, elapsedRealtimeUs);
         for (int i=0; i<NUM_SCREEN_BRIGHTNESS_BINS; i++) {
             mScreenBrightnessTimer[i].reset(false, elapsedRealtimeUs);

@@ -460,7 +460,8 @@
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"正在慢速充电"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"正在无线充电"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"未在充电"</string>
-    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"已插入电源，但是现在无法充电"</string>
+    <!-- no translation found for battery_info_status_not_charging (3371084153747234837) -->
+    <skip />
     <string name="battery_info_status_full" msgid="1339002294876531312">"已充满电"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"由管理员控制"</string>
     <string name="disabled" msgid="8017887509554714950">"已停用"</string>
@@ -506,9 +507,9 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"闹钟和提醒"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"允许设置闹钟和提醒"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"闹钟和提醒"</string>
-    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"允许该应用设置闹钟或安排其他操作的执行时间。该应用可能会在您未使用手机时运行，手机或许会比较耗电。如果您关闭此权限，该应用可能无法正常运行，已设置的闹钟将无法在排定的时间响起。"</string>
-    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"允许该应用设置闹钟或安排其他操作的执行时间。该应用可能会在您未使用平板电脑时运行，平板电脑或许会比较耗电。如果您关闭此权限，该应用可能无法正常运行，已设置的闹钟将无法在排定的时间响起。"</string>
-    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"允许该应用设置闹钟或安排其他操作的执行时间。该应用可能会在您未使用设备时运行，设备或许会比较耗电。如果您关闭此权限，该应用可能无法正常运行，已设置的闹钟将无法在排定的时间响起。"</string>
+    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"允许该应用设置闹钟及安排其他操作的执行时间。该应用可能会在您未使用手机时运行，以致手机的电源消耗更快。如果您关闭此权限，该应用可能无法正常运行，已设置的闹钟也无法在排定的时间响起。"</string>
+    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"允许该应用设置闹钟及安排其他操作的执行时间。该应用可能会在您未使用平板电脑时运行，以致平板电脑的电源消耗更快。如果您关闭此权限，该应用可能无法正常运行，已设置的闹钟也无法在排定的时间响起。"</string>
+    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"允许该应用设置闹钟及安排其他操作的执行时间。该应用可能会在您未使用设备时运行，以致设备电源消耗更快。如果您关闭此权限，该应用可能无法正常运行，已设置的闹钟也无法在排定的时间响起。"</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"设置, 闹钟, 提醒, 时钟, schedule, alarm, reminder, clock"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"开启"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"开启勿扰模式"</string>

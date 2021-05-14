@@ -192,6 +192,7 @@
              android:orientation="vertical"
              android:layout_gravity="bottom|center_horizontal"
              android:layout_marginTop="@dimen/keyguard_eca_top_margin"
+             android:layout_marginBottom="12dp"
              android:gravity="center_horizontal"/>
 
 </com.android.keyguard.KeyguardPINView>

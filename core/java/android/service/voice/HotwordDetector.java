@@ -28,7 +28,6 @@ import android.media.AudioFormat;
 import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.SharedMemory;
-import android.service.voice.HotwordDetectionService.InitializationStatus;
 
 /**
  * Basic functionality for hotword detectors.
@@ -160,15 +159,18 @@ public interface HotwordDetector {
          * @param result Info about the second stage detection result, provided by the
          *         {@link HotwordDetectionService}.
          */
-        void onRejected(@Nullable HotwordRejectedResult result);
+        void onRejected(@NonNull HotwordRejectedResult result);
 
         /**
          * Called when the {@link HotwordDetectionService} is created by the system and given a
          * short amount of time to report it's initialization state.
          *
-         * @param status Info about initialization state of {@link HotwordDetectionService}.
+         * @param status Info about initialization state of {@link HotwordDetectionService}; the
+         * allowed values are {@link HotwordDetectionService#INITIALIZATION_STATUS_SUCCESS},
+         * 1<->{@link HotwordDetectionService#getMaxCustomInitializationStatus()},
+         * {@link HotwordDetectionService#INITIALIZATION_STATUS_UNKNOWN}.
          */
-        void onHotwordDetectionServiceInitialized(@InitializationStatus int status);
+        void onHotwordDetectionServiceInitialized(int status);
 
         /**
          * Called with the {@link HotwordDetectionService} is restarted.

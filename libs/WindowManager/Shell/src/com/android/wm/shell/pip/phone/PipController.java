@@ -535,10 +535,8 @@ public class PipController implements PipTransitionController.PipTransitionCallb
 
     private void onPipCornerRadiusChanged() {
         if (mPinnedStackAnimationRecentsCallback != null) {
-            final boolean enableCornerRadius =
-                    SystemProperties.getBoolean("debug.sf.enable_hole_punch_pip", false);
-            final int cornerRadius = enableCornerRadius
-                    ? mContext.getResources().getDimensionPixelSize(R.dimen.pip_corner_radius) : 0;
+            final int cornerRadius =
+                    mContext.getResources().getDimensionPixelSize(R.dimen.pip_corner_radius);
             try {
                 mPinnedStackAnimationRecentsCallback.onPipCornerRadiusChanged(cornerRadius);
             } catch (RemoteException e) {
