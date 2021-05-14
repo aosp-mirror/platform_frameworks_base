@@ -15,7 +15,6 @@
  */
 
 package com.android.server;
-
 import static android.Manifest.permission.RECEIVE_DATA_ACTIVITY_CHANGE;
 import static android.content.pm.PackageManager.FEATURE_BLUETOOTH;
 import static android.content.pm.PackageManager.FEATURE_WATCH;
@@ -125,6 +124,7 @@ import android.net.INetworkActivityListener;
 import android.net.INetworkAgent;
 import android.net.INetworkMonitor;
 import android.net.INetworkMonitorCallbacks;
+import android.net.INetworkOfferCallback;
 import android.net.IOnCompleteListener;
 import android.net.IQosCallback;
 import android.net.ISocketKeepaliveCallback;
@@ -133,6 +133,8 @@ import android.net.IpMemoryStore;
 import android.net.IpPrefix;
 import android.net.LinkProperties;
 import android.net.MatchAllNetworkSpecifier;
+import android.net.NativeNetworkConfig;
+import android.net.NativeNetworkType;
 import android.net.NattSocketKeepalive;
 import android.net.Network;
 import android.net.NetworkAgent;
@@ -232,6 +234,7 @@ import com.android.net.module.util.PermissionUtils;
 import com.android.server.connectivity.AutodestructReference;
 import com.android.server.connectivity.DnsManager;
 import com.android.server.connectivity.DnsManager.PrivateDnsValidationUpdate;
+import com.android.server.connectivity.FullScore;
 import com.android.server.connectivity.KeepaliveTracker;
 import com.android.server.connectivity.LingerMonitor;
 import com.android.server.connectivity.MockableSystemProperties;
@@ -239,6 +242,7 @@ import com.android.server.connectivity.NetworkAgentInfo;
 import com.android.server.connectivity.NetworkDiagnostics;
 import com.android.server.connectivity.NetworkNotificationManager;
 import com.android.server.connectivity.NetworkNotificationManager.NotificationType;
+import com.android.server.connectivity.NetworkOffer;
 import com.android.server.connectivity.NetworkRanker;
 import com.android.server.connectivity.PermissionMonitor;
 import com.android.server.connectivity.ProfileNetworkPreferences;
@@ -600,6 +604,18 @@ public class ConnectivityService extends IConnectivityManager.Stub
      * arg2 = blockedReasons
      */
     private static final int EVENT_UID_BLOCKED_REASON_CHANGED = 51;
+
+    /**
+     * Event to register a new network offer
+     * obj = NetworkOffer
+     */
+    private static final int EVENT_REGISTER_NETWORK_OFFER = 52;
+
+    /**
+     * Event to unregister an existing network offer
+     * obj = INetworkOfferCallback
+     */
+    private static final int EVENT_UNREGISTER_NETWORK_OFFER = 53;
 
     /**
      * Argument for {@link #EVENT_PROVISIONING_NOTIFICATION} to indicate that the notification
@@ -1378,7 +1394,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // arguments like the handler or the DnsResolver.
         // TODO : remove this ; it is probably better handled with a sentinel request.
         mNoServiceNetwork = new NetworkAgentInfo(null,
-                new Network(NO_SERVICE_NET_ID),
+                new Network(INetd.UNREACHABLE_NET_ID),
                 new NetworkInfo(TYPE_NONE, 0, "", ""),
                 new LinkProperties(), new NetworkCapabilities(),
                 new NetworkScore.Builder().setLegacyInt(0).build(), mContext, null,
@@ -3804,36 +3820,43 @@ public class ConnectivityService extends IConnectivityManager.Stub
         nai.onNetworkDestroyed();
     }
 
-    private boolean createNativeNetwork(@NonNull NetworkAgentInfo networkAgent) {
+    private boolean createNativeNetwork(@NonNull NetworkAgentInfo nai) {
         try {
             // This should never fail.  Specifying an already in use NetID will cause failure.
-            if (networkAgent.isVPN()) {
-                mNetd.networkCreateVpn(networkAgent.network.getNetId(),
-                        (networkAgent.networkAgentConfig == null
-                                || !networkAgent.networkAgentConfig.allowBypass));
+            final NativeNetworkConfig config;
+            if (nai.isVPN()) {
+                if (getVpnType(nai) == VpnManager.TYPE_VPN_NONE) {
+                    Log.wtf(TAG, "Unable to get VPN type from network " + nai.toShortString());
+                    return false;
+                }
+                config = new NativeNetworkConfig(nai.network.getNetId(), NativeNetworkType.VIRTUAL,
+                        INetd.PERMISSION_NONE,
+                        (nai.networkAgentConfig == null || !nai.networkAgentConfig.allowBypass),
+                        getVpnType(nai));
             } else {
-                mNetd.networkCreatePhysical(networkAgent.network.getNetId(),
-                        getNetworkPermission(networkAgent.networkCapabilities));
+                config = new NativeNetworkConfig(nai.network.getNetId(), NativeNetworkType.PHYSICAL,
+                        getNetworkPermission(nai.networkCapabilities), /*secure=*/ false,
+                        VpnManager.TYPE_VPN_NONE);
             }
-            mDnsResolver.createNetworkCache(networkAgent.network.getNetId());
-            mDnsManager.updateTransportsForNetwork(networkAgent.network.getNetId(),
-                    networkAgent.networkCapabilities.getTransportTypes());
+            mNetd.networkCreate(config);
+            mDnsResolver.createNetworkCache(nai.network.getNetId());
+            mDnsManager.updateTransportsForNetwork(nai.network.getNetId(),
+                    nai.networkCapabilities.getTransportTypes());
             return true;
         } catch (RemoteException | ServiceSpecificException e) {
-            loge("Error creating network " + networkAgent.network.getNetId() + ": "
-                    + e.getMessage());
+            loge("Error creating network " + nai.toShortString() + ": " + e.getMessage());
             return false;
         }
     }
 
-    private void destroyNativeNetwork(@NonNull NetworkAgentInfo networkAgent) {
+    private void destroyNativeNetwork(@NonNull NetworkAgentInfo nai) {
         try {
-            mNetd.networkDestroy(networkAgent.network.getNetId());
+            mNetd.networkDestroy(nai.network.getNetId());
         } catch (RemoteException | ServiceSpecificException e) {
             loge("Exception destroying network(networkDestroy): " + e);
         }
         try {
-            mDnsResolver.destroyNetworkCache(networkAgent.network.getNetId());
+            mDnsResolver.destroyNetworkCache(nai.network.getNetId());
         } catch (RemoteException | ServiceSpecificException e) {
             loge("Exception destroying network: " + e);
         }
@@ -4673,6 +4696,18 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 }
                 case EVENT_UNREGISTER_NETWORK_PROVIDER: {
                     handleUnregisterNetworkProvider((Messenger) msg.obj);
+                    break;
+                }
+                case EVENT_REGISTER_NETWORK_OFFER: {
+                    handleRegisterNetworkOffer((NetworkOffer) msg.obj);
+                    break;
+                }
+                case EVENT_UNREGISTER_NETWORK_OFFER: {
+                    final NetworkOfferInfo offer =
+                            findNetworkOfferInfoByCallback((INetworkOfferCallback) msg.obj);
+                    if (null != offer) {
+                        handleUnregisterNetworkOffer(offer);
+                    }
                     break;
                 }
                 case EVENT_REGISTER_NETWORK_AGENT: {
@@ -6205,11 +6240,36 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mHandler.sendMessage(mHandler.obtainMessage(EVENT_UNREGISTER_NETWORK_PROVIDER, messenger));
     }
 
+    @Override
+    public void offerNetwork(@NonNull final Messenger providerMessenger,
+            @NonNull final NetworkScore score, @NonNull final NetworkCapabilities caps,
+            @NonNull final INetworkOfferCallback callback) {
+        final NetworkOffer offer = new NetworkOffer(
+                FullScore.makeProspectiveScore(score, caps), caps, callback, providerMessenger);
+        mHandler.sendMessage(mHandler.obtainMessage(EVENT_REGISTER_NETWORK_OFFER, offer));
+    }
+
+    @Override
+    public void unofferNetwork(@NonNull final INetworkOfferCallback callback) {
+        mHandler.sendMessage(mHandler.obtainMessage(EVENT_UNREGISTER_NETWORK_OFFER, callback));
+    }
+
     private void handleUnregisterNetworkProvider(Messenger messenger) {
         NetworkProviderInfo npi = mNetworkProviderInfos.remove(messenger);
         if (npi == null) {
             loge("Failed to find Messenger in unregisterNetworkProvider");
             return;
+        }
+        // Unregister all the offers from this provider
+        final ArrayList<NetworkOfferInfo> toRemove = new ArrayList<>();
+        for (final NetworkOfferInfo noi : mNetworkOffers) {
+            if (noi.offer.provider == messenger) {
+                // Can't call handleUnregisterNetworkOffer here because iteration is in progress
+                toRemove.add(noi);
+            }
+        }
+        for (NetworkOfferInfo noi : toRemove) {
+            handleUnregisterNetworkOffer(noi);
         }
         if (DBG) log("unregisterNetworkProvider for " + npi.name);
     }
@@ -6248,6 +6308,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
     // contents must never be mutated. When the ranges change, the array is replaced with a new one
     // (on the handler thread).
     private volatile List<UidRange> mVpnBlockedUidRanges = new ArrayList<>();
+
+    // Must only be accessed on the handler thread
+    @NonNull
+    private final ArrayList<NetworkOfferInfo> mNetworkOffers = new ArrayList<>();
 
     @GuardedBy("mBlockedAppUids")
     private final HashSet<Integer> mBlockedAppUids = new HashSet<>();
@@ -6424,8 +6488,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
     // Request used to optionally keep vehicle internal network always active
     private final NetworkRequest mDefaultVehicleRequest;
 
-    // TODO replace with INetd.UNREACHABLE_NET_ID when available.
-    private static final int NO_SERVICE_NET_ID = 52;
     // Sentinel NAI used to direct apps with default networks that should have no connectivity to a
     // network with no service. This NAI should never be matched against, nor should any public API
     // ever return the associated network. For this reason, this NAI is not in the list of available
@@ -6571,6 +6633,65 @@ public class ConnectivityService extends IConnectivityManager.Stub
         NetworkInfo networkInfo = nai.networkInfo;
         updateNetworkInfo(nai, networkInfo);
         updateUids(nai, null, nai.networkCapabilities);
+    }
+
+    private class NetworkOfferInfo implements IBinder.DeathRecipient {
+        @NonNull public final NetworkOffer offer;
+
+        NetworkOfferInfo(@NonNull final NetworkOffer offer) {
+            this.offer = offer;
+        }
+
+        @Override
+        public void binderDied() {
+            mHandler.post(() -> handleUnregisterNetworkOffer(this));
+        }
+    }
+
+    /**
+     * Register or update a network offer.
+     * @param newOffer The new offer. If the callback member is the same as an existing
+     *                 offer, it is an update of that offer.
+     */
+    private void handleRegisterNetworkOffer(@NonNull final NetworkOffer newOffer) {
+        ensureRunningOnConnectivityServiceThread();
+        if (null == mNetworkProviderInfos.get(newOffer.provider)) {
+            // This may actually happen if a provider updates its score or registers and then
+            // immediately unregisters. The offer would still be in the handler queue, but the
+            // provider would have been removed.
+            if (DBG) log("Received offer from an unregistered provider");
+            return;
+        }
+
+        final NetworkOfferInfo existingOffer = findNetworkOfferInfoByCallback(newOffer.callback);
+        if (null != existingOffer) {
+            handleUnregisterNetworkOffer(existingOffer);
+            newOffer.migrateFrom(existingOffer.offer);
+        }
+        final NetworkOfferInfo noi = new NetworkOfferInfo(newOffer);
+        try {
+            noi.offer.provider.getBinder().linkToDeath(noi, 0 /* flags */);
+        } catch (RemoteException e) {
+            noi.binderDied();
+            return;
+        }
+        mNetworkOffers.add(noi);
+        // TODO : send requests to the provider.
+    }
+
+    private void handleUnregisterNetworkOffer(@NonNull final NetworkOfferInfo noi) {
+        ensureRunningOnConnectivityServiceThread();
+        mNetworkOffers.remove(noi);
+        noi.offer.provider.getBinder().unlinkToDeath(noi, 0 /* flags */);
+    }
+
+    @Nullable private NetworkOfferInfo findNetworkOfferInfoByCallback(
+            @NonNull final INetworkOfferCallback callback) {
+        ensureRunningOnConnectivityServiceThread();
+        for (final NetworkOfferInfo noi : mNetworkOffers) {
+            if (noi.offer.callback.equals(callback)) return noi;
+        }
+        return null;
     }
 
     /**
@@ -9032,7 +9153,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     private NetworkCapabilities getNetworkCapabilitiesWithoutUids(@NonNull NetworkCapabilities nc) {
-        final NetworkCapabilities sanitized = new NetworkCapabilities(nc);
+        final NetworkCapabilities sanitized = new NetworkCapabilities(nc,
+                NetworkCapabilities.REDACT_ALL);
         sanitized.setUids(null);
         sanitized.setAdministratorUids(new int[0]);
         sanitized.setOwnerUid(Process.INVALID_UID);

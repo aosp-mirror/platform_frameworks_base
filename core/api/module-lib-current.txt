@@ -89,9 +89,9 @@ package android.net {
   public final class UnderlyingNetworkInfo implements android.os.Parcelable {
     ctor public UnderlyingNetworkInfo(int, @NonNull String, @NonNull java.util.List<java.lang.String>);
     method public int describeContents();
-    method @NonNull public String getIface();
+    method @NonNull public String getInterface();
     method public int getOwnerUid();
-    method @NonNull public java.util.List<java.lang.String> getUnderlyingIfaces();
+    method @NonNull public java.util.List<java.lang.String> getUnderlyingInterfaces();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.UnderlyingNetworkInfo> CREATOR;
   }
