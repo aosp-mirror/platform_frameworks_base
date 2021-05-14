@@ -575,6 +575,8 @@ public class UserManager {
      * <p>This restriction also prevents VPNs from starting. However, in Android 7.0
      * ({@linkplain android.os.Build.VERSION_CODES#N API level 24}) or higher, the system does
      * start always-on VPNs created by the device or profile owner.
+     * <p>From Android 12 ({@linkplain android.os.Build.VERSION_CODES#S API level 31}) enforcing
+     * this restriction clears currently active VPN if it was configured by the user.
      *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
