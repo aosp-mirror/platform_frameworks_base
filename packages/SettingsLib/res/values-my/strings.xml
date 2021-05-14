@@ -460,7 +460,7 @@
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"နှေးကွေးစွာ အားသွင်း"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"ကြိုးမဲ့ အားသွင်းနေသည်"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"အားသွင်းမနေပါ"</string>
-    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"ပလပ်ထိုးထားသောကြောင့် ယခုအားသွင်း၍ မရသေးပါ"</string>
+    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"ချိတ်ဆက်ထားသည်၊ အားသွင်းမနေပါ"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"အားသွင်းပြီးပါပြီ"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"စီမံခန့်ခွဲသူမှ ထိန်းချုပ်ပါသည်"</string>
     <string name="disabled" msgid="8017887509554714950">"ပိတ်ထားပြီး"</string>

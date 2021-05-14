@@ -206,6 +206,12 @@
   <!-- A tag used to store the margin end for this view when the right icon is gone -->
   <item type="id" name="tag_margin_end_when_icon_visible" />
 
+  <!-- A tag used on the notification @id/left_icon to indicate that this view should be pupulated with the drawable from @id/right_icon when visible. -->
+  <item type="id" name="tag_uses_right_icon_drawable" />
+
+  <!-- A tag used on notification @id/right_icon to indicate that this view should remain visible even when the @id/left_icon is shown. -->
+  <item type="id" name="tag_keep_when_showing_left_icon" />
+
   <!-- Marks the "copy to clipboard" button in the ChooserActivity -->
   <item type="id" name="chooser_copy_button" />
 

@@ -460,7 +460,7 @@
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"הסוללה נטענת לאט"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"בטעינה אלחוטית"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"לא בטעינה"</string>
-    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"המכשיר מחובר, אבל לא ניתן לטעון עכשיו"</string>
+    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"מחובר, לא בטעינה"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"הסוללה טעונה"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"נמצא בשליטת מנהל מערכת"</string>
     <string name="disabled" msgid="8017887509554714950">"מושבת"</string>
@@ -505,7 +505,7 @@
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"פחות זמן."</string>
     <string name="cancel" msgid="5665114069455378395">"ביטול"</string>
     <string name="okay" msgid="949938843324579502">"אישור"</string>
-    <string name="alarms_and_reminders_label" msgid="6918395649731424294">"השכמות ותזכורות"</string>
+    <string name="alarms_and_reminders_label" msgid="6918395649731424294">"שעונים מעוררים ותזכורות"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"הרשאה להגדרה של שעונים מעוררים ותזכורות"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"שעונים מעוררים ותזכורות"</string>
     <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"הגדרה זו מתירה לאפליקציה להגדיר שעון מעורר ולתזמן אירועים אחרים. ייתכן שהאפליקציה תפעל גם כשלא נעשה שימוש בטלפון שלך, ולכן תגביר את צריכת הסוללה. אם ההרשאה הזו תושבת, ייתכן שהאפליקציה לא תפעל כראוי ושהשעונים המעוררים לא יפעלו כפי שתוזמנו."</string>

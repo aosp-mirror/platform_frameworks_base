@@ -51,12 +51,7 @@ public class BatteryUsageStatsRule implements TestRule {
 
     private final PowerProfile mPowerProfile;
     private final MockClocks mMockClocks = new MockClocks();
-    private final MockBatteryStatsImpl mBatteryStats = new MockBatteryStatsImpl(mMockClocks) {
-        @Override
-        public boolean hasBluetoothActivityReporting() {
-            return true;
-        }
-    };
+    private final MockBatteryStatsImpl mBatteryStats;
 
     private BatteryUsageStats mBatteryUsageStats;
     private boolean mScreenOn;
@@ -64,6 +59,7 @@ public class BatteryUsageStatsRule implements TestRule {
     public BatteryUsageStatsRule() {
         Context context = InstrumentationRegistry.getContext();
         mPowerProfile = spy(new PowerProfile(context, true /* forTest */));
+        mBatteryStats = new MockBatteryStatsImpl(mMockClocks);
         mBatteryStats.setPowerProfile(mPowerProfile);
     }
 
@@ -110,10 +106,17 @@ public class BatteryUsageStatsRule implements TestRule {
 
     /** Call only after setting the power profile information. */
     public BatteryUsageStatsRule initMeasuredEnergyStatsLocked() {
+        return initMeasuredEnergyStatsLocked(new String[0]);
+    }
+
+    /** Call only after setting the power profile information. */
+    public BatteryUsageStatsRule initMeasuredEnergyStatsLocked(
+            String[] customPowerComponentNames) {
         final boolean[] supportedStandardBuckets =
                 new boolean[MeasuredEnergyStats.NUMBER_STANDARD_POWER_BUCKETS];
         Arrays.fill(supportedStandardBuckets, true);
-        mBatteryStats.initMeasuredEnergyStatsLocked(supportedStandardBuckets, new String[0]);
+        mBatteryStats.initMeasuredEnergyStatsLocked(supportedStandardBuckets,
+                customPowerComponentNames);
         mBatteryStats.informThatAllExternalStatsAreFlushed();
         return this;
     }

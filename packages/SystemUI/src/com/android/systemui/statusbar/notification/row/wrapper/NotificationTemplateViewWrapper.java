@@ -20,10 +20,12 @@ import static android.view.View.VISIBLE;
 
 import static com.android.systemui.statusbar.notification.row.ExpandableNotificationRow.DEFAULT_HEADER_VISIBLE_AMOUNT;
 
+import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.graphics.drawable.Icon;
 import android.service.notification.StatusBarNotification;
 import android.util.ArraySet;
 import android.view.View;
@@ -31,6 +33,8 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import androidx.annotation.Nullable;
 
 import com.android.internal.util.ContrastColorUtil;
 import com.android.internal.widget.NotificationActionListLayout;
@@ -143,16 +147,14 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
                 com.android.internal.R.dimen.notification_content_margin_top);
     }
 
-    private void resolveTemplateViews(StatusBarNotification notification) {
+    private void resolveTemplateViews(StatusBarNotification sbn) {
         mRightIcon = mView.findViewById(com.android.internal.R.id.right_icon);
         if (mRightIcon != null) {
-            mRightIcon.setTag(ImageTransformState.ICON_TAG,
-                    notification.getNotification().getLargeIcon());
+            mRightIcon.setTag(ImageTransformState.ICON_TAG, getRightIcon(sbn.getNotification()));
         }
         mLeftIcon = mView.findViewById(com.android.internal.R.id.left_icon);
         if (mLeftIcon != null) {
-            mLeftIcon.setTag(ImageTransformState.ICON_TAG,
-                    notification.getNotification().getLargeIcon());
+            mLeftIcon.setTag(ImageTransformState.ICON_TAG, getLargeIcon(sbn.getNotification()));
         }
         mTitle = mView.findViewById(com.android.internal.R.id.title);
         mText = mView.findViewById(com.android.internal.R.id.text);
@@ -169,6 +171,27 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
         mRemoteInputHistory = mView.findViewById(
                 com.android.internal.R.id.notification_material_reply_container);
         updatePendingIntentCancellations();
+    }
+
+    @Nullable
+    protected final Icon getLargeIcon(Notification n) {
+        Icon modernLargeIcon = n.getLargeIcon();
+        if (modernLargeIcon == null && n.largeIcon != null) {
+            return Icon.createWithBitmap(n.largeIcon);
+        }
+        return modernLargeIcon;
+    }
+
+    @Nullable
+    protected final Icon getRightIcon(Notification n) {
+        if (n.extras.getBoolean(Notification.EXTRA_SHOW_BIG_PICTURE_WHEN_COLLAPSED)
+                && n.getNotificationStyle() == Notification.BigPictureStyle.class) {
+            Icon pictureIcon = Notification.BigPictureStyle.getPictureIcon(n.extras);
+            if (pictureIcon != null) {
+                return pictureIcon;
+            }
+        }
+        return getLargeIcon(n);
     }
 
     private void updatePendingIntentCancellations() {

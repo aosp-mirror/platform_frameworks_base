@@ -30,6 +30,9 @@ import java.util.Set;
  * <p>An {@link AppSearchSessionShim} instance provides access to database operations such as
  * setting a schema, adding documents, and searching.
  *
+ * <p>Instances of this interface are usually obtained from a storage implementation, e.g. {@code
+ * AppSearchManager.createSearchSession()} or {@code PlatformStorage.createSearchSession()}.
+ *
  * <p>All implementations of this interface must be thread safe.
  *
  * @see GlobalSearchSessionShim

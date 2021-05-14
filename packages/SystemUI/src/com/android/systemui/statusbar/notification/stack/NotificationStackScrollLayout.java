@@ -664,7 +664,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             mDebugPaint.setColor(Color.CYAN);
             canvas.drawLine(0, y, getWidth(), y, mDebugPaint);
 
-            y = (int) (mAmbientState.getStackY() + mSidePaddings + mAmbientState.getStackHeight());
+            y = (int) (mAmbientState.getStackY() + mAmbientState.getStackHeight());
             mDebugPaint.setColor(Color.BLUE);
             canvas.drawLine(0, y, getWidth(), y, mDebugPaint);
         }
@@ -1149,8 +1149,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             mOnStackYChanged.run();
         }
         if (mQsExpansionFraction <= 0) {
+            final float scrimTopPadding = mAmbientState.isOnKeyguard() ? 0 : mSidePaddings;
             final float stackEndHeight = Math.max(0f,
-                    getHeight() - getEmptyBottomMargin() - stackY - mSidePaddings);
+                    getHeight() - getEmptyBottomMargin() - stackY);
             mAmbientState.setStackEndHeight(stackEndHeight);
             mAmbientState.setStackHeight(
                     MathUtils.lerp(stackEndHeight * StackScrollAlgorithm.START_FRACTION,
@@ -2067,18 +2068,22 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private void updateContentHeight() {
-        int height = 0;
+        final float scrimTopPadding = mAmbientState.isOnKeyguard() ? 0 : mSidePaddings;
+        int height = (int) scrimTopPadding;
         float previousPaddingRequest = mPaddingBetweenElements;
         int numShownItems = 0;
         int numShownNotifs = 0;
         boolean finish = false;
         int maxDisplayedNotifications = mMaxDisplayedNotifications;
         ExpandableView previousView = null;
+
         for (int i = 0; i < getChildCount(); i++) {
             ExpandableView expandableView = (ExpandableView) getChildAt(i);
             boolean footerViewOnLockScreen = expandableView == mFooterView && onKeyguard();
+
             if (expandableView.getVisibility() != View.GONE
                     && !expandableView.hasNoContentHeight() && !footerViewOnLockScreen) {
+
                 boolean limitReached = maxDisplayedNotifications != -1
                         && numShownNotifs >= maxDisplayedNotifications;
                 final float viewHeight;

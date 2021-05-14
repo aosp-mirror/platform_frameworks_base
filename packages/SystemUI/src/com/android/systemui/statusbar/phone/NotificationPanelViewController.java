@@ -4071,6 +4071,7 @@ public class NotificationPanelViewController extends PanelViewController {
             // force a call to onThemeChanged
             mConfigurationListener.onThemeChanged();
             mFalsingManager.addTapListener(mFalsingTapListener);
+            mKeyguardIndicationController.init();
         }
 
         @Override

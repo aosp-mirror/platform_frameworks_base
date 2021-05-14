@@ -460,7 +460,8 @@
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"กำลังชาร์จอย่างช้าๆ"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"กำลังชาร์จแบบไร้สาย"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"ไม่ได้ชาร์จ"</string>
-    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"เสียบอยู่ ไม่สามารถชาร์จได้ในขณะนี้"</string>
+    <!-- no translation found for battery_info_status_not_charging (3371084153747234837) -->
+    <skip />
     <string name="battery_info_status_full" msgid="1339002294876531312">"ชาร์จแล้ว"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"ผู้ดูแลระบบเป็นผู้ควบคุม"</string>
     <string name="disabled" msgid="8017887509554714950">"ปิดอยู่"</string>
@@ -506,9 +507,9 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"การปลุกและการช่วยเตือน"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"อนุญาตให้ตั้งปลุกและการช่วยเตือน"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"การปลุกและการช่วยเตือน"</string>
-    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"อนุญาตให้แอปตั้งปลุกและกำหนดเวลาการดำเนินการอื่นๆ ระบบอาจใช้แอปนี้เมื่อคุณไม่ได้ใช้โทรศัพท์ ซึ่งอาจใช้แบตเตอรี่มากขึ้น หากสิทธิ์ดังกล่าวปิดอยู่ แอปอาจทำงานไม่ปกติ และการปลุกจะไม่ทำงานตามกำหนดเวลา"</string>
-    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"อนุญาตให้แอปตั้งปลุกและกำหนดเวลาการดำเนินการอื่นๆ ระบบอาจใช้แอปนี้เมื่อคุณไม่ได้ใช้แท็บเล็ต ซึ่งอาจใช้แบตเตอรี่มากขึ้น หากสิทธิ์ดังกล่าวปิดอยู่ แอปอาจทำงานไม่ปกติ และการปลุกจะไม่ทำงานตามกำหนดเวลา"</string>
-    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"อนุญาตให้แอปตั้งปลุกและกำหนดเวลาการดำเนินการอื่นๆ ระบบอาจใช้แอปนี้เมื่อคุณไม่ได้ใช้อุปกรณ์ ซึ่งอาจใช้แบตเตอรี่มากขึ้น หากสิทธิ์ดังกล่าวปิดอยู่ แอปอาจทำงานไม่ปกติ และการปลุกจะไม่ทำงานตามกำหนดเวลา"</string>
+    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"อนุญาตให้แอปตั้งปลุกและกำหนดเวลาการดำเนินการอื่นๆ ระบบอาจใช้แอปนี้แม้คุณจะไม่ได้ใช้โทรศัพท์อยู่ จึงอาจทำให้เปลืองแบตเตอรี่มากขึ้น การปิดสิทธิ์นี้จะทำให้แอปทำงานไม่ปกติและการปลุกไม่ทำงานตามกำหนดเวลา"</string>
+    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"อนุญาตให้แอปตั้งปลุกและกำหนดเวลาการดำเนินการอื่นๆ ระบบอาจใช้แอปนี้แม้คุณจะไม่ได้ใช้แท็บเล็ตอยู่ จึงอาจทำให้เปลืองแบตเตอรี่มากขึ้น การปิดสิทธิ์นี้จะทำให้แอปทำงานไม่ปกติและการปลุกไม่ทำงานตามกำหนดเวลา"</string>
+    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"อนุญาตให้แอปตั้งปลุกและกำหนดเวลาการดำเนินการอื่นๆ ระบบอาจใช้แอปนี้แม้คุณจะไม่ได้ใช้อุปกรณ์อยู่ จึงอาจทำให้เปลืองแบตเตอรี่มากขึ้น การปิดสิทธิ์นี้จะทำให้แอปทำงานไม่ปกติและการปลุกไม่ทำงานตามกำหนดเวลา"</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"กำหนดเวลา การปลุก การช่วยเตือน นาฬิกา"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"เปิด"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"เปิด \"ห้ามรบกวน\""</string>

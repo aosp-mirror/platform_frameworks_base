@@ -28,6 +28,20 @@
 #include <log/log.h>
 #include <ui/PixelFormat.h>
 
+// These are unstable internal APIs in google-benchmark. We should just implement our own variant
+// of these instead, but this was quicker. Disabled-by-default to avoid any breakages when
+// google-benchmark updates if they change anything
+#if 0
+#define USE_SKETCHY_INTERNAL_STATS
+namespace benchmark {
+std::vector<BenchmarkReporter::Run> ComputeStats(
+        const std::vector<BenchmarkReporter::Run> &reports);
+double StatisticsMean(const std::vector<double>& v);
+double StatisticsMedian(const std::vector<double>& v);
+double StatisticsStdDev(const std::vector<double>& v);
+}
+#endif
+
 using namespace android;
 using namespace android::uirenderer;
 using namespace android::uirenderer::renderthread;
@@ -66,6 +80,7 @@ using BenchmarkResults = std::vector<benchmark::BenchmarkReporter::Run>;
 
 void outputBenchmarkReport(const TestScene::Info& info, const TestScene::Options& opts,
                            double durationInS, int repetationIndex, BenchmarkResults* reports) {
+    using namespace benchmark;
     benchmark::BenchmarkReporter::Run report;
     report.repetitions = opts.repeatCount;
     report.repetition_index = repetationIndex;
@@ -73,12 +88,22 @@ void outputBenchmarkReport(const TestScene::Info& info, const TestScene::Options
     report.iterations = static_cast<int64_t>(opts.frameCount);
     report.real_accumulated_time = durationInS;
     report.cpu_accumulated_time = durationInS;
-    report.counters["items_per_second"] = opts.frameCount / durationInS;
+    report.counters["FPS"] = opts.frameCount / durationInS;
+    if (opts.reportGpuMemoryUsage) {
+        size_t cpuUsage, gpuUsage;
+        RenderProxy::getMemoryUsage(&cpuUsage, &gpuUsage);
+        report.counters["Rendering RAM"] = Counter{static_cast<double>(cpuUsage + gpuUsage),
+                                                   Counter::kDefaults, Counter::kIs1024};
+    }
     reports->push_back(report);
 }
 
 static void doRun(const TestScene::Info& info, const TestScene::Options& opts, int repetitionIndex,
                   BenchmarkResults* reports) {
+    if (opts.reportGpuMemoryUsage) {
+        // If we're reporting GPU memory usage we need to first start with a clean slate
+        RenderProxy::purgeCaches();
+    }
     Properties::forceDrawFrame = true;
     TestContext testContext;
     testContext.setRenderOffscreen(opts.renderOffscreen);
@@ -162,11 +187,6 @@ static void doRun(const TestScene::Info& info, const TestScene::Options& opts, i
 
 void run(const TestScene::Info& info, const TestScene::Options& opts,
          benchmark::BenchmarkReporter* reporter) {
-    if (opts.reportGpuMemoryUsage) {
-        // If we're reporting GPU memory usage we need to first start with a clean slate
-        // All repetitions of the same test will share a single memory usage report
-        RenderProxy::trimMemory(100);
-    }
     BenchmarkResults results;
     for (int i = 0; i < opts.repeatCount; i++) {
         doRun(info, opts, i, reporter ? &results : nullptr);
@@ -174,10 +194,21 @@ void run(const TestScene::Info& info, const TestScene::Options& opts,
     if (reporter) {
         reporter->ReportRuns(results);
         if (results.size() > 1) {
-            // TODO: Report summary
+#ifdef USE_SKETCHY_INTERNAL_STATS
+            std::vector<benchmark::internal::Statistics> stats;
+            stats.reserve(3);
+            stats.emplace_back("mean", benchmark::StatisticsMean);
+            stats.emplace_back("median", benchmark::StatisticsMedian);
+            stats.emplace_back("stddev", benchmark::StatisticsStdDev);
+            for (auto& it : results) {
+                it.statistics = &stats;
+            }
+            auto summary = benchmark::ComputeStats(results);
+            reporter->ReportRuns(summary);
+#endif
         }
     }
-    if (opts.reportGpuMemoryUsage) {
+    if (opts.reportGpuMemoryUsageVerbose) {
         RenderProxy::dumpGraphicsMemory(STDOUT_FILENO, false);
     }
 }

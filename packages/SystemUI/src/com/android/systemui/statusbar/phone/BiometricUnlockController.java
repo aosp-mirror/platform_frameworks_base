@@ -38,7 +38,6 @@ import com.android.keyguard.KeyguardConstants;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.KeyguardViewController;
-import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -250,16 +249,20 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             @Main Resources resources,
             KeyguardBypassController keyguardBypassController, DozeParameters dozeParameters,
-            MetricsLogger metricsLogger, DumpManager dumpManager) {
+            MetricsLogger metricsLogger, DumpManager dumpManager,
+            PowerManager powerManager,
+            NotificationMediaManager notificationMediaManager,
+            WakefulnessLifecycle wakefulnessLifecycle,
+            ScreenLifecycle screenLifecycle) {
         mContext = context;
-        mPowerManager = context.getSystemService(PowerManager.class);
+        mPowerManager = powerManager;
         mShadeController = shadeController;
         mUpdateMonitor = keyguardUpdateMonitor;
         mDozeParameters = dozeParameters;
         mUpdateMonitor.registerCallback(this);
-        mMediaManager = Dependency.get(NotificationMediaManager.class);
-        Dependency.get(WakefulnessLifecycle.class).addObserver(mWakefulnessObserver);
-        Dependency.get(ScreenLifecycle.class).addObserver(mScreenObserver);
+        mMediaManager = notificationMediaManager;
+        wakefulnessLifecycle.addObserver(mWakefulnessObserver);
+        screenLifecycle.addObserver(mScreenObserver);
 
         mNotificationShadeWindowController = notificationShadeWindowController;
         mDozeScrimController = dozeScrimController;
@@ -415,7 +418,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
                 if (!wasDeviceInteractive) {
                     mPendingShowBouncer = true;
                 } else {
-                    showBouncer();
+                    mPendingShowBouncer = false;
                     mKeyguardViewController.notifyKeyguardAuthenticated(
                             false /* strongAuth */);
                 }
