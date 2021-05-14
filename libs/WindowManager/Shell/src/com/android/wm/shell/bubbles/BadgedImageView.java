@@ -111,7 +111,7 @@ public class BadgedImageView extends ImageView {
 
         Path iconPath = PathParser.createPathFromPathData(
                 getResources().getString(com.android.internal.R.string.config_icon_mask));
-        mDotRenderer = new DotRenderer(mPositioner.getBubbleBitmapSize(),
+        mDotRenderer = new DotRenderer(mPositioner.getBubbleSize(),
                 iconPath, DEFAULT_PATH_SIZE);
     }
 
@@ -192,7 +192,7 @@ public class BadgedImageView extends ImageView {
      * @param iconPath The new icon path to use when calculating dot position.
      */
     void drawDot(Path iconPath) {
-        mDotRenderer = new DotRenderer(mPositioner.getBubbleBitmapSize(),
+        mDotRenderer = new DotRenderer(mPositioner.getBubbleSize(),
                 iconPath, DEFAULT_PATH_SIZE);
         invalidate();
     }

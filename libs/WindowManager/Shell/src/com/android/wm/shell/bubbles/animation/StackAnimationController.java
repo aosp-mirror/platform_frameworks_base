@@ -182,9 +182,7 @@ public class StackAnimationController extends
     private int mMaxBubbles;
     /** Default bubble elevation. */
     private int mElevation;
-    /** Diameter of the bubble icon. */
-    private int mBubbleBitmapSize;
-    /** Width of the bubble (icon and padding). */
+    /** Diameter of the bubble. */
     private int mBubbleSize;
     /**
      * The amount of space to add between the bubbles and certain UI elements, such as the top of
@@ -302,7 +300,7 @@ public class StackAnimationController extends
             return true; // Default to left, which is where it starts by default.
         }
 
-        float stackCenter = mStackPosition.x + mBubbleBitmapSize / 2;
+        float stackCenter = mStackPosition.x + mBubbleSize / 2;
         float screenCenter = mLayout.getWidth() / 2;
         return stackCenter < screenCenter;
     }
@@ -346,7 +344,7 @@ public class StackAnimationController extends
      * @return The X value that the stack will end up at after the fling/spring.
      */
     public float flingStackThenSpringToEdge(float x, float velX, float velY) {
-        final boolean stackOnLeftSide = x - mBubbleBitmapSize / 2 < mLayout.getWidth() / 2;
+        final boolean stackOnLeftSide = x - mBubbleSize / 2 < mLayout.getWidth() / 2;
 
         final boolean stackShouldFlingLeft = stackOnLeftSide
                 ? velX < ESCAPE_VELOCITY
@@ -857,7 +855,6 @@ public class StackAnimationController extends
         mMaxBubbles = res.getInteger(R.integer.bubbles_max_rendered);
         mElevation = res.getDimensionPixelSize(R.dimen.bubble_elevation);
         mBubbleSize = mPositioner.getBubbleSize();
-        mBubbleBitmapSize = mPositioner.getBubbleBitmapSize();
         mBubblePaddingTop = res.getDimensionPixelSize(R.dimen.bubble_padding_top);
         mBubbleOffscreen = res.getDimensionPixelSize(R.dimen.bubble_stack_offscreen);
     }

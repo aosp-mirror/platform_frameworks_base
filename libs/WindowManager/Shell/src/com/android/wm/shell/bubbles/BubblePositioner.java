@@ -69,7 +69,7 @@ public class BubblePositioner {
     private Insets mInsets;
 
     private int mBubbleSize;
-    private int mBubbleBitmapSize;
+    private int mBubbleBadgeSize;
     private int mExpandedViewLargeScreenWidth;
     private int mExpandedViewPadding;
     private int mPointerMargin;
@@ -150,8 +150,8 @@ public class BubblePositioner {
         mPositionRect.bottom -= mInsets.bottom;
 
         Resources res = mContext.getResources();
-        mBubbleSize = res.getDimensionPixelSize(R.dimen.individual_bubble_size);
-        mBubbleBitmapSize = res.getDimensionPixelSize(R.dimen.bubble_bitmap_size);
+        mBubbleSize = res.getDimensionPixelSize(R.dimen.bubble_size);
+        mBubbleBadgeSize = res.getDimensionPixelSize(R.dimen.bubble_badge_size);
         mExpandedViewLargeScreenWidth = res.getDimensionPixelSize(
                 R.dimen.bubble_expanded_view_tablet_width);
         mExpandedViewPadding = res.getDimensionPixelSize(R.dimen.bubble_expanded_view_padding);
@@ -225,20 +225,11 @@ public class BubblePositioner {
         return isLandscape() || mShowingInTaskbar || mIsLargeScreen;
     }
 
-    /** Size of the bubble account for badge & dot. */
+    /** Size of the bubble. */
     public int getBubbleSize() {
-        int bsize = (mShowingInTaskbar && mTaskbarIconSize > 0)
+        return (mShowingInTaskbar && mTaskbarIconSize > 0)
                 ? mTaskbarIconSize
                 : mBubbleSize;
-        return bsize;
-    }
-
-    /** Size of the bitmap within the bubble */
-    public int getBubbleBitmapSize() {
-        float size =  (mShowingInTaskbar && mTaskbarIconSize > 0)
-                ? (mTaskbarIconSize * BUBBLE_BITMAP_SIZE_PERCENT)
-                : mBubbleBitmapSize;
-        return (int) size;
     }
 
     /**

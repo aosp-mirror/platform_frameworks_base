@@ -763,7 +763,7 @@ public class BubbleStackView extends FrameLayout
 
         Resources res = getResources();
         mMaxBubbles = res.getInteger(R.integer.bubbles_max_rendered);
-        mBubbleSize = res.getDimensionPixelSize(R.dimen.individual_bubble_size);
+        mBubbleSize = res.getDimensionPixelSize(R.dimen.bubble_size);
         mBubbleElevation = res.getDimensionPixelSize(R.dimen.bubble_elevation);
         mBubbleTouchPadding = res.getDimensionPixelSize(R.dimen.bubble_touch_padding);
         mImeOffset = res.getDimensionPixelSize(R.dimen.pip_ime_offset);

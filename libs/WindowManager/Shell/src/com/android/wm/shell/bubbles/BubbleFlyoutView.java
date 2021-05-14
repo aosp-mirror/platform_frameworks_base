@@ -72,7 +72,6 @@ public class BubbleFlyoutView extends FrameLayout {
     private final int mFlyoutSpaceFromBubble;
     private final int mPointerSize;
     private int mBubbleSize;
-    private int mBubbleBitmapSize;
 
     private final int mFlyoutElevation;
     private final int mBubbleElevation;
@@ -337,10 +336,9 @@ public class BubbleFlyoutView extends FrameLayout {
             boolean hideDot,
             BubblePositioner positioner)  {
 
-        mBubbleBitmapSize = positioner.getBubbleBitmapSize();
         mBubbleSize = positioner.getBubbleSize();
 
-        mOriginalDotSize = SIZE_PERCENTAGE * mBubbleBitmapSize;
+        mOriginalDotSize = SIZE_PERCENTAGE * mBubbleSize;
         mNewDotRadius = (DOT_SCALE * mOriginalDotSize) / 2f;
         mNewDotSize = mNewDotRadius * 2f;
 

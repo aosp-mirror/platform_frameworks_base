@@ -210,7 +210,7 @@ public class ExpandedAnimationController
         mStackOffsetPx = res.getDimensionPixelSize(R.dimen.bubble_stack_offset);
         mBubbleSizePx = mPositioner.getBubbleSize();
         mBubblesMaxRendered = res.getInteger(R.integer.bubbles_max_rendered);
-        mBubblesMaxSpace = res.getDimensionPixelSize(R.dimen.bubble_max_spacing);
+        mBubblesMaxSpace = res.getDimensionPixelSize(R.dimen.bubble_spacing);
         final float availableSpace = mPositioner.isLandscape()
                 ? mPositioner.getAvailableRect().height()
                 : mPositioner.getAvailableRect().width();
