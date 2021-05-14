@@ -532,9 +532,10 @@ public class AlarmManager {
      * modest timeliness requirements for its alarms.
      *
      * <p>
-     * Note: Starting with API {@link Build.VERSION_CODES#S}, the system will ensure that the window
-     * specified is at least a few minutes, as smaller windows are considered practically exact
-     * and should use the other APIs provided for exact alarms.
+     * Note: Starting with API {@link Build.VERSION_CODES#S}, apps should not pass in a window of
+     * less than 10 minutes. The system will try its best to accommodate smaller windows if the
+     * alarm is supposed to fire in the near future, but there are no guarantees and the app should
+     * expect any window smaller than 10 minutes to get elongated to 10 minutes.
      *
      * <p>
      * This method can also be used to achieve strict ordering guarantees among
@@ -588,9 +589,10 @@ public class AlarmManager {
      * if {@code null} is passed as the {@code targetHandler} parameter.
      *
      * <p>
-     * Note: Starting with API {@link Build.VERSION_CODES#S}, the system will ensure that the window
-     * specified is at least a few minutes, as smaller windows are considered practically exact
-     * and should use the other APIs provided for exact alarms.
+     * Note: Starting with API {@link Build.VERSION_CODES#S}, apps should not pass in a window of
+     * less than 10 minutes. The system will try its best to accommodate smaller windows if the
+     * alarm is supposed to fire in the near future, but there are no guarantees and the app should
+     * expect any window smaller than 10 minutes to get elongated to 10 minutes.
      *
      * @see #setWindow(int, long, long, PendingIntent)
      */
