@@ -82,16 +82,14 @@ class OngoingCallController @Inject constructor(
                     entry.sbn.notification.contentIntent.intent,
                     entry.sbn.uid)
                 updateChip()
+            } else if (isCallNotification(entry)) {
+                removeChip()
             }
         }
 
         override fun onEntryRemoved(entry: NotificationEntry, reason: Int) {
             if (isOngoingCallNotification(entry)) {
-                ongoingCallInfo = null
-                mListeners.forEach { l -> l.onOngoingCallStateChanged(animate = true) }
-                if (uidObserver != null) {
-                    iActivityManager.unregisterUidObserver(uidObserver)
-                }
+                removeChip()
             }
         }
     }
@@ -224,6 +222,14 @@ class OngoingCallController @Inject constructor(
         return procState <= ActivityManager.PROCESS_STATE_TOP
     }
 
+    private fun removeChip() {
+        ongoingCallInfo = null
+        mListeners.forEach { l -> l.onOngoingCallStateChanged(animate = true) }
+        if (uidObserver != null) {
+            iActivityManager.unregisterUidObserver(uidObserver)
+        }
+    }
+
     private class OngoingCallInfo(
         val callStartTime: Long,
         val intent: Intent,
@@ -233,9 +239,14 @@ class OngoingCallController @Inject constructor(
 
 private fun isOngoingCallNotification(entry: NotificationEntry): Boolean {
     val extras = entry.sbn.notification.extras
-    val callStyleTemplateName = Notification.CallStyle::class.java.name
-    return extras.getString(Notification.EXTRA_TEMPLATE) == callStyleTemplateName &&
+    return isCallNotification(entry) &&
             extras.getInt(Notification.EXTRA_CALL_TYPE, -1) == CALL_TYPE_ONGOING
+}
+
+private fun isCallNotification(entry: NotificationEntry): Boolean {
+    val extras = entry.sbn.notification.extras
+    val callStyleTemplateName = Notification.CallStyle::class.java.name
+    return extras.getString(Notification.EXTRA_TEMPLATE) == callStyleTemplateName
 }
 
 private const val TAG = "OngoingCallController"
