@@ -217,10 +217,13 @@ public class AppSearchManagerService extends SystemService {
             }
             if (ImplInstanceManager.getAppSearchDir(userId).exists()) {
                 // Only clear the package's data if AppSearch exists for this user.
-                AppSearchImpl impl = mImplInstanceManager.getOrCreateAppSearchImpl(mContext,
+                PlatformLogger logger = mLoggerInstanceManager.getOrCreatePlatformLogger(mContext,
                         userId);
+                AppSearchImpl impl = mImplInstanceManager.getOrCreateAppSearchImpl(mContext,
+                        userId, logger);
                 //TODO(b/145759910) clear visibility setting for package.
                 impl.clearPackageData(packageName);
+                logger.removeCachedUidForPackage(packageName);
             }
         } catch (Throwable t) {
             Log.e(TAG, "Unable to remove data for package: " + packageName, t);
@@ -423,22 +426,22 @@ public class AppSearchManagerService extends SystemService {
                     invokeCallbackOnError(callback, t);
                 } finally {
                     if (logger != null) {
+                        int estimatedBinderLatencyMillis =
+                                2 * (int) (totalLatencyStartTimeMillis - binderCallStartTimeMillis);
+                        int totalLatencyMillis =
+                                (int) (SystemClock.elapsedRealtime() - totalLatencyStartTimeMillis);
                         CallStats.Builder cBuilder = new CallStats.Builder(packageName,
                                 databaseName)
                                 .setCallType(CallStats.CALL_TYPE_PUT_DOCUMENTS)
                                 // TODO(b/173532925) check the existing binder call latency chart
                                 // is good enough for us:
                                 // http://dashboards/view/_72c98f9a_91d9_41d4_ab9a_bc14f79742b4
-                                .setEstimatedBinderLatencyMillis(
-                                        2 * (int) (totalLatencyStartTimeMillis
-                                                - binderCallStartTimeMillis))
+                                .setEstimatedBinderLatencyMillis(estimatedBinderLatencyMillis)
                                 .setNumOperationsSucceeded(operationSuccessCount)
                                 .setNumOperationsFailed(operationFailureCount);
                         cBuilder.getGeneralStatsBuilder()
                                 .setStatusCode(statusCode)
-                                .setTotalLatencyMillis(
-                                        (int) (SystemClock.elapsedRealtime()
-                                                - totalLatencyStartTimeMillis));
+                                .setTotalLatencyMillis(totalLatencyMillis);
                         logger.logStats(cBuilder.build());
                     }
                 }
@@ -913,18 +916,51 @@ public class AppSearchManagerService extends SystemService {
         }
 
         @Override
-        public void initialize(@UserIdInt int userId, @NonNull IAppSearchResultCallback callback) {
+        public void initialize(@UserIdInt int userId,
+                @ElapsedRealtimeLong long binderCallStartTimeMillis,
+                @NonNull IAppSearchResultCallback callback) {
             Objects.requireNonNull(callback);
+            long totalLatencyStartTimeMillis = SystemClock.elapsedRealtime();
             int callingUid = Binder.getCallingUid();
             int callingUserId = handleIncomingUser(userId, callingUid);
             EXECUTOR.execute(() -> {
+                @AppSearchResult.ResultCode int statusCode = AppSearchResult.RESULT_OK;
+                PlatformLogger logger = null;
+                int operationSuccessCount = 0;
+                int operationFailureCount = 0;
                 try {
                     verifyUserUnlocked(callingUserId);
-                    mImplInstanceManager.getOrCreateAppSearchImpl(mContext, callingUserId);
-                    mLoggerInstanceManager.getOrCreatePlatformLogger(getContext(), callingUserId);
+                    logger = mLoggerInstanceManager.getOrCreatePlatformLogger(mContext,
+                            callingUserId);
+                    mImplInstanceManager.getOrCreateAppSearchImpl(mContext, callingUserId, logger);
+                    ++operationSuccessCount;
                     invokeCallbackOnResult(callback, AppSearchResult.newSuccessfulResult(null));
                 } catch (Throwable t) {
+                    ++operationFailureCount;
+                    statusCode = throwableToFailedResult(t).getResultCode();
                     invokeCallbackOnError(callback, t);
+                } finally {
+                    if (logger != null) {
+                        int estimatedBinderLatencyMillis =
+                                2 * (int) (totalLatencyStartTimeMillis - binderCallStartTimeMillis);
+                        int totalLatencyMillis =
+                                (int) (SystemClock.elapsedRealtime() - totalLatencyStartTimeMillis);
+                        // TODO(b/173532925) make packageName and database nullable after
+                        //  removing generalStats
+                        CallStats.Builder cBuilder = new CallStats.Builder(/*packageName=*/"",
+                                /*database=*/ "")
+                                .setCallType(CallStats.CALL_TYPE_INITIALIZE)
+                                // TODO(b/173532925) check the existing binder call latency chart
+                                // is good enough for us:
+                                // http://dashboards/view/_72c98f9a_91d9_41d4_ab9a_bc14f79742b4
+                                .setEstimatedBinderLatencyMillis(estimatedBinderLatencyMillis)
+                                .setNumOperationsSucceeded(operationSuccessCount)
+                                .setNumOperationsFailed(operationFailureCount);
+                        cBuilder.getGeneralStatsBuilder()
+                                .setStatusCode(statusCode)
+                                .setTotalLatencyMillis(totalLatencyMillis);
+                        logger.logStats(cBuilder.build());
+                    }
                 }
             });
         }
@@ -1021,8 +1057,10 @@ public class AppSearchManagerService extends SystemService {
             int userId = userHandle.getIdentifier();
             try {
                 verifyUserUnlocked(userId);
-                AppSearchImpl impl = mImplInstanceManager.getOrCreateAppSearchImpl(mContext,
+                PlatformLogger logger = mLoggerInstanceManager.getOrCreatePlatformLogger(mContext,
                         userId);
+                AppSearchImpl impl = mImplInstanceManager.getOrCreateAppSearchImpl(mContext,
+                        userId, logger);
                 stats.dataSize += impl.getStorageInfoForPackage(packageName).getSizeBytes();
             } catch (Throwable t) {
                 Log.e(
@@ -1046,8 +1084,10 @@ public class AppSearchManagerService extends SystemService {
                 if (packagesForUid == null) {
                     return;
                 }
-                AppSearchImpl impl = mImplInstanceManager.getOrCreateAppSearchImpl(mContext,
+                PlatformLogger logger = mLoggerInstanceManager.getOrCreatePlatformLogger(mContext,
                         userId);
+                AppSearchImpl impl = mImplInstanceManager.getOrCreateAppSearchImpl(mContext,
+                        userId, logger);
                 for (int i = 0; i < packagesForUid.length; i++) {
                     stats.dataSize +=
                             impl.getStorageInfoForPackage(packagesForUid[i]).getSizeBytes();
@@ -1073,8 +1113,10 @@ public class AppSearchManagerService extends SystemService {
                 if (packagesForUser == null) {
                     return;
                 }
+                PlatformLogger logger = mLoggerInstanceManager.getOrCreatePlatformLogger(mContext,
+                        userId);
                 AppSearchImpl impl =
-                        mImplInstanceManager.getOrCreateAppSearchImpl(mContext, userId);
+                        mImplInstanceManager.getOrCreateAppSearchImpl(mContext, userId, logger);
                 for (int i = 0; i < packagesForUser.size(); i++) {
                     String packageName = packagesForUser.get(i).packageName;
                     stats.dataSize += impl.getStorageInfoForPackage(packageName).getSizeBytes();
