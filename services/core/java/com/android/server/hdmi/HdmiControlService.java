@@ -3030,6 +3030,7 @@ public class HdmiControlService extends SystemService {
     @ServiceThreadOnly
     @VisibleForTesting
     protected void onStandby(final int standbyAction) {
+        mWakeUpMessageReceived = false;
         assertRunOnServiceThread();
         mPowerStatusController.setPowerStatus(HdmiControlManager.POWER_STATUS_TRANSIENT_TO_STANDBY,
                 false);
