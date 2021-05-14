@@ -37,6 +37,7 @@ interface IAppSearchManager {
      *     incompatible documents will be deleted.
      * @param schemaVersion  The overall schema version number of the request.
      * @param userId Id of the calling user
+     * @param binderCallStartTimeMillis start timestamp of binder call in Millis
      * @param callback {@link IAppSearchResultCallback#onResult} will be called with an
      *     {@link AppSearchResult}&lt;{@link Bundle}&gt;, where the value are
      *     {@link SetSchemaResponse} bundle.
@@ -50,6 +51,7 @@ interface IAppSearchManager {
         boolean forceOverride,
         in int schemaVersion,
         in int userId,
+        in long binderCallStartTimeMillis,
         in IAppSearchResultCallback callback);
 
     /**
@@ -115,6 +117,7 @@ interface IAppSearchManager {
      * @param typePropertyPaths A map of schema type to a list of property paths to return in the
      *     result.
      * @param userId Id of the calling user
+     * @param binderCallStartTimeMillis start timestamp of binder call in Millis
      * @param callback
      *     If the call fails to start, {@link IAppSearchBatchResultCallback#onSystemError}
      *     will be called with the cause throwable. Otherwise,
@@ -129,6 +132,7 @@ interface IAppSearchManager {
         in List<String> ids,
         in Map<String, List<String>> typePropertyPaths,
         in int userId,
+        in long binderCallStartTimeMillis,
         in IAppSearchBatchResultCallback callback);
 
     /**
@@ -273,6 +277,7 @@ interface IAppSearchManager {
      * @param namespace    Namespace of the document to remove.
      * @param ids The IDs of the documents to delete
      * @param userId Id of the calling user
+     * @param binderCallStartTimeMillis start timestamp of binder call in Millis
      * @param callback
      *     If the call fails to start, {@link IAppSearchBatchResultCallback#onSystemError}
      *     will be called with the cause throwable. Otherwise,
@@ -287,6 +292,7 @@ interface IAppSearchManager {
         in String namespace,
         in List<String> ids,
         in int userId,
+        in long binderCallStartTimeMillis,
         in IAppSearchBatchResultCallback callback);
 
     /**
@@ -297,6 +303,7 @@ interface IAppSearchManager {
      * @param queryExpression String to search for
      * @param searchSpecBundle SearchSpec bundle
      * @param userId Id of the calling user
+     * @param binderCallStartTimeMillis start timestamp of binder call in Millis
      * @param callback {@link IAppSearchResultCallback#onResult} will be called with an
      *     {@link AppSearchResult}&lt;{@link Void}&gt;.
      */
@@ -306,6 +313,7 @@ interface IAppSearchManager {
         in String queryExpression,
         in Bundle searchSpecBundle,
         in int userId,
+        in long binderCallStartTimeMillis,
         in IAppSearchResultCallback callback);
 
     /**
@@ -328,8 +336,9 @@ interface IAppSearchManager {
      * Persists all update/delete requests to the disk.
      *
      * @param userId Id of the calling user
+     * @param binderCallStartTimeMillis start timestamp of binder call in Millis
      */
-    void persistToDisk(in int userId);
+    void persistToDisk(in int userId, in long binderCallStartTimeMillis);
 
     /**
      * Creates and initializes AppSearchImpl for the calling app.
