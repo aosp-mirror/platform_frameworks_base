@@ -90,8 +90,8 @@ public class ScreenRecordDialog extends Activity {
         });
 
         mModes = new ArrayList<>();
-        mModes.add(MIC);
         mModes.add(INTERNAL);
+        mModes.add(MIC);
         mModes.add(MIC_AND_INTERNAL);
 
         mAudioSwitch = findViewById(R.id.screenrecord_audio_switch);
