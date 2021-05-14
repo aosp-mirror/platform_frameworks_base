@@ -16,6 +16,9 @@
 
 package com.android.systemui.wallet.ui;
 
+import static android.provider.Settings.ACTION_LOCKSCREEN_SETTINGS;
+
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -178,7 +181,10 @@ public class WalletActivity extends LifecycleActivity {
             finish();
             return true;
         } else if (itemId == R.id.wallet_lockscreen_settings) {
-            // TODO(b/186496392): Navigate to Lock Screen Settings page when the item is clicked.
+            Intent intent =
+                    new Intent(ACTION_LOCKSCREEN_SETTINGS)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            mActivityStarter.startActivity(intent, true);
             return true;
         }
         return super.onOptionsItemSelected(item);
