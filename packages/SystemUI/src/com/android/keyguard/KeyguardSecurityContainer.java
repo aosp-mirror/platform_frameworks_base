@@ -42,7 +42,6 @@ import android.view.WindowInsetsAnimation;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
-import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import androidx.dynamicanimation.animation.DynamicAnimation;
 import androidx.dynamicanimation.animation.SpringAnimation;
@@ -104,7 +103,6 @@ public class KeyguardSecurityContainer extends FrameLayout {
 
     private boolean mIsSecurityViewLeftAligned = true;
     private boolean mOneHandedMode = false;
-    private SecurityMode mSecurityMode = SecurityMode.Invalid;
     private ViewPropertyAnimator mRunningOneHandedAnimator;
 
     private final WindowInsetsAnimation.Callback mWindowInsetsAnimationCallback =
@@ -248,66 +246,47 @@ public class KeyguardSecurityContainer extends FrameLayout {
     }
 
     void onResume(SecurityMode securityMode, boolean faceAuthEnabled) {
-        mSecurityMode = securityMode;
         mSecurityViewFlipper.setWindowInsetsAnimationCallback(mWindowInsetsAnimationCallback);
         updateBiometricRetry(securityMode, faceAuthEnabled);
-
-        updateLayoutForSecurityMode(securityMode);
     }
 
-    void updateLayoutForSecurityMode(SecurityMode securityMode) {
-        mSecurityMode = securityMode;
-        mOneHandedMode = canUseOneHandedBouncer();
-
-        if (mOneHandedMode) {
-            mIsSecurityViewLeftAligned = isOneHandedKeyguardLeftAligned(mContext);
-        }
-
+    /**
+     * Sets whether this security container is in one handed mode. If so, it will measure its
+     * child SecurityViewFlipper in one half of the screen, and move it when tapping on the opposite
+     * side of the screen.
+     */
+    public void setOneHandedMode(boolean oneHandedMode) {
+        mOneHandedMode = oneHandedMode;
         updateSecurityViewGravity();
         updateSecurityViewLocation(false);
     }
 
-    /** Update keyguard position based on a tapped X coordinate. */
-    public void updateKeyguardPosition(float x) {
-        if (mOneHandedMode) {
-            moveBouncerForXCoordinate(x, /* animate= */false);
-        }
+    /** Returns whether this security container is in one-handed mode. */
+    public boolean isOneHandedMode() {
+        return mOneHandedMode;
     }
 
-    /** Return whether the one-handed keyguard should be enabled. */
-    private boolean canUseOneHandedBouncer() {
-        // Is it enabled?
-        if (!getResources().getBoolean(
-                com.android.internal.R.bool.config_enableDynamicKeyguardPositioning)) {
-            return false;
-        }
-
-        if (!KeyguardSecurityModel.isSecurityViewOneHanded(mSecurityMode)) {
-            return false;
-        }
-
-        return getResources().getBoolean(R.bool.can_use_one_handed_bouncer);
+    /**
+     * When in one-handed mode, sets if the inner SecurityViewFlipper should be aligned to the
+     * left-hand side of the screen or not, and whether to animate when moving between the two.
+     */
+    public void setOneHandedModeLeftAligned(boolean leftAligned, boolean animate) {
+        mIsSecurityViewLeftAligned = leftAligned;
+        updateSecurityViewLocation(animate);
     }
 
-    /** Read whether the one-handed keyguard should be on the left/right from settings. */
-    private boolean isOneHandedKeyguardLeftAligned(Context context) {
-        try {
-            return Settings.Global.getInt(context.getContentResolver(),
-                    Settings.Global.ONE_HANDED_KEYGUARD_SIDE)
-                    == Settings.Global.ONE_HANDED_KEYGUARD_SIDE_LEFT;
-        } catch (Settings.SettingNotFoundException ex) {
-            return true;
-        }
+    /** Returns whether the inner SecurityViewFlipper is left-aligned when in one-handed mode. */
+    public boolean isOneHandedModeLeftAligned() {
+        return mIsSecurityViewLeftAligned;
     }
 
     private void updateSecurityViewGravity() {
-        View securityView = findKeyguardSecurityView();
-
-        if (securityView == null) {
+        if (mSecurityViewFlipper == null) {
             return;
         }
 
-        FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) securityView.getLayoutParams();
+        FrameLayout.LayoutParams lp =
+                (FrameLayout.LayoutParams) mSecurityViewFlipper.getLayoutParams();
 
         if (mOneHandedMode) {
             lp.gravity = Gravity.LEFT | Gravity.BOTTOM;
@@ -315,7 +294,7 @@ public class KeyguardSecurityContainer extends FrameLayout {
             lp.gravity = Gravity.CENTER_HORIZONTAL;
         }
 
-        securityView.setLayoutParams(lp);
+        mSecurityViewFlipper.setLayoutParams(lp);
     }
 
     /**
@@ -324,14 +303,12 @@ public class KeyguardSecurityContainer extends FrameLayout {
      * by the security view .
      */
     private void updateSecurityViewLocation(boolean animate) {
-        View securityView = findKeyguardSecurityView();
-
-        if (securityView == null) {
+        if (mSecurityViewFlipper == null) {
             return;
         }
 
         if (!mOneHandedMode) {
-            securityView.setTranslationX(0);
+            mSecurityViewFlipper.setTranslationX(0);
             return;
         }
 
@@ -343,7 +320,8 @@ public class KeyguardSecurityContainer extends FrameLayout {
         int targetTranslation = mIsSecurityViewLeftAligned ? 0 : (int) (getMeasuredWidth() / 2f);
 
         if (animate) {
-            mRunningOneHandedAnimator = securityView.animate().translationX(targetTranslation);
+            mRunningOneHandedAnimator =
+                    mSecurityViewFlipper.animate().translationX(targetTranslation);
             mRunningOneHandedAnimator.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
             mRunningOneHandedAnimator.setListener(new AnimatorListenerAdapter() {
                 @Override
@@ -355,25 +333,8 @@ public class KeyguardSecurityContainer extends FrameLayout {
             mRunningOneHandedAnimator.setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
             mRunningOneHandedAnimator.start();
         } else {
-            securityView.setTranslationX(targetTranslation);
+            mSecurityViewFlipper.setTranslationX(targetTranslation);
         }
-    }
-
-    @Nullable
-    private KeyguardSecurityViewFlipper findKeyguardSecurityView() {
-        for (int i = 0; i < getChildCount(); i++) {
-            View child = getChildAt(i);
-
-            if (isKeyguardSecurityView(child)) {
-                return (KeyguardSecurityViewFlipper) child;
-            }
-        }
-
-        return null;
-    }
-
-    private boolean isKeyguardSecurityView(View view) {
-        return view instanceof KeyguardSecurityViewFlipper;
     }
 
     public void onPause() {
@@ -635,7 +596,7 @@ public class KeyguardSecurityContainer extends FrameLayout {
         for (int i = 0; i < getChildCount(); i++) {
             final View view = getChildAt(i);
             if (view.getVisibility() != GONE) {
-                if (mOneHandedMode && isKeyguardSecurityView(view)) {
+                if (mOneHandedMode && view == mSecurityViewFlipper) {
                     measureChildWithMargins(view, halfWidthMeasureSpec, 0,
                             heightMeasureSpec, 0);
                 } else {

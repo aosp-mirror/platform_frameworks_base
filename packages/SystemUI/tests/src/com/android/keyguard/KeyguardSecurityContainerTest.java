@@ -28,7 +28,6 @@ import static org.mockito.Mockito.when;
 import android.graphics.Insets;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
-import android.testing.TestableResources;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
@@ -37,8 +36,6 @@ import android.widget.FrameLayout;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
-import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 
 import org.junit.Before;
@@ -56,11 +53,6 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
     private static final int SCREEN_WIDTH = 1600;
     private static final int FAKE_MEASURE_SPEC =
             View.MeasureSpec.makeMeasureSpec(SCREEN_WIDTH, View.MeasureSpec.EXACTLY);
-
-    private static final SecurityMode ONE_HANDED_SECURITY_MODE = SecurityMode.PIN;
-    private static final SecurityMode TWO_HANDED_SECURITY_MODE = SecurityMode.Password;
-
-
 
     @Rule
     public MockitoRule mRule = MockitoJUnit.rule();
@@ -90,45 +82,8 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
     }
 
     @Test
-    public void onMeasure_usesFullWidthWithoutOneHandedMode() {
-        setUpKeyguard(
-                /* deviceConfigCanUseOneHandedKeyguard= */false,
-                /* sysuiResourceCanUseOneHandedKeyguard= */ false,
-                ONE_HANDED_SECURITY_MODE);
-
-        mKeyguardSecurityContainer.measure(FAKE_MEASURE_SPEC, FAKE_MEASURE_SPEC);
-
-        verify(mSecurityViewFlipper).measure(FAKE_MEASURE_SPEC, FAKE_MEASURE_SPEC);
-    }
-
-    @Test
-    public void onMeasure_usesFullWidthWithDeviceFlagDisabled() {
-        setUpKeyguard(
-                /* deviceConfigCanUseOneHandedKeyguard= */false,
-                /* sysuiResourceCanUseOneHandedKeyguard= */ true,
-                ONE_HANDED_SECURITY_MODE);
-
-        mKeyguardSecurityContainer.measure(FAKE_MEASURE_SPEC, FAKE_MEASURE_SPEC);
-        verify(mSecurityViewFlipper).measure(FAKE_MEASURE_SPEC, FAKE_MEASURE_SPEC);
-    }
-
-    @Test
-    public void onMeasure_usesFullWidthWithSysUIFlagDisabled() {
-        setUpKeyguard(
-                /* deviceConfigCanUseOneHandedKeyguard= */true,
-                /* sysuiResourceCanUseOneHandedKeyguard= */ false,
-                ONE_HANDED_SECURITY_MODE);
-
-        mKeyguardSecurityContainer.measure(FAKE_MEASURE_SPEC, FAKE_MEASURE_SPEC);
-        verify(mSecurityViewFlipper).measure(FAKE_MEASURE_SPEC, FAKE_MEASURE_SPEC);
-    }
-
-    @Test
-    public void onMeasure_usesHalfWidthWithFlagsEnabled() {
-        setUpKeyguard(
-                /* deviceConfigCanUseOneHandedKeyguard= */true,
-                /* sysuiResourceCanUseOneHandedKeyguard= */ true,
-                ONE_HANDED_SECURITY_MODE);
+    public void onMeasure_usesHalfWidthWithOneHandedModeEnabled() {
+        mKeyguardSecurityContainer.setOneHandedMode(/* oneHandedMode= */true);
 
         int halfWidthMeasureSpec =
                 View.MeasureSpec.makeMeasureSpec(SCREEN_WIDTH / 2, View.MeasureSpec.EXACTLY);
@@ -138,11 +93,8 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
     }
 
     @Test
-    public void onMeasure_usesFullWidthForFullScreenIme() {
-        setUpKeyguard(
-                /* deviceConfigCanUseOneHandedKeyguard= */true,
-                /* sysuiResourceCanUseOneHandedKeyguard= */ true,
-                TWO_HANDED_SECURITY_MODE);
+    public void onMeasure_usesFullWidthWithOneHandedModeDisabled() {
+        mKeyguardSecurityContainer.setOneHandedMode(/* oneHandedMode= */false);
 
         mKeyguardSecurityContainer.measure(FAKE_MEASURE_SPEC, FAKE_MEASURE_SPEC);
         verify(mSecurityViewFlipper).measure(FAKE_MEASURE_SPEC, FAKE_MEASURE_SPEC);
@@ -153,10 +105,7 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
         int imeInsetAmount = 100;
         int systemBarInsetAmount = 10;
 
-        setUpKeyguard(
-                /* deviceConfigCanUseOneHandedKeyguard= */false,
-                /* sysuiResourceCanUseOneHandedKeyguard= */ false,
-                ONE_HANDED_SECURITY_MODE);
+        mKeyguardSecurityContainer.setOneHandedMode(/* oneHandedMode= */false);
 
         Insets imeInset = Insets.of(0, 0, 0, imeInsetAmount);
         Insets systemBarInset = Insets.of(0, 0, 0, systemBarInsetAmount);
@@ -180,10 +129,7 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
         int imeInsetAmount = 0;
         int systemBarInsetAmount = 10;
 
-        setUpKeyguard(
-                /* deviceConfigCanUseOneHandedKeyguard= */false,
-                /* sysuiResourceCanUseOneHandedKeyguard= */ false,
-                ONE_HANDED_SECURITY_MODE);
+        mKeyguardSecurityContainer.setOneHandedMode(/* oneHandedMode= */false);
 
         Insets imeInset = Insets.of(0, 0, 0, imeInsetAmount);
         Insets systemBarInset = Insets.of(0, 0, 0, systemBarInsetAmount);
@@ -201,18 +147,12 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
         verify(mSecurityViewFlipper).measure(FAKE_MEASURE_SPEC, expectedHeightMeasureSpec);
     }
 
-    private void setupForUpdateKeyguardPosition(SecurityMode securityMode) {
-        setUpKeyguard(
-                /* deviceConfigCanUseOneHandedKeyguard= */true,
-                /* sysuiResourceCanUseOneHandedKeyguard= */ true,
-                securityMode);
+    private void setupForUpdateKeyguardPosition(boolean oneHandedMode) {
+        mKeyguardSecurityContainer.setOneHandedMode(oneHandedMode);
+        mKeyguardSecurityContainer.setOneHandedModeLeftAligned(true, false);
 
         mKeyguardSecurityContainer.measure(FAKE_MEASURE_SPEC, FAKE_MEASURE_SPEC);
         mKeyguardSecurityContainer.layout(0, 0, SCREEN_WIDTH, SCREEN_WIDTH);
-
-        // Start off left-aligned. This should happen anyway, but just do this to ensure
-        // definitely move to the left.
-        mKeyguardSecurityContainer.updateKeyguardPosition(0.0f);
 
         // Clear any interactions with the mock so we know the interactions definitely come from the
         // below testing.
@@ -220,37 +160,28 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
     }
 
     @Test
-    public void updateKeyguardPosition_movesKeyguard() {
-        setupForUpdateKeyguardPosition(ONE_HANDED_SECURITY_MODE);
+    public void setIsLeftAligned_movesKeyguard() {
+        setupForUpdateKeyguardPosition(/* oneHandedMode= */ true);
 
-        mKeyguardSecurityContainer.updateKeyguardPosition((SCREEN_WIDTH / 4f) * 3f);
+        mKeyguardSecurityContainer.setOneHandedModeLeftAligned(
+                /* leftAligned= */false, /* animate= */false);
         verify(mSecurityViewFlipper).setTranslationX(SCREEN_WIDTH / 2.0f);
 
-        mKeyguardSecurityContainer.updateKeyguardPosition(0.0f);
+        mKeyguardSecurityContainer.setOneHandedModeLeftAligned(
+                /* leftAligned= */true, /* animate= */false);
         verify(mSecurityViewFlipper).setTranslationX(0.0f);
     }
 
     @Test
-    public void updateKeyguardPosition_doesntMoveTwoHandedKeyguard() {
-        setupForUpdateKeyguardPosition(TWO_HANDED_SECURITY_MODE);
+    public void setIsLeftAligned_doesntMoveTwoHandedKeyguard() {
+        setupForUpdateKeyguardPosition(/* oneHandedMode= */ false);
 
-        mKeyguardSecurityContainer.updateKeyguardPosition((SCREEN_WIDTH / 4f) * 3f);
+        mKeyguardSecurityContainer.setOneHandedModeLeftAligned(
+                /* leftAligned= */false, /* animate= */false);
         verify(mSecurityViewFlipper, never()).setTranslationX(anyInt());
 
-        mKeyguardSecurityContainer.updateKeyguardPosition(0.0f);
+        mKeyguardSecurityContainer.setOneHandedModeLeftAligned(
+                /* leftAligned= */true, /* animate= */false);
         verify(mSecurityViewFlipper, never()).setTranslationX(anyInt());
-    }
-
-    private void setUpKeyguard(
-            boolean deviceConfigCanUseOneHandedKeyguard,
-            boolean sysuiResourceCanUseOneHandedKeyguard,
-            SecurityMode securityMode) {
-        TestableResources testableResources = mContext.getOrCreateTestableResources();
-        testableResources.addOverride(
-                com.android.internal.R.bool.config_enableDynamicKeyguardPositioning,
-                deviceConfigCanUseOneHandedKeyguard);
-        testableResources.addOverride(R.bool.can_use_one_handed_bouncer,
-                sysuiResourceCanUseOneHandedKeyguard);
-        mKeyguardSecurityContainer.updateLayoutForSecurityMode(securityMode);
     }
 }
