@@ -194,7 +194,12 @@ public final class PlatformLogger implements AppSearchLogger {
 
     @Override
     public void logStats(@NonNull InitializeStats stats) throws AppSearchException {
-        // TODO(b/173532925): Implement
+        Objects.requireNonNull(stats);
+        synchronized (mLock) {
+            if (shouldLogForTypeLocked(CallStats.CALL_TYPE_INITIALIZE)) {
+                logStatsImplLocked(stats);
+            }
+        }
     }
 
     @Override
@@ -337,6 +342,32 @@ public final class PlatformLogger implements AppSearchLogger {
         }
     }
 
+    @GuardedBy("mLock")
+    private void logStatsImplLocked(@NonNull InitializeStats stats) {
+        mLastPushTimeMillisLocked = SystemClock.elapsedRealtime();
+        ExtraStats extraStats = createExtraStatsLocked(/*packageName=*/ null,
+                CallStats.CALL_TYPE_INITIALIZE);
+        FrameworkStatsLog.write(FrameworkStatsLog.APP_SEARCH_INITIALIZE_STATS_REPORTED,
+                extraStats.mSamplingRatio,
+                extraStats.mSkippedSampleCount,
+                extraStats.mPackageUid,
+                stats.getStatusCode(),
+                stats.getTotalLatencyMillis(),
+                stats.hasDeSync(),
+                stats.getPrepareSchemaAndNamespacesLatencyMillis(),
+                stats.getPrepareVisibilityStoreLatencyMillis(),
+                stats.getNativeLatencyMillis(),
+                stats.getDocumentStoreRecoveryCause(),
+                stats.getIndexRestorationCause(),
+                stats.getSchemaStoreRecoveryCause(),
+                stats.getDocumentStoreRecoveryLatencyMillis(),
+                stats.getIndexRestorationLatencyMillis(),
+                stats.getSchemaStoreRecoveryLatencyMillis(),
+                stats.getDocumentStoreDataStatus(),
+                stats.getDocumentCount(),
+                stats.getSchemaTypeCount());
+    }
+
     /**
      * Calculate the hash code as an integer by returning the last four bytes of its MD5.
      *
@@ -377,12 +408,19 @@ public final class PlatformLogger implements AppSearchLogger {
      * <p>This method is called by most of logToWestworldLocked functions to reduce code
      * duplication.
      */
+    // TODO(b/173532925) Once we add CTS test for logging atoms and can inspect the result, we can
+    // remove this @VisibleForTesting and directly use PlatformLogger.logStats to test sampling and
+    // rate limiting.
     @VisibleForTesting
     @GuardedBy("mLock")
     @NonNull
-    ExtraStats createExtraStatsLocked(@NonNull String packageName,
+    ExtraStats createExtraStatsLocked(@Nullable String packageName,
             @CallStats.CallType int callType) {
-        int packageUid = getPackageUidAsUserLocked(packageName);
+        int packageUid = Process.INVALID_UID;
+        if (packageName != null) {
+            packageUid = getPackageUidAsUserLocked(packageName);
+        }
+
         int samplingRatio = mConfig.mSamplingRatios.get(callType,
                 mConfig.mDefaultSamplingRatio);
 
@@ -400,6 +438,9 @@ public final class PlatformLogger implements AppSearchLogger {
      * stats.
      */
     @GuardedBy("mLock")
+    // TODO(b/173532925) Once we add CTS test for logging atoms and can inspect the result, we can
+    // remove this @VisibleForTesting and directly use PlatformLogger.logStats to test sampling and
+    // rate limiting.
     @VisibleForTesting
     boolean shouldLogForTypeLocked(@CallStats.CallType int callType) {
         int samplingRatio = mConfig.mSamplingRatios.get(callType,
