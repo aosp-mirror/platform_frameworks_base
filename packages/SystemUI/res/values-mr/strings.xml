@@ -292,7 +292,7 @@
     <!-- no translation found for accessibility_quick_settings_work_mode_off (9106217884005620744) -->
     <skip />
     <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"कार्य मोड सुरू."</string>
-    <!-- no translation found for accessibility_quick_settings_work_mode_changed_off (2653550342355027441) -->
+    <!-- no translation found for accessibility_quick_settings_work_mode_changed_off (6422896967647049692) -->
     <skip />
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"कार्य मोड सुरू केला."</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"डेटा सर्व्हर बंद केला."</string>
@@ -473,14 +473,10 @@
     <string name="interruption_level_none_twoline" msgid="8579382742855486372">"संपूर्ण\nशांतता"</string>
     <string name="interruption_level_priority_twoline" msgid="8523482736582498083">"केवळ\nप्राधान्य"</string>
     <string name="interruption_level_alarms_twoline" msgid="2045067991335708767">"केवळ\nअलार्म"</string>
-    <!-- no translation found for keyguard_indication_charging_time_wireless (577856646141738675) -->
-    <skip />
-    <!-- no translation found for keyguard_indication_charging_time (6492711711891071502) -->
-    <skip />
-    <!-- no translation found for keyguard_indication_charging_time_fast (8390311020603859480) -->
-    <skip />
-    <!-- no translation found for keyguard_indication_charging_time_slowly (301936949731705417) -->
-    <skip />
+    <string name="keyguard_indication_charging_time_wireless" msgid="577856646141738675">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • वायरलेस पद्धतीने चार्ज होत आहे • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> मध्ये पूर्ण होईल"</string>
+    <string name="keyguard_indication_charging_time" msgid="6492711711891071502">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • चार्ज होत आहे • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> मध्ये पूर्ण होईल"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • वेगाने चार्ज होत आहे • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> मध्ये पूर्ण होईल"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • हळू चार्ज होत आहे • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> मध्ये पूर्ण होईल"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"वापरकर्ता स्विच करा"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="5759855008166759399">"वापरकर्ता स्विच करा, वर्तमान वापरकर्ता <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="383168614528618402">"वर्तमान वापरकर्ता <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -1144,7 +1140,7 @@
     <string name="audio_status" msgid="4237055636967709208">"ऐकत आहे"</string>
     <string name="game_status" msgid="1340694320630973259">"प्ले करत आहे"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"मित्रमैत्रिणी"</string>
-    <string name="empty_status" msgid="5938893404951307749">"चला, आज रात्री चॅट करूया!"</string>
+    <string name="empty_status" msgid="5938893404951307749">"आज रात्री चॅट करू या"</string>
     <string name="status_before_loading" msgid="1500477307859631381">"आशय लवकरच दाखवला जाईल"</string>
     <string name="missed_call" msgid="4228016077700161689">"मिस्ड कॉल"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
@@ -1160,4 +1156,6 @@
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"ऑथेंटिकेट करा"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"डिव्हाइस एंटर करा"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"उघडण्यासाठी फिंगरप्रिंट वापरा"</string>
+    <!-- no translation found for ongoing_phone_call_content_description (5332334388483099947) -->
+    <skip />
 </resources>

@@ -289,10 +289,9 @@
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"മൊബൈൽ ഹോട്ട്‌സ്‌പോട്ട് ഓഫാക്കി."</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"മൊബൈൽ ഹോട്ട്‌സ്‌പോട്ട് ഓണാക്കി."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"സ്ക്രീൻ കാസ്‌റ്റുചെയ്യൽ നിർത്തി."</string>
-    <!-- no translation found for accessibility_quick_settings_work_mode_off (9106217884005620744) -->
-    <skip />
+    <string name="accessibility_quick_settings_work_mode_off" msgid="9106217884005620744">"പ്രവർത്തന മോഡ് താൽക്കാലികമായി നിർത്തി."</string>
     <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"പ്രവർത്തന മോഡ് ഓണാണ്."</string>
-    <!-- no translation found for accessibility_quick_settings_work_mode_changed_off (2653550342355027441) -->
+    <!-- no translation found for accessibility_quick_settings_work_mode_changed_off (6422896967647049692) -->
     <skip />
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"പ്രവർത്തന മോഡ് ഓണാക്കി."</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"ഡാറ്റ സേവർ ഓഫാക്കി."</string>
@@ -412,8 +411,7 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"<xliff:g id="DATA_LIMIT">%s</xliff:g> പരിധി"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"<xliff:g id="DATA_LIMIT">%s</xliff:g> മുന്നറിയിപ്പ്"</string>
     <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"ഔദ്യോഗിക പ്രൊഫൈൽ"</string>
-    <!-- no translation found for quick_settings_work_mode_paused (4841109346916998613) -->
-    <skip />
+    <string name="quick_settings_work_mode_paused" msgid="4841109346916998613">"താൽക്കാലികമായി നിർത്തി"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"നൈറ്റ് ലൈറ്റ്"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"സൂര്യാസ്‌തമയത്തിന്"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"സൂര്യോദയം വരെ"</string>
@@ -473,14 +471,10 @@
     <string name="interruption_level_none_twoline" msgid="8579382742855486372">"പൂർണ്ണ\nനിശബ്‌ദത"</string>
     <string name="interruption_level_priority_twoline" msgid="8523482736582498083">"മുൻഗണന\nമാത്രം"</string>
     <string name="interruption_level_alarms_twoline" msgid="2045067991335708767">"അലാറങ്ങൾ\nമാത്രം"</string>
-    <!-- no translation found for keyguard_indication_charging_time_wireless (577856646141738675) -->
-    <skip />
-    <!-- no translation found for keyguard_indication_charging_time (6492711711891071502) -->
-    <skip />
-    <!-- no translation found for keyguard_indication_charging_time_fast (8390311020603859480) -->
-    <skip />
-    <!-- no translation found for keyguard_indication_charging_time_slowly (301936949731705417) -->
-    <skip />
+    <string name="keyguard_indication_charging_time_wireless" msgid="577856646141738675">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • വയർലെസ്സ് ആയി ചാർജ് ചെയ്യുന്നു • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>-ൽ പൂർത്തിയാകും"</string>
+    <string name="keyguard_indication_charging_time" msgid="6492711711891071502">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ചാർജ് ചെയ്യുന്നു • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>-ൽ പൂർത്തിയാകും"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • വേഗത്തിൽ ചാർജ് ചെയ്യുന്നു • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>-ൽ പൂർത്തിയാകും"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • പതുക്കെ ചാർജ് ചെയ്യുന്നു • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>-ൽ പൂർത്തിയാകും"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"ഉപയോക്താവ് മാറുക"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="5759855008166759399">"ഉപയോക്താവിനെ മാറ്റുക, <xliff:g id="CURRENT_USER_NAME">%s</xliff:g> എന്നയാളാണ് നിലവിലുള്ള ഉപയോക്താവ്"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="383168614528618402">"നിലവിലെ ഉപയോക്താവ് <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -676,12 +670,10 @@
     <string name="wallet_title" msgid="5369767670735827105">"വാലറ്റ്"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"എല്ലാം കാണിക്കുക"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"പണമടയ്‌ക്കാൻ അൺലോക്ക് ചെയ്യുക"</string>
-    <!-- no translation found for wallet_secondary_label_no_card (1282609666895946317) -->
-    <skip />
+    <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"സജ്ജീകരിച്ചിട്ടില്ല"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"ഉപയോഗിക്കാൻ അൺലോക്ക് ചെയ്യുക"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"നിങ്ങളുടെ കാർഡുകൾ ലഭ്യമാക്കുന്നതിൽ ഒരു പ്രശ്‌നമുണ്ടായി, പിന്നീട് വീണ്ടും ശ്രമിക്കുക"</string>
-    <!-- no translation found for wallet_lockscreen_settings_label (3539105300870383570) -->
-    <skip />
+    <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"ലോക്ക് സ്ക്രീൻ ക്രമീകരണം"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"ഔദ്യോഗിക പ്രൊഫൈൽ"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"ഫ്ലൈറ്റ് മോഡ്"</string>
     <string name="add_tile" msgid="6239678623873086686">"ടൈൽ ചേർക്കുക"</string>
@@ -871,8 +863,7 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"ഓൺ"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"ഓഫ്"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"ലഭ്യമല്ല"</string>
-    <!-- no translation found for tile_disabled (373212051546573069) -->
-    <skip />
+    <string name="tile_disabled" msgid="373212051546573069">"പ്രവർത്തനരഹിതമാക്കി"</string>
     <string name="nav_bar" msgid="4642708685386136807">"നാവിഗേഷൻ ബാർ"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"ലേ‌ഔട്ട്"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"അധിക ഇടത് ബട്ടൺ തരം"</string>
@@ -1144,11 +1135,11 @@
     <string name="audio_status" msgid="4237055636967709208">"കേൾക്കുന്നു"</string>
     <string name="game_status" msgid="1340694320630973259">"കളിക്കുന്നു"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"സുഹൃത്തുക്കൾ"</string>
-    <string name="empty_status" msgid="5938893404951307749">"ഇന്നുരാത്രി ചാറ്റുചെയ്യാം!"</string>
+    <string name="empty_status" msgid="5938893404951307749">"ഇന്നുരാത്രി ചാറ്റ് ചെയ്യാം!"</string>
     <string name="status_before_loading" msgid="1500477307859631381">"ഉള്ളടക്കം ഉടൻ ദൃശ്യമാകും"</string>
     <string name="missed_call" msgid="4228016077700161689">"മിസ്‌ഡ് കോൾ"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
-    <string name="people_tile_description" msgid="8154966188085545556">"അടുത്തിടെയുള്ള സന്ദേശങ്ങൾ, മിസ്‌ഡ് കോളുകൾ, സ്റ്റാറ്റസ് അപ്‌ഡേറ്റുകൾ എന്നിവ കാണുക"</string>
+    <string name="people_tile_description" msgid="8154966188085545556">"അടുത്തിടെയുള്ള സന്ദേശങ്ങൾ, മിസ്‌ഡ് കോൾ, സ്റ്റാറ്റസ് അപ്‌ഡേറ്റുകൾ എന്നിവ കാണൂ"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"സംഭാഷണം"</string>
     <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g>, ഒരു സന്ദേശം അയച്ചു"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g>, ഒരു ചിത്രം അയച്ചു"</string>
@@ -1160,4 +1151,6 @@
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"പരിശോധിച്ചുറപ്പിക്കുക"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"ഉപകരണം നൽകുക"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"തുറക്കുന്നതിന് നിങ്ങളുടെ ഫിംഗർപ്രിന്റ് ഉപയോഗിക്കുക"</string>
+    <!-- no translation found for ongoing_phone_call_content_description (5332334388483099947) -->
+    <skip />
 </resources>

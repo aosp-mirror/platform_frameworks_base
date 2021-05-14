@@ -289,11 +289,9 @@
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"Мобилната точка за достъп се изключи."</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"Мобилната точка за достъп се включи."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"Предаването на съдържанието от екрана спря."</string>
-    <!-- no translation found for accessibility_quick_settings_work_mode_off (9106217884005620744) -->
-    <skip />
+    <string name="accessibility_quick_settings_work_mode_off" msgid="9106217884005620744">"Работният режим е на пауза."</string>
     <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"Работният режим е включен."</string>
-    <!-- no translation found for accessibility_quick_settings_work_mode_changed_off (2653550342355027441) -->
-    <skip />
+    <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6422896967647049692">"Работният режим е на пауза."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"Работният режим е включен."</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"Функцията „Икономия на данни“ е изключена."</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"Функцията „Икономия на данни“ е включена."</string>
@@ -412,8 +410,7 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"Ограничение от <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"Предупреждение: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"Служебен потребителски профил"</string>
-    <!-- no translation found for quick_settings_work_mode_paused (4841109346916998613) -->
-    <skip />
+    <string name="quick_settings_work_mode_paused" msgid="4841109346916998613">"На пауза"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Нощно осветление"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Ще се вкл. по залез"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"До изгрев"</string>
@@ -473,14 +470,10 @@
     <string name="interruption_level_none_twoline" msgid="8579382742855486372">"Пълна\nтишина"</string>
     <string name="interruption_level_priority_twoline" msgid="8523482736582498083">"Само\nс приоритет"</string>
     <string name="interruption_level_alarms_twoline" msgid="2045067991335708767">"Само\nбудилници"</string>
-    <!-- no translation found for keyguard_indication_charging_time_wireless (577856646141738675) -->
-    <skip />
-    <!-- no translation found for keyguard_indication_charging_time (6492711711891071502) -->
-    <skip />
-    <!-- no translation found for keyguard_indication_charging_time_fast (8390311020603859480) -->
-    <skip />
-    <!-- no translation found for keyguard_indication_charging_time_slowly (301936949731705417) -->
-    <skip />
+    <string name="keyguard_indication_charging_time_wireless" msgid="577856646141738675">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Зарежда се безжично • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> до пълно зареждане"</string>
+    <string name="keyguard_indication_charging_time" msgid="6492711711891071502">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Зарежда се • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> до пълно зареждане"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Зарежда се бързо • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> до пълно зареждане"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Зарежда се бавно • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> до пълно зареждане"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Превключване между потребителите"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="5759855008166759399">"Превключване на потребителя – текущият е <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="383168614528618402">"Текущ потребител – <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -676,12 +669,10 @@
     <string name="wallet_title" msgid="5369767670735827105">"Портфейл"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Показване на всички"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Отключване с цел плащане"</string>
-    <!-- no translation found for wallet_secondary_label_no_card (1282609666895946317) -->
-    <skip />
+    <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"Не е настроено"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Отключване с цел използване"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"При извличането на картите ви възникна проблем. Моля, опитайте отново по-късно"</string>
-    <!-- no translation found for wallet_lockscreen_settings_label (3539105300870383570) -->
-    <skip />
+    <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Настройки за заключения екран"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Потребителски профил в Work"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Самолетен режим"</string>
     <string name="add_tile" msgid="6239678623873086686">"Добавяне на плочка"</string>
@@ -871,8 +862,7 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"Вкл."</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"Изкл."</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"Не е налице"</string>
-    <!-- no translation found for tile_disabled (373212051546573069) -->
-    <skip />
+    <string name="tile_disabled" msgid="373212051546573069">"Деактивирано"</string>
     <string name="nav_bar" msgid="4642708685386136807">"Лента за навигация"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"Оформление"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"Тип на допълнителния ляв бутон"</string>
@@ -1144,11 +1134,11 @@
     <string name="audio_status" msgid="4237055636967709208">"Слуша се"</string>
     <string name="game_status" msgid="1340694320630973259">"Играете"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"Приятели"</string>
-    <string name="empty_status" msgid="5938893404951307749">"Да разговаряме!"</string>
+    <string name="empty_status" msgid="5938893404951307749">"Да поговорим!"</string>
     <string name="status_before_loading" msgid="1500477307859631381">"Съдържанието ще се покаже скоро"</string>
     <string name="missed_call" msgid="4228016077700161689">"Пропуснато обаждане"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"Над <xliff:g id="NUMBER">%d</xliff:g>"</string>
-    <string name="people_tile_description" msgid="8154966188085545556">"Преглеждайте скорошните съобщения, пропуснатите обаждания и актуална информация за състоянието"</string>
+    <string name="people_tile_description" msgid="8154966188085545556">"Преглеждайте скорошни съобщения, пропуснати обаждания и информация за състоянието"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Разговор"</string>
     <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g> изпрати съобщение"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> изпрати изображение"</string>
@@ -1160,4 +1150,6 @@
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"удостоверяване"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"вход в устройството"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Използвайте отпечатък за отваряне"</string>
+    <!-- no translation found for ongoing_phone_call_content_description (5332334388483099947) -->
+    <skip />
 </resources>
