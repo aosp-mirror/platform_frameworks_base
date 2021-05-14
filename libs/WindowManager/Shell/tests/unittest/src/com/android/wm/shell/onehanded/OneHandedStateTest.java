@@ -74,8 +74,6 @@ public class OneHandedStateTest extends OneHandedTestCase {
     @Mock
     OneHandedTutorialHandler mMockTutorialHandler;
     @Mock
-    OneHandedGestureHandler mMockGestureHandler;
-    @Mock
     OneHandedSettingsUtil mMockSettingsUitl;
     @Mock
     OneHandedUiEventLogger mMockUiEventLogger;
@@ -126,7 +124,6 @@ public class OneHandedStateTest extends OneHandedTestCase {
                 mMockDisplayAreaOrganizer,
                 mMockTouchHandler,
                 mMockTutorialHandler,
-                mMockGestureHandler,
                 mMockSettingsUitl,
                 mOneHandedAccessibilityUtil,
                 mSpiedTimeoutHandler,
