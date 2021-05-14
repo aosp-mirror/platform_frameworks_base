@@ -746,7 +746,8 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
 
         @Override
         public void query(String packageName, String databaseName, String queryExpression,
-                Bundle searchSpecBundle, int userId, IAppSearchResultCallback callback)
+                Bundle searchSpecBundle, int userId, long binderCallStartTimeMillis,
+                IAppSearchResultCallback callback)
                 throws RemoteException {
             final String key = getKey(userId, databaseName);
             if (!mDocumentMap.containsKey(key)) {
@@ -776,7 +777,8 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
 
         @Override
         public void globalQuery(String packageName, String queryExpression, Bundle searchSpecBundle,
-                int userId, IAppSearchResultCallback callback) throws RemoteException {
+                int userId, long binderCallStartTimeMillis, IAppSearchResultCallback callback)
+                throws RemoteException {
             ignore(callback);
         }
 

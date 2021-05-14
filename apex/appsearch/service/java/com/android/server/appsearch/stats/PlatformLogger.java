@@ -17,6 +17,7 @@
 package com.android.server.appsearch.stats;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.appsearch.exceptions.AppSearchException;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -198,7 +199,12 @@ public final class PlatformLogger implements AppSearchLogger {
 
     @Override
     public void logStats(@NonNull SearchStats stats) throws AppSearchException {
-        // TODO(b/173532925): Implement
+        Objects.requireNonNull(stats);
+        synchronized (mLock) {
+            if (shouldLogForTypeLocked(CallStats.CALL_TYPE_SEARCH)) {
+                logStatsImplLocked(stats);
+            }
+        }
     }
 
     /**
@@ -242,7 +248,9 @@ public final class PlatformLogger implements AppSearchLogger {
             //
             // Something is wrong while calculating the hash code for database
             // this shouldn't happen since we always use "MD5" and "UTF-8"
-            Log.e(TAG, "Error calculating hash code for database " + database, e);
+            if (database != null) {
+                Log.e(TAG, "Error calculating hash code for database " + database, e);
+            }
         }
     }
 
@@ -277,7 +285,55 @@ public final class PlatformLogger implements AppSearchLogger {
             //
             // Something is wrong while calculating the hash code for database
             // this shouldn't happen since we always use "MD5" and "UTF-8"
-            Log.e(TAG, "Error calculating hash code for database " + database, e);
+            if (database != null) {
+                Log.e(TAG, "Error calculating hash code for database " + database, e);
+            }
+        }
+    }
+
+    @GuardedBy("mLock")
+    private void logStatsImplLocked(@NonNull SearchStats stats) {
+        mLastPushTimeMillisLocked = SystemClock.elapsedRealtime();
+        ExtraStats extraStats = createExtraStatsLocked(stats.getPackageName(),
+                CallStats.CALL_TYPE_SEARCH);
+        String database = stats.getDatabase();
+        try {
+            int hashCodeForDatabase = calculateHashCodeMd5(database);
+            FrameworkStatsLog.write(FrameworkStatsLog.APP_SEARCH_QUERY_STATS_REPORTED,
+                    extraStats.mSamplingRatio,
+                    extraStats.mSkippedSampleCount,
+                    extraStats.mPackageUid,
+                    hashCodeForDatabase,
+                    stats.getStatusCode(),
+                    stats.getTotalLatencyMillis(),
+                    stats.getRewriteSearchSpecLatencyMillis(),
+                    stats.getRewriteSearchResultLatencyMillis(),
+                    stats.getVisibilityScope(),
+                    stats.getNativeLatencyMillis(),
+                    stats.getTermCount(),
+                    stats.getQueryLength(),
+                    stats.getFilteredNamespaceCount(),
+                    stats.getFilteredSchemaTypeCount(),
+                    stats.getRequestedPageSize(),
+                    stats.getCurrentPageReturnedResultCount(),
+                    stats.isFirstPage(),
+                    stats.getParseQueryLatencyMillis(),
+                    stats.getRankingStrategy(),
+                    stats.getScoredDocumentCount(),
+                    stats.getScoringLatencyMillis(),
+                    stats.getRankingLatencyMillis(),
+                    stats.getDocumentRetrievingLatencyMillis(),
+                    stats.getResultWithSnippetsCount());
+        } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
+            // TODO(b/184204720) report hashing error to Westworld
+            //  We need to set a special value(e.g. 0xFFFFFFFF) for the hashing of the database,
+            //  so in the dashboard we know there is some error for hashing.
+            //
+            // Something is wrong while calculating the hash code for database
+            // this shouldn't happen since we always use "MD5" and "UTF-8"
+            if (database != null) {
+                Log.e(TAG, "Error calculating hash code for database " + database, e);
+            }
         }
     }
 
@@ -285,13 +341,20 @@ public final class PlatformLogger implements AppSearchLogger {
      * Calculate the hash code as an integer by returning the last four bytes of its MD5.
      *
      * @param str a string
-     * @return hash code as an integer
+     * @return hash code as an integer. returns -1 if str is null.
      * @throws AppSearchException if either algorithm or encoding does not exist.
      */
     @VisibleForTesting
     @NonNull
-    static int calculateHashCodeMd5(@NonNull String str) throws
+    static int calculateHashCodeMd5(@Nullable String str) throws
             NoSuchAlgorithmException, UnsupportedEncodingException {
+        if (str == null) {
+            // Just return -1 if caller doesn't have database name
+            // For some stats like globalQuery, databaseName can be null.
+            // Since in atom it is an integer, we have to return something here.
+            return -1;
+        }
+
         MessageDigest md = MessageDigest.getInstance("MD5");
         md.update(str.getBytes(/*charsetName=*/ "UTF-8"));
         byte[] digest = md.digest();
