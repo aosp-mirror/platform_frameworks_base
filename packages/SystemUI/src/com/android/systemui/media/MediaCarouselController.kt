@@ -3,6 +3,7 @@ package com.android.systemui.media
 import android.app.smartspace.SmartspaceTarget
 import android.content.Context
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.provider.Settings.ACTION_MEDIA_CONTROLS_SETTINGS
 import android.util.Log
@@ -380,6 +381,7 @@ class MediaCarouselController @Inject constructor(
 
     private fun recreatePlayers() {
         bgColor = getBackgroundColor()
+        pageIndicator.tintList = ColorStateList.valueOf(getForegroundColor())
 
         MediaPlayerData.mediaData().forEach { (key, data) ->
             removePlayer(key, dismissMediaData = false)
@@ -389,6 +391,10 @@ class MediaCarouselController @Inject constructor(
 
     private fun getBackgroundColor(): Int {
         return context.getColor(android.R.color.system_accent2_50)
+    }
+
+    private fun getForegroundColor(): Int {
+        return context.getColor(android.R.color.system_accent2_900)
     }
 
     private fun updatePageIndicator() {
