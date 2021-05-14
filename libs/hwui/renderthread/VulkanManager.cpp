@@ -340,6 +340,8 @@ void VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
 }
 
 void VulkanManager::initialize() {
+    std::lock_guard _lock{mInitializeLock};
+
     if (mDevice != VK_NULL_HANDLE) {
         return;
     }
