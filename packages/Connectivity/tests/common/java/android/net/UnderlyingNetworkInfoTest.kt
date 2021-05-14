@@ -36,15 +36,15 @@ class UnderlyingNetworkInfoTest {
     @Test
     fun testParcelUnparcel() {
         val testInfo = UnderlyingNetworkInfo(TEST_OWNER_UID, TEST_IFACE, TEST_IFACE_LIST)
-        assertEquals(TEST_OWNER_UID, testInfo.ownerUid)
-        assertEquals(TEST_IFACE, testInfo.iface)
-        assertEquals(TEST_IFACE_LIST, testInfo.underlyingIfaces)
+        assertEquals(TEST_OWNER_UID, testInfo.getOwnerUid())
+        assertEquals(TEST_IFACE, testInfo.getInterface())
+        assertEquals(TEST_IFACE_LIST, testInfo.getUnderlyingInterfaces())
         assertParcelSane(testInfo, 3)
 
         val emptyInfo = UnderlyingNetworkInfo(0, String(), listOf())
-        assertEquals(0, emptyInfo.ownerUid)
-        assertEquals(String(), emptyInfo.iface)
-        assertEquals(listOf(), emptyInfo.underlyingIfaces)
+        assertEquals(0, emptyInfo.getOwnerUid())
+        assertEquals(String(), emptyInfo.getInterface())
+        assertEquals(listOf(), emptyInfo.getUnderlyingInterfaces())
         assertParcelSane(emptyInfo, 3)
     }
 }
