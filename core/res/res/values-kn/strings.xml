@@ -1022,8 +1022,7 @@
     <string name="text_copied" msgid="2531420577879738860">"ಪಠ್ಯವನ್ನು ಕ್ಲಿಪ್‌ಬೋರ್ಡ್‌ಗೆ ನಕಲಿಸಲಾಗಿದೆ."</string>
     <string name="copied" msgid="4675902854553014676">"ನಕಲಿಸಲಾಗಿದೆ"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ಅನ್ನು <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> ನಿಂದ ಅಂಟಿಸಲಾಗಿದೆ"</string>
-    <!-- no translation found for pasted_from_clipboard (7355790625710831847) -->
-    <skip />
+    <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ಅನ್ನು ನಿಮ್ಮ ಕ್ಲಿಪ್‌ಬೋರ್ಡ್‌ನಿಂದ ಅಂಟಿಸಲಾಗಿದೆ"</string>
     <string name="pasted_text" msgid="4298871641549173733">"ನೀವು ನಕಲಿಸಿರುವ ಪಠ್ಯವನ್ನು <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ನಿಂದ ಅಂಟಿಸಲಾಗಿದೆ"</string>
     <string name="pasted_image" msgid="4729097394781491022">"ನೀವು ನಕಲಿಸಿರುವ ಚಿತ್ರವನ್ನು <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ನಿಂದ ಅಂಟಿಸಲಾಗಿದೆ"</string>
     <string name="pasted_content" msgid="646276353060777131">"ನೀವು ನಕಲಿಸಿರುವ ವಿಷಯವನ್ನು <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ನಿಂದ ಅಂಟಿಸಲಾಗಿದೆ"</string>
@@ -1261,14 +1260,10 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> ಸಿದ್ಧಪಡಿಸಲಾಗುತ್ತಿದೆ."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಪ್ರಾರಂಭಿಸಲಾಗುತ್ತಿದೆ."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"ಬೂಟ್ ಪೂರ್ಣಗೊಳಿಸಲಾಗುತ್ತಿದೆ."</string>
-    <!-- no translation found for fp_enrollment_powerbutton_intent_title (3385634173366119903) -->
-    <skip />
-    <!-- no translation found for fp_enrollment_powerbutton_intent_message (6582149052513682522) -->
-    <skip />
-    <!-- no translation found for fp_enrollment_powerbutton_intent_positive_button (5963520983910436791) -->
-    <skip />
-    <!-- no translation found for fp_enrollment_powerbutton_intent_negative_button (6465764183480190748) -->
-    <skip />
+    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"ಸ್ಕ್ರೀನ್ ಆಫ್ ಮಾಡಬೇಕೇ?"</string>
+    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"ಫಿಂಗರ್‌ ಪ್ರಿಂಟ್ ಅನ್ನು ಸೆಟ್ಟಪ್ ಮಾಡುವಾಗ ನೀವು ಪವರ್ ಬಟನ್‌ಅನ್ನು ಒತ್ತಿದ್ದೀರಿ \n\nಸಾಮಾನ್ಯವಾಗಿ ಇದರಿಂದ ನಿಮ್ಮ ಸ್ಕ್ರೀನ್ ಆಫ್ ಆಗುತ್ತದೆ."</string>
+    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"ಆಫ್ ಮಾಡಿ"</string>
+    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"ರದ್ದುಗೊಳಿಸಿ"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> ರನ್ ಆಗುತ್ತಿದೆ"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"ಆಟಕ್ಕೆ ಹಿಂತಿರುಗಲು ಟ್ಯಾಪ್‌ ಮಾಡಿ"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"ಆಟವನ್ನು ಆಯ್ಕೆ ಮಾಡಿ"</string>
@@ -1719,8 +1714,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"ಶಾರ್ಟ್‌ಕಟ್ ಬಳಸಿ"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"ಬಣ್ಣ ವಿಲೋಮ"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"ಬಣ್ಣ ತಿದ್ದುಪಡಿ"</string>
-    <!-- no translation found for one_handed_mode_feature_name (2334330034828094891) -->
-    <skip />
+    <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"ಒಂದು ಕೈ ಮೋಡ್‌"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"ಇನ್ನಷ್ಟು ಮಬ್ಬು"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"ವಾಲ್ಯೂಮ್ ಕೀಗಳನ್ನು ಹಿಡಿದುಕೊಳ್ಳಿ. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ಅನ್ನು ಆನ್ ಮಾಡಲಾಗಿದೆ."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"ವಾಲ್ಯೂಮ್ ಕೀಗಳನ್ನು ಹಿಡಿದಿಟ್ಟುಕೊಳ್ಳಲಾಗಿದೆ. <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, ಆಫ್ ಮಾಡಲಾಗಿದೆ."</string>

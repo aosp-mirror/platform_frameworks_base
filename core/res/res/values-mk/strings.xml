@@ -1181,8 +1181,7 @@
     <string name="not_checked" msgid="7972320087569023342">"не е штиклирано"</string>
     <string name="selected" msgid="6614607926197755875">"избрано"</string>
     <string name="not_selected" msgid="410652016565864475">"не е избрано"</string>
-    <!-- no translation found for in_progress (2149208189184319441) -->
-    <skip />
+    <string name="in_progress" msgid="2149208189184319441">"во тек"</string>
     <string name="whichApplication" msgid="5432266899591255759">"Активирај со"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"Остварете го дејството со %1$s"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"Заврши го дејството"</string>
@@ -1715,8 +1714,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Користи кратенка"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Инверзија на бои"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Корекција на бои"</string>
-    <!-- no translation found for one_handed_mode_feature_name (2334330034828094891) -->
-    <skip />
+    <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Режим со една рака"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Дополнително затемнување"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Ги задржавте копчињата за јачина на звук. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> е вклучена."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Ги задржавте копчињата за јачина на звук. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> е исклучена."</string>
@@ -1872,10 +1870,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Ажурирано од администраторот"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Избришано од администраторот"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Во ред"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (4877297130366222145) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (8518809702138617167) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"„Штедачот на батерија“ вклучува темна тема и ја ограничува или исклучува активноста во заднина, некои визуелни ефекти, одредени функции и некои мрежни врски.\n\n"<annotation id="url">"Дознајте повеќе"</annotation></string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"„Штедачот на батерија“ вклучува темна тема и ја ограничува или исклучува активноста во заднина, некои визуелнни ефекти, одредени функции и некои мрежни врски."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"За да се намали користењето интернет, „Штедачот на интернет“ спречува дел од апликациите да испраќаат или да примаат податоци во заднина. Одредена апликација што ја користите ќе може да користи интернет, но можеби тоа ќе го прави поретко. Ова значи, на пример, дека сликите нема да се прикажуваат додека не ги допрете."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Да се вклучи „Штедач на интернет“?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Вклучи"</string>
@@ -1978,10 +1974,8 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"Апликацијата <xliff:g id="APP_NAME_0">%1$s</xliff:g> не е достапна во моментов. Со ова управува <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Дознај повеќе"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Прекини ја паузата"</string>
-    <!-- no translation found for work_mode_off_title (961171256005852058) -->
-    <skip />
-    <!-- no translation found for work_mode_off_message (7319580997683623309) -->
-    <skip />
+    <string name="work_mode_off_title" msgid="961171256005852058">"Да се вклучат работни апликации?"</string>
+    <string name="work_mode_off_message" msgid="7319580997683623309">"Добијте пристап до вашите работни апликации и известувања"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Вклучи"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Апликацијата не е достапна"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> не е достапна во моментов."</string>

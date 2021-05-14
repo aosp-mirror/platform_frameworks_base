@@ -1181,8 +1181,7 @@
     <string name="not_checked" msgid="7972320087569023342">"පරීක්ෂා කර නැත"</string>
     <string name="selected" msgid="6614607926197755875">"තෝරන ලදි"</string>
     <string name="not_selected" msgid="410652016565864475">"තෝරා නොමැත"</string>
-    <!-- no translation found for in_progress (2149208189184319441) -->
-    <skip />
+    <string name="in_progress" msgid="2149208189184319441">"සිදු වෙමින් පවතී"</string>
     <string name="whichApplication" msgid="5432266899591255759">"පහත භාවිතයෙන් ක්‍රියාව සම්පූර්ණ කරන්න"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"%1$s භාවිතා කරමින් ක්‍රියාව සම්පුර්ණ කරන්න"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"ක්‍රියාව සම්පූර්ණ කරන්න"</string>
@@ -1715,8 +1714,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"කෙටිමඟ භාවිතා කරන්න"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"වර්ණ අපවර්තනය"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"වර්ණ නිවැරදි කිරීම"</string>
-    <!-- no translation found for one_handed_mode_feature_name (2334330034828094891) -->
-    <skip />
+    <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"තනි අත් ප්‍රකාරය"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"තවත් අඳුරු"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"හඬ පරිමා යතුරු අල්ලා ගන්න <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ක්‍රියාත්මකයි."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"හඬ පරිමා යතුරු අල්ලා ගන්න <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ක්‍රියාවිරහිතයි."</string>
@@ -1872,10 +1870,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"ඔබගේ පරිපාලක මඟින් යාවත්කාලීන කර ඇත"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"ඔබගේ පරිපාලක මඟින් මකා දමා ඇත"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"හරි"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (4877297130366222145) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (8518809702138617167) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"බැටරි සුරැකුම අඳුරු තේමාව ක්‍රියාත්මක කර පසුබිම් ක්‍රියාකාරකම්, සමහර දෘශ්‍ය ප්‍රයෝග, යම් විශේෂාංග සහ සමහර ජාල සම්බන්ධතා සීමා හෝ ක්‍රියාවිරහිත කරයි.\n\n"<annotation id="url">"තව දැන ගන්න"</annotation></string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"බැටරි සුරැකුම අඳුරු තේමාව ක්‍රියාත්මක කර පසුබිම් ක්‍රියාකාරකම්, සමහර දෘශ්‍ය ප්‍රයෝග, යම් විශේෂාංග සහ සමහර ජාල සම්බන්ධතා සීමා හෝ ක්‍රියාවිරහිත කරයි."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"දත්ත භාවිතය අඩු කිරීමට උදවු වීමට, දත්ත සුරැකුම සමහර යෙදුම් පසුබිමින් දත්ත යැවීම සහ ලබා ගැනීම වළක්වයි. ඔබ දැනට භාවිත කරන යෙදුමකට දත්ත වෙත පිවිසීමට හැකිය, නමුත් එසේ කරන්නේ කලාතුරකින් විය හැකිය. මෙයින් අදහස් වන්නේ, උදාහරණයක් ලෙස, එම රූප ඔබ ඒවාට තට්ටු කරන තෙක් සංදර්ශනය නොවන බවය."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"දත්ත සුරැකුම ක්‍රියාත්මක කරන්නද?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ක්‍රියාත්මක කරන්න"</string>
@@ -1978,10 +1974,8 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> මේ අවස්ථාවේදී ලබා ගත නොහැකිය. මෙය <xliff:g id="APP_NAME_1">%2$s</xliff:g> මගින් කළමනාකරණය කෙරේ."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"තව දැන ගන්න"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"යෙදුම විරාම කිරීම ඉවත් කරන්න"</string>
-    <!-- no translation found for work_mode_off_title (961171256005852058) -->
-    <skip />
-    <!-- no translation found for work_mode_off_message (7319580997683623309) -->
-    <skip />
+    <string name="work_mode_off_title" msgid="961171256005852058">"කාර්යාල යෙදු. ක්‍රියා. කරන්නද?"</string>
+    <string name="work_mode_off_message" msgid="7319580997683623309">"ඔබගේ කාර්යාල යෙදුම් සහ දැනුම්දීම් වෙත ප්‍රවේශය ලබා ගන්න"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"ක්‍රියාත්මක කරන්න"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"යෙදුම ලබා ගත නොහැකිය"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> මේ දැන් ලබා ගත නොහැකිය."</string>
