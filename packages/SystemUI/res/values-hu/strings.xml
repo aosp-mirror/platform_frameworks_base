@@ -421,7 +421,7 @@
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"Bekapcsolás: <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"Eddig: <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"Sötét téma"</string>
-    <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"Akkumulátorkímélő"</string>
+    <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"Akkumulátorkímélő mód"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"Be: napnyugta"</string>
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"Napfelkeltéig"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"Be: <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -602,7 +602,7 @@
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"A kitűzött alkalmazás megnyithat más alkalmazásokat."</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"Az alkalmazás kitűzésének megszüntetéséhez tartsa lenyomva a Vissza és az Áttekintés gombokat"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Az alkalmazás kitűzésének megszüntetéséhez tartsa lenyomva a Vissza és a Kezdőképernyő gombot"</string>
-    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Az alkalmazás kitűzésének megszüntetéséhez csúsztassa felfelé ujját, majd tartsa lenyomva"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"A kitűzés megszüntetéséhez csúsztassa felfelé ujját, majd tartsa lenyomva"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"Értem"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Nem, köszönöm"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"Alkalmazás kitűzve"</string>

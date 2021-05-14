@@ -35,7 +35,7 @@
     <string name="wifi_not_in_range" msgid="1541760821805777772">"Ընդգրկույթից դուրս է"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"Չի միանա ավտոմատ"</string>
     <string name="wifi_no_internet" msgid="1774198889176926299">"Ինտերնետ կապ չկա"</string>
-    <string name="saved_network" msgid="7143698034077223645">"Ով է պահել՝ <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="saved_network" msgid="7143698034077223645">"Պահվել է՝ <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"Ավտոմատ կերպով կապակցվել է %1$s-ի միջոցով"</string>
     <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"Ավտոմատ միացել է ցանցերի վարկանիշի մատակարարի միջոցով"</string>
     <string name="connected_via_passpoint" msgid="7735442932429075684">"Միացված է %1$s-ի միջոցով"</string>
@@ -196,7 +196,7 @@
     <string name="choose_profile" msgid="343803890897657450">"Ընտրեք պրոֆիլ"</string>
     <string name="category_personal" msgid="6236798763159385225">"Անձնական"</string>
     <string name="category_work" msgid="4014193632325996115">"Աշխատանքային"</string>
-    <string name="development_settings_title" msgid="140296922921597393">"Ծրագրավորողի ընտրանքներ"</string>
+    <string name="development_settings_title" msgid="140296922921597393">"Մշակողի ընտրանքներ"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Միացնել մշակողի ընտրանքները"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Կարգավորել ընտրանքները ծրագրի ծրագրավորման համար"</string>
     <string name="development_settings_not_available" msgid="355070198089140951">"Ծրագրավորման ընտրանքներն այլևս հասանելի չեն այս օգտատիրոջ"</string>
@@ -506,7 +506,7 @@
     <string name="alarm_template_far" msgid="6382760514842998629">"<xliff:g id="WHEN">%1$s</xliff:g>-ին"</string>
     <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"Տևողություն"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Ամեն անգամ հարցնել"</string>
-    <string name="zen_mode_forever" msgid="3339224497605461291">"Մինչև չանջատեք"</string>
+    <string name="zen_mode_forever" msgid="3339224497605461291">"Մինչև անջատեք"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Հենց նոր"</string>
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Հեռախոսի բարձրախոս"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Կապի խնդիր կա: Սարքն անջատեք և նորից միացրեք:"</string>

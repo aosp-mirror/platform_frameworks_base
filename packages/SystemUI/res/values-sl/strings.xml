@@ -95,14 +95,14 @@
     <string name="screenrecord_description" msgid="1123231719680353736">"Med snemanjem lahko sistem Android zajame morebitne občutljive podatke, ki so prikazani na zaslonu ali se predvajajo v napravi. To vključuje gesla, podatke za plačilo, fotografije, sporočila in zvok."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Snemanje zvoka"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Zvok v napravi"</string>
-    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Zvoki v napravi, kot so glasba, klici in toni zvonjenja"</string>
+    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Zvoki v napravi, kot so glasba, klici in toni zvonjenja."</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Mikrofon"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Zvok v napravi in mikrofon"</string>
     <string name="screenrecord_start" msgid="330991441575775004">"Začni"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Snemanje zaslona"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Snemanje zaslona in zvoka"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"Prikaz dotikov na zaslonu"</string>
-    <string name="screenrecord_stop_text" msgid="6549288689506057686">"Dotaknite se, da ustavite"</string>
+    <string name="screenrecord_stop_text" msgid="6549288689506057686">"Dotaknite se, da ustavite."</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"Ustavi"</string>
     <string name="screenrecord_pause_label" msgid="6004054907104549857">"Začasno ustavi"</string>
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"Nadaljuj"</string>
@@ -425,7 +425,7 @@
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"Vklop ob <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"Do <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"Temna tema"</string>
-    <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"Varčevanje z baterijo"</string>
+    <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"Varčevanje z energijo baterije"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"Ob sončnem zahodu"</string>
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"Do sončnega vzhoda"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"Vklop ob <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -514,7 +514,7 @@
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Želite začeti snemati ali predvajati z aplikacijo <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"Tega ne prikaži več"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Izbriši vse"</string>
-    <string name="manage_notifications_text" msgid="6885645344647733116">"Upravljanje"</string>
+    <string name="manage_notifications_text" msgid="6885645344647733116">"Upravljaj"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Zgodovina"</string>
     <string name="notification_section_header_incoming" msgid="850925217908095197">"Novo"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"Tiho"</string>
@@ -718,14 +718,14 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"Privzeto"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"Mehurček"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Brez zvočnega opozarjanja ali vibriranja"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Brez zvočnega opozarjanja ali vibriranja, prikaz nižje v razdelku s pogovorom"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Zvonjenje ali vibriranje je omogočeno na podlagi nastavitev telefona"</string>
+    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Brez zvočnega opozarjanja ali vibriranja, prikaz nižje v razdelku Pogovor."</string>
+    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Zvonjenje ali vibriranje je omogočeno na podlagi nastavitev telefona."</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Zvonjenje ali vibriranje je omogočeno na podlagi nastavitev telefona. Pogovori v aplikaciji <xliff:g id="APP_NAME">%1$s</xliff:g> so privzeto prikazani v oblačkih."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Zadrži vašo pozornost z lebdečo bližnjico do te vsebine."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Prikaz na vrhu razdelka s pogovorom in v plavajočem oblačku, prikaz profilne slike na zaklenjenem zaslonu"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Prikaz na vrhu razdelka Pogovor in v plavajočem oblačku, prikaz profilne slike na zaklenjenem zaslonu."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Nastavitve"</string>
-    <string name="notification_priority_title" msgid="2079708866333537093">"Prednost"</string>
-    <string name="no_shortcut" msgid="8257177117568230126">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> ne podpira pogovornih funkcij"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"Prednostno"</string>
+    <string name="no_shortcut" msgid="8257177117568230126">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> ne podpira pogovornih funkcij."</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Ni nedavnih oblačkov"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Tukaj bodo prikazani tako nedavni kot tudi opuščeni oblački"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Za ta obvestila ni mogoče spremeniti nastavitev."</string>
@@ -836,7 +836,7 @@
     <string name="accessibility_data_saver_on" msgid="5394743820189757731">"Varčevanje s podatki je vklopljeno"</string>
     <string name="accessibility_data_saver_off" msgid="58339669022107171">"Varčevanje s podatki je izklopljeno"</string>
     <string name="switch_bar_on" msgid="1770868129120096114">"Vklopljeno"</string>
-    <string name="switch_bar_off" msgid="5669805115416379556">"Izklop"</string>
+    <string name="switch_bar_off" msgid="5669805115416379556">"Izklopljeno"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"Ni na voljo"</string>
     <string name="nav_bar" msgid="4642708685386136807">"Vrstica za krmarjenje"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"Postavitev"</string>
@@ -1036,7 +1036,7 @@
     <string name="magnification_window_title" msgid="4863914360847258333">"Povečevalno okno"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Kontrolniki povečevalnega okna"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Kontrolniki naprave"</string>
-    <string name="quick_controls_subtitle" msgid="1667408093326318053">"Dodajte kontrolnike za povezane naprave"</string>
+    <string name="quick_controls_subtitle" msgid="1667408093326318053">"Dodajte kontrolnike za povezane naprave."</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"Nastavitev kontrolnikov naprave"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Za dostop do kontrolnikov pridržite gumb za vklop"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Izberite aplikacijo za dodajanje kontrolnikov"</string>
@@ -1054,9 +1054,9 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"odstranitev iz priljubljenih"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Premakni na položaj <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Kontrolniki"</string>
-    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Izberite kontrolnike, do katerih želite imeti dostop prek menija za vklop/izklop"</string>
-    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Držite in povlecite, da prerazporedite kontrolnike"</string>
-    <string name="controls_favorite_removed" msgid="5276978408529217272">"Vsi kontrolniki so bili odstranjeni"</string>
+    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Izberite kontrolnike, do katerih želite imeti dostop prek menija za vklop/izklop."</string>
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Držite in povlecite, da prerazporedite kontrolnike."</string>
+    <string name="controls_favorite_removed" msgid="5276978408529217272">"Vsi kontrolniki so bili odstranjeni."</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Spremembe niso shranjene"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Prikaz drugih aplikacij"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Kontrolnikov ni bilo mogoče naložiti. Preverite aplikacijo <xliff:g id="APP">%s</xliff:g> in se prepričajte, da se njene nastavitve niso spremenile."</string>

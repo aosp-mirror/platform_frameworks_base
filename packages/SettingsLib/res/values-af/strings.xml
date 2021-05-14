@@ -377,8 +377,8 @@
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Maak dat enige program na eksterne berging geskryf kan word, ongeag manifeswaardes"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Dwing aktiwiteite om verstelbaar te wees"</string>
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Maak die groottes van alle aktiwiteite verstelbaar vir veelvuldige vensters, ongeag manifeswaardes."</string>
-    <string name="enable_freeform_support" msgid="7599125687603914253">"Aktiveer vormvrye-Windows"</string>
-    <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Aktiveer steun vir eksperimentele vormvrye-Windows."</string>
+    <string name="enable_freeform_support" msgid="7599125687603914253">"Aktiveer vormvrye vensters"</string>
+    <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Aktiveer steun vir eksperimentele vormvrye vensters."</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Werkskerm-rugsteunwagwoord"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Volle rekenaarrugsteune word nie tans beskerm nie"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Tik om die wagwoord vir volledige rekenaarrugsteune te verander of te verwyder"</string>
@@ -458,7 +458,7 @@
     <string name="disabled" msgid="8017887509554714950">"Gedeaktiveer"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Toegelaat"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Nie toegelaat nie"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"Installeer onbekende apps"</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"Installeer onbekende programme"</string>
     <string name="home" msgid="973834627243661438">"Instellingstuisblad"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"0%"</item>

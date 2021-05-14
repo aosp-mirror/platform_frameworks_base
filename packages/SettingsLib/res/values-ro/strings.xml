@@ -117,7 +117,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Anulați"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Asocierea dispozitivelor vă permite accesul la persoanele de contact și la istoricul apelurilor când dispozitivul este conectat."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Nu s-a putut împerechea cu <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Nu s-a putut împerechea cu <xliff:g id="DEVICE_NAME">%1$s</xliff:g> din cauza unui cod PIN sau al unei chei de acces incorecte."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Nu s-a putut asocia cu <xliff:g id="DEVICE_NAME">%1$s</xliff:g> din cauza unui cod PIN sau a unei chei de acces incorecte."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Nu se poate comunica cu <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Împerechere respinsă de <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Computer"</string>
@@ -458,7 +458,7 @@
     <string name="disabled" msgid="8017887509554714950">"Dezactivată"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Permise"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Nepermise"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"Instalare aplicații necunoscute"</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"Instalarea aplicațiilor necunoscute"</string>
     <string name="home" msgid="973834627243661438">"Ecran principal Setări"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"0%"</item>
@@ -467,8 +467,8 @@
   </string-array>
     <string name="charge_length_format" msgid="6941645744588690932">"Acum <xliff:g id="ID_1">%1$s</xliff:g>"</string>
     <string name="remaining_length_format" msgid="4310625772926171089">"Timp rămas: <xliff:g id="ID_1">%1$s</xliff:g>"</string>
-    <string name="screen_zoom_summary_small" msgid="6050633151263074260">"Mic"</string>
-    <string name="screen_zoom_summary_default" msgid="1888865694033865408">"Prestabilit"</string>
+    <string name="screen_zoom_summary_small" msgid="6050633151263074260">"Mică"</string>
+    <string name="screen_zoom_summary_default" msgid="1888865694033865408">"Prestabilită"</string>
     <string name="screen_zoom_summary_large" msgid="4706951482598978984">"Mare"</string>
     <string name="screen_zoom_summary_very_large" msgid="7317423942896999029">"Mai mare"</string>
     <string name="screen_zoom_summary_extremely_large" msgid="1438045624562358554">"Cel mai mare"</string>

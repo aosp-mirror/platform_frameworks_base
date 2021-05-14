@@ -301,7 +301,7 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"存取您的日曆"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"短訊"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"傳送和查看短訊"</string>
-    <string name="permgrouplab_storage" msgid="1938416135375282333">"檔案及媒體"</string>
+    <string name="permgrouplab_storage" msgid="1938416135375282333">"檔案和媒體"</string>
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"存取裝置上的相片、媒體和檔案"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"麥克風"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"錄音"</string>
@@ -423,13 +423,13 @@
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"允許應用程式存取額外的位置提供者指令。這項設定可能會使應用程式干擾 GPS 或其他位置來源的運作。"</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"只在前景存取精確位置"</string>
     <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"使用此應用程式時，應用程式可透過定位服務獲取您的精確位置。您的裝置必須開啟定位服務，才能讓應用程式獲取位置。這可能會增加電池用量。"</string>
-    <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"只在前景存取大概位置"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"使用此應用程式時，應用程式可透過定位服務獲取您的大概位置。您的裝置必須開啟定位服務，才能讓應用程式獲取位置。"</string>
+    <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"只在前景存取概略位置"</string>
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"使用此應用程式時，應用程式可透過定位服務獲取您的概略位置。您的裝置必須開啟定位服務，才能讓應用程式獲取位置。"</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"在背景存取位置資訊"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"即使您不使用此應用程式，它仍可隨時存取位置。"</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"更改音效設定"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"允許應用程式修改全域音頻設定，例如音量和用於輸出的喇叭。"</string>
-    <string name="permlab_recordAudio" msgid="1208457423054219147">"錄製音效"</string>
+    <string name="permlab_recordAudio" msgid="1208457423054219147">"錄音"</string>
     <string name="permdesc_recordAudio" msgid="3976213377904701093">"此應用程式可以隨時使用麥克風錄音。"</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"發送指令至 SIM 卡"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"允許應用程式傳送指令到 SIM 卡。這項操作具有高危險性。"</string>
@@ -999,7 +999,7 @@
     <string name="last_month" msgid="1528906781083518683">"上個月"</string>
     <string name="older" msgid="1645159827884647400">"較舊"</string>
     <string name="preposition_for_date" msgid="2780767868832729599">"於 <xliff:g id="DATE">%s</xliff:g>"</string>
-    <string name="preposition_for_time" msgid="4336835286453822053">"在 <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="preposition_for_time" msgid="4336835286453822053">"在<xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="preposition_for_year" msgid="3149809685340130039">"於 <xliff:g id="YEAR">%s</xliff:g> 年"</string>
     <string name="day" msgid="8394717255950176156">"天"</string>
     <string name="days" msgid="4570879797423034973">"天"</string>
@@ -1901,7 +1901,7 @@
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"已連線至 <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"輕按即可查看檔案"</string>
     <string name="pin_target" msgid="8036028973110156895">"固定"</string>
-    <string name="pin_specific_target" msgid="7824671240625957415">"將<xliff:g id="LABEL">%1$s</xliff:g>置頂"</string>
+    <string name="pin_specific_target" msgid="7824671240625957415">"固定「<xliff:g id="LABEL">%1$s</xliff:g>」"</string>
     <string name="unpin_target" msgid="3963318576590204447">"取消固定"</string>
     <string name="unpin_specific_target" msgid="3859828252160908146">"取消將<xliff:g id="LABEL">%1$s</xliff:g>置頂"</string>
     <string name="app_info" msgid="6113278084877079851">"應用程式資料"</string>

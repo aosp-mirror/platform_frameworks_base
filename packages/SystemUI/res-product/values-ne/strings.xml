@@ -22,7 +22,7 @@
     <string name="dock_alignment_slow_charging" product="default" msgid="6997633396534416792">"अझ छिटो चार्ज गर्न फोनलाई फेरि मिलाउनुहोस्"</string>
     <string name="dock_alignment_not_charging" product="default" msgid="3980752926226749808">"तारविनै चार्ज गर्न फोनलाई फेरि मिलाउनुहोस्"</string>
     <string name="inattentive_sleep_warning_message" product="tv" msgid="6844464574089665063">"Android टिभी यन्त्र चाँडै निष्क्रिय हुने छ; सक्रिय राख्न कुनै बटन थिच्नुहोस्।"</string>
-    <string name="inattentive_sleep_warning_message" product="default" msgid="5693904520452332224">"यो यन्त्र चाँडै निष्क्रिय हुने छ; सक्रिय राख्न थिच्नुहोस्।"</string>
+    <string name="inattentive_sleep_warning_message" product="default" msgid="5693904520452332224">"यो डिभाइस चाँडै निष्क्रिय हुने छ; सक्रिय राख्न थिच्नुहोस्।"</string>
     <string name="keyguard_missing_sim_message" product="tablet" msgid="5018086454277963787">"ट्याब्लेटमा SIM कार्ड छैन।"</string>
     <string name="keyguard_missing_sim_message" product="default" msgid="7053347843877341391">"फोनमा SIM कार्ड छैन।"</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="6278551068943958651">"PIN कोडहरू मिलेनन्"</string>

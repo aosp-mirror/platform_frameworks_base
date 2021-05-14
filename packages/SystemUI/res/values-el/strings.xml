@@ -602,7 +602,7 @@
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Η καρφιτσωμένη εφαρμογή μπορεί να ανοίξει άλλες εφαρμογές."</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"Για να ξεκαρφιτσώσετε αυτήν την εφαρμογή, αγγίξτε παρατεταμένα τα κουμπιά Πίσω και Επισκόπηση."</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Για να ξεκαρφιτσώσετε αυτήν την εφαρμογή, αγγίξτε παρατεταμένα τα κουμπιά Πίσω και Αρχική οθόνη."</string>
-    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Για να ξεκαρφιτσώσετε αυτήν την εφαρμογή, σύρετε προς τα πάνω και κρατήστε παρατεταμένα"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Για να ξεκαρφ. την εφαρμογή, σύρετε προς τα πάνω και κρατήστε"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"Το κατάλαβα"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Όχι"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"Η εφαρμογή καρφιτσώθηκε."</string>

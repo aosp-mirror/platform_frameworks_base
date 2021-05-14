@@ -19,7 +19,7 @@
     <string name="app_name" msgid="7488448184431507488">"Paketin asentaja"</string>
     <string name="install" msgid="711829760615509273">"Asenna"</string>
     <string name="done" msgid="6632441120016885253">"Valmis"</string>
-    <string name="cancel" msgid="1018267193425558088">"Peruuta"</string>
+    <string name="cancel" msgid="1018267193425558088">"Peru"</string>
     <string name="installing" msgid="4921993079741206516">"Asennetaan…"</string>
     <string name="installing_app" msgid="1165095864863849422">"Asennetaan <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="install_done" msgid="5987363587661783896">"Sovellus on asennettu."</string>

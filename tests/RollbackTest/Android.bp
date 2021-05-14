@@ -29,7 +29,12 @@ java_test_host {
     name: "StagedRollbackTest",
     srcs: ["StagedRollbackTest/src/**/*.java"],
     libs: ["tradefed"],
-    static_libs: ["testng", "compatibility-tradefed", "RollbackTestLib"],
+    static_libs: [
+        "compatibility-tradefed",
+        "frameworks-base-hostutils",
+        "RollbackTestLib",
+        "testng",
+    ],
     test_suites: ["general-tests"],
     test_config: "StagedRollbackTest.xml",
     data: [":com.android.apex.apkrollback.test_v1"],
@@ -39,7 +44,7 @@ java_test_host {
     name: "NetworkStagedRollbackTest",
     srcs: ["NetworkStagedRollbackTest/src/**/*.java"],
     libs: ["tradefed"],
-    static_libs: ["RollbackTestLib"],
+    static_libs: ["RollbackTestLib", "frameworks-base-hostutils"],
     test_suites: ["general-tests"],
     test_config: "NetworkStagedRollbackTest.xml",
 }

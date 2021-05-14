@@ -117,7 +117,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Zrušiť"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Párovaním udelíte zariadeniam po pripojení prístup k svojim kontaktom a histórii hovorov."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Nepodarilo sa spárovať so zariadením <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Nepodarilo sa spárovať so zariadením <xliff:g id="DEVICE_NAME">%1$s</xliff:g>, pretože ste zadali nesprávny kód PIN alebo prístupový kľúč."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"So zariadením <xliff:g id="DEVICE_NAME">%1$s</xliff:g> sa nespárovalo pre nesprávny kód PIN alebo prístupový kľúč."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"So zariadením <xliff:g id="DEVICE_NAME">%1$s</xliff:g> nie je možné komunikovať."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Párovanie odmietnuté zariadením <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Počítač"</string>
@@ -153,7 +153,7 @@
     <string name="unknown" msgid="3544487229740637809">"Neznáme"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"Používateľ: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"Pre niektoré akcie"</string>
-    <string name="launch_defaults_none" msgid="8049374306261262709">"Nie je predvolená pre žiadne akcie"</string>
+    <string name="launch_defaults_none" msgid="8049374306261262709">"Nie sú nastavené žiadne predvolené"</string>
     <string name="tts_settings" msgid="8130616705989351312">"Nastavenia prevodu textu na reč"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"Prevod textu na reč"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"Rýchlosť reči"</string>
@@ -237,7 +237,7 @@
     <string name="bugreport_in_power" msgid="8664089072534638709">"Odkaz na hlásenie chyby"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Zobraziť v hlavnej ponuke tlačidlo na vytvorenie hlásenia chyby"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Nevypínať obrazovku"</string>
-    <string name="keep_screen_on_summary" msgid="1510731514101925829">"Obrazovka sa pri nabíjaní neprepne do režimu spánku"</string>
+    <string name="keep_screen_on_summary" msgid="1510731514101925829">"Neprepínať obrazovku pri nabíjaní do režimu spánku"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Povoliť denník Bluetooth HCI"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Zachytávať pakety rozhrania Bluetooth (Prepnúť Bluetooth po zmene tohto nastavenia.)"</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"Odblokovať OEM"</string>
@@ -271,7 +271,7 @@
     <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4898693684282596143">"Spustiť zvukový kodek Bluetooth\nVýber: počet bitov na vzorku"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="364277285688014427">"Bluetooth Audio – režim kanála"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="2076949781460359589">"Spustiť zvukový kodek Bluetooth\nVýber: režim kanála"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3233402355917446304">"Kodek LDAC Bluetooth Audio: Kvalita prehrávania"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3233402355917446304">"Kodek LDAC Bluetooth Audio: kvalita prehrávania"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7274396574659784285">"Spustiť zvukový kodek Bluetooth typu LDAC\nVýber kodeku: kvalita prehrávania"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="2040810756832027227">"Streamovanie: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"Súkromné DNS"</string>
@@ -279,7 +279,7 @@
     <string name="private_dns_mode_off" msgid="7065962499349997041">"Vypnuté"</string>
     <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"Automaticky"</string>
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"Názov hostiteľa poskytovateľa súkromného DNS"</string>
-    <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Zadajte názov hostiteľa poskytovateľa DNS"</string>
+    <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Zadajte hostiteľa poskytovateľa DNS"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"Nepodarilo sa pripojiť"</string>
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Zobraziť možnosti certifikácie bezdrôtového zobrazenia"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Zvýšiť úroveň denníkov Wi‑Fi, zobrazovať podľa SSID RSSI pri výbere siete Wi‑Fi"</string>
@@ -297,9 +297,9 @@
     <string name="select_usb_configuration_dialog_title" msgid="3579567144722589237">"Výber konfigurácie USB"</string>
     <string name="allow_mock_location" msgid="2102650981552527884">"Povoliť simulované polohy"</string>
     <string name="allow_mock_location_summary" msgid="179780881081354579">"Povoliť simulované polohy"</string>
-    <string name="debug_view_attributes" msgid="3539609843984208216">"Kontrola atribútov zobrazenia"</string>
+    <string name="debug_view_attributes" msgid="3539609843984208216">"Kontrolovať atribúty zobrazenia"</string>
     <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"Vždy ponechávať mobilné dáta aktívne, dokonca aj pri aktívnej sieti Wi‑Fi (na rýchle prepínanie sietí)"</string>
-    <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Ak je k dispozícii hardvérová akcelerácia tetheringu, používať ju"</string>
+    <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Používať hardvérovú akceleráciu tetheringu (ak je k dispozícii)"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"Povoliť ladenie cez USB?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"Ladenie cez USB je určené iba na účely vývoja. Možno ho použiť na kopírovanie dát medzi počítačom a zariadením, inštaláciu aplikácií do zariadenia bez upozornenia a čítanie dát denníka."</string>
     <string name="adbwifi_warning_title" msgid="727104571653031865">"Chcete povoliť bezdrôtové ladenie?"</string>
@@ -310,8 +310,8 @@
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"Overovať aplikácie z USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Kontrolovať škodlivosť aplikácií nainštalovaných pomocou nástroja ADB alebo ADT"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Zariadenia Bluetooth sa budú zobrazovať bez názvov (iba adresy MAC)"</string>
-    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Umožňuje zakázať funkciu absolútnej hlasitosti rozhrania Bluetooth v prípade problémov s hlasitosťou vo vzdialených zariadeniach, ako je napríklad neprijateľne vysoká hlasitosť alebo absencia ovládacích prvkov."</string>
-    <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Umožňuje povoliť skupinu funkcií Bluetooth Gabeldorche."</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Zakázať funkciu absolútnej hlasitosti rozhrania Bluetooth pri problémoch s hlasitosťou vo vzdialených zariadeniach (napr. príliš vysoká hlasitosť alebo absencia ovládacích prvkov)"</string>
+    <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Povoliť skupinu funkcií Bluetooth Gabeldorche"</string>
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Povoľuje funkciu Zlepšené možnosti pripojenia."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Miestny terminál"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Povoliť terminálovú apl. na miestny prístup k prostrediu shell"</string>
@@ -355,12 +355,12 @@
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Vynútiť pre všetky jazyky rozloženie obrazovky sprava doľava"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Vynútiť 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Povoliť 4x MSAA v aplikáciách OpenGL ES 2.0"</string>
-    <string name="show_non_rect_clip" msgid="7499758654867881817">"Ladenie operácií s neobdĺžnikovými výstrižkami"</string>
+    <string name="show_non_rect_clip" msgid="7499758654867881817">"Ladiť operácie s neobdĺžnikovými výstrižkami"</string>
     <string name="track_frame_time" msgid="522674651937771106">"Vykresľovanie HWUI profilu"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Povoliť vrstvy ladenia grafického procesora"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Povoliť načítanie vrstiev ladenia grafického procesora na ladenie aplikácií"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Aktivovať podr. zapis. dodáv. do denníka"</string>
-    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Zahŕňajte v hláseniach chýb ďalšie denníky dodávateľa pre konkrétne zariadenie, ktoré môžu obsahovať osobné údaje, zvýšiť spotrebu batérie alebo zabrať viac ukladacieho priestoru."</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Zahŕňať do hlásení chýb ďalšie denníky dodávateľa pre konkrétne zariadenie, ktoré môžu obsahovať osobné údaje, zvýšiť spotrebu batérie alebo zabrať viac ukladacieho priestoru."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Mierka animácie okna"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Mierka animácie premeny"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Mierka dĺžky animácie"</string>
@@ -372,13 +372,13 @@
     <string name="show_all_anrs" msgid="9160563836616468726">"Zobrazovať nereagovania aplikácií na pozadí"</string>
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Zobrazovať dialógové okno „Aplikácia nereaguje“ pre aplikácie na pozadí"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Zobraziť hlásenia kanála upozornení"</string>
-    <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Zobrazuje varovné hlásenie na obrazovke, keď aplikácia zverejní upozornenie bez platného kanála"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Zobrazovať na obrazovke varovné hlásenie, keď aplikácia zverejní upozornenie bez platného kanála"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Vynútiť povolenie aplikácií na externom úložisku"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Umožňuje zapísať akúkoľvek aplikáciu do externého úložiska bez ohľadu na hodnoty v manifeste"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Vynútiť možnosť zmeny veľkosti aktivít"</string>
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Veľkosti všetkých aktivít bude možné zmeniť na niekoľko okien (bez ohľadu na hodnoty manifestu)."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Povoliť okná s voľným tvarom"</string>
-    <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Povolenie podpory pre experimentálne okná s voľným tvarom."</string>
+    <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Povoliť podporu pre experimentálne okná s voľným tvarom"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Heslo pre zálohy v počítači"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Úplné zálohy v počítači nie sú momentálne chránené"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Klepnutím zmeníte alebo odstránite heslo pre úplné zálohy do počítača"</string>

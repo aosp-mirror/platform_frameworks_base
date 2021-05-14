@@ -85,7 +85,7 @@
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Telefonatat"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Transferimi i skedarëve"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Pajisja e hyrjes"</string>
-    <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Qasja në internet"</string>
+    <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Qasje në internet"</string>
     <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"Ndarja e kontakteve"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"Përdore për ndarjen e kontakteve"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Ndarja e lidhjes së internetit"</string>
@@ -117,7 +117,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Anulo"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Çiftimi lejon qasjen te kontaktet dhe historiku yt i telefonatave."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Nuk mundi të çiftohej me <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Nuk mundi të çiftohej me <xliff:g id="DEVICE_NAME">%1$s</xliff:g> për shkak të një kodi PIN ose një kodi të pasaktë."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Nuk mundi të çiftohej me <xliff:g id="DEVICE_NAME">%1$s</xliff:g> për shkak të një kodi PIN ose çelësi kalimi të pasaktë."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Nuk mund të komunikohet me <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Çiftimi u refuzua nga <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Kompjuteri"</string>
@@ -229,7 +229,7 @@
     <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Çifto pajisjen përmes Wi‑Fi duke skanuar një kod QR"</string>
     <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Po çifton pajisjen…"</string>
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Çiftimi i pajisjes dështoi. Ose kodi QR nuk ishte i saktë, ose pajisja nuk është e lidhur me të njëjtin rrjet."</string>
-    <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"Adresa e IP-së dhe porta"</string>
+    <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"Adresa IP dhe porta"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Skano kodin QR"</string>
     <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Çifto pajisjen përmes Wi‑Fi duke skanuar një kod QR"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Lidhu me një rrjet Wi-Fi"</string>
@@ -243,12 +243,12 @@
     <string name="oem_unlock_enable" msgid="5334869171871566731">"Shkyçja e OEM-së"</string>
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Lejo shkyçjen e ngarkimit të sistemit"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"Të lejohet shkyçja e OEM-së?"</string>
-    <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"PARALAJMËRIM! Funksionet e mbrojtjes së pajisjes nuk do të punojnë në këtë pajisje gjatë kohës që ky cilësim është i aktivizuar."</string>
+    <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"PARALAJMËRIM! Veçoritë e mbrojtjes së pajisjes nuk do të punojnë në këtë pajisje gjatë kohës që ky cilësim është i aktivizuar."</string>
     <string name="mock_location_app" msgid="6269380172542248304">"Zgjidh apl. që simulon vendndodhjen"</string>
     <string name="mock_location_app_not_set" msgid="6972032787262831155">"Nuk është vendosur asnjë aplikacion që simulon vendndodhjen"</string>
     <string name="mock_location_app_set" msgid="4706722469342913843">"Aplikacioni për simulimin e vendndodhjes: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"Rrjetet"</string>
-    <string name="wifi_display_certification" msgid="1805579519992520381">"Certifikimi i ekranit valor"</string>
+    <string name="wifi_display_certification" msgid="1805579519992520381">"Certifikimi i ekranit pa tel"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Aktivizo hyrjen Wi-Fi Verbose"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Përshpejtimi i skanimit të Wi‑Fi"</string>
     <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Renditja e rastësishme e adresave MAC të përmirësuara me Wi-Fi"</string>
@@ -281,7 +281,7 @@
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"Emri i pritësit të ofruesit të DNS-së private"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Fut emrin e pritësit të ofruesit të DNS-së"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"Nuk mund të lidhej"</string>
-    <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Shfaq opsionet për certifikimin e ekranit valor"</string>
+    <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Shfaq opsionet për certifikimin e ekranit pa tel"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Rrit nivelin regjistrues të Wi‑Fi duke shfaqur SSID RSSI-në te Zgjedhësi i Wi‑Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Zvogëlon shkarkimin e baterisë dhe përmirëson cilësinë e funksionimit të rrjetit"</string>
     <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Kur ky modalitet është i aktivizuar, adresa MAC e kësaj pajisjeje mund të ndryshojë çdo herë që lidhet me një rrjet që ka të aktivizuar renditjen e rastësishme të adresave MAC."</string>
@@ -347,8 +347,8 @@
     <string name="disable_overlays_summary" msgid="1954852414363338166">"Përdor gjithmonë GPU-në për përbërjen e ekranit"</string>
     <string name="simulate_color_space" msgid="1206503300335835151">"Simulo hapësirën e ngjyrës"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"Aktivizo gjurmët e OpenGL-së"</string>
-    <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Çaktivizo rrugëzuezin e audios përmes USB-së"</string>
-    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Çaktivizo router-in automatik për te kufjet ose altoparlantët"</string>
+    <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Çaktivizo kalimin e audios përmes USB-së"</string>
+    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Çaktivizo kalimin automatik për te kufjet ose altoparlantët"</string>
     <string name="debug_layout" msgid="1659216803043339741">"Shfaq konturet e kuadrit"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"Shfaq konturet e klipit, hapësirat etj."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Detyro drejtimin e shkrimit nga e djathta në të majtë"</string>
@@ -506,7 +506,7 @@
     <string name="alarm_template_far" msgid="6382760514842998629">"ditën <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"Kohëzgjatja"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Pyet çdo herë"</string>
-    <string name="zen_mode_forever" msgid="3339224497605461291">"Deri sa ta çaktivizosh"</string>
+    <string name="zen_mode_forever" msgid="3339224497605461291">"Derisa ta çaktivizosh"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Pikërisht tani"</string>
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Altoparlanti i telefonit"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Problem me lidhjen. Fike dhe ndize përsëri pajisjen"</string>

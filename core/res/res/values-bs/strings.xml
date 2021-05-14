@@ -625,7 +625,7 @@
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"mijenja ili briše sadržaj vaše dijeljene pohrane"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Omogućava aplikaciji da piše sadržaj vaše dijeljene pohrane."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"Uputi/primi SIP pozive"</string>
-    <string name="permdesc_use_sip" msgid="3590270893253204451">"Dozvoljava aplikaciji upućivanje i prijem SIP poziva."</string>
+    <string name="permdesc_use_sip" msgid="3590270893253204451">"Dozvoljava aplikaciji upućivanje i primanje SIP poziva."</string>
     <string name="permlab_register_sim_subscription" msgid="1653054249287576161">"registriraj nove telekom SMS veze"</string>
     <string name="permdesc_register_sim_subscription" msgid="4183858662792232464">"Dozvoljava aplikaciji da registrira nove telekom SIM veze."</string>
     <string name="permlab_register_call_provider" msgid="6135073566140050702">"registriraj nove telekom veze"</string>
@@ -681,11 +681,11 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Prati broj neispravnih lozinki koje su unijete za otključavanje ekrana te zaključava tablet ili briše sve podatke ovog korisnika ukoliko je unijeto previše neispravnih lozinki."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Praćenje broja unosa netačnih lozinki za otključavanje ekrana te zaključavanje Android TV uređaja ili brisanje svih podataka ovog korisnika u slučaju prekomjernog unosa netačnih lozinki."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Prati broj neispravnih lozinki koje su unijete za otključavanje ekrana te zaključava telefon ili briše sve podatke ovog korisnika ukoliko je unijeto previše neispravnih lozinki."</string>
-    <string name="policylab_resetPassword" msgid="214556238645096520">"Promijeni zaključavanje ekrana"</string>
+    <string name="policylab_resetPassword" msgid="214556238645096520">"Promjena zaključavanja ekrana"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Mijenja zaključavanje ekrana."</string>
-    <string name="policylab_forceLock" msgid="7360335502968476434">"Zaključava ekran"</string>
+    <string name="policylab_forceLock" msgid="7360335502968476434">"Zaključavanje ekrana"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"Kontrolira kako i kada se ekran zaključava."</string>
-    <string name="policylab_wipeData" msgid="1359485247727537311">"Briše sve podatke"</string>
+    <string name="policylab_wipeData" msgid="1359485247727537311">"Brisanje svih podataka"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Briše podatke s tableta bez upozorenja tako što ga vraća na fabričke postavke."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Brisanje podataka Android TV uređaja bez upozorenja vraćanjem uređaja na fabričke postavke."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Briše podatke s telefona bez upozorenja vraćanjem telefona na fabričke postavke."</string>
@@ -701,7 +701,7 @@
     <string name="policydesc_encryptedStorage" msgid="1102516950740375617">"Zahtijeva šifriranje pohranjenih podataka aplikacije."</string>
     <string name="policylab_disableCamera" msgid="5749486347810162018">"Isključuje kamere"</string>
     <string name="policydesc_disableCamera" msgid="3204405908799676104">"Sprečava korištenje svih kamera uređaja."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"Onemog. neke funk. zak. ekrana"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"Onemog. funkcija zaklj. ekrana"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"Sprečava korištenje nekih funkcija za zaključavanje ekrana."</string>
   <string-array name="phoneTypes">
     <item msgid="8996339953292723951">"Kuća"</item>
@@ -1295,10 +1295,10 @@
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"Uvijek dozvoli"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"Nikada ne dozvoli"</string>
     <string name="sim_removed_title" msgid="5387212933992546283">"SIM kartica uklonjena"</string>
-    <string name="sim_removed_message" msgid="9051174064474904617">"Mobilna mreža bit će nedostupna do ponovnog pokretanja s umetnutom važećom SIM karticom."</string>
+    <string name="sim_removed_message" msgid="9051174064474904617">"Mobilna mreža neće biti dostupna dok ponovo ne pokrenete uređaj s umetnutom važećom SIM karticom."</string>
     <string name="sim_done_button" msgid="6464250841528410598">"Gotovo"</string>
     <string name="sim_added_title" msgid="7930779986759414595">"SIM kartica dodana"</string>
-    <string name="sim_added_message" msgid="6602906609509958680">"Za pristup mobilnoj mreži ponovo pokrenite uređaj."</string>
+    <string name="sim_added_message" msgid="6602906609509958680">"Ponovo pokrenite uređaj da pristupite mobilnoj mreži."</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"Ponovo pokreni"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"Aktivirajte uslugu mobilne mreže"</string>
     <string name="install_carrier_app_notification_text" msgid="2781317581274192728">"Preuzmite aplikaciju operatera da aktivirate novi SIM"</string>
@@ -1335,7 +1335,7 @@
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Omogućen način rada okvira za testiranje"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Izvršite vraćanje na fabričke postavke da onemogućite način rada okvira za testiranje."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"Serijska konzola omogućena"</string>
-    <string name="console_running_notification_message" msgid="7892751888125174039">"Izvedba je otežana. Da onemogućite, provjerite program za učitavanje operativnog sistema."</string>
+    <string name="console_running_notification_message" msgid="7892751888125174039">"Performanse su smanjene. Da onemogućite, provjerite program za učitavanje operativnog sistema."</string>
     <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"Tečnost ili nečistoće u USB priključku"</string>
     <string name="usb_contaminant_detected_message" msgid="7346100585390795743">"USB priključak je automatski onemogućen. Dodirnite da saznate više."</string>
     <string name="usb_contaminant_not_detected_title" msgid="2651167729563264053">"USB priključak je sada sigurno koristiti"</string>
@@ -1346,7 +1346,7 @@
     <string name="share_remote_bugreport_notification_message_finished" msgid="7325635795739260135">"Vaš administrator je zatražio izvještaj o greškama kako bi pomogao u rješavanju problema ovog uređaja. Moguće je dijeljenje aplikacija i podataka."</string>
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"PODIJELI"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"ODBACI"</string>
-    <string name="select_input_method" msgid="3971267998568587025">"Odabir načina unosa"</string>
+    <string name="select_input_method" msgid="3971267998568587025">"Odaberite način unosa"</string>
     <string name="show_ime" msgid="6406112007347443383">"Prikaži na ekranu dok je fizička tastatura aktivna"</string>
     <string name="hardware" msgid="1800597768237606953">"Prikaz virtuelne tastature"</string>
     <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"Konfiguriraj fizičku tastaturu"</string>
