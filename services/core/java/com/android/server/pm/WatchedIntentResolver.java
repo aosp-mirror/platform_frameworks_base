@@ -14,18 +14,20 @@
  * limitations under the License.
  */
 
-package com.android.server;
+package com.android.server.pm;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 
-import com.android.server.pm.WatchedIntentFilter;
+import com.android.server.IntentResolver;
 import com.android.server.utils.Snappable;
 import com.android.server.utils.Watchable;
 import com.android.server.utils.WatchableImpl;
 import com.android.server.utils.Watcher;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -34,7 +36,8 @@ import java.util.List;
  * @param <R> The resolver type.
  * {@hide}
  */
-public abstract class WatchedIntentResolver<F extends Watchable, R extends Object>
+public abstract class WatchedIntentResolver<F extends WatchedIntentFilter,
+                                            R extends WatchedIntentFilter>
         extends IntentResolver<F, R>
         implements Watchable, Snappable {
 
@@ -116,11 +119,21 @@ public abstract class WatchedIntentResolver<F extends Watchable, R extends Objec
         onChanged();
     }
 
+    // Sorts a List of IntentFilter objects into descending priority order.
+    @SuppressWarnings("rawtypes")
+    private static final Comparator<WatchedIntentFilter> sResolvePrioritySorter =
+            new Comparator<>() {
+        public int compare(WatchedIntentFilter o1, WatchedIntentFilter o2) {
+            final int q1 = o1.getPriority();
+            final int q2 = o2.getPriority();
+            return (q1 > q2) ? -1 : ((q1 < q2) ? 1 : 0);
+        }
+    };
+
     @Override
     @SuppressWarnings("unchecked")
     protected void sortResults(List<R> results) {
-        super.sortResults(results);
-        onChanged();
+        Collections.sort(results, sResolvePrioritySorter);
     }
 
     /**
