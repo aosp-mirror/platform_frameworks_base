@@ -638,10 +638,11 @@ public final class InputMethodInfo implements Parcelable {
     }
 
     /**
-     * Return {@code true} if this input method should be shown in the IME picker.
-     * @hide
+     * Returns {@code true} if this input method should be shown in menus for selecting an Input
+     * Method, such as the system Input Method Picker. This is {@code false} if the IME is intended
+     * to be accessed programmatically.
      */
-    public boolean showInInputMethodPicker() {
+    public boolean shouldShowInInputMethodPicker() {
         return mShowInInputMethodPicker;
     }
 
