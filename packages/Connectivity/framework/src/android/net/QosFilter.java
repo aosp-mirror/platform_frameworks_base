@@ -71,5 +71,16 @@ public abstract class QosFilter {
      */
     public abstract boolean matchesLocalAddress(@NonNull InetAddress address,
             int startPort, int endPort);
+
+    /**
+     * Determines whether or not the parameters is a match for the filter.
+     *
+     * @param address the remote address
+     * @param startPort the start of the port range
+     * @param endPort the end of the port range
+     * @return whether the parameters match the remote address of the filter
+     */
+    public abstract boolean matchesRemoteAddress(@NonNull InetAddress address,
+            int startPort, int endPort);
 }
 
