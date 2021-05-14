@@ -289,12 +289,6 @@ public class RecentsAnimationController implements DeathRecipient {
                         }
                     }
                     if (!behindSystemBars) {
-                        // Make sure to update the correct IME parent in case that the IME parent
-                        // may be computed as display layer when re-layout window happens during
-                        // rotation but there is intermediate state that the bounds of task and
-                        // the IME target's activity is not the same during rotating.
-                        mDisplayContent.updateImeParent();
-
                         // Hiding IME if IME window is not attached to app.
                         // Since some windowing mode is not proper to snapshot Task with IME window
                         // while the app transitioning to the next task (e.g. split-screen mode)
