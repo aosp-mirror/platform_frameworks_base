@@ -31,12 +31,12 @@ import com.android.systemui.R;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingCollectorFake;
-import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.DragDownHelper;
+import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
@@ -89,6 +89,7 @@ public class NotificationShadeWindowViewTest extends SysuiTestCase {
     @Mock private NotificationShadeWindowController mNotificationShadeWindowController;
     @Mock private NotificationStackScrollLayoutController mNotificationStackScrollLayoutController;
     @Mock private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
+    @Mock private LockscreenShadeTransitionController mLockscreenShadeTransitionController;
 
     @Before
     public void setUp() {
@@ -112,7 +113,7 @@ public class NotificationShadeWindowViewTest extends SysuiTestCase {
                 mPulseExpansionHandler,
                 mDynamicPrivacyController,
                 mBypassController,
-                new FalsingManagerFake(),
+                mLockscreenShadeTransitionController,
                 new FalsingCollectorFake(),
                 mPluginManager,
                 mTunerService,

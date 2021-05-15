@@ -40,6 +40,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyguardIndicationController;
+import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
@@ -127,7 +128,8 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
                 mock(NotificationShadeWindowController.class), mock(DynamicPrivacyController.class),
                 mock(KeyguardStateController.class),
                 mock(KeyguardIndicationController.class), mStatusBar,
-                mock(ShadeControllerImpl.class), mCommandQueue, mInitController,
+                mock(ShadeControllerImpl.class), mock(LockscreenShadeTransitionController.class),
+                mCommandQueue, mInitController,
                 mNotificationInterruptStateProvider);
         mInitController.executePostInitTasks();
         ArgumentCaptor<NotificationInterruptSuppressor> suppressorCaptor =
