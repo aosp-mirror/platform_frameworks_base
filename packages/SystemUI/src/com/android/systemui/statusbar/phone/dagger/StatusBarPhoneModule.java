@@ -51,6 +51,7 @@ import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.KeyguardIndicationController;
+import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
@@ -213,6 +214,7 @@ public interface StatusBarPhoneModule {
             OngoingCallController ongoingCallController,
             SystemStatusAnimationScheduler animationScheduler,
             StatusBarLocationPublisher locationPublisher,
+            LockscreenShadeTransitionController transitionController,
             FeatureFlags featureFlags,
             KeyguardUnlockAnimationController keyguardUnlockAnimationController) {
         return new StatusBar(
@@ -299,6 +301,7 @@ public interface StatusBarPhoneModule {
                 ongoingCallController,
                 animationScheduler,
                 locationPublisher,
+                transitionController,
                 featureFlags,
                 keyguardUnlockAnimationController);
     }
