@@ -203,6 +203,22 @@ class LegacySplitScreenTaskListener implements ShellTaskOrganizer.TaskListener {
             return;
         }
         synchronized (this) {
+            if (!taskInfo.supportsMultiWindow) {
+                if (mSplitScreenController.isDividerVisible()) {
+                    // Dismiss the split screen if the task no longer supports multi window.
+                    if (taskInfo.taskId == mPrimary.taskId
+                            || taskInfo.parentTaskId == mPrimary.taskId) {
+                        // If the primary is focused, dismiss to primary.
+                        mSplitScreenController
+                                .startDismissSplit(taskInfo.isFocused /* toPrimaryTask */);
+                    } else {
+                        // If the secondary is not focused, dismiss to primary.
+                        mSplitScreenController
+                                .startDismissSplit(!taskInfo.isFocused /* toPrimaryTask */);
+                    }
+                }
+                return;
+            }
             if (taskInfo.hasParentTask()) {
                 // changed messages are noisy since it reports on every ensureVisibility. This
                 // conflicts with legacy app-transitions which "swaps" the position to a

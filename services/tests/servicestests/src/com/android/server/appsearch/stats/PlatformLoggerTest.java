@@ -196,6 +196,12 @@ public class PlatformLoggerTest {
     }
 
     @Test
+    public void testCalculateHashCode_MD5_strIsNull() throws
+            NoSuchAlgorithmException, UnsupportedEncodingException {
+        assertThat(PlatformLogger.calculateHashCodeMd5(/*str=*/ null)).isEqualTo(-1);
+    }
+
+    @Test
     public void testShouldLogForTypeLocked_trueWhenSampleRatioIsOne() {
         final int samplingRatio = 1;
         final String testPackageName = "packageName";

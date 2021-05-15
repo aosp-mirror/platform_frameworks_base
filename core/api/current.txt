@@ -141,6 +141,7 @@ package android {
     field public static final String REORDER_TASKS = "android.permission.REORDER_TASKS";
     field public static final String REQUEST_COMPANION_PROFILE_WATCH = "android.permission.REQUEST_COMPANION_PROFILE_WATCH";
     field public static final String REQUEST_COMPANION_RUN_IN_BACKGROUND = "android.permission.REQUEST_COMPANION_RUN_IN_BACKGROUND";
+    field public static final String REQUEST_COMPANION_START_FOREGROUND_SERVICES_FROM_BACKGROUND = "android.permission.REQUEST_COMPANION_START_FOREGROUND_SERVICES_FROM_BACKGROUND";
     field public static final String REQUEST_COMPANION_USE_DATA_IN_BACKGROUND = "android.permission.REQUEST_COMPANION_USE_DATA_IN_BACKGROUND";
     field public static final String REQUEST_DELETE_PACKAGES = "android.permission.REQUEST_DELETE_PACKAGES";
     field public static final String REQUEST_IGNORE_BATTERY_OPTIMIZATIONS = "android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS";
@@ -51986,6 +51987,7 @@ package android.view.inputmethod {
     method public int getSubtypeCount();
     method public android.graphics.drawable.Drawable loadIcon(android.content.pm.PackageManager);
     method public CharSequence loadLabel(android.content.pm.PackageManager);
+    method public boolean shouldShowInInputMethodPicker();
     method public boolean suppressesSpellChecker();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.view.inputmethod.InputMethodInfo> CREATOR;
@@ -52891,8 +52893,8 @@ package android.view.translation {
 
   public static final class TranslationRequest.Builder {
     ctor public TranslationRequest.Builder();
-    method @NonNull public android.view.translation.TranslationRequest.Builder addTranslationRequestValue(@NonNull android.view.translation.TranslationRequestValue);
-    method @NonNull public android.view.translation.TranslationRequest.Builder addViewTranslationRequest(@NonNull android.view.translation.ViewTranslationRequest);
+    method @Deprecated @NonNull public android.view.translation.TranslationRequest.Builder addTranslationRequestValue(@NonNull android.view.translation.TranslationRequestValue);
+    method @Deprecated @NonNull public android.view.translation.TranslationRequest.Builder addViewTranslationRequest(@NonNull android.view.translation.ViewTranslationRequest);
     method @NonNull public android.view.translation.TranslationRequest build();
     method @NonNull public android.view.translation.TranslationRequest.Builder setFlags(int);
     method @NonNull public android.view.translation.TranslationRequest.Builder setTranslationRequestValues(@NonNull java.util.List<android.view.translation.TranslationRequestValue>);
