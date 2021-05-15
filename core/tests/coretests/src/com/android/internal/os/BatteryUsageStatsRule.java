@@ -57,8 +57,13 @@ public class BatteryUsageStatsRule implements TestRule {
     private boolean mScreenOn;
 
     public BatteryUsageStatsRule() {
+        this(0);
+    }
+
+    public BatteryUsageStatsRule(long currentTime) {
         Context context = InstrumentationRegistry.getContext();
         mPowerProfile = spy(new PowerProfile(context, true /* forTest */));
+        mMockClocks.currentTime = currentTime;
         mBatteryStats = new MockBatteryStatsImpl(mMockClocks);
         mBatteryStats.setPowerProfile(mPowerProfile);
     }
@@ -162,6 +167,10 @@ public class BatteryUsageStatsRule implements TestRule {
     public void setTime(long realtimeMs, long uptimeMs) {
         mMockClocks.realtime = realtimeMs;
         mMockClocks.uptime = uptimeMs;
+    }
+
+    public void setCurrentTime(long currentTimeMs) {
+        mMockClocks.currentTime = currentTimeMs;
     }
 
     BatteryUsageStats apply(PowerCalculator... calculators) {

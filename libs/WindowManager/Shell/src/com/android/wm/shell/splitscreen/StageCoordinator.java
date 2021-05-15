@@ -908,6 +908,13 @@ class StageCoordinator implements SplitLayout.LayoutChangeListener,
             StageCoordinator.this.onStageRootTaskVanished(this);
         }
 
+        @Override
+        public void onNoLongerSupportMultiWindow() {
+            if (mMainStage.isActive()) {
+                StageCoordinator.this.exitSplitScreen();
+            }
+        }
+
         private void reset() {
             mHasRootTask = false;
             mVisible = false;

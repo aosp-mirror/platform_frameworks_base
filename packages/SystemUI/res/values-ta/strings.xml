@@ -289,11 +289,9 @@
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"மொபைல் ஹாட்ஸ்பாட் முடக்கப்பட்டது."</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"மொபைல் ஹாட்ஸ்பாட் இயக்கப்பட்டது."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"திரையை அனுப்புதல் நிறுத்தப்பட்டது."</string>
-    <!-- no translation found for accessibility_quick_settings_work_mode_off (9106217884005620744) -->
-    <skip />
+    <string name="accessibility_quick_settings_work_mode_off" msgid="9106217884005620744">"பணிப் பயன்முறை இடைநிறுத்தப்பட்டது."</string>
     <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"பணிப் பயன்முறை இயக்கப்பட்டுள்ளது."</string>
-    <!-- no translation found for accessibility_quick_settings_work_mode_changed_off (2653550342355027441) -->
-    <skip />
+    <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6422896967647049692">"பணிப் பயன்முறை இடைநிறுத்தப்பட்டது."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"பணிப் பயன்முறை இயக்கப்பட்டது."</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"டேட்டா சேமிப்பான் முடக்கப்பட்டது."</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"டேட்டா சேமிப்பான் இயக்கப்பட்டது."</string>
@@ -412,8 +410,7 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"<xliff:g id="DATA_LIMIT">%s</xliff:g> வரம்பு"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"<xliff:g id="DATA_LIMIT">%s</xliff:g> எச்சரிக்கை"</string>
     <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"பணிக் கணக்கு"</string>
-    <!-- no translation found for quick_settings_work_mode_paused (4841109346916998613) -->
-    <skip />
+    <string name="quick_settings_work_mode_paused" msgid="4841109346916998613">"இடைநிறுத்தப்பட்டது"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"நைட் லைட்"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"மாலையில் ஆன் செய்"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"காலை வரை"</string>
@@ -473,14 +470,10 @@
     <string name="interruption_level_none_twoline" msgid="8579382742855486372">"அறிவிப்புகள்\nவேண்டாம்"</string>
     <string name="interruption_level_priority_twoline" msgid="8523482736582498083">"முன்னுரிமைகள்\nமட்டும்"</string>
     <string name="interruption_level_alarms_twoline" msgid="2045067991335708767">"அலாரங்கள்\nமட்டும்"</string>
-    <!-- no translation found for keyguard_indication_charging_time_wireless (577856646141738675) -->
-    <skip />
-    <!-- no translation found for keyguard_indication_charging_time (6492711711891071502) -->
-    <skip />
-    <!-- no translation found for keyguard_indication_charging_time_fast (8390311020603859480) -->
-    <skip />
-    <!-- no translation found for keyguard_indication_charging_time_slowly (301936949731705417) -->
-    <skip />
+    <string name="keyguard_indication_charging_time_wireless" msgid="577856646141738675">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • வயர்லெஸ் முறையில் சார்ஜாகிறது • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> இல் முழுதும் சார்ஜாகும்"</string>
+    <string name="keyguard_indication_charging_time" msgid="6492711711891071502">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • சார்ஜாகிறது • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> இல் முழுதும் சார்ஜாகும்"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • வேகமாகச் சார்ஜாகிறது • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> இல் முழுதும் சார்ஜாகும்"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • மெதுவாக சார்ஜாகிறது • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> இல் முழுதும் சார்ஜாகும்"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"பயனரை மாற்று"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="5759855008166759399">"பயனரை மாற்று, தற்போதைய பயனர் <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="383168614528618402">"தற்போதைய பயனர்: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -676,12 +669,10 @@
     <string name="wallet_title" msgid="5369767670735827105">"வாலட்"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"அனைத்தையும் காட்டு"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"பணம் செலுத்த அன்லாக் செய்க"</string>
-    <!-- no translation found for wallet_secondary_label_no_card (1282609666895946317) -->
-    <skip />
+    <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"அமைக்கப்படவில்லை"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"பயன்படுத்துவதற்கு அன்லாக் செய்க"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"உங்கள் கார்டுகளின் விவரங்களைப் பெறுவதில் சிக்கல் ஏற்பட்டது, பிறகு முயலவும்"</string>
-    <!-- no translation found for wallet_lockscreen_settings_label (3539105300870383570) -->
-    <skip />
+    <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"பூட்டுத் திரை அமைப்புகள்"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"பணிக் கணக்கு"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"விமானப் பயன்முறை"</string>
     <string name="add_tile" msgid="6239678623873086686">"டைலைச் சேர்க்கும்"</string>
@@ -871,8 +862,7 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"ஆன்"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"ஆஃப்"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"இல்லை"</string>
-    <!-- no translation found for tile_disabled (373212051546573069) -->
-    <skip />
+    <string name="tile_disabled" msgid="373212051546573069">"முடக்கப்பட்டது"</string>
     <string name="nav_bar" msgid="4642708685386136807">"வழிசெலுத்தல் பட்டி"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"தளவமைப்பு"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"கூடுதல் இடப்புற பட்டன் வகை"</string>
@@ -1160,4 +1150,6 @@
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"அங்கீகரி"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"சாதனத்தைத் திற"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"கைரேகையைப் பயன்படுத்தி திறந்திடுங்கள்"</string>
+    <!-- no translation found for ongoing_phone_call_content_description (5332334388483099947) -->
+    <skip />
 </resources>

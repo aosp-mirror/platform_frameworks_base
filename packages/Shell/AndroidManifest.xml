@@ -555,6 +555,9 @@
     <!-- Permission required for CTS test - CtsAlarmManagerTestCases -->
     <uses-permission android:name="android.permission.UPDATE_DEVICE_STATS" />
 
+    <!-- Permission required for CTS test - GlobalSearchSessionPlatformCtsTests -->
+    <uses-permission android:name="android.permission.READ_GLOBAL_APP_SEARCH_DATA" />
+
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"
                 android:defaultToDeviceProtectedStorage="true"

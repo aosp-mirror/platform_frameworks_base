@@ -16,6 +16,9 @@
 
 package com.android.server.wm;
 
+import static android.content.ClipDescription.MIMETYPE_APPLICATION_ACTIVITY;
+import static android.content.ClipDescription.MIMETYPE_APPLICATION_SHORTCUT;
+import static android.content.ClipDescription.MIMETYPE_APPLICATION_TASK;
 import static android.os.InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_INTERCEPT_GLOBAL_DRAG_AND_DROP;
 
@@ -441,8 +444,9 @@ class DragState {
             Slog.d(TAG_WM, "broadcasting DRAG_STARTED at (" + touchX + ", " + touchY + ")");
         }
 
+        final boolean containsAppExtras = containsApplicationExtras(mDataDescription);
         mService.mRoot.forAllWindows(w -> {
-            sendDragStartedLocked(w, touchX, touchY, mDataDescription, mData);
+            sendDragStartedLocked(w, touchX, touchY, containsAppExtras);
         }, false /* traverseTopToBottom */);
     }
 
@@ -455,9 +459,9 @@ class DragState {
      * process, so it's safe for the caller to call recycle() on the event afterwards.
      */
     private void sendDragStartedLocked(WindowState newWin, float touchX, float touchY,
-            ClipDescription desc, ClipData data) {
+            boolean containsAppExtras) {
         final boolean interceptsGlobalDrag = targetInterceptsGlobalDrag(newWin);
-        if (mDragInProgress && isValidDropTarget(newWin, interceptsGlobalDrag)) {
+        if (mDragInProgress && isValidDropTarget(newWin, containsAppExtras, interceptsGlobalDrag)) {
             DragEvent event = obtainDragEvent(DragEvent.ACTION_DRAG_STARTED, touchX, touchY,
                     interceptsGlobalDrag, false /* includeDragSurface */,
                     null /* dragAndDropPermission */);
@@ -476,8 +480,26 @@ class DragState {
         }
     }
 
-    private boolean isValidDropTarget(WindowState targetWin, boolean interceptsGlobalDrag) {
+    /**
+     * Returns true if this is a drag of an application mime type.
+     */
+    private boolean containsApplicationExtras(ClipDescription desc) {
+        if (desc == null) {
+            return false;
+        }
+        return desc.hasMimeType(MIMETYPE_APPLICATION_ACTIVITY)
+                || desc.hasMimeType(MIMETYPE_APPLICATION_SHORTCUT)
+                || desc.hasMimeType(MIMETYPE_APPLICATION_TASK);
+    }
+
+    private boolean isValidDropTarget(WindowState targetWin, boolean containsAppExtras,
+            boolean interceptsGlobalDrag) {
         if (targetWin == null) {
+            return false;
+        }
+        if (!interceptsGlobalDrag && containsAppExtras) {
+            // App-drags can only go to windows that can intercept global drag, and not to normal
+            // app windows
             return false;
         }
         if (!targetWin.isPotentialDragTarget(interceptsGlobalDrag)) {
@@ -522,7 +544,8 @@ class DragState {
             if (DEBUG_DRAG) {
                 Slog.d(TAG_WM, "need to send DRAG_STARTED to new window " + newWin);
             }
-            sendDragStartedLocked(newWin, mCurrentX, mCurrentY, mDataDescription, mData);
+            sendDragStartedLocked(newWin, mCurrentX, mCurrentY,
+                    containsApplicationExtras(mDataDescription));
         }
     }
 

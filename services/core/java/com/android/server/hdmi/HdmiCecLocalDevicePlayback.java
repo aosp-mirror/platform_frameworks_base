@@ -262,18 +262,6 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
         return super.handleUserControlPressed(message);
     }
 
-    @Override
-    protected void wakeUpIfActiveSource() {
-        if (!isActiveSource()) {
-            return;
-        }
-        // Wake up the device if the power is in standby mode, or its screen is off -
-        // which can happen if the device is holding a partial lock.
-        if (mService.isPowerStandbyOrTransient() || !mService.getPowerManager().isScreenOn()) {
-            mService.wakeUp();
-        }
-    }
-
     @ServiceThreadOnly
     @Constants.HandleMessageResult
     protected int handleSetMenuLanguage(HdmiCecMessage message) {
