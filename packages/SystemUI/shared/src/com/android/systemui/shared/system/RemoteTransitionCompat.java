@@ -236,9 +236,9 @@ public class RemoteTransitionCompat implements Parcelable {
         }
 
         @Override public void setFinishTaskTransaction(int taskId,
-                PictureInPictureSurfaceTransaction finishTransaction) {
+                PictureInPictureSurfaceTransaction finishTransaction, SurfaceControl overlay) {
             if (mWrapped != null) {
-                mWrapped.setFinishTaskTransaction(taskId, finishTransaction);
+                mWrapped.setFinishTaskTransaction(taskId, finishTransaction, overlay);
             }
         }
 
