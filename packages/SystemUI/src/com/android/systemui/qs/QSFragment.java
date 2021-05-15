@@ -112,6 +112,17 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
      * otherwise.
      */
     private boolean mTranslateWhileExpanding;
+    private boolean mPulseExpanding;
+
+    /**
+     * Are we currently transitioning from lockscreen to the full shade?
+     */
+    private boolean mTransitioningToFullShade;
+
+    /**
+     * Whether the next Quick settings
+     */
+    private boolean mAnimateNextQsUpdate;
 
     @Inject
     public QSFragment(RemoteInputQuickSettingsDisabler remoteInputQsDisabler,
@@ -265,6 +276,11 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         }
     }
 
+    @Override
+    public boolean isFullyCollapsed() {
+        return mLastQSExpansion == 0.0f || mLastQSExpansion == -1;
+    }
+
     private void setEditLocation(View view) {
         View edit = view.findViewById(android.R.id.edit);
         int[] loc = edit.getLocationOnScreen();
@@ -335,14 +351,22 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     }
 
     @Override
-    public void setShowCollapsedOnKeyguard(boolean showCollapsedOnKeyguard) {
-        if (showCollapsedOnKeyguard != mShowCollapsedOnKeyguard) {
-            mShowCollapsedOnKeyguard = showCollapsedOnKeyguard;
+    public void setPulseExpanding(boolean pulseExpanding) {
+        if (pulseExpanding != mPulseExpanding) {
+            mPulseExpanding = pulseExpanding;
+            updateShowCollapsedOnKeyguard();
+        }
+    }
+
+    private void updateShowCollapsedOnKeyguard() {
+        boolean showCollapsed = mPulseExpanding || mTransitioningToFullShade;
+        if (showCollapsed != mShowCollapsedOnKeyguard) {
+            mShowCollapsedOnKeyguard = showCollapsed;
             updateQsState();
             if (mQSAnimator != null) {
-                mQSAnimator.setShowCollapsedOnKeyguard(showCollapsedOnKeyguard);
+                mQSAnimator.setShowCollapsedOnKeyguard(showCollapsed);
             }
-            if (!showCollapsedOnKeyguard && isKeyguardShowing()) {
+            if (!showCollapsed && isKeyguardShowing()) {
                 setQsExpansion(mLastQSExpansion, 0);
             }
         }
@@ -411,13 +435,24 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     }
 
     @Override
-    public void setQsExpansion(float expansion, float headerTranslation) {
-        if (DEBUG) Log.d(TAG, "setQSExpansion " + expansion + " " + headerTranslation);
+    public void setTransitionToFullShadeAmount(float pxAmount, boolean animated) {
+        boolean isTransitioningToFullShade = pxAmount > 0;
+        if (isTransitioningToFullShade != mTransitioningToFullShade) {
+            mTransitioningToFullShade = isTransitioningToFullShade;
+            updateShowCollapsedOnKeyguard();
+            setQsExpansion(mLastQSExpansion, mLastHeaderTranslation);
+        }
+    }
 
+    @Override
+    public void setQsExpansion(float expansion, float proposedTranslation) {
+        if (DEBUG) Log.d(TAG, "setQSExpansion " + expansion + " " + proposedTranslation);
+        float headerTranslation = mTransitioningToFullShade ? 0 : proposedTranslation;
         if (mQSAnimator != null) {
             final boolean showQSOnLockscreen = expansion > 0;
             final boolean showQSUnlocked = headerTranslation == 0 || !mTranslateWhileExpanding;
-            mQSAnimator.startAlphaAnimation(showQSOnLockscreen || showQSUnlocked);
+            mQSAnimator.startAlphaAnimation(showQSOnLockscreen || showQSUnlocked
+                    || mTransitioningToFullShade);
         }
         mContainer.setExpansion(expansion);
         final float translationScaleY = (mTranslateWhileExpanding
@@ -539,18 +574,6 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     private boolean headerWillBeAnimating() {
         return mState == StatusBarState.KEYGUARD && mShowCollapsedOnKeyguard
                 && !isKeyguardShowing();
-    }
-
-    @Override
-    public void animateHeaderSlidingIn(long delay) {
-        if (DEBUG) Log.d(TAG, "animateHeaderSlidingIn");
-        // If the QS is already expanded we don't need to slide in the header as it's already
-        // visible.
-        if (!mQsExpanded && getView().getTranslationY() != 0) {
-            mHeaderAnimating = true;
-            mDelay = delay;
-            getView().getViewTreeObserver().addOnPreDrawListener(mStartHeaderSlidingIn);
-        }
     }
 
     @Override

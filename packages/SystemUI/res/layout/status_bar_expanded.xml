@@ -37,6 +37,25 @@
         android:layout_height="match_parent"
         android:layout_width="match_parent" />
 
+    <include
+        layout="@layout/keyguard_bottom_area"
+        android:visibility="gone" />
+
+    <ViewStub
+        android:id="@+id/keyguard_user_switcher_stub"
+        android:layout="@layout/keyguard_user_switcher"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent" />
+
+    <include layout="@layout/status_bar_expanded_plugin_frame"/>
+
+    <include layout="@layout/dock_info_bottom_area_overlay" />
+
+    <com.android.keyguard.LockIconView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/lock_icon_view" />
+
     <com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -48,6 +67,18 @@
         <include
             layout="@layout/keyguard_status_view"
             android:visibility="gone"/>
+
+        <com.android.systemui.scrim.ScrimView
+            android:id="@+id/scrim_notifications"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:importantForAccessibility="no"
+            systemui:ignoreRightInset="true"
+            systemui:layout_constraintStart_toStartOf="parent"
+            systemui:layout_constraintEnd_toEndOf="parent"
+            systemui:layout_constraintTop_toTopOf="parent"
+            systemui:layout_constraintBottom_toBottomOf="parent"
+            />
 
         <include layout="@layout/dock_info_overlay" />
 
@@ -101,22 +132,9 @@
 
     </com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer>
 
-    <include layout="@layout/dock_info_bottom_area_overlay" />
-
-    <include
-        layout="@layout/keyguard_bottom_area"
-        android:visibility="gone" />
-
-    <ViewStub
-        android:id="@+id/keyguard_user_switcher_stub"
-        android:layout="@layout/keyguard_user_switcher"
-        android:layout_height="match_parent"
-        android:layout_width="match_parent" />
-
-    <include layout="@layout/status_bar_expanded_plugin_frame"/>
-
-    <com.android.keyguard.LockIconView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/lock_icon_view" />
+    <FrameLayout
+        android:id="@+id/preview_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+    </FrameLayout>
 </com.android.systemui.statusbar.phone.NotificationPanelView>
