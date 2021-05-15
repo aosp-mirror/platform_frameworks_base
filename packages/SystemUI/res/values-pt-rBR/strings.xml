@@ -291,7 +291,7 @@
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"A transmissão de tela foi interrompida."</string>
     <string name="accessibility_quick_settings_work_mode_off" msgid="9106217884005620744">"Modo de trabalho pausado."</string>
     <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"Modo de trabalho ativado."</string>
-    <string name="accessibility_quick_settings_work_mode_changed_off" msgid="2653550342355027441">"O modo de trabalho foi pausado."</string>
+    <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6422896967647049692">"Modo de trabalho pausado."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"Modo de trabalho ativado."</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"Economia de dados desativada."</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"Economia de dados ativada."</string>
@@ -1150,4 +1150,6 @@
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"autenticar"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"acessar o dispositivo"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Use a impressão digital para abrir"</string>
+    <!-- no translation found for ongoing_phone_call_content_description (5332334388483099947) -->
+    <skip />
 </resources>

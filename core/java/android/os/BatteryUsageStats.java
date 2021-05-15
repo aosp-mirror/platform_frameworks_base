@@ -75,8 +75,10 @@ public final class BatteryUsageStats implements Parcelable {
     public static final int AGGREGATE_BATTERY_CONSUMER_SCOPE_COUNT = 2;
 
     private final int mDischargePercentage;
-    private final long mStatsStartTimestampMs;
     private final double mBatteryCapacityMah;
+    private final long mStatsStartTimestampMs;
+    private final long mStatsEndTimestampMs;
+    private final long mStatsDurationMs;
     private final double mDischargedPowerLowerBound;
     private final double mDischargedPowerUpperBound;
     private final long mBatteryTimeRemainingMs;
@@ -90,6 +92,12 @@ public final class BatteryUsageStats implements Parcelable {
 
     private BatteryUsageStats(@NonNull Builder builder) {
         mStatsStartTimestampMs = builder.mStatsStartTimestampMs;
+        mStatsEndTimestampMs = builder.mStatsEndTimestampMs;
+        if (builder.mStatsDurationMs != -1) {
+            mStatsDurationMs = builder.mStatsDurationMs;
+        } else {
+            mStatsDurationMs = mStatsEndTimestampMs - mStatsStartTimestampMs;
+        }
         mBatteryCapacityMah = builder.mBatteryCapacityMah;
         mDischargePercentage = builder.mDischargePercentage;
         mDischargedPowerLowerBound = builder.mDischargedPowerLowerBoundMah;
@@ -138,6 +146,24 @@ public final class BatteryUsageStats implements Parcelable {
      */
     public long getStatsStartTimestamp() {
         return mStatsStartTimestampMs;
+    }
+
+    /**
+     * Timestamp (as returned by System.currentTimeMillis()) of when the stats snapshot was taken,
+     * in milliseconds.
+     */
+    public long getStatsEndTimestamp() {
+        return mStatsEndTimestampMs;
+    }
+
+    /**
+     * Returns the duration of the stats session captured by this BatteryUsageStats.
+     * In rare cases, statsDuration != statsEndTimestamp - statsStartTimestamp.  This may
+     * happen when BatteryUsageStats represents an accumulation of data across multiple
+     * non-contiguous sessions.
+     */
+    public long getStatsDuration() {
+        return mStatsDurationMs;
     }
 
     /**
@@ -229,6 +255,8 @@ public final class BatteryUsageStats implements Parcelable {
 
     private BatteryUsageStats(@NonNull Parcel source) {
         mStatsStartTimestampMs = source.readLong();
+        mStatsEndTimestampMs = source.readLong();
+        mStatsDurationMs = source.readLong();
         mBatteryCapacityMah = source.readDouble();
         mDischargePercentage = source.readInt();
         mDischargedPowerLowerBound = source.readDouble();
@@ -287,6 +315,8 @@ public final class BatteryUsageStats implements Parcelable {
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeLong(mStatsStartTimestampMs);
+        dest.writeLong(mStatsEndTimestampMs);
+        dest.writeLong(mStatsDurationMs);
         dest.writeDouble(mBatteryCapacityMah);
         dest.writeInt(mDischargePercentage);
         dest.writeDouble(mDischargedPowerLowerBound);
@@ -441,6 +471,8 @@ public final class BatteryUsageStats implements Parcelable {
         private final String[] mCustomPowerComponentNames;
         private final boolean mIncludePowerModels;
         private long mStatsStartTimestampMs;
+        private long mStatsEndTimestampMs;
+        private long mStatsDurationMs = -1;
         private double mBatteryCapacityMah;
         private int mDischargePercentage;
         private double mDischargedPowerLowerBoundMah;
@@ -490,6 +522,23 @@ public final class BatteryUsageStats implements Parcelable {
          */
         public Builder setStatsStartTimestamp(long statsStartTimestampMs) {
             mStatsStartTimestampMs = statsStartTimestampMs;
+            return this;
+        }
+
+        /**
+         * Sets the timestamp of when the battery stats snapshot was taken, in milliseconds.
+         */
+        public Builder setStatsEndTimestamp(long statsEndTimestampMs) {
+            mStatsEndTimestampMs = statsEndTimestampMs;
+            return this;
+        }
+
+        /**
+         * Sets the duration of the stats session.  The default value of this field is
+         * statsEndTimestamp - statsStartTimestamp.
+         */
+        public Builder setStatsDuration(long statsDurationMs) {
+            mStatsDurationMs = statsDurationMs;
             return this;
         }
 

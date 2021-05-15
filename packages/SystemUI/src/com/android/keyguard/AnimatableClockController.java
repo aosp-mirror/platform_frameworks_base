@@ -131,6 +131,11 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
         mKeyguardUpdateMonitor.removeCallback(mKeyguardUpdateMonitorCallback);
     }
 
+    /** Animate the clock appearance */
+    public void animateAppear() {
+        mView.animateAppear();
+    }
+
     /**
      * Updates the time for the view.
      */

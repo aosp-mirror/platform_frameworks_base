@@ -102,6 +102,7 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.util.time.FakeSystemClock;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 
@@ -246,6 +247,8 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     private KeyguardMediaController mKeyguardMediaController;
     @Mock
     private PrivacyDotViewController mPrivacyDotViewController;
+    @Mock
+    private SecureSettings mSecureSettings;
 
     private SysuiStatusBarStateController mStatusBarStateController;
     private NotificationPanelViewController mNotificationPanelViewController;
@@ -355,7 +358,8 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mQuickAccessWalletClient,
                 mKeyguardMediaController,
                 mPrivacyDotViewController,
-                new FakeExecutor(new FakeSystemClock()));
+                new FakeExecutor(new FakeSystemClock()),
+                mSecureSettings);
         mNotificationPanelViewController.initDependencies(
                 mStatusBar,
                 mNotificationShelfController);
