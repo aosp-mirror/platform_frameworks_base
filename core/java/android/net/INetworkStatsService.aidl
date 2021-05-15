@@ -65,8 +65,8 @@ interface INetworkStatsService {
     /** Increment data layer count of operations performed for UID and tag. */
     void incrementOperationCount(int uid, int tag, int operationCount);
 
-    /** Force update of ifaces. */
-    void forceUpdateIfaces(
+    /**  Notify {@code NetworkStatsService} about network status changed. */
+    void notifyNetworkStatus(
          in Network[] defaultNetworks,
          in NetworkStateSnapshot[] snapshots,
          in String activeIface,
