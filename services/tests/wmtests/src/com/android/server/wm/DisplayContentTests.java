@@ -1904,7 +1904,7 @@ public class DisplayContentTests extends WindowTestsBase {
         mDisplayContent.setImeInputTarget(appWin2);
         mDisplayContent.computeImeTarget(true);
         assertEquals(appWin2, mDisplayContent.getImeTarget(IME_TARGET_LAYERING));
-        assertTrue(mDisplayContent.isImeAttachedToApp());
+        assertTrue(mDisplayContent.shouldImeAttachedToApp());
 
         verify(mDisplayContent, atLeast(1)).attachAndShowImeScreenshotOnTarget();
         verify(mWm.mTaskSnapshotController).snapshotImeFromAttachedTask(appWin1.getTask());

@@ -6865,7 +6865,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         // An activity in size compatibility mode may have override bounds which equals to its
         // parent bounds, so the exact bounds should also be checked to allow IME window to attach
-        // to the activity. See {@link DisplayContent#isImeAttachedToApp}.
+        // to the activity. See {@link DisplayContent#shouldImeAttachedToApp}.
         final WindowContainer parent = getParent();
         return parent == null || parent.getBounds().equals(overrideBounds);
     }

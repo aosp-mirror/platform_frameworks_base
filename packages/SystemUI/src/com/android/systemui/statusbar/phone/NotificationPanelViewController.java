@@ -151,6 +151,7 @@ import com.android.systemui.statusbar.policy.KeyguardUserSwitcherController;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcherView;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.util.Utils;
+import com.android.systemui.util.settings.SecureSettings;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 
 import java.io.FileDescriptor;
@@ -530,6 +531,7 @@ public class NotificationPanelViewController extends PanelViewController {
 
     private final QuickAccessWalletClient mQuickAccessWalletClient;
     private final Executor mUiExecutor;
+    private final SecureSettings mSecureSettings;
 
     private int mLockScreenMode = KeyguardUpdateMonitor.LOCK_SCREEN_MODE_NORMAL;
     private KeyguardMediaController mKeyguardMediaController;
@@ -605,7 +607,8 @@ public class NotificationPanelViewController extends PanelViewController {
             QuickAccessWalletClient quickAccessWalletClient,
             KeyguardMediaController keyguardMediaController,
             PrivacyDotViewController privacyDotViewController,
-            @Main Executor uiExecutor) {
+            @Main Executor uiExecutor,
+            SecureSettings secureSettings) {
         super(view, falsingManager, dozeLog, keyguardStateController,
                 (SysuiStatusBarStateController) statusBarStateController, vibratorHelper,
                 statusBarKeyguardViewManager, latencyTracker, flingAnimationUtilsBuilder.get(),
@@ -657,6 +660,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mMediaDataManager = mediaDataManager;
         mQuickAccessWalletClient = quickAccessWalletClient;
         mUiExecutor = uiExecutor;
+        mSecureSettings = secureSettings;
         pulseExpansionHandler.setPulseExpandAbortListener(() -> {
             if (mQs != null) {
                 mQs.animateHeaderSlidingOut();
@@ -1033,8 +1037,10 @@ public class NotificationPanelViewController extends PanelViewController {
         mKeyguardBottomArea.setStatusBar(mStatusBar);
         mKeyguardBottomArea.setUserSetupComplete(mUserSetupComplete);
         mKeyguardBottomArea.setFalsingManager(mFalsingManager);
-        mKeyguardBottomArea.initWallet(mQuickAccessWalletClient, mUiExecutor,
-                mFeatureFlags.isQuickAccessWalletEnabled());
+
+        if (mFeatureFlags.isQuickAccessWalletEnabled()) {
+            mKeyguardBottomArea.initWallet(mQuickAccessWalletClient, mUiExecutor, mSecureSettings);
+        }
     }
 
     private void updateMaxDisplayedNotifications(boolean recompute) {

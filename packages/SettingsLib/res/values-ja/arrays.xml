@@ -54,9 +54,9 @@
     <item msgid="9048424957228926377">"常にチェック"</item>
   </string-array>
   <string-array name="hdcp_checking_summaries">
-    <item msgid="4045840870658484038">"HDCP チェックを使用しない"</item>
-    <item msgid="8254225038262324761">"DRM コンテンツにのみ HDCP チェックを使用する"</item>
-    <item msgid="6421717003037072581">"HDCP チェックを常に使用する"</item>
+    <item msgid="4045840870658484038">"HDCPチェックを使用しない"</item>
+    <item msgid="8254225038262324761">"DRMコンテンツにのみHDCPチェックを使用する"</item>
+    <item msgid="6421717003037072581">"HDCPチェックを常に使用する"</item>
   </string-array>
   <string-array name="bt_hci_snoop_log_entries">
     <item msgid="695678520785580527">"無効"</item>

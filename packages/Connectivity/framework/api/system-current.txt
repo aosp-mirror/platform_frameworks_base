@@ -296,7 +296,6 @@ package android.net {
     method @NonNull public android.net.NetworkCapabilities.Builder addCapability(int);
     method @NonNull public android.net.NetworkCapabilities.Builder addTransportType(int);
     method @NonNull public android.net.NetworkCapabilities build();
-    method @NonNull public android.net.NetworkCapabilities.Builder clearAll();
     method @NonNull public android.net.NetworkCapabilities.Builder removeCapability(int);
     method @NonNull public android.net.NetworkCapabilities.Builder removeTransportType(int);
     method @NonNull @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY) public android.net.NetworkCapabilities.Builder setAdministratorUids(@NonNull int[]);
@@ -310,6 +309,7 @@ package android.net {
     method @NonNull @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY) public android.net.NetworkCapabilities.Builder setSsid(@Nullable String);
     method @NonNull public android.net.NetworkCapabilities.Builder setSubscriptionIds(@NonNull java.util.Set<java.lang.Integer>);
     method @NonNull public android.net.NetworkCapabilities.Builder setTransportInfo(@Nullable android.net.TransportInfo);
+    method @NonNull public static android.net.NetworkCapabilities.Builder withoutDefaultCapabilities();
   }
 
   public class NetworkProvider {
