@@ -289,11 +289,9 @@
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"Mobilais tīklājs ir izslēgts."</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"Mobilais tīklājs ir ieslēgts."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"Ekrāna apraidīšana ir apturēta."</string>
-    <!-- no translation found for accessibility_quick_settings_work_mode_off (9106217884005620744) -->
-    <skip />
+    <string name="accessibility_quick_settings_work_mode_off" msgid="9106217884005620744">"Darba režīms pārtraukts."</string>
     <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"Darba režīms ir ieslēgts."</string>
-    <!-- no translation found for accessibility_quick_settings_work_mode_changed_off (2653550342355027441) -->
-    <skip />
+    <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6422896967647049692">"Darba režīms ir pārtraukts."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"Darba režīms ir ieslēgts."</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"Datu lietojuma samazinātājs ir izslēgts."</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"Datu lietojuma samazinātājs ir ieslēgts."</string>
@@ -414,8 +412,7 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"Ierobežojums: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"<xliff:g id="DATA_LIMIT">%s</xliff:g> brīdinājums"</string>
     <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"Darba profils"</string>
-    <!-- no translation found for quick_settings_work_mode_paused (4841109346916998613) -->
-    <skip />
+    <string name="quick_settings_work_mode_paused" msgid="4841109346916998613">"Pārtraukts"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Nakts režīms"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Saulrietā"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Līdz saullēktam"</string>
@@ -475,14 +472,10 @@
     <string name="interruption_level_none_twoline" msgid="8579382742855486372">"Pilnīgs\nklusums"</string>
     <string name="interruption_level_priority_twoline" msgid="8523482736582498083">"Tikai\nprioritārie"</string>
     <string name="interruption_level_alarms_twoline" msgid="2045067991335708767">"Tikai\nsignāli"</string>
-    <!-- no translation found for keyguard_indication_charging_time_wireless (577856646141738675) -->
-    <skip />
-    <!-- no translation found for keyguard_indication_charging_time (6492711711891071502) -->
-    <skip />
-    <!-- no translation found for keyguard_indication_charging_time_fast (8390311020603859480) -->
-    <skip />
-    <!-- no translation found for keyguard_indication_charging_time_slowly (301936949731705417) -->
-    <skip />
+    <string name="keyguard_indication_charging_time_wireless" msgid="577856646141738675">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Bezvadu uzlāde • Laiks līdz pilnai uzlādei: <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
+    <string name="keyguard_indication_charging_time" msgid="6492711711891071502">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Notiek uzlāde • Laiks līdz pilnai uzlādei: <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Ātrā uzlāde • Laiks līdz pilnai uzlādei: <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Lēnā uzlāde • Laiks līdz pilnai uzlādei: <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Mainīt lietotāju"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="5759855008166759399">"Pārslēgt lietotāju; pašreizējais lietotājs: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="383168614528618402">"Pašreizējais lietotājs: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -679,12 +672,10 @@
     <string name="wallet_title" msgid="5369767670735827105">"Maks"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Rādīt visu"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Lai maksātu, atbloķējiet ekrānu"</string>
-    <!-- no translation found for wallet_secondary_label_no_card (1282609666895946317) -->
-    <skip />
+    <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"Nav iestatīts"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Lai izmantotu, atbloķējiet ekrānu"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Ienesot jūsu kartes, radās problēma. Lūdzu, vēlāk mēģiniet vēlreiz."</string>
-    <!-- no translation found for wallet_lockscreen_settings_label (3539105300870383570) -->
-    <skip />
+    <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Bloķēšanas ekrāna iestatījumi"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Darba profils"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Lidojuma režīms"</string>
     <string name="add_tile" msgid="6239678623873086686">"Pievienot elementu"</string>
@@ -876,8 +867,7 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"Ieslēgts"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"Izslēgts"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"Nav pieejams"</string>
-    <!-- no translation found for tile_disabled (373212051546573069) -->
-    <skip />
+    <string name="tile_disabled" msgid="373212051546573069">"Atspējots"</string>
     <string name="nav_bar" msgid="4642708685386136807">"Navigācijas josla"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"Izkārtojums"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"Kreisās puses papildu pogas veids"</string>
@@ -1166,4 +1156,6 @@
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"veiktu autentificēšanu"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"izmantotu ierīci"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Atvēršanai izmantojiet pirksta nospiedumu"</string>
+    <!-- no translation found for ongoing_phone_call_content_description (5332334388483099947) -->
+    <skip />
 </resources>

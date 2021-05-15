@@ -19,6 +19,7 @@ package com.android.server.graphics.fonts;
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.content.Context;
 import android.graphics.Typeface;
 import android.graphics.fonts.FontFamily;
@@ -61,7 +62,9 @@ public final class FontManagerService extends IFontManager.Stub {
     private static final String TAG = "FontManagerService";
 
     private static final String FONT_FILES_DIR = "/data/fonts/files";
+    private static final String CONFIG_XML_FILE = "/data/fonts/config/config.xml";
 
+    @RequiresPermission(Manifest.permission.UPDATE_FONTS)
     @Override
     public FontConfig getFontConfig() {
         getContext().enforceCallingPermission(Manifest.permission.UPDATE_FONTS,
@@ -69,28 +72,38 @@ public final class FontManagerService extends IFontManager.Stub {
         return getSystemFontConfig();
     }
 
+    @RequiresPermission(Manifest.permission.UPDATE_FONTS)
     @Override
     public int updateFontFamily(@NonNull List<FontUpdateRequest> requests, int baseVersion) {
-        Preconditions.checkArgumentNonnegative(baseVersion);
-        Objects.requireNonNull(requests);
-        getContext().enforceCallingPermission(Manifest.permission.UPDATE_FONTS,
-                "UPDATE_FONTS permission required.");
         try {
-            update(baseVersion, requests);
-            return FontManager.RESULT_SUCCESS;
-        } catch (SystemFontException e) {
-            Slog.e(TAG, "Failed to update font family", e);
-            return e.getErrorCode();
+            Preconditions.checkArgumentNonnegative(baseVersion);
+            Objects.requireNonNull(requests);
+            getContext().enforceCallingPermission(Manifest.permission.UPDATE_FONTS,
+                    "UPDATE_FONTS permission required.");
+            try {
+                update(baseVersion, requests);
+                return FontManager.RESULT_SUCCESS;
+            } catch (SystemFontException e) {
+                Slog.e(TAG, "Failed to update font family", e);
+                return e.getErrorCode();
+            }
         } finally {
-            for (FontUpdateRequest request : requests) {
-                ParcelFileDescriptor fd = request.getFd();
-                if (fd != null) {
-                    try {
-                        fd.close();
-                    } catch (IOException e) {
-                        Slog.w(TAG, "Failed to close fd", e);
-                    }
-                }
+            closeFileDescriptors(requests);
+        }
+    }
+
+    private static void closeFileDescriptors(@Nullable List<FontUpdateRequest> requests) {
+        // Make sure we close every passed FD, even if 'requests' is constructed incorrectly and
+        // some fields are null.
+        if (requests == null) return;
+        for (FontUpdateRequest request : requests) {
+            if (request == null) continue;
+            ParcelFileDescriptor fd = request.getFd();
+            if (fd == null) continue;
+            try {
+                fd.close();
+            } catch (IOException e) {
+                Slog.w(TAG, "Failed to close fd", e);
             }
         }
     }
@@ -118,9 +131,9 @@ public final class FontManagerService extends IFontManager.Stub {
     public static final class Lifecycle extends SystemService {
         private final FontManagerService mService;
 
-        public Lifecycle(@NonNull Context context) {
+        public Lifecycle(@NonNull Context context, boolean safeMode) {
             super(context);
-            mService = new FontManagerService(context);
+            mService = new FontManagerService(context, safeMode);
         }
 
         @Override
@@ -175,18 +188,24 @@ public final class FontManagerService extends IFontManager.Stub {
     @Nullable
     private SharedMemory mSerializedFontMap = null;
 
-    private FontManagerService(Context context) {
+    private FontManagerService(Context context, boolean safeMode) {
+        if (safeMode) {
+            Slog.i(TAG, "Entering safe mode. Deleting all font updates.");
+            UpdatableFontDir.deleteAllFiles(new File(FONT_FILES_DIR), new File(CONFIG_XML_FILE));
+        }
         mContext = context;
-        mUpdatableFontDir = createUpdatableFontDir();
+        mUpdatableFontDir = createUpdatableFontDir(safeMode);
         initialize();
     }
 
     @Nullable
-    private static UpdatableFontDir createUpdatableFontDir() {
+    private static UpdatableFontDir createUpdatableFontDir(boolean safeMode) {
+        // Never read updatable font files in safe mode.
+        if (safeMode) return null;
         // If apk verity is supported, fs-verity should be available.
         if (!VerityUtils.isFsVeritySupported()) return null;
-        return new UpdatableFontDir(new File(FONT_FILES_DIR),
-                new OtfFontFileParser(), new FsverityUtilImpl());
+        return new UpdatableFontDir(new File(FONT_FILES_DIR), new OtfFontFileParser(),
+                new FsverityUtilImpl(), new File(CONFIG_XML_FILE));
     }
 
     private void initialize() {
@@ -231,18 +250,23 @@ public final class FontManagerService extends IFontManager.Stub {
         }
     }
 
-    /* package */ void clearUpdates() throws SystemFontException {
-        if (mUpdatableFontDir == null) {
-            throw new SystemFontException(
-                    FontManager.RESULT_ERROR_FONT_UPDATER_DISABLED,
-                    "The font updater is disabled.");
-        }
-        synchronized (mUpdatableFontDirLock) {
-            mUpdatableFontDir.clearUpdates();
-            updateSerializedFontMap();
-        }
+    /**
+     * Clears all updates and restarts FontManagerService.
+     *
+     * <p>CAUTION: this method is not safe. Existing processes may crash due to missing font files.
+     * This method is only for {@link FontManagerShellCommand}.
+     */
+    /* package */ void clearUpdates() {
+        UpdatableFontDir.deleteAllFiles(new File(FONT_FILES_DIR), new File(CONFIG_XML_FILE));
+        initialize();
     }
 
+    /**
+     * Restarts FontManagerService, removing not-the-latest font files.
+     *
+     * <p>CAUTION: this method is not safe. Existing processes may crash due to missing font files.
+     * This method is only for {@link FontManagerShellCommand}.
+     */
     /* package */ void restart() {
         initialize();
     }

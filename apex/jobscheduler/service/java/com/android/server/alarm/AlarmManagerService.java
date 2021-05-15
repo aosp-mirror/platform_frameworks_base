@@ -530,8 +530,7 @@ public class AlarmManagerService extends SystemService {
         private static final long DEFAULT_MIN_FUTURITY = 5 * 1000;
         private static final long DEFAULT_MIN_INTERVAL = 60 * 1000;
         private static final long DEFAULT_MAX_INTERVAL = 365 * INTERVAL_DAY;
-        // TODO (b/185199076): Tune based on breakage reports.
-        private static final long DEFAULT_MIN_WINDOW = 30 * 60 * 1000;
+        private static final long DEFAULT_MIN_WINDOW = 10 * 60 * 1000;
         private static final long DEFAULT_ALLOW_WHILE_IDLE_WHITELIST_DURATION = 10 * 1000;
         private static final long DEFAULT_LISTENER_TIMEOUT = 5 * 1000;
         private static final int DEFAULT_MAX_ALARMS_PER_UID = 500;
@@ -1145,6 +1144,18 @@ public class AlarmManagerService extends SystemService {
             when -= mInjector.getCurrentTimeMillis() - mInjector.getElapsedRealtime();
         }
         return when;
+    }
+
+    /**
+     * This is the minimum window that can be requested for the given alarm. Windows smaller than
+     * this value will be elongated to match it.
+     * Current heuristic is similar to {@link #maxTriggerTime(long, long, long)}, the minimum
+     * allowed window is either {@link Constants#MIN_WINDOW} or 75% of the alarm's futurity,
+     * whichever is smaller.
+     */
+    long getMinimumAllowedWindow(long nowElapsed, long triggerElapsed) {
+        final long futurity = triggerElapsed - nowElapsed;
+        return Math.min((long) (futurity * 0.75), mConstants.MIN_WINDOW);
     }
 
     // Apply a heuristic to { recurrence interval, futurity of the trigger time } to
@@ -1833,25 +1844,6 @@ public class AlarmManagerService extends SystemService {
             }
         }
 
-        // Snap the window to reasonable limits.
-        if (windowLength > INTERVAL_DAY) {
-            Slog.w(TAG, "Window length " + windowLength
-                    + "ms suspiciously long; limiting to 1 day");
-            windowLength = INTERVAL_DAY;
-        } else if (windowLength > 0 && windowLength < mConstants.MIN_WINDOW
-                && (flags & FLAG_PRIORITIZE) == 0) {
-            if (CompatChanges.isChangeEnabled(AlarmManager.ENFORCE_MINIMUM_WINDOW_ON_INEXACT_ALARMS,
-                    callingPackage, UserHandle.getUserHandleForUid(callingUid))) {
-                Slog.w(TAG, "Window length " + windowLength + "ms too short; expanding to "
-                        + mConstants.MIN_WINDOW + "ms.");
-                windowLength = mConstants.MIN_WINDOW;
-            } else {
-                // TODO (b/185199076): Remove log once we have some data about what apps will break
-                Slog.wtf(TAG, "Short window " + windowLength + "ms specified by "
-                        + callingPackage);
-            }
-        }
-
         // Sanity check the recurrence interval.  This will catch people who supply
         // seconds when the API expects milliseconds, or apps trying shenanigans
         // around intentional period overflow, etc.
@@ -1883,7 +1875,7 @@ public class AlarmManagerService extends SystemService {
         // Try to prevent spamming by making sure apps aren't firing alarms in the immediate future
         final long minTrigger = nowElapsed
                 + (UserHandle.isCore(callingUid) ? 0L : mConstants.MIN_FUTURITY);
-        final long triggerElapsed = (nominalTrigger > minTrigger) ? nominalTrigger : minTrigger;
+        final long triggerElapsed = Math.max(minTrigger, nominalTrigger);
 
         final long maxElapsed;
         if (windowLength == 0) {
@@ -1893,6 +1885,25 @@ public class AlarmManagerService extends SystemService {
             // Fix this window in place, so that as time approaches we don't collapse it.
             windowLength = maxElapsed - triggerElapsed;
         } else {
+            // The window was explicitly requested. Snap it to allowable limits.
+            final long minAllowedWindow = getMinimumAllowedWindow(nowElapsed, triggerElapsed);
+            if (windowLength > INTERVAL_DAY) {
+                Slog.w(TAG, "Window length " + windowLength + "ms too long; limiting to 1 day");
+                windowLength = INTERVAL_DAY;
+            } else if ((flags & FLAG_PRIORITIZE) == 0 && windowLength < minAllowedWindow) {
+                // Prioritized alarms are exempt from minimum window limits.
+                if (CompatChanges.isChangeEnabled(
+                        AlarmManager.ENFORCE_MINIMUM_WINDOW_ON_INEXACT_ALARMS, callingPackage,
+                        UserHandle.getUserHandleForUid(callingUid))) {
+                    Slog.w(TAG, "Window length " + windowLength + "ms too short; expanding to "
+                            + minAllowedWindow + "ms.");
+                    windowLength = minAllowedWindow;
+                } else {
+                    // TODO (b/185199076): Remove temporary log to catch breaking apps.
+                    Slog.wtf(TAG, "Short window " + windowLength + "ms specified by "
+                            + callingPackage);
+                }
+            }
             maxElapsed = triggerElapsed + windowLength;
         }
         synchronized (mLock) {

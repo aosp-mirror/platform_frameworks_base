@@ -292,7 +292,7 @@
     <!-- no translation found for accessibility_quick_settings_work_mode_off (9106217884005620744) -->
     <skip />
     <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"કાર્ય મોડ ચાલુ."</string>
-    <!-- no translation found for accessibility_quick_settings_work_mode_changed_off (2653550342355027441) -->
+    <!-- no translation found for accessibility_quick_settings_work_mode_changed_off (6422896967647049692) -->
     <skip />
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"કાર્ય મોડ ચાલુ કર્યો."</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"ડેટા સેવર બંધ કર્યું."</string>
@@ -1148,7 +1148,7 @@
     <string name="status_before_loading" msgid="1500477307859631381">"ટૂંક સમયમાં કન્ટેન્ટ બતાવવામાં આવશે"</string>
     <string name="missed_call" msgid="4228016077700161689">"ચૂકી ગયેલો કૉલ"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
-    <string name="people_tile_description" msgid="8154966188085545556">"તાજેતરના મેસેજ, ચૂકી ગયેલા કૉલ અને સ્ટેટસ અપડેટ જુઓ"</string>
+    <string name="people_tile_description" msgid="8154966188085545556">"તાજેતરના સંદેશા, ચૂકી ગયેલા કૉલ અને સ્ટેટસ અપડેટ જુઓ"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"વાતચીત"</string>
     <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g> દ્વારા કોઈ સંદેશ મોકલવામાં આવ્યો"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> દ્વારા કોઈ છબી મોકલવામાં આવી"</string>
@@ -1160,4 +1160,6 @@
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"ખાતરી કરો"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"ડિવાઇસ અનલૉક કરો"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"ખોલવા માટે ફિંગરપ્રિન્ટનો ઉપયોગ કરો"</string>
+    <!-- no translation found for ongoing_phone_call_content_description (5332334388483099947) -->
+    <skip />
 </resources>

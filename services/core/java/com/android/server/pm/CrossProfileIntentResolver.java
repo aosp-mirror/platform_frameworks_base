@@ -19,7 +19,6 @@ package com.android.server.pm;
 import android.annotation.NonNull;
 import android.content.IntentFilter;
 
-import com.android.server.WatchedIntentResolver;
 import com.android.server.utils.Snappable;
 import com.android.server.utils.SnapshotCache;
 

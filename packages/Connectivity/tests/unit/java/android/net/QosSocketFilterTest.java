@@ -35,7 +35,7 @@ public class QosSocketFilterTest {
     public void testPortExactMatch() {
         final InetAddress addressA = InetAddresses.parseNumericAddress("1.2.3.4");
         final InetAddress addressB = InetAddresses.parseNumericAddress("1.2.3.4");
-        assertTrue(QosSocketFilter.matchesLocalAddress(
+        assertTrue(QosSocketFilter.matchesAddress(
                 new InetSocketAddress(addressA, 10), addressB, 10, 10));
 
     }
@@ -44,7 +44,7 @@ public class QosSocketFilterTest {
     public void testPortLessThanStart() {
         final InetAddress addressA = InetAddresses.parseNumericAddress("1.2.3.4");
         final InetAddress addressB = InetAddresses.parseNumericAddress("1.2.3.4");
-        assertFalse(QosSocketFilter.matchesLocalAddress(
+        assertFalse(QosSocketFilter.matchesAddress(
                 new InetSocketAddress(addressA, 8), addressB, 10, 10));
     }
 
@@ -52,7 +52,7 @@ public class QosSocketFilterTest {
     public void testPortGreaterThanEnd() {
         final InetAddress addressA = InetAddresses.parseNumericAddress("1.2.3.4");
         final InetAddress addressB = InetAddresses.parseNumericAddress("1.2.3.4");
-        assertFalse(QosSocketFilter.matchesLocalAddress(
+        assertFalse(QosSocketFilter.matchesAddress(
                 new InetSocketAddress(addressA, 18), addressB, 10, 10));
     }
 
@@ -60,7 +60,7 @@ public class QosSocketFilterTest {
     public void testPortBetweenStartAndEnd() {
         final InetAddress addressA = InetAddresses.parseNumericAddress("1.2.3.4");
         final InetAddress addressB = InetAddresses.parseNumericAddress("1.2.3.4");
-        assertTrue(QosSocketFilter.matchesLocalAddress(
+        assertTrue(QosSocketFilter.matchesAddress(
                 new InetSocketAddress(addressA, 10), addressB, 8, 18));
     }
 
@@ -68,7 +68,7 @@ public class QosSocketFilterTest {
     public void testAddressesDontMatch() {
         final InetAddress addressA = InetAddresses.parseNumericAddress("1.2.3.4");
         final InetAddress addressB = InetAddresses.parseNumericAddress("1.2.3.5");
-        assertFalse(QosSocketFilter.matchesLocalAddress(
+        assertFalse(QosSocketFilter.matchesAddress(
                 new InetSocketAddress(addressA, 10), addressB, 10, 10));
     }
 }
