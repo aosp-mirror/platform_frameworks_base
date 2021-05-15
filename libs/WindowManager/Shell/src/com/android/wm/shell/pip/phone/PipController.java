@@ -44,6 +44,7 @@ import android.util.Pair;
 import android.util.Size;
 import android.util.Slog;
 import android.view.DisplayInfo;
+import android.view.SurfaceControl;
 import android.view.WindowManagerGlobal;
 import android.window.WindowContainerTransaction;
 
@@ -557,8 +558,9 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         return entryBounds;
     }
 
-    private void stopSwipePipToHome(ComponentName componentName, Rect destinationBounds) {
-        mPipTaskOrganizer.stopSwipePipToHome(componentName, destinationBounds);
+    private void stopSwipePipToHome(ComponentName componentName, Rect destinationBounds,
+            SurfaceControl overlay) {
+        mPipTaskOrganizer.stopSwipePipToHome(componentName, destinationBounds, overlay);
     }
 
     @Override
@@ -850,10 +852,11 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         }
 
         @Override
-        public void stopSwipePipToHome(ComponentName componentName, Rect destinationBounds) {
+        public void stopSwipePipToHome(ComponentName componentName, Rect destinationBounds,
+                SurfaceControl overlay) {
             executeRemoteCallWithTaskPermission(mController, "stopSwipePipToHome",
                     (controller) -> {
-                        controller.stopSwipePipToHome(componentName, destinationBounds);
+                        controller.stopSwipePipToHome(componentName, destinationBounds, overlay);
                     });
         }
 

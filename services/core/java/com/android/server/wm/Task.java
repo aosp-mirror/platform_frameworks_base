@@ -482,6 +482,9 @@ class Task extends WindowContainer<WindowContainer> {
     // Do not forget to reset this after reparenting.
     // TODO: remove this once the recents animation is moved to the Shell
     PictureInPictureSurfaceTransaction mLastRecentsAnimationTransaction;
+    // The content overlay to be applied with mLastRecentsAnimationTransaction
+    // TODO: remove this once the recents animation is moved to the Shell
+    SurfaceControl mLastRecentsAnimationOverlay;
 
     static final int LAYER_RANK_INVISIBLE = -1;
     // Ranking (from top) of this task among all visible tasks. (-1 means it's not visible)
@@ -5383,6 +5386,10 @@ class Task extends WindowContainer<WindowContainer> {
                     : WINDOWING_MODE_FULLSCREEN;
         }
         if (currentMode == WINDOWING_MODE_PINNED) {
+            // In the case that we've disabled affecting the SysUI flags as a part of seamlessly
+            // transferring the transform on the leash to the task, reset this state once we've
+            // actually entered pip
+            setCanAffectSystemUiFlags(true);
             mRootWindowContainer.notifyActivityPipModeChanged(null);
         }
         if (likelyResolvedMode == WINDOWING_MODE_PINNED
@@ -7616,22 +7623,28 @@ class Task extends WindowContainer<WindowContainer> {
         reparent(newParent, onTop ? POSITION_TOP : POSITION_BOTTOM);
     }
 
-    void setLastRecentsAnimationTransaction(
-            @NonNull PictureInPictureSurfaceTransaction transaction) {
+    void setLastRecentsAnimationTransaction(@NonNull PictureInPictureSurfaceTransaction transaction,
+            @Nullable SurfaceControl overlay) {
         mLastRecentsAnimationTransaction = new PictureInPictureSurfaceTransaction(transaction);
+        mLastRecentsAnimationOverlay = overlay;
     }
 
     void clearLastRecentsAnimationTransaction() {
         mLastRecentsAnimationTransaction = null;
+        mLastRecentsAnimationOverlay = null;
         // reset also the transform introduced by mLastRecentsAnimationTransaction
         getPendingTransaction().setMatrix(mSurfaceControl, Matrix.IDENTITY_MATRIX, new float[9]);
     }
 
     void maybeApplyLastRecentsAnimationTransaction() {
         if (mLastRecentsAnimationTransaction != null) {
+            if (mLastRecentsAnimationOverlay != null) {
+                getPendingTransaction().reparent(mLastRecentsAnimationOverlay, mSurfaceControl);
+            }
             PictureInPictureSurfaceTransaction.apply(mLastRecentsAnimationTransaction,
                     mSurfaceControl, getPendingTransaction());
             mLastRecentsAnimationTransaction = null;
+            mLastRecentsAnimationOverlay = null;
         }
     }
 
