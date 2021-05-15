@@ -40,6 +40,8 @@ public final class InteractionJankMonitorWrapper {
             InteractionJankMonitor.CUJ_LAUNCHER_OPEN_ALL_APPS;
     public static final int CUJ_ALL_APPS_SCROLL =
             InteractionJankMonitor.CUJ_LAUNCHER_ALL_APPS_SCROLL;
+    public static final int CUJ_APP_LAUNCH_FROM_WIDGET =
+            InteractionJankMonitor.CUJ_LAUNCHER_APP_LAUNCH_FROM_WIDGET;
 
     @IntDef({
             CUJ_APP_LAUNCH_FROM_RECENTS,
@@ -47,6 +49,7 @@ public final class InteractionJankMonitorWrapper {
             CUJ_APP_CLOSE_TO_HOME,
             CUJ_APP_CLOSE_TO_PIP,
             CUJ_QUICK_SWITCH,
+            CUJ_APP_LAUNCH_FROM_WIDGET,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CujType {
