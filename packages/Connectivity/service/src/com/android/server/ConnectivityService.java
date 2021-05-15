@@ -8576,11 +8576,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         final UnderlyingNetworkInfo[] underlyingNetworkInfos = getAllVpnInfo();
         try {
             final ArrayList<NetworkStateSnapshot> snapshots = new ArrayList<>();
-            // TODO: Directly use NetworkStateSnapshot when feasible.
-            for (final NetworkState state : getAllNetworkState()) {
-                final NetworkStateSnapshot snapshot = new NetworkStateSnapshot(state.network,
-                        state.networkCapabilities, state.linkProperties, state.subscriberId,
-                        state.legacyNetworkType);
+            for (final NetworkStateSnapshot snapshot : getAllNetworkStateSnapshots()) {
                 snapshots.add(snapshot);
             }
             mStatsManager.notifyNetworkStatus(getDefaultNetworks(),
