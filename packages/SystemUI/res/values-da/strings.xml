@@ -291,7 +291,7 @@
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"Casting af din skærm er stoppet."</string>
     <string name="accessibility_quick_settings_work_mode_off" msgid="9106217884005620744">"Arbejdstilstand er på pause."</string>
     <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"Arbejdstilstand er slået til."</string>
-    <string name="accessibility_quick_settings_work_mode_changed_off" msgid="2653550342355027441">"Arbejdstilstand er sat på pause."</string>
+    <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6422896967647049692">"Arbejdstilstand er sat på pause."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"Arbejdstilstand er slået til."</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"Datasparefunktionen er slået fra."</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"Datasparefunktionen er aktiveret."</string>
@@ -1150,4 +1150,6 @@
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"godkende"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"få adgang til enheden"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Brug fingeraftryk for at åbne"</string>
+    <!-- no translation found for ongoing_phone_call_content_description (5332334388483099947) -->
+    <skip />
 </resources>

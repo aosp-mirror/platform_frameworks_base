@@ -18,6 +18,7 @@ package android.view;
 
 import android.app.ActivityManager;
 import android.view.IRemoteAnimationFinishedCallback;
+import android.view.SurfaceControl;
 import android.graphics.GraphicBuffer;
 import android.window.PictureInPictureSurfaceTransaction;
 import android.window.TaskSnapshot;
@@ -43,9 +44,10 @@ interface IRecentsAnimationController {
      * updated accordingly. This should be called before `finish`
      * @param taskId for which the leash should be updated
      * @param finishTransaction leash operations for the final transform.
+     * @param overlay the surface control for an overlay being shown above the pip (can be null)
      */
      void setFinishTaskTransaction(int taskId,
-             in PictureInPictureSurfaceTransaction finishTransaction);
+             in PictureInPictureSurfaceTransaction finishTransaction, in SurfaceControl overlay);
 
     /**
      * Notifies to the system that the animation into Recents should end, and all leashes associated

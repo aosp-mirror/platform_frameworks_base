@@ -35,7 +35,6 @@ import com.google.android.material.resources.TextAppearanceConfig;
 public class CollapsingToolbarBaseActivity extends SettingsTransitionActivity {
 
     private CollapsingToolbarLayout mCollapsingToolbarLayout;
-    private Toolbar mToolbar;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -45,8 +44,8 @@ public class CollapsingToolbarBaseActivity extends SettingsTransitionActivity {
         super.setContentView(R.layout.collapsing_toolbar_base_layout);
         mCollapsingToolbarLayout = findViewById(R.id.collapsing_toolbar);
 
-        mToolbar = findViewById(R.id.action_bar);
-        setActionBar(mToolbar);
+        final Toolbar toolbar = findViewById(R.id.action_bar);
+        setActionBar(toolbar);
 
         // Enable title and home button by default
         final ActionBar actionBar = getActionBar();
@@ -97,14 +96,9 @@ public class CollapsingToolbarBaseActivity extends SettingsTransitionActivity {
     @Override
     public boolean onNavigateUp() {
         if (!super.onNavigateUp()) {
-            finish();
+            finishAfterTransition();
         }
         return true;
-    }
-
-    @Override
-    public Toolbar getToolbar() {
-        return mToolbar;
     }
 
     /**

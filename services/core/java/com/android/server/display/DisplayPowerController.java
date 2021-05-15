@@ -1362,6 +1362,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     + mBrightnessReasonTemp.toString(brightnessAdjustmentFlags)
                     + "', previous reason: '" + mBrightnessReason + "'.");
             mBrightnessReason.set(mBrightnessReasonTemp);
+        } else if (mBrightnessReasonTemp.reason == BrightnessReason.REASON_MANUAL
+                && userSetBrightnessChanged) {
+            Slog.v(TAG, "Brightness [" + brightnessState + "] manual adjustment.");
         }
 
         // Update display white-balance.
@@ -2021,7 +2024,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 || mPendingScreenBrightnessSetting < 0.0f)) {
             return false;
         }
-        if (mCurrentScreenBrightnessSetting == mPendingScreenBrightnessSetting) {
+        if (BrightnessSynchronizer.floatEquals(
+                mCurrentScreenBrightnessSetting, mPendingScreenBrightnessSetting)) {
             mPendingScreenBrightnessSetting = PowerManager.BRIGHTNESS_INVALID_FLOAT;
             mTemporaryScreenBrightness = PowerManager.BRIGHTNESS_INVALID_FLOAT;
             return false;

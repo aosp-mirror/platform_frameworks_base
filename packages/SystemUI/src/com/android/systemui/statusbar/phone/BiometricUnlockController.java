@@ -114,7 +114,8 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
     public static final int MODE_ONLY_WAKE = 4;
 
     /**
-     * Mode in which fingerprint unlocks the device.
+     * Mode in which fingerprint unlocks the device or passive auth (ie face auth) unlocks the
+     * device while being requested when keyguard is occluded.
      */
     public static final int MODE_UNLOCK_COLLAPSING = 5;
 
@@ -355,8 +356,10 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         Optional.ofNullable(BiometricUiEvent.SUCCESS_EVENT_BY_SOURCE_TYPE.get(biometricSourceType))
                 .ifPresent(UI_EVENT_LOGGER::log);
 
-        boolean unlockAllowed = mKeyguardBypassController.onBiometricAuthenticated(
-                biometricSourceType, isStrongBiometric);
+        boolean unlockAllowed =
+                mKeyguardStateController.isOccluded()
+                        || mKeyguardBypassController.onBiometricAuthenticated(
+                                biometricSourceType, isStrongBiometric);
         if (unlockAllowed) {
             mKeyguardViewMediator.userActivity();
             startWakeAndUnlock(biometricSourceType, isStrongBiometric);
@@ -580,6 +583,9 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         }
         if (unlockingAllowed && deviceDreaming) {
             return bypass ? MODE_WAKE_AND_UNLOCK_FROM_DREAM : MODE_ONLY_WAKE;
+        }
+        if (unlockingAllowed && mKeyguardStateController.isOccluded()) {
+            return MODE_UNLOCK_COLLAPSING;
         }
         if (mKeyguardViewController.isShowing()) {
             if (mKeyguardViewController.bouncerIsOrWillBeShowing() && unlockingAllowed) {

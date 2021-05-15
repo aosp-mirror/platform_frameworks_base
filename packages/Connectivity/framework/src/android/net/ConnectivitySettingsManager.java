@@ -43,7 +43,6 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Set;
 import java.util.StringJoiner;
-import java.util.regex.Pattern;
 
 /**
  * A manager class for connectivity module settings.
@@ -375,11 +374,12 @@ public class ConnectivitySettingsManager {
     private static final String PRIVATE_DNS_MODE_PROVIDER_HOSTNAME_STRING = "hostname";
 
     /**
-     * A list of apps that should be granted netd system permission for using restricted networks.
+     * A list of apps that is allowed on restricted networks.
      *
      * @hide
      */
-    public static final String RESTRICTED_ALLOWED_APPS = "restricted_allowed_apps";
+    public static final String APPS_ALLOWED_ON_RESTRICTED_NETWORKS =
+            "apps_allowed_on_restricted_networks";
 
     /**
      * Get mobile data activity timeout from {@link Settings}.
@@ -1047,17 +1047,16 @@ public class ConnectivitySettingsManager {
     }
 
     /**
-     * Get the list of apps(from {@link Settings}) that should be granted netd system permission for
-     * using restricted networks.
+     * Get the list of apps(from {@link Settings}) that is allowed on restricted networks.
      *
      * @param context The {@link Context} to query the setting.
-     * @return A list of apps that should be granted netd system permission for using restricted
-     *         networks or null if no setting value.
+     * @return A list of apps that is allowed on restricted networks or null if no setting
+     *         value.
      */
     @NonNull
-    public static Set<String> getRestrictedAllowedApps(@NonNull Context context) {
+    public static Set<String> getAppsAllowedOnRestrictedNetworks(@NonNull Context context) {
         final String appList = Settings.Secure.getString(
-                context.getContentResolver(), RESTRICTED_ALLOWED_APPS);
+                context.getContentResolver(), APPS_ALLOWED_ON_RESTRICTED_NETWORKS);
         if (TextUtils.isEmpty(appList)) {
             return new ArraySet<>();
         }
@@ -1065,27 +1064,24 @@ public class ConnectivitySettingsManager {
     }
 
     /**
-     * Set the list of apps(from {@link Settings}) that should be granted netd system permission for
-     * using restricted networks.
+     * Set the list of apps(from {@link Settings}) that is allowed on restricted networks.
      *
      * Note: Please refer to android developer guidelines for valid app(package name).
      * https://developer.android.com/guide/topics/manifest/manifest-element.html#package
      *
      * @param context The {@link Context} to set the setting.
-     * @param list A list of apps that should be granted netd system permission for using
-     *             restricted networks.
+     * @param list A list of apps that is allowed on restricted networks.
      */
-    public static void setRestrictedAllowedApps(@NonNull Context context,
+    public static void setAppsAllowedOnRestrictedNetworks(@NonNull Context context,
             @NonNull Set<String> list) {
-        final Pattern appPattern = Pattern.compile("[a-zA-Z_0-9]+([.][a-zA-Z_0-9]+)*");
         final StringJoiner joiner = new StringJoiner(";");
         for (String app : list) {
-            if (!appPattern.matcher(app).matches()) {
+            if (app == null || app.contains(";")) {
                 throw new IllegalArgumentException("Invalid app(package name)");
             }
             joiner.add(app);
         }
-        Settings.Secure.putString(
-                context.getContentResolver(), RESTRICTED_ALLOWED_APPS, joiner.toString());
+        Settings.Secure.putString(context.getContentResolver(), APPS_ALLOWED_ON_RESTRICTED_NETWORKS,
+                joiner.toString());
     }
 }

@@ -442,16 +442,83 @@ public class HdmiControlService extends SystemService {
 
     public HdmiControlService(Context context) {
         super(context);
-        List<Integer> deviceTypes = HdmiProperties.device_type();
-        if (deviceTypes.contains(null)) {
-            Slog.w(TAG, "Error parsing ro.hdmi.device.type: " + SystemProperties.get(
-                    "ro.hdmi.device_type"));
-            deviceTypes = deviceTypes.stream().filter(Objects::nonNull).collect(
-                    Collectors.toList());
-        }
-        mLocalDevices = deviceTypes;
+        mLocalDevices = readDeviceTypes();
         mSettingsObserver = new SettingsObserver(mHandler);
         mHdmiCecConfig = new HdmiCecConfig(context);
+    }
+
+    @VisibleForTesting
+    protected List<HdmiProperties.cec_device_types_values> getCecDeviceTypes() {
+        return HdmiProperties.cec_device_types();
+    }
+
+    @VisibleForTesting
+    protected List<Integer> getDeviceTypes() {
+        return HdmiProperties.device_type();
+    }
+
+    /**
+     * Extracts a list of integer device types from the sysprop ro.hdmi.cec_device_types.
+     * If ro.hdmi.cec_device_types is not set, reads from ro.hdmi.device.type instead.
+     * @return the list of integer device types
+     */
+    @VisibleForTesting
+    protected List<Integer> readDeviceTypes() {
+        List<HdmiProperties.cec_device_types_values> cecDeviceTypes = getCecDeviceTypes();
+        if (!cecDeviceTypes.isEmpty()) {
+            if (cecDeviceTypes.contains(null)) {
+                Slog.w(TAG, "Error parsing ro.hdmi.cec_device_types: " + SystemProperties.get(
+                        "ro.hdmi.cec_device_types"));
+            }
+            return cecDeviceTypes.stream()
+                    .map(HdmiControlService::enumToIntDeviceType)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+        } else {
+            // If ro.hdmi.cec_device_types isn't set, fall back to reading ro.hdmi.device_type
+            List<Integer> deviceTypes = getDeviceTypes();
+            if (deviceTypes.contains(null)) {
+                Slog.w(TAG, "Error parsing ro.hdmi.device_type: " + SystemProperties.get(
+                        "ro.hdmi.device_type"));
+            }
+            return deviceTypes.stream()
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+        }
+    }
+
+    /**
+     * Converts an enum representing a value in ro.hdmi.cec_device_types to an integer device type.
+     * Returns null if the input is null or an unrecognized device type.
+     */
+    @Nullable
+    private static Integer enumToIntDeviceType(
+            @Nullable HdmiProperties.cec_device_types_values cecDeviceType) {
+        if (cecDeviceType == null) {
+            return null;
+        }
+        switch (cecDeviceType) {
+            case TV:
+                return HdmiDeviceInfo.DEVICE_TV;
+            case RECORDING_DEVICE:
+                return HdmiDeviceInfo.DEVICE_RECORDER;
+            case RESERVED:
+                return HdmiDeviceInfo.DEVICE_RESERVED;
+            case TUNER:
+                return HdmiDeviceInfo.DEVICE_TUNER;
+            case PLAYBACK_DEVICE:
+                return HdmiDeviceInfo.DEVICE_PLAYBACK;
+            case AUDIO_SYSTEM:
+                return HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM;
+            case PURE_CEC_SWITCH:
+                return HdmiDeviceInfo.DEVICE_PURE_CEC_SWITCH;
+            case VIDEO_PROCESSOR:
+                return HdmiDeviceInfo.DEVICE_VIDEO_PROCESSOR;
+            default:
+                Slog.w(TAG, "Unrecognized device type in ro.hdmi.cec_device_types: "
+                        + cecDeviceType.getPropValue());
+                return null;
+        }
     }
 
     protected static List<Integer> getIntList(String string) {
@@ -3030,6 +3097,7 @@ public class HdmiControlService extends SystemService {
     @ServiceThreadOnly
     @VisibleForTesting
     protected void onStandby(final int standbyAction) {
+        mWakeUpMessageReceived = false;
         assertRunOnServiceThread();
         mPowerStatusController.setPowerStatus(HdmiControlManager.POWER_STATUS_TRANSIENT_TO_STANDBY,
                 false);

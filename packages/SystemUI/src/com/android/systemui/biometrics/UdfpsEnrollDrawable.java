@@ -16,6 +16,8 @@
 
 package com.android.systemui.biometrics;
 
+import android.animation.AnimatorSet;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -24,6 +26,9 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
+import android.os.Looper;
+import android.view.animation.AccelerateDecelerateInterpolator;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -38,16 +43,32 @@ public class UdfpsEnrollDrawable extends UdfpsDrawable {
 
     static final float PROGRESS_BAR_RADIUS = 360.f;
 
+    private static final long ANIM_DURATION = 800;
+    // 1 + SCALE_MAX is the maximum that the moving target will animate to
+    private static final float SCALE_MAX = 0.25f;
+
     @NonNull private final Drawable mMovingTargetFpIcon;
     @NonNull private final Paint mSensorOutlinePaint;
     @NonNull private final Paint mBlueFill;
     @NonNull private final Paint mBlueStroke;
+    @NonNull private final Handler mHandler;
 
     @Nullable private RectF mSensorRect;
     @Nullable private UdfpsEnrollHelper mEnrollHelper;
 
+    // Moving target animator set
+    @Nullable AnimatorSet mAnimatorSet;
+    // Moving target location
+    float mCurrentX;
+    float mCurrentY;
+    // Moving target size
+    float mCurrentScale = 1.f;
+
+
     UdfpsEnrollDrawable(@NonNull Context context) {
         super(context);
+
+        mHandler = new Handler(Looper.getMainLooper());
 
         mSensorOutlinePaint = new Paint(0 /* flags */);
         mSensorOutlinePaint.setAntiAlias(true);
@@ -90,6 +111,46 @@ public class UdfpsEnrollDrawable extends UdfpsDrawable {
         invalidateSelf();
     }
 
+    void onEnrollmentProgress(int remaining, int totalSteps) {
+        if (mEnrollHelper.isCenterEnrollmentComplete()) {
+            mHandler.post(() -> {
+                if (mAnimatorSet != null && mAnimatorSet.isRunning()) {
+                    mAnimatorSet.end();
+                }
+
+                final PointF point = mEnrollHelper.getNextGuidedEnrollmentPoint();
+
+                final ValueAnimator x = ValueAnimator.ofFloat(mCurrentX, point.x);
+                x.addUpdateListener(animation -> {
+                    mCurrentX = (float) animation.getAnimatedValue();
+                    invalidateSelf();
+                });
+
+                final ValueAnimator y = ValueAnimator.ofFloat(mCurrentY, point.y);
+                y.addUpdateListener(animation -> {
+                    mCurrentY = (float) animation.getAnimatedValue();
+                    invalidateSelf();
+                });
+
+                final ValueAnimator scale = ValueAnimator.ofFloat(0, (float) Math.PI);
+                scale.setDuration(ANIM_DURATION);
+                scale.addUpdateListener(animation -> {
+                    // Grow then shrink
+                    mCurrentScale = 1 +
+                            SCALE_MAX * (float) Math.sin((float) animation.getAnimatedValue());
+                    invalidateSelf();
+                });
+
+                mAnimatorSet = new AnimatorSet();
+
+                mAnimatorSet.setInterpolator(new AccelerateDecelerateInterpolator());
+                mAnimatorSet.setDuration(ANIM_DURATION);
+                mAnimatorSet.playTogether(x, y, scale);
+                mAnimatorSet.start();
+            });
+        }
+    }
+
     @Override
     public void draw(@NonNull Canvas canvas) {
         if (isIlluminationShowing()) {
@@ -98,13 +159,12 @@ public class UdfpsEnrollDrawable extends UdfpsDrawable {
 
         // Draw moving target
         if (mEnrollHelper.isCenterEnrollmentComplete()) {
-            mFingerprintDrawable.setAlpha(mAlpha == 255 ? 64 : mAlpha);
-            mSensorOutlinePaint.setAlpha(mAlpha == 255 ? 64 : mAlpha);
-
             canvas.save();
-            final PointF point = mEnrollHelper.getNextGuidedEnrollmentPoint();
-            canvas.translate(point.x, point.y);
+            canvas.translate(mCurrentX, mCurrentY);
+
             if (mSensorRect != null) {
+                canvas.scale(mCurrentScale, mCurrentScale,
+                        mSensorRect.centerX(), mSensorRect.centerY());
                 canvas.drawOval(mSensorRect, mBlueFill);
                 canvas.drawOval(mSensorRect, mBlueStroke);
             }
