@@ -41,6 +41,7 @@ import android.graphics.Color;
 import android.os.Handler;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.util.MathUtils;
 import android.view.View;
 
 import androidx.test.filters.SmallTest;
@@ -1119,6 +1120,32 @@ public class ScrimControllerTest extends SysuiTestCase {
 
         assertAlphaAfterExpansion(mNotificationsScrim, /* alpha */ 0.2f, /* expansion */ 0.8f);
         assertAlphaAfterExpansion(mNotificationsScrim, /* alpha */ 0.8f, /* expansion */ 0.2f);
+    }
+
+    @Test
+    public void testNotificationTransparency_followsTransitionToFullShade() {
+        mScrimController.transitionTo(ScrimState.SHADE_LOCKED);
+        mScrimController.setPanelExpansion(1.0f);
+        finishAnimationsImmediately();
+        float shadeLockedAlpha = mNotificationsScrim.getViewAlpha();
+        mScrimController.transitionTo(ScrimState.KEYGUARD);
+        mScrimController.setPanelExpansion(1.0f);
+        finishAnimationsImmediately();
+        float keyguardAlpha = mNotificationsScrim.getViewAlpha();
+
+        mScrimController.setClipsQsScrim(true);
+        float progress = 0.5f;
+        mScrimController.setTransitionToFullShadeProgress(progress);
+        assertEquals(MathUtils.lerp(keyguardAlpha, shadeLockedAlpha, progress),
+                mNotificationsScrim.getViewAlpha(), 0.2);
+        progress = 0.0f;
+        mScrimController.setTransitionToFullShadeProgress(progress);
+        assertEquals(MathUtils.lerp(keyguardAlpha, shadeLockedAlpha, progress),
+                mNotificationsScrim.getViewAlpha(), 0.2);
+        progress = 1.0f;
+        mScrimController.setTransitionToFullShadeProgress(progress);
+        assertEquals(MathUtils.lerp(keyguardAlpha, shadeLockedAlpha, progress),
+                mNotificationsScrim.getViewAlpha(), 0.2);
     }
 
     private void assertAlphaAfterExpansion(ScrimView scrim, float expectedAlpha, float expansion) {
