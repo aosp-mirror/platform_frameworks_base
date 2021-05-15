@@ -26,6 +26,7 @@ import android.util.MathUtils
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroupOverlay
+import com.android.systemui.R
 import com.android.systemui.animation.Interpolators
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.WakefulnessLifecycle
@@ -35,6 +36,7 @@ import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator
 import com.android.systemui.statusbar.phone.KeyguardBypassController
+import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.animation.UniqueObjectHostView
 import javax.inject.Inject
@@ -74,6 +76,7 @@ class MediaHierarchyManager @Inject constructor(
     private val bypassController: KeyguardBypassController,
     private val mediaCarouselController: MediaCarouselController,
     private val notifLockscreenUserManager: NotificationLockscreenUserManager,
+    configurationController: ConfigurationController,
     wakefulnessLifecycle: WakefulnessLifecycle,
     private val statusBarKeyguardViewManager: StatusBarKeyguardViewManager
 ) {
@@ -183,6 +186,58 @@ class MediaHierarchyManager @Inject constructor(
         }
 
     /**
+     * distance that the full shade transition takes in order for media to fully transition to the
+     * shade
+     */
+    private var distanceForFullShadeTransition = 0
+
+    /**
+     * Delay after which the media will start transitioning to the full shade on the lockscreen.
+     */
+    private var fullShadeTransitionDelay = 0
+
+    /**
+     * The amount of progress we are currently in if we're transitioning to the full shade.
+     * 0.0f means we're not transitioning yet, while 1 means we're all the way in the full
+     * shade.
+     */
+    private var fullShadeTransitionProgress = 0f
+        set(value) {
+            if (field == value) {
+                return
+            }
+            field = value
+            if (bypassController.bypassEnabled) {
+                return
+            }
+            updateDesiredLocation()
+            if (value >= 0) {
+                updateTargetState()
+                applyTargetStateIfNotAnimating()
+            }
+        }
+
+    private val isTransitioningToFullShade: Boolean
+        get() = fullShadeTransitionProgress != 0f && !bypassController.bypassEnabled
+
+    /**
+     * Set the amount of pixels we have currently dragged down if we're transitioning to the full
+     * shade. 0.0f means we're not transitioning yet.
+     */
+    fun setTransitionToFullShadeAmount(value: Float) {
+        // If we're transitioning starting on the shade_locked, we don't want any delay and rather
+        // have it aligned with the rest of the animation
+        val delay = if (statusbarState == StatusBarState.KEYGUARD) {
+            fullShadeTransitionDelay
+        } else {
+            0
+        }
+        val progress = MathUtils.saturate((value - delay) /
+                (distanceForFullShadeTransition - delay))
+        fullShadeTransitionProgress = Interpolators.FAST_OUT_SLOW_IN.getInterpolation(progress)
+    }
+
+    /**
      * Is the shade currently collapsing from the expanded qs? If we're on the lockscreen and in qs,
      * we wouldn't want to transition in that case.
      */
@@ -242,6 +297,12 @@ class MediaHierarchyManager @Inject constructor(
         }
 
     init {
+        updateConfiguration()
+        configurationController.addCallback(object : ConfigurationController.ConfigurationListener {
+            override fun onDensityOrFontScaleChanged() {
+                updateConfiguration()
+            }
+        })
         statusBarStateController.addCallback(object : StatusBarStateController.StateListener {
             override fun onStatePreChange(oldState: Int, newState: Int) {
                 // We're updating the location before the state change happens, since we want the
@@ -310,6 +371,13 @@ class MediaHierarchyManager @Inject constructor(
                 goingToSleep = false
             }
         })
+    }
+
+    private fun updateConfiguration() {
+        distanceForFullShadeTransition = context.resources.getDimensionPixelSize(
+                R.dimen.lockscreen_shade_qs_transition_distance)
+        fullShadeTransitionDelay = context.resources.getDimensionPixelSize(
+                R.dimen.lockscreen_shade_media_transition_start_delay)
     }
 
     /**
@@ -546,6 +614,9 @@ class MediaHierarchyManager @Inject constructor(
         if (progress >= 0) {
             return progress
         }
+        if (isTransitioningToFullShade) {
+            return fullShadeTransitionProgress
+        }
         return -1.0f
     }
 
@@ -643,6 +714,7 @@ class MediaHierarchyManager @Inject constructor(
         val location = when {
             qsExpansion > 0.0f && !onLockscreen -> LOCATION_QS
             qsExpansion > 0.4f && onLockscreen -> LOCATION_QS
+            onLockscreen && isTransitioningToFullShade -> LOCATION_QQS
             onLockscreen && allowedOnLockscreen -> LOCATION_LOCKSCREEN
             else -> LOCATION_QQS
         }
