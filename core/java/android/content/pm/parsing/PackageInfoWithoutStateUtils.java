@@ -713,6 +713,7 @@ public class PackageInfoWithoutStateUtils {
         componentInfo.directBootAware = mainComponent.isDirectBootAware();
         componentInfo.enabled = mainComponent.isEnabled();
         componentInfo.splitName = mainComponent.getSplitName();
+        componentInfo.attributionTags = mainComponent.getAttributionTags();
     }
 
     private static void assignSharedFieldsForPackageItemInfo(
