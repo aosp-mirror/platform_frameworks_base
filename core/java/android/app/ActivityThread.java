@@ -3509,7 +3509,8 @@ public final class ActivityThread extends ClientTransactionHandler
                     cl, component.getClassName(), r.intent);
             StrictMode.incrementExpectedActivityCount(activity.getClass());
             r.intent.setExtrasClassLoader(cl);
-            r.intent.prepareToEnterProcess(isProtectedComponent(r.activityInfo));
+            r.intent.prepareToEnterProcess(isProtectedComponent(r.activityInfo),
+                    appContext.getAttributionSource());
             if (r.state != null) {
                 r.state.setClassLoader(cl);
             }
@@ -3801,7 +3802,8 @@ public final class ActivityThread extends ClientTransactionHandler
         for (int i=0; i<N; i++) {
             ReferrerIntent intent = intents.get(i);
             intent.setExtrasClassLoader(r.activity.getClassLoader());
-            intent.prepareToEnterProcess(isProtectedComponent(r.activityInfo));
+            intent.prepareToEnterProcess(isProtectedComponent(r.activityInfo),
+                    r.activity.getAttributionSource());
             r.activity.mFragments.noteStateNotSaved();
             mInstrumentation.callActivityOnNewIntent(r.activity, intent);
         }
@@ -4241,10 +4243,15 @@ public final class ActivityThread extends ClientTransactionHandler
             if (data.info.splitName != null) {
                 context = (ContextImpl) context.createContextForSplit(data.info.splitName);
             }
+            if (data.info.attributionTags != null && data.info.attributionTags.length > 0) {
+                final String attributionTag = data.info.attributionTags[0];
+                context = (ContextImpl) context.createAttributionContext(attributionTag);
+            }
             java.lang.ClassLoader cl = context.getClassLoader();
             data.intent.setExtrasClassLoader(cl);
             data.intent.prepareToEnterProcess(
-                    isProtectedComponent(data.info) || isProtectedBroadcast(data.intent));
+                    isProtectedComponent(data.info) || isProtectedBroadcast(data.intent),
+                    context.getAttributionSource());
             data.setExtrasClassLoader(cl);
             receiver = packageInfo.getAppFactory()
                     .instantiateReceiver(cl, data.info.name, data.intent);
@@ -4435,6 +4442,10 @@ public final class ActivityThread extends ClientTransactionHandler
             if (data.info.splitName != null) {
                 context = (ContextImpl) context.createContextForSplit(data.info.splitName);
             }
+            if (data.info.attributionTags != null && data.info.attributionTags.length > 0) {
+                final String attributionTag = data.info.attributionTags[0];
+                context = (ContextImpl) context.createAttributionContext(attributionTag);
+            }
             // Service resources must be initialized with the same loaders as the application
             // context.
             context.getResources().addLoaders(
@@ -4469,7 +4480,8 @@ public final class ActivityThread extends ClientTransactionHandler
         if (s != null) {
             try {
                 data.intent.setExtrasClassLoader(s.getClassLoader());
-                data.intent.prepareToEnterProcess(isProtectedComponent(createData.info));
+                data.intent.prepareToEnterProcess(isProtectedComponent(createData.info),
+                        s.getAttributionSource());
                 try {
                     if (!data.rebind) {
                         IBinder binder = s.onBind(data.intent);
@@ -4499,7 +4511,8 @@ public final class ActivityThread extends ClientTransactionHandler
         if (s != null) {
             try {
                 data.intent.setExtrasClassLoader(s.getClassLoader());
-                data.intent.prepareToEnterProcess(isProtectedComponent(createData.info));
+                data.intent.prepareToEnterProcess(isProtectedComponent(createData.info),
+                        s.getAttributionSource());
                 boolean doRebind = s.onUnbind(data.intent);
                 try {
                     if (doRebind) {
@@ -4588,7 +4601,8 @@ public final class ActivityThread extends ClientTransactionHandler
             try {
                 if (data.args != null) {
                     data.args.setExtrasClassLoader(s.getClassLoader());
-                    data.args.prepareToEnterProcess(isProtectedComponent(createData.info));
+                    data.args.prepareToEnterProcess(isProtectedComponent(createData.info),
+                            s.getAttributionSource());
                 }
                 int res;
                 if (!data.taskRemoved) {
@@ -5241,7 +5255,8 @@ public final class ActivityThread extends ClientTransactionHandler
             try {
                 if (ri.mData != null) {
                     ri.mData.setExtrasClassLoader(r.activity.getClassLoader());
-                    ri.mData.prepareToEnterProcess(isProtectedComponent(r.activityInfo));
+                    ri.mData.prepareToEnterProcess(isProtectedComponent(r.activityInfo),
+                            r.activity.getAttributionSource());
                 }
                 if (DEBUG_RESULTS) Slog.v(TAG,
                         "Delivering result to activity " + r + " : " + ri);
@@ -7341,6 +7356,10 @@ public final class ActivityThread extends ClientTransactionHandler
                 } catch (NameNotFoundException e) {
                     throw new RuntimeException(e);
                 }
+            }
+            if (info.attributionTags != null && info.attributionTags.length > 0) {
+                final String attributionTag = info.attributionTags[0];
+                c = c.createAttributionContext(attributionTag);
             }
 
             try {
