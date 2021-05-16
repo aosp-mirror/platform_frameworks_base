@@ -68,7 +68,8 @@ public class ParsedServiceUtils {
                     R.styleable.AndroidManifestService_name,
                     R.styleable.AndroidManifestService_process,
                     R.styleable.AndroidManifestService_roundIcon,
-                    R.styleable.AndroidManifestService_splitName
+                    R.styleable.AndroidManifestService_splitName,
+                    R.styleable.AndroidManifestService_attributionTags
             );
 
             if (result.isError()) {
