@@ -16,6 +16,9 @@
 
 package android.media.audiopolicy;
 
+import static java.lang.annotation.RetentionPolicy.SOURCE;
+
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -24,6 +27,7 @@ import android.os.Build;
 import android.os.Parcel;
 import android.util.Log;
 
+import java.lang.annotation.Retention;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Objects;
@@ -199,7 +203,19 @@ public class AudioMixingRule {
     }
 
     private final int mTargetMixType;
-    int getTargetMixType() { return mTargetMixType; }
+
+    /** @hide */
+    @IntDef({AudioMix.MIX_TYPE_PLAYERS, AudioMix.MIX_TYPE_RECORDERS})
+    @Retention(SOURCE)
+    public @interface MixType {}
+
+    /**
+     * Gets target mix type of the mixing rule.
+     */
+    public @MixType int getTargetMixType() {
+        return mTargetMixType;
+    }
+
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private final ArrayList<AudioMixMatchCriterion> mCriteria;
     /** @hide */
@@ -469,17 +485,24 @@ public class AudioMixingRule {
         }
 
         /**
-         * Set target mix type of the mixing rule.
+         * Sets target mix type of the mixing rule.
          *
-         * <p>Note: If the mix type was not specified, it will be decided automatically by mixing
-         * rule. For {@link #RULE_MATCH_UID}, the default type is {@link AudioMix#MIX_TYPE_PLAYERS}.
+         * <p>Note: If the mix type was not specified, it will be decided automatically by matched
+         * mixing rule. For example, {@link AudioMixingRule#RULE_MATCH_ATTRIBUTE_USAGE} or {@link
+         * AudioMixingRule#RULE_MATCH_USERID} applied {@link AudioMix#MIX_TYPE_PLAYERS}, {@link
+         * AudioMixingRule#RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET} applied {@link
+         * AudioMix#MIX_TYPE_RECORDERS}. For {@link AudioMixingRule#RULE_MATCH_UID}, the mix type
+         * could be {@link AudioMix#MIX_TYPE_PLAYERS} or {@link AudioMix#MIX_TYPE_RECORDERS}, and
+         * {@link AudioMix#MIX_TYPE_PLAYERS} is the default value.
          *
          * @param mixType {@link AudioMix#MIX_TYPE_PLAYERS} or {@link AudioMix#MIX_TYPE_RECORDERS}
          * @return the same Builder instance.
-         *
-         * @hide
          */
-        public @NonNull Builder setTargetMixType(int mixType) {
+        public @NonNull Builder setTargetMixType(@MixType int mixType) {
+            if (mixType != AudioMix.MIX_TYPE_PLAYERS && mixType != AudioMix.MIX_TYPE_RECORDERS) {
+                throw new IllegalArgumentException("Illegal argument for mix type");
+            }
+
             mTargetMixType = mixType;
             Log.i("AudioMixingRule", "Builder setTargetMixType " + mixType);
             return this;
