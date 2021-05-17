@@ -611,7 +611,7 @@
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Ikon for fingeravtrykk"</string>
     <string name="permlab_manageFace" msgid="4569549381889283282">"administrere maskinvare for Ansiktslås"</string>
     <string name="permdesc_manageFace" msgid="6204569688492710471">"Lar appen bruke metoder for å legge til og slette ansiktmaler for bruk."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"bruke maskinvare for Ansiktslås"</string>
+    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"bruk maskinvare for Ansiktslås"</string>
     <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Lar appen bruke maskinvare for Ansiktslås til autentisering"</string>
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Ansiktslås"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Registrer ansiktet ditt på nytt"</string>
