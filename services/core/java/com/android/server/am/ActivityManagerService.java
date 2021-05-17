@@ -4136,7 +4136,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (appId < 0 && packageName != null) {
             try {
                 appId = UserHandle.getAppId(AppGlobals.getPackageManager()
-                        .getPackageUid(packageName, MATCH_DEBUG_TRIAGED_MISSING, 0));
+                        .getPackageUid(packageName, MATCH_DEBUG_TRIAGED_MISSING, userId));
             } catch (RemoteException e) {
             }
         }
