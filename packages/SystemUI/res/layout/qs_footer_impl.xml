@@ -51,7 +51,7 @@
                 android:focusable="true"
                 android:gravity="center_vertical"
                 android:singleLine="true"
-                android:textAppearance="@style/TextAppearance.QS.Build"
+                android:textAppearance="@style/TextAppearance.QS.Status.Build"
                 android:visibility="gone" />
 
             <com.android.systemui.qs.PageIndicator
