@@ -11470,7 +11470,9 @@ public class Intent implements Parcelable, Cloneable {
         if (mAction != null && mAction.startsWith("android.bluetooth.")
                 && hasExtra(BluetoothDevice.EXTRA_DEVICE)) {
             final BluetoothDevice device = getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-            device.prepareToEnterProcess(source);
+            if (device != null) {
+                device.prepareToEnterProcess(source);
+            }
         }
     }
 
