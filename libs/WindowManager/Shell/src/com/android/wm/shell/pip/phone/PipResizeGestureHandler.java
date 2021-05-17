@@ -383,14 +383,17 @@ public class PipResizeGestureHandler {
             return;
         }
 
+        final Rect pipBounds = mPipBoundsState.getBounds();
         if (action == MotionEvent.ACTION_POINTER_DOWN) {
-            if (mFirstIndex == -1 && mSecondIndex == -1) {
+            if (mFirstIndex == -1 && mSecondIndex == -1
+                    && pipBounds.contains((int) ev.getRawX(0), (int) ev.getRawY(0))
+                    && pipBounds.contains((int) ev.getRawX(1), (int) ev.getRawY(1))) {
                 mAllowGesture = true;
                 mFirstIndex = 0;
                 mSecondIndex = 1;
                 mDownPoint.set(ev.getRawX(mFirstIndex), ev.getRawY(mFirstIndex));
                 mDownSecondPoint.set(ev.getRawX(mSecondIndex), ev.getRawY(mSecondIndex));
-                mDownBounds.set(mPipBoundsState.getBounds());
+                mDownBounds.set(pipBounds);
 
                 mLastPoint.set(mDownPoint);
                 mLastSecondPoint.set(mLastSecondPoint);
