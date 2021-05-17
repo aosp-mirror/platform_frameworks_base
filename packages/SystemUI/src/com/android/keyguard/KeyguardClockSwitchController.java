@@ -259,6 +259,9 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             mClockViewController.refreshTime();
             mLargeClockViewController.refreshTime();
         }
+        if (mSmartspaceController != null) {
+            mSmartspaceController.requestSmartspaceUpdate();
+        }
 
         mView.refresh();
     }
