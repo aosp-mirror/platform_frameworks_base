@@ -3762,13 +3762,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
         }
 
-        final DataLoaderManager dataLoaderManager = mContext.getSystemService(
-                DataLoaderManager.class);
-        if (dataLoaderManager == null) {
-            throw new PackageManagerException(INSTALL_FAILED_MEDIA_UNAVAILABLE,
-                    "Failed to find data loader manager service");
-        }
-
         final DataLoaderParams params = this.params.dataLoaderParams;
         final boolean manualStartAndDestroy = !isIncrementalInstallation();
         final boolean systemDataLoader = isSystemDataLoaderInstallation();
@@ -3793,20 +3786,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     return;
                 }
                 try {
-                    IDataLoader dataLoader = dataLoaderManager.getDataLoader(dataLoaderId);
-                    if (dataLoader == null) {
-                        mDataLoaderFinished = true;
-                        dispatchSessionValidationFailure(INSTALL_FAILED_MEDIA_UNAVAILABLE,
-                                "Failure to obtain data loader");
-                        return;
-                    }
-
                     switch (status) {
                         case IDataLoaderStatusListener.DATA_LOADER_BOUND: {
                             if (manualStartAndDestroy) {
                                 FileSystemControlParcel control = new FileSystemControlParcel();
                                 control.callback = new FileSystemConnector(addedFiles);
-                                dataLoader.create(dataLoaderId, params.getData(), control, this);
+                                getDataLoader(dataLoaderId).create(dataLoaderId, params.getData(),
+                                        control, this);
                             }
 
                             break;
@@ -3815,12 +3801,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                             if (manualStartAndDestroy) {
                                 // IncrementalFileStorages will call start after all files are
                                 // created in IncFS.
-                                dataLoader.start(dataLoaderId);
+                                getDataLoader(dataLoaderId).start(dataLoaderId);
                             }
                             break;
                         }
                         case IDataLoaderStatusListener.DATA_LOADER_STARTED: {
-                            dataLoader.prepareImage(
+                            getDataLoader(dataLoaderId).prepareImage(
                                     dataLoaderId,
                                     addedFiles.toArray(
                                             new InstallationFileParcel[addedFiles.size()]),
@@ -3836,7 +3822,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                                 dispatchSessionSealed();
                             }
                             if (manualStartAndDestroy) {
-                                dataLoader.destroy(dataLoaderId);
+                                getDataLoader(dataLoaderId).destroy(dataLoaderId);
                             }
                             break;
                         }
@@ -3845,7 +3831,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                             dispatchSessionValidationFailure(INSTALL_FAILED_MEDIA_UNAVAILABLE,
                                     "Failed to prepare image.");
                             if (manualStartAndDestroy) {
-                                dataLoader.destroy(dataLoaderId);
+                                getDataLoader(dataLoaderId).destroy(dataLoaderId);
                             }
                             break;
                         }
@@ -3860,11 +3846,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                             break;
                         }
                         case IDataLoaderStatusListener.DATA_LOADER_UNRECOVERABLE:
-                            mDataLoaderFinished = true;
-                            dispatchSessionValidationFailure(INSTALL_FAILED_MEDIA_UNAVAILABLE,
+                            throw new PackageManagerException(INSTALL_FAILED_MEDIA_UNAVAILABLE,
                                     "DataLoader reported unrecoverable failure.");
-                            break;
                     }
+                } catch (PackageManagerException e) {
+                    mDataLoaderFinished = true;
+                    dispatchSessionValidationFailure(e.error, ExceptionUtils.getCompleteMessage(e));
                 } catch (RemoteException e) {
                     // In case of streaming failure we don't want to fail or commit the session.
                     // Just return from this method and allow caller to commit again.
@@ -3939,13 +3926,31 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         final long bindDelayMs = 0;
-        if (!dataLoaderManager.bindToDataLoader(sessionId, params.getData(), bindDelayMs,
+        if (!getDataLoaderManager().bindToDataLoader(sessionId, params.getData(), bindDelayMs,
                 statusListener)) {
             throw new PackageManagerException(INSTALL_FAILED_MEDIA_UNAVAILABLE,
                     "Failed to initialize data loader");
         }
 
         return false;
+    }
+
+    private DataLoaderManager getDataLoaderManager() throws PackageManagerException {
+        DataLoaderManager dataLoaderManager = mContext.getSystemService(DataLoaderManager.class);
+        if (dataLoaderManager == null) {
+            throw new PackageManagerException(INSTALL_FAILED_MEDIA_UNAVAILABLE,
+                    "Failed to find data loader manager service");
+        }
+        return dataLoaderManager;
+    }
+
+    private IDataLoader getDataLoader(int dataLoaderId) throws PackageManagerException {
+        IDataLoader dataLoader = getDataLoaderManager().getDataLoader(dataLoaderId);
+        if (dataLoader == null) {
+            throw new PackageManagerException(INSTALL_FAILED_MEDIA_UNAVAILABLE,
+                    "Failure to obtain data loader");
+        }
+        return dataLoader;
     }
 
     private void dispatchSessionValidationFailure(int error, String detailMessage) {
