@@ -2952,8 +2952,6 @@
     [CHAR LIMIT=NONE] -->
     <string name="battery_state_unknown_notification_text">Tap for more information</string>
 
-    <string name="qs_tile_label_fontFamily" translatable="false">@*android:string/config_headlineFontFamilyMedium</string>
-
     <!-- Secondary label for alarm tile when there is no next alarm information [CHAR LIMIT=20] -->
     <string name="qs_alarm_tile_no_alarm">No alarm set</string>
 
