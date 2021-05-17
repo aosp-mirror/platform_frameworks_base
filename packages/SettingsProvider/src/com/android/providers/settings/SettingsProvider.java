@@ -19,6 +19,12 @@ package com.android.providers.settings;
 import static android.os.Process.ROOT_UID;
 import static android.os.Process.SHELL_UID;
 import static android.os.Process.SYSTEM_UID;
+import static android.provider.Settings.Config.SYNC_DISABLED_MODE_NONE;
+import static android.provider.Settings.Config.SYNC_DISABLED_MODE_PERSISTENT;
+import static android.provider.Settings.Config.SYNC_DISABLED_MODE_UNTIL_REBOOT;
+import static android.provider.Settings.SET_ALL_RESULT_DISABLED;
+import static android.provider.Settings.SET_ALL_RESULT_FAILURE;
+import static android.provider.Settings.SET_ALL_RESULT_SUCCESS;
 import static android.provider.Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_MAGNIFICATION_CONTROLLER;
 import static android.provider.Settings.Secure.NOTIFICATION_BUBBLES;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_2BUTTON_OVERLAY;
@@ -83,8 +89,10 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
+import android.provider.Settings.Config.SyncDisabledMode;
 import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
+import android.provider.Settings.SetAllResult;
 import android.provider.settings.validators.SystemSettingsValidators;
 import android.provider.settings.validators.Validator;
 import android.text.TextUtils;
@@ -338,6 +346,9 @@ public class SettingsProvider extends ContentProvider {
     // We have to call in the package manager with no lock held,
     private volatile IPackageManager mPackageManager;
 
+    @GuardedBy("mLock")
+    private boolean mSyncConfigDisabledUntilReboot;
+
     public static int makeKey(int type, int userId) {
         return SettingsState.makeKey(type, userId);
     }
@@ -446,8 +457,21 @@ public class SettingsProvider extends ContentProvider {
                 String prefix = getSettingPrefix(args);
                 Map<String, String> flags = getSettingFlags(args);
                 Bundle result = new Bundle();
-                result.putBoolean(Settings.KEY_CONFIG_SET_RETURN,
+                result.putInt(Settings.KEY_CONFIG_SET_ALL_RETURN,
                         setAllConfigSettings(prefix, flags));
+                return result;
+            }
+
+            case Settings.CALL_METHOD_SET_SYNC_DISABLED_CONFIG: {
+                final int mode = getSyncDisabledMode(args);
+                setSyncDisabledConfig(mode);
+                break;
+            }
+
+            case Settings.CALL_METHOD_IS_SYNC_DISABLED_CONFIG: {
+                Bundle result = new Bundle();
+                result.putBoolean(Settings.KEY_CONFIG_IS_SYNC_DISABLED_RETURN,
+                        isSyncDisabledConfig());
                 return result;
             }
 
@@ -1105,7 +1129,8 @@ public class SettingsProvider extends ContentProvider {
                 MUTATION_OPERATION_INSERT, 0);
     }
 
-    private boolean setAllConfigSettings(String prefix, Map<String, String> keyValues) {
+
+    private @SetAllResult int setAllConfigSettings(String prefix, Map<String, String> keyValues) {
         if (DEBUG) {
             Slog.v(LOG_TAG, "setAllConfigSettings for prefix: " + prefix);
         }
@@ -1113,9 +1138,95 @@ public class SettingsProvider extends ContentProvider {
         enforceWritePermission(Manifest.permission.WRITE_DEVICE_CONFIG);
 
         synchronized (mLock) {
+            if (isSyncDisabledConfigLocked()) {
+                return SET_ALL_RESULT_DISABLED;
+            }
             final int key = makeKey(SETTINGS_TYPE_CONFIG, UserHandle.USER_SYSTEM);
-            return mSettingsRegistry.setConfigSettingsLocked(key, prefix, keyValues,
+            boolean success = mSettingsRegistry.setConfigSettingsLocked(key, prefix, keyValues,
                     resolveCallingPackage());
+            return success ? SET_ALL_RESULT_SUCCESS : SET_ALL_RESULT_FAILURE;
+        }
+    }
+
+    private void setSyncDisabledConfig(@SyncDisabledMode int syncDisabledMode) {
+        if (DEBUG) {
+            Slog.v(LOG_TAG, "setSyncDisabledConfig(" + syncDisabledMode + ")");
+        }
+
+        enforceWritePermission(Manifest.permission.WRITE_DEVICE_CONFIG);
+
+        synchronized (mLock) {
+            setSyncDisabledConfigLocked(syncDisabledMode);
+        }
+    }
+
+    private boolean isSyncDisabledConfig() {
+        if (DEBUG) {
+            Slog.v(LOG_TAG, "isSyncDisabledConfig");
+        }
+
+        enforceWritePermission(Manifest.permission.WRITE_DEVICE_CONFIG);
+
+        synchronized (mLock) {
+            return isSyncDisabledConfigLocked();
+        }
+    }
+
+    @GuardedBy("mLock")
+    private void setSyncDisabledConfigLocked(@SyncDisabledMode int syncDisabledMode) {
+        boolean persistentValue;
+        boolean inMemoryValue;
+        if (syncDisabledMode == SYNC_DISABLED_MODE_NONE) {
+            persistentValue = false;
+            inMemoryValue = false;
+        } else if (syncDisabledMode == SYNC_DISABLED_MODE_PERSISTENT) {
+            persistentValue = true;
+            inMemoryValue = false;
+        } else if (syncDisabledMode == SYNC_DISABLED_MODE_UNTIL_REBOOT) {
+            persistentValue = false;
+            inMemoryValue = true;
+        } else {
+            throw new IllegalArgumentException(Integer.toString(syncDisabledMode));
+        }
+
+        mSyncConfigDisabledUntilReboot = inMemoryValue;
+
+        CallingIdentity callingIdentity = clearCallingIdentity();
+        try {
+            String globalSettingValue = persistentValue ? "1" : "0";
+            mSettingsRegistry.insertSettingLocked(SETTINGS_TYPE_GLOBAL,
+                    UserHandle.USER_SYSTEM, Settings.Global.DEVICE_CONFIG_SYNC_DISABLED,
+                    globalSettingValue, /*tag=*/null, /*makeDefault=*/false,
+                    SettingsState.SYSTEM_PACKAGE_NAME, /*forceNotify=*/false,
+                    /*criticalSettings=*/null, Settings.DEFAULT_OVERRIDEABLE_BY_RESTORE);
+        } finally {
+            restoreCallingIdentity(callingIdentity);
+        }
+    }
+
+    @GuardedBy("mLock")
+    private boolean isSyncDisabledConfigLocked() {
+        // Check the values used for both SYNC_DISABLED_MODE_PERSISTENT and
+        // SYNC_DISABLED_MODE_UNTIL_REBOOT.
+
+        // The SYNC_DISABLED_MODE_UNTIL_REBOOT value is cheap to check first.
+        if (mSyncConfigDisabledUntilReboot) {
+            return true;
+        }
+
+        // Now check the global setting used to implement SYNC_DISABLED_MODE_PERSISTENT.
+        CallingIdentity callingIdentity = clearCallingIdentity();
+        try {
+            Setting settingLocked = mSettingsRegistry.getSettingLocked(
+                    SETTINGS_TYPE_GLOBAL, UserHandle.USER_SYSTEM,
+                    Global.DEVICE_CONFIG_SYNC_DISABLED);
+            if (settingLocked == null) {
+                return false;
+            }
+            String settingValue = settingLocked.getValue();
+            return settingValue != null && !"0".equals(settingValue);
+        } finally {
+            restoreCallingIdentity(callingIdentity);
         }
     }
 
@@ -2225,6 +2336,16 @@ public class SettingsProvider extends ContentProvider {
 
     private static boolean getSettingOverrideableByRestore(Bundle args) {
         return (args != null) && args.getBoolean(Settings.CALL_METHOD_OVERRIDEABLE_BY_RESTORE_KEY);
+    }
+
+    private static int getSyncDisabledMode(Bundle args) {
+        final int mode = (args != null)
+                ? args.getInt(Settings.CALL_METHOD_SYNC_DISABLED_MODE_KEY) : -1;
+        if (mode == SYNC_DISABLED_MODE_NONE || mode == SYNC_DISABLED_MODE_UNTIL_REBOOT
+                || mode == SYNC_DISABLED_MODE_PERSISTENT) {
+            return mode;
+        }
+        throw new IllegalArgumentException("Invalid sync disabled mode: " + mode);
     }
 
     private static int getResetModeEnforcingPermission(Bundle args) {
