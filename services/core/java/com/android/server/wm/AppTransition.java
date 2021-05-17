@@ -449,6 +449,19 @@ public class AppTransition implements Dump {
 
         if (mRemoteAnimationController != null) {
             mRemoteAnimationController.goodToGo(transit);
+        } else if ((isTaskOpenTransitOld(transit) || transit == TRANSIT_OLD_WALLPAPER_CLOSE)
+                && topOpeningAnim != null) {
+            if (mDisplayContent.getDisplayPolicy().shouldAttachNavBarToAppDuringTransition()
+                    && mService.getRecentsAnimationController() == null) {
+                final NavBarFadeAnimationController controller =
+                        new NavBarFadeAnimationController(mDisplayContent);
+                // For remote animation case, the nav bar fades out and in is controlled by the
+                // remote side. For non-remote animation case, we play the fade out/in animation
+                // here. We play the nav bar fade-out animation when the app transition animation
+                // starts and play the fade-in animation sequentially once the fade-out is finished.
+                controller.fadeOutAndInSequentially(topOpeningAnim.getDurationHint(),
+                        null /* fadeOutParent */, topOpeningApp.getSurfaceControl());
+            }
         }
         return redoLayout;
     }
