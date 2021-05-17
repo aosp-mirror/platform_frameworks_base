@@ -113,12 +113,10 @@ public class AudioMix {
      */
     public static final int MIX_TYPE_INVALID = -1;
     /**
-     * @hide
      * Mix type indicating playback streams are mixed.
      */
     public static final int MIX_TYPE_PLAYERS = 0;
     /**
-     * @hide
      * Mix type indicating recording streams are mixed.
      */
     public static final int MIX_TYPE_RECORDERS = 1;
