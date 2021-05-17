@@ -136,6 +136,8 @@
     <string name="accessibility_camera_button" msgid="2938898391716647247">"کیمرا"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"فون"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"صوتی معاون"</string>
+    <!-- no translation found for accessibility_wallet_button (1458258783460555507) -->
+    <skip />
     <string name="accessibility_unlock_button" msgid="122785427241471085">"غیر مقفل کریں"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"آلہ مقفل کر دیا گیا"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="5209142744692162598">"فنگر پرنٹ کا انتظار ہے"</string>
@@ -1151,6 +1153,8 @@
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"تصدیق کریں"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"آلہ درج کریں"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"کھولنے کے لیے فنگر پرنٹ کا استعمال کریں"</string>
+    <!-- no translation found for accessibility_fingerprint_bouncer (7189102492498735519) -->
+    <skip />
     <!-- no translation found for ongoing_phone_call_content_description (5332334388483099947) -->
     <skip />
 </resources>
