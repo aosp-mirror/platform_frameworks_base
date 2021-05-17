@@ -609,14 +609,14 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"فنگر پرنٹ آئیکن"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"چہرے کے ذریعے غیر مقفل کرنے والے ہارڈ ویئر کا نظم کریں"</string>
+    <string name="permlab_manageFace" msgid="4569549381889283282">"فیس اَنلاک والے ہارڈ ویئر کا نظم کریں"</string>
     <string name="permdesc_manageFace" msgid="6204569688492710471">"ایپ کو چہرے کی تمثیلات شامل اور حذف کرنے کے طریقوں کو کالعدم قرار دینے کی اجازت دیتا ہے۔"</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"چہرے کے ذریعے غیر مقفل کرنے والا ہارڈ ویئر استعمال کریں"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"ایپ کو تصدیق کے لیے چہرے کے ذریعے غیر مقفل کرنے کا ہارڈ ویئر استعمال کرنے کی اجازت دیتی ہے"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"چہرے کے ذریعے غیر مقفل کریں"</string>
+    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"فیس اَنلاک والا ہارڈ ویئر استعمال کریں"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"ایپ کو تصدیق کے لیے فیس اَنلاک کا ہارڈ ویئر استعمال کرنے کی اجازت دیتی ہے"</string>
+    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"فیس اَنلاک"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"اپنے چہرے کو دوبارہ مندرج کریں"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"شناخت کو بہتر بنانے کے لیے براہ کرم اپنے چہرے کو دوبارہ مندرج کریں"</string>
-    <string name="face_setup_notification_title" msgid="550617822603450009">"چہرے کے ذریعے غیر مقفل کرنا سیٹ اپ کریں"</string>
+    <string name="face_setup_notification_title" msgid="550617822603450009">"فیس اَنلاک سیٹ اپ کریں"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"اپنے فون کی طرف دیکھ کر اسے غیر مقفل کریں"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"غیر مقفل کرنے کے مزید طریقے سیٹ اپ کریں"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"فنگر پرنٹ شامل کرنے کیلئے تھپتھپائیں"</string>
@@ -643,18 +643,18 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"چہرے کی توثیق نہیں کی جا سکی۔ ہارڈ ویئر دستیاب نہیں ہے۔"</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"چہرے کے ذریعے غیر مقفل کرنے کو دوبارہ آزمائیں۔"</string>
+    <string name="face_error_timeout" msgid="522924647742024699">"فیس اَنلاک کو دوبارہ آزمائیں۔"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"چہرے کا نیا ڈیٹا اسٹور نہیں کر سکتے۔ پہلے پرانا حذف کریں۔"</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"چہرے پر ہونے والی کارروائی منسوخ ہو گئی۔"</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"صارف نے چہرے کے ذریعے غیر مقفل کرنے کو منسوخ کر دیا۔"</string>
+    <string name="face_error_user_canceled" msgid="8553045452825849843">"صارف نے فیس اَنلاک کو منسوخ کر دیا۔"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"کافی زیادہ کوششیں کی گئیں۔ دوبارہ کوشش کریں۔"</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"کافی زیادہ کوششیں۔ چہرے کے ذریعے غیر مقفل کرنا غیر فعال کر دیا گیا۔"</string>
+    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"کافی زیادہ کوششیں۔ فیس اَنلاک غیر فعال کر دیا گیا۔"</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"چہرے کی توثیق نہیں کی جا سکی۔ پھر آزمائيں۔"</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"آپ نے بذریعہ چہرہ غیر مقفل کرنے کو سیٹ نہیں کیا ہے۔"</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"اس آلہ پر چہرے کے ذریعے غیر مقفل کرنا تعاون یافتہ نہیں ہے۔"</string>
+    <string name="face_error_not_enrolled" msgid="7369928733504691611">"آپ نے فیس اَنلاک کو سیٹ نہیں کیا ہے۔"</string>
+    <string name="face_error_hw_not_present" msgid="1070600921591729944">"اس آلہ پر فیس اَنلاک تعاون یافتہ نہیں ہے۔"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"سینسر عارضی طور غیر فعال ہے۔"</string>
     <string name="face_name_template" msgid="3877037340223318119">"چہرہ <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <string name="face_app_setting_name" msgid="8130135875458467243">"چہرے کے ذریعے غیر مقفل کرنا استعمال کریں"</string>
+    <string name="face_app_setting_name" msgid="8130135875458467243">"فیس اَنلاک استعمال کریں"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"چہرہ یا اسکرین لاک استعمال کریں"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"جاری رکھنے کے لیے اپنے چہرے کا استعمال کریں"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"جاری رکھنے کے لیے اپنے چہرے یا اسکرین لاک کا استعمال کریں"</string>
@@ -887,7 +887,7 @@
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"دوبارہ کوشش کریں"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"دوبارہ کوشش کریں"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"تمام خصوصیات اور ڈیٹا کیلئے غیر مقفل کریں"</string>
-    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"چہرہ کے ذریعے غیر مقفل کریں کی زیادہ سے زیادہ کوششوں سے تجاوز کرگیا"</string>
+    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"فیس اَنلاک کی زیادہ سے زیادہ کوششوں سے تجاوز کرگیا"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"‏کوئی SIM کارڈ نہیں ہے"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"‏ٹیبلیٹ میں کوئی SIM کارڈ نہیں ہے۔"</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"‏آپ کے Android TV آلہ میں SIM کارڈ نہیں ہے۔"</string>
@@ -957,7 +957,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"غیر مقفل کرنے والے علاقے کو پھیلائیں۔"</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"سلائیڈ کے ذریعے غیر مقفل کریں۔"</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"پیٹرن کے ذریعے غیر مقفل کریں۔"</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"چہرے کے ذریعے غیر مقفل کریں۔"</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"فیس اَنلاک۔"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"پن کے ذریعے غیر مقفل کریں۔"</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"‏Sim پن غیر مقفل۔"</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"‏Sim Puk غیر مقفل۔"</string>
