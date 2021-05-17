@@ -37,7 +37,8 @@ import java.util.Objects;
 import java.util.TimeZone;
 
 /**
- * Controller for an AnimatableClockView. Instantiated by {@link KeyguardClockSwitchController}.
+ * Controller for an AnimatableClockView on the keyguard. Instantiated by
+ * {@link KeyguardClockSwitchController}.
  */
 public class AnimatableClockController extends ViewController<AnimatableClockView> {
     private static final int FORMAT_NUMBER = 1234567890;
@@ -46,6 +47,7 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final KeyguardBypassController mBypassController;
+    private final BatteryController mBatteryController;
     private final int mDozingColor = Color.WHITE;
     private int mLockScreenColor;
 
@@ -53,6 +55,7 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
     private boolean mIsCharging;
     private float mDozeAmount;
     private Locale mLocale;
+    private boolean mAttached; // if keyguard isn't showing, mAttached = false
 
     private final NumberFormat mBurmeseNf = NumberFormat.getInstance(Locale.forLanguageTag("my"));
     private final String mBurmeseNumerals;
@@ -73,44 +76,47 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
         mBroadcastDispatcher = broadcastDispatcher;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mBypassController = bypassController;
+        mBatteryController = batteryController;
 
         mBurmeseNumerals = mBurmeseNf.format(FORMAT_NUMBER);
         mBurmeseLineSpacing = getContext().getResources().getFloat(
                 R.dimen.keyguard_clock_line_spacing_scale_burmese);
         mDefaultLineSpacing = getContext().getResources().getFloat(
                 R.dimen.keyguard_clock_line_spacing_scale);
-
-        batteryController.addCallback(new BatteryController.BatteryStateChangeCallback() {
-            @Override
-            public void onBatteryLevelChanged(int level, boolean pluggedIn, boolean charging) {
-                if (!mIsCharging && charging) {
-                    mView.animateCharge(mIsDozing);
-                }
-                mIsCharging = charging;
-            }
-        });
     }
 
-    private BroadcastReceiver mLocaleBroadcastReceiver = new BroadcastReceiver() {
+    private final BatteryController.BatteryStateChangeCallback mBatteryCallback =
+            new BatteryController.BatteryStateChangeCallback() {
+        @Override
+        public void onBatteryLevelChanged(int level, boolean pluggedIn, boolean charging) {
+            if (!mIsCharging && charging) {
+                mView.animateCharge(mIsDozing);
+            }
+            mIsCharging = charging;
+        }
+    };
+
+    private final BroadcastReceiver mLocaleBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             updateLocale();
         }
     };
 
-    @Override
-    protected void onViewAttached() {
-        updateLocale();
-        mBroadcastDispatcher.registerReceiver(mLocaleBroadcastReceiver,
-                new IntentFilter(Intent.ACTION_LOCALE_CHANGED));
-        mStatusBarStateController.addCallback(mStatusBarStateListener);
-        mIsDozing = mStatusBarStateController.isDozing();
-        mDozeAmount = mStatusBarStateController.getDozeAmount();
-        mKeyguardUpdateMonitor.registerCallback(mKeyguardUpdateMonitorCallback);
-
-        refreshTime();
-        initColors();
-    }
+    private final KeyguardUpdateMonitorCallback mKeyguardPersistentCallback =
+            new KeyguardUpdateMonitorCallback() {
+        @Override
+        public void onKeyguardVisibilityChanged(boolean showing) {
+            // call attached/detached methods on visibility changes. benefits include:
+            //  - no animations when keyguard/clock view aren't visible
+            //  - resets state when keyguard is visible again (ie: font weight)
+            if (showing) {
+                onViewAttached();
+            } else {
+                onViewDetached();
+            }
+        }
+    };
 
     private final KeyguardUpdateMonitorCallback mKeyguardUpdateMonitorCallback =
             new KeyguardUpdateMonitorCallback() {
@@ -125,10 +131,41 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
     };
 
     @Override
+    protected void onViewAttached() {
+        if (mAttached) {
+            return;
+        }
+        mAttached = true;
+        updateLocale();
+        mBroadcastDispatcher.registerReceiver(mLocaleBroadcastReceiver,
+                new IntentFilter(Intent.ACTION_LOCALE_CHANGED));
+        mStatusBarStateController.addCallback(mStatusBarStateListener);
+        mIsDozing = mStatusBarStateController.isDozing();
+        mDozeAmount = mStatusBarStateController.getDozeAmount();
+        mBatteryController.addCallback(mBatteryCallback);
+        mKeyguardUpdateMonitor.registerCallback(mKeyguardUpdateMonitorCallback);
+
+        mKeyguardUpdateMonitor.removeCallback(mKeyguardPersistentCallback);
+        mKeyguardUpdateMonitor.registerCallback(mKeyguardPersistentCallback);
+
+        refreshTime();
+        initColors();
+    }
+
+    @Override
     protected void onViewDetached() {
+        if (!mAttached) {
+            return;
+        }
+
+        mAttached = false;
         mBroadcastDispatcher.unregisterReceiver(mLocaleBroadcastReceiver);
         mStatusBarStateController.removeCallback(mStatusBarStateListener);
         mKeyguardUpdateMonitor.removeCallback(mKeyguardUpdateMonitorCallback);
+        mBatteryController.removeCallback(mBatteryCallback);
+        if (!mView.isAttachedToWindow()) {
+            mKeyguardUpdateMonitor.removeCallback(mKeyguardPersistentCallback);
+        }
     }
 
     /** Animate the clock appearance */
