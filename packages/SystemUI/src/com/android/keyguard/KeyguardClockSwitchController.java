@@ -307,8 +307,6 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         NotificationIconContainer nic = (NotificationIconContainer)
                 mView.findViewById(
                         com.android.systemui.R.id.left_aligned_notification_icon_container);
-
-        // alt icon area is set in KeyguardClockSwitchController
         mNotificationIconAreaController.setupAodIcons(nic);
     }
 
