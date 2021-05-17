@@ -39,6 +39,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.net.ConnectivitySettingsManager;
 import android.net.INetd;
 import android.net.UidRange;
 import android.net.Uri;
@@ -49,6 +50,7 @@ import android.os.SystemConfigManager;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.system.OsConstants;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
@@ -104,6 +106,14 @@ public class PermissionMonitor {
     // added/removed.
     @GuardedBy("this")
     private final Set<Integer> mAllApps = new HashSet<>();
+
+    // A set of apps which are allowed to use restricted networks. These apps can't hold the
+    // CONNECTIVITY_USE_RESTRICTED_NETWORKS permission because they can't be signature|privileged
+    // apps. However, these apps should still be able to use restricted networks under certain
+    // conditions (e.g. government app using emergency services). So grant netd system permission
+    // to uids whose package name is listed in APPS_ALLOWED_ON_RESTRICTED_NETWORKS setting.
+    @GuardedBy("this")
+    private final Set<String> mAppsAllowedOnRestrictedNetworks = new ArraySet<>();
 
     private BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
         @Override
@@ -165,6 +175,11 @@ public class PermissionMonitor {
                 mIntentReceiver, intentFilter, null /* broadcastPermission */,
                 null /* scheduler */);
 
+        // Read APPS_ALLOWED_ON_RESTRICTED_NETWORKS setting and update
+        // mAppsAllowedOnRestrictedNetworks.
+        updateAppsAllowedOnRestrictedNetworks(
+                ConnectivitySettingsManager.getAppsAllowedOnRestrictedNetworks(mContext));
+
         List<PackageInfo> apps = mPackageManager.getInstalledPackages(GET_PERMISSIONS
                 | MATCH_ANY_USER);
         if (apps == null) {
@@ -220,8 +235,30 @@ public class PermissionMonitor {
     }
 
     @VisibleForTesting
+    void updateAppsAllowedOnRestrictedNetworks(final Set<String> apps) {
+        mAppsAllowedOnRestrictedNetworks.clear();
+        mAppsAllowedOnRestrictedNetworks.addAll(apps);
+    }
+
+    @VisibleForTesting
     static boolean isVendorApp(@NonNull ApplicationInfo appInfo) {
         return appInfo.isVendor() || appInfo.isOem() || appInfo.isProduct();
+    }
+
+    @VisibleForTesting
+    boolean isCarryoverPackage(final ApplicationInfo appInfo) {
+        if (appInfo == null) return false;
+        return (appInfo.targetSdkVersion < VERSION_Q && isVendorApp(appInfo))
+                // Backward compatibility for b/114245686, on devices that launched before Q daemons
+                // and apps running as the system UID are exempted from this check.
+                || (appInfo.uid == SYSTEM_UID && mDeps.getDeviceFirstSdkInt() < VERSION_Q);
+    }
+
+    @VisibleForTesting
+    boolean isAppAllowedOnRestrictedNetworks(@NonNull final PackageInfo app) {
+        // Check whether package name is in allowed on restricted networks app list. If so, this app
+        // can have netd system permission.
+        return mAppsAllowedOnRestrictedNetworks.contains(app.packageName);
     }
 
     @VisibleForTesting
@@ -241,22 +278,10 @@ public class PermissionMonitor {
 
     @VisibleForTesting
     boolean hasRestrictedNetworkPermission(@NonNull final PackageInfo app) {
-        // TODO : remove this check in the future(b/31479477). All apps should just
-        // request the appropriate permission for their use case since android Q.
-        if (app.applicationInfo != null) {
-            // Backward compatibility for b/114245686, on devices that launched before Q daemons
-            // and apps running as the system UID are exempted from this check.
-            if (app.applicationInfo.uid == SYSTEM_UID && mDeps.getDeviceFirstSdkInt() < VERSION_Q) {
-                return true;
-            }
-
-            if (app.applicationInfo.targetSdkVersion < VERSION_Q
-                    && isVendorApp(app.applicationInfo)) {
-                return true;
-            }
-        }
-
-        return hasPermission(app, PERMISSION_MAINLINE_NETWORK_STACK)
+        // TODO : remove carryover package check in the future(b/31479477). All apps should just
+        //  request the appropriate permission for their use case since android Q.
+        return isCarryoverPackage(app.applicationInfo) || isAppAllowedOnRestrictedNetworks(app)
+                || hasPermission(app, PERMISSION_MAINLINE_NETWORK_STACK)
                 || hasPermission(app, NETWORK_STACK)
                 || hasPermission(app, CONNECTIVITY_USE_RESTRICTED_NETWORKS);
     }
