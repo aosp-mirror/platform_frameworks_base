@@ -134,5 +134,8 @@ interface ISystemUiProxy {
      */
     void onBackPressed() = 44;
 
-    // Next id = 45
+    /** Sets home rotation enabled. */
+    void setHomeRotationEnabled(boolean enabled) = 45;
+
+    // Next id = 46
 }
