@@ -1788,8 +1788,8 @@ public class AccountManagerService
                         return false;
                     }
                     if (accounts.accountsDb.findAllDeAccounts().size() > 100) {
-                        Log.w(TAG, "insertAccountIntoDatabase: " + account
-                                + ", skipping since more than 50 accounts on device exist");
+                        Log.w(TAG, "insertAccountIntoDatabase: " + account.toSafeString()
+                                + ", skipping since more than 100 accounts on device exist");
                         return false;
                     }
                     long accountId = accounts.accountsDb.insertCeAccount(account, password);
