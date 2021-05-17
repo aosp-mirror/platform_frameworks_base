@@ -252,7 +252,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         @Override
         public void onStateChanged(int newState) {
             mStatusBarState = newState;
-            updateBiometricListeningState();
         }
 
         @Override
