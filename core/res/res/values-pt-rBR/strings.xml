@@ -835,7 +835,7 @@
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Tente novamente"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Tente novamente"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Desbloqueio para todos os recursos e dados"</string>
-    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"O número máximo de tentativas de Desbloqueio por reconhecimento facial foi excedido"</string>
+    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"O número máximo de tentativas de desbloqueio por reconhecimento facial foi excedido"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"Sem chip"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"Não há um chip no tablet."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Nenhum chip no seu dispositivo Android TV."</string>
