@@ -887,7 +887,7 @@
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"እንደገና ሞክር"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"እንደገና ሞክር"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"ለሁሉም ባህሪያት እና ውሂብ ያስከፍቱ"</string>
-    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"የመጨረሻውን  የገጽ ክፈት ሙከራዎችን አልፏል"</string>
+    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"የመጨረሻውን በመልክ መክፈት ሙከራዎችን አልፏል"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"ምንም ሲም ካርድ የለም"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"በጡባዊ ውስጥ ምንም SIM ካርድ የለም።"</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"በእርስዎ Android TV መሣሪያ ላይ ምንም ሲም ካርድ የለም።"</string>
@@ -957,7 +957,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"የመክፈቻ አካባቢውን አስፋፋ።"</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"በማንሸራተት ክፈት።"</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"በስርዓተ-ጥለት መክፈት።"</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"በፊት መክፈት።"</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"በመልክ መክፈት።"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"በፒን መክፈት።"</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"የሲም ፒን ክፈት።"</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"የሲም PUK ክፈት።"</string>
@@ -1022,7 +1022,7 @@
     <string name="text_copied" msgid="2531420577879738860">"ፅሁፍ ወደ ቅንጥብ ሰሌዳ ተገልብጧል።"</string>
     <string name="copied" msgid="4675902854553014676">"ተቀድቷል"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ከ <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> ተለጥፏል"</string>
-    <string name="pasted_from_clipboard" msgid="6295556725844421812">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ከቅንጣብ ሰሌዳ ተለጥፏል"</string>
+    <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ከእርስዎ ቅንጥብ ሰሌዳ ተለጥፏል"</string>
     <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> እርስዎ የቀዱትን ጽሑፍ ለጥፏል"</string>
     <string name="pasted_image" msgid="4729097394781491022">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> እርስዎ የቀዱትን ምስል ለጥፏል"</string>
     <string name="pasted_content" msgid="646276353060777131">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> እርስዎ የቀዱትን ይዘት ለጥፏል"</string>
@@ -1259,6 +1259,10 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g>ን ማዘጋጀት።"</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"መተግበሪያዎችን በማስጀመር ላይ፡፡"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"አጨራረስ ማስነሻ፡፡"</string>
+    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"ማያ ገጽ ይጥፋ?"</string>
+    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"የጣት አሻራዎን ሲያዋቅሩ የኃይል አዝራሩን ተጫንተውታል። \n\n ይህ አብዛኛው ጊዜ ማያ ገጽዎን ያጠፈዋል።"</string>
+    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"አጥፋ"</string>
+    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"ይቅር"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> አሂድ"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"ወደ ጨዋታ ለመመለስ መታ ያድርጉ"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"ጨዋታ ይምረጡ"</string>
@@ -1709,6 +1713,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"አቋራጭ ይጠቀሙ"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"ተቃራኒ ቀለም"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"የቀለም ማስተካከያ"</string>
+    <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"የአንድ እጅ ሁነታ"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"ተጨማሪ ደብዛዛ"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"የድምፅ ቁልፎችን ይዟል። <xliff:g id="SERVICE_NAME">%1$s</xliff:g> በርቷል።"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"የድምፅ ቁልፎችን ይዟል። <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ጠፍተዋል።"</string>
@@ -1773,6 +1778,17 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"ሞናርክ"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"ኳርቶ"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"ፉልስካፕ"</string>
+    <string name="mediasize_na_ansi_c" msgid="3104916921818289618">"ANSI C"</string>
+    <string name="mediasize_na_ansi_d" msgid="254005964819282724">"ANSI D"</string>
+    <string name="mediasize_na_ansi_e" msgid="4424174989686785675">"ANSI E"</string>
+    <string name="mediasize_na_ansi_f" msgid="146980362213260987">"ANSI F"</string>
+    <string name="mediasize_na_arch_a" msgid="5280681822380032361">"Arch A"</string>
+    <string name="mediasize_na_arch_b" msgid="2113344093437297427">"Arch B"</string>
+    <string name="mediasize_na_arch_c" msgid="971002546186856623">"Arch C"</string>
+    <string name="mediasize_na_arch_d" msgid="6450996075335049806">"Arch D"</string>
+    <string name="mediasize_na_arch_e" msgid="6782708486949266519">"Arch E"</string>
+    <string name="mediasize_na_arch_e1" msgid="4707138568738504275">"Arch E1"</string>
+    <string name="mediasize_na_super_b" msgid="6964127155618393178">"Super B"</string>
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"አር ኦ ሲ 8ኬ"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"አር ኦ ሲ 16ኬ"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"ፒ አር ሲ 1"</string>
@@ -1809,6 +1825,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"ካሁ"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"ካኩ2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"ዩ4"</string>
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"L"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"የማይታወቅ የቁም"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"የማይታወቅ የወርድ"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"ተትቷል"</string>
@@ -1852,8 +1869,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"በእርስዎ አስተዳዳሪ ተዘምኗል"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"በእርስዎ አስተዳዳሪ ተሰርዟል"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"እሺ"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"የባትሪ ዕድሜን ለማራዘም፣ የባትሪ ቆጣቢ፦\n\n•ጨለማ ገጽታን ያበራል\n•የበስተጀርባ እንቅስቃሴን፣ አንዳንድ የሚታዩ ማሳመሪያዎችን፣ እና ሌሎች እንደ «Hey Google» ያሉ ባህሪያትን ያጠፋል ወይም ይገድባል\n\n"<annotation id="url">"የበለጠ ለመረዳት"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"የባትሪ ዕድሜን ለማራዘም የባትሪ ኃይል ቆጣቢ፦\n\n• ጨለማ ገጽታን ያበራል\n• የበስተጀርባ እንቅስቃሴን፣ አንዳንድ ምስላዊ ተጽዕኖዎችን እና ሌሎች እንደ «Hey Google» ያሉ ባህሪያትን ያጠፋል ወይም ይገድባል"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"የባትሪ ኃይል ቆጣቢ ጠቆር ያለ ገጽታን ያበራል እና የጀርባ እንቅስቃሴን፣ አንዳንድ ምስላዊ ተጽዕኖዎችን፣ የተወሰኑ ባህሪያትን እና አንዳንድ አውታረ መረብ ግንኙነቶችን ይገድባል ወይም ያጠፋል።\n\n"<annotation id="url">"የበለጠ ለመረዳት"</annotation></string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"ባትሪ ቆጣቢ ጠቆር ያለ ገጽታን ያበራል እና የጀርባ እንቅስቃሴን፣ አንዳንድ ዕይታዊ ውጤቶችን፣ አንዳንድ ባህሪዎችን፣ እና አንዳንድ የአውታረ መረብ ግንኙነቶችን ይገድባል ወይም ያጠፋል።"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"የውሂብ አጠቃቀም እንዲቀንስ ለማገዝ ውሂብ ቆጣቢ አንዳንድ መተግበሪያዎች ከበስተጀርባ ሆነው ውሂብ እንዳይልኩ ወይም እንዳይቀበሉ ይከለክላቸዋል። በአሁኑ ጊዜ እየተጠቀሙበት ያለ መተግበሪያ ውሂብ ሊደርስ ይችላል፣ ነገር ግን ባነሰ ተደጋጋሚነት ሊሆን ይችላል። ይሄ ማለት ለምሳሌ ምስሎችን መታ እስኪያደርጓቸው ድረስ ላይታዩ ይችላሉ ማለት ነው።"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ውሂብ ቆጣቢ ይጥፋ?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"አብራ"</string>
@@ -1929,6 +1946,7 @@
     <string name="close_button_text" msgid="10603510034455258">"ዝጋ"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>፦ <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"መልስ"</string>
+    <string name="call_notification_answer_video_action" msgid="2086030940195382249">"ቪዲዮ"</string>
     <string name="call_notification_decline_action" msgid="3700345945214000726">"አትቀበል"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"ስልኩን ዝጋ"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"ገቢ ጥሪ"</string>
@@ -1955,8 +1973,8 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> አሁን ላይ አይገኝም። በ<xliff:g id="APP_NAME_1">%2$s</xliff:g> የሚተዳደር ነው።"</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"የበለጠ ለመረዳት"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"መተግበሪያን ላፍታ እንዳይቆም አድርግ"</string>
-    <string name="work_mode_off_title" msgid="5503291976647976560">"የስራ መገለጫ ይብራ?"</string>
-    <string name="work_mode_off_message" msgid="8417484421098563803">"የእርስዎ የስራ መተግበሪያዎች፣ ማሳወቂያዎች፣ ውሂብ እና ሌሎች የስራ መገለጫ ባህሪያት ይበራሉ"</string>
+    <string name="work_mode_off_title" msgid="961171256005852058">"የሥራ መተግበሪያዎች ይብሩ?"</string>
+    <string name="work_mode_off_message" msgid="7319580997683623309">"የእርስዎን የሥራ መተግበሪያዎች እና ማሳወቂያዎች መዳረሻ ያግኙ"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"አብራ"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"መተግበሪያ አይገኝም"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> አሁን አይገኝም።"</string>
@@ -2072,6 +2090,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"ይህ ማሳወቂያ ወደ ዝምታ ዝቅ ብሏል። ግብረመልስ ለመስጠት መታ ያድርጉ።"</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"ይህ ማሳወቂያ ከፍተኛ ደረጃ ተሰጥቶታል። ግብረመልስ ለመስጠት መታ ያድርጉ።"</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"ይህ ማሳወቂያ ዝቅተኛ ደረጃ ተሰጥቶታል። ግብረመልስ ለመስጠት መታ ያድርጉ።"</string>
+    <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"የተሻሻሉ ማሳወቂያዎች"</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"የተጠቆሙ እርምጃዎች እና ምላሾች አሁን በተሻሻሉ ማሳወቂያዎች ቀርበዋል። የAndroid አስማሚ ማሳወቂያዎች ከእንግዲህ አይደገፉም።"</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"እሺ"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"አጥፋ"</string>
+    <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"የበለጠ ለመረዳት"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"የተሻሻሉ ማሳወቂያዎች በAndroid 12 ውስጥ Android ራስ-አስማሚ ማሳወቂያዎችን ተክተዋል። ይህ ባህሪ የተጠቆሙ እርምጃዎችን እና ምላሾችን ያሳያል እንዲሁም ማሳወቂያዎችዎን ያደራጃል።\n\nየተሻሻሉ ማሳወቂያዎች እንደ የእውቂያ ስሞች እና መልዕክቶች ያሉ የግል መረጃዎችን ጨምሮ የማሳወቂያ ይዘቶችን መድረስ ይችላሉ። ይህ ባህሪ እንደ የስልክ ጥሪዎችን መመለስ እና አትረብሽን መቆጣጠርን ያሉ ማሳወቂያዎችን ማሰናበት ወይም ምላሽ መስጠት ይችላል።"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"የዕለት ተዕለት ሁነታ መረጃ ማሳወቂያዎች"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"ባትሪ ከተለመደው ኃይል መሙላት በፊት ሊያልቅ ይችላል"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"የባትሪ ቆጣቢ የባትሪ ዕድሜን ለማራዘም ገብሯል።"</string>
@@ -2268,4 +2292,6 @@
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"የመተግበሪያ የምርት ስም ምስል"</string>
     <string name="view_and_control_notification_title" msgid="4300765399209912240">"የመዳረሻ ቅንብሮችን ይፈትሹ"</string>
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> ማያ ገጽዎን ማየት እና መቆጣጠር ይችላል። ለመገምገም መታ ያድርጉ።"</string>
+    <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> ተተርጉሟል።"</string>
+    <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"መልዕክት ከ<xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> ወደ <xliff:g id="TO_LANGUAGE">%2$s</xliff:g> ተተርጉሟል።"</string>
 </resources>

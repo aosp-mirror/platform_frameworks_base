@@ -611,7 +611,7 @@
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Ikon for fingeravtrykk"</string>
     <string name="permlab_manageFace" msgid="4569549381889283282">"administrere maskinvare for Ansiktslås"</string>
     <string name="permdesc_manageFace" msgid="6204569688492710471">"Lar appen bruke metoder for å legge til og slette ansiktmaler for bruk."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"bruke maskinvare for Ansiktslås"</string>
+    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"bruk maskinvare for Ansiktslås"</string>
     <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Lar appen bruke maskinvare for Ansiktslås til autentisering"</string>
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Ansiktslås"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Registrer ansiktet ditt på nytt"</string>
@@ -1022,7 +1022,7 @@
     <string name="text_copied" msgid="2531420577879738860">"Kopierte tekst til utklippstavlen."</string>
     <string name="copied" msgid="4675902854553014676">"Kopiert"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> limte inn fra <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>"</string>
-    <string name="pasted_from_clipboard" msgid="6295556725844421812">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> limte inn fra utklippstavlen"</string>
+    <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> har limt inn fra utklippstavlen"</string>
     <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> limte inn tekst du kopierte"</string>
     <string name="pasted_image" msgid="4729097394781491022">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> limte inn et bilde du kopierte"</string>
     <string name="pasted_content" msgid="646276353060777131">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> limte inn innhold du kopierte"</string>
@@ -1259,6 +1259,10 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"Forbereder <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Starter apper."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Ferdigstiller oppstart."</string>
+    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"Vil du slå av skjermen?"</string>
+    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"Da du konfigurerte fingeravtrykket, trykket du på av/på-knappen.\n\nDette slår vanligvis av skjermen."</string>
+    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"Slå av"</string>
+    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"Avbryt"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> kjører"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Trykk for å gå tilbake til spillet"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Velg et spill"</string>
@@ -1709,7 +1713,8 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Bruk snarveien"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Fargeinvertering"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Fargekorrigering"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Ekstra dempet belysning"</string>
+    <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Enhåndsmodus"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Ekstra dimmet"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Volumtastene holdes inne. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> er slått på."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Volumtastene holdes inne. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> er slått av."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Trykk og hold inne begge volumtastene i tre sekunder for å bruke <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
@@ -1773,6 +1778,17 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"Monarch"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"Quarto"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"Foolscap"</string>
+    <string name="mediasize_na_ansi_c" msgid="3104916921818289618">"ANSI C"</string>
+    <string name="mediasize_na_ansi_d" msgid="254005964819282724">"ANSI D"</string>
+    <string name="mediasize_na_ansi_e" msgid="4424174989686785675">"ANSI E"</string>
+    <string name="mediasize_na_ansi_f" msgid="146980362213260987">"ANSI F"</string>
+    <string name="mediasize_na_arch_a" msgid="5280681822380032361">"Arch A"</string>
+    <string name="mediasize_na_arch_b" msgid="2113344093437297427">"Arch B"</string>
+    <string name="mediasize_na_arch_c" msgid="971002546186856623">"Arch C"</string>
+    <string name="mediasize_na_arch_d" msgid="6450996075335049806">"Arch D"</string>
+    <string name="mediasize_na_arch_e" msgid="6782708486949266519">"Arch E"</string>
+    <string name="mediasize_na_arch_e1" msgid="4707138568738504275">"Arch E1"</string>
+    <string name="mediasize_na_super_b" msgid="6964127155618393178">"Super B"</string>
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1"</string>
@@ -1809,6 +1825,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"L"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"Ukjent portrett"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"Ukjent landskap"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"Kansellert"</string>
@@ -1852,8 +1869,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Oppdatert av administratoren din"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Slettet av administratoren din"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"For å forlenge batterilevetiden gjør Batterisparing dette:\n\n• slår på mørkt tema\n• slår av eller begrenser bakgrunnsaktivitet, enkelte visuelle effekter og andre funksjoner, for eksempel «Hey Google»\n\n"<annotation id="url">"Finn ut mer"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"For å forlenge batterilevetiden gjør Batterisparing dette:\n\n• slår på mørkt tema\n• slår av eller begrenser bakgrunnsaktivitet, enkelte visuelle effekter og andre funksjoner, for eksempel «Hey Google»"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"Batterisparing slår på mørkt tema og begrenser eller slår av bakgrunnsaktivitet, enkelte visuelle effekter, noen funksjoner og noen nettverkstilkoblinger.\n\n"<annotation id="url">"Finn ut mer"</annotation></string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"Batterisparing slår på mørkt tema og begrenser eller slår av bakgrunnsaktivitet, enkelte visuelle effekter, noen funksjoner og noen nettverkstilkoblinger."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Datasparing hindrer noen apper fra å sende og motta data i bakgrunnen, for å redusere dataforbruket. Aktive apper kan bruke data, men kanskje ikke så mye som ellers – for eksempel vises ikke bilder før du trykker på dem."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Vil du slå på Datasparing?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Slå på"</string>
@@ -1929,6 +1946,7 @@
     <string name="close_button_text" msgid="10603510034455258">"Lukk"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g><xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"Svar"</string>
+    <string name="call_notification_answer_video_action" msgid="2086030940195382249">"Video"</string>
     <string name="call_notification_decline_action" msgid="3700345945214000726">"Avvis"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Legg på"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"Innkommende anrop"</string>
@@ -1955,8 +1973,8 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> er ikke tilgjengelig akkurat nå. Dette administreres av <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Finn ut mer"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Opphev pause for appen"</string>
-    <string name="work_mode_off_title" msgid="5503291976647976560">"Vil du slå på jobbprofilen?"</string>
-    <string name="work_mode_off_message" msgid="8417484421098563803">"Jobbappene dine samt varsler, data og andre funksjoner i jobbprofilen din blir slått på"</string>
+    <string name="work_mode_off_title" msgid="961171256005852058">"Vil du slå på jobbapper?"</string>
+    <string name="work_mode_off_message" msgid="7319580997683623309">"Få tilgang til jobbapper og -varsler"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Slå på"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Appen er ikke tilgjengelig"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> er ikke tilgjengelig for øyeblikket."</string>
@@ -2072,6 +2090,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Dette varselet ble nedgradert til lydløst. Trykk for å gi tilbakemelding."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Dette varselet ble rangert høyere. Trykk for å gi tilbakemelding."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Dette varselet ble rangert lavere. Trykk for å gi tilbakemelding."</string>
+    <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"Forbedrede varsler"</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"Foreslåtte handlinger og svar leveres nå i forbedrede varsler. Tilpassede Android-varsler støttes ikke lenger."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Slå av"</string>
+    <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Finn ut mer"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"Forbedrede varsler erstatter tilpassede Android-varsler i Android 12. Denne funksjonen viser foreslåtte handlinger og svar og organiserer varslene dine.\n\nForbedrede varsler har tilgang til varselinnhold, inkludert personopplysninger som kontaktnavn og meldinger. Funksjonen kan også avvise og svare på varsler, for eksempel svare på anrop og kontrollere «Ikke forstyrr»."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Varsel med informasjon om rutinemodus"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Batteriet kan gå tomt før den vanlige ladingen"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Batterisparing er aktivert for å forlenge batterilevetiden"</string>
@@ -2255,7 +2279,7 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <string name="window_magnification_prompt_title" msgid="2876703640772778215">"Nye forstørringsinnstillinger"</string>
+    <string name="window_magnification_prompt_title" msgid="2876703640772778215">"Nye innstillinger for forstørring"</string>
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Nå kan du forstørre en del av skjermen"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Slå på i innstillingene"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Avvis"</string>
@@ -2268,4 +2292,6 @@
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Merkevareprofilen til appen"</string>
     <string name="view_and_control_notification_title" msgid="4300765399209912240">"Sjekk tilgangsinnstillingene"</string>
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> kan se og kontrollere skjermen. Trykk for å gjennomgå."</string>
+    <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> er oversatt."</string>
+    <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Meldingen er oversatt fra <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> til <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
 </resources>

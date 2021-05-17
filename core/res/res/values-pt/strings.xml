@@ -887,7 +887,7 @@
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Tente novamente"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Tente novamente"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Desbloqueio para todos os recursos e dados"</string>
-    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"O número máximo de tentativas de Desbloqueio por reconhecimento facial foi excedido"</string>
+    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"O número máximo de tentativas de desbloqueio por reconhecimento facial foi excedido"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"Sem chip"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"Não há um chip no tablet."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Nenhum chip no seu dispositivo Android TV."</string>
@@ -1022,7 +1022,7 @@
     <string name="text_copied" msgid="2531420577879738860">"Texto copiado para a área de transferência."</string>
     <string name="copied" msgid="4675902854553014676">"Copiado"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"Dados do app <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> colados no app <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>"</string>
-    <string name="pasted_from_clipboard" msgid="6295556725844421812">"Dados da área de transferência colados no app <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>"</string>
+    <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> colou conteúdo da sua área de transferência"</string>
     <string name="pasted_text" msgid="4298871641549173733">"O app <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> colou o texto copiado"</string>
     <string name="pasted_image" msgid="4729097394781491022">"O app <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> colou uma imagem copiada"</string>
     <string name="pasted_content" msgid="646276353060777131">"O app <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> colou o conteúdo copiado"</string>
@@ -1259,6 +1259,10 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"Preparando <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Iniciando apps."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Concluindo a inicialização."</string>
+    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"Desligar a tela?"</string>
+    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"Durante a configuração da sua impressão digital, você pressionou o botão liga/desliga.\n\nNormalmente, essa ação desliga a tela."</string>
+    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"Desligar"</string>
+    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"Cancelar"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> em execução"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Toque para voltar ao jogo"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Escolha o jogo"</string>
@@ -1709,6 +1713,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Usar atalho"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Inversão de cores"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Correção de cor"</string>
+    <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Modo para uma mão"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Mais escuro"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Teclas de volume pressionadas. Serviço <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ativado."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Teclas de volume pressionadas. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> desativado."</string>
@@ -1773,6 +1778,17 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"Monarch"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"Quarto"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"Foolscap"</string>
+    <string name="mediasize_na_ansi_c" msgid="3104916921818289618">"ANSI C"</string>
+    <string name="mediasize_na_ansi_d" msgid="254005964819282724">"ANSI D"</string>
+    <string name="mediasize_na_ansi_e" msgid="4424174989686785675">"ANSI E"</string>
+    <string name="mediasize_na_ansi_f" msgid="146980362213260987">"ANSI F"</string>
+    <string name="mediasize_na_arch_a" msgid="5280681822380032361">"Arch A"</string>
+    <string name="mediasize_na_arch_b" msgid="2113344093437297427">"Arch B"</string>
+    <string name="mediasize_na_arch_c" msgid="971002546186856623">"Arch C"</string>
+    <string name="mediasize_na_arch_d" msgid="6450996075335049806">"Arch D"</string>
+    <string name="mediasize_na_arch_e" msgid="6782708486949266519">"Arch E"</string>
+    <string name="mediasize_na_arch_e1" msgid="4707138568738504275">"Arch E1"</string>
+    <string name="mediasize_na_super_b" msgid="6964127155618393178">"Super B"</string>
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1"</string>
@@ -1809,6 +1825,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"L"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"Retrato desconhecido"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"Paisagem desconhecido"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"Cancelado"</string>
@@ -1852,8 +1869,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Atualizado pelo seu administrador"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Excluído pelo seu administrador"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Para prolongar a duração da carga, a \"Economia de bateria\":\n\n• ativa o tema escuro;\n• desativa ou restringe atividades em segundo plano, alguns efeitos visuais e outros recursos, como o \"Ok Google\".\n\n"<annotation id="url">"Saiba mais"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"Para prolongar a duração da carga, a \"Economia de bateria\":\n\n• ativa o tema escuro;\n• desativa ou restringe atividades em segundo plano, alguns efeitos visuais e outros recursos, como o \"Ok Google\"."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"A Economia de bateria ativa o tema escuro e limita ou desativa atividades em segundo plano, alguns efeitos visuais, recursos específicos e algumas conexões de rede.\n\n"<annotation id="url">"Saiba mais"</annotation></string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"A Economia de bateria ativa o tema escuro e limita ou desativa atividades em segundo plano, alguns efeitos visuais, recursos específicos e algumas conexões de rede."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Para ajudar a reduzir o uso de dados, a Economia de dados impede que alguns apps enviem ou recebam dados em segundo plano. Um app que você esteja usando no momento pode acessar dados, mas com menos frequência. Isso pode fazer com que imagens não sejam exibidas até que você toque nelas."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Ativar \"Economia de dados\"?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Ativar"</string>
@@ -1901,7 +1918,7 @@
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Durante a semana à noite"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Fim de semana"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Evento"</string>
-    <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Dormindo"</string>
+    <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Dormir"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> está silenciando alguns sons"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Há um problema interno com seu dispositivo. Ele pode ficar instável até que você faça a redefinição para configuração original."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"Há um problema interno com seu dispositivo. Entre em contato com o fabricante para saber mais detalhes."</string>
@@ -1929,6 +1946,7 @@
     <string name="close_button_text" msgid="10603510034455258">"Fechar"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"Atender"</string>
+    <string name="call_notification_answer_video_action" msgid="2086030940195382249">"Vídeo"</string>
     <string name="call_notification_decline_action" msgid="3700345945214000726">"Recusar"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Desligar"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"Chamada recebida"</string>
@@ -1955,8 +1973,8 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"O app <xliff:g id="APP_NAME_0">%1$s</xliff:g> não está disponível no momento. Isso é gerenciado pelo app <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Saiba mais"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Retomar app"</string>
-    <string name="work_mode_off_title" msgid="5503291976647976560">"Ativar o perfil de trabalho?"</string>
-    <string name="work_mode_off_message" msgid="8417484421098563803">"Seus apps, notificações, dados e outros recursos do perfil de trabalho serão ativados"</string>
+    <string name="work_mode_off_title" msgid="961171256005852058">"Ativar apps de trabalho?"</string>
+    <string name="work_mode_off_message" msgid="7319580997683623309">"Acesse seus apps e notificações de trabalho"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Ativar"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"O app não está disponível"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"O app <xliff:g id="APP_NAME">%1$s</xliff:g> não está disponível no momento."</string>
@@ -2072,6 +2090,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Esta notificação foi rebaixada a Silenciosa. Toque para enviar seu feedback."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Esta notificação foi classificada com maior prioridade. Toque para enviar seu feedback."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Esta notificação foi classificada com menor prioridade. Toque para enviar seu feedback."</string>
+    <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"Notificações aprimoradas"</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"As ações e respostas sugeridas agora são fornecidas pelas notificações aprimoradas. As Notificações adaptáveis do Android não estão mais disponíveis."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Desativar"</string>
+    <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Saiba mais"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"No Android 12, as notificações aprimoradas substituíram as Notificações adaptáveis. Esse recurso exibe ações e respostas sugeridas, além de organizar suas notificações.\n\nAs notificações aprimoradas podem acessar o conteúdo das notificações, incluindo informações pessoais como nomes de contatos e mensagens. Elas também podem dispensar ou responder às notificações, como atender chamadas telefônicas e controlar o Não perturbe."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notificação de informação do modo rotina"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"A bateria pode acabar antes da recarga normal"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"A Economia de bateria foi ativada para aumentar a duração da carga"</string>
@@ -2268,4 +2292,6 @@
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Imagem da marca do aplicativo"</string>
     <string name="view_and_control_notification_title" msgid="4300765399209912240">"Confira as configurações de acesso"</string>
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"O serviço <xliff:g id="SERVICE_NAME">%s</xliff:g> pode ver e controlar sua tela. Toque para revisar."</string>
+    <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"Mensagem \"<xliff:g id="MESSAGE">%1$s</xliff:g>\" traduzida."</string>
+    <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Mensagem traduzida do <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> para o <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
 </resources>
