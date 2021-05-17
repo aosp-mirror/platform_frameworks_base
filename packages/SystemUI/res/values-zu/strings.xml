@@ -136,6 +136,7 @@
     <string name="accessibility_camera_button" msgid="2938898391716647247">"Ikhamela"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"Ifoni"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Isisekeli sezwi"</string>
+    <string name="accessibility_wallet_button" msgid="1458258783460555507">"I-wallet"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"Vula"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Idivayisi ikhiyiwe"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="5209142744692162598">"Ilindele izigxivizo zeminwe"</string>
@@ -1150,6 +1151,6 @@
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"gunyaza"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"faka idivayisi"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Sebenzisa izigxivizo zeminwe ukuvula"</string>
-    <!-- no translation found for ongoing_phone_call_content_description (5332334388483099947) -->
-    <skip />
+    <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Ukufakazela ubuqiniso budingekile. Thinta inzwa yezigxivizo zeminwe ukuze uqinisekise."</string>
+    <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Ikholi yefoni eqhubekayo"</string>
 </resources>

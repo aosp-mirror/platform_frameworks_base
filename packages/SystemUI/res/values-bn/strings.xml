@@ -136,6 +136,8 @@
     <string name="accessibility_camera_button" msgid="2938898391716647247">"ক্যামেরা"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"ফোন"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"ভয়েস সহায়তা"</string>
+    <!-- no translation found for accessibility_wallet_button (1458258783460555507) -->
+    <skip />
     <string name="accessibility_unlock_button" msgid="122785427241471085">"আনলক করুন"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"ডিভাইস লক করা আছে"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="5209142744692162598">"আঙ্গুলের ছাপের জন্য অপেক্ষা করা হচ্ছে"</string>
@@ -289,8 +291,7 @@
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"মোবাইল হটস্পট বন্ধ হয়েছে।"</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"মোবাইল হটস্পট চালু হয়েছে।"</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"স্ক্রিন কাস্ট করা থেমেছে।"</string>
-    <!-- no translation found for accessibility_quick_settings_work_mode_off (9106217884005620744) -->
-    <skip />
+    <string name="accessibility_quick_settings_work_mode_off" msgid="9106217884005620744">"\'অফিস\' মোড পজ করা আছে।"</string>
     <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"কাজের মোড চালু আছে"</string>
     <!-- no translation found for accessibility_quick_settings_work_mode_changed_off (6422896967647049692) -->
     <skip />
@@ -412,8 +413,7 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"সীমা <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"<xliff:g id="DATA_LIMIT">%s</xliff:g> সতর্কতা"</string>
     <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"কাজের প্রোফাইল"</string>
-    <!-- no translation found for quick_settings_work_mode_paused (4841109346916998613) -->
-    <skip />
+    <string name="quick_settings_work_mode_paused" msgid="4841109346916998613">"পজ করা আছে"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"নাইট লাইট"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"সূর্যাস্তে চালু হবে"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"সূর্যোদয় পর্যন্ত"</string>
@@ -672,12 +672,10 @@
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"সবকটি দেখুন"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"পেমেন্ট করতে ডিভাইস আনলক করুন"</string>
-    <!-- no translation found for wallet_secondary_label_no_card (1282609666895946317) -->
-    <skip />
+    <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"সেট আপ করা নেই"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"ব্যবহার করতে আনলক করুন"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"আপনার কার্ড সংক্রান্ত তথ্য পেতে সমস্যা হয়েছে, পরে আবার চেষ্টা করুন"</string>
-    <!-- no translation found for wallet_lockscreen_settings_label (3539105300870383570) -->
-    <skip />
+    <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"লক স্ক্রিন সেটিংস"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"কাজের প্রোফাইল"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"বিমান মোড"</string>
     <string name="add_tile" msgid="6239678623873086686">"টাইল যোগ করুন"</string>
@@ -867,8 +865,7 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"চালু আছে"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"বন্ধ আছে"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"উপলভ্য নয়"</string>
-    <!-- no translation found for tile_disabled (373212051546573069) -->
-    <skip />
+    <string name="tile_disabled" msgid="373212051546573069">"বন্ধ করা আছে"</string>
     <string name="nav_bar" msgid="4642708685386136807">"নেভিগেশন বার"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"লেআউট"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"অতিরিক্ত বাঁদিকের বোতামের ধরণ"</string>
@@ -1156,6 +1153,8 @@
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"যাচাই করিয়ে নিন"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"ডিভাইস আনলক করুন"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"খুলতে ফিঙ্গারপ্রিন্ট ব্যবহার করুন"</string>
+    <!-- no translation found for accessibility_fingerprint_bouncer (7189102492498735519) -->
+    <skip />
     <!-- no translation found for ongoing_phone_call_content_description (5332334388483099947) -->
     <skip />
 </resources>
