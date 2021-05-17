@@ -2156,10 +2156,22 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private void restrictRequestUidsForCallerAndSetRequestorInfo(NetworkCapabilities nc,
             int callerUid, String callerPackageName) {
+        // There is no need to track the effective UID of the request here. If the caller
+        // lacks the settings permission, the effective UID is the same as the calling ID.
         if (!checkSettingsPermission()) {
-            // There is no need to track the effective UID of the request here. If the caller lacks
-            // the settings permission, the effective UID is the same as the calling ID.
-            nc.setSingleUid(callerUid);
+            // Unprivileged apps can only pass in null or their own UID.
+            if (nc.getUids() == null) {
+                // If the caller passes in null, the callback will also match networks that do not
+                // apply to its UID, similarly to what it would see if it called getAllNetworks.
+                // In this case, redact everything in the request immediately. This ensures that the
+                // app is not able to get any redacted information by filing an unredacted request
+                // and observing whether the request matches something.
+                if (nc.getNetworkSpecifier() != null) {
+                    nc.setNetworkSpecifier(nc.getNetworkSpecifier().redact());
+                }
+            } else {
+                nc.setSingleUid(callerUid);
+            }
         }
         nc.setRequestorUidAndPackageName(callerUid, callerPackageName);
         nc.setAdministratorUids(new int[0]);
