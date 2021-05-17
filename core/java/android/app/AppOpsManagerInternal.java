@@ -29,6 +29,7 @@ import com.android.internal.util.function.HexFunction;
 import com.android.internal.util.function.NonaFunction;
 import com.android.internal.util.function.OctFunction;
 import com.android.internal.util.function.QuadFunction;
+import com.android.internal.util.function.QuintFunction;
 import com.android.internal.util.function.TriFunction;
 
 /**
@@ -45,12 +46,14 @@ public abstract class AppOpsManagerInternal {
          * @param code The op code to check.
          * @param uid The UID for which to check.
          * @param packageName The package for which to check.
-         * @param superImpl The super implementation.
+         * @param attributionTag The attribution tag for which to check.
          * @param raw Whether to check the raw op i.e. not interpret the mode based on UID state.
+         * @param superImpl The super implementation.
          * @return The app op check result.
          */
-        int checkOperation(int code, int uid, String packageName, boolean raw,
-                QuadFunction<Integer, Integer, String, Boolean, Integer> superImpl);
+        int checkOperation(int code, int uid, String packageName, @Nullable String attributionTag,
+                boolean raw,
+                QuintFunction<Integer, Integer, String, String, Boolean, Integer> superImpl);
 
         /**
          * Allows overriding check audio operation behavior.
