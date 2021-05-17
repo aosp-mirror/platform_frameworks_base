@@ -277,7 +277,7 @@
     <string name="notification_hidden_text" msgid="2835519769868187223">"नवीन सूचना"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6465975799223304567">"व्हर्च्युअल कीबोर्ड"</string>
     <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"वास्तविक कीबोर्ड"</string>
-    <string name="notification_channel_security" msgid="8516754650348238057">"सुरक्षितता"</string>
+    <string name="notification_channel_security" msgid="8516754650348238057">"सुरक्षा"</string>
     <string name="notification_channel_car_mode" msgid="2123919247040988436">"कार मोड"</string>
     <string name="notification_channel_account" msgid="6436294521740148173">"खाते स्थिती"</string>
     <string name="notification_channel_developer" msgid="1691059964407549150">"डेव्हलपर मेसेज"</string>
@@ -538,10 +538,8 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"ॲपला जवळपासची ब्लूटूथ डिव्‍हाइस शोधण्यासाठी आणि ती पेअर करण्यासाठी अनुमती देते"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"पेअर केलेल्या ब्लूटूथ डिव्‍हाइसशी कनेक्ट करा"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"पेअर केलेल्या ब्लूटूथ डिव्‍हाइसशी कनेक्ट करण्यासाठी ॲपला अनुमती द्या"</string>
-    <!-- no translation found for permlab_bluetooth_advertise (2781147747928853177) -->
-    <skip />
-    <!-- no translation found for permdesc_bluetooth_advertise (6085174451034210183) -->
-    <skip />
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"जवळपासच्या ब्लूटूथ डिव्‍हाइसवर जाहिरात करा"</string>
+    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"जवळपासच्या ब्लूटूथ डिव्‍हाइसवर जाहिरात करण्याची ॲपला परवानगी देते"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"जवळच्या अल्ट्रा-वाइडबँड डिव्हाइसदरम्यानचे संबंधित स्थान निर्धारित करा"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"ॲपला जवळच्या अल्ट्रा-वाइडबँड डिव्हाइसदरम्यानचे संबंधित स्थान निर्धारित करण्याची अनुमती द्या"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"प्राधान्यकृत NFC पेमेंट सेवा माहिती"</string>
@@ -1024,7 +1022,7 @@
     <string name="text_copied" msgid="2531420577879738860">"मजकूर क्लिपबोर्डवर कॉपी केला."</string>
     <string name="copied" msgid="4675902854553014676">"कॉपी केले"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> वरून <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> पेस्ट केले"</string>
-    <string name="pasted_from_clipboard" msgid="6295556725844421812">"क्लिपबोर्डवरून <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> पेस्ट केले"</string>
+    <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ने तुमच्या क्लिपबोर्डवरून पेस्ट केले"</string>
     <string name="pasted_text" msgid="4298871641549173733">"तुम्ही कॉपी केलेला मजकूर <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ने पेस्ट केला"</string>
     <string name="pasted_image" msgid="4729097394781491022">"तुम्ही कॉपी केलेली इमेज <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ने पेस्ट केली"</string>
     <string name="pasted_content" msgid="646276353060777131">"तुम्ही कॉपी केलेला आशय <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ने पेस्ट केला"</string>
@@ -1261,6 +1259,10 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> तयार करत आहे."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"अ‍ॅप्स सुरू करत आहे."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"बूट समाप्त होत आहे."</string>
+    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"स्क्रीन बंद करायची आहे का?"</string>
+    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"तुम्ही तुमची फिंगरप्रिंट सेट करत असताना पॉवर बटण दाबले.\n\nयामुळे सहसा तुमची स्क्रीन बंद होते."</string>
+    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"बंद करा"</string>
+    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"रद्द करा"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"रन होणारे <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"गेमवर परत जाण्यासाठी टॅप करा"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"गेम निवडा"</string>
@@ -1605,7 +1607,7 @@
     <string name="activity_chooser_view_see_all" msgid="3917045206812726099">"सर्व पहा"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="8880731437191978314">"ॲक्टिव्हिटी निवडा"</string>
     <string name="share_action_provider_share_with" msgid="1904096863622941880">"यांच्यासह शेअर करा"</string>
-    <string name="sending" msgid="206925243621664438">"पाठवित आहे..."</string>
+    <string name="sending" msgid="206925243621664438">"पाठवत आहे..."</string>
     <string name="launchBrowserDefault" msgid="6328349989932924119">"ब्राउझर लाँच करायचा?"</string>
     <string name="SetupCallDefault" msgid="5581740063237175247">"कॉल स्वीकारायचा?"</string>
     <string name="activity_resolver_use_always" msgid="5575222334666843269">"नेहमी"</string>
@@ -1711,6 +1713,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"शॉर्टकट वापरा"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"रंगांची उलटापालट"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"रंग सुधारणा"</string>
+    <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"एकहाती मोड"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"आणखी डिम"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"धरून ठेवलेल्या व्हॉल्यूम की. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> सुरू केला आहे."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"धरून ठेवलेल्या व्हॉल्यूम की. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> बंद केले आहे."</string>
@@ -1775,6 +1778,17 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"Monarch"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"Quarto"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"Foolscap"</string>
+    <string name="mediasize_na_ansi_c" msgid="3104916921818289618">"ANSI C"</string>
+    <string name="mediasize_na_ansi_d" msgid="254005964819282724">"ANSI D"</string>
+    <string name="mediasize_na_ansi_e" msgid="4424174989686785675">"ANSI E"</string>
+    <string name="mediasize_na_ansi_f" msgid="146980362213260987">"ANSI F"</string>
+    <string name="mediasize_na_arch_a" msgid="5280681822380032361">"Arch A"</string>
+    <string name="mediasize_na_arch_b" msgid="2113344093437297427">"Arch B"</string>
+    <string name="mediasize_na_arch_c" msgid="971002546186856623">"Arch C"</string>
+    <string name="mediasize_na_arch_d" msgid="6450996075335049806">"Arch D"</string>
+    <string name="mediasize_na_arch_e" msgid="6782708486949266519">"Arch E"</string>
+    <string name="mediasize_na_arch_e1" msgid="4707138568738504275">"Arch E1"</string>
+    <string name="mediasize_na_super_b" msgid="6964127155618393178">"Super B"</string>
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1"</string>
@@ -1811,6 +1825,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"L"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"अज्ञात पोट्रेट"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"अज्ञात लँडस्केप"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"रद्द केले"</string>
@@ -1854,8 +1869,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"आपल्या प्रशासकाने अपडेट केले"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"आपल्या प्रशासकाने हटवले"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ओके"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"बॅटरी लाइफ वाढवण्यासाठी बॅटरी सेव्हर:\n\n•गडद थीम सुरू करते\n•बॅकग्राउंड ॲक्टिव्हिटी, काही व्हिज्युअल इफेक्ट आणि \"Ok Google\" यांसारखी वैशिष्ट्ये बंद किंवा मर्यादित करते.\n\n"<annotation id="url">"अधिक जाणून घ्या"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"बॅटरी लाइफ वाढवण्यासाठी बॅटरी सेव्हर:\n\n• गडद थीम सुरू करते\n• बॅकग्राउंड ॲक्टिव्हिटी, काही व्हिज्युअल इफेक्ट आणि “Ok Google” यांसारखी इतर वैशिष्ट्ये बंद किंवा मर्यादित करते"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"बॅटरी सेव्हर गडद थीम सुरू करते आणि बॅकग्राउंड ॲक्टिव्हिटी, काही व्हिज्युअल इफेक्ट, ठरावीक वैशिष्ट्ये व काही नेटवर्क कनेक्शन मर्यादित किंवा बंद करते.\n\n"<annotation id="url">"अधिक जाणून घ्या"</annotation></string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"बॅटरी सेव्हर गडद थीम सुरू करते आणि बॅकग्राउंड ॲक्टिव्हिटी, काही व्हिज्युअल इफेक्ट, ठरावीक वैशिष्ट्ये व काही नेटवर्क कनेक्शन मर्यादित किंवा बंद करते."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"डेटाचा वापर कमी करण्यात मदत करण्यासाठी काही अ‍ॅप्सना बॅकग्राउंडमध्ये डेटा पाठवण्यास किंवा मिळवण्यास डेटा सर्व्हर प्रतिबंध करतो. तुम्ही सध्या वापरत असलेले अ‍ॅप डेटा अ‍ॅक्सेस करू शकते, पण तसे खूप कमी वेळा होते. याचाच अर्थ असा की, तुम्ही इमेजवर टॅप करेपर्यंत त्या डिस्प्ले होणार नाहीत असे होऊ शकते."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"डेटा सेव्हर सुरू करायचे?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"सुरू करा"</string>
@@ -1931,6 +1946,7 @@
     <string name="close_button_text" msgid="10603510034455258">"बंद करा"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"उत्तर द्या"</string>
+    <string name="call_notification_answer_video_action" msgid="2086030940195382249">"व्हिडिओ"</string>
     <string name="call_notification_decline_action" msgid="3700345945214000726">"नकार द्या"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"कॉल बंद करा"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"इनकमिंग कॉल"</string>
@@ -1957,8 +1973,8 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> आत्ता उपलब्ध नाही. हे <xliff:g id="APP_NAME_1">%2$s</xliff:g> कडून व्यवस्थापित केले जाते."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"अधिक जाणून घ्या"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"अ‍ॅप उघडा"</string>
-    <string name="work_mode_off_title" msgid="5503291976647976560">"कार्य प्रोफाइल सुरू ठेवायची?"</string>
-    <string name="work_mode_off_message" msgid="8417484421098563803">"तुमची कार्य अ‍ॅप्स, सूचना, डेटा आणि अन्य कार्य प्रोफाइल वैशिष्ट्ये सुरू केली जातील"</string>
+    <string name="work_mode_off_title" msgid="961171256005852058">"कार्य अ‍ॅप्स सुरू करायची का?"</string>
+    <string name="work_mode_off_message" msgid="7319580997683623309">"तुमची कार्य ॲप्स आणि सूचना यांचा अ‍ॅक्सेस मिळवा"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"सुरू करा"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"ॲप उपलब्ध नाही"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> आता उपलब्ध नाही."</string>
@@ -2074,6 +2090,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"ही सूचना सायलंट करण्यात आली आहे. फीडबॅक देण्यासाठी टॅप करा."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"हा सूचनेला उच्च रँक करण्यात आले. फीडबॅक देण्यासाठी टॅप करा."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"या सूचनेला कमी रँक करण्यात आले. फीडबॅक देण्यासाठी टॅप करा."</string>
+    <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"वर्धित सूचना"</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"सुचवलेल्या कृती आणि उत्तरे आता वर्धित सूचनांद्वारे दिल्या जातात. Android अ‍ॅडॅप्टिव्ह सूचना यांना आता सपोर्ट नाही."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"ओके"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"बंद करा"</string>
+    <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"अधिक जाणून घ्या"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"Android 12 मधील Android अ‍ॅडॅप्टिव्ह सूचना यांना आता वर्धित सूचनांनी बदलले आहे. हे वैशिष्ट्य सुचवलेल्या कृती आणि उत्तरे दाखवते व तुमच्या सूचना व्यवस्थापित करते.\n\nवर्धित सूचना या संपर्कांची नावे आणि मेसेज यांसारख्या वैयक्तिक माहितीसह सर्व सूचनांचा आशय अ‍ॅक्सेस करू शकतात. हे वैशिष्‍ट्य फोन कॉलना उत्तर देणे आणि व्यत्यय आणू नका नियंत्रित करणे यांसारख्या कृती करून सूचना डिसमिस करू शकते किंवा त्यांना प्रतिसाद देऊ शकते."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"दिनक्रम मोडची माहिती सूचना"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"चार्जिंगची सामान्य पातळी गाठेपर्यंत कदाचित बॅटरी संपू शकते"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"बॅटरी लाइफ वाढवण्यासाठी बॅटरी सेव्हर सुरू केला आहे"</string>
@@ -2261,17 +2283,15 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"आता तुम्ही तुमच्या स्क्रीनचा एखादा भाग मॅग्निफाय करू शकता"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"सेटिंग्ज मध्ये सुरू करा"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"डिसमिस करा"</string>
-    <!-- no translation found for sensor_privacy_start_use_mic_notification_content_title (2420858361276370367) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_camera_notification_content_title (7287720213963466672) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_notification_content_text (7595608891015777346) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_dialog_turn_on_button (7089318886628390827) -->
-    <skip />
+    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"डिव्हाइसचा मायक्रोफोन अनब्लॉक करा"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"डिव्हाइसचा कॅमेरा अनब्लॉक करा"</string>
+    <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"सर्व &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; आणि सर्व ॲप्स व सेवांसाठी"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"अनब्लॉक करा"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"सेन्सरशी संबंधित गोपनीयतेबाबत सूचना"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"ॲप्लिकेशन आयकन"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"अ‍ॅप्लिकेशन ब्रॅंडिंग इमेज"</string>
     <string name="view_and_control_notification_title" msgid="4300765399209912240">"अ‍ॅक्सेसशी संबंधित सेटिंग्ज तपासा"</string>
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> हे तुमची स्क्रीन पाहू शकते आणि नियंत्रित करू शकते. परीक्षण करण्यासाठी टॅप करा."</string>
+    <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> चे भाषांतर केले."</string>
+    <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"मेसेजचे <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> मधून <xliff:g id="TO_LANGUAGE">%2$s</xliff:g> मध्ये भाषांतर केले."</string>
 </resources>

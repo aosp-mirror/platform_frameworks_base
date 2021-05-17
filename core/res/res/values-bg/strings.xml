@@ -1022,7 +1022,7 @@
     <string name="text_copied" msgid="2531420577879738860">"Текстът е копиран в буферната памет."</string>
     <string name="copied" msgid="4675902854553014676">"Копирано"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> постави данни от <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>"</string>
-    <string name="pasted_from_clipboard" msgid="6295556725844421812">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> постави данни от буферната памет"</string>
+    <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> постави данни от буферната памет"</string>
     <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> постави копиран от вас текст"</string>
     <string name="pasted_image" msgid="4729097394781491022">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> постави копирано от вас изображение"</string>
     <string name="pasted_content" msgid="646276353060777131">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> постави копирано от вас съдържание"</string>
@@ -1259,6 +1259,10 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> се подготвя."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Приложенията се стартират."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Зареждането завършва."</string>
+    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"Да се изключи ли екранът?"</string>
+    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"При настройването на отпечатъка си натиснахте бутона за захранване.\n\nТова действие обикновено изключва екрана."</string>
+    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"Изключване"</string>
+    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"Отказ"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> се изпълнява"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Докоснете, за да се върнете към играта"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Избиране на игра"</string>
@@ -1709,6 +1713,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Използване на пряк път"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Инвертиране на цветовете"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Коригиране на цветовете"</string>
+    <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Режим за работа с една ръка"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Допълнително затъмняване"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Задържахте бутоните за силата на звука. Услугата <xliff:g id="SERVICE_NAME">%1$s</xliff:g> е включена."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Задържахте бутоните за силата на звука. Услугата <xliff:g id="SERVICE_NAME">%1$s</xliff:g> е изключена."</string>
@@ -1773,6 +1778,17 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"Monarch"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"Quarto"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"Foolscap"</string>
+    <string name="mediasize_na_ansi_c" msgid="3104916921818289618">"ANSI C"</string>
+    <string name="mediasize_na_ansi_d" msgid="254005964819282724">"ANSI D"</string>
+    <string name="mediasize_na_ansi_e" msgid="4424174989686785675">"ANSI E"</string>
+    <string name="mediasize_na_ansi_f" msgid="146980362213260987">"ANSI F"</string>
+    <string name="mediasize_na_arch_a" msgid="5280681822380032361">"Arch A"</string>
+    <string name="mediasize_na_arch_b" msgid="2113344093437297427">"Arch B"</string>
+    <string name="mediasize_na_arch_c" msgid="971002546186856623">"Arch C"</string>
+    <string name="mediasize_na_arch_d" msgid="6450996075335049806">"Arch D"</string>
+    <string name="mediasize_na_arch_e" msgid="6782708486949266519">"Arch E"</string>
+    <string name="mediasize_na_arch_e1" msgid="4707138568738504275">"Arch E1"</string>
+    <string name="mediasize_na_super_b" msgid="6964127155618393178">"Super B"</string>
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1"</string>
@@ -1809,6 +1825,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"L"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"Неизвестен вертикален формат"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"Неизвестен хоризонтален формат"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"Анулирано"</string>
@@ -1852,10 +1869,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Актуализирано от администратора ви"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Изтрито от администратора ви"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ОК"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"С цел удължаване на живота на батерията режимът за запазването ѝ:\n\n•·включва тъмната тема;\n•·изключва или ограничава активността на заден план, някои визуални ефекти и други функции, като например „Ok Google“.\n\n"<annotation id="url">"Научете повече"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"С цел удължаване на живота на батерията режимът за запазването ѝ:\n\n• включва тъмната тема;\n• изключва или ограничава активността на заден план, някои визуални ефекти и други функции, като например „Ok Google“."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"Режимът за запазване на батерията включва тъмната тема и ограничава или изключва активността на заден план, някои визуални ефекти, определени функции и някои връзки с мрежата.\n\n"<annotation id="url">"Научете повече"</annotation></string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"Режимът за запазване на батерията включва тъмната тема и ограничава или изключва активността на заден план, някои визуални ефекти, определени функции и някои връзки с мрежата."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"С цел намаляване на преноса на данни функцията за икономия на данни не позволява на някои приложения да изпращат или получават данни на заден план. Понастоящем използвано от вас приложение може да използва данни, но по-рядко. Това например може да означава, че изображенията не се показват, докато не ги докоснете."</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"Ще вкл. ли „Икономия на данни“?"</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"Включване на „Икономия на данни“?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Включване"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="other">За %1$d минути (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
@@ -1929,6 +1946,7 @@
     <string name="close_button_text" msgid="10603510034455258">"Затваряне"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"„<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>“: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"Отговор"</string>
+    <string name="call_notification_answer_video_action" msgid="2086030940195382249">"Видеообаждане"</string>
     <string name="call_notification_decline_action" msgid="3700345945214000726">"Отхвърляне"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Затваряне"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"Входящо обаждане"</string>
@@ -1955,8 +1973,8 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"В момента няма достъп до <xliff:g id="APP_NAME_0">%1$s</xliff:g>. Това се управлява от <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Научете повече"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Отмяна на паузата за приложението"</string>
-    <string name="work_mode_off_title" msgid="5503291976647976560">"Вкл. на служ. потр. профил?"</string>
-    <string name="work_mode_off_message" msgid="8417484421098563803">"Служебните ви приложения, известия и данни, както и другите функции на служебния потребителски профил ще бъдат включени"</string>
+    <string name="work_mode_off_title" msgid="961171256005852058">"Включване на служ. приложения?"</string>
+    <string name="work_mode_off_message" msgid="7319580997683623309">"Получете достъп до служебните си приложения и известия"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Включване"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Приложението не е достъпно"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"В момента няма достъп до <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
@@ -2072,6 +2090,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Това известие бе понижено до беззвучно. Докоснете, за да изпратите отзиви."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Това известие бе класирано по-високо. Докоснете, за да изпратите отзиви."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Това известие бе класирано по-ниско. Докоснете, за да изпратите отзиви."</string>
+    <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"Подобрени известия"</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"Предложените действия и отговори вече се предоставят от функцията за подобрени известия. Адаптивните известия за Android вече не се поддържат."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Изключване"</string>
+    <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Научете повече"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"Адаптивните известия бяха заменени от функцията за подобрени известия в Android 12. Тя показва предложени действия и отговори и организира известията ви.\n\nФункцията може да осъществява достъп до съдържанието в известията, включително личната информация, като например имената на контактите и текстовите съобщения. Тя има възможност да отхвърля известията или да предприема действия в тях, като например приемане на телефонни обаждания или контролиране на режима „Не безпокойте“."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Известие с информация за режима на поредица"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Батерията може да се изтощи преди обичайното зареждане"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Режимът за запазване на батерията е активиран с цел удължаване на живота на батерията"</string>
@@ -2268,4 +2292,6 @@
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Изображение на търговската марка на приложението"</string>
     <string name="view_and_control_notification_title" msgid="4300765399209912240">"Проверете настройките за достъп"</string>
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> може да преглежда и управлява съдържанието на екрана ви. Докоснете за преглед."</string>
+    <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"Съобщението <xliff:g id="MESSAGE">%1$s</xliff:g> бе преведено."</string>
+    <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Съобщението бе преведено от <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> на <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
 </resources>

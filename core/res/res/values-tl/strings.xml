@@ -1022,7 +1022,7 @@
     <string name="text_copied" msgid="2531420577879738860">"Nakopya ang teksto sa clipboard."</string>
     <string name="copied" msgid="4675902854553014676">"Nakopya"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"Na-paste ang <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> mula sa <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>"</string>
-    <string name="pasted_from_clipboard" msgid="6295556725844421812">"Na-paste ang <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> mula sa clipboard"</string>
+    <string name="pasted_from_clipboard" msgid="7355790625710831847">"Na-paste ang <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> mula sa iyong clipboard"</string>
     <string name="pasted_text" msgid="4298871641549173733">"Nag-paste ang <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ng text na nakopya mo"</string>
     <string name="pasted_image" msgid="4729097394781491022">"Nag-paste ang <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ng larawang nakopya mo"</string>
     <string name="pasted_content" msgid="646276353060777131">"Nag-paste ang <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ng content na nakopya mo"</string>
@@ -1259,6 +1259,10 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"Ihinahanda ang <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Sinisimulan ang apps."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Pagtatapos ng pag-boot."</string>
+    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"I-off ang screen?"</string>
+    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"Habang sine-set up ang iyong fingerprint, pinindot mo ang Power button.\n\nKaraniwan nitong ino-off ang iyong screen."</string>
+    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"I-off"</string>
+    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"Kanselahin"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"Tumatakbo ang <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Mag-tap upang bumalik sa laro"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Pumili ng laro"</string>
@@ -1709,6 +1713,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Gamitin ang Shortcut"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Pag-invert ng Kulay"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Pagwawasto ng Kulay"</string>
+    <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"One-Hand mode"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Extra dim"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Pinindot nang matagal ang volume keys. Na-on ang <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Pinindot nang matagal ang volume keys. Na-off ang <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
@@ -1773,6 +1778,17 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"Monarch"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"Quarto"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"Foolscap"</string>
+    <string name="mediasize_na_ansi_c" msgid="3104916921818289618">"ANSI C"</string>
+    <string name="mediasize_na_ansi_d" msgid="254005964819282724">"ANSI D"</string>
+    <string name="mediasize_na_ansi_e" msgid="4424174989686785675">"ANSI E"</string>
+    <string name="mediasize_na_ansi_f" msgid="146980362213260987">"ANSI F"</string>
+    <string name="mediasize_na_arch_a" msgid="5280681822380032361">"Arch A"</string>
+    <string name="mediasize_na_arch_b" msgid="2113344093437297427">"Arch B"</string>
+    <string name="mediasize_na_arch_c" msgid="971002546186856623">"Arch C"</string>
+    <string name="mediasize_na_arch_d" msgid="6450996075335049806">"Arch D"</string>
+    <string name="mediasize_na_arch_e" msgid="6782708486949266519">"Arch E"</string>
+    <string name="mediasize_na_arch_e1" msgid="4707138568738504275">"Arch E1"</string>
+    <string name="mediasize_na_super_b" msgid="6964127155618393178">"Super B"</string>
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1"</string>
@@ -1809,6 +1825,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"L"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"Hindi alam na portrait"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"Hindi alam na landscape"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"Kinansela"</string>
@@ -1852,8 +1869,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Na-update ng iyong admin"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Na-delete ng iyong admin"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Para patagalin ang baterya, ginagawa ng Pantipid ng Baterya na:\n\n• I-on ang Madilim na tema\n• I-off o paghihigpitan ang aktibidad sa background, ilang visual effect, at iba pang feature gaya ng “Hey Google”\n\n"<annotation id="url">"Matuto pa"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"Para patagalin ang baterya, ginagawa ng Pantipid ng Baterya na:\n\n• I-on ang Madilim na tema\n• I-off o paghihigpitan ang aktibidad sa background, ilang visual effect, at iba pang feature gaya ng “Hey Google”"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"Ino-on ng Pantipid ng Baterya ang Madilim na tema at nililimitahan o ino-off nito ang aktibidad sa background, ilang visual effect, ilang partikular na feature, at ilang koneksyon sa network.\n\n"<annotation id="url">"Matuto pa"</annotation></string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"Ino-on ng Pantipid ng Baterya ang Madilim na tema at nililimitahan o ino-off nito ang aktibidad sa background, ilang visual effect, ilang partikular na feature, at ilang koneksyon sa network."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Upang makatulong na mabawasan ang paggamit ng data, pinipigilan ng Data Saver ang ilang app na magpadala o makatanggap ng data sa background. Maaaring mag-access ng data ang isang app na ginagamit mo sa kasalukuyan, ngunit mas bihira na nito magagawa iyon. Halimbawa, maaaring hindi lumabas ang mga larawan hangga\'t hindi mo nata-tap ang mga ito."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"I-on ang Data Saver?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"I-on"</string>
@@ -1929,6 +1946,7 @@
     <string name="close_button_text" msgid="10603510034455258">"Isara"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"Sagutin"</string>
+    <string name="call_notification_answer_video_action" msgid="2086030940195382249">"Video"</string>
     <string name="call_notification_decline_action" msgid="3700345945214000726">"Tanggihan"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Ibaba"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"Papasok na tawag"</string>
@@ -1955,8 +1973,8 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"Hindi available ang <xliff:g id="APP_NAME_0">%1$s</xliff:g> sa ngayon. Pinamamahalaan ito ng <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Matuto pa"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"I-unpause ang app"</string>
-    <string name="work_mode_off_title" msgid="5503291976647976560">"I-on ang profile sa trabaho?"</string>
-    <string name="work_mode_off_message" msgid="8417484421098563803">"Mao-on ang iyong mga app sa trabaho, notification, data, at iba pang feature sa profile sa trabaho"</string>
+    <string name="work_mode_off_title" msgid="961171256005852058">"I-on ang app para sa trabaho?"</string>
+    <string name="work_mode_off_message" msgid="7319580997683623309">"Makakuha ng access sa iyong mga app para sa trabaho at notification"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"I-on"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Hindi available ang app"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Hindi available sa ngayon ang <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
@@ -2072,6 +2090,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Na-demote sa Naka-silent ang notification na ito. I-tap para magbigay ng feedback."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Itinaas ang ranggo ng notification na ito. I-tap para magbigay ng feedback."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Ibinaba ang ranggo ng notification na ito. I-tap para magbigay ng feedback."</string>
+    <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"Mga pinahusay na notification"</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"Nagbibigay na ng mga iminumungkahing pagkilos at tugon ang mga pinahusay na notification. Hindi na sinusuportahan ang Mga Adaptive na Notification ng Android."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"I-off"</string>
+    <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Matuto pa"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"Pinalitan ng mga pinahusay na notification ang Mga Adaptive na Notification ng Android sa Android 12. Nagpapakita ng mga iminumungkahing pagkilos at tugon ang feature na ito, at isinasaayos nito ang iyong mga notification.\n\nMaa-access ng mga pinahusay na notification ang content ng notification, kabilang ang personal na impormasyon gaya ng mga pangalan ng contact at mensahe. Puwede ring i-dismiss o tugunan ng feature na ito ang mga notification, gaya ng pagsagot sa mga tawag at pagkontrol sa Huwag Istorbohin."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notification ng impormasyon ng Routine Mode"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Maaaring maubos ang baterya bago ang karaniwang pag-charge"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Na-activate ang Pantipid ng Baterya para patagalin ang buhay ng baterya"</string>
@@ -2268,4 +2292,6 @@
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Representasyon ng brand ng application"</string>
     <string name="view_and_control_notification_title" msgid="4300765399209912240">"Tingnan ang mga setting ng pag-access"</string>
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"Makikita at makokontrol ng <xliff:g id="SERVICE_NAME">%s</xliff:g> ang iyong screen. I-tap para suriin."</string>
+    <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"Naisalin ang <xliff:g id="MESSAGE">%1$s</xliff:g>."</string>
+    <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Naisalin ang mensahe sa <xliff:g id="TO_LANGUAGE">%2$s</xliff:g> mula sa <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g>."</string>
 </resources>
