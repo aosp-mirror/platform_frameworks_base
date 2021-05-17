@@ -420,6 +420,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -620,6 +621,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @GuardedBy("this")
     BroadcastStats mCurBroadcastStats;
+
+    TraceErrorLogger mTraceErrorLogger;
 
     BroadcastQueue broadcastQueueForIntent(Intent intent) {
         if (isOnOffloadQueue(intent.getFlags())) {
@@ -2336,6 +2339,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         mInternal = new LocalService();
         mPendingStartActivityUids = new PendingStartActivityUids(mContext);
+        mTraceErrorLogger = new TraceErrorLogger();
     }
 
     public void setSystemServiceManager(SystemServiceManager mgr) {
@@ -7810,7 +7814,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         addErrorToDropBox(
                 eventType, r, processName, null, null, null, null, null, null, crashInfo,
-                new Float(loadingProgress), incrementalMetrics);
+                new Float(loadingProgress), incrementalMetrics, null);
 
         mAppErrors.crashApplication(r, crashInfo);
     }
@@ -7993,7 +7997,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 callingPid, (r != null) ? r.getProcessClassEnum() : 0);
 
         addErrorToDropBox("wtf", r, processName, null, null, null, tag, null, null, crashInfo,
-                null, null);
+                null, null, null);
 
         return r;
     }
@@ -8018,7 +8022,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         for (Pair<String, ApplicationErrorReport.CrashInfo> p = list.poll();
                 p != null; p = list.poll()) {
             addErrorToDropBox("wtf", proc, "system_server", null, null, null, p.first, null, null,
-                    p.second, null, null);
+                    p.second, null, null, null);
         }
     }
 
@@ -8109,13 +8113,15 @@ public class ActivityManagerService extends IActivityManager.Stub
      * @param crashInfo giving an application stack trace, null if absent
      * @param loadingProgress the loading progress of an installed package, range in [0, 1].
      * @param incrementalMetrics metrics for apps installed on Incremental.
+     * @param errorId a unique id to append to the dropbox headers.
      */
     public void addErrorToDropBox(String eventType,
             ProcessRecord process, String processName, String activityShortComponentName,
             String parentShortComponentName, ProcessRecord parentProcess,
             String subject, final String report, final File dataFile,
             final ApplicationErrorReport.CrashInfo crashInfo,
-            @Nullable Float loadingProgress, @Nullable IncrementalMetrics incrementalMetrics) {
+            @Nullable Float loadingProgress, @Nullable IncrementalMetrics incrementalMetrics,
+            @Nullable UUID errorId) {
         // NOTE -- this must never acquire the ActivityManagerService lock,
         // otherwise the watchdog may be prevented from resetting the system.
 
@@ -8168,6 +8174,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
         if (subject != null) {
             sb.append("Subject: ").append(subject).append("\n");
+        }
+        if (errorId != null) {
+            sb.append("ErrorId: ").append(errorId.toString()).append("\n");
         }
         sb.append("Build: ").append(Build.FINGERPRINT).append("\n");
         if (Debug.isDebuggerConnected()) {
