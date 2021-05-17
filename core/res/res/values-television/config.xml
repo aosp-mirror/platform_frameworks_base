@@ -42,4 +42,8 @@
 
     <!-- Allow SystemUI to show the shutdown dialog -->
     <bool name="config_showSysuiShutdown">true</bool>
+
+    <!-- Component name of the activity used to inform a user about a sensory being blocked because
+     of privacy settings. -->
+    <string name="config_sensorUseStartedActivity">com.android.systemui/com.android.systemui.sensorprivacy.television.TvUnblockSensorActivity</string>
 </resources>
