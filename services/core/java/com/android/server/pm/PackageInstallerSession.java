@@ -2334,6 +2334,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             synchronized (mLock) {
                 childSessions = getChildSessionsLocked();
             }
+            // Spot check to reject a non-staged multi package install of APEXes and APKs.
+            if (!params.isStaged && containsApkSession()
+                    && sessionContains(s -> s.isApexSession())) {
+                throw new PackageManagerException(
+                    PackageManager.INSTALL_FAILED_SESSION_INVALID,
+                    "Non-staged multi package install of APEX and APK packages is not supported");
+            }
             List<PackageManagerService.VerificationParams> verifyingChildSessions =
                     new ArrayList<>(childSessions.size());
             boolean success = true;
@@ -2376,8 +2383,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     private void installNonStaged()
             throws PackageManagerException {
-        Preconditions.checkArgument(containsApkSession());
-
         final PackageManagerService.InstallParams installingSession = makeInstallParams();
         if (installingSession == null) {
             throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
@@ -2606,9 +2611,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             return;
         }
 
-        // APEX sessions should be handled above
-        Preconditions.checkState(!isApexSession());
-
         install();
     }
 
@@ -2630,8 +2632,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
         }
 
-        // Do not try to install apex session. Parent session will have at least one apk session.
-        if (!isMultiPackage() && isApexSession()) {
+        // Do not try to install staged apex session. Parent session will have at least one apk
+        // session.
+        if (!isMultiPackage() && isApexSession() && params.isStaged) {
             sendUpdateToRemoteStatusReceiver(INSTALL_SUCCEEDED,
                     "Apex package should have been installed by apexd", null);
             return null;

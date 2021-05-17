@@ -632,12 +632,13 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                 throw new IllegalArgumentException(
                     "This device doesn't support the installation of APEX files");
             }
-            if (!params.isStaged) {
-                throw new IllegalArgumentException(
-                    "APEX files can only be installed as part of a staged session.");
-            }
             if (params.isMultiPackage) {
                 throw new IllegalArgumentException("A multi-session can't be set as APEX.");
+            }
+            if (!params.isStaged
+                    && (params.installFlags & PackageManager.INSTALL_ENABLE_ROLLBACK) != 0) {
+                throw new IllegalArgumentException(
+                    "Non-staged APEX session doesn't support INSTALL_ENABLE_ROLLBACK");
             }
         }
 
@@ -874,7 +875,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
     }
 
     private File buildSessionDir(int sessionId, SessionParams params) {
-        if (params.isStaged) {
+        if (params.isStaged || (params.installFlags & PackageManager.INSTALL_APEX) != 0) {
             final File sessionStagingDir = Environment.getDataStagingDirectory(params.volumeUuid);
             return new File(sessionStagingDir, "session_" + sessionId);
         }
