@@ -947,6 +947,24 @@ public final class UpdatableFontDirTest {
         assertThat(updated).isNotEqualTo(firstFontFamily);
     }
 
+    @Test
+    public void deleteAllFiles() throws Exception {
+        FakeFontFileParser parser = new FakeFontFileParser();
+        FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
+        UpdatableFontDir dirForPreparation = new UpdatableFontDir(
+                mUpdatableFontFilesDir, parser, fakeFsverityUtil,
+                mConfigFile, mCurrentTimeSupplier, mConfigSupplier);
+        dirForPreparation.loadFontFileMap();
+        dirForPreparation.update(Collections.singletonList(
+                newFontUpdateRequest("foo.ttf,1,foo", GOOD_SIGNATURE)));
+        assertThat(mConfigFile.exists()).isTrue();
+        assertThat(mUpdatableFontFilesDir.list()).hasLength(1);
+
+        UpdatableFontDir.deleteAllFiles(mUpdatableFontFilesDir, mConfigFile);
+        assertThat(mConfigFile.exists()).isFalse();
+        assertThat(mUpdatableFontFilesDir.list()).hasLength(0);
+    }
+
     private FontUpdateRequest newFontUpdateRequest(String content, String signature)
             throws Exception {
         File file = File.createTempFile("font", "ttf", mCacheDir);

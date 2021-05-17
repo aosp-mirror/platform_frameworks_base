@@ -145,7 +145,13 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         final boolean hasUdfps = mAuthController.getUdfpsSensorLocation() != null;
         mHasUdfpsOrFaceAuthFeatures = hasFaceAuth || hasUdfps;
         if (!mHasUdfpsOrFaceAuthFeatures) {
-            ((ViewGroup) mView.getParent()).removeView(mView);
+            // Posting since removing a view in the middle of onAttach can lead to a crash in the
+            // iteration loop when the view isn't last
+            mView.setVisibility(View.GONE);
+            mView.post(() -> {
+                mView.setVisibility(View.VISIBLE);
+                ((ViewGroup) mView.getParent()).removeView(mView);
+            });
             return;
         }
 

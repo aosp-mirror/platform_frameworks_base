@@ -141,7 +141,6 @@ package android {
     field public static final String REORDER_TASKS = "android.permission.REORDER_TASKS";
     field public static final String REQUEST_COMPANION_PROFILE_WATCH = "android.permission.REQUEST_COMPANION_PROFILE_WATCH";
     field public static final String REQUEST_COMPANION_RUN_IN_BACKGROUND = "android.permission.REQUEST_COMPANION_RUN_IN_BACKGROUND";
-    field public static final String REQUEST_COMPANION_START_FOREGROUND_SERVICES_FROM_BACKGROUND = "android.permission.REQUEST_COMPANION_START_FOREGROUND_SERVICES_FROM_BACKGROUND";
     field public static final String REQUEST_COMPANION_USE_DATA_IN_BACKGROUND = "android.permission.REQUEST_COMPANION_USE_DATA_IN_BACKGROUND";
     field public static final String REQUEST_DELETE_PACKAGES = "android.permission.REQUEST_DELETE_PACKAGES";
     field public static final String REQUEST_IGNORE_BATTERY_OPTIMIZATIONS = "android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS";
@@ -11883,7 +11882,6 @@ package android.content.pm {
     field public static final int SCREEN_ORIENTATION_USER_LANDSCAPE = 11; // 0xb
     field public static final int SCREEN_ORIENTATION_USER_PORTRAIT = 12; // 0xc
     field public static final int UIOPTION_SPLIT_ACTION_BAR_WHEN_NARROW = 1; // 0x1
-    field public String[] attributionTags;
     field public int colorMode;
     field public int configChanges;
     field public int documentLaunchMode;
@@ -12075,6 +12073,7 @@ package android.content.pm {
     method public final int getLogoResource();
     method public boolean isEnabled();
     field public android.content.pm.ApplicationInfo applicationInfo;
+    field public String[] attributionTags;
     field public int descriptionRes;
     field public boolean directBootAware;
     field public boolean enabled;
@@ -51985,6 +51984,7 @@ package android.view.inputmethod {
     method public int getSubtypeCount();
     method public android.graphics.drawable.Drawable loadIcon(android.content.pm.PackageManager);
     method public CharSequence loadLabel(android.content.pm.PackageManager);
+    method public boolean shouldShowInInputMethodPicker();
     method public boolean suppressesSpellChecker();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.view.inputmethod.InputMethodInfo> CREATOR;

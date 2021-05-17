@@ -139,6 +139,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -1405,21 +1406,28 @@ public class LocationManagerService extends ILocationManager.Stub implements
 
         Preconditions.checkArgument(userId >= 0);
 
-
         boolean enabled = mInjector.getSettingsHelper().isLocationEnabled(userId);
 
-        String[] allowedPackages = null;
+        ArrayMap<String, String[]> allowedPackages = null;
         if (!enabled) {
-            ArraySet<String> packages = new ArraySet<>();
+            ArrayMap<String, ArraySet<String>> packages = new ArrayMap<>();
             for (LocationProviderManager manager : mProviderManagers) {
                 CallerIdentity identity = manager.getIdentity();
                 if (identity != null) {
-                    packages.add(identity.getPackageName());
+                    packages.computeIfAbsent(identity.getPackageName(), k -> new ArraySet<>()).add(
+                            identity.getAttributionTag());
                 }
             }
-            packages.add(mContext.getPackageName());
-            packages.addAll(mInjector.getSettingsHelper().getIgnoreSettingsPackageWhitelist());
-            allowedPackages = packages.toArray(new String[0]);
+            for (String packageName :
+                    mInjector.getSettingsHelper().getIgnoreSettingsPackageWhitelist()) {
+                packages.computeIfAbsent(packageName, k -> new ArraySet<>());
+            }
+            packages.computeIfAbsent(mContext.getPackageName(), k -> new ArraySet<>());
+
+            allowedPackages = new ArrayMap<>();
+            for (Map.Entry<String, ArraySet<String>> entry : packages.entrySet()) {
+                allowedPackages.put(entry.getKey(), entry.getValue().toArray(new String[0]));
+            }
         }
 
         AppOpsManager appOpsManager = Objects.requireNonNull(

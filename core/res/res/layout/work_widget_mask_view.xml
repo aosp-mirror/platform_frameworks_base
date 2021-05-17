@@ -18,14 +18,14 @@ Copyright (C) 2015 The Android Open Source Project
     android:id="@+id/work_widget_mask_frame"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?android:attr/colorSurfaceVariant"
+    android:background="@drawable/work_widget_mask_view_background"
     android:importantForAccessibility="noHideDescendants"
     android:clickable="true">
 
     <com.android.internal.widget.DisableImageView
         android:id="@+id/work_widget_app_icon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:layout_gravity="center"
         android:clickable="false" />
 

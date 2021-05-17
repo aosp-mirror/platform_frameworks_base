@@ -31,6 +31,7 @@ import static com.android.systemui.statusbar.notification.stack.NotificationStac
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.canChildBeDismissed;
 import static com.android.systemui.statusbar.phone.NotificationIconAreaController.HIGH_PRIORITY;
 
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.PointF;
@@ -38,6 +39,7 @@ import android.provider.Settings;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
+import android.util.MathUtils;
 import android.util.Pair;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -59,6 +61,7 @@ import com.android.systemui.ExpandHelper;
 import com.android.systemui.Gefingerpoken;
 import com.android.systemui.R;
 import com.android.systemui.SwipeHelper;
+import com.android.systemui.animation.Interpolators;
 import com.android.systemui.classifier.Classifier;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
@@ -70,6 +73,7 @@ import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.OnMenuEv
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.FeatureFlags;
+import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager.UserChangedListener;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
@@ -107,7 +111,6 @@ import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.HeadsUpTouchHelper;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
-import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -168,6 +171,7 @@ public class NotificationStackScrollLayoutController {
     // TODO: StatusBar should be encapsulated behind a Controller
     private final StatusBar mStatusBar;
     private final SectionHeaderController mSilentHeaderController;
+    private final LockscreenShadeTransitionController mLockscreenShadeTransitionController;
 
     private NotificationStackScrollLayout mView;
     private boolean mFadeNotificationsOnDismiss;
@@ -180,6 +184,9 @@ public class NotificationStackScrollLayoutController {
             new NotificationListContainerImpl();
 
     private ColorExtractor.OnColorsChangedListener mOnColorsChangedListener;
+
+    private int mTotalDistanceForFullShadeTransition;
+    private int mTotalExtraMediaInsetFullShadeTransition;
 
     @VisibleForTesting
     final View.OnAttachStateChangeListener mOnAttachStateChangeListener =
@@ -240,7 +247,19 @@ public class NotificationStackScrollLayoutController {
         public void onThemeChanged() {
             updateFooter();
         }
+
+        @Override
+        public void onConfigChanged(Configuration newConfig) {
+            updateResources();
+        }
     };
+
+    private void updateResources() {
+        mTotalExtraMediaInsetFullShadeTransition = mResources.getDimensionPixelSize(
+                R.dimen.lockscreen_shade_transition_extra_media_inset);
+        mTotalDistanceForFullShadeTransition = mResources.getDimensionPixelSize(
+                R.dimen.lockscreen_shade_qs_transition_distance);
+    }
 
     private final StatusBarStateController.StateListener mStateListener =
             new StatusBarStateController.StateListener() {
@@ -571,6 +590,7 @@ public class NotificationStackScrollLayoutController {
             NotifPipeline notifPipeline,
             NotifCollection notifCollection,
             NotificationEntryManager notificationEntryManager,
+            LockscreenShadeTransitionController lockscreenShadeTransitionController,
             IStatusBarService iStatusBarService,
             UiEventLogger uiEventLogger,
             ForegroundServiceDismissalFeatureController fgFeatureController,
@@ -592,6 +612,7 @@ public class NotificationStackScrollLayoutController {
         mZenModeController = zenModeController;
         mLockscreenUserManager = lockscreenUserManager;
         mMetricsLogger = metricsLogger;
+        mLockscreenShadeTransitionController = lockscreenShadeTransitionController;
         mFalsingCollector = falsingCollector;
         mFalsingManager = falsingManager;
         mResources = resources;
@@ -624,6 +645,7 @@ public class NotificationStackScrollLayoutController {
         mRemoteInputManager = remoteInputManager;
         mVisualStabilityManager = visualStabilityManager;
         mShadeController = shadeController;
+        updateResources();
     }
 
     public void attach(NotificationStackScrollLayout view) {
@@ -676,6 +698,8 @@ public class NotificationStackScrollLayoutController {
 
         mScrimController.setScrimBehindChangeRunnable(mView::updateBackgroundDimming);
 
+        mLockscreenShadeTransitionController.setStackScroller(this);
+
         mLockscreenUserManager.addUserChangedListener(mLockscreenUserChangeListener);
 
         mFadeNotificationsOnDismiss =  // TODO: this should probably be injected directly
@@ -705,7 +729,6 @@ public class NotificationStackScrollLayoutController {
                 Settings.Secure.NOTIFICATION_HISTORY_ENABLED);
 
         mKeyguardMediaController.setVisibilityChangedListener(visible -> {
-            mView.setKeyguardMediaControllorVisible(visible);
             if (visible) {
                 mView.generateAddAnimation(
                         mKeyguardMediaController.getSinglePaneContainer(),
@@ -1203,11 +1226,6 @@ public class NotificationStackScrollLayoutController {
         mView.runAfterAnimationFinished(r);
     }
 
-    public void setNotificationPanelController(
-            NotificationPanelViewController notificationPanelViewController) {
-        mView.setNotificationPanelController(notificationPanelViewController);
-    }
-
     public void setShelfController(NotificationShelfController notificationShelfController) {
         mView.setShelfController(notificationShelfController);
     }
@@ -1275,7 +1293,10 @@ public class NotificationStackScrollLayoutController {
                         NotificationLogger.getNotificationLocation(entry)));
     }
 
-    boolean hasActiveNotifications() {
+    /**
+     * @return if the shade has currently any active notifications.
+     */
+    public boolean hasActiveNotifications() {
         if (mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
             return !mNotifPipeline.getShadeList().isEmpty();
         } else {
@@ -1354,8 +1375,57 @@ public class NotificationStackScrollLayoutController {
         }
     }
 
+    /**
+     * @return the expand helper callback.
+     */
+    public ExpandHelper.Callback getExpandHelperCallback() {
+        return mView.getExpandHelperCallback();
+    }
+
+    /**
+     * @return If the shade is in the locked down shade.
+     */
     public boolean isInLockedDownShade() {
         return mDynamicPrivacyController.isInLockedDownShade();
+    }
+
+    /**
+     * Set the dimmed state for all of the notification views.
+     */
+    public void setDimmed(boolean dimmed, boolean animate) {
+        mView.setDimmed(dimmed, animate);
+    }
+
+    /**
+     * @return the inset during the full shade transition, that needs to be added to the position
+     *         of the quick settings edge. This is relevant for media, that is transitioning
+     *         from the keyguard host to the quick settings one.
+     */
+    public int getFullShadeTransitionInset() {
+        MediaHeaderView view = mKeyguardMediaController.getSinglePaneContainer();
+        if (view == null || view.getHeight() == 0
+                || mStatusBarStateController.getState() != KEYGUARD) {
+            return 0;
+        }
+        return view.getHeight() + mView.getPaddingAfterMedia();
+    }
+
+    /**
+     * Set the amount of pixels we have currently dragged down if we're transitioning to the full
+     * shade. 0.0f means we're not transitioning yet.
+     */
+    public void setTransitionToFullShadeAmount(float amount) {
+        float extraTopInset;
+        MediaHeaderView view = mKeyguardMediaController.getSinglePaneContainer();
+        if (view == null || view.getHeight() == 0
+                || mStatusBarStateController.getState() != KEYGUARD) {
+            extraTopInset = 0;
+        } else {
+            extraTopInset = MathUtils.saturate(amount / mTotalDistanceForFullShadeTransition);
+            extraTopInset = Interpolators.FAST_OUT_SLOW_IN.getInterpolation(extraTopInset);
+            extraTopInset = extraTopInset * mTotalExtraMediaInsetFullShadeTransition;
+        }
+        mView.setExtraTopInsetForFullShadeTransition(extraTopInset);
     }
 
     /**

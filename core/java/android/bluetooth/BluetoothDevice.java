@@ -1190,6 +1190,11 @@ public final class BluetoothDevice implements Parcelable {
         return devices;
     }
 
+    /** {@hide} */
+    public void prepareToEnterProcess(AttributionSource attributionSource) {
+        setAttributionSource(attributionSource);
+    }
+
     @Override
     public boolean equals(@Nullable Object o) {
         if (o instanceof BluetoothDevice) {

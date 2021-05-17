@@ -694,6 +694,8 @@ public class OomAdjuster {
         boolean containsCycle = collectReachableProcessesLocked(mPendingProcessSet,
                 processes, uids);
 
+        // Clear the pending set as they should've been included in 'processes'.
+        mPendingProcessSet.clear();
         // Reset the flag
         state.setReachable(false);
         // Remove this app from the return list because we've done the computation on it.
@@ -767,10 +769,6 @@ public class OomAdjuster {
                 }
                 queue.offer(service);
                 service.mState.setReachable(true);
-                // During scanning the reachable dependants, remove them from the pending oomadj
-                // targets list if it's possible, as they've been added into the immediate
-                // oomadj targets list 'processes' above.
-                mPendingProcessSet.remove(service);
             }
             final ProcessProviderRecord ppr = pr.mProviders;
             for (int i = ppr.numberOfProviderConnections() - 1; i >= 0; i--) {
@@ -786,10 +784,6 @@ public class OomAdjuster {
                 }
                 queue.offer(provider);
                 provider.mState.setReachable(true);
-                // During scanning the reachable dependants, remove them from the pending oomadj
-                // targets list if it's possible, as they've been added into the immediate
-                // oomadj targets list 'processes' above.
-                mPendingProcessSet.remove(provider);
             }
         }
 
@@ -887,11 +881,11 @@ public class OomAdjuster {
         final ArrayList<ProcessRecord> processes = mTmpProcessList;
         final ActiveUids uids = mTmpUidRecords;
         collectReachableProcessesLocked(mPendingProcessSet, processes, uids);
+        mPendingProcessSet.clear();
         synchronized (mProcLock) {
             updateOomAdjInnerLSP(oomAdjReason, topApp, processes, uids, true, false);
         }
         processes.clear();
-        mPendingProcessSet.clear();
 
         mService.mOomAdjProfiler.oomAdjEnded();
         Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);

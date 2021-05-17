@@ -1201,8 +1201,7 @@ public final class ViewRootImpl implements ViewParent,
                             Looper.myLooper());
 
                     if (mAttachInfo.mThreadedRenderer != null) {
-                        InputMetricsListener listener =
-                                new InputMetricsListener(mInputEventReceiver);
+                        InputMetricsListener listener = new InputMetricsListener();
                         mHardwareRendererObserver = new HardwareRendererObserver(
                                 listener, listener.data, mHandler, true /*waitForPresentTime*/);
                         mAttachInfo.mThreadedRenderer.addObserver(mHardwareRendererObserver);
@@ -1414,6 +1413,9 @@ public final class ViewRootImpl implements ViewParent,
                 if (mAttachInfo.mThreadedRenderer != null) {
                     mAttachInfo.mHardwareAccelerated =
                             mAttachInfo.mHardwareAccelerationRequested = true;
+                    if (mHardwareRendererObserver != null) {
+                        mAttachInfo.mThreadedRenderer.addObserver(mHardwareRendererObserver);
+                    }
                 }
             }
         }
@@ -7505,7 +7507,8 @@ public final class ViewRootImpl implements ViewParent,
                 final View prevDragView = mCurrentDragView;
 
                 if (what == DragEvent.ACTION_DROP && event.mClipData != null) {
-                    event.mClipData.prepareToEnterProcess();
+                    event.mClipData.prepareToEnterProcess(
+                            mView.getContext().getAttributionSource());
                 }
 
                 // Now dispatch the drag/drop event
@@ -8117,6 +8120,9 @@ public final class ViewRootImpl implements ViewParent,
         ThreadedRenderer hardwareRenderer = mAttachInfo.mThreadedRenderer;
 
         if (hardwareRenderer != null) {
+            if (mHardwareRendererObserver != null) {
+                hardwareRenderer.removeObserver(mHardwareRendererObserver);
+            }
             if (mView != null) {
                 hardwareRenderer.destroyHardwareResources(mView);
             }
@@ -8618,17 +8624,11 @@ public final class ViewRootImpl implements ViewParent,
             super.dispose();
         }
     }
-    WindowInputEventReceiver mInputEventReceiver;
+    private WindowInputEventReceiver mInputEventReceiver;
 
     final class InputMetricsListener
             implements HardwareRendererObserver.OnFrameMetricsAvailableListener {
         public long[] data = new long[FrameMetrics.Index.FRAME_STATS_COUNT];
-
-        private InputEventReceiver mReceiver;
-
-        InputMetricsListener(InputEventReceiver receiver) {
-            mReceiver = receiver;
-        }
 
         @Override
         public void onFrameMetricsAvailable(int dropCountSinceLastInvocation) {
@@ -8642,6 +8642,20 @@ public final class ViewRootImpl implements ViewParent,
                 // available, we cannot compute end-to-end input latency metrics.
                 return;
             }
+            final long gpuCompletedTime = data[FrameMetrics.Index.GPU_COMPLETED];
+            if (mInputEventReceiver == null) {
+                return;
+            }
+            if (gpuCompletedTime >= presentTime) {
+                final double discrepancyMs = (gpuCompletedTime - presentTime) * 1E-6;
+                final long vsyncId = data[FrameMetrics.Index.FRAME_TIMELINE_VSYNC_ID];
+                Log.w(TAG, "Not reporting timeline because gpuCompletedTime is " + discrepancyMs
+                        + "ms ahead of presentTime. FRAME_TIMELINE_VSYNC_ID=" + vsyncId
+                        + ", INPUT_EVENT_ID=" + inputEventId);
+                // TODO(b/186664409): figure out why this sometimes happens
+                return;
+            }
+            mInputEventReceiver.reportTimeline(inputEventId, gpuCompletedTime, presentTime);
         }
     }
     HardwareRendererObserver mHardwareRendererObserver;

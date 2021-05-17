@@ -125,25 +125,14 @@ public class WorkModeTile extends QSTileImpl<BooleanState> implements
         } else {
             state.slash.isSlashed = true;
         }
-        state.label = mContext.getString(R.string.quick_settings_work_mode_label);
+        state.label = getTileLabel();
         state.contentDescription = state.label;
         state.expandedAccessibilityClassName = Switch.class.getName();
         state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
-        state.secondaryLabel = state.value ? "" :
-                mContext.getString(R.string.quick_settings_work_mode_paused);
     }
 
     @Override
     public int getMetricsCategory() {
         return MetricsEvent.QS_WORKMODE;
-    }
-
-    @Override
-    protected String composeChangeAnnouncement() {
-        if (mState.value) {
-            return mContext.getString(R.string.accessibility_quick_settings_work_mode_changed_on);
-        } else {
-            return mContext.getString(R.string.accessibility_quick_settings_work_mode_changed_off);
-        }
     }
 }

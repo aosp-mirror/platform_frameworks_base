@@ -220,6 +220,8 @@ private:
 
     VkSemaphore mSwapSemaphore = VK_NULL_HANDLE;
     void* mDestroySemaphoreContext = nullptr;
+
+    std::mutex mInitializeLock;
 };
 
 } /* namespace renderthread */

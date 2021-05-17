@@ -64,6 +64,12 @@ class KeyguardMediaController @Inject constructor(
         mediaHost.init(MediaHierarchyManager.LOCATION_LOCKSCREEN)
     }
 
+    /**
+     * Is the media player visible?
+     */
+    var visible = false
+        private set
+
     var visibilityChangedListener: ((Boolean) -> Unit)? = null
 
     /**
@@ -106,11 +112,11 @@ class KeyguardMediaController @Inject constructor(
         val keyguardOrUserSwitcher = (statusBarStateController.state == StatusBarState.KEYGUARD ||
                 statusBarStateController.state == StatusBarState.FULLSCREEN_USER_SWITCHER)
         // mediaHost.visible required for proper animations handling
-        val shouldBeVisible = mediaHost.visible &&
+        visible = mediaHost.visible &&
                 !bypassController.bypassEnabled &&
                 keyguardOrUserSwitcher &&
                 notifLockscreenUserManager.shouldShowLockscreenNotifications()
-        if (shouldBeVisible) {
+        if (visible) {
             showMediaPlayer()
         } else {
             hideMediaPlayer()

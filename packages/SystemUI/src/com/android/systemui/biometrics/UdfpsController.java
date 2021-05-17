@@ -630,6 +630,14 @@ public class UdfpsController implements DozeReceiver {
                     animation.init();
                     mView.setAnimationViewController(animation);
 
+                    // This view overlaps the sensor area, so prevent it from being selectable
+                    // during a11y.
+                    if (reason == IUdfpsOverlayController.REASON_ENROLL_FIND_SENSOR
+                            || reason == IUdfpsOverlayController.REASON_ENROLL_ENROLLING) {
+                        mView.setImportantForAccessibility(
+                                View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS);
+                    }
+
                     mWindowManager.addView(mView, computeLayoutParams(animation));
                     mAccessibilityManager.addTouchExplorationStateChangeListener(
                             mTouchExplorationStateChangeListener);

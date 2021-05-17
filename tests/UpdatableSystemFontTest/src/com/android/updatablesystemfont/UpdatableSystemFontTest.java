@@ -20,6 +20,7 @@ import static android.os.ParcelFileDescriptor.MODE_READ_ONLY;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assume.assumeTrue;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -247,7 +248,6 @@ public class UpdatableSystemFontTest {
         assertThat(fontPathAfterReboot).isEqualTo(fontPath);
     }
 
-
     @Test
     public void fdLeakTest() throws Exception {
         long originalOpenFontCount =
@@ -273,6 +273,20 @@ public class UpdatableSystemFontTest {
         }
     }
 
+    @Test
+    public void fdLeakTest_withoutPermission() throws Exception {
+        Pattern patternEmojiVPlus1 =
+                Pattern.compile(Pattern.quote(TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF));
+        byte[] signature = Files.readAllBytes(Paths.get(TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF_FSV_SIG));
+        try (ParcelFileDescriptor fd = ParcelFileDescriptor.open(
+                new File(TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF), MODE_READ_ONLY)) {
+            assertThrows(SecurityException.class,
+                    () -> updateFontFileWithoutPermission(fd, signature, 0));
+        }
+        List<String> openFiles = getOpenFiles("system_server");
+        assertThat(countMatch(openFiles, patternEmojiVPlus1)).isEqualTo(0);
+    }
+
     private static String insertCert(String certPath) throws Exception {
         Pair<String, String> result;
         try (InputStream is = new FileInputStream(certPath)) {
@@ -290,14 +304,19 @@ public class UpdatableSystemFontTest {
         try (ParcelFileDescriptor fd =
                 ParcelFileDescriptor.open(new File(fontPath), MODE_READ_ONLY)) {
             return SystemUtil.runWithShellPermissionIdentity(() -> {
-                FontConfig fontConfig = mFontManager.getFontConfig();
-                return mFontManager.updateFontFamily(
-                        new FontFamilyUpdateRequest.Builder()
-                                .addFontFileUpdateRequest(new FontFileUpdateRequest(fd, signature))
-                                .build(),
-                        fontConfig.getConfigVersion());
+                int configVersion = mFontManager.getFontConfig().getConfigVersion();
+                return updateFontFileWithoutPermission(fd, signature, configVersion);
             });
         }
+    }
+
+    private int updateFontFileWithoutPermission(ParcelFileDescriptor fd, byte[] signature,
+            int configVersion) {
+        return mFontManager.updateFontFamily(
+                new FontFamilyUpdateRequest.Builder()
+                        .addFontFileUpdateRequest(new FontFileUpdateRequest(fd, signature))
+                        .build(),
+                configVersion);
     }
 
     private String getFontPath(String psName) {

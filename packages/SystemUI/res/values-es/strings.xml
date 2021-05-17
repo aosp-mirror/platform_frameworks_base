@@ -136,6 +136,8 @@
     <string name="accessibility_camera_button" msgid="2938898391716647247">"Cámara"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"Teléfono"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Asistente voz"</string>
+    <!-- no translation found for accessibility_wallet_button (1458258783460555507) -->
+    <skip />
     <string name="accessibility_unlock_button" msgid="122785427241471085">"Desbloquear"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Dispositivo bloqueado"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="5209142744692162598">"Esperando huella digital"</string>
@@ -1001,7 +1003,7 @@
     <string name="auto_saver_enabled_text" msgid="7889491183116752719">"El modo Ahorro de batería se activará automáticamente cuando quede menos de un <xliff:g id="PERCENTAGE">%d</xliff:g> %% de batería."</string>
     <string name="open_saver_setting_action" msgid="2111461909782935190">"Ajustes"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"Entendido"</string>
-    <string name="heap_dump_tile_name" msgid="2464189856478823046">"Volcar pila de SysUI"</string>
+    <string name="heap_dump_tile_name" msgid="2464189856478823046">"Volcar montículo de SysUI"</string>
     <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"<xliff:g id="APP">%1$s</xliff:g> está usando tu <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Hay aplicaciones que usan tu <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
@@ -1120,7 +1122,7 @@
     <string name="timestamp" msgid="6577851592534538533">"Hace <xliff:g id="DURATION">%1$s</xliff:g>"</string>
     <string name="less_than_timestamp" msgid="6598972791137724517">"Hace menos de <xliff:g id="DURATION">%1$s</xliff:g>"</string>
     <string name="over_timestamp" msgid="4765793502859358634">"Hace más de <xliff:g id="DURATION">%1$s</xliff:g>"</string>
-    <string name="birthday_status" msgid="2596961629465396761">"Fecha de nacimiento"</string>
+    <string name="birthday_status" msgid="2596961629465396761">"Cumpleaños"</string>
     <string name="birthday_status_content_description" msgid="682836371128282925">"Es el cumpleaños de <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="upcoming_birthday_status" msgid="2005452239256870351">"Cumpleaños en breve"</string>
     <string name="upcoming_birthday_status_content_description" msgid="2165036816803797148">"Se acerca el cumpleaños de <xliff:g id="NAME">%1$s</xliff:g>"</string>
@@ -1134,7 +1136,7 @@
     <string name="audio_status" msgid="4237055636967709208">"Escuchando"</string>
     <string name="game_status" msgid="1340694320630973259">"Reproduciendo"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"Amigos"</string>
-    <string name="empty_status" msgid="5938893404951307749">"Charlemos esta noche"</string>
+    <string name="empty_status" msgid="5938893404951307749">"¿Hablamos luego?"</string>
     <string name="status_before_loading" msgid="1500477307859631381">"El contenido se mostrará en breve"</string>
     <string name="missed_call" msgid="4228016077700161689">"Llamada perdida"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
@@ -1150,6 +1152,8 @@
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"autenticarte"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"acceder al dispositivo"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Usa la huella digital para abrir"</string>
+    <!-- no translation found for accessibility_fingerprint_bouncer (7189102492498735519) -->
+    <skip />
     <!-- no translation found for ongoing_phone_call_content_description (5332334388483099947) -->
     <skip />
 </resources>

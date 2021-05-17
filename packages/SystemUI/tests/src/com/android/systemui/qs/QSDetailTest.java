@@ -20,7 +20,9 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -75,6 +77,7 @@ public class QSDetailTest extends SysuiTestCase {
         mQsPanelController = mock(QSPanelController.class);
         mQuickHeader = mock(QuickStatusBarHeader.class);
         mQsDetail.setQsPanel(mQsPanelController, mQuickHeader, mock(QSFooter.class));
+        mQsDetail.mClipper = mock(QSDetailClipper.class);
 
         mMockDetailAdapter = mock(DetailAdapter.class);
         when(mMockDetailAdapter.createDetailView(any(), any(), any()))
@@ -112,6 +115,62 @@ public class QSDetailTest extends SysuiTestCase {
 
         assertEquals(1, mUiEventLogger.numLogs());
         assertEquals(QSUserSwitcherEvent.QS_USER_DETAIL_CLOSE.getId(), mUiEventLogger.eventId(0));
+    }
+
+    @Test
+    public void testShowDetail_ShouldAnimate() {
+        mTestableLooper.processAllMessages();
+
+        when(mMockDetailAdapter.shouldAnimate()).thenReturn(true);
+        mQsDetail.setFullyExpanded(true);
+
+        mQsDetail.handleShowingDetail(mMockDetailAdapter, 0, 0, false);
+        verify(mQsDetail.mClipper).updateCircularClip(eq(true) /* animate */, anyInt(), anyInt(),
+                eq(true) /* in */, any());
+        clearInvocations(mQsDetail.mClipper);
+
+        mQsDetail.handleShowingDetail(null, 0, 0, false);
+        verify(mQsDetail.mClipper).updateCircularClip(eq(true) /* animate */, anyInt(), anyInt(),
+                eq(false) /* in */, any());
+    }
+
+    @Test
+    public void testShowDetail_ShouldNotAnimate() {
+        mTestableLooper.processAllMessages();
+
+        when(mMockDetailAdapter.shouldAnimate()).thenReturn(false);
+        mQsDetail.setFullyExpanded(true);
+
+        mQsDetail.handleShowingDetail(mMockDetailAdapter, 0, 0, false);
+        verify(mQsDetail.mClipper).updateCircularClip(eq(false) /* animate */, anyInt(), anyInt(),
+                eq(true) /* in */, any());
+        clearInvocations(mQsDetail.mClipper);
+
+        mQsDetail.handleShowingDetail(null, 0, 0, false);
+        verify(mQsDetail.mClipper).updateCircularClip(eq(false) /* animate */, anyInt(), anyInt(),
+                eq(false) /* in */, any());
+    }
+
+    @Test
+    public void testDoneButton_CloseDetailPanel() {
+        mTestableLooper.processAllMessages();
+
+        when(mMockDetailAdapter.onDoneButtonClicked()).thenReturn(false);
+
+        mQsDetail.handleShowingDetail(mMockDetailAdapter, 0, 0, false);
+        mQsDetail.requireViewById(android.R.id.button1).performClick();
+        verify(mQsPanelController).closeDetail();
+    }
+
+    @Test
+    public void testDoneButton_KeepDetailPanelOpen() {
+        mTestableLooper.processAllMessages();
+
+        when(mMockDetailAdapter.onDoneButtonClicked()).thenReturn(true);
+
+        mQsDetail.handleShowingDetail(mMockDetailAdapter, 0, 0, false);
+        mQsDetail.requireViewById(android.R.id.button1).performClick();
+        verify(mQsPanelController, never()).closeDetail();
     }
 
     @Test

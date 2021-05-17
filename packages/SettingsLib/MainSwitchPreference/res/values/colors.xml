@@ -26,9 +26,12 @@
     <!-- Material next state off color-->
     <color name="settingslib_state_off_color">?androidprv:attr/colorAccentSecondary</color>
 
+    <!-- Material next thumb off color-->
+    <color name="settingslib_thumb_off_color">@android:color/system_neutral2_100</color>
+
     <!-- Material next track on color-->
     <color name="settingslib_track_on_color">?androidprv:attr/colorAccentPrimaryVariant</color>
 
     <!-- Material next track off color-->
-    <color name="settingslib_track_off_color">?androidprv:attr/colorAccentSecondaryVariant</color>
+    <color name="settingslib_track_off_color">@android:color/system_neutral2_600</color>
 </resources>

@@ -27,7 +27,7 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.net.ConnectivityManager.MultipathPreference;
+import android.net.ConnectivityAnnotations.MultipathPreference;
 import android.os.Process;
 import android.os.UserHandle;
 import android.provider.Settings;
