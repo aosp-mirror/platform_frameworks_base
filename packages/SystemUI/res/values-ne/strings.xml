@@ -136,6 +136,8 @@
     <string name="accessibility_camera_button" msgid="2938898391716647247">"क्यामेरा"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"फोन"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"आवाज सहायता"</string>
+    <!-- no translation found for accessibility_wallet_button (1458258783460555507) -->
+    <skip />
     <string name="accessibility_unlock_button" msgid="122785427241471085">"खोल्नुहोस्"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"यन्त्र लक गरिएको छ"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="5209142744692162598">"फिंगरप्रिन्ट कुर्दै"</string>
@@ -471,14 +473,10 @@
     <string name="interruption_level_none_twoline" msgid="8579382742855486372">"पूरै\nशान्त"</string>
     <string name="interruption_level_priority_twoline" msgid="8523482736582498083">"प्राथमिकता \nमात्र"</string>
     <string name="interruption_level_alarms_twoline" msgid="2045067991335708767">"अलार्महरू \nमात्र"</string>
-    <!-- no translation found for keyguard_indication_charging_time_wireless (577856646141738675) -->
-    <skip />
-    <!-- no translation found for keyguard_indication_charging_time (6492711711891071502) -->
-    <skip />
-    <!-- no translation found for keyguard_indication_charging_time_fast (8390311020603859480) -->
-    <skip />
-    <!-- no translation found for keyguard_indication_charging_time_slowly (301936949731705417) -->
-    <skip />
+    <string name="keyguard_indication_charging_time_wireless" msgid="577856646141738675">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • तारविनै चार्ज हुँदै छ • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> मा पूरै चार्ज हुन्छ"</string>
+    <string name="keyguard_indication_charging_time" msgid="6492711711891071502">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • चार्ज हुँदै छ • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> मा पूरै चार्ज हुन्छ"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • छिटो चार्ज हुँदै छ • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> मा पूरै चार्ज हुन्छ"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • बिस्तारै चार्ज हुँदै छ • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> मा पूरै चार्ज हुन्छ"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"प्रयोगकर्ता फेर्नुहोस्"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="5759855008166759399">"प्रयोगकर्ता, हालको प्रयोगकर्ता <xliff:g id="CURRENT_USER_NAME">%s</xliff:g> मा स्विच गर्नुहोस्"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="383168614528618402">"हालको प्रयोगकर्ता <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -1155,6 +1153,8 @@
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"प्रमाणित गर्नुहोस्"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"डिभाइस हाल्नुहोस्"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"फिंगरप्रिन्ट प्रयोग गरी खोल्नुहोस्"</string>
+    <!-- no translation found for accessibility_fingerprint_bouncer (7189102492498735519) -->
+    <skip />
     <!-- no translation found for ongoing_phone_call_content_description (5332334388483099947) -->
     <skip />
 </resources>
