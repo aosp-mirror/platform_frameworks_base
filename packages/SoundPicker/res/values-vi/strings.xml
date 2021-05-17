@@ -18,7 +18,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="ringtone_default" msgid="798836092118824500">"Nhạc chuông mặc định"</string>
     <string name="notification_sound_default" msgid="8133121186242636840">"Âm thanh thông báo mặc định"</string>
-    <string name="alarm_sound_default" msgid="4787646764557462649">"Âm thanh báo thức mặc định"</string>
+    <string name="alarm_sound_default" msgid="4787646764557462649">"Âm thanh chuông báo mặc định"</string>
     <string name="add_ringtone_text" msgid="6642389991738337529">"Thêm nhạc chuông"</string>
     <string name="add_alarm_text" msgid="3545497316166999225">"Thêm báo thức"</string>
     <string name="add_notification_text" msgid="4431129543300614788">"Thêm thông báo"</string>
