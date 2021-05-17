@@ -73,6 +73,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.RectF;
@@ -326,9 +327,15 @@ public class StatusBar extends SystemUI implements DemoMode,
     public static final int FADE_KEYGUARD_DURATION = 300;
     public static final int FADE_KEYGUARD_DURATION_PULSING = 96;
 
+    public static final long[] CAMERA_LAUNCH_GESTURE_VIBRATION_TIMINGS =
+            new long[]{20, 20, 20, 20, 100, 20};
+    public static final int[] CAMERA_LAUNCH_GESTURE_VIBRATION_AMPLITUDES =
+            new int[]{39, 82, 139, 213, 0, 127};
 
-    /** If true, the system is in the half-boot-to-decryption-screen state.
-     * Prudently disable QS and notifications.  */
+    /**
+     * If true, the system is in the half-boot-to-decryption-screen state.
+     * Prudently disable QS and notifications.
+     */
     public static final boolean ONLY_CORE_APPS;
 
     /** If true, the lockscreen will show a distinct wallpaper */
@@ -600,7 +607,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private int mLastCameraLaunchSource;
     protected PowerManager.WakeLock mGestureWakeLock;
     private Vibrator mVibrator;
-    private long[] mCameraLaunchGestureVibePattern;
+    private VibrationEffect mCameraLaunchGestureVibrationEffect;
 
     private final int[] mTmpInt2 = new int[2];
 
@@ -1311,12 +1318,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         mGestureWakeLock = mPowerManager.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK,
                 "GestureWakeLock");
         mVibrator = mContext.getSystemService(Vibrator.class);
-        int[] pattern = mContext.getResources().getIntArray(
-                R.array.config_cameraLaunchGestureVibePattern);
-        mCameraLaunchGestureVibePattern = new long[pattern.length];
-        for (int i = 0; i < pattern.length; i++) {
-            mCameraLaunchGestureVibePattern[i] = pattern[i];
-        }
+        mCameraLaunchGestureVibrationEffect = getCameraGestureVibrationEffect(
+                mVibrator, context.getResources());
 
         // receive broadcasts
         registerBroadcastReceiver();
@@ -4062,12 +4065,37 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     private void vibrateForCameraGesture() {
         // Make sure to pass -1 for repeat so VibratorService doesn't stop us when going to sleep.
-        mVibrator.vibrate(mCameraLaunchGestureVibePattern, -1 /* repeat */);
+        mVibrator.vibrate(mCameraLaunchGestureVibrationEffect);
+    }
+
+    private static VibrationEffect getCameraGestureVibrationEffect(Vibrator vibrator,
+            Resources resources) {
+        if (vibrator.areAllPrimitivesSupported(
+                VibrationEffect.Composition.PRIMITIVE_QUICK_RISE,
+                VibrationEffect.Composition.PRIMITIVE_CLICK)) {
+            return VibrationEffect.startComposition()
+                    .addPrimitive(VibrationEffect.Composition.PRIMITIVE_QUICK_RISE)
+                    .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 1, 50)
+                    .compose();
+        }
+        if (vibrator.hasAmplitudeControl()) {
+            return VibrationEffect.createWaveform(
+                    CAMERA_LAUNCH_GESTURE_VIBRATION_TIMINGS,
+                    CAMERA_LAUNCH_GESTURE_VIBRATION_AMPLITUDES,
+                    /* repeat= */ -1);
+        }
+
+        int[] pattern = resources.getIntArray(R.array.config_cameraLaunchGestureVibePattern);
+        long[] timings = new long[pattern.length];
+        for (int i = 0; i < pattern.length; i++) {
+            timings[i] = pattern[i];
+        }
+        return VibrationEffect.createWaveform(timings, /* repeat= */ -1);
     }
 
     /**
      * @return true if the screen is currently fully off, i.e. has finished turning off and has
-     *         since not started turning on.
+     * since not started turning on.
      */
     public boolean isScreenFullyOff() {
         return mScreenLifecycle.getScreenState() == ScreenLifecycle.SCREEN_OFF;
