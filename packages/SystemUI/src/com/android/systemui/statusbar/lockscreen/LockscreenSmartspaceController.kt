@@ -106,6 +106,10 @@ class LockscreenSmartspaceController @Inject constructor(
         return view
     }
 
+    fun requestSmartspaceUpdate() {
+        session?.requestSmartspaceUpdate()
+    }
+
     private fun buildView(parent: ViewGroup) {
         if (plugin == null) {
             return
