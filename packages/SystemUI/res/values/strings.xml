@@ -2724,15 +2724,8 @@
     <string name="accessibility_floating_button_action_double_tap_to_toggle">toggle</string>
 
     <!-- Device Controls strings -->
-    <!-- Device Controls empty state, title [CHAR LIMIT=30] -->
-    <string name="quick_controls_title">Device controls</string>
-    <!-- Device Controls empty state, subtitle [CHAR LIMIT=100] -->
-    <string name="quick_controls_subtitle">Add controls for your connected devices</string>
-
-    <!-- Device Controls setup, title [CHAR LIMIT=50] -->
-    <string name="quick_controls_setup_title">Set up device controls</string>
-    <!-- Device Controls setup, subtitle [CHAR LIMIT=100] -->
-    <string name="quick_controls_setup_subtitle">Hold the Power button to access your controls</string>
+    <!-- Device Controls, Quick Settings tile title [CHAR LIMIT=30] -->
+    <string name="quick_controls_title">Home controls</string>
 
     <!-- Controls management providers screen title [CHAR LIMIT=60]-->
     <string name="controls_providers_title">Choose app to add controls</string>
@@ -2761,7 +2754,7 @@
     <!-- Controls management controls screen default title [CHAR LIMIT=30] -->
     <string name="controls_favorite_default_title">Controls</string>
     <!-- Controls management controls screen subtitle [CHAR LIMIT=NONE] -->
-    <string name="controls_favorite_subtitle">Choose controls to access from the power menu</string>
+    <string name="controls_favorite_subtitle">Choose controls to access from Quick Settings</string>
     <!-- Controls management editing screen, user direction for rearranging controls [CHAR LIMIT=NONE] -->
     <string name="controls_favorite_rearrange">Hold &amp; drag to rearrange controls</string>
 
@@ -2853,7 +2846,7 @@
     <!-- Stateless control message informing the user that a routine has started [CHAR_LIMIT=30] -->
     <string name="controls_in_progress">In progress</string>
     <!-- Tooltip informing user where the recently added controls are [CHAR_LIMIT=100] -->
-    <string name="controls_added_tooltip">Hold Power button to see new controls</string>
+    <string name="controls_added_tooltip">Open Quick Settings to see new controls</string>
 
     <!-- Controls menu, add [CHAR_LIMIT=30] -->
     <string name="controls_menu_add">Add controls</string>
