@@ -8571,7 +8571,7 @@ public class TelephonyManager {
      * app has carrier privileges (see {@link #hasCarrierPrivileges}).
      * <p>
      * If {@link android.telephony.TelephonyManager#isRadioInterfaceCapabilitySupported}
-     * ({@link TelephonyManager#CAPABILITY_ALLOWED_NETWORK_TYPES_USED}) returns true, then
+     * ({@link TelephonyManager#CAPABILITY_USES_ALLOWED_NETWORK_TYPES_BITMASK}) returns true, then
      * setAllowedNetworkTypesBitmap is used on the radio interface.  Otherwise,
      * setPreferredNetworkTypesBitmap is used instead.
      *
@@ -8609,7 +8609,7 @@ public class TelephonyManager {
      * app has carrier privileges (see {@link #hasCarrierPrivileges}).
      * <p>
      * If {@link android.telephony.TelephonyManager#isRadioInterfaceCapabilitySupported}
-     * ({@link TelephonyManager#CAPABILITY_ALLOWED_NETWORK_TYPES_USED}) returns true, then
+     * ({@link TelephonyManager#CAPABILITY_USES_ALLOWED_NETWORK_TYPES_BITMASK}) returns true, then
      * setAllowedNetworkTypesBitmap is used on the radio interface.  Otherwise,
      * setPreferredNetworkTypesBitmap is used instead.
      *
@@ -8640,7 +8640,7 @@ public class TelephonyManager {
      * be set through {@link #setPreferredNetworkTypeBitmask}.
      * <p>
      * If {@link android.telephony.TelephonyManager#isRadioInterfaceCapabilitySupported}
-     * ({@link TelephonyManager#CAPABILITY_ALLOWED_NETWORK_TYPES_USED}) returns true, then
+     * ({@link TelephonyManager#CAPABILITY_USES_ALLOWED_NETWORK_TYPES_BITMASK}) returns true, then
      * setAllowedNetworkTypesBitmap is used on the radio interface.  Otherwise,
      * setPreferredNetworkTypesBitmap is used instead.
      *
@@ -8653,7 +8653,7 @@ public class TelephonyManager {
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     @RequiresFeature(
             enforcement = "android.telephony.TelephonyManager#isRadioInterfaceCapabilitySupported",
-            value = TelephonyManager.CAPABILITY_ALLOWED_NETWORK_TYPES_USED)
+            value = TelephonyManager.CAPABILITY_USES_ALLOWED_NETWORK_TYPES_BITMASK)
     @SystemApi
     public boolean setAllowedNetworkTypes(@NetworkTypeBitMask long allowedNetworkTypes) {
         try {
@@ -8738,7 +8738,7 @@ public class TelephonyManager {
      * {@link TelephonyManager#setAllowedNetworkTypes}.
      * <p>
      * If {@link android.telephony.TelephonyManager#isRadioInterfaceCapabilitySupported}
-     * ({@link TelephonyManager#CAPABILITY_ALLOWED_NETWORK_TYPES_USED}) returns true, then
+     * ({@link TelephonyManager#CAPABILITY_USES_ALLOWED_NETWORK_TYPES_BITMASK}) returns true, then
      * setAllowedNetworkTypesBitmap is used on the radio interface. Otherwise,
      * setPreferredNetworkTypesBitmap is used instead.
      *
@@ -8752,7 +8752,7 @@ public class TelephonyManager {
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     @RequiresFeature(
             enforcement = "android.telephony.TelephonyManager#isRadioInterfaceCapabilitySupported",
-            value = TelephonyManager.CAPABILITY_ALLOWED_NETWORK_TYPES_USED)
+            value = TelephonyManager.CAPABILITY_USES_ALLOWED_NETWORK_TYPES_BITMASK)
     public void setAllowedNetworkTypesForReason(@AllowedNetworkTypesReason int reason,
             @NetworkTypeBitMask long allowedNetworkTypes) {
         if (!isValidAllowedNetworkTypesReason(reason)) {
@@ -8788,7 +8788,7 @@ public class TelephonyManager {
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     @RequiresFeature(
             enforcement = "android.telephony.TelephonyManager#isRadioInterfaceCapabilitySupported",
-            value = TelephonyManager.CAPABILITY_ALLOWED_NETWORK_TYPES_USED)
+            value = TelephonyManager.CAPABILITY_USES_ALLOWED_NETWORK_TYPES_BITMASK)
     @SystemApi
     public @NetworkTypeBitMask long getAllowedNetworkTypesForReason(
             @AllowedNetworkTypesReason int reason) {
@@ -14984,8 +14984,8 @@ public class TelephonyManager {
      * @hide
      */
     @SystemApi
-    public static final String CAPABILITY_ALLOWED_NETWORK_TYPES_USED =
-            "CAPABILITY_ALLOWED_NETWORK_TYPES_USED";
+    public static final String CAPABILITY_USES_ALLOWED_NETWORK_TYPES_BITMASK =
+            "CAPABILITY_USES_ALLOWED_NETWORK_TYPES_BITMASK";
 
     /**
      * Indicates whether {@link #setNrDualConnectivityState()} and
@@ -15029,7 +15029,7 @@ public class TelephonyManager {
      *
      * Here is a related list for the systemapi-only valid constants:
      *     CAPABILITY_SECONDARY_LINK_BANDWIDTH_VISIBLE
-     *     CAPABILITY_ALLOWED_NETWORK_TYPES_USED
+     *     CAPABILITY_USES_ALLOWED_NETWORK_TYPES_BITMASK
      *     CAPABILITY_NR_DUAL_CONNECTIVITY_CONFIGURATION_AVAILABLE
      *     CAPABILITY_THERMAL_MITIGATION_DATA_THROTTLING
      *
