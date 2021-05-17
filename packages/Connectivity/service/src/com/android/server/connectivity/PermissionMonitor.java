@@ -24,6 +24,7 @@ import static android.Manifest.permission.UPDATE_DEVICE_STATS;
 import static android.content.pm.PackageInfo.REQUESTED_PERMISSION_GRANTED;
 import static android.content.pm.PackageManager.GET_PERMISSIONS;
 import static android.content.pm.PackageManager.MATCH_ANY_USER;
+import static android.net.ConnectivitySettingsManager.APPS_ALLOWED_ON_RESTRICTED_NETWORKS;
 import static android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK;
 import static android.os.Process.INVALID_UID;
 import static android.os.Process.SYSTEM_UID;
@@ -39,6 +40,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.database.ContentObserver;
 import android.net.ConnectivitySettingsManager;
 import android.net.INetd;
 import android.net.UidRange;
@@ -49,6 +51,7 @@ import android.os.ServiceSpecificException;
 import android.os.SystemConfigManager;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.Settings;
 import android.system.OsConstants;
 import android.util.ArraySet;
 import android.util.Log;
@@ -67,7 +70,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
 
 /**
  * A utility class to inform Netd of UID permisisons.
@@ -145,6 +147,22 @@ public class PermissionMonitor {
         public int getDeviceFirstSdkInt() {
             return Build.VERSION.DEVICE_INITIAL_SDK_INT;
         }
+
+        /**
+         * Get apps allowed to use restricted networks via ConnectivitySettingsManager.
+         */
+        public Set<String> getAppsAllowedOnRestrictedNetworks(@NonNull Context context) {
+            return ConnectivitySettingsManager.getAppsAllowedOnRestrictedNetworks(context);
+        }
+
+        /**
+         * Register ContentObserver for given Uri.
+         */
+        public void registerContentObserver(@NonNull Context context, @NonNull Uri uri,
+                boolean notifyForDescendants, @NonNull ContentObserver observer) {
+            context.getContentResolver().registerContentObserver(
+                    uri, notifyForDescendants, observer);
+        }
     }
 
     public PermissionMonitor(@NonNull final Context context, @NonNull final INetd netd) {
@@ -167,18 +185,30 @@ public class PermissionMonitor {
     public synchronized void startMonitoring() {
         log("Monitoring");
 
+        final Context userAllContext = mContext.createContextAsUser(UserHandle.ALL, 0 /* flags */);
         final IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
         intentFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         intentFilter.addDataScheme("package");
-        mContext.createContextAsUser(UserHandle.ALL, 0 /* flags */).registerReceiver(
+        userAllContext.registerReceiver(
                 mIntentReceiver, intentFilter, null /* broadcastPermission */,
                 null /* scheduler */);
 
+        // Register APPS_ALLOWED_ON_RESTRICTED_NETWORKS setting observer
+        mDeps.registerContentObserver(
+                userAllContext,
+                Settings.Secure.getUriFor(APPS_ALLOWED_ON_RESTRICTED_NETWORKS),
+                false /* notifyForDescendants */,
+                new ContentObserver(null) {
+                    @Override
+                    public void onChange(boolean selfChange) {
+                        onSettingChanged();
+                    }
+                });
+
         // Read APPS_ALLOWED_ON_RESTRICTED_NETWORKS setting and update
         // mAppsAllowedOnRestrictedNetworks.
-        updateAppsAllowedOnRestrictedNetworks(
-                ConnectivitySettingsManager.getAppsAllowedOnRestrictedNetworks(mContext));
+        updateAppsAllowedOnRestrictedNetworks(mDeps.getAppsAllowedOnRestrictedNetworks(mContext));
 
         List<PackageInfo> apps = mPackageManager.getInstalledPackages(GET_PERMISSIONS
                 | MATCH_ANY_USER);
@@ -435,6 +465,20 @@ public class PermissionMonitor {
         mAllApps.add(UserHandle.getAppId(uid));
     }
 
+    private Boolean highestUidNetworkPermission(int uid) {
+        Boolean permission = null;
+        final String[] packages = mPackageManager.getPackagesForUid(uid);
+        if (!CollectionUtils.isEmpty(packages)) {
+            for (String name : packages) {
+                permission = highestPermissionForUid(permission, name);
+                if (permission == SYSTEM) {
+                    break;
+                }
+            }
+        }
+        return permission;
+    }
+
     /**
      * Called when a package is removed.
      *
@@ -465,19 +509,14 @@ public class PermissionMonitor {
         }
 
         Map<Integer, Boolean> apps = new HashMap<>();
-        Boolean permission = null;
-        String[] packages = mPackageManager.getPackagesForUid(uid);
-        if (packages != null && packages.length > 0) {
-            for (String name : packages) {
-                permission = highestPermissionForUid(permission, name);
-                if (permission == SYSTEM) {
-                    // An app with this UID still has the SYSTEM permission.
-                    // Therefore, this UID must already have the SYSTEM permission.
-                    // Nothing to do.
-                    return;
-                }
-            }
+        final Boolean permission = highestUidNetworkPermission(uid);
+        if (permission == SYSTEM) {
+            // An app with this UID still has the SYSTEM permission.
+            // Therefore, this UID must already have the SYSTEM permission.
+            // Nothing to do.
+            return;
         }
+
         if (permission == mApps.get(uid)) {
             // The permissions of this UID have not changed. Nothing to do.
             return;
@@ -728,6 +767,38 @@ public class PermissionMonitor {
     @VisibleForTesting
     public Set<UidRange> getVpnUidRanges(String iface) {
         return mVpnUidRanges.get(iface);
+    }
+
+    private synchronized void onSettingChanged() {
+        // Step1. Update apps allowed to use restricted networks and compute the set of packages to
+        // update.
+        final Set<String> packagesToUpdate = new ArraySet<>(mAppsAllowedOnRestrictedNetworks);
+        updateAppsAllowedOnRestrictedNetworks(mDeps.getAppsAllowedOnRestrictedNetworks(mContext));
+        packagesToUpdate.addAll(mAppsAllowedOnRestrictedNetworks);
+
+        final Map<Integer, Boolean> updatedApps = new HashMap<>();
+        final Map<Integer, Boolean> removedApps = new HashMap<>();
+
+        // Step2. For each package to update, find out its new permission.
+        for (String app : packagesToUpdate) {
+            final PackageInfo info = getPackageInfo(app);
+            if (info == null || info.applicationInfo == null) continue;
+
+            final int uid = info.applicationInfo.uid;
+            final Boolean permission = highestUidNetworkPermission(uid);
+
+            if (null == permission) {
+                removedApps.put(uid, NETWORK); // Doesn't matter which permission is set here.
+                mApps.remove(uid);
+            } else {
+                updatedApps.put(uid, permission);
+                mApps.put(uid, permission);
+            }
+        }
+
+        // Step3. Update or revoke permission for uids with netd.
+        update(mUsers, updatedApps, true /* add */);
+        update(mUsers, removedApps, false /* add */);
     }
 
     /** Dump info to dumpsys */
