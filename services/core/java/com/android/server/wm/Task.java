@@ -2003,6 +2003,8 @@ class Task extends WindowContainer<WindowContainer> {
             return false;
         }
         if (tda == null) {
+            Slog.w(TAG_TASKS, "Can't find TaskDisplayArea to determine support for multi"
+                    + " window. Task id=" + mTaskId + " attached=" + isAttached());
             return false;
         }
 
@@ -4046,10 +4048,17 @@ class Task extends WindowContainer<WindowContainer> {
         fillTaskInfo(info, true /* stripExtras */);
     }
 
+    void fillTaskInfo(TaskInfo info, boolean stripExtras) {
+        fillTaskInfo(info, stripExtras, getDisplayArea());
+    }
+
     /**
      * Fills in a {@link TaskInfo} with information from this task.
+     *
+     * @param tda consider whether this Task can be put in multi window as it will be attached to
+     *            the give {@link TaskDisplayArea}.
      */
-    void fillTaskInfo(TaskInfo info, boolean stripExtras) {
+    void fillTaskInfo(TaskInfo info, boolean stripExtras, @Nullable TaskDisplayArea tda) {
         getNumRunningActivities(mReuseActivitiesReport);
         info.userId = isLeafTask() ? mUserId : mCurrentUser;
         info.taskId = mTaskId;
@@ -4074,8 +4083,8 @@ class Task extends WindowContainer<WindowContainer> {
         info.numActivities = mReuseActivitiesReport.numActivities;
         info.lastActiveTime = lastActiveTime;
         info.taskDescription = new ActivityManager.TaskDescription(getTaskDescription());
-        info.supportsSplitScreenMultiWindow = supportsSplitScreenWindowingMode();
-        info.supportsMultiWindow = supportsMultiWindow();
+        info.supportsSplitScreenMultiWindow = supportsSplitScreenWindowingModeInDisplayArea(tda);
+        info.supportsMultiWindow = supportsMultiWindowInDisplayArea(tda);
         info.configuration.setTo(getConfiguration());
         // Update to the task's current activity type and windowing mode which may differ from the
         // window configuration
