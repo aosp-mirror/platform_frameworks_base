@@ -1839,8 +1839,6 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 // For a full update we replace the RemoteViews completely.
                 widget.views = views;
             }
-            widget.views.setProviderInstanceId(UPDATE_COUNTER.get());
-
             int memoryUsage;
             if ((UserHandle.getAppId(Binder.getCallingUid()) != Process.SYSTEM_UID) &&
                     (widget.views != null) &&
@@ -1942,13 +1940,14 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             return;
         }
         if (updateViews != null) {
+            updateViews = new RemoteViews(updateViews);
             updateViews.setProviderInstanceId(requestId);
         }
 
         SomeArgs args = SomeArgs.obtain();
         args.arg1 = widget.host;
         args.arg2 = widget.host.callbacks;
-        args.arg3 = (updateViews != null) ? updateViews.clone() : null;
+        args.arg3 = updateViews;
         args.arg4 = requestId;
         args.argi1 = widget.appWidgetId;
 
