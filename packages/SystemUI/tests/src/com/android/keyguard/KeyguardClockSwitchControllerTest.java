@@ -232,6 +232,13 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
         verify(mView).removeView(mFakeSmartspaceView);
     }
 
+    @Test
+    public void testRefresh() {
+        mController.refresh();
+
+        verify(mSmartspaceController).requestSmartspaceUpdate();
+    }
+
     private void verifyAttachment(VerificationMode times) {
         verify(mClockManager, times).addOnClockChangedListener(
                 any(ClockManager.ClockChangedListener.class));
