@@ -18,6 +18,7 @@ package com.android.server.timezonedetector;
 import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_IS_AUTO_DETECTION_ENABLED;
 import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_IS_GEO_DETECTION_ENABLED;
 import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_IS_GEO_DETECTION_SUPPORTED;
+import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_IS_TELEPHONY_DETECTION_SUPPORTED;
 import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_SERVICE_NAME;
 import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_SET_AUTO_DETECTION_ENABLED;
 import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_SET_GEO_DETECTION_ENABLED;
@@ -61,6 +62,8 @@ class TimeZoneDetectorShellCommand extends ShellCommand {
                 return runIsAutoDetectionEnabled();
             case SHELL_COMMAND_SET_AUTO_DETECTION_ENABLED:
                 return runSetAutoDetectionEnabled();
+            case SHELL_COMMAND_IS_TELEPHONY_DETECTION_SUPPORTED:
+                return runIsTelephonyDetectionSupported();
             case SHELL_COMMAND_IS_GEO_DETECTION_SUPPORTED:
                 return runIsGeoDetectionSupported();
             case SHELL_COMMAND_IS_GEO_DETECTION_ENABLED:
@@ -85,6 +88,13 @@ class TimeZoneDetectorShellCommand extends ShellCommand {
         boolean enabled = mInterface.getCapabilitiesAndConfig(userId)
                 .getConfiguration()
                 .isAutoDetectionEnabled();
+        pw.println(enabled);
+        return 0;
+    }
+
+    private int runIsTelephonyDetectionSupported() {
+        final PrintWriter pw = getOutPrintWriter();
+        boolean enabled = mInterface.isTelephonyTimeZoneDetectionSupported();
         pw.println(enabled);
         return 0;
     }
@@ -169,6 +179,9 @@ class TimeZoneDetectorShellCommand extends ShellCommand {
         pw.printf("    Prints true/false according to the automatic time zone detection setting\n");
         pw.printf("  %s true|false\n", SHELL_COMMAND_SET_AUTO_DETECTION_ENABLED);
         pw.printf("    Sets the automatic time zone detection setting.\n");
+        pw.printf("  %s\n", SHELL_COMMAND_IS_TELEPHONY_DETECTION_SUPPORTED);
+        pw.printf("    Prints true/false according to whether telephony time zone detection is"
+                + " supported on this device.\n");
         pw.printf("  %s\n", SHELL_COMMAND_IS_GEO_DETECTION_SUPPORTED);
         pw.printf("    Prints true/false according to whether geolocation time zone detection is"
                 + " supported on this device.\n");
