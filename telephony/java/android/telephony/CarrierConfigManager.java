@@ -4960,7 +4960,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_NETWORK_TEMP_NOT_METERED_SUPPORTED_BOOL, false);
         sDefaults.putInt(KEY_DEFAULT_RTT_MODE_INT, 0);
         sDefaults.putStringArray(KEY_ALLOWED_INITIAL_ATTACH_APN_TYPES_STRING_ARRAY,
-                new String[]{"ia", "default", "ims", "mms", "dun", "emergency"});
+                new String[]{"ia", "default", "mms", "dun"});
         sDefaults.putBoolean(KEY_STORE_SIM_PIN_FOR_UNATTENDED_REBOOT_BOOL, true);
         sDefaults.putBoolean(KEY_HIDE_ENABLE_2G, false);
         sDefaults.putBoolean(KEY_DISPLAY_NO_DATA_NOTIFICATION_ON_PERMANENT_FAILURE_BOOL, false);
