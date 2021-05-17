@@ -146,6 +146,9 @@ public class BubbleExpandedView extends LinearLayout {
             ActivityOptions options = ActivityOptions.makeCustomAnimation(getContext(),
                     0 /* enterResId */, 0 /* exitResId */);
 
+            Rect launchBounds = new Rect();
+            mTaskView.getBoundsOnScreen(launchBounds);
+
             // TODO: I notice inconsistencies in lifecycle
             // Post to keep the lifecycle normal
             post(() -> {
@@ -159,7 +162,7 @@ public class BubbleExpandedView extends LinearLayout {
                     if (!mIsOverflow && mBubble.hasMetadataShortcutId()) {
                         options.setApplyActivityFlagsForBubbles(true);
                         mTaskView.startShortcutActivity(mBubble.getShortcutInfo(),
-                                options, null /* sourceBounds */);
+                                options, launchBounds);
                     } else {
                         Intent fillInIntent = new Intent();
                         // Apply flags to make behaviour match documentLaunchMode=always.
@@ -168,7 +171,8 @@ public class BubbleExpandedView extends LinearLayout {
                         if (mBubble != null) {
                             mBubble.setIntentActive();
                         }
-                        mTaskView.startActivity(mPendingIntent, fillInIntent, options);
+                        mTaskView.startActivity(mPendingIntent, fillInIntent, options,
+                                launchBounds);
                     }
                 } catch (RuntimeException e) {
                     // If there's a runtime exception here then there's something
