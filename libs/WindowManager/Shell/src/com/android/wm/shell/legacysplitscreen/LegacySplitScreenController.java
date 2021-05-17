@@ -577,7 +577,7 @@ public class LegacySplitScreenController implements DisplayController.OnDisplays
             mSplits.getSplitTransitions().dismissSplit(
                     mSplits, mSplitLayout, !toPrimaryTask, snapped);
         } else {
-        mWindowManagerProxy.applyDismissSplit(mSplits, mSplitLayout, !toPrimaryTask);
+            mWindowManagerProxy.applyDismissSplit(mSplits, mSplitLayout, !toPrimaryTask);
             onDismissSplit();
         }
     }
