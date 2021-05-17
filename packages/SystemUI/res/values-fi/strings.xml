@@ -39,7 +39,7 @@
     <string name="battery_saver_start_action" msgid="4553256017945469937">"Ota virransäästö käyttöön"</string>
     <string name="status_bar_settings_settings_button" msgid="534331565185171556">"Asetukset"</string>
     <string name="status_bar_settings_wifi_button" msgid="7243072479837270946">"Wi-Fi"</string>
-    <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Näytön automaattinen kierto"</string>
+    <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Näytön automaattinen kääntö"</string>
     <string name="status_bar_settings_mute_label" msgid="914392730086057522">"ÄÄNET."</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="2151934479226017725">"AUTO"</string>
     <string name="status_bar_settings_notifications" msgid="5285316949980621438">"Ilmoitukset"</string>
@@ -92,8 +92,10 @@
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Kuvaa enemmän"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Hylkää kuvakaappaus"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Kuvakaappauksen esikatselu"</string>
-    <string name="screenshot_top_boundary" msgid="1500569103321300856">"Yläraja"</string>
-    <string name="screenshot_bottom_boundary" msgid="5657242629526407311">"Alaraja"</string>
+    <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"Yläreuna <xliff:g id="PERCENT">%1$d</xliff:g> prosenttia"</string>
+    <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Alareuna <xliff:g id="PERCENT">%1$d</xliff:g> prosenttia"</string>
+    <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"Vasen reuna <xliff:g id="PERCENT">%1$d</xliff:g> prosenttia"</string>
+    <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"Oikea reuna <xliff:g id="PERCENT">%1$d</xliff:g> prosenttia"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Näytön tallentaja"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Näytön tallennusta käsitellään"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Pysyvä ilmoitus näytön tallentamisesta"</string>
@@ -134,7 +136,10 @@
     <string name="accessibility_camera_button" msgid="2938898391716647247">"Kamera"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"Puhelin"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Ääniapuri"</string>
+    <!-- no translation found for accessibility_wallet_button (1458258783460555507) -->
+    <skip />
     <string name="accessibility_unlock_button" msgid="122785427241471085">"Avaa lukitus"</string>
+    <string name="accessibility_lock_icon" msgid="661492842417875775">"Laite lukittu"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="5209142744692162598">"Odotetaan sormenjälkeä"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="1811563723195375298">"Avaa lukitus jollakin muulla tavalla kuin sormenjäljellä"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Kasvojen skannaus"</string>
@@ -207,8 +212,8 @@
     <string name="accessibility_two_bars" msgid="1335676987274417121">"Kaksi palkkia."</string>
     <string name="accessibility_three_bars" msgid="819417766606501295">"Kolme palkkia."</string>
     <string name="accessibility_signal_full" msgid="5920148525598637311">"Vahva signaali."</string>
-    <string name="accessibility_desc_on" msgid="2899626845061427845">"Käytössä."</string>
-    <string name="accessibility_desc_off" msgid="8055389500285421408">"Pois käytöstä."</string>
+    <string name="accessibility_desc_on" msgid="2899626845061427845">"Päällä."</string>
+    <string name="accessibility_desc_off" msgid="8055389500285421408">"Pois päältä."</string>
     <string name="accessibility_desc_connected" msgid="3082590384032624233">"Yhdistetty."</string>
     <string name="accessibility_desc_connecting" msgid="8011433412112903614">"Yhdistetään."</string>
     <string name="data_connection_hspa" msgid="6096234094857660873">"HSPA"</string>
@@ -217,7 +222,7 @@
     <string name="accessibility_no_sim" msgid="1140839832913084973">"Ei SIM-korttia."</string>
     <string name="accessibility_cell_data" msgid="172950885786007392">"Mobiilidata"</string>
     <string name="accessibility_cell_data_on" msgid="691666434519443162">"Mobiilidata käytössä"</string>
-    <string name="cell_data_off" msgid="4886198950247099526">"Pois käytöstä"</string>
+    <string name="cell_data_off" msgid="4886198950247099526">"Pois päältä"</string>
     <string name="accessibility_bluetooth_tether" msgid="6327291292208790599">"Internetin jakaminen Bluetoothin kautta."</string>
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"Lentokonetila."</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN päällä"</string>
@@ -286,9 +291,9 @@
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"Mobiiliyhteyden hotspot poistettiin käytöstä."</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"Mobiiliyhteyden hotspot otettiin käyttöön."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"Ruudun lähetys pysäytettiin."</string>
-    <string name="accessibility_quick_settings_work_mode_off" msgid="562749867895549696">"Työtila on poistettu käytöstä."</string>
+    <string name="accessibility_quick_settings_work_mode_off" msgid="9106217884005620744">"Työtila keskeytetty."</string>
     <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"Työtila on käytössä."</string>
-    <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6256690740556798683">"Työtila poistettiin käytöstä."</string>
+    <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6422896967647049692">"Työtila keskeytetty."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"Työtila otettiin käyttöön."</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"Data Saver poistettiin käytöstä."</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"Data Saver otettiin käyttöön."</string>
@@ -349,8 +354,10 @@
     <string name="quick_settings_ime_label" msgid="3351174938144332051">"Syöttötapa"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Sijainti"</string>
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"Sijainti ei käytössä"</string>
-    <string name="quick_settings_camera_label" msgid="1367149596242401934">"Estä kamera"</string>
-    <string name="quick_settings_mic_label" msgid="8245831073612564953">"Mykistä mikrofoni"</string>
+    <string name="quick_settings_camera_label" msgid="5612076679385269339">"Pääsy kameraan"</string>
+    <string name="quick_settings_mic_label" msgid="8392773746295266375">"Pääsy mikrofoniin"</string>
+    <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"Käytettävissä"</string>
+    <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"Estetty"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"Medialaite"</string>
     <string name="quick_settings_rssi_label" msgid="3397615415140356701">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="7499207215265078598">"Vain hätäpuhelut"</string>
@@ -405,6 +412,7 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"kiintiö <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"<xliff:g id="DATA_LIMIT">%s</xliff:g> – varoitus"</string>
     <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"Työprofiili"</string>
+    <string name="quick_settings_work_mode_paused" msgid="4841109346916998613">"Keskeytetty"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Yövalo"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Auringon laskiessa"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Auringonnousuun"</string>
@@ -422,8 +430,12 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Tallennus"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Aloita"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Lopeta"</string>
-    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="8643239110815357707">"Jotta voit jatkaa, &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; tarvitsee pääsyn laitteesi mikrofoniin."</string>
-    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="7773612142162829116">"Jotta voit jatkaa, &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; tarvitsee pääsyn laitteesi kameraan."</string>
+    <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Kumotaanko laitteen mikrofonin esto?"</string>
+    <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Kumotaanko laitteen kameran esto?"</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Kumotaanko laitteen kameran ja mikrofonin esto?"</string>
+    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Tämä kumoaa kaikkien sellaisten sovellusten ja palveluiden eston, joilla on lupa käyttää mikrofoniasi."</string>
+    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Tämä kumoaa kaikkien sellaisten sovellusten ja palveluiden eston, joilla on lupa käyttää kameraasi."</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Tämä kumoaa kaikkien sellaisten sovellusten ja palveluiden eston, joilla on lupa käyttää kameraasi tai mikrofoniasi."</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"Laite"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Vaihda sovellusta pyyhkäisemällä ylös"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Vaihda sovellusta nopeasti vetämällä oikealle"</string>
@@ -460,10 +472,10 @@
     <string name="interruption_level_none_twoline" msgid="8579382742855486372">"Täydellinen\nhiljaisuus"</string>
     <string name="interruption_level_priority_twoline" msgid="8523482736582498083">"Vain\ntärkeät"</string>
     <string name="interruption_level_alarms_twoline" msgid="2045067991335708767">"Vain\nherätykset"</string>
-    <string name="keyguard_indication_charging_time_wireless" msgid="7343602278805644915">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Ladataan langattomasti (täynnä <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> päästä)"</string>
-    <string name="keyguard_indication_charging_time" msgid="4927557805886436909">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Ladataan (täynnä <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> päästä)"</string>
-    <string name="keyguard_indication_charging_time_fast" msgid="7895986003578341126">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Ladataan nopeasti (täynnä <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> päästä)"</string>
-    <string name="keyguard_indication_charging_time_slowly" msgid="245442950133408398">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Ladataan hitaasti (täynnä <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> päästä)"</string>
+    <string name="keyguard_indication_charging_time_wireless" msgid="577856646141738675">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Latautuu langattomasti • Täynnä <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> päästä"</string>
+    <string name="keyguard_indication_charging_time" msgid="6492711711891071502">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Latautuu • Täynnä <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> päästä"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Latautuu nopeasti • Täynnä <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> päästä"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Latautuu hitaasti • Täynnä <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> päästä"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Vaihda käyttäjää"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="5759855008166759399">"Vaihda käyttäjä (nyt <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>)"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="383168614528618402">"Nykyinen käyttäjä: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -501,7 +513,7 @@
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Aloitetaanko tallentaminen tai striimaus?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Haluatko, että <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> aloittaa tallennuksen tai striimauksen?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"Älä näytä uudelleen"</string>
-    <string name="clear_all_notifications_text" msgid="348312370303046130">"Poista kaikki"</string>
+    <string name="clear_all_notifications_text" msgid="348312370303046130">"Tyhjennä kaikki"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Muuta asetuksia"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Historia"</string>
     <string name="notification_section_header_incoming" msgid="850925217908095197">"Uudet"</string>
@@ -527,7 +539,7 @@
     <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> omistaa tämän laitteen, joka on yhdistetty VPN:iin"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Organisaatiosi voi valvoa työprofiilisi verkkoliikennettä."</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> voi valvoa työprofiilisi verkkoliikennettä."</string>
-    <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"IT-järjestelmänvalvoja näkee työprofiilin verkkotoiminnan"</string>
+    <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"IT-järjestelmänvalvoja näkee, mitä työprofiililla tehdään verkossa"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Verkkoa saatetaan valvoa"</string>
     <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"Tämä laite on yhdistetty VPN:iin"</string>
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Työprofiilisi on yhdistetty tähän: <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
@@ -544,9 +556,9 @@
     <string name="disconnect_vpn" msgid="26286850045344557">"Katkaise VPN-yhteys"</string>
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Näytä säännöt"</string>
     <string name="monitoring_button_view_controls" msgid="8316440345340701117">"Katso asetukset"</string>
-    <string name="monitoring_description_named_management" msgid="505833016545056036">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> omistaa tämän laitteen.\n\nJärjestelmänvalvoja voi valvoa ja muuttaa asetuksia, yrityskäyttöä, sovelluksia sekä laitteeseen yhdistettyjä tietoja ja sen sijaintitietoja.\n\nSaat lisätietoja järjestelmänvalvojalta."</string>
+    <string name="monitoring_description_named_management" msgid="505833016545056036">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> omistaa tämän laitteen.\n\nJärjestelmänvalvoja voi valvoa ja hallita asetuksia, pääsyoikeuksia, sovelluksia, laitteen käyttödataa ja sijaintitietoja.\n\nSaat lisätietoja järjestelmänvalvojalta."</string>
     <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"<xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g> voi saada pääsyn tähän laitteeseen liittyvään dataan, ylläpitää sovelluksia ja muuttaa laitteen asetuksia.\n\nJos sinulla on kysyttävää, ota yhteyttä laitteen tarjoajaan: <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g>."</string>
-    <string name="monitoring_description_management" msgid="4308879039175729014">"Organisaatiosi omistaa tämän laitteen.\n\nJärjestelmänvalvoja voi valvoa ja muuttaa asetuksia, yrityskäyttöä, sovelluksia sekä laitteeseen yhdistettyjä tietoja ja sen sijaintitietoja.\n\nSaat lisätietoja järjestelmänvalvojalta."</string>
+    <string name="monitoring_description_management" msgid="4308879039175729014">"Organisaatiosi omistaa tämän laitteen.\n\nJärjestelmänvalvoja voi valvoa ja hallita asetuksia, pääsyoikeuksia, sovelluksia, laitteen käyttödataa ja sijaintitietoja.\n\nSaat lisätietoja järjestelmänvalvojalta."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Organisaatiosi asensi laitteeseen varmenteen myöntäjän. Suojattua verkkoliikennettäsi voidaan valvoa tai muuttaa."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Organisaatiosi lisäsi työprofiiliin varmenteen myöntäjän. Suojattua verkkoliikennettäsi voidaan valvoa tai muuttaa."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Laitteeseen on asennettu varmenteen myöntäjä. Suojattua verkkoliikennettäsi voidaan valvoa tai muuttaa."</string>
@@ -558,7 +570,7 @@
     <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"Henkilökohtainen profiilisi on yhteydessä sovellukseen <xliff:g id="VPN_APP">%1$s</xliff:g>, joka voi valvoa verkkotoimintaasi, esimerkiksi sähköposteja, sovelluksia ja verkkosivustoja."</string>
     <string name="monitoring_description_do_header_generic" msgid="6130190408164834986">"Laitettasi hallinnoi <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g>."</string>
     <string name="monitoring_description_do_header_with_name" msgid="2696255132542779511">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> hallinnoi laitettasi sovelluksen <xliff:g id="DEVICE_OWNER_APP">%2$s</xliff:g> avulla."</string>
-    <string name="monitoring_description_do_body" msgid="7700878065625769970">"Järjestelmänvalvoja voi valvoa ja hallita asetuksia, yrityskäyttöä, sovelluksia sekä laitteeseen yhdistettyjä tietoja ja sen sijaintitietoja."</string>
+    <string name="monitoring_description_do_body" msgid="7700878065625769970">"Järjestelmänvalvoja voi valvoa ja hallita asetuksia, pääsyoikeuksia, sovelluksia, laitteen käyttödataa ja sijaintitietoja."</string>
     <string name="monitoring_description_do_learn_more_separator" msgid="1467280496376492558">" "</string>
     <string name="monitoring_description_do_learn_more" msgid="645149183455573790">"Lisätietoja"</string>
     <string name="monitoring_description_do_body_vpn" msgid="7699280130070502303">"Olet yhteydessä sovellukseen <xliff:g id="VPN_APP">%1$s</xliff:g>, joka voi valvoa verkkotoimintaasi, esimerkiksi sähköposteja, sovelluksia ja verkkosivustoja."</string>
@@ -657,18 +669,12 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Herätys"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
-    <!-- no translation found for wallet_button_label_device_unlocked (4653372304880486681) -->
-    <skip />
-    <!-- no translation found for wallet_button_label_device_locked (4418473374652969487) -->
-    <skip />
-    <!-- no translation found for wallet_secondary_label_active (4909706168969888137) -->
-    <skip />
-    <!-- no translation found for wallet_secondary_label_no_card (1750103386908123401) -->
-    <skip />
-    <!-- no translation found for wallet_secondary_label_device_locked (5175862019125370506) -->
-    <skip />
-    <!-- no translation found for wallet_error_generic (257704570182963611) -->
-    <skip />
+    <string name="wallet_app_button_label" msgid="7123784239111190992">"Näytä kaikki"</string>
+    <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Avaa lukitus ja maksa"</string>
+    <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"Ei otettu käyttöön"</string>
+    <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Avaa lukitus ja käytä"</string>
+    <string name="wallet_error_generic" msgid="257704570182963611">"Korttien noutamisessa oli ongelma, yritä myöhemmin uudelleen"</string>
+    <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Lukitusnäytön asetukset"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Työprofiili"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Lentokonetila"</string>
     <string name="add_tile" msgid="6239678623873086686">"Lisää ruutu"</string>
@@ -701,8 +707,8 @@
     <string name="do_not_silence" msgid="4982217934250511227">"Älä hiljennä"</string>
     <string name="do_not_silence_block" msgid="4361847809775811849">"Älä hiljennä tai estä"</string>
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Ilmoitusten tehohallinta"</string>
-    <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"Käytössä"</string>
-    <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"Pois käytöstä"</string>
+    <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"Päällä"</string>
+    <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"Pois päältä"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"Ilmoitusten tehohallinnan avulla voit määrittää sovelluksen ilmoituksille tärkeystason väliltä 0–5. \n\n"<b>"Taso 5"</b>" \n– Ilmoitukset näytetään ilmoitusluettelon yläosassa \n– Näkyminen koko näytön tilassa sallitaan \n– Ilmoitukset kurkistavat aina näytölle\n\n"<b>"Taso 4"</b>" \n– Näkyminen koko näytön tilassa estetään \n– Ilmoitukset kurkistavat aina näytölle \n\n"<b>"Taso 3"</b>" \n– Näkyminen koko näytön tilassa estetään \n– Ei kurkistamista \n\n"<b>"Taso 2"</b>" \n– Näkyminen koko näytön tilassa estetään \n– Ei kurkistamista \n– Ei ääniä eikä värinää \n\n"<b>"Taso 1"</b>" \n– Näkyminen koko näytön tilassa estetään \n– Ei kurkistamista \n– Ei ääniä eikä värinää \n– Ilmoitukset piilotetaan lukitusnäytöltä ja tilapalkista \n– Ilmoitukset näytetään ilmoitusluettelon alaosassa \n\n"<b>"Taso 0"</b>" \n– Kaikki sovelluksen ilmoitukset estetään"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"Ilmoitukset"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"Et näe näitä ilmoituksia enää"</string>
@@ -737,11 +743,12 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Tila:&lt;/b&gt; hiljennetty"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Tila:&lt;/b&gt; valittu tärkeämmäksi"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Tila:&lt;/b&gt; valittu vähemmän tärkeäksi"</string>
-    <!-- no translation found for notification_channel_summary_priority (4592979359953954258) -->
-    <skip />
+    <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Näkyy keskusteluilmoitusten yläosassa ja profiilikuvana lukitusnäytöllä"</string>
+    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Näkyy keskusteluilmoitusten yläosassa ja profiilikuvana lukitusnäytöllä, näkyy kuplana"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Näkyy keskusteluilmoitusten yläosassa ja profiilikuvana lukitusnäytöllä, keskeyttää Älä häiritse ‑tilan"</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Näkyy keskusteluilmoitusten yläosassa ja profiilikuvana lukitusnäytöllä, näkyy kuplana, keskeyttää Älä häiritse ‑tilan"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Asetukset"</string>
-    <!-- no translation found for notification_priority_title (5256226572739882190) -->
-    <skip />
+    <string name="notification_priority_title" msgid="2079708866333537093">"Tärkeä"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> ei tue keskusteluominaisuuksia"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Näitä ilmoituksia ei voi muokata"</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Tätä ilmoitusryhmää ei voi määrittää tässä"</string>
@@ -784,7 +791,7 @@
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"Ilmoitusten torkkuasetukset"</string>
     <string name="notification_menu_snooze_action" msgid="5415729610393475019">"Muistuta minua"</string>
     <string name="notification_menu_settings_action" msgid="7085494017202764285">"Asetukset"</string>
-    <string name="snooze_undo" msgid="60890935148417175">"KUMOA"</string>
+    <string name="snooze_undo" msgid="2738844148845992103">"Kumoa"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"Torkku: <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2066838694120718170">
       <item quantity="other">%d tuntia</item>
@@ -824,6 +831,7 @@
     <string name="keyboard_key_insert" msgid="4621692715704410493">"Insert"</string>
     <string name="keyboard_key_num_lock" msgid="7209960042043090548">"Num Lock"</string>
     <string name="keyboard_key_numpad_template" msgid="7316338238459991821">"Numeronäppäimistö <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="notif_inline_reply_remove_attachment_description" msgid="7954075334095405429">"Poista liite"</string>
     <string name="keyboard_shortcut_group_system" msgid="1583416273777875970">"Järjestelmä"</string>
     <string name="keyboard_shortcut_group_system_home" msgid="7465138628692109907">"Aloitusnäyttö"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="8628108256824616927">"Viimeaikaiset"</string>
@@ -853,9 +861,10 @@
     <string name="data_saver" msgid="3484013368530820763">"Data Saver"</string>
     <string name="accessibility_data_saver_on" msgid="5394743820189757731">"Data Saver on käytössä."</string>
     <string name="accessibility_data_saver_off" msgid="58339669022107171">"Data Saver on pois käytöstä."</string>
-    <string name="switch_bar_on" msgid="1770868129120096114">"Käytössä"</string>
-    <string name="switch_bar_off" msgid="5669805115416379556">"Pois käytöstä"</string>
+    <string name="switch_bar_on" msgid="1770868129120096114">"Päällä"</string>
+    <string name="switch_bar_off" msgid="5669805115416379556">"Pois päältä"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"Ei käytettävissä"</string>
+    <string name="tile_disabled" msgid="373212051546573069">"Ei käytössä"</string>
     <string name="nav_bar" msgid="4642708685386136807">"Navigointipalkki"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"Asettelu"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"Ylimääräinen vasen painiketyyppi"</string>
@@ -999,11 +1008,11 @@
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"<xliff:g id="TYPES_LIST">%s</xliff:g> ovat sovellusten käytössä."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" ja "</string>
-    <string name="ongoing_privacy_dialog_using_op" msgid="4125175620929701569">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> käyttää kohdetta <xliff:g id="APP_OPP_NAME">%2$s</xliff:g>"</string>
-    <string name="ongoing_privacy_dialog_recent_op" msgid="4255923947334262404">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> käytti kohdetta <xliff:g id="APP_OPP_NAME">%2$s</xliff:g> äskettäin"</string>
-    <string name="ongoing_privacy_dialog_enterprise" msgid="4082735415905550729">"(yritys)"</string>
+    <string name="ongoing_privacy_dialog_using_op" msgid="426635338010011796">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> käyttää tätä"</string>
+    <string name="ongoing_privacy_dialog_recent_op" msgid="2736290123662790026">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> käytti tätä äskettäin"</string>
+    <string name="ongoing_privacy_dialog_enterprise" msgid="3003314125311966061">"(työ)"</string>
     <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"Puhelu"</string>
-    <string name="ongoing_privacy_dialog_attribution_text" msgid="9186683306719924646">"(kautta: <xliff:g id="ATTRIBUTION">%s</xliff:g>)"</string>
+    <string name="ongoing_privacy_dialog_attribution_text" msgid="4738795925380373994">"(kautta: <xliff:g id="APPLICATION_NAME_S_">%s</xliff:g>)"</string>
     <string name="privacy_type_camera" msgid="7974051382167078332">"kamera"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"sijainti"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"mikrofoni"</string>
@@ -1014,18 +1023,6 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Järjestelmän navigointitapa vaihdettu. Voit muuttaa sitä asetuksista."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Vaihda järjestelmän navigointitapaa asetuksista"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Virransäästötila"</string>
-    <string name="priority_onboarding_title" msgid="2893070698479227616">"Tärkeäksi merkitty keskustelu"</string>
-    <!-- no translation found for priority_onboarding_behavior (636826237468953117) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_show_at_top_text (3861580571311518785) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_show_avatar_text (1781653813573865071) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_appear_as_bubble_text (4359924720680083057) -->
-    <skip />
-    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Keskeyttää Älä häiritse ‑tilan"</string>
-    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Selvä"</string>
-    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Asetukset"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Suurennusikkuna"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Suurennusikkunan ohjaimet"</string>
     <string name="accessibility_control_zoom_in" msgid="1189272315480097417">"Lähennä"</string>
@@ -1040,18 +1037,13 @@
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Vaihda"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"Esteettömyyspainike on korvannut esteettömyyseleen\n\n"<annotation id="link">"Katso asetukset"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Piilota painike tilapäisesti siirtämällä se reunaan"</string>
-    <!-- no translation found for accessibility_floating_button_action_move_top_left (6253520703618545705) -->
-    <skip />
-    <!-- no translation found for accessibility_floating_button_action_move_top_right (6106225581993479711) -->
-    <skip />
-    <!-- no translation found for accessibility_floating_button_action_move_bottom_left (8063394111137429725) -->
-    <skip />
-    <!-- no translation found for accessibility_floating_button_action_move_bottom_right (6196904373227440500) -->
-    <skip />
-    <!-- no translation found for accessibility_floating_button_action_move_to_edge_and_hide_to_half (662401168245782658) -->
-    <skip />
-    <!-- no translation found for accessibility_floating_button_action_move_out_edge_and_show (8354760891651663326) -->
-    <skip />
+    <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Siirrä vasempaan yläreunaan"</string>
+    <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Siirrä oikeaan yläreunaan"</string>
+    <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"Siirrä vasempaan alareunaan"</string>
+    <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"Siirrä oikeaan alareunaan"</string>
+    <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Siirrä reunaan ja piilota"</string>
+    <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Siirrä pois reunasta ja näytä"</string>
+    <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"vaihda"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Laitteiden hallinta"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Lisää ohjaimia yhdistettyjä laitteita varten"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"Laitteiden hallinnan käyttöönotto"</string>
@@ -1093,11 +1085,12 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Pyyhkäise nähdäksesi lisää"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Ladataan suosituksia"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Media"</string>
-    <string name="controls_media_close_session" msgid="3957093425905475065">"Piilota nykyinen käyttökerta."</string>
-    <string name="controls_media_active_session" msgid="1984383994625845642">"Nykyistä käyttökertaa ei voi piilottaa."</string>
+    <string name="controls_media_close_session" msgid="1193000643003066508">"Piilotetaanko median käyttökerta?"</string>
+    <string name="controls_media_active_session" msgid="3146882316024153337">"Tätä median käyttökertaa ei voi piilottaa."</string>
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Ohita"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Jatka"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Asetukset"</string>
+    <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"Toista"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Epäaktiivinen, tarkista sovellus"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Virhe, yritetään uudelleen…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Ei löydy"</string>
@@ -1130,36 +1123,37 @@
     <string name="less_than_timestamp" msgid="6598972791137724517">"Alle <xliff:g id="DURATION">%1$s</xliff:g> sitten"</string>
     <string name="over_timestamp" msgid="4765793502859358634">"Yli <xliff:g id="DURATION">%1$s</xliff:g> sitten"</string>
     <string name="birthday_status" msgid="2596961629465396761">"Syntymäpäivä"</string>
-    <!-- no translation found for birthday_status_content_description (7677415209545817153) -->
-    <skip />
+    <string name="birthday_status_content_description" msgid="682836371128282925">"<xliff:g id="NAME">%1$s</xliff:g> viettää tänään syntymäpäiväänsä"</string>
     <string name="upcoming_birthday_status" msgid="2005452239256870351">"Syntymäpäivä pian"</string>
-    <!-- no translation found for upcoming_birthday_status_content_description (1210885672210845293) -->
-    <skip />
+    <string name="upcoming_birthday_status_content_description" msgid="2165036816803797148">"<xliff:g id="NAME">%1$s</xliff:g> viettää pian syntymäpäiväänsä"</string>
     <string name="anniversary_status" msgid="1790034157507590838">"Vuosipäivä"</string>
-    <!-- no translation found for anniversary_status_content_description (6214503393960662875) -->
-    <skip />
+    <string name="anniversary_status_content_description" msgid="8212171790843327442">"<xliff:g id="NAME">%1$s</xliff:g> juhlii tänään vuosipäiväänsä"</string>
     <string name="location_status" msgid="1294990572202541812">"Sijaintia jaetaan"</string>
-    <!-- no translation found for location_status_content_description (2982386178160071305) -->
-    <skip />
+    <string name="location_status_content_description" msgid="2982386178160071305">"<xliff:g id="NAME">%1$s</xliff:g> jakaa sijaintia"</string>
     <string name="new_story_status" msgid="9012195158584846525">"Uusi juttu"</string>
-    <!-- no translation found for new_story_status_content_description (4963137422622516708) -->
-    <skip />
+    <string name="new_story_status_content_description" msgid="4963137422622516708">"<xliff:g id="NAME">%1$s</xliff:g> jakoi uuden tarinan"</string>
     <string name="video_status" msgid="4548544654316843225">"Katsotaan"</string>
     <string name="audio_status" msgid="4237055636967709208">"Kuunnellaan"</string>
     <string name="game_status" msgid="1340694320630973259">"Toistetaan"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"Kaverit"</string>
     <string name="empty_status" msgid="5938893404951307749">"Jutellaan illalla!"</string>
-    <!-- no translation found for status_before_loading (1500477307859631381) -->
-    <skip />
+    <string name="status_before_loading" msgid="1500477307859631381">"Sisältö tulee pian näkyviin"</string>
     <string name="missed_call" msgid="4228016077700161689">"Vastaamaton puhelu"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"Yli <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"Katso viimeaikaiset viestit, vastaamattomat puhelut ja tilapäivitykset"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Keskustelu"</string>
-    <!-- no translation found for new_notification_text_content_description (5574393603145263727) -->
-    <skip />
-    <!-- no translation found for new_notification_image_content_description (6017506886810813123) -->
-    <skip />
+    <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g> lähetti viestin"</string>
+    <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> lähetti kuvan"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Ongelma akkumittarin lukemisessa"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Saat lisätietoja napauttamalla"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Ei herätyksiä"</string>
+    <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Sormenjälkitunnistin"</string>
+    <string name="accessibility_udfps_disabled_button" msgid="4284034245130239384">"Sormenjälkitunnistin poistettu käytöstä"</string>
+    <string name="accessibility_authenticate_hint" msgid="798914151813205721">"todentaaksesi"</string>
+    <string name="accessibility_enter_hint" msgid="2617864063504824834">"avataksesi laitteen"</string>
+    <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Avaa sormenjäljellä"</string>
+    <!-- no translation found for accessibility_fingerprint_bouncer (7189102492498735519) -->
+    <skip />
+    <!-- no translation found for ongoing_phone_call_content_description (5332334388483099947) -->
+    <skip />
 </resources>

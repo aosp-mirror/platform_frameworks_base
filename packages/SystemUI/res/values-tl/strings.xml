@@ -92,8 +92,10 @@
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Mag-capture pa"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"I-dismiss ang screenshot"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Preview ng screenshot"</string>
-    <string name="screenshot_top_boundary" msgid="1500569103321300856">"Pinakamataas na limitasyon"</string>
-    <string name="screenshot_bottom_boundary" msgid="5657242629526407311">"Pinakamababang limitasyon"</string>
+    <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"<xliff:g id="PERCENT">%1$d</xliff:g> (na) porsyento sa hangganan sa itaas"</string>
+    <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"<xliff:g id="PERCENT">%1$d</xliff:g> (na) porsyento sa hangganan sa ibaba"</string>
+    <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"<xliff:g id="PERCENT">%1$d</xliff:g> (na) porsyento sa hangganan sa kaliwa"</string>
+    <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"<xliff:g id="PERCENT">%1$d</xliff:g> (na) porsyento sa hangganan sa kanan"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Recorder ng Screen"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Pinoproseso screen recording"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Kasalukuyang notification para sa session ng pag-record ng screen"</string>
@@ -134,7 +136,10 @@
     <string name="accessibility_camera_button" msgid="2938898391716647247">"Camera"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"Telepono"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Voice Assist"</string>
+    <!-- no translation found for accessibility_wallet_button (1458258783460555507) -->
+    <skip />
     <string name="accessibility_unlock_button" msgid="122785427241471085">"I-unlock"</string>
+    <string name="accessibility_lock_icon" msgid="661492842417875775">"Naka-lock ang device"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="5209142744692162598">"Naghihintay ng fingerprint"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="1811563723195375298">"I-unlock nang hindi ginagamit ang iyong fingerprint"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Sina-scan ang mukha"</string>
@@ -286,9 +291,9 @@
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"Na-off ang mobile hotspot."</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"Na-on ang mobile hotspot."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"Itinigil ang pagka-cast sa screen."</string>
-    <string name="accessibility_quick_settings_work_mode_off" msgid="562749867895549696">"Naka-off ang work mode."</string>
+    <string name="accessibility_quick_settings_work_mode_off" msgid="9106217884005620744">"Naka-pause ang work mode."</string>
     <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"Naka-on ang work mode."</string>
-    <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6256690740556798683">"Na-off ang work mode."</string>
+    <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6422896967647049692">"Naka-pause ang work mode."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"Na-on ang work mode."</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"Na-off ang Data Saver."</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"Na-on ang Data Saver."</string>
@@ -340,7 +345,7 @@
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"Mga Hearing Aid"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"Ino-on…"</string>
     <string name="quick_settings_brightness_label" msgid="680259653088849563">"Brightness"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Awtomatikong i-rotate"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"I-auto rotate"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Awtomatikong i-rotate ang screen"</string>
     <string name="accessibility_quick_settings_rotation_value" msgid="2916484894750819251">"<xliff:g id="ID_1">%s</xliff:g> mode"</string>
     <string name="quick_settings_rotation_locked_label" msgid="4420863550666310319">"Naka-lock ang pag-ikot"</string>
@@ -349,8 +354,10 @@
     <string name="quick_settings_ime_label" msgid="3351174938144332051">"Pamamaraan ng Pag-input"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Lokasyon"</string>
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"Naka-off ang Lokasyon"</string>
-    <string name="quick_settings_camera_label" msgid="1367149596242401934">"I-block ang Camera"</string>
-    <string name="quick_settings_mic_label" msgid="8245831073612564953">"I-mute ang Mikropono"</string>
+    <string name="quick_settings_camera_label" msgid="5612076679385269339">"Access sa camera"</string>
+    <string name="quick_settings_mic_label" msgid="8392773746295266375">"Access sa mic"</string>
+    <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"Available"</string>
+    <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"Naka-block"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"Device ng media"</string>
     <string name="quick_settings_rssi_label" msgid="3397615415140356701">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="7499207215265078598">"Mga Pang-emergency na Tawag Lamang"</string>
@@ -405,10 +412,11 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"<xliff:g id="DATA_LIMIT">%s</xliff:g> ang limitasyon"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"Babala sa <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"Profile sa trabaho"</string>
+    <string name="quick_settings_work_mode_paused" msgid="4841109346916998613">"Naka-pause"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Night Light"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Mao-on sa sunset"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Hanggang sunrise"</string>
-    <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"Mao-on sa ganap na <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"Mao-on nang <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"Hanggang <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"Madilim na tema"</string>
     <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"Pantipid ng Baterya"</string>
@@ -422,8 +430,12 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Pag-record ng Screen"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Magsimula"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Ihinto"</string>
-    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="8643239110815357707">"Para magpatuloy, kailangan ng &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; ng access sa mikropono ng iyong device."</string>
-    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="7773612142162829116">"Para magpatuloy, kailangan ng &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; ng access sa camera ng iyong device."</string>
+    <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"I-unblock ang mikropono ng device?"</string>
+    <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"I-unblock ang camera ng device?"</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"I-unblock ang camera at mikropono ng device?"</string>
+    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Ina-unblock nito ang access para sa lahat ng app at serbisyong pinapayagang gumamit ng iyong mikropono."</string>
+    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Ina-unblock nito ang access para sa lahat ng app at serbisyong pinapayagang gumamit ng iyong camera."</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Ina-unblock nito ang access para sa lahat ng app at serbisyong pinapayagang gumamit ng iyong camera o mikropono."</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"Device"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Mag-swipe pataas upang lumipat ng app"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"I-drag pakanan para mabilisang magpalipat-lipat ng app"</string>
@@ -460,10 +472,10 @@
     <string name="interruption_level_none_twoline" msgid="8579382742855486372">"Ganap na\nkatahimikan"</string>
     <string name="interruption_level_priority_twoline" msgid="8523482736582498083">"Priyoridad\nlang"</string>
     <string name="interruption_level_alarms_twoline" msgid="2045067991335708767">"Mga alarm\nlang"</string>
-    <string name="keyguard_indication_charging_time_wireless" msgid="7343602278805644915">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Wireless na nagcha-charge (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> bago mapuno)"</string>
-    <string name="keyguard_indication_charging_time" msgid="4927557805886436909">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Nagcha-charge (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> hanggang mapuno)"</string>
-    <string name="keyguard_indication_charging_time_fast" msgid="7895986003578341126">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Mabilis na nagcha-charge (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> na lang)"</string>
-    <string name="keyguard_indication_charging_time_slowly" msgid="245442950133408398">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Mabagal na nagcha-charge (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> na lang)"</string>
+    <string name="keyguard_indication_charging_time_wireless" msgid="577856646141738675">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Wireless na nagcha-charge • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> na lang para mapuno"</string>
+    <string name="keyguard_indication_charging_time" msgid="6492711711891071502">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Nagcha-charge • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> na lang para mapuno"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Mabilis na nagcha-charge • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> na lang para mapuno"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Mabagal na nagcha-charge • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> na lang para mapuno"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Magpalit ng user"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="5759855008166759399">"Magpalit ng user, kasalukuyang user <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="383168614528618402">"Kasalukuyang user <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -527,7 +539,7 @@
     <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Pagmamay-ari ng <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ang device na ito at nakakonekta ito sa mga VPN"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Maaaring sumubaybay ang iyong organisasyon ng trapiko sa network sa profile sa trabaho mo"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"Maaaring subaybayan ng <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ang trapiko sa network sa iyong profile sa trabaho"</string>
-    <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"Nakikita ng iyong IT admin ang aktibidad sa network ng profile sa trabaho"</string>
+    <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"Nakikita ng IT admin ang aktibidad sa network"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Maaaring sinusubaybayan ang network"</string>
     <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"Nakakonekta sa mga VPN ang device na ito"</string>
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Nakakonekta sa <xliff:g id="VPN_APP">%1$s</xliff:g> ang iyong profile sa trabaho"</string>
@@ -657,12 +669,12 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Alarma"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
-    <string name="wallet_button_label_device_unlocked" msgid="4653372304880486681">"Ipakita lahat"</string>
-    <string name="wallet_button_label_device_locked" msgid="4418473374652969487">"I-unlock para magbayad"</string>
-    <string name="wallet_secondary_label_active" msgid="4909706168969888137">"Handa na"</string>
-    <string name="wallet_secondary_label_no_card" msgid="1750103386908123401">"Mag-set up ng pagbabayad"</string>
+    <string name="wallet_app_button_label" msgid="7123784239111190992">"Ipakita lahat"</string>
+    <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"I-unlock para magbayad"</string>
+    <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"Hindi naka-set up"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"I-unlock para magamit"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Nagkaproblema sa pagkuha ng iyong mga card, pakisubukan ulit sa ibang pagkakataon"</string>
+    <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Mga setting ng lock screen"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Profile sa trabaho"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Airplane mode"</string>
     <string name="add_tile" msgid="6239678623873086686">"Magdagdag ng tile"</string>
@@ -731,9 +743,12 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Status:&lt;/b&gt; Na-demote sa Naka-silent"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Status:&lt;/b&gt; Ranked nang Mas Mataas"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Status:&lt;/b&gt; Na-rank nang Mas Mababa"</string>
-    <string name="notification_channel_summary_priority" msgid="4592979359953954258">"Palaging ipinapakita sa itaas ng iyong mga notification, kahit na naka-on ang Priority mode"</string>
+    <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Makikita sa itaas ng mga notification ng pag-uusap at bilang larawan sa profile sa lock screen"</string>
+    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Makikita sa itaas ng mga notification ng pag-uusap at bilang larawan sa profile sa lock screen, lumalabas bilang bubble"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Makikita sa itaas ng mga notification ng pag-uusap at bilang larawan sa profile sa lock screen, naaabala ang Huwag Istorbohin"</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Makikita sa itaas ng mga notification ng pag-uusap at bilang larawan sa profile sa lock screen, lumalabas bilang bubble, naaabala ang Huwag Istorbohin"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Mga Setting"</string>
-    <string name="notification_priority_title" msgid="5256226572739882190">"Mga priyoridad na pag-uusap"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"Priyoridad"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"Hindi sinusuportahan ng <xliff:g id="APP_NAME">%1$s</xliff:g> ang mga feature ng pag-uusap"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Hindi puwedeng baguhin ang mga notification na ito."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Hindi mako-configure dito ang pangkat na ito ng mga notification"</string>
@@ -776,7 +791,7 @@
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"mga opsyon sa pag-snooze ng notification"</string>
     <string name="notification_menu_snooze_action" msgid="5415729610393475019">"Paalalahanan ako"</string>
     <string name="notification_menu_settings_action" msgid="7085494017202764285">"Mga Setting"</string>
-    <string name="snooze_undo" msgid="60890935148417175">"I-UNDO"</string>
+    <string name="snooze_undo" msgid="2738844148845992103">"I-undo"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"Na-snooze ng <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2066838694120718170">
       <item quantity="one">%d oras</item>
@@ -816,6 +831,7 @@
     <string name="keyboard_key_insert" msgid="4621692715704410493">"Insert"</string>
     <string name="keyboard_key_num_lock" msgid="7209960042043090548">"Num Lock"</string>
     <string name="keyboard_key_numpad_template" msgid="7316338238459991821">"Numpad <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="notif_inline_reply_remove_attachment_description" msgid="7954075334095405429">"Alisin ang attachment"</string>
     <string name="keyboard_shortcut_group_system" msgid="1583416273777875970">"System"</string>
     <string name="keyboard_shortcut_group_system_home" msgid="7465138628692109907">"Home"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="8628108256824616927">"Mga Kamakailang Ginamit"</string>
@@ -848,6 +864,7 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"I-on"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"I-off"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"Hindi available"</string>
+    <string name="tile_disabled" msgid="373212051546573069">"Naka-disable"</string>
     <string name="nav_bar" msgid="4642708685386136807">"Navigation bar"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"Layout"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"Uri ng extra na button ng kaliwa"</string>
@@ -991,11 +1008,11 @@
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Ginagamit ng mga application ang iyong <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" at "</string>
-    <string name="ongoing_privacy_dialog_using_op" msgid="4125175620929701569">"Ginagamit ng <xliff:g id="APPLICATION_NAME">%1$s</xliff:g> ang <xliff:g id="APP_OPP_NAME">%2$s</xliff:g>"</string>
-    <string name="ongoing_privacy_dialog_recent_op" msgid="4255923947334262404">"Kamakailang ginamit ng <xliff:g id="APPLICATION_NAME">%1$s</xliff:g> ang <xliff:g id="APP_OPP_NAME">%2$s</xliff:g>"</string>
-    <string name="ongoing_privacy_dialog_enterprise" msgid="4082735415905550729">"(enterprise)"</string>
+    <string name="ongoing_privacy_dialog_using_op" msgid="426635338010011796">"Ginagamit ng <xliff:g id="APPLICATION_NAME">%1$s</xliff:g>"</string>
+    <string name="ongoing_privacy_dialog_recent_op" msgid="2736290123662790026">"Kamakailang ginamit ng <xliff:g id="APPLICATION_NAME">%1$s</xliff:g>"</string>
+    <string name="ongoing_privacy_dialog_enterprise" msgid="3003314125311966061">"(trabaho)"</string>
     <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"Tawag sa telepono"</string>
-    <string name="ongoing_privacy_dialog_attribution_text" msgid="9186683306719924646">"(sa pamamagitan ng <xliff:g id="ATTRIBUTION">%s</xliff:g>)"</string>
+    <string name="ongoing_privacy_dialog_attribution_text" msgid="4738795925380373994">"(sa pamamagitan ng <xliff:g id="APPLICATION_NAME_S_">%s</xliff:g>)"</string>
     <string name="privacy_type_camera" msgid="7974051382167078332">"camera"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"lokasyon"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"mikropono"</string>
@@ -1006,14 +1023,6 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Na-update na ang pag-navigate ng system. Para gumawa ng mga pagbabago, pumunta sa Mga Setting."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Pumunta sa Mga Setting para i-update ang pag-navigate sa system"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Naka-standby"</string>
-    <string name="priority_onboarding_title" msgid="2893070698479227616">"Ginawang priyoridad ang pag-uusap"</string>
-    <string name="priority_onboarding_behavior" msgid="636826237468953117">"Mga priyoridad na pag-uusap"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="3861580571311518785">"Ipinapakita ang pag-uusap na ito sa itaas ng listahan mo at palaging ipapakita sa iyo kapag naka-on ang Priority mode"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="1781653813573865071">"Ipinapakita ang mga larawan sa profile sa lock screen"</string>
-    <string name="priority_onboarding_appear_as_bubble_text" msgid="4359924720680083057">"Madali mong mahahanap ang mga pag-uusap na ito sa mga bubble sa iyong Home screen"</string>
-    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Ihinto ang Huwag Istorbohin"</string>
-    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"OK"</string>
-    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Mga Setting"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Window ng Pag-magnify"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Mga Kontrol sa Pag-magnify ng Window"</string>
     <string name="accessibility_control_zoom_in" msgid="1189272315480097417">"Mag-zoom in"</string>
@@ -1034,6 +1043,7 @@
     <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"Ilipat sa kanan sa ibaba"</string>
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Ilipat sa sulok at itago"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Alisin sa sulok at ipakita"</string>
+    <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"i-toggle"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Mga kontrol ng device"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Magdagdag ng kontrol para sa mga nakakonektang device"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"I-set up ang mga kontrol ng device"</string>
@@ -1075,11 +1085,12 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Mag-swipe para tumingin ng higit pa"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Nilo-load ang rekomendasyon"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Media"</string>
-    <string name="controls_media_close_session" msgid="3957093425905475065">"Itago ang kasalukuyang session."</string>
-    <string name="controls_media_active_session" msgid="1984383994625845642">"Hindi maitatago ang kasalukuyang session."</string>
+    <string name="controls_media_close_session" msgid="1193000643003066508">"Itago ang session ng media na ito?"</string>
+    <string name="controls_media_active_session" msgid="3146882316024153337">"Hindi maitatago ang kasalukuyang session ng media."</string>
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"I-dismiss"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Ituloy"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Mga Setting"</string>
+    <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"I-play"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Hindi aktibo, tingnan ang app"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Nagka-error, sinusubukan ulit…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Hindi nahanap"</string>
@@ -1112,11 +1123,11 @@
     <string name="less_than_timestamp" msgid="6598972791137724517">"Wala pang <xliff:g id="DURATION">%1$s</xliff:g> ang nakalipas"</string>
     <string name="over_timestamp" msgid="4765793502859358634">"Mahigit <xliff:g id="DURATION">%1$s</xliff:g> ang nakalipas"</string>
     <string name="birthday_status" msgid="2596961629465396761">"Kaarawan"</string>
-    <string name="birthday_status_content_description" msgid="7677415209545817153">"Kaarawan ni <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="birthday_status_content_description" msgid="682836371128282925">"Kaarawan ni <xliff:g id="NAME">%1$s</xliff:g> ngayon"</string>
     <string name="upcoming_birthday_status" msgid="2005452239256870351">"Kaarawang paparating"</string>
-    <string name="upcoming_birthday_status_content_description" msgid="1210885672210845293">"Malapit na ang kaarawan ni <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="upcoming_birthday_status_content_description" msgid="2165036816803797148">"Malapit na ang kaarawan ni <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="anniversary_status" msgid="1790034157507590838">"Anibersaryo"</string>
-    <string name="anniversary_status_content_description" msgid="6214503393960662875">"Anibersaryo ni <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="anniversary_status_content_description" msgid="8212171790843327442">"Anibersaryo ni <xliff:g id="NAME">%1$s</xliff:g> ngayon"</string>
     <string name="location_status" msgid="1294990572202541812">"Ibinabahagi ang lokasyon"</string>
     <string name="location_status_content_description" msgid="2982386178160071305">"Nagbabahagi ng lokasyon si <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="new_story_status" msgid="9012195158584846525">"Bagong kuwento"</string>
@@ -1136,4 +1147,13 @@
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Nagkaproblema sa pagbabasa ng iyong battery meter"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"I-tap para sa higit pang impormasyon"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Walang alarm"</string>
+    <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Sensor para sa fingerprint"</string>
+    <string name="accessibility_udfps_disabled_button" msgid="4284034245130239384">"Naka-disable ang sensor para sa fingerprint"</string>
+    <string name="accessibility_authenticate_hint" msgid="798914151813205721">"i-authenticate"</string>
+    <string name="accessibility_enter_hint" msgid="2617864063504824834">"ilagay ang device"</string>
+    <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Gamitin ang fingerprint para buksan"</string>
+    <!-- no translation found for accessibility_fingerprint_bouncer (7189102492498735519) -->
+    <skip />
+    <!-- no translation found for ongoing_phone_call_content_description (5332334388483099947) -->
+    <skip />
 </resources>
