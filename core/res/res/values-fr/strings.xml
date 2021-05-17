@@ -611,9 +611,9 @@
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Icône d\'empreinte digitale"</string>
     <string name="permlab_manageFace" msgid="4569549381889283282">"gérer les composants de Face Unlock"</string>
     <string name="permdesc_manageFace" msgid="6204569688492710471">"Autorise l\'appli à invoquer des méthodes pour ajouter et supprimer des modèles de visages."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"utiliser les composants de Face Unlock"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Autorise l\'application à utiliser les composants de Face Unlock pour l\'authentification"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Face Unlock"</string>
+    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"utiliser le matériel de déverrouillage par authentification faciale"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Autorise l\'appli à utiliser le matériel de déverrouillage par authentification faciale"</string>
+    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Déverrouillage par authentification faciale"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Enregistrer à nouveau votre visage"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Pour améliorer la reconnaissance, veuillez enregistrer à nouveau votre visage"</string>
     <string name="face_setup_notification_title" msgid="550617822603450009">"Configurer Face Unlock"</string>
@@ -643,7 +643,7 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Imposs. valider visage. Matériel non disponible."</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"Réessayez d\'activer Face Unlock."</string>
+    <string name="face_error_timeout" msgid="522924647742024699">"Réessayez d\'activer le déverrouillage."</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Impossible stocker nouv. visages. Veuillez en supprimer un."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Opération de reconnaissance faciale annulée."</string>
     <string name="face_error_user_canceled" msgid="8553045452825849843">"Face Unlock annulé par l\'utilisateur."</string>

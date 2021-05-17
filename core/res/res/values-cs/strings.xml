@@ -656,7 +656,7 @@
     <string name="face_error_lockout" msgid="7864408714994529437">"Příliš mnoho pokusů. Zkuste to později."</string>
     <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Příliš mnoho pokusů. Odemknutí obličejem bylo deaktivováno."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Obličej se nepodařilo ověřit. Zkuste to znovu."</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"Ověření obličejem nemáte nastavené."</string>
+    <string name="face_error_not_enrolled" msgid="7369928733504691611">"Odemknutí obličejem nemáte nastavené."</string>
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"Odemknutí obličejem na tomto zařízení není podporováno."</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Senzor je dočasně deaktivován."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Obličej <xliff:g id="FACEID">%d</xliff:g>"</string>

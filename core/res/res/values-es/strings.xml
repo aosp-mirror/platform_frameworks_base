@@ -1272,12 +1272,12 @@
     <string name="new_app_action" msgid="547772182913269801">"Abrir <xliff:g id="NEW_APP">%1$s</xliff:g>"</string>
     <string name="new_app_description" msgid="1958903080400806644">"<xliff:g id="OLD_APP">%1$s</xliff:g> se cerrará sin guardar"</string>
     <string name="dump_heap_notification" msgid="5316644945404825032">"<xliff:g id="PROC">%1$s</xliff:g> ha superado el límite de memoria"</string>
-    <string name="dump_heap_ready_notification" msgid="2302452262927390268">"El volcado de pila <xliff:g id="PROC">%1$s</xliff:g> está listo"</string>
-    <string name="dump_heap_notification_detail" msgid="8431586843001054050">"Se ha recopilado un volcado de pila. Toca para compartir."</string>
-    <string name="dump_heap_title" msgid="4367128917229233901">"¿Compartir volcado de pila?"</string>
-    <string name="dump_heap_text" msgid="1692649033835719336">"El proceso <xliff:g id="PROC">%1$s</xliff:g> ha superado su límite de memoria de <xliff:g id="SIZE">%2$s</xliff:g>. Hay un volcado de pila disponible que puedes compartir con su desarrollador (ten cuidado, ya que puede incluir información personal a la que tenga acceso la aplicación)."</string>
-    <string name="dump_heap_system_text" msgid="6805155514925350849">"El proceso <xliff:g id="PROC">%1$s</xliff:g> ha superado su límite de memoria de <xliff:g id="SIZE">%2$s</xliff:g>. Hay un volcado de pila disponible que puedes compartir. Ten cuidado, ya que puede incluir información personal sensible a la que el proceso puede acceder, como texto que hayas introducido."</string>
-    <string name="dump_heap_ready_text" msgid="5849618132123045516">"Hay un volcado de pila del proceso <xliff:g id="PROC">%1$s</xliff:g> que puedes compartir. Ten cuidado, ya que puede incluir información personal sensible a la que el proceso puede acceder, como texto que hayas introducido."</string>
+    <string name="dump_heap_ready_notification" msgid="2302452262927390268">"El volcado de montículo <xliff:g id="PROC">%1$s</xliff:g> está listo"</string>
+    <string name="dump_heap_notification_detail" msgid="8431586843001054050">"Se ha recopilado un volcado de montículo. Toca para compartir."</string>
+    <string name="dump_heap_title" msgid="4367128917229233901">"¿Compartir volcado de montículo?"</string>
+    <string name="dump_heap_text" msgid="1692649033835719336">"El proceso <xliff:g id="PROC">%1$s</xliff:g> ha superado su límite de memoria de <xliff:g id="SIZE">%2$s</xliff:g>. Hay un volcado de montículo disponible que puedes compartir con su desarrollador (ten cuidado, ya que puede incluir información personal a la que tenga acceso la aplicación)."</string>
+    <string name="dump_heap_system_text" msgid="6805155514925350849">"El proceso <xliff:g id="PROC">%1$s</xliff:g> ha superado su límite de memoria de <xliff:g id="SIZE">%2$s</xliff:g>. Hay un volcado de montículo disponible que puedes compartir. Ten cuidado, ya que puede incluir información personal sensible a la que el proceso puede acceder, como texto que hayas introducido."</string>
+    <string name="dump_heap_ready_text" msgid="5849618132123045516">"Hay un volcado de montículo del proceso <xliff:g id="PROC">%1$s</xliff:g> que puedes compartir. Ten cuidado, ya que puede incluir información personal sensible a la que el proceso puede acceder, como texto que hayas introducido."</string>
     <string name="sendText" msgid="493003724401350724">"Selecciona una acción para el texto"</string>
     <string name="volume_ringtone" msgid="134784084629229029">"Volumen del timbre"</string>
     <string name="volume_music" msgid="7727274216734955095">"Volumen de multimedia"</string>
