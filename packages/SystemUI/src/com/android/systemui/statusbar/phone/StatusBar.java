@@ -3706,7 +3706,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private void showBouncerIfKeyguard() {
         if ((mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED)
                 && !mKeyguardViewMediator.isHiding()) {
-            mStatusBarKeyguardViewManager.showBouncer(true /* scrimmed */);
+            mStatusBarKeyguardViewManager.showGenericBouncer(true /* scrimmed */);
         }
     }
 
