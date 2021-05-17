@@ -4603,13 +4603,14 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             return super.forAllWindows(callback, traverseTopToBottom);
         }
 
-        private boolean skipImeWindowsDuringTraversal(DisplayContent dc) {
+        private static boolean skipImeWindowsDuringTraversal(DisplayContent dc) {
             // We skip IME windows so they're processed just above their target, except
             // in split-screen mode where we process the IME containers above the docked divider.
             // Note that this method check should align with {@link
             // WindowState#applyImeWindowsIfNeeded} in case of any state mismatch.
-            return dc.getImeTarget(IME_TARGET_LAYERING) != null
-                    && !dc.getDefaultTaskDisplayArea().isSplitScreenModeActivated();
+            return dc.mImeLayeringTarget != null
+                    && (!dc.getDefaultTaskDisplayArea().isSplitScreenModeActivated()
+                             || dc.mImeLayeringTarget.getTask() == null);
         }
 
         /** Like {@link #forAllWindows}, but ignores {@link #skipImeWindowsDuringTraversal} */
