@@ -1354,11 +1354,6 @@ interface ITelephony {
             String callingFeatureId);
 
     /**
-     * Returns the subscription ID associated with the specified PhoneAccount.
-     */
-    int getSubIdForPhoneAccount(in PhoneAccount phoneAccount);
-
-    /**
      * Returns the subscription ID associated with the specified PhoneAccountHandle.
      */
     int getSubIdForPhoneAccountHandle(in PhoneAccountHandle phoneAccountHandle,
