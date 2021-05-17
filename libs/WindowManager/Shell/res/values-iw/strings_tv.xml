@@ -19,6 +19,6 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="notification_channel_tv_pip" msgid="2576686079160402435">"תמונה בתוך תמונה"</string>
     <string name="pip_notification_unknown_title" msgid="2729870284350772311">"(תוכנית ללא כותרת)"</string>
-    <string name="pip_close" msgid="9135220303720555525">"‏סגור PIP"</string>
+    <string name="pip_close" msgid="9135220303720555525">"‏סגירת PIP"</string>
     <string name="pip_fullscreen" msgid="7278047353591302554">"מסך מלא"</string>
 </resources>
