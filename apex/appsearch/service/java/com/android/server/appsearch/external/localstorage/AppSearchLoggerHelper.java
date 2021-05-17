@@ -103,8 +103,7 @@ public final class AppSearchLoggerHelper {
         toStatsBuilder
                 .setNativeLatencyMillis(fromNativeStats.getLatencyMs())
                 .setTermCount(fromNativeStats.getNumTerms())
-                // TODO(b/173532925) query length missing in native
-                // .setNativeQueryLength(0)
+                .setQueryLength(fromNativeStats.getQueryLength())
                 .setFilteredNamespaceCount(fromNativeStats.getNumNamespacesFiltered())
                 .setFilteredSchemaTypeCount(fromNativeStats.getNumSchemaTypesFiltered())
                 .setRequestedPageSize(fromNativeStats.getRequestedPageSize())
