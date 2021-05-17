@@ -1045,14 +1045,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
             } else {
                 // ConnectivityService publishes binder service using publishBinderService() with
                 // no priority assigned will be treated as NORMAL priority. Dumpsys does not send
-                // "--dump-priority" arguments to the service. Thus, dump both NORMAL and HIGH to
-                // align the legacy design.
+                // "--dump-priority" arguments to the service. Thus, dump NORMAL only to align the
+                // legacy output for dumpsys connectivity.
                 // TODO: Integrate into signal dump.
                 dumpNormal(fd, pw, args);
-                pw.println();
-                pw.println("DUMP OF SERVICE HIGH connectivity");
-                pw.println();
-                dumpHigh(fd, pw);
             }
         }
     }
