@@ -267,8 +267,40 @@ public final class Settings {
     /** @hide */
     public static final String EXTRA_NETWORK_TEMPLATE = "network_template";
 
+    /**
+     * The return values for {@link Settings.Config#set}
+     * @hide
+     */
+    @IntDef(prefix = "SET_ALL_RESULT_",
+            value = { SET_ALL_RESULT_FAILURE, SET_ALL_RESULT_SUCCESS, SET_ALL_RESULT_DISABLED })
+    @Retention(RetentionPolicy.SOURCE)
+    @Target({ElementType.TYPE_PARAMETER, ElementType.TYPE_USE})
+    public @interface SetAllResult {}
+
+    /**
+     * A return value for {@link #KEY_CONFIG_SET_ALL_RETURN}, indicates failure.
+     * @hide
+     */
+    public static final int SET_ALL_RESULT_FAILURE = 0;
+
+    /**
+     * A return value for {@link #KEY_CONFIG_SET_ALL_RETURN}, indicates success.
+     * @hide
+     */
+    public static final int SET_ALL_RESULT_SUCCESS = 1;
+
+    /**
+     * A return value for {@link #KEY_CONFIG_SET_ALL_RETURN}, indicates a set all is disabled.
+     * @hide
+     */
+    public static final int SET_ALL_RESULT_DISABLED = 2;
+
     /** @hide */
-    public static final String KEY_CONFIG_SET_RETURN = "config_set_return";
+    public static final String KEY_CONFIG_SET_ALL_RETURN = "config_set_all_return";
+
+    /** @hide */
+    public static final String KEY_CONFIG_IS_SYNC_DISABLED_RETURN =
+            "config_is_sync_disabled_return";
 
     /**
      * An int extra specifying a subscription ID.
@@ -2324,6 +2356,11 @@ public final class Settings {
     public static final String CALL_METHOD_PREFIX_KEY = "_prefix";
 
     /**
+     * @hide - String argument extra to the fast-path call()-based requests
+     */
+    public static final String CALL_METHOD_SYNC_DISABLED_MODE_KEY = "_disabled_mode";
+
+    /**
      * @hide - RemoteCallback monitor callback argument extra to the fast-path call()-based requests
      */
     public static final String CALL_METHOD_MONITOR_CALLBACK_KEY = "_monitor_callback_key";
@@ -2385,6 +2422,15 @@ public final class Settings {
 
     /** @hide - Private call() method to reset to defaults the 'configuration' table */
     public static final String CALL_METHOD_LIST_CONFIG = "LIST_config";
+
+    /** @hide - Private call() method to disable / re-enable syncs to the 'configuration' table */
+    public static final String CALL_METHOD_SET_SYNC_DISABLED_CONFIG = "SET_SYNC_DISABLED_config";
+
+    /**
+     * @hide - Private call() method to return whether syncs are disabled for the 'configuration'
+     * table
+     */
+    public static final String CALL_METHOD_IS_SYNC_DISABLED_CONFIG = "IS_SYNC_DISABLED_config";
 
     /** @hide - Private call() method to register monitor callback for 'configuration' table */
     public static final String CALL_METHOD_REGISTER_MONITOR_CALLBACK_CONFIG =
@@ -2762,11 +2808,11 @@ public final class Settings {
             return true;
         }
 
-        public boolean setStringsForPrefix(ContentResolver cr, String prefix,
+        public @SetAllResult int setStringsForPrefix(ContentResolver cr, String prefix,
                 HashMap<String, String> keyValues) {
             if (mCallSetAllCommand == null) {
                 // This NameValueCache does not support atomically setting multiple flags
-                return false;
+                return SET_ALL_RESULT_FAILURE;
             }
             try {
                 Bundle args = new Bundle();
@@ -2776,10 +2822,10 @@ public final class Settings {
                 Bundle bundle = cp.call(cr.getAttributionSource(),
                         mProviderHolder.mUri.getAuthority(),
                         mCallSetAllCommand, null, args);
-                return bundle.getBoolean(KEY_CONFIG_SET_RETURN);
+                return bundle.getInt(KEY_CONFIG_SET_ALL_RETURN);
             } catch (RemoteException e) {
                 // Not supported by the remote side
-                return false;
+                return SET_ALL_RESULT_FAILURE;
             }
         }
 
@@ -14199,6 +14245,15 @@ public final class Settings {
         public static final String ARE_USER_DISABLED_HDR_FORMATS_ALLOWED =
                 "are_user_disabled_hdr_formats_allowed";
 
+        /**
+         * Whether or not syncs (bulk set operations) for {@link DeviceConfig} are disabled
+         * currently. The value is boolean (1 or 0). The value '1' means that {@link
+         * DeviceConfig#setProperties(DeviceConfig.Properties)} will return {@code false}.
+         *
+         * @hide
+         */
+        public static final String DEVICE_CONFIG_SYNC_DISABLED = "device_config_sync_disabled";
+
         /** @hide */ public static String zenModeToString(int mode) {
             if (mode == ZEN_MODE_IMPORTANT_INTERRUPTIONS) return "ZEN_MODE_IMPORTANT_INTERRUPTIONS";
             if (mode == ZEN_MODE_ALARMS) return "ZEN_MODE_ALARMS";
@@ -16033,6 +16088,39 @@ public final class Settings {
      * @hide
      */
     public static final class Config extends NameValueTable {
+
+        /**
+         * The modes that can be used when disabling syncs to the 'config' settings.
+         * @hide
+         */
+        @IntDef(prefix = "DISABLE_SYNC_MODE_",
+                value = { SYNC_DISABLED_MODE_NONE, SYNC_DISABLED_MODE_PERSISTENT,
+                        SYNC_DISABLED_MODE_UNTIL_REBOOT })
+        @Retention(RetentionPolicy.SOURCE)
+        @Target({ElementType.TYPE_PARAMETER, ElementType.TYPE_USE})
+        public @interface SyncDisabledMode {}
+
+        /**
+         * Sync is not not disabled.
+         *
+         * @hide
+         */
+        public static final int SYNC_DISABLED_MODE_NONE = 0;
+
+        /**
+         * Disabling of Config bulk update / syncing is persistent, i.e. it survives a device
+         * reboot.
+         * @hide
+         */
+        public static final int SYNC_DISABLED_MODE_PERSISTENT = 1;
+
+        /**
+         * Disabling of Config bulk update / syncing is not persistent, i.e. it will not survive a
+         * device reboot.
+         * @hide
+         */
+        public static final int SYNC_DISABLED_MODE_UNTIL_REBOOT = 2;
+
         private static final ContentProviderHolder sProviderHolder =
                 new ContentProviderHolder(DeviceConfig.CONTENT_URI);
 
@@ -16125,7 +16213,7 @@ public final class Settings {
          * @param resolver to access the database with.
          * @param namespace to which the names should be set.
          * @param keyValues map of key names (without the prefix) to values.
-         * @return
+         * @return true if the name/value pairs were set, false if setting was blocked
          *
          * @hide
          */
@@ -16138,12 +16226,15 @@ public final class Settings {
                 compositeKeyValueMap.put(
                         createCompositeName(namespace, entry.getKey()), entry.getValue());
             }
-            // If can't set given configuration that means it's bad
-            if (!sNameValueCache.setStringsForPrefix(resolver, createPrefix(namespace),
-                    compositeKeyValueMap)) {
-                throw new DeviceConfig.BadConfigException();
+            int result = sNameValueCache.setStringsForPrefix(
+                    resolver, createPrefix(namespace), compositeKeyValueMap);
+            if (result == SET_ALL_RESULT_SUCCESS) {
+                return true;
+            } else if (result == SET_ALL_RESULT_DISABLED) {
+                return false;
             }
-            return true;
+            // If can't set given configuration that means it's bad
+            throw new DeviceConfig.BadConfigException();
         }
 
         /**
@@ -16176,6 +16267,50 @@ public final class Settings {
             } catch (RemoteException e) {
                 Log.w(TAG, "Can't reset to defaults for " + DeviceConfig.CONTENT_URI, e);
             }
+        }
+
+        /**
+         * Bridge method between {@link DeviceConfig#setSyncDisabled(int)} and the
+         * {@link com.android.providers.settings.SettingsProvider} implementation.
+         *
+         * @hide
+         */
+        @SuppressLint("AndroidFrameworkRequiresPermission")
+        @RequiresPermission(Manifest.permission.WRITE_DEVICE_CONFIG)
+        static void setSyncDisabled(
+                @NonNull ContentResolver resolver, @SyncDisabledMode int disableSyncMode) {
+            try {
+                Bundle args = new Bundle();
+                args.putInt(CALL_METHOD_SYNC_DISABLED_MODE_KEY, disableSyncMode);
+                IContentProvider cp = sProviderHolder.getProvider(resolver);
+                cp.call(resolver.getAttributionSource(),
+                        sProviderHolder.mUri.getAuthority(), CALL_METHOD_SET_SYNC_DISABLED_CONFIG,
+                        null, args);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Can't set sync disabled " + DeviceConfig.CONTENT_URI, e);
+            }
+        }
+
+        /**
+         * Bridge method between {@link DeviceConfig#isSyncDisabled()} and the
+         * {@link com.android.providers.settings.SettingsProvider} implementation.
+         *
+         * @hide
+         */
+        @SuppressLint("AndroidFrameworkRequiresPermission")
+        @RequiresPermission(Manifest.permission.WRITE_DEVICE_CONFIG)
+        static boolean isSyncDisabled(@NonNull ContentResolver resolver) {
+            try {
+                Bundle args = Bundle.EMPTY;
+                IContentProvider cp = sProviderHolder.getProvider(resolver);
+                Bundle bundle = cp.call(resolver.getAttributionSource(),
+                        sProviderHolder.mUri.getAuthority(), CALL_METHOD_IS_SYNC_DISABLED_CONFIG,
+                        null, args);
+                return bundle.getBoolean(KEY_CONFIG_IS_SYNC_DISABLED_RETURN);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Can't query sync disabled " + DeviceConfig.CONTENT_URI, e);
+            }
+            return false;
         }
 
         /**
