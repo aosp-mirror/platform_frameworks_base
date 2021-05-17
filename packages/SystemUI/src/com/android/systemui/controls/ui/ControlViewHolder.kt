@@ -47,6 +47,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.ColorInt
+import androidx.annotation.VisibleForTesting
 import com.android.internal.graphics.ColorUtils
 import com.android.systemui.R
 import com.android.systemui.animation.Interpolators
@@ -454,7 +455,8 @@ class ControlViewHolder(
         }
     }
 
-    private fun updateStatusRow(
+    @VisibleForTesting
+    internal fun updateStatusRow(
         enabled: Boolean,
         text: CharSequence,
         drawable: Drawable,
@@ -469,11 +471,8 @@ class ControlViewHolder(
         status.setTextColor(color)
 
         control?.getCustomIcon()?.let {
-            // do not tint custom icons, assume the intended icon color is correct
-            if (icon.imageTintList != null) {
-                icon.imageTintList = null
-            }
             icon.setImageIcon(it)
+            icon.imageTintList = it.tintList
         } ?: run {
             if (drawable is StateListDrawable) {
                 // Only reset the drawable if it is a different resource, as it will interfere
