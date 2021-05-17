@@ -67,7 +67,7 @@
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"हाल ही के बबल्स मौजूद नहीं हैं"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"हाल ही के बबल्स और हटाए गए बबल्स यहां दिखेंगे"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"बबल"</string>
-    <string name="manage_bubbles_text" msgid="7730624269650594419">"प्रबंधित करें"</string>
+    <string name="manage_bubbles_text" msgid="7730624269650594419">"मैनेज करें"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"बबल खारिज किया गया."</string>
     <string name="restart_button_description" msgid="5887656107651190519">"इस ऐप्लिकेशन को रीस्टार्ट करने और फ़ुल स्क्रीन पर देखने के लिए टैप करें."</string>
     <string name="got_it" msgid="4428750913636945527">"ठीक है"</string>
