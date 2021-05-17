@@ -1320,12 +1320,12 @@ public final class SensorPrivacyService extends SystemService {
     private void setUserRestriction(int userId, int sensor, boolean enabled) {
         if (sensor == CAMERA) {
             mAppOpsManager.setUserRestrictionForUser(OP_CAMERA, enabled,
-                    mAppOpsRestrictionToken, new String[]{}, userId);
+                    mAppOpsRestrictionToken, null, userId);
         } else if (sensor == MICROPHONE) {
             mAppOpsManager.setUserRestrictionForUser(OP_RECORD_AUDIO, enabled,
-                    mAppOpsRestrictionToken, new String[]{}, userId);
+                    mAppOpsRestrictionToken, null, userId);
             mAppOpsManager.setUserRestrictionForUser(OP_RECORD_AUDIO_HOTWORD, enabled,
-                    mAppOpsRestrictionToken, new String[]{}, userId);
+                    mAppOpsRestrictionToken, null, userId);
         }
     }
 

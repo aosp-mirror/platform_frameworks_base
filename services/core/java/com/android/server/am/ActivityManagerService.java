@@ -351,6 +351,7 @@ import com.android.internal.util.function.HexFunction;
 import com.android.internal.util.function.NonaFunction;
 import com.android.internal.util.function.OctFunction;
 import com.android.internal.util.function.QuadFunction;
+import com.android.internal.util.function.QuintFunction;
 import com.android.internal.util.function.TriFunction;
 import com.android.server.AlarmManagerInternal;
 import com.android.server.DeviceIdleInternal;
@@ -16750,19 +16751,20 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public int checkOperation(int code, int uid, String packageName, boolean raw,
-                QuadFunction<Integer, Integer, String, Boolean, Integer> superImpl) {
+        public int checkOperation(int code, int uid, String packageName,
+                String attributionTag, boolean raw,
+                QuintFunction<Integer, Integer, String, String, Boolean, Integer> superImpl) {
             if (uid == mTargetUid && isTargetOp(code)) {
                 final int shellUid = UserHandle.getUid(UserHandle.getUserId(uid),
                         Process.SHELL_UID);
                 final long identity = Binder.clearCallingIdentity();
                 try {
-                    return superImpl.apply(code, shellUid, "com.android.shell", raw);
+                    return superImpl.apply(code, shellUid, "com.android.shell", null, raw);
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }
             }
-            return superImpl.apply(code, uid, packageName, raw);
+            return superImpl.apply(code, uid, packageName, attributionTag, raw);
         }
 
         @Override
