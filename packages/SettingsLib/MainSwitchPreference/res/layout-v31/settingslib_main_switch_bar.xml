@@ -19,10 +19,6 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_height="wrap_content"
     android:layout_width="match_parent"
-    android:paddingStart="?android:attr/listPreferredItemPaddingStart"
-    android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
-    android:paddingLeft="?android:attr/listPreferredItemPaddingLeft"
-    android:paddingRight="?android:attr/listPreferredItemPaddingRight"
     android:background="?android:attr/colorBackground"
     android:orientation="vertical">
 
@@ -31,15 +27,16 @@
         android:minHeight="@dimen/settingslib_min_switch_bar_height"
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
-        android:paddingLeft="@dimen/settingslib_switchbar_margin_start"
-        android:paddingRight="@dimen/settingslib_switchbar_margin_end">
+        android:layout_margin="@dimen/settingslib_switchbar_margin"
+        android:paddingStart="@dimen/settingslib_switchbar_padding_left"
+        android:paddingEnd="@dimen/settingslib_switchbar_padding_right">
 
         <TextView
             android:id="@+id/switch_text"
             android:layout_height="wrap_content"
             android:layout_width="0dp"
             android:layout_weight="1"
-            android:layout_marginRight="16dp"
+            android:layout_marginEnd="16dp"
             android:layout_gravity="center_vertical"
             android:maxLines="2"
             android:ellipsize="end"
