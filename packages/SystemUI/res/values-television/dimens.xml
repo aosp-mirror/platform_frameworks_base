@@ -21,4 +21,27 @@
     <dimen name="privacy_chip_icon_margin">3dp</dimen>
     <dimen name="privacy_chip_icon_padding">8dp</dimen>
     <dimen name="privacy_chip_icon_size">13dp</dimen>
+
+    <dimen name="bottom_sheet_padding_horizontal">32dp</dimen>
+    <dimen name="bottom_sheet_padding_vertical">24dp</dimen>
+
+    <dimen name="bottom_sheet_icon_size">42dp</dimen>
+    <dimen name="bottom_sheet_icon_margin">8dp</dimen>
+    <dimen name="bottom_sheet_title_margin_bottom">18dp</dimen>
+    <dimen name="bottom_sheet_details_margin_bottom">8dp</dimen>
+
+    <dimen name="bottom_sheet_actions_width">296dp</dimen>
+    <dimen name="bottom_sheet_actions_spacing">12dp</dimen>
+    <item name="bottom_sheet_button_selection_scaled" format="float" type="dimen">1.1</item>
+    <dimen name="bottom_sheet_button_width">232dp</dimen>
+    <dimen name="bottom_sheet_button_padding_horizontal">20dp</dimen>
+    <dimen name="bottom_sheet_button_padding_vertical">16dp</dimen>
+
+    <dimen name="bottom_sheet_corner_radius">24dp</dimen>
+    <dimen name="bottom_sheet_button_corner_radius">10dp</dimen>
+
+    <dimen name="bottom_sheet_min_height">208dp</dimen>
+    <dimen name="bottom_sheet_margin">24dp</dimen>
+    <dimen name="bottom_sheet_background_blur_radius">120dp</dimen>
+
 </resources>
