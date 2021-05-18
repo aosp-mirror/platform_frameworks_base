@@ -34,6 +34,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.Signature;
+import android.net.ConnectivityAnnotations.MultipathPreference;
+import android.net.ConnectivityAnnotations.RestrictBackgroundStatus;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.os.Build;
@@ -463,6 +465,7 @@ public class NetworkPolicyManager {
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     @RequiresPermission(NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK)
+    @RestrictBackgroundStatus
     public int getRestrictBackgroundStatus(int uid) {
         try {
             return mService.getRestrictBackgroundStatus(uid);
@@ -588,6 +591,7 @@ public class NetworkPolicyManager {
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     @RequiresPermission(NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK)
+    @MultipathPreference
     public int getMultipathPreference(@NonNull Network network) {
         try {
             return mService.getMultipathPreference(network);

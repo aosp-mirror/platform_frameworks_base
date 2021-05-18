@@ -136,6 +136,8 @@
     <string name="accessibility_camera_button" msgid="2938898391716647247">"कॅमेरा"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"फोन"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"व्हॉइस सहाय्य"</string>
+    <!-- no translation found for accessibility_wallet_button (1458258783460555507) -->
+    <skip />
     <string name="accessibility_unlock_button" msgid="122785427241471085">"अनलॉक करा"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"डिव्हाइस लॉक केले"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="5209142744692162598">"फिंगरप्रिंटची प्रतीक्षा करत आहे"</string>
@@ -289,8 +291,7 @@
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"मोबाइल हॉटस्पॉट बंद केला."</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"मोबाइल हॉटस्पॉट सुरू केला."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"स्क्रीन कास्ट करणे थांबले."</string>
-    <!-- no translation found for accessibility_quick_settings_work_mode_off (9106217884005620744) -->
-    <skip />
+    <string name="accessibility_quick_settings_work_mode_off" msgid="9106217884005620744">"कार्य मोड थांबवला."</string>
     <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"कार्य मोड सुरू."</string>
     <!-- no translation found for accessibility_quick_settings_work_mode_changed_off (6422896967647049692) -->
     <skip />
@@ -412,8 +413,7 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"<xliff:g id="DATA_LIMIT">%s</xliff:g> मर्यादा"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"<xliff:g id="DATA_LIMIT">%s</xliff:g> चेतावणी"</string>
     <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"कार्य प्रोफाइल"</string>
-    <!-- no translation found for quick_settings_work_mode_paused (4841109346916998613) -->
-    <skip />
+    <string name="quick_settings_work_mode_paused" msgid="4841109346916998613">"थाबंवला"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"रात्रीचा प्रकाश"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"संध्याकाळी सुरू असते"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"सूर्योदयापर्यंत"</string>
@@ -672,12 +672,10 @@
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"सर्व दाखवा"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"पैसे देण्यासाठी अनलॉक करा"</string>
-    <!-- no translation found for wallet_secondary_label_no_card (1282609666895946317) -->
-    <skip />
+    <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"सेट केलेले नाही"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"वापरण्यासाठी अनलॉक करा"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"तुमची कार्ड मिळवताना समस्या आली, कृपया नंतर पुन्हा प्रयत्न करा"</string>
-    <!-- no translation found for wallet_lockscreen_settings_label (3539105300870383570) -->
-    <skip />
+    <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"लॉक स्क्रीन सेटिंग्ज"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"कार्य प्रोफाईल"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"विमान मोड"</string>
     <string name="add_tile" msgid="6239678623873086686">"टाइल जोडा"</string>
@@ -867,8 +865,7 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"सुरू"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"बंद"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"उपलब्ध नाही"</string>
-    <!-- no translation found for tile_disabled (373212051546573069) -->
-    <skip />
+    <string name="tile_disabled" msgid="373212051546573069">"बंद केली"</string>
     <string name="nav_bar" msgid="4642708685386136807">"नॅव्हिगेशन बार"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"लेआउट"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"अतिरिक्त डाव्या बटणाचा प्रकार"</string>
@@ -1156,6 +1153,8 @@
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"ऑथेंटिकेट करा"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"डिव्हाइस एंटर करा"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"उघडण्यासाठी फिंगरप्रिंट वापरा"</string>
+    <!-- no translation found for accessibility_fingerprint_bouncer (7189102492498735519) -->
+    <skip />
     <!-- no translation found for ongoing_phone_call_content_description (5332334388483099947) -->
     <skip />
 </resources>

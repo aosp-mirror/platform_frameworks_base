@@ -308,7 +308,7 @@ public class SplashscreenContentDrawer {
             mFinalIconDrawable = SplashscreenIconDrawableFactory.makeIconDrawable(
                     mTmpAttrs.mIconBgColor != Color.TRANSPARENT
                             ? mTmpAttrs.mIconBgColor : mThemeColor,
-                    iconDrawable, mFinalIconSize, mSplashscreenWorkerHandler);
+                    iconDrawable, mDefaultIconSize, mFinalIconSize, mSplashscreenWorkerHandler);
         }
 
         private boolean processAdaptiveIcon(Drawable iconDrawable) {

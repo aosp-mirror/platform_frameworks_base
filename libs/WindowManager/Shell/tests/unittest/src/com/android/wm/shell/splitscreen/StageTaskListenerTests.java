@@ -27,6 +27,7 @@ import static org.mockito.Mockito.verify;
 
 import android.app.ActivityManager;
 import android.view.SurfaceControl;
+import android.view.SurfaceSession;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
@@ -38,6 +39,8 @@ import com.android.wm.shell.common.SyncTransactionQueue;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -52,6 +55,8 @@ public final class StageTaskListenerTests {
     @Mock private ShellTaskOrganizer mTaskOrganizer;
     @Mock private StageTaskListener.StageListenerCallbacks mCallbacks;
     @Mock private SyncTransactionQueue mSyncQueue;
+    @Captor private ArgumentCaptor<SyncTransactionQueue.TransactionRunnable> mRunnableCaptor;
+    private SurfaceSession mSurfaceSession = new SurfaceSession();
     private ActivityManager.RunningTaskInfo mRootTask;
     private StageTaskListener mStageTaskListener;
 
@@ -62,10 +67,21 @@ public final class StageTaskListenerTests {
                 mTaskOrganizer,
                 DEFAULT_DISPLAY,
                 mCallbacks,
-                mSyncQueue);
+                mSyncQueue,
+                mSurfaceSession);
         mRootTask = new TestRunningTaskInfoBuilder().build();
         mRootTask.parentTaskId = INVALID_TASK_ID;
         mStageTaskListener.onTaskAppeared(mRootTask, new SurfaceControl());
+    }
+
+    @Test
+    public void testInitsDimLayer() {
+        verify(mSyncQueue).runInSync(mRunnableCaptor.capture());
+        final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+        mRunnableCaptor.getValue().runWithTransaction(t);
+        t.apply();
+
+        assertThat(mStageTaskListener.mDimLayer).isNotNull();
     }
 
     @Test
