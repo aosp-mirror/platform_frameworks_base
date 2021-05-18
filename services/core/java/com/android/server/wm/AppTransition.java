@@ -875,7 +875,7 @@ public class AppTransition implements Dump {
                             + "transit=%s Callers=%s",
                     a, appTransitionOldToString(transit), Debug.getCallers(3));
         } else if (mNextAppTransitionType == NEXT_TRANSIT_TYPE_CLIP_REVEAL) {
-            a = mTransitionAnimation.createClipRevealAnimationLocked(
+            a = mTransitionAnimation.createClipRevealAnimationLockedCompat(
                     transit, enter, frame, displayFrame,
                     mDefaultNextAppTransitionAnimationSpec != null
                             ? mDefaultNextAppTransitionAnimationSpec.rect : null);
@@ -884,7 +884,7 @@ public class AppTransition implements Dump {
                             + "transit=%s Callers=%s",
                     a, appTransitionOldToString(transit), Debug.getCallers(3));
         } else if (mNextAppTransitionType == NEXT_TRANSIT_TYPE_SCALE_UP) {
-            a = mTransitionAnimation.createScaleUpAnimationLocked(transit, enter, frame,
+            a = mTransitionAnimation.createScaleUpAnimationLockedCompat(transit, enter, frame,
                     mDefaultNextAppTransitionAnimationSpec != null
                             ? mDefaultNextAppTransitionAnimationSpec.rect : null);
             ProtoLog.v(WM_DEBUG_APP_TRANSITIONS_ANIM,
@@ -896,7 +896,7 @@ public class AppTransition implements Dump {
             mNextAppTransitionScaleUp =
                     (mNextAppTransitionType == NEXT_TRANSIT_TYPE_THUMBNAIL_SCALE_UP);
             final HardwareBuffer thumbnailHeader = getAppTransitionThumbnailHeader(container);
-            a = mTransitionAnimation.createThumbnailEnterExitAnimationLocked(enter,
+            a = mTransitionAnimation.createThumbnailEnterExitAnimationLockedCompat(enter,
                     mNextAppTransitionScaleUp, frame, transit, thumbnailHeader,
                     mDefaultNextAppTransitionAnimationSpec != null
                             ? mDefaultNextAppTransitionAnimationSpec.rect : null);

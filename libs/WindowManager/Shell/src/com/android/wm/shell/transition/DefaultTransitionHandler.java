@@ -36,6 +36,12 @@ import static android.window.TransitionInfo.FLAG_SHOW_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
 import static android.window.TransitionInfo.FLAG_TRANSLUCENT;
 
+import static com.android.internal.policy.TransitionAnimation.WALLPAPER_TRANSITION_CLOSE;
+import static com.android.internal.policy.TransitionAnimation.WALLPAPER_TRANSITION_INTRA_CLOSE;
+import static com.android.internal.policy.TransitionAnimation.WALLPAPER_TRANSITION_INTRA_OPEN;
+import static com.android.internal.policy.TransitionAnimation.WALLPAPER_TRANSITION_NONE;
+import static com.android.internal.policy.TransitionAnimation.WALLPAPER_TRANSITION_OPEN;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
@@ -134,6 +140,8 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             mAnimations.remove(transition);
             finishCallback.onTransitionFinished(null /* wct */, null /* wctCB */);
         };
+
+        final int wallpaperTransit = getWallpaperTransitType(info);
         for (int i = info.getChanges().size() - 1; i >= 0; --i) {
             final TransitionInfo.Change change = info.getChanges().get(i);
             if (change.getMode() == TRANSIT_CHANGE) {
@@ -151,7 +159,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             // Don't animate anything that isn't independent.
             if (!TransitionInfo.isIndependent(change, info)) continue;
 
-            Animation a = loadAnimation(info, change);
+            Animation a = loadAnimation(info, change, wallpaperTransit);
             if (a != null) {
                 startAnimInternal(animations, a, change.getLeash(), onAnimFinish,
                         null /* position */);
@@ -180,14 +188,15 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
     }
 
     @Nullable
-    private Animation loadAnimation(TransitionInfo info, TransitionInfo.Change change) {
+    private Animation loadAnimation(TransitionInfo info, TransitionInfo.Change change,
+            int wallpaperTransit) {
         Animation a = null;
 
         final int type = info.getType();
         final int flags = info.getFlags();
-        final boolean isOpening = Transitions.isOpeningType(type);
         final int changeMode = change.getMode();
         final int changeFlags = change.getFlags();
+        final boolean isOpeningType = Transitions.isOpeningType(type);
         final boolean enter = Transitions.isOpeningType(changeMode);
         final boolean isTask = change.getTaskInfo() != null;
         final TransitionInfo.AnimationOptions options = info.getAnimationOptions();
@@ -196,7 +205,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
 
         if (type == TRANSIT_RELAUNCH) {
             a = mTransitionAnimation.createRelaunchAnimation(
-                    change.getStartAbsBounds(), mInsets, change.getEndAbsBounds());
+                    change.getEndAbsBounds(), mInsets, change.getEndAbsBounds());
         } else if (type == TRANSIT_KEYGUARD_GOING_AWAY) {
             a = mTransitionAnimation.loadKeyguardExitAnimation(flags,
                     (changeFlags & FLAG_SHOW_WALLPAPER) != 0);
@@ -209,64 +218,81 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         } else if (overrideType == ANIM_OPEN_CROSS_PROFILE_APPS && enter) {
             a = mTransitionAnimation.loadCrossProfileAppEnterAnimation();
         } else if (overrideType == ANIM_CLIP_REVEAL) {
-            a = mTransitionAnimation.createClipRevealAnimationLocked(changeMode, enter,
+            a = mTransitionAnimation.createClipRevealAnimationLocked(type, wallpaperTransit, enter,
                     change.getEndAbsBounds(), change.getEndAbsBounds(),
                     options.getTransitionBounds());
         } else if (overrideType == ANIM_SCALE_UP) {
-            a = mTransitionAnimation.createScaleUpAnimationLocked(changeMode, enter,
+            a = mTransitionAnimation.createScaleUpAnimationLocked(type, wallpaperTransit, enter,
                     change.getEndAbsBounds(), options.getTransitionBounds());
         } else if (overrideType == ANIM_THUMBNAIL_SCALE_UP
                 || overrideType == ANIM_THUMBNAIL_SCALE_DOWN) {
             final boolean scaleUp = overrideType == ANIM_THUMBNAIL_SCALE_UP;
             a = mTransitionAnimation.createThumbnailEnterExitAnimationLocked(enter, scaleUp,
-                    change.getEndAbsBounds(), changeMode, options.getThumbnail(),
+                    change.getEndAbsBounds(), type, wallpaperTransit, options.getThumbnail(),
                     options.getTransitionBounds());
-        } else if (changeMode == TRANSIT_OPEN && isOpening) {
-            if ((changeFlags & FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT) != 0) {
-                // This received a transferred starting window, so don't animate
-                return null;
-            }
-
-            if ((changeFlags & FLAG_IS_VOICE_INTERACTION) != 0) {
-                a = mTransitionAnimation.loadVoiceActivityOpenAnimation(true /** enter */);
-            } else if (isTask) {
-                a = mTransitionAnimation.loadDefaultAnimationAttr(
-                        R.styleable.WindowAnimation_taskOpenEnterAnimation);
+        } else if (wallpaperTransit == WALLPAPER_TRANSITION_INTRA_OPEN) {
+            a = mTransitionAnimation.loadDefaultAnimationAttr(enter
+                    ? R.styleable.WindowAnimation_wallpaperIntraOpenEnterAnimation
+                    : R.styleable.WindowAnimation_wallpaperIntraOpenExitAnimation);
+        } else if (wallpaperTransit == WALLPAPER_TRANSITION_INTRA_CLOSE) {
+            a = mTransitionAnimation.loadDefaultAnimationAttr(enter
+                    ? R.styleable.WindowAnimation_wallpaperIntraCloseEnterAnimation
+                    : R.styleable.WindowAnimation_wallpaperIntraCloseExitAnimation);
+        } else if (wallpaperTransit == WALLPAPER_TRANSITION_OPEN) {
+            a = mTransitionAnimation.loadDefaultAnimationAttr(enter
+                    ? R.styleable.WindowAnimation_wallpaperOpenEnterAnimation
+                    : R.styleable.WindowAnimation_wallpaperOpenExitAnimation);
+        } else if (wallpaperTransit == WALLPAPER_TRANSITION_CLOSE) {
+            a = mTransitionAnimation.loadDefaultAnimationAttr(enter
+                    ? R.styleable.WindowAnimation_wallpaperCloseEnterAnimation
+                    : R.styleable.WindowAnimation_wallpaperCloseExitAnimation);
+        } else if ((changeFlags & FLAG_IS_VOICE_INTERACTION) != 0) {
+            if (isOpeningType) {
+                a = mTransitionAnimation.loadVoiceActivityOpenAnimation(enter);
             } else {
-                a = mTransitionAnimation.loadDefaultAnimationRes(
-                        (changeFlags & FLAG_TRANSLUCENT) == 0
-                        ? R.anim.activity_open_enter : R.anim.activity_translucent_open_enter);
+                a = mTransitionAnimation.loadVoiceActivityExitAnimation(enter);
             }
-        } else if (changeMode == TRANSIT_TO_FRONT && isOpening) {
-            if ((changeFlags & FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT) != 0) {
-                // This received a transferred starting window, so don't animate
-                return null;
-            }
-
-            if ((changeFlags & FLAG_IS_VOICE_INTERACTION) != 0) {
-                a = mTransitionAnimation.loadVoiceActivityOpenAnimation(true /** enter */);
+        } else if ((changeFlags & FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT) != 0 && isOpeningType) {
+            // This received a transferred starting window, so don't animate
+            return null;
+        } else if (type == TRANSIT_OPEN) {
+            if (isTask) {
+                a = mTransitionAnimation.loadDefaultAnimationAttr(enter
+                        ? R.styleable.WindowAnimation_taskOpenEnterAnimation
+                        : R.styleable.WindowAnimation_taskOpenExitAnimation);
             } else {
-                a = mTransitionAnimation.loadDefaultAnimationAttr(
-                        R.styleable.WindowAnimation_taskToFrontEnterAnimation);
+                if ((changeFlags & FLAG_TRANSLUCENT) != 0 && enter) {
+                    a = mTransitionAnimation.loadDefaultAnimationRes(
+                            R.anim.activity_translucent_open_enter);
+                } else {
+                    a = mTransitionAnimation.loadDefaultAnimationAttr(enter
+                            ? R.styleable.WindowAnimation_activityOpenEnterAnimation
+                            : R.styleable.WindowAnimation_activityOpenExitAnimation);
+                }
             }
-        } else if (changeMode == TRANSIT_CLOSE && !isOpening) {
-            if ((changeFlags & FLAG_IS_VOICE_INTERACTION) != 0) {
-                a = mTransitionAnimation.loadVoiceActivityExitAnimation(false /** enter */);
-            } else if (isTask) {
-                a = mTransitionAnimation.loadDefaultAnimationAttr(
-                        R.styleable.WindowAnimation_taskCloseExitAnimation);
+        } else if (type == TRANSIT_TO_FRONT) {
+            a = mTransitionAnimation.loadDefaultAnimationAttr(enter
+                    ? R.styleable.WindowAnimation_taskToFrontEnterAnimation
+                    : R.styleable.WindowAnimation_taskToFrontExitAnimation);
+        } else if (type == TRANSIT_CLOSE) {
+            if (isTask) {
+                a = mTransitionAnimation.loadDefaultAnimationAttr(enter
+                        ? R.styleable.WindowAnimation_taskCloseEnterAnimation
+                        : R.styleable.WindowAnimation_taskCloseExitAnimation);
             } else {
-                a = mTransitionAnimation.loadDefaultAnimationRes(
-                        (changeFlags & FLAG_TRANSLUCENT) == 0
-                        ? R.anim.activity_close_exit : R.anim.activity_translucent_close_exit);
+                if ((changeFlags & FLAG_TRANSLUCENT) != 0 && !enter) {
+                    a = mTransitionAnimation.loadDefaultAnimationRes(
+                            R.anim.activity_translucent_close_exit);
+                } else {
+                    a = mTransitionAnimation.loadDefaultAnimationAttr(enter
+                            ? R.styleable.WindowAnimation_activityCloseEnterAnimation
+                            : R.styleable.WindowAnimation_activityCloseExitAnimation);
+                }
             }
-        } else if (changeMode == TRANSIT_TO_BACK && !isOpening) {
-            if ((changeFlags & FLAG_IS_VOICE_INTERACTION) != 0) {
-                a = mTransitionAnimation.loadVoiceActivityExitAnimation(false /** enter */);
-            } else {
-                a = mTransitionAnimation.loadDefaultAnimationAttr(
-                        R.styleable.WindowAnimation_taskToBackExitAnimation);
-            }
+        } else if (type == TRANSIT_TO_BACK) {
+            a = mTransitionAnimation.loadDefaultAnimationAttr(enter
+                    ? R.styleable.WindowAnimation_taskToBackEnterAnimation
+                    : R.styleable.WindowAnimation_taskToBackExitAnimation);
         } else if (changeMode == TRANSIT_CHANGE) {
             // In the absence of a specific adapter, we just want to keep everything stationary.
             a = new AlphaAnimation(1.f, 1.f);
@@ -274,10 +300,11 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         }
 
         if (a != null) {
-            Rect start = change.getStartAbsBounds();
-            Rect end = change.getEndAbsBounds();
+            if (!a.isInitialized()) {
+                Rect end = change.getEndAbsBounds();
+                a.initialize(end.width(), end.height(), end.width(), end.height());
+            }
             a.restrictDuration(MAX_ANIMATION_DURATION);
-            a.initialize(end.width(), end.height(), start.width(), start.height());
             a.scaleCurrentDuration(mTransitionAnimationScaleSetting);
         }
         return a;
@@ -395,6 +422,33 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         a.restrictDuration(MAX_ANIMATION_DURATION);
         a.scaleCurrentDuration(mTransitionAnimationScaleSetting);
         startAnimInternal(animations, a, wt.getSurface(), finisher, null /* position */);
+    }
+
+    private static int getWallpaperTransitType(TransitionInfo info) {
+        boolean hasOpenWallpaper = false;
+        boolean hasCloseWallpaper = false;
+
+        for (int i = info.getChanges().size() - 1; i >= 0; --i) {
+            final TransitionInfo.Change change = info.getChanges().get(i);
+            if ((change.getFlags() & FLAG_SHOW_WALLPAPER) != 0) {
+                if (Transitions.isOpeningType(change.getMode())) {
+                    hasOpenWallpaper = true;
+                } else if (Transitions.isClosingType(change.getMode())) {
+                    hasCloseWallpaper = true;
+                }
+            }
+        }
+
+        if (hasOpenWallpaper && hasCloseWallpaper) {
+            return Transitions.isOpeningType(info.getType())
+                    ? WALLPAPER_TRANSITION_INTRA_OPEN : WALLPAPER_TRANSITION_INTRA_CLOSE;
+        } else if (hasOpenWallpaper) {
+            return WALLPAPER_TRANSITION_OPEN;
+        } else if (hasCloseWallpaper) {
+            return WALLPAPER_TRANSITION_CLOSE;
+        } else {
+            return WALLPAPER_TRANSITION_NONE;
+        }
     }
 
     private static void applyTransformation(long time, SurfaceControl.Transaction t,

@@ -16,15 +16,18 @@
 
 package com.android.internal.policy;
 
+import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE;
 import static android.view.WindowManager.TRANSIT_OLD_ACTIVITY_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_ACTIVITY_OPEN;
+import static android.view.WindowManager.TRANSIT_OLD_NONE;
 import static android.view.WindowManager.TRANSIT_OLD_TRANSLUCENT_ACTIVITY_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_TRANSLUCENT_ACTIVITY_OPEN;
 import static android.view.WindowManager.TRANSIT_OLD_WALLPAPER_INTRA_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_WALLPAPER_INTRA_OPEN;
+import static android.view.WindowManager.TRANSIT_OPEN;
 
 import android.annotation.DrawableRes;
 import android.annotation.NonNull;
@@ -46,6 +49,7 @@ import android.os.SystemProperties;
 import android.util.Slog;
 import android.view.WindowManager.LayoutParams;
 import android.view.WindowManager.TransitionOldType;
+import android.view.WindowManager.TransitionType;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
@@ -62,11 +66,17 @@ import java.util.List;
 
 /** @hide */
 public class TransitionAnimation {
+    public static final int WALLPAPER_TRANSITION_NONE = 0;
+    public static final int WALLPAPER_TRANSITION_OPEN = 1;
+    public static final int WALLPAPER_TRANSITION_CLOSE = 2;
+    public static final int WALLPAPER_TRANSITION_INTRA_OPEN = 3;
+    public static final int WALLPAPER_TRANSITION_INTRA_CLOSE = 4;
+
     // These are the possible states for the enter/exit activities during a thumbnail transition
-    public static final int THUMBNAIL_TRANSITION_ENTER_SCALE_UP = 0;
-    public static final int THUMBNAIL_TRANSITION_EXIT_SCALE_UP = 1;
-    public static final int THUMBNAIL_TRANSITION_ENTER_SCALE_DOWN = 2;
-    public static final int THUMBNAIL_TRANSITION_EXIT_SCALE_DOWN = 3;
+    private static final int THUMBNAIL_TRANSITION_ENTER_SCALE_UP = 0;
+    private static final int THUMBNAIL_TRANSITION_EXIT_SCALE_UP = 1;
+    private static final int THUMBNAIL_TRANSITION_ENTER_SCALE_DOWN = 2;
+    private static final int THUMBNAIL_TRANSITION_EXIT_SCALE_DOWN = 3;
 
     /**
      * Maximum duration for the clip reveal animation. This is used when there is a lot of movement
@@ -379,8 +389,15 @@ public class TransitionAnimation {
         }
     }
 
-    public Animation createClipRevealAnimationLocked(int transit, boolean enter, Rect appFrame,
-            Rect displayFrame, Rect startRect) {
+    public Animation createClipRevealAnimationLocked(@TransitionType int transit,
+            int wallpaperTransit, boolean enter, Rect appFrame, Rect displayFrame, Rect startRect) {
+        return createClipRevealAnimationLockedCompat(
+                getTransitCompatType(transit, wallpaperTransit), enter, appFrame, displayFrame,
+                startRect);
+    }
+
+    public Animation createClipRevealAnimationLockedCompat(@TransitionOldType int transit,
+            boolean enter, Rect appFrame, Rect displayFrame, Rect startRect) {
         final Animation anim;
         if (enter) {
             final int appWidth = appFrame.width();
@@ -490,8 +507,14 @@ public class TransitionAnimation {
         return anim;
     }
 
-    public Animation createScaleUpAnimationLocked(int transit, boolean enter,
-            Rect containingFrame, Rect startRect) {
+    public Animation createScaleUpAnimationLocked(@TransitionType int transit, int wallpaperTransit,
+            boolean enter, Rect containingFrame, Rect startRect) {
+        return createScaleUpAnimationLockedCompat(getTransitCompatType(transit, wallpaperTransit),
+                enter, containingFrame, startRect);
+    }
+
+    public Animation createScaleUpAnimationLockedCompat(@TransitionOldType int transit,
+            boolean enter, Rect containingFrame, Rect startRect) {
         Animation a;
         setupDefaultNextAppTransitionStartRect(startRect, mTmpRect);
         final int appWidth = containingFrame.width();
@@ -546,12 +569,19 @@ public class TransitionAnimation {
         return a;
     }
 
+    public Animation createThumbnailEnterExitAnimationLocked(boolean enter, boolean scaleUp,
+            Rect containingFrame, @TransitionType int transit, int wallpaperTransit,
+            HardwareBuffer thumbnailHeader, Rect startRect) {
+        return createThumbnailEnterExitAnimationLockedCompat(enter, scaleUp, containingFrame,
+                getTransitCompatType(transit, wallpaperTransit), thumbnailHeader, startRect);
+    }
+
     /**
      * This animation is created when we are doing a thumbnail transition, for the activity that is
      * leaving, and the activity that is entering.
      */
-    public Animation createThumbnailEnterExitAnimationLocked(boolean enter, boolean scaleUp,
-            Rect containingFrame, int transit, HardwareBuffer thumbnailHeader,
+    public Animation createThumbnailEnterExitAnimationLockedCompat(boolean enter, boolean scaleUp,
+            Rect containingFrame, @TransitionOldType int transit, HardwareBuffer thumbnailHeader,
             Rect startRect) {
         final int appWidth = containingFrame.width();
         final int appHeight = containingFrame.height();
@@ -897,7 +927,7 @@ public class TransitionAnimation {
      * Prepares the specified animation with a standard duration, interpolator, etc.
      */
     private Animation prepareThumbnailAnimation(Animation a, int appWidth, int appHeight,
-            int transit) {
+            @TransitionOldType int transit) {
         // Pick the desired duration.  If this is an inter-activity transition,
         // it  is the standard duration for that.  Otherwise we use the longer
         // task transition duration.
@@ -992,6 +1022,22 @@ public class TransitionAnimation {
             return R.anim.activity_translucent_close_exit;
         }
         return anim;
+    }
+
+    private static @TransitionOldType int getTransitCompatType(@TransitionType int transit,
+            int wallpaperTransit) {
+        if (wallpaperTransit == WALLPAPER_TRANSITION_INTRA_OPEN) {
+            return TRANSIT_OLD_WALLPAPER_INTRA_OPEN;
+        } else if (wallpaperTransit == WALLPAPER_TRANSITION_INTRA_CLOSE) {
+            return TRANSIT_OLD_WALLPAPER_INTRA_CLOSE;
+        } else if (transit == TRANSIT_OPEN) {
+            return TRANSIT_OLD_ACTIVITY_OPEN;
+        } else if (transit == TRANSIT_CLOSE) {
+            return TRANSIT_OLD_ACTIVITY_CLOSE;
+        }
+
+        // We only do some special handle for above type, so use type NONE for default behavior.
+        return TRANSIT_OLD_NONE;
     }
 
     /**
