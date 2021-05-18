@@ -455,8 +455,9 @@
     <!-- Permission needed for CTS test - MatchContentFrameRateTest -->
     <uses-permission android:name="android.permission.MODIFY_REFRESH_RATE_SWITCHING_TYPE" />
 
-    <!-- Permission needed for CTS test - TimeManagerTest -->
+    <!-- Permissions needed for CTS test - TimeManagerTest -->
     <uses-permission android:name="android.permission.MANAGE_TIME_AND_ZONE_DETECTION" />
+    <uses-permission android:name="android.permission.SUGGEST_EXTERNAL_TIME" />
 
     <!-- Permission required for CTS test - android.server.biometrics -->
     <uses-permission android:name="android.permission.USE_BIOMETRIC" />
