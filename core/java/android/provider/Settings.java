@@ -10046,6 +10046,12 @@ public final class Settings {
         @Readable
         public static final String NAS_SETTINGS_UPDATED = "nas_settings_updated";
 
+        /**
+         * Control whether Game Dashboard shortcut is always on for all games.
+         * @hide
+         */
+        @Readable
+        public static final String GAME_DASHBOARD_ALWAYS_ON = "game_dashboard_always_on";
 
         /**
          * These entries are considered common between the personal and the managed profile,
