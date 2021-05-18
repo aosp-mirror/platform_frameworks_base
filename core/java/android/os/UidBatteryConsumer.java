@@ -20,9 +20,15 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.text.TextUtils;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 
 import com.android.internal.os.PowerCalculator;
 
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -142,6 +148,57 @@ public final class UidBatteryConsumer extends BatteryConsumer implements Parcela
     @Override
     public int describeContents() {
         return 0;
+    }
+
+    /** Serializes this object to XML */
+    void writeToXml(TypedXmlSerializer serializer) throws IOException {
+        if (getConsumedPower() == 0) {
+            return;
+        }
+
+        serializer.startTag(null, BatteryUsageStats.XML_TAG_UID);
+        serializer.attributeInt(null, BatteryUsageStats.XML_ATTR_UID, getUid());
+        if (!TextUtils.isEmpty(mPackageWithHighestDrain)) {
+            serializer.attribute(null, BatteryUsageStats.XML_ATTR_HIGHEST_DRAIN_PACKAGE,
+                    mPackageWithHighestDrain);
+        }
+        serializer.attributeLong(null, BatteryUsageStats.XML_ATTR_TIME_IN_FOREGROUND,
+                mTimeInForegroundMs);
+        serializer.attributeLong(null, BatteryUsageStats.XML_ATTR_TIME_IN_BACKGROUND,
+                mTimeInBackgroundMs);
+        mPowerComponents.writeToXml(serializer);
+        serializer.endTag(null, BatteryUsageStats.XML_TAG_UID);
+    }
+
+    /** Parses an XML representation and populates the BatteryUsageStats builder */
+    static void createFromXml(TypedXmlPullParser parser, BatteryUsageStats.Builder builder)
+            throws XmlPullParserException, IOException {
+        final int uid = parser.getAttributeInt(null, BatteryUsageStats.XML_ATTR_UID);
+        final UidBatteryConsumer.Builder consumerBuilder =
+                builder.getOrCreateUidBatteryConsumerBuilder(uid);
+
+        int eventType = parser.getEventType();
+        if (eventType != XmlPullParser.START_TAG
+                || !parser.getName().equals(BatteryUsageStats.XML_TAG_UID)) {
+            throw new XmlPullParserException("Invalid XML parser state");
+        }
+
+        consumerBuilder.setPackageWithHighestDrain(
+                parser.getAttributeValue(null, BatteryUsageStats.XML_ATTR_HIGHEST_DRAIN_PACKAGE));
+        consumerBuilder.setTimeInStateMs(STATE_FOREGROUND,
+                parser.getAttributeLong(null, BatteryUsageStats.XML_ATTR_TIME_IN_FOREGROUND));
+        consumerBuilder.setTimeInStateMs(STATE_BACKGROUND,
+                parser.getAttributeLong(null, BatteryUsageStats.XML_ATTR_TIME_IN_BACKGROUND));
+        while (!(eventType == XmlPullParser.END_TAG
+                && parser.getName().equals(BatteryUsageStats.XML_TAG_UID))
+                && eventType != XmlPullParser.END_DOCUMENT) {
+            if (eventType == XmlPullParser.START_TAG) {
+                if (parser.getName().equals(BatteryUsageStats.XML_TAG_POWER_COMPONENTS)) {
+                    PowerComponents.parseXml(parser, consumerBuilder.mPowerComponentsBuilder);
+                }
+            }
+            eventType = parser.next();
+        }
     }
 
     /**
