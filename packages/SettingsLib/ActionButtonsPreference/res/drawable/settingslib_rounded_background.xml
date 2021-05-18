@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Copyright (C) 2018 The Android Open Source Project
+  Copyright (C) 2021 The Android Open Source Project
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -15,11 +15,11 @@
   limitations under the License.
   -->
 
-<resources>
-    <style name="SettingsLibActionButton" parent="android:Widget.DeviceDefault.Button.Borderless.Colored">
-        <item name="android:drawablePadding">4dp</item>
-        <item name="android:drawableTint">@*android:color/btn_colored_borderless_text_material</item>
-        <item name="android:paddingTop">20dp</item>
-        <item name="android:paddingBottom">20dp</item>
-    </style>
-</resources>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+       xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
+       android:shape="rectangle">
+    <solid android:color="?androidprv:attr/colorSurface" />
+    <corners
+        android:radius="?android:attr/dialogCornerRadius"
+    />
+</shape>
