@@ -3936,6 +3936,9 @@
     <!-- Handle volume keys directly in Window Manager without passing them to the foreground app -->
     <bool name="config_handleVolumeKeysInWindowManager">false</bool>
 
+    <!-- Rely or not on hardcoded aliased streams table within AudioService -->
+    <bool name="config_handleVolumeAliasesUsingVolumeGroups">false</bool>
+
     <!-- Volume level of in-call notification tone playback [0..1] -->
     <item name="config_inCallNotificationVolume" format="float" type="dimen">.10</item>
 
