@@ -348,14 +348,14 @@ public class StackScrollAlgorithm {
             StackScrollAlgorithmState algorithmState,
             AmbientState ambientState) {
 
-        final boolean isShowingShelf = ambientState.getShelf() != null
+        final boolean showingShelf = ambientState.getShelf() != null
                 && algorithmState.firstViewInShelf != null;
 
-        final float stackHeight = ambientState.getStackHeight()
-                - (isShowingShelf ? ambientState.getShelf().getIntrinsicHeight() : 0f);
+        final float shelfHeight = showingShelf ? ambientState.getShelf().getIntrinsicHeight() : 0f;
+        final float scrimPadding = ambientState.isOnKeyguard() ? 0 : mNotificationScrimPadding;
 
-        float stackEndHeight = ambientState.getStackEndHeight()
-                - (isShowingShelf ? ambientState.getShelf().getIntrinsicHeight() : 0f);
+        final float stackHeight = ambientState.getStackHeight()  - shelfHeight - scrimPadding;
+        final float stackEndHeight = ambientState.getStackEndHeight() - shelfHeight - scrimPadding;
 
         return stackHeight / stackEndHeight;
     }
@@ -459,8 +459,7 @@ public class StackScrollAlgorithm {
                     maxViewHeight = algorithmState.viewHeightBeforeShelf;
                 }
             }
-            viewState.height = (int) MathUtils.lerp(maxViewHeight * START_FRACTION, maxViewHeight,
-                    expansionFraction);
+            viewState.height = (int) (maxViewHeight * expansionFraction);
         }
 
         currentYPosition += viewState.height + expansionFraction * mPaddingBetweenElements;
