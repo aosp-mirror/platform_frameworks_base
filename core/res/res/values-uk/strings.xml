@@ -573,10 +573,10 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Значок відбитка пальця"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"керувати апаратним забезпечення для Фейсконтролю"</string>
+    <string name="permlab_manageFace" msgid="4569549381889283282">"керувати апаратним забезпечення фейсконтролю"</string>
     <string name="permdesc_manageFace" msgid="6204569688492710471">"Додаток може активувати способи додавання й видалення шаблонів облич."</string>
     <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"використовувати апаратне забезпечення для Фейсконтролю"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Додаток може використовувати апаратне забезпечення для Фейсконтролю"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Додаток зможе використовувати для автентифікації апаратне забезпечення фейсконтролю"</string>
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Фейсконтроль"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Повторно проскануйте обличчя"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Повторно проскануйте обличчя для ефективнішого розпізнавання"</string>
@@ -603,15 +603,15 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Не вдається перевірити обличчя. Апаратне забезпечення недоступне."</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"Скористайтеся Фейсконтролем ще раз."</string>
+    <string name="face_error_timeout" msgid="522924647742024699">"Спробуйте скористатися фейсконтролем ще раз."</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Не вдається зберегти нові дані про обличчя. Видаліть старі."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Дію з обличчям скасовано."</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"Користувач скасував Фейсконтроль."</string>
+    <string name="face_error_user_canceled" msgid="8553045452825849843">"Фейсконтроль: користувач скасував операцію."</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Забагато спроб. Повторіть пізніше."</string>
     <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Забагато спроб. Фейсконтроль вимкнено."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Не вдається перевірити обличчя. Повторіть спробу."</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"Ви не налаштували Фейсконтроль"</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"На цьому пристрої не підтримується Фейсконтроль."</string>
+    <string name="face_error_not_enrolled" msgid="7369928733504691611">"Ви не налаштували фейсконтроль"</string>
+    <string name="face_error_hw_not_present" msgid="1070600921591729944">"На цьому пристрої не підтримується фейсконтроль."</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Датчик тимчасово вимкнено."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Обличчя <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">

@@ -456,8 +456,8 @@
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"एपलाई डिभाइसमा जारी रहेका कलहरू हेर्नुका साथै तिनीहरूलाई गर्ने अनुमति दिनुहोस्‌। यसमा गरिएका कलहरूको सङ्ख्या र कलहरूको अवस्था जस्ता जानकारी समावेश हुन्छन्‌।"</string>
     <string name="permlab_exemptFromAudioRecordRestrictions" msgid="1164725468350759486">"अडियो रेकर्ड गर्ने कार्यमा लगाइएका प्रतिबन्धहरूबाट छुट दिनुहोस्"</string>
     <string name="permdesc_exemptFromAudioRecordRestrictions" msgid="2425117015896871976">"यो एपलाई अडियो रेकर्ड गर्ने कार्यमा लगाइएका प्रतिबन्धहरूबाट छुट दिनुहोस्।"</string>
-    <string name="permlab_acceptHandover" msgid="2925523073573116523">"अर्को अनुप्रयोगमा सुरु गरिएको कल जारी राख्नुहोस्"</string>
-    <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"यस एपलाई अर्को अनुप्रयोगमा सुरु गरिएको कल जारी राख्ने अनुमति दिन्छ।"</string>
+    <string name="permlab_acceptHandover" msgid="2925523073573116523">"अर्को एपमा सुरु गरिएको कल जारी राख्नुहोस्"</string>
+    <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"यस एपलाई अर्को एपमा सुरु गरिएको कल जारी राख्ने अनुमति दिन्छ।"</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"फोन नम्बरहरू पढ्ने"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"उक्त एपलाई यस डिभाइसको फोन नम्बरहरूमाथि पहुँच राख्न दिनुहोस्।"</string>
     <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"कारको स्क्रिन सक्रिय राख्नुहोस्"</string>
@@ -600,7 +600,7 @@
     <string name="face_error_timeout" msgid="522924647742024699">"फेरि फेस अनलक प्रयोग गरी हेर्नुहोस्।"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"अनुहारसम्बन्धी नयाँ डेटा भण्डारण गर्न सकिएन। पहिले कुनै पुरानो डेटा मेटाउनुहोस्।"</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"अनुहार पहिचान रद्द गरियो।"</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"प्रयोगकर्ताले फेस अनलकको कार्य रद्द गर्नुभयो।"</string>
+    <string name="face_error_user_canceled" msgid="8553045452825849843">"प्रयोगकर्ताले फेस अनलक रद्द गर्नुभयो।"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"धेरैपटक प्रयासहरू भए। पछि फेरि प्रयास गर्नुहोस्‌।"</string>
     <string name="face_error_lockout_permanent" msgid="8277853602168960343">"अत्यधिक प्रयासहरू भए। फेस अनलक असक्षम पारियो।"</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"अनुहार पुष्टि गर्न सकिएन। फेरि प्रयास गर्नुहोस्।"</string>
@@ -835,7 +835,7 @@
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"फेरि प्रयास गर्नुहोस्"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"फेरि प्रयास गर्नुहोस्"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"सबै सुविधाहरू र डेटाका लागि अनलक गर्नुहोस्"</string>
-    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"अत्यधिक मोहडा खोल्ने प्रयासहरू बढी भए।"</string>
+    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"फेस अनलक प्रयोग गरी अनलक गर्ने प्रयास अत्याधिक धेरै भयो"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"SIM कार्ड छैन"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"ट्याब्लेटमा SIM कार्ड छैन।"</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"तपाईंको Android टिभी डिभाइसमा SIM कार्ड छैन।"</string>
@@ -957,7 +957,7 @@
     <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="88642768580408561">"एपलाई तपाईंको Android टिभी डिभाइसमा भण्डार गरिएका ब्राउजरको इतिहास र पुस्तक चिन्हहरू परिमार्जन गर्ने अनुमति दिन्छ। यसले एपलाई ब्राउजरको डेटा मेटाउने वा परिमार्जन गर्ने अनुमति दिन सक्छ। ध्यान दिनुहोस्: तेस्रो पक्षीय ब्राउजर वा वेब ब्राउज गर्ने सुविधा प्रदान गर्ने अन्य एपहरूले यो अनुमति लागू गर्न सक्दैनन्।"</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="2245203087160913652">"तपाईँको फोनमा भण्डारण भएको ब्राउजरको इतिहास वा बुकमार्कहरू परिवर्तन गर्नको लागि एपलाई अनुमति दिन्छ। यसले सायद ब्राउजर डेटालाई मेट्न वा परिवर्तन गर्नको लागि एपलाई अनुमति दिन्छ। नोट: वेब ब्राउज गर्ने क्षमतासहितका अन्य एपहरू वा तेस्रो- पक्ष ब्राउजरद्वारा सायद यस अनुमतिलाई लागु गर्न सकिंदैन।"</string>
     <string name="permlab_setAlarm" msgid="1158001610254173567">"एउटा आलर्म सेट गर्नुहोस्"</string>
-    <string name="permdesc_setAlarm" msgid="2185033720060109640">"स्थापना गरिएको सङ्केत घडी अनुप्रयोगमा सङ्केत समय मिलाउन एपलाई अनुमति दिन्छ। केही सङ्केत घडी एपहरूले यो सुविधा कार्यान्वयन नगर्न सक्छन्।"</string>
+    <string name="permdesc_setAlarm" msgid="2185033720060109640">"स्थापना गरिएको सङ्केत घडी एपमा सङ्केत समय मिलाउन एपलाई अनुमति दिन्छ। केही सङ्केत घडी एपहरूले यो सुविधा कार्यान्वयन नगर्न सक्छन्।"</string>
     <string name="permlab_addVoicemail" msgid="4770245808840814471">"भ्वाइसमेल थप गर्नुहोस्"</string>
     <string name="permdesc_addVoicemail" msgid="5470312139820074324">"तपाईँको भ्वाइसमेल इनबक्समा सन्देश थप्नको लागि एपलाई अनुमति दिन्छ।"</string>
     <string name="permlab_writeGeolocationPermissions" msgid="8605631647492879449">"भूस्थान अनुमतिहरू ब्राउजर परिवर्तन गर्नुहोस्"</string>
@@ -1976,7 +1976,7 @@
     <string name="slice_more_content" msgid="3377367737876888459">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="shortcut_restored_on_lower_version" msgid="9206301954024286063">"या त एपको संस्करण स्तरह्रास गरियो वा यो यस सर्टकटसँग मिल्दो छैन"</string>
     <string name="shortcut_restore_not_supported" msgid="4763198938588468400">"अनुप्रयोगले ब्याकअप तथा पुनर्स्थापनालाई समर्थन नगर्ने हुँदा सर्टकट पुनर्स्थापित गर्न सकिएन"</string>
-    <string name="shortcut_restore_signature_mismatch" msgid="579345304221605479">"अनुप्रयोगमा प्रयोग गरिने हस्ताक्षर नमिल्ने हुँदा सर्टकट पुनर्स्थापित गर्न सकिएन"</string>
+    <string name="shortcut_restore_signature_mismatch" msgid="579345304221605479">"एपमा प्रयोग गरिने हस्ताक्षर नमिल्ने हुँदा सर्टकट पुनर्स्थापित गर्न सकिएन"</string>
     <string name="shortcut_restore_unknown_issue" msgid="2478146134395982154">"सर्टकट पुनर्स्थापित गर्न सकिएन"</string>
     <string name="shortcut_disabled_reason_unknown" msgid="753074793553599166">"सर्टकट असक्षम पारिएको छ"</string>
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"स्थापना रद्द गर्नु…"</string>

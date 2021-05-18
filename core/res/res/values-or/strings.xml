@@ -567,11 +567,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"ଟିପଚିହ୍ନ ଆଇକନ୍"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"ଫେସ୍ ଅନ୍‌ଲକ୍ ହାର୍ଡୱେର୍ ପରିଚାଳନା କରନ୍ତୁ"</string>
+    <string name="permlab_manageFace" msgid="4569549381889283282">"ଫେସ୍ ଅନଲକ୍ ହାର୍ଡୱେର୍ ପରିଚାଳନା କରନ୍ତୁ"</string>
     <string name="permdesc_manageFace" msgid="6204569688492710471">"ବ୍ୟବହାର ପାଇଁ ଆପ୍‍କୁ ଫେସିଆଲ୍‍ ଟେମ୍ପଲେଟ୍‍ ଯୋଡିବା ଓ ଡିଲିଟ୍‍ ର ପଦ୍ଧତି ପାଇଁ ଅନୁମତି ଦିଅନ୍ତୁ।"</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"ଫେସ୍ ଅନ୍‌ଲକ୍ ହାର୍ଡୱେର୍ ବ୍ୟବହାର କରନ୍ତୁ"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"ପ୍ରାମାଣିକତା ପାଇଁ ଫେସ୍ ଅନ୍‌ଲକ୍ ହାର୍ଡୱେର୍‌ର ବ୍ୟବହାର ପାଇଁ ଆପ୍‍କୁ ଅନୁମତି ଦିଅନ୍ତୁ।"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"ଫେସ୍ ଅନ୍‌ଲକ୍"</string>
+    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"ଫେସ୍ ଅନଲକ୍ ହାର୍ଡୱେର୍ ବ୍ୟବହାର କରନ୍ତୁ"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"ପ୍ରମାଣୀକରଣ ପାଇଁ ଫେସ୍ ଅନଲକ୍ ହାର୍ଡୱେର୍‌ର ବ୍ୟବହାର କରିବା ପାଇଁ ଆପ୍‍କୁ ଅନୁମତି ଦିଅନ୍ତୁ"</string>
+    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"ଫେସ୍ ଅନଲକ୍"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"ଆପଣଙ୍କର ମୁହଁ ପୁଣି-ଏନ୍‍ରୋଲ୍ କରନ୍ତୁ"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"ଚିହ୍ନଟକରଣକୁ ଉନ୍ନତ କରିବା ପାଇଁ, ଦୟାକରି ଆପଣଙ୍କର ମୁହଁ ପୁଣି-ଏନ୍‍ରୋଲ୍ କରନ୍ତୁ।"</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"ମୁହଁର ଡାଟା କ୍ୟାପଚର୍ ହେଲାନାହିଁ। ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
@@ -597,15 +597,15 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"ମୁହଁ ଚିହ୍ନଟ କରିପାରିଲା ନାହିଁ। ହାର୍ଡୱେୟାର୍ ଉପଲବ୍ଧ ନାହିଁ।"</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"ଫେସ୍ ଅନ୍‌ଲକ୍ ପୁଣି ବ୍ୟବହାର କରି ଦେଖନ୍ତୁ"</string>
+    <string name="face_error_timeout" msgid="522924647742024699">"ଫେସ୍ ଅନଲକ୍ ପୁଣି ବ୍ୟବହାର କରି ଦେଖନ୍ତୁ।"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"ନୂଆ ମୁହଁ ଡାଟା ଷ୍ଟୋର୍ ହେବ ନାହିଁ। ପ୍ରଥମେ ପୁରୁଣାକୁ ଡିଲିଟ୍ କରନ୍ତୁ।"</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"ଫେସ୍‍ର ଅପରେଶନ୍‍ କ୍ୟାନ୍ସଲ୍‍ ହୋ‍ଇଗଲା"</string>
     <string name="face_error_user_canceled" msgid="8553045452825849843">"ଉପଯୋଗକର୍ତ୍ତାଙ୍କ ଦ୍ୱାରା ଫେସ୍ ଅନଲକ୍ ବାତିଲ୍ କରାଯାଇଛି।"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"ବାରମ୍ବାର ଚେଷ୍ଟା। ପରେ ପୁଣିଥରେ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"ଅତ୍ୟଧିକ ପ୍ରଚେଷ୍ଟା. ଫେସ୍ ଅନ୍‌ଲକ୍ ଅକ୍ଷମ କରନ୍ତୁ"</string>
+    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"ଅତ୍ୟଧିକ ପ୍ରଚେଷ୍ଟା। ଫେସ୍ ଅନଲକ୍ ଅକ୍ଷମ ହୋଇଛି।"</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"ମୁହଁ ଚିହ୍ନଟ କରିପାରିଲା ନାହିଁ। ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"ଆପଣ ଫେସ୍ ଅନ୍‌ଲକ୍ ସେଟ୍ ଅପ୍ କରିନାହାଁନ୍ତି"</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"ଏହି ଡିଭାଇସ୍‌ରେ ଫେସ୍ ଅନ୍‌ଲକ୍ ସମର୍ଥିତ ନୁହେଁ।"</string>
+    <string name="face_error_not_enrolled" msgid="7369928733504691611">"ଆପଣ ଫେସ୍ ଅନଲକ୍ ସେଟ୍ ଅପ୍ କରିନାହାଁନ୍ତି।"</string>
+    <string name="face_error_hw_not_present" msgid="1070600921591729944">"ଏହି ଡିଭାଇସରେ ଫେସ୍ ଅନଲକ୍ ସମର୍ଥିତ ନୁହେଁ।"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"ସେନ୍ସରକୁ ଅସ୍ଥାୟୀ ଭାବେ ଅକ୍ଷମ କରାଯାଇଛି।"</string>
     <string name="face_name_template" msgid="3877037340223318119">"<xliff:g id="FACEID">%d</xliff:g>ଙ୍କ ଫେସ୍‍"</string>
   <string-array name="face_error_vendor">
@@ -835,7 +835,7 @@
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"ସମସ୍ତ ସୁବିଧା ତଥା ଡାଟା ପାଇଁ ଅନଲକ୍‍ କରନ୍ତୁ"</string>
-    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"ମାଲିକର ମୁହଁ ଚିହ୍ନି ଅନଲକ୍‍ କରିବାର ସର୍ବାଧିକ ଧାର୍ଯ୍ୟ ସୀମା ଅତିକ୍ରମ କଲା"</string>
+    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"ସର୍ବାଧିକ ଫେସ୍ ଅନଲକ୍‍ ପ୍ରଚେଷ୍ଟା ଅତିକ୍ରମ କରିଛି"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"କୌଣସି SIM କାର୍ଡ ନାହିଁ"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"ଟାବଲେଟ୍‌ରେ କୌଣସି SIM‍ କାର୍ଡ ନାହିଁ।"</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"ଆପଣଙ୍କର Android TV ଡିଭାଇସ୍‌ରେ କୌଣସି SIM କାର୍ଡ ନାହିଁ।"</string>

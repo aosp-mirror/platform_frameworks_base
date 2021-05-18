@@ -575,8 +575,8 @@
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Ikona odtlačku prsta"</string>
     <string name="permlab_manageFace" msgid="4569549381889283282">"spravovať hardvér odomknutia tvárou"</string>
     <string name="permdesc_manageFace" msgid="6204569688492710471">"Umožňuje aplikácii vyvolať metódy, ktoré pridávajú a odstraňujú šablóny tvárí."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"používať hardvér Odomknutia tvárou"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Umožňuje aplikácii používať na overenie totožnosti hardvér Odomknutia tvárou"</string>
+    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"používať hardvér odomknutia tvárou"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Umožňuje aplikácii používať na overenie totožnosti hardvér odomknutia tvárou"</string>
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Odomknutie tvárou"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Znova zaregistrujte svoju tvár"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Znova zaregistrujte svoju tvár, aby sa zlepšilo rozpoznávanie"</string>
