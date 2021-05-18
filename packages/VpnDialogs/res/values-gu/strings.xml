@@ -18,6 +18,8 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="prompt" msgid="3183836924226407828">"કનેક્શન વિનંતી"</string>
     <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> VPN કનેક્શન સેટ કરવા માગે છે જે તેને નેટવર્ક ટ્રાફિક મૉનિટર કરવાની મંજૂરી આપે છે. જો તમને સ્રોત પર વિશ્વાસ હોય તો જ સ્વીકારો. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; તમારી સ્ક્રીનની ટોચ પર ત્યારે દેખાય છે જ્યારે VPN સક્રિય હોય છે."</string>
+    <!-- no translation found for warning (5188957997628124947) -->
+    <skip />
     <string name="legacy_title" msgid="192936250066580964">"VPN કનેક્ટ કરેલું છે"</string>
     <string name="session" msgid="6470628549473641030">"સત્ર:"</string>
     <string name="duration" msgid="3584782459928719435">"અવધિ:"</string>
