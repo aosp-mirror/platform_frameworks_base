@@ -524,10 +524,10 @@
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"このアプリに画面ロックの複雑さレベル（高、中、低、なし）を認識することを許可します。複雑さレベルは、画面ロックの文字数の範囲やタイプを示すものです。アプリから一定レベルまで画面ロックを更新するよう推奨されることもありますが、ユーザーは無視したり別の操作を行ったりできます。画面ロックは平文で保存されないため、アプリが正確なパスワードを知ることはありません。"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"生体認証ハードウェアの使用"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"生体認証ハードウェアを認証に使用することをアプリに許可します"</string>
-    <string name="permlab_manageFingerprint" msgid="7432667156322821178">"指紋ハードウェアの管理"</string>
+    <string name="permlab_manageFingerprint" msgid="7432667156322821178">"指紋認証ハードウェアの管理"</string>
     <string name="permdesc_manageFingerprint" msgid="2025616816437339865">"使用する指紋テンプレートの追加や削除を行う方法の呼び出しをアプリに許可します。"</string>
-    <string name="permlab_useFingerprint" msgid="1001421069766751922">"指紋ハードウェアの使用"</string>
-    <string name="permdesc_useFingerprint" msgid="412463055059323742">"指紋ハードウェアを認証に使用することをアプリに許可します"</string>
+    <string name="permlab_useFingerprint" msgid="1001421069766751922">"指紋認証ハードウェアの使用"</string>
+    <string name="permdesc_useFingerprint" msgid="412463055059323742">"指紋認証ハードウェアを認証に使用することをアプリに許可します"</string>
     <string name="permlab_audioWrite" msgid="8501705294265669405">"音楽コレクションの変更"</string>
     <string name="permdesc_audioWrite" msgid="8057399517013412431">"音楽コレクションの変更をアプリに許可します。"</string>
     <string name="permlab_videoWrite" msgid="5940738769586451318">"動画コレクションの変更"</string>
@@ -552,7 +552,7 @@
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"指紋認証を完了しました"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"顔を認証しました"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"顔を認証しました。[確認] を押してください"</string>
-    <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"指紋ハードウェアは使用できません。"</string>
+    <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"指紋認証ハードウェアは使用できません。"</string>
     <string name="fingerprint_error_no_space" msgid="6126456006769817485">"指紋を保存できません。既存の指紋を削除してください。"</string>
     <string name="fingerprint_error_timeout" msgid="2946635815726054226">"指紋の読み取りがタイムアウトになりました。もう一度お試しください。"</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"指紋の操作をキャンセルしました。"</string>
@@ -665,7 +665,7 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"携帯通信会社のSMSサービスのトップレベルインターフェースにバインドすることを所有者に許可します。通常のアプリでは不要です。"</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"携帯通信会社のサービスへのバインド"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"携帯通信会社のサービスにバインドすることを所有者に許可します。通常のアプリでは不要です。"</string>
-    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"サイレント モードへのアクセス"</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"サイレント モードの利用"</string>
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"サイレント モード設定の読み取りと書き込みをアプリに許可します。"</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"表示権限の使用の開始"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"アプリの権限使用の開始を所有者に許可します。通常のアプリでは不要です。"</string>
@@ -1562,7 +1562,7 @@
     <string name="wireless_display_route_description" msgid="8297563323032966831">"ワイヤレス ディスプレイ"</string>
     <string name="media_route_button_content_description" msgid="2299223698196869956">"キャスト"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"デバイスに接続"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"デバイスへの画面のキャスト"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"デバイスに画面をキャスト"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"デバイスを検索しています…"</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"設定"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"接続を解除"</string>
@@ -1633,7 +1633,7 @@
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"OFF"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> にデバイスのフル コントロールを許可しますか？"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"<xliff:g id="SERVICE">%1$s</xliff:g> をオンにすると、デバイスデータの暗号化の強化に画面ロックは使用されなくなります。"</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"フル コントロールは、ユーザー補助機能を必要とするユーザーをサポートするアプリには適していますが、ほとんどのアプリには適していません。"</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"フル コントロールは、ユーザー補助機能が必要な場合には適していますが、その他の多くのアプリには不要です。"</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"画面の表示と操作"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"画面上のすべてのコンテンツを読み取り、他のアプリでコンテンツを表示することができます。"</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"操作の表示と実行"</string>
@@ -1765,7 +1765,7 @@
     <string name="restr_pin_confirm_pin" msgid="7143161971614944989">"新しいPINの確認"</string>
     <string name="restr_pin_create_pin" msgid="917067613896366033">"制限を変更するためのPINを作成してください"</string>
     <string name="restr_pin_error_doesnt_match" msgid="7063392698489280556">"PINが一致しません。もう一度お試しください。"</string>
-    <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PINが短すぎます。4桁以上にしてください。"</string>
+    <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PINが短すぎます。4桁以上で作成してください。"</string>
     <plurals name="restr_pin_countdown" formatted="false" msgid="4427486903285216153">
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g>秒後にもう一度お試しください</item>
       <item quantity="one">1秒後にもう一度お試しください</item>
@@ -2040,9 +2040,9 @@
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"電源ダイアログ"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"ロック画面"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"スクリーンショット"</string>
-    <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"画面上のユーザー補助のショートカット"</string>
-    <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"画面上のユーザー補助のショートカットの選択メニュー"</string>
-    <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"ユーザー補助のショートカット"</string>
+    <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"画面上のユーザー補助機能のショートカット"</string>
+    <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"画面上のユーザー補助機能のショートカットの選択メニュー"</string>
+    <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"ユーザー補助機能のショートカット"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> のキャプション バーです。"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> は RESTRICTED バケットに移動しました。"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>

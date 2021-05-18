@@ -102,7 +102,7 @@
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Grabando pantalla"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Grabando pantalla y audio"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"Mostrar toques en la pantalla"</string>
-    <string name="screenrecord_stop_text" msgid="6549288689506057686">"Toca aquí para detener"</string>
+    <string name="screenrecord_stop_text" msgid="6549288689506057686">"Toca para detener"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"Detener"</string>
     <string name="screenrecord_pause_label" msgid="6004054907104549857">"Pausar"</string>
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"Seguir"</string>
@@ -224,7 +224,7 @@
     <string name="data_connection_lte" msgid="557021044282539923">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="4799302403782283178">"LTE+"</string>
     <string name="data_connection_cdma" msgid="7678457855627313518">"1X"</string>
-    <string name="data_connection_roaming" msgid="375650836665414797">"Itinerancia"</string>
+    <string name="data_connection_roaming" msgid="375650836665414797">"Roaming"</string>
     <string name="data_connection_edge" msgid="6316755666481405762">"EDGE"</string>
     <string name="accessibility_data_connection_wifi" msgid="4422160347472742434">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="1140839832913084973">"Sin tarjeta SIM"</string>
@@ -384,7 +384,7 @@
     <string name="quick_settings_cast_title" msgid="2279220930629235211">"Enviar pantalla"</string>
     <string name="quick_settings_casting" msgid="1435880708719268055">"Enviando"</string>
     <string name="quick_settings_cast_device_default_name" msgid="6988469571141331700">"Dispositivo sin nombre"</string>
-    <string name="quick_settings_cast_device_default_description" msgid="2580520859212250265">"Listo para enviar"</string>
+    <string name="quick_settings_cast_device_default_description" msgid="2580520859212250265">"Hecho para enviar"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"No hay dispositivos disponibles"</string>
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Wi‑Fi no conectado"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Brillo"</string>
@@ -392,12 +392,12 @@
     <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Invertir colores"</string>
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"Modo de corrección de color"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Más ajustes"</string>
-    <string name="quick_settings_done" msgid="2163641301648855793">"Listo"</string>
+    <string name="quick_settings_done" msgid="2163641301648855793">"Hecho"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Conectado"</string>
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"Conectado (<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> de batería)"</string>
     <string name="quick_settings_connecting" msgid="2381969772953268809">"Conectando..."</string>
     <string name="quick_settings_tethering_label" msgid="5257299852322475780">"Compartir conexión"</string>
-    <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"Punto de acceso"</string>
+    <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"Compartir Internet"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"Activando…"</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Ahorro de datos activado"</string>
     <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="3142308865165871976">
@@ -592,21 +592,21 @@
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"activar"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"desactivar"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"Cambiar dispositivo de salida"</string>
-    <string name="screen_pinning_title" msgid="9058007390337841305">"La aplicación está fijada"</string>
-    <string name="screen_pinning_description" msgid="8699395373875667743">"La pantalla se mantendrá visible hasta que dejes de fijarla. Para dejar de fijarla, mantén pulsados los botones Atrás y Aplicaciones recientes."</string>
-    <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"La pantalla se mantendrá visible hasta que dejes de fijarla. Para dejar de fijarla, mantén pulsados los botones Atrás e Inicio."</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"La pantalla se mantendrá visible hasta que dejes de fijarla. Para dejar de fijarla, desliza el dedo hacia arriba y mantenlo pulsado."</string>
-    <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"La pantalla se mantendrá visible hasta que dejes de fijarla. Para dejar de fijarla, mantén pulsado el botón Aplicaciones recientes."</string>
-    <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"La pantalla se mantendrá visible hasta que dejes de fijarla. Para dejar de fijarla, mantén pulsado el botón Inicio."</string>
+    <string name="screen_pinning_title" msgid="9058007390337841305">"Aplicación fijada"</string>
+    <string name="screen_pinning_description" msgid="8699395373875667743">"La aplicación se mantendrá visible hasta que dejes de fijarla. Para dejar de fijarla, mantén pulsados los botones Atrás y Aplicaciones recientes."</string>
+    <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"La aplicación se mantendrá visible hasta que dejes de fijarla. Para dejar de fijarla, mantén pulsados los botones Atrás e Inicio."</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"La aplicación se mantendrá visible hasta que dejes de fijarla. Para dejar de fijarla, desliza el dedo hacia arriba y mantenlo pulsado."</string>
+    <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"La aplicación se mantendrá visible hasta que dejes de fijarla. Para dejar de fijarla, mantén pulsado el botón Aplicaciones recientes."</string>
+    <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"La aplicación se mantendrá visible hasta que dejes de fijarla. Para dejar de fijarla, mantén pulsado el botón Inicio."</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Es posible que se pueda acceder a datos personales, como contactos o el contenido de correos."</string>
-    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Se pueden abrir otras aplicaciones desde aplicaciones fijadas."</string>
+    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Las aplicaciones fijadas pueden abrir otras aplicaciones."</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"Para dejar de fijar esta aplicación, mantén pulsados los botones Atrás y Aplicaciones recientes"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Para dejar de fijar esta aplicación, mantén pulsados los botones Atrás e Inicio"</string>
-    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Para dejar de fijar esta aplicación, desliza el dedo hacia arriba y no lo separes de la pantalla."</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Para dejar de fijar esta aplicación, desliza el dedo hacia arriba y mantenlo pulsado"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"Entendido"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"No, gracias"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"Aplicación fijada"</string>
-    <string name="screen_pinning_exit" msgid="4553787518387346893">"Aplicación no fijada"</string>
+    <string name="screen_pinning_exit" msgid="4553787518387346893">"Se ha dejado de fijar la aplicación"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"¿Ocultar <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"Volverá a aparecer la próxima vez que actives esta opción en Ajustes."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="3341477479055016776">"Ocultar"</string>
@@ -662,7 +662,7 @@
     <string name="alarm_template" msgid="2234991538018805736">"a las <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"el <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_detail" msgid="544463655956179791">"Ajustes rápidos, <xliff:g id="TITLE">%s</xliff:g>."</string>
-    <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"Punto de acceso"</string>
+    <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"Compartir Internet"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Perfil de trabajo"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Diversión solo para algunos"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"El configurador de UI del sistema te ofrece otras formas de modificar y personalizar la interfaz de usuario de Android. Estas funciones experimentales pueden cambiar, fallar o desaparecer en futuras versiones. Te recomendamos que tengas cuidado."</string>
@@ -694,7 +694,7 @@
     <string name="notification_channel_silenced" msgid="1995937493874511359">"Estas notificaciones se mostrarán de forma silenciosa"</string>
     <string name="notification_channel_unsilenced" msgid="94878840742161152">"Estas notificaciones te avisarán con sonido"</string>
     <string name="inline_blocking_helper" msgid="2891486013649543452">"Normalmente ignoras estas notificaciones. \n¿Quieres seguir viéndolas?"</string>
-    <string name="inline_done_button" msgid="6043094985588909584">"Listo"</string>
+    <string name="inline_done_button" msgid="6043094985588909584">"Hecho"</string>
     <string name="inline_ok_button" msgid="603075490581280343">"Aplicar"</string>
     <string name="inline_keep_showing" msgid="8736001253507073497">"¿Quieres seguir viendo estas notificaciones?"</string>
     <string name="inline_stop_button" msgid="2453460935438696090">"Detener las notificaciones"</string>
@@ -713,13 +713,13 @@
     <string name="notification_bubble_title" msgid="8330481035191903164">"Burbuja"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Sin sonido ni vibración"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Sin sonido ni vibración, y se muestra más abajo en la sección de conversaciones"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Es posible que suene o vibre según los ajustes del teléfono"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Es posible que suene o vibre según los ajustes del teléfono. Las conversaciones de <xliff:g id="APP_NAME">%1$s</xliff:g> aparecen como burbujas de forma predeterminada."</string>
+    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Puede sonar o vibrar según los ajustes del teléfono"</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Puede sonar o vibrar según los ajustes del teléfono. Las conversaciones de <xliff:g id="APP_NAME">%1$s</xliff:g> aparecen como burbujas de forma predeterminada."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Llama tu atención con un acceso directo flotante a este contenido."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Se muestra arriba en la sección de conversaciones, como burbuja flotante, y la imagen de perfil aparece en la pantalla de bloqueo"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Se muestra arriba en la sección de conversaciones, aparece como burbuja flotante y la imagen de perfil se incluye en la pantalla de bloqueo"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Ajustes"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioridad"</string>
-    <string name="no_shortcut" msgid="8257177117568230126">"No se pueden usar funciones de conversación con <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> no admite funciones de conversación"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"No hay burbujas recientes"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Las burbujas recientes y las cerradas aparecerán aquí"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Estas notificaciones no se pueden modificar."</string>
@@ -741,7 +741,7 @@
     <string name="notification_channel_switch_accessibility" msgid="8979885820432540252">"Permite las notificaciones de este canal"</string>
     <string name="notification_more_settings" msgid="4936228656989201793">"Más ajustes"</string>
     <string name="notification_app_settings" msgid="8963648463858039377">"Personalizar"</string>
-    <string name="notification_done" msgid="6215117625922713976">"Listo"</string>
+    <string name="notification_done" msgid="6215117625922713976">"Hecho"</string>
     <string name="inline_undo" msgid="9026953267645116526">"Deshacer"</string>
     <string name="demote" msgid="6225813324237153980">"Marcar esta notificación como que no es una conversación"</string>
     <string name="notification_conversation_favorite" msgid="1905240206975921907">"Conversación importante"</string>
@@ -987,7 +987,7 @@
     <string name="auto_saver_enabled_text" msgid="7889491183116752719">"El modo Ahorro de batería se activará automáticamente cuando quede menos de un <xliff:g id="PERCENTAGE">%d</xliff:g> %% de batería."</string>
     <string name="open_saver_setting_action" msgid="2111461909782935190">"Ajustes"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"Entendido"</string>
-    <string name="heap_dump_tile_name" msgid="2464189856478823046">"Volcar pila de SysUI"</string>
+    <string name="heap_dump_tile_name" msgid="2464189856478823046">"Volcar montículo de SysUI"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"Sensores desactivados"</string>
     <string name="device_services" msgid="1549944177856658705">"Servicios del dispositivo"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Sin título"</string>
@@ -1042,7 +1042,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"quitar de favoritos"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Mover a la posición <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Controles"</string>
-    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Elige los controles a los que acceder desde el menú de encendido"</string>
+    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Elige los controles a los que quieras acceder desde el menú de encendido"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Mantén pulsado y arrastra un control para reubicarlo"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Todos los controles quitados"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"No se han guardado los cambios"</string>

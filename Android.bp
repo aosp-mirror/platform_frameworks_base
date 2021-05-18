@@ -536,6 +536,7 @@ java_library {
         "android.hardware.wifi-V1.0-java-constants",
         // Additional dependencies needed to build the ike API classes.
         "ike-internals",
+        "modules-utils-build",
     ],
     apex_available: ["//apex_available:platform"],
     visibility: [
@@ -657,7 +658,6 @@ filegroup {
         "core/java/android/annotation/RequiresPermission.java",
         "core/java/android/annotation/SdkConstant.java",
         "core/java/android/annotation/StringDef.java",
-        "core/java/android/annotation/SuppressLint.java",
         "core/java/android/annotation/SystemApi.java",
         "core/java/android/annotation/SystemService.java",
         "core/java/android/annotation/TestApi.java",

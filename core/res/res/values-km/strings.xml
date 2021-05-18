@@ -571,7 +571,7 @@
     <string name="permdesc_manageFace" msgid="6204569688492710471">"អនុញ្ញាតឱ្យកម្មវិធីប្រើវិធីសាស្ត្រដើម្បី​បញ្ចូល និងលុបទម្រង់​គំរូ​ផ្ទៃមុខសម្រាប់ប្រើប្រាស់។"</string>
     <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"ប្រើ​ហាតវែរ​ដោះសោ​តាមទម្រង់មុខ"</string>
     <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"អនុញ្ញាត​ឱ្យ​កម្មវិធី​ប្រើ​ហាតវែរ​ដោះសោតាមទម្រង់មុខ​សម្រាប់​ការផ្ទៀងផ្ទាត់"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"ការដោះសោ​តាមទម្រង់មុខ"</string>
+    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"ដោះ​សោ​តាម​​ទម្រង់​មុខ"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"ស្កេន​បញ្ចូល​មុខរបស់អ្នក​ម្ដងទៀត"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"ដើម្បី​ធ្វើឱ្យ​ការសម្គាល់មុខ​ប្រសើរជាងមុន សូមស្កេន​បញ្ចូល​មុខរបស់អ្នក​ម្ដងទៀត"</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"មិនអាច​ថត​ទិន្នន័យទម្រង់មុខ​បាន​ត្រឹមត្រូវទេ។ សូមព្យាយាមម្ដងទៀត។"</string>
@@ -1093,7 +1093,7 @@
     <string name="cut" msgid="2561199725874745819">"កាត់"</string>
     <string name="copy" msgid="5472512047143665218">"ចម្លង"</string>
     <string name="failed_to_copy_to_clipboard" msgid="725919885138539875">"មិនអាច​ចម្លងទៅ​អង្គចងចាំទេ"</string>
-    <string name="paste" msgid="461843306215520225">"បិទ​ភ្ជាប់"</string>
+    <string name="paste" msgid="461843306215520225">"ដាក់ចូល"</string>
     <string name="paste_as_plain_text" msgid="7664800665823182587">"បិទភ្ជាប់ជាអត្ថបទធម្មតា"</string>
     <string name="replace" msgid="7842675434546657444">"ជំនួស..."</string>
     <string name="delete" msgid="1514113991712129054">"លុប"</string>
@@ -1306,8 +1306,8 @@
     <string name="usb_power_notification_message" msgid="7284765627437897702">"កំពុងសាកថ្ម​ឧបករណ៍​ដែលបានភ្ជាប់។ សូមចុចសម្រាប់​ជម្រើសបន្ថែម។"</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"បាន​រកឃើញ​គ្រឿង​បរិក្ខារ​សំឡេង​អាណាឡូក"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"ឧបករណ៍​ដែលភ្ជាប់​មក​ជាមួយ​មិនត្រូវគ្នា​ជាមួយ​ទូរសព្ទ​នេះទេ។ ចុច​ដើម្បី​ស្វែងយល់​បន្ថែម។"</string>
-    <string name="adb_active_notification_title" msgid="408390247354560331">"បាន​ភ្ជាប់​ការ​កែ​កំហុសតាម​ USB"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"ចុច​ដើម្បី​បិទ​ការកែកំហុសតាម ​USB"</string>
+    <string name="adb_active_notification_title" msgid="408390247354560331">"បាន​ភ្ជាប់​ការ​ជួសជុលតាម​ USB"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"ចុច​ដើម្បី​បិទ​ការជួសជុលតាម ​USB"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"ជ្រើស​រើស ដើម្បី​បិទ​ការ​កែ​កំហុសតាម USB ។"</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"បានភ្ជាប់​ការជួសជុល​ដោយឥតខ្សែ"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"ចុច ដើម្បី​បិទ​ការជួសជុល​ដោយឥតខ្សែ"</string>
@@ -1507,7 +1507,7 @@
     <string name="action_menu_overflow_description" msgid="4579536843510088170">"ជម្រើស​ច្រើន​ទៀត"</string>
     <string name="action_bar_home_description_format" msgid="5087107531331621803">"%1$s, %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="4346835454749569826">"%1$s, %2$s, %3$s"</string>
-    <string name="storage_internal" msgid="8490227947584914460">"ឧបករណ៍ផ្ទុកដែលចែករំលែកខាងក្នុង"</string>
+    <string name="storage_internal" msgid="8490227947584914460">"ទំហំផ្ទុករួមខាងក្នុង"</string>
     <string name="storage_sd_card" msgid="3404740277075331881">"កាត​អេសឌី"</string>
     <string name="storage_sd_card_label" msgid="7526153141147470509">"កាត SD <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb_drive" msgid="448030813201444573">"ឧបករណ៍ផ្ទុក USB"</string>
@@ -1786,7 +1786,7 @@
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"<xliff:g id="LABEL">%1$s</xliff:g> ការងារទី 2"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"<xliff:g id="LABEL">%1$s</xliff:g> ការងារទី 3"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"សួរ​រក​កូដ PIN មុន​ពេល​ផ្ដាច់"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"សួរ​រក​លំនាំ​ដោះ​សោ​មុន​ពេល​ផ្ដាច់"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"សួរ​រក​លំនាំ​ដោះ​សោ​មុន​ពេលដោះខ្ទាស់"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"សួរ​រក​ពាក្យ​សម្ងាត់​មុន​ពេល​ផ្ដាច់"</string>
     <string name="package_installed_device_owner" msgid="7035926868974878525">"​ដំឡើង​ដោយ​អ្នកគ្រប់គ្រង​របស់​អ្នក"</string>
     <string name="package_updated_device_owner" msgid="7560272363805506941">"ធ្វើ​បច្ចុប្បន្នភាព​ដោយ​អ្នកគ្រប់គ្រង​របស់​អ្នក"</string>

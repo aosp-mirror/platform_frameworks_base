@@ -479,9 +479,9 @@
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Ungependa kumwondoa mgeni?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Data na programu zote katika kipindi hiki zitafutwa."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Ondoa"</string>
-    <string name="guest_wipe_session_title" msgid="7147965814683990944">"Karibu tena, mwalikwa!"</string>
+    <string name="guest_wipe_session_title" msgid="7147965814683990944">"Karibu tena mgeni!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Je, unataka kuendelea na kipindi chako?"</string>
-    <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Anza tena"</string>
+    <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Anza upya"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Ndiyo, endelea"</string>
     <string name="guest_notification_title" msgid="4434456703930764167">"Mtumiaji mgeni"</string>
     <string name="guest_notification_text" msgid="4202692942089571351">"Ili kufuta programu na data, mwondoe mtumiaji mgeni"</string>
@@ -951,7 +951,7 @@
     <string name="notification_channel_storage" msgid="2720725707628094977">"Hifadhi"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"Vidokezo"</string>
     <string name="instant_apps" msgid="8337185853050247304">"Programu Zinazofunguka Papo Hapo"</string>
-    <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> inaendelea kutumika"</string>
+    <string name="instant_apps_title" msgid="8942706782103036910">"Programu ya <xliff:g id="APP">%1$s</xliff:g> inatumika"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"Programu inafunguka bila kusakinishwa."</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"Programu inafunguka bila kusakinishwa. Gusa ili upate maelezo zaidi."</string>
     <string name="app_info" msgid="5153758994129963243">"Maelezo ya programu"</string>

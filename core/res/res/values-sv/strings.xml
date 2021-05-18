@@ -93,7 +93,7 @@
     <string name="notification_channel_mobile_data_status" msgid="1941911162076442474">"Status för mobildata"</string>
     <string name="notification_channel_sms" msgid="1243384981025535724">"Sms"</string>
     <string name="notification_channel_voice_mail" msgid="8457433203106654172">"Röstmeddelanden"</string>
-    <string name="notification_channel_wfc" msgid="9048240466765169038">"Wi-Fi-samtal"</string>
+    <string name="notification_channel_wfc" msgid="9048240466765169038">"wifi-samtal"</string>
     <string name="notification_channel_sim" msgid="5098802350325677490">"Status för SIM-kort"</string>
     <string name="notification_channel_sim_high_prio" msgid="642361929452850928">"SIM-aviseringar med hög prioritet"</string>
     <string name="peerTtyModeFull" msgid="337553730440832160">"Peer-enheten begärde texttelefonläget FULL"</string>
@@ -122,30 +122,30 @@
     <string name="roamingText11" msgid="5245687407203281407">"Roamingbanner på"</string>
     <string name="roamingText12" msgid="673537506362152640">"Roamingbanner av"</string>
     <string name="roamingTextSearching" msgid="5323235489657753486">"Söker efter tjänst"</string>
-    <string name="wfcRegErrorTitle" msgid="3193072971584858020">"Det gick inte att konfigurera Wi-Fi-samtal"</string>
+    <string name="wfcRegErrorTitle" msgid="3193072971584858020">"Det gick inte att konfigurera wifi-samtal"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="468830943567116703">"Om du vill ringa samtal och skicka meddelanden via Wi-Fi ber du först operatören att konfigurera tjänsten. Därefter kan du aktivera Wi-Fi-samtal på nytt från Inställningar. (Felkod: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
+    <item msgid="468830943567116703">"Om du vill ringa samtal och skicka meddelanden via wifi ber du först operatören att konfigurera tjänsten. Därefter kan du aktivera wifi-samtal på nytt från Inställningar. (Felkod: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
-    <item msgid="4795145070505729156">"Följande fel uppstod när Wi-Fi-samtal skulle registreras hos operatören: <xliff:g id="CODE">%1$s</xliff:g>"</item>
+    <item msgid="4795145070505729156">"Följande fel uppstod när wifi-samtal skulle registreras hos operatören: <xliff:g id="CODE">%1$s</xliff:g>"</item>
   </string-array>
     <!-- no translation found for wfcSpnFormat_spn (2982505428519096311) -->
     <skip />
-    <string name="wfcSpnFormat_spn_wifi_calling" msgid="3165949348000906194">"Wi-Fi-samtal via <xliff:g id="SPN">%s</xliff:g>"</string>
-    <string name="wfcSpnFormat_spn_wifi_calling_vo_hyphen" msgid="3836827895369365298">"Wi-Fi-samtal med <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_wifi_calling" msgid="3165949348000906194">"wifi-samtal via <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_wifi_calling_vo_hyphen" msgid="3836827895369365298">"wifi-samtal med <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_wlan_call" msgid="4895315549916165700">"WLAN-samtal"</string>
     <string name="wfcSpnFormat_spn_wlan_call" msgid="255919245825481510">"WLAN-samtal via <xliff:g id="SPN">%s</xliff:g>"</string>
-    <string name="wfcSpnFormat_spn_wifi" msgid="7232899594327126970">"Wi-Fi via <xliff:g id="SPN">%s</xliff:g>"</string>
-    <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="8383917598312067365">"Wi-Fi-samtal | <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_wifi" msgid="7232899594327126970">"wifi via <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="8383917598312067365">"wifi-samtal | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="6865214948822061486">"VoWifi via <xliff:g id="SPN">%s</xliff:g>"</string>
-    <string name="wfcSpnFormat_wifi_calling" msgid="6178935388378661755">"Wi-Fi-samtal"</string>
-    <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"Wi-Fi"</string>
-    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"Wi-Fi-samtal"</string>
+    <string name="wfcSpnFormat_wifi_calling" msgid="6178935388378661755">"wifi-samtal"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"Wifi"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"wifi-samtal"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="5626710010766902560">"Av"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"Ring via Wi-Fi"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"Ring via wifi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"Ring via mobilnätverk"</string>
-    <string name="wfc_mode_wifi_only_summary" msgid="104951993894678665">"Endast Wi-Fi"</string>
+    <string name="wfc_mode_wifi_only_summary" msgid="104951993894678665">"Endast wifi"</string>
     <string name="cfTemplateNotForwarded" msgid="862202427794270501">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Vidarebefordras inte"</string>
     <string name="cfTemplateForwarded" msgid="9132506315842157860">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g><xliff:g id="DIALING_NUMBER">{1}</xliff:g> efter <xliff:g id="TIME_DELAY">{2}</xliff:g> sekunder"</string>
@@ -295,7 +295,7 @@
     <string name="managed_profile_label" msgid="7316778766973512382">"Byt till jobbprofilen"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Kontakter"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"få tillgång till dina kontakter"</string>
-    <string name="permgrouplab_location" msgid="1858277002233964394">"Plats"</string>
+    <string name="permgrouplab_location" msgid="1858277002233964394">"plats"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"komma åt enhetens platsuppgifter"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"Kalender"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"få tillgång till din kalender"</string>
@@ -492,14 +492,14 @@
     <string name="permdesc_changeNetworkState" msgid="649341947816898736">"Tillåter att appen ändrar statusen för en nätverksanslutning."</string>
     <string name="permlab_changeTetherState" msgid="9079611809931863861">"ändra sammanlänkad anslutning"</string>
     <string name="permdesc_changeTetherState" msgid="3025129606422533085">"Tillåter att appen ändrar statusen för en delad nätverksanslutning."</string>
-    <string name="permlab_accessWifiState" msgid="5552488500317911052">"visa Wi-Fi-anslutningar"</string>
-    <string name="permdesc_accessWifiState" msgid="6913641669259483363">"Tillåter att appen kommer åt information om Wi-Fi-nätverk, till exempel om Wi-Fi är aktiverat och namn på anslutna Wi-Fi-enheter."</string>
-    <string name="permlab_changeWifiState" msgid="7947824109713181554">"anslut och koppla från Wi-Fi"</string>
-    <string name="permdesc_changeWifiState" msgid="7170350070554505384">"Tillåter att appen ansluter till och kopplar från Wi-Fi-åtkomstpunkter samt gör ändringar i enhetens konfiguration för Wi-Fi-nätverk."</string>
-    <string name="permlab_changeWifiMulticastState" msgid="285626875870754696">"tillåt Wi-Fi multicast-mottagning"</string>
-    <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="191079868596433554">"Tillåter att appen tar emot paket som skickats med multicast-adress till alla enheter i ett Wi-Fi-nätverk och inte bara till den här surfplattan. Detta drar mer batteri än när multicastläget inte används."</string>
-    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="1336952358450652595">"Tillåter att appen tar emot paket som skickats med multicast-adress till alla enheter i ett Wi-Fi-nätverk och inte bara till den här Android TV-enheten. Detta drar mer batteri än när multicastläget inte används."</string>
-    <string name="permdesc_changeWifiMulticastState" product="default" msgid="8296627590220222740">"Tillåter att appen tar emot paket som skickats med multicast-adress till alla enheter i ett Wi-Fi-nätverk och inte bara till den här mobilen. Detta drar mer batteri än när multicastläget inte används."</string>
+    <string name="permlab_accessWifiState" msgid="5552488500317911052">"visa wifi-anslutningar"</string>
+    <string name="permdesc_accessWifiState" msgid="6913641669259483363">"Tillåter att appen kommer åt information om wifi-nätverk, till exempel om wifi är aktiverat och namn på anslutna wifi-enheter."</string>
+    <string name="permlab_changeWifiState" msgid="7947824109713181554">"anslut och koppla från wifi"</string>
+    <string name="permdesc_changeWifiState" msgid="7170350070554505384">"Tillåter att appen ansluter till och kopplar från wifi-åtkomstpunkter samt gör ändringar i enhetens konfiguration för wifi-nätverk."</string>
+    <string name="permlab_changeWifiMulticastState" msgid="285626875870754696">"tillåt wifi multicast-mottagning"</string>
+    <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="191079868596433554">"Tillåter att appen tar emot paket som skickats med multicast-adress till alla enheter i ett wifi-nätverk och inte bara till den här surfplattan. Detta drar mer batteri än när multicastläget inte används."</string>
+    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="1336952358450652595">"Tillåter att appen tar emot paket som skickats med multicast-adress till alla enheter i ett wifi-nätverk och inte bara till den här Android TV-enheten. Detta drar mer batteri än när multicastläget inte används."</string>
+    <string name="permdesc_changeWifiMulticastState" product="default" msgid="8296627590220222740">"Tillåter att appen tar emot paket som skickats med multicast-adress till alla enheter i ett wifi-nätverk och inte bara till den här mobilen. Detta drar mer batteri än när multicastläget inte används."</string>
     <string name="permlab_bluetoothAdmin" msgid="6490373569441946064">"få åtkomst till Bluetooth-inställningar"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="5370837055438574863">"Tillåter att appen konfigurerar den lokala Bluetooth-surfplattan samt upptäcker och parkopplar den med fjärranslutna enheter."</string>
     <string name="permdesc_bluetoothAdmin" product="tv" msgid="1623992984547014588">"Tillåter att appen konfigurerar Bluetooth på Android TV-enheten samt upptäcker fjärrenheter och parkopplar enheten med dem."</string>
@@ -835,7 +835,7 @@
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Försök igen"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Försök igen"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Lås upp för alla funktioner och all data"</string>
-    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Du har försökt låsa upp med Ansiktslås för många gånger"</string>
+    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Du har försökt låsa upp med ansiktslås för många gånger"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"Inget SIM-kort"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"Inget SIM-kort i surfplattan."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Inget SIM-kort i Android TV-enheten."</string>
@@ -1236,7 +1236,7 @@
     <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"Ljud för alarm"</string>
     <string name="ringtone_picker_title_notification" msgid="6387191794719608122">"Aviseringsljud"</string>
     <string name="ringtone_unknown" msgid="5059495249862816475">"Okänt"</string>
-    <string name="wifi_available_sign_in" msgid="381054692557675237">"Logga in på ett Wi-Fi-nätverk"</string>
+    <string name="wifi_available_sign_in" msgid="381054692557675237">"Logga in på ett wifi-nätverk"</string>
     <string name="network_available_sign_in" msgid="1520342291829283114">"Logga in på nätverket"</string>
     <!-- no translation found for network_available_sign_in_detailed (7520423801613396556) -->
     <skip />
@@ -1252,7 +1252,7 @@
     <string name="network_switch_metered_toast" msgid="501662047275723743">"Byte av nätverk från <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> till <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
   <string-array name="network_switch_type_name">
     <item msgid="2255670471736226365">"mobildata"</item>
-    <item msgid="5520925862115353992">"Wi-Fi"</item>
+    <item msgid="5520925862115353992">"Wifi"</item>
     <item msgid="1055487873974272842">"Bluetooth"</item>
     <item msgid="1616528372438698248">"Ethernet"</item>
     <item msgid="9177085807664964627">"VPN"</item>
@@ -1517,10 +1517,10 @@
     <string name="data_usage_warning_title" msgid="9034893717078325845">"Datavarning"</string>
     <string name="data_usage_warning_body" msgid="1669325367188029454">"Du har använt <xliff:g id="APP">%s</xliff:g> data"</string>
     <string name="data_usage_mobile_limit_title" msgid="3911447354393775241">"Gränsen för mobildata har nåtts"</string>
-    <string name="data_usage_wifi_limit_title" msgid="2069698056520812232">"Datagränsen för Wi-Fi har uppnåtts"</string>
+    <string name="data_usage_wifi_limit_title" msgid="2069698056520812232">"Datagränsen för wifi har uppnåtts"</string>
     <string name="data_usage_limit_body" msgid="3567699582000085710">"Data är pausade under resten av cykeln"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="101888478915677895">"Över gränsen för mobildata"</string>
-    <string name="data_usage_wifi_limit_snoozed_title" msgid="1622359254521960508">"Över gränsen för Wi-Fi-data"</string>
+    <string name="data_usage_wifi_limit_snoozed_title" msgid="1622359254521960508">"Över gränsen för wifi-data"</string>
     <string name="data_usage_limit_snoozed_body" msgid="545146591766765678">"Du överskridit den inställda gränsen med <xliff:g id="SIZE">%s</xliff:g>"</string>
     <string name="data_usage_restricted_title" msgid="126711424380051268">"Bakgrundsdata är begränsade"</string>
     <string name="data_usage_restricted_body" msgid="5338694433686077733">"Ta bort begränsning."</string>
@@ -1794,7 +1794,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"Batterisparläget förlänger batteritiden genom att:\n\n• aktivera mörkt tema\n• inaktivera eller begränsa aktivitet i bakgrunden, vissa visuella effekter och andra funktioner, som ”Hey Google”\n\n"<annotation id="url">"Läs mer"</annotation></string>
     <string name="battery_saver_description" msgid="8587408568232177204">"Batterisparläget förlänger batteritiden genom att:\n\n• aktivera mörkt tema\n• inaktivera eller begränsa aktivitet i bakgrunden, vissa visuella effekter och andra funktioner, som ”Hey Google”"</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Med databesparing kan du minska dataanvändningen genom att hindra en del appar från att skicka eller ta emot data i bakgrunden. Appar som du använder kan komma åt data, men det sker kanske inte lika ofta. Detta innebär t.ex. att bilder inte visas förrän du trycker på dem."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Med Databesparing kan du minska dataanvändningen genom att hindra en del appar från att skicka eller ta emot data i bakgrunden. Appar som du använder kan komma åt data, men det sker kanske inte lika ofta. Detta innebär t.ex. att bilder inte visas förrän du trycker på dem."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Vill du aktivera Databesparing?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Aktivera"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">

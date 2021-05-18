@@ -507,9 +507,9 @@
     <string name="permdesc_changeWifiMulticastState" product="tv" msgid="1336952358450652595">"Дазваляе праграме атрымліваць пакеты, адпраўленыя на ўсе прылады ў сетцы Wi-Fi з дапамогай групавых адрасоў, а не толькі на вашу прыладу Android TV. Праз гэта будзе спажывацца больш энергіі, чым у рэжыме нешматадраснай перадачы."</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="8296627590220222740">"Дазваляе прыкладанням атрымліваць пакеты, адпраўленыя на ўсе прылады з сеткi Wi-Fi з дапамогай групавых адрасоў, а не толькі на ваш тэлефон. Будзе выкарыстоўвацца больш энергіі, чым у рэжыме нешматадраснай перадачы."</string>
     <string name="permlab_bluetoothAdmin" msgid="6490373569441946064">"атрыманне доступу да налад прылады Bluetooth"</string>
-    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="5370837055438574863">"Дазваляе прыкладанням наладжваць лакальны планшэт Bluetooth, выяўляць і падлучаць выдаленыя прылады."</string>
+    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="5370837055438574863">"Дазваляе праграме наладжваць лакальны планшэт Bluetooth, выяўляць і спалучаць выдаленыя прылады."</string>
     <string name="permdesc_bluetoothAdmin" product="tv" msgid="1623992984547014588">"Дазваляе праграме наладжваць канфігурацыю Bluetooth на прыладзе Android TV, а таксама выяўляць аддаленыя прылады і спалучацца з імі."</string>
-    <string name="permdesc_bluetoothAdmin" product="default" msgid="7381341743021234863">"Дазваляе прыкладанням наладжваць лакальны тэлефон Bluetooth, а таксама знаходзіць выдаленыя прылады i падлучацца да ix."</string>
+    <string name="permdesc_bluetoothAdmin" product="default" msgid="7381341743021234863">"Дазваляе праграме наладжваць лакальны тэлефон Bluetooth, а таксама знаходзіць выдаленыя прылады i спалучаць ix."</string>
     <string name="permlab_accessWimaxState" msgid="7029563339012437434">"падключаць да WiMAX i адключаць ад яго"</string>
     <string name="permdesc_accessWimaxState" msgid="5372734776802067708">"Дазваляе прыкладанню вызначаць, ці ўключаны WiMAX, і інфармацыю пра любую сетку WiMAX, якая спалучана з iншымi."</string>
     <string name="permlab_changeWimaxState" msgid="6223305780806267462">"Змяніць стан WiMAX"</string>
@@ -775,7 +775,7 @@
     <string name="eventTypeAnniversary" msgid="4684702412407916888">"Гадавіна"</string>
     <string name="eventTypeOther" msgid="530671238533887997">"Іншае"</string>
     <string name="emailTypeCustom" msgid="1809435350482181786">"Карыстальніцкая"</string>
-    <string name="emailTypeHome" msgid="1597116303154775999">"Хатні"</string>
+    <string name="emailTypeHome" msgid="1597116303154775999">"Асабістая"</string>
     <string name="emailTypeWork" msgid="2020095414401882111">"Працоўная"</string>
     <string name="emailTypeOther" msgid="5131130857030897465">"Іншая"</string>
     <string name="emailTypeMobile" msgid="787155077375364230">"Мабільны"</string>
@@ -841,7 +841,7 @@
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Паўтарыце спробу"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Паўтарыце спробу"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Разблакіраваць для ўсіх функцый і даных"</string>
-    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Перавышана максімальная колькасць спроб разблакоўкі праз Фэйскантроль"</string>
+    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Перавышана максімальная колькасць спроб разблакоўкі праз распазнаванне твару"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"Няма SIM-карты"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"Няма SIM-карты ў планшэце."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"У вашай прыладзе Android TV няма SIM-карты."</string>
@@ -1347,15 +1347,15 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Выяўлены аксесуар аналагавага аўдыя"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Далучаная прылада не сумяшчальная з гэтым тэлефонам. Націсніце, каб даведацца больш."</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"Адладка па USB падключана"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"Націсніце, каб выключыць адладку па USB"</string>
-    <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Выберыце, каб адключыць адладку USB."</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"Націсніце, каб адключыць адладку па USB"</string>
+    <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Выберыце, каб адключыць адладку па USB."</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Адладка па Wi-Fi уключана"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Націсніце, каб выключыць адладку па Wi-Fi"</string>
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"Выберыце, каб выключыць адладку па Wi-Fi."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Тэставы рэжым уключаны"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Каб выключыць тэставы рэжым, скіньце налады да заводскіх значэнняў."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"Паслядоўная кансоль уключана"</string>
-    <string name="console_running_notification_message" msgid="7892751888125174039">"Паказчык эфектыўнасці змяніўся. Каб выключыць кансоль, праверце загрузчык."</string>
+    <string name="console_running_notification_message" msgid="7892751888125174039">"Паказчык прадукцыйнасці змяніўся. Каб выключыць кансоль, праверце загрузчык."</string>
     <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"Вадкасць або смецце ў порце USB"</string>
     <string name="usb_contaminant_detected_message" msgid="7346100585390795743">"Порт USB аўтаматычна адключаны. Каб даведацца больш, націсніце тут."</string>
     <string name="usb_contaminant_not_detected_title" msgid="2651167729563264053">"Порт USB можна выкарыстоўваць"</string>
@@ -1602,7 +1602,7 @@
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"Сістэма"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="4214648773120426288">"Bluetooth-аўдыё"</string>
     <string name="wireless_display_route_description" msgid="8297563323032966831">"Бесправадны дысплей"</string>
-    <string name="media_route_button_content_description" msgid="2299223698196869956">"Перадача"</string>
+    <string name="media_route_button_content_description" msgid="2299223698196869956">"Трансляцыя"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"Падключыцца да прылады"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Трансліраваць экран на прыладу"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"Пошук прылад..."</string>
@@ -1692,8 +1692,8 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Гатова"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Дэактываваць камбінацыю хуткага доступу"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Выкарыстоўваць камбінацыю хуткага доступу"</string>
-    <string name="color_inversion_feature_name" msgid="326050048927789012">"Інверсія колеру"</string>
-    <string name="color_correction_feature_name" msgid="3655077237805422597">"Карэкцыя колеру"</string>
+    <string name="color_inversion_feature_name" msgid="326050048927789012">"Інверсія колераў"</string>
+    <string name="color_correction_feature_name" msgid="3655077237805422597">"Карэкцыя колераў"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Клавішы гучнасці ўтрымліваліся націснутымі. Уключана служба \"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\"."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Клавішы гучнасці ўтрымліваліся націснутымі. Служба \"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\" выключана."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Каб карыстацца сэрвісам \"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\", націсніце і ўтрымлівайце на працягу трох секунд абедзве клавішы гучнасці"</string>
@@ -1705,13 +1705,13 @@
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Каб пераключыцца на іншую функцыю, правядзіце ўверх трыма пальцамі і ўтрымлівайце іх на экране."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Павелічэнне"</string>
     <string name="user_switched" msgid="7249833311585228097">"Бягучы карыстальнік <xliff:g id="NAME">%1$s</xliff:g>."</string>
-    <string name="user_switching_message" msgid="1912993630661332336">"Пераход да <xliff:g id="NAME">%1$s</xliff:g>..."</string>
+    <string name="user_switching_message" msgid="1912993630661332336">"Пераход у рэжым \"<xliff:g id="NAME">%1$s</xliff:g>\"..."</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g> выходзіць з сістэмы…"</string>
     <string name="owner_name" msgid="8713560351570795743">"Уладальнік"</string>
     <string name="error_message_title" msgid="4082495589294631966">"Памылка"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"Ваш адміністратар не дазваляе гэту змену"</string>
     <string name="app_not_found" msgid="3429506115332341800">"Прыкладанне для гэтага дзеяння не знойдзенае"</string>
-    <string name="revoke" msgid="5526857743819590458">"Ануляваць"</string>
+    <string name="revoke" msgid="5526857743819590458">"Адклікаць"</string>
     <string name="mediasize_iso_a0" msgid="7039061159929977973">"ISO A0"</string>
     <string name="mediasize_iso_a1" msgid="4063589931031977223">"ISO A1"</string>
     <string name="mediasize_iso_a2" msgid="2779860175680233980">"ISO A2"</string>
@@ -1984,7 +1984,7 @@
     <string name="app_category_maps" msgid="6395725487922533156">"Карты і навігацыя"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"Прадукцыйнасць"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"Сховішча на прыладзе"</string>
-    <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"Адладка USB"</string>
+    <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"Адладка па USB"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"гадз"</string>
     <string name="time_picker_minute_label" msgid="8307452311269824553">"хв"</string>
     <string name="time_picker_header_text" msgid="9073802285051516688">"Задаць час"</string>

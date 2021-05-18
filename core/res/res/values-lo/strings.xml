@@ -569,7 +569,7 @@
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"ໄອຄອນລາຍນິ້ວມື"</string>
     <string name="permlab_manageFace" msgid="4569549381889283282">"ຈັດການຮາດແວປົດລັອກດ້ວຍໜ້າ"</string>
     <string name="permdesc_manageFace" msgid="6204569688492710471">"ອະນຸຍາດໃຫ້ແອັບເປີດວິທີການຕ່າງໆເພື່ອເພີ່ມ ແລະ ລຶບແມ່ແບບໃບໜ້າສຳລັບການນຳໃຊ້."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"ໃຊ້ຮາດແວການປົດລັອກໃບໜ້າ"</string>
+    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"ໃຊ້ຮາດແວການປົດລັອກດ້ວຍໜ້າ"</string>
     <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"ອະນຸຍາດໃຫ້ແອັບໃຊ້ຮາດແວການປົດລັອກດ້ວຍໜ້າເພື່ອພິສູດຢືນຢັນ"</string>
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"ປົດລັອກດ້ວຍໜ້າ"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"ລົງທະບຽນໃບໜ້າຂອງທ່ານຄືນໃໝ່"</string>
@@ -1661,7 +1661,7 @@
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"ເພື່ອສະຫຼັບລະຫວ່າງຄຸນສົມບັດຕ່າງໆ, ໃຫ້ປັດຂຶ້ນດ້ວຍສາມນິ້ວຄ້າງໄວ້."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"ການຂະຫຍາຍ"</string>
     <string name="user_switched" msgid="7249833311585228097">"ຜູ່ໃຊ້ປັດຈຸບັນ <xliff:g id="NAME">%1$s</xliff:g> ."</string>
-    <string name="user_switching_message" msgid="1912993630661332336">"ກຳ​ລັງ​ສະ​ລັບ​​ໄປ​ຫາ <xliff:g id="NAME">%1$s</xliff:g>…"</string>
+    <string name="user_switching_message" msgid="1912993630661332336">"ກຳລັງສະຫຼັບໄປຫາ<xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"ກຳລັງອອກຈາກລະບົບ <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="8713560351570795743">"ເຈົ້າຂອງ"</string>
     <string name="error_message_title" msgid="4082495589294631966">"ຜິດພາດ"</string>

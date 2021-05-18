@@ -88,7 +88,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"ایپ یا آپ کی تنظیم کی جانب سے اسکرین شاٹس لینے کی اجازت نہیں ہے"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"اسکرین شاٹ برخاست کریں"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"اسکرین شاٹ کا پیش منظر"</string>
-    <string name="screenrecord_name" msgid="2596401223859996572">"سکرین ریکارڈر"</string>
+    <string name="screenrecord_name" msgid="2596401223859996572">"اسکرین ریکارڈر"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"سکرین ریکارڈنگ پروسیس ہورہی ہے"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"اسکرین ریکارڈ سیشن کیلئے جاری اطلاع"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"ریکارڈنگ شروع کریں؟"</string>
@@ -430,7 +430,7 @@
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"‏NFC غیر فعال ہے"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"‏NFC فعال ہے"</string>
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"اسکرین ریکارڈر کریں"</string>
-    <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"آغاز"</string>
+    <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"شروع کریں"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"روکیں"</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"آلہ"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"ایپس سوئچ کرنے کیلئے اوپر سوائپ کریں"</string>

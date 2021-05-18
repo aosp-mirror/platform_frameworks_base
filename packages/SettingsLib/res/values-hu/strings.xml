@@ -366,7 +366,7 @@
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Animáció tempója"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"Másodlagos kijelzők szimulálása"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"Alkalmazások"</string>
-    <string name="immediately_destroy_activities" msgid="1826287490705167403">"Törölje a tevékenységeket"</string>
+    <string name="immediately_destroy_activities" msgid="1826287490705167403">"Tevékenységek törlése"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Tevékenységek törlése, amint elhagyják azokat"</string>
     <string name="app_process_limit_title" msgid="8361367869453043007">"Háttérfolyamat-korlátozás"</string>
     <string name="show_all_anrs" msgid="9160563836616468726">"Háttérben lévő ANR-ek"</string>

@@ -254,7 +254,7 @@
       <item quantity="one">A tirar uma captura de ecrã do relatório de erro dentro de <xliff:g id="NUMBER_0">%d</xliff:g> segundo…</item>
     </plurals>
     <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"Captura de ecrã tirada com o relatório de erro."</string>
-    <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"Falha ao tirar captura de ecrã com o relatório de erro."</string>
+    <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"Falha ao fazer captura de ecrã com o relatório de erro."</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Modo silencioso"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"Som desativado"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"O som está ativado"</string>
@@ -327,7 +327,7 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"É possível tocar, deslizar rapidamente, juntar os dedos e realizar outros gestos"</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Gestos de impressão digital"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Pode capturar gestos realizados no sensor de impressões digitais do dispositivo."</string>
-    <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Tirar captura de ecrã"</string>
+    <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Fazer captura de ecrã"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"É possível tirar uma captura de ecrã."</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"desativar ou modificar barra de estado"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Permite à app desativar a barra de estado ou adicionar e remover ícones do sistema."</string>
@@ -1562,7 +1562,7 @@
     <string name="wireless_display_route_description" msgid="8297563323032966831">"Visualização sem fios"</string>
     <string name="media_route_button_content_description" msgid="2299223698196869956">"Transmitir"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"Ligar ao dispositivo"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Transmitir ecrã para o dispositivo"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Transmitir ecrã para dispositivo"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"A pesquisar dispositivos…"</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"Definições"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Desligar"</string>
@@ -1633,11 +1633,11 @@
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"DESATIVADO"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Permitir que o serviço <xliff:g id="SERVICE">%1$s</xliff:g> tenha controlo total sobre o seu dispositivo?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Se ativar o serviço <xliff:g id="SERVICE">%1$s</xliff:g>, o dispositivo não utilizará o bloqueio de ecrã para otimizar a encriptação de dados."</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"O controlo total é adequado para aplicações que ajudam nas necessidades de acessibilidade, mas não para a maioria das aplicações."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"O controlo total é adequado para aplicações que ajudam nas necessidades de acessibilidade, mas não para a maioria das apps."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Ver e controlar o ecrã"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Pode ler todo o conteúdo do ecrã e sobrepor conteúdo a outras aplicações."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Veja e execute ações"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Pode monitorizar as suas interações com uma app ou um sensor de hardware e interagir com aplicações em seu nome."</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Pode monitorizar as suas interações com uma app ou um sensor de hardware e interagir com apps em seu nome."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Permitir"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Recusar"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Toque numa funcionalidade para começar a utilizá-la:"</string>

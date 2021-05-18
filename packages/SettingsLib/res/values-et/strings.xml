@@ -85,12 +85,12 @@
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Telefonikõned"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Failiedastus"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Sisendseade"</string>
-    <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Internetti juurdepääs"</string>
-    <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"Kontakti jagamine"</string>
+    <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Juurdepääs internetile"</string>
+    <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"Kontaktide jagamine"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"Kasutamine kontaktide jagamiseks"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Interneti-ühenduse jagamine"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"Tekstsõnumid"</string>
-    <string name="bluetooth_profile_sap" msgid="8304170950447934386">"SIM-i juurdepääs"</string>
+    <string name="bluetooth_profile_sap" msgid="8304170950447934386">"Juurdepääs SIM-ile"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD-heli: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD-heli"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Kuuldeaparaadid"</string>

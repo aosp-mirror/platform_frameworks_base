@@ -27,7 +27,7 @@
     <string name="label_duplex" msgid="5370037254347072243">"နှစ်ဖက်လှ"</string>
     <string name="label_orientation" msgid="2853142581990496477">"အနေအထား"</string>
     <string name="label_pages" msgid="7768589729282182230">"စာမျက်နှာများ"</string>
-    <string name="destination_default_text" msgid="5422708056807065710">"ပုံနှိပ်စက်ကို ရွေးပါ"</string>
+    <string name="destination_default_text" msgid="5422708056807065710">"ပရင်တာကို ရွေးပါ"</string>
     <string name="template_all_pages" msgid="3322235982020148762">"အားလုံး <xliff:g id="PAGE_COUNT">%1$s</xliff:g>"</string>
     <string name="template_page_range" msgid="428638530038286328">"<xliff:g id="PAGE_COUNT">%1$s</xliff:g>ဘောင် ထဲမှာ"</string>
     <string name="pages_range_example" msgid="8558694453556945172">"ဥပမာ ၁-၅၊ ၈၊ ၁၁-၁၃"</string>
@@ -36,7 +36,7 @@
     <string name="printing_app_crashed" msgid="854477616686566398">"စာထုတ်လုပ်သော အက်ပ်ခဏ ပျက်သွားပါသည်"</string>
     <string name="generating_print_job" msgid="3119608742651698916">"စာထုတ်အလုပ်ကို လုပ်နေပါသည်"</string>
     <string name="save_as_pdf" msgid="5718454119847596853">"PDF အဖြစ်သိမ်းရန်"</string>
-    <string name="all_printers" msgid="5018829726861876202">"စာထုတ်စက် အားလုံး"</string>
+    <string name="all_printers" msgid="5018829726861876202">"ပ အားလုံး"</string>
     <string name="print_dialog" msgid="32628687461331979">"စာထုတ်ရန် အချက်ပြခြင်း"</string>
     <string name="current_page_template" msgid="5145005201131935302">"<xliff:g id="CURRENT_PAGE">%1$d</xliff:g>/<xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
     <string name="page_description_template" msgid="6831239682256197161">"<xliff:g id="PAGE_COUNT">%2$d</xliff:g>ထဲက စာမျက်နှာ <xliff:g id="CURRENT_PAGE">%1$d</xliff:g>"</string>
@@ -48,16 +48,16 @@
     <string name="print_options_expanded" msgid="6944679157471691859">"ပရင့်ထုတ် ရွေးစရာများကို ချဲ့ထား"</string>
     <string name="print_options_collapsed" msgid="7455930445670414332">"ပရင့်ထုတ် ရွေးစရာများကို ခေါက်ထား"</string>
     <string name="search" msgid="5421724265322228497">"ရှာဖွေခြင်း"</string>
-    <string name="all_printers_label" msgid="3178848870161526399">"စာထုတ်စက် အားလုံး"</string>
+    <string name="all_printers_label" msgid="3178848870161526399">"ပ အားလုံး"</string>
     <string name="add_print_service_label" msgid="5356702546188981940">"ဝန်ဆောင်မှုထည့်ရန်"</string>
     <string name="print_search_box_shown_utterance" msgid="7967404953901376090">"ရှာဖွေစရာ နေရာ မြင်တွေ့ရပါသည်"</string>
     <string name="print_search_box_hidden_utterance" msgid="5727755169343113351">"ရှာဖွေရန် နေရာ ပျောက်ကွယ်နေပါသည်"</string>
-    <string name="print_add_printer" msgid="1088656468360653455">"စာထုတ်စက်ကို ထည့်ပါ"</string>
-    <string name="print_select_printer" msgid="7388760939873368698">"စာထုတ်စက်ကို ရွေးရန်"</string>
-    <string name="print_forget_printer" msgid="5035287497291910766">"စာထုတ်စက်ကို မေ့လိုက်ရန်"</string>
+    <string name="print_add_printer" msgid="1088656468360653455">"ပရင်တာထည့်ရန်"</string>
+    <string name="print_select_printer" msgid="7388760939873368698">"ပရင်တာကို ရွေးရန်"</string>
+    <string name="print_forget_printer" msgid="5035287497291910766">"ပရင်တာကို မေ့လိုက်ရန်"</string>
     <plurals name="print_search_result_count_utterance" formatted="false" msgid="6997663738361080868">
-      <item quantity="other"><xliff:g id="COUNT_1">%1$s</xliff:g> စာထုတ်စက်များ တွေ့ရှိပါသည်</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%1$s</xliff:g>စာထုတ်စက် တွေ့ရှိပါသည်</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$s</xliff:g> ပရင်တာများ တွေ့ရှိပါသည်</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$s</xliff:g>ပရင်တာ တွေ့ရှိပါသည်</item>
     </plurals>
     <string name="printer_extended_description_template" msgid="1366699227703381874">"<xliff:g id="PRINT_SERVICE_LABEL">%1$s</xliff:g> - <xliff:g id="PRINTER_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="printer_info_desc" msgid="7181988788991581654">"ဤပရင်တာ အကြောင်း ပိုမိုလေ့လာပါ"</string>
@@ -65,27 +65,27 @@
     <string name="notification_channel_failure" msgid="9042250774797916414">"မအောင်မြင်သည့် ပရင့်ထုတ်မှုများ"</string>
     <string name="could_not_create_file" msgid="3425025039427448443">"ဖိုင်အမည်ကို ထည့်၍မရပါ"</string>
     <string name="print_services_disabled_toast" msgid="9089060734685174685">"အချို့ပုံနှိပ်ဝန်ဆောင်မှုများကို ပိတ်ထားပါသည်"</string>
-    <string name="print_searching_for_printers" msgid="6550424555079932867">"ပုံနှိပ်စက်များကို ရှာနေသည်"</string>
+    <string name="print_searching_for_printers" msgid="6550424555079932867">"ပရင်တာများကို ရှာနေသည်"</string>
     <string name="print_no_print_services" msgid="8561247706423327966">"ပုံနှိပ်ထုတ်ယူရေး ဝန်ဆောင်မှုများ ဖွင့်မထားပါ"</string>
-    <string name="print_no_printers" msgid="4869403323900054866">"စာထုတ်စက် တစ်ခုမှ မတွေ့ရှိပါ"</string>
+    <string name="print_no_printers" msgid="4869403323900054866">"ပ တစ်ခုမှ မတွေ့ရှိပါ"</string>
     <string name="cannot_add_printer" msgid="7840348733668023106">"ပုံနှိပ်စက်များကို ထည့်၍မရပါ"</string>
-    <string name="select_to_add_printers" msgid="3800709038689830974">"ပုံနှိပ်စက်ထည့်ရန် ရွေးပါ"</string>
+    <string name="select_to_add_printers" msgid="3800709038689830974">"ပရင်တာထည့်ရန် ရွေးပါ"</string>
     <string name="enable_print_service" msgid="3482815747043533842">"ဖွင့်ရန် ရွေးပါ"</string>
     <string name="enabled_services_title" msgid="7036986099096582296">"ဖွင့်ထားသည့် ဝန်ဆောင်မှုများ"</string>
     <string name="recommended_services_title" msgid="3799434882937956924">"အကြံပြုထားသည့် ဝန်ဆောင်မှုများ"</string>
     <string name="disabled_services_title" msgid="7313253167968363211">"ပိတ်ထားသည့် ဝန်ဆောင်မှုများ"</string>
     <string name="all_services_title" msgid="5578662754874906455">"ဝန်ဆောင်မှုများ အားလုံး"</string>
     <plurals name="print_services_recommendation_subtitle" formatted="false" msgid="5678487708807185138">
-      <item quantity="other">ပုံနှိပ်စက် <xliff:g id="COUNT_1">%1$s</xliff:g> ခုကို ရှာဖွေရန် စနစ်ထည့်သွင်းပါ</item>
-      <item quantity="one">ပုံနှိပ်စက် <xliff:g id="COUNT_0">%1$s</xliff:g> ခုကို ရှာဖွေရန် စနစ်ထည့်သွင်းပါ</item>
+      <item quantity="other">ပရင်တာ <xliff:g id="COUNT_1">%1$s</xliff:g> ခုကို ရှာဖွေရန် စနစ်ထည့်သွင်းပါ</item>
+      <item quantity="one">ပရင်တာ <xliff:g id="COUNT_0">%1$s</xliff:g> ခုကို ရှာဖွေရန် စနစ်ထည့်သွင်းပါ</item>
     </plurals>
     <string name="printing_notification_title_template" msgid="295903957762447362">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> ကို စာထုတ်နေပါသည်"</string>
     <string name="cancelling_notification_title_template" msgid="1821759594704703197">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> ကို ပယ်ဖျက်နေပါသည်"</string>
-    <string name="failed_notification_title_template" msgid="2256217208186530973">"စာထုတ်စက်မှ အမှား <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
-    <string name="blocked_notification_title_template" msgid="1175435827331588646">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>ကိုစာထုတ်စက်ကငြင်းလိုက်သည်"</string>
+    <string name="failed_notification_title_template" msgid="2256217208186530973">"ပရင်တာမှ အမှား <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
+    <string name="blocked_notification_title_template" msgid="1175435827331588646">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> ကိုပရင်တာက ငြင်းလိုက်သည်"</string>
     <string name="cancel" msgid="4373674107267141885">"မလုပ်တော့"</string>
     <string name="restart" msgid="2472034227037808749">"ပြန်စရန်"</string>
-    <string name="no_connection_to_printer" msgid="2159246915977282728">"စာထုတ်စက်နဲ့ ဆက်သွယ်ထားမှု မရှိပါ"</string>
+    <string name="no_connection_to_printer" msgid="2159246915977282728">"ပရင်တာနှင့် ဆက်သွယ်ထားမှု မရှိပါ"</string>
     <string name="reason_unknown" msgid="5507940196503246139">"မသိ"</string>
     <string name="print_service_security_warning_title" msgid="2160752291246775320">"<xliff:g id="SERVICE">%1$s</xliff:g> ကိုသုံးမလား။"</string>
     <string name="print_service_security_warning_summary" msgid="1427434625361692006">"သင်၏ စာရွက်စာတမ်းများသည် ပရင်တာထံသို့ သွားစဉ် ဆာဗာ တစ်ခု သို့မဟုတ် ပိုများပြီး ဖြတ်ကျော်နိုင်ရသည်။"</string>
@@ -105,7 +105,7 @@
     <string name="print_write_error_message" msgid="5787642615179572543">"ဖိုင်သို့ မရေးနိုင်ခဲ့"</string>
     <string name="print_error_default_message" msgid="8602678405502922346">"လုပ်၍မရခဲ့ပါ။ ထပ်စမ်းကြည့်ပါ။"</string>
     <string name="print_error_retry" msgid="1426421728784259538">"ထပ်စမ်းကြည့်ရန်"</string>
-    <string name="print_error_printer_unavailable" msgid="8985614415253203381">"ဒီပရင်တာမှာ ယခုအချိန်မှာ မရနိုင်ပါ။"</string>
+    <string name="print_error_printer_unavailable" msgid="8985614415253203381">"ဤပရင်တာသည် ယခုအချိန်တွင် မရနိုင်ပါ။"</string>
     <string name="print_cannot_load_page" msgid="6179560924492912009">"အစမ်းကြည့်ခြင်းကို ပြသ၍မရပါ"</string>
     <string name="print_preparing_preview" msgid="3939930735671364712">"အစမ်းကြည့်ရန် ပြင်ဆင်နေ…"</string>
 </resources>

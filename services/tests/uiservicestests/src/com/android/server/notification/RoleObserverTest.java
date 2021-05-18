@@ -32,6 +32,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.app.IUriGrantsManager;
@@ -156,7 +157,8 @@ public class RoleObserverTest extends UiServiceTestCase {
                     mock(DevicePolicyManagerInternal.class), mock(IUriGrantsManager.class),
                     mock(UriGrantsManagerInternal.class),
                     mock(AppOpsManager.class), mUm, mock(NotificationHistoryManager.class),
-                    mock(StatsManager.class), mock(TelephonyManager.class));
+                    mock(StatsManager.class), mock(TelephonyManager.class),
+                    mock(ActivityManagerInternal.class));
         } catch (SecurityException e) {
             if (!e.getMessage().contains("Permission Denial: not allowed to send broadcast")) {
                 throw e;

@@ -35,7 +35,7 @@
     <string name="wifi_not_in_range" msgid="1541760821805777772">"Xizmat doirasidan tashqarida"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"Avtomatik ravishda ulanilmaydi"</string>
     <string name="wifi_no_internet" msgid="1774198889176926299">"Internet aloqasi yo‘q"</string>
-    <string name="saved_network" msgid="7143698034077223645">"<xliff:g id="NAME">%1$s</xliff:g> tomonidan saqlangan"</string>
+    <string name="saved_network" msgid="7143698034077223645">"Saqlangan: <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"%1$s orqali avtomatik ulandi"</string>
     <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"Tarmoqlar reytingi muallifi orqali avtomatik ulandi"</string>
     <string name="connected_via_passpoint" msgid="7735442932429075684">"%1$s orqali ulangan"</string>
@@ -146,7 +146,7 @@
     <string name="tether_settings_title_usb" msgid="3728686573430917722">"USB modem"</string>
     <string name="tether_settings_title_wifi" msgid="4803402057533895526">"Ixcham hotspot"</string>
     <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"Bluetooth modem"</string>
-    <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"Modem"</string>
+    <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"Modem rejimi"</string>
     <string name="tether_settings_title_all" msgid="8910259483383010470">"Modem rejimi"</string>
     <string name="managed_user_title" msgid="449081789742645723">"Barcha ishga oid ilovalar"</string>
     <string name="user_guest" msgid="6939192779649870792">"Mehmon"</string>
@@ -211,9 +211,9 @@
     <string name="adb_wireless_error" msgid="721958772149779856">"Xato"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Wi-Fi orqali debagging"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Mavjud qurilmalarni koʻrish va ulardan foydalanish uchun Wi-Fi orqali debagging funksiyasini yoqing"</string>
-    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"QR kod yordamida qurilmani ulang"</string>
+    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Qurilmani QR kod orqali ulash"</string>
     <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"QR kod skaneri yordamida yangi qurilmalarni ulang"</string>
-    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Ulanish kodi yordamida qurilmani ulang"</string>
+    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Qurilmani ulanish kodi orqali ulash"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Olti xonali kod yordamida yangi qurilmalarni ulash mumkin"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Ulangan qurilmalar"</string>
     <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"Hozirda ulangan"</string>
@@ -418,7 +418,7 @@
     <string name="daltonizer_mode_deuteranomaly" msgid="3507284319584683963">"Deyteranomaliya (qizil/yashil)"</string>
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomaliya (qizil/yashil)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomaliya (ko‘k/sariq)"</string>
-    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Rangni tuzatish"</string>
+    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Ranglarni tuzatish"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"Ranglarni tuzatish orqali qurilmangizda ranglar qanday chiqishini tuzatish mumkin"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> bilan almashtirildi"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
@@ -547,7 +547,7 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"Qulf o‘rnatish"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"Bunga almashish: <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Mehmon kiritish"</string>
-    <string name="guest_exit_guest" msgid="5908239569510734136">"Mehmon rejimini olib tashlash"</string>
+    <string name="guest_exit_guest" msgid="5908239569510734136">"Mehmonni olib tashlash"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Mehmon"</string>
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Qurilma standarti"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Yoqilmagan"</string>

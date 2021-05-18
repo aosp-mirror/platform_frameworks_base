@@ -117,7 +117,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"റദ്ദാക്കുക"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"കണക്‌റ്റു‌ചെയ്‌തിരിക്കുമ്പോൾ, ജോടിയാക്കുന്നത് നിങ്ങളുടെ കോൺടാക്‌റ്റുകളിലേക്കും കോൾ ചരിത്രത്തിലേക്കും  ആക്‌സസ്സ് അനുവദിക്കുന്നു."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> എന്നതുമായി ജോടിയാക്കാനായില്ല."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"ഒരു തെറ്റായ പിൻ അല്ലെങ്കിൽ പാസ്‌കീ കാരണം <xliff:g id="DEVICE_NAME">%1$s</xliff:g> എന്നതുമായി ജോടിയാക്കാനായില്ല."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"തെറ്റായ പിൻ/പാസ്‌കീ കാരണം <xliff:g id="DEVICE_NAME">%1$s</xliff:g> എന്നതുമായി ജോടിയാക്കാനായില്ല."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> എന്നതുമായി ആശയവിനിമയം നടത്താനായില്ല."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>, ജോടിയാക്കൽ നിരസിച്ചു."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"കമ്പ്യൂട്ടർ"</string>
@@ -238,19 +238,19 @@
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"ബഗ് റിപ്പോർട്ട് എടുക്കുന്നതിന് പവർ മെനുവിൽ ഒരു ബട്ടൺ കാണിക്കുക"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"സജീവമായി തുടരുക"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"ചാർജ് ചെയ്യുമ്പോൾ സ്‌ക്രീൻ ഒരിക്കലും സ്ലീപ്പ് മോഡിലാകില്ല"</string>
-    <string name="bt_hci_snoop_log" msgid="7291287955649081448">"ബ്ലൂടൂത്ത് HCI സ്‌നൂപ്പ് ലോഗ് സജീവമാക്കൂ"</string>
+    <string name="bt_hci_snoop_log" msgid="7291287955649081448">"ബ്ലൂടൂത്ത് HCI സ്‌നൂപ്പ് ലോഗ് പ്രവർത്തനക്ഷമമാക്കുക"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Bluetooth പായ്ക്കറ്റുകൾ ക്യാപ്‌ചർ ചെയ്യുക. (ഈ ക്രമീകരണം മാറ്റിയ ശേഷം Bluetooth മാറ്റുക)"</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"OEM അൺലോക്ക് ചെയ്യൽ"</string>
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"അൺലോക്കാകാൻ ബൂട്ട്‌ലോഡറിനെ അനുവദിക്കുക"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"OEM അൺലോക്കുചെയ്യൽ അനുവദിക്കണോ?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"മുന്നറിയിപ്പ്: ഈ ക്രമീകരണം ഓണായിരിക്കുമ്പോൾ, ഉപകരണ സുരക്ഷാ ഫീച്ചറുകൾ ഈ ഉപകരണത്തിൽ പ്രവർത്തിക്കില്ല."</string>
     <string name="mock_location_app" msgid="6269380172542248304">"മോക്ക്‌ലൊക്കേഷൻ ആപ്പ് തിരഞ്ഞെടുക്കൂ"</string>
-    <string name="mock_location_app_not_set" msgid="6972032787262831155">"മോക്ക് ലൊക്കേഷൻ ആപ്പ് സജ്ജമാക്കിയിട്ടില്ല"</string>
+    <string name="mock_location_app_not_set" msgid="6972032787262831155">"മോക്ക് ലൊക്കേഷൻ ആപ്പ് സജ്ജീകരിച്ചിട്ടില്ല"</string>
     <string name="mock_location_app_set" msgid="4706722469342913843">"മോക്ക് ലൊക്കേഷൻ ആപ്പ്: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"നെറ്റ്‍വര്‍ക്കിംഗ്"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"വയർലെസ് ഡിസ്‌പ്ലേ സർട്ടിഫിക്കേഷൻ"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"വൈഫൈ വെർബോസ് ലോഗിംഗ് പ്രവർത്തനക്ഷമമാക്കുക"</string>
-    <string name="wifi_scan_throttling" msgid="2985624788509913617">"വൈഫൈ സ്‌കാൻ പ്രവർത്തനരഹിതമാക്കുന്നു"</string>
+    <string name="wifi_scan_throttling" msgid="2985624788509913617">"വൈഫൈ സ്‌കാൻ ത്രോട്ടിലിംഗ്"</string>
     <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"വൈഫൈ മെച്ചപ്പെടുത്തിയ MAC ക്രമരഹിതമാക്കൽ"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"മൊബൈൽ ഡാറ്റ എല്ലായ്‌പ്പോഴും സജീവം"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"ടെതറിംഗ് ഹാർഡ്‌വെയർ ത്വരിതപ്പെടുത്തൽ"</string>
@@ -267,7 +267,7 @@
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="1638623076480928191">"Bluetooth ഓഡിയോ സാമ്പിൾ നിരക്ക്"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5876305103137067798">"Bluetooth Audio Codec\nSelection ട്രിഗ്ഗര്‍ ചെയ്യുക: സാമ്പിൾ റേറ്റ്"</string>
     <string name="bluetooth_select_a2dp_codec_type_help_info" msgid="8647200416514412338">"ചാരനിറത്തിലാക്കിയിട്ടുണ്ടെങ്കിൽ, ഫോണോ ഹെഡ്‌സെറ്റോ പിന്തുണയ്ക്കുന്നില്ലെന്നാണ് അർത്ഥം"</string>
-    <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="6253965294594390806">"പ്രതി സാമ്പിളിലെ Bluetooth ഓഡിയോ ബിറ്റ് നി"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="6253965294594390806">"ഓരോ സാമ്പിളിലെയും Bluetooth ഓഡിയോ ബിറ്റുകൾ"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4898693684282596143">"Bluetooth Audio Codec\nSelection ട്രിഗ്ഗര്‍ ചെയ്യുക: ഓരോ സാമ്പിളിനുള്ള ബിറ്റുകൾ"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="364277285688014427">"Bluetooth ഓഡിയോ ചാനൽ മോഡ്"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="2076949781460359589">"Bluetooth Audio Codec\nSelection ട്രിഗ്ഗര്‍ ചെയ്യുക: ചാനൽ മോഡ്"</string>
@@ -297,7 +297,7 @@
     <string name="select_usb_configuration_dialog_title" msgid="3579567144722589237">"USB കോൺഫിഗറേഷൻ തിരഞ്ഞെടുക്കൂ"</string>
     <string name="allow_mock_location" msgid="2102650981552527884">"വ്യാജ ലൊക്കേഷനുകൾ അനുവദിക്കുക"</string>
     <string name="allow_mock_location_summary" msgid="179780881081354579">"വ്യാജ ലൊക്കേഷനുകൾ അനുവദിക്കുക"</string>
-    <string name="debug_view_attributes" msgid="3539609843984208216">"ആട്രിബ്യൂട്ട് പരിശോധന കാണൽ സജീവമാക്കൂ"</string>
+    <string name="debug_view_attributes" msgid="3539609843984208216">"ആട്രിബ്യൂട്ട് പരിശോധന കാണൽ പ്രവർത്തനക്ഷമമാക്കുക"</string>
     <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"വൈഫൈ സജീവമാണെങ്കിലും, മൊബൈൽ ഡാറ്റ സജീവമായി നിർത്തുക (വേഗത്തിൽ നെറ്റ്‌വർക്ക് മാറുന്നതിനായി)."</string>
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"ലഭ്യമാണെങ്കിൽ \'ടെതറിംഗ് ഹാർഡ്‌വെയർ ത്വരിതപ്പെടുത്തൽ\' ഉപയോഗിക്കുക"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"USB ഡീബഗ്ഗുചെയ്യാൻ അനുവദിക്കണോ?"</string>
@@ -317,21 +317,21 @@
     <string name="enable_terminal_summary" msgid="2481074834856064500">"പ്രാദേശിക ഷെൽ ആക്‌സസ് നൽകുന്ന ടെർമിനൽ അപ്ലിക്കേഷൻ പ്രവർത്തനക്ഷമമാക്കുക"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP പരിശോധന"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP ചെക്കിംഗ്‌രീതി സജ്ജമാക്കുക"</string>
-    <string name="debug_debugging_category" msgid="535341063709248842">"ഡീബഗ് ചെയ്യുന്നു"</string>
+    <string name="debug_debugging_category" msgid="535341063709248842">"ഡീബഗ്ഗിംഗ്"</string>
     <string name="debug_app" msgid="8903350241392391766">"ഡീബഗ് ആപ്പ് തിരഞ്ഞെടുക്കുക"</string>
-    <string name="debug_app_not_set" msgid="1934083001283807188">"ഡീബഗ് അപ്ലിക്കേഷനുകളൊന്നും സജ്ജമാക്കിയിട്ടില്ല"</string>
+    <string name="debug_app_not_set" msgid="1934083001283807188">"ഡീബഗ് ആപ്പുകളൊന്നും സജ്ജീകരിച്ചിട്ടില്ല"</string>
     <string name="debug_app_set" msgid="6599535090477753651">"ഡീബഗ്ഗുചെയ്യൽ അപ്ലിക്കേഷൻ: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="2543228890535466325">"ആപ്പ് തിരഞ്ഞെടുക്കൂ"</string>
     <string name="no_application" msgid="9038334538870247690">"ഒന്നുമില്ല"</string>
     <string name="wait_for_debugger" msgid="7461199843335409809">"ഡീബഗ്ഗറിനായി കാത്തിരിക്കുക"</string>
-    <string name="wait_for_debugger_summary" msgid="6846330006113363286">"ഡീബഗ്ഗുചെയ്‌ത അപ്ലിക്കേഷൻ നിർവ്വഹണത്തിനുമുമ്പായി അറ്റാച്ചുചെയ്യുന്നതിന് ഡീബഗ്ഗറിനായി കാത്തിരിക്കുന്നു."</string>
+    <string name="wait_for_debugger_summary" msgid="6846330006113363286">"നിർവ്വഹണത്തിന് മുമ്പായി അറ്റാച്ച് ചെയ്യാൻ ഡീബഗ് ചെയ്ത ആപ്പ്, ഡീബഗ്ഗറിനായി കാത്തിരിക്കുന്നു."</string>
     <string name="debug_input_category" msgid="7349460906970849771">"ഇൻപുട്ട്"</string>
     <string name="debug_drawing_category" msgid="5066171112313666619">"ഡ്രോയിംഗ്"</string>
-    <string name="debug_hw_drawing_category" msgid="5830815169336975162">"ഹാർഡ്‌വെയർ ത്വരിതപ്പെടുത്തിയ റെൻഡർ ചെയ്യൽ"</string>
+    <string name="debug_hw_drawing_category" msgid="5830815169336975162">"ഹാർഡ്‌വെയർ ത്വരിതപ്പെടുത്തിയ റെൻഡറിംഗ്"</string>
     <string name="media_category" msgid="8122076702526144053">"മീഡിയ"</string>
     <string name="debug_monitoring_category" msgid="1597387133765424994">"മോണിറ്ററിംഗ്"</string>
     <string name="strict_mode" msgid="889864762140862437">"ഫോഴ്സ്‌മോഡ് സജീവമാക്കി"</string>
-    <string name="strict_mode_summary" msgid="1838248687233554654">"പ്രധാന ത്രെഡിൽ അപ്ലിക്കേഷനുകൾ ദൈർഘ്യമേറിയ പ്രവർത്തനങ്ങൾ നടത്തുമ്പോൾ സ്‌ക്രീൻ ഫ്ലാഷ് ചെയ്യുക"</string>
+    <string name="strict_mode_summary" msgid="1838248687233554654">"പ്രധാന ത്രെഡിൽ ആപ്പുകൾ ദൈർഘ്യമേറിയ പ്രവർത്തനങ്ങൾ നടത്തുമ്പോൾ സ്‌ക്രീൻ ഫ്ലാഷ് ചെയ്യുക"</string>
     <string name="pointer_location" msgid="7516929526199520173">"പോയിന്റർ ലൊക്കേഷൻ"</string>
     <string name="pointer_location_summary" msgid="957120116989798464">"സ്‌ക്രീൻ ഓവർലേ നിലവിലെ ടച്ച് ഡാറ്റ ദൃശ്യമാക്കുന്നു"</string>
     <string name="show_touches" msgid="8437666942161289025">"ടാപ്പുകൾ കാണിക്കുക"</string>
@@ -355,14 +355,14 @@
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"എല്ലാ ഭാഷകൾക്കുമായി സ്‌ക്രീൻ ലേഔട്ട് ഡയറക്ഷൻ RTL-ലേക്ക് നിർബന്ധമാക്കുക"</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA നിർബന്ധമാക്കുക"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 ആപ്പുകളിൽ 4x MSAA പ്രവർത്തനക്ഷമമാക്കൂ"</string>
-    <string name="show_non_rect_clip" msgid="7499758654867881817">"ചതുരാകൃതിയിലല്ലാത്ത ക്ലിപ്പ്‌പ്രവർത്തനം ഡീബഗുചെയ്യൂ"</string>
+    <string name="show_non_rect_clip" msgid="7499758654867881817">"ചതുരമല്ലാത്ത ക്ലിപ്പ്‌ പ്രവർത്തനം ഡീബഗ്ഗ് ചെയ്യുക"</string>
     <string name="track_frame_time" msgid="522674651937771106">"HWUI റെൻഡറിംഗ് പ്രൊഫൈൽ"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"GPU ഡീബഗ് ലെയറുകൾ പ്രവർത്തനക്ഷമമാക്കൂ"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"ഡീബഗ് ആപ്പുകൾക്കായി GPU ഡീബഗ് ലെയറുകൾ ലോഡ് ചെയ്യാൻ അനുവദിക്കുക"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"വെർബോസ് വെണ്ടർ ലോഗ് ചെയ്യൽ പ്രവർത്തനക്ഷമമാക്കൂ"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"ബഗ് റിപ്പോർട്ടുകളിൽ ഉപകരണ-നിർദ്ദിഷ്ട വെണ്ടർ അധിക ലോഗുകൾ ഉൾപ്പെടുത്തുക, അതിൽ സ്വകാര്യ വിവരങ്ങൾ അടങ്ങിയിരിക്കാം, കൂടുതൽ ബാറ്ററി ഉപയോഗിക്കാം കൂടാതെ/അല്ലെങ്കിൽ കൂടുതൽ സ്‌റ്റോറേജ് ഇടം ഉപയോഗിക്കാം."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"വിൻഡോ ആനിമേഷൻ സ്‌കെയിൽ"</string>
-    <string name="transition_animation_scale_title" msgid="1278477690695439337">"സംക്രമണ ആനിമേഷൻ സ്‌കെയിൽ"</string>
+    <string name="transition_animation_scale_title" msgid="1278477690695439337">"ട്രാൻസിഷൻ ആനിമേഷൻ സ്‌കെയിൽ"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"ആനിമേറ്റർ ദൈർഘ്യ സ്‌കെയിൽ"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"രണ്ടാം ഡിസ്‌പ്ലേകൾ പ്രവർത്തിപ്പിക്കുക"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"ആപ്പുകൾ"</string>

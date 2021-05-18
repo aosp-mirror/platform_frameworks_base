@@ -117,7 +117,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Annuller"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Parring giver adgang til dine kontakter og din opkaldshistorik, når enhederne er forbundet."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Der kunne ikke parres med <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Der kunne ikke parres med <xliff:g id="DEVICE_NAME">%1$s</xliff:g> på grund af en forkert pinkode eller adgangsnøgle."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Parring med <xliff:g id="DEVICE_NAME">%1$s</xliff:g> mislykkedes på grund af en forkert pinkode eller adgangsnøgle."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Der kan ikke kommunikeres med <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Parring afvist af <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Computer"</string>
@@ -348,7 +348,7 @@
     <string name="simulate_color_space" msgid="1206503300335835151">"Simuler farverum"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"Aktivér OpenGL-spor"</string>
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Slå USB-lydhåndtering fra"</string>
-    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Slå autom. lydhåndtering fra for USB-lydenheder"</string>
+    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Slå automatisk lydhåndtering fra for USB-lydenheder"</string>
     <string name="debug_layout" msgid="1659216803043339741">"Vis layoutgrænser"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"Vis grænser for klip, margener osv."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Tving læsning mod venstre"</string>
@@ -418,7 +418,7 @@
     <string name="daltonizer_mode_deuteranomaly" msgid="3507284319584683963">"Deuteranopi (rød-grøn)"</string>
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanopi (rød-grøn)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanopi (blå-gul)"</string>
-    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Korriger farver"</string>
+    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Farvekorrigering"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"Ved hjælp af farvekorrigering kan du justere, hvordan farver ser ud på din enhed"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Tilsidesat af <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
@@ -532,7 +532,7 @@
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Begrænset profil"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Vil du tilføje en ny bruger?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Du kan dele denne enhed med andre ved at oprette ekstra brugere. Hver bruger har sit personlige område, som kan tilpasses med apps, baggrund osv. Brugerne kan også justere enhedsindstillinger, som for eksempel Wi-Fi, som påvirker alle.\n\nNår du tilføjer en ny bruger, skal vedkommende konfigurere sit område.\n\nAlle brugere kan opdatere apps for alle andre brugere. Indstillinger og tjenester for hjælpefunktioner overføres muligvis ikke til den nye bruger."</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"Når du tilføjer en ny bruger, skal personen konfigurere sit rum.\n\nEnhver bruger kan opdatere apps for alle andre brugere."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"Når du tilføjer en ny bruger, skal personen konfigurere sit rum.\n\nAlle brugere kan opdatere apps for alle de andre brugere."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Vil du konfigurere brugeren nu?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Sørg for, at brugeren har mulighed for at tage enheden og konfigurere sit eget rum"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Vil du oprette en profil nu?"</string>
@@ -546,7 +546,7 @@
     <string name="user_need_lock_message" msgid="4311424336209509301">"Før du kan oprette en begrænset profil, skal du oprette en skærmlås for at beskytte dine apps og personlige data."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Konfigurer låseskærmen"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"Skift til <xliff:g id="USER_NAME">%s</xliff:g>"</string>
-    <string name="guest_new_guest" msgid="3482026122932643557">"Tilføj gæsten"</string>
+    <string name="guest_new_guest" msgid="3482026122932643557">"Tilføj gæst"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Fjern gæsten"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Gæst"</string>
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Enhedens standardindstilling"</string>

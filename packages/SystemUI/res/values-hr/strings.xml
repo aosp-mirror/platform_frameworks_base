@@ -63,7 +63,7 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Dopusti"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"Otklanjanje pogrešaka putem USB-a nije dopušteno"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"Korisnik koji je trenutačno prijavljen na ovaj uređaj ne može uključiti otklanjanje pogrešaka putem USB-a. Da biste upotrebljavali tu značajku, prijeđite na primarnog korisnika."</string>
-    <string name="wifi_debugging_title" msgid="7300007687492186076">"Dopuštate li bežično otklanjanje pogrešaka na ovoj mreži?"</string>
+    <string name="wifi_debugging_title" msgid="7300007687492186076">"Želite li dopustiti bežično otklanjanje pogrešaka na ovoj mreži?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"Naziv mreže (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nAdresa Wi‑Fija (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"Uvijek dopusti na ovoj mreži"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"Dopusti"</string>
@@ -98,7 +98,7 @@
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Zvuk s vašeg uređaja, poput glazbe, poziva i melodija zvona"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Mikrofon"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Zvuk na uređaju i mikrofon"</string>
-    <string name="screenrecord_start" msgid="330991441575775004">"Početak"</string>
+    <string name="screenrecord_start" msgid="330991441575775004">"Započni"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Snimanje zaslona"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Snimanje zaslona i zvuka"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"Prikaz dodira na zaslonu"</string>
@@ -391,7 +391,7 @@
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Svjetlina"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="2325362583903258677">"AUTOMATSKI"</string>
     <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Zamjena boja"</string>
-    <string name="quick_settings_color_space_label" msgid="537528291083575559">"Način korekcije boje"</string>
+    <string name="quick_settings_color_space_label" msgid="537528291083575559">"Način korekcije boja"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Više  postavki"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Gotovo"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Povezano"</string>
@@ -548,7 +548,7 @@
     <string name="disable_vpn" msgid="482685974985502922">"Onemogući VPN"</string>
     <string name="disconnect_vpn" msgid="26286850045344557">"Prekini vezu s VPN-om"</string>
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Prikaži pravila"</string>
-    <string name="monitoring_description_named_management" msgid="505833016545056036">"Ovaj uređaj pripada organizaciji <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nVaš IT administrator može nadzirati postavke, korporacijski pristup, aplikacije, podatke o uređaju i lokaciji uređaja te upravljati njima.\n\nZa više informacija obratite se IT administratoru."</string>
+    <string name="monitoring_description_named_management" msgid="505833016545056036">"Vlasnik ovog uređaja je <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nVaš IT administrator može nadzirati postavke, korporacijski pristup, aplikacije, podatke o uređaju i lokaciji uređaja te upravljati njima.\n\nZa više informacija obratite se IT administratoru."</string>
     <string name="monitoring_description_management" msgid="4308879039175729014">"Ovaj uređaj pripada vašoj organizaciji.\n\nVaš IT administrator može nadzirati postavke, korporacijski pristup, aplikacije, podatke o uređaju i lokaciji uređaja te upravljati njima.\n\nZa više informacija obratite se IT administratoru."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Vaša je organizacija instalirala izdavač certifikata na ovom uređaju. Vaš sigurni mrežni promet možda se nadzire ili modificira."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Vaša je organizacija instalirala izdavač certifikata na vašem radnom profilu. Vaš sigurni mrežni promet možda se nadzire ili modificira."</string>
@@ -598,7 +598,7 @@
     <string name="screen_pinning_title" msgid="9058007390337841305">"Aplikacija je prikvačena"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Zaslon će tako ostati u prvom planu dok ga ne otkvačite. Dodirnite i zadržite Natrag i Pregled da biste ga otkvačili."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Zaslon će tako ostati u prvom planu dok ga ne otkvačite. Dodirnite gumbe Natrag i Početna i zadržite pritisak da biste ga otkvačili."</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Zaslon će tako ostati u prvom planu dok ga ne otkvačite. Prijeđite prstom prema gore i zadržite da biste ga otkvačili."</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Aplikacija će ostati u prvom planu dok je ne otkvačite. Prijeđite prstom prema gore i zadržite da biste je otkvačili."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Zaslon će tako ostati u prvom planu dok ga ne otkvačite. Dodirnite i zadržite Pregled da biste ga otkvačili."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Zaslon će tako ostati u prvom planu dok ga ne otkvačite. Dodirnite gumb Početna i zadržite pritisak da biste ga otkvačili."</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Osobni podaci mogu biti dostupni (na primjer kontakti i sadržaj e-pošte)."</string>
@@ -864,7 +864,7 @@
     <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Zadržite i povucite da biste premjestili pločice"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Povucite ovdje za uklanjanje"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"Potrebno je barem <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> pločica"</string>
-    <string name="qs_edit" msgid="5583565172803472437">"Uredi"</string>
+    <string name="qs_edit" msgid="5583565172803472437">"Uređivanje"</string>
     <string name="tuner_time" msgid="2450785840990529997">"Vrijeme"</string>
   <string-array name="clock_options">
     <item msgid="3986445361435142273">"Prikaži sate, minute i sekunde"</item>
@@ -966,10 +966,10 @@
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi je isključen"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth je isključen"</string>
-    <string name="dnd_is_off" msgid="3185706903793094463">"Način Ne ometaj isključen"</string>
-    <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"Način Ne ometaj uključilo je automatsko pravilo (<xliff:g id="ID_1">%s</xliff:g>)."</string>
-    <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"Način Ne ometaj uključila je aplikacija (<xliff:g id="ID_1">%s</xliff:g>)."</string>
-    <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"Način Ne ometaj uključilo je automatsko pravilo ili aplikacija."</string>
+    <string name="dnd_is_off" msgid="3185706903793094463">"Način Ne uznemiravaj isključen"</string>
+    <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"Način Ne uznemiravaj uključilo je automatsko pravilo (<xliff:g id="ID_1">%s</xliff:g>)."</string>
+    <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"Način Ne uznemiravaj uključila je aplikacija (<xliff:g id="ID_1">%s</xliff:g>)."</string>
+    <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"Način Ne uznemiravaj uključilo je automatsko pravilo ili aplikacija."</string>
     <string name="qs_dnd_until" msgid="7844269319043747955">"Do <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="qs_dnd_keep" msgid="3829697305432866434">"Zadrži"</string>
     <string name="qs_dnd_replace" msgid="7712119051407052689">"Zamijeni"</string>
@@ -1031,7 +1031,7 @@
     <string name="magnification_window_title" msgid="4863914360847258333">"Prozor za povećavanje"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Kontrole prozora za povećavanje"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Kontrole uređaja"</string>
-    <string name="quick_controls_subtitle" msgid="1667408093326318053">"Dodavanje kontrola za povezane uređaje"</string>
+    <string name="quick_controls_subtitle" msgid="1667408093326318053">"Dodajte kontrole za povezane uređaje"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"Postavljanje kontrola uređaja"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Dulje pritisnite tipku za uključivanje/isključivanje da biste pristupili kontrolama"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Odabir aplikacije za dodavanje kontrola"</string>
@@ -1048,7 +1048,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"uklonili iz favorita"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Premjestite na položaj <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Kontrole"</string>
-    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Odaberite kontrole kojima želite pristupati iz izbornika napajanja"</string>
+    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Odaberite kontrole kojima želite pristupati iz izbornika tipke za uključivanje/isključivanje"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Zadržite i povucite da biste promijenili raspored kontrola"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Sve su kontrole uklonjene"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Promjene nisu spremljene"</string>

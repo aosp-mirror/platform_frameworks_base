@@ -76,7 +76,7 @@ cc_library_static {
     product_variables: {
         arc: {
             exclude_srcs: [
-                "com_android_server_AlarmManagerService.cpp",
+                "com_android_server_alarm_AlarmManagerService.cpp",
             ],
             srcs: [
                 ":arctimersrcs",
@@ -197,6 +197,6 @@ filegroup {
 filegroup {
     name: "lib_alarmManagerService_native",
     srcs: [
-        "com_android_server_AlarmManagerService.cpp",
+        "com_android_server_alarm_AlarmManagerService.cpp",
     ],
 }

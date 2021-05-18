@@ -38,7 +38,7 @@
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Aktivera"</string>
     <string name="battery_saver_start_action" msgid="4553256017945469937">"Aktivera batterisparläget"</string>
     <string name="status_bar_settings_settings_button" msgid="534331565185171556">"Inställningar"</string>
-    <string name="status_bar_settings_wifi_button" msgid="7243072479837270946">"Wi-Fi"</string>
+    <string name="status_bar_settings_wifi_button" msgid="7243072479837270946">"Wifi"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Rotera skärmen automatiskt"</string>
     <string name="status_bar_settings_mute_label" msgid="914392730086057522">"TYST"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="2151934479226017725">"AUTO"</string>
@@ -98,7 +98,7 @@
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Ljud från enheten, till exempel musik, samtal och ringsignaler"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Mikrofon"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Ljud på enheten och från mikrofonen"</string>
-    <string name="screenrecord_start" msgid="330991441575775004">"Start"</string>
+    <string name="screenrecord_start" msgid="330991441575775004">"Starta"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Skärminspelning pågår"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Skärm- och ljudinspelning pågår"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"Visa tryck på skärmen"</string>
@@ -226,7 +226,7 @@
     <string name="data_connection_cdma" msgid="7678457855627313518">"1X"</string>
     <string name="data_connection_roaming" msgid="375650836665414797">"Roaming"</string>
     <string name="data_connection_edge" msgid="6316755666481405762">"EDGE"</string>
-    <string name="accessibility_data_connection_wifi" msgid="4422160347472742434">"Wi-Fi"</string>
+    <string name="accessibility_data_connection_wifi" msgid="4422160347472742434">"Wifi"</string>
     <string name="accessibility_no_sim" msgid="1140839832913084973">"Inget SIM-kort."</string>
     <string name="accessibility_cell_data" msgid="172950885786007392">"Mobildata"</string>
     <string name="accessibility_cell_data_on" msgid="691666434519443162">"Mobildata har aktiverats"</string>
@@ -265,8 +265,8 @@
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"Låsskärm för arbete"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"Stäng"</string>
     <string name="accessibility_quick_settings_wifi" msgid="167707325133803052">"<xliff:g id="SIGNAL">%1$s</xliff:g>."</string>
-    <string name="accessibility_quick_settings_wifi_changed_off" msgid="2230487165558877262">"Wi-Fi har inaktiverats."</string>
-    <string name="accessibility_quick_settings_wifi_changed_on" msgid="1490362586009027611">"Wi-Fi har aktiverats."</string>
+    <string name="accessibility_quick_settings_wifi_changed_off" msgid="2230487165558877262">"wifi har inaktiverats."</string>
+    <string name="accessibility_quick_settings_wifi_changed_on" msgid="1490362586009027611">"wifi har aktiverats."</string>
     <string name="accessibility_quick_settings_mobile" msgid="1817825313718492906">"Mobil <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_battery" msgid="533594896310663853">"Batteri <xliff:g id="STATE">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_airplane_off" msgid="1275658769368793228">"Flygplansläge av."</string>
@@ -374,19 +374,19 @@
     <string name="quick_settings_user_label" msgid="1253515509432672496">"Jag"</string>
     <string name="quick_settings_user_title" msgid="8673045967216204537">"Användare"</string>
     <string name="quick_settings_user_new_user" msgid="3347905871336069666">"Ny användare"</string>
-    <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
+    <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wifi"</string>
     <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"Ej ansluten"</string>
     <string name="quick_settings_wifi_no_network" msgid="6003178398713839313">"Inget nätverk"</string>
-    <string name="quick_settings_wifi_off_label" msgid="4003379736176547594">"Wi-Fi av"</string>
-    <string name="quick_settings_wifi_on_label" msgid="2489928193654318511">"Wi-Fi är aktiverat"</string>
-    <string name="quick_settings_wifi_detail_empty_text" msgid="483130889414601732">"Det finns inga tillgängliga Wi-Fi-nätverk"</string>
+    <string name="quick_settings_wifi_off_label" msgid="4003379736176547594">"wifi av"</string>
+    <string name="quick_settings_wifi_on_label" msgid="2489928193654318511">"wifi är aktiverat"</string>
+    <string name="quick_settings_wifi_detail_empty_text" msgid="483130889414601732">"Det finns inga tillgängliga wifi-nätverk"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7501659015509357887">"Aktiverar …"</string>
     <string name="quick_settings_cast_title" msgid="2279220930629235211">"Casta skärmen"</string>
     <string name="quick_settings_casting" msgid="1435880708719268055">"Castar"</string>
     <string name="quick_settings_cast_device_default_name" msgid="6988469571141331700">"Namnlös enhet"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2580520859212250265">"Redo att casta"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"Inga tillgängliga enheter"</string>
-    <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Inte ansluten till Wi-Fi"</string>
+    <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Inte ansluten till wifi"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Ljusstyrka"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="2325362583903258677">"AUTO"</string>
     <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Invertera färger"</string>
@@ -479,7 +479,7 @@
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Vill du ta bort gästen?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Alla appar och data i denna session kommer att raderas."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Ta bort"</string>
-    <string name="guest_wipe_session_title" msgid="7147965814683990944">"Välkommen tillbaka gäst!"</string>
+    <string name="guest_wipe_session_title" msgid="7147965814683990944">"Välkommen tillbaka som gäst!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Vill du fortsätta sessionen?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Börja om"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Ja, fortsätt"</string>
@@ -640,8 +640,8 @@
     <string name="output_none_found" msgid="5488087293120982770">"Inga enheter hittades"</string>
     <string name="output_none_found_service_off" msgid="935667567681386368">"Inga enheter hittades. Testa att aktivera <xliff:g id="SERVICE">%1$s</xliff:g>"</string>
     <string name="output_service_bt" msgid="4315362133973911687">"Bluetooth"</string>
-    <string name="output_service_wifi" msgid="9003667810868222134">"Wi-Fi"</string>
-    <string name="output_service_bt_wifi" msgid="7186882540475524124">"Bluetooth och Wi-Fi"</string>
+    <string name="output_service_wifi" msgid="9003667810868222134">"Wifi"</string>
+    <string name="output_service_bt_wifi" msgid="7186882540475524124">"Bluetooth och wifi"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"Inställningar för systemgränssnitt"</string>
     <string name="show_battery_percentage" msgid="6235377891802910455">"Visa inbäddad batteriprocent"</string>
     <string name="show_battery_percentage_summary" msgid="9053024758304102915">"Visa batterinivå i procent i statusfältsikonen när enheten inte laddas"</string>
@@ -716,7 +716,7 @@
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Kan ringa eller vibrera beroende på inställningarna på telefonen"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Kan ringa eller vibrera beroende på inställningarna på telefonen. Konversationer från <xliff:g id="APP_NAME">%1$s</xliff:g> visas i bubblor som standard."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Behåller din uppmärksamhet med en flytande genväg till innehållet."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Visas högst upp bland konversationerna som en flytande bubbla, visar profilbilden på låsskärmen"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Visas högst upp bland konversationerna som en flytande bubbla och visar profilbilden på låsskärmen"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Inställningar"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritet"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> har inte stöd för konversationsfunktioner"</string>
@@ -826,7 +826,7 @@
     <string name="accessibility_data_saver_on" msgid="5394743820189757731">"Databesparing är aktiverat"</string>
     <string name="accessibility_data_saver_off" msgid="58339669022107171">"Databesparing är inaktiverat"</string>
     <string name="switch_bar_on" msgid="1770868129120096114">"På"</string>
-    <string name="switch_bar_off" msgid="5669805115416379556">"Inaktiverat"</string>
+    <string name="switch_bar_off" msgid="5669805115416379556">"Av"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"Inte tillgängligt"</string>
     <string name="nav_bar" msgid="4642708685386136807">"Navigeringsfält"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"Layout"</string>
@@ -959,7 +959,7 @@
     <string name="mobile_data" msgid="4564407557775397216">"Mobildata"</string>
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> — <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g> <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
-    <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi är inaktiverat"</string>
+    <string name="wifi_is_off" msgid="5389597396308001471">"wifi är inaktiverat"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth är inaktiverat"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"Stör ej är inaktiverat"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"Stör ej aktiverades via en automatisk regel (<xliff:g id="ID_1">%s</xliff:g>)."</string>
@@ -971,7 +971,7 @@
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Appar körs i bakgrunden"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Tryck för information om batteri- och dataanvändning"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Vill du inaktivera mobildata?"</string>
-    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Du kan inte skicka data eller använda internet via <xliff:g id="CARRIER">%s</xliff:g>. Internetanslutning blir bara möjlig via Wi-Fi."</string>
+    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Du kan inte skicka data eller använda internet via <xliff:g id="CARRIER">%s</xliff:g>. Internetanslutning blir bara möjlig via wifi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"din operatör"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Svaret kan inte verifieras av Inställningar eftersom en app skymmer en begäran om behörighet."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"Tillåter du att bitar av <xliff:g id="APP_2">%2$s</xliff:g> visas i <xliff:g id="APP_0">%1$s</xliff:g>?"</string>
@@ -1042,7 +1042,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"ta bort från favoriter"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Flytta till position <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Kontroller"</string>
-    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Välj snabbkontroller som ska visas i strömbrytarmenyn"</string>
+    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Välj snabbkontroller som ska visas i startmenyn"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Ändra ordning på kontrollerna genom att trycka och dra"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Alla kontroller har tagits bort"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Ändringarna har inte sparats"</string>

@@ -318,7 +318,7 @@
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Mengambil konten jendela"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Memeriksa konten jendela tempat Anda berinteraksi."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Mengaktifkan Jelajahi dengan Sentuhan"</string>
-    <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"Item yang diketuk akan diucapkan dengan jelas dan layar dapat dijelajahi menggunakan isyarat."</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"Item yang diketuk akan diucapkan dengan jelas dan layar dapat dijelajahi menggunakan gestur."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"Mengamati teks yang Anda ketik"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"Meliputi data pribadi seperti nomor kartu kredit dan sandi."</string>
     <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"Mengontrol perbesaran layar"</string>
@@ -990,8 +990,8 @@
     <string name="enable_explore_by_touch_warning_title" msgid="5095399706284943314">"Aktifkan Menjelajah dengan Sentuhan?"</string>
     <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="1037295476738940824">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> ingin mengaktifkan Menjelajah dengan Sentuhan. Saat Menjelajah dengan Sentuhan diaktifkan, Anda dapat melihat atau mendengar deskripsi dari apa yang ada di bawah jari Anda atau melakukan gerakan untuk berinteraksi dengan tablet."</string>
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> ingin mengaktifkan Menjelajah dengan Sentuhan. Saat Menjelajah dengan Sentuhan diaktifkan, Anda dapat mendengar atau melihat deskripsi dari apa yang ada di bawah jari Anda atau melakukan gerakan untuk berinteraksi dengan ponsel."</string>
-    <string name="oneMonthDurationPast" msgid="4538030857114635777">"1 bulan yang lalu"</string>
-    <string name="beforeOneMonthDurationPast" msgid="8315149541372065392">"Sebelum 1 bulan yang lalu"</string>
+    <string name="oneMonthDurationPast" msgid="4538030857114635777">"1 bulan lalu"</string>
+    <string name="beforeOneMonthDurationPast" msgid="8315149541372065392">"Sebelum 1 bulan lalu"</string>
     <plurals name="last_num_days" formatted="false" msgid="687443109145393632">
       <item quantity="other"> <xliff:g id="COUNT_1">%d</xliff:g> hari terakhir</item>
       <item quantity="one"> <xliff:g id="COUNT_0">%d</xliff:g> hari terakhir</item>
@@ -1200,7 +1200,7 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"Menyiapkan <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Memulai aplikasi."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Menyelesaikan boot."</string>
-    <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> berjalan"</string>
+    <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> sedang berjalan"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Ketuk untuk kembali ke game"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Pilih game"</string>
     <string name="heavy_weight_switcher_text" msgid="6814316627367160126">"Agar performa tetap maksimal, hanya 1 game yang dapat dibuka sekaligus."</string>
@@ -1295,7 +1295,7 @@
     <string name="no_permissions" msgid="5729199278862516390">"Tidak perlu izin"</string>
     <string name="perm_costs_money" msgid="749054595022779685">"ini mungkin tidak gratis"</string>
     <string name="dlg_ok" msgid="5103447663504839312">"Oke"</string>
-    <string name="usb_charging_notification_title" msgid="1674124518282666955">"Mengisi daya perangkat ini via USB"</string>
+    <string name="usb_charging_notification_title" msgid="1674124518282666955">"Daya perangkat sedang diisi via USB"</string>
     <string name="usb_supplying_notification_title" msgid="5378546632408101811">"Mengisi daya perangkat yang terhubung via USB"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"Transfer file USB diaktifkan"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"PTP via USB diaktifkan"</string>
@@ -1565,7 +1565,7 @@
     <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Transmisi layar ke perangkat"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"Menelusuri perangkat…"</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"Setelan"</string>
-    <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Putuskan sambungan"</string>
+    <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Putuskan koneksi"</string>
     <string name="media_route_status_scanning" msgid="8045156315309594482">"Memindai..."</string>
     <string name="media_route_status_connecting" msgid="5845597961412010540">"Menyambung..."</string>
     <string name="media_route_status_available" msgid="1477537663492007608">"Tersedia"</string>
@@ -1634,10 +1634,10 @@
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Izinkan <xliff:g id="SERVICE">%1$s</xliff:g> memiliki kontrol penuh atas perangkat Anda?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Jika Anda mengaktifkan <xliff:g id="SERVICE">%1$s</xliff:g>, perangkat tidak akan menggunakan kunci layar untuk meningkatkan enkripsi data."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Kontrol penuh sesuai untuk aplikasi yang membantu Anda terkait kebutuhan aksesibilitas, tetapi tidak untuk sebagian besar aplikasi."</string>
-    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Tampilan dan layar kontrol"</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Melihat dan mengontrol layar"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Aplikasi dapat membaca semua konten di layar dan menampilkan konten di atas aplikasi lain."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Menampilkan dan melakukan tindakan"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Aplikasi dapat melacak interaksi Anda dengan aplikasi atau sensor hardware, dan berinteraksi dengan aplikasi atas nama Anda."</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Aplikasi dapat melacak interaksi Anda dengan aplikasi atau sensor hardware, dan melakukan interaksi dengan aplikasi untuk Anda."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Izinkan"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Tolak"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Ketuk fitur untuk mulai menggunakannya:"</string>
@@ -1900,10 +1900,10 @@
     <string name="profile_encrypted_message" msgid="1128512616293157802">"Ketuk untuk membuka kunci profil kerja"</string>
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"Terhubung ke <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"Ketuk untuk melihat file"</string>
-    <string name="pin_target" msgid="8036028973110156895">"Pasang pin"</string>
-    <string name="pin_specific_target" msgid="7824671240625957415">"Pasang pin <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="pin_target" msgid="8036028973110156895">"Sematkan"</string>
+    <string name="pin_specific_target" msgid="7824671240625957415">"Sematkan <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="unpin_target" msgid="3963318576590204447">"Lepas pin"</string>
-    <string name="unpin_specific_target" msgid="3859828252160908146">"Lepas pin <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="unpin_specific_target" msgid="3859828252160908146">"Lepas sematan <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="app_info" msgid="6113278084877079851">"Info aplikasi"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"Memulai demo..."</string>

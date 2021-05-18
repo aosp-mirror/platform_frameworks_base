@@ -1661,9 +1661,9 @@
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"За превключване между функциите прекарайте три пръста нагоре и задръжте."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Ниво на мащаба"</string>
     <string name="user_switched" msgid="7249833311585228097">"Текущ потребител <xliff:g id="NAME">%1$s</xliff:g>."</string>
-    <string name="user_switching_message" msgid="1912993630661332336">"Превключва се към <xliff:g id="NAME">%1$s</xliff:g>…"</string>
+    <string name="user_switching_message" msgid="1912993630661332336">"Превключва се към: <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g> излиза…"</string>
-    <string name="owner_name" msgid="8713560351570795743">"собственик"</string>
+    <string name="owner_name" msgid="8713560351570795743">"Собственик"</string>
     <string name="error_message_title" msgid="4082495589294631966">"Грешка"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"Тази промяна не е разрешена от администратора ви"</string>
     <string name="app_not_found" msgid="3429506115332341800">"Няма намерено приложение за извършване на това действие"</string>
@@ -1795,7 +1795,7 @@
     <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"С цел удължаване на живота на батерията режимът за запазването ѝ:\n\n•·включва тъмната тема;\n•·изключва или ограничава активността на заден план, някои визуални ефекти и други функции, като например „Ok Google“.\n\n"<annotation id="url">"Научете повече"</annotation></string>
     <string name="battery_saver_description" msgid="8587408568232177204">"С цел удължаване на живота на батерията режимът за запазването ѝ:\n\n• включва тъмната тема;\n• изключва или ограничава активността на заден план, някои визуални ефекти и други функции, като например „Ok Google“."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"С цел намаляване на преноса на данни функцията за икономия на данни не позволява на някои приложения да изпращат или получават данни на заден план. Понастоящем използвано от вас приложение може да използва данни, но по-рядко. Това например може да означава, че изображенията не се показват, докато не ги докоснете."</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"Ще вкл. ли „Икономия на данни“?"</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"Включване на „Икономия на данни“?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Включване"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="other">За %1$d минути (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

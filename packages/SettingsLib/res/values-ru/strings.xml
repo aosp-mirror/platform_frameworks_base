@@ -35,7 +35,7 @@
     <string name="wifi_not_in_range" msgid="1541760821805777772">"Недоступна"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"Подключение не будет выполняться автоматически"</string>
     <string name="wifi_no_internet" msgid="1774198889176926299">"Без доступа к Интернету"</string>
-    <string name="saved_network" msgid="7143698034077223645">"Кто сохранил: <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="saved_network" msgid="7143698034077223645">"Сохранено: <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"Автоматически подключено к %1$s"</string>
     <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"Автоматически подключено через автора рейтинга сетей"</string>
     <string name="connected_via_passpoint" msgid="7735442932429075684">"Подключено к %1$s"</string>
@@ -85,7 +85,7 @@
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Звонки"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Профиль OPP"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Профиль HID"</string>
-    <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Доступ к Интернету"</string>
+    <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Доступ к интернету"</string>
     <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"Обмен контактами"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"Использовать для обмена контактами"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Профиль PAN"</string>
@@ -117,7 +117,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Отмена"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Установление соединения обеспечивает доступ к вашим контактам и журналу звонков при подключении."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Не удалось подключиться к устройству \"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>\"."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Не удалось подключиться к устройству \"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>\", так как введен неверный PIN-код или пароль."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Не удалось подключиться к устройству \"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>\": неверный PIN-код или пароль."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Не удается установить соединение с устройством \"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>\"."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> не разрешает подключение."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Компьютер"</string>
@@ -274,11 +274,11 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3233402355917446304">"Аудиокодек LDAC для Bluetooth: качество воспроизведения"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7274396574659784285">"Запустить аудиокодек LDAC для Bluetooth\nВыбор: качество воспроизведения"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="2040810756832027227">"Потоковая передача: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
-    <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"Персональный DNS-сервер"</string>
-    <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"Выберите режим персонального DNS-сервера"</string>
-    <string name="private_dns_mode_off" msgid="7065962499349997041">"Отключено"</string>
-    <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"Автоматический режим"</string>
-    <string name="private_dns_mode_provider" msgid="3619040641762557028">"Имя хоста поставщика персонального DNS-сервера"</string>
+    <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"Частный DNS-сервер"</string>
+    <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"Выберите режим частного DNS-сервера"</string>
+    <string name="private_dns_mode_off" msgid="7065962499349997041">"Отключен"</string>
+    <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"Автоматически"</string>
+    <string name="private_dns_mode_provider" msgid="3619040641762557028">"Вручную"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Введите имя хоста поставщика DNS"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"Ошибка подключения"</string>
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Показывать параметры сертификации беспроводных мониторов"</string>
@@ -324,7 +324,7 @@
     <string name="select_application" msgid="2543228890535466325">"Выбор приложения"</string>
     <string name="no_application" msgid="9038334538870247690">"Нет"</string>
     <string name="wait_for_debugger" msgid="7461199843335409809">"Ждать подключения отладчика"</string>
-    <string name="wait_for_debugger_summary" msgid="6846330006113363286">"Приложение ожидает подключения отладчика"</string>
+    <string name="wait_for_debugger_summary" msgid="6846330006113363286">"Отлаживаемое приложение будет ожидать подключения отладчика перед выполнением"</string>
     <string name="debug_input_category" msgid="7349460906970849771">"Ввод"</string>
     <string name="debug_drawing_category" msgid="5066171112313666619">"Отрисовка"</string>
     <string name="debug_hw_drawing_category" msgid="5830815169336975162">"Аппаратное ускорение отрисовки"</string>
@@ -401,7 +401,7 @@
     <string name="inactive_app_active_summary" msgid="8047630990208722344">"Включено. Нажмите, чтобы отключить."</string>
     <string name="standby_bucket_summary" msgid="5128193447550429600">"Статус приложения в режиме ожидания:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Работающие службы"</string>
-    <string name="runningservices_settings_summary" msgid="1046080643262665743">"Просмотр и управление работающими службами"</string>
+    <string name="runningservices_settings_summary" msgid="1046080643262665743">"Просмотр работающих служб и управление ими"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Сервис WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"Настройки сервиса WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"Вариант недействителен. Повторите попытку."</string>
@@ -458,7 +458,7 @@
     <string name="disabled" msgid="8017887509554714950">"Отключено"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Разрешено"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Запрещено"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"Неизвестные приложения"</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"Установка неизвестных приложений"</string>
     <string name="home" msgid="973834627243661438">"Настройки"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"0 %"</item>
@@ -547,8 +547,8 @@
     <string name="profile_info_settings_title" msgid="105699672534365099">"Информация о профиле"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"Чтобы создать профиль с ограниченным доступом, необходимо предварительно настроить блокировку экрана для защиты приложений и личных данных"</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Включить блокировку"</string>
-    <string name="user_switch_to_user" msgid="6975428297154968543">"Переключиться на этот аккаунт: <xliff:g id="USER_NAME">%s</xliff:g>"</string>
-    <string name="guest_new_guest" msgid="3482026122932643557">"Добавить аккаунт гостя"</string>
+    <string name="user_switch_to_user" msgid="6975428297154968543">"Сменить пользователя на <xliff:g id="USER_NAME">%s</xliff:g>"</string>
+    <string name="guest_new_guest" msgid="3482026122932643557">"Добавить гостя"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Удалить аккаунт гостя"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Гость"</string>
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Вариант по умолчанию"</string>

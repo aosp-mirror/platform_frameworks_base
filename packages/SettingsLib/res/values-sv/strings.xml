@@ -27,7 +27,7 @@
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"Inaktiverad"</string>
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"IP-konfigurationsfel"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"Ingen anslutning på grund av låg kvalitet på nätverket"</string>
-    <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"Wi-Fi-anslutningsfel"</string>
+    <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"Wifi-anslutningsfel"</string>
     <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"Autentiseringsproblem"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"Det gick inte att ansluta"</string>
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"Det gick inte att ansluta till <xliff:g id="AP_NAME">%1$s</xliff:g>"</string>
@@ -131,12 +131,12 @@
     <string name="bluetooth_hearingaid_right_pairing_message" msgid="2655347721696331048">"Parkopplar höger hörapparat …"</string>
     <string name="bluetooth_hearingaid_left_battery_level" msgid="7375621694748104876">"Vänster – <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batteri"</string>
     <string name="bluetooth_hearingaid_right_battery_level" msgid="1850094448499089312">"Höger – <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batteri"</string>
-    <string name="accessibility_wifi_off" msgid="1195445715254137155">"Wi-Fi är inaktiverat."</string>
-    <string name="accessibility_no_wifi" msgid="5297119459491085771">"Ingen Wi-Fi-anslutning."</string>
-    <string name="accessibility_wifi_one_bar" msgid="6025652717281815212">"Wi-Fi: en stapel."</string>
-    <string name="accessibility_wifi_two_bars" msgid="687800024970972270">"Wi-Fi: två staplar."</string>
-    <string name="accessibility_wifi_three_bars" msgid="779895671061950234">"Wi-Fi: tre staplar."</string>
-    <string name="accessibility_wifi_signal_full" msgid="7165262794551355617">"Full signalstyrka för Wi-Fi."</string>
+    <string name="accessibility_wifi_off" msgid="1195445715254137155">"Wifi är inaktiverat."</string>
+    <string name="accessibility_no_wifi" msgid="5297119459491085771">"Ingen wifi-anslutning."</string>
+    <string name="accessibility_wifi_one_bar" msgid="6025652717281815212">"Wifi: en stapel."</string>
+    <string name="accessibility_wifi_two_bars" msgid="687800024970972270">"Wifi: två staplar."</string>
+    <string name="accessibility_wifi_three_bars" msgid="779895671061950234">"Wifi: tre staplar."</string>
+    <string name="accessibility_wifi_signal_full" msgid="7165262794551355617">"Full signalstyrka för wifi."</string>
     <string name="accessibility_wifi_security_type_none" msgid="162352241518066966">"Öppet nätverk"</string>
     <string name="accessibility_wifi_security_type_secured" msgid="2399774097343238942">"Säkert nätverk"</string>
     <string name="process_kernel_label" msgid="950292573930336765">"Operativsystemet Android"</string>
@@ -207,7 +207,7 @@
     <string name="enable_adb_summary" msgid="3711526030096574316">"Felsökningsläge när USB har anslutits"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"Återkalla åtkomst till USB-felsökning"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"Trådlös felsökning"</string>
-    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Felsökningsläge vid Wi-Fi-anslutning"</string>
+    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Felsökningsläge vid wifi-anslutning"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"Fel"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Trådlös felsökning"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Aktivera trådlös felsökning om du vill se tillgängliga enheter"</string>
@@ -223,16 +223,16 @@
     <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"Det gick inte att ansluta"</string>
     <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"Kontrollera att <xliff:g id="DEVICE_NAME">%1$s</xliff:g> är ansluten till rätt nätverk"</string>
     <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"Parkoppla med enheten"</string>
-    <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Wi-Fi-kopplingskod"</string>
+    <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Wifi-parkopplingskod"</string>
     <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"Det gick inte att parkoppla"</string>
     <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Kontrollera att enheten är ansluten till samma nätverk."</string>
-    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Parkoppla enheten via Wi-Fi genom att skanna en QR-kod"</string>
+    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Parkoppla enheten via wifi genom att skanna en QR-kod"</string>
     <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Enheten parkopplas …"</string>
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Det gick inte att parkoppla enheten. Antingen var det fel QR-kod eller är enheten inte ansluten till samma nätverk."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP-adress och port"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Skanna QR-kod"</string>
-    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Parkoppla enheten via Wi-Fi genom att skanna en QR-kod"</string>
-    <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Anslut till ett Wi-Fi-nätverk"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Parkoppla enheten via wifi genom att skanna en QR-kod"</string>
+    <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Anslut till ett wifi-nätverk"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, debug, dev, felsöka, felsökning"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Genväg till felrapport"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Visa en knapp för felrapportering i extramenyn"</string>
@@ -248,9 +248,9 @@
     <string name="mock_location_app_not_set" msgid="6972032787262831155">"Ingen app för påhittad plats har angetts"</string>
     <string name="mock_location_app_set" msgid="4706722469342913843">"App för påhittad plats: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"Nätverk"</string>
-    <string name="wifi_display_certification" msgid="1805579519992520381">"Certifiering för Wi-Fi-skärmdelning"</string>
-    <string name="wifi_verbose_logging" msgid="1785910450009679371">"Aktivera utförlig loggning för Wi-Fi"</string>
-    <string name="wifi_scan_throttling" msgid="2985624788509913617">"Begränsning av Wi-Fi-sökning"</string>
+    <string name="wifi_display_certification" msgid="1805579519992520381">"Certifiering för wifi-skärmdelning"</string>
+    <string name="wifi_verbose_logging" msgid="1785910450009679371">"Aktivera utförlig loggning för wifi"</string>
+    <string name="wifi_scan_throttling" msgid="2985624788509913617">"Begränsning av wifi-sökning"</string>
     <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Wi‑Fi‑förstärkt MAC-slumpgenerering"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Mobildata alltid aktiverad"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Maskinvaruacceleration för internetdelning"</string>
@@ -281,8 +281,8 @@
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"Värdnamn för leverantör av privat DNS"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Ange värdnamn för DNS-leverantör"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"Kan inte ansluta"</string>
-    <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Visa certifieringsalternativ för Wi-Fi-skärmdelning"</string>
-    <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Öka loggningsnivån för Wi-Fi, visa per SSID RSSI i Wi‑Fi Picker"</string>
+    <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Visa certifieringsalternativ för wifi-skärmdelning"</string>
+    <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Öka loggningsnivån för wifi, visa per SSID RSSI i Wi‑Fi Picker"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Sänker batteriförbrukningen och förbättrar nätverksprestandan"</string>
     <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"När det här läget är aktiverat kan enhetens MAC-adress ändras varje gång den ansluts till ett nätverk där slumpgenerering av MAC-adress har aktiverats."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Med datapriser"</string>
@@ -298,7 +298,7 @@
     <string name="allow_mock_location" msgid="2102650981552527884">"Tillåt skenplatser"</string>
     <string name="allow_mock_location_summary" msgid="179780881081354579">"Tillåt skenplatser"</string>
     <string name="debug_view_attributes" msgid="3539609843984208216">"Aktivera inspektion av visningsattribut"</string>
-    <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"Håll alltid mobildata aktiverad, även när Wi-Fi är aktiverat (så att du snabbt kan byta mellan nätverk)."</string>
+    <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"Håll alltid mobildata aktiverad, även när wifi är aktiverat (så att du snabbt kan byta mellan nätverk)."</string>
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Använd maskinvaruacceleration för internetdelning om tillgängligt"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"Ska USB-felsökning tillåtas?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"USB-felsökning ska endast användas i utvecklingssyfte. Använd den för att kopiera data mellan datorn och enheten, installera appar på enheten utan meddelanden och läsa loggdata."</string>

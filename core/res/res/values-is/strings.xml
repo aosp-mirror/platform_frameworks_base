@@ -570,7 +570,7 @@
     <string name="permlab_manageFace" msgid="4569549381889283282">"stjórna vélbúnaði andlitsopnunar"</string>
     <string name="permdesc_manageFace" msgid="6204569688492710471">"Leyfir forritinu að beita aðferðum til að bæta við og eyða andlitssniðmátum til notkunar."</string>
     <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"nota vélbúnað andlitsopnunar"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Leyfir forritinu að nota andlitsopnunarvélbúnað til auðkenningar"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Leyfir forritinu að nota vélbúnað andlitsopnunar til auðkenningar"</string>
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Andlitsopnun"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Skráðu andlitið þitt aftur"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Skráðu andlitið þitt til að bæta kennsl"</string>
@@ -835,7 +835,7 @@
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Reyndu aftur"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Reyndu aftur"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Taktu úr lás til að sjá alla eiginleika og gögn"</string>
-    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Hámarksfjölda tilrauna til að opna með andliti náð"</string>
+    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Hámarksfjölda tilrauna til andlitsopnunar náð"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"Ekkert SIM-kort"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"Ekkert SIM-kort í spjaldtölvunni."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Ekkert SIM-kort er í Android TV tækinu."</string>
@@ -905,7 +905,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"Stækka opnunarsvæði."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"Opnun með stroku."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"Opnun með mynstri."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"Opnun með andliti."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"Andlitsopnun."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"Opnun með PIN-númeri."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"Taka PIN-númer SIM-korts úr lás."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"Taka PUK-númer SIM-korts úr lás."</string>
@@ -1794,7 +1794,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Í lagi"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"Til að auka rafhlöðuendingu gerir rafhlöðusparnaður eftirfarandi:\n\n•Kveikir á dökku þema\n•Slekkur á eða takmarkar bakgrunnsvirkni, tilteknar myndbrellur og aðra eiginleika eins og „Ok Google“\n\n"<annotation id="url">"Frekari upplýsingar"</annotation></string>
     <string name="battery_saver_description" msgid="8587408568232177204">"Til að auka rafhlöðuendingu gerir rafhlöðusparnaður eftirfarandi:\n\n•Kveikir á dökku þema\n•Slekkur á eða takmarkar bakgrunnsvirkni, tilteknar myndbrellur og aðra eiginleika eins og „Ok Google“"</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Gagnasparnaður getur hjálpað til við að draga úr gagnanotkun með því að hindra forrit í að senda eða sækja gögn í bakgrunni. Forrit sem er í notkun getur náð í gögn, en gerir það kannski sjaldnar. Niðurstaðan getur verið, svo dæmi sé tekið, að myndir eru ekki birtar fyrr en þú ýtir á þær."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Gagnasparnaður getur hjálpað til við að draga úr gagnanotkun með því að hindra forrit í að senda eða sækja gögn í bakgrunni. Forrit sem er í notkun getur náð í gögn, en gerir það kannski sjaldnar. Niðurstaðan getur verið að myndir eru ekki birtar fyrr en þú ýtir á þær, svo dæmi sé tekið."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Kveikja á gagnasparnaði?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Kveikja"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
