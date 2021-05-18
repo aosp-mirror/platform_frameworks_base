@@ -294,7 +294,6 @@ public class ScrimView extends View {
 
     /**
      * Make bottom edge concave so overlap between layers is not visible for alphas between 0 and 1
-     * @return height of concavity
      */
     public void enableBottomEdgeConcave(boolean clipScrim) {
         if (mDrawable instanceof ScrimDrawable) {
