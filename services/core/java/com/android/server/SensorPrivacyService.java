@@ -76,6 +76,7 @@ import android.provider.Settings;
 import android.service.SensorPrivacyIndividualEnabledSensorProto;
 import android.service.SensorPrivacyServiceDumpProto;
 import android.service.SensorPrivacyUserProto;
+import android.service.voice.VoiceInteractionManagerInternal;
 import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyManager;
 import android.telephony.emergency.EmergencyNumber;
@@ -172,6 +173,7 @@ public final class SensorPrivacyService extends SystemService {
         mActivityManager = context.getSystemService(ActivityManager.class);
         mActivityTaskManager = context.getSystemService(ActivityTaskManager.class);
         mTelephonyManager = context.getSystemService(TelephonyManager.class);
+
         mSensorPrivacyServiceImpl = new SensorPrivacyServiceImpl();
     }
 
@@ -400,6 +402,15 @@ public final class SensorPrivacyService extends SystemService {
                     showSensorUseReminderNotification(user, packageName, sensor);
                     return;
                 }
+            }
+
+            VoiceInteractionManagerInternal voiceInteractionManagerInternal =
+                    LocalServices.getService(VoiceInteractionManagerInternal.class);
+
+            if (sensor == MICROPHONE && voiceInteractionManagerInternal != null
+                    && voiceInteractionManagerInternal.hasActiveSession(packageName)) {
+                enqueueSensorUseReminderDialogAsync(-1, user, packageName, sensor);
+                return;
             }
 
             Log.i(TAG, packageName + "/" + uid + " started using sensor " + sensor
