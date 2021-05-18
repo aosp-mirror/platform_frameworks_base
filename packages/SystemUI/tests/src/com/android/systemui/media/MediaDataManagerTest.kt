@@ -28,6 +28,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
+import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito
@@ -41,7 +42,6 @@ import org.mockito.Mockito.`when` as whenever
 private const val KEY = "KEY"
 private const val KEY_2 = "KEY_2"
 private const val KEY_MEDIA_SMARTSPACE = "MEDIA_SMARTSPACE_ID"
-private const val KEY_NONE_MEDIA_SMARTSPACE = "NONE_MEDIA_SMARTSPACE_ID"
 private const val PACKAGE_NAME = "com.android.systemui"
 private const val APP_NAME = "SystemUI"
 private const val SESSION_ARTIST = "artist"
@@ -364,13 +364,14 @@ class MediaDataManagerTest : SysuiTestCase() {
     fun testOnSmartspaceMediaDataLoaded_hasNewMediaTarget_callsListener() {
         smartspaceMediaDataProvider.onTargetsAvailable(listOf(mediaSmartspaceTarget))
         verify(listener).onSmartspaceMediaDataLoaded(
-            eq(KEY_MEDIA_SMARTSPACE), eq(mediaSmartspaceTarget))
+            eq(KEY_MEDIA_SMARTSPACE), eq(mediaSmartspaceTarget), eq(false))
     }
 
     @Test
     fun testOnSmartspaceMediaDataLoaded_hasNoneMediaTarget_notCallsListener() {
         smartspaceMediaDataProvider.onTargetsAvailable(listOf())
-        verify(listener, never()).onSmartspaceMediaDataLoaded(anyObject(), anyObject())
+        verify(listener, never())
+                .onSmartspaceMediaDataLoaded(anyObject(), anyObject(), anyBoolean())
     }
 
     @Test
