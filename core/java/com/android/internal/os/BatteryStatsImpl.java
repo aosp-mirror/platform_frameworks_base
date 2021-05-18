@@ -6126,6 +6126,17 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
+    /**
+     * Records timing data related to an incoming Binder call in order to attribute
+     * the power consumption to the calling app.
+     */
+    public void noteBinderCallStats(int workSourceUid,
+            Collection<BinderCallsStats.CallStat> callStats) {
+        synchronized (this) {
+            getUidStatsLocked(workSourceUid).noteBinderCallStatsLocked(callStats);
+        }
+    }
+
     public String[] getWifiIfaces() {
         synchronized (mWifiNetworkLock) {
             return mWifiIfaces;
@@ -8690,6 +8701,17 @@ public class BatteryStatsImpl extends BatteryStats {
                     }
                 }
             }
+        }
+
+        /**
+         * Notes incoming binder call stats associated with this work source UID.
+         */
+        public void noteBinderCallStatsLocked(Collection<BinderCallsStats.CallStat> callStats) {
+            if (DEBUG) {
+                Slog.d(TAG, "noteBinderCalls() workSourceUid = [" + mUid + "], callStats = ["
+                        + new ArrayList<>(callStats) + "]");
+            }
+            // TODO(dplotnikov): finish the implementation by actually remembering the stats
         }
 
         /**
