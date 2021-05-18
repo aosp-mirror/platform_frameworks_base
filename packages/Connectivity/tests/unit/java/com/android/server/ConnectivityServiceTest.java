@@ -4277,6 +4277,124 @@ public class ConnectivityServiceTest {
         mCm.unregisterNetworkCallback(callback);
     }
 
+    @Test
+    public void testNetworkCallbackWithNullUids() throws Exception {
+        final NetworkRequest request = new NetworkRequest.Builder()
+                .removeCapability(NET_CAPABILITY_NOT_VPN)
+                .build();
+        final TestNetworkCallback callback = new TestNetworkCallback();
+        mCm.registerNetworkCallback(request, callback);
+
+        // Attempt to file a callback for networks applying to another UID. This does not actually
+        // work, because this code does not currently have permission to do so. The callback behaves
+        // exactly the same as the one registered just above.
+        final int otherUid = UserHandle.getUid(RESTRICTED_USER, VPN_UID);
+        final NetworkRequest otherUidRequest = new NetworkRequest.Builder()
+                .removeCapability(NET_CAPABILITY_NOT_VPN)
+                .setUids(UidRange.toIntRanges(uidRangesForUids(otherUid)))
+                .build();
+        final TestNetworkCallback otherUidCallback = new TestNetworkCallback();
+        mCm.registerNetworkCallback(otherUidRequest, otherUidCallback);
+
+        final NetworkRequest includeOtherUidsRequest = new NetworkRequest.Builder()
+                .removeCapability(NET_CAPABILITY_NOT_VPN)
+                .setIncludeOtherUidNetworks(true)
+                .build();
+        final TestNetworkCallback includeOtherUidsCallback = new TestNetworkCallback();
+        mCm.registerNetworkCallback(includeOtherUidsRequest, includeOtherUidsCallback);
+
+        // Both callbacks see a network with no specifier that applies to their UID.
+        mWiFiNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_WIFI);
+        mWiFiNetworkAgent.connect(false /* validated */);
+        callback.expectAvailableCallbacksUnvalidated(mWiFiNetworkAgent);
+        otherUidCallback.expectAvailableCallbacksUnvalidated(mWiFiNetworkAgent);
+        includeOtherUidsCallback.expectAvailableCallbacksUnvalidated(mWiFiNetworkAgent);
+        mWiFiNetworkAgent.disconnect();
+        callback.expectCallback(CallbackEntry.LOST, mWiFiNetworkAgent);
+        otherUidCallback.expectCallback(CallbackEntry.LOST, mWiFiNetworkAgent);
+        includeOtherUidsCallback.expectCallback(CallbackEntry.LOST, mWiFiNetworkAgent);
+
+        // Only the includeOtherUidsCallback sees a VPN that does not apply to its UID.
+        final UidRange range = UidRange.createForUser(UserHandle.of(RESTRICTED_USER));
+        final Set<UidRange> vpnRanges = Collections.singleton(range);
+        mMockVpn.establish(new LinkProperties(), VPN_UID, vpnRanges);
+        includeOtherUidsCallback.expectAvailableThenValidatedCallbacks(mMockVpn);
+        callback.assertNoCallback();
+        otherUidCallback.assertNoCallback();
+
+        mMockVpn.disconnect();
+        includeOtherUidsCallback.expectCallback(CallbackEntry.LOST, mMockVpn);
+        callback.assertNoCallback();
+        otherUidCallback.assertNoCallback();
+    }
+
+    private static class RedactableNetworkSpecifier extends NetworkSpecifier {
+        public static final int ID_INVALID = -1;
+
+        public final int networkId;
+
+        RedactableNetworkSpecifier(int networkId) {
+            this.networkId = networkId;
+        }
+
+        @Override
+        public boolean canBeSatisfiedBy(NetworkSpecifier other) {
+            return other instanceof RedactableNetworkSpecifier
+                    && this.networkId == ((RedactableNetworkSpecifier) other).networkId;
+        }
+
+        @Override
+        public NetworkSpecifier redact() {
+            return new RedactableNetworkSpecifier(ID_INVALID);
+        }
+    }
+
+    @Test
+    public void testNetworkCallbackWithNullUidsRedactsSpecifier() throws Exception {
+        final RedactableNetworkSpecifier specifier = new RedactableNetworkSpecifier(42);
+        final NetworkRequest request = new NetworkRequest.Builder()
+                .addCapability(NET_CAPABILITY_INTERNET)
+                .addTransportType(TRANSPORT_WIFI)
+                .setNetworkSpecifier(specifier)
+                .build();
+        final TestNetworkCallback callback = new TestNetworkCallback();
+        mCm.registerNetworkCallback(request, callback);
+
+        // Attempt to file a callback for networks applying to another UID. This does not actually
+        // work, because this code does not currently have permission to do so. The callback behaves
+        // exactly the same as the one registered just above.
+        final int otherUid = UserHandle.getUid(RESTRICTED_USER, VPN_UID);
+        final NetworkRequest otherUidRequest = new NetworkRequest.Builder()
+                .addCapability(NET_CAPABILITY_INTERNET)
+                .addTransportType(TRANSPORT_WIFI)
+                .setNetworkSpecifier(specifier)
+                .setUids(UidRange.toIntRanges(uidRangesForUids(otherUid)))
+                .build();
+        final TestNetworkCallback otherUidCallback = new TestNetworkCallback();
+        mCm.registerNetworkCallback(otherUidRequest, otherUidCallback);
+
+        final NetworkRequest includeOtherUidsRequest = new NetworkRequest.Builder()
+                .addCapability(NET_CAPABILITY_INTERNET)
+                .addTransportType(TRANSPORT_WIFI)
+                .setNetworkSpecifier(specifier)
+                .setIncludeOtherUidNetworks(true)
+                .build();
+        final TestNetworkCallback includeOtherUidsCallback = new TestNetworkCallback();
+        mCm.registerNetworkCallback(includeOtherUidsRequest, callback);
+
+        // Only the regular callback sees the network, because callbacks filed with no UID have
+        // their specifiers redacted.
+        final LinkProperties emptyLp = new LinkProperties();
+        final NetworkCapabilities ncTemplate = new NetworkCapabilities()
+                .addTransportType(TRANSPORT_WIFI)
+                .setNetworkSpecifier(specifier);
+        mWiFiNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_WIFI, emptyLp, ncTemplate);
+        mWiFiNetworkAgent.connect(false /* validated */);
+        callback.expectAvailableCallbacksUnvalidated(mWiFiNetworkAgent);
+        otherUidCallback.expectAvailableCallbacksUnvalidated(mWiFiNetworkAgent);
+        includeOtherUidsCallback.assertNoCallback();
+    }
+
     private void setCaptivePortalMode(int mode) {
         ContentResolver cr = mServiceContext.getContentResolver();
         Settings.Global.putInt(cr, ConnectivitySettingsManager.CAPTIVE_PORTAL_MODE, mode);
