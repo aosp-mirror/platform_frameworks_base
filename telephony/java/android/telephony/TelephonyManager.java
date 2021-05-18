@@ -15025,6 +15025,15 @@ public class TelephonyManager {
             "CAPABILITY_PHYSICAL_CHANNEL_CONFIG_1_6_SUPPORTED";
 
     /**
+     * Indicates whether modem supports handling parsed SIM phonebook records through the RIL,
+     * both batched reads and individual writes.
+     *
+     * @hide
+     */
+    public static final String CAPABILITY_SIM_PHONEBOOK_IN_MODEM =
+            "CAPABILITY_SIM_PHONEBOOK_IN_MODEM";
+
+    /**
      * A list of the radio interface capability values with public valid constants.
      *
      * Here is a related list for the systemapi-only valid constants:
@@ -15039,6 +15048,7 @@ public class TelephonyManager {
     @Retention(RetentionPolicy.SOURCE)
     @StringDef(prefix = "CAPABILITY_", value = {
             CAPABILITY_SLICING_CONFIG_SUPPORTED,
+            CAPABILITY_SIM_PHONEBOOK_IN_MODEM,
     })
     public @interface RadioInterfaceCapability {}
 
