@@ -35,7 +35,6 @@ import android.graphics.BlendMode;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -228,8 +227,6 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
                 alternateTextColor = ta.getColor(3, backgroundColor);
             }
         }
-        mEditText.setAllColors(backgroundColor, editBgColor,
-                accentColor, textColor, hintTextColor);
         final ColorStateList accentTint = new ColorStateList(new int[][]{
                 new int[]{com.android.internal.R.attr.state_enabled},
                 new int[]{},
@@ -237,6 +234,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
                 accentColor,
                 accentColor & 0x4DFFFFFF // %30 opacity
         });
+        mEditText.setAllColors(accentColor, textColor, hintTextColor);
         mContentBackground.setColor(editBgColor);
         mContentBackground.setStroke(stroke, accentTint);
         mDelete.setImageTintList(ColorStateList.valueOf(alternateTextColor));
@@ -875,7 +873,6 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         private final OnReceiveContentListener mOnReceiveContentListener = this::onReceiveContent;
 
         private RemoteInputView mRemoteInputView;
-        private ColorDrawable mBackground;
         boolean mShowImeOnInputConnection;
         private LightBarController mLightBarController;
         private InputMethodManager mInputMethodManager;
@@ -885,8 +882,6 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         public RemoteEditText(Context context, AttributeSet attrs) {
             super(context, attrs);
             mLightBarController = Dependency.get(LightBarController.class);
-
-            mBackground = new ColorDrawable();
         }
 
         void setSupportedMimeTypes(@Nullable Collection<String> mimeTypes) {
@@ -1045,9 +1040,6 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
 
             if (focusable) {
                 requestFocus();
-                setBackground(mBackground);
-            } else {
-                setBackground(null);
             }
         }
 
@@ -1062,10 +1054,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
             return remainingItems;
         }
 
-        protected void setAllColors(int backgroundColor, int editBackgroundColor,
-                int accentColor, int textColor, int hintTextColor) {
-            setBackgroundColor(editBackgroundColor);
-            mBackground.setColor(editBackgroundColor);
+        protected void setAllColors(int accentColor, int textColor, int hintTextColor) {
             setTextColor(textColor);
             setHintTextColor(hintTextColor);
             getTextCursorDrawable().setColorFilter(accentColor, PorterDuff.Mode.SRC_IN);
