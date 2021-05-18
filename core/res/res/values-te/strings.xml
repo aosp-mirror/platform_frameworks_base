@@ -1498,8 +1498,8 @@
     <string name="keyboardview_keycode_enter" msgid="168054869339091055">"Enter"</string>
     <string name="activitychooserview_choose_application" msgid="3500574466367891463">"యాప్‌ను ఎంచుకోండి"</string>
     <string name="activitychooserview_choose_application_error" msgid="6937782107559241734">"<xliff:g id="APPLICATION_NAME">%s</xliff:g>ని ప్రారంభించడం సాధ్యపడలేదు"</string>
-    <string name="shareactionprovider_share_with" msgid="2753089758467748982">"వీటితో భాగస్వామ్యం చేయండి"</string>
-    <string name="shareactionprovider_share_with_application" msgid="4902832247173666973">"<xliff:g id="APPLICATION_NAME">%s</xliff:g>తో భాగస్వామ్యం చేయండి"</string>
+    <string name="shareactionprovider_share_with" msgid="2753089758467748982">"వీటితో షేర్ చేయండి"</string>
+    <string name="shareactionprovider_share_with_application" msgid="4902832247173666973">"<xliff:g id="APPLICATION_NAME">%s</xliff:g>తో షేర్ చేయండి"</string>
     <string name="content_description_sliding_handle" msgid="982510275422590757">"స్లైడింగ్ హ్యాండిల్. తాకి, ఆపై నొక్కి ఉంచండి."</string>
     <string name="description_target_unlock_tablet" msgid="7431571180065859551">"అన్‌లాక్ చేయడానికి స్వైప్ చేయండి."</string>
     <string name="action_bar_home_description" msgid="1501655419158631974">"హోమ్‌కు నావిగేట్ చేయండి"</string>
@@ -1543,7 +1543,7 @@
     <string name="sha1_fingerprint" msgid="2339915142825390774">"SHA-1 వేలిముద్ర:"</string>
     <string name="activity_chooser_view_see_all" msgid="3917045206812726099">"అన్నీ చూడండి"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="8880731437191978314">"కార్యాచరణను ఎంచుకోండి"</string>
-    <string name="share_action_provider_share_with" msgid="1904096863622941880">"వీటితో భాగస్వామ్యం చేయండి"</string>
+    <string name="share_action_provider_share_with" msgid="1904096863622941880">"వీటితో షేర్ చేయండి"</string>
     <string name="sending" msgid="206925243621664438">"పంపుతోంది..."</string>
     <string name="launchBrowserDefault" msgid="6328349989932924119">"బ్రౌజర్‌ను ప్రారంభించాలా?"</string>
     <string name="SetupCallDefault" msgid="5581740063237175247">"కాల్‌ను ఆమోదించాలా?"</string>
