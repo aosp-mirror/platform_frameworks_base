@@ -249,7 +249,7 @@
     <string name="mock_location_app_not_set" msgid="6972032787262831155">"Ingen app for fiktiv plassering er angitt"</string>
     <string name="mock_location_app_set" msgid="4706722469342913843">"App for fiktiv plassering: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"Nettverk"</string>
-    <string name="wifi_display_certification" msgid="1805579519992520381">"Trådløs skjermsertifisering"</string>
+    <string name="wifi_display_certification" msgid="1805579519992520381">"Trådløs skjerm-sertifisering"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Slå på detaljert Wi-Fi-loggføring"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Begrensning av Wi‑Fi-skanning"</string>
     <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Wi‑Fi‑forbedret MAC-tilfeldiggjøring"</string>
@@ -279,7 +279,7 @@
     <string name="private_dns_mode_off" msgid="7065962499349997041">"Av"</string>
     <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"Automatisk"</string>
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"Vertsnavn for privat DNS-leverandør"</string>
-    <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Skriv inn vertsnavnet til DNS-leverandøren"</string>
+    <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Skriv inn DNS-leverandørens vertsnavn"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"Kunne ikke koble til"</string>
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Vis alternativer for sertifisering av trådløs skjerm"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Øk Wi-Fi-loggenivå – vis per SSID RSSI i Wi-Fi-velgeren"</string>
@@ -345,7 +345,7 @@
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"Feilsøk GPU-overtegning"</string>
     <string name="disable_overlays" msgid="4206590799671557143">"Slå av maskinvareoverlegg"</string>
     <string name="disable_overlays_summary" msgid="1954852414363338166">"Bruk alltid GPU for skjermsammensetting"</string>
-    <string name="simulate_color_space" msgid="1206503300335835151">"Simuler fargeområde"</string>
+    <string name="simulate_color_space" msgid="1206503300335835151">"Simuler fargerom"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"Slå på OpenGL-spor"</string>
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Slå av lydomkobling via USB"</string>
     <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Slå av automatisk lydomkobling til USB-enheter"</string>
@@ -405,6 +405,7 @@
     <string name="transcode_enable_all" msgid="2411165920039166710">"Slå på omkoding"</string>
     <string name="transcode_default" msgid="3784803084573509491">"Anta at apper støtter moderne formater"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"Vis omkodingsvarsler"</string>
+    <string name="transcode_disable_cache" msgid="3160069309377467045">"Slå av omkodingsbuffer"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Aktive tjenester"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Se og kontrollér tjenester som kjører"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView-implementering"</string>
@@ -450,19 +451,17 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"Nettbrettet slås kanskje av snart (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Enheten slås kanskje av snart (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_remaining_charging_duration_only (8085099012811384899) -->
-    <skip />
-    <!-- no translation found for power_charging_duration (6127154952524919719) -->
-    <skip />
+    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"Fulladet om <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – Fulladet om <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> – optimaliserer batteritilstanden"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Ukjent"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Lader"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Lader raskt"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Lader sakte"</string>
+    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Lader trådløst"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Lader ikke"</string>
-    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Laderen er koblet til – kan ikke lade akkurat nå"</string>
-    <!-- no translation found for battery_info_status_full (1339002294876531312) -->
-    <skip />
+    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Tilkoblet, lader ikke"</string>
+    <string name="battery_info_status_full" msgid="1339002294876531312">"Ladet"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Kontrollert av administratoren"</string>
     <string name="disabled" msgid="8017887509554714950">"Slått av"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Tillatt"</string>
@@ -505,10 +504,12 @@
     <string name="cancel" msgid="5665114069455378395">"Avbryt"</string>
     <string name="okay" msgid="949938843324579502">"OK"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmer og påminnelser"</string>
-    <string name="alarms_and_reminders_switch_title" msgid="186992351401152744">"Gi tillatelse til å angi alarmer og påminnelser"</string>
-    <string name="alarms_and_reminders_title" msgid="2988400785896875237">"Alarmer og påminnelser"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="5882788882647778753">"Tillat denne appen å planlegge alarmer eller andre tidsbaserte hendelser. Dette gjør at appen kan starte og kjøre, selv når du ikke bruker enheten. Hvis du opphever denne tillatelsen, kan det føre til feil med appen, blant annet at alarmer som appen har planlagt, ikke fungerer lenger."</string>
-    <string name="keywords_alarms_and_reminders" msgid="8882739572152019456">"tidsplan, alarm, påminnelse, hendelse"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Tillat innstilling av alarmer og påminnelser"</string>
+    <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmer og påminnelser"</string>
+    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"Tillat at denne appen stiller inn alarmer og planlegger andre handlinger. Denne appen kan brukes når du ikke bruker telefonen, noe som kan bruke mer batteri. Hvis denne tillatelsen er av, fungerer appen muligens ikke som normalt, og alarmene i den fungerer ikke som planlagt."</string>
+    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"Tillat at denne appen stiller inn alarmer og planlegger andre handlinger. Denne appen kan brukes når du ikke bruker nettbrettet, noe som kan bruke mer batteri. Hvis denne tillatelsen er av, fungerer appen muligens ikke som normalt, og alarmene i den fungerer ikke som planlagt."</string>
+    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"Tillat at denne appen stiller inn alarmer og planlegger andre handlinger. Denne appen kan brukes når du ikke bruker enheten, noe som kan bruke mer batteri. Hvis denne tillatelsen er av, fungerer appen muligens ikke som normalt, og alarmene i den fungerer ikke som planlagt."</string>
+    <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"tidsplan, alarm, påminnelse, klokke"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Slå på"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Slå på Ikke forstyrr"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Aldri"</string>
@@ -562,8 +563,7 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"Angi lås"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"Bytt til <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Oppretter en ny bruker …"</string>
-    <!-- no translation found for add_user_failed (4809887794313944872) -->
-    <skip />
+    <string name="add_user_failed" msgid="4809887794313944872">"Kunne ikke opprette noen ny bruker"</string>
     <string name="user_nickname" msgid="262624187455825083">"Kallenavn"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Legg til en gjest"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Fjern gjesten"</string>

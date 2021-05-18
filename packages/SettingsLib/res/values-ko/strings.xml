@@ -405,6 +405,7 @@
     <string name="transcode_enable_all" msgid="2411165920039166710">"트랜스코딩 사용"</string>
     <string name="transcode_default" msgid="3784803084573509491">"앱이 최신 형식을 지원하는 것으로 가정"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"트랜스코딩 알림 표시"</string>
+    <string name="transcode_disable_cache" msgid="3160069309377467045">"트랜스코딩 캐시 사용 중지"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"실행 중인 서비스"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"현재 실행 중인 서비스 보기 및 제어"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView 구현"</string>
@@ -450,19 +451,17 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"태블릿이 곧 종료될 수 있음(<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"기기가 곧 종료될 수 있음(<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_remaining_charging_duration_only (8085099012811384899) -->
-    <skip />
-    <!-- no translation found for power_charging_duration (6127154952524919719) -->
-    <skip />
+    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> 후 충전 완료"</string>
+    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g>: <xliff:g id="TIME">%2$s</xliff:g> 후 충전 완료"</string>
     <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - 배터리 상태 최적화 중"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"알 수 없음"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"충전 중"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"고속 충전 중"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"저속 충전 중"</string>
+    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"무선 충전 중"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"충전 안함"</string>
-    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"전원이 연결되었지만 현재 충전할 수 없음"</string>
-    <!-- no translation found for battery_info_status_full (1339002294876531312) -->
-    <skip />
+    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"연결됨, 충전 중 아님"</string>
+    <string name="battery_info_status_full" msgid="1339002294876531312">"청구됨"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"관리자가 제어"</string>
     <string name="disabled" msgid="8017887509554714950">"사용 안함"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"허용됨"</string>
@@ -505,10 +504,12 @@
     <string name="cancel" msgid="5665114069455378395">"취소"</string>
     <string name="okay" msgid="949938843324579502">"확인"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"알람 및 리마인더"</string>
-    <string name="alarms_and_reminders_switch_title" msgid="186992351401152744">"알람 또는 리마인더를 설정하도록 허용"</string>
-    <string name="alarms_and_reminders_title" msgid="2988400785896875237">"알람 및 리마인더"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="5882788882647778753">"이 앱에서 알람 또는 다른 시간 기반 일정을 예약하도록 허용합니다. 이렇게 하면 기기를 사용하고 있지 않더라도 앱이 절전 모드에서 해제된 후 실행됩니다. 이 권한을 취소하면 앱이 오작동할 수 있으며 특히 이 앱에서 예약한 모든 알람은 더 이상 작동하지 않습니다."</string>
-    <string name="keywords_alarms_and_reminders" msgid="8882739572152019456">"일정 예약, 알람, 리마인더, 이벤트"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"알람 및 리마인더 설정 허용"</string>
+    <string name="alarms_and_reminders_title" msgid="8819933264635406032">"알람 및 리마인더"</string>
+    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"앱에서 알람을 설정하고 다른 작업의 일정을 예약할 수 있도록 허용합니다. 휴대전화를 사용하지 않을 때 앱이 사용될 수 있으며 이로 인해 배터리 사용량이 증가할 수 있습니다. 이 권한을 사용 중지하면 앱이 정상 작동하지 않고 알람이 일정대로 실행되지 않을 수 있습니다."</string>
+    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"앱에서 알람을 설정하고 다른 작업의 일정을 예약할 수 있도록 허용합니다. 태블릿을 사용하지 않을 때 앱이 사용될 수 있으며 이로 인해 배터리 사용량이 증가할 수 있습니다. 이 권한을 사용 중지하면 앱이 정상 작동하지 않고 알람이 일정대로 실행되지 않을 수 있습니다."</string>
+    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"앱에서 알람을 설정하고 다른 작업의 일정을 예약할 수 있도록 허용합니다. 기기를 사용하지 않을 때 앱이 사용될 수 있으며 이로 인해 배터리 사용량이 증가할 수 있습니다. 이 권한을 사용 중지하면 앱이 정상 작동하지 않고 알람이 일정대로 실행되지 않을 수 있습니다."</string>
+    <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"일정 예약, 알람, 리마인더, 시계"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"사용 설정"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"방해 금지 모드 사용 설정"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"사용 안함"</string>
@@ -562,8 +563,7 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"잠금 설정"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"<xliff:g id="USER_NAME">%s</xliff:g>(으)로 전환"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"새로운 사용자를 만드는 중…"</string>
-    <!-- no translation found for add_user_failed (4809887794313944872) -->
-    <skip />
+    <string name="add_user_failed" msgid="4809887794313944872">"새 사용자를 만들지 못함"</string>
     <string name="user_nickname" msgid="262624187455825083">"닉네임"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"게스트 추가"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"게스트 삭제"</string>

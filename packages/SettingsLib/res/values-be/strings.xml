@@ -204,9 +204,9 @@
     <string name="vpn_settings_not_available" msgid="2894137119965668920">"Налады VPN недаступныя для гэтага карыстальніка"</string>
     <string name="tethering_settings_not_available" msgid="266821736434699780">"Налады мадэма недаступныя для гэтага карыстальніка"</string>
     <string name="apn_settings_not_available" msgid="1147111671403342300">"Налады Імя пункту доступу недаступныя для гэтага карыстальніка"</string>
-    <string name="enable_adb" msgid="8072776357237289039">"Адладка USB"</string>
+    <string name="enable_adb" msgid="8072776357237289039">"Адладка па USB"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"Рэжым адладкі, калі USB падключаны"</string>
-    <string name="clear_adb_keys" msgid="3010148733140369917">"Адклікаць дазвол USB-адладкі"</string>
+    <string name="clear_adb_keys" msgid="3010148733140369917">"Скасаваць дазвол да адладкі па USB"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"Адладка па Wi-Fi"</string>
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Рэжым адладкі з падключанай сеткай Wi‑Fi"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"Памылка"</string>
@@ -300,17 +300,17 @@
     <string name="debug_view_attributes" msgid="3539609843984208216">"Уключыць прагляд атрыбутаў"</string>
     <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"Перадача даных мабільнай сувязі заўсёды актыўная, нават калі актыўная сетка Wi‑Fi (для хуткага пераключэння паміж сеткамі)."</string>
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Выкарыстоўваць апаратнае паскарэнне ў рэжыме мадэма пры наяўнасці"</string>
-    <string name="adb_warning_title" msgid="7708653449506485728">"Дазволіць адладку USB?"</string>
-    <string name="adb_warning_message" msgid="8145270656419669221">"Адладка USB прызначана толькі для мэтаў распрацоўкі. Яна можа выкарыстоўвацца, каб капіяваць дадзеныя паміж кампутарам і прыладай, усталёўваць прыкладанні на прыладзе без папярэдняга апавяшчэння і чытаць дадзеныя дзённiка."</string>
+    <string name="adb_warning_title" msgid="7708653449506485728">"Дазволіць адладку па USB?"</string>
+    <string name="adb_warning_message" msgid="8145270656419669221">"Адладка па USB прызначана толькі для мэт распрацоўкі. Яна можа выкарыстоўвацца, каб капіраваць даныя паміж камп\'ютарам і прыладай, усталёўваць праграмы на прыладзе без папярэдняга апавяшчэння і чытаць даныя журнала."</string>
     <string name="adbwifi_warning_title" msgid="727104571653031865">"Дазволіць адладку па Wi-Fi?"</string>
     <string name="adbwifi_warning_message" msgid="8005936574322702388">"Адладка па Wi-Fi прызначана толькі для мэт распрацоўкі. Яна можа выкарыстоўвацца, каб капіраваць даныя паміж камп\'ютарам і прыладай, усталёўваць праграмы на прыладзе без апавяшчэння і чытаць даныя журнала."</string>
-    <string name="adb_keys_warning_message" msgid="2968555274488101220">"Адклікаць доступ да адладкі USB з усіх камп\'ютараў, на якiх вы уваходзiлi ў сiстэму?"</string>
+    <string name="adb_keys_warning_message" msgid="2968555274488101220">"Скасаваць доступ да адладкі па USB з усіх камп\'ютараў, на якiх вы уваходзiлi ў сiстэму?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"Дазволiць налады распрацоўшчыка?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"Гэтыя налады прызначаны толькi для распрацоўшыкаў. Яны могуць выклікаць збоi прылад i ўсталяваных на iх прыкладанняў, а таксама перашкаджаць iх працы."</string>
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"Праверце праграмы па USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Праверка бяспекі праграм, усталяваных з дапамогай ADB/ADT."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Прылады Bluetooth будуць паказаны без назваў (толькі MAC-адрасы)"</string>
-    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Адключыць функцыю абсалютнага гуку Bluetooth у выпадку праблем з гукам на аддаленых прыладах, напрыклад, пры непрымальна высокай гучнасці або адсутнасці кіравання."</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Адключыць функцыю абсалютнага гуку Bluetooth у выпадку праблем з гукам на аддаленых прыладах, напрыклад пры непрымальна высокай гучнасці або адсутнасці кіравання."</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Уключае стос функцый Bluetooth Gabeldorsche."</string>
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Уключае функцыю \"Палепшанае падключэнне\"."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Лакальны тэрмінал"</string>
@@ -405,6 +405,7 @@
     <string name="transcode_enable_all" msgid="2411165920039166710">"Уключыць перакадзіраванне"</string>
     <string name="transcode_default" msgid="3784803084573509491">"Лічыца, што праграмы падтрымліваюць сучасныя фарматы"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"Паказваць апавяшчэнні пра перакадзіраванне"</string>
+    <string name="transcode_disable_cache" msgid="3160069309377467045">"Адключыць кэш перакадзіравання"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Запушчаныя службы"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Прагляд запушчаных службаў i кіраванне iмi"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Рэалізацыя WebView"</string>
@@ -423,7 +424,7 @@
     <string name="daltonizer_mode_deuteranomaly" msgid="3507284319584683963">"Дэйтэранамалія (чырвоны-зялёны)"</string>
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Пратанамалія (чырвоны-зялёны)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Трытанамалія (сіні-жоўты)"</string>
-    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Карэкцыя колеру"</string>
+    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Карэкцыя колераў"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="2333641630205214702">"Наладзьце адлюстраванне колераў на экране прылады. Гэта налада можа быць карыснай, калі вы захочаце:&lt;br/&gt;&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;бачыць колеры больш дакладна;&lt;/li&gt; &lt;li&gt;&amp;nbsp;выдаліць колеры, якія перашкаджаюць вам сканцэнтравацца&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Перавызначаны <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
@@ -450,19 +451,17 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"Планшэт у хуткім часе выключыцца (узровень зараду: <xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Прылада ў хуткім часе выключыцца (узровень зараду: <xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_remaining_charging_duration_only (8085099012811384899) -->
-    <skip />
-    <!-- no translation found for power_charging_duration (6127154952524919719) -->
-    <skip />
+    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"Да поўнай зарадкі засталося <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – да поўнай зарадкі засталося: <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - Аптымізацыя стану акумулятара"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Невядома"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Зарадка"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Хуткая зарадка"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Павольная зарадка"</string>
+    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Бесправадная зарадка"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Не зараджаецца"</string>
-    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Падключана да сеткі сілкавання, зарадзіць зараз немагчыма"</string>
-    <!-- no translation found for battery_info_status_full (1339002294876531312) -->
-    <skip />
+    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Падключана, не зараджаецца"</string>
+    <string name="battery_info_status_full" msgid="1339002294876531312">"Зараджаны"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Кантралюецца адміністратарам"</string>
     <string name="disabled" msgid="8017887509554714950">"Адключанае"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Дазволена"</string>
@@ -507,10 +506,12 @@
     <string name="cancel" msgid="5665114069455378395">"Скасаваць"</string>
     <string name="okay" msgid="949938843324579502">"ОК"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Будзільнікі і напаміны"</string>
-    <string name="alarms_and_reminders_switch_title" msgid="186992351401152744">"Дазволіць наладжваць будзільнікі і напаміны"</string>
-    <string name="alarms_and_reminders_title" msgid="2988400785896875237">"Будзільнікі і напаміны"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="5882788882647778753">"Дазвольце гэтай праграме ўключаць будзільнікі і задаваць час падзей. Дзякуючы гэтаму праграма будзе абуджацца і працаваць, нават калі вы не выкарыстоўваеце прыладу. Звярніце ўвагу, што скасаванне дазволу можа прывесці да збояў у працы праграмы, у прыватнасці, будуць адключаны будзільнікі, зададзеныя праграмай."</string>
-    <string name="keywords_alarms_and_reminders" msgid="8882739572152019456">"расклад, будзільнік, напамін, падзея"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Дазволіць усталёўваць будзільнікі і напаміны"</string>
+    <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Будзільнікі і напаміны"</string>
+    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"Дазвольце гэтай праграме ўсталёўваць будзільнікі і задаваць расклад для дзеянняў. Праграма можа працаваць, калі вы не выкарыстоўваеце тэлефон, і ў выніку хутчэй разраджаць акумулятар. Калі гэты дазвол выключаны, праграма можа не працаваць належым чынам, а яе будзільнікі – не спрацоўваць як запланавана."</string>
+    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"Дазвольце гэтай праграме ўсталёўваць будзільнікі і задаваць расклад для дзеянняў. Праграма можа працаваць, калі вы не выкарыстоўваеце планшэт, і ў выніку хутчэй разраджаць акумулятар. Калі гэты дазвол выключаны, праграма можа не працаваць належым чынам, а яе будзільнікі – не спрацоўваць як запланавана."</string>
+    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"Дазвольце гэтай праграме ўсталёўваць будзільнікі і задаваць расклад для дзеянняў. Праграма можа працаваць, калі вы не выкарыстоўваеце прыладу, і ў выніку хутчэй разраджаць акумулятар. Калі гэты дазвол выключаны, праграма можа не працаваць належым чынам, а яе будзільнікі – не спрацоўваць як запланавана."</string>
+    <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"расклад, будзільнік, напамін, гадзіннік"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Уключыць"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Уключэнне рэжыму \"Не турбаваць\""</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Ніколі"</string>
@@ -564,8 +565,7 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"Усталёўка блакiроўкi"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"Пераключыцца на карыстальніка <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Ствараецца новы карыстальнік…"</string>
-    <!-- no translation found for add_user_failed (4809887794313944872) -->
-    <skip />
+    <string name="add_user_failed" msgid="4809887794313944872">"Не ўдалося стварыць новага карыстальніка"</string>
     <string name="user_nickname" msgid="262624187455825083">"Псеўданім"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Дадаць госця"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Выдаліць госця"</string>

@@ -380,7 +380,7 @@
     <string name="enable_freeform_support" msgid="7599125687603914253">"啟用自由形式視窗"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"啟用實驗版自由形式視窗的支援功能。"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"電腦備份密碼"</string>
-    <string name="local_backup_password_summary_none" msgid="7646898032616361714">"電腦完整備份目前未受保護"</string>
+    <string name="local_backup_password_summary_none" msgid="7646898032616361714">"目前尚未設定密碼來保護完整的備份檔案 (透過電腦備份的檔案)"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"輕觸即可變更或移除電腦完整備份的密碼"</string>
     <string name="local_backup_password_toast_success" msgid="4891666204428091604">"已設定新備份密碼"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="2994718182129097733">"新密碼與確認密碼不符。"</string>
@@ -405,6 +405,7 @@
     <string name="transcode_enable_all" msgid="2411165920039166710">"啟用轉碼"</string>
     <string name="transcode_default" msgid="3784803084573509491">"假設應用程式支援新格式"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"顯示轉碼通知"</string>
+    <string name="transcode_disable_cache" msgid="3160069309377467045">"停用轉碼快取"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"正在運作的服務"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"查看並管理目前正在執行的服務"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView 實作"</string>
@@ -450,19 +451,17 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"平板電腦可能即將關機 (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"裝置可能即將關機 (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_remaining_charging_duration_only (8085099012811384899) -->
-    <skip />
-    <!-- no translation found for power_charging_duration (6127154952524919719) -->
-    <skip />
+    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g>後充飽"</string>
+    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>後充飽"</string>
     <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - 最佳化調整電池狀態"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"不明"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"充電中"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"快速充電中"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"慢速充電中"</string>
+    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"正在進行無線充電"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"非充電中"</string>
-    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"已接上電源，但現在無法充電"</string>
-    <!-- no translation found for battery_info_status_full (1339002294876531312) -->
-    <skip />
+    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"已連接，尚未充電"</string>
+    <string name="battery_info_status_full" msgid="1339002294876531312">"充電完成"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"已由管理員停用"</string>
     <string name="disabled" msgid="8017887509554714950">"已停用"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"允許"</string>
@@ -505,10 +504,12 @@
     <string name="cancel" msgid="5665114069455378395">"取消"</string>
     <string name="okay" msgid="949938843324579502">"確定"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"鬧鐘與提醒"</string>
-    <string name="alarms_and_reminders_switch_title" msgid="186992351401152744">"允許設定鬧鐘或提醒"</string>
-    <string name="alarms_and_reminders_title" msgid="2988400785896875237">"鬧鐘與提醒"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="5882788882647778753">"允許這個應用程式安排鬧鐘或其他有時限的活動。如此一來，即使你並未使用裝置，應用程式仍可啟動並執行。請注意，如果撤銷這項權限，可能會導致應用程式無法運作，尤其是應用程式設定的所有鬧鐘都將不會響鈴。"</string>
-    <string name="keywords_alarms_and_reminders" msgid="8882739572152019456">"時間表, 鬧鐘, 提醒, 活動"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"允許設定鬧鐘和提醒"</string>
+    <string name="alarms_and_reminders_title" msgid="8819933264635406032">"鬧鐘和提醒"</string>
+    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"允許這個應用程式設定鬧鐘及安排其他操作的執行時間。這個應用程式可能會在你未使用手機時執行，手機也許會比較耗電。如果關閉這項權限，這個應用程式可能無法正常運作，已設定的鬧鐘也不會在排定的時間響起。"</string>
+    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"允許這個應用程式設定鬧鐘及安排其他操作的執行時間。這個應用程式可能會在你未使用平板電腦時執行，平板電腦也許會比較耗電。如果關閉這項權限，這個應用程式可能無法正常運作，已設定的鬧鐘也不會在排定的時間響起。"</string>
+    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"允許這個應用程式設定鬧鐘及安排其他操作的執行時間。這個應用程式可能會在你未使用裝置時執行，裝置也許會比較耗電。如果關閉這項權限，這個應用程式可能無法正常運作，已設定的鬧鐘也不會在排定的時間響起。"</string>
+    <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"時間表, 鬧鐘, 提醒, 時鐘"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"開啟"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"開啟「零打擾」模式"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"永不"</string>
@@ -562,8 +563,7 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"設定鎖定"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"切換至<xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"正在建立新使用者…"</string>
-    <!-- no translation found for add_user_failed (4809887794313944872) -->
-    <skip />
+    <string name="add_user_failed" msgid="4809887794313944872">"無法建立新的使用者"</string>
     <string name="user_nickname" msgid="262624187455825083">"暱稱"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"新增訪客"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"移除訪客"</string>

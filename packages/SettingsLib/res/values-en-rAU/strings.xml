@@ -405,6 +405,7 @@
     <string name="transcode_enable_all" msgid="2411165920039166710">"Enable transcoding"</string>
     <string name="transcode_default" msgid="3784803084573509491">"Assume apps support modern formats"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"Show transcoding notifications"</string>
+    <string name="transcode_disable_cache" msgid="3160069309377467045">"Disable transcoding cache"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Running services"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"View and control currently running services"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView implementation"</string>
@@ -457,8 +458,9 @@
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Charging"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Charging rapidly"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Charging slowly"</string>
+    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Charging wirelessly"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Not charging"</string>
-    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Plugged in, can\'t charge at the moment"</string>
+    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Connected, not charging"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Charged"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Controlled by admin"</string>
     <string name="disabled" msgid="8017887509554714950">"Disabled"</string>
@@ -502,10 +504,12 @@
     <string name="cancel" msgid="5665114069455378395">"Cancel"</string>
     <string name="okay" msgid="949938843324579502">"OK"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarms and reminders"</string>
-    <string name="alarms_and_reminders_switch_title" msgid="186992351401152744">"Allow alarms or reminders to be set"</string>
-    <string name="alarms_and_reminders_title" msgid="2988400785896875237">"Alarms and reminders"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="5882788882647778753">"Allow this app to schedule alarms or other timing-based events. This will allow the app to wake up and run even when you are not using the device. Note that revoking this permission may cause the app to malfunction; specifically, any alarms that the app has scheduled will no longer work."</string>
-    <string name="keywords_alarms_and_reminders" msgid="8882739572152019456">"schedule, alarm, reminder, event"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Allow setting alarms and reminders"</string>
+    <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarms &amp; reminders"</string>
+    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"Allow this app to set alarms and schedule other actions. This app may be used when you’re not using your phone, which may use more battery. If this permission is off, this app may not function normally, and its alarms won’t work as scheduled."</string>
+    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"Allow this app to set alarms and schedule other actions. This app may be used when you’re not using your tablet, which may use more battery. If this permission is off, this app may not function normally, and its alarms won’t work as scheduled."</string>
+    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"Allow this app to set alarms and schedule other actions. This app may be used when you’re not using your device, which may use more battery. If this permission is off, this app may not function normally, and its alarms won’t work as scheduled."</string>
+    <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"schedule, alarm, reminder, clock"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Turn on"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Turn on Do Not Disturb"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Never"</string>

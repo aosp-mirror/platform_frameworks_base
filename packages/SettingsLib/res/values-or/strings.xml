@@ -156,7 +156,7 @@
     <string name="launch_defaults_some" msgid="3631650616557252926">"କିଛି ପୂର୍ବ-ନିର୍ଦ୍ଧାରିତ ମାନ ସେଟ୍‌ ହୋଇଛି"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"କୌଣସି ଡିଫଲ୍ଟ ସେଟ୍‍ ହୋଇନାହିଁ"</string>
     <string name="tts_settings" msgid="8130616705989351312">"ଟେକ୍ସଟ-ରୁ-ସ୍ପିଚ୍ ସେଟିଂସ୍"</string>
-    <string name="tts_settings_title" msgid="7602210956640483039">"ଟେକ୍ସଟ-ରୁ-ସ୍ପିଚ୍ ଆଉଟପୁଟ୍‌"</string>
+    <string name="tts_settings_title" msgid="7602210956640483039">"ଟେକ୍ସଟ୍‍-ଟୁ-ସ୍ପିଚ୍‍ ଆଉଟ୍‍ପୁଟ୍‌"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"ସ୍ପିଚ୍‌ ରେଟ୍"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"ଲେଖା ପଢ଼ିବାର ବେଗ"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"ପିଚ୍‌"</string>
@@ -237,7 +237,7 @@
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, ଡିବଗ୍, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"ବଗ୍ ରିପୋର୍ଟ ସର୍ଟକଟ୍‌"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"ବଗ୍ ରିପୋର୍ଟ ଦେବା ପାଇଁ ପାୱାର୍‌ ମେନୁରେ ଏକ ବଟନ୍‌ ଦେଖାନ୍ତୁ"</string>
-    <string name="keep_screen_on" msgid="1187161672348797558">"ଜାଗ୍ରତ ରଖନ୍ତୁ"</string>
+    <string name="keep_screen_on" msgid="1187161672348797558">"ସତର୍କ ରୁହନ୍ତୁ"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"ଚାର୍ଜ ହେବାବେଳେ ସ୍କ୍ରୀନ୍‌ ଆଦୌ ବନ୍ଦ ହେବନାହିଁ"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"ବ୍ଲୁଟୂଥ୍‍‌ HCI ସ୍ନୁପ୍‌ ଲଗ୍‌ ସକ୍ଷମ କରନ୍ତୁ"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"ବ୍ଲୁଟୁଥ୍‌ ପ୍ୟାକେଟ୍ କ୍ୟାପଚର୍ କରନ୍ତୁ (ଏହି ସେଟିଂ ବଦଳାଇବା ପରେ ବ୍ଲୁଟୁଥ୍‍‌କୁ ଟୋଗଲ୍ କରନ୍ତୁ)"</string>
@@ -405,6 +405,7 @@
     <string name="transcode_enable_all" msgid="2411165920039166710">"ଟ୍ରାନ୍ସକୋଡିଂକୁ ସକ୍ଷମ କରନ୍ତୁ"</string>
     <string name="transcode_default" msgid="3784803084573509491">"ଧରିନିଅନ୍ତୁ ଆପଗୁଡ଼ିକ ଆଧୁନିକ ଫର୍ମାଟଗୁଡ଼ିକୁ ସମର୍ଥନ କରେ"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"ଟ୍ରାନ୍ସକୋଡିଂ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକୁ ଦେଖାନ୍ତୁ"</string>
+    <string name="transcode_disable_cache" msgid="3160069309377467045">"ଟ୍ରାନ୍ସକୋଡିଂ କ୍ୟାଶକୁ ଅକ୍ଷମ କରନ୍ତୁ"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"ଚାଲୁଥିବା ସେବାଗୁଡ଼ିକ"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"ଏବେ ଚାଲୁଥିବା ସେବାଗୁଡ଼ିକୁ ଦେଖନ୍ତୁ ଓ ନିୟନ୍ତ୍ରଣ କରନ୍ତୁ"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"ୱେବ୍‌ଭ୍ୟୁ ପ୍ରୟୋଗ"</string>
@@ -450,19 +451,17 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"ଟାବଲେଟ୍ ଶୀଘ୍ର ବନ୍ଦ ହୋଇଯାଇପାରେ (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"ଡିଭାଇସ୍ ଶୀଘ୍ର ବନ୍ଦ ହୋଇଯାଇପାରେ (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_remaining_charging_duration_only (8085099012811384899) -->
-    <skip />
-    <!-- no translation found for power_charging_duration (6127154952524919719) -->
-    <skip />
+    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"ପୂର୍ଣ୍ଣ ହେବାକୁ ଆଉ <xliff:g id="TIME">%1$s</xliff:g> ବାକି ଅଛି"</string>
+    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - ପୂର୍ଣ୍ଣ ହେବାକୁ ଆଉ <xliff:g id="TIME">%2$s</xliff:g> ବାକି ଅଛି"</string>
     <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - ବ୍ୟାଟେରୀ ହେଲ୍ଥ ପାଇଁ ଅପ୍ଟିମାଇଜ୍ ହେଉଛି"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"ଅଜ୍ଞାତ"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"ଚାର୍ଜ ହେଉଛି"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"ଶୀଘ୍ର ଚାର୍ଜ ହେଉଛି"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"ଧୀରେ ଚାର୍ଜ ହେଉଛି"</string>
+    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"ୱେୟରଲେସ ଭାବେ ଚାର୍ଜିଂ"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"ଚାର୍ଜ ହେଉନାହିଁ"</string>
-    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"ପ୍ଲଗ୍‌ରେ ଲାଗିଛି, ହେଲେ ଏବେ ଚାର୍ଜ କରିପାରିବ ନାହିଁ"</string>
-    <!-- no translation found for battery_info_status_full (1339002294876531312) -->
-    <skip />
+    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"ସଂଯୋଗ କରାଯାଇଛି, ଚାର୍ଜ ହେଉନାହିଁ"</string>
+    <string name="battery_info_status_full" msgid="1339002294876531312">"ଚାର୍ଜ ହୋଇଯାଇଛି"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"ଆଡ୍‌ମିନ୍‌ ଦ୍ୱାରା ନିୟନ୍ତ୍ରିତ"</string>
     <string name="disabled" msgid="8017887509554714950">"ଅକ୍ଷମ ହୋଇଛି"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"ଅନୁମତି ଦିଆଯାଇଛି"</string>
@@ -505,10 +504,12 @@
     <string name="cancel" msgid="5665114069455378395">"ବାତିଲ୍"</string>
     <string name="okay" msgid="949938843324579502">"ଠିକ୍‌ ଅଛି"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"ଆଲାରାମ୍ ଏବଂ ରିମାଇଣ୍ଡରଗୁଡ଼ିକ"</string>
-    <string name="alarms_and_reminders_switch_title" msgid="186992351401152744">"ଆଲାରାମ୍ ବା ରିମାଇଣ୍ଡର୍ ସେଟ୍ କରିବାକୁ ଅନୁମତି ଦିଅନ୍ତୁ"</string>
-    <string name="alarms_and_reminders_title" msgid="2988400785896875237">"ଆଲାରାମ୍ ଏବଂ ରିମାଇଣ୍ଡରଗୁଡ଼ିକ"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="5882788882647778753">"ଆଲାରାମ୍ କିମ୍ବା ଅନ୍ୟ ସମୟ ଆଧାରିତ ଇଭେଣ୍ଟଗୁଡ଼ିକ ସିଡୁଲ୍ କରିବା ପାଇଁ ଏହି ଆପକୁ ଅନୁମତି ଦିଅନ୍ତୁ। ଆପଣ ଡିଭାଇସ୍ ବ୍ୟବହାର କରୁନଥିଲେ ମଧ୍ୟ ଏହା ଆପକୁ ସକ୍ରିୟ ହେବା ଏବଂ ଚାଲିବାକୁ ଅନୁମତି ଦେବ। ଧ୍ୟାନ ଦିଅନ୍ତୁ ଯେ ଏହି ଅନୁମତି ପ୍ରତ୍ୟାହାର କରିବା ଫଳରେ ଆପ୍ ଠିକରେ କାମ ନକରିପାରେ, ନିର୍ଦ୍ଦିଷ୍ଟ ଭାବେ ଆପ୍ ସିଡୁଲ୍ କରିଥିବା ଯେ କୌଣସି ଆଲାରାମ୍ ଆଉ କାମ କରିବ ନାହିଁ।"</string>
-    <string name="keywords_alarms_and_reminders" msgid="8882739572152019456">"ସିଡୁଲ୍, ଆଲାରାମ, ରିମାଇଣ୍ଡର୍, ଇଭେଣ୍ଟ"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"ଆଲାରାମ ଓ ରିମାଇଣ୍ଡରଗୁଡ଼ିକ ସେଟ କରିବାକୁ ଅନୁମତି ଦିଅନ୍ତୁ"</string>
+    <string name="alarms_and_reminders_title" msgid="8819933264635406032">"ଆଲାରାମ୍ ଏବଂ ରିମାଇଣ୍ଡରଗୁଡ଼ିକ"</string>
+    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"ଆଲାରାମଗୁଡ଼ିକୁ ସେଟ୍ କରିବା ଏବଂ ଅନ୍ୟ କାର୍ଯ୍ୟଗୁଡ଼ିକୁ ସିଡୁଲ୍ କରିବା ପାଇଁ ଏହି ଆପକୁ ଅନୁମତି ଦିଅନ୍ତୁ। ଆପଣ ଆପଣଙ୍କ ଟାବଲେଟ୍ ବ୍ୟବହାର କରୁନଥିବା ସମୟରେ ଏହି ଆପକୁ ବ୍ୟବହାର କରାଯାଇପାରେ, ଯାହା ଅଧିକ ବ୍ୟାଟେରୀ ବ୍ୟବହାର କରିପାରେ। ଯଦି ଏହି ଅନୁମତି ବନ୍ଦ ଥାଏ, ଏହି ଆପ୍ ସାମାନ୍ୟ ରୂପେ କାର୍ଯ୍ୟ କରିନପାରେ ଏବଂ ଏହାର ଆଲାରାମଗୁଡ଼ିକ ସିଡୁଲ୍ କରାଯାଇଥିବା ଅନୁସାରେ କାମ କରିବ ନାହିଁ।"</string>
+    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"ଆଲାରାମଗୁଡ଼ିକୁ ସେଟ୍ କରିବା ଏବଂ ଅନ୍ୟ କାର୍ଯ୍ୟଗୁଡ଼ିକୁ ସିଡୁଲ୍ କରିବା ପାଇଁ ଏହି ଆପକୁ ଅନୁମତି ଦିଅନ୍ତୁ। ଆପଣ ଆପଣଙ୍କ ଟାବଲେଟ୍ ବ୍ୟବହାର କରୁନଥିବା ସମୟରେ ଏହି ଆପକୁ ବ୍ୟବହାର କରାଯାଇପାରେ, ଯାହା ଅଧିକ ବ୍ୟାଟେରୀ ବ୍ୟବହାର କରିପାରେ। ଯଦି ଏହି ଅନୁମତି ବନ୍ଦ ଥାଏ, ଏହି ଆପ୍ ସାମାନ୍ୟ ରୂପେ କାର୍ଯ୍ୟ କରିନପାରେ ଏବଂ ଏହାର ଆଲାରାମଗୁଡ଼ିକ ସିଡୁଲ୍ କରାଯାଇଥିବା ଅନୁସାରେ କାମ କରିବ ନାହିଁ।"</string>
+    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"ଆଲାରାମଗୁଡ଼ିକୁ ସେଟ୍ କରିବା ଏବଂ ଅନ୍ୟ କାର୍ଯ୍ୟଗୁଡ଼ିକୁ ସିଡୁଲ୍ କରିବା ପାଇଁ ଏହି ଆପକୁ ଅନୁମତି ଦିଅନ୍ତୁ। ଆପଣ ଆପଣଙ୍କ ଟାବଲେଟ୍ ବ୍ୟବହାର କରୁନଥିବା ସମୟରେ ଏହି ଆପକୁ ବ୍ୟବହାର କରାଯାଇପାରେ, ଯାହା ଅଧିକ ବ୍ୟାଟେରୀ ବ୍ୟବହାର କରିପାରେ। ଯଦି ଏହି ଅନୁମତି ବନ୍ଦ ଥାଏ, ଏହି ଆପ୍ ସାମାନ୍ୟ ରୂପେ କାର୍ଯ୍ୟ କରିନପାରେ ଏବଂ ଏହାର ଆଲାରାମଗୁଡ଼ିକ ସିଡୁଲ୍ କରାଯାଇଥିବା ଅନୁସାରେ କାମ କରିବ ନାହିଁ।"</string>
+    <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"ସିଡୁଲ୍, ଆଲାରାମ୍, ରିମାଇଣ୍ଡର୍, ଘଣ୍ଟା"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"ଚାଲୁ କରନ୍ତୁ"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"\"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ\" ଅନ୍ କରନ୍ତୁ"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"କଦାପି ନୁହେଁ"</string>
@@ -562,8 +563,7 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"ଲକ୍‌ ସେଟ୍‌ କରନ୍ତୁ"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"<xliff:g id="USER_NAME">%s</xliff:g>କୁ ସ୍ୱିଚ୍ କରନ୍ତୁ"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"ନୂଆ ଉପଯୋଗକର୍ତ୍ତା ତିଆରି କରାଯାଉଛି…"</string>
-    <!-- no translation found for add_user_failed (4809887794313944872) -->
-    <skip />
+    <string name="add_user_failed" msgid="4809887794313944872">"ନୂଆ ଉପଯୋଗକର୍ତ୍ତା ତିଆରି କରିବାକୁ ବିଫଳ ହେଲା"</string>
     <string name="user_nickname" msgid="262624187455825083">"ଡାକନାମ"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"ଅତିଥି ଯୋଗ କରନ୍ତୁ"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"ଅତିଥିଙ୍କୁ କାଢ଼ି ଦିଅନ୍ତୁ"</string>
