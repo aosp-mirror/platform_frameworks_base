@@ -6231,4 +6231,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         scheduleAnimation();
         return true;
     }
+
+    boolean isTrustedOverlay() {
+        return mInputWindowHandle.isTrustedOverlay();
+    }
 }
