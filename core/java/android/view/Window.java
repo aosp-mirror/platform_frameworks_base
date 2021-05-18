@@ -1354,6 +1354,11 @@ public abstract class Window {
     public void setDecorFitsSystemWindows(boolean decorFitsSystemWindows) {
     }
 
+    /** @hide */
+    public boolean decorFitsSystemWindows() {
+        return false;
+    }
+
     /**
      * Specify custom window attributes.  <strong>PLEASE NOTE:</strong> the
      * layout params you give here should generally be from values previously
