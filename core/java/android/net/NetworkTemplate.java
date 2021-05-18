@@ -427,7 +427,7 @@ public class NetworkTemplate implements Parcelable {
             builder.append(", subType=").append(mSubType);
         }
         if (mOemManaged != OEM_MANAGED_ALL) {
-            builder.append(", oemManaged=").append(mOemManaged);
+            builder.append(", oemManaged=").append(getOemManagedNames(mOemManaged));
         }
         builder.append(", subscriberIdMatchRule=")
                 .append(subscriberIdMatchRuleToString(mSubscriberIdMatchRule));
@@ -774,6 +774,19 @@ public class NetworkTemplate implements Parcelable {
                 return "CARRIER";
             default:
                 return "UNKNOWN(" + matchRule + ")";
+        }
+    }
+
+    private static String getOemManagedNames(int oemManaged) {
+        switch (oemManaged) {
+            case OEM_MANAGED_ALL:
+                return "OEM_MANAGED_ALL";
+            case OEM_MANAGED_NO:
+                return "OEM_MANAGED_NO";
+            case OEM_MANAGED_YES:
+                return "OEM_MANAGED_YES";
+            default:
+                return NetworkIdentity.getOemManagedNames(oemManaged);
         }
     }
 
