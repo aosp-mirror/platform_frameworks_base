@@ -1719,8 +1719,9 @@ public abstract class Window {
      * The window background drawable is drawn on top of the blurred region. The blur
      * region bounds and rounded corners will mimic those of the background drawable.
      * </p><p>
-     * For the blur region to be visible, the window has to be translucent. See
-     * {@link android.R.styleable#Window_windowIsTranslucent}.
+     * For the blur region to be visible, the window has to be translucent
+     * (see {@link android.R.attr#windowIsTranslucent}) and floating
+     * (see {@link android.R.attr#windowIsFloating}).
      * </p><p>
      * Note the difference with {@link WindowManager.LayoutParams#setBlurBehindRadius},
      * which blurs the whole screen behind the window. Background blur blurs the screen behind
