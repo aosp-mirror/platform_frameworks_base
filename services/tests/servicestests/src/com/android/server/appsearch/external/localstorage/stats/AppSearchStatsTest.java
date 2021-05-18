@@ -301,4 +301,28 @@ public class AppSearchStatsTest {
         assertThat(sStats.getBackwardsIncompatibleTypeChangeCount())
                 .isEqualTo(backwardsIncompatibleTypeChangeCount);
     }
+
+    @Test
+    public void testAppSearchStats_RemoveStats() {
+        int nativeLatencyMillis = 1;
+        @RemoveStats.DeleteType int deleteType = 2;
+        int documentDeletedCount = 3;
+
+        final RemoveStats rStats =
+                new RemoveStats.Builder(TEST_PACKAGE_NAME, TEST_DATA_BASE)
+                        .setStatusCode(TEST_STATUS_CODE)
+                        .setTotalLatencyMillis(TEST_TOTAL_LATENCY_MILLIS)
+                        .setNativeLatencyMillis(nativeLatencyMillis)
+                        .setDeleteType(deleteType)
+                        .setDeletedDocumentCount(documentDeletedCount)
+                        .build();
+
+        assertThat(rStats.getPackageName()).isEqualTo(TEST_PACKAGE_NAME);
+        assertThat(rStats.getDatabase()).isEqualTo(TEST_DATA_BASE);
+        assertThat(rStats.getStatusCode()).isEqualTo(TEST_STATUS_CODE);
+        assertThat(rStats.getTotalLatencyMillis()).isEqualTo(TEST_TOTAL_LATENCY_MILLIS);
+        assertThat(rStats.getNativeLatencyMillis()).isEqualTo(nativeLatencyMillis);
+        assertThat(rStats.getDeleteType()).isEqualTo(deleteType);
+        assertThat(rStats.getDeletedDocumentCount()).isEqualTo(documentDeletedCount);
+    }
 }
