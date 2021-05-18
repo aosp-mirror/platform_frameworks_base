@@ -136,6 +136,8 @@
     <string name="accessibility_camera_button" msgid="2938898391716647247">"Fotoaparát"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"Telefón"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Hlasový asistent"</string>
+    <!-- no translation found for accessibility_wallet_button (1458258783460555507) -->
+    <skip />
     <string name="accessibility_unlock_button" msgid="122785427241471085">"Odomknúť"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Zariadenie je uzamknuté"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="5209142744692162598">"Čaká sa na odtlačok prsta"</string>
@@ -1125,7 +1127,7 @@
     <string name="basic_status" msgid="2315371112182658176">"Otvorená konverzácia"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Miniaplikácie konverzácií"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Klepnite na konverzáciu a pridajte ju tak na plochu"</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"Sem sa vráťte, keď dostanete nejaké správy"</string>
+    <string name="no_conversations_text" msgid="7362374212649891057">"Vráťte sa sem, až dostanete nejaké správy"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Prioritné konverzácie"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Nedávne konverzácie"</string>
     <string name="okay" msgid="6490552955618608554">"OK"</string>
@@ -1146,7 +1148,7 @@
     <string name="audio_status" msgid="4237055636967709208">"Počúvam"</string>
     <string name="game_status" msgid="1340694320630973259">"Hrá sa hra"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"Priatelia"</string>
-    <string name="empty_status" msgid="5938893404951307749">"Porozprávajme sa."</string>
+    <string name="empty_status" msgid="5938893404951307749">"Poďme sa rozprávať."</string>
     <string name="status_before_loading" msgid="1500477307859631381">"Obsah sa čoskoro zobrazí"</string>
     <string name="missed_call" msgid="4228016077700161689">"Zmeškaný hovor"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
@@ -1162,6 +1164,8 @@
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"overte"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"vstúpte do zariadenia"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Otvorte odtlačkom prsta"</string>
+    <!-- no translation found for accessibility_fingerprint_bouncer (7189102492498735519) -->
+    <skip />
     <!-- no translation found for ongoing_phone_call_content_description (5332334388483099947) -->
     <skip />
 </resources>

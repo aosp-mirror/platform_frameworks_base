@@ -1261,7 +1261,7 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"正在啟動應用程式。"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"啟動完成。"</string>
     <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"要關閉螢幕嗎？"</string>
-    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"設定指紋時需要按下開關按鈕。\n\n此操作通常會關閉螢幕。"</string>
+    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"您在設定指紋時按了開關按鈕。\n\n螢幕通常會因此而關閉。"</string>
     <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"關閉"</string>
     <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"取消"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"正在執行 <xliff:g id="APP">%1$s</xliff:g>"</string>

@@ -136,6 +136,7 @@
     <string name="accessibility_camera_button" msgid="2938898391716647247">"კამერა"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"ტელეფონი"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"ხმოვანი დახმარება"</string>
+    <string name="accessibility_wallet_button" msgid="1458258783460555507">"Wallet"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"განბლოკვა"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"მოწყობილობა ჩაკეტილია"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="5209142744692162598">"თითის ანაბეჭდის მოლოდინში"</string>
@@ -1117,9 +1118,9 @@
     <string name="priority_conversations" msgid="3967482288896653039">"პრიორიტეტული საუბრები"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"ბოლო მიმოწერები"</string>
     <string name="okay" msgid="6490552955618608554">"კარგი"</string>
-    <string name="timestamp" msgid="6577851592534538533">"<xliff:g id="DURATION">%1$s</xliff:g>-ს წინ"</string>
+    <string name="timestamp" msgid="6577851592534538533">"<xliff:g id="DURATION">%1$s</xliff:g>ს წინ"</string>
     <string name="less_than_timestamp" msgid="6598972791137724517">"<xliff:g id="DURATION">%1$s</xliff:g>-ზე ნაკლები ხნის წინ"</string>
-    <string name="over_timestamp" msgid="4765793502859358634">"<xliff:g id="DURATION">%1$s</xliff:g>-ზე მეტი ხნის წინ"</string>
+    <string name="over_timestamp" msgid="4765793502859358634">"<xliff:g id="DURATION">%1$s</xliff:g>ზე მეტი ხნის წინ"</string>
     <string name="birthday_status" msgid="2596961629465396761">"დაბადების დღე"</string>
     <string name="birthday_status_content_description" msgid="682836371128282925">"<xliff:g id="NAME">%1$s</xliff:g> დღეს იუბილარია"</string>
     <string name="upcoming_birthday_status" msgid="2005452239256870351">"მალე დაბადების დღეა"</string>
@@ -1150,6 +1151,6 @@
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"ავტორიზაცია"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"მოწყობილობის შეყვანა"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"გასახსნელად გამოიყენეთ თითის ანაბეჭდი"</string>
-    <!-- no translation found for ongoing_phone_call_content_description (5332334388483099947) -->
-    <skip />
+    <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"საჭიროა ავტორიზაცია. ავტორიზაციისთვის შეეხეთ თითის ანაბეჭდის სენსორს."</string>
+    <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"მიმდინარე სატელეფონო ზარი"</string>
 </resources>

@@ -1181,8 +1181,7 @@
     <string name="not_checked" msgid="7972320087569023342">"টিকচিহ্ন দেওয়া নেই"</string>
     <string name="selected" msgid="6614607926197755875">"বেছে নেওয়া হয়েছে"</string>
     <string name="not_selected" msgid="410652016565864475">"বেছে নেওয়া হয়নি"</string>
-    <!-- no translation found for in_progress (2149208189184319441) -->
-    <skip />
+    <string name="in_progress" msgid="2149208189184319441">"কাজ চলছে"</string>
     <string name="whichApplication" msgid="5432266899591255759">"এটি ব্যবহার করে ক্রিয়াকলাপ সম্পূর্ণ করুন"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"%1$s ব্যবহার করে ক্রিয়াকলাপ সম্পূর্ণ করুন"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"ক্রিয়াকলাপ সম্পূর্ণ করুন"</string>
@@ -1871,10 +1870,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"আপনার প্রশাসক আপডেট করেছেন"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"আপনার প্রশাসক মুছে দিয়েছেন"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ঠিক আছে"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (4877297130366222145) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (8518809702138617167) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"ব্যাটারি সেভার ডার্ক থিম চালু করে এবং ব্যাকগ্রাউন্ড অ্যাক্টিভিটি, কিছু ভিজ্যুয়াল এফেক্ট, নির্দিষ্ট ফিচার ও কয়েকটি নেটওয়ার্ক কানেকশনের ব্যবহার সীমিত করে বা বন্ধ করে দেয়।\n\n"<annotation id="url">"আরও জানুন"</annotation></string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"ব্যাটারি সেভার ডার্ক থিম চালু করে এবং ব্যাকগ্রাউন্ড অ্যাক্টিভিটি, কিছু ভিজ্যুয়াল এফেক্ট, নির্দিষ্ট ফিচার ও কয়েকটি নেটওয়ার্ক কানেকশনের ব্যবহার সীমিত করে বা বন্ধ করে দেয়।"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"ডেটার ব্যবহার কমাতে সহায়তা করার জন্য, ডেটা সেভার ব্যাকগ্রাউন্ডে কিছু অ্যাপ্লিকেশনকে ডেটা পাঠাতে বা গ্রহণ করতে বাধা দেয়৷ আপনি বর্তমানে এমন একটি অ্যাপ্লিকেশন ব্যবহার করছেন যেটি ডেটা অ্যাক্সেস করতে পারে, তবে সেটি কমই করে৷ এর ফলে যা হতে পারে, উদাহরণস্বরূপ, আপনি ছবির উপর ট্যাপ না করা পর্যন্ত সেগুলি দেখানো হবে না৷"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ডেটা সেভার চালু করবেন?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"চালু করুন"</string>
@@ -1977,10 +1974,8 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> এখন উপলভ্য নয়। এই অ্যাপটিকে <xliff:g id="APP_NAME_1">%2$s</xliff:g> অ্যাপ ম্যানেজ করে।"</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"আরও জানুন"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"অ্যাপ আবার চালু করুন"</string>
-    <!-- no translation found for work_mode_off_title (961171256005852058) -->
-    <skip />
-    <!-- no translation found for work_mode_off_message (7319580997683623309) -->
-    <skip />
+    <string name="work_mode_off_title" msgid="961171256005852058">"অফিস অ্যাপ চালু করবেন?"</string>
+    <string name="work_mode_off_message" msgid="7319580997683623309">"আপনার অফিস অ্যাপ এবং বিজ্ঞপ্তিতে অ্যাক্সেস পান"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"চালু করুন"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"অ্যাপ পাওয়া যাচ্ছে না"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"এই মুহূর্তে <xliff:g id="APP_NAME">%1$s</xliff:g> অ্যাপ পাওয়া যাচ্ছে না।"</string>
