@@ -30,6 +30,7 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
 import org.mockito.Mockito
@@ -228,37 +229,39 @@ class MediaDataFilterTest : SysuiTestCase() {
     }
 
     @Test
-    fun testOnSmartspaceMediaDataLoaded_noMedia_nonEmptyRecommendation_usesSmartspace() {
+    fun testOnSmartspaceMediaDataLoaded_noMedia_nonEmptyRec_prioritizesSmartspace() {
         mediaDataFilter.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, smartspaceData)
 
-        verify(listener).onSmartspaceMediaDataLoaded(eq(SMARTSPACE_KEY), eq(smartspaceData))
+        verify(listener)
+                .onSmartspaceMediaDataLoaded(eq(SMARTSPACE_KEY), eq(smartspaceData), eq(true))
         assertThat(mediaDataFilter.hasActiveMedia()).isTrue()
     }
 
     @Test
-    fun testOnSmartspaceMediaDataLoaded_noMedia_emptyRecommendation_showsNothing() {
+    fun testOnSmartspaceMediaDataLoaded_noMedia_emptyRec_showsNothing() {
         `when`(smartspaceData.iconGrid).thenReturn(listOf())
 
         mediaDataFilter.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, smartspaceData)
 
         verify(listener, never())
-            .onSmartspaceMediaDataLoaded(eq(SMARTSPACE_KEY), eq(smartspaceData))
+            .onSmartspaceMediaDataLoaded(eq(SMARTSPACE_KEY), eq(smartspaceData), anyBoolean())
         assertThat(mediaDataFilter.hasActiveMedia()).isTrue()
     }
 
     @Test
-    fun testOnSmartspaceMediaDataLoaded_noRecentMedia_nonEmptyRecommendation_usesSmartspace() {
+    fun testOnSmartspaceMediaDataLoaded_noRecentMedia_nonEmptyRec_prioritizesSmartspace() {
         val dataOld = dataMain.copy(active = false, lastActive = clock.elapsedRealtime())
         mediaDataFilter.onMediaDataLoaded(KEY, null, dataOld)
         clock.advanceTime(SMARTSPACE_MAX_AGE + 100)
         mediaDataFilter.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, smartspaceData)
 
-        verify(listener).onSmartspaceMediaDataLoaded(eq(SMARTSPACE_KEY), eq(smartspaceData))
+        verify(listener)
+                .onSmartspaceMediaDataLoaded(eq(SMARTSPACE_KEY), eq(smartspaceData), eq(true))
         assertThat(mediaDataFilter.hasActiveMedia()).isTrue()
     }
 
     @Test
-    fun testOnSmartspaceMediaDataLoaded_noRecentMedia_emptyRecommendation_showsNothing() {
+    fun testOnSmartspaceMediaDataLoaded_noRecentMedia_emptyRec_showsNothing() {
         `when`(smartspaceData.iconGrid).thenReturn(listOf())
 
         val dataOld = dataMain.copy(active = false, lastActive = clock.elapsedRealtime())
@@ -267,12 +270,14 @@ class MediaDataFilterTest : SysuiTestCase() {
         mediaDataFilter.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, smartspaceData)
 
         verify(listener, never())
-            .onSmartspaceMediaDataLoaded(eq(SMARTSPACE_KEY), eq(smartspaceData))
+            .onSmartspaceMediaDataLoaded(eq(SMARTSPACE_KEY), eq(smartspaceData), anyBoolean())
         assertThat(mediaDataFilter.hasActiveMedia()).isTrue()
     }
 
     @Test
-    fun testOnSmartspaceMediaDataLoaded_hasRecentMedia_usesMedia() {
+    fun testOnSmartspaceMediaDataLoaded_hasRecentMedia_emptyRec_usesMedia() {
+        `when`(smartspaceData.iconGrid).thenReturn(listOf())
+
         // WHEN we have media that was recently played, but not currently active
         val dataCurrent = dataMain.copy(active = false, lastActive = clock.elapsedRealtime())
         mediaDataFilter.onMediaDataLoaded(KEY, null, dataCurrent)
@@ -285,19 +290,41 @@ class MediaDataFilterTest : SysuiTestCase() {
         val dataCurrentAndActive = dataCurrent.copy(active = true)
         verify(listener).onMediaDataLoaded(eq(KEY), eq(KEY), eq(dataCurrentAndActive))
         assertThat(mediaDataFilter.hasActiveMedia()).isTrue()
+        // Smartspace update shouldn't be propagated for the empty rec list.
+        verify(listener, never())
+                .onSmartspaceMediaDataLoaded(eq(SMARTSPACE_KEY), eq(smartspaceData), anyBoolean())
     }
 
     @Test
-    fun testOnSmartspaceMediaDataRemoved_usedSmartspace_clearsMedia() {
+    fun testOnSmartspaceMediaDataLoaded_hasRecentMedia_nonEmptyRec_usesBoth() {
+        // WHEN we have media that was recently played, but not currently active
+        val dataCurrent = dataMain.copy(active = false, lastActive = clock.elapsedRealtime())
+        mediaDataFilter.onMediaDataLoaded(KEY, null, dataCurrent)
+        verify(listener).onMediaDataLoaded(eq(KEY), eq(null), eq(dataCurrent))
+
+        // AND we get a smartspace signal
+        mediaDataFilter.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, smartspaceData)
+
+        // THEN we should tell listeners to treat the media as active instead
+        val dataCurrentAndActive = dataCurrent.copy(active = true)
+        verify(listener).onMediaDataLoaded(eq(KEY), eq(KEY), eq(dataCurrentAndActive))
+        assertThat(mediaDataFilter.hasActiveMedia()).isTrue()
+        // Smartspace update should also be propagated but not prioritized.
+        verify(listener)
+                .onSmartspaceMediaDataLoaded(eq(SMARTSPACE_KEY), eq(smartspaceData), eq(false))
+    }
+
+    @Test
+    fun testOnSmartspaceMediaDataRemoved_usedSmartspace_clearsSmartspace() {
         mediaDataFilter.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, smartspaceData)
         mediaDataFilter.onSmartspaceMediaDataRemoved(SMARTSPACE_KEY)
 
         verify(listener).onSmartspaceMediaDataRemoved(SMARTSPACE_KEY)
-        assertThat(mediaDataFilter.hasActiveMedia()).isFalse()
+        assertThat(mediaDataFilter.hasSmartspace).isFalse()
     }
 
     @Test
-    fun testOnSmartspaceMediaDataRemoved_usedMedia_clearsMedia() {
+    fun testOnSmartspaceMediaDataRemoved_usedMediaAndSmartspace_clearsBoth() {
         val dataCurrent = dataMain.copy(active = false, lastActive = clock.elapsedRealtime())
         mediaDataFilter.onMediaDataLoaded(KEY, null, dataCurrent)
         mediaDataFilter.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, smartspaceData)
@@ -305,6 +332,8 @@ class MediaDataFilterTest : SysuiTestCase() {
         mediaDataFilter.onSmartspaceMediaDataRemoved(SMARTSPACE_KEY)
 
         verify(listener).onMediaDataLoaded(eq(KEY), eq(KEY), eq(dataCurrent))
+        verify(listener).onSmartspaceMediaDataRemoved(SMARTSPACE_KEY)
         assertThat(mediaDataFilter.hasActiveMedia()).isFalse()
+        assertThat(mediaDataFilter.hasSmartspace).isFalse()
     }
 }
