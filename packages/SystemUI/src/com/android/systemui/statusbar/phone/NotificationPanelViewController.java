@@ -331,7 +331,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private LockIconViewController mLockIconViewController;
     private NotificationsQuickSettingsContainer mNotificationContainerParent;
     private boolean mAnimateNextPositionUpdate;
-
+    private float mQuickQsOffsetHeight;
     private int mTrackingPointer;
     private VelocityTracker mQsVelocityTracker;
     private boolean mQsTracking;
@@ -942,6 +942,8 @@ public class NotificationPanelViewController extends PanelViewController {
     }
 
     public void updateResources() {
+        mQuickQsOffsetHeight = mResources.getDimensionPixelSize(
+                com.android.internal.R.dimen.quick_qs_offset_height);
         mSplitShadeNotificationsTopPadding =
                 mResources.getDimensionPixelSize(R.dimen.notifications_top_padding_split_shade);
         int qsWidth = mResources.getDimensionPixelSize(R.dimen.qs_panel_width);
@@ -2170,7 +2172,8 @@ public class NotificationPanelViewController extends PanelViewController {
                 // can be wrong during transitions when waiting for the keyguard to unlock
                 top = mTransitionToFullShadeQSPosition;
             } else {
-                float notificationTop = getQSEdgePosition();
+                final float notificationTop = getQSEdgePosition();
+                mAmbientState.setNotificationScrimTop(notificationTop);
                 top = (int) (isOnKeyguard() ? Math.min(qsPanelBottomY, notificationTop)
                         : notificationTop);
             }
@@ -2252,7 +2255,8 @@ public class NotificationPanelViewController extends PanelViewController {
 
     private float getQSEdgePosition() {
         // TODO: replace StackY with unified calculation
-        return mAmbientState.getStackY() - mAmbientState.getScrollY();
+        return Math.max(mQuickQsOffsetHeight * mAmbientState.getExpansionFraction(),
+                mAmbientState.getStackY() - mAmbientState.getScrollY());
     }
 
     private int calculateQsBottomPosition(float qsExpansionFraction) {
