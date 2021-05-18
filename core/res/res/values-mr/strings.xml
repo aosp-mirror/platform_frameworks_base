@@ -887,7 +887,7 @@
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"पुन्हा प्रयत्न करा"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"पुन्हा प्रयत्न करा"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"सर्व वैशिष्‍ट्ये आणि डेटासाठी अनलॉक करा"</string>
-    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"कमाल चेहरा अनलॉक प्रयत्न ओलांडले"</string>
+    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"कमाल फेस अनलॉक प्रयत्न ओलांडले"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"सिम कार्ड नाही"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"टॅब्लेटमध्ये सिम कार्ड नाही."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"तुमच्या Android TV डिव्हाइसमध्ये सिम कार्ड नाही."</string>
@@ -957,7 +957,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"अनलॉक क्षेत्र विस्तृत करा."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"स्‍लाइड अनलॉक."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"पॅटर्न अनलॉक."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"चेहरा अनलॉक."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"फेस अनलॉक."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"पिन अनलॉक."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"सिम पिन अनलॉक करा"</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"सिम PUK अनलॉक करा"</string>
