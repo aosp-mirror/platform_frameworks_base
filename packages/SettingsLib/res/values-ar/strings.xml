@@ -460,8 +460,7 @@
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"جارٍ الشحن ببطء"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"جارٍ الشحن لاسلكيًا"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"لا يتم الشحن"</string>
-    <!-- no translation found for battery_info_status_not_charging (3371084153747234837) -->
-    <skip />
+    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"الجهاز متصل بالشاحن، ولا يتم الشحن."</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"تم الشحن"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"إعدادات يتحكم فيها المشرف"</string>
     <string name="disabled" msgid="8017887509554714950">"غير مفعّل"</string>

@@ -460,8 +460,7 @@
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"ધીમેથી ચાર્જ થાય છે"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"વાયરલેસથી ચાર્જિંગ"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"ચાર્જ થઈ રહ્યું નથી"</string>
-    <!-- no translation found for battery_info_status_not_charging (3371084153747234837) -->
-    <skip />
+    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"કનેક્ટ કરેલું છે, પણ ચાર્જ થઈ રહ્યું નથી"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"ચાર્જ થયું"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"વ્યવસ્થાપક દ્વારા નિયંત્રિત"</string>
     <string name="disabled" msgid="8017887509554714950">"અક્ષમ કર્યો"</string>
