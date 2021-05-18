@@ -3063,16 +3063,20 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     @Override
-    public int checkOperationRaw(int code, int uid, String packageName) {
-        return mCheckOpsDelegateDispatcher.checkOperation(code, uid, packageName, true /*raw*/);
+    public int checkOperationRaw(int code, int uid, String packageName,
+            @Nullable String attributionTag) {
+        return mCheckOpsDelegateDispatcher.checkOperation(code, uid, packageName, attributionTag,
+                true /*raw*/);
     }
 
     @Override
     public int checkOperation(int code, int uid, String packageName) {
-        return mCheckOpsDelegateDispatcher.checkOperation(code, uid, packageName, false /*raw*/);
+        return mCheckOpsDelegateDispatcher.checkOperation(code, uid, packageName, null,
+                false /*raw*/);
     }
 
-    private int checkOperationImpl(int code, int uid, String packageName, boolean raw) {
+    private int checkOperationImpl(int code, int uid, String packageName,
+            @Nullable String attributionTag, boolean raw) {
         verifyIncomingOp(code);
         verifyIncomingPackage(packageName, UserHandle.getUserId(uid));
 
@@ -3080,7 +3084,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         if (resolvedPackageName == null) {
             return AppOpsManager.MODE_IGNORED;
         }
-        return checkOperationUnchecked(code, uid, resolvedPackageName, raw);
+        return checkOperationUnchecked(code, uid, resolvedPackageName, attributionTag, raw);
     }
 
     /**
@@ -3094,7 +3098,7 @@ public class AppOpsService extends IAppOpsService.Stub {
      * @return The mode of the op
      */
     private @Mode int checkOperationUnchecked(int code, int uid, @NonNull String packageName,
-                boolean raw) {
+            @Nullable String attributionTag, boolean raw) {
         RestrictionBypass bypass;
         try {
             bypass = verifyAndGetBypass(uid, packageName, null);
@@ -3107,7 +3111,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             return AppOpsManager.MODE_IGNORED;
         }
         synchronized (this) {
-            if (isOpRestrictedLocked(uid, code, packageName, bypass)) {
+            if (isOpRestrictedLocked(uid, code, packageName, attributionTag, bypass)) {
                 return AppOpsManager.MODE_IGNORED;
             }
             code = AppOpsManager.opToSwitch(code);
@@ -3326,7 +3330,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
             final int switchCode = AppOpsManager.opToSwitch(code);
             final UidState uidState = ops.uidState;
-            if (isOpRestrictedLocked(uid, code, packageName, bypass)) {
+            if (isOpRestrictedLocked(uid, code, packageName, attributionTag, bypass)) {
                 attributedOp.rejected(uidState.state, flags);
                 scheduleOpNotedIfNeededLocked(code, uid, packageName, attributionTag, flags,
                         AppOpsManager.MODE_IGNORED);
@@ -3813,7 +3817,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             final Op op = getOpLocked(ops, code, uid, true);
             final AttributedOp attributedOp = op.getOrCreateAttribution(op, attributionTag);
             final UidState uidState = ops.uidState;
-            isRestricted = isOpRestrictedLocked(uid, code, packageName, bypass);
+            isRestricted = isOpRestrictedLocked(uid, code, packageName, attributionTag, bypass);
             final int switchCode = AppOpsManager.opToSwitch(code);
             // If there is a non-default per UID policy (we set UID op mode only if
             // non-default) it takes over, otherwise use the per package policy.
@@ -4555,7 +4559,7 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     private boolean isOpRestrictedLocked(int uid, int code, String packageName,
-            @Nullable RestrictionBypass appBypass) {
+            String attributionTag, @Nullable RestrictionBypass appBypass) {
         int userHandle = UserHandle.getUserId(uid);
         final int restrictionSetCount = mOpUserRestrictions.size();
 
@@ -4563,7 +4567,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             // For each client, check that the given op is not restricted, or that the given
             // package is exempt from the restriction.
             ClientRestrictionState restrictionState = mOpUserRestrictions.valueAt(i);
-            if (restrictionState.hasRestriction(code, packageName, userHandle)) {
+            if (restrictionState.hasRestriction(code, packageName, attributionTag, userHandle)) {
                 RestrictionBypass opBypass = opAllowSystemBypassRestriction(code);
                 if (opBypass != null) {
                     // If we are the system, bypass user restrictions for certain codes
@@ -6177,25 +6181,20 @@ public class AppOpsService extends IAppOpsService.Stub {
                     }
                 }
 
-                final int excludedPackageCount = restrictionState.perUserExcludedPackages != null
-                        ? restrictionState.perUserExcludedPackages.size() : 0;
+                final int excludedPackageCount = restrictionState.perUserExcludedPackageTags != null
+                        ? restrictionState.perUserExcludedPackageTags.size() : 0;
                 if (excludedPackageCount > 0 && dumpOp < 0) {
                     boolean printedPackagesHeader = false;
                     for (int j = 0; j < excludedPackageCount; j++) {
-                        int userId = restrictionState.perUserExcludedPackages.keyAt(j);
-                        String[] packageNames = restrictionState.perUserExcludedPackages.valueAt(j);
+                        int userId = restrictionState.perUserExcludedPackageTags.keyAt(j);
+                        Map<String, String[]> packageNames =
+                                restrictionState.perUserExcludedPackageTags.valueAt(j);
                         if (packageNames == null) {
                             continue;
                         }
                         boolean hasPackage;
                         if (dumpPackage != null) {
-                            hasPackage = false;
-                            for (String pkg : packageNames) {
-                                if (dumpPackage.equals(pkg)) {
-                                    hasPackage = true;
-                                    break;
-                                }
-                            }
+                            hasPackage = packageNames.containsKey(dumpPackage);
                         } else {
                             hasPackage = true;
                         }
@@ -6210,8 +6209,24 @@ public class AppOpsService extends IAppOpsService.Stub {
                             pw.println("      Excluded packages:");
                             printedPackagesHeader = true;
                         }
-                        pw.print("        "); pw.print("user: "); pw.print(userId);
-                                pw.print(" packages: "); pw.println(Arrays.toString(packageNames));
+                        pw.print("        ");
+                        pw.print("user: ");
+                        pw.print(userId);
+                        pw.println(" packages: ");
+                        for (Map.Entry<String, String[]> entry : packageNames.entrySet()) {
+                            if (entry.getValue() == null) {
+                                continue;
+                            }
+                            pw.print("          ");
+                            pw.print(entry.getKey());
+                            pw.print(": ");
+                            if (entry.getValue().length == 0) {
+                                pw.print("*");
+                            } else {
+                                pw.print(Arrays.toString(entry.getValue()));
+                            }
+                            pw.println();
+                        }
                     }
                 }
             }
@@ -6245,7 +6260,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     @Override
     public void setUserRestriction(int code, boolean restricted, IBinder token, int userHandle,
-            String[] exceptionPackages) {
+            Map<String, String[]> excludedPackageTags) {
         if (Binder.getCallingPid() != Process.myPid()) {
             mContext.enforcePermission(Manifest.permission.MANAGE_APP_OPS_RESTRICTIONS,
                     Binder.getCallingPid(), Binder.getCallingUid(), null);
@@ -6261,11 +6276,11 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
         verifyIncomingOp(code);
         Objects.requireNonNull(token);
-        setUserRestrictionNoCheck(code, restricted, token, userHandle, exceptionPackages);
+        setUserRestrictionNoCheck(code, restricted, token, userHandle, excludedPackageTags);
     }
 
     private void setUserRestrictionNoCheck(int code, boolean restricted, IBinder token,
-            int userHandle, String[] exceptionPackages) {
+            int userHandle, Map<String, String[]> excludedPackageTags) {
         synchronized (AppOpsService.this) {
             ClientRestrictionState restrictionState = mOpUserRestrictions.get(token);
 
@@ -6278,7 +6293,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                 mOpUserRestrictions.put(token, restrictionState);
             }
 
-            if (restrictionState.setRestriction(code, restricted, exceptionPackages, userHandle)) {
+            if (restrictionState.setRestriction(code, restricted, excludedPackageTags,
+                    userHandle)) {
                 mHandler.sendMessage(PooledLambda.obtainMessage(
                         AppOpsService::notifyWatchersOfChange, this, code, UID_ANY));
                 mHandler.sendMessage(PooledLambda.obtainMessage(
@@ -6454,6 +6470,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 "offsetHistory");
         // Must not hold the appops lock
         mHistoricalRegistry.offsetHistory(offsetMillis);
+        mHistoricalRegistry.offsetDiscreteHistory(offsetMillis);
     }
 
     @Override
@@ -6808,7 +6825,7 @@ public class AppOpsService extends IAppOpsService.Stub {
     private final class ClientRestrictionState implements DeathRecipient {
         private final IBinder token;
         SparseArray<boolean[]> perUserRestrictions;
-        SparseArray<String[]> perUserExcludedPackages;
+        SparseArray<Map<String, String[]>> perUserExcludedPackageTags;
 
         public ClientRestrictionState(IBinder token)
                 throws RemoteException {
@@ -6817,7 +6834,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
 
         public boolean setRestriction(int code, boolean restricted,
-                String[] excludedPackages, int userId) {
+                Map<String, String[]> excludedPackageTags, int userId) {
             boolean changed = false;
 
             if (perUserRestrictions == null && restricted) {
@@ -6859,19 +6876,27 @@ public class AppOpsService extends IAppOpsService.Stub {
                     }
 
                     if (userRestrictions != null) {
-                        final boolean noExcludedPackages = ArrayUtils.isEmpty(excludedPackages);
-                        if (perUserExcludedPackages == null && !noExcludedPackages) {
-                            perUserExcludedPackages = new SparseArray<>();
+                        final boolean noExcludedPackages = ArrayUtils.isEmpty(excludedPackageTags);
+                        if (perUserExcludedPackageTags == null && !noExcludedPackages) {
+                            perUserExcludedPackageTags = new SparseArray<>();
                         }
-                        if (perUserExcludedPackages != null && !Arrays.equals(excludedPackages,
-                                perUserExcludedPackages.get(thisUserId))) {
+                        if (perUserExcludedPackageTags != null) {
                             if (noExcludedPackages) {
-                                perUserExcludedPackages.remove(thisUserId);
-                                if (perUserExcludedPackages.size() <= 0) {
-                                    perUserExcludedPackages = null;
+                                perUserExcludedPackageTags.remove(thisUserId);
+                                if (perUserExcludedPackageTags.size() <= 0) {
+                                    perUserExcludedPackageTags = null;
                                 }
                             } else {
-                                perUserExcludedPackages.put(thisUserId, excludedPackages);
+                                Map<String, String[]> userExcludedPackageTags =
+                                        perUserExcludedPackageTags.get(thisUserId);
+                                if (userExcludedPackageTags == null) {
+                                    userExcludedPackageTags = new ArrayMap<>(
+                                            excludedPackageTags.size());
+                                    perUserExcludedPackageTags.put(thisUserId,
+                                            userExcludedPackageTags);
+                                }
+                                userExcludedPackageTags.clear();
+                                userExcludedPackageTags.putAll(excludedPackageTags);
                             }
                             changed = true;
                         }
@@ -6882,7 +6907,8 @@ public class AppOpsService extends IAppOpsService.Stub {
             return changed;
         }
 
-        public boolean hasRestriction(int restriction, String packageName, int userId) {
+        public boolean hasRestriction(int restriction, String packageName, String attributionTag,
+                int userId) {
             if (perUserRestrictions == null) {
                 return false;
             }
@@ -6893,21 +6919,29 @@ public class AppOpsService extends IAppOpsService.Stub {
             if (!restrictions[restriction]) {
                 return false;
             }
-            if (perUserExcludedPackages == null) {
+            if (perUserExcludedPackageTags == null) {
                 return true;
             }
-            String[] perUserExclusions = perUserExcludedPackages.get(userId);
+            Map<String, String[]> perUserExclusions = perUserExcludedPackageTags.get(userId);
             if (perUserExclusions == null) {
                 return true;
             }
-            return !ArrayUtils.contains(perUserExclusions, packageName);
+            String[] excludedTags = perUserExclusions.get(packageName);
+            if (excludedTags == null) {
+                return true;
+            }
+            if (excludedTags.length == 0) {
+                // all attribution tags within the package are excluded
+                return false;
+            }
+            return !ArrayUtils.contains(excludedTags, attributionTag);
         }
 
         public void removeUser(int userId) {
-            if (perUserExcludedPackages != null) {
-                perUserExcludedPackages.remove(userId);
-                if (perUserExcludedPackages.size() <= 0) {
-                    perUserExcludedPackages = null;
+            if (perUserExcludedPackageTags != null) {
+                perUserExcludedPackageTags.remove(userId);
+                if (perUserExcludedPackageTags.size() <= 0) {
+                    perUserExcludedPackageTags = null;
                 }
             }
             if (perUserRestrictions != null) {
@@ -7139,23 +7173,25 @@ public class AppOpsService extends IAppOpsService.Stub {
             return mCheckOpsDelegate;
         }
 
-        public int checkOperation(int code, int uid, String packageName, boolean raw) {
+        public int checkOperation(int code, int uid, String packageName,
+                @Nullable String attributionTag, boolean raw) {
             if (mPolicy != null) {
                 if (mCheckOpsDelegate != null) {
-                    return mPolicy.checkOperation(code, uid, packageName, raw,
+                    return mPolicy.checkOperation(code, uid, packageName, attributionTag, raw,
                             this::checkDelegateOperationImpl);
                 } else {
-                    return mPolicy.checkOperation(code, uid, packageName, raw,
+                    return mPolicy.checkOperation(code, uid, packageName, attributionTag, raw,
                             AppOpsService.this::checkOperationImpl);
                 }
             } else if (mCheckOpsDelegate != null) {
-                return checkDelegateOperationImpl(code, uid, packageName, raw);
+                return checkDelegateOperationImpl(code, uid, packageName, attributionTag, raw);
             }
-            return checkOperationImpl(code, uid, packageName, raw);
+            return checkOperationImpl(code, uid, packageName, attributionTag, raw);
         }
 
-        private int checkDelegateOperationImpl(int code, int uid, String packageName, boolean raw) {
-            return mCheckOpsDelegate.checkOperation(code, uid, packageName, raw,
+        private int checkDelegateOperationImpl(int code, int uid, String packageName,
+                @Nullable String attributionTag, boolean raw) {
+            return mCheckOpsDelegate.checkOperation(code, uid, packageName, attributionTag, raw,
                     AppOpsService.this::checkOperationImpl);
         }
 

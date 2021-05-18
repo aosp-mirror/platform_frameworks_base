@@ -185,8 +185,16 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                 mDeferredAnimEndTransaction = tx;
                 return;
             }
-            finishResize(tx, destinationBounds, direction, animationType);
-            sendOnPipTransitionFinished(direction);
+
+            if (mState != State.EXITING_PIP || direction == TRANSITION_DIRECTION_LEAVE_PIP) {
+                // Finish resize as long as we're not exiting PIP, or, if we are, only if this is
+                // the end of the leave PIP animation.
+                // This is necessary in case there was a resize animation ongoing when exit PIP
+                // started, in which case the first resize will be skipped to let the exit
+                // operation handle the final resize out of PIP mode. See b/185306679.
+                finishResize(tx, destinationBounds, direction, animationType);
+                sendOnPipTransitionFinished(direction);
+            }
             if (direction == TRANSITION_DIRECTION_TO_PIP) {
                 // TODO (b//169221267): Add jank listener for transactions without buffer updates.
                 //InteractionJankMonitor.getInstance().end(

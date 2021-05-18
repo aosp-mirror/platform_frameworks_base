@@ -44,6 +44,7 @@ import com.android.internal.util.function.HexFunction;
 import com.android.internal.util.function.NonaFunction;
 import com.android.internal.util.function.OctFunction;
 import com.android.internal.util.function.QuadFunction;
+import com.android.internal.util.function.QuintFunction;
 import com.android.internal.util.function.TriFunction;
 import com.android.server.LocalServices;
 
@@ -140,9 +141,10 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
     }
 
     @Override
-    public int checkOperation(int code, int uid, String packageName, boolean raw,
-            QuadFunction<Integer, Integer, String, Boolean, Integer> superImpl) {
-        return superImpl.apply(code, uid, packageName, raw);
+    public int checkOperation(int code, int uid, String packageName,
+            @Nullable String attributionTag, boolean raw,
+            QuintFunction<Integer, Integer, String, String, Boolean, Integer> superImpl) {
+        return superImpl.apply(code, uid, packageName, attributionTag, raw);
     }
 
     @Override

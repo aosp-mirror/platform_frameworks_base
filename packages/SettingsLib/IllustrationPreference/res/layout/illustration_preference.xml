@@ -23,20 +23,13 @@
     android:gravity="center"
     android:orientation="horizontal">
 
-    <View
-        android:id="@+id/protection_layer"
-        android:layout_width="412dp"
-        android:layout_height="300dp"
-        android:layout_gravity="center"
-        android:padding="@dimen/settingslib_illustration_padding"
-        android:background="@drawable/protection_background"/>
-
     <com.airbnb.lottie.LottieAnimationView
         android:id="@+id/lottie_view"
         android:layout_width="412dp"
         android:layout_height="300dp"
         android:layout_gravity="center"
-        android:padding="@dimen/settingslib_illustration_padding"
+        android:clipToOutline="true"
+        android:background="@drawable/protection_background"
         android:importantForAccessibility="no"/>
 
     <ImageView
