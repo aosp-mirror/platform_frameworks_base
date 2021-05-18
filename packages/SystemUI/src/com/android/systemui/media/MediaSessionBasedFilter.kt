@@ -135,7 +135,11 @@ class MediaSessionBasedFilter @Inject constructor(
         }
     }
 
-    override fun onSmartspaceMediaDataLoaded(key: String, data: SmartspaceTarget) {
+    override fun onSmartspaceMediaDataLoaded(
+        key: String,
+        data: SmartspaceTarget,
+        shouldPrioritize: Boolean
+    ) {
         backgroundExecutor.execute {
             dispatchSmartspaceMediaDataLoaded(key, data)
         }
