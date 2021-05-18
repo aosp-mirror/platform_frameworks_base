@@ -157,7 +157,7 @@ static inline void applyMatrix(const SkMatrix& transform, SkRect* rect) {
 static inline void mapRect(const RenderProperties& props, const SkRect& in, SkRect* out) {
     if (in.isEmpty()) return;
     SkRect temp(in);
-    if (Properties::stretchEffectBehavior == StretchEffectBehavior::UniformScale) {
+    if (Properties::getStretchEffectBehavior() == StretchEffectBehavior::UniformScale) {
         const StretchEffect& stretch = props.layerProperties().getStretchEffect();
         if (!stretch.isEmpty()) {
             applyMatrix(stretch.makeLinearStretch(props.getWidth(), props.getHeight()), &temp);
