@@ -241,13 +241,13 @@ status_t NativeInputEventReceiver::processOutboundEvents() {
         }
 
         // Some other error. Give up
-        ALOGW("Failed to send outbound event on channel '%s'.  status=%d",
-              getInputChannelName().c_str(), status);
+        ALOGW("Failed to send outbound event on channel '%s'.  status=%s(%d)",
+              getInputChannelName().c_str(), statusToString(status).c_str(), status);
         if (status != DEAD_OBJECT) {
             JNIEnv* env = AndroidRuntime::getJNIEnv();
             std::string message =
-                    android::base::StringPrintf("Failed to send outbound event.  status=%d",
-                                                status);
+                    android::base::StringPrintf("Failed to send outbound event.  status=%s(%d)",
+                                                statusToString(status).c_str(), status);
             jniThrowRuntimeException(env, message.c_str());
             mMessageQueue->raiseAndClearException(env, "finishInputEvent");
         }
@@ -319,8 +319,8 @@ status_t NativeInputEventReceiver::consumeEvents(JNIEnv* env,
         status_t status = mInputConsumer.consume(&mInputEventFactory,
                 consumeBatches, frameTime, &seq, &inputEvent);
         if (status != OK && status != WOULD_BLOCK) {
-            ALOGE("channel '%s' ~ Failed to consume input event.  status=%d",
-                  getInputChannelName().c_str(), status);
+            ALOGE("channel '%s' ~ Failed to consume input event.  status=%s(%d)",
+                  getInputChannelName().c_str(), statusToString(status).c_str(), status);
             return status;
         }
 
@@ -502,9 +502,9 @@ static jlong nativeInit(JNIEnv* env, jclass clazz, jobject receiverWeak,
             receiverWeak, inputChannel, messageQueue);
     status_t status = receiver->initialize();
     if (status) {
-        std::string message =
-                android::base::StringPrintf("Failed to initialize input event receiver.  status=%d",
-                                            status);
+        std::string message = android::base::
+                StringPrintf("Failed to initialize input event receiver.  status=%s(%d)",
+                             statusToString(status).c_str(), status);
         jniThrowRuntimeException(env, message.c_str());
         return 0;
     }
@@ -531,7 +531,7 @@ static void nativeFinishInputEvent(JNIEnv* env, jclass clazz, jlong receiverPtr,
     if (status != DEAD_OBJECT) {
         std::string message =
                 android::base::StringPrintf("Failed to finish input event.  status=%s(%d)",
-                                            strerror(-status), status);
+                                            statusToString(status).c_str(), status);
         jniThrowRuntimeException(env, message.c_str());
     }
 }
@@ -564,8 +564,8 @@ static jboolean nativeConsumeBatchedInputEvents(JNIEnv* env, jclass clazz, jlong
             &consumedBatch);
     if (status && status != DEAD_OBJECT && !env->ExceptionCheck()) {
         std::string message =
-                android::base::StringPrintf("Failed to consume batched input event.  status=%d",
-                                            status);
+                android::base::StringPrintf("Failed to consume batched input event.  status=%s(%d)",
+                                            statusToString(status).c_str(), status);
         jniThrowRuntimeException(env, message.c_str());
         return JNI_FALSE;
     }

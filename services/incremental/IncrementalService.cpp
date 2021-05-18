@@ -1174,7 +1174,8 @@ int IncrementalService::makeFile(StorageId storage, std::string_view path, int m
         return -EINVAL;
     }
     if (auto err = mIncFs->makeFile(ifs->control, normPath, mode, id, params); err) {
-        LOG(ERROR) << "Internal error: storageId " << storage << " failed to makeFile: " << err;
+        LOG(ERROR) << "Internal error: storageId " << storage << " failed to makeFile [" << normPath
+                   << "]: " << err;
         return err;
     }
     if (params.size > 0) {

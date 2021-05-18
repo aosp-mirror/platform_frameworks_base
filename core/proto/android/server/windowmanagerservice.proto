@@ -221,6 +221,9 @@ message DisplayAreaProto {
     optional string name = 2 [ (.android.privacy).dest = DEST_EXPLICIT ];
     repeated DisplayAreaChildProto children = 3 [deprecated=true];
     optional bool is_task_display_area = 4;
+    optional bool is_root_display_area = 5;
+    optional int32 feature_id = 6;
+    optional bool is_organized = 7;
 }
 
 /* represents a generic child of a DisplayArea */

@@ -521,6 +521,7 @@ public class SizeCompatTests extends WindowTestsBase {
 
         mActivity.setState(STOPPED, "testSizeCompatMode");
         mActivity.mVisibleRequested = false;
+        mActivity.visibleIgnoringKeyguard = false;
         mActivity.app.setReportedProcState(ActivityManager.PROCESS_STATE_CACHED_ACTIVITY);
 
         // Simulate the display changes orientation.

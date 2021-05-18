@@ -197,12 +197,13 @@
 
     <style name="TextAppearance.QS.TileLabel">
         <item name="android:textSize">@dimen/qs_tile_text_size</item>
-        <item name="android:fontFamily">@string/qs_tile_label_fontFamily</item>
+        <item name="android:letterSpacing">0.01</item>
+        <item name="android:lineHeight">20sp</item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamilyMedium</item>
     </style>
 
     <style name="TextAppearance.QS.TileLabel.Secondary">
-        <item name="android:textSize">@dimen/qs_tile_text_size</item>
-        <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
     </style>
 
     <style name="TextAppearance.QS.UserSwitcher">
@@ -221,11 +222,6 @@
         <item name="android:textSize">@dimen/celltile_rat_type_size</item>
     </style>
 
-    <style name="TextAppearance.QS.SecurityFooter">
-        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
-        <item name="android:textSize">@dimen/qs_tile_text_size</item>
-    </style>
-
     <style name="TextAppearance.QS.Status">
         <item name="android:fontFamily">@*android:string/config_headlineFontFamilyMedium</item>
         <item name="android:textColor">?android:attr/textColorPrimary</item>
@@ -234,14 +230,22 @@
         <item name="android:lineHeight">20sp</item>
     </style>
 
-    <style name="TextAppearance.QS.Status.NoCarrierText">
+    <style name="TextAppearance.QS.SecurityFooter" parent="@style/TextAppearance.QS.Status">
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
         <item name="android:textColor">?android:attr/textColorSecondary</item>
     </style>
 
-    <style name="TextAppearance.QS.Build">
+    <style name="TextAppearance.QS.Status.Carriers">
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
+    </style>
+
+    <style name="TextAppearance.QS.Status.Carriers.NoCarrierText">
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
+    </style>
+
+    <style name="TextAppearance.QS.Status.Build">
         <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
         <item name="android:textColor">?android:attr/textColorSecondary</item>
-        <item name="android:textSize">14sp</item>
     </style>
 
     <style name="TextAppearance.DeviceManagementDialog">
@@ -603,11 +607,12 @@
            parent="@*android:style/TextAppearance.DeviceDefault.Notification.Info">
     </style>
 
-    <style name="TextAppearance.QSEdit.Headers"
-        parent="@*android:style/TextAppearance.DeviceDefault.Body2">
-        <item name="android:textSize">11sp</item>
+    <style name="TextAppearance.QSEdit" >
+        <item name="android:textSize">14sp</item>
+        <item name="android:letterSpacing">0.01</item>
+        <item name="android:lineHeight">20sp</item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
         <item name="android:textColor">?android:attr/textColorSecondary</item>
-        <item name="android:textAllCaps">true</item>
     </style>
 
     <style name="QSCustomizeToolbar" parent="@*android:style/Widget.DeviceDefault.Toolbar">

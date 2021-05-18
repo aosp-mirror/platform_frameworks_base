@@ -127,6 +127,20 @@ prebuilt_etc {
 }
 
 prebuilt_etc {
+    name: "privapp_whitelist_com.android.networkstack",
+    sub_dir: "permissions",
+    src: "com.android.networkstack.xml",
+    filename_from_src: true,
+}
+
+prebuilt_etc {
+    name: "privapp_whitelist_com.android.networkstack.tethering",
+    sub_dir: "permissions",
+    src: "com.android.networkstack.tethering.xml",
+    filename_from_src: true,
+}
+
+prebuilt_etc {
     name: "privapp_whitelist_com.android.provision",
     system_ext_specific: true,
     sub_dir: "permissions",

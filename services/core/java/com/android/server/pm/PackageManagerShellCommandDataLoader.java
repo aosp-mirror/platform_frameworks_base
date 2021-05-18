@@ -33,9 +33,12 @@ import libcore.io.IoUtils;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.Collection;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Callback data loader for PackageManagerShellCommand installations.
@@ -136,6 +139,12 @@ public class PackageManagerShellCommandDataLoader extends DataLoaderService {
 
         private final byte mMode;
         private final String mData;
+        private final String mSalt;
+
+        private static AtomicLong sGlobalSalt = new AtomicLong((new SecureRandom()).nextLong());
+        private static Long nextGlobalSalt() {
+            return sGlobalSalt.incrementAndGet();
+        }
 
         static Metadata forStdIn(String fileId) {
             return new Metadata(STDIN, fileId);
@@ -144,7 +153,7 @@ public class PackageManagerShellCommandDataLoader extends DataLoaderService {
         /** @hide */
         @VisibleForTesting
         public static Metadata forLocalFile(String filePath) {
-            return new Metadata(LOCAL_FILE, filePath);
+            return new Metadata(LOCAL_FILE, filePath, nextGlobalSalt().toString());
         }
 
         static Metadata forDataOnlyStreaming(String fileId) {
@@ -156,26 +165,71 @@ public class PackageManagerShellCommandDataLoader extends DataLoaderService {
         }
 
         private Metadata(byte mode, String data) {
+            this(mode, data, null);
+        }
+
+        private Metadata(byte mode, String data, String salt) {
             this.mMode = mode;
             this.mData = (data == null) ? "" : data;
+            this.mSalt = salt;
         }
 
         static Metadata fromByteArray(byte[] bytes) throws IOException {
-            if (bytes == null || bytes.length == 0) {
+            if (bytes == null || bytes.length < 5) {
                 return null;
             }
-            byte mode = bytes[0];
-            String data = new String(bytes, 1, bytes.length - 1, StandardCharsets.UTF_8);
-            return new Metadata(mode, data);
+            int offset = 0;
+            final byte mode = bytes[offset];
+            offset += 1;
+            final String data;
+            final String salt;
+            switch (mode) {
+                case LOCAL_FILE: {
+                    int dataSize = ByteBuffer.wrap(bytes, offset, 4).order(
+                            ByteOrder.LITTLE_ENDIAN).getInt();
+                    offset += 4;
+                    data = new String(bytes, offset, dataSize, StandardCharsets.UTF_8);
+                    offset += dataSize;
+                    salt = new String(bytes, offset, bytes.length - offset,
+                            StandardCharsets.UTF_8);
+                    break;
+                }
+                default:
+                    data = new String(bytes, offset, bytes.length - offset,
+                            StandardCharsets.UTF_8);
+                    salt = null;
+                    break;
+            }
+            return new Metadata(mode, data, salt);
         }
 
         /** @hide */
         @VisibleForTesting
         public byte[] toByteArray() {
-            byte[] dataBytes = this.mData.getBytes(StandardCharsets.UTF_8);
-            byte[] result = new byte[1 + dataBytes.length];
-            result[0] = this.mMode;
-            System.arraycopy(dataBytes, 0, result, 1, dataBytes.length);
+            final byte[] result;
+            final byte[] dataBytes = this.mData.getBytes(StandardCharsets.UTF_8);
+            switch (this.mMode) {
+                case LOCAL_FILE: {
+                    int dataSize = dataBytes.length;
+                    byte[] saltBytes = this.mSalt.getBytes(StandardCharsets.UTF_8);
+                    result = new byte[1 + 4 + dataSize + saltBytes.length];
+                    int offset = 0;
+                    result[offset] = this.mMode;
+                    offset += 1;
+                    ByteBuffer.wrap(result, offset, 4).order(ByteOrder.LITTLE_ENDIAN).putInt(
+                            dataSize);
+                    offset += 4;
+                    System.arraycopy(dataBytes, 0, result, offset, dataSize);
+                    offset += dataSize;
+                    System.arraycopy(saltBytes, 0, result, offset, saltBytes.length);
+                    break;
+                }
+                default:
+                    result = new byte[1 + dataBytes.length];
+                    result[0] = this.mMode;
+                    System.arraycopy(dataBytes, 0, result, 1, dataBytes.length);
+                    break;
+            }
             return result;
         }
 
