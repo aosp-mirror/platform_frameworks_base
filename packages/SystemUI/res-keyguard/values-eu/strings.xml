@@ -24,7 +24,7 @@
     <string name="keyguard_password_enter_pin_code" msgid="8582296866585566671">"Idatzi PIN kodea"</string>
     <string name="keyguard_password_enter_puk_code" msgid="3813154965969758868">"Idatzi SIM txartelaren PUK kodea eta PIN kode berria"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="3529260761374385243">"SIM txartelaren PUK kodea"</string>
-    <string name="keyguard_password_enter_pin_prompt" msgid="2304037870481240781">"SIM txartelaren PIN kode berria"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="2304037870481240781">"SIM txartelaren PIN berria"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="6180028658339706333"><font size="17">"Pasahitza idazteko, sakatu hau"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="7393393239623946777">"Idatzi desblokeatzeko pasahitza"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="3692259677395250509">"Idatzi desblokeatzeko PIN kodea"</string>
@@ -62,7 +62,7 @@
     <string name="kg_forgot_pattern_button_text" msgid="3304688032024541260">"Eredua ahaztu zaizu"</string>
     <string name="kg_wrong_pattern" msgid="5907301342430102842">"Eredua ez da zuzena"</string>
     <string name="kg_wrong_password" msgid="4143127991071670512">"Pasahitza ez da zuzena"</string>
-    <string name="kg_wrong_pin" msgid="4160978845968732624">"PIN kode hori ez da zuzena"</string>
+    <string name="kg_wrong_pin" msgid="4160978845968732624">"PIN hori ez da zuzena"</string>
     <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="991400408675793914">
       <item quantity="other">Saiatu berriro <xliff:g id="NUMBER">%d</xliff:g> segundo igarotakoan.</item>
       <item quantity="one">Saiatu berriro segundo bat igarotakoan.</item>
