@@ -375,6 +375,13 @@ public class SpellChecker implements SpellCheckerSessionListener {
         final int sequenceNumber = suggestionsInfo.getSequence();
         for (int k = 0; k < mLength; ++k) {
             if (sequenceNumber == mIds[k]) {
+                final SpellCheckSpan spellCheckSpan = mSpellCheckSpans[k];
+                final int spellCheckSpanStart = editable.getSpanStart(spellCheckSpan);
+                if (spellCheckSpanStart < 0) {
+                    // Skips the suggestion if the matched span has been removed.
+                    return null;
+                }
+
                 final int attributes = suggestionsInfo.getSuggestionsAttributes();
                 final boolean isInDictionary =
                         ((attributes & SuggestionsInfo.RESULT_ATTR_IN_THE_DICTIONARY) > 0);
@@ -383,7 +390,11 @@ public class SpellChecker implements SpellCheckerSessionListener {
                 final boolean looksLikeGrammarError =
                         ((attributes & SuggestionsInfo.RESULT_ATTR_LOOKS_LIKE_GRAMMAR_ERROR) > 0);
 
-                final SpellCheckSpan spellCheckSpan = mSpellCheckSpans[k];
+                // Validates the suggestions range in case the SpellCheckSpan is out-of-date but not
+                // removed as expected.
+                if (spellCheckSpanStart + offset + length > editable.length()) {
+                    return spellCheckSpan;
+                }
                 //TODO: we need to change that rule for results from a sentence-level spell
                 // checker that will probably be in dictionary.
                 if (!isInDictionary && (looksLikeTypo || looksLikeGrammarError)) {
@@ -393,7 +404,6 @@ public class SpellChecker implements SpellCheckerSessionListener {
                     // Valid word -- isInDictionary || !looksLikeTypo
                     // Allow the spell checker to remove existing misspelled span by
                     // overwriting the span over the same place
-                    final int spellCheckSpanStart = editable.getSpanStart(spellCheckSpan);
                     final int spellCheckSpanEnd = editable.getSpanEnd(spellCheckSpan);
                     final int start;
                     final int end;
@@ -461,7 +471,6 @@ public class SpellChecker implements SpellCheckerSessionListener {
     @Override
     public void onGetSentenceSuggestions(SentenceSuggestionsInfo[] results) {
         final Editable editable = (Editable) mTextView.getText();
-        final int sentenceLength = editable.length();
         for (int i = 0; i < results.length; ++i) {
             final SentenceSuggestionsInfo ssi = results[i];
             if (ssi == null) {
@@ -475,9 +484,6 @@ public class SpellChecker implements SpellCheckerSessionListener {
                 }
                 final int offset = ssi.getOffsetAt(j);
                 final int length = ssi.getLengthAt(j);
-                if (offset < 0 || offset + length > sentenceLength) {
-                    continue;
-                }
                 final SpellCheckSpan scs = onGetSuggestionsInternal(
                         suggestionsInfo, offset, length);
                 if (spellCheckSpan == null && scs != null) {

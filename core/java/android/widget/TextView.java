@@ -10746,12 +10746,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         Editable text = (Editable) mText;
 
         T[] spans = text.getSpans(start, end, type);
-        final int length = spans.length;
-        for (int i = 0; i < length; i++) {
-            final int spanStart = text.getSpanStart(spans[i]);
-            final int spanEnd = text.getSpanEnd(spans[i]);
-            if (spanEnd == start || spanStart == end) break;
-            text.removeSpan(spans[i]);
+        ArrayList<T> spansToRemove = new ArrayList<>();
+        for (T span : spans) {
+            final int spanStart = text.getSpanStart(span);
+            final int spanEnd = text.getSpanEnd(span);
+            if (spanEnd == start || spanStart == end) continue;
+            spansToRemove.add(span);
+        }
+        for (T span : spansToRemove) {
+            text.removeSpan(span);
         }
     }
 
