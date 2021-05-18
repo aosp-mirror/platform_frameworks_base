@@ -6066,6 +6066,7 @@ class Task extends WindowContainer<WindowContainer> {
      * @param prev The previously resumed activity, for when in the process
      * of pausing; can be null to call from elsewhere.
      * @param options Activity options.
+     * @param deferPause When {@code true}, this will not pause back tasks.
      *
      * @return Returns true if something is being resumed, or false if
      * nothing happened.
@@ -6076,7 +6077,8 @@ class Task extends WindowContainer<WindowContainer> {
      *       right activity for the current system state.
      */
     @GuardedBy("mService")
-    boolean resumeTopActivityUncheckedLocked(ActivityRecord prev, ActivityOptions options) {
+    boolean resumeTopActivityUncheckedLocked(ActivityRecord prev, ActivityOptions options,
+            boolean deferPause) {
         if (mInResumeTopActivity) {
             // Don't even start recursing.
             return false;
@@ -6089,7 +6091,7 @@ class Task extends WindowContainer<WindowContainer> {
 
             if (isLeafTask()) {
                 if (isFocusableAndVisible()) {
-                    someActivityResumed = resumeTopActivityInnerLocked(prev, options);
+                    someActivityResumed = resumeTopActivityInnerLocked(prev, options, deferPause);
                 }
             } else {
                 int idx = mChildren.size() - 1;
@@ -6102,7 +6104,8 @@ class Task extends WindowContainer<WindowContainer> {
                         break;
                     }
 
-                    someActivityResumed |= child.resumeTopActivityUncheckedLocked(prev, options);
+                    someActivityResumed |= child.resumeTopActivityUncheckedLocked(prev, options,
+                            deferPause);
                     // Doing so in order to prevent IndexOOB since hierarchy might changes while
                     // resuming activities, for example dismissing split-screen while starting
                     // non-resizeable activity.
@@ -6130,8 +6133,15 @@ class Task extends WindowContainer<WindowContainer> {
         return someActivityResumed;
     }
 
+    /** @see #resumeTopActivityUncheckedLocked(ActivityRecord, ActivityOptions, boolean) */
     @GuardedBy("mService")
-    private boolean resumeTopActivityInnerLocked(ActivityRecord prev, ActivityOptions options) {
+    boolean resumeTopActivityUncheckedLocked(ActivityRecord prev, ActivityOptions options) {
+        return resumeTopActivityUncheckedLocked(prev, options, false /* skipPause */);
+    }
+
+    @GuardedBy("mService")
+    private boolean resumeTopActivityInnerLocked(ActivityRecord prev, ActivityOptions options,
+            boolean deferPause) {
         if (!mAtmService.isBooting() && !mAtmService.isBooted()) {
             // Not ready yet!
             return false;
@@ -6227,7 +6237,7 @@ class Task extends WindowContainer<WindowContainer> {
             lastResumed = lastFocusedRootTask.getResumedActivity();
         }
 
-        boolean pausing = taskDisplayArea.pauseBackTasks(next);
+        boolean pausing = !deferPause && taskDisplayArea.pauseBackTasks(next);
         if (mResumedActivity != null) {
             ProtoLog.d(WM_DEBUG_STATES, "resumeTopActivityLocked: Pausing %s", mResumedActivity);
             pausing |= startPausingLocked(false /* uiSleeping */, next,
