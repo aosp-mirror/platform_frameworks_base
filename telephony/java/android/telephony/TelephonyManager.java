@@ -11115,14 +11115,10 @@ public class TelephonyManager {
     @UnsupportedAppUsage
     public int getSubIdForPhoneAccount(@Nullable PhoneAccount phoneAccount) {
         int retval = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
-        try {
-            ITelephony service = getITelephony();
-            if (service != null) {
-                retval = service.getSubIdForPhoneAccount(phoneAccount);
-            }
-        } catch (RemoteException e) {
+        if (phoneAccount != null
+                && phoneAccount.hasCapabilities(PhoneAccount.CAPABILITY_SIM_SUBSCRIPTION)) {
+            retval = getSubscriptionId(phoneAccount.getAccountHandle());
         }
-
         return retval;
     }
 
