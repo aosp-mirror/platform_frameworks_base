@@ -208,9 +208,13 @@ class MediaCarouselController @Inject constructor(
                 }
             }
 
-            override fun onSmartspaceMediaDataLoaded(key: String, data: SmartspaceTarget) {
+            override fun onSmartspaceMediaDataLoaded(
+                key: String,
+                data: SmartspaceTarget,
+                shouldPrioritize: Boolean
+            ) {
                 Log.d(TAG, "My Smartspace media update is here")
-                addSmartspaceMediaRecommendations(key, data)
+                addSmartspaceMediaRecommendations(key, data, shouldPrioritize)
                 MediaPlayerData.getMediaPlayer(key, null)?.let {
                     logSmartspaceCardReported(759, // SMARTSPACE_CARD_RECEIVED
                             it.mInstanceId,
@@ -327,7 +331,11 @@ class MediaCarouselController @Inject constructor(
         return existingPlayer == null
     }
 
-    private fun addSmartspaceMediaRecommendations(key: String, data: SmartspaceTarget) {
+    private fun addSmartspaceMediaRecommendations(
+        key: String,
+        data: SmartspaceTarget,
+        shouldPrioritize: Boolean
+    ) {
         Log.d(TAG, "Updating smartspace target in carousel")
         if (MediaPlayerData.getMediaPlayer(key, null) != null) {
             Log.w(TAG, "Skip adding smartspace target in carousel")
@@ -342,7 +350,7 @@ class MediaCarouselController @Inject constructor(
             ViewGroup.LayoutParams.WRAP_CONTENT)
         newRecs.recommendationViewHolder?.recommendations?.setLayoutParams(lp)
         newRecs.bindRecommendation(data, bgColor)
-        MediaPlayerData.addMediaRecommendation(key, newRecs)
+        MediaPlayerData.addMediaRecommendation(key, newRecs, shouldPrioritize)
         updatePlayerToState(newRecs, noAnimation = true)
         reorderAllPlayers()
         updatePageIndicator()
@@ -671,17 +679,19 @@ class MediaCarouselController @Inject constructor(
 internal object MediaPlayerData {
     private val EMPTY = MediaData(-1, false, 0, null, null, null, null, null,
         emptyList(), emptyList(), "INVALID", null, null, null, true, null)
+    // Whether should prioritize Smartspace card.
+    private var shouldPrioritizeSs: Boolean = false
 
     data class MediaSortKey(
-        // Is Smartspace media recommendation. When the Smartspace media is present, it should
-        // always be the first card in carousel.
+        // Whether the item represents a Smartspace media recommendation.
         val isSsMediaRec: Boolean,
         val data: MediaData,
         val updateTime: Long = 0
     )
 
     private val comparator =
-        compareByDescending<MediaSortKey> { it.isSsMediaRec }
+        compareByDescending<MediaSortKey>
+            { if (shouldPrioritizeSs) it.isSsMediaRec else !it.isSsMediaRec }
             .thenByDescending { it.data.isPlaying }
             .thenByDescending { it.data.isLocalSession }
             .thenByDescending { !it.data.resumption }
@@ -697,7 +707,8 @@ internal object MediaPlayerData {
         mediaPlayers.put(sortKey, player)
     }
 
-    fun addMediaRecommendation(key: String, player: MediaControlPanel) {
+    fun addMediaRecommendation(key: String, player: MediaControlPanel, shouldPrioritize: Boolean) {
+        shouldPrioritizeSs = shouldPrioritize
         removeMediaPlayer(key)
         val sortKey = MediaSortKey(isSsMediaRec = true, EMPTY, System.currentTimeMillis())
         mediaData.put(key, sortKey)
