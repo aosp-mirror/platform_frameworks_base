@@ -2411,6 +2411,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             mDisplayPolicy.onConfigurationChanged();
             mPinnedTaskController.onPostDisplayConfigurationChanged();
         }
+        // Update IME parent if needed.
+        updateImeParent();
 
         if (lastOrientation != getConfiguration().orientation) {
             getMetricsLogger().write(
@@ -3965,7 +3967,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
 
         // Otherwise, we just attach it to where the display area policy put it.
-        return mImeWindowsContainer.getParent().getSurfaceControl();
+        return mImeWindowsContainer.getParent() != null
+                ? mImeWindowsContainer.getParent().getSurfaceControl() : null;
     }
 
     void setLayoutNeeded() {
