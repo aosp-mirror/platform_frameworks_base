@@ -655,7 +655,7 @@
     <string name="face_error_security_update_required" msgid="5076017208528750161">"سینسر عارضی طور غیر فعال ہے۔"</string>
     <string name="face_name_template" msgid="3877037340223318119">"چہرہ <xliff:g id="FACEID">%d</xliff:g>"</string>
     <string name="face_app_setting_name" msgid="8130135875458467243">"فیس اَنلاک استعمال کریں"</string>
-    <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"چہرہ یا اسکرین لاک استعمال کریں"</string>
+    <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"فیس یا اسکرین لاک استعمال کریں"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"جاری رکھنے کے لیے اپنے چہرے کا استعمال کریں"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"جاری رکھنے کے لیے اپنے چہرے یا اسکرین لاک کا استعمال کریں"</string>
   <string-array name="face_error_vendor">
