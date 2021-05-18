@@ -544,10 +544,8 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Zezwala na wykrywanie i parowanie przez aplikację urządzeń Bluetooth w pobliżu"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"łączenie ze sparowanymi urządzeniami Bluetooth"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Zezwala na łączenie aplikacji ze sparowanymi urządzeniami Bluetooth"</string>
-    <!-- no translation found for permlab_bluetooth_advertise (2781147747928853177) -->
-    <skip />
-    <!-- no translation found for permdesc_bluetooth_advertise (6085174451034210183) -->
-    <skip />
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"kierowanie informacji do urządzeń Bluetooth w pobliżu"</string>
+    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Zezwala na kierowanie przez aplikację informacji do urządzeń Bluetooth w pobliżu"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"określanie względnego położenia urządzeń ultraszerokopasmowych w pobliżu"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Zezwól na określanie przez aplikację względnego położenia urządzeń ultraszerokopasmowych w pobliżu"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informacje o preferowanych usługach płatniczych NFC"</string>
@@ -1030,7 +1028,7 @@
     <string name="text_copied" msgid="2531420577879738860">"Tekst został skopiowany do schowka."</string>
     <string name="copied" msgid="4675902854553014676">"Skopiowano"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"Aplikacja <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> wkleiła dane z aplikacji <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>"</string>
-    <string name="pasted_from_clipboard" msgid="6295556725844421812">"Aplikacja <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> wkleiła dane ze schowka"</string>
+    <string name="pasted_from_clipboard" msgid="7355790625710831847">"Aplikacja <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> skopiowała dane ze schowka"</string>
     <string name="pasted_text" msgid="4298871641549173733">"Aplikacja <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> wkleiła skopiowany tekst"</string>
     <string name="pasted_image" msgid="4729097394781491022">"Aplikacja <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> wkleiła skopiowany obraz"</string>
     <string name="pasted_content" msgid="646276353060777131">"Aplikacja <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> wkleiła skopiowane treści"</string>
@@ -1301,6 +1299,10 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"Przygotowuję aplikację <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Uruchamianie aplikacji."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Kończenie uruchamiania."</string>
+    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"Wyłączyć ekran?"</string>
+    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"Podczas konfigurowania odcisku palca naciśnięto przycisk zasilania.\n\nZwykle powoduje to wyłączenie ekranu."</string>
+    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"Wyłącz"</string>
+    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"Anuluj"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"Działa <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Kliknij, by wrócić do gry"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Wybierz grę"</string>
@@ -1739,7 +1741,7 @@
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Pozwolić usłudze <xliff:g id="SERVICE">%1$s</xliff:g> na pełną kontrolę nad urządzeniem?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Jeśli włączysz usługę <xliff:g id="SERVICE">%1$s</xliff:g>, Twoje urządzenie nie będzie korzystać z blokady ekranu, by usprawnić szyfrowanie danych."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Pełna kontrola jest odpowiednia dla aplikacji, które pomagają Ci radzić sobie z niepełnosprawnością, ale nie należy jej przyznawać wszystkim aplikacjom."</string>
-    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Wyświetlaj i steruj ekranem"</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Wyświetlaj i kontroluj ekran"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Może odczytywać całą zawartość ekranu i wyświetlać treść nad innymi aplikacjami."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Wyświetlaj i wykonuj działania"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Może śledzić Twoje interakcje z aplikacjami lub czujnikiem sprzętowym, a także obsługiwać aplikacje za Ciebie."</string>
@@ -1755,6 +1757,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Użyj skrótu"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Odwrócenie kolorów"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Korekcja kolorów"</string>
+    <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Tryb jednej ręki"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Dodatkowe przyciemnienie"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Przytrzymano klawisze głośności. Usługa <xliff:g id="SERVICE_NAME">%1$s</xliff:g> została włączona."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Przytrzymano klawisze głośności. Usługa <xliff:g id="SERVICE_NAME">%1$s</xliff:g> została wyłączona."</string>
@@ -1819,6 +1822,17 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"Monarch"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"Quarto"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"Foolscap"</string>
+    <string name="mediasize_na_ansi_c" msgid="3104916921818289618">"ANSI C"</string>
+    <string name="mediasize_na_ansi_d" msgid="254005964819282724">"ANSI D"</string>
+    <string name="mediasize_na_ansi_e" msgid="4424174989686785675">"ANSI E"</string>
+    <string name="mediasize_na_ansi_f" msgid="146980362213260987">"ANSI F"</string>
+    <string name="mediasize_na_arch_a" msgid="5280681822380032361">"Arch A"</string>
+    <string name="mediasize_na_arch_b" msgid="2113344093437297427">"Arch B"</string>
+    <string name="mediasize_na_arch_c" msgid="971002546186856623">"Arch C"</string>
+    <string name="mediasize_na_arch_d" msgid="6450996075335049806">"Arch D"</string>
+    <string name="mediasize_na_arch_e" msgid="6782708486949266519">"Arch E"</string>
+    <string name="mediasize_na_arch_e1" msgid="4707138568738504275">"Arch E1"</string>
+    <string name="mediasize_na_super_b" msgid="6964127155618393178">"Super B"</string>
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1"</string>
@@ -1855,6 +1869,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"L"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"Nieznany pionowy"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"Nieznany poziomy"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"Anulowane"</string>
@@ -1900,8 +1915,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Zaktualizowany przez administratora"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Usunięty przez administratora"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Aby wydłużyć czas pracy na baterii, funkcja Oszczędzanie baterii:\n\n• włącza ciemny motyw,\n• wyłącza lub ogranicza aktywność w tle, niektóre efekty wizualne oraz inne funkcje, np. „OK Google”.\n\n"<annotation id="url">"Więcej informacji"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"Aby wydłużyć czas pracy na baterii, Oszczędzanie baterii:\n\n• włącza ciemny motyw,\n• wyłącza lub ogranicza aktywność w tle, niektóre efekty wizualne oraz inne funkcje, np. „OK Google”."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"Oszczędzanie baterii uruchamia ciemny motyw oraz wyłącza lub ogranicza aktywność w tle, niektóre efekty wizualne, pewne funkcje oraz wybrane połączenia sieciowe.\n\n"<annotation id="url">"Więcej informacji"</annotation></string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"Oszczędzanie baterii uruchamia ciemny motyw oraz wyłącza lub ogranicza aktywność w tle, niektóre efekty wizualne, pewne funkcje oraz wybrane połączenia sieciowe."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Oszczędzanie danych uniemożliwia niektórym aplikacjom wysyłanie i odbieranie danych w tle, zmniejszając w ten sposób ich użycie. Aplikacja, z której w tej chwili korzystasz, może uzyskiwać dostęp do danych, ale rzadziej. Może to powodować, że obrazy będą się wyświetlać dopiero po kliknięciu."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Włączyć Oszczędzanie danych?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Włącz"</string>
@@ -1993,6 +2008,7 @@
     <string name="close_button_text" msgid="10603510034455258">"Zamknij"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"Odbierz"</string>
+    <string name="call_notification_answer_video_action" msgid="2086030940195382249">"Film"</string>
     <string name="call_notification_decline_action" msgid="3700345945214000726">"Odrzuć"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Rozłącz"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"Połączenie przychodzące"</string>
@@ -2021,8 +2037,8 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"Aplikacja <xliff:g id="APP_NAME_0">%1$s</xliff:g> nie jest teraz dostępna. Zarządza tym aplikacja <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Więcej informacji"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Wznów działanie aplikacji"</string>
-    <string name="work_mode_off_title" msgid="5503291976647976560">"Włączyć profil służbowy?"</string>
-    <string name="work_mode_off_message" msgid="8417484421098563803">"Aplikacje służbowe, powiadomienia, dane i inne funkcje profilu służbowego zostaną włączone"</string>
+    <string name="work_mode_off_title" msgid="961171256005852058">"Włączyć aplikacje służbowe?"</string>
+    <string name="work_mode_off_message" msgid="7319580997683623309">"Uzyskaj dostęp do aplikacji służbowych i powiadomień"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Włącz"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplikacja jest niedostępna"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Aplikacja <xliff:g id="APP_NAME">%1$s</xliff:g> jest obecnie niedostępna."</string>
@@ -2140,6 +2156,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"To powiadomienie zostało zmienione na Ciche. Kliknij, by przesłać opinię."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Podniesiono ważność tego powiadomienia. Kliknij, by przesłać opinię."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Obniżono ważność tego powiadomienia. Kliknij, by przesłać opinię."</string>
+    <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"Ulepszone powiadomienia"</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"Sugerowane działania i odpowiedzi pojawiają się teraz w ulepszonych powiadomieniach. Powiadomienia adaptacyjne w Androidzie nie są już obsługiwane."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Wyłącz"</string>
+    <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Więcej informacji"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"W Androidzie 12 ulepszone powiadomienia zastąpiły powiadomienia adaptacyjne. Ta funkcja pokazuje sugerowane działania i odpowiedzi oraz porządkuje powiadomienia.\n\nUlepszone powiadomienia mogą czytać wszystkie powiadomienia, w tym dane osobowe takie jak nazwy kontaktów i treść wiadomości. Funkcja może też zamykać powiadomienia oraz reagować na nie, np. odbierać połączenia telefoniczne i sterować trybem Nie przeszkadzać."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Powiadomienie z informacją o trybie rutynowym"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Bateria może się wyczerpać przed zwykłą porą ładowania"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Włączono Oszczędzanie baterii, by wydłużyć czas pracy na baterii"</string>
@@ -2329,17 +2351,15 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Możesz teraz powiększyć część ekranu"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Włącz w Ustawieniach"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Odrzuć"</string>
-    <!-- no translation found for sensor_privacy_start_use_mic_notification_content_title (2420858361276370367) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_camera_notification_content_title (7287720213963466672) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_notification_content_text (7595608891015777346) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_dialog_turn_on_button (7089318886628390827) -->
-    <skip />
+    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Odblokuj mikrofon urządzenia"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Odblokuj aparat urządzenia"</string>
+    <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"Dla aplikacji „<xliff:g id="APP">%s</xliff:g>” i wszystkich aplikacji oraz usług"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Odblokuj"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Poufność danych z czujników"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Ikona aplikacji"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Wizerunek marki aplikacji"</string>
     <string name="view_and_control_notification_title" msgid="4300765399209912240">"Sprawdź ustawienia dostępu"</string>
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"Usługa <xliff:g id="SERVICE_NAME">%s</xliff:g> może wyświetlać i kontrolować ekran. Kliknij, aby sprawdzić."</string>
+    <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"Przetłumaczono wiadomość: <xliff:g id="MESSAGE">%1$s</xliff:g>."</string>
+    <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Wiadomość przetłumaczono z języka: <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> na język: <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
 </resources>

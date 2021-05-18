@@ -106,7 +106,7 @@
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"PIN kodea idatzi beharko duzu gailua berrabiarazten denean"</string>
     <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"Pasahitza idatzi beharko duzu gailua berrabiarazten denean"</string>
     <string name="kg_prompt_reason_timeout_pattern" msgid="9170360502528959889">"Eredua behar da gailua babestuago izateko"</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="5945186097160029201">"PIN kodea behar da gailua babestuago izateko"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="5945186097160029201">"PINa behar da gailua babestuago izateko"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"Pasahitza behar da gailua babestuago izateko"</string>
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="1922016914701991230">"Eredua marraztu beharko duzu profilez aldatzen baduzu"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="6490434826361055400">"PIN kodea idatzi beharko duzu profilez aldatzen baduzu"</string>

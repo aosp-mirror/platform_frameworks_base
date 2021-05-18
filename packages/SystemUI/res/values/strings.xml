@@ -691,10 +691,6 @@
     <string name="accessibility_quick_settings_hotspot_changed_on">Mobile hotspot turned on.</string>
     <!-- Announcement made when the screen stopped casting (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_casting_turned_off">Screen casting stopped.</string>
-    <!-- Content description of the work mode title in quick settings when off (not shown on the screen). Paused is used as an adjective [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_work_mode_off">Work mode paused.</string>
-    <!-- Content description of the work mode title in quick settings when on (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_work_mode_on">Work mode on.</string>
     <!-- Announcement made when the work mode changes to off (not shown on the screen). Paused is used as a verb. [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_work_mode_changed_off">Work mode paused.</string>
     <!-- Announcement made when the work mode changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
@@ -953,11 +949,9 @@
     <string name="quick_settings_cellular_detail_data_warning"><xliff:g id="data_limit" example="2.0 GB">%s</xliff:g> warning</string>
     <!-- QuickSettings: This string is in the easy-to-view settings that a user can pull down from
     the top of their phone's screen. This is a label for a toggle to turn the work profile on and
-    off. "Work profile" means a separate profile on a user's phone that's specifically for their
+    off. This means a separate profile on a user's phone that's specifically for their
     work apps and managed by their company. "Work" is used as an adjective. [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_work_mode_label">Work profile</string>
-    <!-- QuickSettings: Secondary label for work mode tile when it's off. [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_work_mode_paused">Paused</string>
+    <string name="quick_settings_work_mode_label">Work apps</string>
     <!-- QuickSettings: Label for the toggle to activate Night display (renamed "Night Light" with title caps). [CHAR LIMIT=20] -->
     <string name="quick_settings_night_display_label">Night Light</string>
     <!-- QuickSettings: Secondary text for when the Night Light will be enabled at sunset. [CHAR LIMIT=20] -->

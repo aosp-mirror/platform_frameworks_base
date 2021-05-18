@@ -1022,7 +1022,7 @@
     <string name="text_copied" msgid="2531420577879738860">"A szöveg bemásolva a vágólapra."</string>
     <string name="copied" msgid="4675902854553014676">"Átmásolva"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"A(z) <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> tartalmat másolt vágólapra a(z) <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> appból"</string>
-    <string name="pasted_from_clipboard" msgid="6295556725844421812">"A(z) <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> beillesztette a vágólapon lévő tartalmat"</string>
+    <string name="pasted_from_clipboard" msgid="7355790625710831847">"A(z) <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> beillesztett a vágólapról"</string>
     <string name="pasted_text" msgid="4298871641549173733">"A(z) <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> beillesztette a másolt szöveget"</string>
     <string name="pasted_image" msgid="4729097394781491022">"A(z) <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> beillesztette a másolt képet"</string>
     <string name="pasted_content" msgid="646276353060777131">"A(z) <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> beillesztette a másolt tartalmat"</string>
@@ -1259,6 +1259,10 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"A(z) <xliff:g id="APPNAME">%1$s</xliff:g> előkészítése."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Kezdő alkalmazások."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Rendszerindítás befejezése."</string>
+    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"Kikapcsolja a képernyőt?"</string>
+    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"Ujjlenyomata beállítása közben megnyomta a bekapcsológombot.\n\nEz általában kikapcsolja a képernyőt."</string>
+    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"Kikapcsolás"</string>
+    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"Mégse"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> fut"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Koppintson ide a játékhoz való visszatéréshez"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Játék kiválasztása"</string>
@@ -1709,6 +1713,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Billentyűparancs használata"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Színek invertálása"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Színkorrekció"</string>
+    <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Egykezes mód"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Extrasötét"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Nyomva tartotta a hangerőgombokat. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> bekapcsolva."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Nyomva tartotta a hangerőgombokat. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> kikapcsolva."</string>
@@ -1773,6 +1778,17 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"„Monarch” méret"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"„Quarto” méret"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"„Foolscap” méret"</string>
+    <string name="mediasize_na_ansi_c" msgid="3104916921818289618">"ANSI C"</string>
+    <string name="mediasize_na_ansi_d" msgid="254005964819282724">"ANSI D"</string>
+    <string name="mediasize_na_ansi_e" msgid="4424174989686785675">"ANSI E"</string>
+    <string name="mediasize_na_ansi_f" msgid="146980362213260987">"ANSI F"</string>
+    <string name="mediasize_na_arch_a" msgid="5280681822380032361">"Arch A"</string>
+    <string name="mediasize_na_arch_b" msgid="2113344093437297427">"Arch B"</string>
+    <string name="mediasize_na_arch_c" msgid="971002546186856623">"Arch C"</string>
+    <string name="mediasize_na_arch_d" msgid="6450996075335049806">"Arch D"</string>
+    <string name="mediasize_na_arch_e" msgid="6782708486949266519">"Arch E"</string>
+    <string name="mediasize_na_arch_e1" msgid="4707138568738504275">"Arch E1"</string>
+    <string name="mediasize_na_super_b" msgid="6964127155618393178">"Super B"</string>
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"„ROC 8K” méret"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"„ROC 16K” méret"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"„PRC 1” méret"</string>
@@ -1809,6 +1825,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"„Kahu” méret"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"„Kaku2” méret"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"„You4” méret"</string>
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"L"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"Ismeretlen álló"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"Ismeretlen fekvő"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"Törölve"</string>
@@ -1852,8 +1869,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"A rendszergazda által frissítve"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"A rendszergazda által törölve"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Az Akkumulátorkímélő mód az akkumulátor üzemidejének növelése érdekében a következőket teszi:\n\n• Bekapcsolja a sötét témát.\n• Kikapcsolja vagy korlátozza a háttérben futó tevékenységeket, egyes vizuális effekteket, az „Ok Google” parancsot és egyéb funkciókat.\n\n"<annotation id="url">"További információ"</annotation>"."</string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"Az Akkumulátorkímélő mód az akkumulátor üzemidejének növelése érdekében a következőket teszi:\n\n• Bekapcsolja a sötét témát.\n• Kikapcsolja vagy korlátozza a háttérben futó tevékenységeket, egyes vizuális effekteket, az „Ok Google” parancsot és egyéb funkciókat."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"Az Akkumulátorkímélő mód bekapcsolja a Sötét témát, és korlátozza vagy kikapcsolja a háttérbeli tevékenységeket, valamint bizonyos vizuális effekteket, funkciókat és hálózati kapcsolatokat.\n\n"<annotation id="url">"További információ"</annotation></string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"Az Akkumulátorkímélő mód bekapcsolja a Sötét témát, és korlátozza vagy kikapcsolja a háttérbeli tevékenységeket, valamint bizonyos vizuális effekteket, funkciókat és hálózati kapcsolatokat."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Az adatforgalom csökkentése érdekében az Adatforgalom-csökkentő megakadályozza, hogy egyes alkalmazások adatokat küldjenek vagy fogadjanak a háttérben. Az Ön által jelenleg használt alkalmazások hozzáférhetnek az adatokhoz, de csak ritkábban. Ez például azt jelentheti, hogy a képek csak rákoppintás után jelennek meg."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Bekapcsolja az Adatforgalom-csökkentőt?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Bekapcsolás"</string>
@@ -1929,6 +1946,7 @@
     <string name="close_button_text" msgid="10603510034455258">"Bezárás"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"Fogadás"</string>
+    <string name="call_notification_answer_video_action" msgid="2086030940195382249">"Videó"</string>
     <string name="call_notification_decline_action" msgid="3700345945214000726">"Elutasítás"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Befejezés"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"Bejövő hívás"</string>
@@ -1955,8 +1973,8 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"A(z) <xliff:g id="APP_NAME_0">%1$s</xliff:g> alkalmazás jelenleg nem áll rendelkezésre. Ezt a(z) <xliff:g id="APP_NAME_1">%2$s</xliff:g> kezeli."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"További információ"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Alkalmazás szüneteltetésének feloldása"</string>
-    <string name="work_mode_off_title" msgid="5503291976647976560">"Bekapcsolja a munkaprofilt?"</string>
-    <string name="work_mode_off_message" msgid="8417484421098563803">"A munkahelyi alkalmazások, értesítések, adatok és a munkaprofilhoz tartozó egyéb funkciók be lesznek kapcsolva"</string>
+    <string name="work_mode_off_title" msgid="961171256005852058">"Bekapcsolja a munkaappokat?"</string>
+    <string name="work_mode_off_message" msgid="7319580997683623309">"Hozzáférést kaphat munkahelyi alkalmazásaihoz és értesítéseihez"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Bekapcsolás"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Az alkalmazás nem hozzáférhető"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"A(z) <xliff:g id="APP_NAME">%1$s</xliff:g> jelenleg nem hozzáférhető."</string>
@@ -2072,6 +2090,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Ezt az értesítést némára állította a rendszer. Visszajelzés küldéséhez koppintson ide."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Ezt az értesítést előrébb sorolta a rendszer. Visszajelzés küldéséhez koppintson ide."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Ezt az értesítést hátrébb sorolta a rendszer. Visszajelzés küldéséhez koppintson ide."</string>
+    <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"Bővített értesítések"</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"Javasolt műveletek és válaszok mostantól bővített értesítésekkel. Az androidos alkalmazkodó értesítések már nem támogatottak."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Kikapcsolás"</string>
+    <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"További információ"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"A bővített értesítések felváltják az androidos alkalmazkodó értesítéseket az Android 12-es verziójában. Ez a funkció a javasolt műveleteket és válaszokat mutatja, és rendszerezi az értesítéseket.\n\nA bővített értesítések minden értesítéstartalmat olvashatnak (így a személyes adatokat, mint például a névjegyek nevét és az üzeneteket is). Ez a funkció emellett elvetheti az értesítéseket, valamint válaszolhat rájuk, például felveheti a telefonhívásokat, és vezérelheti a Ne zavarjanak módot."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Információs értesítés a rutinmódról"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Előfordulhat, hogy az akkumulátor lemerül a szokásos töltési időszak előtt"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Akkumulátorkímélő mód aktiválva az akkumulátor üzemidejének növelése érdekében"</string>
@@ -2268,4 +2292,6 @@
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Alkalmazás márkaképe"</string>
     <string name="view_and_control_notification_title" msgid="4300765399209912240">"Ellenőrizze a hozzáférési beállításokat"</string>
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"A(z) <xliff:g id="SERVICE_NAME">%s</xliff:g> megtekintheti és irányíthatja képernyőjét. Koppintson az áttekintéshez."</string>
+    <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"A következő lefordítása sikeresen megtörtént: <xliff:g id="MESSAGE">%1$s</xliff:g>."</string>
+    <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Sikerült lefordítani az üzenetet <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> nyelvről <xliff:g id="TO_LANGUAGE">%2$s</xliff:g> nyelvre."</string>
 </resources>

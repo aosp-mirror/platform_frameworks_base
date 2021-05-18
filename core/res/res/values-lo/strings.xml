@@ -1022,7 +1022,7 @@
     <string name="text_copied" msgid="2531420577879738860">"ສຳເນົາຂໍ້ຄວາມໃສ່ຄລິບບອດແລ້ວ."</string>
     <string name="copied" msgid="4675902854553014676">"ສຳເນົາແລ້ວ"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"ວາງ <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ຈາກ <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> ແລ້ວ"</string>
-    <string name="pasted_from_clipboard" msgid="6295556725844421812">"ວາງ <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ຈາກຄລິບບອດແລ້ວ"</string>
+    <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ວາງຈາກຄລິບບອດຂອງທ່ານແລ້ວ"</string>
     <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ວາງຂໍ້ຄວາມທີ່ທ່ານສຳເນົາແລ້ວ"</string>
     <string name="pasted_image" msgid="4729097394781491022">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ວາງຮູບທີ່ທ່ານສຳເນົາແລ້ວ"</string>
     <string name="pasted_content" msgid="646276353060777131">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ວາງເນື້ອຫາທີ່ທ່ານສຳເນົາແລ້ວ"</string>
@@ -1259,6 +1259,10 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"ກຳ​ລັງ​ກຽມ <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"ກຳລັງເປີດແອັບຯ."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"ກຳລັງສຳເລັດການເປີດລະບົບ."</string>
+    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"ປິດໜ້າຈໍໄວ້ບໍ?"</string>
+    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"ໃນລະຫວ່າງການຕັ້ງຄ່າລາຍນິ້ວມືຂອງທ່ານ, ທ່ານກົດປຸ່ມເປີດປິດ.\n\nໂດຍປົກກະຕິນີ້ຈະເປັນການປິດໜ້າຈໍຂອງທ່ານ."</string>
+    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"ປິດໄວ້"</string>
+    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"ຍົກເລີກ"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> ກຳລັງເຮັດວຽກ"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Tap to return to game"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Choose game"</string>
@@ -1709,6 +1713,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"ໃຊ້ປຸ່ມລັດ"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"ການປີ້ນສີ"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"ການແກ້ໄຂຄ່າສີ"</string>
+    <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"ໂໝດມືດຽວ"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"ຫຼຸດແສງເປັນພິເສດ"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"ກົດປຸ່ມລະດັບສຽງຄ້າງໄວ້. ເປີດໃຊ້ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ແລ້ວ."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"ກົດປຸ່ມລະດັບສຽງຄ້າງໄວ້. ປິດ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ໄວ້ແລ້ວ."</string>
@@ -1773,6 +1778,17 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"Monarch"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"Quarto"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"Foolscap"</string>
+    <string name="mediasize_na_ansi_c" msgid="3104916921818289618">"ANSI C"</string>
+    <string name="mediasize_na_ansi_d" msgid="254005964819282724">"ANSI D"</string>
+    <string name="mediasize_na_ansi_e" msgid="4424174989686785675">"ANSI E"</string>
+    <string name="mediasize_na_ansi_f" msgid="146980362213260987">"ANSI F"</string>
+    <string name="mediasize_na_arch_a" msgid="5280681822380032361">"Arch A"</string>
+    <string name="mediasize_na_arch_b" msgid="2113344093437297427">"Arch B"</string>
+    <string name="mediasize_na_arch_c" msgid="971002546186856623">"Arch C"</string>
+    <string name="mediasize_na_arch_d" msgid="6450996075335049806">"Arch D"</string>
+    <string name="mediasize_na_arch_e" msgid="6782708486949266519">"Arch E"</string>
+    <string name="mediasize_na_arch_e1" msgid="4707138568738504275">"Arch E1"</string>
+    <string name="mediasize_na_super_b" msgid="6964127155618393178">"Super B"</string>
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1"</string>
@@ -1809,6 +1825,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"L"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"Unknown portrait"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"Unknown landscape"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"ຍົກເລີກແລ້ວ"</string>
@@ -1852,8 +1869,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"ຖືກອັບໂຫລດໂດຍຜູ້ເບິ່ງແຍງລະບົບຂອງທ່ານ"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"ຖືກລຶບອອກໂດຍຜູ້ເບິ່ງແຍງລະບົບຂອງທ່ານ"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ຕົກລົງ"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"ເພື່ອຍືດອາຍຸແບັດເຕີຣີ, ຕົວປະຢັດແບັດເຕີຣີຈະ:\n\n• ເປີດໃຊ້ຮູບແບບສີສັນມືດ\n• ປິດ ຫຼື ຈຳກັດການເຄື່ອນໄຫວໃນພື້ນຫຼັງ, ເອັບເຟັກດ້ານພາບບາງຢ່າງ ແລະ ຄຸນສົມບັດອື່ນໆ ເຊັ່ນ: “Ok Google”\n\n"<annotation id="url">"ສຶກສາເພີ່ມເຕີມ"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"ເພື່ອຍືດອາຍຸແບັດເຕີຣີ, ຕົວປະຢັດແບັດເຕີຣີຈະ:\n\n• ເປີດໃຊ້ຮູບແບບສີສັນມືດ\n• ປິດ ຫຼື ຈຳກັດການເຄື່ອນໄຫວໃນພື້ນຫຼັງ, ເອັບເຟັກດ້ານພາບບາງຢ່າງ ແລະ ຄຸນສົມບັດອື່ນໆ ເຊັ່ນ: “Ok Google”"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"ຕົວປະຢັດແບັດເຕີຣີຈະເປີດໃຊ້ຮູບແບບສີສັນມືດ ແລະ ຈຳກັດ ຫຼື ປິດການເຄື່ອນໄຫວໃນພື້ນຫຼັງ, ເອັບເຟັກທາງພາບຈຳນວນໜຶ່ງ, ຄຸນສົມບັດບາງຢ່າງ ແລະ ການເຊື່ອມຕໍ່ເຄືອຂ່າຍບາງອັນ.\n\n"<annotation id="url">"ສຶກສາເພີ່ມເຕີມ"</annotation></string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"ຕົວປະຢັດແບັດເຕີຣີຈະເປີດໃຊ້ຮູບແບບສີສັນມືດ ແລະ ຈຳກັດ ຫຼື ປິດການເຄື່ອນໄຫວໃນພື້ນຫຼັງ, ເອັບເຟັກທາງພາບຈຳນວນໜຶ່ງ, ຄຸນສົມບັດບາງຢ່າງ ແລະ ການເຊື່ອມຕໍ່ເຄືອຂ່າຍບາງອັນ."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"ເພື່ອຊ່ວຍຫຼຸດຜ່ອນການນຳໃຊ້ຂໍ້ມູນ, ຕົວປະຢັດອິນເຕີເນັດຈະປ້ອງກັນບໍ່ໃຫ້ບາງແອັບສົ່ງ ຫຼື ຮັບຂໍ້ມູນໃນພື້ນຫຼັງ. ແອັບໃດໜຶ່ງທີ່ທ່ານກຳລັງໃຊ້ຢູ່ຈະສາມາດເຂົ້າເຖິງຂໍ້ມູນໄດ້ ແຕ່ອາດເຂົ້າເຖິງໄດ້ຖີ່ໜ້ອຍລົງ. ນີ້ອາດໝາຍຄວາມວ່າ ຮູບພາບຕ່າງໆອາດບໍ່ສະແດງຈົນກວ່າທ່ານຈະແຕະໃສ່ກ່ອນ."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ເປີດຕົວປະຢັດອິນເຕີເນັດບໍ?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ເປີດໃຊ້"</string>
@@ -1929,6 +1946,7 @@
     <string name="close_button_text" msgid="10603510034455258">"ປິດ"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"ຮັບສາຍ"</string>
+    <string name="call_notification_answer_video_action" msgid="2086030940195382249">"ວິດີໂອ"</string>
     <string name="call_notification_decline_action" msgid="3700345945214000726">"ປະຕິເສດ"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"ວາງສາຍ"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"ສາຍໂທເຂົ້າ"</string>
@@ -1955,8 +1973,8 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> ບໍ່ສາມາດໃຊ້ໄດ້ໃນຕອນນີ້. ມັນຖືກຈັດການໂດຍ <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"ສຶກສາເພີ່ມເຕີມ"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"ຍົກເລີກການຢຸດແອັບຊົ່ວຄາວ"</string>
-    <string name="work_mode_off_title" msgid="5503291976647976560">"ເປີດໃຊ້ໂປຣໄຟລ໌ບ່ອນເຮັດວຽກບໍ?"</string>
-    <string name="work_mode_off_message" msgid="8417484421098563803">"ແອັບວຽກຂອງທ່ານ, ການແຈ້ງເຕືອນ, ຂໍ້ມູນ ແລະ ຄຸນສົມບັດໂປຣໄຟລ໌ວຽກຈະຖືກເປີດໃຊ້"</string>
+    <string name="work_mode_off_title" msgid="961171256005852058">"ເປີດໃຊ້ແອັບບ່ອນເຮັດວຽກບໍ?"</string>
+    <string name="work_mode_off_message" msgid="7319580997683623309">"ຮັບສິດເຂົ້າເຖິງແອັບບ່ອນເຮັດວຽກ ແລະ ການແຈ້ງເຕືອນຂອງທ່ານ"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"ເປີດ​"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"ແອັບບໍ່ສາມາດໃຊ້ໄດ້"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ບໍ່ສາມາດໃຊ້ໄດ້ໃນຕອນນີ້."</string>
@@ -2072,6 +2090,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"ການແຈ້ງເຕືອນນີ້ຖືກຫຼຸດລະດັບເປັນປິດສຽງແລ້ວ. ແຕະເພື່ອສົ່ງຄຳຕິຊົມ."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"ການແຈ້ງເຕືອນນີ້ຖືກເລື່ອນລະດັບຂຶ້ນແລ້ວ. ແຕະເພື່ອສົ່ງຄຳຕິຊົມ."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"ການແຈ້ງເຕືອນນີ້ຖືກຫຼຸດລະດັບລົງແລ້ວ. ແຕະເພື່ອສົ່ງຄຳຕິຊົມ."</string>
+    <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"ການແຈ້ງເຕືອນທີ່ປັບປຸງໃຫ້ດີຂຶ້ນ"</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"ຕອນນີ້ຄຳສັ່ງ ແລະ ການຕອບກັບທີ່ແນະນຳແມ່ນສະໜອງໃຫ້ໂດຍການແຈ້ງເຕືອນທີ່ປັບປຸງໃຫ້ດີຂຶ້ນ. ບໍ່ຮອງຮັບການແຈ້ງເຕືອນແບບປັບຕົວໄດ້ຂອງ Android ອີກຕໍ່ໄປແລ້ວ."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"ຕົກລົງ"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"ປິດໄວ້"</string>
+    <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"ສຶກສາເພີ່ມເຕີມ"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"ການແຈ້ງເຕືອນແບບປັບຕົວໄດ້ຂອງ Android ຖືກແທນທີ່ດ້ວຍການແຈ້ງເຕືອນທີ່ປັບປຸງໃຫ້ດີຂຶ້ນໃນ Android 12 ແລ້ວ. ຄຸນສົມບັດນີ້ສະແດງຄຳສັ່ງ ແລະ ການຕອບກັບທີ່ແນະນຳ ແລະ ຈັດລະບຽບການແຈ້ງເຕືອນຂອງທ່ານ.\n\nການແຈ້ງເຕືອນທີ່ປັບປຸງໃຫ້ດີຂຶ້ນສາມາດເຂົ້າເຖິງເນື້ອຫາການແຈ້ງເຕືອນໄດ້, ຮວມທັງຂໍ້ມູນສ່ວນຕົວ ເຊັ່ນ: ຊື່ຜູ້ຕິດຕໍ່ ແລະ ຂໍ້ຄວາມ. ຄຸນສົມບັດນີ້ສາມາດປິດ ຫຼື ຕອບກັບຫາການແຈ້ງເຕືອນໄດ້ນຳ ເຊັ່ນ: ການຮັບສາຍໂທລະສັບ ແລະ ການຄວບຄຸມໂໝດຫ້າມລົບກວນ."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ການແຈ້ງເຕືອນຂໍ້ມູນໂໝດກິດຈະວັດປະຈຳວັນ"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"ແບັດເຕີຣີອາດໝົດກ່ອນການສາກຕາມປົກກະຕິ"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"ເປີດຕົວປະຢັດແບັດເຕີຣີເພື່ອຂະຫຍາຍອາຍຸແບັດເຕີຣີ"</string>
@@ -2268,4 +2292,6 @@
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"ຮູບແບຣນແອັບພລິເຄຊັນ"</string>
     <string name="view_and_control_notification_title" msgid="4300765399209912240">"ກວດສອບການຕັ້ງຄ່າການເຂົ້າເຖິງ"</string>
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> ສາມາດເບິ່ງ ແລະ ຄວບຄຸມໜ້າຈໍຂອງທ່ານໄດ້. ແຕະເພື່ອກວດສອບ."</string>
+    <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"ແປ <xliff:g id="MESSAGE">%1$s</xliff:g> ແລ້ວ."</string>
+    <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"ແປຂໍ້ຄວາມຈາກ <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> ເປັນ <xliff:g id="TO_LANGUAGE">%2$s</xliff:g> ແລ້ວ."</string>
 </resources>

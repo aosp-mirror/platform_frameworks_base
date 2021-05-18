@@ -609,14 +609,14 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Fingerprint icon"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"manage face unlock hardware"</string>
+    <string name="permlab_manageFace" msgid="4569549381889283282">"manage Face Unlock hardware"</string>
     <string name="permdesc_manageFace" msgid="6204569688492710471">"Allows the app to invoke methods to add and delete facial templates for use."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"use face unlock hardware"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Allows the app to use face unlock hardware for authentication"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Face unlock"</string>
+    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"use Face Unlock hardware"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Allows the app to use Face Unlock hardware for authentication"</string>
+    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Face Unlock"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Re-enrol your face"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"To improve recognition, please re-enrol your face"</string>
-    <string name="face_setup_notification_title" msgid="550617822603450009">"Set up face unlock"</string>
+    <string name="face_setup_notification_title" msgid="550617822603450009">"Set up Face Unlock"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Unlock your phone by looking at it"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Set up more ways to unlock"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Tap to add a fingerprint"</string>
@@ -643,18 +643,18 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Can’t verify face. Hardware not available."</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"Try face unlock again."</string>
+    <string name="face_error_timeout" msgid="522924647742024699">"Try Face Unlock again."</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Can’t store new face data. Delete an old one first."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Face operation cancelled."</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"Face unlock cancelled by user."</string>
+    <string name="face_error_user_canceled" msgid="8553045452825849843">"Face Unlock cancelled by user."</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Too many attempts. Try again later."</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Too many attempts. Face unlock disabled."</string>
+    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Too many attempts. Face Unlock disabled."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Can’t verify face. Try again."</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"You haven’t set up face unlock."</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"Face unlock is not supported on this device."</string>
+    <string name="face_error_not_enrolled" msgid="7369928733504691611">"You haven’t set up Face Unlock."</string>
+    <string name="face_error_hw_not_present" msgid="1070600921591729944">"Face Unlock is not supported on this device."</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Sensor temporarily disabled."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Face <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <string name="face_app_setting_name" msgid="8130135875458467243">"Use face unlock"</string>
+    <string name="face_app_setting_name" msgid="8130135875458467243">"Use Face Unlock"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Use face or screen lock"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Use your face to continue"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Use your face or screen lock to continue"</string>
@@ -887,7 +887,7 @@
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Try again"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Try again"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Unlock for all features and data"</string>
-    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Maximum face unlock attempts exceeded"</string>
+    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Maximum Face Unlock attempts exceeded"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"No SIM card"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"No SIM card in tablet."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"No SIM card in your Android TV device."</string>
@@ -957,7 +957,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"Expand unlock area."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"Slide unlock."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"Pattern unlock."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"Face unlock."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"Face Unlock."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"Pin unlock."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"SIM PIN unlock."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"SIM PUK unlock."</string>
@@ -1022,7 +1022,7 @@
     <string name="text_copied" msgid="2531420577879738860">"Text copied to clipboard."</string>
     <string name="copied" msgid="4675902854553014676">"Copied"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> pasted from <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>"</string>
-    <string name="pasted_from_clipboard" msgid="6295556725844421812">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> pasted from clipboard"</string>
+    <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> pasted from your clipboard"</string>
     <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> pasted text that you copied"</string>
     <string name="pasted_image" msgid="4729097394781491022">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> pasted an image that you copied"</string>
     <string name="pasted_content" msgid="646276353060777131">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> pasted content that you copied"</string>
@@ -1259,6 +1259,10 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"Preparing <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Starting apps."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Finishing boot."</string>
+    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"Turn off screen?"</string>
+    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"While setting up your fingerprint, you pressed the power button.\n\nThis usually turns off your screen."</string>
+    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"Turn off"</string>
+    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"Cancel"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> running"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Tap to return to game"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Choose game"</string>
@@ -1709,6 +1713,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Use Shortcut"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Colour Inversion"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Colour correction"</string>
+    <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"One-handed mode"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Extra dim"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Held volume keys. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> turned on."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Held volume keys. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> turned off."</string>
@@ -1773,6 +1778,17 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"Monarch"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"Quarto"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"Foolscap"</string>
+    <string name="mediasize_na_ansi_c" msgid="3104916921818289618">"ANSI C"</string>
+    <string name="mediasize_na_ansi_d" msgid="254005964819282724">"ANSI D"</string>
+    <string name="mediasize_na_ansi_e" msgid="4424174989686785675">"ANSI E"</string>
+    <string name="mediasize_na_ansi_f" msgid="146980362213260987">"ANSI F"</string>
+    <string name="mediasize_na_arch_a" msgid="5280681822380032361">"Arch A"</string>
+    <string name="mediasize_na_arch_b" msgid="2113344093437297427">"Arch B"</string>
+    <string name="mediasize_na_arch_c" msgid="971002546186856623">"Arch C"</string>
+    <string name="mediasize_na_arch_d" msgid="6450996075335049806">"Arch D"</string>
+    <string name="mediasize_na_arch_e" msgid="6782708486949266519">"Arch E"</string>
+    <string name="mediasize_na_arch_e1" msgid="4707138568738504275">"Arch E1"</string>
+    <string name="mediasize_na_super_b" msgid="6964127155618393178">"Super B"</string>
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1"</string>
@@ -1809,6 +1825,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"L"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"Unknown portrait"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"Unknown landscape"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"Cancelled"</string>
@@ -1852,8 +1869,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Updated by your admin"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Deleted by your admin"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"To extend battery life, Battery Saver:\n\n• Turns on Dark theme\n• Turns off or restricts background activity, some visual effects and other features like “Hey Google”\n\n"<annotation id="url">"Learn more"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"To extend battery life, Battery Saver:\n\n• Turns on Dark theme\n• Turns off or restricts background activity, some visual effects and other features like “Hey Google”"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"Battery Saver turns on Dark theme and limits or turns off background activity, some visual effects, certain features and some network connections.\n\n"<annotation id="url">"Learn more"</annotation></string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"Battery Saver turns on Dark theme and limits or turns off background activity, some visual effects, certain features and some network connections."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"To help reduce data usage, Data Saver prevents some apps from sending or receiving data in the background. An app you\'re currently using can access data, but may do so less frequently. This may mean, for example, that images don’t display until you tap them."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Turn on Data Saver?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Turn on"</string>
@@ -1929,6 +1946,7 @@
     <string name="close_button_text" msgid="10603510034455258">"Close"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"Answer"</string>
+    <string name="call_notification_answer_video_action" msgid="2086030940195382249">"Video"</string>
     <string name="call_notification_decline_action" msgid="3700345945214000726">"Decline"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Hang up"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"Incoming call"</string>
@@ -1955,8 +1973,8 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> isn’t available at the moment. This is managed by <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Learn more"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Unpause app"</string>
-    <string name="work_mode_off_title" msgid="5503291976647976560">"Turn on work profile?"</string>
-    <string name="work_mode_off_message" msgid="8417484421098563803">"Your work apps, notifications, data and other work profile features will be turned on"</string>
+    <string name="work_mode_off_title" msgid="961171256005852058">"Turn on work apps?"</string>
+    <string name="work_mode_off_message" msgid="7319580997683623309">"Get access to your work apps and notifications"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Turn on"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"App is not available"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> is not available right now."</string>
@@ -2072,6 +2090,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"This notification was demoted to silent. Tap to provide feedback."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"This notification was ranked higher. Tap to provide feedback."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"This notification was ranked lower. Tap to provide feedback."</string>
+    <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"Enhanced notifications"</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"Suggested actions and replies are now provided by enhanced notifications. Android adaptive notifications are no longer supported."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Turn off"</string>
+    <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Learn more"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"Enhanced notifications replaced Android adaptive notifications in Android 12. This feature shows suggested actions and replies, and organises your notifications.\n\nEnhanced notifications can access notification content, including personal information like contact names and messages. This feature can also dismiss or respond to notifications, such as answering phone calls and controlling Do Not Disturb."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Routine Mode info notification"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Battery may run out before usual charge"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Battery Saver activated to extend battery life"</string>
@@ -2257,7 +2281,7 @@
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
     <string name="window_magnification_prompt_title" msgid="2876703640772778215">"New magnification settings"</string>
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"You can now magnify part of your screen"</string>
-    <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Turn on in settings"</string>
+    <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Turn on in Settings"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Dismiss"</string>
     <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Unblock device microphone"</string>
     <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Unblock device camera"</string>
@@ -2268,4 +2292,6 @@
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Application branding image"</string>
     <string name="view_and_control_notification_title" msgid="4300765399209912240">"Check access settings"</string>
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> can view and control your screen. Tap to review."</string>
+    <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> translated."</string>
+    <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Message translated from <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> to <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
 </resources>

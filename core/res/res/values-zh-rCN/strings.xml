@@ -538,10 +538,8 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"允许该应用发现附近的蓝牙设备并与其配对"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"连接到已配对的蓝牙设备"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"允许该应用连接到已配对的蓝牙设备"</string>
-    <!-- no translation found for permlab_bluetooth_advertise (2781147747928853177) -->
-    <skip />
-    <!-- no translation found for permdesc_bluetooth_advertise (6085174451034210183) -->
-    <skip />
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"向附近的蓝牙设备广播"</string>
+    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"允许该应用向附近的蓝牙设备广播"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"确定附近超宽带设备之间的相对位置"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"允许应用确定附近超宽带设备之间的相对位置"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"首选 NFC 付款服务信息"</string>
@@ -1024,7 +1022,7 @@
     <string name="text_copied" msgid="2531420577879738860">"文本已复制到剪贴板。"</string>
     <string name="copied" msgid="4675902854553014676">"已复制"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>已粘贴从<xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>复制的内容"</string>
-    <string name="pasted_from_clipboard" msgid="6295556725844421812">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>已粘贴剪贴板中的内容"</string>
+    <string name="pasted_from_clipboard" msgid="7355790625710831847">"已将剪贴板中的内容粘贴到<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>"</string>
     <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>已粘贴您复制的文字"</string>
     <string name="pasted_image" msgid="4729097394781491022">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>已粘贴您复制的图片"</string>
     <string name="pasted_content" msgid="646276353060777131">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>已粘贴您复制的内容"</string>
@@ -1261,6 +1259,10 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"正在准备升级<xliff:g id="APPNAME">%1$s</xliff:g>。"</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"正在启动应用。"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"即将完成启动。"</string>
+    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"要关闭屏幕吗？"</string>
+    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"您在设置指纹时按了电源按钮。\n\n此操作通常会关闭屏幕。"</string>
+    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"关闭"</string>
+    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"取消"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g>正在运行"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"点按即可返回游戏"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"选择游戏"</string>
@@ -1388,7 +1390,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"分享"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"拒绝"</string>
     <string name="select_input_method" msgid="3971267998568587025">"选择输入法"</string>
-    <string name="show_ime" msgid="6406112007347443383">"在连接到实体键盘时保持显示"</string>
+    <string name="show_ime" msgid="6406112007347443383">"开启后，连接到实体键盘时，它会一直显示在屏幕上"</string>
     <string name="hardware" msgid="1800597768237606953">"显示虚拟键盘"</string>
     <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"配置实体键盘"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"点按即可选择语言和布局"</string>
@@ -1711,6 +1713,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"使用快捷方式"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"颜色反转"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"色彩校正"</string>
+    <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"单手模式"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"极暗"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"已按住音量键。<xliff:g id="SERVICE_NAME">%1$s</xliff:g>已开启。"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"已按住音量键。<xliff:g id="SERVICE_NAME">%1$s</xliff:g>已关闭。"</string>
@@ -1775,6 +1778,17 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"Monarch"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"Quarto"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"Foolscap"</string>
+    <string name="mediasize_na_ansi_c" msgid="3104916921818289618">"ANSI C"</string>
+    <string name="mediasize_na_ansi_d" msgid="254005964819282724">"ANSI D"</string>
+    <string name="mediasize_na_ansi_e" msgid="4424174989686785675">"ANSI E"</string>
+    <string name="mediasize_na_ansi_f" msgid="146980362213260987">"ANSI F"</string>
+    <string name="mediasize_na_arch_a" msgid="5280681822380032361">"Arch A"</string>
+    <string name="mediasize_na_arch_b" msgid="2113344093437297427">"Arch B"</string>
+    <string name="mediasize_na_arch_c" msgid="971002546186856623">"Arch C"</string>
+    <string name="mediasize_na_arch_d" msgid="6450996075335049806">"Arch D"</string>
+    <string name="mediasize_na_arch_e" msgid="6782708486949266519">"Arch E"</string>
+    <string name="mediasize_na_arch_e1" msgid="4707138568738504275">"Arch E1"</string>
+    <string name="mediasize_na_super_b" msgid="6964127155618393178">"Super B"</string>
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1"</string>
@@ -1811,6 +1825,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"大"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"未知（纵向）"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"未知（横向）"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"已取消"</string>
@@ -1854,8 +1869,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"已由您的管理员更新"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"已由您的管理员删除"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"确定"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"为了延长电池续航时间，省电模式会执行以下操作：\n\n• 开启深色主题\n• 关闭或限制后台活动、部分视觉效果和其他功能，例如“Ok Google”\n\n"<annotation id="url">"了解详情"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"为了延长电池续航时间，省电模式会执行以下操作：\n\n• 开启深色主题\n• 关闭或限制后台活动、部分视觉效果和其他功能，例如“Ok Google”"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"在省电模式下，系统会启用深色主题，并限制或关闭后台活动、某些视觉效果、特定功能和部分网络连接。\n\n"<annotation id="url">"了解详情"</annotation></string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"在省电模式下，系统会启用深色主题，并限制或关闭后台活动、某些视觉效果、特定功能和部分网络连接。"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"为了减少流量消耗，流量节省程序会阻止某些应用在后台收发数据。您当前使用的应用可以收发数据，但频率可能会降低。举例而言，这可能意味着图片只有在您点按之后才会显示。"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"要开启流量节省程序吗？"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"开启"</string>
@@ -1931,6 +1946,7 @@
     <string name="close_button_text" msgid="10603510034455258">"关闭"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>：<xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"接听"</string>
+    <string name="call_notification_answer_video_action" msgid="2086030940195382249">"视频通话"</string>
     <string name="call_notification_decline_action" msgid="3700345945214000726">"拒接"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"挂断"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"来电"</string>
@@ -1957,8 +1973,8 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g>目前无法使用。该应用是由<xliff:g id="APP_NAME_1">%2$s</xliff:g>所管理。"</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"了解详情"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"取消暂停应用"</string>
-    <string name="work_mode_off_title" msgid="5503291976647976560">"要开启工作资料吗？"</string>
-    <string name="work_mode_off_message" msgid="8417484421098563803">"您的工作应用、通知、数据及其他工作资料功能将会开启"</string>
+    <string name="work_mode_off_title" msgid="961171256005852058">"要开启工作应用访问权限吗？"</string>
+    <string name="work_mode_off_message" msgid="7319580997683623309">"获取工作应用和通知的访问权限"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"开启"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"应用无法使用"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g>目前无法使用。"</string>
@@ -2074,6 +2090,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"系统已将此通知的重要性降低为“静音”。点按即可提供反馈。"</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"系统已提升此通知的重要性。点按即可提供反馈。"</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"系统已降低此通知的重要性。点按即可提供反馈。"</string>
+    <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"增强型通知功能"</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"建议的操作和回复目前由增强型通知功能提供。系统不再支持 Android 自适应通知功能。"</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"确定"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"关闭"</string>
+    <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"了解详情"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"在 Android 12 中，增强型通知功能取代了 Android 自适应通知功能。增强型通知功能可以显示建议的操作和回复，并可将通知整理得井井有条。\n\n增强型通知功能可以访问通知内容，包括联系人名称和消息等个人信息。该功能还可以关闭或响应通知，例如接听来电以及控制勿扰模式。"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"日常安排模式信息通知"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"电池电量可能会在您平时的充电时间之前耗尽"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"已启用省电模式以延长电池续航时间"</string>
@@ -2261,17 +2283,15 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"现在您可以放大屏幕上的部分内容"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"在“设置”中开启"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"关闭"</string>
-    <!-- no translation found for sensor_privacy_start_use_mic_notification_content_title (2420858361276370367) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_camera_notification_content_title (7287720213963466672) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_notification_content_text (7595608891015777346) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_dialog_turn_on_button (7089318886628390827) -->
-    <skip />
+    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"取消禁用设备麦克风"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"取消禁用设备摄像头"</string>
+    <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"针对&lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt;及所有应用和服务"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"取消禁用"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"传感器隐私权"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"应用图标"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"应用品牌图片"</string>
     <string name="view_and_control_notification_title" msgid="4300765399209912240">"查看权限设置"</string>
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g>可以查看和控制您的屏幕。点按即可查看。"</string>
+    <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"已翻译“<xliff:g id="MESSAGE">%1$s</xliff:g>”。"</string>
+    <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"已将消息内容从<xliff:g id="FROM_LANGUAGE">%1$s</xliff:g>翻译成<xliff:g id="TO_LANGUAGE">%2$s</xliff:g>。"</string>
 </resources>
