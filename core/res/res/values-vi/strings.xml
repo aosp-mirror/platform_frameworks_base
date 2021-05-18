@@ -609,9 +609,9 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Biểu tượng vân tay"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"quản lý phần cứng mở khóa bằng khuôn mặt"</string>
+    <string name="permlab_manageFace" msgid="4569549381889283282">"quản lý phần cứng của tính năng mở khóa bằng khuôn mặt"</string>
     <string name="permdesc_manageFace" msgid="6204569688492710471">"Cho phép ứng dụng gọi ra các phương pháp để thêm và xóa mẫu khuôn mặt sử dụng."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"sử dụng phần cứng mở khóa bằng khuôn mặt"</string>
+    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"sử dụng phần cứng của tính năng mở khóa bằng khuôn mặt"</string>
     <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Cho phép ứng dụng dùng phần cứng mở khóa bằng khuôn mặt để tiến hành xác thực"</string>
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Mở khóa bằng khuôn mặt"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Đăng ký lại khuôn mặt của bạn"</string>
