@@ -70,7 +70,7 @@ package android.net {
     method @Nullable @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE) public android.net.Network getActiveNetwork();
     method @Deprecated @Nullable @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE) public android.net.NetworkInfo getActiveNetworkInfo();
     method @Deprecated @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE) public android.net.NetworkInfo[] getAllNetworkInfo();
-    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE) public android.net.Network[] getAllNetworks();
+    method @Deprecated @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE) public android.net.Network[] getAllNetworks();
     method @Deprecated public boolean getBackgroundDataSetting();
     method @Nullable public android.net.Network getBoundNetworkForProcess();
     method public int getConnectionOwnerUid(int, @NonNull java.net.InetSocketAddress, @NonNull java.net.InetSocketAddress);
@@ -406,6 +406,7 @@ package android.net {
     method @NonNull public android.net.NetworkRequest.Builder clearCapabilities();
     method public android.net.NetworkRequest.Builder removeCapability(int);
     method public android.net.NetworkRequest.Builder removeTransportType(int);
+    method @NonNull public android.net.NetworkRequest.Builder setIncludeOtherUidNetworks(boolean);
     method @Deprecated public android.net.NetworkRequest.Builder setNetworkSpecifier(String);
     method public android.net.NetworkRequest.Builder setNetworkSpecifier(android.net.NetworkSpecifier);
   }
