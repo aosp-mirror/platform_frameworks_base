@@ -1275,6 +1275,7 @@ public class DisplayContentTests extends WindowTestsBase {
         // Assume that the display rotation is changed so it is frozen in preparation for animation.
         doReturn(true).when(rotationAnim).hasScreenshot();
         mWm.mDisplayFrozen = true;
+        displayContent.getDisplayRotation().setRotation((displayContent.getRotation() + 1) % 4);
         displayContent.setRotationAnimation(rotationAnim);
         // The fade rotation animation also starts to hide some non-app windows.
         assertNotNull(displayContent.getFadeRotationAnimationController());
