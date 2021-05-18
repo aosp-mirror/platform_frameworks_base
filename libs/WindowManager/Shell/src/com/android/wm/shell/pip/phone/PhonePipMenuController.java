@@ -173,13 +173,6 @@ public class PhonePipMenuController implements PipMenuController {
         detachPipMenuView();
     }
 
-
-    void onPinnedStackAnimationEnded() {
-        if (isMenuVisible()) {
-            mPipMenuView.onPipAnimationEnded();
-        }
-    }
-
     private void attachPipMenuView() {
         // In case detach was not called (e.g. PIP unexpectedly closed)
         if (mPipMenuView != null) {
