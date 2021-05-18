@@ -21,7 +21,7 @@ filegroup {
     name: "services.core-sources",
     srcs: ["java/**/*.java"],
     exclude_srcs: [
-        ":services.core-sources-am-wm"
+        ":services.core-sources-am-wm",
     ],
     path: "java",
     visibility: [
@@ -38,13 +38,13 @@ genrule {
     ],
     tools: ["protologtool"],
     cmd: "$(location protologtool) transform-protolog-calls " +
-      "--protolog-class com.android.internal.protolog.common.ProtoLog " +
-      "--protolog-impl-class com.android.internal.protolog.ProtoLogImpl " +
-      "--protolog-cache-class 'com.android.server.wm.ProtoLogCache' " +
-      "--loggroups-class com.android.internal.protolog.ProtoLogGroup " +
-      "--loggroups-jar $(location :protolog-groups) " +
-      "--output-srcjar $(out) " +
-      "$(locations :services.core-sources-am-wm)",
+        "--protolog-class com.android.internal.protolog.common.ProtoLog " +
+        "--protolog-impl-class com.android.internal.protolog.ProtoLogImpl " +
+        "--protolog-cache-class 'com.android.server.wm.ProtoLogCache' " +
+        "--loggroups-class com.android.internal.protolog.ProtoLogGroup " +
+        "--loggroups-jar $(location :protolog-groups) " +
+        "--output-srcjar $(out) " +
+        "$(locations :services.core-sources-am-wm)",
     out: ["services.core.protolog.srcjar"],
 }
 
@@ -56,11 +56,11 @@ genrule {
     ],
     tools: ["protologtool"],
     cmd: "$(location protologtool) generate-viewer-config " +
-      "--protolog-class com.android.internal.protolog.common.ProtoLog " +
-      "--loggroups-class com.android.internal.protolog.ProtoLogGroup " +
-      "--loggroups-jar $(location :protolog-groups) " +
-      "--viewer-conf $(out) " +
-      "$(locations :services.core-sources-am-wm)",
+        "--protolog-class com.android.internal.protolog.common.ProtoLog " +
+        "--loggroups-class com.android.internal.protolog.ProtoLogGroup " +
+        "--loggroups-jar $(location :protolog-groups) " +
+        "--viewer-conf $(out) " +
+        "$(locations :services.core-sources-am-wm)",
     out: ["services.core.protolog.json"],
 }
 
@@ -71,12 +71,12 @@ genrule {
         ":services.core.protolog.json",
     ],
     cmd: "cp $(location :generate-protolog.json) $(out) && " +
-      "{ ! (diff $(out) $(location :services.core.protolog.json) | grep -q '^<') || " +
-      "{ echo -e '\\n\\n################################################################\\n#\\n" +
-      "#  ERROR: ProtoLog viewer config is stale.  To update it, run:\\n#\\n" +
-      "#  cp $(location :generate-protolog.json) " +
-      "$(location :services.core.protolog.json)\\n#\\n" +
-      "################################################################\\n\\n' >&2 && false; } }",
+        "{ ! (diff $(out) $(location :services.core.protolog.json) | grep -q '^<') || " +
+        "{ echo -e '\\n\\n################################################################\\n#\\n" +
+        "#  ERROR: ProtoLog viewer config is stale.  To update it, run:\\n#\\n" +
+        "#  cp $(location :generate-protolog.json) " +
+        "$(location :services.core.protolog.json)\\n#\\n" +
+        "################################################################\\n\\n' >&2 && false; } }",
     out: ["services.core.protolog.json"],
 }
 
@@ -84,7 +84,7 @@ genrule {
     name: "statslog-art-java-gen",
     tools: ["stats-log-api-gen"],
     cmd: "$(location stats-log-api-gen) --java $(out) --module art" +
-         " --javaPackage com.android.internal.art --javaClass ArtStatsLog --worksource",
+        " --javaPackage com.android.internal.art --javaClass ArtStatsLog --worksource",
     out: ["com/android/internal/art/ArtStatsLog.java"],
 }
 
@@ -185,7 +185,7 @@ java_library {
 
 java_library_host {
     name: "core_cts_test_resources",
-    srcs: ["java/com/android/server/notification/SmallHash.java"]
+    srcs: ["java/com/android/server/notification/SmallHash.java"],
 }
 
 prebuilt_etc {
@@ -209,7 +209,6 @@ prebuilt_etc {
 filegroup {
     name: "services.core-sources-deviceconfig-interface",
     srcs: [
-         "java/com/android/server/utils/DeviceConfigInterface.java"
+        "java/com/android/server/utils/DeviceConfigInterface.java",
     ],
 }
-
