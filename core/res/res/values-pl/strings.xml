@@ -649,7 +649,7 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Nie można zweryfikować twarzy. Sprzęt niedostępny."</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"Spróbuj rozpoznania twarzy ponownie."</string>
+    <string name="face_error_timeout" msgid="522924647742024699">"Spróbuj rozpoznawania twarzy ponownie."</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Nie można przechowywać nowych danych twarzy. Usuń stare."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Analiza twarzy została anulowana."</string>
     <string name="face_error_user_canceled" msgid="8553045452825849843">"Użytkownik anulował rozpoznawanie twarzy."</string>

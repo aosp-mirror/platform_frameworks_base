@@ -609,14 +609,14 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Саусақ ізі белгішесі"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"Face Unlock жабдығын басқару"</string>
+    <string name="permlab_manageFace" msgid="4569549381889283282">"Бет тану жабдығын басқару"</string>
     <string name="permdesc_manageFace" msgid="6204569688492710471">"Қолданбаға пайдаланатын бет үлгілерін енгізу және жою әдістерін шақыруға мүмкіндік береді."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"Face Unlock жабдығын пайдалану"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Аутентификациялау үшін қолданбаға Face Unlock жабдығын пайдалануға рұқсат береді."</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Face Unlock"</string>
+    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"Бет тану жабдығын пайдалану"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Аутентификациялау үшін қолданбаға бет тану жабдығын пайдалануға рұқсат береді."</string>
+    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Бет тану"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Бетті қайта тіркеу"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Құрылғы жүзіңізді жақсырақ тануы үшін, бетіңізді қайта тіркеңіз."</string>
-    <string name="face_setup_notification_title" msgid="550617822603450009">"Face Unlock функциясын реттеу"</string>
+    <string name="face_setup_notification_title" msgid="550617822603450009">"Бет тану функциясын реттеу"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Телефоныңызға қарап, оның құлпын ашыңыз."</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Құлыпты ашудың басқа тәсілдерін реттеу"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Саусақ ізін қосу үшін түртіңіз."</string>
@@ -643,18 +643,18 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Бетті тану мүмкін емес. Жабдық қолжетімді емес."</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"Face Unlock функциясын қайта қолданып көріңіз."</string>
+    <string name="face_error_timeout" msgid="522924647742024699">"Бет тану функциясын қайта қолданып көріңіз."</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Жаңа бетті сақтау мүмкін емес. Алдымен ескісін жойыңыз."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Бетті танудан бас тартылды."</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"Пайдаланушы Face Unlock функциясынан бас тартты."</string>
+    <string name="face_error_user_canceled" msgid="8553045452825849843">"Пайдаланушы бет тану функциясынан бас тартты."</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Тым көп әрекет жасалды. Кейінірек қайталаңыз."</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Тым көп әрекет жасалды. Face Unlock функциясы өшірілді."</string>
+    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Тым көп әрекет жасалды. Бет тану функциясы өшірілді."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Бетті тану мүмкін емес. Әрекетті қайталаңыз."</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"Face Unlock реттелмеді."</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"Бұл құрылғыда Face Unlock функциясы істемейді."</string>
+    <string name="face_error_not_enrolled" msgid="7369928733504691611">"Бет тану реттелмеді."</string>
+    <string name="face_error_hw_not_present" msgid="1070600921591729944">"Бұл құрылғыда бет тану функциясы істемейді."</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Датчик уақытша өшірулі."</string>
     <string name="face_name_template" msgid="3877037340223318119">"<xliff:g id="FACEID">%d</xliff:g> беті"</string>
-    <string name="face_app_setting_name" msgid="8130135875458467243">"Face Unlock функциясын пайдалану"</string>
+    <string name="face_app_setting_name" msgid="8130135875458467243">"Бет тану функциясын пайдалану"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Face Lock функциясын немесе экран құлпын пайдалану"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Жалғастыру үшін бетіңізді көрсетіңіз."</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Жалғастыру үшін бетті анықтау функциясын немесе экран құлпын пайдаланыңыз."</string>
@@ -887,7 +887,7 @@
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Қайталап көріңіз"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Қайталап көріңіз"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Мүмкіндіктер мен деректер үшін құлыпты ашыңыз"</string>
-    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Бет-әлпет арқылы ашу әрекеттері анықталған шегінен асып кетті"</string>
+    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Бет тану арқылы ашу әрекеттері анықталған шегінен асып кетті"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"SIM картасы жоқ"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"Планшетте SIM картасы жоқ."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Android TV құрылғыңызда SIM картасы жоқ."</string>
@@ -957,7 +957,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"Ашу аймағын кеңейту."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"Сырғыту арқылы ашу."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"Кескін арқылы ашу."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"Бет-әлпет арқылы ашу."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"Бет тану."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"Pin арқылы ашу."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"SIM құлпын PIN кодымен ашу"</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"SIM құлпын PUK кодымен ашу"</string>
