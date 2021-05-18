@@ -609,14 +609,14 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਪ੍ਰਤੀਕ"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"ਚਿਹਰਾ ਅਣਲਾਕ ਹਾਰਡਵੇਅਰ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰੋ"</string>
+    <string name="permlab_manageFace" msgid="4569549381889283282">"ਫ਼ੇਸ ਅਣਲਾਕ ਹਾਰਡਵੇਅਰ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰੋ"</string>
     <string name="permdesc_manageFace" msgid="6204569688492710471">"ਐਪ ਨੂੰ ਵਰਤਣ ਲਈ ਚਿਹਰਾ ਟੈਮਪਲੇਟ ਸ਼ਾਮਲ ਕਰਨ ਜਾਂ ਮਿਟਾਉਣ ਦੀਆਂ ਵਿਧੀਆਂ ਦੀ ਬੇਨਤੀ ਕਰਨ ਦਿੰਦੀ ਹੈ।"</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"ਚਿਹਰਾ ਅਣਲਾਕ ਹਾਰਡਵੇਅਰ ਵਰਤੋ"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"ਐਪ ਨੂੰ ਪ੍ਰਮਾਣੀਕਰਨ ਲਈ ਚਿਹਰਾ ਅਣਲਾਕ ਹਾਰਡਵੇਅਰ ਵਰਤਣ ਦਿੰਦੀ ਹੈ"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"ਚਿਹਰਾ ਅਣਲਾਕ"</string>
+    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"ਫ਼ੇਸ ਅਣਲਾਕ ਹਾਰਡਵੇਅਰ ਵਰਤੋ"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"ਐਪ ਨੂੰ ਪ੍ਰਮਾਣੀਕਰਨ ਲਈ ਫ਼ੇਸ ਅਣਲਾਕ ਹਾਰਡਵੇਅਰ ਵਰਤਣ ਦਿੰਦੀ ਹੈ"</string>
+    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"ਫ਼ੇਸ ਅਣਲਾਕ"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"ਆਪਣਾ ਚਿਹਰਾ ਮੁੜ-ਦਰਜ ਕਰੋ"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"ਪਛਾਣ ਨੂੰ ਬਿਹਤਰ ਬਣਾਉਣ ਲਈ, ਕਿਰਪਾ ਕਰਕੇ ਆਪਣੇ ਚਿਹਰੇ ਨੂੰ ਮੁੜ-ਦਰਜ ਕਰੋ"</string>
-    <string name="face_setup_notification_title" msgid="550617822603450009">"ਚਿਹਰਾ ਅਣਲਾਕ ਸੈੱਟਅੱਪ ਕਰੋ"</string>
+    <string name="face_setup_notification_title" msgid="550617822603450009">"ਫ਼ੇਸ ਅਣਲਾਕ ਸੈੱਟਅੱਪ ਕਰੋ"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"ਆਪਣੇ ਫ਼ੋਨ ਵੱਲ ਦੇਖ ਕੇ ਇਸਨੂੰ ਅਣਲਾਕ ਕਰੋ"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"ਅਣਲਾਕ ਕਰਨ ਦੇ ਹੋਰ ਤਰੀਕਿਆਂ ਦਾ ਸੈੱਟਅੱਪ ਕਰੋ"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਸ਼ਾਮਲ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ"</string>
@@ -643,19 +643,19 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"ਚਿਹਰੇ ਦੀ ਪੁਸ਼ਟੀ ਨਹੀਂ ਹੋ ਸਕੀ। ਹਾਰਡਵੇਅਰ ਉਪਲਬਧ ਨਹੀਂ।"</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"ਚਿਹਰਾ ਅਣਲਾਕ ਦੁਬਾਰਾ ਵਰਤ ਕੇ ਦੇਖੋ।"</string>
+    <string name="face_error_timeout" msgid="522924647742024699">"ਫ਼ੇਸ ਅਣਲਾਕ ਦੁਬਾਰਾ ਵਰਤ ਕੇ ਦੇਖੋ।"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"ਨਵਾਂ ਚਿਹਰਾ ਡਾਟਾ ਸਟੋਰ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ। ਪਹਿਲਾਂ ਪੁਰਾਣਾ ਹਟਾਓ।"</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"ਚਿਹਰਾ ਪਛਾਣਨ ਦੀ ਪ੍ਰਕਿਰਿਆ ਰੱਦ ਕੀਤੀ ਗਈ।"</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"ਵਰਤੋਂਕਾਰ ਨੇ ਚਿਹਰਾ ਅਣਲਾਕ ਰੱਦ ਕੀਤਾ।"</string>
+    <string name="face_error_user_canceled" msgid="8553045452825849843">"ਵਰਤੋਂਕਾਰ ਨੇ ਫ਼ੇਸ ਅਣਲਾਕ ਰੱਦ ਕੀਤਾ।"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"ਹੱਦੋਂ ਵੱਧ ਕੋਸ਼ਿਸ਼ਾਂ। ਬਾਅਦ ਵਿੱਚ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"ਬਹੁਤ ਸਾਰੀਆਂ ਕੋਸ਼ਿਸ਼ਾਂ। ਚਿਹਰਾ ਅਣਲਾਕ ਬੰਦ ਕੀਤਾ ਗਿਆ।"</string>
+    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"ਬਹੁਤ ਸਾਰੀਆਂ ਕੋਸ਼ਿਸ਼ਾਂ। ਫ਼ੇਸ ਅਣਲਾਕ ਬੰਦ ਕੀਤਾ ਗਿਆ।"</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"ਚਿਹਰੇ ਦੀ ਪੁਸ਼ਟੀ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕੀ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"ਤੁਸੀਂ ਚਿਹਰਾ ਅਣਲਾਕ ਸੈੱਟਅੱਪ ਨਹੀਂ ਕੀਤਾ ਹੈ।"</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"ਇਸ ਡੀਵਾਈਸ ਵਿੱਚ ਚਿਹਰਾ ਅਣਲਾਕ ਦੀ ਸੁਵਿਧਾ ਨਹੀਂ ਹੈ।"</string>
+    <string name="face_error_not_enrolled" msgid="7369928733504691611">"ਤੁਸੀਂ ਫ਼ੇਸ ਅਣਲਾਕ ਸੈੱਟਅੱਪ ਨਹੀਂ ਕੀਤਾ ਹੈ।"</string>
+    <string name="face_error_hw_not_present" msgid="1070600921591729944">"ਇਸ ਡੀਵਾਈਸ ਵਿੱਚ ਫ਼ੇਸ ਅਣਲਾਕ ਦੀ ਸੁਵਿਧਾ ਨਹੀਂ ਹੈ।"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"ਸੈਂਸਰ ਅਸਥਾਈ ਤੌਰ \'ਤੇ ਬੰਦ ਕੀਤਾ ਗਿਆ।"</string>
     <string name="face_name_template" msgid="3877037340223318119">"ਚਿਹਰਾ <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <string name="face_app_setting_name" msgid="8130135875458467243">"ਚਿਹਰਾ ਅਣਲਾਕ ਦੀ ਵਰਤੋਂ ਕਰੋ"</string>
-    <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"ਚਿਹਰਾ ਜਾਂ ਸਕ੍ਰੀਨ ਲਾਕ ਦੀ ਵਰਤੋਂ ਕਰੋ"</string>
+    <string name="face_app_setting_name" msgid="8130135875458467243">"ਫ਼ੇਸ ਅਣਲਾਕ ਦੀ ਵਰਤੋਂ ਕਰੋ"</string>
+    <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"ਫ਼ੇਸ ਜਾਂ ਸਕ੍ਰੀਨ ਲਾਕ ਦੀ ਵਰਤੋਂ ਕਰੋ"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"ਜਾਰੀ ਰੱਖਣ ਲਈ ਆਪਣੇ ਚਿਹਰੇ ਦੀ ਵਰਤੋਂ ਕਰੋ"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"ਜਾਰੀ ਰੱਖਣ ਲਈ ਆਪਣਾ ਚਿਹਰਾ ਜਾਂ ਸਕ੍ਰੀਨ ਲਾਕ ਵਰਤੋ"</string>
   <string-array name="face_error_vendor">
@@ -887,7 +887,7 @@
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"ਸਾਰੀਆਂ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਅਤੇ ਡਾਟੇ ਲਈ ਅਣਲਾਕ ਕਰੋ"</string>
-    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"ਅਧਿਕਤਮ ਚਿਹਰਾ ਅਣਲਾਕ ਕੋਸ਼ਿਸ਼ਾਂ ਵਧੀਆਂ"</string>
+    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"ਫ਼ੇਸ ਅਣਲਾਕ ਦੀਆਂ ਕੋਸ਼ਿਸ਼ਾਂ ਸੀਮਾ ਤੋਂ ਪਾਰ ਹੋ ਗਈਆਂ"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"ਕੋਈ ਸਿਮ ਕਾਰਡ ਨਹੀਂ"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"ਟੈਬਲੈੱਟ ਵਿੱਚ ਕੋਈ ਸਿਮ ਕਾਰਡ ਨਹੀਂ ਹੈ।"</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"ਤੁਹਾਡੇ Android TV ਡੀਵਾਈਸ ਵਿੱਚ ਕੋਈ ਸਿਮ ਕਾਰਡ ਮੌਜੂਦ ਨਹੀਂ।"</string>
@@ -957,7 +957,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"ਅਣਲਾਕ ਖੇਤਰ ਦਾ ਵਿਸਤਾਰ ਕਰੋ।"</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"ਅਣਲਾਕ ਸਲਾਈਡ ਕਰੋ।"</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"ਪੈਟਰਨ ਅਣਲਾਕ।"</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"ਚਿਹਰਾ ਅਣਲਾਕ।"</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"ਫ਼ੇਸ ਅਣਲਾਕ।"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"ਪਿੰਨ ਅਣਲਾਕ।"</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"ਸਿਮ ਪਿੰਨ ਅਣਲਾਕ।"</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"ਸਿਮ Puk ਅਣਲਾਕ।"</string>
