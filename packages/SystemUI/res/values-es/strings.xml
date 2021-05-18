@@ -987,7 +987,7 @@
     <string name="auto_saver_enabled_text" msgid="7889491183116752719">"El modo Ahorro de batería se activará automáticamente cuando quede menos de un <xliff:g id="PERCENTAGE">%d</xliff:g> %% de batería."</string>
     <string name="open_saver_setting_action" msgid="2111461909782935190">"Ajustes"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"Entendido"</string>
-    <string name="heap_dump_tile_name" msgid="2464189856478823046">"Volcar pila de SysUI"</string>
+    <string name="heap_dump_tile_name" msgid="2464189856478823046">"Volcar montículo de SysUI"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"Sensores desactivados"</string>
     <string name="device_services" msgid="1549944177856658705">"Servicios del dispositivo"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Sin título"</string>

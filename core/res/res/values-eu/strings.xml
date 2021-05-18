@@ -854,7 +854,7 @@
     <string name="emergency_calls_only" msgid="3057351206678279851">"Larrialdi-deiak soilik"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"Sarea blokeatuta dago"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"SIM txartela PUK bidez blokeatuta dago."</string>
-    <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"Ikusi erabiltzailearen gida edo jarri bezeroarentzako laguntza-zerbitzuarekin harremanetan."</string>
+    <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"Ikusi erabiltzailearentzako gida edo jarri bezeroarentzako laguntza-zerbitzuarekin harremanetan."</string>
     <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"SIM txartela blokeatuta dago."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"SIM txartela desblokeatzen…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"Desblokeatzeko eredua oker marraztu duzu <xliff:g id="NUMBER_0">%1$d</xliff:g> aldiz. \n\nSaiatu berriro <xliff:g id="NUMBER_1">%2$d</xliff:g> segundo barru."</string>
