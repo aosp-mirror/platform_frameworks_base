@@ -248,7 +248,7 @@ void RenderNodeDrawable::drawContent(SkCanvas* canvas) const {
 
             const StretchEffect& stretch = properties.layerProperties().getStretchEffect();
             if (stretch.isEmpty() ||
-                Properties::stretchEffectBehavior == StretchEffectBehavior::UniformScale) {
+                Properties::getStretchEffectBehavior() == StretchEffectBehavior::UniformScale) {
                 // If we don't have any stretch effects, issue the filtered
                 // canvas draw calls to make sure we still punch a hole
                 // with the same canvas transformation + clip into the target
@@ -327,7 +327,7 @@ void RenderNodeDrawable::setViewProperties(const RenderProperties& properties, S
             canvas->concat(*properties.getTransformMatrix());
         }
     }
-    if (Properties::stretchEffectBehavior == StretchEffectBehavior::UniformScale) {
+    if (Properties::getStretchEffectBehavior() == StretchEffectBehavior::UniformScale) {
         const StretchEffect& stretch = properties.layerProperties().getStretchEffect();
         if (!stretch.isEmpty()) {
             canvas->concat(
