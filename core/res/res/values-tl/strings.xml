@@ -567,11 +567,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Icon ng fingerprint"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"pamahalaan ang hardware ng face unlock"</string>
+    <string name="permlab_manageFace" msgid="4569549381889283282">"pamahalaan ang hardware ng pag-unlock gamit ang mukha"</string>
     <string name="permdesc_manageFace" msgid="6204569688492710471">"Pumapayag na mag-invoke ang app ng paraang magdagdag at mag-delete ng template ng mukha."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"gamitin ang hardware ng face unlock"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Pinapayagan ang app na gamitin ang hardware ng face unlock para sa pag-authenticate"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Face unlock"</string>
+    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"gamitin ang hardware ng Pag-unlock Gamit ang Mukha"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Pinapayagan ang app na gamitin ang hardware ng Pag-unlock Gamit ang Mukha para sa pag-authenticate"</string>
+    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Pag-unlock Gamit ang Mukha"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"I-enroll ulit ang iyong mukha"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Para mapahusay ang pagkilala, paki-enroll ulit ang iyong mukha"</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Hindi makakuha ng tamang face data. Subukang muli."</string>
@@ -597,15 +597,15 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Di ma-verify ang mukha. Di available ang hardware."</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"Subukan ulit ang face unlock."</string>
+    <string name="face_error_timeout" msgid="522924647742024699">"Subukan ulit ang pag-unlock gamit ang mukha."</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Hindi ma-store ang data ng mukha. Mag-delete muna ng iba."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Nakansela ang operation kaugnay ng mukha."</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"Kinansela ng user ang face unlock."</string>
+    <string name="face_error_user_canceled" msgid="8553045452825849843">"Kinansela ng user ang pag-unlock gamit ang mukha."</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Masyadong maraming pagsubok. Subukang muli mamaya."</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Masyadong maraming pagsubok. Na-disable ang face unlock."</string>
+    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Masyadong maraming pagsubok. Na-disable ang pag-unlock gamit ang mukha."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Hindi ma-verify ang mukha. Subukang muli."</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"Hindi mo pa nase-set up ang face unlock."</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"Hindi sinusuportahan ang face unlock sa device na ito."</string>
+    <string name="face_error_not_enrolled" msgid="7369928733504691611">"Hindi mo pa nase-set up ang pag-unlock gamit ang mukha."</string>
+    <string name="face_error_hw_not_present" msgid="1070600921591729944">"Hindi sinusuportahan ang pag-unlock gamit ang mukha sa device na ito."</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Pansamantalang na-disable ang sensor."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Mukha <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
@@ -835,7 +835,7 @@
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Subukang muli"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Subukang muli"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"I-unlock para sa lahat ng feature at data"</string>
-    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Nalagpasan na ang maximum na mga pagtatangka sa Face Unlock"</string>
+    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Nalagpasan na ang maximum na mga pagtatangka sa Pag-unlock Gamit ang Mukha"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"Walang SIM card"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"Walang SIM card sa tablet."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Walang SIM card sa iyong Android TV device."</string>
@@ -905,7 +905,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"Palakihin ang bahagi ng pag-unlock."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"Pag-unlock ng slide."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"Pag-unlock ng pattern."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"Face unlock."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"Pag-unlock gamit ang mukha."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"Pag-unlock ng pin."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"Pag-unlock ng Pin ng Sim."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"Pag-unlock ng Puk ng Sim."</string>

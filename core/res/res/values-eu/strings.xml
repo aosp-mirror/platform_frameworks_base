@@ -42,7 +42,7 @@
     <string name="serviceErased" msgid="997354043770513494">"Behar bezala ezabatu da."</string>
     <string name="passwordIncorrect" msgid="917087532676155877">"Pasahitz okerra."</string>
     <string name="mmiComplete" msgid="6341884570892520140">"MMI osatu da."</string>
-    <string name="badPin" msgid="888372071306274355">"Idatzi duzun PIN kode zaharra ez da zuzena."</string>
+    <string name="badPin" msgid="888372071306274355">"Idatzi duzun PIN zaharra ez da zuzena."</string>
     <string name="badPuk" msgid="4232069163733147376">"Idatzi duzun PUK kode zaharra ez da zuzena. Saiatu berriro."</string>
     <string name="mismatchPin" msgid="2929611853228707473">"Idatzi dituzun PIN kodeak ez datoz bat."</string>
     <string name="invalidPin" msgid="7542498253319440408">"Idatzi 4 eta 8 zenbaki bitarteko PIN bat."</string>
@@ -854,7 +854,7 @@
     <string name="emergency_calls_only" msgid="3057351206678279851">"Larrialdi-deiak soilik"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"Sarea blokeatuta dago"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"SIM txartela PUK bidez blokeatuta dago."</string>
-    <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"Ikusi erabiltzailearen gida edo jarri bezeroarentzako laguntza-zerbitzuarekin harremanetan."</string>
+    <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"Ikusi erabiltzailearentzako gida edo jarri bezeroarentzako laguntza-zerbitzuarekin harremanetan."</string>
     <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"SIM txartela blokeatuta dago."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"SIM txartela desblokeatzen…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"Desblokeatzeko eredua oker marraztu duzu <xliff:g id="NUMBER_0">%1$d</xliff:g> aldiz. \n\nSaiatu berriro <xliff:g id="NUMBER_1">%2$d</xliff:g> segundo barru."</string>
