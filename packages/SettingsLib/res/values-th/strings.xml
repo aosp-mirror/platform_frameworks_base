@@ -368,9 +368,9 @@
     <string name="debug_applications_category" msgid="5394089406638954196">"แอปพลิเคชัน"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"ไม่เก็บกิจกรรม"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"ล้างทุกกิจกรรมทันทีที่ผู้ใช้ออกไป"</string>
-    <string name="app_process_limit_title" msgid="8361367869453043007">"ขีดจำกัดกระบวนการพื้นหลัง"</string>
+    <string name="app_process_limit_title" msgid="8361367869453043007">"ขีดจำกัดกระบวนการเบื้องหลัง"</string>
     <string name="show_all_anrs" msgid="9160563836616468726">"แสดง ANR พื้นหลัง"</string>
-    <string name="show_all_anrs_summary" msgid="8562788834431971392">"แสดงกล่องโต้ตอบ \"แอปไม่ตอบสนอง\" สำหรับแอปพื้นหลัง"</string>
+    <string name="show_all_anrs_summary" msgid="8562788834431971392">"แสดงกล่องโต้ตอบ \"แอปไม่ตอบสนอง\" สำหรับแอปเบื้องหลัง"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"แสดงคำเตือนจากช่องทางการแจ้งเตือน"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"แสดงคำเตือนบนหน้าจอเมื่อแอปโพสต์การแจ้งเตือนโดยไม่มีช่องทางที่ถูกต้อง"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"บังคับให้แอปสามารถใช้ที่เก็บภายนอก"</string>
@@ -405,6 +405,7 @@
     <string name="transcode_enable_all" msgid="2411165920039166710">"เปิดใช้การแปลง"</string>
     <string name="transcode_default" msgid="3784803084573509491">"ถือว่าแอปรองรับรูปแบบสมัยใหม่"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"แสดงการแจ้งเตือนการแปลง"</string>
+    <string name="transcode_disable_cache" msgid="3160069309377467045">"ปิดใช้แคชสำหรับการแปลง"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"บริการที่ทำงานอยู่"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"ดูและควบคุมบริการที่ทำงานอยู่"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"การใช้งาน WebView"</string>
@@ -450,19 +451,17 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"แท็บเล็ตอาจปิดเครื่องในไม่ช้า (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"อุปกรณ์อาจปิดเครื่องในไม่ช้า (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_remaining_charging_duration_only (8085099012811384899) -->
-    <skip />
-    <!-- no translation found for power_charging_duration (6127154952524919719) -->
-    <skip />
+    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"อีก <xliff:g id="TIME">%1$s</xliff:g> จึงจะเต็ม"</string>
+    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - อีก <xliff:g id="TIME">%2$s</xliff:g> จึงจะเต็ม"</string>
     <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - กำลังเพิ่มประสิทธิภาพแบตเตอรี่"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"ไม่ทราบ"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"กำลังชาร์จ"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"กำลังชาร์จอย่างเร็ว"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"กำลังชาร์จอย่างช้าๆ"</string>
+    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"กำลังชาร์จแบบไร้สาย"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"ไม่ได้ชาร์จ"</string>
-    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"เสียบอยู่ ไม่สามารถชาร์จได้ในขณะนี้"</string>
-    <!-- no translation found for battery_info_status_full (1339002294876531312) -->
-    <skip />
+    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"เชื่อมต่ออยู่ ไม่ได้ชาร์จ"</string>
+    <string name="battery_info_status_full" msgid="1339002294876531312">"ชาร์จแล้ว"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"ผู้ดูแลระบบเป็นผู้ควบคุม"</string>
     <string name="disabled" msgid="8017887509554714950">"ปิดอยู่"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"อนุญาต"</string>
@@ -505,10 +504,12 @@
     <string name="cancel" msgid="5665114069455378395">"ยกเลิก"</string>
     <string name="okay" msgid="949938843324579502">"ตกลง"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"การปลุกและการช่วยเตือน"</string>
-    <string name="alarms_and_reminders_switch_title" msgid="186992351401152744">"อนุญาตให้ตั้งนาฬิกาปลุกหรือการช่วยเตือน"</string>
-    <string name="alarms_and_reminders_title" msgid="2988400785896875237">"การปลุกและการช่วยเตือน"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="5882788882647778753">"อนุญาตให้แอปนี้ตั้งนาฬิกาปลุกหรือเหตุการณ์ตามการจับเวลาอื่นๆ ซึ่งจะเป็นการปลุกระบบให้แอปทำงานแม้ว่าคุณไม่ได้ใช้อุปกรณ์อยู่ก็ตาม โปรดทราบว่าการเพิกถอนสิทธิ์นี้อาจทำให้แอปทำงานผิดปกติ นั่นคือการปลุกที่แอปตั้งเวลาไว้จะใช้ไม่ได้อีก"</string>
-    <string name="keywords_alarms_and_reminders" msgid="8882739572152019456">"กำหนดเวลา การปลุก การช่วยเตือน เหตุการณ์"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"อนุญาตให้ตั้งปลุกและการช่วยเตือน"</string>
+    <string name="alarms_and_reminders_title" msgid="8819933264635406032">"การปลุกและการช่วยเตือน"</string>
+    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"อนุญาตให้แอปตั้งปลุกและกำหนดเวลาการดำเนินการอื่นๆ ระบบอาจใช้แอปนี้แม้คุณจะไม่ได้ใช้โทรศัพท์อยู่ จึงอาจทำให้เปลืองแบตเตอรี่มากขึ้น การปิดสิทธิ์นี้จะทำให้แอปทำงานไม่ปกติและการปลุกไม่ทำงานตามกำหนดเวลา"</string>
+    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"อนุญาตให้แอปตั้งปลุกและกำหนดเวลาการดำเนินการอื่นๆ ระบบอาจใช้แอปนี้แม้คุณจะไม่ได้ใช้แท็บเล็ตอยู่ จึงอาจทำให้เปลืองแบตเตอรี่มากขึ้น การปิดสิทธิ์นี้จะทำให้แอปทำงานไม่ปกติและการปลุกไม่ทำงานตามกำหนดเวลา"</string>
+    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"อนุญาตให้แอปตั้งปลุกและกำหนดเวลาการดำเนินการอื่นๆ ระบบอาจใช้แอปนี้แม้คุณจะไม่ได้ใช้อุปกรณ์อยู่ จึงอาจทำให้เปลืองแบตเตอรี่มากขึ้น การปิดสิทธิ์นี้จะทำให้แอปทำงานไม่ปกติและการปลุกไม่ทำงานตามกำหนดเวลา"</string>
+    <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"กำหนดเวลา การปลุก การช่วยเตือน นาฬิกา"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"เปิด"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"เปิด \"ห้ามรบกวน\""</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"ไม่เลย"</string>
@@ -562,11 +563,10 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"ตั้งค่าล็อก"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"เปลี่ยนเป็น <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"กำลังสร้างผู้ใช้ใหม่…"</string>
-    <!-- no translation found for add_user_failed (4809887794313944872) -->
-    <skip />
+    <string name="add_user_failed" msgid="4809887794313944872">"สร้างผู้ใช้ใหม่ไม่ได้"</string>
     <string name="user_nickname" msgid="262624187455825083">"ชื่อเล่น"</string>
-    <string name="guest_new_guest" msgid="3482026122932643557">"เพิ่มผู้เข้าร่วม"</string>
-    <string name="guest_exit_guest" msgid="5908239569510734136">"นำผู้เข้าร่วมออก"</string>
+    <string name="guest_new_guest" msgid="3482026122932643557">"เพิ่มผู้ใช้ชั่วคราว"</string>
+    <string name="guest_exit_guest" msgid="5908239569510734136">"นำผู้ใช้ชั่วคราวออก"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"ผู้ใช้ชั่วคราว"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"ถ่ายรูป"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"เลือกรูปภาพ"</string>

@@ -118,7 +118,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Cancelar"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"La sincronización te permite acceder a los contactos y al historial de llamadas cuando el dispositivo está conectado."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"No se pudo vincular con <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"No se pudo vincular con <xliff:g id="DEVICE_NAME">%1$s</xliff:g> debido a que el PIN o la clave de acceso son incorrectos."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"No se pudo vincular con <xliff:g id="DEVICE_NAME">%1$s</xliff:g> porque la clave de acceso o el PIN son incorrectos."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"No se puede establecer la comunicación con <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Vínculo rechazado por <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Computadora"</string>
@@ -331,7 +331,7 @@
     <string name="media_category" msgid="8122076702526144053">"Multimedia"</string>
     <string name="debug_monitoring_category" msgid="1597387133765424994">"Supervisión"</string>
     <string name="strict_mode" msgid="889864762140862437">"Modo estricto"</string>
-    <string name="strict_mode_summary" msgid="1838248687233554654">"Destello por op. de apps en el subproceso principal"</string>
+    <string name="strict_mode_summary" msgid="1838248687233554654">"Parpadear si aplicaciones tardan en proceso principal"</string>
     <string name="pointer_location" msgid="7516929526199520173">"Ubicación del puntero"</string>
     <string name="pointer_location_summary" msgid="957120116989798464">"Superponer capa en pant. para mostrar puntos tocados"</string>
     <string name="show_touches" msgid="8437666942161289025">"Mostrar presiones"</string>
@@ -369,7 +369,7 @@
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"Eliminar actividades"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Descartar todas las actividades en cuanto el usuario las abandona"</string>
     <string name="app_process_limit_title" msgid="8361367869453043007">"Límite de procesos en segundo plano"</string>
-    <string name="show_all_anrs" msgid="9160563836616468726">"Mostrar ANR en 2.° plano"</string>
+    <string name="show_all_anrs" msgid="9160563836616468726">"Mostrar ANR en segundo plano"</string>
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Mostrar diálogo cuando las apps en segundo plano no responden"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Alertas de notificaciones"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Advertencia en pantalla cuando una app publica una notificación sin canal válido"</string>
@@ -405,6 +405,7 @@
     <string name="transcode_enable_all" msgid="2411165920039166710">"Habilitar la transcodificación"</string>
     <string name="transcode_default" msgid="3784803084573509491">"Suponer que las apps admiten formatos modernos"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"Mostrar notificaciones de transcodificación"</string>
+    <string name="transcode_disable_cache" msgid="3160069309377467045">"Inhabilitar caché de transcodificación"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"En ejecución"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Ver y controlar servicios actuales en ejecución"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Implementación de WebView"</string>
@@ -457,8 +458,9 @@
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Cargando"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Cargando rápido"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Carga lenta"</string>
+    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Carga inalámbrica"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"No se está cargando."</string>
-    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Conectado. No se puede cargar en este momento"</string>
+    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Está conectado, pero no se está cargando"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Cargada"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Controlada por el administrador"</string>
     <string name="disabled" msgid="8017887509554714950">"Inhabilitada"</string>
@@ -502,10 +504,12 @@
     <string name="cancel" msgid="5665114069455378395">"Cancelar"</string>
     <string name="okay" msgid="949938843324579502">"Aceptar"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmas y recordatorios"</string>
-    <string name="alarms_and_reminders_switch_title" msgid="186992351401152744">"Permitir programar alarmas o recordatorios"</string>
-    <string name="alarms_and_reminders_title" msgid="2988400785896875237">"Alarmas y recordatorios"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="5882788882647778753">"Permite que esta app programe alarmas y otros eventos de tiempo. Esto permitirá que la app se active y se ejecute incluso cuando no uses el dispositivo. Ten en cuenta que revocar este permiso podría hacer que la app no funcione correctamente, y es posible que las alarmas que haya programado la app dejen de funcionar."</string>
-    <string name="keywords_alarms_and_reminders" msgid="8882739572152019456">"programar, alarma, recordatorio, evento"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Permitir configuración de alarmas y recordatorios"</string>
+    <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmas y recordatorios"</string>
+    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"Permite que esta app configure alarmas y programe otras acciones. Esta app podría ejecutarse cuando no estás usando el teléfono, lo que podría consumir más batería. Si este permiso está desactivado, es posible que la app no funcione con normalidad, y las alarmas no seguirán su programación."</string>
+    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"Permite que esta app configure alarmas y programe otras acciones. Esta app podría ejecutarse cuando no estás usando la tablet, lo que podría consumir más batería. Si este permiso está desactivado, es posible que la app no funcione con normalidad, y las alarmas no seguirán su programación."</string>
+    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"Permite que esta app configure alarmas y programe otras acciones. Esta app se puede usar cuando no estás usando el dispositivo, lo que podría consumir más batería. Si este permiso está desactivado, es posible que la app no funcione con normalidad, y las alarmas no seguirán su programación."</string>
+    <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"programar, alarma, recordatorio, reloj"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Activar"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Activar No interrumpir"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Nunca"</string>
@@ -559,8 +563,7 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"Configurar bloqueo"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"Cambiar a <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Creando usuario nuevo…"</string>
-    <!-- no translation found for add_user_failed (4809887794313944872) -->
-    <skip />
+    <string name="add_user_failed" msgid="4809887794313944872">"No se pudo crear el usuario nuevo"</string>
     <string name="user_nickname" msgid="262624187455825083">"Sobrenombre"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Agregar invitado"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Quitar invitado"</string>

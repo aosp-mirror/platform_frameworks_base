@@ -405,6 +405,7 @@
     <string name="transcode_enable_all" msgid="2411165920039166710">"ට්‍රාන්ස්කෝඩින් සබල කරන්න"</string>
     <string name="transcode_default" msgid="3784803084573509491">"යෙදුම් නවීන ආකෘති සඳහා සහාය දක්වයි යැයි උපකල්පනය කරමු"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"ට්‍රාන්ස්කෝඩින් දැනුම්දීම් පෙන්වන්න"</string>
+    <string name="transcode_disable_cache" msgid="3160069309377467045">"ට්‍රාන්ස්කොඩින් හැඹිලිය අබල කරන්න"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"ධාවනය වන සේවා"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"දැනට ධාවනය වන සේවා බලන්න සහ පාලනය කරන්න"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView ක්‍රියාත්මක කිරීම"</string>
@@ -450,19 +451,17 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"ටැබ්ලට් පරිගණකය ඉක්මනින් වැසිය හැකිය (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"උපාංගය ඉක්මනින් වැසිය හැකිය (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_remaining_charging_duration_only (8085099012811384899) -->
-    <skip />
-    <!-- no translation found for power_charging_duration (6127154952524919719) -->
-    <skip />
+    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"සම්පූර්ණ වීමට <xliff:g id="TIME">%1$s</xliff:g>ක් ඉතිරියි"</string>
+    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - සම්පූර්ණ වීමට <xliff:g id="TIME">%2$s</xliff:g>ක් ඉතිරියි"</string>
     <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - බැටරි ආයු කාලය වැඩි දියුණු කරමින්"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"නොදනී"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"ආරෝපණය වෙමින්"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"ශීඝ්‍ර ආරෝපණය"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"සෙමින් ආරෝපණය"</string>
+    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"නොරැහැන්ව ආරෝපණය වේ"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"ආරෝපණය නොවේ"</string>
-    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"පේනුගත කර ඇත, මේ අවස්ථාවේදී ආරෝපණය කළ නොහැකිය"</string>
-    <!-- no translation found for battery_info_status_full (1339002294876531312) -->
-    <skip />
+    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"සම්බන්ධයි, ආරෝපණය නොවේ"</string>
+    <string name="battery_info_status_full" msgid="1339002294876531312">"අරෝපිතයි"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"පරිපාලක විසින් පාලනය කරන ලදී"</string>
     <string name="disabled" msgid="8017887509554714950">"අබල කර ඇත"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"ඉඩ දුන්"</string>
@@ -505,10 +504,12 @@
     <string name="cancel" msgid="5665114069455378395">"අවලංගු කරන්න"</string>
     <string name="okay" msgid="949938843324579502">"හරි"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"එලාම සහ සිහිකැඳවීම්"</string>
-    <string name="alarms_and_reminders_switch_title" msgid="186992351401152744">"එලාම හෝ සිහිකැඳවීම් සැකසීමට ඉඩ දෙන්න"</string>
-    <string name="alarms_and_reminders_title" msgid="2988400785896875237">"එලාම සහ සිහිකැඳවීම්"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="5882788882647778753">"එලාම හෝ වේලාව පදනම් කර ගත් වෙනත් සිදුවීම් කාලසටහන්ගත කිරීමට මෙම යෙදුමට ඉඩ දෙන්න. ඔබ උපාංගය භාවිත නොකරන විට පවා යෙදුමට අවදි වීමට සහ ක්‍රියාත්මක වීමට මෙය ඉඩ දෙයි. මෙම අවසරය අහෝසි කිරීම යෙදුම හොඳින් ක්‍රියාත්මක නොවීමට හේතු විය හැකි බව සලකන්න, විශේෂයෙන් යෙදුම කාලසටහන්ගත කර ඇති යම් එලාම තවදුරටත් ක්‍රියා නොකරනු ඇත."</string>
-    <string name="keywords_alarms_and_reminders" msgid="8882739572152019456">"කාල සටහන, එලාමය, සිහිකැඳවීම, සිදුවීම"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"එලාම සහ සිහිකැඳවීම් සැකසීමට ඉඩ දෙන්න"</string>
+    <string name="alarms_and_reminders_title" msgid="8819933264635406032">"එලාම සහ සිහිකැඳවීම්"</string>
+    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"එලාම සැකසීමට සහ වෙනත් ක්‍රියා කාල සටහන්ගත කිරීමට මෙම යෙදුමට ඉඩ දෙන්න. ඔබ ඔබගේ දුරකථනය භාවිත නොකරන විට මෙම යෙදුම භාවිත කළ හැකිය, එය බැටරිය වැඩියෙන් භාවිත කළ හැකිය. මෙම අවසරය ක්‍රියාවිරහිත නම්, මෙම යෙදුම සාමාන්‍ය ආකාරයට ක්‍රියා නොකළ හැකි අතර, එහි එලාම කාල සටහන්ගත කර ඇති පරිදි ක්‍රියා නොකරනු ඇත."</string>
+    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"එලාම සැකසීමට සහ වෙනත් ක්‍රියා කාල සටහන්ගත කිරීමට මෙම යෙදුමට ඉඩ දෙන්න. ඔබ ඔබගේ ටැබ්ලටය භාවිත නොකරන විට මෙම යෙදුම භාවිත කළ හැකිය, එය බැටරිය වැඩියෙන් භාවිත කළ හැකිය. මෙම අවසරය ක්‍රියාවිරහිත නම්, මෙම යෙදුම සාමාන්‍ය ආකාරයට ක්‍රියා නොකළ හැකි අතර, එහි එලාම කාල සටහන්ගත කර ඇති පරිදි ක්‍රියා නොකරනු ඇත."</string>
+    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"එලාම සැකසීමට සහ වෙනත් ක්‍රියා කාල සටහන්ගත කිරීමට මෙම යෙදුමට ඉඩ දෙන්න. ඔබ ඔබගේ උපාංගය භාවිත නොකරන විට මෙම යෙදුම භාවිත කළ හැකිය, එය බැටරිය වැඩියෙන් භාවිත කළ හැකිය. මෙම අවසරය ක්‍රියාවිරහිත නම්, මෙම යෙදුම සාමාන්‍ය ආකාරයට ක්‍රියා නොකළ හැකි අතර, එහි එලාම කාල සටහන්ගත කර ඇති පරිදි ක්‍රියා නොකරනු ඇත."</string>
+    <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"කාල සටහන, එලාමය, සිහිකැඳවීම, ඔරලෝසුව"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"ක්‍රියාත්මක කරන්න"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"බාධා නොකරන්න ක්‍රියාත්මක කරන්න"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"කිසි විටක නැත"</string>
@@ -562,8 +563,7 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"අගුල සකසන්න"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"<xliff:g id="USER_NAME">%s</xliff:g> වෙත මාරු වන්න"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"නව පරිශීලක තනමින්…"</string>
-    <!-- no translation found for add_user_failed (4809887794313944872) -->
-    <skip />
+    <string name="add_user_failed" msgid="4809887794313944872">"නව පරිශීලකයෙකු තැනීමට අසමත් විය"</string>
     <string name="user_nickname" msgid="262624187455825083">"අපනාමය"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"අමුත්තා එක් කරන්න"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"අමුත්තා ඉවත් කරන්න"</string>

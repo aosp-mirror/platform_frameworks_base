@@ -118,7 +118,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Cancel·la"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"La vinculació permet accedir als contactes i a l\'historial de trucades quan el dispositiu està connectat."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"No s\'ha pogut vincular amb <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"No s\'ha pogut vincular amb <xliff:g id="DEVICE_NAME">%1$s</xliff:g>, perquè el PIN o la contrasenya són incorrectes."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"No s\'ha pogut vincular a <xliff:g id="DEVICE_NAME">%1$s</xliff:g>: el PIN o la clau d\'accés són incorrectes."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"No es pot comunicar amb <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Vinculació rebutjada per <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Ordinador"</string>
@@ -405,6 +405,7 @@
     <string name="transcode_enable_all" msgid="2411165920039166710">"Activa la transcodificació"</string>
     <string name="transcode_default" msgid="3784803084573509491">"Assumeix que les aplicacions són compatibles amb formats moderns"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"Mostra les notificacions de transcodificació"</string>
+    <string name="transcode_disable_cache" msgid="3160069309377467045">"Desactiva la memòria cau per a la transcodificació"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Serveis en execució"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Visualitza i controla els serveis en execució"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Implementació de WebView"</string>
@@ -450,24 +451,22 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"És possible que la tauleta s\'apagui aviat (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"És possible que el dispositiu s\'apagui aviat (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g>: <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_remaining_charging_duration_only (8085099012811384899) -->
-    <skip />
-    <!-- no translation found for power_charging_duration (6127154952524919719) -->
-    <skip />
+    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> per completar la càrrega"</string>
+    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g>: <xliff:g id="TIME">%2$s</xliff:g> per completar la càrrega"</string>
     <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g>: s\'està optimitzant per preservar l\'estat de la bateria"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Desconegut"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"S\'està carregant"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Carregant ràpidament"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Carregant lentament"</string>
+    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Carregant sense fil"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"No s\'està carregant"</string>
-    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"El dispositiu està endollat però en aquests moments no es pot carregar"</string>
-    <!-- no translation found for battery_info_status_full (1339002294876531312) -->
-    <skip />
+    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Connectat; no s\'està carregant"</string>
+    <string name="battery_info_status_full" msgid="1339002294876531312">"Carregada"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Controlat per l\'administrador"</string>
     <string name="disabled" msgid="8017887509554714950">"Desactivat"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Amb permís"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Sense permís"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"Instal·la aplicacions desconegudes"</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"Instal·lar aplicacions desconegudes"</string>
     <string name="home" msgid="973834627243661438">"Pàgina d\'inici de configuració"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"0%"</item>
@@ -505,10 +504,12 @@
     <string name="cancel" msgid="5665114069455378395">"Cancel·la"</string>
     <string name="okay" msgid="949938843324579502">"D\'acord"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmes i recordatoris"</string>
-    <string name="alarms_and_reminders_switch_title" msgid="186992351401152744">"Permet configurar alarmes o recordatoris"</string>
-    <string name="alarms_and_reminders_title" msgid="2988400785896875237">"Alarmes i recordatoris"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="5882788882647778753">"Permet que aquesta aplicació programi alarmes o altres esdeveniments basats en el temps. Això permetrà que l\'aplicació s\'activi i s\'executi fins i tot quan no utilitzes el dispositiu. Si revoques aquest permís, pot ser que l\'aplicació no funcioni correctament; concretament, no sonarà cap alarma que l\'aplicació hagi programat."</string>
-    <string name="keywords_alarms_and_reminders" msgid="8882739572152019456">"programació, alarma, recordatori, esdeveniment"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Permet la configuració d\'alarmes i recordatoris"</string>
+    <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmes i recordatoris"</string>
+    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"Permet que aquesta aplicació configuri alarmes i programi altres accions. Aquesta aplicació es pot utilitzar quan no fas servir el telèfon, que pot consumir més bateria. Si aquest permís està desactivat, pot ser que l\'aplicació no funcioni amb normalitat i que les alarmes no funcionin tal com s\'han programat."</string>
+    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"Permet que aquesta aplicació configuri alarmes i programi altres accions. Aquesta aplicació es pot utilitzar quan no fas servir la tauleta, que pot consumir més bateria. Si aquest permís està desactivat, pot ser que l\'aplicació no funcioni amb normalitat i que les alarmes no funcionin tal com s\'han programat."</string>
+    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"Permet que aquesta aplicació configuri alarmes i programi altres accions. Aquesta aplicació es pot utilitzar quan no fas servir el dispositiu, que pot consumir més bateria. Si aquest permís està desactivat, pot ser que l\'aplicació no funcioni amb normalitat i que les alarmes no funcionin tal com s\'han programat."</string>
+    <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"programació, alarma, recordatori, rellotge"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Activa"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Activa el mode No molestis"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Mai"</string>
@@ -562,8 +563,7 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"Defineix un bloqueig"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"Canvia a <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"S\'està creant l\'usuari…"</string>
-    <!-- no translation found for add_user_failed (4809887794313944872) -->
-    <skip />
+    <string name="add_user_failed" msgid="4809887794313944872">"No s\'ha pogut crear l\'usuari"</string>
     <string name="user_nickname" msgid="262624187455825083">"Àlies"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Afegeix un convidat"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Suprimeix el convidat"</string>

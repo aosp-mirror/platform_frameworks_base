@@ -156,7 +156,7 @@
     <string name="launch_defaults_some" msgid="3631650616557252926">"הוגדרו כמה ברירות מחדל"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"לא הוגדרו ברירות מחדל"</string>
     <string name="tts_settings" msgid="8130616705989351312">"הגדרות טקסט לדיבור"</string>
-    <string name="tts_settings_title" msgid="7602210956640483039">"פלט טקסט לדיבור"</string>
+    <string name="tts_settings_title" msgid="7602210956640483039">"המרת טקסט לדיבור"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"קצב דיבור"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"המהירות שבה הטקסט נאמר"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"גובה צליל"</string>
@@ -197,10 +197,10 @@
     <string name="choose_profile" msgid="343803890897657450">"בחירת פרופיל"</string>
     <string name="category_personal" msgid="6236798763159385225">"אישי"</string>
     <string name="category_work" msgid="4014193632325996115">"עבודה"</string>
-    <string name="development_settings_title" msgid="140296922921597393">"אפשרויות מפתח"</string>
-    <string name="development_settings_enable" msgid="4285094651288242183">"הפעלת אפשרויות מפתח"</string>
+    <string name="development_settings_title" msgid="140296922921597393">"אפשרויות למפתחים"</string>
+    <string name="development_settings_enable" msgid="4285094651288242183">"הפעלת אפשרויות למפתחים"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"הגדרת אפשרויות לפיתוח אפליקציות"</string>
-    <string name="development_settings_not_available" msgid="355070198089140951">"אפשרויות מפתח אינן זמינות עבור משתמש זה"</string>
+    <string name="development_settings_not_available" msgid="355070198089140951">"אפשרויות למפתחים אינן זמינות עבור משתמש זה"</string>
     <string name="vpn_settings_not_available" msgid="2894137119965668920">"‏הגדרות VPN אינן זמינות עבור המשתמש הזה."</string>
     <string name="tethering_settings_not_available" msgid="266821736434699780">"הגדרות עבור שיתוף של חיבור אינטרנט אינן זמינות עבור המשתמש הזה"</string>
     <string name="apn_settings_not_available" msgid="1147111671403342300">"‏הגדרות עבור שם נקודת גישה (APN) אינן זמינות עבור המשתמש הזה"</string>
@@ -219,7 +219,7 @@
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"מכשירים מותאמים"</string>
     <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"מחובר עכשיו"</string>
     <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"פרטי מכשיר"</string>
-    <string name="adb_device_forget" msgid="193072400783068417">"אפשר לשכוח"</string>
+    <string name="adb_device_forget" msgid="193072400783068417">"הסרה"</string>
     <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"המזהה הייחודי של המכשיר: <xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
     <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"החיבור נכשל"</string>
     <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"עליך לוודא שהמכשיר <xliff:g id="DEVICE_NAME">%1$s</xliff:g> מחובר לרשת הנכונה"</string>
@@ -267,7 +267,7 @@
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="1638623076480928191">"‏קצב דגימה של אודיו ל-Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5876305103137067798">"‏הפעלת ‏Codec אודיו ל-Bluetooth\nבחירה: קצב דגימה"</string>
     <string name="bluetooth_select_a2dp_codec_type_help_info" msgid="8647200416514412338">"כשזה מופיע באפור, אין לזה תמיכה בטלפון או באוזניות"</string>
-    <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="6253965294594390806">"‏מספר סיביות לדגימה באודיו ל-Bluetooth"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="6253965294594390806">"‏מספר ביטים לדגימה באודיו ל-Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4898693684282596143">"‏הפעלת ‏Codec אודיו ל-Bluetooth\nבחירה: ביטים לדגימה"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="364277285688014427">"‏מצב של ערוץ אודיו ל-Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="2076949781460359589">"‏הפעלת ‏Codec אודיו ל-Bluetooth\nבחירה: מצב ערוץ"</string>
@@ -275,9 +275,9 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7274396574659784285">"‏הפעלת Codec אודיו LDAC ל-Bluetooth\nבחירה: איכות נגינה"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="2040810756832027227">"סטרימינג: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"‏DNS פרטי"</string>
-    <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"‏יש לבחור במצב DNS פרטי"</string>
+    <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"‏בחירת מצב של DNS פרטי"</string>
     <string name="private_dns_mode_off" msgid="7065962499349997041">"מושבת"</string>
-    <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"באופן אוטומטי"</string>
+    <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"אוטומטי"</string>
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"‏שם מארח של ספק DNS פרטי"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"‏צריך להזין את שם המארח של ספק DNS"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"לא ניתן היה להתחבר"</string>
@@ -285,7 +285,7 @@
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"‏העלאת רמת הרישום של Wi‑Fi ביומן, הצגה לכל SSID RSSI ב-Wi‑Fi Picker"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"אפשרות זו מפחיתה את קצב התרוקנות הסוללה ומשפרת את ביצועי הרשת"</string>
     <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"‏כשמצב זה מופעל, כתובת ה-MAC של המכשיר הזה עשויה להשתנות בכל פעם שהוא מתחבר לרשת שפועלת בה רנדומיזציה של כתובות MAC."</string>
-    <string name="wifi_metered_label" msgid="8737187690304098638">"נמדדת"</string>
+    <string name="wifi_metered_label" msgid="8737187690304098638">"חיוב לפי שימוש בנתונים"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"לא נמדדת"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"גודלי מאגר של יומן רישום"</string>
     <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"יש לבחור גדלים של יוצר יומן לכל מאגר יומן"</string>
@@ -405,6 +405,7 @@
     <string name="transcode_enable_all" msgid="2411165920039166710">"הפעלת המרת קידוד"</string>
     <string name="transcode_default" msgid="3784803084573509491">"הנחת העבודה היא שאפליקציות תומכות בפורמטים מודרניים"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"הצגת התראות לגבי המרת קידוד"</string>
+    <string name="transcode_disable_cache" msgid="3160069309377467045">"השבתת השמירה של המרת הקידוד במטמון"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"שירותים פועלים"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"הצגת השירותים הפועלים כעת ושליטה בהם"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"‏יישום WebView"</string>
@@ -450,24 +451,22 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"הטאבלט עלול להיכבות בקרוב (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"המכשיר עלול להיכבות בקרוב (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g>‏ – <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_remaining_charging_duration_only (8085099012811384899) -->
-    <skip />
-    <!-- no translation found for power_charging_duration (6127154952524919719) -->
-    <skip />
+    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"הזמן הנותר לטעינה מלאה: <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – הזמן הנותר לטעינה מלאה: <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> ﹣ מופעל מיטוב לשמירה על תקינות הסוללה"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"לא ידוע"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"בטעינה"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"הסוללה נטענת מהר"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"הסוללה נטענת לאט"</string>
+    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"בטעינה אלחוטית"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"לא בטעינה"</string>
-    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"המכשיר מחובר, אבל לא ניתן לטעון עכשיו"</string>
-    <!-- no translation found for battery_info_status_full (1339002294876531312) -->
-    <skip />
+    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"מחובר, לא בטעינה"</string>
+    <string name="battery_info_status_full" msgid="1339002294876531312">"הסוללה טעונה"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"נמצא בשליטת מנהל מערכת"</string>
     <string name="disabled" msgid="8017887509554714950">"מושבת"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"מורשה"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"לא מורשה"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"להתקין גם אם לא מוכר לך?"</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"התקנת אפליקציות לא מוכרות"</string>
     <string name="home" msgid="973834627243661438">"דף הבית של ההגדרות"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"0%"</item>
@@ -506,11 +505,13 @@
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"פחות זמן."</string>
     <string name="cancel" msgid="5665114069455378395">"ביטול"</string>
     <string name="okay" msgid="949938843324579502">"אישור"</string>
-    <string name="alarms_and_reminders_label" msgid="6918395649731424294">"השכמות ותזכורות"</string>
-    <string name="alarms_and_reminders_switch_title" msgid="186992351401152744">"מאפשרת להגדיר השכמות ותזכורות"</string>
-    <string name="alarms_and_reminders_title" msgid="2988400785896875237">"השכמות ותזכורות"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="5882788882647778753">"הגדרה זו מתירה לאפליקציה לתזמן השכמות או אירועים אחרים הניתנים לתזמון. ההגדרה תאפשר לאפליקציה לצאת ממצב שינה ולפעול גם כשהמכשיר לא בשימוש. לתשומת ליבך, ביטול ההרשאה הזאת עלול לגרום לתקלה באפליקציה, כמו השכמות מתוזמנות שלא יפעלו יותר."</string>
-    <string name="keywords_alarms_and_reminders" msgid="8882739572152019456">"תזמון, השכמה, תזכורת, אירוע"</string>
+    <string name="alarms_and_reminders_label" msgid="6918395649731424294">"שעונים מעוררים ותזכורות"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"הרשאה להגדרה של שעונים מעוררים ותזכורות"</string>
+    <string name="alarms_and_reminders_title" msgid="8819933264635406032">"שעונים מעוררים ותזכורות"</string>
+    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"הגדרה זו מתירה לאפליקציה להגדיר שעון מעורר ולתזמן אירועים אחרים. ייתכן שהאפליקציה תפעל גם כשלא נעשה שימוש בטלפון שלך, ולכן תגביר את צריכת הסוללה. אם ההרשאה הזו תושבת, ייתכן שהאפליקציה לא תפעל כראוי ושהשעונים המעוררים לא יפעלו כפי שתוזמנו."</string>
+    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"הגדרה זו מתירה לאפליקציה להגדיר שעון מעורר ולתזמן אירועים אחרים. ייתכן שהאפליקציה תפעל גם כשלא נעשה שימוש בטאבלט שלך, ולכן תגביר את צריכת הסוללה. אם ההרשאה הזו תושבת, ייתכן שהאפליקציה לא תפעל כראוי ושהשעונים המעוררים לא יפעלו כפי שתוזמנו."</string>
+    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"הגדרה זו מתירה לאפליקציה להגדיר שעון מעורר ולתזמן אירועים אחרים. ייתכן שהאפליקציה תפעל גם כשלא נעשה שימוש במכשיר שלך, ולכן תגביר את צריכת הסוללה. אם ההרשאה הזו תושבת, ייתכן שהאפליקציה לא תפעל כראוי ושהשעונים המעוררים לא יפעלו כפי שתוזמנו."</string>
+    <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"תזמון, שעון מעורר, תזכורת, שעון"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"הפעלה"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"הפעלת מצב נא לא להפריע"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"אף פעם"</string>
@@ -524,7 +525,7 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"יש לשאול בכל פעם"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"עד הכיבוי"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"הרגע"</string>
-    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"רמקול של טלפון"</string>
+    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"רמקול של הטלפון"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"הטלפון הזה"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"יש בעיה בחיבור. עליך לכבות את המכשיר ולהפעיל אותו מחדש"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"התקן אודיו חוטי"</string>
@@ -564,8 +565,7 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"הגדרת נעילה"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"מעבר אל <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"בתהליך יצירה של משתמש חדש…"</string>
-    <!-- no translation found for add_user_failed (4809887794313944872) -->
-    <skip />
+    <string name="add_user_failed" msgid="4809887794313944872">"לא ניתן היה ליצור משתמש חדש"</string>
     <string name="user_nickname" msgid="262624187455825083">"כינוי"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"הוספת אורח"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"הסרת אורח"</string>
