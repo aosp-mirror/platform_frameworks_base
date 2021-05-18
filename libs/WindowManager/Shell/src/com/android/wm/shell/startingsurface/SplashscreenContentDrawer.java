@@ -39,6 +39,7 @@ import android.os.HandlerThread;
 import android.os.Trace;
 import android.util.Slog;
 import android.view.SurfaceControl;
+import android.view.View;
 import android.window.SplashScreenView;
 
 import com.android.internal.R;
@@ -398,7 +399,17 @@ public class SplashscreenContentDrawer {
                 splashScreenView.setNotCopyable();
                 splashScreenView.setRevealAnimationSupported(false);
             }
-            splashScreenView.makeSystemUIColorsTransparent();
+            splashScreenView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
+                @Override
+                public void onViewAttachedToWindow(View v) {
+                    SplashScreenView.applySystemBarsContrastColor(v.getWindowInsetsController(),
+                            splashScreenView.getInitBackgroundColor());
+                }
+
+                @Override
+                public void onViewDetachedFromWindow(View v) {
+                }
+            });
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
             return splashScreenView;
         }
