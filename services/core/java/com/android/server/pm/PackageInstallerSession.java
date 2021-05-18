@@ -46,9 +46,11 @@ import static com.android.internal.util.XmlUtils.writeUriAttribute;
 import static com.android.server.pm.PackageInstallerService.prepareStageDir;
 
 import android.Manifest;
+import android.annotation.AnyThread;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.WorkerThread;
 import android.app.AppOpsManager;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -261,6 +263,15 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static final int INCREMENTAL_STORAGE_BLOCKED_TIMEOUT_MS = 2000;
     private static final int INCREMENTAL_STORAGE_UNHEALTHY_TIMEOUT_MS = 7000;
     private static final int INCREMENTAL_STORAGE_UNHEALTHY_MONITORING_MS = 60000;
+
+    /**
+     * The default value of {@link #mValidatedTargetSdk} is {@link Integer#MAX_VALUE}. If {@link
+     * #mValidatedTargetSdk} is compared with {@link Build.VERSION_CODES#Q} before getting the
+     * target sdk version from a validated apk in {@link #validateApkInstallLocked()}, the compared
+     * result will not trigger any user action in
+     * {@link #checkUserActionRequirement(PackageInstallerSession)}.
+     */
+    private static final int INVALID_TARGET_SDK_VERSION = Integer.MAX_VALUE;
 
     // TODO: enforce INSTALL_ALLOW_TEST
     // TODO: enforce INSTALL_ALLOW_DOWNGRADE
@@ -795,6 +806,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     @GuardedBy("mLock")
     private PackageLite mPackageLite;
+
+    /**
+     * Keep the target sdk of a validated apk.
+     */
+    @GuardedBy("mLock")
+    private int mValidatedTargetSdk = INVALID_TARGET_SDK_VERSION;
 
     private static final FileFilter sAddedApkFilter = new FileFilter() {
         @Override
@@ -1727,6 +1744,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         mHandler.obtainMessage(MSG_STREAM_VALIDATE_AND_COMMIT).sendToTarget();
     }
 
+    @WorkerThread
     private void handleStreamValidateAndCommit() {
         PackageManagerException unrecoverableFailure = null;
         // This will track whether the session and any children were validated and are ready to
@@ -1976,6 +1994,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      * exception is thrown.
      * @throws PackageManagerException on an unrecoverable error.
      */
+    @WorkerThread
     private boolean streamValidateAndCommit() throws PackageManagerException {
         // TODO(patb): since the work done here for a parent session in a multi-package install is
         //             mostly superficial, consider splitting this method for the parent and
@@ -2137,6 +2156,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      *                    immutable by the caller during the method call. Used to resolve child
      *                    sessions Ids to actual object reference.
      */
+    @AnyThread
     void onAfterSessionRead(SparseArray<PackageInstallerSession> allSessions) {
         synchronized (mLock) {
             // Resolve null values to actual object references
@@ -2222,6 +2242,51 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
+    @WorkerThread
+    private static boolean checkUserActionRequirement(PackageInstallerSession session) {
+        if (session.isMultiPackage()) {
+            return false;
+        }
+
+        @UserActionRequirement int userActionRequirement = USER_ACTION_NOT_NEEDED;
+        // TODO(b/159331446): Move this to makeSessionActiveForInstall and update javadoc
+        userActionRequirement = session.computeUserActionRequirement();
+        if (userActionRequirement == USER_ACTION_REQUIRED) {
+            session.sendPendingUserActionIntent();
+            return true;
+        }
+
+        if (!session.isApexSession() && userActionRequirement == USER_ACTION_PENDING_APK_PARSING) {
+            final int validatedTargetSdk;
+            synchronized (session.mLock) {
+                validatedTargetSdk = session.mValidatedTargetSdk;
+            }
+
+            if (validatedTargetSdk != INVALID_TARGET_SDK_VERSION
+                    && validatedTargetSdk < Build.VERSION_CODES.Q) {
+                session.sendPendingUserActionIntent();
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Find out any session needs user action.
+     *
+     * @return true if the session set requires user action for the installation, otherwise false.
+     */
+    @WorkerThread
+    private boolean sendPendingUserActionIntentIfNeeded() {
+        synchronized (mLock) {
+            assertNotChildLocked("PackageInstallerSession#sendPendingUserActionIntentIfNeeded");
+        }
+
+        return sessionContains(PackageInstallerSession::checkUserActionRequirement);
+    }
+
+    @WorkerThread
     private void handleInstall() {
         if (isInstallerDeviceOwnerOrAffiliatedProfileOwner()) {
             DevicePolicyEventLogger
@@ -2229,6 +2294,17 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     .setAdmin(mInstallSource.installerPackageName)
                     .write();
         }
+
+        /**
+         * Stops the installation of the whole session set if one session needs user action
+         * in its belong session set. When the user answers the yes,
+         * {@link #setPermissionsResult(boolean)} is called and then {@link #MSG_INSTALL} is
+         * handled to come back here to check again.
+         */
+        if (sendPendingUserActionIntentIfNeeded()) {
+            return;
+        }
+
         if (params.isStaged) {
             // TODO(b/136257624): CTS test fails if we don't send session finished broadcast, even
             //  though ideally, we just need to send session committed broadcast.
@@ -2253,9 +2329,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             throws PackageManagerException {
         final PackageManagerService.VerificationParams verifyingSession =
                 prepareForVerification();
-        if (verifyingSession == null) {
-            return;
-        }
         if (isMultiPackage()) {
             final List<PackageInstallerSession> childSessions;
             synchronized (mLock) {
@@ -2270,9 +2343,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 try {
                     final PackageManagerService.VerificationParams verifyingChildSession =
                             session.prepareForVerification();
-                    if (verifyingChildSession != null) {
-                        verifyingChildSessions.add(verifyingChildSession);
-                    }
+                    verifyingChildSessions.add(verifyingChildSession);
                 } catch (PackageManagerException e) {
                     failure = e;
                     success = false;
@@ -2355,21 +2426,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      * {@link PackageManagerService.VerificationParams} representing this new staged state or null
      * in case permissions need to be requested before verification can proceed.
      */
-    @Nullable
+    @NonNull
     private PackageManagerService.VerificationParams prepareForVerification()
             throws PackageManagerException {
         assertNotLocked("makeSessionActive");
-
-        @UserActionRequirement
-        int userActionRequirement = USER_ACTION_NOT_NEEDED;
-        // TODO(b/159331446): Move this to makeSessionActiveForInstall and update javadoc
-        if (!params.isMultiPackage) {
-            userActionRequirement = computeUserActionRequirement();
-            if (userActionRequirement == USER_ACTION_REQUIRED) {
-                sendPendingUserActionIntent();
-                return null;
-            } // else, we'll wait until we parse to determine if we need to
-        }
 
         synchronized (mLock) {
             if (mRelinquished) {
@@ -2395,12 +2455,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
                     extractNativeLibraries(
                             mPackageLite, stageDir, params.abiOverride, mayInheritNativeLibs());
-
-                    if (userActionRequirement == USER_ACTION_PENDING_APK_PARSING
-                            && (result.getTargetSdk() < Build.VERSION_CODES.Q)) {
-                        sendPendingUserActionIntent();
-                        return null;
-                    }
                 }
             }
             return makeVerificationParamsLocked();
@@ -2815,7 +2869,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @GuardedBy("mLock")
     private PackageLite validateApkInstallLocked() throws PackageManagerException {
         ApkLite baseApk = null;
-        PackageLite packageLite = null;
+        final PackageLite packageLite;
         mPackageLite = null;
         mPackageName = null;
         mVersionCode = -1;
@@ -3122,6 +3176,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 mIncrementalFileStorages.disallowReadLogs();
             }
         }
+
+        // {@link #sendPendingUserActionIntentIfNeeded} needs to use
+        // {@link PackageLite#getTargetSdk()}
+        mValidatedTargetSdk = packageLite.getTargetSdk();
+
         return packageLite;
     }
 
@@ -3533,8 +3592,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             // Mark and kick off another install pass
             synchronized (mLock) {
                 mPermissionsManuallyAccepted = true;
-                mHandler.obtainMessage(MSG_INSTALL).sendToTarget();
             }
+
+            PackageInstallerSession root =
+                    (hasParentSessionId())
+                            ? mSessionProvider.getSession(getParentSessionId())
+                            : this;
+            root.mHandler.obtainMessage(MSG_INSTALL).sendToTarget();
         } else {
             destroyInternal();
             dispatchSessionFinished(INSTALL_FAILED_ABORTED, "User rejected permissions", null);
