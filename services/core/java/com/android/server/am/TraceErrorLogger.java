@@ -26,7 +26,7 @@ import java.util.UUID;
  *
  * @hide
  */
-class TraceErrorLogger {
+public class TraceErrorLogger {
     private static final String COUNTER_PREFIX = "ErrorId:";
     private static final String ADD_ERROR_ID = "add_error_id";
     private static final int PLACEHOLDER_VALUE = 1;

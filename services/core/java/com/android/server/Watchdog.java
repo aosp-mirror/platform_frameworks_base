@@ -45,6 +45,7 @@ import com.android.internal.os.ProcessCpuTracker;
 import com.android.internal.os.ZygoteConnectionConstants;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.am.ActivityManagerService;
+import com.android.server.am.TraceErrorLogger;
 import com.android.server.wm.SurfaceAnimationThread;
 
 import java.io.BufferedReader;
@@ -59,6 +60,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /** This class calls its monitor every minute. Killing this process if they don't return **/
@@ -158,6 +160,8 @@ public class Watchdog {
     private IActivityController mController;
     private boolean mAllowRestart = true;
     private final List<Integer> mInterestingJavaPids = new ArrayList<>();
+
+    private final TraceErrorLogger mTraceErrorLogger;
 
     /**
      * Used for checking status of handle threads and scheduling monitor callbacks.
@@ -367,6 +371,8 @@ public class Watchdog {
         // See the notes on DEFAULT_TIMEOUT.
         assert DB ||
                 DEFAULT_TIMEOUT > ZygoteConnectionConstants.WRAPPED_PID_TIMEOUT_MILLIS;
+
+        mTraceErrorLogger = new TraceErrorLogger();
     }
 
     /**
@@ -667,6 +673,19 @@ public class Watchdog {
             // Then kill this process so that the system will restart.
             EventLog.writeEvent(EventLogTags.WATCHDOG, subject);
 
+            final UUID errorId;
+            if (mTraceErrorLogger.isAddErrorIdEnabled()) {
+                errorId = mTraceErrorLogger.generateErrorId();
+                mTraceErrorLogger.addErrorIdToTrace(errorId);
+            } else {
+                errorId = null;
+            }
+
+            // Log the atom as early as possible since it is used as a mechanism to trigger
+            // Perfetto. Ideally, the Perfetto trace capture should happen as close to the
+            // point in time when the Watchdog happens as possible.
+            FrameworkStatsLog.write(FrameworkStatsLog.SYSTEM_SERVER_WATCHDOG_OCCURRED, subject);
+
             long anrTime = SystemClock.uptimeMillis();
             StringBuilder report = new StringBuilder();
             report.append(MemoryPressureUtil.currentPsiState());
@@ -691,7 +710,6 @@ public class Watchdog {
             // Try to add the error to the dropbox, but assuming that the ActivityManager
             // itself may be deadlocked.  (which has happened, causing this statement to
             // deadlock and the watchdog as a whole to be ineffective)
-            final String localSubject = subject;
             Thread dropboxThread = new Thread("watchdogWriteToDropbox") {
                     public void run() {
                         // If a watched thread hangs before init() is called, we don't have a
@@ -699,11 +717,9 @@ public class Watchdog {
                         if (mActivity != null) {
                             mActivity.addErrorToDropBox(
                                     "watchdog", null, "system_server", null, null, null,
-                                    null, report.toString(), stack, null, null, null, null);
-
+                                    null, report.toString(), stack, null, null, null,
+                                    errorId);
                         }
-                        FrameworkStatsLog.write(FrameworkStatsLog.SYSTEM_SERVER_WATCHDOG_OCCURRED,
-                                localSubject);
                     }
                 };
             dropboxThread.start();
