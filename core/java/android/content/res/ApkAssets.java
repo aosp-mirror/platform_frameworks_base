@@ -334,13 +334,14 @@ public final class ApkAssets {
         }
     }
 
+    @Nullable
     CharSequence getStringFromPool(int idx) {
         if (mStringBlock == null) {
             return null;
         }
 
         synchronized (this) {
-            return mStringBlock.get(idx);
+            return mStringBlock.getSequence(idx);
         }
     }
 

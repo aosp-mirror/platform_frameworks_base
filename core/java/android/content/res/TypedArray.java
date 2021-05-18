@@ -1376,6 +1376,7 @@ public class TypedArray implements AutoCloseable {
         return true;
     }
 
+    @Nullable
     private CharSequence loadStringValueAt(int index) {
         final int[] data = mData;
         final int cookie = data[index + STYLE_ASSET_COOKIE];
