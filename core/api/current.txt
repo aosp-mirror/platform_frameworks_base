@@ -39223,7 +39223,8 @@ package android.speech {
     method @MainThread public static android.speech.SpeechRecognizer createSpeechRecognizer(android.content.Context);
     method @MainThread public static android.speech.SpeechRecognizer createSpeechRecognizer(android.content.Context, android.content.ComponentName);
     method public void destroy();
-    method public static boolean isRecognitionAvailable(android.content.Context);
+    method public static boolean isOnDeviceRecognitionAvailable(@NonNull android.content.Context);
+    method public static boolean isRecognitionAvailable(@NonNull android.content.Context);
     method @MainThread public void setRecognitionListener(android.speech.RecognitionListener);
     method @MainThread public void startListening(android.content.Intent);
     method @MainThread public void stopListening();
