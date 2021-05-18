@@ -159,13 +159,13 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.test.BroadcastInterceptingContext;
 import com.android.internal.util.test.BroadcastInterceptingContext.FutureIntent;
+import com.android.internal.util.test.FsUtil;
 import com.android.server.DeviceIdleInternal;
 import com.android.server.LocalServices;
 import com.android.server.usage.AppStandbyInternal;
 
 import com.google.common.util.concurrent.AbstractFuture;
 
-import libcore.io.IoUtils;
 import libcore.io.Streams;
 
 import org.junit.After;
@@ -2347,7 +2347,7 @@ public class NetworkPolicyManagerServiceTest {
     private void setNetpolicyXml(Context context) throws Exception {
         mPolicyDir = context.getFilesDir();
         if (mPolicyDir.exists()) {
-            IoUtils.deleteContents(mPolicyDir);
+            FsUtil.deleteContents(mPolicyDir);
         }
         if (!TextUtils.isEmpty(mNetpolicyXml)) {
             final String assetPath = NETPOLICY_DIR + "/" + mNetpolicyXml;
