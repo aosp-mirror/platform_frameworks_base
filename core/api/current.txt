@@ -52846,7 +52846,7 @@ package android.view.translation {
     method public int getTranslationFlags();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.view.translation.TranslationContext> CREATOR;
-    field public static final int FLAG_DICTIONARY_DESCRIPTION = 4; // 0x4
+    field public static final int FLAG_DEFINITIONS = 4; // 0x4
     field public static final int FLAG_LOW_LATENCY = 1; // 0x1
     field public static final int FLAG_TRANSLITERATION = 2; // 0x2
   }
@@ -52931,12 +52931,13 @@ package android.view.translation {
   public final class TranslationResponseValue implements android.os.Parcelable {
     method public int describeContents();
     method @NonNull public static android.view.translation.TranslationResponseValue forError();
-    method @Nullable public CharSequence getDictionaryDescription();
+    method @NonNull public android.os.Bundle getExtras();
     method public int getStatusCode();
     method @Nullable public CharSequence getText();
     method @Nullable public CharSequence getTransliteration();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.view.translation.TranslationResponseValue> CREATOR;
+    field public static final String EXTRA_DEFINITIONS = "android.view.translation.extra.DEFINITIONS";
     field public static final int STATUS_ERROR = 1; // 0x1
     field public static final int STATUS_SUCCESS = 0; // 0x0
   }
@@ -52944,7 +52945,7 @@ package android.view.translation {
   public static final class TranslationResponseValue.Builder {
     ctor public TranslationResponseValue.Builder(int);
     method @NonNull public android.view.translation.TranslationResponseValue build();
-    method @NonNull public android.view.translation.TranslationResponseValue.Builder setDictionaryDescription(@NonNull CharSequence);
+    method @NonNull public android.view.translation.TranslationResponseValue.Builder setExtras(@NonNull android.os.Bundle);
     method @NonNull public android.view.translation.TranslationResponseValue.Builder setText(@NonNull CharSequence);
     method @NonNull public android.view.translation.TranslationResponseValue.Builder setTransliteration(@NonNull CharSequence);
   }
