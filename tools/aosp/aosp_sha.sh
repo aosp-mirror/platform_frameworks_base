@@ -5,7 +5,21 @@ if git branch -vv | grep -q -P "^\*[^\[]+\[aosp/"; then
     # Change appears to be in AOSP
     exit 0
 else
-    # Change appears to be non-AOSP; search for files
+    # Change appears to be non-AOSP.
+
+    # If this is a cherry-pick, then allow it.
+    cherrypick=0
+    while read -r line ; do
+      if [[ $line =~ cherry\ picked\ from  ]] ; then
+        (( cherrypick++ ))
+      fi
+    done < <(git show $1)
+    if (( cherrypick != 0 )); then
+      # This is a cherry-pick, so allow it.
+      exit 0
+    fi
+
+    # See if any files are affected.
     count=0
     while read -r file ; do
         if (( count == 0 )); then
