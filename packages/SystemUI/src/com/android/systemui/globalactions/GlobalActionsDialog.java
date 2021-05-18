@@ -151,6 +151,7 @@ public class GlobalActionsDialog extends GlobalActionsDialogLite
                 iWindowManager,
                 backgroundExecutor,
                 uiEventLogger,
+                null,
                 ringerModeTracker, sysUiState, handler);
 
         mLockPatternUtils = lockPatternUtils;
@@ -298,7 +299,7 @@ public class GlobalActionsDialog extends GlobalActionsDialogLite
             super(context, com.android.systemui.R.style.Theme_SystemUI_Dialog_GlobalActions,
                     adapter, overflowAdapter, depthController, sysuiColorExtractor,
                     statusBarService, notificationShadeWindowController, sysuiState,
-                    onRotateCallback, keyguardShowing, powerAdapter, uiEventLogger);
+                    onRotateCallback, keyguardShowing, powerAdapter, uiEventLogger, null);
             mWalletFactory = walletFactory;
 
             // Update window attributes
