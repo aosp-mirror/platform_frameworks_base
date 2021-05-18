@@ -609,14 +609,14 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Icono de huella digital"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"gestionar el hardware de desbloqueo facial"</string>
+    <string name="permlab_manageFace" msgid="4569549381889283282">"gestionar el hardware de Desbloqueo facial"</string>
     <string name="permdesc_manageFace" msgid="6204569688492710471">"Permite que la app use métodos para añadir y suprimir plantillas de caras para su uso."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"Utilizar hardware de desbloqueo facial"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Permite que la aplicación utilice el hardware de desbloqueo facial para autenticarte"</string>
+    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"utilizar hardware de Desbloqueo facial"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Permite que la aplicación utilice el hardware de Desbloqueo facial para autenticarte"</string>
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Desbloqueo facial"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Volver a registrar la cara"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Para mejorar el reconocimiento, vuelve a registrar tu cara"</string>
-    <string name="face_setup_notification_title" msgid="550617822603450009">"Configura el desbloqueo facial"</string>
+    <string name="face_setup_notification_title" msgid="550617822603450009">"Configura Desbloqueo facial"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Desbloquea el teléfono con solo mirarlo"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Configura más formas de desbloqueo"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Toca para añadir una huella digital"</string>
@@ -643,19 +643,19 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"No se puede verificar. Hardware no disponible."</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"Vuelve a probar el desbloqueo facial."</string>
+    <string name="face_error_timeout" msgid="522924647742024699">"Vuelve a probar Desbloqueo facial."</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Para guardar nuevos datos faciales, borra otros antiguos."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Se ha cancelado el reconocimiento facial."</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"El usuario ha cancelado el desbloqueo facial."</string>
+    <string name="face_error_user_canceled" msgid="8553045452825849843">"El usuario ha cancelado Desbloqueo facial."</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Demasiados intentos. Inténtalo de nuevo más tarde."</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Muchos intentos. Se ha inhabilitado el desbloqueo facial."</string>
+    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Muchos intentos. Se ha inhabilitado Desbloqueo facial."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"No se ha verificado tu cara. Vuelve a intentarlo."</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"No has configurado el desbloqueo facial."</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"El desbloqueo facial no está disponible en este dispositivo."</string>
+    <string name="face_error_not_enrolled" msgid="7369928733504691611">"No has configurado Desbloqueo facial."</string>
+    <string name="face_error_hw_not_present" msgid="1070600921591729944">"Desbloqueo facial no está disponible en este dispositivo."</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"El sensor está inhabilitado en estos momentos."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Cara <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <string name="face_app_setting_name" msgid="8130135875458467243">"Usar desbloqueo facial"</string>
-    <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Usar desbloqueo facial o bloqueo de pantalla"</string>
+    <string name="face_app_setting_name" msgid="8130135875458467243">"Usar Desbloqueo facial"</string>
+    <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Usar Desbloqueo facial o Bloqueo de pantalla"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Usa tu cara para continuar"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Usa tu cara o tu bloqueo de pantalla para continuar"</string>
   <string-array name="face_error_vendor">
@@ -887,7 +887,7 @@
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Vuelve a intentarlo"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Vuelve a intentarlo"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Desbloquear para todos los datos y funciones"</string>
-    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Se ha superado el número máximo de intentos de desbloqueo facial."</string>
+    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Se ha superado el número máximo de intentos de Desbloqueo facial."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"Falta la tarjeta SIM."</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"No se ha insertado ninguna tarjeta SIM en el tablet."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"No hay ninguna tarjeta SIM en tu dispositivo Android TV."</string>

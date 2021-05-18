@@ -609,14 +609,14 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"ফিংগাৰপ্ৰিণ্ট আইকন"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"মুখাৱয়বৰদ্বাৰা আনলক হার্ডৱেৰ পৰিচালনা কৰক"</string>
+    <string name="permlab_manageFace" msgid="4569549381889283282">"ফেচ আনলক হার্ডৱেৰ পৰিচালনা কৰক"</string>
     <string name="permdesc_manageFace" msgid="6204569688492710471">"মুখমণ্ডলৰ টেম্প্লেট যোগ কৰাৰ বা মচাৰ পদ্ধতি কামত লগাবলৈ আহ্বান কৰিবলৈ এপটোক অনুমতি দিয়ে।"</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"মুখাৱয়বৰদ্বাৰা আনলক হার্ডৱেৰ ব্যৱহাৰ কৰক"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"বিশ্বাসযোগ্যতা প্ৰমাণীকৰণৰ বাবে এপ্‌ক মুখাৱয়বৰদ্বাৰা আনলক কৰা হাৰ্ডৱেৰ ব্যৱহাৰ কৰিবলৈ দিয়ে"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"মুখাৱয়বৰদ্বাৰা আনলক কৰা সুবিধা"</string>
+    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"ফেচ আনলক হার্ডৱেৰ ব্যৱহাৰ কৰক"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"বিশ্বাসযোগ্যতা প্ৰমাণীকৰণৰ বাবে এপ্‌ক ফেচ আনলক কৰা হাৰ্ডৱেৰ ব্যৱহাৰ কৰিবলৈ দিয়ে"</string>
+    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"ফেচ আনলক কৰা সুবিধা"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"আপোনাৰ মুখমণ্ডল পুনৰ পঞ্জীয়ণ কৰক"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"চিনাক্তকৰণৰ সুবিধাটো উন্নত কৰিবলৈ, অনুগ্ৰহ কৰি আপোনাৰ মুখমণ্ডল পুনৰ পঞ্জীয়ন কৰক"</string>
-    <string name="face_setup_notification_title" msgid="550617822603450009">"মুখাৱয়বৰদ্বাৰা আনলক কৰা সুবিধাটো ছেট আপ কৰক"</string>
+    <string name="face_setup_notification_title" msgid="550617822603450009">"ফেচ আনলক সুবিধাটো ছেট আপ কৰক"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"আপোনাৰ ফ’নটোলৈ চাই সেইটো আনলক কৰক"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"আনলক কৰাৰ অধিক উপায় ছেট আপ কৰক"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"এটা ফিংগাৰপ্ৰিণ্ট যোগ দিবলৈ টিপক"</string>
@@ -643,19 +643,19 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"মুখমণ্ডল সত্যাপন কৰিব পৰা নগ’ল। হাৰ্ডৱেৰ নাই।"</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"পুনৰ মুখাৱয়বৰদ্বাৰা আনলক কৰি চাওক।"</string>
+    <string name="face_error_timeout" msgid="522924647742024699">"পুনৰ ফেচ আনলক কৰি চাওক।"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"নতুন মুখমণ্ডলৰ ডেটা জমা কৰিব পৰা নাই। প্ৰথমে পুৰণি এখন মচক।"</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"মুখমণ্ডলৰ প্ৰক্ৰিয়া বাতিল কৰা হ’ল।"</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"ব্যৱহাৰকাৰীয়ে মুখাৱয়বৰদ্বাৰা আনলক কৰাটো বাতিল কৰিছে।"</string>
+    <string name="face_error_user_canceled" msgid="8553045452825849843">"ব্যৱহাৰকাৰীয়ে ফেচ আনলক কৰাটো বাতিল কৰিছে।"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"অত্যধিক ভুল প্ৰয়াস। কিছুসময়ৰ পাছত আকৌ চেষ্টা কৰক।"</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"অতি বেছি প্ৰয়াস। মুখাৱয়বৰদ্বাৰা আনলক কৰাটো অক্ষম কৰা হৈছে।"</string>
+    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"অতি বেছি প্ৰয়াস। ফেচ আনলক কৰাটো অক্ষম কৰা হৈছে।"</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"মুখমণ্ডল সত্যাপন কৰিব পৰা নগ’ল। আকৌ চেষ্টা কৰক।"</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"আপুনি মুখাৱয়বৰদ্বাৰা আনলক কৰাটো ছেট আপ কৰা নাই।"</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"এই ডিভাইচটোত মুখাৱয়বৰদ্বাৰা আনলক কৰা সুবিধাটো নচলে।"</string>
+    <string name="face_error_not_enrolled" msgid="7369928733504691611">"আপুনি ফেচ আনলক ছেট আপ কৰা নাই।"</string>
+    <string name="face_error_hw_not_present" msgid="1070600921591729944">"এই ডিভাইচটোত ফেচ আনলক কৰা সুবিধাটো নচলে।"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"ছেন্সৰটো সাময়িকভাৱে অক্ষম হৈ আছে।"</string>
     <string name="face_name_template" msgid="3877037340223318119">"মুখমণ্ডল <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <string name="face_app_setting_name" msgid="8130135875458467243">"মুখাৱয়বৰে আনলক কৰা ব্যৱহাৰ কৰক"</string>
-    <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"মুখাৱয়বৰে আনলক কৰা অথবা স্ক্ৰীন লক ব্যৱহাৰ কৰক"</string>
+    <string name="face_app_setting_name" msgid="8130135875458467243">"ফেচ আনলক ব্যৱহাৰ কৰক"</string>
+    <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"ফেচ আনলক অথবা স্ক্ৰীন লক ব্যৱহাৰ কৰক"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"অব্যাহত ৰাখিবলৈ নিজৰ মুখাৱয়ব ব্যৱহাৰ কৰক"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"অব্যাহত ৰাখিবলৈ আপোনাৰ মুখাৱয়ব অথবা স্ক্ৰীন লক ব্যৱহাৰ কৰক"</string>
   <string-array name="face_error_vendor">
@@ -887,7 +887,7 @@
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"আকৌ চেষ্টা কৰক"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"আকৌ চেষ্টা কৰক"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"সকলো সুবিধা আৰু ডেটাৰ বাবে আনলক কৰক"</string>
-    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"গৰাকীৰ মুখাৱয়বৰ দ্বাৰা আনলক কৰা সর্বধিক সীমা অতিক্ৰম কৰা হ’ল"</string>
+    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"গৰাকীৰ ফেচ আনলক কৰা সৰ্বাধিক সীমা অতিক্ৰম কৰা হ’ল"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"কোনো ছিম কাৰ্ড নাই"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"টে\'বলেটত ছিম কার্ড নাই।"</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"আপোনাৰ Android TV ডিভাইচটোত কোনো ছিম কার্ড নাই।"</string>
@@ -957,7 +957,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"আনলক ক্ষেত্ৰ বিস্তাৰ কৰক।"</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"শ্লাইডৰদ্বাৰা আনলক।"</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"আৰ্হিৰদ্বাৰা আনলক।"</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"মুখাৱয়বৰদ্বাৰা আনলক।"</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"ফেচ আনলক।"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"পিনৰদ্বাৰা আনলক।"</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"ছিম পিন আনলক।"</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"ছিম পিইউকে আনলক।"</string>
