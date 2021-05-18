@@ -103,7 +103,6 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.widget.ILockSettings;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.appbinding.AppBindingService;
-import com.android.server.art.ArtManagerLocal;
 import com.android.server.attention.AttentionManagerService;
 import com.android.server.audio.AudioService;
 import com.android.server.biometrics.AuthService;
@@ -2610,10 +2609,6 @@ public final class SystemServer implements Dumpable {
 
         t.traceBegin("GameManagerService");
         mSystemServiceManager.startService(GAME_MANAGER_SERVICE_CLASS);
-        t.traceEnd();
-
-        t.traceBegin("ArtManagerLocal");
-        LocalManagerRegistry.addManager(ArtManagerLocal.class, new ArtManagerLocal());
         t.traceEnd();
 
         if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_UWB)) {
