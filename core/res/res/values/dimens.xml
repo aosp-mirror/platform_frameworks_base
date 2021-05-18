@@ -939,4 +939,8 @@
     <!-- System-provided padding for inner views on app widgets. The resolved value of this resource may change at runtime. @removed -->
     <dimen name="__removed_system_app_widget_internal_padding">16dp</dimen>
 
+    <!-- The width/height of the icon view on staring surface. -->
+    <dimen name="starting_surface_icon_size">160dp</dimen>
+    <!-- The default width/height of the icon on the spec of adaptive icon drawable. -->
+    <dimen name="starting_surface_default_icon_size">108dp</dimen>
 </resources>

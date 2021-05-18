@@ -179,11 +179,6 @@
         individual_bubble_size + some padding. -->
     <dimen name="bubble_stack_user_education_side_inset">72dp</dimen>
 
-    <!-- The width/height of the icon view on staring surface. -->
-    <dimen name="starting_surface_icon_size">160dp</dimen>
-    <!-- The default width/height of the icon on the spec of adaptive icon drawable. -->
-    <dimen name="default_icon_size">108dp</dimen>
-
     <!-- The width/height of the size compat restart button. -->
     <dimen name="size_compat_button_size">48dp</dimen>
 

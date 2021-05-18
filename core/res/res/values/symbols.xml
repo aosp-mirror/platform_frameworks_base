@@ -4382,4 +4382,7 @@
 
   <java-symbol type="bool" name="config_supportsMicToggle" />
   <java-symbol type="bool" name="config_supportsCamToggle" />
+
+  <java-symbol type="dimen" name="starting_surface_icon_size" />
+  <java-symbol type="dimen" name="starting_surface_default_icon_size" />
 </resources>
