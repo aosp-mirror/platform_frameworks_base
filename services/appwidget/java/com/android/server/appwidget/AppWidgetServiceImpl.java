@@ -554,7 +554,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             }
 
             if (onClickIntent != null) {
-                views.setOnClickPendingIntent(R.id.work_widget_mask_frame,
+                views.setOnClickPendingIntent(android.R.id.background,
                         PendingIntent.getActivity(mContext, 0, onClickIntent,
                                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE));
             }
