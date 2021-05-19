@@ -2881,12 +2881,16 @@
     <string name="recent_conversations">Recent conversations</string>
     <!-- Text for button dismissing configuration activity with no conversations [CHAR LIMIT=20] -->
     <string name="okay">Okay</string>
-    <!-- Timestamp for notification with exact time [CHAR LIMIT=25] -->
-    <string name="timestamp"><xliff:g id="duration" example="5 hours">%1$s</xliff:g> ago</string>
-    <!-- Timestamp for notification when less than a certain time window [CHAR LIMIT=25] -->
-    <string name="less_than_timestamp">Less than <xliff:g id="duration" example="5 hours">%1$s</xliff:g> ago</string>
-    <!-- Timestamp for notification when over a certain time window [CHAR LIMIT=25] -->
-    <string name="over_timestamp">Over <xliff:g id="duration" example="1 week">%1$s</xliff:g> ago</string>
+    <!-- Timestamp for notification with exact time in days plural [CHAR LIMIT=25] -->
+    <string name="days_timestamp"><xliff:g id="duration" example="5">%1$s</xliff:g> days ago</string>
+    <!-- Timestamp for notification from one week ago[CHAR LIMIT=25] -->
+    <string name="one_week_timestamp">1 week ago</string>
+    <!-- Timestamp for notification from two weeks ago [CHAR LIMIT=25] -->
+    <string name="two_weeks_timestamp">2 weeks ago</string>
+    <!-- Timestamp for notification when over one week ago [CHAR LIMIT=25] -->
+    <string name="over_one_week_timestamp">Over 1 week ago</string>
+    <!-- Timestamp for notification when over two weeks ago [CHAR LIMIT=25] -->
+    <string name="over_two_weeks_timestamp">Over 2 weeks ago</string>
     <!-- Status text on the Conversation widget for a birthday today [CHAR LIMIT=20] -->
     <string name="birthday_status">Birthday</string>
     <!-- Content description text on the Conversation widget for a birthday today [CHAR LIMIT=150] -->

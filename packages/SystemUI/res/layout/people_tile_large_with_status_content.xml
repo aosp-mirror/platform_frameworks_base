@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright (C) 2021 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,8 +13,15 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<shape xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android">
-    <solid android:color="?androidprv:attr/colorAccentPrimary" />
-    <corners android:radius="@dimen/people_space_messages_count_radius" />
-</shape>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:background="@drawable/people_space_tile_view_card"
+    android:id="@+id/item"
+    android:clipToOutline="true"
+    android:theme="@android:style/Theme.DeviceDefault.DayNight"
+    android:layout_gravity="center"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <include layout="@layout/people_status_scrim_layout" />
+    <include layout="@layout/people_tile_large_with_content" />
+</RelativeLayout>
