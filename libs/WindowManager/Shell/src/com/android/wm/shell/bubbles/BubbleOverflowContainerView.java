@@ -27,6 +27,7 @@ import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -179,6 +180,13 @@ public class BubbleOverflowContainerView extends LinearLayout {
 
         mEmptyStateTitle.setTextColor(textColor);
         mEmptyStateSubtitle.setTextColor(textColor);
+    }
+
+    public void updateFontSize() {
+        final float fontSize = mContext.getResources()
+                .getDimensionPixelSize(com.android.internal.R.dimen.text_size_body_2_material);
+        mEmptyStateTitle.setTextSize(TypedValue.COMPLEX_UNIT_PX, fontSize);
+        mEmptyStateSubtitle.setTextSize(TypedValue.COMPLEX_UNIT_PX, fontSize);
     }
 
     private final BubbleData.Listener mDataListener = new BubbleData.Listener() {
