@@ -17,6 +17,7 @@
 package com.android.systemui.navigationbar;
 
 import android.content.Context;
+import android.graphics.Rect;
 import android.view.View;
 
 import com.android.systemui.dagger.SysUISingleton;
@@ -47,7 +48,8 @@ public class NavigationBarOverlayController {
     /**
      * Initialize the controller with visibility change callback.
      */
-    public void init(Consumer<Boolean> visibilityChangeCallback) {}
+    public void init(Consumer<Boolean> visibilityChangeCallback,
+            Consumer<Rect> excludeBackRegionCallback) {}
 
     /**
      * Set whether the view can be shown.
