@@ -1433,10 +1433,18 @@ public class ConnectivityManager {
      * Returns an array of all {@link Network} currently tracked by the
      * framework.
      *
+     * @deprecated This method does not provide any notification of network state changes, forcing
+     *             apps to call it repeatedly. This is inefficient and prone to race conditions.
+     *             Apps should use methods such as
+     *             {@link #registerNetworkCallback(NetworkRequest, NetworkCallback)} instead.
+     *             Apps that desire to obtain information about networks that do not apply to them
+     *             can use {@link NetworkRequest.Builder#setIncludeOtherUidNetworks}.
+     *
      * @return an array of {@link Network} objects.
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
     @NonNull
+    @Deprecated
     public Network[] getAllNetworks() {
         try {
             return mService.getAllNetworks();

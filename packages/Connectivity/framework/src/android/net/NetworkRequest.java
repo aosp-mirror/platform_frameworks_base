@@ -287,10 +287,15 @@ public class NetworkRequest implements Parcelable {
         }
 
         /**
-         * Set the watched UIDs for this request. This will be reset and wiped out unless
-         * the calling app holds the CHANGE_NETWORK_STATE permission.
+         * Sets this request to match only networks that apply to the specified UIDs.
          *
-         * @param uids The watched UIDs as a set of {@code Range<Integer>}, or null for everything.
+         * By default, the set of UIDs is the UID of the calling app, and this request will match
+         * any network that applies to the app. Setting it to {@code null} will observe any
+         * network on the system, even if it does not apply to this app. In this case, any
+         * {@link NetworkSpecifier} set on this request will be redacted or removed to prevent the
+         * application deducing restricted information such as location.
+         *
+         * @param uids The UIDs as a set of {@code Range<Integer>}, or null for everything.
          * @return The builder to facilitate chaining.
          * @hide
          */
@@ -515,6 +520,30 @@ public class NetworkRequest implements Parcelable {
         @SystemApi
         public Builder setSubscriptionIds(@NonNull Set<Integer> subIds) {
             mNetworkCapabilities.setSubscriptionIds(subIds);
+            return this;
+        }
+
+        /**
+         * Specifies whether the built request should also match networks that do not apply to the
+         * calling UID.
+         *
+         * By default, the built request will only match networks that apply to the calling UID.
+         * If this method is called with {@code true}, the built request will match any network on
+         * the system that matches the other parameters of the request. In this case, any
+         * information in the built request that is subject to redaction for security or privacy
+         * purposes, such as a {@link NetworkSpecifier}, will be redacted or removed to prevent the
+         * application deducing sensitive information.
+         *
+         * @param include Whether to match networks that do not apply to the calling UID.
+         * @return The builder to facilitate chaining.
+         */
+        @NonNull
+        public Builder setIncludeOtherUidNetworks(boolean include) {
+            if (include) {
+                mNetworkCapabilities.setUids(null);
+            } else {
+                mNetworkCapabilities.setSingleUid(Process.myUid());
+            }
             return this;
         }
     }
