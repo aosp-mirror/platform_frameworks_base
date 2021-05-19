@@ -345,7 +345,7 @@
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"GPU ओव्हरड्रॉ डीबग करा"</string>
     <string name="disable_overlays" msgid="4206590799671557143">"HW ओव्हरले बंद करा"</string>
     <string name="disable_overlays_summary" msgid="1954852414363338166">"स्क्रीन तयार करण्यासाठी नेहमी GPU वापरा"</string>
-    <string name="simulate_color_space" msgid="1206503300335835151">"रंग स्थानाची बतावणी करा"</string>
+    <string name="simulate_color_space" msgid="1206503300335835151">"रंग स्थान सिम्युलेट करा"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"OpenGL ट्रेस सुरू करा"</string>
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"USB ऑडिओ राउटिंग बंद करा"</string>
     <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"USB ऑडिओ परिधीय वरील स्वयंचलित राउटिंग बंद करा"</string>
@@ -405,6 +405,7 @@
     <string name="transcode_enable_all" msgid="2411165920039166710">"ट्रान्सकोडिंग सुरू करा"</string>
     <string name="transcode_default" msgid="3784803084573509491">"असे गृहीत धरा की, ॲप्स आधुनिक फॉरमॅटना सपोर्ट करतात"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"ट्रान्सकोडिंग सूचना दाखवा"</string>
+    <string name="transcode_disable_cache" msgid="3160069309377467045">"ट्रान्सकोडिंग कॅशे बंद करा"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"सुरू सेवा"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"सध्या सुरू असलेल्या सेवा पहा आणि नियंत्रित करा"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"वेबदृश्य अंमलबजावणी"</string>
@@ -450,19 +451,17 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"टॅबलेट लवकरच बंद होऊ शकतो (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"डिव्हाइस लवकरच बंद होऊ शकते (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_remaining_charging_duration_only (8085099012811384899) -->
-    <skip />
-    <!-- no translation found for power_charging_duration (6127154952524919719) -->
-    <skip />
+    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"पूर्ण चार्ज होण्यासाठी <xliff:g id="TIME">%1$s</xliff:g> शिल्लक आहे"</string>
+    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - पूर्ण चार्ज होण्यासाठी <xliff:g id="TIME">%2$s</xliff:g> शिल्लक आहे"</string>
     <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - बॅटरीची क्षमता वाढवण्यासाठी ऑप्टिमाइझ करत आहे"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"अज्ञात"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"चार्ज होत आहे"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"वेगाने चार्ज होत आहे"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"हळूहळू चार्ज होत आहे"</string>
+    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"वायरलेसने चार्ज होत आहे"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"चार्ज होत नाही"</string>
-    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"प्लग इन केलेले आहे, आता चार्ज करू शकत नाही"</string>
-    <!-- no translation found for battery_info_status_full (1339002294876531312) -->
-    <skip />
+    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"कनेक्ट केले, चार्ज होत नाही"</string>
+    <string name="battery_info_status_full" msgid="1339002294876531312">"चार्ज झाली"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"प्रशासकाने नियंत्रित केलेले"</string>
     <string name="disabled" msgid="8017887509554714950">"अक्षम"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"अनुमती आहे"</string>
@@ -505,10 +504,12 @@
     <string name="cancel" msgid="5665114069455378395">"रद्द करा"</string>
     <string name="okay" msgid="949938843324579502">"ठीक आहे"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"अलार्म आणि रिमाइंडर"</string>
-    <string name="alarms_and_reminders_switch_title" msgid="186992351401152744">"अलार्म किंवा रिमाइंडर सेट करण्याची अनुमती द्या"</string>
-    <string name="alarms_and_reminders_title" msgid="2988400785896875237">"अलार्म आणि रिमाइंडर"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="5882788882647778753">"या अ‍ॅपला अलार्म किंवा वेळेवर आधारित इतर इव्हेंट शेड्युल करण्याची अनुमती द्या. यामुळे तुम्ही डिव्हाइस वापरत नसतानादेखील अ‍ॅपला सुरू आणि रन करण्याची अनुमती मिळते. लक्षात ठेवा की, ही परवानगी नाकारल्याने ॲप कदाचित नीट काम करणार नाही, विशेषतः अ‍ॅपने शेड्युल केलेले कोणतेही अलार्म यापुढे काम करणार नाहीत."</string>
-    <string name="keywords_alarms_and_reminders" msgid="8882739572152019456">"शेड्युल, अलार्म, रिमाइंडर, इव्‍हेंट"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"अलार्म आणि रिमाइंडर सेट करण्याची अनुमती द्या"</string>
+    <string name="alarms_and_reminders_title" msgid="8819933264635406032">"अलार्म आणि रिमाइंडर"</string>
+    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"या ॲपला अलार्म सेट करण्याची आणि इतर कृती शेड्युल करण्याची अनुमती द्या. तुम्ही तुमचा फोन वापरत नसताना हे ॲप वापरले जाऊ शकते, ज्यामुळे जास्त बॅटरी वापरली जाऊ शकते. ही परवानगी नसल्यास, हे ॲप सामान्यपणे काम करू शकणार नाही आणि त्याचे अलार्म शेड्युल केल्याप्रमाणे काम करणार नाहीत."</string>
+    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"या ॲपला अलार्म सेट करण्याची आणि इतर कृती शेड्युल करण्याची अनुमती द्या. तुम्ही तुमचा टॅबलेट वापरत नसताना हे ॲप वापरले जाऊ शकते, ज्यामुळे जास्त बॅटरी वापरली जाऊ शकते. ही परवानगी नसल्यास, हे ॲप सामान्यपणे काम करू शकणार नाही आणि त्याचे अलार्म शेड्युल केल्याप्रमाणे काम करणार नाहीत."</string>
+    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"या ॲपला अलार्म सेट करण्याची आणि इतर कृती शेड्युल करण्याची अनुमती द्या. तुम्ही तुमचे डिव्हाइस वापरत नसताना हे ॲप वापरले जाऊ शकते, ज्यामुळे जास्त बॅटरी वापरली जाऊ शकते. ही परवानगी नसल्यास, हे ॲप सामान्यपणे काम करू शकणार नाही आणि त्याचे अलार्म शेड्युल केल्याप्रमाणे काम करणार नाहीत."</string>
+    <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"शेड्युल, अलार्म, रिमाइंडर, घड्याळ"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"सुरू करा"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"व्यत्यय आणू नका सुरू करा"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"कधीही नाही"</string>
@@ -562,8 +563,7 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"लॉक सेट करा"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"<xliff:g id="USER_NAME">%s</xliff:g> वर स्विच करा"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"नवीन वापरकर्ता तयार करत आहे…"</string>
-    <!-- no translation found for add_user_failed (4809887794313944872) -->
-    <skip />
+    <string name="add_user_failed" msgid="4809887794313944872">"नवीन वापरकर्ता तयार करता आला नाही"</string>
     <string name="user_nickname" msgid="262624187455825083">"टोपणनाव"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"अतिथी जोडा"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"अतिथी काढून टाका"</string>

@@ -887,7 +887,7 @@
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Обидете се повторно"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Обидете се повторно"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Отклучи за сите функции и податоци"</string>
-    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Максималниот број обиди на отклучување со лице е надминат"</string>
+    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Максималниот број обиди на отклучување со лик е надминат"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"Нема SIM картичка"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"Во таблетот нема SIM картичка."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Нема SIM-картичка во вашиот уред Android TV."</string>

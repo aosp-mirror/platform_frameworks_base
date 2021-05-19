@@ -4051,10 +4051,7 @@ public final class ActivityThread extends ClientTransactionHandler
         final SplashScreenView.Builder builder = new SplashScreenView.Builder(r.activity);
         final SplashScreenView view = builder.createFromParcel(parcelable).build();
         decorView.addView(view);
-        view.cacheRootWindow(r.window);
-        view.makeSystemUIColorsTransparent();
-        r.activity.mSplashScreenView = view;
-        view.attachHostActivity(r.activity);
+        view.attachHostActivityAndSetSystemUIColors(r.activity, r.window);
         view.requestLayout();
         // Ensure splash screen view is shown before remove the splash screen window.
         final ViewRootImpl impl = decorView.getViewRootImpl();
@@ -4096,12 +4093,13 @@ public final class ActivityThread extends ClientTransactionHandler
 
     @Override
     public void handOverSplashScreenView(@NonNull ActivityClientRecord r) {
-        if (r.activity.mSplashScreenView != null) {
-            synchronized (this) {
-                if (mSplashScreenGlobal != null) {
-                    mSplashScreenGlobal.dispatchOnExitAnimation(r.token,
-                            r.activity.mSplashScreenView);
-                }
+        final SplashScreenView v = r.activity.getSplashScreenView();
+        if (v == null) {
+            return;
+        }
+        synchronized (this) {
+            if (mSplashScreenGlobal != null) {
+                mSplashScreenGlobal.dispatchOnExitAnimation(r.token, v);
             }
         }
     }

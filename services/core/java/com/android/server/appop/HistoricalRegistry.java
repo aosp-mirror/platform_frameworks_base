@@ -212,6 +212,7 @@ final class HistoricalRegistry {
     }
 
     void systemReady(@NonNull ContentResolver resolver) {
+        mDiscreteRegistry.systemReady();
         final Uri uri = Settings.Global.getUriFor(Settings.Global.APPOP_HISTORY_PARAMETERS);
         resolver.registerContentObserver(uri, false, new ContentObserver(
                 FgThread.getHandler()) {
@@ -249,7 +250,6 @@ final class HistoricalRegistry {
                 }
             }
         }
-        mDiscreteRegistry.systemReady();
     }
 
     private boolean isPersistenceInitializedMLocked() {
@@ -594,6 +594,9 @@ final class HistoricalRegistry {
                 mPersistence.persistHistoricalOpsDLocked(history);
             }
         }
+    }
+
+    void offsetDiscreteHistory(long offsetMillis) {
         mDiscreteRegistry.offsetHistory(offsetMillis);
     }
 

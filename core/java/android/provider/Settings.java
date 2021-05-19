@@ -922,6 +922,21 @@ public final class Settings {
             "android.settings.LOCALE_SETTINGS";
 
     /**
+     * Activity Action: Show settings to allow configuration of lockscreen.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_LOCKSCREEN_SETTINGS = "android.settings.LOCK_SCREEN_SETTINGS";
+
+    /**
      * Activity Action: Show settings to configure input methods, in particular
      * allowing the user to enable input methods.
      * <p>
@@ -10031,6 +10046,12 @@ public final class Settings {
         @Readable
         public static final String NAS_SETTINGS_UPDATED = "nas_settings_updated";
 
+        /**
+         * Control whether Game Dashboard shortcut is always on for all games.
+         * @hide
+         */
+        @Readable
+        public static final String GAME_DASHBOARD_ALWAYS_ON = "game_dashboard_always_on";
 
         /**
          * These entries are considered common between the personal and the managed profile,

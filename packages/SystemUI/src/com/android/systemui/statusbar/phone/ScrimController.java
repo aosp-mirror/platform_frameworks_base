@@ -547,9 +547,12 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
      * Set bounds for notifications background, all coordinates are absolute
      */
     public void setNotificationsBounds(float left, float top, float right, float bottom) {
-        mNotificationsScrim.setDrawableBounds(left, top, right, bottom);
         if (mClipsQsScrim) {
+            // "top - 1" to have 1 px of scrims overlap, see: b/186644628
+            mNotificationsScrim.setDrawableBounds(left, top - 1, right, bottom);
             mScrimBehind.setBottomEdgePosition((int) top);
+        } else {
+            mNotificationsScrim.setDrawableBounds(left, top, right, bottom);
         }
     }
 

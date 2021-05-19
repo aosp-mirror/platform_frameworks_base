@@ -118,7 +118,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"إلغاء"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"يضمن لك الإقران إمكانية الدخول إلى جهات اتصالك وسجل المكالمات عند الاتصال."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"تعذر الإقران مع <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"تعذر الإقران مع <xliff:g id="DEVICE_NAME">%1$s</xliff:g> نظرًا لوجود رقم تعريف شخصي أو مفتاح مرور غير صحيح."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"تعذر الإقران مع <xliff:g id="DEVICE_NAME">%1$s</xliff:g> بسبب وجود رقم تعريف شخصي أو مفتاح مرور غير صحيح."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"لا يمكن الاتصال بـ <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"تم رفض الاقتران بواسطة <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"كمبيوتر"</string>
@@ -197,7 +197,7 @@
     <string name="choose_profile" msgid="343803890897657450">"اختيار ملف شخصي"</string>
     <string name="category_personal" msgid="6236798763159385225">"شخصي"</string>
     <string name="category_work" msgid="4014193632325996115">"للعمل"</string>
-    <string name="development_settings_title" msgid="140296922921597393">"خيارات مطور البرامج"</string>
+    <string name="development_settings_title" msgid="140296922921597393">"خيارات المطورين"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"تفعيل خيارات المطورين"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"تعيين خيارات تطوير التطبيق"</string>
     <string name="development_settings_not_available" msgid="355070198089140951">"لا تتوفر خيارات مطوّر البرامج لهذا المستخدم"</string>
@@ -238,15 +238,15 @@
     <string name="bugreport_in_power" msgid="8664089072534638709">"اختصار تقرير الأخطاء"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"عرض زر في قائمة زر التشغيل لإعداد تقرير بالأخطاء"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"البقاء في الوضع النشط"</string>
-    <string name="keep_screen_on_summary" msgid="1510731514101925829">"لا يتم مطلقًا دخول الشاشة في وضع السكون أثناء الشحن"</string>
+    <string name="keep_screen_on_summary" msgid="1510731514101925829">"لا يتم مطلقًا دخول الشاشة في وضع السكون أثناء الشحن."</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"تفعيل سجلّ تطفل بواجهة وحدة تحكم المضيف في بلوتوث"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"رَقمِن محتوى حزم بيانات البلوتوث. (تبديل البلوتوث بعد تغيير هذا الإعداد)"</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"فتح قفل المصنّع الأصلي للجهاز"</string>
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"‏السماح بإلغاء قفل برنامج bootloader"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"هل تريد السماح بإلغاء قفل المصنّع الأصلي للجهاز؟"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"تحذير: لن تعمل ميزات الحماية على هذا الجهاز أثناء تفعيل هذا الإعداد."</string>
-    <string name="mock_location_app" msgid="6269380172542248304">"اختيار تطبيق الموقع الزائف"</string>
-    <string name="mock_location_app_not_set" msgid="6972032787262831155">"لم يتم ضبط تطبيق موقع زائف"</string>
+    <string name="mock_location_app" msgid="6269380172542248304">"اختيار تطبيق الموقع الجغرافي الوهمي"</string>
+    <string name="mock_location_app_not_set" msgid="6972032787262831155">"لم يتم ضبط تطبيق موقع جغرافي وهمي"</string>
     <string name="mock_location_app_set" msgid="4706722469342913843">"تطبيق الموقع الزائف: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"الشبكات"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"شهادة عرض شاشة لاسلكي"</string>
@@ -283,7 +283,7 @@
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"تعذّر الاتصال"</string>
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"عرض خيارات شهادة عرض شاشة لاسلكي"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"‏زيادة مستوى تسجيل Wi-Fi، وعرض لكل SSID RSSI في منتقي Wi-Fi"</string>
-    <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"لتقليل استنفاد البطارية وتحسين أداء الشبكة."</string>
+    <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"لتقليل استهلاك البطارية وتحسين أداء الشبكة"</string>
     <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"‏عند تفعيل هذا الوضع، قد يتم تغيير عنوان MAC لهذا الجهاز في كل مرة تتصل فيها بشبكة تم تفعيل التوزيع العشوائي لعناوين MAC عليها."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"تفرض تكلفة استخدام"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"بدون قياس"</string>
@@ -309,7 +309,7 @@
     <string name="dev_settings_warning_message" msgid="37741686486073668">"هذه الإعدادات مخصصة لاستخدام التطوير فقط. قد يتسبب هذا في حدوث أعطال أو خلل في أداء الجهاز والتطبيقات المثبتة عليه."</string>
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"‏التحقق من التطبيقات عبر USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"‏التحقق من التطبيقات المثبتة عبر ADB/ADT لكشف السلوك الضار"</string>
-    <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"‏سيتم عرض أجهزة البلوتوث بدون أسماء (عناوين MAC فقط)"</string>
+    <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"‏سيتم عرض أجهزة البلوتوث بدون أسماء (عناوين MAC فقط)."</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"لإيقاف ميزة مستوى الصوت المطلق للبلوتوث في حال حدوث مشاكل متعلقة بمستوى الصوت في الأجهزة البعيدة، مثل مستوى صوت عالٍ بشكل غير مقبول أو عدم إمكانية التحكّم في الصوت"</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"‏تفعيل حِزم ميزة Bluetooth Gabeldorsche"</string>
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"لتفعيل الميزة \"إمكانية اتصال محسّن\""</string>
@@ -380,7 +380,7 @@
     <string name="enable_freeform_support" msgid="7599125687603914253">"تفعيل النوافذ الحرة"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"إتاحة استخدام النوافذ الحرة التجريبية"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"كلمة مرور احتياطية للكمبيوتر"</string>
-    <string name="local_backup_password_summary_none" msgid="7646898032616361714">"النُسخ الاحتياطية الكاملة لسطح المكتب غير محمية في الوقت الحالي"</string>
+    <string name="local_backup_password_summary_none" msgid="7646898032616361714">"النُسخ الاحتياطية الكاملة لسطح المكتب غير محمية في الوقت الحالي."</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"انقر لتغيير كلمة مرور النسخ الاحتياطية الكاملة لسطح المكتب أو إزالتها."</string>
     <string name="local_backup_password_toast_success" msgid="4891666204428091604">"تم ضبط كلمة مرور احتياطية جديدة"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="2994718182129097733">"كلمة المرور الجديدة وتأكيدها لا يتطابقان"</string>
@@ -405,6 +405,7 @@
     <string name="transcode_enable_all" msgid="2411165920039166710">"تفعيل تحويل الترميز"</string>
     <string name="transcode_default" msgid="3784803084573509491">"افتراض أن التطبيق يتوافق مع التنسيقات الحديثة"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"إظهار إشعارات تحويل الترميز"</string>
+    <string name="transcode_disable_cache" msgid="3160069309377467045">"إيقاف ذاكرة التخزين المؤقت لميزة \"تحويل الترميز\""</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"الخدمات قيد التشغيل"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"عرض الخدمات قيد التشغيل في الوقت الحالي والتحكم فيها"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"‏تطبيق WebView"</string>
@@ -450,19 +451,17 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"قد يتم إغلاق الجهاز اللوحي قريبًا (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"قد يتم إغلاق الجهاز قريبًا (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_remaining_charging_duration_only (8085099012811384899) -->
-    <skip />
-    <!-- no translation found for power_charging_duration (6127154952524919719) -->
-    <skip />
+    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"يتبقّى <xliff:g id="TIME">%1$s</xliff:g> حتى اكتمال شحن البطارية."</string>
+    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - يتبقّى <xliff:g id="TIME">%2$s</xliff:g> حتى اكتمال شحن البطارية."</string>
     <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - التحسين للحفاظ على سلامة البطارية"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"غير معروف"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"جارٍ الشحن"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"جارٍ الشحن سريعًا"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"جارٍ الشحن ببطء"</string>
+    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"جارٍ الشحن لاسلكيًا"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"لا يتم الشحن"</string>
-    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"تم التوصيل، ولكن يتعذّر الشحن الآن"</string>
-    <!-- no translation found for battery_info_status_full (1339002294876531312) -->
-    <skip />
+    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"الجهاز متصل بالشاحن، ولا يتم الشحن."</string>
+    <string name="battery_info_status_full" msgid="1339002294876531312">"تم الشحن"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"إعدادات يتحكم فيها المشرف"</string>
     <string name="disabled" msgid="8017887509554714950">"غير مفعّل"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"مسموح به"</string>
@@ -509,10 +508,12 @@
     <string name="cancel" msgid="5665114069455378395">"إلغاء"</string>
     <string name="okay" msgid="949938843324579502">"حسنًا"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"المنبّهات والتذكيرات"</string>
-    <string name="alarms_and_reminders_switch_title" msgid="186992351401152744">"السماح بضبط المنبّهات أو التذكيرات"</string>
-    <string name="alarms_and_reminders_title" msgid="2988400785896875237">"المنبّهات والتذكيرات"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="5882788882647778753">"يمكنك السماح لهذا التطبيق بضبط المنبّهات أو الموقّتات الأخرى استنادًا إلى الأحداث. سيسمح هذا الأذن بتنشيط التطبيق وتشغيله حتى في حال عدم استخدام الجهاز. تجدر الإشارة إلى أن إبطال هذا الأذن قد يسبب خللاً في عمل التطبيق، وعلى وجه الخصوص لن تعمل أي منبّهات تم ضبطها بواسطة التطبيق."</string>
-    <string name="keywords_alarms_and_reminders" msgid="8882739572152019456">"جدول زمني، منبّه، تذكير، حدث، فعالية"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"السماح بضبط المنبّهات والتذكيرات"</string>
+    <string name="alarms_and_reminders_title" msgid="8819933264635406032">"المنبّهات والتذكيرات"</string>
+    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"يمكنك السماح لهذا التطبيق بضبط المنبّهات وجدولة الإجراءات الأخرى. قد يتم استخدام هذا التطبيق عند عدم استخدامك للهاتف، مما قد يستهلك المزيد من شحن البطارية. إذا كان هذا الإذن غير مفعّل، قد لا يعمل هذا التطبيق بشكل طبيعي ولن تعمل المنبّهات فيه كما هو مقرر."</string>
+    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"يمكنك السماح لهذا التطبيق بضبط المنبّهات وجدولة الإجراءات الأخرى. قد يتم استخدام هذا التطبيق عند عدم استخدامك للجهاز اللوحي، مما قد يستهلك المزيد من شحن البطارية. إذا كان هذا الإذن غير مفعّل، قد لا يعمل هذا التطبيق بشكل طبيعي ولن تعمل المنبّهات فيه كما هو مقرر."</string>
+    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"يمكنك السماح لهذا التطبيق بضبط المنبّهات وجدولة الإجراءات الأخرى. قد يتم استخدام هذا التطبيق عند عدم استخدامك للجهاز، مما قد يستهلك المزيد من شحن البطارية. إذا كان هذا الإذن غير مفعّل، قد لا يعمل هذا التطبيق بشكل طبيعي ولن تعمل المنبّهات فيه كما هو مقرر."</string>
+    <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"جدول زمني، جدولة، منبّه، تذكير، ساعة"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"تفعيل"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"تفعيل وضع \"الرجاء عدم الإزعاج\""</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"مطلقًا"</string>
@@ -566,8 +567,7 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"تعيين التأمين"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"التبديل إلى <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"جارٍ إنشاء مستخدم جديد…"</string>
-    <!-- no translation found for add_user_failed (4809887794313944872) -->
-    <skip />
+    <string name="add_user_failed" msgid="4809887794313944872">"تعذّر إنشاء مستخدم جديد."</string>
     <string name="user_nickname" msgid="262624187455825083">"اللقب"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"إضافة ضيف"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"إزالة جلسة الضيف"</string>
