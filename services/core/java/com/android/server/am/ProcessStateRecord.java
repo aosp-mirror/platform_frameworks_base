@@ -25,7 +25,6 @@ import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.PowerWhitelistManager.REASON_BACKGROUND_ACTIVITY_PERMISSION;
 import static android.os.PowerWhitelistManager.REASON_BACKGROUND_FGS_PERMISSION;
-import static android.os.PowerWhitelistManager.REASON_COMPANION_DEVICE_MANAGER;
 import static android.os.PowerWhitelistManager.REASON_DENIED;
 import static android.os.PowerWhitelistManager.REASON_DEVICE_OWNER;
 import static android.os.PowerWhitelistManager.REASON_PROFILE_OWNER;
@@ -1217,6 +1216,7 @@ final class ProcessStateRecord {
         mAllowStartFgs = mAllowStartFgsByPermission = ret;
     }
 
+    // TODO(b/188063200) Clean up this method. Why do we need to duplicate only some of the checks?
     @GuardedBy("mService")
     void setAllowStartFgs() {
         if (mAllowStartFgs != REASON_DENIED) {
@@ -1233,16 +1233,6 @@ final class ProcessStateRecord {
             if (mService.mInternal != null) {
                 if (mService.mInternal.isDeviceOwner(mApp.info.uid)) {
                     mAllowStartFgs = REASON_DEVICE_OWNER;
-                }
-            }
-        }
-
-        if (mAllowStartFgs == REASON_DENIED) {
-            if (mService.mInternal != null) {
-                final boolean isCompanionApp = mService.mInternal.isAssociatedCompanionApp(
-                        UserHandle.getUserId(mApp.info.uid), mApp.info.uid);
-                if (isCompanionApp) {
-                    mAllowStartFgs = REASON_COMPANION_DEVICE_MANAGER;
                 }
             }
         }
