@@ -834,6 +834,19 @@ public class AccessibilityWindowManagerTest {
         assertNull(token);
     }
 
+    @Test
+    public void onDisplayReparented_shouldRemoveObserver() throws RemoteException {
+        // Starts tracking window of second display.
+        startTrackingPerDisplay(SECONDARY_DISPLAY_ID);
+        assertTrue(mA11yWindowManager.isTrackingWindowsLocked(SECONDARY_DISPLAY_ID));
+        // Notifies the second display is an embedded one of the default display.
+        final WindowsForAccessibilityCallback callbacks =
+                mCallbackOfWindows.get(Display.DEFAULT_DISPLAY);
+        callbacks.onDisplayReparented(SECONDARY_DISPLAY_ID);
+        // Makes sure the observer of the second display is removed.
+        assertFalse(mA11yWindowManager.isTrackingWindowsLocked(SECONDARY_DISPLAY_ID));
+    }
+
     private void registerLeashedTokenAndWindowId() {
         mA11yWindowManager.registerIdLocked(mMockHostToken, HOST_WINDOW_ID);
         mA11yWindowManager.registerIdLocked(mMockEmbeddedToken, EMBEDDED_WINDOW_ID);
