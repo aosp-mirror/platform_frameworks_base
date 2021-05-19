@@ -230,12 +230,8 @@ public abstract class TranslationService extends Service {
      */
     // TODO(b/176464808): the session id won't be unique cross client/server process. Need to find
     // solution to make it's safe.
-    // TODO: make abstract once aiai is implemented.
-    public void onCreateTranslationSession(@NonNull TranslationContext translationContext,
-            int sessionId, @NonNull Consumer<Boolean> callback) {
-        onCreateTranslationSession(translationContext, sessionId);
-        callback.accept(true);
-    }
+    public abstract void onCreateTranslationSession(@NonNull TranslationContext translationContext,
+            int sessionId, @NonNull Consumer<Boolean> callback);
 
     /**
      * TODO: fill in javadoc.
@@ -285,23 +281,9 @@ public abstract class TranslationService extends Service {
      * @param callback
      * @param cancellationSignal
      */
-    //TODO: make abstract once aiai transitions.
-    public void onTranslationRequest(@NonNull TranslationRequest request, int sessionId,
+    public abstract void onTranslationRequest(@NonNull TranslationRequest request, int sessionId,
             @Nullable CancellationSignal cancellationSignal,
-            @NonNull Consumer<TranslationResponse> callback) {
-        onTranslationRequest(request, sessionId, cancellationSignal,
-                new OnTranslationResultCallback() {
-                    @Override
-                    public void onTranslationSuccess(@NonNull TranslationResponse response) {
-                        callback.accept(response);
-                    }
-
-                    @Override
-                    public void onError() {
-                        // null-op
-                    }
-                });
-    }
+            @NonNull Consumer<TranslationResponse> callback);
 
     /**
      * TODO: fill in javadoc
