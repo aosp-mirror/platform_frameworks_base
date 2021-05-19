@@ -272,7 +272,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
     private void updateAlpha() {
         // fade icon on transition to showing bouncer
         int alpha = mShowingUdfpsBouncer ? 255
-                : Math.abs((int) MathUtils.map(.4f, 0f, .7f, 255f,
+                : Math.abs((int) MathUtils.constrainedMap(0f, 255f, .4f, .7f,
                         mInputBouncerHiddenAmount));
         mView.setUnpausedAlpha(alpha);
     }

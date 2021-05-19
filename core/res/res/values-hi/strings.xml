@@ -611,9 +611,9 @@
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"फ़िंगरप्रिंट आइकॉन"</string>
     <string name="permlab_manageFace" msgid="4569549381889283282">"\'मालिक का चेहरा पहचानकर अनलॉक\' वाला हार्डवेयर प्रबंधित करें"</string>
     <string name="permdesc_manageFace" msgid="6204569688492710471">"ऐप्लिकेशन को चेहरे के टेम्पलेट इस्तेमाल के तरीके जोड़ने और मिटाने की मंज़ूरी मिलती है."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"\'मालिक का चेहरा पहचानकर अनलॉक\' वाला हार्डवेयर इस्तेमाल करें"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"ऐप्लिकेशन को \'मालिक का चेहरा पहचानकर अनलॉक\' वाले हार्डवेयर के इस्तेमाल की मंज़ूरी देता है"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"मालिक का चेहरा पहचानकर अनलॉक"</string>
+    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"फ़ेस अनलॉक हार्डवेयर इस्तेमाल करें"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"फ़ेस अनलॉक हार्डवेयर के इस्तेमाल की मंज़ूरी देता है"</string>
+    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"फ़ेस अनलॉक"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"अपना चेहरा फिर से दर्ज करें"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"कृपया अपना चेहरा फिर से दर्ज करें ताकि आपको बेहतर तरीके से पहचाना जा सके"</string>
     <string name="face_setup_notification_title" msgid="550617822603450009">"फ़ेस अनलॉक की सुविधा सेट अप करें"</string>
@@ -643,7 +643,7 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"चेहरा नहीं पहचान पा रहे. हार्डवेयर उपलब्ध नहीं है."</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"\'मालिक का चेहरा पहचानकर अनलॉक\' फिर से आज़माएं."</string>
+    <string name="face_error_timeout" msgid="522924647742024699">"फ़ेस अनलॉक की सुविधा फिर से आज़माएं."</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"चेहरे का नया डेटा सेव नहीं हो सकता. कोई पुराना डेटा मिटाएं."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"चेहरा पहचानने की कार्रवाई रद्द की गई."</string>
     <string name="face_error_user_canceled" msgid="8553045452825849843">"उपयोगकर्ता ने \'मालिक का चेहरा पहचानकर अनलॉक\' रद्द की."</string>
@@ -651,7 +651,7 @@
     <string name="face_error_lockout_permanent" msgid="8277853602168960343">"कई बार कोशिश की जा चुकी है. \'मालिक का चेहरा पहचानकर अनलॉक\' बंद है."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"चेहरा नहीं पहचान पा रहे. फिर से कोशिश करें."</string>
     <string name="face_error_not_enrolled" msgid="7369928733504691611">"आपने \'मालिक का चेहरा पहचानकर अनलॉक\' सेट नहीं की है."</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"इस डिवाइस पर \'मालिक का चेहरा पहचानकर अनलॉक\' काम नहीं करती है."</string>
+    <string name="face_error_hw_not_present" msgid="1070600921591729944">"इस डिवाइस पर फ़ेस अनलॉक की सुविधा काम नहीं करती है."</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"सेंसर कुछ समय के लिए बंद कर दिया गया है."</string>
     <string name="face_name_template" msgid="3877037340223318119">"चेहरा <xliff:g id="FACEID">%d</xliff:g>"</string>
     <string name="face_app_setting_name" msgid="8130135875458467243">"\'फ़ेस अनलॉक\' इस्तेमाल करें"</string>

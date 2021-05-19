@@ -72,7 +72,7 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put("settings_contextual_home", "false");
         DEFAULT_FLAGS.put(SETTINGS_PROVIDER_MODEL, "true");
         DEFAULT_FLAGS.put(SETTINGS_USE_NEW_BACKUP_ELIGIBILITY_RULES, "true");
-        DEFAULT_FLAGS.put(SETTINGS_ENABLE_SECURITY_HUB, "false");
+        DEFAULT_FLAGS.put(SETTINGS_ENABLE_SECURITY_HUB, "true");
     }
 
     private static final Set<String> PERSISTENT_FLAGS;

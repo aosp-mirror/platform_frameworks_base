@@ -23,16 +23,16 @@
     android:layout_height="wrap_content"
     android:minHeight="?android:attr/listPreferredItemHeightSmall"
     android:gravity="center_vertical"
-    android:background="?android:attr/selectableItemBackground"
+    android:background="@android:color/transparent"
     android:clipToPadding="false">
 
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
+        android:background="?android:attr/selectableItemBackground"
         android:gravity="start|center_vertical"
         android:clipToPadding="false"
-        android:duplicateParentState="true"
         android:paddingStart="?android:attr/listPreferredItemPaddingStart"
         android:paddingEnd="?android:attr/listPreferredItemPaddingEnd">
 
@@ -44,14 +44,12 @@
             android:minWidth="56dp"
             android:orientation="horizontal"
             android:clipToPadding="false"
-            android:duplicateParentState="true"
             android:paddingTop="4dp"
             android:paddingBottom="4dp">
             <androidx.preference.internal.PreferenceImageView
                 android:id="@android:id/icon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:duplicateParentState="true"
                 settings:maxWidth="48dp"
                 settings:maxHeight="48dp" />
         </LinearLayout>
@@ -60,7 +58,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:duplicateParentState="true"
             android:paddingTop="16dp"
             android:paddingBottom="16dp">
 
@@ -69,7 +66,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:singleLine="true"
-                android:duplicateParentState="true"
                 android:textAppearance="?android:attr/textAppearanceListItem"
                 android:ellipsize="marquee" />
 
@@ -79,7 +75,6 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@android:id/title"
                 android:layout_alignStart="@android:id/title"
-                android:duplicateParentState="true"
                 android:textAppearance="?android:attr/textAppearanceListItemSecondary"
                 android:textColor="?android:attr/textColorSecondary"
                 android:maxLines="10" />
@@ -95,7 +90,6 @@
         android:id="@android:id/widget_frame"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:duplicateParentState="true"
         android:minWidth="64dp"
         android:gravity="center"
         android:orientation="vertical" />

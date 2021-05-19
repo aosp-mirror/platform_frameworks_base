@@ -38,7 +38,6 @@ public final class XmlTags {
     public static final String ATTR_TYPE = "t";
     public static final String TAG_ALLOWED_PACKAGE = "wl";
     public static final String ATTR_CERTIFICATE = "ct";
-    public static final String TAG_ALLOWED_PERMISSION = "ap";
 
     // For BlobHandle
     public static final String TAG_BLOB_HANDLE = "bh";
@@ -56,7 +55,4 @@ public final class XmlTags {
     public static final String TAG_LEASEE = "l";
     public static final String ATTR_DESCRIPTION_RES_NAME = "rn";
     public static final String ATTR_DESCRIPTION = "d";
-
-    // Generic
-    public static final String ATTR_VALUE = "val";
 }

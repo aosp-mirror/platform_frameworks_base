@@ -3931,6 +3931,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         applyDecorFitsSystemWindows();
     }
 
+    @Override
+    public boolean decorFitsSystemWindows() {
+        return mDecorFitsSystemWindows;
+    }
+
     private void applyDecorFitsSystemWindows() {
         ViewRootImpl impl = getViewRootImplOrNull();
         if (impl != null) {

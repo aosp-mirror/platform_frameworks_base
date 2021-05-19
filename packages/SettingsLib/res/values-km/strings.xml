@@ -460,8 +460,7 @@
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"កំពុង​សាកថ្មយឺត"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"កំពុង​សាកថ្ម​ឥតខ្សែ"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"មិនកំពុង​បញ្ចូល​ថ្ម"</string>
-    <!-- no translation found for battery_info_status_not_charging (3371084153747234837) -->
-    <skip />
+    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"បានភ្ជាប់ មិនកំពុង​សាកថ្ម"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"បាន​សាក​ថ្ម"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"គ្រប់គ្រងដោយអ្នកគ្រប់គ្រង"</string>
     <string name="disabled" msgid="8017887509554714950">"បិទ"</string>

@@ -2411,6 +2411,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             mDisplayPolicy.onConfigurationChanged();
             mPinnedTaskController.onPostDisplayConfigurationChanged();
         }
+        // Update IME parent if needed.
+        updateImeParent();
 
         if (lastOrientation != getConfiguration().orientation) {
             getMetricsLogger().write(
@@ -2998,6 +3000,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // Hide the windows which are not significant in rotation animation. So that the windows
         // don't need to block the unfreeze time.
         if (screenRotationAnimation != null && screenRotationAnimation.hasScreenshot()
+                // Do not fade for freezing without rotation change.
+                && mDisplayRotation.getRotation() != getWindowConfiguration().getRotation()
                 && mFadeRotationAnimationController == null) {
             startFadeRotationAnimation(false /* shouldDebounce */);
         }
@@ -3963,7 +3967,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
 
         // Otherwise, we just attach it to where the display area policy put it.
-        return mImeWindowsContainer.getParent().getSurfaceControl();
+        return mImeWindowsContainer.getParent() != null
+                ? mImeWindowsContainer.getParent().getSurfaceControl() : null;
     }
 
     void setLayoutNeeded() {

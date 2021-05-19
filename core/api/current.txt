@@ -7905,10 +7905,8 @@ package android.app.blob {
   public static class BlobStoreManager.Session implements java.io.Closeable {
     method public void abandon() throws java.io.IOException;
     method public void allowPackageAccess(@NonNull String, @NonNull byte[]) throws java.io.IOException;
-    method public void allowPackagesWithLocationPermission(@NonNull String) throws java.io.IOException;
     method public void allowPublicAccess() throws java.io.IOException;
     method public void allowSameSignatureAccess() throws java.io.IOException;
-    method public boolean arePackagesWithLocationPermissionAllowed(@NonNull String) throws java.io.IOException;
     method public void close() throws java.io.IOException;
     method public void commit(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>) throws java.io.IOException;
     method public long getSize() throws java.io.IOException;
@@ -52848,7 +52846,7 @@ package android.view.translation {
     method public int getTranslationFlags();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.view.translation.TranslationContext> CREATOR;
-    field public static final int FLAG_DICTIONARY_DESCRIPTION = 4; // 0x4
+    field public static final int FLAG_DEFINITIONS = 4; // 0x4
     field public static final int FLAG_LOW_LATENCY = 1; // 0x1
     field public static final int FLAG_TRANSLITERATION = 2; // 0x2
   }
@@ -52933,12 +52931,13 @@ package android.view.translation {
   public final class TranslationResponseValue implements android.os.Parcelable {
     method public int describeContents();
     method @NonNull public static android.view.translation.TranslationResponseValue forError();
-    method @Nullable public CharSequence getDictionaryDescription();
+    method @NonNull public android.os.Bundle getExtras();
     method public int getStatusCode();
     method @Nullable public CharSequence getText();
     method @Nullable public CharSequence getTransliteration();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.view.translation.TranslationResponseValue> CREATOR;
+    field public static final String EXTRA_DEFINITIONS = "android.view.translation.extra.DEFINITIONS";
     field public static final int STATUS_ERROR = 1; // 0x1
     field public static final int STATUS_SUCCESS = 0; // 0x0
   }
@@ -52946,7 +52945,7 @@ package android.view.translation {
   public static final class TranslationResponseValue.Builder {
     ctor public TranslationResponseValue.Builder(int);
     method @NonNull public android.view.translation.TranslationResponseValue build();
-    method @NonNull public android.view.translation.TranslationResponseValue.Builder setDictionaryDescription(@NonNull CharSequence);
+    method @NonNull public android.view.translation.TranslationResponseValue.Builder setExtras(@NonNull android.os.Bundle);
     method @NonNull public android.view.translation.TranslationResponseValue.Builder setText(@NonNull CharSequence);
     method @NonNull public android.view.translation.TranslationResponseValue.Builder setTransliteration(@NonNull CharSequence);
   }
@@ -52978,7 +52977,7 @@ package android.view.translation {
     method public void onFinished();
     method public void onPaused();
     method public default void onResumed(@NonNull android.icu.util.ULocale, @NonNull android.icu.util.ULocale);
-    method @Deprecated public void onStarted(@NonNull String, @NonNull String);
+    method @Deprecated public default void onStarted(@NonNull String, @NonNull String);
     method public default void onStarted(@NonNull android.icu.util.ULocale, @NonNull android.icu.util.ULocale);
   }
 
