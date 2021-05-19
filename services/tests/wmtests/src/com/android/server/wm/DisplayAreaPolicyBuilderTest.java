@@ -35,10 +35,10 @@ import static android.window.DisplayAreaOrganizer.FEATURE_ROOT;
 import static android.window.DisplayAreaOrganizer.FEATURE_VENDOR_FIRST;
 import static android.window.DisplayAreaOrganizer.FEATURE_VENDOR_LAST;
 import static android.window.DisplayAreaOrganizer.FEATURE_WINDOWED_MAGNIFICATION;
+import static android.window.DisplayAreaOrganizer.KEY_ROOT_DISPLAY_AREA_ID;
 
 import static com.android.server.wm.DisplayArea.Type.ABOVE_TASKS;
 import static com.android.server.wm.DisplayAreaPolicyBuilder.Feature;
-import static com.android.server.wm.DisplayAreaPolicyBuilder.KEY_ROOT_DISPLAY_AREA_ID;
 
 import static com.google.common.truth.Truth.assertThat;
 
