@@ -56,7 +56,9 @@ public class ImsRcsManager {
 
     /**
      * Activity Action: Show the opt-in dialog for enabling or disabling RCS contact discovery
-     * using User Capability Exchange (UCE).
+     * using User Capability Exchange (UCE), which enables a service that periodically shares the
+     * phone numbers of all of the contacts in the user's address book with the carrier to refresh
+     * the RCS capabilities associated with those contacts as the local cache becomes stale.
      * <p>
      * An application that depends on RCS contact discovery being enabled must send this intent
      * using {@link Context#startActivity(Intent)} to ask the user to opt-in for contacts upload for
