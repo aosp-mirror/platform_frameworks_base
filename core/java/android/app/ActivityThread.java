@@ -3510,7 +3510,7 @@ public final class ActivityThread extends ClientTransactionHandler
             StrictMode.incrementExpectedActivityCount(activity.getClass());
             r.intent.setExtrasClassLoader(cl);
             r.intent.prepareToEnterProcess(isProtectedComponent(r.activityInfo),
-                    activity.getAttributionSource());
+                    appContext.getAttributionSource());
             if (r.state != null) {
                 r.state.setClassLoader(cl);
             }
@@ -4441,6 +4441,10 @@ public final class ActivityThread extends ClientTransactionHandler
                     .createServiceBaseContext(this, packageInfo));
             if (data.info.splitName != null) {
                 context = (ContextImpl) context.createContextForSplit(data.info.splitName);
+            }
+            if (data.info.attributionTags != null && data.info.attributionTags.length > 0) {
+                final String attributionTag = data.info.attributionTags[0];
+                context = (ContextImpl) context.createAttributionContext(attributionTag);
             }
             // Service resources must be initialized with the same loaders as the application
             // context.
@@ -7352,6 +7356,10 @@ public final class ActivityThread extends ClientTransactionHandler
                 } catch (NameNotFoundException e) {
                     throw new RuntimeException(e);
                 }
+            }
+            if (info.attributionTags != null && info.attributionTags.length > 0) {
+                final String attributionTag = info.attributionTags[0];
+                c = c.createAttributionContext(attributionTag);
             }
 
             try {

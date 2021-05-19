@@ -74,7 +74,8 @@ public class ParsedProviderUtils {
                     R.styleable.AndroidManifestProvider_name,
                     R.styleable.AndroidManifestProvider_process,
                     R.styleable.AndroidManifestProvider_roundIcon,
-                    R.styleable.AndroidManifestProvider_splitName);
+                    R.styleable.AndroidManifestProvider_splitName,
+                    R.styleable.AndroidManifestProvider_attributionTags);
             if (result.isError()) {
                 return result;
             }

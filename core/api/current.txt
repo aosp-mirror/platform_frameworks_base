@@ -11884,7 +11884,6 @@ package android.content.pm {
     field public static final int SCREEN_ORIENTATION_USER_LANDSCAPE = 11; // 0xb
     field public static final int SCREEN_ORIENTATION_USER_PORTRAIT = 12; // 0xc
     field public static final int UIOPTION_SPLIT_ACTION_BAR_WHEN_NARROW = 1; // 0x1
-    field public String[] attributionTags;
     field public int colorMode;
     field public int configChanges;
     field public int documentLaunchMode;
@@ -12076,6 +12075,7 @@ package android.content.pm {
     method public final int getLogoResource();
     method public boolean isEnabled();
     field public android.content.pm.ApplicationInfo applicationInfo;
+    field public String[] attributionTags;
     field public int descriptionRes;
     field public boolean directBootAware;
     field public boolean enabled;
