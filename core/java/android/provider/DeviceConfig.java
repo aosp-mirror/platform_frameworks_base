@@ -31,6 +31,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.database.ContentObserver;
 import android.net.Uri;
+import android.provider.Settings.Config.SyncDisabledMode;
 import android.provider.Settings.ResetMode;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -852,6 +853,37 @@ public final class DeviceConfig {
     public static void resetToDefaults(@ResetMode int resetMode, @Nullable String namespace) {
         ContentResolver contentResolver = ActivityThread.currentApplication().getContentResolver();
         Settings.Config.resetToDefaults(contentResolver, resetMode, namespace);
+    }
+
+    /**
+     * Disables or re-enables bulk modifications ({@link #setProperties(Properties)}) to device
+     * config values. This is intended for use during tests to prevent a sync operation clearing
+     * config values, which could influence the outcome of the tests, i.e. by changing behavior.
+     *
+     * @param syncDisabledMode the mode to use, see {@link Settings.Config#SYNC_DISABLED_MODE_NONE},
+     *     {@link Settings.Config#SYNC_DISABLED_MODE_PERSISTENT} and {@link
+     *     Settings.Config#SYNC_DISABLED_MODE_UNTIL_REBOOT}
+     *
+     * @see #isSyncDisabled()
+     * @hide
+     */
+    @RequiresPermission(WRITE_DEVICE_CONFIG)
+    public static void setSyncDisabled(@SyncDisabledMode int syncDisabledMode) {
+        ContentResolver contentResolver = ActivityThread.currentApplication().getContentResolver();
+        Settings.Config.setSyncDisabled(contentResolver, syncDisabledMode);
+    }
+
+    /**
+     * Returns the current state of sync disabling, {@code true} when disabled, {@code false}
+     * otherwise.
+     *
+     * @see #setSyncDisabled(int)
+     * @hide
+     */
+    @RequiresPermission(WRITE_DEVICE_CONFIG)
+    public static boolean isSyncDisabled() {
+        ContentResolver contentResolver = ActivityThread.currentApplication().getContentResolver();
+        return Settings.Config.isSyncDisabled(contentResolver);
     }
 
     /**
