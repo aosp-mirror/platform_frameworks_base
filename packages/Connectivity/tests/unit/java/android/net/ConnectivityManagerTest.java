@@ -317,26 +317,34 @@ public class ConnectivityManagerTest {
         NetworkCallback nullCallback = null;
         PendingIntent nullIntent = null;
 
-        mustFail(() -> { manager.requestNetwork(null, callback); });
-        mustFail(() -> { manager.requestNetwork(request, nullCallback); });
-        mustFail(() -> { manager.requestNetwork(request, callback, null); });
-        mustFail(() -> { manager.requestNetwork(request, callback, -1); });
-        mustFail(() -> { manager.requestNetwork(request, nullIntent); });
+        mustFail(() -> manager.requestNetwork(null, callback));
+        mustFail(() -> manager.requestNetwork(request, nullCallback));
+        mustFail(() -> manager.requestNetwork(request, callback, null));
+        mustFail(() -> manager.requestNetwork(request, callback, -1));
+        mustFail(() -> manager.requestNetwork(request, nullIntent));
 
-        mustFail(() -> { manager.registerNetworkCallback(null, callback, handler); });
-        mustFail(() -> { manager.registerNetworkCallback(request, null, handler); });
-        mustFail(() -> { manager.registerNetworkCallback(request, callback, null); });
-        mustFail(() -> { manager.registerNetworkCallback(request, nullIntent); });
+        mustFail(() -> manager.requestBackgroundNetwork(null, callback, handler));
+        mustFail(() -> manager.requestBackgroundNetwork(request, null, handler));
+        mustFail(() -> manager.requestBackgroundNetwork(request, callback, null));
 
-        mustFail(() -> { manager.registerDefaultNetworkCallback(null, handler); });
-        mustFail(() -> { manager.registerDefaultNetworkCallback(callback, null); });
+        mustFail(() -> manager.registerNetworkCallback(null, callback, handler));
+        mustFail(() -> manager.registerNetworkCallback(request, null, handler));
+        mustFail(() -> manager.registerNetworkCallback(request, callback, null));
+        mustFail(() -> manager.registerNetworkCallback(request, nullIntent));
 
-        mustFail(() -> { manager.registerSystemDefaultNetworkCallback(null, handler); });
-        mustFail(() -> { manager.registerSystemDefaultNetworkCallback(callback, null); });
+        mustFail(() -> manager.registerDefaultNetworkCallback(null, handler));
+        mustFail(() -> manager.registerDefaultNetworkCallback(callback, null));
 
-        mustFail(() -> { manager.unregisterNetworkCallback(nullCallback); });
-        mustFail(() -> { manager.unregisterNetworkCallback(nullIntent); });
-        mustFail(() -> { manager.releaseNetworkRequest(nullIntent); });
+        mustFail(() -> manager.registerSystemDefaultNetworkCallback(null, handler));
+        mustFail(() -> manager.registerSystemDefaultNetworkCallback(callback, null));
+
+        mustFail(() -> manager.registerBestMatchingNetworkCallback(null, callback, handler));
+        mustFail(() -> manager.registerBestMatchingNetworkCallback(request, null, handler));
+        mustFail(() -> manager.registerBestMatchingNetworkCallback(request, callback, null));
+
+        mustFail(() -> manager.unregisterNetworkCallback(nullCallback));
+        mustFail(() -> manager.unregisterNetworkCallback(nullIntent));
+        mustFail(() -> manager.releaseNetworkRequest(nullIntent));
     }
 
     static void mustFail(Runnable fn) {
