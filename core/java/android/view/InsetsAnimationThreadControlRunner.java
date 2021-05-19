@@ -141,6 +141,17 @@ public class InsetsAnimationThreadControlRunner implements InsetsAnimationContro
 
     @Override
     @UiThread
+    public int getControllingTypes() {
+        return mControl.getControllingTypes();
+    }
+
+    @Override
+    public void notifyControlRevoked(@InsetsType int types) {
+        mControl.notifyControlRevoked(types);
+    }
+
+    @Override
+    @UiThread
     public void cancel() {
         InsetsAnimationThread.getHandler().post(mControl::cancel);
     }
