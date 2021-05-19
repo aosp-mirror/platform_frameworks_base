@@ -46,7 +46,6 @@ import android.os.Bundle;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.AttributeSet;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.MathUtils;
 import android.util.Pair;
@@ -71,17 +70,14 @@ import android.widget.ScrollView;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.ColorUtils;
 import com.android.internal.jank.InteractionJankMonitor;
-import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.keyguard.KeyguardSliceView;
 import com.android.settingslib.Utils;
-import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.ExpandHelper;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.DragDownHelper.DragDownCallback;
 import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
@@ -89,7 +85,6 @@ import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.ExpandAnimationParameters;
 import com.android.systemui.statusbar.notification.FakeShadowView;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
@@ -108,9 +103,6 @@ import com.android.systemui.statusbar.notification.row.ForegroundServiceDungeonV
 import com.android.systemui.statusbar.notification.row.StackScrollerDecorView;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
 import com.android.systemui.statusbar.phone.HeadsUpTouchHelper;
-import com.android.systemui.statusbar.phone.LockscreenGestureLogger;
-import com.android.systemui.statusbar.phone.LockscreenGestureLogger.LockscreenUiEvent;
-import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.HeadsUpUtil;
@@ -151,7 +143,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      */
     private static final int DISTANCE_BETWEEN_ADJACENT_SECTIONS_PX = 1;
     private KeyguardBypassEnabledProvider mKeyguardBypassEnabledProvider;
-    private final SysuiStatusBarStateController mStatusbarStateController;
 
     private ExpandHelper mExpandHelper;
     private NotificationSwipeHelper mSwipeHelper;
@@ -433,13 +424,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private ShadeController mShadeController;
     private Runnable mOnStackYChanged;
 
-    private final DisplayMetrics mDisplayMetrics = Dependency.get(DisplayMetrics.class);
-    private final LockscreenGestureLogger mLockscreenGestureLogger =
-            Dependency.get(LockscreenGestureLogger.class);
     protected boolean mClearAllEnabled;
 
     private Interpolator mHideXInterpolator = Interpolators.FAST_OUT_SLOW_IN;
-    private NotificationPanelViewController mNotificationPanelController;
 
     private final NotificationSectionsManager mSectionsManager;
     private ForegroundServiceDungeonView mFgsSectionView;
@@ -448,6 +435,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private float mLastSentExpandedHeight;
     private boolean mWillExpand;
     private int mGapHeight;
+
+    /**
+     * The extra inset during the full shade transition
+     */
+    private float mExtraTopInsetForFullShadeTransition;
 
     private int mWaterfallTopInset;
     private NotificationStackScrollLayoutController mController;
@@ -496,7 +488,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             NotificationSectionsManager notificationSectionsManager,
             GroupMembershipManager groupMembershipManager,
             GroupExpansionManager groupExpansionManager,
-            SysuiStatusBarStateController statusbarStateController,
             AmbientState ambientState,
             FeatureFlags featureFlags) {
         super(context, attrs, 0, 0);
@@ -535,7 +526,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mClearAllEnabled = res.getBoolean(R.bool.config_enableNotificationsClearAll);
         mGroupMembershipManager = groupMembershipManager;
         mGroupExpansionManager = groupExpansionManager;
-        mStatusbarStateController = statusbarStateController;
     }
 
     void initializeForegroundServiceSection(ForegroundServiceDungeonView fgsSectionView) {
@@ -1142,8 +1132,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      */
     private void updateStackPosition() {
         // Consider interpolating from an mExpansionStartY for use on lockscreen and AOD
+        float endTopPosition = mTopPadding + mExtraTopInsetForFullShadeTransition;
         final float fraction = mAmbientState.getExpansionFraction();
-        final float stackY = MathUtils.lerp(0, mTopPadding, fraction);
+        final float stackY = MathUtils.lerp(0, endTopPosition, fraction);
         mAmbientState.setStackY(stackY);
         if (mOnStackYChanged != null) {
             mOnStackYChanged.run();
@@ -4278,6 +4269,13 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 + mGapHeight;
     }
 
+    /**
+     * @return the padding after the media header on the lockscreen
+     */
+    public int getPaddingAfterMedia() {
+        return mGapHeight + mPaddingBetweenElements;
+    }
+
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public int getEmptyShadeViewHeight() {
         return mEmptyShadeView.getHeight();
@@ -4933,12 +4931,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 getChildCount() - offsetFromEnd);
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    public void setNotificationPanelController(
-            NotificationPanelViewController notificationPanelViewController) {
-        mNotificationPanelController = notificationPanelViewController;
-    }
-
     /**
      * Set how far the wake up is when waking up from pulsing. This is a height and will adjust the
      * notification positions accordingly.
@@ -5152,6 +5144,16 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     void setShadeController(ShadeController shadeController) {
         mShadeController = shadeController;
+    }
+
+    /**
+     * Sets the extra top inset for the full shade transition. This is needed to compensate for
+     * media transitioning to quick settings
+     */
+    public void setExtraTopInsetForFullShadeTransition(float inset) {
+        mExtraTopInsetForFullShadeTransition = inset;
+        updateStackPosition();
+        requestChildrenUpdate();
     }
 
     /**
@@ -5526,107 +5528,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    public void setKeyguardMediaControllorVisible(boolean keyguardMediaControllorVisible) {
-        mKeyguardMediaControllorVisible = keyguardMediaControllorVisible;
-    }
-
     void resetCheckSnoozeLeavebehind() {
         setCheckForLeaveBehind(true);
     }
-
-    // ---------------------- DragDownHelper.OnDragDownListener ------------------------------------
-
-    @ShadeViewRefactor(RefactorComponent.INPUT)
-    private final DragDownCallback mDragDownCallback = new DragDownCallback() {
-
-        @Override
-        public boolean canDragDown() {
-            return mStatusBarState == StatusBarState.KEYGUARD
-                    && (mController.hasActiveNotifications() || mKeyguardMediaControllorVisible)
-                    || mController.isInLockedDownShade();
-        }
-
-        /* Only ever called as a consequence of a lockscreen expansion gesture. */
-        @Override
-        public void onDraggedDown(View startingChild, int dragLengthY) {
-            boolean canDragDown =
-                    mController.hasActiveNotifications() || mKeyguardMediaControllorVisible;
-            if (mStatusBarState == StatusBarState.KEYGUARD && canDragDown) {
-                mLockscreenGestureLogger.write(
-                        MetricsEvent.ACTION_LS_SHADE,
-                        (int) (dragLengthY / mDisplayMetrics.density),
-                        0 /* velocityDp - N/A */);
-                mLockscreenGestureLogger.log(LockscreenUiEvent.LOCKSCREEN_PULL_SHADE_OPEN);
-
-                if (!mAmbientState.isDozing() || startingChild != null) {
-                    // We have notifications, go to locked shade.
-                    mShadeController.goToLockedShade(startingChild);
-                    if (startingChild instanceof ExpandableNotificationRow) {
-                        ExpandableNotificationRow row = (ExpandableNotificationRow) startingChild;
-                        row.onExpandedByGesture(true /* drag down is always an open */);
-                    }
-                }
-            } else if (mController.isInLockedDownShade()) {
-                mStatusbarStateController.setLeaveOpenOnKeyguardHide(true);
-                mStatusBar.dismissKeyguardThenExecute(() -> false /* dismissAction */,
-                        null /* cancelRunnable */, false /* afterKeyguardGone */);
-            }
-        }
-
-        @Override
-        public void onDragDownReset() {
-            setDimmed(true /* dimmed */, true /* animated */);
-            resetScrollPosition();
-            resetCheckSnoozeLeavebehind();
-        }
-
-        @Override
-        public void onCrossedThreshold(boolean above) {
-            setDimmed(!above /* dimmed */, true /* animate */);
-        }
-
-        @Override
-        public void onTouchSlopExceeded() {
-            cancelLongPress();
-            mController.checkSnoozeLeavebehind();
-        }
-
-        @Override
-        public void setEmptyDragAmount(float amount) {
-            mNotificationPanelController.setEmptyDragAmount(amount);
-        }
-
-        @Override
-        public boolean isFalsingCheckNeeded() {
-            return mStatusBarState == StatusBarState.KEYGUARD;
-        }
-
-        @Override
-        public boolean isDragDownEnabledForView(ExpandableView view) {
-            if (isDragDownAnywhereEnabled()) {
-                return true;
-            }
-            if (mController.isInLockedDownShade()) {
-                if (view == null) {
-                    // Dragging down is allowed in general
-                    return true;
-                }
-                if (view instanceof ExpandableNotificationRow) {
-                    // Only drag down on sensitive views, otherwise the ExpandHelper will take this
-                    return ((ExpandableNotificationRow) view).getEntry().isSensitive();
-                }
-            }
-            return false;
-        }
-
-        @Override
-        public boolean isDragDownAnywhereEnabled() {
-            return mStatusbarStateController.getState() == StatusBarState.KEYGUARD
-                    && !mKeyguardBypassEnabledProvider.getBypassEnabled();
-        }
-    };
-
-    public DragDownCallback getDragDownCallback() { return mDragDownCallback; }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     private final HeadsUpTouchHelper.Callback mHeadsUpCallback = new HeadsUpTouchHelper.Callback() {

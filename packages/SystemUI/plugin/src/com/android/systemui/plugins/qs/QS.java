@@ -33,7 +33,7 @@ public interface QS extends FragmentBase {
 
     String ACTION = "com.android.systemui.action.PLUGIN_QS";
 
-    int VERSION = 8;
+    int VERSION = 9;
 
     String TAG = "QS";
 
@@ -50,8 +50,13 @@ public interface QS extends FragmentBase {
     void setListening(boolean listening);
     boolean isShowingDetail();
     void closeDetail();
-    default void setShowCollapsedOnKeyguard(boolean showCollapsedOnKeyguard) {}
-    void animateHeaderSlidingIn(long delay);
+
+    /**
+     * Set that we're currently pulse expanding
+     *
+     * @param pulseExpanding if we're currently expanding during pulsing
+     */
+    default void setPulseExpanding(boolean pulseExpanding) {}
     void animateHeaderSlidingOut();
     void setQsExpansion(float qsExpansionFraction, float headerTranslation);
     void setHeaderListening(boolean listening);
@@ -79,9 +84,22 @@ public interface QS extends FragmentBase {
     void setTranslateWhileExpanding(boolean shouldTranslate);
 
     /**
+     * Set the amount of pixels we have currently dragged down if we're transitioning to the full
+     * shade. 0.0f means we're not transitioning yet.
+     */
+    default void setTransitionToFullShadeAmount(float pxAmount, boolean animated) {}
+
+    /**
      * A rounded corner clipping that makes QS feel as if it were behind everything.
      */
     void setFancyClipping(int top, int bottom, int cornerRadius, boolean visible);
+
+    /**
+     * @return if quick settings is fully collapsed currently
+     */
+    default boolean isFullyCollapsed() {
+        return true;
+    }
 
     @ProvidesInterface(version = HeightListener.VERSION)
     interface HeightListener {

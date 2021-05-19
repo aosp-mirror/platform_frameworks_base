@@ -82,6 +82,7 @@ import com.android.systemui.qs.QSDetailDisplayer;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.KeyguardAffordanceView;
+import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationShelfController;
@@ -226,6 +227,8 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     @Mock
     private NotificationShadeDepthController mNotificationShadeDepthController;
     @Mock
+    private LockscreenShadeTransitionController mLockscreenShadeTransitionController;
+    @Mock
     private AuthController mAuthController;
     @Mock
     private ScrimController mScrimController;
@@ -314,7 +317,9 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mKeyguardBypassController, mHeadsUpManager,
                 mock(NotificationRoundnessManager.class),
                 mStatusBarStateController,
-                new FalsingManagerFake(), new FalsingCollectorFake());
+                new FalsingManagerFake(),
+                mLockscreenShadeTransitionController,
+                new FalsingCollectorFake());
         when(mKeyguardStatusViewComponentFactory.build(any()))
                 .thenReturn(mKeyguardStatusViewComponent);
         when(mKeyguardStatusViewComponent.getKeyguardClockSwitchController())
@@ -330,7 +335,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mResources,
                 mLayoutInflater,
                 coordinator, expansionHandler, mDynamicPrivacyController, mKeyguardBypassController,
-                new FalsingManagerFake(), new FalsingCollectorFake(), mShadeController,
+                new FalsingManagerFake(), new FalsingCollectorFake(),
                 mNotificationLockscreenUserManager, mNotificationEntryManager,
                 mKeyguardStateController, mStatusBarStateController, mDozeLog,
                 mDozeParameters, mCommandQueue, mVibratorHelper,
@@ -344,6 +349,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mKeyguardQsUserSwitchComponentFactory,
                 mKeyguardUserSwitcherComponentFactory,
                 mKeyguardStatusBarViewComponentFactory,
+                mLockscreenShadeTransitionController,
                 mQSDetailDisplayer,
                 mGroupManager,
                 mNotificationAreaController,
