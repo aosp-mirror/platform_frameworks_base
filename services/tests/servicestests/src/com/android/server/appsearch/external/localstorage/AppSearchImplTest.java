@@ -55,6 +55,7 @@ import com.android.server.appsearch.proto.SearchSpecProto;
 import com.android.server.appsearch.proto.StatusProto;
 import com.android.server.appsearch.proto.StringIndexingConfig;
 import com.android.server.appsearch.proto.TermMatchType;
+import com.android.server.appsearch.visibilitystore.VisibilityStore;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -86,7 +87,6 @@ public class AppSearchImplTest {
                         mTemporaryFolder.newFolder(),
                         context,
                         VisibilityStore.NO_OP_USER_ID,
-                        /*globalQuerierPackage=*/ context.getPackageName(),
                         /*logger=*/ null);
     }
 
@@ -496,11 +496,7 @@ public class AppSearchImplTest {
         File appsearchDir = mTemporaryFolder.newFolder();
         AppSearchImpl appSearchImpl =
                 AppSearchImpl.create(
-                        appsearchDir,
-                        context,
-                        VisibilityStore.NO_OP_USER_ID,
-                        /*globalQuerierPackage=*/ "",
-                        /*logger=*/ null);
+                        appsearchDir, context, VisibilityStore.NO_OP_USER_ID, /*logger=*/ null);
 
         // Insert schema
         List<AppSearchSchema> schemas =
@@ -563,11 +559,7 @@ public class AppSearchImplTest {
         appSearchImpl.close();
         appSearchImpl =
                 AppSearchImpl.create(
-                        appsearchDir,
-                        context,
-                        VisibilityStore.NO_OP_USER_ID,
-                        /*globalQuerierPackage=*/ context.getPackageName(),
-                        testLogger);
+                        appsearchDir, context, VisibilityStore.NO_OP_USER_ID, testLogger);
 
         // Check recovery state
         InitializeStats initStats = testLogger.mInitializeStats;
@@ -1163,6 +1155,7 @@ public class AppSearchImplTest {
     public void testClearPackageData() throws AppSearchException {
         List<SchemaTypeConfigProto> existingSchemas =
                 mAppSearchImpl.getSchemaProtoLocked().getTypesList();
+        Map<String, Set<String>> existingDatabases = mAppSearchImpl.getPackageToDatabases();
 
         // Insert package schema
         List<AppSearchSchema> schema =
@@ -1210,6 +1203,67 @@ public class AppSearchImplTest {
         // Verify the schema is cleared.
         assertThat(mAppSearchImpl.getSchemaProtoLocked().getTypesList())
                 .containsExactlyElementsIn(existingSchemas);
+        assertThat(mAppSearchImpl.getPackageToDatabases())
+                .containsExactlyEntriesIn(existingDatabases);
+    }
+
+    @Test
+    public void testPrunePackageData() throws AppSearchException {
+        List<SchemaTypeConfigProto> existingSchemas =
+                mAppSearchImpl.getSchemaProtoLocked().getTypesList();
+        Map<String, Set<String>> existingDatabases = mAppSearchImpl.getPackageToDatabases();
+
+        Set<String> existingPackages = new ArraySet<>(existingSchemas.size());
+        for (int i = 0; i < existingSchemas.size(); i++) {
+            existingPackages.add(PrefixUtil.getPackageName(existingSchemas.get(i).getSchemaType()));
+        }
+
+        // Insert schema for package A and B.
+        List<AppSearchSchema> schema =
+                ImmutableList.of(new AppSearchSchema.Builder("schema").build());
+        mAppSearchImpl.setSchema(
+                "packageA",
+                "database",
+                schema,
+                /*schemasNotPlatformSurfaceable=*/ Collections.emptyList(),
+                /*schemasPackageAccessible=*/ Collections.emptyMap(),
+                /*forceOverride=*/ false,
+                /*version=*/ 0);
+        mAppSearchImpl.setSchema(
+                "packageB",
+                "database",
+                schema,
+                /*schemasNotPlatformSurfaceable=*/ Collections.emptyList(),
+                /*schemasPackageAccessible=*/ Collections.emptyMap(),
+                /*forceOverride=*/ false,
+                /*version=*/ 0);
+
+        // Verify these two packages is stored in AppSearch
+        SchemaProto expectedProto =
+                SchemaProto.newBuilder()
+                        .addTypes(
+                                SchemaTypeConfigProto.newBuilder()
+                                        .setSchemaType("packageA$database/schema")
+                                        .setVersion(0))
+                        .addTypes(
+                                SchemaTypeConfigProto.newBuilder()
+                                        .setSchemaType("packageB$database/schema")
+                                        .setVersion(0))
+                        .build();
+        List<SchemaTypeConfigProto> expectedTypes = new ArrayList<>();
+        expectedTypes.addAll(existingSchemas);
+        expectedTypes.addAll(expectedProto.getTypesList());
+        assertThat(mAppSearchImpl.getSchemaProtoLocked().getTypesList())
+                .containsExactlyElementsIn(expectedTypes);
+
+        // Prune packages
+        mAppSearchImpl.prunePackageData(existingPackages);
+
+        // Verify the schema is same as beginning.
+        assertThat(mAppSearchImpl.getSchemaProtoLocked().getTypesList())
+                .containsExactlyElementsIn(existingSchemas);
+        assertThat(mAppSearchImpl.getPackageToDatabases())
+                .containsExactlyEntriesIn(existingDatabases);
     }
 
     @Test
@@ -1256,36 +1310,6 @@ public class AppSearchImplTest {
                 /*version=*/ 0);
         assertThat(mAppSearchImpl.getPackageToDatabases())
                 .containsExactlyEntriesIn(expectedMapping);
-    }
-
-    @Test
-    public void testGetPrefixes() throws Exception {
-        Set<String> existingPrefixes = mAppSearchImpl.getPrefixesLocked();
-
-        // Has database1
-        Set<String> expectedPrefixes = new ArraySet<>(existingPrefixes);
-        expectedPrefixes.add(createPrefix("package", "database1"));
-        mAppSearchImpl.setSchema(
-                "package",
-                "database1",
-                Collections.singletonList(new AppSearchSchema.Builder("schema").build()),
-                /*schemasNotPlatformSurfaceable=*/ Collections.emptyList(),
-                /*schemasPackageAccessible=*/ Collections.emptyMap(),
-                /*forceOverride=*/ false,
-                /*version=*/ 0);
-        assertThat(mAppSearchImpl.getPrefixesLocked()).containsExactlyElementsIn(expectedPrefixes);
-
-        // Has both databases
-        expectedPrefixes.add(createPrefix("package", "database2"));
-        mAppSearchImpl.setSchema(
-                "package",
-                "database2",
-                Collections.singletonList(new AppSearchSchema.Builder("schema").build()),
-                /*schemasNotPlatformSurfaceable=*/ Collections.emptyList(),
-                /*schemasPackageAccessible=*/ Collections.emptyMap(),
-                /*forceOverride=*/ false,
-                /*version=*/ 0);
-        assertThat(mAppSearchImpl.getPrefixesLocked()).containsExactlyElementsIn(expectedPrefixes);
     }
 
     @Test
@@ -1665,7 +1689,6 @@ public class AppSearchImplTest {
                         mTemporaryFolder.newFolder(),
                         context,
                         VisibilityStore.NO_OP_USER_ID,
-                        /*globalQuerierPackage=*/ "",
                         /*logger=*/ null);
 
         // Initial check that we could do something at first.
@@ -1815,11 +1838,7 @@ public class AppSearchImplTest {
         File appsearchDir = mTemporaryFolder.newFolder();
         AppSearchImpl appSearchImpl =
                 AppSearchImpl.create(
-                        appsearchDir,
-                        context,
-                        VisibilityStore.NO_OP_USER_ID,
-                        /*globalQuerierPackage=*/ "",
-                        /*logger=*/ null);
+                        appsearchDir, context, VisibilityStore.NO_OP_USER_ID, /*logger=*/ null);
 
         List<AppSearchSchema> schemas =
                 Collections.singletonList(new AppSearchSchema.Builder("type").build());
@@ -1846,11 +1865,7 @@ public class AppSearchImplTest {
         // That document should be visible even from another instance.
         AppSearchImpl appSearchImpl2 =
                 AppSearchImpl.create(
-                        appsearchDir,
-                        context,
-                        VisibilityStore.NO_OP_USER_ID,
-                        /*globalQuerierPackage=*/ "",
-                        /*logger=*/ null);
+                        appsearchDir, context, VisibilityStore.NO_OP_USER_ID, /*logger=*/ null);
         getResult =
                 appSearchImpl2.getDocument(
                         "package", "database", "namespace1", "id1", Collections.emptyMap());
@@ -1864,11 +1879,7 @@ public class AppSearchImplTest {
         File appsearchDir = mTemporaryFolder.newFolder();
         AppSearchImpl appSearchImpl =
                 AppSearchImpl.create(
-                        appsearchDir,
-                        context,
-                        VisibilityStore.NO_OP_USER_ID,
-                        /*globalQuerierPackage=*/ "",
-                        /*logger=*/ null);
+                        appsearchDir, context, VisibilityStore.NO_OP_USER_ID, /*logger=*/ null);
 
         List<AppSearchSchema> schemas =
                 Collections.singletonList(new AppSearchSchema.Builder("type").build());
@@ -1919,11 +1930,7 @@ public class AppSearchImplTest {
         // Only the second document should be retrievable from another instance.
         AppSearchImpl appSearchImpl2 =
                 AppSearchImpl.create(
-                        appsearchDir,
-                        context,
-                        VisibilityStore.NO_OP_USER_ID,
-                        /*globalQuerierPackage=*/ "",
-                        /*logger=*/ null);
+                        appsearchDir, context, VisibilityStore.NO_OP_USER_ID, /*logger=*/ null);
         expectThrows(
                 AppSearchException.class,
                 () ->
@@ -1946,11 +1953,7 @@ public class AppSearchImplTest {
         File appsearchDir = mTemporaryFolder.newFolder();
         AppSearchImpl appSearchImpl =
                 AppSearchImpl.create(
-                        appsearchDir,
-                        context,
-                        VisibilityStore.NO_OP_USER_ID,
-                        /*globalQuerierPackage=*/ "",
-                        /*logger=*/ null);
+                        appsearchDir, context, VisibilityStore.NO_OP_USER_ID, /*logger=*/ null);
 
         List<AppSearchSchema> schemas =
                 Collections.singletonList(new AppSearchSchema.Builder("type").build());
@@ -2009,11 +2012,7 @@ public class AppSearchImplTest {
         // Only the second document should be retrievable from another instance.
         AppSearchImpl appSearchImpl2 =
                 AppSearchImpl.create(
-                        appsearchDir,
-                        context,
-                        VisibilityStore.NO_OP_USER_ID,
-                        /*globalQuerierPackage=*/ "",
-                        /*logger=*/ null);
+                        appsearchDir, context, VisibilityStore.NO_OP_USER_ID, /*logger=*/ null);
         expectThrows(
                 AppSearchException.class,
                 () ->
