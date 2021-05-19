@@ -17,6 +17,7 @@
 package com.android.wm.shell.pip;
 
 import android.app.PictureInPictureParams;
+import android.view.SurfaceControl;
 import android.content.ComponentName;
 import android.content.pm.ActivityInfo;
 import android.graphics.Rect;
@@ -48,8 +49,10 @@ interface IPip {
      *
      * @param componentName ComponentName represents the Activity
      * @param destinationBounds the destination bounds the PiP window lands into
+     * @param overlay an optional overlay to fade out after entering PiP
      */
-    oneway void stopSwipePipToHome(in ComponentName componentName, in Rect destinationBounds) = 2;
+    oneway void stopSwipePipToHome(in ComponentName componentName, in Rect destinationBounds,
+            in SurfaceControl overlay) = 2;
 
     /**
      * Sets listener to get pinned stack animation callbacks.

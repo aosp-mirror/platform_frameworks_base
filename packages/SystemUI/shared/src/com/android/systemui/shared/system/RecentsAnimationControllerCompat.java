@@ -19,6 +19,7 @@ package com.android.systemui.shared.system;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.IRecentsAnimationController;
+import android.view.SurfaceControl;
 import android.window.PictureInPictureSurfaceTransaction;
 import android.window.TaskSnapshot;
 
@@ -76,11 +77,13 @@ public class RecentsAnimationControllerCompat {
      * updated accordingly. This should be called before `finish`
      * @param taskId Task id of the Activity in PiP mode.
      * @param finishTransaction leash operations for the final transform.
+     * @param overlay the surface control for an overlay being shown above the pip (can be null)
      */
     public void setFinishTaskTransaction(int taskId,
-            PictureInPictureSurfaceTransaction finishTransaction) {
+            PictureInPictureSurfaceTransaction finishTransaction,
+            SurfaceControl overlay) {
         try {
-            mAnimationController.setFinishTaskTransaction(taskId, finishTransaction);
+            mAnimationController.setFinishTaskTransaction(taskId, finishTransaction, overlay);
         } catch (RemoteException e) {
             Log.d(TAG, "Failed to set finish task bounds", e);
         }

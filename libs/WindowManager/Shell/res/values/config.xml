@@ -24,6 +24,9 @@
     <!-- Animation duration for resizing of PIP. -->
     <integer name="config_pipResizeAnimationDuration">425</integer>
 
+    <!-- Animation duration for crossfading of PIP (specifically to fade out the layer on top). -->
+    <integer name="config_pipCrossfadeAnimationDuration">150</integer>
+
     <!-- Allow dragging the PIP to a location to close it -->
     <bool name="config_pipEnableDismissDragToEdge">true</bool>
 

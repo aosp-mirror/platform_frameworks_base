@@ -85,6 +85,15 @@ public final class SystemFonts {
         }
     }
 
+    /**
+     * @hide
+     */
+    public static void resetAvailableFonts() {
+        synchronized (LOCK) {
+            sAvailableFonts = null;
+        }
+    }
+
     private static @Nullable ByteBuffer mmap(@NonNull String fullPath) {
         try (FileInputStream file = new FileInputStream(fullPath)) {
             final FileChannel fileChannel = file.getChannel();
