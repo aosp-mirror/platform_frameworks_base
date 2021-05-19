@@ -83,11 +83,12 @@ public class StartingSurfaceDrawerTests {
         }
 
         @Override
-        protected void postAddWindow(int taskId, IBinder appToken,
+        protected boolean postAddWindow(int taskId, IBinder appToken,
                 View view, WindowManager wm, WindowManager.LayoutParams params) {
             // listen for addView
             mAddWindowForTask = taskId;
             mViewThemeResId = view.getContext().getThemeResId();
+            return true;
         }
 
         @Override
