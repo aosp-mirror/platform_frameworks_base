@@ -99,6 +99,13 @@ public abstract class AuthBiometricView extends LinearLayout {
         int ACTION_BUTTON_TRY_AGAIN = 4;
         int ACTION_ERROR = 5;
         int ACTION_USE_DEVICE_CREDENTIAL = 6;
+        /**
+         * Notify the receiver to start the fingerprint sensor.
+         *
+         * This is only applicable to multi-sensor devices that need to delay fingerprint auth
+         * (i.e face -> fingerprint).
+         */
+        int ACTION_START_DELAYED_FINGERPRINT_SENSOR = 7;
 
         /**
          * When an action has occurred. The caller will only invoke this when the callback should
@@ -166,7 +173,7 @@ public abstract class AuthBiometricView extends LinearLayout {
     }
 
     private final Injector mInjector;
-    private final Handler mHandler;
+    protected final Handler mHandler;
     private final AccessibilityManager mAccessibilityManager;
     protected final int mTextColorError;
     protected final int mTextColorHint;
@@ -199,7 +206,7 @@ public abstract class AuthBiometricView extends LinearLayout {
     // Measurements when biometric view is showing text, buttons, etc.
     @Nullable @VisibleForTesting AuthDialog.LayoutParams mLayoutParams;
 
-    private Callback mCallback;
+    protected Callback mCallback;
     protected @BiometricState int mState;
 
     private float mIconOriginalY;

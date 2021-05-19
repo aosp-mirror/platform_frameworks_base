@@ -119,6 +119,18 @@ public class AuthBiometricFaceToFingerprintView extends AuthBiometricFaceView {
     }
 
     @Override
+    @BiometricState
+    protected int getStateForAfterError() {
+        if (mActiveSensorType == TYPE_FACE) {
+            mHandler.post(() -> mCallback.onAction(
+                    Callback.ACTION_START_DELAYED_FINGERPRINT_SENSOR));
+            return STATE_AUTHENTICATING;
+        }
+
+        return super.getStateForAfterError();
+    }
+
+    @Override
     @NonNull
     protected IconController getIconController() {
         if (mActiveSensorType == TYPE_FINGERPRINT) {
