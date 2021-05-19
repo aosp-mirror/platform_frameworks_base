@@ -680,13 +680,20 @@ public final class Parcel {
 
     /**
      * Store or read an IBinder interface token in the parcel at the current
-     * {@link #dataPosition}.  This is used to validate that the marshalled
-     * transaction is intended for the target interface.
+     * {@link #dataPosition}. This is used to validate that the marshalled
+     * transaction is intended for the target interface. This is typically written
+     * at the beginning of transactions as a header.
      */
     public final void writeInterfaceToken(@NonNull String interfaceName) {
         nativeWriteInterfaceToken(mNativePtr, interfaceName);
     }
 
+    /**
+     * Read the header written by writeInterfaceToken and verify it matches
+     * the interface name in question. If the wrong interface type is present,
+     * {@link SecurityException} is thrown. When used over binder, this exception
+     * should propagate to the caller.
+     */
     public final void enforceInterface(@NonNull String interfaceName) {
         nativeEnforceInterface(mNativePtr, interfaceName);
     }
