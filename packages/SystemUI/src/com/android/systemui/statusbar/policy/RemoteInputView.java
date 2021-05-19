@@ -309,6 +309,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         } else {
             attachment.setVisibility(VISIBLE);
         }
+        updateSendButton();
     }
 
     /**
@@ -330,6 +331,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
                 results);
 
         mEntry.remoteInputText = mEditText.getText();
+        // TODO(b/188646667): store attachment to entry
         mEntry.remoteInputUri = null;
         mEntry.remoteInputMimeType = null;
 
@@ -366,6 +368,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
                 : "\"" + attachmentLabel + "\" " + mEditText.getText();
 
         mEntry.remoteInputText = fullText;
+        // TODO(b/188646667): store attachment to entry
         mEntry.remoteInputMimeType = contentType;
         mEntry.remoteInputUri = data;
 
@@ -468,6 +471,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     private void onDefocus(boolean animate, boolean logClose) {
         mController.removeRemoteInput(mEntry, mToken);
         mEntry.remoteInputText = mEditText.getText();
+        // TODO(b/188646667): store attachment to entry
 
         // During removal, we get reattached and lose focus. Not hiding in that
         // case to prevent flicker.
@@ -555,6 +559,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         mEntry.editedSuggestionInfo = editedSuggestionInfo;
         if (editedSuggestionInfo != null) {
             mEntry.remoteInputText = editedSuggestionInfo.originalText;
+            // TODO(b/188646667): store attachment to entry
         }
     }
 
@@ -594,9 +599,10 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         mEditText.setInnerFocusable(true);
         mEditText.mShowImeOnInputConnection = true;
         mEditText.setText(mEntry.remoteInputText);
-        mEditText.setSelection(mEditText.getText().length());
+        mEditText.setSelection(mEditText.length());
         mEditText.requestFocus();
         mController.addRemoteInput(mEntry, mToken);
+        // TODO(b/188646667): restore attachment from entry
 
         mRemoteInputQuickSettingsDisabler.setRemoteInputActive(true);
 
@@ -619,6 +625,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     private void reset() {
         mResetting = true;
         mEntry.remoteInputTextWhenReset = SpannedString.valueOf(mEditText.getText());
+        // TODO(b/188646667): store attachment at time of reset to entry
 
         mEditText.getText().clear();
         mEditText.setEnabled(true);
@@ -627,6 +634,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         mController.removeSpinning(mEntry.getKey(), mToken);
         updateSendButton();
         onDefocus(false /* animate */, false /* logClose */);
+        // TODO(b/188646667): clear attachment
 
         mResetting = false;
     }
@@ -643,7 +651,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     }
 
     private void updateSendButton() {
-        mSendButton.setEnabled(mEditText.getText().length() != 0);
+        mSendButton.setEnabled(mEditText.length() != 0 || mAttachment != null);
     }
 
     public void close() {
@@ -910,6 +918,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
                     // our focus, so we'll need to save our text here.
                     if (mRemoteInputView != null) {
                         mRemoteInputView.mEntry.remoteInputText = getText();
+                        // TODO(b/188646667): store attachment to entry
                     }
                 }
                 return;
