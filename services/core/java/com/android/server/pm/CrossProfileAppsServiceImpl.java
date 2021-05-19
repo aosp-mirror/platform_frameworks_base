@@ -288,12 +288,36 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
         if (targetUserProfiles.isEmpty()) {
             return false;
         }
-        return hasCallerGotInteractAcrossProfilesPermission(callingPackage);
+        return hasCallerGotInteractAcrossProfilesPermission(callingPackage)
+                && haveProfilesGotInteractAcrossProfilesPermission(
+                        callingPackage, targetUserProfiles);
     }
 
     private boolean hasCallerGotInteractAcrossProfilesPermission(String callingPackage) {
         return hasInteractAcrossProfilesPermission(
                 callingPackage, mInjector.getCallingUid(), mInjector.getCallingPid());
+    }
+
+    private boolean haveProfilesGotInteractAcrossProfilesPermission(
+            String packageName, List<UserHandle> profiles) {
+        for (UserHandle profile : profiles) {
+            final int uid = mInjector.withCleanCallingIdentity(() -> {
+                try {
+                    return mInjector.getPackageManager().getPackageUidAsUser(
+                            packageName, /* flags= */ 0, profile.getIdentifier());
+                } catch (PackageManager.NameNotFoundException e) {
+                    return -1;
+                }
+            });
+            if (uid == -1) {
+                return false;
+            }
+            if (!hasInteractAcrossProfilesPermission(
+                    packageName, uid, PermissionChecker.PID_UNKNOWN)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private boolean isCrossProfilePackageAllowlisted(String packageName) {
