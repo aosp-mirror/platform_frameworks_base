@@ -567,11 +567,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Ikon cap jari"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"urus perkakasan wajah buka kunci"</string>
+    <string name="permlab_manageFace" msgid="4569549381889283282">"urus perkakasan buka kunci wajah"</string>
     <string name="permdesc_manageFace" msgid="6204569688492710471">"Membenarkan apl menggunakan kaedah untuk menambahkan dan memadamkan templat wajah untuk digunakan."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"gunakan perkakasan wajah buka kunci"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Membenarkan apl menggunakan perkakasan wajah buka kunci untuk pengesahan"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Wajah buka kunci"</string>
+    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"gunakan perkakasan buka kunci wajah"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Membenarkan apl menggunakan perkakasan buka kunci wajah untuk pengesahan"</string>
+    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Buka kunci wajah"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Daftarkan semula wajah anda"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Untuk meningkatkan pengecaman, sila daftarkan semula wajah anda"</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Gagal menangkap data wajah dgn tepat. Cuba lagi."</string>
@@ -597,15 +597,15 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Tdk dpt sahkan wajah. Perkakasan tidak tersedia."</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"Cuba wajah buka kunci sekali lagi."</string>
+    <string name="face_error_timeout" msgid="522924647742024699">"Cuba buka kunci wajah sekali lagi."</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Tdk dpt menyimpan data wajah baharu. Padamkan yg lama dahulu."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Pengendalian wajah dibatalkan."</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"Wajah buka kunci dibatalkan oleh pengguna."</string>
+    <string name="face_error_user_canceled" msgid="8553045452825849843">"Buka kunci wajah dibatalkan oleh pengguna."</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Terlalu banyak percubaan. Cuba sebentar lagi."</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Terlalu banyak percubaan. Wajah buka kunci dilumpuhkan."</string>
+    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Terlalu banyak percubaan. Buka kunci wajah dilumpuhkan."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Tidak dapat mengesahkan wajah. Cuba lagi."</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"Anda belum menyediakan wajah buka kunci."</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"Wajah buka kunci tidak disokong pada peranti ini."</string>
+    <string name="face_error_not_enrolled" msgid="7369928733504691611">"Anda belum menyediakan buka kunci wajah."</string>
+    <string name="face_error_hw_not_present" msgid="1070600921591729944">"Buka kunci wajah tidak disokong pada peranti ini."</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Penderia dilumpuhkan sementara."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Wajah <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
@@ -905,7 +905,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"Kembangkan bahagian buka kunci."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"Buka kunci luncur."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"Buka kunci corak."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"Wajah Buka Kunci"</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"Buka Kunci Wajah"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"Buka kunci pin."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"Buka kunci Pin Sim."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"Buka kunci Puk Sim."</string>
@@ -1103,7 +1103,7 @@
     <string name="redo" msgid="7231448494008532233">"Buat semula"</string>
     <string name="autofill" msgid="511224882647795296">"Autolengkap"</string>
     <string name="textSelectionCABTitle" msgid="5151441579532476940">"Pemilihan teks"</string>
-    <string name="addToDictionary" msgid="8041821113480950096">"Tambah ke kamus"</string>
+    <string name="addToDictionary" msgid="8041821113480950096">"Tambahkan pada kamus"</string>
     <string name="deleteText" msgid="4200807474529938112">"Padam"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Kaedah input"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Tindakan teks"</string>
@@ -1183,7 +1183,7 @@
     <string name="unsupported_display_size_show" msgid="980129850974919375">"Sentiasa tunjukkan"</string>
     <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"<xliff:g id="APP_NAME">%1$s</xliff:g> telah dibina untuk versi yang tidak serasi dengan OS Android dan mungkin menunjukkan gelagat yang tidak dijangka. Versi kemas kini apl mungkin tersedia."</string>
     <string name="unsupported_compile_sdk_show" msgid="1601210057960312248">"Sentiasa tunjukkan"</string>
-    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Semak kemas kini"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Semak kemaskinian"</string>
     <string name="smv_application" msgid="3775183542777792638">"Apl <xliff:g id="APPLICATION">%1$s</xliff:g> (proses <xliff:g id="PROCESS">%2$s</xliff:g>) telah melanggar dasar Mod Tegasnya sendiri."</string>
     <string name="smv_process" msgid="1398801497130695446">"Proses <xliff:g id="PROCESS">%1$s</xliff:g> telah melanggar dasar Mod Tegasnya sendiri."</string>
     <string name="android_upgrading_title" product="default" msgid="7279077384220829683">"Telefon sedang mengemas kini…"</string>
@@ -1794,7 +1794,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"Untuk melanjutkan hayat bateri, Penjimat Bateri:\n\n•Menghidupkan Tema gelap\n•Mematikan atau mengehadkan aktiviti latar belakang, sesetengah kesan visual dan ciri lain seperti “Ok Google”\n\n"<annotation id="url">"Ketahui lebih lanjut"</annotation></string>
     <string name="battery_saver_description" msgid="8587408568232177204">"Untuk melanjutkan hayat bateri, Penjimat Bateri:\n\n•Menghidupkan Tema gelap\n•Mematikan atau mengehadkan aktiviti latar belakang, sesetengah kesan visual dan ciri lain seperti “Ok Google”"</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Untuk membantu mengurangkan penggunaan data, Penjimat Data menghalang sesetengah apl daripada menghantar atau menerima data di latar. Apl yang sedang digunakan boleh mengakses data tetapi mungkin tidak secara kerap. Perkara ini mungkin bermaksud bahawa imej tidak dipaparkan sehingga anda mengetik pada imej itu, contohnya."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Untuk membantu penggunaan data dikurangkan, Penjimat Data menghalang sesetengah apl daripada menghantar atau menerima data di latar. Apl yang sedang digunakan boleh mengakses data tetapi mungkin tidak secara kerap. Perkara ini mungkin bermaksud bahawa imej tidak dipaparkan sehingga anda mengetik pada imej itu, contohnya."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Hidupkan Penjimat Data?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Hidupkan"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
@@ -1892,7 +1892,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"Apl tidak tersedia"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> tidak tersedia sekarang."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Apl ini dibina untuk versi Android yang lebih lama dan mungkin tidak berfungsi dengan betul. Cuba semak kemas kini atau hubungi pembangun."</string>
-    <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Semak kemas kini"</string>
+    <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Semak kemaskinian"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Anda mempunyai mesej baharu"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Buka apl SMS untuk melihat"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Sesetengah fungsi mungkin terhad"</string>

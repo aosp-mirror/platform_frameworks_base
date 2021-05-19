@@ -571,7 +571,7 @@
     <string name="permdesc_manageFace" msgid="6204569688492710471">"საშუალებას აძლევს აპს, დაამატოს და წაშალოს სახეების შაბლონები."</string>
     <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"სახით განბლოკვის აპარატურის გამოყენება"</string>
     <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"საშუალებას აძლევს აპს, ამოცნობისთვის გამოიყენოს სახით განბლოკვის აპარატურა"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"განბლოკვა სახით"</string>
+    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"სახით განბლოკვა"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"დაარეგისტრირეთ თქვენი სახე ხელახლა"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"ამოცნობის გასაუმჯობესებლად, გთხოვთ, ხელახლა დაარეგისტრიროთ თქვენი სახე"</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"სახის ზუსტი მონაცემები არ აღიბეჭდა. ცადეთ ხელახლა."</string>
@@ -600,12 +600,12 @@
     <string name="face_error_timeout" msgid="522924647742024699">"ცადეთ ხელახლა სახით განბლოკვა."</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"სახის ახალი მონაცემები ვერ ინახება. ჯერ ძველი წაშალეთ."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"სახის ამოცნობა გაუქმდა."</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"განბლოკვა სახით გაუქმდა მომხმარებლის მიერ."</string>
+    <string name="face_error_user_canceled" msgid="8553045452825849843">"სახით განბლოკვა გაუქმდა მომხმარებლის მიერ."</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"დაფიქსირდა ბევრი მცდელობა. ცადეთ მოგვიანებით."</string>
     <string name="face_error_lockout_permanent" msgid="8277853602168960343">"მეტისმეტად ბევრი მცდელობა იყო. სახით განბლოკვა გათიშულია."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"სახის დადასტურება ვერ ხერხდება. ცადეთ ხელახლა."</string>
     <string name="face_error_not_enrolled" msgid="7369928733504691611">"თქვენ არ დაგიყენებიათ სახით განბლოკვა."</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"განბლოკვა სახით ამ მოწყობილობაზე მხარდაჭერილი არ არის."</string>
+    <string name="face_error_hw_not_present" msgid="1070600921591729944">"სახით განბლოკვა ამ მოწყობილობაზე მხარდაჭერილი არ არის."</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"სენსორი დროებით გათიშულია."</string>
     <string name="face_name_template" msgid="3877037340223318119">"სახე <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
@@ -681,7 +681,7 @@
     <string name="policylab_resetPassword" msgid="214556238645096520">"ეკრანის დაბლოკვის შეცვლა"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"ეკრანის დაბლოკვის შეცვლა"</string>
     <string name="policylab_forceLock" msgid="7360335502968476434">"ეკრანის დაბლოკვა"</string>
-    <string name="policydesc_forceLock" msgid="1008844760853899693">"გააკონტროლეთ, როგორ და როდის დაიბლოკოს ეკრანი."</string>
+    <string name="policydesc_forceLock" msgid="1008844760853899693">"გაკონტროლება, თუ როგორ და როდის დაიბლოკოს ეკრანი."</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"ყველა მონაცემის წაშლა"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"ტაბლეტის მონაცემების გაუფრთხილებლად წაშლა, ქარხნული მონაცემების აღდგენით"</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"თქვენი Android TV მოწყობილობის მონაცემების გაუფრთხილებლად ამოშლა ქარხნული მონაცემების აღდგენის გზით."</string>
@@ -835,7 +835,7 @@
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"კიდევ სცადეთ"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"კიდევ სცადეთ"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"ყველა ფუნქციისა და მონაცემის განბლოკვა"</string>
-    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"სახის ამოცნობით განბლოკვის მცდელობამ დაშვებულ რაოდენობას გადააჭარბა"</string>
+    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"სახით განბლოკვის მცდელობამ დაშვებულ რაოდენობას გადააჭარბა"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"SIM ბარათი არ არის"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"ტაბლეტში არ დევს SIM ბარათი."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"თქვენს Android TV მოწყობილობაში SIM ბარათი არ არის."</string>
@@ -905,7 +905,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"განბლოკვის სივრცის გაშლა."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"გასრიალებით განბლოკვა"</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"განბლოკვა ნიმუშით."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"განბლოკვა სახით"</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"სახით განბლოკვა"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"განბლოკვა Pin-ით."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"SIM-ის PIN-კოდით განბლოკვა."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"SIM-ის PUK-კოდით განბლოკვა."</string>
@@ -1114,7 +1114,7 @@
     <string name="app_running_notification_text" msgid="5120815883400228566">"შეეხეთ მეტი ინფორმაციისთვის ან აპის მუშაობის შესაწყვეტად."</string>
     <string name="ok" msgid="2646370155170753815">"OK"</string>
     <string name="cancel" msgid="6908697720451760115">"გაუქმება"</string>
-    <string name="yes" msgid="9069828999585032361">"OK"</string>
+    <string name="yes" msgid="9069828999585032361">"კარგი"</string>
     <string name="no" msgid="5122037903299899715">"გაუქმება"</string>
     <string name="dialog_alert_title" msgid="651856561974090712">"ყურადღება"</string>
     <string name="loading" msgid="3138021523725055037">"ჩატვირთვა…"</string>
@@ -1294,7 +1294,7 @@
     <string name="perms_description_app" msgid="2747752389870161996">"მომწოდებელი: <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="no_permissions" msgid="5729199278862516390">"ნებართვა საჭირო არ არის"</string>
     <string name="perm_costs_money" msgid="749054595022779685">"ამისათვის შესაძლოა მოგიწიოთ თანხის გადახდა"</string>
-    <string name="dlg_ok" msgid="5103447663504839312">"OK"</string>
+    <string name="dlg_ok" msgid="5103447663504839312">"კარგი"</string>
     <string name="usb_charging_notification_title" msgid="1674124518282666955">"ეს მოწყობ. USB-თი იტენება"</string>
     <string name="usb_supplying_notification_title" msgid="5378546632408101811">"დაკავშირებული მოწყობილობა USB-თი იტენება"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"ფაილების USB-თი გადაცემა ჩართულია"</string>

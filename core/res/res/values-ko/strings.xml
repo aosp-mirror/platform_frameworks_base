@@ -567,11 +567,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"지문 아이콘"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"얼굴인식 잠금해제 하드웨어 관리"</string>
+    <string name="permlab_manageFace" msgid="4569549381889283282">"얼굴 인식 잠금 해제 하드웨어 관리"</string>
     <string name="permdesc_manageFace" msgid="6204569688492710471">"사용할 얼굴 템플릿의 추가 및 삭제 메서드를 앱에서 호출하도록 허용합니다."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"얼굴인식 잠금해제 하드웨어 사용"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"앱에서 얼굴인식 잠금해제 하드웨어를 인증에 사용하도록 허용합니다."</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"얼굴인식 잠금해제"</string>
+    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"얼굴 인식 잠금 해제 하드웨어 사용"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"앱에서 얼굴 인식 잠금 해제 하드웨어를 인증에 사용하도록 허용합니다."</string>
+    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"얼굴 인식 잠금 해제"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"얼굴 재등록 필요"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"인식률을 개선하려면 얼굴을 다시 등록하세요."</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"정확한 얼굴 데이터를 캡처하지 못했습니다. 다시 시도하세요."</string>
@@ -597,15 +597,15 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"얼굴을 확인할 수 없습니다. 하드웨어를 사용할 수 없습니다."</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"얼굴인식 잠금해제를 다시 시도해 주세요."</string>
+    <string name="face_error_timeout" msgid="522924647742024699">"얼굴 인식 잠금 해제를 다시 시도해 주세요."</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"새 얼굴 데이터를 저장할 수 없습니다. 먼저 기존 얼굴 데이터를 삭제하세요."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"얼굴 인식 작업이 취소되었습니다."</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"사용자가 얼굴인식 잠금해제를 취소했습니다."</string>
+    <string name="face_error_user_canceled" msgid="8553045452825849843">"사용자가 얼굴 인식 잠금 해제를 취소했습니다."</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"시도 횟수가 너무 많습니다. 나중에 다시 시도하세요."</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"시도 횟수가 너무 많습니다. 얼굴인식 잠금해제가 사용 중지되었습니다."</string>
+    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"시도 횟수가 너무 많습니다. 얼굴 인식 잠금 해제가 사용 중지되었습니다."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"얼굴을 확인할 수 없습니다. 다시 시도하세요."</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"얼굴인식 잠금해제를 설정하지 않았습니다."</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"이 기기에서는 얼굴인식 잠금해제가 지원되지 않습니다."</string>
+    <string name="face_error_not_enrolled" msgid="7369928733504691611">"얼굴 인식 잠금 해제를 설정하지 않았습니다."</string>
+    <string name="face_error_hw_not_present" msgid="1070600921591729944">"이 기기에서는 얼굴 인식 잠금 해제가 지원되지 않습니다."</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"센서가 일시적으로 사용 중지되었습니다."</string>
     <string name="face_name_template" msgid="3877037340223318119">"얼굴 <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
@@ -835,7 +835,7 @@
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"다시 시도"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"다시 시도"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"모든 기능 및 데이터 잠금 해제"</string>
-    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"얼굴 인식 잠금해제 최대 시도 횟수를 초과했습니다."</string>
+    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"얼굴 인식 잠금 해제 최대 시도 횟수를 초과했습니다."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"SIM 카드가 없습니다."</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"태블릿에 SIM 카드가 없습니다."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Android TV 기기에 SIM 카드가 없습니다."</string>
@@ -905,7 +905,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"잠금 해제 영역 확장"</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"슬라이드하여 잠금해제합니다."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"패턴을 사용하여 잠금해제합니다."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"얼굴 인식을 사용하여 잠금해제합니다."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"얼굴을 인식하여 잠금 해제합니다."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"핀을 사용하여 잠금해제합니다."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"SIM PIN 잠금 해제"</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"SIM PUK 잠금 해제"</string>
@@ -1999,7 +1999,7 @@
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"화면에서 다른 앱 위에 표시"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"루틴 모드 정보 알림"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"평소에 충전하는 시간 전에 배터리가 소진될 수 있습니다."</string>
-    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"배터리 수명을 연장하기 위해 배터리 세이버가 활성화되었습니다."</string>
+    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"배터리 수명을 연장하기 위해 절전 모드가 활성화되었습니다."</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"절전 모드"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"절전 모드가 사용 중지되었습니다"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"휴대전화의 배터리가 충분하므로 기능이 더 이상 제한되지 않습니다"</string>

@@ -297,7 +297,7 @@
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"আপনার পরিচিতিগুলিতে অ্যাক্সেস"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"লোকেশন"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"এই ডিভাইসের লোকেশন অ্যাক্সেস"</string>
-    <string name="permgrouplab_calendar" msgid="6426860926123033230">"Calendar"</string>
+    <string name="permgrouplab_calendar" msgid="6426860926123033230">"ক্যালেন্ডার"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"আপনার ক্যালেন্ডারে অ্যাক্সেস"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"এসএমএসগুলি পাঠাতে এবং দেখতে"</string>
@@ -567,11 +567,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"আঙ্গুলের ছাপ আইকন"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"মুখের সাহায্যে আনলক করার হার্ডওয়্যার ম্যানেজ করা"</string>
+    <string name="permlab_manageFace" msgid="4569549381889283282">"ফেস আনলক হার্ডওয়্যার ম্যানেজ করা"</string>
     <string name="permdesc_manageFace" msgid="6204569688492710471">"ব্যবহার করার জন্য ফেস টেম্পলেট যোগ করা এবং মোছার পদ্ধতি গ্রহণ করতে অ্যাপটিকে অনুমতি দেয়৷"</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"মুখের সাহায্যে আনলক করার হার্ডওয়্যার ব্যবহার করা"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"অ্যাপকে যাচাইকরণের জন্য মুখের সাহায্যে আনলক করার হার্ডওয়্যার ব্যবহার করতে দেয়"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"মুখের সাহায্যে আনলক"</string>
+    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"ফেস আনলক হার্ডওয়্যার ব্যবহার করা"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"অ্যাপকে যাচাইকরণের জন্য ফেস আনলক হার্ডওয়্যার ব্যবহার করতে দেয়"</string>
+    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"ফেস আনলক"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"আপনার ফেস আবার এনরোল করুন"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"শনাক্তকরণের উন্নতি করতে আপনার ফেস আবার এনরোল করুন"</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"মুখের সঠিক ডেটা পাওয়া যায়নি। আবার চেষ্টা করুন।"</string>
@@ -597,15 +597,15 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"ফেস যাচাই করা যায়নি। হার্ডওয়্যার উপলভ্য নেই।"</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"আবার মুখের সাহায্যে আনলক করার চেষ্টা করুন।"</string>
+    <string name="face_error_timeout" msgid="522924647742024699">"আবার ফেস আনলকের মাধ্যমে চেষ্টা করুন।"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"নতুন ফেস ডেটা স্টোর করা যায়নি। প্রথমে পুরনোটি মুছে ফেলুন।"</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"ফেস অপারেশন বাতিল করা হয়েছে৷"</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"ব্যবহারকারী মুখের সাহায্যে আনলক বাতিল করে দিয়েছেন।"</string>
+    <string name="face_error_user_canceled" msgid="8553045452825849843">"ব্যবহারকারী ফেস আনলক বাতিল করে দিয়েছেন।"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"অনেকবার চেষ্টা করা হয়েছে। পরে আবার চেষ্টা করুন।"</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"অনেকবার চেষ্টা করেছেন। মুখের সাহায্যে আনলক করার সুবিধা বন্ধ করা হয়েছে।"</string>
+    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"অনেকবার চেষ্টা করেছেন। ফেস আনলক বন্ধ করা হয়েছে।"</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"আপনার মুখ যাচাই করা যাচ্ছে না। আবার চেষ্টা করুন।"</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"এখনও মুখের সাহায্যে আনলক করার সুবিধা সেট-আপ করেননি।"</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"এই ডিভাইসে মুখের সাহায্যে আনলক করার সুবিধাটি কাজ করে না।"</string>
+    <string name="face_error_not_enrolled" msgid="7369928733504691611">"এখনও ফেস আনলক সেট-আপ করেননি।"</string>
+    <string name="face_error_hw_not_present" msgid="1070600921591729944">"এই ডিভাইসে ফেস আনলক সুবিধাটি কাজ করে না।"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"সেন্সর অস্থায়ীভাবে বন্ধ করা আছে।"</string>
     <string name="face_name_template" msgid="3877037340223318119">"<xliff:g id="FACEID">%d</xliff:g> ফেস"</string>
   <string-array name="face_error_vendor">
@@ -698,7 +698,7 @@
     <string name="policydesc_encryptedStorage" msgid="1102516950740375617">"এই সঞ্চিত অ্যাপ্লিকেশন ডেটা এনক্রিপ্ট করা দরকার৷"</string>
     <string name="policylab_disableCamera" msgid="5749486347810162018">"ক্যামেরাগুলি অক্ষম করে"</string>
     <string name="policydesc_disableCamera" msgid="3204405908799676104">"সমস্ত ডিভাইসের ক্যামেরার ব্যবহার আটকায়৷"</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"কিছু স্ক্রিন লক বৈশিষ্ট্য বন্ধ করুন"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"কিছু স্ক্রিন লক বৈশিষ্ট্য বন্ধ করে"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"কিছু স্ক্রিন লক বৈশিষ্ট্যের ব্যবহার আটকান।"</string>
   <string-array name="phoneTypes">
     <item msgid="8996339953292723951">"বাড়ি"</item>
@@ -835,7 +835,7 @@
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"আবার চেষ্টা করুন"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"আবার চেষ্টা করুন"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"সমস্ত বৈশিষ্ট্য এবং ডেটার জন্য আনলক করুন"</string>
-    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"মুখের সাহায্যে আনলক করার প্রচেষ্টা যতবার করা যায় তার সীমা পেরিয়ে গেছে"</string>
+    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"ফেস আনলক ফিচারের সাহায্যে আনলকের চেষ্টা সর্বোচ্চ সীমা পেরিয়ে গেছে"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"কোনো সিম কার্ড নেই"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"ট্যাবলেটের মধ্যে কোনো সিম কার্ড নেই৷"</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"আপনার Android TV ডিভাইসে কোনও সিম কার্ড নেই।"</string>
@@ -905,7 +905,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"আনলক এলাকা প্রসারিত করুন৷"</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"স্লাইড দিয়ে আনলক৷"</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"প্যাটার্ন দিয়ে আনলক৷"</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"মুখের সাহায্যে আনলক৷"</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"ফেস আনলক৷"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"পিন দিয়ে আনলক৷"</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"সিম পিন আনলক।"</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"সিম পিইউকে আনলক।"</string>
@@ -1563,9 +1563,9 @@
     <string name="media_route_button_content_description" msgid="2299223698196869956">"কাস্ট করুন"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"ডিভাইসে সংযোগ করুন"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"ডিভাইসে স্ক্রিন কাস্ট করুন"</string>
-    <string name="media_route_chooser_searching" msgid="6119673534251329535">"ডিভাইসগুলি সার্চ করা হচ্ছে…"</string>
+    <string name="media_route_chooser_searching" msgid="6119673534251329535">"ডিভাইস সার্চ করা হচ্ছে…"</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"সেটিংস"</string>
-    <string name="media_route_controller_disconnect" msgid="7362617572732576959">"সংযোগ বিচ্ছিন্ন করুন"</string>
+    <string name="media_route_controller_disconnect" msgid="7362617572732576959">"ডিসকানেক্ট করুন"</string>
     <string name="media_route_status_scanning" msgid="8045156315309594482">"স্ক্যান করা হচ্ছে…"</string>
     <string name="media_route_status_connecting" msgid="5845597961412010540">"সংযুক্ত হচ্ছে..."</string>
     <string name="media_route_status_available" msgid="1477537663492007608">"উপলব্ধ"</string>

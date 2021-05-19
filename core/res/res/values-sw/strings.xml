@@ -26,7 +26,7 @@
     <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
     <string name="terabyteShort" msgid="1822367128583886496">"TB"</string>
     <string name="petabyteShort" msgid="5651571254228534832">"PB"</string>
-    <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
+    <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="UNIT">%2$s</xliff:g> <xliff:g id="NUMBER">%1$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;Haina jina&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(Hakuna nambari ya simu)"</string>
     <string name="unknownName" msgid="7078697621109055330">"Isiyojulikana"</string>
@@ -835,7 +835,7 @@
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Jaribu tena"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Jaribu tena"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Fungua kifaa ili upate data na vipengele vyote"</string>
-    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Umepitisha idadi ya juu ya mara ambazo unaweza kujaribu Kufungua kwa Uso"</string>
+    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Umepitisha idadi ya juu ya mara ambazo unaweza kujaribu kufungua kwa uso"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"Hakuna SIM kadi"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"Hakuna SIM kadi katika kompyuta ndogo."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Hakuna SIM kadi kwenye kifaa chako cha Android TV."</string>
@@ -968,7 +968,7 @@
     <string name="save_password_never" msgid="6776808375903410659">"Katu"</string>
     <string name="open_permission_deny" msgid="5136793905306987251">"Hauna idhini ya kufungua ukurasa huu."</string>
     <string name="text_copied" msgid="2531420577879738860">"Maandishi yamenakiliwa kwenye ubao wa kunakili."</string>
-    <string name="copied" msgid="4675902854553014676">"Imenakiliwa"</string>
+    <string name="copied" msgid="4675902854553014676">"Umenakili"</string>
     <string name="more_item_label" msgid="7419249600215749115">"Zaidi"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"Menyu+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Meta+"</string>

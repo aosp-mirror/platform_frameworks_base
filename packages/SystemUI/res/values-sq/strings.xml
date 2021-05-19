@@ -39,7 +39,7 @@
     <string name="battery_saver_start_action" msgid="4553256017945469937">"Aktivizo \"Kursyesin e baterisë\""</string>
     <string name="status_bar_settings_settings_button" msgid="534331565185171556">"Cilësimet"</string>
     <string name="status_bar_settings_wifi_button" msgid="7243072479837270946">"Wi-Fi"</string>
-    <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Ekran me rrotullim automatik"</string>
+    <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Rrotullimi automatik i ekranit"</string>
     <string name="status_bar_settings_mute_label" msgid="914392730086057522">"NË HESHTJE"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="2151934479226017725">"AUTO"</string>
     <string name="status_bar_settings_notifications" msgid="5285316949980621438">"Njoftimet"</string>
@@ -63,7 +63,7 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Lejo"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"Korrigjimi përmes USB-së nuk lejohet"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"Përdoruesi i identifikuar aktualisht në këtë pajisje nuk mund ta aktivizojë korrigjimin përmes USB-së. Për ta përdorur këtë veçori, kalo te përdoruesi parësor."</string>
-    <string name="wifi_debugging_title" msgid="7300007687492186076">"Do ta lejosh korrigjimin përmes Wi-Fi në këtë rrjet?"</string>
+    <string name="wifi_debugging_title" msgid="7300007687492186076">"Të lejohet korrigjimi përmes Wi-Fi në këtë rrjet?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"Emri i rrjetit (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nAdresa Wi‑Fi (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"Lejo gjithmonë në këtë rrjet"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"Lejo"</string>
@@ -91,7 +91,7 @@
     <string name="screenrecord_name" msgid="2596401223859996572">"Regjistruesi i ekranit"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Regjistrimi i ekranit po përpunohet"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Njoftim i vazhdueshëm për një seancë regjistrimi të ekranit"</string>
-    <string name="screenrecord_start_label" msgid="1750350278888217473">"Të nis regjistrimi?"</string>
+    <string name="screenrecord_start_label" msgid="1750350278888217473">"Të niset regjistrimi?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"Gjatë regjistrimit, sistemi Android mund të regjistrojë çdo informacion delikat që është i dukshëm në ekranin tënd ose që luhet në pajisje. Kjo përfshin fjalëkalimet, informacionin e pagesave, fotografitë, mesazhet dhe audion."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Regjistro audio"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Audioja e pajisjes"</string>
@@ -298,8 +298,8 @@
     <string name="accessibility_quick_settings_flashlight_on" msgid="3785616827729850766">"Elektriku u aktivizua."</string>
     <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3782375441381402599">"Elektriku u çaktivizua."</string>
     <string name="accessibility_quick_settings_flashlight_changed_on" msgid="4747870681508334200">"Elektriku është i aktivizuar."</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="7548045840282925393">"Kthimi i ngjyrës u çaktivizua."</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="4711141858364404084">"Kthimi i ngjyrës u aktivizua."</string>
+    <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="7548045840282925393">"Anasjellja e ngjyrës u çaktivizua."</string>
+    <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="4711141858364404084">"Anasjellja e ngjyrës u aktivizua."</string>
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"Qasja në zona publike interneti është e çaktivizuar."</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"Zona e qasjes publike për internet është e aktivizuar."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"Transmetimi i ekranit ndaloi."</string>
@@ -358,7 +358,7 @@
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"Po aktivizohet…"</string>
     <string name="quick_settings_brightness_label" msgid="680259653088849563">"Ndriçimi"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Rrotullim automatik"</string>
-    <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Ekran me rrotullim automatik"</string>
+    <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Rrotullimi automatik i ekranit"</string>
     <string name="accessibility_quick_settings_rotation_value" msgid="2916484894750819251">"Modaliteti <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="quick_settings_rotation_locked_label" msgid="4420863550666310319">"rrotullimi është i kyçur"</string>
     <string name="quick_settings_rotation_locked_portrait_label" msgid="1194988975270484482">"Vertikalisht"</string>
@@ -600,12 +600,12 @@
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Kjo e ruan në pamje deri sa ta heqësh nga gozhdimi. Prek dhe mbaj të shtypur \"Kreu\" për ta hequr nga gozhdimi."</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Të dhënat personale mund të jenë të qasshme (si kontaktet dhe përmbajtja e email-eve)"</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Aplikacioni i gozhduar mund të hapë aplikacione të tjera."</string>
-    <string name="screen_pinning_toast" msgid="8177286912533744328">"Për të hequr gozhdimin e këtij aplikacioni, mbaj shtypur butonat \"Prapa\" dhe \"Përmbledhja\"."</string>
-    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Për të hequr gozhdimin e këtij aplikacioni, mbaj shtypur butonat \"Prapa\" dhe \"Kreu\""</string>
-    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Për të hequr gozhdimin e këtij aplikacioni, rrëshqit shpejt lart dhe mbaje të shtypur"</string>
+    <string name="screen_pinning_toast" msgid="8177286912533744328">"Për të zhgozhduar këtë aplikacion, prek dhe mbaj shtypur butonat \"Prapa\" dhe \"Përmbledhja\""</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Për të zhgozhduar këtë aplikacion, prek dhe mbaj shtypur butonat \"Prapa\" dhe \"Ekrani bazë\""</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Për të zhgozhduar këtë aplikacion, rrëshqit shpejt lart dhe mbaje të shtypur"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"E kuptova"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Jo, faleminderit!"</string>
-    <string name="screen_pinning_start" msgid="7483998671383371313">"Aplikacioni i gozhduar"</string>
+    <string name="screen_pinning_start" msgid="7483998671383371313">"Aplikacioni u gozhdua"</string>
     <string name="screen_pinning_exit" msgid="4553787518387346893">"Aplikacioni i zhgozhduar"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"Të fshihet <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"Do të rishfaqet herën tjetër kur ta aktivizoni te cilësimet."</string>

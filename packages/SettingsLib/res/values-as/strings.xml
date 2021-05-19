@@ -86,7 +86,7 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"ফাইল স্থানান্তৰণ"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"ইনপুট ডিভাইচ"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"ইণ্টাৰনেট সংযোগ"</string>
-    <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"শ্বেয়াৰিঙৰ সৈতে যোগাযোগ কৰক"</string>
+    <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"সম্পৰ্ক শ্বেয়াৰ কৰা"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"সম্পৰ্ক শ্বেয়াৰ কৰিবলৈ ব্যৱহাৰ কৰক"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"ইণ্টাৰনেট সংযোগ শ্বেয়াৰ"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"পাঠ বাৰ্তা"</string>
@@ -275,7 +275,7 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7274396574659784285">"ব্লুটুথ অডিঅ\' LDAC\nক\'ডেক বাছনি আৰম্ভ কৰক: প্লেবেকৰ গুণগত মান"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="2040810756832027227">"ষ্ট্ৰীম কৰি থকা হৈছে: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"ব্যক্তিগত DNS"</string>
-    <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"ব্যক্তিগত DNS ম\'ড বাছনি কৰক"</string>
+    <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"ব্যক্তিগত ডিএনএছ ম\'ড বাছনি কৰক"</string>
     <string name="private_dns_mode_off" msgid="7065962499349997041">"অফ"</string>
     <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"স্বয়ংক্ৰিয়"</string>
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"ব্যক্তিগত ডিএনএছ প্ৰদানকাৰীৰ হোষ্টনাম"</string>

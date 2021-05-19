@@ -291,7 +291,7 @@
     <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"Pilih saiz Pengelog bagi setiap penimbal log"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="8631859265777337991">"Kosongkan storan gigih pengelog?"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="6447590867594287413">"Apabila kami tidak lagi memantau menggunakan pengelog gigih, kami dikehendaki untuk memadamkan data pengelog yang menghuni peranti anda."</string>
-    <string name="select_logpersist_title" msgid="447071974007104196">"Smpn data pengelog secara gigih pd prnti"</string>
+    <string name="select_logpersist_title" msgid="447071974007104196">"Sentiasa simpan data pengelog pada peranti"</string>
     <string name="select_logpersist_dialog_title" msgid="7745193591195485594">"Pilih penimbal log untuk menyimpan secara gigih pada peranti"</string>
     <string name="select_usb_configuration_title" msgid="6339801314922294586">"Pilih Konfigurasi USB"</string>
     <string name="select_usb_configuration_dialog_title" msgid="3579567144722589237">"Pilih Konfigurasi USB"</string>
@@ -347,7 +347,7 @@
     <string name="disable_overlays_summary" msgid="1954852414363338166">"Sentiasa gunakan GPU untuk komposit skrin"</string>
     <string name="simulate_color_space" msgid="1206503300335835151">"Tiru ruang warna"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"Dayakan kesan OpenGL"</string>
-    <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Lmpuhkn phalaan audio USB"</string>
+    <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Lumpuhkan penghalaan audio USB"</string>
     <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Lumpuhkan penghalaan automatik ke persisian audio USB"</string>
     <string name="debug_layout" msgid="1659216803043339741">"Tunjukkan batas reka letak"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"Tunjukkan batas klip, margin dll."</string>
@@ -357,9 +357,9 @@
     <string name="force_msaa_summary" msgid="9070437493586769500">"Dayakan 4x MSAA dalam apl OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Nyahpepijat operasi keratan bukan segi empat tepat"</string>
     <string name="track_frame_time" msgid="522674651937771106">"Pemaparan HWUI profil"</string>
-    <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Dayakan lpsn nyhppjat GPU"</string>
+    <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Dayakan lepasan nyahpepijat GPU"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Bnrkn pemuatan lpsn nyhppjt GPU utk apl pnyhppjtn"</string>
-    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Dayakn pngelogan vendor brjela"</string>
+    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Dayakan pengelogan vendor berjela"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Sertakan log tambahan vendor khusus peranti dalam laporan pepijat, yang mungkin mengandungi maklumat peribadi, menggunakan lebih banyak kuasa bateri dan/atau menggunakan lebih banyak storan."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Skala animasi tetingkap"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Skala animasi peralihan"</string>

@@ -835,7 +835,7 @@
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Qaytadan urining"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Qaytadan urining"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Barcha funksiya va ma’lumotlar uchun qulfdan chiqaring"</string>
-    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Yuzni tanitib qulfni ochishga urinish miqdoridan oshib ketdi"</string>
+    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Yuz bilan ochishga urinish miqdoridan oshib ketdi"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"SIM karta solinmagan"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"Planshetingizda SIM karta yo‘q."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Android TV qurilmangizda SIM karta topilmadi."</string>
@@ -905,7 +905,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"Qulfni ochish maydonini kengaytirish."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"Qulfni silab ochish"</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"Grafik kalit bilan ochish."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"Qulfni yuzni tanitib ochish"</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"Yuz bilan ochish."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"Pin qulfini ochish."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"SIM kartani PIN kod bilan ochish."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"SIM kartani PUK kod bilan ochish."</string>
@@ -1649,7 +1649,7 @@
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Tezkor ishga tushirishni o‘chirib qo‘yish"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Tezkor ishga tushirishdan foydalanish"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Ranglarni akslantirish"</string>
-    <string name="color_correction_feature_name" msgid="3655077237805422597">"Rangni tuzatish"</string>
+    <string name="color_correction_feature_name" msgid="3655077237805422597">"Ranglarni tuzatish"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Tovush tugmalari bosib turildi. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> yoqildi."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Tovush tugmalari bosib turildi. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> faolsizlantirildi."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> xizmatidan foydalanish uchun ikkala ovoz balandligi tugmalarini uzoq bosib turing"</string>

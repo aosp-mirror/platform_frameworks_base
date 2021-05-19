@@ -381,7 +381,7 @@
     <string name="quick_settings_wifi_on_label" msgid="2489928193654318511">"Wi-Fi ligado"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="483130889414601732">"Não estão disponíveis redes Wi-Fi"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7501659015509357887">"A ativar..."</string>
-    <string name="quick_settings_cast_title" msgid="2279220930629235211">"Transmissão do ecrã"</string>
+    <string name="quick_settings_cast_title" msgid="2279220930629235211">"Transm. do ecrã"</string>
     <string name="quick_settings_casting" msgid="1435880708719268055">"Transmissão"</string>
     <string name="quick_settings_cast_device_default_name" msgid="6988469571141331700">"Dispositivo sem nome"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2580520859212250265">"Pronto para transmitir"</string>
@@ -477,9 +477,9 @@
     <string name="user_add_user" msgid="4336657383006913022">"Adicionar utilizador"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Novo utilizador"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Remover o convidado?"</string>
-    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Todas as aplicações e dados desta sessão serão eliminados."</string>
+    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Todas as apps e dados desta sessão serão eliminados."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Remover"</string>
-    <string name="guest_wipe_session_title" msgid="7147965814683990944">"Bem-vindo de volta, caro(a) convidado(a)!"</string>
+    <string name="guest_wipe_session_title" msgid="7147965814683990944">"Bem-vindo de volta, convidado!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Pretende continuar a sessão?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Recomeçar"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Sim, continuar"</string>
@@ -490,7 +490,7 @@
     <string name="user_logout_notification_text" msgid="7441286737342997991">"Terminar sessão do utilizador atual"</string>
     <string name="user_logout_notification_action" msgid="7974458760719361881">"TERMINAR SESSÃO DO UTILIZADOR"</string>
     <string name="user_add_user_title" msgid="4172327541504825032">"Adicionar um novo utilizador?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"Ao adicionar um novo utilizador, essa pessoa tem de configurar o respetivo espaço.\n\nQualquer utilizador pode atualizar aplicações para todos os outros utilizadores."</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"Ao adicionar um novo utilizador, essa pessoa tem de configurar o respetivo espaço.\n\nQualquer utilizador pode atualizar apps para todos os outros utilizadores."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Limite de utilizadores alcançado"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">Pode adicionar até <xliff:g id="COUNT">%d</xliff:g> utilizadores.</item>
@@ -855,8 +855,8 @@
     <string name="right_keycode" msgid="2480715509844798438">"Código de tecla direito"</string>
     <string name="left_icon" msgid="5036278531966897006">"Ícone esquerdo"</string>
     <string name="right_icon" msgid="1103955040645237425">"Ícone direito"</string>
-    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Tocar sem soltar e arrastar para adicionar mosaicos"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Tocar sem soltar e arrastar para reorganizar os mosaicos"</string>
+    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Toque sem soltar e arraste para reorganizar os mosaicos"</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Toque sem soltar e arraste para reorganizar os mosaicos"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Arrastar para aqui para remover"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"Necessita de, pelo menos, <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> cartões"</string>
     <string name="qs_edit" msgid="5583565172803472437">"Editar"</string>

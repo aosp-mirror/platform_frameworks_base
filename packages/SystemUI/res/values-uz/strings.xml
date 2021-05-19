@@ -476,7 +476,7 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Profilni ko‘rsatish"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Foydalanuvchi"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Yangi foydalanuvchi"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Mehmon hisobi o‘chirib tashlansinmi?"</string>
+    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Mehmon olib tashlansinmi?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Ushbu seansdagi barcha ilovalar va ma’lumotlar o‘chirib tashlanadi."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Olib tashlash"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Xush kelibsiz, mehmon!"</string>
@@ -485,7 +485,7 @@
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Ha, davom ettirilsin"</string>
     <string name="guest_notification_title" msgid="4434456703930764167">"Mehmon foydalanuvchi"</string>
     <string name="guest_notification_text" msgid="4202692942089571351">"Ilova va ma’l-ni o‘chirish u-n mehmon hisobini o‘chiring"</string>
-    <string name="guest_notification_remove_action" msgid="4153019027696868099">"MEHMON HISOBINI O‘CHIRISH"</string>
+    <string name="guest_notification_remove_action" msgid="4153019027696868099">"MEHMONNI OLIB TASHLASH"</string>
     <string name="user_logout_notification_title" msgid="3644848998053832589">"Foydalanuvchi nomidan chiqish"</string>
     <string name="user_logout_notification_text" msgid="7441286737342997991">"Joriy foydalanuvchini tizimdan chiqaring"</string>
     <string name="user_logout_notification_action" msgid="7974458760719361881">"FOYDALANUVCHI NOMIDAN CHIQISH"</string>
@@ -550,7 +550,7 @@
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Tashkilotingiz bu qurilmada CA sertifikatini o‘rnatdi. U himoyalangan tarmoq trafigini nazorat qilishi va o‘zgartirishi mumkin."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Tashkilotingiz ishchi profilingizga CA sertifikatini o‘rnatdi. U himoyalangan tarmoq trafigini nazorat qilishi va o‘zgartirishi mumkin."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Qurilmada CA sertifikati o‘rnatilgan. U himoyalangan tarmoq trafigini nazorat qilishi va o‘zgartirishi mumkin."</string>
-    <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Administrator qurilmangizdagi trafikni nazorat qiluvchi tarmoq jurnalini yoqdi."</string>
+    <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Administrator qurilmangizdagi trafikni nazorat qiluvchi tarmoq jurnalini yuritishni faollashtirgan."</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"<xliff:g id="VPN_APP">%1$s</xliff:g> ilovasi ishga tushirilgan. U internetdagi harakatlaringiz, jumladan, e-pochta, ilova va veb-saytlardagi xatti-harakatlaringizni kuzatishi mumkin."</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"<xliff:g id="VPN_APP_0">%1$s</xliff:g> va <xliff:g id="VPN_APP_1">%2$s</xliff:g> ilovalari ishga tushirilgan. Ular tarmoqdagi, jumladan, e-pochta, ilova va veb-saytlardagi xatti-harakatlaringizni kuzatishi mumkin."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Ishchi profilingizda tarmoqdagi, jumladan, e-pochta, ilova va veb-saytlardagi xatti-harakatlaringizni kuzatishi mumkin bo‘lgan <xliff:g id="VPN_APP">%1$s</xliff:g> ilovasi ishga tushirilgan."</string>
@@ -565,7 +565,7 @@
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"VPN sozlamalarini ochish"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="7107390013344435439">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="8329781950135541003">"Ishonchli sertifikatlarni ochish"</string>
-    <string name="monitoring_description_network_logging" msgid="577305979174002252">"Administrator qurilmangizdagi trafikni nazorat qiluvchi tarmoq jurnalini yoqdi.\n\nBatafsil axborot olish uchun administratoringizga murojaat qiling."</string>
+    <string name="monitoring_description_network_logging" msgid="577305979174002252">"Administrator qurilmangizdagi trafikni nazorat qiluvchi tarmoq jurnalini yuritishni faollashtirgan.\n\nBatafsil axborot olish uchun administratoringizga murojaat qiling."</string>
     <string name="monitoring_description_vpn" msgid="1685428000684586870">"Siz ilovaga VPN tarmog‘iga ulanishga ruxsat bergansiz.\n\nUshbu ilova qurilmangiz va internetdagi harakatlaringizni, jumladan, e-pochta, ilovalar va veb-saytlardagi xatti-harakatlaringizni kuzatishi mumkin."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="4964237035412372751">"Sizning ishchi profilingiz <xliff:g id="ORGANIZATION">%1$s</xliff:g> tomonidan boshqariladi.\n\nAdministrator internetdagi harakatlaringizni, jumladan, e-pochta, ilova va xavfsiz veb-saytlar bilan ishlashingizni kuzatishi mumkin.\n\nBatafsil axborot olish uchun administrator bilan bog‘laning.\n\nShuningdek, siz VPN tarmog‘iga ham ulangansiz. U internetdagi harakatlaringizni kuzatishi mumkin."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>

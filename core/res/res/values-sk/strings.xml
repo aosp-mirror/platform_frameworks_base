@@ -575,8 +575,8 @@
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Ikona odtlačku prsta"</string>
     <string name="permlab_manageFace" msgid="4569549381889283282">"spravovať hardvér odomknutia tvárou"</string>
     <string name="permdesc_manageFace" msgid="6204569688492710471">"Umožňuje aplikácii vyvolať metódy, ktoré pridávajú a odstraňujú šablóny tvárí."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"používať hardvér Odomknutia tvárou"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Umožňuje aplikácii používať na overenie totožnosti hardvér Odomknutia tvárou"</string>
+    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"používať hardvér odomknutia tvárou"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Umožňuje aplikácii používať na overenie totožnosti hardvér odomknutia tvárou"</string>
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Odomknutie tvárou"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Znova zaregistrujte svoju tvár"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Znova zaregistrujte svoju tvár, aby sa zlepšilo rozpoznávanie"</string>
@@ -1840,7 +1840,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"Šetrič batérie predlžuje výdrž batérie:\n\n• zapnutím tmavého motívu;\n•vypnutím alebo obmedzením aktivity na pozadí, niektorých vizuálnych efektov a ďalších funkcií, ako napríklad kľúčového slova „Hey Google“.\n\n"<annotation id="url">"Ďalšie informácie"</annotation></string>
     <string name="battery_saver_description" msgid="8587408568232177204">"Šetrič batérie predlžuje výdrž batérie:\n\n• zapnutím tmavého motívu;\n• vypnutím alebo obmedzením aktivity na pozadí, niektorých vizuálnych efektov a ďalších funkcií, ako napríklad kľúčového slova „Hey Google“."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"S cieľom znížiť spotrebu dát bráni šetrič dát niektorým aplikáciám odosielať alebo prijímať dáta na pozadí. Aplikácia, ktorú práve používate, môže využívať dáta, ale možno to bude robiť menej často. Znamená to napríklad, že sa nezobrazia obrázky, kým na ne neklepnete."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"S cieľom znížiť spotrebu dát bráni šetrič dát niektorým aplikáciám odosielať alebo prijímať dáta na pozadí. Aplikácia, ktorú práve používate, môže využívať dáta, ale možno to bude robiť menej často. Môže to napríklad znamenať, že sa obrázky zobrazia, až keď na ne klepnete."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Chcete zapnúť šetrič dát?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Zapnúť"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">

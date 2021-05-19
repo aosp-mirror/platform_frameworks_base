@@ -385,7 +385,7 @@
     <string name="permdesc_foregroundService" msgid="8720071450020922795">"Cho phép ứng dụng sử dụng các dịch vụ trên nền trước."</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"đo dung lượng lưu trữ ứng dụng"</string>
     <string name="permdesc_getPackageSize" msgid="742743530909966782">"Cho phép ứng dụng truy xuất mã, dữ liệu và kích thước bộ nhớ đệm của chính ứng dụng"</string>
-    <string name="permlab_writeSettings" msgid="8057285063719277394">"sửa đổi các tùy chọn cài đặt hệ thống"</string>
+    <string name="permlab_writeSettings" msgid="8057285063719277394">"sửa đổi các chế độ cài đặt hệ thống"</string>
     <string name="permdesc_writeSettings" msgid="8293047411196067188">"Cho phép ứng dụng sửa đổi dữ liệu cài đặt của hệ thống. Ứng dụng độc hại có thể làm hỏng cấu hình hệ thống của bạn."</string>
     <string name="permlab_receiveBootCompleted" msgid="6643339400247325379">"chạy khi khởi động"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="5565659082718177484">"Cho phép ứng dụng tự chạy ngay khi hệ thống khởi động xong. Quyền này có thể khiến máy tính bảng mất nhiều thời gian khởi động hơn và cho phép ứng dụng làm chậm toàn bộ máy tính bảng do ứng dụng luôn chạy."</string>
@@ -511,9 +511,9 @@
     <string name="permdesc_changeWimaxState" product="tv" msgid="5373274458799425276">"Cho phép ứng dụng kết nối và ngắt kết nối thiết bị Android TV khỏi mạng WiMAX."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="1551666203780202101">"Cho phép ứng dụng kết nối điện thoại và ngắt kết nối điện thoại khỏi mạng WiMAX."</string>
     <string name="permlab_bluetooth" msgid="586333280736937209">"ghép nối với thiết bị Bluetooth"</string>
-    <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Cho phép ứng dụng xem cấu hình của Bluetooth trên máy tính bảng và tạo và chấp nhận các kết nối với các thiết bị được ghép nối."</string>
-    <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Cho phép ứng dụng xem cấu hình của Bluetooth trên thiết bị Android TV, đồng thời tạo và chấp nhận các kết nối với thiết bị được ghép nối."</string>
-    <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Cho phép ứng dụng xem cấu hình của Bluetooth trên điện thoại, tạo và chấp nhận các kết nối với các thiết bị được ghép nối."</string>
+    <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Cho phép ứng dụng xem cấu hình của Bluetooth trên máy tính bảng và tạo và chấp nhận các kết nối với các thiết bị đã ghép nối."</string>
+    <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Cho phép ứng dụng xem cấu hình của Bluetooth trên thiết bị Android TV, đồng thời tạo và chấp nhận các kết nối với thiết bị đã ghép nối."</string>
+    <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Cho phép ứng dụng xem cấu hình của Bluetooth trên điện thoại, tạo và chấp nhận các kết nối với các thiết bị đã ghép nối."</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Thông tin về dịch vụ thanh toán qua công nghệ giao tiếp tầm gần (NFC) được ưu tiên"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Cho phép ứng dụng nhận thông tin về dịch vụ thanh toán qua công nghệ giao tiếp tầm gần mà bạn ưu tiên, chẳng hạn như các hình thức hỗ trợ đã đăng ký và điểm đến trong hành trình."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kiểm soát Liên lạc trường gần"</string>
@@ -567,9 +567,9 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Biểu tượng vân tay"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"quản lý phần cứng mở khóa bằng khuôn mặt"</string>
+    <string name="permlab_manageFace" msgid="4569549381889283282">"quản lý phần cứng của tính năng mở khóa bằng khuôn mặt"</string>
     <string name="permdesc_manageFace" msgid="6204569688492710471">"Cho phép ứng dụng gọi ra các phương pháp để thêm và xóa mẫu khuôn mặt sử dụng."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"sử dụng phần cứng mở khóa bằng khuôn mặt"</string>
+    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"sử dụng phần cứng của tính năng mở khóa bằng khuôn mặt"</string>
     <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Cho phép ứng dụng dùng phần cứng mở khóa bằng khuôn mặt để tiến hành xác thực"</string>
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Mở khóa bằng khuôn mặt"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Đăng ký lại khuôn mặt của bạn"</string>
@@ -665,7 +665,7 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Cho phép chủ sở hữu liên kết với giao diện cấp cao nhất của dịch vụ nhắn tin của nhà cung cấp dịch vụ. Không cần thiết cho các ứng dụng thông thường."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"liên kết với dịch vụ của nhà cung cấp"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Cho phép chủ sở hữu liên kết với các dịch vụ của nhà cung cấp. Không bao giờ cần cho các ứng dụng thông thường."</string>
-    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"truy cập Không làm phiền"</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"quyền truy cập chế độ Không làm phiền"</string>
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Cho phép ứng dụng đọc và ghi cấu hình Không làm phiền."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"cấp quyền xem"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Cho phép chủ sở hữu cấp quyền cho một ứng dụng. Các ứng dụng thông thường sẽ không bao giờ cần quyền này."</string>
@@ -1099,7 +1099,7 @@
     <string name="delete" msgid="1514113991712129054">"Xóa"</string>
     <string name="copyUrl" msgid="6229645005987260230">"Sao chép URL"</string>
     <string name="selectTextMode" msgid="3225108910999318778">"Chọn văn bản"</string>
-    <string name="undo" msgid="3175318090002654673">"Hoàn tác"</string>
+    <string name="undo" msgid="3175318090002654673">"Hủy"</string>
     <string name="redo" msgid="7231448494008532233">"Làm lại"</string>
     <string name="autofill" msgid="511224882647795296">"Tự động điền"</string>
     <string name="textSelectionCABTitle" msgid="5151441579532476940">"Lựa chọn văn bản"</string>
@@ -1327,8 +1327,8 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"CHIA SẺ"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"TỪ CHỐI"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Chọn phương thức nhập"</string>
-    <string name="show_ime" msgid="6406112007347443383">"Hiển thị bàn phím ảo trên màn hình trong khi bàn phím vật lý đang hoạt động"</string>
-    <string name="hardware" msgid="1800597768237606953">"Hiển thị bàn phím ảo"</string>
+    <string name="show_ime" msgid="6406112007347443383">"Hiện bàn phím ảo trên màn hình trong khi bàn phím vật lý đang hoạt động"</string>
+    <string name="hardware" msgid="1800597768237606953">"Hiện bàn phím ảo"</string>
     <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"Định cấu hình bàn phím vật lý"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Nhấn để chọn ngôn ngữ và bố cục"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -2029,7 +2029,7 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> tệp</item>
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> tệp</item>
     </plurals>
-    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Không có gợi ý về người để chia sẻ"</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Không có gợi ý nào về người mà bạn có thể chia sẻ"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Danh sách ứng dụng"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Ứng dụng này chưa được cấp quyền ghi âm nhưng vẫn có thể ghi âm thông qua thiết bị USB này."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Màn hình chính"</string>

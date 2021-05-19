@@ -368,9 +368,9 @@
     <string name="debug_applications_category" msgid="5394089406638954196">"แอปพลิเคชัน"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"ไม่เก็บกิจกรรม"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"ล้างทุกกิจกรรมทันทีที่ผู้ใช้ออกไป"</string>
-    <string name="app_process_limit_title" msgid="8361367869453043007">"ขีดจำกัดกระบวนการพื้นหลัง"</string>
+    <string name="app_process_limit_title" msgid="8361367869453043007">"ขีดจำกัดกระบวนการเบื้องหลัง"</string>
     <string name="show_all_anrs" msgid="9160563836616468726">"แสดง ANR พื้นหลัง"</string>
-    <string name="show_all_anrs_summary" msgid="8562788834431971392">"แสดงกล่องโต้ตอบ \"แอปไม่ตอบสนอง\" สำหรับแอปพื้นหลัง"</string>
+    <string name="show_all_anrs_summary" msgid="8562788834431971392">"แสดงกล่องโต้ตอบ \"แอปไม่ตอบสนอง\" สำหรับแอปเบื้องหลัง"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"แสดงคำเตือนจากช่องทางการแจ้งเตือน"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"แสดงคำเตือนบนหน้าจอเมื่อแอปโพสต์การแจ้งเตือนโดยไม่มีช่องทางที่ถูกต้อง"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"บังคับให้แอปสามารถใช้ที่เก็บภายนอก"</string>
@@ -546,8 +546,8 @@
     <string name="user_need_lock_message" msgid="4311424336209509301">"ก่อนที่คุณจะสามารถสร้างโปรไฟล์ที่ถูกจำกัดได้ คุณจะต้องตั้งค่าล็อกหน้าจอเพื่อปกป้องแอปและข้อมูลส่วนตัวของคุณ"</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"ตั้งค่าล็อก"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"เปลี่ยนเป็น <xliff:g id="USER_NAME">%s</xliff:g>"</string>
-    <string name="guest_new_guest" msgid="3482026122932643557">"เพิ่มผู้เข้าร่วม"</string>
-    <string name="guest_exit_guest" msgid="5908239569510734136">"นำผู้เข้าร่วมออก"</string>
+    <string name="guest_new_guest" msgid="3482026122932643557">"เพิ่มผู้ใช้ชั่วคราว"</string>
+    <string name="guest_exit_guest" msgid="5908239569510734136">"นำผู้ใช้ชั่วคราวออก"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"ผู้ใช้ชั่วคราว"</string>
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"ค่าเริ่มต้นของอุปกรณ์"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"ปิดใช้"</string>

@@ -279,12 +279,12 @@
     <string name="private_dns_mode_off" msgid="7065962499349997041">"Desativado"</string>
     <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"Automático"</string>
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"Nome do host do provedor de DNS particular"</string>
-    <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Informe o nome do host do provedor de DNS"</string>
+    <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Informe o nome do host"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"Não foi possível conectar"</string>
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Mostrar opções de certificação de Display sem fio"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Aumentar o nível de registro de Wi-Fi; mostrar conforme o RSSI do SSID no seletor de Wi-Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Reduz o consumo de bateria e melhora o desempenho da rede"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Quando esse modo está ativado, o endereço MAC do dispositivo pode mudar a cada vez que ele se conecta a uma rede com ordem aleatória de MAC."</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Quando esse modo estiver ativado, o endereço MAC do dispositivo poderá mudar toda vez que ele se conectar a uma rede com ordem aleatória de MAC."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Limitada"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Ilimitada"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Tamanhos de buffer de logger"</string>
@@ -359,8 +359,8 @@
     <string name="track_frame_time" msgid="522674651937771106">"Classificar renderização HWUI"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Ativar camadas de depuração de GPU"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Permitir carregamento de camadas de depuração de GPU p/ apps de depuração"</string>
-    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Ativ. registro detal. de fornecedor"</string>
-    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Inclui mais registros de fornecedores específicos do dispositivo em relatórios de bugs, que podem conter informações privadas e usar mais bateria e/ou armazenamento."</string>
+    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Ativar registro detalhado de fornecedor"</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Incluir mais registros de fornecedores específicos do dispositivo em relatórios de bugs, que podem conter informações particulares e usar mais bateria e/ou armazenamento."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Escala de animação da janela"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Escala de animação de transição"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Escala de duração do Animator"</string>

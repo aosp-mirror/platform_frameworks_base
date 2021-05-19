@@ -161,7 +161,7 @@
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"Visina glasa"</string>
     <string name="tts_default_pitch_summary" msgid="9132719475281551884">"Utiče na ton sintetiziranog govora"</string>
     <string name="tts_default_lang_title" msgid="4698933575028098940">"Jezik"</string>
-    <string name="tts_lang_use_system" msgid="6312945299804012406">"Koristi jezik sistema"</string>
+    <string name="tts_lang_use_system" msgid="6312945299804012406">"Korištenje jezika sistema"</string>
     <string name="tts_lang_not_selected" msgid="7927823081096056147">"Jezik nije izabran"</string>
     <string name="tts_default_lang_summary" msgid="9042620014800063470">"Postavlja glas za dati jezik za izgovoreni tekst"</string>
     <string name="tts_play_example_title" msgid="1599468547216481684">"Poslušajte primjer"</string>
@@ -205,7 +205,7 @@
     <string name="apn_settings_not_available" msgid="1147111671403342300">"Postavke za ime pristupne tačke nisu dostupne za ovog korisnika"</string>
     <string name="enable_adb" msgid="8072776357237289039">"Otklanjanje grešaka putem USB-a"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"Način rada za uklanjanje grešaka kada je povezan USB"</string>
-    <string name="clear_adb_keys" msgid="3010148733140369917">"Ukini odobrenja otklanjanja grešaka putem USB-a"</string>
+    <string name="clear_adb_keys" msgid="3010148733140369917">"Ukinite odobrenja otklanjanja grešaka putem USB-a"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"Bežično otklanjanje grešaka"</string>
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Način rada otklanjanja grešaka kada je WiFi mreža povezana"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"Greška"</string>
@@ -250,9 +250,9 @@
     <string name="debug_networking_category" msgid="6829757985772659599">"Umrežavanje"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"Certifikacija bežičnog prikaza"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Omogući detaljni zapisnik za WiFi"</string>
-    <string name="wifi_scan_throttling" msgid="2985624788509913617">"Reguliranje skeniranja WiFi mreže"</string>
+    <string name="wifi_scan_throttling" msgid="2985624788509913617">"Usporavanje skeniranja WiFi-ja"</string>
     <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Nasum. odabir MAC-a poboljšan WiFi-jem"</string>
-    <string name="mobile_data_always_on" msgid="8275958101875563572">"Prijenos podataka na mobilnoj mreži je uvijek aktivan"</string>
+    <string name="mobile_data_always_on" msgid="8275958101875563572">"Prijenos podataka na mobilnoj mreži uvijek aktivan"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Hardversko ubrzavanje za povezivanje putem mobitela"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Prikaži Bluetooth uređaje bez naziva"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"Onemogući apsolutnu jačinu zvuka"</string>
@@ -370,7 +370,7 @@
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Obustavlja se svaka aktivnost čim je korisnik napusti"</string>
     <string name="app_process_limit_title" msgid="8361367869453043007">"Ograničenje procesa u pozadini"</string>
     <string name="show_all_anrs" msgid="9160563836616468726">"Prikaži ANR-e u pozadini"</string>
-    <string name="show_all_anrs_summary" msgid="8562788834431971392">"Prikaz dijaloga \"Aplikacija ne reagira\" za aplikacije pokrenute u pozadini"</string>
+    <string name="show_all_anrs_summary" msgid="8562788834431971392">"Prikaz dijaloškog okvira \"Aplikacija ne reagira\" za aplikacije pokrenute u pozadini"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Prikaži upozorenja kanala obavještenja"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Prikaz upozorenja na ekranu kada aplikacija pošalje obavještenje bez važećeg kanala"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Nametni aplikacije na vanjskoj pohrani"</string>
@@ -418,7 +418,7 @@
     <string name="daltonizer_mode_deuteranomaly" msgid="3507284319584683963">"Deuteranomalija (crveno-zeleno)"</string>
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomalija (crveno-zeleno)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomalija (plavo-žuto)"</string>
-    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Ispravka boje"</string>
+    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Ispravka boja"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"Ispravka boje vam dozvoljava da prilagodite način prikazivanja boja na uređaju"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Zamjenjuje <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>

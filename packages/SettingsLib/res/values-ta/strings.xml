@@ -389,7 +389,7 @@
   <string-array name="color_mode_names">
     <item msgid="3836559907767149216">"வைபிரன்ட் (இயல்பு)"</item>
     <item msgid="9112200311983078311">"இயற்கை வண்ணம்"</item>
-    <item msgid="6564241960833766170">"வழக்கமான வண்ணம்"</item>
+    <item msgid="6564241960833766170">"இயல்புநிலை"</item>
   </string-array>
   <string-array name="color_mode_descriptions">
     <item msgid="6828141153199944847">"மேம்படுத்தப்பட்ட வண்ணங்கள்"</item>
@@ -458,7 +458,7 @@
     <string name="disabled" msgid="8017887509554714950">"முடக்கப்பட்டது"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"அனுமதிக்கப்பட்டது"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"அனுமதிக்கப்படவில்லை"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"நிறுவுதல் (அறியாதவை)"</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"தெரியாத ஆப்ஸ்களை நிறுவுதல்"</string>
     <string name="home" msgid="973834627243661438">"அமைப்புகள் முகப்பு"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"0%"</item>

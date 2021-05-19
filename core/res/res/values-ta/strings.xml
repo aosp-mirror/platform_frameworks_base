@@ -208,7 +208,7 @@
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"டேப்லெட் விருப்பங்கள்"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV விருப்பத்தேர்வுகள்"</string>
     <string name="power_dialog" product="default" msgid="1107775420270203046">"தொலைபேசி விருப்பங்கள்"</string>
-    <string name="silent_mode" msgid="8796112363642579333">"நிசப்த பயன்முறை"</string>
+    <string name="silent_mode" msgid="8796112363642579333">"சைலன்ட் பயன்முறை"</string>
     <string name="turn_on_radio" msgid="2961717788170634233">"வயர்லெஸ்ஸை இயக்கு"</string>
     <string name="turn_off_radio" msgid="7222573978109933360">"வயர்லெஸ்ஸை முடக்கு"</string>
     <string name="screen_lock" msgid="2072642720826409809">"திரைப் பூட்டு"</string>
@@ -255,7 +255,7 @@
     </plurals>
     <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"பிழை அறிக்கை ஸ்க்ரீன்ஷாட் எடுக்கப்பட்டது"</string>
     <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"பிழை அறிக்கையை ஸ்க்ரீன்ஷாட் எடுக்க முடியவில்லை"</string>
-    <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"நிசப்த பயன்முறை"</string>
+    <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"சைலன்ட் பயன்முறை"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"ஒலி முடக்கத்தில் உள்ளது"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"ஒலி இயக்கத்தில் உள்ளது"</string>
     <string name="global_actions_toggle_airplane_mode" msgid="6911684460146916206">"விமானப் பயன்முறை"</string>
@@ -297,7 +297,7 @@
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"தொடர்புகளை அணுக வேண்டும்"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"இருப்பிடம்"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"இந்தச் சாதனத்தின் இருப்பிடத்தை அறிந்து கொள்ள"</string>
-    <string name="permgrouplab_calendar" msgid="6426860926123033230">"Calendar"</string>
+    <string name="permgrouplab_calendar" msgid="6426860926123033230">"கேலெண்டர்"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"கேலெண்டரை அணுகலாம்"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS அனுப்பலாம், வந்த SMSகளைப் பார்க்கலாம்"</string>
@@ -567,7 +567,7 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"கைரேகை ஐகான்"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"\'முகம் காட்டித் திறத்தலுக்கான\' வன்பொருளை நிர்வகித்தல்"</string>
+    <string name="permlab_manageFace" msgid="4569549381889283282">"\'முகம் காட்டித் திறத்தல்\' அம்சத்துக்கான வன்பொருளை நிர்வகித்தல்"</string>
     <string name="permdesc_manageFace" msgid="6204569688492710471">"உபயோகிப்பதற்காக முக டெம்ப்ளேட்டுகளை சேர்க்கும்/நீக்கும் முறைகளை இயக்க, ஆப்ஸை அனுமதிக்கும்."</string>
     <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"’முகம் காட்டித் திறத்தல்’ அம்சத்திற்கான வன்பொருளைப் பயன்படுத்துதல்"</string>
     <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"அடையாளம் காண \'முகம் காட்டித் திறத்தலுக்கான\' வன்பொருளைப் பயன்படுத்த ஆப்ஸை அனுமதிக்கும்"</string>
@@ -600,11 +600,11 @@
     <string name="face_error_timeout" msgid="522924647742024699">"\'முகம் காட்டித் திறத்தலை\' மீண்டும் முயலவும்."</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"புதிய முகங்களைச் சேர்க்க இயலவில்லை. பழையது ஒன்றை நீக்கவும்."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"முக அங்கீகாரச் செயல்பாடு ரத்துசெய்யப்பட்டது."</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"\'முகம் காட்டித் திறத்தல்\' பயனரால் ரத்துசெய்யப்பட்டது."</string>
+    <string name="face_error_user_canceled" msgid="8553045452825849843">"பயனர் \'முகம் காட்டித் திறத்தல்\' அம்சத்தை ரத்துசெய்தார்."</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"பலமுறை முயன்றுவிட்டீர்கள். பிறகு முயலவும்."</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"பலமுறை முயன்றுவிட்டீர்கள். \'முகம் காட்டித் திறத்தல்’ முடக்கப்பட்டது."</string>
+    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"பலமுறை முயன்றுவிட்டீர்கள். \'முகம் காட்டித் திறத்தல்’ அம்சம் முடக்கப்பட்டது."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"முகத்தைச் சரிபார்க்க இயலவில்லை. மீண்டும் முயலவும்."</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"’முகம் காட்டித் திறத்தலை’ நீங்கள் அமைக்கவில்லை."</string>
+    <string name="face_error_not_enrolled" msgid="7369928733504691611">"‘முகம் காட்டித் திறத்தல்’ அம்சத்தை நீங்கள் அமைக்கவில்லை."</string>
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"இந்த சாதனத்தில் ’முகம் காட்டித் திறத்தல்’ ஆதரிக்கப்படவில்லை."</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"சென்சார் தற்காலிகமாக முடக்கப்பட்டுள்ளது."</string>
     <string name="face_name_template" msgid="3877037340223318119">"முகம் <xliff:g id="FACEID">%d</xliff:g>"</string>
@@ -678,7 +678,7 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"திரையைத் திறக்கும் போது, எத்தனை முறை தவறான கடவுச்சொல்லை உள்ளிட்டீர்கள் என்பதைக் கண்காணிக்கிறது மற்றும் கடவுச்சொற்களைப் பல முறை தவறாக உள்ளிட்டால், டேப்லெட்டைப் பூட்டும் அல்லது இந்தப் பயனரின் எல்லா தரவையும் அழிக்கும்."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"திரையைத் திறக்கும் போது எத்தனை முறை தவறான கடவுச்சொல்லை உள்ளிட்டீர்கள் என்பதைக் கண்காணிப்பதோடு கடவுச்சொற்களைப் பல முறை தவறாக உள்ளிட்டால் Android TVயைப் பூட்டும் அல்லது இந்தப் பயனரின் அனைத்துத் தரவையும் அழிக்கும்."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"திரையைத் திறக்கும் போது, எத்தனை முறை தவறான கடவுச்சொல்லை உள்ளிட்டீர்கள் என்பதைக் கண்காணிக்கிறது மற்றும் கடவுச்சொற்களைப் பல முறை தவறாக உள்ளிட்டால், ஃபோனைப் பூட்டும் அல்லது இந்தப் பயனரின் எல்லா தரவையும் அழிக்கும்."</string>
-    <string name="policylab_resetPassword" msgid="214556238645096520">"திரைப் பூட்டை மாற்று"</string>
+    <string name="policylab_resetPassword" msgid="214556238645096520">"திரைப் பூட்டை மாற்றுதல்"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"திரைப் பூட்டை மாற்றும்."</string>
     <string name="policylab_forceLock" msgid="7360335502968476434">"திரையைப் பூட்டு"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"திரை எப்படி, எப்போது பூட்டப்படுகிறது என்பதைக் கட்டுப்படுத்தலாம்."</string>
@@ -835,7 +835,7 @@
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"மீண்டும் முயற்சிக்கவும்"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"மீண்டும் முயற்சிக்கவும்"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"எல்லா அம்சங்கள் &amp; தரவை பெற, சாதனத்தை திறக்கவும்"</string>
-    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"முகம் திறப்பதற்கான அதிகபட்ச முயற்சிகள் கடந்தன"</string>
+    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"முகம் காட்டித் திறத்தல் அம்சத்தை அதிகமுறை பயன்படுத்துவிட்டீர்கள்"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"சிம் கார்டு இல்லை"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"டேப்லெட்டில் சிம் கார்டு இல்லை."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Android TVயில் SIM கார்டு இல்லை."</string>
@@ -1218,7 +1218,7 @@
     <string name="volume_ringtone" msgid="134784084629229029">"ரிங்கரின் ஒலியளவு"</string>
     <string name="volume_music" msgid="7727274216734955095">"மீடியாவின் ஒலியளவு"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="2614142915948898228">"புளூடூத் வழியாக இயக்குகிறது"</string>
-    <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"ரிங்டோனை நிசப்தமாக அமைக்கவும்"</string>
+    <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"சைலன்ட் ரிங்டோன் அமைக்கப்பட்டுள்ளது"</string>
     <string name="volume_call" msgid="7625321655265747433">"அழைப்பில் இருக்கும்போதான ஒலியளவு"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"புளூடூத் அழைப்பில் இருக்கும்போதான ஒலியளவு"</string>
     <string name="volume_alarm" msgid="4486241060751798448">"அலாரத்தின் ஒலியளவு"</string>
@@ -1648,8 +1648,8 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"முடிந்தது"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"ஷார்ட்கட்டை முடக்கு"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"ஷார்ட்கட்டைப் பயன்படுத்து"</string>
-    <string name="color_inversion_feature_name" msgid="326050048927789012">"கலர் இன்வெர்ஷன்"</string>
-    <string name="color_correction_feature_name" msgid="3655077237805422597">"வண்ணத் திருத்தம்"</string>
+    <string name="color_inversion_feature_name" msgid="326050048927789012">"நிற நேரெதிர் மாற்றம்"</string>
+    <string name="color_correction_feature_name" msgid="3655077237805422597">"நிறத் திருத்தம்"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"ஒலியளவுக்கான விசைகளைப் பிடித்திருந்தீர்கள். <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ஆன் செய்யப்பட்டது."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"ஒலியளவுக்கான விசைகளைப் பிடித்திருந்தீர்கள். <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ஆஃப் செய்யப்பட்டது."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>ஐப் பயன்படுத்த 3 விநாடிகளுக்கு இரண்டு ஒலியளவு பட்டன்களையும் அழுத்திப் பிடிக்கவும்"</string>
@@ -2000,7 +2000,7 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"வழக்கமான பேட்டரி சேமிப்பானுக்கான விவர அறிவிப்பு"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"வழக்கமாகச் சார்ஜ் செய்வதற்கு முன்பே பேட்டரி தீர்ந்துபோகக்கூடும்"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"பேட்டரி நிலையை நீட்டிக்க பேட்டரி சேமிப்பான் இயக்கப்பட்டுள்ளது"</string>
-    <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"பேட்டரி சேமிப்பான்"</string>
+    <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"பேட்டரி சேமிப்பு"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"பேட்டரி சேமிப்பான் ஆஃப் செய்யப்பட்டுள்ளது"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"மொபைலில் போதுமான சார்ஜ் உள்ளது. அம்சங்கள் இனி தடையின்றி இயங்கும்."</string>
     <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"டேப்லெட்டில் போதுமான சார்ஜ் உள்ளது. அம்சங்கள் இனி தடையின்றி இயங்கும்."</string>
@@ -2038,7 +2038,7 @@
     <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"அறிவிப்புகள்"</string>
     <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"விரைவு அமைப்புகள்"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"பவர் உரையாடல்"</string>
-    <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"பூட்டுத் திரை"</string>
+    <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"லாக் ஸ்கிரீன்"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"ஸ்கிரீன்ஷாட்"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"திரையிலுள்ள அணுகல்தன்மை ஷார்ட்கட்"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"திரையிலுள்ள அணுகல்தன்மை ஷார்ட்கட்டிற்கான தேர்வி"</string>

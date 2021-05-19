@@ -116,7 +116,7 @@
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"Dobijanje odobrenja nije uspjelo"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Greška pri pokretanju snimanja ekrana"</string>
     <string name="usb_preference_title" msgid="1439924437558480718">"Opcije USB prijenosa fajlova"</string>
-    <string name="use_mtp_button_title" msgid="5036082897886518086">"Reproduciranje medijskih sadržaja (MTP)"</string>
+    <string name="use_mtp_button_title" msgid="5036082897886518086">"Učitaj kao plejer medija (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7676427598943446826">"Priključiti kao kameru (PTP)"</string>
     <string name="installer_cd_button_title" msgid="5499998592841984743">"Instalirajte Android File Transfer za Mac"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Nazad"</string>
@@ -478,8 +478,8 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Pokaži profil"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Dodaj korisnika"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Novi korisnik"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Želite li ukloniti gosta?"</string>
-    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Sve aplikacije i svi podaci iz ove sesije bit će izbrisani."</string>
+    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Ukloniti gosta?"</string>
+    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Sve aplikacije i podaci iz ove sesije će se izbrisati."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Ukloni"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Zdravo! Lijepo je opet vidjeti goste."</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Želite li nastaviti sesiju?"</string>
@@ -491,7 +491,7 @@
     <string name="user_logout_notification_title" msgid="3644848998053832589">"Odjavi korisnika"</string>
     <string name="user_logout_notification_text" msgid="7441286737342997991">"Odjavi trenutnog korisnika"</string>
     <string name="user_logout_notification_action" msgid="7974458760719361881">"ODJAVI KORISNIKA"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"Želite dodati novog korisnika?"</string>
+    <string name="user_add_user_title" msgid="4172327541504825032">"Dodati novog korisnika?"</string>
     <string name="user_add_user_message_short" msgid="2599370307878014791">"Kada dodate novog korisnika, ta osoba treba postaviti svoj prostor.\n\nSvaki korisnik može ažurirati aplikacije za sve ostale korisnike."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Dostignut limit za broj korisnika"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
@@ -503,7 +503,7 @@
     <string name="user_remove_user_message" msgid="6702834122128031833">"Sve aplikacije i podaci ovog korisnika bit će izbrisani."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Ukloni"</string>
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"Uključena je Ušteda baterije"</string>
-    <string name="battery_saver_notification_text" msgid="2617841636449016951">"Minimizira rad i prijenos podataka u pozadini"</string>
+    <string name="battery_saver_notification_text" msgid="2617841636449016951">"Smanjuje performanse i prijenos podataka u pozadini"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Isključi Uštedu baterije"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"Aplikacija <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> će imati pristup svim informacijama koje se prikazuju na ekranu ili koje se reproduciraju s vašeg uređaja za vrijeme snimanja ili emitiranja. To obuhvata informacije kao što su lozinke, detalji o plaćanju, fotografije, poruke i zvuk koji reproducirate."</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Usluga koja pruža ovu funkciju će imati pristup svim informacijama koje se prikazuju na ekranu ili koje se reproduciraju s vašeg uređaja za vrijeme snimanja ili emitiranja. To obuhvata informacije kao što su lozinke, detalji o plaćanju, fotografije, poruke i zvuk koji reproducirate."</string>
@@ -605,7 +605,7 @@
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Zakačena aplikacija može otvoriti druge aplikacije."</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"Dodirnite i držite dugmad Nazad i Pregled da otkačite ovu aplikaciju"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Dodirnite i držite dugmad Nazad i Početni ekran da otkačite ovu aplikaciju"</string>
-    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Prevucite prema gore i zadržite da otkačite ovu aplikaciju"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Prevucite prema gore i zadržite da otkačite aplikaciju"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"Razumijem"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Ne, hvala"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"Aplikacija je zakačena"</string>
@@ -715,11 +715,11 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"Zadano"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"Oblačić"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Bez zvuka ili vibracije"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Bez zvuka ili vibracije i pojavljuje se pri dnu odjeljka za razgovor"</string>
+    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Bez zvuka ili vibracije i pojavljuje se pri dnu odjeljka razgovora"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Može zvoniti ili vibrirati na osnovu postavki vašeg telefona"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Može zvoniti ili vibrirati na osnovu postavki vašeg telefona. Razgovori iz oblačića u aplikaciji <xliff:g id="APP_NAME">%1$s</xliff:g> kao zadana opcija."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Privlači vašu pažnju pomoću plutajuće prečice do ovog sadržaja."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Prikazuje se na vrhu odjeljka za razgovor, pojavljuje se kao plutajući oblačić, prikazuje sliku profila na zaključanom ekranu"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Prikazuje se na vrhu odjeljka razgovora, pojavljuje se kao plutajući oblačić, prikazuje sliku profila na zaključanom ekranu"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Postavke"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritetni"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> ne podržava funkcije razgovora"</string>
@@ -774,7 +774,7 @@
     <string name="battery_panel_title" msgid="5931157246673665963">"Potrošnja baterije"</string>
     <string name="battery_detail_charging_summary" msgid="8821202155297559706">"Ušteda baterije je isključena prilikom punjenja"</string>
     <string name="battery_detail_switch_title" msgid="6940976502957380405">"Ušteda baterije"</string>
-    <string name="battery_detail_switch_summary" msgid="3668748557848025990">"Ograničava rad i prijenos podataka u pozadini"</string>
+    <string name="battery_detail_switch_summary" msgid="3668748557848025990">"Smanjuje performanse i prijenos podataka u pozadini"</string>
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"Dugme <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Tipka za početak"</string>
     <string name="keyboard_key_back" msgid="4185420465469481999">"Nazad"</string>
@@ -1021,7 +1021,7 @@
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Stanje mirovanja"</string>
     <string name="priority_onboarding_title" msgid="2893070698479227616">"Razgovor je postavljen kao prioritetan"</string>
     <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Prioritetni razgovori će:"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Biti prikazani na vrhu odjeljka za razgovor"</string>
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Biti prikazani na vrhu odjeljka razgovora"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Prikazivati sliku profila na zaključanom ekranu"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Izgleda kao plutajući oblačić iznad aplikacija"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Prekida način rada Ne ometaj"</string>

@@ -603,7 +603,7 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Nie można zweryfikować twarzy. Sprzęt niedostępny."</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"Spróbuj rozpoznania twarzy ponownie."</string>
+    <string name="face_error_timeout" msgid="522924647742024699">"Spróbuj rozpoznawania twarzy ponownie."</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Nie można przechowywać nowych danych twarzy. Usuń stare."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Analiza twarzy została anulowana."</string>
     <string name="face_error_user_canceled" msgid="8553045452825849843">"Użytkownik anulował rozpoznawanie twarzy."</string>
@@ -1336,14 +1336,14 @@
     <string name="perm_costs_money" msgid="749054595022779685">"to może generować dodatkowe koszty"</string>
     <string name="dlg_ok" msgid="5103447663504839312">"OK"</string>
     <string name="usb_charging_notification_title" msgid="1674124518282666955">"Ładowanie urządzenia przez USB"</string>
-    <string name="usb_supplying_notification_title" msgid="5378546632408101811">"Ładowanie podłączonego urządzenia przez USB"</string>
+    <string name="usb_supplying_notification_title" msgid="5378546632408101811">"Ładowanie połączonego urządzenia przez USB"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"Przesyłanie plików przez USB włączone"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"Tryb PTP przez USB włączony"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"Tethering USB włączony"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"Tryb MIDI przez USB włączony"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"Podłączono akcesorium USB"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"Kliknij, by wyświetlić więcej opcji."</string>
-    <string name="usb_power_notification_message" msgid="7284765627437897702">"Ładowanie podłączonego urządzenia. Kliknij, by wyświetlić więcej opcji."</string>
+    <string name="usb_power_notification_message" msgid="7284765627437897702">"Ładowanie połączonego urządzenia. Kliknij, by wyświetlić więcej opcji."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Wykryto analogowe urządzenie audio"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Podłączone urządzenie nie jest zgodne z tym telefonem. Kliknij, by dowiedzieć się więcej."</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"Podłączono moduł debugowania USB"</string>
@@ -1678,7 +1678,7 @@
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Pozwolić usłudze <xliff:g id="SERVICE">%1$s</xliff:g> na pełną kontrolę nad urządzeniem?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Jeśli włączysz usługę <xliff:g id="SERVICE">%1$s</xliff:g>, Twoje urządzenie nie będzie korzystać z blokady ekranu, by usprawnić szyfrowanie danych."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Pełna kontrola jest odpowiednia dla aplikacji, które pomagają Ci radzić sobie z niepełnosprawnością, ale nie należy jej przyznawać wszystkim aplikacjom."</string>
-    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Wyświetlaj i steruj ekranem"</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Wyświetlaj i kontroluj ekran"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Może odczytywać całą zawartość ekranu i wyświetlać treść nad innymi aplikacjami."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Wyświetlaj i wykonuj działania"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Może śledzić Twoje interakcje z aplikacjami lub czujnikiem sprzętowym, a także obsługiwać aplikacje za Ciebie."</string>

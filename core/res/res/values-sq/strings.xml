@@ -185,7 +185,7 @@
     <string name="ssl_ca_cert_noti_by_administrator" msgid="4564941950768783879">"Nga administratori i profilit tënd të punës"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="217337232273211674">"Nga <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
     <string name="work_profile_deleted" msgid="5891181538182009328">"Profili i punës u fshi"</string>
-    <string name="work_profile_deleted_details" msgid="3773706828364418016">"Aplikacioni i administratorit të profilit të punës mungon ose është dëmtuar. Si rezultat i kësaj, profili yt i punës dhe të dhënat përkatëse janë fshirë. Kontakto me administratorin për ndihmë."</string>
+    <string name="work_profile_deleted_details" msgid="3773706828364418016">"Aplikacioni i administrimit të profilit të punës mungon ose është dëmtuar. Si rezultat i kësaj, profili yt i punës dhe të dhënat përkatëse janë fshirë. Kontakto me administratorin për ndihmë."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"Profili yt i punës nuk është më i disponueshëm në këtë pajisje"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"Shumë përpjekje për fjalëkalimin"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Administratori e refuzoi pajisjen për përdorim personal"</string>
@@ -198,7 +198,7 @@
     <string name="sensor_notification_service" msgid="7474531979178682676">"Shërbimi i njoftimeve të sensorit"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Shërbimi i muzgut"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Pajisja do të spastrohet"</string>
-    <string name="factory_reset_message" msgid="2657049595153992213">"Aplikacioni i administratorit nuk mund të përdoret. Pajisja jote tani do të fshihet.\n\nNëse ke pyetje, kontakto me administratorin e organizatës."</string>
+    <string name="factory_reset_message" msgid="2657049595153992213">"Aplikacioni i administrimit nuk mund të përdoret. Pajisja jote tani do të fshihet.\n\nNëse ke pyetje, kontakto me administratorin e organizatës."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Printimi është çaktivizuar nga <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Aktivizo profilin e punës"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Aplikacionet e tua personale janë bllokuar derisa të aktivizosh profilin tënd të punës"</string>
@@ -567,10 +567,10 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Ikona e gjurmës së gishtit"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"menaxho harduerin për shkyçjen me fytyrën"</string>
+    <string name="permlab_manageFace" msgid="4569549381889283282">"menaxho harduerin për shkyçjen me fytyrë"</string>
     <string name="permdesc_manageFace" msgid="6204569688492710471">"Lejon aplikacionin të aktivizojë mënyra për shtim e fshirje të shablloneve të përdorura."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"përdor harduerin e shkyçjes me fytyrën"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Lejon aplikacionin të përdorë harduerin e shkyçjes me fytyrën për procesin e vërtetimit"</string>
+    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"përdor harduerin e shkyçjes me fytyrë"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Lejon aplikacionin të përdorë harduerin e shkyçjes me fytyrë për procesin e vërtetimit"</string>
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Shkyçja me fytyrë"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Regjistro përsëri fytyrën tënde"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Për të përmirësuar njohjen, regjistro përsëri fytyrën tënde"</string>
@@ -597,7 +597,7 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Fytyra s\'mund të verifikohet. Hardueri nuk ofrohet."</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"Provo përsëri shkyçjen me fytyrën."</string>
+    <string name="face_error_timeout" msgid="522924647742024699">"Provo përsëri shkyçjen me fytyrë."</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"S\'mund të ruhen të dhëna të reja fytyre. Fshi një të vjetër në fillim."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Veprimi me fytyrën u anulua."</string>
     <string name="face_error_user_canceled" msgid="8553045452825849843">"Shkyçja me fytyrë u anulua nga përdoruesi."</string>
@@ -690,16 +690,16 @@
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Spastroji të dhënat e këtij përdoruesi në këtë tablet pa paralajmërim."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Spastroji të dhënat e këtij përdoruesi në këtë pajisje Android TV pa paralajmërim."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Spastroji të dhënat e këtij përdoruesi në këtë telefon pa paralajmërim."</string>
-    <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Cakto përfaqësuesin global të pajisjes"</string>
-    <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Cakto përfaqësuesin global të pajisjes që të përdoret kur të aktivizohet politika. Vetëm pronari i pajisjes mund ta caktojë përfaqësuesin global."</string>
+    <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Cakto proxy-in global të pajisjes"</string>
+    <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Cakto proxy-in global të pajisjes që të përdoret kur të aktivizohet politika. Vetëm pronari i pajisjes mund ta caktojë proxy-in global."</string>
     <string name="policylab_expirePassword" msgid="6015404400532459169">"Cakto skadimin e fjalëkalimit të kyçjes së ekranit"</string>
     <string name="policydesc_expirePassword" msgid="9136524319325960675">"Ndrysho se sa shpesh duhet të ndërrohet fjalëkalimi, kodi PIN ose modeli i kyçjes së ekranit."</string>
     <string name="policylab_encryptedStorage" msgid="9012936958126670110">"Cakto enkriptimin e hapësirës ruajtëse"</string>
     <string name="policydesc_encryptedStorage" msgid="1102516950740375617">"Kërko që të dhënat e ruajtura të aplikacionit të enkriptohen."</string>
     <string name="policylab_disableCamera" msgid="5749486347810162018">"Çaktivizo kamerat"</string>
     <string name="policydesc_disableCamera" msgid="3204405908799676104">"Parandalo përdorimin e të gjitha kamerave të pajisjes."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"Çaktivizimin e disa funksioneve të kyçjes së ekranit"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"Parandalo përdorimin e disa funksioneve të kyçjes së ekranit."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"Çaktivizimin e disa veçorive të kyçjes së ekranit"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"Parandalo përdorimin e disa veçorive të kyçjes së ekranit."</string>
   <string-array name="phoneTypes">
     <item msgid="8996339953292723951">"Shtëpia"</item>
     <item msgid="7740243458912727194">"Celulari"</item>
@@ -835,7 +835,7 @@
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Provo sërish"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Provo sërish"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Shkyçe për të gjitha funksionet dhe të dhënat"</string>
-    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Tentativat maksimale të \"Shkyçjes me fytyrë\" u tejkaluan"</string>
+    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Përpjektet maksimale të \"Shkyçjes me fytyrë\" u tejkaluan"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"Nuk ka kartë SIM"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"Nuk ka kartë SIM në tablet."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Nuk ka kartë SIM në pajisjen tënde Android TV."</string>
@@ -905,7 +905,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"Zgjero zonën e shkyçjes."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"Rrëshqit shkyçjen."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"Shkyçje me motiv."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"Shkyçje me fytyrë."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"Shkyçja me fytyrë."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"Shkyçje me PIN."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"Shkyçja e kartës SIM me kodin PIN"</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"Shkyçja e kartës SIM me kodin PUK"</string>
@@ -1208,12 +1208,12 @@
     <string name="new_app_action" msgid="547772182913269801">"Hap <xliff:g id="NEW_APP">%1$s</xliff:g>"</string>
     <string name="new_app_description" msgid="1958903080400806644">"<xliff:g id="OLD_APP">%1$s</xliff:g> do të mbyllet pa u ruajtur"</string>
     <string name="dump_heap_notification" msgid="5316644945404825032">"<xliff:g id="PROC">%1$s</xliff:g> e ka kaluar kufirin e memories"</string>
-    <string name="dump_heap_ready_notification" msgid="2302452262927390268">"Stiva e skedarëve fiktivë të <xliff:g id="PROC">%1$s</xliff:g> është gati"</string>
-    <string name="dump_heap_notification_detail" msgid="8431586843001054050">"Stiva e skedarëve fiktivë është mbledhur. Trokit për t\'i ndarë."</string>
-    <string name="dump_heap_title" msgid="4367128917229233901">"Të ndahet stiva e skedarëve fiktivë?"</string>
-    <string name="dump_heap_text" msgid="1692649033835719336">"Procesi <xliff:g id="PROC">%1$s</xliff:g> ka kaluar kufirin e tij të memories prej <xliff:g id="SIZE">%2$s</xliff:g>. Ke një stivë të skedarësh fiktivë që mund ta ndash me zhvilluesin e tij. Ki kujdes pasi kjo stivë skedarësh fiktivë mund të përmbajë çdo informacion personal ku ka qasje aplikacioni."</string>
-    <string name="dump_heap_system_text" msgid="6805155514925350849">"Procesi <xliff:g id="PROC">%1$s</xliff:g> e ka kaluar kufirin e tij të memories prej <xliff:g id="SIZE">%2$s</xliff:g>. Ke një stivë skedarësh fiktivë që mund ta ndash. Ki kujdes pasi kjo stivë skedarësh fiktivë mund të përmbajë çdo informacion personal delikat ku ka qasje procesi dhe mund të përfshijë gjërat që ke shkruar ti."</string>
-    <string name="dump_heap_ready_text" msgid="5849618132123045516">"Ke një stivë skedarësh fiktivë të procesit <xliff:g id="PROC">%1$s</xliff:g> që mund ta ndash. Ki kujdes pasi kjo stivë skedarësh fiktivë mund të përmbajë çdo informacion personal delikat ku ka qasje procesi dhe mund të përfshijë gjërat që ke shkruar ti."</string>
+    <string name="dump_heap_ready_notification" msgid="2302452262927390268">"Grumbulli i skedarëve fiktivë të <xliff:g id="PROC">%1$s</xliff:g> është gati"</string>
+    <string name="dump_heap_notification_detail" msgid="8431586843001054050">"Grumbulli i skedarëve fiktivë është mbledhur. Trokit për t\'i ndarë."</string>
+    <string name="dump_heap_title" msgid="4367128917229233901">"Të ndahet grumbulli i skedarëve fiktivë?"</string>
+    <string name="dump_heap_text" msgid="1692649033835719336">"Procesi <xliff:g id="PROC">%1$s</xliff:g> ka kaluar kufirin e tij të memories prej <xliff:g id="SIZE">%2$s</xliff:g>. Ke një grumbull skedarësh fiktivë që mund ta ndash me zhvilluesin e tij. Ki kujdes pasi ky grumbull skedarësh fiktivë mund të përmbajë çdo informacion personal tëndin ku ka qasje aplikacioni."</string>
+    <string name="dump_heap_system_text" msgid="6805155514925350849">"Procesi <xliff:g id="PROC">%1$s</xliff:g> e ka kaluar kufirin e tij të memories prej <xliff:g id="SIZE">%2$s</xliff:g>. Ke një grumbull skedarësh fiktivë që mund ta ndash. Ki kujdes pasi ky grumbull skedarësh fiktivë mund të përmbajë çdo informacion personal delikat ku ka qasje procesi dhe mund të përfshijë gjërat që ke shkruar ti."</string>
+    <string name="dump_heap_ready_text" msgid="5849618132123045516">"Ke një grumbull skedarësh fiktivë të procesit <xliff:g id="PROC">%1$s</xliff:g> që mund ta ndash. Ki kujdes pasi ky grumbull skedarësh fiktivë mund të përmbajë çdo informacion personal delikat ku ka qasje procesi dhe mund të përfshijë gjërat që ke shkruar ti."</string>
     <string name="sendText" msgid="493003724401350724">"Zgjidh një veprim për tekstin"</string>
     <string name="volume_ringtone" msgid="134784084629229029">"Volumi i ziles"</string>
     <string name="volume_music" msgid="7727274216734955095">"Volumi i medias"</string>
@@ -1299,7 +1299,7 @@
     <string name="usb_supplying_notification_title" msgid="5378546632408101811">"Pajisja e lidhur po karikohet nëpërmjet USB-së"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"Transferimi i skedarëve nëpërmjet USB-së u aktivizua"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"PTP nëpërmjet USB-së u aktivizua"</string>
-    <string name="usb_tether_notification_title" msgid="8828527870612663771">"Ndarja e internetit nëpërmjet USB-së u aktivizua"</string>
+    <string name="usb_tether_notification_title" msgid="8828527870612663771">"Ndarja e internetit përmes USB-së u aktivizua"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"MIDI nëpërmjet USB-së u aktivizua"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"Aksesori i USB-së u lidh"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"Trokit për më shumë opsione."</string>
@@ -1648,7 +1648,7 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"U krye"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Çaktivizo shkurtoren"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Përdor shkurtoren"</string>
-    <string name="color_inversion_feature_name" msgid="326050048927789012">"Kthimi i ngjyrës"</string>
+    <string name="color_inversion_feature_name" msgid="326050048927789012">"Anasjellja e ngjyrës"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Korrigjimi i ngjyrës"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Tastet e volumit të mbajtura shtypur. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> i aktivizuar."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Tastet e volumit të mbajtura shtypur. U çaktivizua \"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\"."</string>
@@ -1786,7 +1786,7 @@
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"<xliff:g id="LABEL">%1$s</xliff:g> i dytë i punës"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"<xliff:g id="LABEL">%1$s</xliff:g> i tretë i punës"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Zhgozhdimi kërkon PIN-in"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Kërko model shkyçjeje para heqjes së gozhdimit"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Kërko motivin e shkyçjes para heqjes së gozhdimit"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Kërko fjalëkalim para heqjes nga gozhdimi."</string>
     <string name="package_installed_device_owner" msgid="7035926868974878525">"Instaluar nga administratori"</string>
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Përditësuar nga administratori"</string>
@@ -1999,7 +1999,7 @@
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"po shfaqet mbi aplikacionet e tjera në ekranin tënd"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Njoftimi i informacionit të \"Modalitetit rutinë\""</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Bateria mund të mbarojë përpara ngarkimit të zakonshëm"</string>
-    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"\"Kursyesi i baterisë\" u aktivizua për të zgjatur jetëgjatësinë e baterisë"</string>
+    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"\"Kursyesi i baterisë\" u aktivizua për të rritur kohëzgjatjen e baterisë"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Kursyesi i baterisë"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"\"Kursyesi i baterisë\" është çaktivizuar"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Telefoni ka nivel të mjaftueshëm baterie. Funksionet nuk janë më të kufizuara."</string>
