@@ -48,12 +48,11 @@
             android:id="@+id/messages_count"
             android:layout_gravity="center"
             android:gravity="center"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp"
+            android:paddingHorizontal="8dp"
             android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
             android:textColor="?android:attr/textColorPrimary"
             android:background="@drawable/people_space_messages_count_background"
-            android:textSize="14sp"
+            android:textSize="@dimen/name_text_size_for_small"
             android:maxLines="1"
             android:ellipsize="end"
             android:layout_width="wrap_content"
@@ -71,6 +70,6 @@
             android:paddingHorizontal="4dp"
             android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
             android:textColor="?android:attr/textColorPrimary"
-            android:textSize="14sp" />
+            android:textSize="@dimen/name_text_size_for_small" />
     </LinearLayout>
 </FrameLayout>
