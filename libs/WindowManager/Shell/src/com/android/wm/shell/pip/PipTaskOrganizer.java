@@ -39,6 +39,7 @@ import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTI
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_USER_RESIZE;
 import static com.android.wm.shell.pip.PipAnimationController.isInPipDirection;
 import static com.android.wm.shell.pip.PipAnimationController.isOutPipDirection;
+import static com.android.wm.shell.pip.PipAnimationController.isRemovePipDirection;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -186,8 +187,17 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                 mDeferredAnimEndTransaction = tx;
                 return;
             }
-            finishResize(tx, destinationBounds, direction, animationType);
-            sendOnPipTransitionFinished(direction);
+            final boolean isExitPipDirection = isOutPipDirection(direction)
+                    || isRemovePipDirection(direction);
+            if (mState != State.EXITING_PIP || isExitPipDirection) {
+                // Finish resize as long as we're not exiting PIP, or, if we are, only if this is
+                // the end of an exit PIP animation.
+                // This is necessary in case there was a resize animation ongoing when exit PIP
+                // started, in which case the first resize will be skipped to let the exit
+                // operation handle the final resize out of PIP mode. See b/185306679.
+                finishResize(tx, destinationBounds, direction, animationType);
+                sendOnPipTransitionFinished(direction);
+            }
             if (direction == TRANSITION_DIRECTION_TO_PIP) {
                 // TODO (b//169221267): Add jank listener for transactions without buffer updates.
                 //InteractionJankMonitor.getInstance().end(
