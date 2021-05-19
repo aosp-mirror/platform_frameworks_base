@@ -612,7 +612,7 @@
     <string name="permlab_manageFace" msgid="4569549381889283282">"gérer le matériel de déverrouillage par reconnaissance faciale"</string>
     <string name="permdesc_manageFace" msgid="6204569688492710471">"Permet à l\'appli d\'employer des méthodes d\'aj. et de suppr. de modèles de reconn. visage."</string>
     <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"utiliser le matériel de déverrouillage par reconnaissance faciale"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Permet à l\'appli d\'utiliser du matériel de déverr. par reconn faciale pour l\'authentific."</string>
+    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Permet à l\'appli d\'utiliser du matériel de déverr. par reconn. faciale pour l\'authentific."</string>
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Déverrouillage par reconnaissance faciale"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Inscrivez votre visage à nouveau"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Pour améliorer la reconnaissance, veuillez enregistrer à nouveau votre visage"</string>
@@ -887,7 +887,7 @@
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Réessayer"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Réessayer"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Déverr. pour acc. aux autres fonction. et données"</string>
-    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Nombre maximal autorisé de tentatives Face Unlock atteint."</string>
+    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Nombre maximal atteint de tentatives de déverrouillage par reconnaissance faciale"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"Aucune carte SIM"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"Aucune carte SIM n\'est insérée dans la tablette."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Aucune carte SIM ne se trouve dans votre appareil Android TV."</string>

@@ -613,7 +613,7 @@
     <string name="permdesc_manageFace" msgid="6204569688492710471">"អនុញ្ញាតឱ្យកម្មវិធីប្រើវិធីសាស្ត្រដើម្បី​បញ្ចូល និងលុបទម្រង់​គំរូ​ផ្ទៃមុខសម្រាប់ប្រើប្រាស់។"</string>
     <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"ប្រើ​ហាតវែរ​ដោះសោ​តាមទម្រង់មុខ"</string>
     <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"អនុញ្ញាត​ឱ្យ​កម្មវិធី​ប្រើ​ហាតវែរ​ដោះសោតាមទម្រង់មុខ​សម្រាប់​ការផ្ទៀងផ្ទាត់"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"ការដោះសោ​តាមទម្រង់មុខ"</string>
+    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"ដោះ​សោ​តាម​​ទម្រង់​មុខ"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"ស្កេន​បញ្ចូល​មុខរបស់អ្នក​ម្ដងទៀត"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"ដើម្បី​ធ្វើឱ្យ​ការសម្គាល់មុខ​ប្រសើរជាងមុន សូមស្កេន​បញ្ចូល​មុខរបស់អ្នក​ម្ដងទៀត"</string>
     <string name="face_setup_notification_title" msgid="550617822603450009">"រៀបចំ​ការដោះសោ​តាម​ទម្រង់​មុខ"</string>

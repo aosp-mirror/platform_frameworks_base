@@ -217,7 +217,7 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
         OneHandedTimeoutHandler timeoutHandler = new OneHandedTimeoutHandler(mainExecutor);
         OneHandedState transitionState = new OneHandedState();
         OneHandedTutorialHandler tutorialHandler = new OneHandedTutorialHandler(context,
-                displayLayout, windowManager, mainExecutor);
+                displayLayout, windowManager, settingsUtil, mainExecutor);
         OneHandedAnimationController animationController =
                 new OneHandedAnimationController(context);
         OneHandedTouchHandler touchHandler = new OneHandedTouchHandler(timeoutHandler,
@@ -299,6 +299,8 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
         mAccessibilityManager = AccessibilityManager.getInstance(context);
         mAccessibilityManager.addAccessibilityStateChangeListener(
                 mAccessibilityStateChangeListener);
+
+        mState.addSListeners(mTutorialHandler);
     }
 
     public OneHanded asOneHanded() {
@@ -627,13 +629,13 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
     }
 
     private void onConfigChanged(Configuration newConfig) {
-        if (mTutorialHandler != null) {
-            if (!mIsOneHandedEnabled
-                    || newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                return;
-            }
-            mTutorialHandler.onConfigurationChanged(newConfig);
+        if (mTutorialHandler == null) {
+            return;
         }
+        if (!mIsOneHandedEnabled || newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            return;
+        }
+        mTutorialHandler.onConfigurationChanged();
     }
 
     private void onUserSwitch(int newUserId) {

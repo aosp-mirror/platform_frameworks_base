@@ -38,7 +38,11 @@ class MediaDataCombineLatest @Inject constructor() : MediaDataManager.Listener,
         }
     }
 
-    override fun onSmartspaceMediaDataLoaded(key: String, data: SmartspaceTarget) {
+    override fun onSmartspaceMediaDataLoaded(
+        key: String,
+        data: SmartspaceTarget,
+        shouldPrioritize: Boolean
+    ) {
         listeners.toSet().forEach { it.onSmartspaceMediaDataLoaded(key, data) }
     }
 
