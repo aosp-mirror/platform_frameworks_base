@@ -595,6 +595,7 @@ public final class DeviceConfig {
      *
      * @hide
      */
+    @TestApi
     public static final String NAMESPACE_CONSTRAIN_DISPLAY_APIS = "constrain_display_apis";
 
     /**
