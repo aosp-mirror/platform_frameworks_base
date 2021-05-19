@@ -596,6 +596,13 @@ public final class DeviceConfig {
      */
     public static final String NAMESPACE_CONSTRAIN_DISPLAY_APIS = "constrain_display_apis";
 
+    /**
+     * Trace error logger properties definitions.
+     *
+     * @hide
+     */
+    public static final String NAMESPACE_TRACE_ERROR_LOGGER = "trace_error_logger";
+
     private static final Object sLock = new Object();
     @GuardedBy("sLock")
     private static ArrayMap<OnPropertiesChangedListener, Pair<String, Executor>> sListeners =
