@@ -715,7 +715,7 @@ public class BubbleController {
             }
             if (newConfig.fontScale != mFontScale) {
                 mFontScale = newConfig.fontScale;
-                mStackView.updateFontScale(mFontScale);
+                mStackView.updateFontScale();
             }
             if (newConfig.getLayoutDirection() != mLayoutDirection) {
                 mLayoutDirection = newConfig.getLayoutDirection();
