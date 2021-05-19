@@ -379,10 +379,10 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
                         brightness.getMeasuredHeight() * 0.5f, 0);
                 mBrightnessAnimator = new TouchAnimator.Builder()
                         .addFloat(brightness, "alpha", 0, 1)
-                        .addFloat(brightness, "scaleY", 0.3f, 1)
-                        .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
+                        .addFloat(brightness, "sliderScaleY", 0.3f, 1)
+                        .setInterpolator(Interpolators.ALPHA_IN)
+                        .setStartDelay(0.3f)
                         .build();
-                brightness.setPivotY(0);
                 mAllViews.add(brightness);
             } else {
                 mBrightnessAnimator = null;
