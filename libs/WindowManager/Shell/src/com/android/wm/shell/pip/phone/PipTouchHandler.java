@@ -472,17 +472,20 @@ public class PipTouchHandler {
             float aspectRatio) {
         final int shorterLength = Math.min(mPipBoundsState.getDisplayBounds().width(),
                 mPipBoundsState.getDisplayBounds().height());
-        final int totalPadding = insetBounds.left * 2;
+        final int totalHorizontalPadding = insetBounds.left
+                + (mPipBoundsState.getDisplayBounds().width() - insetBounds.right);
+        final int totalVerticalPadding = insetBounds.top
+                + (mPipBoundsState.getDisplayBounds().height() - insetBounds.bottom);
         final int minWidth, minHeight, maxWidth, maxHeight;
         if (aspectRatio > 1f) {
             minWidth = (int) Math.min(normalBounds.width(), shorterLength * MINIMUM_SIZE_PERCENT);
             minHeight = (int) (minWidth / aspectRatio);
-            maxWidth = (int) Math.max(normalBounds.width(), shorterLength - totalPadding);
+            maxWidth = (int) Math.max(normalBounds.width(), shorterLength - totalHorizontalPadding);
             maxHeight = (int) (maxWidth / aspectRatio);
         } else {
             minHeight = (int) Math.min(normalBounds.height(), shorterLength * MINIMUM_SIZE_PERCENT);
             minWidth = (int) (minHeight * aspectRatio);
-            maxHeight = (int) Math.max(normalBounds.height(), shorterLength - totalPadding);
+            maxHeight = (int) Math.max(normalBounds.height(), shorterLength - totalVerticalPadding);
             maxWidth = (int) (maxHeight * aspectRatio);
         }
 
