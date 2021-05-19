@@ -957,7 +957,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"Kilit açma alanını genişletin."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"Kaydırarak kilit açma."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"Desenle kilit açma."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"Yüzle kilit açma."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"Yüzle tanıma kilidi."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"Pin koduyla kilit açma."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"SIM PIN kilidini açın."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"SIM PUK kilidini açın."</string>

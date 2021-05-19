@@ -2139,7 +2139,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 // Move the last recents animation transaction from original task to the new one.
                 if (task.mLastRecentsAnimationTransaction != null) {
                     rootTask.setLastRecentsAnimationTransaction(
-                            task.mLastRecentsAnimationTransaction);
+                            task.mLastRecentsAnimationTransaction,
+                            task.mLastRecentsAnimationOverlay);
                     task.clearLastRecentsAnimationTransaction();
                 }
 
