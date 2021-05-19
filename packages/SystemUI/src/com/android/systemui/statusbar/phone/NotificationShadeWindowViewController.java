@@ -409,9 +409,8 @@ public class NotificationShadeWindowViewController {
         ExpandHelper.Callback expandHelperCallback = mStackScrollLayout.getExpandHelperCallback();
         DragDownHelper.DragDownCallback dragDownCallback = mStackScrollLayout.getDragDownCallback();
         setDragDownHelper(
-                new DragDownHelper(
-                        mView.getContext(), mView, expandHelperCallback,
-                        dragDownCallback, mFalsingManager, mFalsingCollector));
+                new DragDownHelper(mFalsingManager, expandHelperCallback, dragDownCallback,
+                        mFalsingCollector, mView, mView.getContext()));
 
         mDepthController.setRoot(mView);
         mNotificationPanelViewController.addExpansionListener(mDepthController);
