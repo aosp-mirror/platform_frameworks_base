@@ -2145,7 +2145,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     && !isEncryptedOrLockdown(getCurrentUser())
                     && mStrongAuthTracker.hasUserAuthenticatedSinceBoot()
                     && userDoesNotHaveTrust);
-
         return shouldListenKeyguardState && shouldListenUserState && shouldListenBouncerState
                 && shouldListenUdfpsState;
     }
@@ -3270,7 +3269,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             pw.println("    disabled(DPM)=" + isFingerprintDisabled(userId));
             pw.println("    possible=" + isUnlockWithFingerprintPossible(userId));
             pw.println("    listening: actual=" + mFingerprintRunningState
-                    + " expected=" + (shouldListenForFingerprint(false) ? 1 : 0));
+                    + " expected=" + (shouldListenForFingerprint(isUdfpsEnrolled()) ? 1 : 0));
             pw.println("    strongAuthFlags=" + Integer.toHexString(strongAuthFlags));
             pw.println("    trustManaged=" + getUserTrustIsManaged(userId));
             pw.println("    udfpsEnrolled=" + isUdfpsEnrolled());
