@@ -61,7 +61,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Set;
 import java.util.UUID;
 
@@ -146,7 +145,6 @@ public class UnderlyingNetworkTrackerTest {
                         mVcnContext,
                         SUB_GROUP,
                         mSubscriptionSnapshot,
-                        Collections.singleton(NetworkCapabilities.NET_CAPABILITY_INTERNET),
                         mNetworkTrackerCb);
     }
 
@@ -187,7 +185,6 @@ public class UnderlyingNetworkTrackerTest {
                 vcnContext,
                 SUB_GROUP,
                 mSubscriptionSnapshot,
-                Collections.singleton(NetworkCapabilities.NET_CAPABILITY_INTERNET),
                 mNetworkTrackerCb);
 
         verify(cm)
