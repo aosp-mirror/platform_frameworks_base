@@ -45,7 +45,7 @@
     <string name="status_bar_settings_notifications" msgid="5285316949980621438">"အကြောင်းကြားချက်များ"</string>
     <string name="bluetooth_tethered" msgid="4171071193052799041">"ဘလူးတုသ်မှတဆင့်ပြန်လည်ချိတ်ဆက်ခြင်း"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="2972273031043777851">"ထည့်သွင်းနည်းများ သတ်မှတ်ခြင်း"</string>
-    <string name="status_bar_use_physical_keyboard" msgid="4849251850931213371">"ခလုတ်ပါဝင်သော ကီးဘုတ်"</string>
+    <string name="status_bar_use_physical_keyboard" msgid="4849251850931213371">"စက်၏ ကီးဘုတ်"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> အား ဝင်သုံးရန် <xliff:g id="APPLICATION">%1$s</xliff:g> ကို ခွင့်ပြုပါသလား။"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"<xliff:g id="APPLICATION">%1$s</xliff:g> အား <xliff:g id="USB_DEVICE">%2$s</xliff:g> ကို သုံးခွင့်ပြုမလား။\nဤအက်ပ်ကို အသံဖမ်းခွင့် ပေးမထားသော်လည်း ၎င်းသည် ဤ USB စက်ပစ္စည်းမှတစ်ဆင့် အသံများကို ဖမ်းယူနိုင်ပါသည်။"</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g> အား ဝင်သုံးရန် <xliff:g id="APPLICATION">%1$s</xliff:g> ကို ခွင့်ပြုပါသလား။"</string>
@@ -101,7 +101,7 @@
     <string name="screenrecord_start" msgid="330991441575775004">"စတင်ရန်"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"ဖန်သားပြင်ကို ရိုက်ကူးနေသည်"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"အသံနှင့် ဖန်သားပြင်ကို ရိုက်ကူးနေသည်"</string>
-    <string name="screenrecord_taps_label" msgid="1595690528298857649">"မျက်နှာပြင်ပေါ်တွင် ထိချက်များ ပြရန်"</string>
+    <string name="screenrecord_taps_label" msgid="1595690528298857649">"ဖန်သားပြင်ပေါ်တွင် ထိချက်များ ပြရန်"</string>
     <string name="screenrecord_stop_text" msgid="6549288689506057686">"ရပ်ရန် တို့ပါ"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"ရပ်ရန်"</string>
     <string name="screenrecord_pause_label" msgid="6004054907104549857">"ခဏရပ်ရန်"</string>
@@ -210,7 +210,7 @@
     <string name="accessibility_two_bars" msgid="1335676987274417121">"၂ ဘား"</string>
     <string name="accessibility_three_bars" msgid="819417766606501295">"၃ ဘား"</string>
     <string name="accessibility_signal_full" msgid="5920148525598637311">"ဒေတာထုတ်လွှင့်မှုအပြည့်ဖမ်းမိခြင်း"</string>
-    <string name="accessibility_desc_on" msgid="2899626845061427845">"ဖွင့်ထားသည်"</string>
+    <string name="accessibility_desc_on" msgid="2899626845061427845">"ဖွင့်"</string>
     <string name="accessibility_desc_off" msgid="8055389500285421408">"ပိတ်ထားသည်"</string>
     <string name="accessibility_desc_connected" msgid="3082590384032624233">"ချိတ်ဆက်ထားသည်"</string>
     <string name="accessibility_desc_connecting" msgid="8011433412112903614">"ချိတ်ဆက်နေ။"</string>
@@ -232,7 +232,7 @@
     <string name="accessibility_cell_data_on" msgid="691666434519443162">"မိုဘိုင်းဒေတာကို ဖွင့်ထားပါသည်"</string>
     <string name="cell_data_off_content_description" msgid="9165555931499878044">"မိုဘိုင်းဒေတာ ပိတ်ထားသည်"</string>
     <string name="not_default_data_content_description" msgid="6757881730711522517">"ဒေတာအသုံးပြုရန် သတ်မှတ်မထားပါ"</string>
-    <string name="cell_data_off" msgid="4886198950247099526">"ပိတ်ရန်"</string>
+    <string name="cell_data_off" msgid="4886198950247099526">"ပိတ်"</string>
     <string name="accessibility_bluetooth_tether" msgid="6327291292208790599">"ဘလူးတုသ်သုံး၍ ချိတ်ဆက်ခြင်း"</string>
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"လေယာဉ်ပျံမုဒ်"</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN ကို ဖွင့်ထားသည်။"</string>
@@ -396,7 +396,7 @@
     <string name="quick_settings_connected" msgid="3873605509184830379">"ချိတ်ဆက်ထား"</string>
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"ချိတ်ဆက်ပြီးပါပြီ၊ ဘက်ထရီ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="2381969772953268809">"ဆက်သွယ်နေ..."</string>
-    <string name="quick_settings_tethering_label" msgid="5257299852322475780">"တွဲချီပေးခြင်း"</string>
+    <string name="quick_settings_tethering_label" msgid="5257299852322475780">"မိုဘိုင်းသုံးတွဲချိတ်ခြင်း"</string>
     <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"ဟော့စပေါ့"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"ဖွင့်နေသည်…"</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"\'ဒေတာချွေတာမှု\' ဖွင့်ထားသည်"</string>
@@ -476,12 +476,12 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"ပရိုဖိုင်ကို ပြရန်"</string>
     <string name="user_add_user" msgid="4336657383006913022">"အသုံးပြုသူ ထည့်ရန်"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"အသုံးပြုသူ အသစ်"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"ဧည့်သည်ကို ဖယ်ထုတ်လိုက်ရမလား?"</string>
+    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"ဧည့်သည်ကို ဖယ်မလား။"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ဒီချိတ်ဆက်မှု ထဲက အက်ပ်များ အားလုံး နှင့် ဒေတာကို ဖျက်ပစ်မည်။"</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"ဖယ်ထုတ်ပါ"</string>
-    <string name="guest_wipe_session_title" msgid="7147965814683990944">"ပြန်လာတာ ကြိုဆိုပါသည်၊ ဧည့်သည်!"</string>
-    <string name="guest_wipe_session_message" msgid="3393823610257065457">"သင်သည် သင်၏ ချိတ်ဆက်မှုကို ဆက်ပြုလုပ် လိုပါသလား?"</string>
-    <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"အစမှ ပြန်စပါ"</string>
+    <string name="guest_wipe_session_title" msgid="7147965814683990944">"ဧည့်သည်ကို ပြန်လည် ကြိုဆိုပါသည်။"</string>
+    <string name="guest_wipe_session_message" msgid="3393823610257065457">"သင်၏ စက်ရှင်ကို ဆက်လုပ်လိုပါသလား။"</string>
+    <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"ပြန်စပါ"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"ဆက်လုပ်ပါ"</string>
     <string name="guest_notification_title" msgid="4434456703930764167">"ဧည့်သည် အသုံးပြုသူ"</string>
     <string name="guest_notification_text" msgid="4202692942089571351">"အက်ပ်များနှင့် ဒေတာအား ဖျက်ရန်၊ တခဏသုံးစွဲသူအား ဖယ်ရှားပါ"</string>
@@ -503,7 +503,7 @@
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"လုပ်ကိုင်မှုကို လျှော့ချလျက် နောက်ခံ ဒေတာကို ကန့်သတ်သည်"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"ဘက်ထရီ အားထိန်းကို ပိတ်ရန်"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> သည် အသံဖမ်းနေစဉ် (သို့) ကာစ်လုပ်နေစဉ် သင့်ဖန်သားပြင်တွင် မြင်ရသော (သို့) သင့်စက်တွင် ဖွင့်ထားသော အချက်အလက်မှန်သမျှကို သုံးနိုင်နိုင်ပါမည်။ ၎င်းတွင် စကားဝှက်များ၊ ငွေပေးချေမှုအသေးစိတ်များ၊ ဓာတ်ပုံများ၊ မက်ဆေ့ဂျ်များနှင့် သင်ဖွင့်သည့်အသံကဲ့သို့သော အချက်အလက်များ ပါဝင်သည်။"</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"ဤလုပ်ရပ်အတွက် ဝန်ဆောင်မှုသည် အသံဖမ်းနေစဉ် (သို့) ကာစ်လုပ်နေစဉ် သင့်ဖန်သားပြင်တွင် မြင်ရသော (သို့) သင့်စက်တွင် ဖွင့်ထားသော အချက်အလက်မှန်သမျှကို သုံးနိုင်ပြီး သင့်စက်မှ ဖွင့်နိုင်ပါမည်။ ၎င်းတွင် စကားဝှက်များ၊ ငွေပေးချေမှုအသေးစိတ်များ၊ ဓာတ်ပုံများ၊ မက်ဆေ့ဂျ်များနှင့် သင်ဖွင့်သည့်အသံကဲ့သို့သော အချက်အလက်များ ပါဝင်သည်။"</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"ဤဝန်ဆောင်မှုသည် အသံဖမ်းနေစဉ် (သို့) ကာစ်လုပ်နေစဉ်အတွင်း သင့်ဖန်သားပြင်တွင် မြင်ရသော (သို့) သင့်စက်တွင် ဖွင့်ထားသော အချက်အလက်အားလုံးကို ကြည့်နိုင်ပါမည်။ ၎င်းတွင် စကားဝှက်များ၊ ငွေပေးချေမှုအသေးစိတ်များ၊ ဓာတ်ပုံများ၊ မက်ဆေ့ဂျ်များနှင့် သင်ဖွင့်သည့်အသံကဲ့သို့သော အချက်အလက်များ ပါဝင်သည်။"</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"ဖမ်းယူခြင်း သို့မဟုတ် ကာစ်လုပ်ခြင်း စတင်မလား။"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> နှင့် ဖမ်းယူခြင်း သို့မဟုတ် ကာစ်လုပ်ခြင်း စတင်မလား။"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"နောက်ထပ် မပြပါနှင့်"</string>
@@ -579,7 +579,7 @@
     <string name="keyguard_indication_trust_unlocked_plugged_in" msgid="2323452175329362855">"<xliff:g id="KEYGUARD_INDICATION">%1$s</xliff:g>\n<xliff:g id="POWER_INDICATION">%2$s</xliff:g>"</string>
     <string name="hidden_notifications_title" msgid="1782412844777612795">"အကြောင်းကြားချက်များ မြန်မြန်ရရန်"</string>
     <string name="hidden_notifications_text" msgid="5899627470450792578">"မဖွင့်ခင် ၎င်းတို့ကို ကြည့်ပါ"</string>
-    <string name="hidden_notifications_cancel" msgid="4805370226181001278">"မလိုအပ်ပါ"</string>
+    <string name="hidden_notifications_cancel" msgid="4805370226181001278">"မလိုပါ"</string>
     <string name="hidden_notifications_setup" msgid="2064795578526982467">"သတ်မှတ်ရန်"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>။ <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="volume_zen_end_now" msgid="5901885672973736563">"ပိတ်ရန်"</string>
@@ -600,11 +600,11 @@
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"သင်က ပင်မဖြုတ်မချင်း ၎င်းကိုပြသထားပါမည်။ ပင်ဖြုတ်ရန် \'ပင်မ\' ခလုတ်ကို တို့၍ဖိထားပါ။"</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"ကိုယ်ရေးကိုယ်တာ ဒေတာများ (အဆက်အသွယ်နှင့် အီးမေးလ် အကြောင်းအရာများကဲ့သို့) ကို အသုံးပြုနိုင်ပါသည်။"</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"ပင်ထိုးထားသည့်အက်ပ်က အခြားအက်ပ်များကို ဖွင့်နိုင်သည်။"</string>
-    <string name="screen_pinning_toast" msgid="8177286912533744328">"ဤအက်ပ်ကိုပင်ဖြုတ်ရန် \'နောက်သို့\' နှင့် \'အနှစ်ချုပ်\' ခလုတ်များကို ထိ၍နှိပ်ထားပါ"</string>
-    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"ဤအက်ပ်ကိုပင်ဖြုတ်ရန် \'နောက်သို့\' နှင့် \'ပင်မ\' ခလုတ်တို့ကို ထိ၍နှိပ်ထားပါ"</string>
-    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"ဤအက်ပ်ကိုပင်ဖြုတ်ရန် အပေါ်သို့ ပွတ်ဆွဲပြီး ဖိထားပါ"</string>
+    <string name="screen_pinning_toast" msgid="8177286912533744328">"ဤအက်ပ်ကို ပင်ဖြုတ်ရန် \'နောက်သို့\' နှင့် \'အနှစ်ချုပ်\' ခလုတ်များကို ထိ၍နှိပ်ထားပါ"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"ဤအက်ပ်ကို ပင်ဖြုတ်ရန် \'နောက်သို့\' နှင့် \'ပင်မ\' ခလုတ်တို့ကို ထိ၍နှိပ်ထားပါ"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"ဤအက်ပ်ကို ပင်ဖြုတ်ရန် အပေါ်သို့ ပွတ်ဆွဲပြီး ဖိထားပါ"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"ရပါပြီ"</string>
-    <string name="screen_pinning_negative" msgid="6882816864569211666">"မလိုတော့ပါ"</string>
+    <string name="screen_pinning_negative" msgid="6882816864569211666">"မလိုပါ"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"အက်ပ်ကို ပင်ထိုးလိုက်သည်"</string>
     <string name="screen_pinning_exit" msgid="4553787518387346893">"အက်ပ်ကို ပင်ဖြုတ်လိုက်သည်"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> ဝှက်မည်လား?"</string>
@@ -685,8 +685,8 @@
     <string name="do_not_silence" msgid="4982217934250511227">"အသံ မတိတ်ပါနှင့်"</string>
     <string name="do_not_silence_block" msgid="4361847809775811849">"အသံ မတိတ်ပါနှင့် သို့မဟုတ် မပိတ်ဆို့ပါနှင့်"</string>
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"ပါဝါအကြောင်းကြားချက် ထိန်းချုပ်မှုများ"</string>
-    <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"ဖွင့်ပါ"</string>
-    <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"ပိတ်ထားသည်"</string>
+    <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"ဖွင့်"</string>
+    <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"ပိတ်"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"ပါဝါအကြောင်းကြားချက် ထိန်းချုပ်မှုများကိုအသုံးပြုပြီး အက်ပ်တစ်ခု၏ အကြောင်းကြားချက် အရေးပါမှု ၀ မှ ၅ အထိသတ်မှတ်ပေးနိုင်သည်။ \n\n"<b>"အဆင့် ၅"</b>" \n- အကြောင်းကြားချက်စာရင်း၏ ထိပ်ဆုံးတွင် ပြသည် \n- မျက်နှာပြင်အပြည့် ကြားဖြတ်ဖော်ပြခြင်းကို ခွင့်ပြုသည် \n- အမြဲတမ်း ခေတ္တပြပါမည် \n\n"<b>"အဆင့် ၄"</b>" \n- မျက်နှာပြင်အပြည့် ကြားဖြတ်ဖော်ပြခြင်း မရှိစေရန် ကာကွယ်ပေးသည် \n- အမြဲတမ်း ခေတ္တပြပါမည် \n\n"<b>"အဆင့် ၃"</b>" \n- မျက်နှာပြင်အပြည့် ကြားဖြတ်ဖော်ပြခြင်း မရှိစေရန် ကာကွယ်ပေးသည် \n- ဘယ်တော့မှ ခေတ္တပြခြင်း မရှိပါ \n\n"<b>"အဆင့် ၂"</b>" \n- မျက်နှာပြင်အပြည့် ကြားဖြတ်ဖော်ပြခြင်း မရှိစေရန် ကာကွယ်ပေးသည် \n- ဘယ်တော့မှ ခေတ္တပြခြင်း မရှိပါ \n- အသံမြည်ခြင်းနှင့် တုန်ခါခြင်းများ ဘယ်တော့မှ မပြုလုပ်ပါ \n\n"<b>"အဆင့် ၁"</b>" \n- မျက်နှာပြင်အပြည့် ကြားဖြတ်ဖော်ပြခြင်း မရှိစေရန် ကာကွယ်ပေးသည် \n- ဘယ်တော့မှ ခေတ္တပြခြင်း မရှိပါ \n- အသံမြည်ခြင်းနှင့် တုန်ခါခြင်းများ ဘယ်တော့မှ မပြုလုပ်ပါ \n- လော့ခ်ချထားသည့် မျက်နှာပြင်နှင့် အခြေအနေဘားတန်းတို့တွင် မပြပါ \n- အကြောင်းကြားချက်စာရင်း အောက်ဆုံးတွင်ပြသည် \n\n"<b>"အဆင့် ၀"</b>" \n- အက်ပ်မှ အကြောင်းကြားချက်များ အားလုံးကို ပိတ်ဆို့သည်"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"အကြောင်းကြားချက်များ"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"ဤအကြောင်းကြားချက်များကို မြင်ရတော့မည် မဟုတ်ပါ"</string>
@@ -825,8 +825,8 @@
     <string name="data_saver" msgid="3484013368530820763">"ဒေတာချွေတာမှု"</string>
     <string name="accessibility_data_saver_on" msgid="5394743820189757731">"ဒေတာချွေတာမှု ဖွင့်ထားသည်"</string>
     <string name="accessibility_data_saver_off" msgid="58339669022107171">"ဒေတာချွေတာမှု ပိတ်ထားသည်"</string>
-    <string name="switch_bar_on" msgid="1770868129120096114">"ဖွင့်ပါ"</string>
-    <string name="switch_bar_off" msgid="5669805115416379556">"ပိတ်ထားသည်"</string>
+    <string name="switch_bar_on" msgid="1770868129120096114">"ဖွင့်"</string>
+    <string name="switch_bar_off" msgid="5669805115416379556">"ပိတ်"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"မရနိုင်ပါ"</string>
     <string name="nav_bar" msgid="4642708685386136807">"ရွှေ့လျားရန်ဘားတန်း"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"အပြင်အဆင်"</string>

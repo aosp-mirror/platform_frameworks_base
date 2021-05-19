@@ -19,7 +19,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="4811759950673118541">"رابط کاربر سیستم"</string>
+    <string name="app_label" msgid="4811759950673118541">"میانای کاربر سیستم"</string>
     <string name="status_bar_clear_all_button" msgid="2491321682873657397">"پاک کردن"</string>
     <string name="status_bar_no_notifications_title" msgid="7812479124981107507">"اعلانی موجود نیست"</string>
     <string name="status_bar_ongoing_events_title" msgid="3986169317496615446">"در حال انجام"</string>
@@ -66,7 +66,7 @@
     <string name="wifi_debugging_title" msgid="7300007687492186076">"اشکال‌زدایی بی‌سیم در این شبکه مجاز شود؟"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"‏نام شبکه (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nنشانی Wi‑Fi (BSSID)‎\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"همیشه در این شبکه مجاز شود"</string>
-    <string name="wifi_debugging_allow" msgid="4573224609684957886">"مجاز"</string>
+    <string name="wifi_debugging_allow" msgid="4573224609684957886">"مجاز بودن"</string>
     <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"اشکال‌زدایی بی‌سیم مجاز نیست"</string>
     <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"کاربری که درحال‌حاضر در این دستگاه به سیستم وارد شده است نمی‌تواند اشکال‌زدایی بی‌سیم را روشن کند. برای استفاده از این ویژگی، به کاربر اصلی بروید."</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"‏درگاه USB غیرفعال شده است"</string>
@@ -426,9 +426,9 @@
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"تا طلوع آفتاب"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"ساعت <xliff:g id="TIME">%s</xliff:g> روشن می‌شود"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"تا<xliff:g id="TIME">%s</xliff:g>"</string>
-    <string name="quick_settings_nfc_label" msgid="1054317416221168085">"‏ارتباط میدان نزدیک (NFC)"</string>
-    <string name="quick_settings_nfc_off" msgid="3465000058515424663">"‏«ارتباط میدان نزدیک» (NFC) غیرفعال است"</string>
-    <string name="quick_settings_nfc_on" msgid="1004976611203202230">"‏«ارتباط میدان نزدیک» (NFC) فعال است"</string>
+    <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
+    <string name="quick_settings_nfc_off" msgid="3465000058515424663">"‏NFC غیرفعال است"</string>
+    <string name="quick_settings_nfc_on" msgid="1004976611203202230">"‏NFC فعال است"</string>
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"ضبط کردن صفحه‌نمایش"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"شروع"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"توقف"</string>
@@ -592,20 +592,20 @@
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"فعال کردن"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"غیرفعال کردن"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"تغییر دستگاه خروجی"</string>
-    <string name="screen_pinning_title" msgid="9058007390337841305">"برنامه پین شده است"</string>
-    <string name="screen_pinning_description" msgid="8699395373875667743">"تا زمانی که پین را بردارید، در نما نگه‌داشته می‌شود. برای برداشتن پین، «برگشت» و «نمای کلی» را لمس کنید و نگه‌دارید."</string>
-    <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"تا برداشتن پین، در نما نگه‌داشته می‌شود. برای برداشتن پین، «برگشت» و «صفحه اصلی» را لمس کنید و نگه‌دارید."</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"به این ترتیب تا زمانی پین آن را برندارید قابل‌مشاهده است. برای برداشتن پین، از پایین صفحه تند به‌طرف بالا بکشید و نگه دارید."</string>
-    <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"تا زمانی که پین را بردارید، در نما نگه‌داشته می‌شود. برای برداشتن پین، «نمای کلی» را لمس کنید و نگه‌دارید."</string>
-    <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"تا برداشتن پین، در نما نگه‌داشته می‌شود. برای برداشتن پین، «صفحه اصلی» را لمس کنید و نگه‌دارید."</string>
+    <string name="screen_pinning_title" msgid="9058007390337841305">"برنامه سنجاق شده است"</string>
+    <string name="screen_pinning_description" msgid="8699395373875667743">"تا زمانی که پین را بردارید، در نما نگه‌داشته می‌شود. برای برداشتن سنجاق، «برگشت» و «نمای کلی» را لمس کنید و نگه‌دارید."</string>
+    <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"تا برداشتن سنجاق، در نما نگه‌داشته می‌شود. برای برداشتن سنجاق، «برگشت» و «صفحه اصلی» را لمس کنید و نگه‌دارید."</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"به این ترتیب تا زمانی پین آن را برندارید قابل‌مشاهده است. برای برداشتن سنجاق، از پایین صفحه تند به‌طرف بالا بکشید و نگه دارید."</string>
+    <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"تا زمانی که پین را بردارید، در نما نگه‌داشته می‌شود. برای برداشتن سنجاق، «نمای کلی» را لمس کنید و نگه‌دارید."</string>
+    <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"تا برداشتن سنجاق، در نما نگه‌داشته می‌شود. برای برداشتن سنجاق، «صفحه اصلی» را لمس کنید و نگه‌دارید."</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"ممکن است داده‌های شخصی (مانند مخاطبین و محتوای ایمیل) در دسترس باشد."</string>
-    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"برنامه پین‌شده ممکن است برنامه‌های دیگر را باز کند."</string>
-    <string name="screen_pinning_toast" msgid="8177286912533744328">"برای برداشتن پین این برنامه، دکمه‌های «برگشت» و «نمای کلی» را لمس کنید و نگه‌دارید"</string>
-    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"برای برداشتن پین این برنامه، دکمه‌های «برگشت» و «صفحه اصلی» را لمس کنید و نگه دارید"</string>
-    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"برای برداشتن پین این برنامه، صفحه را تند بالا بکشید و نگه دارید"</string>
+    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"برنامه سنجاق‌شده ممکن است برنامه‌های دیگر را باز کند."</string>
+    <string name="screen_pinning_toast" msgid="8177286912533744328">"برای برداشتن سنجاق این برنامه، دکمه‌های «برگشت» و «نمای کلی» را لمس کنید و نگه‌دارید"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"برای برداشتن سنجاق این برنامه، دکمه‌های «برگشت» و «صفحه اصلی» را لمس کنید و نگه دارید"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"برای برداشتن سنجاق این برنامه، صفحه را تند بالا بکشید و نگه دارید"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"متوجه شدم"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"نه متشکرم"</string>
-    <string name="screen_pinning_start" msgid="7483998671383371313">"برنامه پین شد"</string>
+    <string name="screen_pinning_start" msgid="7483998671383371313">"برنامه سنجاق شد"</string>
     <string name="screen_pinning_exit" msgid="4553787518387346893">"سنجاق از برنامه برداشته شد"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> مخفی شود؟"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"دفعه بعد که آن را روشن کنید، در تنظیمات نشان داده می‌شود."</string>
@@ -642,13 +642,13 @@
     <string name="output_service_bt" msgid="4315362133973911687">"بلوتوث"</string>
     <string name="output_service_wifi" msgid="9003667810868222134">"Wi-Fi"</string>
     <string name="output_service_bt_wifi" msgid="7186882540475524124">"‏بلوتوث و Wi-Fi"</string>
-    <string name="system_ui_tuner" msgid="1471348823289954729">"تنظیم‌کننده واسط کاربری سیستم"</string>
+    <string name="system_ui_tuner" msgid="1471348823289954729">"تنظیم‌کننده میانای کاربری سیستم"</string>
     <string name="show_battery_percentage" msgid="6235377891802910455">"نمایش درصد شارژ باتری جاسازی شده"</string>
     <string name="show_battery_percentage_summary" msgid="9053024758304102915">"نمایش درصد سطح باتری در نماد نوار وضعیت، هنگامی که باتری شارژ نمی‌شود"</string>
     <string name="quick_settings" msgid="6211774484997470203">"تنظیمات سریع"</string>
     <string name="status_bar" msgid="4357390266055077437">"نوار وضعیت"</string>
     <string name="overview" msgid="3522318590458536816">"نمای کلی"</string>
-    <string name="demo_mode" msgid="263484519766901593">"حالت نمایشی رابط کاربری سیستم"</string>
+    <string name="demo_mode" msgid="263484519766901593">"حالت نمایشی میانای کاربر سیستم"</string>
     <string name="enable_demo_mode" msgid="3180345364745966431">"فعال کردن حالت نمایشی"</string>
     <string name="show_demo_mode" msgid="3677956462273059726">"نمایش حالت نمایشی"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"اترنت"</string>
@@ -665,12 +665,12 @@
     <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"نقطه اتصال"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"نمایه کاری"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"برای بعضی افراد سرگرم‌کننده است اما نه برای همه"</string>
-    <string name="tuner_warning" msgid="1861736288458481650">"‏«تنظیم‌کننده واسط کاربری سیستم» روش‌های بیشتری برای تنظیم دقیق و سفارشی کردن واسط کاربری Android در اختیار شما قرار می‌دهد. ممکن است این ویژگی‌های آزمایشی تغییر کنند، خراب شوند یا در نسخه‌های آینده جود نداشته باشند. با احتیاط ادامه دهید."</string>
+    <string name="tuner_warning" msgid="1861736288458481650">"‏«تنظیم‌کننده میانای کاربری سیستم» روش‌های بیشتری برای تنظیم دقیق و سفارشی کردن واسط کاربری Android در اختیار شما قرار می‌دهد. ممکن است این ویژگی‌های آزمایشی تغییر کنند، خراب شوند یا در نسخه‌های آینده جود نداشته باشند. با احتیاط ادامه دهید."</string>
     <string name="tuner_persistent_warning" msgid="230466285569307806">"ممکن است این قابلیت‌های آزمایشی تغییر کنند، خراب شوند یا در نسخه‌های آینده وجود نداشته باشد. بااحتیاط ادامه دهید."</string>
     <string name="got_it" msgid="477119182261892069">"متوجه شدم"</string>
-    <string name="tuner_toast" msgid="3812684836514766951">"تبریک می‌گوییم! «تنظیم‌کننده واسط کاربری سیستم» به «تنظیمات» اضافه شد"</string>
+    <string name="tuner_toast" msgid="3812684836514766951">"تبریک می‌گوییم! «تنظیم‌کننده میانای کاربری سیستم» به «تنظیمات» اضافه شد"</string>
     <string name="remove_from_settings" msgid="633775561782209994">"حذف از تنظیمات"</string>
-    <string name="remove_from_settings_prompt" msgid="551565437265615426">"«تنظیم‌کننده واسط کاربری سیستم» از تنظیمات حذف شود و همه ویژگی‌های آن متوقف شوند؟"</string>
+    <string name="remove_from_settings_prompt" msgid="551565437265615426">"«تنظیم‌کننده میانای کاربری سیستم» از تنظیمات حذف شود و همه ویژگی‌های آن متوقف شوند؟"</string>
     <string name="activity_not_found" msgid="8711661533828200293">"برنامه در دستگاه شما نصب نیست"</string>
     <string name="clock_seconds" msgid="8709189470828542071">"نمایش ثانیه‌های ساعت"</string>
     <string name="clock_seconds_desc" msgid="2415312788902144817">"ثانیه‌های ساعت را در نوار وضعیت نشان می‌دهد. ممکن است بر ماندگاری باتری تأثیر بگذارد."</string>
@@ -720,8 +720,8 @@
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"تنظیمات"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"اولویت"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> از ویژگی‌های مکالمه پشتیبانی نمی‌کند"</string>
-    <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"هیچ حبابک جدیدی وجود ندارد"</string>
-    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"حبابک‌ها اخیر و حبابک‌ها ردشده اینجا ظاهر خواهند شد"</string>
+    <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"حبابک جدیدی وجود ندارد"</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"حبابک‌های اخیر و حبابک‌های ردشده اینجا ظاهر خواهند شد"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"این اعلان‌ها قابل اصلاح نیستند."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"نمی‌توانید این گروه اعلان‌ها را در اینجا پیکربندی کنید"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"اعلان‌های دارای پراکسی"</string>
@@ -738,7 +738,7 @@
     <string name="notification_appops_ok" msgid="2177609375872784124">"تأیید"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6111817750774381094">"کنترل‌های اعلان برای <xliff:g id="APP_NAME">%1$s</xliff:g> باز شد"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="1561909368876911701">"کنترل‌های اعلان برای <xliff:g id="APP_NAME">%1$s</xliff:g> بسته شد"</string>
-    <string name="notification_channel_switch_accessibility" msgid="8979885820432540252">"مجاز کردن اعلان‌های این کانال"</string>
+    <string name="notification_channel_switch_accessibility" msgid="8979885820432540252">"مجاز بودن اعلان‌های این کانال"</string>
     <string name="notification_more_settings" msgid="4936228656989201793">"تنظیمات بیشتر"</string>
     <string name="notification_app_settings" msgid="8963648463858039377">"سفارشی کردن"</string>
     <string name="notification_done" msgid="6215117625922713976">"تمام"</string>
@@ -946,12 +946,12 @@
     <string name="tuner_app" msgid="6949280415826686972">"<xliff:g id="APP">%1$s</xliff:g> برنامه"</string>
     <string name="notification_channel_alerts" msgid="3385787053375150046">"هشدارها"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"باتری"</string>
-    <string name="notification_channel_screenshot" msgid="7665814998932211997">"عکس‌های صفحه‌نمایش"</string>
+    <string name="notification_channel_screenshot" msgid="7665814998932211997">"نماگرفت‌ها"</string>
     <string name="notification_channel_general" msgid="4384774889645929705">"پیام‌های عمومی"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"فضای ذخیره‌سازی"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"نکات"</string>
     <string name="instant_apps" msgid="8337185853050247304">"برنامه‌های فوری"</string>
-    <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> درحال اجرا"</string>
+    <string name="instant_apps_title" msgid="8942706782103036910">"‫‫<xliff:g id="APP">%1$s</xliff:g> درحال اجرا"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"برنامه بدون نصب شدن باز شد."</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"برنامه بدون نصب شدن باز شد. برای اطلاعات بیشتر ضربه بزنید."</string>
     <string name="app_info" msgid="5153758994129963243">"اطلاعات برنامه"</string>
@@ -1008,7 +1008,7 @@
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"گپ بااستفاده از حبابک‌ها"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"مکالمه‌های جدید به‌صورت نمادهای شناور یا حبابک‌ها نشان داده می‌شوند. برای باز کردن حبابک‌ها ضربه بزنید. برای جابه‌جایی، آن را بکشید."</string>
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"کنترل حبابک‌ها در هرزمانی"</string>
-    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"برای خاموش کردن «حبابک‌ها» از این برنامه، روی «مدیریت» ضربه بزنید"</string>
+    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"برای خاموش کردن حبابک‌ها از این برنامه، روی «مدیریت» ضربه بزنید"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"متوجه‌ام"</string>
     <string name="bubbles_app_settings" msgid="5779443644062348657">"تنظیمات <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"پیمایش سیستم به‌روزرسانی شد. برای انجام تغییرات به «تنظیمات» بروید."</string>

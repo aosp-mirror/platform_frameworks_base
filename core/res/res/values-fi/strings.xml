@@ -567,11 +567,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Sormenjälkikuvake"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"hallinnoida Face Unlock ‑laitteistoa"</string>
+    <string name="permlab_manageFace" msgid="4569549381889283282">"hallinnoida kasvojentunnistusavauksen laitteistoa"</string>
     <string name="permdesc_manageFace" msgid="6204569688492710471">"Sallii sovelluksen käyttää menetelmiä, joilla voidaan lisätä tai poistaa kasvomalleja."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"käyttää Face Unlock ‑laitteistoa"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Sallii sovelluksen käyttää Face Unlock ‑laitteistoa todennukseen"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Face Unlock"</string>
+    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"käyttää kasvojentunnistusavauksen laitteistoa"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Sallii sovelluksen käyttää kasvojentunnistusavauksen laitteistoa todennukseen"</string>
+    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Kasvojentunnistusavaus"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Lisää kasvot uudelleen"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Lisää kasvosi uudelleen tunnistamisen parantamiseksi"</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Tarkan kasvodatan tallennus epäonnistui. Yritä uudelleen."</string>
@@ -597,15 +597,15 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Kasvoja ei voi vahvistaa. Laitteisto ei käytettäv."</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"Yritä käyttää Face Unlockia uudelleen."</string>
+    <string name="face_error_timeout" msgid="522924647742024699">"Yritä käyttää kasvojentunnistusavausta uudelleen."</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Uutta kasvodataa ei voi tallentaa. Poista ensin vanhaa."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Kasvotoiminto peruutettu"</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"Käyttäjä peruutti Face Unlockin."</string>
+    <string name="face_error_user_canceled" msgid="8553045452825849843">"Käyttäjä peruutti kasvojentunnistusavauksen."</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Liian monta yritystä. Yritä myöhemmin uudelleen."</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Liian monta yritystä. Face Unlock poistettu käytöstä."</string>
+    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Liian monta yritystä. Kasvojentunnistusavaus poistettu käytöstä."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Kasvoja ei voi vahvistaa. Yritä uudelleen."</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"Et ole määrittänyt Face Unlockia."</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"Tämä laite ei tue Face Unlockia."</string>
+    <string name="face_error_not_enrolled" msgid="7369928733504691611">"Et ole määrittänyt kasvojentunnistusavausta."</string>
+    <string name="face_error_hw_not_present" msgid="1070600921591729944">"Tämä laite ei tue kasvojentunnistusavausta."</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Tunnistin poistettu väliaikaisesti käytöstä."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Kasvot <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
@@ -835,7 +835,7 @@
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Yritä uudelleen"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Yritä uudelleen"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Käytä kaikkia ominaisuuksia avaamalla lukitus."</string>
-    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Face Unlock -yrityksiä tehty suurin sallittu määrä."</string>
+    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Kasvojentunnistusavauksen yrityksiä tehty suurin sallittu määrä."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"Ei SIM-korttia"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"Tablet-laitteessa ei ole SIM-korttia."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Android TV ‑laitteessa ei ole SIM-korttia."</string>
@@ -905,7 +905,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"Laajenna lukituksen poiston aluetta."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"Lukituksen poisto liu\'uttamalla."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"Lukituksen poisto salasanalla."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"Face Unlock"</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"Kasvojentunnistusavaus"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"Lukituksen poisto PIN-koodilla."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"SIM-kortin PIN-koodin lukituksen avaus"</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"SIM-kortin PUK-koodin lukituksen avaus"</string>
@@ -1113,9 +1113,9 @@
     <string name="app_running_notification_title" msgid="8985999749231486569">"<xliff:g id="APP_NAME">%1$s</xliff:g> on käynnissä"</string>
     <string name="app_running_notification_text" msgid="5120815883400228566">"Hanki lisätietoja tai sulje sovellus napauttamalla."</string>
     <string name="ok" msgid="2646370155170753815">"OK"</string>
-    <string name="cancel" msgid="6908697720451760115">"Peruuta"</string>
+    <string name="cancel" msgid="6908697720451760115">"Peru"</string>
     <string name="yes" msgid="9069828999585032361">"OK"</string>
-    <string name="no" msgid="5122037903299899715">"Peruuta"</string>
+    <string name="no" msgid="5122037903299899715">"Peru"</string>
     <string name="dialog_alert_title" msgid="651856561974090712">"Huomio"</string>
     <string name="loading" msgid="3138021523725055037">"Ladataan…"</string>
     <string name="capital_on" msgid="2770685323900821829">"PÄÄLLÄ"</string>
@@ -1269,7 +1269,7 @@
     <string name="sms_short_code_details" msgid="2723725738333388351">"Tämä "<b>"voi aiheuttaa kuluja"</b>" matkapuhelinliittymälaskuusi."</string>
     <string name="sms_premium_short_code_details" msgid="1400296309866638111"><b>"Tämä aiheuttaa kuluja matkapuhelinliittymälaskuusi."</b></string>
     <string name="sms_short_code_confirm_allow" msgid="920477594325526691">"Lähetä"</string>
-    <string name="sms_short_code_confirm_deny" msgid="1356917469323768230">"Peruuta"</string>
+    <string name="sms_short_code_confirm_deny" msgid="1356917469323768230">"Peru"</string>
     <string name="sms_short_code_remember_choice" msgid="1374526438647744862">"Muista valintani"</string>
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"Muuta kohd. Asetukset &gt; Sovellukset"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"Salli aina"</string>
@@ -1490,7 +1490,7 @@
     <string name="date_picker_prev_month_button" msgid="3418694374017868369">"Edellinen kuukausi"</string>
     <string name="date_picker_next_month_button" msgid="4858207337779144840">"Seuraava kuukausi"</string>
     <string name="keyboardview_keycode_alt" msgid="8997420058584292385">"Alt"</string>
-    <string name="keyboardview_keycode_cancel" msgid="2134624484115716975">"Peruuta"</string>
+    <string name="keyboardview_keycode_cancel" msgid="2134624484115716975">"Peru"</string>
     <string name="keyboardview_keycode_delete" msgid="2661117313730098650">"Poista"</string>
     <string name="keyboardview_keycode_done" msgid="2524518019001653851">"Valmis"</string>
     <string name="keyboardview_keycode_mode_change" msgid="2743735349997999020">"Tilan muutos"</string>
@@ -1667,7 +1667,7 @@
     <string name="error_message_title" msgid="4082495589294631966">"Virhe"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"Järjestelmänvalvoja ei salli tätä muutosta."</string>
     <string name="app_not_found" msgid="3429506115332341800">"Tätä toimintoa käsittelevää sovellusta ei löydy"</string>
-    <string name="revoke" msgid="5526857743819590458">"Peruuta"</string>
+    <string name="revoke" msgid="5526857743819590458">"Peru"</string>
     <string name="mediasize_iso_a0" msgid="7039061159929977973">"ISO A0"</string>
     <string name="mediasize_iso_a1" msgid="4063589931031977223">"ISO A1"</string>
     <string name="mediasize_iso_a2" msgid="2779860175680233980">"ISO A2"</string>
@@ -1792,8 +1792,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Järjestelmänvalvoja päivitti tämän."</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Järjestelmänvalvoja poisti tämän."</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"Parantaakseen akunkestoa Virransäästö\n\n•·laittaa tumman teeman päälle\n•·laittaa pois päältä tai rajoittaa taustatoimintoja, joitakin visuaalisia tehosteita ja muita ominaisuuksia (esim. OK Google).\n\n"<annotation id="url">"Lue lisää"</annotation></string>
-    <string name="battery_saver_description" msgid="8587408568232177204">"Parantaakseen akunkestoa Virransäästö\n\n•·laittaa tumman teeman päälle\n•·laittaa pois päältä tai rajoittaa taustatoimintoja, joitakin visuaalisia tehosteita ja muita ominaisuuksia (esim. OK Google)."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"Parantaakseen akunkestoa Virransäästö\n\n• laittaa tumman teeman päälle\n• laittaa pois päältä tai rajoittaa taustatoimintoja, joitakin visuaalisia tehosteita ja muita ominaisuuksia (esim. OK Google).\n\n"<annotation id="url">"Lue lisää"</annotation></string>
+    <string name="battery_saver_description" msgid="8587408568232177204">"Parantaakseen akunkestoa Virransäästö\n\n• laittaa tumman teeman päälle\n• laittaa pois päältä tai rajoittaa taustatoimintoja, joitakin visuaalisia tehosteita ja muita ominaisuuksia (esim. OK Google)."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Data Saver estää joitakin sovelluksia lähettämästä tai vastaanottamasta tietoja taustalla, jotta datan käyttöä voidaan vähentää. Käytössäsi oleva sovellus voi yhä käyttää dataa, mutta se saattaa tehdä niin tavallista harvemmin. Tämä voi tarkoittaa esimerkiksi sitä, että kuva ladataan vasta, kun kosketat sitä."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Otetaanko Data Saver käyttöön?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Ota käyttöön"</string>

@@ -86,8 +86,8 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"انتقال فایل"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"دستگاه ورودی"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"دسترسی به اینترنت"</string>
-    <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"اشتراک‌گذاری مخاطب"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"استفاده برای اشتراک‌گذاری مخاطب"</string>
+    <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"هم‌رسانی مخاطب"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"استفاده برای هم‌رسانی مخاطب"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"اشتراک‌گذاری اتصال اینترنت"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"پیام‌های نوشتاری"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"دسترسی سیم‌کارت"</string>
@@ -117,7 +117,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"لغو"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"وقتی وصل باشید، مرتبط‌سازی اجازه دسترسی به مخاطبین و سابقه تماستان را فراهم می‌کند."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"با <xliff:g id="DEVICE_NAME">%1$s</xliff:g> مرتبط‌سازی نشد."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"به خاطر یک پین یا کلیدواژه نادرست، مرتبط‌سازی با <xliff:g id="DEVICE_NAME">%1$s</xliff:g> انجام نشد."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"به‌خاطر پین یا کلیدواژه نادرست، مرتبط‌سازی با <xliff:g id="DEVICE_NAME">%1$s</xliff:g> انجام نشد."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"ارتباط با <xliff:g id="DEVICE_NAME">%1$s</xliff:g> امکان‌پذیر نیست."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> مرتبط‌سازی را رد کرد."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"رایانه"</string>
@@ -409,8 +409,8 @@
     <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"تبدیل…"</string>
     <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"از قبل به رمزگذاری بر حسب فایل تبدیل شده است"</string>
     <string name="title_convert_fbe" msgid="5780013350366495149">"تبدیل به رمزگذاری مبتنی بر فایل"</string>
-    <string name="convert_to_fbe_warning" msgid="34294381569282109">"تبدیل پارتیشن داده‌ای به رمزگذاری مبتنی بر فایل.\n !!هشدار!! این کار تمام داده‌هایتان را پاک می‌کند.\n این ویژگی در نسخه آلفا قرار دارد و ممکن است به‌درستی کار نکند.\n برای ادامه، «پاک کردن و تبدیل…» را فشار دهید."</string>
-    <string name="button_convert_fbe" msgid="1159861795137727671">"پاک کردن و تبدیل…"</string>
+    <string name="convert_to_fbe_warning" msgid="34294381569282109">"تبدیل پارتیشن داده‌ای به رمزگذاری مبتنی بر فایل.\n !!هشدار!! این کار تمام داده‌هایتان را پاک می‌کند.\n این ویژگی در نسخه آلفا قرار دارد و ممکن است به‌درستی کار نکند.\n برای ادامه، «محو کردن داده و تبدیل…» را فشار دهید."</string>
+    <string name="button_convert_fbe" msgid="1159861795137727671">"محو کردن داده و تبدیل…"</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"حالت رنگ عکس"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"‏استفاده از sRGB"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"غیر فعال"</string>
@@ -456,8 +456,8 @@
     <string name="battery_info_status_full" msgid="4443168946046847468">"پر"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"توسط سرپرست سیستم کنترل می‌شود"</string>
     <string name="disabled" msgid="8017887509554714950">"غیر فعال شد"</string>
-    <string name="external_source_trusted" msgid="1146522036773132905">"مجاز"</string>
-    <string name="external_source_untrusted" msgid="5037891688911672227">"مجاز نیست"</string>
+    <string name="external_source_trusted" msgid="1146522036773132905">"مجاز بودن"</string>
+    <string name="external_source_untrusted" msgid="5037891688911672227">"مجاز نبودن"</string>
     <string name="install_other_apps" msgid="3232595082023199454">"نصب برنامه‌های ناشناس"</string>
     <string name="home" msgid="973834627243661438">"صفحه اصلی تنظیمات"</string>
   <string-array name="battery_labels">
@@ -465,7 +465,7 @@
     <item msgid="8894873528875953317">"۵۰٪"</item>
     <item msgid="7529124349186240216">"۱۰۰٪"</item>
   </string-array>
-    <string name="charge_length_format" msgid="6941645744588690932">"<xliff:g id="ID_1">%1$s</xliff:g> قبل"</string>
+    <string name="charge_length_format" msgid="6941645744588690932">"‫<xliff:g id="ID_1">%1$s</xliff:g> پیش"</string>
     <string name="remaining_length_format" msgid="4310625772926171089">"<xliff:g id="ID_1">%1$s</xliff:g> باقی مانده است"</string>
     <string name="screen_zoom_summary_small" msgid="6050633151263074260">"کوچک"</string>
     <string name="screen_zoom_summary_default" msgid="1888865694033865408">"پیش‌فرض"</string>

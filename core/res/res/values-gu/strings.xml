@@ -87,7 +87,7 @@
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"પસંદગીનું નેટવર્ક બદલવાનો પ્રયાસ કરો. બદલવા માટે ટૅપ કરો."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"કટોકટીની કૉલિંગ સેવા અનુપલબ્ધ"</string>
     <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"વાઇ-ફાઇ પરથી કટોકટીના કૉલ કરી શકાતા નથી"</string>
-    <string name="notification_channel_network_alert" msgid="4788053066033851841">"ચેતવણીઓ"</string>
+    <string name="notification_channel_network_alert" msgid="4788053066033851841">"અલર્ટ"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"કૉલ ફૉર્વર્ડિંગ"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"કટોકટી કૉલબૅક મોડ"</string>
     <string name="notification_channel_mobile_data_status" msgid="1941911162076442474">"મોબાઇલ ડેટાની સ્થિતિ"</string>
@@ -280,7 +280,7 @@
     <string name="notification_channel_network_available" msgid="6083697929214165169">"નેટવર્ક ઉપલબ્ધ છે"</string>
     <string name="notification_channel_vpn" msgid="1628529026203808999">"VPN સ્થિતિ"</string>
     <string name="notification_channel_device_admin" msgid="6384932669406095506">"તમારા IT વ્યવસ્થાપક તરફથી અલર્ટ"</string>
-    <string name="notification_channel_alerts" msgid="5070241039583668427">"ચેતવણીઓ"</string>
+    <string name="notification_channel_alerts" msgid="5070241039583668427">"અલર્ટ"</string>
     <string name="notification_channel_retail_mode" msgid="3732239154256431213">"રિટેલ ડેમો"</string>
     <string name="notification_channel_usb" msgid="1528280969406244896">"USB કનેક્શન"</string>
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"ઍપ ચાલી રહ્યું છે"</string>
@@ -293,7 +293,7 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android સિસ્ટમ"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"વ્યક્તિગત પ્રોફાઇલ પર સ્વિચ કરો"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"કાર્યાલયની પ્રોફાઇલ પર સ્વિચ કરો"</string>
-    <string name="permgrouplab_contacts" msgid="4254143639307316920">"Contacts"</string>
+    <string name="permgrouplab_contacts" msgid="4254143639307316920">"સંપર્કો"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"તમારા સંપર્કોને ઍક્સેસ કરવાની"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"સ્થાન"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"આ ઉપકરણના સ્થાનને ઍક્સેસ કરવાની"</string>
@@ -350,7 +350,7 @@
     <string name="permlab_bindCellBroadcastService" msgid="586746677002040651">"સેલ બ્રોડકાસ્ટ સંદેશા ફૉરવર્ડ કરો"</string>
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"સેલ બ્રોડકાસ્ટ સંદેશા પ્રાપ્ત થાય કે તરત ફૉરવર્ડ કરવા માટે સેલ બ્રોડકાસ્ટ મૉડ્યૂલ સાથે પ્રતિબદ્ધ થવા બાબતે ઍપને મંજૂરી આપે છે. તમને કટોકટીની પરિસ્થિતિની ચેતવણી આપવા માટે સેલ બ્રોડકાસ્ટ અલર્ટ અમુક સ્થાનોમાં ડિલિવર કરવામાં આવે છે. કટોકટી અંગેનો સેલ બ્રોડકાસ્ટ પ્રાપ્ત થાય, ત્યારે દુર્ભાવનાપૂર્ણ ઍપ તમારા ડિવાઇસના કાર્યપ્રદર્શન અથવા ઑપરેશનમાં વિક્ષેપ પાડે તેમ બની શકે છે."</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"સેલ બ્રોડકાસ્ટ સંદેશા વાંચો"</string>
-    <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"એપ્લિકેશનને તમારા ઉપકરણ દ્વારા પ્રાપ્ત થયેલ સેલ બ્રોડકાસ્ટ સંદેશાને વાંચવાની મંજૂરી આપે છે. સેલ બ્રોડકાસ્ટ ચેતવણીઓ તમને કટોકટીની સ્થિતિઓ અંગે ચેતવવા માટે કેટલાક સ્થાનોમાં વિતરિત થાય છે. જ્યારે કટોકટીનો સેલ બ્રોડકાસ્ટ પ્રાપ્ત થાય ત્યારે દુર્ભાવનાપૂર્ણ ઍપ્લિકેશનો તમારા ઉપકરણના પ્રદર્શન અથવા ઓપરેશનમાં હસ્તક્ષેપ કરી શકે છે."</string>
+    <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"ઍપ તમારા ડિવાઇસ દ્વારા પ્રાપ્ત થયેલ સેલ બ્રોડકાસ્ટ સંદેશાને વાંચવાની મંજૂરી આપે છે. સેલ બ્રોડકાસ્ટ ચેતવણીઓ તમને ઇમર્જન્સીની સ્થિતિઓ અંગે ચેતવવા માટે કેટલાક સ્થાનોમાં વિતરિત થાય છે. જ્યારે ઇમર્જન્સીનો સેલ બ્રોડકાસ્ટ પ્રાપ્ત થાય ત્યારે દુર્ભાવનાપૂર્ણ ઍપ તમારા ડિવાઇસના કાર્યપ્રદર્શન અથવા ઓપરેશનમાં હસ્તક્ષેપ કરી શકે છે."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"સબ્સ્ક્રાઇબ કરેલ ફીડ્સ વાંચો"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="6911349196661811865">"એપ્લિકેશનને હાલમાં સમન્વયિત ફીડ્સ વિશે વિગતો મેળવવાની મંજૂરી આપે છે."</string>
     <string name="permlab_sendSms" msgid="7757368721742014252">"SMS સંદેશા મોકલો અને જુઓ"</string>
@@ -637,8 +637,8 @@
     <string name="permdesc_control_incall_experience" msgid="5896723643771737534">"એપ્લિકેશનને કૉલમાં વપરાશકર્તા અનુભવ પ્રદાન કરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_readNetworkUsageHistory" msgid="8470402862501573795">"ઐતિહાસિક નેટવર્ક ઉપયોગ વાંચો"</string>
     <string name="permdesc_readNetworkUsageHistory" msgid="1112962304941637102">"એપ્લિકેશનને ચોક્કસ નેટવર્ક્સ અને ઍપ્લિકેશનો માટે ઐતિહાસિક નેટવર્ક વપરાશ વાંચવાની મંજૂરી આપે છે."</string>
-    <string name="permlab_manageNetworkPolicy" msgid="6872549423152175378">"નેટવર્ક નીતિ મેનેજ કરો"</string>
-    <string name="permdesc_manageNetworkPolicy" msgid="1865663268764673296">"ઍપને નેટવર્ક નીતિઓ મેનેજ કરવાની અને ઍપ-વિશિષ્ટ નિયમો નિર્ધારિત કરવાની મંજૂરી આપે છે."</string>
+    <string name="permlab_manageNetworkPolicy" msgid="6872549423152175378">"નેટવર્ક પૉલિસી મેનેજ કરો"</string>
+    <string name="permdesc_manageNetworkPolicy" msgid="1865663268764673296">"ઍપને નેટવર્ક પૉલિસીઓ મેનેજ કરવાની અને ઍપ-વિશિષ્ટ નિયમો નિર્ધારિત કરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="7448790834938749041">"નેટવર્ક વપરાશ એકાઉન્ટિંગ સંશોધિત કરો"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5076042642247205390">"એપ્લિકેશનને કેવી રીતે ઍપ્લિકેશનો સામે નેટવર્ક વપરાશ ગણવામાં આવે છે તે સંશોધિત કરવાની મંજૂરી આપે છે. સામાન્ય ઍપ્લિકેશનો દ્વારા ઉપયોગમાં લેવા માટે નથી."</string>
     <string name="permlab_accessNotifications" msgid="7130360248191984741">"ઍક્સેસ સૂચનાઓ"</string>
@@ -691,7 +691,7 @@
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"ચેતવણી વિના આ Android TV ડિવાઇસ પર રહેલો આ વપરાશકર્તાનો ડેટા કાઢી નાખો."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"ચેતવણી વિના આ ફોન પરનો આ વપરાશકર્તાનો ડેટા કાઢી નાખો."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"ઉપકરણ વૈશ્વિક પ્રોક્સી સેટ કરો"</string>
-    <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"નીતિ સક્ષમ હોય તે વખતે ઉપયોગ કરવા માટેના ઉપકરણ વૈશ્વિક પ્રોક્સીને સેટ કરો. ફક્ત ઉપકરણના માલિક વૈશ્વિક પ્રોક્સી સેટ કરી શકે છે."</string>
+    <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"પૉલિસી ચાલુ હોય તે વખતે ઉપયોગ કરવા માટેના ડિવાઇસ વૈશ્વિક પ્રોક્સીને સેટ કરો. ફક્ત ડિવાઇસના માલિક વૈશ્વિક પ્રોક્સી સેટ કરી શકે છે."</string>
     <string name="policylab_expirePassword" msgid="6015404400532459169">"સ્ક્રીન લૉક પાસવર્ડ સમાપ્તિ સેટ કરો"</string>
     <string name="policydesc_expirePassword" msgid="9136524319325960675">"કેટલા સમયાંતરે સ્ક્રીન લૉક પાસવર્ડ, પિન અથવા પૅટર્ન બદલવો આવશ્યક છે, તેને બદલો."</string>
     <string name="policylab_encryptedStorage" msgid="9012936958126670110">"સંગ્રહ એન્ક્રિપ્શન સેટ કરો"</string>
@@ -999,7 +999,7 @@
     <string name="last_month" msgid="1528906781083518683">"છેલ્લો મહિનો"</string>
     <string name="older" msgid="1645159827884647400">"જૂનું"</string>
     <string name="preposition_for_date" msgid="2780767868832729599">"<xliff:g id="DATE">%s</xliff:g> ના રોજ"</string>
-    <string name="preposition_for_time" msgid="4336835286453822053">"<xliff:g id="TIME">%s</xliff:g> પર"</string>
+    <string name="preposition_for_time" msgid="4336835286453822053">"<xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="preposition_for_year" msgid="3149809685340130039">"<xliff:g id="YEAR">%s</xliff:g> માં"</string>
     <string name="day" msgid="8394717255950176156">"દિવસ"</string>
     <string name="days" msgid="4570879797423034973">"દિવસ"</string>
@@ -1537,7 +1537,7 @@
     <string name="validity_period" msgid="1717724283033175968">"માન્યતા:"</string>
     <string name="issued_on" msgid="5855489688152497307">"આ રોજ જારી:"</string>
     <string name="expires_on" msgid="1623640879705103121">"આ રોજ સમાપ્ત:"</string>
-    <string name="serial_number" msgid="3479576915806623429">"શૃંખલા ક્રમાંક:"</string>
+    <string name="serial_number" msgid="3479576915806623429">"અનુક્રમ નંબર:"</string>
     <string name="fingerprints" msgid="148690767172613723">"ફિંગરપ્રિંટ્સ:"</string>
     <string name="sha256_fingerprint" msgid="7103976380961964600">"SHA-256 ફિંગરપ્રિન્ટ:"</string>
     <string name="sha1_fingerprint" msgid="2339915142825390774">"SHA-1 ફિંગરપ્રિન્ટ:"</string>
@@ -1547,7 +1547,7 @@
     <string name="sending" msgid="206925243621664438">"મોકલી રહ્યાં છે…"</string>
     <string name="launchBrowserDefault" msgid="6328349989932924119">"બ્રાઉઝર લોન્ચ કરીએ?"</string>
     <string name="SetupCallDefault" msgid="5581740063237175247">"કૉલ સ્વીકારીએ?"</string>
-    <string name="activity_resolver_use_always" msgid="5575222334666843269">"હંમેશા"</string>
+    <string name="activity_resolver_use_always" msgid="5575222334666843269">"હંમેશાં"</string>
     <string name="activity_resolver_use_once" msgid="948462794469672658">"ફક્ત એક વાર"</string>
     <string name="activity_resolver_work_profiles_support" msgid="4071345609235361269">"%1$s કાર્ય પ્રોફાઇલનું સમર્થન કરતું નથી"</string>
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"ટેબ્લેટ"</string>
@@ -1618,7 +1618,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4670840383567106114">"તમે તમારી અનલૉક પૅટર્ન <xliff:g id="NUMBER_0">%1$d</xliff:g> વખત ખોટી રીતે દોરી છે. વધુ <xliff:g id="NUMBER_1">%2$d</xliff:g> અસફળ પ્રયાસ પછી, તમને ઇમેઇલ એકાઉન્ટનો ઉપયોગ કરીને તમારા Android TV ડિવાઇસને અનલૉક કરવાનું કહેવામાં આવશે.\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g> સેકન્ડમાં ફરીથી પ્રયાસ કરો."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"તમે તમારી અનલૉક પૅટર્ન <xliff:g id="NUMBER_0">%1$d</xliff:g> વખત ખોટી રીતે દોરી. હજી <xliff:g id="NUMBER_1">%2$d</xliff:g> અસફળ પ્રયાસ પછી, તમને ઇમેઇલ એકાઉન્ટનો ઉપયોગ કરીને ફોનને અનલૉક કરવાનું કહેવામાં આવશે.\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g> સેકન્ડમાં ફરીથી પ્રયાસ કરો."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
-    <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"દૂર કરો"</string>
+    <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"કાઢી નાખો"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"ભલામણ કરેલ સ્તરની ઉપર વૉલ્યૂમ વધાર્યો?\n\nલાંબા સમય સુધી ઊંચા અવાજે સાંભળવું તમારી શ્રવણક્ષમતાને નુકસાન પહોંચાડી શકે છે."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ઍક્સેસિબિલિટી શૉર્ટકટનો ઉપયોગ કરીએ?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"જ્યારે શૉર્ટકટ ચાલુ હોય, ત્યારે બન્ને વૉલ્યૂમ બટનને 3 સેકન્ડ સુધી દબાવી રાખવાથી ઍક્સેસિબિલિટી સુવિધા શરૂ થઈ જશે."</string>
@@ -1659,7 +1659,7 @@
     <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"કોઈ એક સુવિધાથી બીજી સુવિધા પર સ્વિચ કરવા માટે, ઍક્સેસિબિલિટી બટનને ટચ કરીને થોડીવાર દબાવી રાખો."</string>
     <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"કોઈ એક સુવિધાથી બીજી સુવિધા પર સ્વિચ કરવા માટે, બે આંગળીઓ વડે સ્ક્રીનની ઉપરની તરફ સ્વાઇપ કરીને દબાવી રાખો."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"કોઈ એક સુવિધાથી બીજી સુવિધા પર સ્વિચ કરવા માટે, ત્રણ આંગળીઓ વડે સ્ક્રીનની ઉપરની તરફ સ્વાઇપ કરીને દબાવી રાખો."</string>
-    <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"વિસ્તૃતીકરણ"</string>
+    <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"મોટું કરવું"</string>
     <string name="user_switched" msgid="7249833311585228097">"વર્તમાન વપરાશકર્તા <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> પર સ્વિચ કરી રહ્યાં છે…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g> લોગ આઉટ થઈ રહ્યાં છે…"</string>
@@ -1792,7 +1792,7 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"તમારા વ્યવસ્થાપક દ્વારા અપડેટ કરવામાં આવેલ છે"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"તમારા વ્યવસ્થાપક દ્વારા કાઢી નાખવામાં આવેલ છે"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ઓકે"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"બૅટરીની આવરદા વધારવા માટે, બૅટરી સેવર:\n\n•ઘેરી થીમ ચાલુ કરે છે\n•બૅકગ્રાઉન્ડ પ્રવૃત્તિ, અમુક વિઝ્યુઅલ ઇફેક્ટ અને “ઓકે Google” જેવી અન્ય સુવિધાઓ બંધ અથવા પ્રતિબંધિત કરે છે\n\n"<annotation id="url">"વધુ જાણો"</annotation></string>
+    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"બૅટરીની આવરદા વધારવા માટે, બૅટરી સેવર:\n\n•ઘેરી થીમ ચાલુ કરે છે\n•બૅકગ્રાઉન્ડ પ્રવૃત્તિ, અમુક વિઝ્યુઅલ ઇફેક્ટ અને “Ok Google” જેવી અન્ય સુવિધાઓ બંધ અથવા પ્રતિબંધિત કરે છે\n\n"<annotation id="url">"વધુ જાણો"</annotation></string>
     <string name="battery_saver_description" msgid="8587408568232177204">"બૅટરીની આવરદા વધારવા માટે, બૅટરી સેવર:\n\n•ઘેરી થીમ ચાલુ કરે છે\n•બૅકગ્રાઉન્ડ પ્રવૃત્તિ, અમુક વિઝ્યુઅલ ઇફેક્ટ અને “ઓકે Google” જેવી અન્ય સુવિધાઓ બંધ અથવા પ્રતિબંધિત કરે છે"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"ડેટા વપરાશને ઘટાડવામાં સહાય માટે, ડેટા સેવર કેટલીક ઍપને બૅકગ્રાઉન્ડમાં ડેટા મોકલવા અથવા પ્રાપ્ત કરવાથી અટકાવે છે. તમે હાલમાં ઉપયોગ કરી રહ્યાં છો તે ઍપ ડેટાને ઍક્સેસ કરી શકે છે, પરંતુ તે આ ક્યારેક જ કરી શકે છે. આનો અર્થ એ હોઈ શકે છે, ઉદાહરણ તરીકે, છબીઓ ત્યાં સુધી પ્રદર્શિત થશે નહીં જ્યાં સુધી તમે તેને ટૅપ નહીં કરો."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ડેટા સેવર ચાલુ કરીએ?"</string>
@@ -1956,7 +1956,7 @@
     <string name="autofill_save_type_debit_card" msgid="3169397504133097468">"ડેબિટ કાર્ડ"</string>
     <string name="autofill_save_type_payment_card" msgid="6555012156728690856">"ચુકવણી કાર્ડ"</string>
     <string name="autofill_save_type_generic_card" msgid="1019367283921448608">"કાર્ડ"</string>
-    <string name="autofill_save_type_username" msgid="1018816929884640882">"વપરાશકર્તાનામ"</string>
+    <string name="autofill_save_type_username" msgid="1018816929884640882">"વપરાશકર્તાનું નામ"</string>
     <string name="autofill_save_type_email_address" msgid="1303262336895591924">"ઇમેઇલ સરનામું"</string>
     <string name="etws_primary_default_message_earthquake" msgid="8401079517718280669">"શાંત રહો અને નજીકમાં આશ્રય લો."</string>
     <string name="etws_primary_default_message_tsunami" msgid="5828171463387976279">"દરિયાકિનારાના પ્રદેશો તથા નદીકાંઠાના વિસ્તારો ખાલી કરીને તાત્કાલિક સુરક્ષિત ઊંચા સ્થાન પર જાઓ."</string>

@@ -258,7 +258,7 @@
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Modo silencioso"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"El sonido está Desactivado"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"El sonido está Activado"</string>
-    <string name="global_actions_toggle_airplane_mode" msgid="6911684460146916206">"Modo avión"</string>
+    <string name="global_actions_toggle_airplane_mode" msgid="6911684460146916206">"Modo de avión"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="5508025516695361936">"El modo avión está Activado"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="8522219771500505475">"El modo avión está Desactivado"</string>
     <string name="global_action_settings" msgid="4671878836947494217">"Configuración"</string>
@@ -309,7 +309,7 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"acceder a tu actividad física"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Cámara"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"tomar fotografías y grabar videos"</string>
-    <string name="permgrouplab_calllog" msgid="7926834372073550288">"Llamadas"</string>
+    <string name="permgrouplab_calllog" msgid="7926834372073550288">"Registros de llamadas"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"leer y escribir el registro de llamadas telefónicas"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Teléfono"</string>
     <string name="permgroupdesc_phone" msgid="270048070781478204">"hacer y administrar llamadas telefónicas"</string>
@@ -1295,8 +1295,8 @@
     <string name="no_permissions" msgid="5729199278862516390">"No se requieren permisos"</string>
     <string name="perm_costs_money" msgid="749054595022779685">"esto puede costarte dinero"</string>
     <string name="dlg_ok" msgid="5103447663504839312">"Aceptar"</string>
-    <string name="usb_charging_notification_title" msgid="1674124518282666955">"Cargando dispositivo mediante USB"</string>
-    <string name="usb_supplying_notification_title" msgid="5378546632408101811">"Cargando el dispositivo conectado mediante USB"</string>
+    <string name="usb_charging_notification_title" msgid="1674124518282666955">"Cargando dispositivo por USB"</string>
+    <string name="usb_supplying_notification_title" msgid="5378546632408101811">"Cargando por USB el dispositivo conectado"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"Se activó la transferencia de archivos mediante USB"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"Se activó el modo PTP mediante USB"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"Se activó la conexión mediante dispositivo móvil por USB"</string>
@@ -1539,8 +1539,8 @@
     <string name="expires_on" msgid="1623640879705103121">"Expira el:"</string>
     <string name="serial_number" msgid="3479576915806623429">"Número de serie:"</string>
     <string name="fingerprints" msgid="148690767172613723">"Huellas digitales:"</string>
-    <string name="sha256_fingerprint" msgid="7103976380961964600">"Huella dactilar SHA-256"</string>
-    <string name="sha1_fingerprint" msgid="2339915142825390774">"Huella dactilar SHA-1:"</string>
+    <string name="sha256_fingerprint" msgid="7103976380961964600">"Huella digital SHA-256"</string>
+    <string name="sha1_fingerprint" msgid="2339915142825390774">"Huella digital SHA-1:"</string>
     <string name="activity_chooser_view_see_all" msgid="3917045206812726099">"Ver todas"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="8880731437191978314">"Elige actividad"</string>
     <string name="share_action_provider_share_with" msgid="1904096863622941880">"Compartir con"</string>

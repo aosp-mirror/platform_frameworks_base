@@ -88,7 +88,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"ការថត​រូបអេក្រង់​មិនត្រូវ​បាន​អនុញ្ញាត​ដោយ​កម្មវិធី​នេះ ឬ​ស្ថាប័ន​របស់អ្នក"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"ច្រានចោល​រូបថត​អេក្រង់"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"ការមើល​រូបថត​អេក្រង់​សាកល្បង"</string>
-    <string name="screenrecord_name" msgid="2596401223859996572">"មុខងារថត​អេក្រង់"</string>
+    <string name="screenrecord_name" msgid="2596401223859996572">"មុខងារថត​វីដេអូអេក្រង់"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"កំពុង​ដំណើរការ​ការថតអេក្រង់"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ការជូនដំណឹង​ដែល​កំពុង​ដំណើរការ​សម្រាប់​រយៈពេលប្រើ​ការថត​សកម្មភាព​អេក្រង់"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"ចាប់ផ្តើម​ថត​ឬ?"</string>
@@ -429,7 +429,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"បាន​បិទ NFC"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"បាន​បើក NFC"</string>
-    <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"ការថត​អេក្រង់"</string>
+    <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"ការថត​វីដេអូអេក្រង់"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"ចាប់ផ្ដើម"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"ឈប់"</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"ឧបករណ៍"</string>
@@ -474,23 +474,23 @@
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="5759855008166759399">"ប្ដូរ​អ្នកប្រើ ​អ្នកប្រើ​បច្ចុប្បន្ន <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="383168614528618402">"អ្នកប្រើបច្ចុប្បន្ន <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"បង្ហាញ​ប្រវត្តិរូប"</string>
-    <string name="user_add_user" msgid="4336657383006913022">"បន្ថែម​អ្នកប្រើ"</string>
+    <string name="user_add_user" msgid="4336657383006913022">"បញ្ចូល​អ្នកប្រើ"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"អ្នកប្រើ​ថ្មី"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"លុប​ភ្ញៀវ​?"</string>
-    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ទិន្នន័យ និង​កម្មវិធី​ទាំងអស់​ក្នុង​សម័យ​នេះ​នឹង​ត្រូវ​បាន​លុប។"</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"លុបចេញ"</string>
+    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"ដកភ្ញៀវចេញឬ?"</string>
+    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"កម្មវិធី និងទិន្នន័យ​ទាំងអស់​ក្នុង​វគ្គ​នេះ​នឹង​ត្រូវ​លុប។"</string>
+    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"ដកចេញ"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"សូម​ស្វាគមន៍​ការ​ត្រឡប់​មកវិញ, ភ្ញៀវ!"</string>
-    <string name="guest_wipe_session_message" msgid="3393823610257065457">"តើ​អ្នក​ចង់​បន្ត​សម័យ​របស់​អ្នក​?"</string>
-    <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"ចាប់ផ្ដើម"</string>
+    <string name="guest_wipe_session_message" msgid="3393823610257065457">"តើ​អ្នក​ចង់​បន្ត​វគ្គ​របស់​អ្នក​ទេ?"</string>
+    <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"ចាប់ផ្ដើមសាជាថ្មី"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"បាទ​/ចាស ​បន្ត"</string>
     <string name="guest_notification_title" msgid="4434456703930764167">"អ្នកប្រើភ្ញៀវ"</string>
     <string name="guest_notification_text" msgid="4202692942089571351">"ដើម្បីលុបកម្មវិធី និងទិន្នន័យ សូមយកអ្នកប្រើជាភ្ញៀវចេញ"</string>
-    <string name="guest_notification_remove_action" msgid="4153019027696868099">"យកភ្ញៀវចេញ"</string>
+    <string name="guest_notification_remove_action" msgid="4153019027696868099">"ដកភ្ញៀវចេញ"</string>
     <string name="user_logout_notification_title" msgid="3644848998053832589">"ចុះឈ្មោះអ្នកប្រើចេញ"</string>
     <string name="user_logout_notification_text" msgid="7441286737342997991">"ចុះឈ្មោះអ្នកប្រើបច្ចុប្បន្នចេញ"</string>
     <string name="user_logout_notification_action" msgid="7974458760719361881">"ចុះឈ្មោះអ្នកប្រើចេញ"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"បន្ថែម​អ្នកប្រើ​ថ្មី?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"ពេល​អ្នក​បន្ថែម​អ្នកប្រើ​ថ្មី អ្នកប្រើ​នោះ​ត្រូវ​កំណត់​ទំហំ​ផ្ទាល់​របស់​គេ។\n\nអ្នក​ប្រើ​ណាមួយ​ក៏​អាច​ធ្វើ​បច្ចុប្បន្នភាព​កម្មវិធី​សម្រាប់​អ្នកប្រើ​ផ្សេង​បាន​ដែរ។"</string>
+    <string name="user_add_user_title" msgid="4172327541504825032">"បញ្ចូល​អ្នកប្រើ​ថ្មីឬ?"</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"នៅពេល​អ្នក​បញ្ចូល​អ្នកប្រើ​ថ្មី អ្នកប្រើ​នោះ​ត្រូវ​រៀបចំកន្លែងរបស់​គេ។\n\nអ្នក​ប្រើ​ណា​ក៏​អាច​ដំឡើងកំណែ​កម្មវិធី​សម្រាប់​អ្នកប្រើទាំងអស់ផ្សេងទៀត​បាន​ដែរ។"</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"​បាន​ឈាន​ដល់ចំនួន​កំណត់អ្នកប្រើប្រាស់"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">អ្នកអាចបញ្ចូល​អ្នក​ប្រើប្រាស់បាន​រហូតដល់ <xliff:g id="COUNT">%d</xliff:g> នាក់។</item>
@@ -498,13 +498,13 @@
     </plurals>
     <string name="user_remove_user_title" msgid="9124124694835811874">"យកអ្នកប្រើចេញ?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"កម្មវិធី និងទិន្នន័យទាំងអស់របស់អ្នកប្រើនេះនឹងត្រូវបានលុប។"</string>
-    <string name="user_remove_user_remove" msgid="8387386066949061256">"យកចេញ"</string>
+    <string name="user_remove_user_remove" msgid="8387386066949061256">"ដកចេញ"</string>
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"មុខងារ​សន្សំ​ថ្មបានបើក"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"ការ​បន្ថយ​ការ​ប្រតិបត្តិ និង​ទិន្នន័យ​ផ្ទៃ​ខាងក្រោយ"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"បិទ​មុខងារ​សន្សំ​ថ្ម"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> នឹងមានសិទ្ធិ​ចូលប្រើ​ព័ត៌មាន​ទាំងអស់​ដែលអាច​មើលឃើញ​នៅលើ​អេក្រង់​របស់អ្នក ឬដែលចាក់​ពីឧបករណ៍​របស់អ្នក នៅពេល​កំពុង​ថត ឬភ្ជាប់។ ព័ត៌មាន​នេះមាន​ដូចជា ពាក្យសម្ងាត់ ព័ត៌មាន​លម្អិត​អំពីការទូទាត់​ប្រាក់ រូបថត សារ និង​សំឡេង​ដែល​អ្នកចាក់​ជាដើម។"</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"សេវាកម្មដែល​ផ្ដល់​មុខងារ​នេះ​នឹងមាន​សិទ្ធិ​ចូលប្រើ​ព័ត៌មាន​ទាំងអស់​ដែល​អាច​មើលឃើញ​នៅលើ​អេក្រង់​របស់អ្នក ឬ​ដែលចាក់​ពីឧបករណ៍​របស់អ្នក នៅពេល​កំពុង​ថត ឬភ្ជាប់។ ព័ត៌មាន​នេះមាន​ដូចជា ពាក្យសម្ងាត់ ព័ត៌មាន​លម្អិត​អំពីការទូទាត់​ប្រាក់ រូបថត សារ និង​សំឡេង​ដែល​អ្នកចាក់​ជាដើម។"</string>
-    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"ចាប់ផ្ដើម​ថត ឬបញ្ជូន​មែនទេ?"</string>
+    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"ចាប់ផ្ដើម​ថត ឬភ្ជាប់​មែនទេ?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"ចាប់ផ្ដើម​ថត ឬភ្ជាប់​ដោយប្រើ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ឬ?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"កុំ​បង្ហាញ​ម្ដងទៀត"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"សម្អាត​ទាំងអស់"</string>
@@ -595,14 +595,14 @@
     <string name="screen_pinning_title" msgid="9058007390337841305">"កម្មវិធី​ត្រូវបានខ្ទាស់"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"វា​នឹង​នៅតែ​បង្ហាញ រហូត​ទាល់​តែ​អ្នក​ដក​ការដៅ។ សូម​សង្កត់​ប៊ូតុង​ថយ​ក្រោយ និង​ប៊ូតុង​ទិដ្ឋភាពរួម​ឲ្យ​ជាប់ ដើម្បី​ដក​ការ​ដៅ។"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"វា​នឹង​នៅតែ​បង្ហាញ រហូត​ទាល់​តែ​អ្នក​ដក​ការដៅ។ សូម​ចុចប៊ូតុង​ថយក្រោយ និងប៊ូតុង​ទំព័រដើម​ឱ្យ​ជាប់ ដើម្បី​ដក​ការ​ដៅ។"</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"វា​នឹង​នៅតែ​បង្ហាញ រហូតទាល់​តែអ្នក​ដកខ្ទាស់ចេញ។ អូសឡើងលើ​ឱ្យជាប់ ដើម្បី​ដក​ខ្ទាស់។"</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"វា​នឹង​នៅតែ​បង្ហាញ រហូតទាល់​តែអ្នក​ដកខ្ទាស់។ អូសឡើងលើ និងសង្កត់​ឱ្យជាប់ ដើម្បី​ដក​ខ្ទាស់។"</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"វា​នឹង​នៅតែ​បង្ហាញ រហូត​ទាល់​តែ​អ្នក​ដក​ការ​ដៅ។ សូម​សង្កត់​ប៊ូតុង​ទិដ្ឋភាពរួម​​ឲ្យ​ជាប់ ដើម្បី​ដក​ការ​ដៅ។"</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"វា​នឹង​នៅតែ​បង្ហាញ រហូត​ទាល់​តែ​អ្នក​ដក​ការដៅ។ សូម​ចុច​ប៊ូតុង​ទំព័រដើម​ឱ្យ​ជាប់ ដើម្បី​ដក​ការ​ដៅ។"</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"អាចចូលប្រើ​ទិន្នន័យផ្ទាល់ខ្លួន​បាន (ដូចជា ទំនាក់ទំនង និងខ្លឹមសារ​អ៊ីមែលជាដើម)។"</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"កម្មវិធីដែលបានខ្ទាស់​អាចបើកកម្មវិធី​ផ្សេងទៀតបាន។"</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"ដើម្បីដកខ្ទាស់​កម្មវិធីនេះ សូមចុច​ប៊ូតុង​ថយក្រោយ និងប៊ូតុង​ទិដ្ឋភាពរួម​ឱ្យជាប់"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"ដើម្បី​ដកខ្ទាស់​កម្មវិធីនេះ សូម​ចុចប៊ូតុង​ថយក្រោយ និង​ប៊ូតុងទំព័រដើម​ឱ្យជាប់"</string>
-    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"ដើម្បីដកខ្ទាស់កម្មវិធី​នេះ សូមអូសឡើងលើ​ឱ្យជាប់"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"ដើម្បីដកខ្ទាស់កម្មវិធី​នេះ សូមអូសឡើងលើ និងសង្កត់​ឱ្យជាប់"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"យល់​ហើយ"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"ទេ អរគុណ"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"បានខ្ទាស់​កម្មវិធី"</string>
@@ -654,7 +654,7 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"អ៊ីសឺរណិត"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"ម៉ោងរោទ៍"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"ប្រវត្តិរូបការងារ"</string>
-    <string name="status_bar_airplane" msgid="4848702508684541009">"របៀបក្នុងយន្តហោះ"</string>
+    <string name="status_bar_airplane" msgid="4848702508684541009">"ពេលជិះយន្តហោះ"</string>
     <string name="add_tile" msgid="6239678623873086686">"បន្ថែមក្រឡាល្អិត"</string>
     <string name="broadcast_tile" msgid="5224010633596487481">"ការផ្សាយជាក្រឡាល្អិត"</string>
     <string name="zen_alarm_warning_indef" msgid="5252866591716504287">"អ្នកនឹងមិនលឺម៉ោងរោទ៍ <xliff:g id="WHEN">%1$s</xliff:g> បន្ទាប់របស់អ្នកទេ ប្រសិនបើអ្នកមិនបិទរបៀបនេះមុនពេលនោះទេ"</string>
@@ -712,7 +712,7 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"លំនាំដើម"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"ពពុះ"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"គ្មាន​សំឡេង ឬការញ័រទេ"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"គ្មានសំឡេង ឬការញ័រ និងការបង្ហាញ​កម្រិតទាបជាង​នេះនៅក្នុង​ផ្នែកសន្ទនាទេ"</string>
+    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"គ្មានសំឡេង​ឬការញ័រ និងបង្ហាញ​ទាបជាង​នៅក្នុង​ផ្នែកសន្ទនា"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"អាចរោទ៍ ឬញ័រ ដោយផ្អែកលើ​ការកំណត់​ទូរសព្ទ"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"អាចរោទ៍ ឬញ័រ ដោយផ្អែកលើ​ការកំណត់​ទូរសព្ទ។ ការសន្ទនា​ពី​ពពុះ <xliff:g id="APP_NAME">%1$s</xliff:g> តាម​លំនាំដើម​។"</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"ធ្វើឱ្យអ្នក​ចាប់អារម្មណ៍​ដោយប្រើ​ផ្លូវកាត់​អណ្ដែត​សម្រាប់ខ្លឹមសារនេះ។"</string>
@@ -822,7 +822,7 @@
     <string name="accessibility_long_click_tile" msgid="210472753156768705">"បើកការកំណត់"</string>
     <string name="accessibility_status_bar_headphones" msgid="1304082414912647414">"បានភ្ជាប់កាស"</string>
     <string name="accessibility_status_bar_headset" msgid="2699275863720926104">"បានភ្ជាប់កាស"</string>
-    <string name="data_saver" msgid="3484013368530820763">"កម្មវិធីសន្សំសំចៃទិន្នន័យ"</string>
+    <string name="data_saver" msgid="3484013368530820763">"មុខងារសន្សំទិន្នន័យ"</string>
     <string name="accessibility_data_saver_on" msgid="5394743820189757731">"កម្មវិធីសន្សំសំចៃទិន្នន័យបានបើក"</string>
     <string name="accessibility_data_saver_off" msgid="58339669022107171">"កម្មវិធីសន្សំសំចៃទិន្នន័យបានបិទ"</string>
     <string name="switch_bar_on" msgid="1770868129120096114">"បើក"</string>
@@ -987,7 +987,7 @@
     <string name="auto_saver_enabled_text" msgid="7889491183116752719">"មុខងារ​សន្សំ​ថ្មនឹង​បើក​ដោយ​ស្វ័យ​ប្រវត្តិ​ នៅពេល​ថ្ម​នៅ​សល់​តិច​ជាង <xliff:g id="PERCENTAGE">%d</xliff:g>%%។"</string>
     <string name="open_saver_setting_action" msgid="2111461909782935190">"ការកំណត់"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"យល់ហើយ"</string>
-    <string name="heap_dump_tile_name" msgid="2464189856478823046">"ចម្លង SysUI Heap"</string>
+    <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"បិទឧបករណ៍​ចាប់សញ្ញា"</string>
     <string name="device_services" msgid="1549944177856658705">"សេវាកម្មឧបករណ៍"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"គ្មាន​ចំណងជើង"</string>

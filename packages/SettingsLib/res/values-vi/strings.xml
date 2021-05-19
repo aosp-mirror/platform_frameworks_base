@@ -215,7 +215,7 @@
     <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Ghép nối các thiết bị mới bằng trình quét mã QR"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Ghép nối thiết bị bằng mã ghép nối"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Ghép nối các thiết bị mới bằng mã gồm 6 chữ số"</string>
-    <string name="adb_paired_devices_title" msgid="5268997341526217362">"Thiết bị được ghép nối"</string>
+    <string name="adb_paired_devices_title" msgid="5268997341526217362">"Thiết bị đã ghép nối"</string>
     <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"Hiện đang kết nối"</string>
     <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"Thông tin chi tiết về thiết bị"</string>
     <string name="adb_device_forget" msgid="193072400783068417">"Xóa"</string>
@@ -254,7 +254,7 @@
     <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Sử dụng địa chỉ MAC Wi‑Fi ngẫu nhiên"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Dữ liệu di động luôn hoạt động"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Tăng tốc phần cứng khi chia sẻ Internet"</string>
-    <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Hiển thị các thiết bị Bluetooth không có tên"</string>
+    <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Hiện các thiết bị Bluetooth không có tên"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"Vô hiệu hóa âm lượng tuyệt đối"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Bật tính năng Gabeldorsche"</string>
     <string name="enhanced_connectivity" msgid="7201127377781666804">"Kết nối nâng cao"</string>
@@ -271,7 +271,7 @@
     <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4898693684282596143">"Kích hoạt chế độ chọn codec\nâm thanh Bluetooth: Số bit trên mỗi mẫu"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="364277285688014427">"Chế độ kênh âm thanh Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="2076949781460359589">"Kích hoạt chế độ chọn codec\nâm thanh Bluetooth: Chế độ kênh"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3233402355917446304">"Codec LDAC âm thanh Bluetooth: Chất lượng phát lại"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3233402355917446304">"Codec LDAC âm thanh qua Bluetooth: Chất lượng phát"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7274396574659784285">"Kích hoạt chế độ chọn codec LDAC\nâm thanh Bluetooth: Chất lượng phát"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="2040810756832027227">"Truyền trực tuyến: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"DNS riêng"</string>
@@ -279,7 +279,7 @@
     <string name="private_dns_mode_off" msgid="7065962499349997041">"Tắt"</string>
     <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"Tự động"</string>
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"Tên máy chủ của nhà cung cấp DNS riêng"</string>
-    <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Nhập tên máy chủ của nhà cung cấp DNS"</string>
+    <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Nhập tên máy chủ"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"Không thể kết nối"</string>
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Hiển thị tùy chọn chứng nhận hiển thị không dây"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Tăng mức ghi nhật ký Wi‑Fi, hiển thị mỗi SSID RSSI trong bộ chọn Wi‑Fi"</string>
@@ -334,11 +334,11 @@
     <string name="strict_mode_summary" msgid="1838248687233554654">"Màn hình nháy khi ứng dụng thực hiện các hoạt động dài trên luồng chính"</string>
     <string name="pointer_location" msgid="7516929526199520173">"Vị trí con trỏ"</string>
     <string name="pointer_location_summary" msgid="957120116989798464">"Lớp phủ màn hình hiển thị dữ liệu chạm hiện tại"</string>
-    <string name="show_touches" msgid="8437666942161289025">"Hiển thị số lần nhấn"</string>
+    <string name="show_touches" msgid="8437666942161289025">"Hiện số lần nhấn"</string>
     <string name="show_touches_summary" msgid="3692861665994502193">"Hiển thị phản hồi trực quan cho các lần nhấn"</string>
-    <string name="show_screen_updates" msgid="2078782895825535494">"Hiển thị bản cập nhật giao diện"</string>
+    <string name="show_screen_updates" msgid="2078782895825535494">"Hiện bản cập nhật giao diện"</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"Chuyển nhanh toàn bộ các giao diện cửa sổ khi các giao diện này cập nhật"</string>
-    <string name="show_hw_screen_updates" msgid="2021286231267747506">"Hiện cập nhật chế độ xem"</string>
+    <string name="show_hw_screen_updates" msgid="2021286231267747506">"Hiện bản cập nhật chế độ xem"</string>
     <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"Chuyển nhanh chế độ xem trong cửa sổ khi được vẽ"</string>
     <string name="show_hw_layers_updates" msgid="5268370750002509767">"Hiện bản cập nhật lớp phần cứng"</string>
     <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"Lớp phần cứng flash có màu xanh khi chúng cập nhật"</string>
@@ -347,10 +347,10 @@
     <string name="disable_overlays_summary" msgid="1954852414363338166">"Luôn sử dụng GPU để tổng hợp màn hình"</string>
     <string name="simulate_color_space" msgid="1206503300335835151">"Mô phỏng không gian màu"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"Bật theo dõi OpenGL"</string>
-    <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Tắt định tuyến âm thanh USB"</string>
-    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Tắt định tuyến tự động tới thiết bị âm thanh ngoại vi USB"</string>
-    <string name="debug_layout" msgid="1659216803043339741">"Hiển thị ranh giới bố cục"</string>
-    <string name="debug_layout_summary" msgid="8825829038287321978">"Hiển thị viền đoạn video, lề, v.v.."</string>
+    <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Tắt chế độ định tuyến âm thanh USB"</string>
+    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Tắt chế độ tự động định tuyến tới thiết bị âm thanh ngoại vi USB"</string>
+    <string name="debug_layout" msgid="1659216803043339741">"Hiện ranh giới bố cục"</string>
+    <string name="debug_layout_summary" msgid="8825829038287321978">"Hiện viền của đoạn video, lề, v.v.."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Buộc hướng bố cục phải sang trái"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Buộc hướng bố cục màn hình phải sang trái cho tất cả ngôn ngữ"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Bắt buộc 4x MSAA"</string>
@@ -488,8 +488,8 @@
     <string name="status_unavailable" msgid="5279036186589861608">"Không có"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"Địa chỉ MAC được gán ngẫu nhiên"</string>
     <plurals name="wifi_tether_connected_summary" formatted="false" msgid="6317236306047306139">
-      <item quantity="other">%1$d thiết bị được kết nối</item>
-      <item quantity="one">%1$d thiết bị được kết nối</item>
+      <item quantity="other">%1$d thiết bị đã kết nối</item>
+      <item quantity="one">%1$d thiết bị đã kết nối</item>
     </plurals>
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Nhiều thời gian hơn."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Ít thời gian hơn."</string>

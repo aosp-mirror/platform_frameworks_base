@@ -433,8 +433,8 @@
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Iniciar"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Parar"</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"Dispositivo"</string>
-    <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Deslize para cima para alternar entre os apps"</string>
-    <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Arraste para a direita para alternar rapidamente entre os apps"</string>
+    <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Deslize para cima para mudar de app"</string>
+    <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Arraste para a direita para mudar rapidamente de app"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Alternar Visão geral"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Carregado"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"Carregando"</string>
@@ -476,16 +476,16 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Mostrar perfil"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Adicionar usuário"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Novo usuário"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Remover convidado?"</string>
+    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Remover visitante?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Todos os apps e dados nesta sessão serão excluídos."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Remover"</string>
-    <string name="guest_wipe_session_title" msgid="7147965814683990944">"Bem-vindo, convidado."</string>
+    <string name="guest_wipe_session_title" msgid="7147965814683990944">"Você voltou, visitante!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Quer continuar a sessão?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Recomeçar"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Sim, continuar"</string>
-    <string name="guest_notification_title" msgid="4434456703930764167">"Usuário convidado"</string>
-    <string name="guest_notification_text" msgid="4202692942089571351">"Para excluir apps e dados, remova o usuário convidado"</string>
-    <string name="guest_notification_remove_action" msgid="4153019027696868099">"REMOVER CONVIDADO"</string>
+    <string name="guest_notification_title" msgid="4434456703930764167">"Usuário visitante"</string>
+    <string name="guest_notification_text" msgid="4202692942089571351">"Para excluir apps e dados, remova o usuário visitante"</string>
+    <string name="guest_notification_remove_action" msgid="4153019027696868099">"REMOVER VISITANTE"</string>
     <string name="user_logout_notification_title" msgid="3644848998053832589">"Desconectar usuário"</string>
     <string name="user_logout_notification_text" msgid="7441286737342997991">"Desconectar usuário atual"</string>
     <string name="user_logout_notification_action" msgid="7974458760719361881">"DESCONECTAR USUÁRIO"</string>
@@ -550,7 +550,7 @@
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Sua organização instalou uma autoridade de certificação neste dispositivo. É possível monitorar ou modificar seu tráfego de rede seguro."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Sua organização instalou uma autoridade de certificação no seu perfil de trabalho. É possível monitorar ou modificar seu tráfego de rede seguro."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Uma autoridade de certificação foi instalada neste dispositivo. É possível monitorar ou modificar seu tráfego de rede seguro."</string>
-    <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Seu administrador ativou o registro de rede, que monitora o tráfego no seu dispositivo."</string>
+    <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"O administrador ativou o registro de rede, que monitora o tráfego no seu dispositivo."</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Você está conectado a <xliff:g id="VPN_APP">%1$s</xliff:g>, que pode monitorar sua atividade na rede, incluindo e-mails, apps e websites."</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Você está conectado a <xliff:g id="VPN_APP_0">%1$s</xliff:g> e <xliff:g id="VPN_APP_1">%2$s</xliff:g>, que podem monitorar sua atividade de rede, incluindo e-mails, apps e websites."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Seu perfil de trabalho está conectado a <xliff:g id="VPN_APP">%1$s</xliff:g>, que pode monitorar sua atividade de rede, incluindo e-mails, apps e websites."</string>
@@ -565,7 +565,7 @@
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Abrir configurações de VPN"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="7107390013344435439">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="8329781950135541003">"Abrir credenciais confiáveis"</string>
-    <string name="monitoring_description_network_logging" msgid="577305979174002252">"Seu administrador ativou o registro de rede, que monitora o tráfego no seu dispositivo.\n\nPara ver mais informações, entre em contato com o administrador."</string>
+    <string name="monitoring_description_network_logging" msgid="577305979174002252">"O administrador ativou o registro de rede, que monitora o tráfego no seu dispositivo.\n\nPara ver mais informações, entre em contato com o administrador."</string>
     <string name="monitoring_description_vpn" msgid="1685428000684586870">"Você deu permissão para um app configurar uma conexão VPN.\n\nEsse app pode monitorar seu dispositivo e a atividade na rede, incluindo e-mails, apps e websites."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="4964237035412372751">"Seu perfil de trabalho é gerenciado por <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nSeu administrador pode monitorar sua atividade de rede, incluindo e-mails, apps e websites.\n\nPara ver mais informações, entre em contato com o administrador.\n\nVocê também está conectado a uma VPN, que pode monitorar sua atividade de rede."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>

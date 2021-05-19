@@ -211,10 +211,10 @@
     <string name="adb_wireless_error" msgid="721958772149779856">"Errorea"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Hari gabeko arazketa"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Erabilgarri dauden gailuak ikusteko eta erabiltzeko, aktibatu hari gabeko arazketa"</string>
-    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Parekatu gailua QR kodearekin"</string>
-    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Parekatu gailu gehiago QR kodea eskaneatuta"</string>
-    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Parekatu gailua parekatze-kodearekin"</string>
-    <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Parekatu gailu gehiago sei digituko kodearekin"</string>
+    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Parekatu gailua QR kode batekin"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Parekatu gailu gehiago QR kode bat eskaneatuta"</string>
+    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Parekatu gailua parekatze-kode batekin"</string>
+    <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Parekatu gailu gehiago sei digituko kode batekin"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Parekatutako gailuak"</string>
     <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"Konektatuta daudenak"</string>
     <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"Gailuaren xehetasunak"</string>
@@ -243,7 +243,7 @@
     <string name="oem_unlock_enable" msgid="5334869171871566731">"OEM desblokeoa"</string>
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Onartu abiarazlea desblokeatzea"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"OEM desblokeoa onartu nahi duzu?"</string>
-    <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"ABISUA: ezarpen hau aktibatuta dagoen bitartean, gailuaren babes-eginbideek ez dute gailu honetan funtzionatuko."</string>
+    <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"ABISUA: ezarpen hau aktibatuta dagoen bitartean, gailua babesteko eginbideek ez dute gailu honetan funtzionatuko."</string>
     <string name="mock_location_app" msgid="6269380172542248304">"Hautatu kokapen faltsuen aplikazioa"</string>
     <string name="mock_location_app_not_set" msgid="6972032787262831155">"Ez da ezarri kokapen faltsuen aplikaziorik"</string>
     <string name="mock_location_app_set" msgid="4706722469342913843">"Kokapen faltsuen aplikazioa: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
@@ -271,7 +271,7 @@
     <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4898693684282596143">"Abiarazi Bluetooth bidezko audio-kodeka\nHautapena: lagin bakoitzeko bitak"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="364277285688014427">"Bluetooth bidezko audioaren kanalaren modua"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="2076949781460359589">"Abiarazi Bluetooth bidezko audio-kodeka\nHautapena: kanal modua"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3233402355917446304">"Bluetooth audioaren LDAC kodeka: erreprodukzioaren kalitatea"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3233402355917446304">"Bluetooth bidezko audioaren LDAC kodeka: erreprodukzioaren kalitatea"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7274396574659784285">"Abiarazi Bluetooth bidezko LDAC\naudio-kodekaren hautapena: erreprodukzio-kalitatea"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="2040810756832027227">"Igortzean: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"DNS pribatua"</string>
@@ -337,18 +337,18 @@
     <string name="show_touches" msgid="8437666942161289025">"Erakutsi sakatutakoa"</string>
     <string name="show_touches_summary" msgid="3692861665994502193">"Erakutsi sakatutako elementuak"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"Erakutsi azaleko aldaketak"</string>
-    <string name="show_screen_updates_summary" msgid="2126932969682087406">"Distiratu leiho osoen azalak eguneratzen direnean"</string>
+    <string name="show_screen_updates_summary" msgid="2126932969682087406">"Distirarazi leiho osoen azalak haiek eguneratzean"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"Erakutsi ikuspegi-aldaketak"</string>
-    <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"Nabarmendu leiho barruko ikuspegiak marraztean"</string>
+    <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"Distirarazi leiho barruko ikuspegiak marraztean"</string>
     <string name="show_hw_layers_updates" msgid="5268370750002509767">"Hardware-geruzen aldaketak"</string>
-    <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"Eguneratu bitartean, hardware-geruzak berdez"</string>
+    <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"Distirarazi hardware-geruzak berdez haiek eguneratzean"</string>
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"Araztu GPU gainidazketa"</string>
     <string name="disable_overlays" msgid="4206590799671557143">"Desgaitu HW gainjartzeak"</string>
     <string name="disable_overlays_summary" msgid="1954852414363338166">"Erabili beti GPU pantaila-muntaietarako"</string>
     <string name="simulate_color_space" msgid="1206503300335835151">"Simulatu kolore-eremua"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"Gaitu OpenGL aztarnak"</string>
-    <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Desgaitu USB audio-bideratzea"</string>
-    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Desgaitu USB audio-gailuetara automatikoki bideratzea"</string>
+    <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Desgaitu USB bidez audioa bideratzeko aukera"</string>
+    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Desgaitu USB bidezko audio-gailuetara automatikoki bideratzeko aukera"</string>
     <string name="debug_layout" msgid="1659216803043339741">"Erakutsi diseinu-mugak"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"Erakutsi kliparen mugak, marjinak, etab."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Behartu eskuin-ezker norabidea"</string>
@@ -363,7 +363,7 @@
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Sartu gailuaren berariazko saltzaileen erregistro gehigarriak akatsen txostenetan; baliteke haiek informazio pribatua izatea, bateria gehiago erabiltzea edo biltegiratzeko toki gehiago hartzea."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Leihoen animazio-eskala"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Trantsizioen animazio-eskala"</string>
-    <string name="animator_duration_scale_title" msgid="7082913931326085176">"Animatzailearen iraupena"</string>
+    <string name="animator_duration_scale_title" msgid="7082913931326085176">"Animatzailearen iraupen-eskala"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"Simulatu bigarren mailako pantailak"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"Aplikazioak"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"Ez mantendu jarduerak"</string>
@@ -498,7 +498,7 @@
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Aktibatu"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Aktibatu ez molestatzeko modua"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Inoiz ez"</string>
-    <string name="zen_interruption_level_priority" msgid="5392140786447823299">"Lehentasuna dutenak soilik"</string>
+    <string name="zen_interruption_level_priority" msgid="5392140786447823299">"Lehentasunezkoak soilik"</string>
     <string name="zen_mode_and_condition" msgid="8877086090066332516">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="zen_alarm_warning_indef" msgid="4146527909616457163">"Ez duzu entzungo hurrengo alarma (<xliff:g id="WHEN">%1$s</xliff:g>) aukera hau lehenago desaktibatzen ez baduzu"</string>
     <string name="zen_alarm_warning" msgid="245729928048586280">"Ez duzu entzungo hurrengo alarma (<xliff:g id="WHEN">%1$s</xliff:g>)"</string>

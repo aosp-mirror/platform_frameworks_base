@@ -117,7 +117,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Annuler"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"L\'association vous permet d\'accéder à vos contacts et à l\'historique des appels lorsque vous êtes connecté."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Impossible d\'associer à <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Impossible d\'établir l\'association avec <xliff:g id="DEVICE_NAME">%1$s</xliff:g> en raison d\'un NIP ou d\'une clé d\'accès incorrects."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Impossible d\'établir l\'association avec <xliff:g id="DEVICE_NAME">%1$s</xliff:g>. NIP ou d\'une clé d\'accès incorrects."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Impossible d\'établir la communication avec <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Association refusée par <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Ordinateur"</string>
@@ -196,10 +196,10 @@
     <string name="choose_profile" msgid="343803890897657450">"Sélectionnez un profil"</string>
     <string name="category_personal" msgid="6236798763159385225">"Personnel"</string>
     <string name="category_work" msgid="4014193632325996115">"Professionnel"</string>
-    <string name="development_settings_title" msgid="140296922921597393">"Options pour les concepteurs"</string>
-    <string name="development_settings_enable" msgid="4285094651288242183">"Activer les options pour les concepteurs"</string>
+    <string name="development_settings_title" msgid="140296922921597393">"Options pour les développeurs"</string>
+    <string name="development_settings_enable" msgid="4285094651288242183">"Activer les options pour les développeurs"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Définir les options pour le développement de l\'application"</string>
-    <string name="development_settings_not_available" msgid="355070198089140951">"Les options proposées aux concepteurs ne sont pas disponibles pour cet utilisateur."</string>
+    <string name="development_settings_not_available" msgid="355070198089140951">"Les options proposées aux développeurs ne sont pas disponibles pour cet utilisateur."</string>
     <string name="vpn_settings_not_available" msgid="2894137119965668920">"Les paramètres de RPV ne sont pas disponibles pour cet utilisateur"</string>
     <string name="tethering_settings_not_available" msgid="266821736434699780">"Les paramètres de partage de connexion ne sont pas disponibles pour cet utilisateur"</string>
     <string name="apn_settings_not_available" msgid="1147111671403342300">"Les paramètres de point d\'accès ne sont pas disponibles pour cet utilisateur"</string>
@@ -233,7 +233,7 @@
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Numériser le code QR"</string>
     <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Associer l\'appareil par Wi-Fi en numérisant un code QR"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Veuillez vous connecter à un réseau Wi-Fi"</string>
-    <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, débogage, concepteur"</string>
+    <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, débogage, développeur"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Raccourci de rapport de bogue"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Afficher un bouton permettant d\'établir un rapport de bogue dans le menu de démarrage"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Rester activé"</string>
@@ -362,7 +362,7 @@
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Activer le journal détaillé des fournisseurs"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Incluez les journaux supplémentaires du fournisseur propres à l\'appareil dans les rapports de bogue. Ils peuvent contenir des données personnelles, épuiser la pile plus rapidement et/ou utiliser plus d\'espace de stockage."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Échelle animation fenêtres"</string>
-    <string name="transition_animation_scale_title" msgid="1278477690695439337">"Échelle animination transitions"</string>
+    <string name="transition_animation_scale_title" msgid="1278477690695439337">"Éch. d\'animation des trans."</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Échelle durée animation"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"Simuler affich. secondaires"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"Applications"</string>
@@ -380,7 +380,7 @@
     <string name="enable_freeform_support" msgid="7599125687603914253">"Activer les fenêtres de forme libre"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Activer la compatibilité avec les fenêtres de forme libre expérimentales."</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Mot de passe sauvegarde PC"</string>
-    <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Les sauvegardes complètes sur PC ne sont pas protégées actuellement."</string>
+    <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Les sauvegardes complètes sur PC ne sont pas protégées actuellement"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Touchez pour modifier ou supprimer le mot de passe utilisé pour les sauvegardes complètes sur ordinateur."</string>
     <string name="local_backup_password_toast_success" msgid="4891666204428091604">"Le nouveau mot de passe de secours a bien été défini."</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="2994718182129097733">"Le nouveau mot de passe et sa confirmation ne correspondent pas."</string>

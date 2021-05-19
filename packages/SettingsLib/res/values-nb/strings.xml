@@ -117,7 +117,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Avbryt"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Med sammenkobling får den andre enheten tilgang til kontaktene og anropsloggen din når den er tilkoblet."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Kan ikke koble til <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Kan ikke koble til <xliff:g id="DEVICE_NAME">%1$s</xliff:g> på grunn av feil personlig kode eller passord."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Kan ikke koble til <xliff:g id="DEVICE_NAME">%1$s</xliff:g> på grunn av feil PIN-kode eller passord."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Kan ikke kommunisere med <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> avslo paring."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Datamaskin"</string>
@@ -248,7 +248,7 @@
     <string name="mock_location_app_not_set" msgid="6972032787262831155">"Ingen app for fiktiv plassering er angitt"</string>
     <string name="mock_location_app_set" msgid="4706722469342913843">"App for fiktiv plassering: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"Nettverk"</string>
-    <string name="wifi_display_certification" msgid="1805579519992520381">"Trådløs skjermsertifisering"</string>
+    <string name="wifi_display_certification" msgid="1805579519992520381">"Trådløs skjerm-sertifisering"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Slå på detaljert Wi-Fi-loggføring"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Begrensning av Wi‑Fi-skanning"</string>
     <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Wi‑Fi‑forbedret MAC-tilfeldiggjøring"</string>
@@ -279,7 +279,7 @@
     <string name="private_dns_mode_off" msgid="7065962499349997041">"Av"</string>
     <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"Automatisk"</string>
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"Vertsnavn for privat DNS-leverandør"</string>
-    <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Skriv inn vertsnavnet til DNS-leverandøren"</string>
+    <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Skriv inn DNS-leverandørens vertsnavn"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"Kunne ikke koble til"</string>
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Vis alternativer for sertifisering av trådløs skjerm"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Øk Wi-Fi-loggenivå – vis per SSID RSSI i Wi-Fi-velgeren"</string>
@@ -345,7 +345,7 @@
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"Feilsøk GPU-overtegning"</string>
     <string name="disable_overlays" msgid="4206590799671557143">"Slå av maskinvareoverlegg"</string>
     <string name="disable_overlays_summary" msgid="1954852414363338166">"Bruk alltid GPU for skjermsammensetting"</string>
-    <string name="simulate_color_space" msgid="1206503300335835151">"Simuler fargeområde"</string>
+    <string name="simulate_color_space" msgid="1206503300335835151">"Simuler fargerom"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"Slå på OpenGL-spor"</string>
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Slå av lydomkobling via USB"</string>
     <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Slå av automatisk lydomkobling til USB-enheter"</string>

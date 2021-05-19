@@ -154,8 +154,8 @@
     <string name="running_process_item_user_label" msgid="3988506293099805796">"Korisnik: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"Postavljene su neke zadane postavke"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"Nema zadanih postavki"</string>
-    <string name="tts_settings" msgid="8130616705989351312">"Postavke za tekst u govor"</string>
-    <string name="tts_settings_title" msgid="7602210956640483039">"Tekst u govor"</string>
+    <string name="tts_settings" msgid="8130616705989351312">"Postavke za pretvaranje teksta u govor"</string>
+    <string name="tts_settings_title" msgid="7602210956640483039">"Pretvaranje teksta u govor"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"Brzina govora"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"Brzina kojom se izgovara tekst"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"Visina glasa"</string>
@@ -210,7 +210,7 @@
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Način otklanjanja pogrešaka kad je Wi-Fi povezan"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"Pogreška"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Bežično otklanjanje pogrešaka"</string>
-    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Da biste vidjeli dostupne uređaje i mogli se njima koristiti, uključite bežično otklanjanje pogrešaka"</string>
+    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Da biste vidjeli i upotrebljavali dostupne uređaje, uključite bežično otklanjanje pogrešaka"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Uparivanje uređaja pomoću QR koda"</string>
     <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Uparivanje novih uređaja pomoću čitača QR koda"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Uparivanje uređaja pomoću koda za uparivanje"</string>
@@ -275,7 +275,7 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7274396574659784285">"Pokreni odabir kodeka za Bluetooth Audio\nLDAC: kvaliteta reprodukcije"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="2040810756832027227">"Strujanje: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"Privatni DNS"</string>
-    <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"Odaberi načina privatnog DNS-a"</string>
+    <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"Odaberite način privatnog DNS-a"</string>
     <string name="private_dns_mode_off" msgid="7065962499349997041">"Isključeno"</string>
     <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"Automatski"</string>
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"Naziv hosta davatelja usluge privatnog DNS-a"</string>
@@ -418,8 +418,8 @@
     <string name="daltonizer_mode_deuteranomaly" msgid="3507284319584683963">"Deuteranomalija (crveno – zeleno)"</string>
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomalija (crveno – zeleno)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomalija (plavo – žuto)"</string>
-    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Korekcija boje"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"Korekcija boje omogućuje vam prilagodbu načina prikazivanja boja na vašem uređaju"</string>
+    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Korekcija boja"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"Korekcija boja omogućuje vam prilagodbu načina prikazivanja boja na vašem uređaju"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Premošćeno postavkom <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Još otprilike <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>

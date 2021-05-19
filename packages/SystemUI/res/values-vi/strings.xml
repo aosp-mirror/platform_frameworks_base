@@ -92,16 +92,16 @@
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Đang xử lý video ghi màn hình"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Thông báo đang diễn ra về phiên ghi màn hình"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Bắt đầu ghi?"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"Trong khi ghi, Hệ thống Android có thể ghi lại mọi thông tin nhạy cảm hiển thị trên màn hình hoặc phát trên thiết bị của bạn. Những thông tin này bao gồm mật khẩu, thông tin thanh toán, ảnh, thông báo và âm thanh."</string>
+    <string name="screenrecord_description" msgid="1123231719680353736">"Trong khi ghi, Hệ thống Android có thể ghi lại mọi thông tin nhạy cảm xuất hiện trên màn hình hoặc phát trên thiết bị của bạn. Những thông tin này bao gồm mật khẩu, thông tin thanh toán, ảnh, thông báo và âm thanh."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Ghi âm"</string>
-    <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Âm thanh từ thiết bị"</string>
-    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Âm thanh từ thiết bị của bạn, chẳng hạn như nhạc, cuộc gọi và nhạc chuông"</string>
+    <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Âm thanh trên thiết bị"</string>
+    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Âm thanh trên thiết bị, chẳng hạn như nhạc, cuộc gọi và nhạc chuông"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Micrô"</string>
-    <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Âm thanh từ thiết bị và micrô"</string>
+    <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Âm thanh trên thiết bị và micrô"</string>
     <string name="screenrecord_start" msgid="330991441575775004">"Bắt đầu"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Đang ghi màn hình"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Đang ghi màn hình và âm thanh"</string>
-    <string name="screenrecord_taps_label" msgid="1595690528298857649">"Hiển thị vị trí của các thao tác chạm trên màn hình"</string>
+    <string name="screenrecord_taps_label" msgid="1595690528298857649">"Hiện vị trí của các thao tác chạm trên màn hình"</string>
     <string name="screenrecord_stop_text" msgid="6549288689506057686">"Nhấn để dừng"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"Dừng"</string>
     <string name="screenrecord_pause_label" msgid="6004054907104549857">"Tạm dừng"</string>
@@ -391,7 +391,7 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="2325362583903258677">"TỰ ĐỘNG"</string>
     <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Đảo ngược màu"</string>
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"Chế độ chỉnh màu"</string>
-    <string name="quick_settings_more_settings" msgid="2878235926753776694">"Cài đặt khác"</string>
+    <string name="quick_settings_more_settings" msgid="2878235926753776694">"Chế độ cài đặt khác"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Xong"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Đã kết nối"</string>
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"Đã kết nối, mức pin <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
@@ -506,7 +506,7 @@
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Dịch vụ cung cấp chức năng này có quyền truy cập vào tất cả các thông tin hiển thị trên màn hình của bạn hoặc phát trên thiết bị của bạn trong khi ghi âm/ghi hình hoặc truyền, bao gồm cả thông tin như mật khẩu, chi tiết thanh toán, ảnh, tin nhắn và âm thanh mà bạn phát."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Bắt đầu ghi âm/ghi hình hoặc truyền?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Bắt đầu ghi âm/ghi hình hoặc truyền bằng <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
-    <string name="media_projection_remember_text" msgid="6896767327140422951">"Không hiển thị lại"</string>
+    <string name="media_projection_remember_text" msgid="6896767327140422951">"Không hiện lại"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Xóa tất cả"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Quản lý"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Lịch sử"</string>
@@ -716,7 +716,7 @@
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Có thể đổ chuông hoặc rung tùy theo chế độ cài đặt trên điện thoại"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Có thể đổ chuông hoặc rung tùy theo chế độ cài đặt trên điện thoại. Theo mặc định, các cuộc trò chuyện từ <xliff:g id="APP_NAME">%1$s</xliff:g> được phép hiển thị dưới dạng bong bóng."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Luôn chú ý vào nội dung này bằng phím tắt nổi."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Hiển thị cuộc trò chuyện ở đầu phần cuộc trò chuyện và dưới dạng bong bóng nổi, hiển thị ảnh hồ sơ trên màn hình khóa"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Hiển thị ở đầu phần cuộc trò chuyện, dưới dạng bong bóng nổi và hiển thị ảnh hồ sơ trên màn hình khóa"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Cài đặt"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Mức độ ưu tiên"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> không hỗ trợ các tính năng trò chuyện"</string>
@@ -739,10 +739,10 @@
     <string name="notification_channel_controls_opened_accessibility" msgid="6111817750774381094">"Đã mở điều khiển thông báo đối với <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="1561909368876911701">"Đã đóng điều khiển thông báo đối với <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="notification_channel_switch_accessibility" msgid="8979885820432540252">"Cho phép thông báo từ kênh này"</string>
-    <string name="notification_more_settings" msgid="4936228656989201793">"Cài đặt khác"</string>
+    <string name="notification_more_settings" msgid="4936228656989201793">"Chế độ cài đặt khác"</string>
     <string name="notification_app_settings" msgid="8963648463858039377">"Tùy chỉnh"</string>
     <string name="notification_done" msgid="6215117625922713976">"Xong"</string>
-    <string name="inline_undo" msgid="9026953267645116526">"Hoàn tác"</string>
+    <string name="inline_undo" msgid="9026953267645116526">"Hủy"</string>
     <string name="demote" msgid="6225813324237153980">"Đánh dấu thông báo này không phải là cuộc trò chuyện"</string>
     <string name="notification_conversation_favorite" msgid="1905240206975921907">"Cuộc trò chuyện quan trọng"</string>
     <string name="notification_conversation_unfavorite" msgid="181383708304763807">"Không phải là cuộc trò chuyện quan trọng"</string>
@@ -756,7 +756,7 @@
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"Tùy chọn báo lại thông báo"</string>
     <string name="notification_menu_snooze_action" msgid="5415729610393475019">"Nhắc tôi"</string>
     <string name="notification_menu_settings_action" msgid="7085494017202764285">"Cài đặt"</string>
-    <string name="snooze_undo" msgid="60890935148417175">"HOÀN TÁC"</string>
+    <string name="snooze_undo" msgid="60890935148417175">"HỦY"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"Báo lại sau <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2066838694120718170">
       <item quantity="other">%d giờ</item>
@@ -825,8 +825,8 @@
     <string name="data_saver" msgid="3484013368530820763">"Trình tiết kiệm dữ liệu"</string>
     <string name="accessibility_data_saver_on" msgid="5394743820189757731">"Trình tiết kiệm dữ liệu đang bật"</string>
     <string name="accessibility_data_saver_off" msgid="58339669022107171">"Trình tiết kiệm dữ liệu đang tắt"</string>
-    <string name="switch_bar_on" msgid="1770868129120096114">"Bật"</string>
-    <string name="switch_bar_off" msgid="5669805115416379556">"Tắt"</string>
+    <string name="switch_bar_on" msgid="1770868129120096114">"Đang bật"</string>
+    <string name="switch_bar_off" msgid="5669805115416379556">"Đang tắt"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"Không có sẵn"</string>
     <string name="nav_bar" msgid="4642708685386136807">"Thanh điều hướng"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"Bố cục"</string>
@@ -1026,7 +1026,7 @@
     <string name="magnification_window_title" msgid="4863914360847258333">"Cửa sổ phóng to"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Các tùy chọn điều khiển cửa sổ phóng to"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Điều khiển thiết bị"</string>
-    <string name="quick_controls_subtitle" msgid="1667408093326318053">"Thêm các tùy chọn điều khiển cho các thiết bị đã kết nối của bạn"</string>
+    <string name="quick_controls_subtitle" msgid="1667408093326318053">"Thêm các nút điều khiển cho các thiết bị đã kết nối"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"Thiết lập các tùy chọn điều khiển thiết bị"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Giữ nút Nguồn để truy cập vào các tùy chọn điều khiển"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Chọn ứng dụng để thêm các tùy chọn điều khiển"</string>

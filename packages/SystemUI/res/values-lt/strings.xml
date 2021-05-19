@@ -517,7 +517,7 @@
     <string name="manage_notifications_text" msgid="6885645344647733116">"Tvarkyti"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Istorija"</string>
     <string name="notification_section_header_incoming" msgid="850925217908095197">"Nauja"</string>
-    <string name="notification_section_header_gentle" msgid="6804099527336337197">"Tylūs"</string>
+    <string name="notification_section_header_gentle" msgid="6804099527336337197">"Tylus"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Pranešimai"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Pokalbiai"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Išvalyti visus tylius pranešimus"</string>

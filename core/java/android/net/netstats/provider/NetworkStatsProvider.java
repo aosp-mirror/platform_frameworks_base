@@ -29,7 +29,8 @@ import android.os.RemoteException;
 @SystemApi
 public abstract class NetworkStatsProvider {
     /**
-     * A value used by {@link #onSetLimit} and {@link #onSetAlert} indicates there is no limit.
+     * A value used by {@link #onSetLimit}, {@link #onSetAlert} and {@link #onSetWarningAndLimit}
+     * indicates there is no limit.
      */
     public static final int QUOTA_UNLIMITED = -1;
 
@@ -42,13 +43,13 @@ public abstract class NetworkStatsProvider {
         }
 
         @Override
-        public void onSetLimit(String iface, long quotaBytes) {
-            NetworkStatsProvider.this.onSetLimit(iface, quotaBytes);
+        public void onSetAlert(long quotaBytes) {
+            NetworkStatsProvider.this.onSetAlert(quotaBytes);
         }
 
         @Override
-        public void onSetAlert(long quotaBytes) {
-            NetworkStatsProvider.this.onSetAlert(quotaBytes);
+        public void onSetWarningAndLimit(String iface, long warningBytes, long limitBytes) {
+            NetworkStatsProvider.this.onSetWarningAndLimit(iface, warningBytes, limitBytes);
         }
     };
 
@@ -145,11 +146,25 @@ public abstract class NetworkStatsProvider {
     }
 
     /**
-     * Notify system that the quota set by {@code onSetLimit} has been reached.
+     * Notify system that the warning set by {@link #onSetWarningAndLimit} has been reached.
+     */
+    public void notifyWarningReached() {
+        try {
+            // Reuse the code path to notify warning reached with limit reached
+            // since framework handles them in the same way.
+            getProviderCallbackBinderOrThrow().notifyWarningOrLimitReached();
+        } catch (RemoteException e) {
+            e.rethrowAsRuntimeException();
+        }
+    }
+
+    /**
+     * Notify system that the quota set by {@link #onSetLimit} or limit set by
+     * {@link #onSetWarningAndLimit} has been reached.
      */
     public void notifyLimitReached() {
         try {
-            getProviderCallbackBinderOrThrow().notifyLimitReached();
+            getProviderCallbackBinderOrThrow().notifyWarningOrLimitReached();
         } catch (RemoteException e) {
             e.rethrowAsRuntimeException();
         }
@@ -181,6 +196,28 @@ public abstract class NetworkStatsProvider {
      *                   from now. A value of {@link #QUOTA_UNLIMITED} indicates there is no limit.
      */
     public abstract void onSetLimit(@NonNull String iface, long quotaBytes);
+
+    /**
+     * Called by {@code NetworkStatsService} when setting the interface quotas for the specified
+     * upstream interface. If a provider implements {@link #onSetWarningAndLimit}, the system
+     * will not call {@link #onSetLimit}. When this method is called, the implementation
+     * should behave as follows:
+     *   1. If {@code warningBytes} is reached on {@code iface}, block all further traffic on
+     *      {@code iface} and call {@link NetworkStatsProvider@notifyWarningReached()}.
+     *   2. If {@code limitBytes} is reached on {@code iface}, block all further traffic on
+     *   {@code iface} and call {@link NetworkStatsProvider#notifyLimitReached()}.
+     *
+     * @param iface the interface requiring the operation.
+     * @param warningBytes the warning defined as the number of bytes, starting from zero and
+     *                     counting from now. A value of {@link #QUOTA_UNLIMITED} indicates
+     *                     there is no warning.
+     * @param limitBytes the limit defined as the number of bytes, starting from zero and counting
+     *                   from now. A value of {@link #QUOTA_UNLIMITED} indicates there is no limit.
+     */
+    public void onSetWarningAndLimit(@NonNull String iface, long warningBytes, long limitBytes) {
+        // Backward compatibility for those who didn't override this function.
+        onSetLimit(iface, limitBytes);
+    }
 
     /**
      * Called by {@code NetworkStatsService} when setting the alert bytes. Custom implementations

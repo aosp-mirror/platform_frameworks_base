@@ -212,7 +212,7 @@
     <string name="turn_on_radio" msgid="2961717788170634233">"വയർലെസ് ഓണാക്കുക"</string>
     <string name="turn_off_radio" msgid="7222573978109933360">"വയർലെസ്സ് ഓഫാക്കുക"</string>
     <string name="screen_lock" msgid="2072642720826409809">"സ്‌ക്രീൻ ലോക്ക്"</string>
-    <string name="power_off" msgid="4111692782492232778">"പവർ ഓഫാക്കുക"</string>
+    <string name="power_off" msgid="4111692782492232778">"പവർ ഓഫ്"</string>
     <string name="silent_mode_silent" msgid="5079789070221150912">"റിംഗർ ഓഫുചെയ്യുക"</string>
     <string name="silent_mode_vibrate" msgid="8821830448369552678">"റിംഗർ വൈബ്രേറ്റുചെയ്യുക"</string>
     <string name="silent_mode_ring" msgid="6039011004781526678">"റിംഗർ ഓൺചെയ്യുക"</string>
@@ -236,10 +236,10 @@
     <string name="global_actions" product="tv" msgid="3871763739487450369">"Android TV ഓപ്‌ഷനുകൾ"</string>
     <string name="global_actions" product="default" msgid="6410072189971495460">"ഫോൺ ഓപ്‌ഷനുകൾ"</string>
     <string name="global_action_lock" msgid="6949357274257655383">"സ്‌ക്രീൻ ലോക്ക്"</string>
-    <string name="global_action_power_off" msgid="4404936470711393203">"പവർ ഓഫാക്കുക"</string>
+    <string name="global_action_power_off" msgid="4404936470711393203">"പവർ ഓഫ്"</string>
     <string name="global_action_power_options" msgid="1185286119330160073">"പവർ"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"റീസ്റ്റാർട്ട് ചെയ്യുക"</string>
-    <string name="global_action_emergency" msgid="1387617624177105088">"അടിയന്തരാവശ്യം"</string>
+    <string name="global_action_emergency" msgid="1387617624177105088">"എമർജൻസി"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"ബഗ് റിപ്പോർട്ട്"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"സെഷൻ അവസാനിപ്പിക്കുക"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"സ്‌ക്രീൻഷോട്ട്"</string>
@@ -297,7 +297,7 @@
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"നിങ്ങളുടെ കോൺടാക്റ്റുകൾ ആക്‌സസ്സ് ചെയ്യുക"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"ലൊക്കേഷൻ"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"ഈ ഉപകരണത്തിന്റെ ലൊക്കേഷൻ ആക്സസ് ചെയ്യാൻ"</string>
-    <string name="permgrouplab_calendar" msgid="6426860926123033230">"Calendar"</string>
+    <string name="permgrouplab_calendar" msgid="6426860926123033230">"കലണ്ടർ"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"നിങ്ങളുടെ കലണ്ടർ ആക്‌സസ്സ് ചെയ്യുക"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS സന്ദേശങ്ങൾ അയയ്‌ക്കുകയും കാണുകയും ചെയ്യുക"</string>
@@ -563,15 +563,15 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"വിരലടയാളങ്ങൾ എൻറോൾ ചെയ്തിട്ടില്ല."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"ഈ ഉപകരണത്തിൽ ഫിംഗർപ്രിന്റ് സെൻസറില്ല."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"സെൻസർ താൽക്കാലികമായി പ്രവർത്തനരഹിതമാക്കി."</string>
-    <string name="fingerprint_name_template" msgid="8941662088160289778">"കൈവിരൽ <xliff:g id="FINGERID">%d</xliff:g>"</string>
+    <string name="fingerprint_name_template" msgid="8941662088160289778">"ഫിംഗർ <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"ഫിംഗർപ്രിന്റ് ഐക്കൺ"</string>
     <string name="permlab_manageFace" msgid="4569549381889283282">"മുഖം തിരിച്ചറിഞ്ഞുള്ള അൺലോക്ക് ഹാർഡ്‌വെയർ മാനേജ് ചെയ്യുക"</string>
     <string name="permdesc_manageFace" msgid="6204569688492710471">"ഉപയോഗിക്കാനായി, മുഖത്തിന്റെ ടെംപ്ലേറ്റുകൾ ചേർക്കാനും ഇല്ലാതാക്കാനുമുള്ള രീതികൾ അഭ്യർത്ഥിക്കാൻ ആപ്പിനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"മുഖം തിരിച്ചറിഞ്ഞുള്ള അൺലോക്ക് ഹാർഡ്‌വെയർ ഉപയോഗിക്കുക"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"പരിശോധിച്ചുറപ്പിക്കാൻ മുഖം തിരിച്ചറിഞ്ഞുള്ള അൺലോക്ക് ഹാർഡ്‌വെയർ ഉപയോഗിക്കാൻ അനുവദിക്കുന്നു"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"മുഖം തിരിച്ചറിഞ്ഞുള്ള അൺലോക്ക്"</string>
+    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"ഫെയ്‌സ് അൺലോക്ക് ഹാർഡ്‌വെയർ ഉപയോഗിക്കുക"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"പരിശോധിച്ചുറപ്പിക്കാൻ ഫെയ്‌സ് അൺലോക്ക് ഹാർഡ്‌വെയർ ഉപയോഗിക്കാൻ അനുവദിക്കുന്നു"</string>
+    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"ഫെയ്‌സ് അൺലോക്ക്"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"നിങ്ങളുടെ മുഖം വീണ്ടും എൻറോൾ ചെയ്യൂ"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"തിരിച്ചറിയൽ മെച്ചപ്പെടുത്താൻ, നിങ്ങളുടെ മുഖം ദയവായി വീണ്ടും എൻറോൾ ചെയ്യൂ"</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"കൃത്യ മുഖ ഡാറ്റ എടുക്കാനായില്ല. വീണ്ടും ശ്രമിക്കൂ."</string>
@@ -597,15 +597,15 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"മുഖം പരിശോധിക്കാൻ കഴിയില്ല. ഹാർഡ്‌വെയർ ലഭ്യമല്ല."</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"മുഖം തിരിച്ചറിഞ്ഞുള്ള അൺലോക്ക് വീണ്ടും പരീക്ഷിക്കൂ"</string>
+    <string name="face_error_timeout" msgid="522924647742024699">"ഫെയ്‌സ് അൺലോക്ക് വീണ്ടും പരീക്ഷിക്കൂ"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"പുതിയ മുഖ ഡാറ്റ സംഭരിക്കാനാകില്ല. ആദ്യം പഴയത് ഇല്ലാതാക്കുക."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"മുഖത്തിന്റെ പ്രവർത്തനം റദ്ദാക്കി."</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"ഉപയോക്താവ് മുഖം തിരിച്ചറിഞ്ഞുള്ള അൺലോക്ക് റദ്ദാക്കി"</string>
+    <string name="face_error_user_canceled" msgid="8553045452825849843">"ഉപയോക്താവ് ഫെയ്‌സ് അൺലോക്ക് റദ്ദാക്കി"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"നിരവധി തവണ ശ്രമിച്ചു. പിന്നീട് വീണ്ടും ശ്രമിക്കുക."</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"വളരെയധികം ശ്രമങ്ങൾ. മുഖം തിരിച്ചറിഞ്ഞുള്ള അൺലോക്ക് പ്രവർത്തനരഹിതമാക്കി"</string>
+    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"വളരെയധികം ശ്രമങ്ങൾ. ഫെയ്‌സ് അൺലോക്ക് പ്രവർത്തനരഹിതമാക്കി"</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"മുഖം പരിശോധിക്കാൻ കഴിയില്ല. വീണ്ടും ശ്രമിക്കൂ."</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"മുഖം തിരിച്ചറിഞ്ഞുള്ള അൺലോക്ക് സജ്ജീകരിച്ചില്ല."</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"മുഖം തിരിച്ചറിഞ്ഞുള്ള അൺലോക്ക് ഈ ഉപകരണം പിന്തുണയ്ക്കുന്നില്ല."</string>
+    <string name="face_error_not_enrolled" msgid="7369928733504691611">"ഫെയ്‌സ് അൺലോക്ക് സജ്ജീകരിച്ചില്ല."</string>
+    <string name="face_error_hw_not_present" msgid="1070600921591729944">"ഫെയ്‌സ് അൺലോക്ക് ഈ ഉപകരണം പിന്തുണയ്ക്കുന്നില്ല."</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"സെൻസർ താൽക്കാലികമായി പ്രവർത്തനരഹിതമാക്കി."</string>
     <string name="face_name_template" msgid="3877037340223318119">"മുഖം <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
@@ -685,7 +685,7 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"എല്ലാ ഡാറ്റയും മായ്ക്കുക"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"ഒരു ഫാക്‌ടറി ഡാറ്റ പുനഃസജ്ജീകരണം നടപ്പിലാക്കുന്നതിലൂടെ ടാബ്‌ലെറ്റിന്റെ ഡാറ്റ മുന്നറിയിപ്പില്ലാതെ മായ്‌ക്കുക."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"ഫാക്‌ടറി ഡാറ്റ റീസെറ്റ് ചെയ്‌ത് നിങ്ങളുടെ Android TV-യിലെ ഉപകരണ ഡാറ്റ മുന്നറിയിപ്പില്ലാതെ മായ്‌ക്കുക."</string>
-    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"ഒരു ഫാക്‌ടറി ഡാറ്റ പുനഃസജ്ജീകരണം നടപ്പിലാക്കുന്നതിലൂടെ ഫോണിന്റെ ഡാറ്റ മുന്നറിയിപ്പില്ലാതെ മായ്‌ക്കുക."</string>
+    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"ഒരു ഫാക്‌ടറി ഡാറ്റാ റീസെറ്റിലൂടെ ഫോണിന്റെ ഡാറ്റ മുന്നറിയിപ്പില്ലാതെ മായ്‌ക്കുക."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"ഉപയോക്തൃ ഡാറ്റ മായ്‌ക്കുക"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"മുന്നറിയിപ്പൊന്നും നൽകാതെ ഈ ടാബ്‌ലെറ്റിലെ ഈ ഉപയോക്താവിന്റെ ഡാറ്റ മായ്‌ക്കുക."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"ഈ Android TV-യിലെ ഈ ഉപയോക്തൃ ഡാറ്റ മുന്നറിയിപ്പില്ലാതെ മായ്‌ക്കുക."</string>
@@ -905,7 +905,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"അൺലോക്ക് ഏരിയ വിപുലീകരിക്കുക."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"സ്ലൈഡ് അൺലോക്ക്."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"പാറ്റേൺ അൺലോക്ക്."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"മുഖം തിരിച്ചറിഞ്ഞുള്ള അൺലോക്ക്."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"ഫെയ്‌സ് അൺലോക്ക്."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"പിൻ അൺലോക്ക്."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"സിം പിൻ അൺലോക്ക്."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"സിം Puk അൺലോക്ക്."</string>
@@ -1135,7 +1135,7 @@
     <string name="whichGiveAccessToApplicationLabel" msgid="7805857277166106236">"ആക്‌സസ് നൽകുക"</string>
     <string name="whichEditApplication" msgid="6191568491456092812">"ഇത് ഉപയോഗിച്ച് എഡിറ്റുചെയ്യുക"</string>
     <string name="whichEditApplicationNamed" msgid="8096494987978521514">"%1$s ഉപയോഗിച്ച് എഡിറ്റുചെയ്യുക"</string>
-    <string name="whichEditApplicationLabel" msgid="1463288652070140285">"എഡിറ്റുചെയ്യുക"</string>
+    <string name="whichEditApplicationLabel" msgid="1463288652070140285">"എഡിറ്റ് ചെയ്യുക"</string>
     <string name="whichSendApplication" msgid="4143847974460792029">"പങ്കിടുക"</string>
     <string name="whichSendApplicationNamed" msgid="4470386782693183461">"%1$s എന്നതുമായി പങ്കിടുക"</string>
     <string name="whichSendApplicationLabel" msgid="7467813004769188515">"പങ്കിടുക"</string>
@@ -1211,9 +1211,9 @@
     <string name="dump_heap_ready_notification" msgid="2302452262927390268">"<xliff:g id="PROC">%1$s</xliff:g> ഹീപ്പ് ഡംപ് തയ്യാറാണ്"</string>
     <string name="dump_heap_notification_detail" msgid="8431586843001054050">"ഹീപ്പ് ഡംപ് ശേഖരിച്ചു. പങ്കിടാൻ ടാപ്പ് ചെയ്യുക"</string>
     <string name="dump_heap_title" msgid="4367128917229233901">"ഹീപ്പ് ഡംപ് പങ്കിടണോ?"</string>
-    <string name="dump_heap_text" msgid="1692649033835719336">"<xliff:g id="PROC">%1$s</xliff:g> പ്രോസസിന്, മെമ്മറി പരിധിയായ <xliff:g id="SIZE">%2$s</xliff:g> കവിഞ്ഞു. അതിന്റെ ഡവലപ്പറുമായി പങ്കിടാൻ ഒരു ഹീപ്പ് ഡംപ് നിങ്ങൾക്ക് ലഭ്യമാണ്. ശ്രദ്ധിക്കുക: ഈ ഹീപ്പ് ഡംപിൽ ആപ്പിന് ആക്‌സസുള്ള ഏതെങ്കിലും വ്യക്തിഗത വിവരം അടങ്ങിയിരിക്കാം."</string>
-    <string name="dump_heap_system_text" msgid="6805155514925350849">"<xliff:g id="PROC">%1$s</xliff:g> പ്രോസസ് അതിൻ്റെ മെമ്മറി പരിധിയായ <xliff:g id="SIZE">%2$s</xliff:g> കവിഞ്ഞു. നിങ്ങൾക്ക് പങ്കിടാൻ ഒരു ഹീപ്പ് ഡംപ് ലഭ്യമാണ്. ശ്രദ്ധിക്കുക: പ്രോസസിന് ആക്‌സസ് ചെയ്യാനാകുന്ന, സൂക്ഷ്‌മമായി കൈകാര്യം ചെയ്യേണ്ട ഏതെങ്കിലും വ്യക്തിഗത വിവരം ഈ ഹീപ്പ് ഡംപിൽ അടങ്ങിയിരിക്കാം, നിങ്ങൾ ടൈപ്പ് ചെയ്‌തിട്ടുള്ള കാര്യങ്ങൾ ഇതിൽ ഉൾപ്പെട്ടിരിക്കാം."</string>
-    <string name="dump_heap_ready_text" msgid="5849618132123045516">"നിങ്ങൾക്ക് പങ്കിടാൻ <xliff:g id="PROC">%1$s</xliff:g> എന്നതിൻ്റെ പ്രോസസിൻ്റെ ഒരു ഹീപ്പ് ഡംപ് ലഭ്യമാണ്. ശ്രദ്ധിക്കുക: പ്രോസസിന് ആക്‌സസ് ചെയ്യാനാകുന്ന, സൂക്ഷ്‌മമായി കൈകാര്യം ചെയ്യേണ്ട ഏതെങ്കിലും വ്യക്തിഗത വിവരം ഈ ഹീപ്പ് ഡംപിൽ അടങ്ങിയിരിക്കാം, നിങ്ങൾ ടൈപ്പ് ചെയ്‌തിട്ടുള്ള കാര്യങ്ങൾ ഇതിൽ ഉൾപ്പെട്ടിരിക്കാം."</string>
+    <string name="dump_heap_text" msgid="1692649033835719336">"<xliff:g id="PROC">%1$s</xliff:g> പ്രോസസിന്, മെമ്മറി പരിധിയായ <xliff:g id="SIZE">%2$s</xliff:g> കവിഞ്ഞു. അതിന്റെ ഡവലപ്പറുമായി പങ്കിടാൻ ഒരു ഹീപ്പ് ഡംപ് നിങ്ങൾക്ക് ലഭ്യമാണ്. ശ്രദ്ധിക്കുക: ഈ ഹീപ്പ് ഡംപിൽ ആപ്പിന് ആക്‌സസുള്ള ഏതെങ്കിലും വ്യക്തിപരമായ വിവരങ്ങൾ അടങ്ങിയിരിക്കാം."</string>
+    <string name="dump_heap_system_text" msgid="6805155514925350849">"<xliff:g id="PROC">%1$s</xliff:g> പ്രോസസ് അതിൻ്റെ മെമ്മറി പരിധിയായ <xliff:g id="SIZE">%2$s</xliff:g> കവിഞ്ഞു. നിങ്ങൾക്ക് പങ്കിടാൻ ഒരു ഹീപ്പ് ഡംപ് ലഭ്യമാണ്. ശ്രദ്ധിക്കുക: പ്രോസസിന് ആക്‌സസ് ചെയ്യാനാകുന്ന, സൂക്ഷ്‌മമായി കൈകാര്യം ചെയ്യേണ്ട ഏതെങ്കിലും വ്യക്തിപരമായ വിവരങ്ങൾ ഈ ഹീപ്പ് ഡംപിൽ അടങ്ങിയിരിക്കാം, നിങ്ങൾ ടൈപ്പ് ചെയ്‌തിട്ടുള്ള കാര്യങ്ങൾ ഇതിൽ ഉൾപ്പെട്ടിരിക്കാം."</string>
+    <string name="dump_heap_ready_text" msgid="5849618132123045516">"നിങ്ങൾക്ക് പങ്കിടാൻ <xliff:g id="PROC">%1$s</xliff:g> എന്നതിൻ്റെ പ്രോസസിൻ്റെ ഒരു ഹീപ്പ് ഡംപ് ലഭ്യമാണ്. ശ്രദ്ധിക്കുക: പ്രോസസിന് ആക്‌സസ് ചെയ്യാനാകുന്ന, സൂക്ഷ്‌മമായി കൈകാര്യം ചെയ്യേണ്ട ഏതെങ്കിലും വ്യക്തിപരമായ വിവരങ്ങൾ ഈ ഹീപ്പ് ഡംപിൽ അടങ്ങിയിരിക്കാം, നിങ്ങൾ ടൈപ്പ് ചെയ്‌തിട്ടുള്ള കാര്യങ്ങൾ ഇതിൽ ഉൾപ്പെട്ടിരിക്കാം."</string>
     <string name="sendText" msgid="493003724401350724">"വാചകസന്ദേശത്തിനായി ഒരു പ്രവർത്തനം തിരഞ്ഞെടുക്കുക"</string>
     <string name="volume_ringtone" msgid="134784084629229029">"റിംഗർ വോളിയം"</string>
     <string name="volume_music" msgid="7727274216734955095">"മീഡിയ വോളിയം"</string>
@@ -1435,7 +1435,7 @@
     <string name="vpn_lockdown_config" msgid="8331697329868252169">"നെറ്റ്‍വര്‍ക്ക് അല്ലെങ്കിൽ VPN ക്രമീകരണം മാറ്റുക"</string>
     <string name="upload_file" msgid="8651942222301634271">"ഫയല്‍‌ തിരഞ്ഞെടുക്കുക"</string>
     <string name="no_file_chosen" msgid="4146295695162318057">"ഫയലൊന്നും തിരഞ്ഞെടുത്തില്ല"</string>
-    <string name="reset" msgid="3865826612628171429">"പുനഃസജ്ജമാക്കുക"</string>
+    <string name="reset" msgid="3865826612628171429">"റീസെറ്റ് ചെയ്യുക"</string>
     <string name="submit" msgid="862795280643405865">"സമർപ്പിക്കുക"</string>
     <string name="car_mode_disable_notification_title" msgid="8450693275833142896">"ഡ്രൈവിംഗ് ആപ്പ് റൺ ചെയ്യുകയാണ്"</string>
     <string name="car_mode_disable_notification_message" msgid="8954550232288567515">"ഡ്രൈവിംഗ് ആപ്പിൽ നിന്ന് പുറത്തുകടക്കാൻ ടാപ്പ് ചെയ്യുക."</string>
@@ -1513,7 +1513,7 @@
     <string name="storage_usb_drive" msgid="448030813201444573">"USB ഡ്രൈവ്"</string>
     <string name="storage_usb_drive_label" msgid="6631740655876540521">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB ഡ്രൈവ്"</string>
     <string name="storage_usb" msgid="2391213347883616886">"USB സ്റ്റോറേജ്"</string>
-    <string name="extract_edit_menu_button" msgid="63954536535863040">"എഡിറ്റുചെയ്യുക"</string>
+    <string name="extract_edit_menu_button" msgid="63954536535863040">"എഡിറ്റ് ചെയ്യുക"</string>
     <string name="data_usage_warning_title" msgid="9034893717078325845">"ഡാറ്റാ മുന്നറിയിപ്പ്"</string>
     <string name="data_usage_warning_body" msgid="1669325367188029454">"നിങ്ങൾ ഡാറ്റയുടെ <xliff:g id="APP">%s</xliff:g> ഉപയോഗിച്ചു"</string>
     <string name="data_usage_mobile_limit_title" msgid="3911447354393775241">"മൊബൈൽ ഡാറ്റ പരിധി എത്തി"</string>
@@ -1877,7 +1877,7 @@
     <string name="user_creation_adding" msgid="7305185499667958364">"<xliff:g id="ACCOUNT">%2$s</xliff:g> എന്ന അക്കൗണ്ട് ഉപയോഗിച്ച് പുതിയ ഉപയോക്താവിനെ സൃഷ്‌ടിക്കാൻ <xliff:g id="APP">%1$s</xliff:g> എന്നതിനെ അനുവദിക്കണോ?"</string>
     <string name="language_selection_title" msgid="52674936078683285">"ഒരു ഭാഷ ചേർക്കുക"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"മേഖലാ മുൻഗണന"</string>
-    <string name="search_language_hint" msgid="7004225294308793583">"ഭാഷയുടെ പേര് ടൈപ്പുചെയ്യുക"</string>
+    <string name="search_language_hint" msgid="7004225294308793583">"ഭാഷ ടൈപ്പ് ചെയ്യുക"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"നിര്‍‌ദ്ദേശിച്ചത്"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"എല്ലാ ഭാഷകളും"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"എല്ലാ പ്രദേശങ്ങളും"</string>

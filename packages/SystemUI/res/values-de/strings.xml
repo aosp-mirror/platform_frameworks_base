@@ -47,7 +47,7 @@
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="2972273031043777851">"Eingabemethoden festlegen"</string>
     <string name="status_bar_use_physical_keyboard" msgid="4849251850931213371">"Physische Tastatur"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"<xliff:g id="APPLICATION">%1$s</xliff:g> den Zugriff auf <xliff:g id="USB_DEVICE">%2$s</xliff:g> gewähren?"</string>
-    <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Der App \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" Zugriff auf das Gerät \"<xliff:g id="USB_DEVICE">%2$s</xliff:g>\" geben?\nDiese App hat noch nicht die Berechtigung zum Aufnehmen erhalten, könnte jedoch Audio über dieses USB-Gerät aufnehmen."</string>
+    <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"<xliff:g id="APPLICATION">%1$s</xliff:g> den Zugriff auf <xliff:g id="USB_DEVICE">%2$s</xliff:g> gewähren?\nDiese App hat noch nicht die Berechtigung zum Aufnehmen erhalten, könnte jedoch Audio über dieses USB-Gerät aufnehmen."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"<xliff:g id="APPLICATION">%1$s</xliff:g> den Zugriff auf <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> gewähren?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Für <xliff:g id="USB_DEVICE">%2$s</xliff:g> <xliff:g id="APPLICATION">%1$s</xliff:g> öffnen?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"<xliff:g id="APPLICATION">%1$s</xliff:g> öffnen, um <xliff:g id="USB_DEVICE">%2$s</xliff:g> zu bedienen?\nDiese App hat noch keine Berechtigung zum Aufnehmen erhalten, könnte aber Audioaufnahmen über dieses USB-Gerät machen."</string>
@@ -63,7 +63,7 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Erlauben"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"USB-Debugging nicht zulässig"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"Der momentan auf diesem Gerät angemeldete Nutzer kann das USB-Debugging nicht aktivieren. Um diese Funktion verwenden zu können, wechsle zum primären Nutzer."</string>
-    <string name="wifi_debugging_title" msgid="7300007687492186076">"\"Debugging über WLAN\" in diesem Netzwerk zulassen?"</string>
+    <string name="wifi_debugging_title" msgid="7300007687492186076">"Debugging über WLAN in diesem Netzwerk zulassen?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"Netzwerkname (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nWLAN-Adresse (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"Immer in diesem Netzwerk zulassen"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"Zulassen"</string>
@@ -94,10 +94,10 @@
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Aufzeichnung starten?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"Beim Aufnehmen kann das Android-System vertrauliche Informationen erfassen, die auf deinem Bildschirm angezeigt oder von deinem Gerät wiedergegeben werden. Das können Passwörter, Zahlungsinformationen, Fotos, Nachrichten und Audioinhalte sein."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Audio aufnehmen"</string>
-    <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Audio über das Gerät"</string>
+    <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Audio des Geräts"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Audioinhalte auf deinem Gerät, wie Musik, Anrufe und Klingeltöne"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Mikrofon"</string>
-    <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Audio über Gerät und externes Mikrofon aufnehmen"</string>
+    <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Audio des Geräts und über externes Mikrofon aufnehmen"</string>
     <string name="screenrecord_start" msgid="330991441575775004">"Start"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Bildschirm wird aufgezeichnet"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Bildschirm und Ton werden aufgezeichnet"</string>
@@ -276,8 +276,8 @@
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"lautlos"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"nur Weckrufe"</string>
     <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"Nicht stören."</string>
-    <string name="accessibility_quick_settings_dnd_changed_off" msgid="1457150026842505799">"\"Bitte nicht stören\" deaktiviert."</string>
-    <string name="accessibility_quick_settings_dnd_changed_on" msgid="186315911607486129">"\"Bitte nicht stören\" aktiviert"</string>
+    <string name="accessibility_quick_settings_dnd_changed_off" msgid="1457150026842505799">"„Bitte nicht stören“ deaktiviert."</string>
+    <string name="accessibility_quick_settings_dnd_changed_on" msgid="186315911607486129">"„Bitte nicht stören“ aktiviert"</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="8250942386687551283">"Bluetooth."</string>
     <string name="accessibility_quick_settings_bluetooth_off" msgid="3795983516942423240">"Bluetooth deaktiviert"</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="3819082137684078013">"Bluetooth aktiviert"</string>
@@ -503,7 +503,7 @@
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"Reduzierung der Leistung und Hintergrunddaten"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Energiesparmodus deaktivieren"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"Die App \"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>\" erhält Zugriff auf alle Informationen, die auf deinem Bildschirm sichtbar sind oder von deinem Gerät wiedergegeben werden, während du aufnimmst oder streamst. Dazu gehören beispielsweise angezeigte Passwörter und Zahlungsdetails, Fotos, Nachrichten und Audioinhalte."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Der Anbieter dieser App erhält Zugriff auf alle Informationen, die auf deinem Bildschirm sichtbar sind oder von deinem Gerät wiedergegeben werden, während du aufnimmst oder streamst. Dazu gehören beispielsweise Passwörter, Zahlungsdetails, Fotos, Nachrichten und Audioinhalte."</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Der Anbieter dieser App erhält Zugriff auf alle Informationen, die auf deinem Bildschirm sichtbar sind oder von deinem Gerät wiedergegeben werden, während du aufnimmst oder streamst. Dazu gehören beispielsweise angezeigte Passwörter, Zahlungsdetails, Fotos, Nachrichten und Audioinhalte."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Aufnahme oder Stream starten?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Aufnehmen oder Streamen mit der App \"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>\" starten?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"Nicht mehr anzeigen"</string>
@@ -515,7 +515,7 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Benachrichtigungen"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Unterhaltungen"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Alle lautlosen Benachrichtigungen löschen"</string>
-    <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Benachrichtigungen durch \"Bitte nicht stören\" pausiert"</string>
+    <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Benachrichtigungen durch „Bitte nicht stören“ pausiert"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Jetzt starten"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Keine Benachrichtigungen"</string>
     <string name="profile_owned_footer" msgid="2756770645766113964">"Profil wird eventuell überwacht."</string>
@@ -595,18 +595,18 @@
     <string name="screen_pinning_title" msgid="9058007390337841305">"App ist auf dem Bildschirm fixiert"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Die App bleibt so lange auf dem Bildschirm fixiert, bis du die Fixierung aufhebst. Berühre und halte dazu \"Zurück\" und \"Übersicht\"."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Die App bleibt so lange auf dem Bildschirm fixiert, bis du die Fixierung aufhebst. Berühre und halte dazu \"Zurück\" und \"Startbildschirm\"."</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Die App bleibt so lange auf dem Bildschirm fixiert, bis du die Fixierung aufhebst. Wische dazu nach oben und halte den Bildschirm gedrückt."</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Die App bleibt so lange auf dem Bildschirm angepinnt, bis du die Fixierung aufhebst. Wische dazu nach oben und halte den Bildschirm gedrückt."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Die App bleibt so lange auf dem Bildschirm fixiert, bis du die Fixierung aufhebst. Berühre und halte dazu \"Übersicht\"."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Die App bleibt so lange auf dem Bildschirm fixiert, bis du die Fixierung aufhebst. Berühre und halte dazu \"Startbildschirm\"."</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Möglicherweise kann auf personenbezogene Daten (Kontakte, E-Mails usw.) zugegriffen werden."</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Die fixierte App kann ggf. andere Apps öffnen."</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"Zum Aufheben der Fixierung dieser App \"Zurück\" und \"Übersicht\" halten"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Zum Aufheben der Fixierung dieser App \"Zurück\" und \"Startbildschirm\" halten"</string>
-    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Zum Aufheben der Fixierung nach oben wischen und halten"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Zum Loslösen der App nach oben wischen und halten"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"Ok"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Nein danke"</string>
-    <string name="screen_pinning_start" msgid="7483998671383371313">"Bildschirm wurde fixiert"</string>
-    <string name="screen_pinning_exit" msgid="4553787518387346893">"Bildschirmfixierung aufgehoben"</string>
+    <string name="screen_pinning_start" msgid="7483998671383371313">"App angepinnt"</string>
+    <string name="screen_pinning_exit" msgid="4553787518387346893">"App vom Bildschirm losgelöst"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> ausblenden?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"Sie wird wieder eingeblendet, wenn du sie in den Einstellungen erneut aktivierst."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="3341477479055016776">"Ausblenden"</string>
@@ -630,9 +630,9 @@
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Zum Stummschalten tippen. Bedienungshilfen werden unter Umständen stummgeschaltet."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s. Zum Aktivieren der Vibration tippen."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s. Zum Stummschalten tippen."</string>
-    <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"stummschalten"</string>
-    <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"Stummschaltung aufheben"</string>
-    <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"vibrieren"</string>
+    <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"Stummschalten"</string>
+    <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"Aufheben der Stummschaltung"</string>
+    <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"Vibrieren lassen"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"Lautstärkeregler von %s"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"Gerät klingelt bei Anrufen und Benachrichtigungen (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="output_title" msgid="3938776561655668350">"Medienausgabe"</string>
@@ -712,11 +712,11 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"Standard"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"Bubble"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Kein Ton und keine Vibration"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Kein Ton und keine Vibration, erscheint weiter unten im Bereich \"Unterhaltungen\""</string>
+    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Kein Ton und keine Vibration, erscheint weiter unten im Bereich „Unterhaltungen“"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Kann klingeln oder vibrieren, abhängig von den Telefoneinstellungen"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Kann klingeln oder vibrieren, je nach Telefoneinstellungen. Unterhaltungen von <xliff:g id="APP_NAME">%1$s</xliff:g> werden standardmäßig als Bubble angezeigt."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Du wirst mit einer unverankerten Verknüpfung darauf aufmerksam gemacht."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Wird oben im Bereich \"Unterhaltungen\" als unverankerte Bubble mit einem Profilbild auf dem Sperrbildschirm angezeigt"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Wird oben im Bereich „Unterhaltungen“ sowie als unverankerte Bubble angezeigt und erscheint mit einem Profilbild auf dem Sperrbildschirm"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Einstellungen"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Priorität"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> unterstützt keine Funktionen für Unterhaltungen"</string>
@@ -725,7 +725,7 @@
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Diese Benachrichtigungen können nicht geändert werden."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Die Benachrichtigungsgruppe kann hier nicht konfiguriert werden"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Weitergeleitete Benachrichtigung"</string>
-    <string name="notification_channel_dialog_title" msgid="6856514143093200019">"Alle <xliff:g id="APP_NAME">%1$s</xliff:g>-Benachrichtigungen"</string>
+    <string name="notification_channel_dialog_title" msgid="6856514143093200019">"Alle Benachrichtigungen von <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="see_more_title" msgid="7409317011708185729">"Mehr"</string>
     <string name="appops_camera" msgid="5215967620896725715">"Diese App verwendet die Kamera."</string>
     <string name="appops_microphone" msgid="8805468338613070149">"Diese App verwendet das Mikrofon."</string>
@@ -815,11 +815,11 @@
     <string name="tuner_full_zen_title" msgid="5120366354224404511">"Einschließlich Lautstärkeregler anzeigen"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"Bitte nicht stören"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"Tastenkombination für Lautstärketasten"</string>
-    <string name="volume_up_silent" msgid="1035180298885717790">"\"Bitte nicht stören\" bei \"Lauter\" deaktivieren"</string>
+    <string name="volume_up_silent" msgid="1035180298885717790">"„Bitte nicht stören“ bei \"Lauter\" deaktivieren"</string>
     <string name="battery" msgid="769686279459897127">"Akku"</string>
     <string name="clock" msgid="8978017607326790204">"Uhr"</string>
     <string name="headset" msgid="4485892374984466437">"Headset"</string>
-    <string name="accessibility_long_click_tile" msgid="210472753156768705">"Einstellungen öffnen"</string>
+    <string name="accessibility_long_click_tile" msgid="210472753156768705">"Öffnen der Einstellungen"</string>
     <string name="accessibility_status_bar_headphones" msgid="1304082414912647414">"Mit Kopfhörer verbunden"</string>
     <string name="accessibility_status_bar_headset" msgid="2699275863720926104">"Mit Headset verbunden"</string>
     <string name="data_saver" msgid="3484013368530820763">"Datensparmodus"</string>
@@ -962,9 +962,9 @@
     <string name="wifi_is_off" msgid="5389597396308001471">"WLAN ist deaktiviert"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth ist deaktiviert"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"„Bitte nicht stören“ ist deaktiviert"</string>
-    <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"\"Bitte nicht stören\" wurde von einer automatischen Regel aktiviert (<xliff:g id="ID_1">%s</xliff:g>)."</string>
-    <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"\"Bitte nicht stören\" wurde von einer App aktiviert (<xliff:g id="ID_1">%s</xliff:g>)."</string>
-    <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"\"Bitte nicht stören\" wurde von einer automatischen Regel oder einer App aktiviert."</string>
+    <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"„Bitte nicht stören“ wurde von einer automatischen Regel aktiviert (<xliff:g id="ID_1">%s</xliff:g>)."</string>
+    <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"„Bitte nicht stören“ wurde von einer App aktiviert (<xliff:g id="ID_1">%s</xliff:g>)."</string>
+    <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"„Bitte nicht stören“ wurde von einer automatischen Regel oder einer App aktiviert."</string>
     <string name="qs_dnd_until" msgid="7844269319043747955">"Bis <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="qs_dnd_keep" msgid="3829697305432866434">"Beibehalten"</string>
     <string name="qs_dnd_replace" msgid="7712119051407052689">"Ersetzen"</string>
@@ -1016,10 +1016,10 @@
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Standby"</string>
     <string name="priority_onboarding_title" msgid="2893070698479227616">"Unterhaltung als vorrangig eingestuft"</string>
     <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Vorrangige Unterhaltungen:"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Werden oben im Bereich \"Unterhaltungen\" angezeigt"</string>
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Oben im Bereich „Unterhaltungen“ anzeigen"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Zeigen Profilbild auf Sperrbildschirm an"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Erscheinen als unverankerte Bubble über anderen Apps"</string>
-    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"\"Bitte nicht stören\" unterbrechen"</string>
+    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"„Bitte nicht stören“ unterbrechen"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"OK"</string>
     <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Einstellungen"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Overlay-Vergrößerungsfenster"</string>
@@ -1038,8 +1038,8 @@
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Zu Favoriten hinzugefügt"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Zu Favoriten hinzugefügt, Position <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"Aus Favoriten entfernt"</string>
-    <string name="accessibility_control_change_favorite" msgid="2943178027582253261">"Zum Hinzufügen zu Favoriten"</string>
-    <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"Zum Entfernen aus Favoriten"</string>
+    <string name="accessibility_control_change_favorite" msgid="2943178027582253261">"Hinzufügen zu Favoriten"</string>
+    <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"Entfernen aus Favoriten"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Auf Position <xliff:g id="NUMBER">%d</xliff:g> verschieben"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Steuerelemente"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Steuerelemente auswählen, auf die man über das Ein-/Aus-Menü zugreifen kann"</string>

@@ -357,7 +357,7 @@
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"Mga Hearing Aid"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"Ino-on…"</string>
     <string name="quick_settings_brightness_label" msgid="680259653088849563">"Brightness"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Awtomatikong i-rotate"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"I-auto rotate"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Awtomatikong i-rotate ang screen"</string>
     <string name="accessibility_quick_settings_rotation_value" msgid="2916484894750819251">"<xliff:g id="ID_1">%s</xliff:g> mode"</string>
     <string name="quick_settings_rotation_locked_label" msgid="4420863550666310319">"Naka-lock ang pag-ikot"</string>
@@ -391,7 +391,7 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="2325362583903258677">"AUTO"</string>
     <string name="quick_settings_inversion_label" msgid="5078769633069667698">"I-invert ang mga kulay"</string>
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"Correction mode ng kulay"</string>
-    <string name="quick_settings_more_settings" msgid="2878235926753776694">"Marami pang setting"</string>
+    <string name="quick_settings_more_settings" msgid="2878235926753776694">"Higit pang setting"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Tapos na"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Nakakonekta"</string>
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"Nakakonekta, baterya <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
@@ -418,7 +418,7 @@
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Night Light"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Mao-on sa sunset"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Hanggang sunrise"</string>
-    <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"Mao-on sa ganap na <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"Mao-on nang <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"Hanggang <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"Madilim na tema"</string>
     <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"Pantipid ng Baterya"</string>
@@ -479,7 +479,7 @@
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Alisin ang bisita?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Ide-delete ang lahat ng app at data sa session na ito."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Alisin"</string>
-    <string name="guest_wipe_session_title" msgid="7147965814683990944">"Maligayang pagbabalik, bisita!"</string>
+    <string name="guest_wipe_session_title" msgid="7147965814683990944">"Welcome ulit, bisita!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Gusto mo bang ipagpatuloy ang iyong session?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Magsimulang muli"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Oo, magpatuloy"</string>
