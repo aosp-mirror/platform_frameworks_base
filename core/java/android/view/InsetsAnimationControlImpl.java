@@ -86,6 +86,7 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
     private final InsetsState mInitialInsetsState;
     private final @AnimationType int mAnimationType;
     private final @InsetsType int mTypes;
+    private @InsetsType int mControllingTypes;
     private final InsetsAnimationControlCallbacks mController;
     private final WindowInsetsAnimation mAnimation;
     /** @see WindowInsetsAnimationController#hasZeroInsetsIme */
@@ -112,6 +113,7 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
         mControls = controls;
         mListener = listener;
         mTypes = types;
+        mControllingTypes = types;
         mController = controller;
         mInitialInsetsState = new InsetsState(state, true /* copySources */);
         if (frame != null) {
@@ -184,6 +186,16 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
     @Override
     @InsetsType public int getTypes() {
         return mTypes;
+    }
+
+    @Override
+    public int getControllingTypes() {
+        return mControllingTypes;
+    }
+
+    @Override
+    public void notifyControlRevoked(@InsetsType int types) {
+        mControllingTypes &= ~types;
     }
 
     @Override

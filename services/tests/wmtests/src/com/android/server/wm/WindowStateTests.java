@@ -20,6 +20,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
+import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_270;
@@ -78,6 +79,7 @@ import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.view.Gravity;
 import android.view.InputWindowHandle;
+import android.view.InsetsSource;
 import android.view.InsetsState;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
@@ -878,6 +880,22 @@ public class WindowStateTests extends WindowTestsBase {
         assertTrue(app.isReadyToDispatchInsetsState());
         mDisplayContent.getInsetsStateController().notifyInsetsChanged();
         verify(app).notifyInsetsChanged();
+    }
+
+    @UseTestDisplay(addWindows = { W_INPUT_METHOD, W_ACTIVITY })
+    @Test
+    public void testImeAlwaysReceivesVisibleNavigationBarInsets() {
+        final InsetsSource navSource = new InsetsSource(ITYPE_NAVIGATION_BAR);
+        mImeWindow.mAboveInsetsState.addSource(navSource);
+        mAppWindow.mAboveInsetsState.addSource(navSource);
+
+        navSource.setVisible(false);
+        assertTrue(mImeWindow.getInsetsState().getSourceOrDefaultVisibility(ITYPE_NAVIGATION_BAR));
+        assertFalse(mAppWindow.getInsetsState().getSourceOrDefaultVisibility(ITYPE_NAVIGATION_BAR));
+
+        navSource.setVisible(true);
+        assertTrue(mImeWindow.getInsetsState().getSourceOrDefaultVisibility(ITYPE_NAVIGATION_BAR));
+        assertTrue(mAppWindow.getInsetsState().getSourceOrDefaultVisibility(ITYPE_NAVIGATION_BAR));
     }
 
     @UseTestDisplay(addWindows = { W_ACTIVITY })
