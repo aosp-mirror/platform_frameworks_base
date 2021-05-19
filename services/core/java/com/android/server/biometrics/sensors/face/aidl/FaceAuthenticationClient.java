@@ -68,7 +68,7 @@ class FaceAuthenticationClient extends AuthenticationClient<ISession> implements
     private final int[] mKeyguardIgnoreList;
     private final int[] mKeyguardIgnoreListVendor;
 
-    private int mLastAcquire;
+    @FaceManager.FaceAcquired private int mLastAcquire = FaceManager.FACE_ACQUIRED_UNKNOWN;
 
     FaceAuthenticationClient(@NonNull Context context,
             @NonNull LazyDaemon<ISession> lazyDaemon, @NonNull IBinder token,
@@ -127,7 +127,8 @@ class FaceAuthenticationClient extends AuthenticationClient<ISession> implements
         // Do not provide haptic feedback if the user was not detected, and an error (usually
         // ERROR_TIMEOUT) is received.
         return mLastAcquire != FaceManager.FACE_ACQUIRED_NOT_DETECTED
-                && mLastAcquire != FaceManager.FACE_ACQUIRED_SENSOR_DIRTY;
+                && mLastAcquire != FaceManager.FACE_ACQUIRED_SENSOR_DIRTY
+                && mLastAcquire != FaceManager.FACE_ACQUIRED_UNKNOWN;
     }
 
     @Override
