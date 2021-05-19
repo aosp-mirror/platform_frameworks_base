@@ -330,21 +330,21 @@
     <dimen name="global_screenshot_bg_protection_height">400dp</dimen>
     <dimen name="global_screenshot_x_scale">80dp</dimen>
     <dimen name="screenshot_bg_protection_height">242dp</dimen>
-    <dimen name="screenshot_preview_elevation">6dp</dimen>
-    <dimen name="screenshot_offset_y">32dp</dimen>
+    <dimen name="screenshot_preview_elevation">4dp</dimen>
+    <dimen name="screenshot_offset_y">24dp</dimen>
     <dimen name="screenshot_offset_x">16dp</dimen>
     <dimen name="screenshot_dismiss_button_tappable_size">48dp</dimen>
     <dimen name="screenshot_dismiss_button_margin">8dp</dimen>
     <dimen name="screenshot_action_container_offset_y">16dp</dimen>
-    <dimen name="screenshot_action_container_corner_radius">10dp</dimen>
-    <dimen name="screenshot_action_container_padding_vertical">6dp</dimen>
+    <dimen name="screenshot_action_container_corner_radius">18dp</dimen>
+    <dimen name="screenshot_action_container_padding_vertical">4dp</dimen>
     <dimen name="screenshot_action_container_margin_horizontal">8dp</dimen>
     <dimen name="screenshot_action_container_padding_right">8dp</dimen>
     <!-- Radius of the chip background on global screenshot actions -->
-    <dimen name="screenshot_button_corner_radius">20dp</dimen>
+    <dimen name="screenshot_button_corner_radius">8dp</dimen>
     <dimen name="screenshot_action_chip_margin_start">8dp</dimen>
-    <dimen name="screenshot_action_chip_margin_vertical">10dp</dimen>
-    <dimen name="screenshot_action_chip_padding_vertical">7dp</dimen>
+    <dimen name="screenshot_action_chip_margin_vertical">4dp</dimen>
+    <dimen name="screenshot_action_chip_padding_vertical">11dp</dimen>
     <dimen name="screenshot_action_chip_icon_size">18dp</dimen>
     <dimen name="screenshot_action_chip_padding_start">8dp</dimen>
     <!-- Padding between icon and text -->
