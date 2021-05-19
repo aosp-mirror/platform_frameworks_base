@@ -7870,56 +7870,52 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     void sendDeviceOwnerCommand(String action, Bundle extras) {
         final int deviceOwnerUserId;
+        final ComponentName receiverComponent;
         synchronized (getLockObject()) {
             deviceOwnerUserId = mOwners.getDeviceOwnerUserId();
+            receiverComponent = mOwners.getDeviceOwnerComponent();
         }
-
-        ComponentName receiverComponent = null;
-        if (action.equals(DeviceAdminReceiver.ACTION_NETWORK_LOGS_AVAILABLE)) {
-            receiverComponent = resolveDelegateReceiver(DELEGATION_NETWORK_LOGGING, action,
-                    deviceOwnerUserId);
-        }
-        if (action.equals(DeviceAdminReceiver.ACTION_SECURITY_LOGS_AVAILABLE)) {
-            receiverComponent = resolveDelegateReceiver(DELEGATION_SECURITY_LOGGING, action,
-                    deviceOwnerUserId);
-        }
-        if (receiverComponent == null) {
-            synchronized (getLockObject()) {
-                receiverComponent = mOwners.getDeviceOwnerComponent();
-            }
-        }
-        sendActiveAdminCommand(action, extras, deviceOwnerUserId, receiverComponent);
+        sendActiveAdminCommand(action, extras, deviceOwnerUserId, receiverComponent,
+                /* inForeground */ false);
     }
 
     void sendDeviceOwnerOrProfileOwnerCommand(String action, Bundle extras, int userId) {
         if (userId == UserHandle.USER_ALL) {
             userId = UserHandle.USER_SYSTEM;
         }
+        boolean inForeground = false;
         ComponentName receiverComponent = null;
         if (action.equals(DeviceAdminReceiver.ACTION_NETWORK_LOGS_AVAILABLE)) {
+            inForeground = true;
             receiverComponent = resolveDelegateReceiver(DELEGATION_NETWORK_LOGGING, action, userId);
         }
         if (action.equals(DeviceAdminReceiver.ACTION_SECURITY_LOGS_AVAILABLE)) {
+            inForeground = true;
             receiverComponent = resolveDelegateReceiver(
                 DELEGATION_SECURITY_LOGGING, action, userId);
         }
         if (receiverComponent == null) {
             receiverComponent = getOwnerComponent(userId);
         }
-        sendActiveAdminCommand(action, extras, userId, receiverComponent);
+        sendActiveAdminCommand(action, extras, userId, receiverComponent, inForeground);
     }
 
     private void sendProfileOwnerCommand(String action, Bundle extras, @UserIdInt int userId) {
-        sendActiveAdminCommand(action, extras, userId, mOwners.getProfileOwnerComponent(userId));
+        sendActiveAdminCommand(action, extras, userId, mOwners.getProfileOwnerComponent(userId),
+                /* inForeground */ false);
     }
 
     private void sendActiveAdminCommand(String action, Bundle extras,
-            @UserIdInt int userId, ComponentName receiverComponent) {
+            @UserIdInt int userId, ComponentName receiverComponent, boolean inForeground) {
         final Intent intent = new Intent(action);
         intent.setComponent(receiverComponent);
         if (extras != null) {
             intent.putExtras(extras);
         }
+        if (inForeground) {
+            intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+        }
+
         if (VERBOSE_LOG) {
             Slogf.v(LOG_TAG, "sendActiveAdminCommand(): broadcasting " + action + " to "
                     + receiverComponent.flattenToShortString() + " on user " + userId);
