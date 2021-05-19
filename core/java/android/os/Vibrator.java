@@ -227,6 +227,17 @@ public abstract class Vibrator {
     }
 
     /**
+     * Check whether the vibrator can be controlled by an external service with the
+     * {@link IExternalVibratorService}.
+     *
+     * @return True if the hardware can be controlled by an external service, otherwise false.
+     * @hide
+     */
+    public boolean hasExternalControl() {
+        return getInfo().hasCapability(IVibrator.CAP_EXTERNAL_CONTROL);
+    }
+
+    /**
      * Gets the resonant frequency of the vibrator.
      *
      * @return the resonant frequency of the vibrator, or {@link Float#NaN NaN} if it's unknown or
