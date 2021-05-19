@@ -1286,6 +1286,40 @@ public class UserManager {
             "disallow_config_private_dns";
 
     /**
+     * Specifies whether the microphone toggle is available to the user. If this restriction is set,
+     * the user will not be able to block microphone access via the system toggle. If microphone
+     * access is blocked when the restriction is added, it will be automatically re-enabled.
+     *
+     * This restriction can only be set by a device owner.
+     *
+     * <p>The default value is <code>false</code>.
+     *
+     * @see android.hardware.SensorPrivacyManager
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_MICROPHONE_TOGGLE =
+            "disallow_microphone_toggle";
+
+    /**
+     * Specifies whether the camera toggle is available to the user. If this restriction is set,
+     * the user will not be able to block camera access via the system toggle. If camera
+     * access is blocked when the restriction is added, it will be automatically re-enabled.
+     *
+     * This restriction can only be set by a device owner.
+     *
+     * <p>The default value is <code>false</code>.
+     *
+     * @see android.hardware.SensorPrivacyManager
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_CAMERA_TOGGLE =
+            "disallow_camera_toggle";
+
+    /**
      * Application restriction key that is used to indicate the pending arrival
      * of real restrictions for the app.
      *
@@ -1376,6 +1410,8 @@ public class UserManager {
             DISALLOW_SHARE_INTO_MANAGED_PROFILE,
             DISALLOW_PRINTING,
             DISALLOW_CONFIG_PRIVATE_DNS,
+            DISALLOW_MICROPHONE_TOGGLE,
+            DISALLOW_CAMERA_TOGGLE,
             KEY_RESTRICTIONS_PENDING,
     })
     @Retention(RetentionPolicy.SOURCE)
