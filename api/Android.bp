@@ -149,6 +149,7 @@ genrule {
 genrule {
     name: "frameworks-base-api-system-current.txt",
     srcs: [
+        ":art.module.public.api{.system.api.txt}",
         ":android.net.ipsec.ike{.system.api.txt}",
         ":framework-connectivity{.system.api.txt}",
         ":framework-media{.system.api.txt}",
@@ -199,6 +200,7 @@ genrule {
 genrule {
     name: "frameworks-base-api-system-removed.txt",
     srcs: [
+        ":art.module.public.api{.system.removed-api.txt}",
         ":android.net.ipsec.ike{.system.removed-api.txt}",
         ":framework-connectivity{.system.removed-api.txt}",
         ":framework-media{.system.removed-api.txt}",
@@ -231,6 +233,7 @@ genrule {
 genrule {
     name: "frameworks-base-api-module-lib-current.txt",
     srcs: [
+        ":art.module.public.api{.module-lib.api.txt}",
         ":android.net.ipsec.ike{.module-lib.api.txt}",
         ":framework-connectivity{.module-lib.api.txt}",
         ":framework-media{.module-lib.api.txt}",
@@ -283,6 +286,7 @@ genrule {
 genrule {
     name: "frameworks-base-api-module-lib-removed.txt",
     srcs: [
+        ":art.module.public.api{.module-lib.removed-api.txt}",
         ":android.net.ipsec.ike{.module-lib.removed-api.txt}",
         ":framework-connectivity{.module-lib.removed-api.txt}",
         ":framework-media{.module-lib.removed-api.txt}",
