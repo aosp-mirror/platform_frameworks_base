@@ -186,6 +186,16 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         ta.recycle();
     }
 
+    private ColorStateList colorStateListWithDisabledAlpha(int color, int disabledAlpha) {
+        return new ColorStateList(new int[][]{
+                new int[]{-com.android.internal.R.attr.state_enabled}, // disabled
+                new int[]{},
+        }, new int[]{
+                ColorUtils.setAlphaComponent(color, disabledAlpha),
+                color
+        });
+    }
+
     /**
      * The remote view needs to adapt to colorized notifications when set
      * It overrides the background of itself as well as all of its childern
@@ -196,54 +206,50 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         mColorized = colorized;
         mTint = backgroundColor;
         final int editBgColor;
-        final int alternateBgColor;
-        final int alternateTextColor;
-        final int accentColor;
-        final int textColor;
-        final int hintTextColor;
-        final int stroke = mContext.getResources().getDimensionPixelSize(
-                R.dimen.remote_input_view_text_stroke);
+        final int deleteBgColor;
+        final int deleteFgColor;
+        final ColorStateList accentColor;
+        final ColorStateList textColor;
+        final int hintColor;
+        final int stroke = colorized ? mContext.getResources().getDimensionPixelSize(
+                R.dimen.remote_input_view_text_stroke) : 0;
         if (colorized) {
             final boolean dark = !ContrastColorUtil.isColorLight(backgroundColor);
             final int foregroundColor = dark ? Color.WHITE : Color.BLACK;
+            final int inverseColor = dark ? Color.BLACK : Color.WHITE;
             editBgColor = backgroundColor;
-            accentColor = foregroundColor;
-            alternateBgColor = foregroundColor;
-            alternateTextColor = backgroundColor;
-            textColor = foregroundColor;
-            hintTextColor = ColorUtils.setAlphaComponent(foregroundColor, 0x99);
+            deleteBgColor = foregroundColor;
+            deleteFgColor = inverseColor;
+            accentColor = colorStateListWithDisabledAlpha(foregroundColor, 0x4D); // 30%
+            textColor = colorStateListWithDisabledAlpha(foregroundColor, 0x99); // 60%
+            hintColor = ColorUtils.setAlphaComponent(foregroundColor, 0x99);
         } else {
-            textColor = mContext.getColor(R.color.remote_input_text);
-            hintTextColor = mContext.getColor(R.color.remote_input_hint);
+            accentColor = mContext.getColorStateList(R.color.remote_input_send);
+            textColor = mContext.getColorStateList(R.color.remote_input_text);
+            hintColor = mContext.getColor(R.color.remote_input_hint);
+            deleteFgColor = textColor.getDefaultColor();
             try (TypedArray ta = getContext().getTheme().obtainStyledAttributes(new int[]{
-                    com.android.internal.R.attr.colorAccent,
-                    com.android.internal.R.attr.colorSurface,
-                    com.android.internal.R.attr.colorSurfaceVariant,
-                    com.android.internal.R.attr.textColorPrimary
+                    com.android.internal.R.attr.colorSurfaceHighlight,
+                    com.android.internal.R.attr.colorSurfaceVariant
             })) {
-                accentColor = ta.getColor(0, textColor);
-                editBgColor = ta.getColor(1, backgroundColor);
-                alternateBgColor = ta.getColor(2, textColor);
-                alternateTextColor = ta.getColor(3, backgroundColor);
+                editBgColor = ta.getColor(0, backgroundColor);
+                deleteBgColor = ta.getColor(1, Color.GRAY);
             }
         }
-        final ColorStateList accentTint = new ColorStateList(new int[][]{
-                new int[]{com.android.internal.R.attr.state_enabled},
-                new int[]{},
-        }, new int[]{
-                accentColor,
-                accentColor & 0x4DFFFFFF // %30 opacity
-        });
-        mEditText.setAllColors(accentColor, textColor, hintTextColor);
+
+        mEditText.setTextColor(textColor);
+        mEditText.setHintTextColor(hintColor);
+        mEditText.getTextCursorDrawable().setColorFilter(
+                accentColor.getDefaultColor(), PorterDuff.Mode.SRC_IN);
         mContentBackground.setColor(editBgColor);
-        mContentBackground.setStroke(stroke, accentTint);
-        mDelete.setImageTintList(ColorStateList.valueOf(alternateTextColor));
-        mDeleteBg.setImageTintList(ColorStateList.valueOf(alternateBgColor));
-        mSendButton.setImageTintList(accentTint);
-        mProgressBar.setProgressTintList(accentTint);
-        mProgressBar.setIndeterminateTintList(accentTint);
-        mProgressBar.setSecondaryProgressTintList(accentTint);
-        setBackgroundColor(editBgColor);
+        mContentBackground.setStroke(stroke, accentColor);
+        mDelete.setImageTintList(ColorStateList.valueOf(deleteFgColor));
+        mDeleteBg.setImageTintList(ColorStateList.valueOf(deleteBgColor));
+        mSendButton.setImageTintList(accentColor);
+        mProgressBar.setProgressTintList(accentColor);
+        mProgressBar.setIndeterminateTintList(accentColor);
+        mProgressBar.setSecondaryProgressTintList(accentColor);
+        setBackgroundColor(backgroundColor);
     }
 
     @Override
@@ -1063,10 +1069,5 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
             return remainingItems;
         }
 
-        protected void setAllColors(int accentColor, int textColor, int hintTextColor) {
-            setTextColor(textColor);
-            setHintTextColor(hintTextColor);
-            getTextCursorDrawable().setColorFilter(accentColor, PorterDuff.Mode.SRC_IN);
-        }
     }
 }
