@@ -3094,7 +3094,7 @@ static jint android_media_tv_Tuner_set_filter_data_source(
         r = iFilterSp->setDataSource(NULL);
     } else {
         sp<IFilter> srcSp = getFilter(env, srcFilter)->getIFilter();
-        if (iFilterSp == NULL) {
+        if (srcSp == NULL) {
             ALOGD("Failed to set filter data source: src filter not found");
             return (jint) Result::INVALID_ARGUMENT;
         }
