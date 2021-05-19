@@ -3547,7 +3547,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 202;
+            private static final int SETTINGS_VERSION = 203;
 
             private final int mUserId;
 
@@ -5128,6 +5128,27 @@ public class SettingsProvider extends ContentProvider {
                                 SettingsState.SYSTEM_PACKAGE_NAME);
                     }
                     currentVersion = 202;
+                }
+
+                if (currentVersion == 202) {
+                    // Version 202: Power menu has been removed, and the privacy setting
+                    // has been split into two for wallet and controls
+                    final SettingsState secureSettings = getSecureSettingsLocked(userId);
+                    final Setting showLockedContent = secureSettings.getSettingLocked(
+                            Secure.POWER_MENU_LOCKED_SHOW_CONTENT);
+                    if (!showLockedContent.isNull()) {
+                        String currentValue = showLockedContent.getValue();
+
+                        secureSettings.insertSettingOverrideableByRestoreLocked(
+                                Secure.LOCKSCREEN_SHOW_CONTROLS,
+                                currentValue, null /* tag */, false /* makeDefault */,
+                                SettingsState.SYSTEM_PACKAGE_NAME);
+                        secureSettings.insertSettingOverrideableByRestoreLocked(
+                                Secure.LOCKSCREEN_SHOW_WALLET,
+                                currentValue, null /* tag */, false /* makeDefault */,
+                                SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
+                    currentVersion = 203;
                 }
 
                 // vXXX: Add new settings above this point.
