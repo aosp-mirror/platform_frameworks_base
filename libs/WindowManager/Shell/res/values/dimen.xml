@@ -97,7 +97,7 @@
     <!-- How much the bubble flyout text container is elevated. -->
     <dimen name="bubble_flyout_elevation">4dp</dimen>
     <!-- How much padding is around the left and right sides of the flyout text. -->
-    <dimen name="bubble_flyout_padding_x">12dp</dimen>
+    <dimen name="bubble_flyout_padding_x">14dp</dimen>
     <!-- How much padding is around the top and bottom of the flyout text. -->
     <dimen name="bubble_flyout_padding_y">10dp</dimen>
     <!-- Size of the triangle that points from the flyout to the bubble stack. -->
