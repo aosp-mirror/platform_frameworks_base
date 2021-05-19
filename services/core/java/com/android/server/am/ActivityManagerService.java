@@ -11970,6 +11970,31 @@ public class ActivityManagerService extends IActivityManager.Stub
             Slog.w(TAG, "Unable to bind backup agent for " + packageName);
             return false;
         }
+        if (app.backupAgentName != null) {
+            final ComponentName backupAgentName = new ComponentName(
+                    app.packageName, app.backupAgentName);
+            int enableState = PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
+            try {
+                enableState = pm.getComponentEnabledSetting(backupAgentName, instantiatedUserId);
+            } catch (RemoteException e) {
+                // can't happen; package manager is process-local
+            }
+            switch (enableState) {
+                case PackageManager.COMPONENT_ENABLED_STATE_DISABLED:
+                case PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER:
+                case PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED:
+                    Slog.w(TAG, "Unable to bind backup agent for " + backupAgentName
+                            + ", the backup agent component is disabled.");
+                    return false;
+
+                case PackageManager.COMPONENT_ENABLED_STATE_DEFAULT:
+                case PackageManager.COMPONENT_ENABLED_STATE_ENABLED:
+                default:
+                    // Since there's no way to declare a backup agent disabled in the manifest,
+                    // assume the case COMPONENT_ENABLED_STATE_DEFAULT to be enabled.
+                    break;
+            }
+        }
 
         int oldBackupUid;
         int newBackupUid;
