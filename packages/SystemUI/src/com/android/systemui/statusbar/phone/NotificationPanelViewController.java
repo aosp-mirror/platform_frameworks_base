@@ -507,6 +507,13 @@ public class NotificationPanelViewController extends PanelViewController {
     private float mSectionPadding;
 
     /**
+     * The padding between the start of notifications and the qs boundary on the lockscreen.
+     * On lockscreen, notifications aren't inset this extra amount, but we still want the
+     * qs boundary to be padded.
+     */
+    private int mLockscreenNotificationQSPadding;
+
+    /**
      * The amount of progress we are currently in if we're transitioning to the full shade.
      * 0.0f means we're not transitioning yet, while 1 means we're all the way in the full
      * shade. This value can also go beyond 1.1 when we're overshooting!
@@ -528,7 +535,7 @@ public class NotificationPanelViewController extends PanelViewController {
     /**
      * The maximum overshoot allowed for the top padding for the full shade transition
      */
-    private int mMaxOverscrollAmountForDragDown;
+    private int mMaxOverscrollAmountForPulse;
 
     /**
      * Should we animate the next bounds update
@@ -811,7 +818,7 @@ public class NotificationPanelViewController extends PanelViewController {
                 amount -> {
                     float progress = amount / mView.getHeight();
                     float overstretch = Interpolators.getOvershootInterpolation(progress,
-                            (float) mMaxOverscrollAmountForDragDown / mView.getHeight(),
+                            (float) mMaxOverscrollAmountForPulse / mView.getHeight(),
                             0.2f);
                     setOverStrechAmount(overstretch);
                 });
@@ -872,13 +879,15 @@ public class NotificationPanelViewController extends PanelViewController {
                 R.dimen.heads_up_status_bar_padding);
         mDistanceForQSFullShadeTransition = mResources.getDimensionPixelSize(
                 R.dimen.lockscreen_shade_qs_transition_distance);
-        mMaxOverscrollAmountForDragDown = mResources.getDimensionPixelSize(
-                R.dimen.lockscreen_shade_max_top_overshoot);
+        mMaxOverscrollAmountForPulse = mResources.getDimensionPixelSize(
+                R.dimen.pulse_expansion_max_top_overshoot);
         mScrimCornerRadius = mResources.getDimensionPixelSize(
                 R.dimen.notification_scrim_corner_radius);
         mScreenCornerRadius = mResources.getDimensionPixelSize(
                 com.android.internal.R.dimen.rounded_corner_radius);
         mNotificationScrimPadding = mResources.getDimensionPixelSize(
+                R.dimen.notification_side_paddings);
+        mLockscreenNotificationQSPadding = mResources.getDimensionPixelSize(
                 R.dimen.notification_side_paddings);
     }
 
@@ -2363,7 +2372,6 @@ public class NotificationPanelViewController extends PanelViewController {
     public void setTransitionToFullShadeAmount(float pxAmount, boolean animate, long delay) {
         mAnimateNextNotificationBounds = animate && !mShouldUseSplitNotificationShade;
         mNotificationBoundsAnimationDelay = delay;
-        float progress = MathUtils.saturate(pxAmount / mView.getHeight());
 
         float endPosition = 0;
         if (pxAmount > 0.0f) {
@@ -2371,29 +2379,28 @@ public class NotificationPanelViewController extends PanelViewController {
                     && !mMediaDataManager.hasActiveMedia()) {
                 // No notifications are visible, let's animate to the height of qs instead
                 if (mQs != null) {
-                    // Let's interpolate to the header height
-                    endPosition = mQs.getHeader().getHeight();
+                    // Let's interpolate to the header height instead of the top padding,
+                    // because the toppadding is way too low because of the large clock.
+                    // we still want to take into account the edgePosition though as that nicely
+                    // overshoots in the stackscroller
+                    endPosition = getQSEdgePosition()
+                            - mNotificationStackScrollLayoutController.getTopPadding()
+                            + mQs.getHeader().getHeight();
                 }
             } else {
                 // Interpolating to the new bottom edge position!
-                endPosition = getQSEdgePosition() - mOverStretchAmount;
-
-                // If we have media, we need to put the boundary below it, as the media header
-                // still uses the space during the transition.
-                endPosition +=
-                        mNotificationStackScrollLayoutController.getFullShadeTransitionInset();
+                endPosition = getQSEdgePosition()
+                        + mNotificationStackScrollLayoutController.getFullShadeTransitionInset();
+                if (isOnKeyguard()) {
+                    endPosition -= mLockscreenNotificationQSPadding;
+                }
             }
         }
 
         // Calculate the overshoot amount such that we're reaching the target after our desired
         // distance, but only reach it fully once we drag a full shade length.
-        float transitionProgress = 0;
-        if (endPosition != 0 && progress != 0) {
-            transitionProgress = Interpolators.getOvershootInterpolation(progress,
-                    mMaxOverscrollAmountForDragDown / endPosition,
-                    (float) mDistanceForQSFullShadeTransition / (float) mView.getHeight());
-        }
-        mTransitioningToFullShadeProgress = transitionProgress;
+        mTransitioningToFullShadeProgress = Interpolators.FAST_OUT_SLOW_IN.getInterpolation(
+                MathUtils.saturate(pxAmount / mDistanceForQSFullShadeTransition));
 
         int position = (int) MathUtils.lerp((float) 0, endPosition,
                 mTransitioningToFullShadeProgress);
@@ -2401,8 +2408,6 @@ public class NotificationPanelViewController extends PanelViewController {
             // we want at least 1 pixel otherwise the panel won't be clipped
             position = Math.max(1, position);
         }
-        float overStretchAmount = Math.max(position - endPosition, 0.0f);
-        setOverStrechAmount(overStretchAmount);
         mTransitionToFullShadeQSPosition = position;
         updateQsExpansion();
     }

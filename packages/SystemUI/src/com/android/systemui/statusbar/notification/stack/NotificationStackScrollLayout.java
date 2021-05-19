@@ -5147,8 +5147,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     /**
-     * Sets the extra top inset for the full shade transition. This is needed to compensate for
-     * media transitioning to quick settings
+     * Sets the extra top inset for the full shade transition. This moves notifications down
+     * during the drag down.
      */
     public void setExtraTopInsetForFullShadeTransition(float inset) {
         mExtraTopInsetForFullShadeTransition = inset;

@@ -185,8 +185,17 @@ public class NotificationStackScrollLayoutController {
 
     private ColorExtractor.OnColorsChangedListener mOnColorsChangedListener;
 
+    /**
+     * The total distance in pixels that the full shade transition takes to transition entirely to
+     * the full shade.
+     */
     private int mTotalDistanceForFullShadeTransition;
-    private int mTotalExtraMediaInsetFullShadeTransition;
+
+    /**
+     * The amount of movement the notifications do when transitioning to the full shade before
+     * reaching the overstrech
+     */
+    private int mNotificationDragDownMovement;
 
     @VisibleForTesting
     final View.OnAttachStateChangeListener mOnAttachStateChangeListener =
@@ -255,8 +264,8 @@ public class NotificationStackScrollLayoutController {
     };
 
     private void updateResources() {
-        mTotalExtraMediaInsetFullShadeTransition = mResources.getDimensionPixelSize(
-                R.dimen.lockscreen_shade_transition_extra_media_inset);
+        mNotificationDragDownMovement = mResources.getDimensionPixelSize(
+                R.dimen.lockscreen_shade_notification_movement);
         mTotalDistanceForFullShadeTransition = mResources.getDimensionPixelSize(
                 R.dimen.lockscreen_shade_qs_transition_distance);
     }
@@ -1415,15 +1424,13 @@ public class NotificationStackScrollLayoutController {
      * shade. 0.0f means we're not transitioning yet.
      */
     public void setTransitionToFullShadeAmount(float amount) {
-        float extraTopInset;
-        MediaHeaderView view = mKeyguardMediaController.getSinglePaneContainer();
-        if (view == null || view.getHeight() == 0
-                || mStatusBarStateController.getState() != KEYGUARD) {
-            extraTopInset = 0;
-        } else {
-            extraTopInset = MathUtils.saturate(amount / mTotalDistanceForFullShadeTransition);
-            extraTopInset = Interpolators.FAST_OUT_SLOW_IN.getInterpolation(extraTopInset);
-            extraTopInset = extraTopInset * mTotalExtraMediaInsetFullShadeTransition;
+        float extraTopInset = 0.0f;
+        if (mStatusBarStateController.getState() == KEYGUARD) {
+            float overallProgress = MathUtils.saturate(amount / mView.getHeight());
+            float transitionProgress = Interpolators.getOvershootInterpolation(overallProgress,
+                    0.6f,
+                    (float) mTotalDistanceForFullShadeTransition / (float) mView.getHeight());
+            extraTopInset = transitionProgress * mNotificationDragDownMovement;
         }
         mView.setExtraTopInsetForFullShadeTransition(extraTopInset);
     }
