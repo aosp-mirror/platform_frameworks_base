@@ -21,6 +21,8 @@ import android.annotation.IntDef;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  Represents current OHM state by following steps, a generic CUJ is
@@ -28,13 +30,13 @@ import java.lang.annotation.RetentionPolicy;
  */
 public class OneHandedState {
     /** DEFAULT STATE after OHM feature initialized. */
-    public static final int STATE_NONE = 0x00000000;
+    public static final int STATE_NONE = 0;
     /** The state flag set when user trigger OHM. */
-    public static final int STATE_ENTERING = 0x00000001;
+    public static final int STATE_ENTERING = 1;
     /** The state flag set when transitioning */
-    public static final int STATE_ACTIVE = 0x00000002;
+    public static final int STATE_ACTIVE = 2;
     /** The state flag set when user stop OHM feature. */
-    public static final int STATE_EXITING = 0x00000004;
+    public static final int STATE_EXITING = 3;
 
     @IntDef(prefix = { "STATE_" }, value =  {
             STATE_NONE,
@@ -54,9 +56,18 @@ public class OneHandedState {
 
     private static final String TAG = OneHandedState.class.getSimpleName();
 
+    private List<OnStateChangedListener> mStateChangeListeners = new ArrayList<>();
+
+    /**
+     * Adds listener to be called back when one handed state changed.
+     * @param listener the listener to be called back
+     */
+    public void addSListeners(OnStateChangedListener listener) {
+        mStateChangeListeners.add(listener);
+    }
+
     /**
      * Gets current transition state of One handed mode.
-     *
      * @return The bitwise flags representing current states.
      */
     public @State int getState() {
@@ -85,6 +96,9 @@ public class OneHandedState {
      */
     public void setState(@State int newState) {
         sCurrentState = newState;
+        if (!mStateChangeListeners.isEmpty()) {
+            mStateChangeListeners.forEach((listener) -> listener.onStateChanged(newState));
+        }
     }
 
     /** Dumps internal state. */
@@ -92,5 +106,15 @@ public class OneHandedState {
         final String innerPrefix = "  ";
         pw.println(TAG);
         pw.println(innerPrefix + "sCurrentState=" + sCurrentState);
+    }
+
+    /**
+     * Gets notified when one handed state changed
+     *
+     * @see OneHandedState
+     */
+    public interface OnStateChangedListener {
+        /** Called when one handed state changed */
+        default void onStateChanged(@State int newState) {}
     }
 }
