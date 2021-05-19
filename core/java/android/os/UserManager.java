@@ -189,6 +189,28 @@ public class UserManager {
     public @interface QuietModeFlag {}
 
     /**
+     * Flag returned by {@link #getUserPrivacySensitivity} to indicate that the user isn't
+     * particularly sensitive about a certain aspect of privacy.
+     */
+    public static final int PRIVACY_SENSITIVITY_DEFAULT = 0x0;
+
+    /**
+     * Flag returned by {@link #getUserPrivacySensitivity} to indicate that the user is sensitive
+     * about location privacy.
+     */
+    public static final int PRIVACY_SENSITIVITY_LOCATION = 0x1;
+
+    /**
+     * List of flags available for the {@link #getUserPrivacySensitivity} method.
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = true, prefix = { "PRIVACY_SENSITIVITY_" }, value = {
+            PRIVACY_SENSITIVITY_DEFAULT,
+            PRIVACY_SENSITIVITY_LOCATION})
+    public @interface PrivacySensitivityFlag {}
+
+    /**
      * @hide
      * No user restriction.
      */
@@ -3935,6 +3957,17 @@ public class UserManager {
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Get the privacy sensitivity of the user.
+     *
+     * @return the privacy sensitivity of the user
+     */
+    @PrivacySensitivityFlag
+    public int getUserPrivacySensitivity() {
+        // TODO: Add actual implementation.
+        return PRIVACY_SENSITIVITY_DEFAULT;
     }
 
     /**
