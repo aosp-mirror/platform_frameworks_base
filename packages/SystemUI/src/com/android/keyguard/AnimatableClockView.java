@@ -44,6 +44,7 @@ public class AnimatableClockView extends TextView {
     private static final CharSequence SINGLE_LINE_FORMAT_12_HOUR = "h:mm";
     private static final CharSequence SINGLE_LINE_FORMAT_24_HOUR = "HH:mm";
     private static final long DOZE_ANIM_DURATION = 300;
+    private static final long APPEAR_ANIM_DURATION = 350;
     private static final long CHARGE_ANIM_DURATION_PHASE_0 = 500;
     private static final long CHARGE_ANIM_DURATION_PHASE_1 = 1000;
 
@@ -154,6 +155,30 @@ public class AnimatableClockView extends TextView {
     void setColors(int dozingColor, int lockScreenColor) {
         mDozingColor = dozingColor;
         mLockScreenColor = lockScreenColor;
+    }
+
+    void animateAppearOnLockscreen() {
+        if (mTextAnimator == null) {
+            return;
+        }
+
+        setTextStyle(
+                mDozingWeight,
+                -1 /* text size, no update */,
+                mLockScreenColor,
+                false /* animate */,
+                0 /* duration */,
+                0 /* delay */,
+                null /* onAnimationEnd */);
+
+        setTextStyle(
+                mLockScreenWeight,
+                -1 /* text size, no update */,
+                mLockScreenColor,
+                true, /* animate */
+                APPEAR_ANIM_DURATION,
+                0 /* delay */,
+                null /* onAnimationEnd */);
     }
 
     void animateDisappear() {

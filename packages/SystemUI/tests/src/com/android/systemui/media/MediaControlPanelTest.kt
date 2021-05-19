@@ -325,7 +325,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
         assertThat(dismiss.isEnabled).isEqualTo(true)
         dismiss.callOnClick()
         val captor = ArgumentCaptor.forClass(ActivityStarter.OnDismissAction::class.java)
-        verify(keyguardDismissUtil).executeWhenUnlocked(captor.capture(), anyBoolean())
+        verify(keyguardDismissUtil).executeWhenUnlocked(captor.capture(), anyBoolean(),
+            eq(false))
 
         captor.value.onDismiss()
         verify(mediaDataManager).dismissMediaData(eq(mediaKey), anyLong())

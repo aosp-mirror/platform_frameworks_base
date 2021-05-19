@@ -59,6 +59,22 @@ filegroup {
     ],
 }
 
+java_library {
+    name: "framework-connectivity-annotations",
+    sdk_version: "module_current",
+    srcs: [
+        "src/android/net/ConnectivityAnnotations.java",
+    ],
+    libs: [
+        "framework-annotations-lib",
+        "framework-connectivity",
+    ],
+    visibility: [
+        "//frameworks/base:__subpackages__",
+        "//packages/modules/Connectivity:__subpackages__",
+    ],
+}
+
 java_sdk_library {
     name: "framework-connectivity",
     sdk_version: "module_current",

@@ -192,44 +192,43 @@ void postDrawVk(int functor, void* data) {
 
 int CreateFunctor_v3(void* data, int version,
                      AwDrawFnFunctorCallbacks* functor_callbacks) {
-  static bool callbacks_initialized = false;
-  static uirenderer::WebViewFunctorCallbacks webview_functor_callbacks = {
-      .onSync = &onSync,
-      .onContextDestroyed = &onContextDestroyed,
-      .onDestroyed = &onDestroyed,
-      .removeOverlays = &removeOverlays,
-  };
-  if (!callbacks_initialized) {
-    switch (uirenderer::WebViewFunctor_queryPlatformRenderMode()) {
-      case uirenderer::RenderMode::OpenGL_ES:
-        webview_functor_callbacks.gles.draw = &draw_gl;
-        break;
-      case uirenderer::RenderMode::Vulkan:
-        webview_functor_callbacks.vk.initialize = &initializeVk;
-        webview_functor_callbacks.vk.draw = &drawVk;
-        webview_functor_callbacks.vk.postDraw = &postDrawVk;
-        break;
+    static uirenderer::WebViewFunctorCallbacks webview_functor_callbacks = [] {
+        uirenderer::WebViewFunctorCallbacks ret = {
+                .onSync = &onSync,
+                .onContextDestroyed = &onContextDestroyed,
+                .onDestroyed = &onDestroyed,
+                .removeOverlays = &removeOverlays,
+        };
+        switch (uirenderer::WebViewFunctor_queryPlatformRenderMode()) {
+            case uirenderer::RenderMode::OpenGL_ES:
+                ret.gles.draw = &draw_gl;
+                break;
+            case uirenderer::RenderMode::Vulkan:
+                ret.vk.initialize = &initializeVk;
+                ret.vk.draw = &drawVk;
+                ret.vk.postDraw = &postDrawVk;
+                break;
+        }
+        return ret;
+    }();
+    SupportData* support = new SupportData{
+            .data = data,
+    };
+
+    // These callbacks are available on all versions.
+    support->callbacks = {
+            .on_sync = functor_callbacks->on_sync,
+            .on_context_destroyed = functor_callbacks->on_context_destroyed,
+            .on_destroyed = functor_callbacks->on_destroyed,
+            .draw_gl = functor_callbacks->draw_gl,
+            .init_vk = functor_callbacks->init_vk,
+            .draw_vk = functor_callbacks->draw_vk,
+            .post_draw_vk = functor_callbacks->post_draw_vk,
+    };
+
+    if (version >= 3) {
+        support->callbacks.remove_overlays = functor_callbacks->remove_overlays;
     }
-    callbacks_initialized = true;
-  }
-  SupportData* support = new SupportData{
-      .data = data,
-  };
-
-  // These callbacks are available on all versions.
-  support->callbacks = {
-      .on_sync = functor_callbacks->on_sync,
-      .on_context_destroyed = functor_callbacks->on_context_destroyed,
-      .on_destroyed = functor_callbacks->on_destroyed,
-      .draw_gl = functor_callbacks->draw_gl,
-      .init_vk = functor_callbacks->init_vk,
-      .draw_vk = functor_callbacks->draw_vk,
-      .post_draw_vk = functor_callbacks->post_draw_vk,
-  };
-
-  if (version >= 3) {
-    support->callbacks.remove_overlays = functor_callbacks->remove_overlays;
-  }
 
   int functor = uirenderer::WebViewFunctor_create(
       support, webview_functor_callbacks,

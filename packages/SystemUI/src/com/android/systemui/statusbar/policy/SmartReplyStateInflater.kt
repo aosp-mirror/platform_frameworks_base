@@ -482,7 +482,7 @@ private val DEBUG = Log.isLoggable(TAG, Log.DEBUG)
 private fun KeyguardDismissUtil.executeWhenUnlocked(
     requiresShadeOpen: Boolean,
     onDismissAction: () -> Boolean
-) = executeWhenUnlocked(onDismissAction, requiresShadeOpen)
+) = executeWhenUnlocked(onDismissAction, requiresShadeOpen, false)
 
 // convenience function that swaps parameter order so that lambda can be placed at the end
 private fun ActivityStarter.startPendingIntentDismissingKeyguard(

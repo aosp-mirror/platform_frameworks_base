@@ -16,6 +16,9 @@
 
 package com.android.systemui.wallet.ui;
 
+import static android.provider.Settings.ACTION_LOCKSCREEN_SETTINGS;
+
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -99,6 +102,7 @@ public class WalletActivity extends LifecycleActivity {
         getActionBar().setHomeAsUpIndicator(getHomeIndicatorDrawable());
         getActionBar().setHomeActionContentDescription(R.string.accessibility_desc_close);
         WalletView walletView = requireViewById(R.id.wallet_view);
+
         mWalletScreenController = new WalletScreenController(
                 this,
                 walletView,
@@ -116,20 +120,31 @@ public class WalletActivity extends LifecycleActivity {
                             && mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
                         return;
                     }
-                    mActivityStarter.startActivity(
-                            mQuickAccessWalletClient.createWalletIntent(), true);
-                    finish();
+
+                    if (mKeyguardStateController.isUnlocked()) {
+                        mActivityStarter.startActivity(
+                                mQuickAccessWalletClient.createWalletIntent(), true);
+                        finish();
+                    } else {
+                        mKeyguardDismissUtil.executeWhenUnlocked(() -> {
+                            mActivityStarter.startActivity(
+                                    mQuickAccessWalletClient.createWalletIntent(), true);
+                            finish();
+                            return false;
+                        }, false, true);
+                    }
                 });
+
         // Click the action button to re-render the screen when the device is unlocked.
-        if (!mKeyguardStateController.isUnlocked()) {
-            walletView.getActionButton().setOnClickListener(
-                    v -> {
-                        if (mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
-                            return;
-                        }
-                        mKeyguardDismissUtil.executeWhenUnlocked(() -> false, false);
-                    });
-        }
+        walletView.setDeviceLockedActionOnClickListener(
+                v -> {
+                    if (mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
+                        return;
+                    }
+
+                    mKeyguardDismissUtil.executeWhenUnlocked(() -> false, false,
+                            false);
+                });
     }
 
     @Override
@@ -142,13 +157,15 @@ public class WalletActivity extends LifecycleActivity {
     protected void onResume() {
         super.onResume();
         mWalletScreenController.queryWalletCards();
-        mKeyguardViewManager.requestUdfps(true, Color.BLACK);
+        mKeyguardViewManager.requestFp(true, Color.BLACK);
+        mKeyguardViewManager.requestFace(true);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        mKeyguardViewManager.requestUdfps(false, -1);
+        mKeyguardViewManager.requestFp(false, -1);
+        mKeyguardViewManager.requestFace(false);
     }
 
     @Override
@@ -164,7 +181,10 @@ public class WalletActivity extends LifecycleActivity {
             finish();
             return true;
         } else if (itemId == R.id.wallet_lockscreen_settings) {
-            // TODO(b/186496392): Navigate to Lock Screen Settings page when the item is clicked.
+            Intent intent =
+                    new Intent(ACTION_LOCKSCREEN_SETTINGS)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            mActivityStarter.startActivity(intent, true);
             return true;
         }
         return super.onOptionsItemSelected(item);

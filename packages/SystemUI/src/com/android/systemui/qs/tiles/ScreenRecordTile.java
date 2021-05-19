@@ -142,7 +142,7 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
             mHost.getUserContext().startActivity(intent);
             return false;
         };
-        mKeyguardDismissUtil.executeWhenUnlocked(dismissAction, false);
+        mKeyguardDismissUtil.executeWhenUnlocked(dismissAction, false, false);
     }
 
     private void cancelCountdown() {

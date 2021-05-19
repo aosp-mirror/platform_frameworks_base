@@ -202,7 +202,6 @@ import android.provider.Settings;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.util.Slog;
 import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
@@ -483,6 +482,9 @@ class Task extends WindowContainer<WindowContainer> {
     // Do not forget to reset this after reparenting.
     // TODO: remove this once the recents animation is moved to the Shell
     PictureInPictureSurfaceTransaction mLastRecentsAnimationTransaction;
+    // The content overlay to be applied with mLastRecentsAnimationTransaction
+    // TODO: remove this once the recents animation is moved to the Shell
+    SurfaceControl mLastRecentsAnimationOverlay;
 
     static final int LAYER_RANK_INVISIBLE = -1;
     // Ranking (from top) of this task among all visible tasks. (-1 means it's not visible)
@@ -1074,25 +1076,6 @@ class Task extends WindowContainer<WindowContainer> {
             String reason) {
         return reparent(preferredRootTask, toTop ? MAX_VALUE : 0, moveRootTaskMode, animate,
                 deferResume, true /* schedulePictureInPictureModeChange */, reason);
-    }
-
-    /**
-     * Convenience method to reparent a task to the top or bottom position of the root task, with
-     * an option to skip scheduling the picture-in-picture mode change.
-     */
-    boolean reparent(Task preferredRootTask, boolean toTop,
-            @ReparentMoveRootTaskMode int moveRootTaskMode, boolean animate, boolean deferResume,
-            boolean schedulePictureInPictureModeChange, String reason) {
-        return reparent(preferredRootTask, toTop ? MAX_VALUE : 0, moveRootTaskMode, animate,
-                deferResume, schedulePictureInPictureModeChange, reason);
-    }
-
-    /** Convenience method to reparent a task to a specific position of the root task. */
-    boolean reparent(Task preferredRootTask, int position,
-            @ReparentMoveRootTaskMode int moveRootTaskMode, boolean animate, boolean deferResume,
-            String reason) {
-        return reparent(preferredRootTask, position, moveRootTaskMode, animate, deferResume,
-                true /* schedulePictureInPictureModeChange */, reason);
     }
 
     /**
@@ -2952,20 +2935,6 @@ class Task extends WindowContainer<WindowContainer> {
             bounds.set(getRequestedOverrideBounds());
         }
         return bounds;
-    }
-
-    /** Updates the task's bounds and override configuration to match what is expected for the
-     * input root task. */
-    void updateOverrideConfigurationForRootTask(Task inRootTask) {
-        final Task rootTask = getRootTask();
-
-        if (rootTask != null && rootTask == inRootTask) {
-            return;
-        }
-
-        if (!inRootTask.inFreeformWindowingMode()) {
-            setBounds(inRootTask.getRequestedOverrideBounds());
-        }
     }
 
     /** Returns the bounds that should be used to launch this task. */
@@ -5417,6 +5386,10 @@ class Task extends WindowContainer<WindowContainer> {
                     : WINDOWING_MODE_FULLSCREEN;
         }
         if (currentMode == WINDOWING_MODE_PINNED) {
+            // In the case that we've disabled affecting the SysUI flags as a part of seamlessly
+            // transferring the transform on the leash to the task, reset this state once we've
+            // actually entered pip
+            setCanAffectSystemUiFlags(true);
             mRootWindowContainer.notifyActivityPipModeChanged(null);
         }
         if (likelyResolvedMode == WINDOWING_MODE_PINNED
@@ -6018,16 +5991,6 @@ class Task extends WindowContainer<WindowContainer> {
         return inPinnedWindowingMode();
     }
 
-    // TODO(NOW!)
-    /**
-     * Returns {@code true} if this is the top-most split-screen-primary or
-     * split-screen-secondary root task, {@code false} otherwise.
-     */
-    boolean isTopSplitScreenRootTask() {
-        return inSplitScreenWindowingMode()
-                && this == getDisplayArea().getTopRootTaskInWindowingMode(getWindowingMode());
-    }
-
     void checkTranslucentActivityWaiting(ActivityRecord top) {
         if (mTranslucentActivityWaiting != top) {
             mUndrawnActivitiesBelowTopTranslucent.clear();
@@ -6229,9 +6192,7 @@ class Task extends WindowContainer<WindowContainer> {
 
         // If we are sleeping, and there is no resumed activity, and the top activity is paused,
         // well that is the state we want.
-        if (shouldSleepOrShutDownActivities()
-                && mLastPausedActivity == next
-                && mRootWindowContainer.allPausedActivitiesComplete()) {
+        if (mLastPausedActivity == next && shouldSleepOrShutDownActivities()) {
             // Make sure we have executed any pending transitions, since there
             // should be nothing left to do at this point.
             executeAppTransition(options);
@@ -6254,14 +6215,6 @@ class Task extends WindowContainer<WindowContainer> {
         mTaskSupervisor.mStoppingActivities.remove(next);
 
         if (DEBUG_SWITCH) Slog.v(TAG_SWITCH, "Resuming " + next);
-
-        // If we are currently pausing an activity, then don't do anything until that is done.
-        if (!mRootWindowContainer.allPausedActivitiesComplete()) {
-            ProtoLog.v(WM_DEBUG_STATES,
-                    "resumeTopActivityLocked: Skip resume: some activity pausing.");
-
-            return false;
-        }
 
         mTaskSupervisor.setLaunchSource(next.info.applicationInfo.uid);
 
@@ -7275,21 +7228,6 @@ class Task extends WindowContainer<WindowContainer> {
         task.setBounds(displayedBounds);
     }
 
-    /**
-     * Until we can break this "set task bounds to same as root task bounds" behavior, this
-     * basically resizes both root task and task bounds to the same bounds.
-     */
-    private void setTaskBounds(Rect bounds) {
-        final PooledConsumer c = PooledLambda.obtainConsumer(Task::setTaskBoundsInner,
-                PooledLambda.__(Task.class), bounds);
-        forAllLeafTasks(c, true /* traverseTopToBottom */);
-        c.recycle();
-    }
-
-    private static void setTaskBoundsInner(Task task, Rect bounds) {
-        task.setBounds(task.isResizeable() ? bounds : null);
-    }
-
     boolean willActivityBeVisible(IBinder token) {
         final ActivityRecord r = ActivityRecord.forTokenLocked(token);
         if (r == null) {
@@ -7549,51 +7487,6 @@ class Task extends WindowContainer<WindowContainer> {
         }
     }
 
-    void positionChildAt(Task task, int position) {
-        if (task.getRootTask() != this) {
-            throw new IllegalArgumentException("AS.positionChildAt: task=" + task
-                    + " is not a child of root task=" + this + " current parent="
-                    + task.getRootTask());
-        }
-
-        task.updateOverrideConfigurationForRootTask(this);
-
-        final ActivityRecord topRunningActivity = task.topRunningActivityLocked();
-        final boolean wasResumed = topRunningActivity == task.mResumedActivity;
-
-        boolean toTop = position >= getChildCount();
-        boolean includingParents = toTop || getDisplayArea().getNextFocusableRootTask(this,
-                true /* ignoreCurrent */) == null;
-        if (WindowManagerDebugConfig.DEBUG_ROOT_TASK) {
-            Slog.i(TAG_WM, "positionChildAt: positioning task=" + task + " at " + position);
-        }
-        positionChildAt(position, task, includingParents);
-        getDisplayContent().layoutAndAssignWindowLayersIfNeeded();
-
-
-        // TODO: Investigate if this random code is really needed.
-        if (task.voiceSession != null) {
-            try {
-                task.voiceSession.taskStarted(task.intent, task.mTaskId);
-            } catch (RemoteException e) {
-            }
-        }
-
-        if (wasResumed) {
-            if (mResumedActivity != null) {
-                Log.wtf(TAG, "mResumedActivity was already set when moving mResumedActivity from"
-                        + " other root task to this task mResumedActivity=" + mResumedActivity
-                        + " other mResumedActivity=" + topRunningActivity);
-            }
-            topRunningActivity.setState(RESUMED, "positionChildAt");
-        }
-
-        // The task might have already been running and its visibility needs to be synchronized with
-        // the visibility of the root task / windows.
-        ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
-        mRootWindowContainer.resumeFocusedTasksTopActivities();
-    }
-
     public void setAlwaysOnTop(boolean alwaysOnTop) {
         // {@link #isAwaysonTop} overrides the original behavior which also evaluates if this
         // task is force hidden, so super.isAlwaysOnTop() is used here to see whether the
@@ -7730,22 +7623,28 @@ class Task extends WindowContainer<WindowContainer> {
         reparent(newParent, onTop ? POSITION_TOP : POSITION_BOTTOM);
     }
 
-    void setLastRecentsAnimationTransaction(
-            @NonNull PictureInPictureSurfaceTransaction transaction) {
+    void setLastRecentsAnimationTransaction(@NonNull PictureInPictureSurfaceTransaction transaction,
+            @Nullable SurfaceControl overlay) {
         mLastRecentsAnimationTransaction = new PictureInPictureSurfaceTransaction(transaction);
+        mLastRecentsAnimationOverlay = overlay;
     }
 
     void clearLastRecentsAnimationTransaction() {
         mLastRecentsAnimationTransaction = null;
+        mLastRecentsAnimationOverlay = null;
         // reset also the transform introduced by mLastRecentsAnimationTransaction
         getPendingTransaction().setMatrix(mSurfaceControl, Matrix.IDENTITY_MATRIX, new float[9]);
     }
 
     void maybeApplyLastRecentsAnimationTransaction() {
         if (mLastRecentsAnimationTransaction != null) {
+            if (mLastRecentsAnimationOverlay != null) {
+                getPendingTransaction().reparent(mLastRecentsAnimationOverlay, mSurfaceControl);
+            }
             PictureInPictureSurfaceTransaction.apply(mLastRecentsAnimationTransaction,
                     mSurfaceControl, getPendingTransaction());
             mLastRecentsAnimationTransaction = null;
+            mLastRecentsAnimationOverlay = null;
         }
     }
 
@@ -7864,8 +7763,8 @@ class Task extends WindowContainer<WindowContainer> {
 
         // Do not sleep activities in this root task if we're marked as focused and the keyguard
         // is in the process of going away.
-        if (isFocusedRootTaskOnDisplay()
-                && mTaskSupervisor.getKeyguardController().isKeyguardGoingAway()
+        if (mTaskSupervisor.getKeyguardController().isKeyguardGoingAway()
+                && isFocusedRootTaskOnDisplay()
                 // Avoid resuming activities on secondary displays since we don't want bubble
                 // activities to be resumed while bubble is still collapsed.
                 // TODO(b/113840485): Having keyguard going away state for secondary displays.
@@ -7878,14 +7777,6 @@ class Task extends WindowContainer<WindowContainer> {
 
     boolean shouldSleepOrShutDownActivities() {
         return shouldSleepActivities() || mAtmService.mShuttingDown;
-    }
-
-    /** Bounds of the root task without adjusting for other factors in the system like visibility
-     * of root docked task.
-     * Most callers should be using {@link ConfigurationContainer#getRequestedOverrideBounds} a
-     * it takes into consideration other system factors. */
-    void getRawBounds(Rect out) {
-        out.set(getRawBounds());
     }
 
     private Rect getRawBounds() {

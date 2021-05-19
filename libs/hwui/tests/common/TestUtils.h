@@ -287,6 +287,7 @@ public:
         int sync = 0;
         int contextDestroyed = 0;
         int destroyed = 0;
+        int removeOverlays = 0;
         int glesDraw = 0;
     };
 
@@ -310,6 +311,12 @@ public:
                         [](int functor, void* client_data) {
                             expectOnRenderThread("onDestroyed");
                             sMockFunctorCounts[functor].destroyed++;
+                        },
+                .removeOverlays =
+                        [](int functor, void* data,
+                           void (*mergeTransaction)(ASurfaceTransaction*)) {
+                            expectOnRenderThread("removeOverlays");
+                            sMockFunctorCounts[functor].removeOverlays++;
                         },
         };
         switch (mode) {

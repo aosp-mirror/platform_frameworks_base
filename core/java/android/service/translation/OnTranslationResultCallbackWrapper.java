@@ -17,7 +17,6 @@
 package android.service.translation;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.os.DeadObjectException;
 import android.os.RemoteException;
 import android.util.Log;
@@ -25,6 +24,7 @@ import android.view.translation.TranslationResponse;
 
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 /**
  * Callback to receive the {@link TranslationResponse} on successful translation.
@@ -32,13 +32,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @hide
  */
 final class OnTranslationResultCallbackWrapper implements
-        TranslationService.OnTranslationResultCallback {
+        Consumer<TranslationResponse> {
 
     private static final String TAG = "OnTranslationResultCallback";
 
     private final @NonNull ITranslationCallback mCallback;
 
-    private AtomicBoolean mCalled;
+    private final AtomicBoolean mCalled;
 
     /**
      * @hide
@@ -49,7 +49,7 @@ final class OnTranslationResultCallbackWrapper implements
     }
 
     @Override
-    public void onTranslationSuccess(@Nullable TranslationResponse response) {
+    public void accept(TranslationResponse response) {
         assertNotCalled();
         if (mCalled.getAndSet(response.isFinalResponse())) {
             throw new IllegalStateException("Already called with complete response");
@@ -64,15 +64,6 @@ final class OnTranslationResultCallbackWrapper implements
             }
             throw e.rethrowAsRuntimeException();
         }
-    }
-
-    /**
-     * @deprecated use {@link #onTranslationSuccess} with error response instead.
-     */
-    @Override
-    @Deprecated
-    public void onError() {
-        // no-op.
     }
 
     private void assertNotCalled() {

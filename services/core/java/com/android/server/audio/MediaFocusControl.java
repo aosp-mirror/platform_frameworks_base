@@ -888,6 +888,7 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
         mEventLogger.log((new AudioEventLogger.StringEvent(
                 "requestAudioFocus() from uid/pid " + uid
                     + "/" + Binder.getCallingPid()
+                    + " AA=" + aa.usageToString() + "/" + aa.contentTypeToString()
                     + " clientId=" + clientId + " callingPack=" + callingPackageName
                     + " req=" + focusChangeHint
                     + " flags=0x" + Integer.toHexString(flags)

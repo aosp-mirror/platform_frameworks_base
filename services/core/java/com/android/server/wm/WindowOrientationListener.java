@@ -1076,6 +1076,9 @@ public abstract class WindowOrientationListener {
         private boolean mRotationEvaluationScheduled;
         private long mRotationResolverTimeoutMillis;
         private final ActivityTaskManagerInternal mActivityTaskManagerInternal;
+        private int mCurrentCallbackId = 0;
+        private Runnable mCancelRotationResolverRequest;
+
         OrientationSensorJudge() {
             super();
             setupRotationResolverParameters();
@@ -1142,8 +1145,6 @@ public abstract class WindowOrientationListener {
                             RotationResolverInternal.class);
                 }
 
-                final CancellationSignal cancellationSignal = new CancellationSignal();
-
                 String packageName = null;
                 if (mActivityTaskManagerInternal != null) {
                     final WindowProcessController controller =
@@ -1155,16 +1156,40 @@ public abstract class WindowOrientationListener {
                     }
                 }
 
+                mCurrentCallbackId++;
+
+                if (mCancelRotationResolverRequest != null) {
+                    getHandler().removeCallbacks(mCancelRotationResolverRequest);
+                }
+                final CancellationSignal cancellationSignal = new CancellationSignal();
+                mCancelRotationResolverRequest = cancellationSignal::cancel;
+                getHandler().postDelayed(
+                        mCancelRotationResolverRequest, mRotationResolverTimeoutMillis);
+
                 mRotationResolverService.resolveRotation(
                         new RotationResolverInternal.RotationResolverCallbackInternal() {
+                            private final int mCallbackId = mCurrentCallbackId;
                             @Override
                             public void onSuccess(int result) {
-                                finalizeRotation(result);
+                                finalizeRotationIfFresh(result);
                             }
 
                             @Override
                             public void onFailure(int error) {
-                                finalizeRotation(reportedRotation);
+                                finalizeRotationIfFresh(reportedRotation);
+                            }
+
+                            private void finalizeRotationIfFresh(int rotation) {
+                                // Ignore the callback if it's not the latest.
+                                if (mCallbackId == mCurrentCallbackId) {
+                                    getHandler().removeCallbacks(mCancelRotationResolverRequest);
+                                    finalizeRotation(rotation);
+                                } else {
+                                    Slog.d(TAG, String.format(
+                                            "An outdated callback received [%s vs. %s]. Ignoring "
+                                                    + "it.",
+                                            mCallbackId, mCurrentCallbackId));
+                                }
                             }
                         },
                         packageName,
@@ -1172,8 +1197,6 @@ public abstract class WindowOrientationListener {
                         mCurrentRotation,
                         mRotationResolverTimeoutMillis,
                         cancellationSignal);
-                getHandler().postDelayed(cancellationSignal::cancel,
-                        mRotationResolverTimeoutMillis);
             } else {
                 finalizeRotation(reportedRotation);
             }

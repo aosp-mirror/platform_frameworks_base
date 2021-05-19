@@ -1195,6 +1195,7 @@ public class HardwareRenderer {
             // so not checking for isolated process here.
             initHintSession();
 
+            nSetIsHighEndGfx(ActivityManager.isHighEndGfx());
             // Defensively clear out the context in case we were passed a context that can leak
             // if we live longer than it, e.g. an activity context.
             mContext = null;
@@ -1314,6 +1315,8 @@ public class HardwareRenderer {
     private static native void nSetColorMode(long nativeProxy, int colorMode);
 
     private static native void nSetSdrWhitePoint(long nativeProxy, float whitePoint);
+
+    private static native void nSetIsHighEndGfx(boolean isHighEndGfx);
 
     private static native int nSyncAndDrawFrame(long nativeProxy, long[] frameInfo, int size);
 

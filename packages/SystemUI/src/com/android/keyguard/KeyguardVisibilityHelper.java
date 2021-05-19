@@ -22,6 +22,9 @@ import android.view.View;
 
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.notification.AnimatableProperty;
+import com.android.systemui.statusbar.notification.PropertyAnimator;
+import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -36,6 +39,9 @@ public class KeyguardVisibilityHelper {
     private final KeyguardStateController mKeyguardStateController;
     private final DozeParameters mDozeParameters;
     private boolean mKeyguardViewVisibilityAnimating;
+    private boolean mLastOccludedState = false;
+    private boolean mAnimatingScreenOff;
+    private final AnimationProperties mAnimationProperties = new AnimationProperties();
 
     public KeyguardVisibilityHelper(View view, KeyguardStateController keyguardStateController,
             DozeParameters dozeParameters) {
@@ -57,6 +63,7 @@ public class KeyguardVisibilityHelper {
             boolean goingToFullShade,
             int oldStatusBarState) {
         mView.animate().cancel();
+        boolean isOccluded = mKeyguardStateController.isOccluded();
         mKeyguardViewVisibilityAnimating = false;
         if ((!keyguardFadingAway && oldStatusBarState == KEYGUARD
                 && statusBarState != KEYGUARD) || goingToFullShade) {
@@ -87,30 +94,60 @@ public class KeyguardVisibilityHelper {
         } else if (statusBarState == KEYGUARD) {
             if (keyguardFadingAway) {
                 mKeyguardViewVisibilityAnimating = true;
+                float target = mView.getY() - mView.getHeight() * 0.05f;
+                int delay = 0;
+                int duration = 125;
+                // We animate the Y properly separately using the PropertyAnimator, as the panel
+                // view als needs to update the end position.
+                mAnimationProperties.setDuration(duration).setDelay(delay);
+                PropertyAnimator.cancelAnimation(mView, AnimatableProperty.Y);
+                PropertyAnimator.setProperty(mView, AnimatableProperty.Y, target,
+                        mAnimationProperties,
+                        true /* animate */);
                 mView.animate()
                         .alpha(0)
-                        .translationYBy(-mView.getHeight() * 0.05f)
                         .setInterpolator(Interpolators.FAST_OUT_LINEAR_IN)
-                        .setDuration(125)
-                        .setStartDelay(0)
+                        .setDuration(duration)
+                        .setStartDelay(delay)
                         .withEndAction(mAnimateKeyguardStatusViewInvisibleEndRunnable)
                         .start();
-            } else if (mDozeParameters.shouldControlUnlockedScreenOff()) {
-                mKeyguardViewVisibilityAnimating = true;
-
+            } else if (mLastOccludedState && !isOccluded) {
+                // An activity was displayed over the lock screen, and has now gone away
                 mView.setVisibility(View.VISIBLE);
                 mView.setAlpha(0f);
 
-                float curTranslationY = mView.getTranslationY();
-                mView.setTranslationY(curTranslationY - mView.getHeight() * 0.1f);
                 mView.animate()
-                        .setStartDelay((int) (StackStateAnimator.ANIMATION_DURATION_WAKEUP * .6f))
                         .setDuration(StackStateAnimator.ANIMATION_DURATION_WAKEUP)
                         .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                         .alpha(1f)
-                        .translationY(curTranslationY)
                         .withEndAction(mAnimateKeyguardStatusViewVisibleEndRunnable)
                         .start();
+            } else if (mDozeParameters.shouldControlUnlockedScreenOff()) {
+                mKeyguardViewVisibilityAnimating = true;
+                mAnimatingScreenOff = true;
+
+                mView.setVisibility(View.VISIBLE);
+                mView.setAlpha(0f);
+                float currentY = mView.getY();
+                mView.setY(currentY - mView.getHeight() * 0.1f);
+                int duration = StackStateAnimator.ANIMATION_DURATION_WAKEUP;
+                int delay = (int) (duration * .6f);
+                // We animate the Y properly separately using the PropertyAnimator, as the panel
+                // view als needs to update the end position.
+                mAnimationProperties.setDuration(duration).setDelay(delay);
+                PropertyAnimator.cancelAnimation(mView, AnimatableProperty.Y);
+                PropertyAnimator.setProperty(mView, AnimatableProperty.Y, currentY,
+                        mAnimationProperties,
+                        true /* animate */);
+
+                mView.animate()
+                        .setStartDelay(delay)
+                        .setDuration(duration)
+                        .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
+                        .alpha(1f)
+                        .withEndAction(mAnimateKeyguardStatusViewVisibleEndRunnable)
+                        .start();
+
             } else {
                 mView.setVisibility(View.VISIBLE);
                 mView.setAlpha(1f);
@@ -119,6 +156,8 @@ public class KeyguardVisibilityHelper {
             mView.setVisibility(View.GONE);
             mView.setAlpha(1f);
         }
+
+        mLastOccludedState = isOccluded;
     }
 
     private final Runnable mAnimateKeyguardStatusViewInvisibleEndRunnable = () -> {
@@ -133,5 +172,13 @@ public class KeyguardVisibilityHelper {
 
     private final Runnable mAnimateKeyguardStatusViewVisibleEndRunnable = () -> {
         mKeyguardViewVisibilityAnimating = false;
+        mAnimatingScreenOff = false;
     };
+
+    /**
+     * @return {@code true} if we are currently animating the screen off from unlock
+     */
+    public boolean isAnimatingScreenOffFromUnlocked() {
+        return mAnimatingScreenOff;
+    }
 }

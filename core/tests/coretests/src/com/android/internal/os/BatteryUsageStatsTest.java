@@ -44,13 +44,13 @@ public class BatteryUsageStatsTest {
 
     @Test
     public void testBuilder() {
-        BatteryUsageStats batteryUsageStats = buildBatteryUsageStats();
+        BatteryUsageStats batteryUsageStats = buildBatteryUsageStats().build();
         validateBatteryUsageStats(batteryUsageStats);
     }
 
     @Test
     public void testParcelability() {
-        final BatteryUsageStats outBatteryUsageStats = buildBatteryUsageStats();
+        final BatteryUsageStats outBatteryUsageStats = buildBatteryUsageStats().build();
         final Parcel outParcel = Parcel.obtain();
         outParcel.writeParcelable(outBatteryUsageStats, 0);
         final byte[] bytes = outParcel.marshall();
@@ -65,9 +65,17 @@ public class BatteryUsageStatsTest {
         validateBatteryUsageStats(inBatteryUsageStats);
     }
 
+
+    @Test
+    public void testDefaultSessionDuration() {
+        final BatteryUsageStats stats =
+                buildBatteryUsageStats().setStatsDuration(10000).build();
+        assertThat(stats.getStatsDuration()).isEqualTo(10000);
+    }
+
     @Test
     public void testDump() {
-        final BatteryUsageStats stats = buildBatteryUsageStats();
+        final BatteryUsageStats stats = buildBatteryUsageStats().build();
         final StringWriter out = new StringWriter();
         try (PrintWriter pw = new PrintWriter(out)) {
             stats.dump(pw, "  ");
@@ -93,7 +101,7 @@ public class BatteryUsageStatsTest {
         assertThat(allNames).hasSize(BatteryConsumer.POWER_COMPONENT_COUNT);
     }
 
-    private BatteryUsageStats buildBatteryUsageStats() {
+    private BatteryUsageStats.Builder buildBatteryUsageStats() {
         final MockClocks clocks = new MockClocks();
         final MockBatteryStatsImpl batteryStats = new MockBatteryStatsImpl(clocks);
         final BatteryStatsImpl.Uid batteryStatsUid = batteryStats.getUidStatsLocked(2000);
@@ -103,7 +111,8 @@ public class BatteryUsageStatsTest {
                         .setBatteryCapacity(4000)
                         .setDischargePercentage(20)
                         .setDischargedPowerRange(1000, 2000)
-                        .setStatsStartTimestamp(1000);
+                        .setStatsStartTimestamp(1000)
+                        .setStatsEndTimestamp(3000);
         builder.getOrCreateUidBatteryConsumerBuilder(batteryStatsUid)
                 .setPackageWithHighestDrain("foo")
                 .setTimeInStateMs(UidBatteryConsumer.STATE_FOREGROUND, 1000)
@@ -152,7 +161,7 @@ public class BatteryUsageStatsTest {
                 .setUsageDurationForCustomComponentMillis(
                         BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID, 40);
 
-        return builder.build();
+        return builder;
     }
 
     public void validateBatteryUsageStats(BatteryUsageStats batteryUsageStats) {
@@ -162,6 +171,8 @@ public class BatteryUsageStatsTest {
         assertThat(batteryUsageStats.getDischargedPowerRange().getLower()).isEqualTo(1000);
         assertThat(batteryUsageStats.getDischargedPowerRange().getUpper()).isEqualTo(2000);
         assertThat(batteryUsageStats.getStatsStartTimestamp()).isEqualTo(1000);
+        assertThat(batteryUsageStats.getStatsEndTimestamp()).isEqualTo(3000);
+        assertThat(batteryUsageStats.getStatsDuration()).isEqualTo(2000);
 
         final List<UidBatteryConsumer> uidBatteryConsumers =
                 batteryUsageStats.getUidBatteryConsumers();

@@ -26,6 +26,7 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.accessibility.AccessibilityManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,6 +54,7 @@ public class UdfpsEnrollHelper {
     @NonNull private final Context mContext;
     // IUdfpsOverlayController reason
     private final int mEnrollReason;
+    private final boolean mAccessibilityEnabled;
     @NonNull private final List<PointF> mGuidedEnrollmentPoints;
 
     private int mTotalSteps = -1;
@@ -67,6 +69,10 @@ public class UdfpsEnrollHelper {
     public UdfpsEnrollHelper(@NonNull Context context, int reason) {
         mContext = context;
         mEnrollReason = reason;
+
+        final AccessibilityManager am = context.getSystemService(AccessibilityManager.class);
+        mAccessibilityEnabled = am.isEnabled();
+
         mGuidedEnrollmentPoints = new ArrayList<>();
 
         // Number of pixels per mm
@@ -148,6 +154,8 @@ public class UdfpsEnrollHelper {
     boolean isCenterEnrollmentComplete() {
         if (mTotalSteps == -1 || mRemainingSteps == -1) {
             return false;
+        } else if (mAccessibilityEnabled) {
+            return false;
         }
         final int stepsEnrolled = mTotalSteps - mRemainingSteps;
         return stepsEnrolled >= NUM_CENTER_TOUCHES;
@@ -155,6 +163,10 @@ public class UdfpsEnrollHelper {
 
     @NonNull
     PointF getNextGuidedEnrollmentPoint() {
+        if (mAccessibilityEnabled) {
+            return new PointF(0f, 0f);
+        }
+
         float scale = SCALE;
         if (Build.IS_ENG || Build.IS_USERDEBUG) {
             scale = Settings.Secure.getFloatForUser(mContext.getContentResolver(),

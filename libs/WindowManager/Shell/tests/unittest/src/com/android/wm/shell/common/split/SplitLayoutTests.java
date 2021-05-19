@@ -35,6 +35,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.policy.DividerSnapAlgorithm;
+import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.DisplayImeController;
 
@@ -48,9 +49,10 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class SplitLayoutTests extends ShellTestCase {
-    @Mock SplitLayout.LayoutChangeListener mLayoutChangeListener;
+    @Mock SplitLayout.SplitLayoutHandler mSplitLayoutHandler;
     @Mock SurfaceControl mRootLeash;
     @Mock DisplayImeController mDisplayImeController;
+    @Mock ShellTaskOrganizer mTaskOrganizer;
     private SplitLayout mSplitLayout;
 
     @Before
@@ -60,9 +62,10 @@ public class SplitLayoutTests extends ShellTestCase {
                 "TestSplitLayout",
                 mContext,
                 getConfiguration(false),
-                mLayoutChangeListener,
+                mSplitLayoutHandler,
                 b -> b.setParent(mRootLeash),
-                mDisplayImeController);
+                mDisplayImeController,
+                mTaskOrganizer);
     }
 
     @Test
@@ -76,19 +79,19 @@ public class SplitLayoutTests extends ShellTestCase {
     @Test
     public void testUpdateDivideBounds() {
         mSplitLayout.updateDivideBounds(anyInt());
-        verify(mLayoutChangeListener).onBoundsChanging(any(SplitLayout.class));
+        verify(mSplitLayoutHandler).onBoundsChanging(any(SplitLayout.class));
     }
 
     @Test
     public void testSetDividePosition() {
         mSplitLayout.setDividePosition(anyInt());
-        verify(mLayoutChangeListener).onBoundsChanged(any(SplitLayout.class));
+        verify(mSplitLayoutHandler).onBoundsChanged(any(SplitLayout.class));
     }
 
     @Test
     public void testOnDoubleTappedDivider() {
         mSplitLayout.onDoubleTappedDivider();
-        verify(mLayoutChangeListener).onDoubleTappedDivider();
+        verify(mSplitLayoutHandler).onDoubleTappedDivider();
     }
 
     @Test
@@ -98,11 +101,11 @@ public class SplitLayoutTests extends ShellTestCase {
         DividerSnapAlgorithm.SnapTarget snapTarget = getSnapTarget(0 /* position */,
                 DividerSnapAlgorithm.SnapTarget.FLAG_DISMISS_START);
         mSplitLayout.snapToTarget(0 /* currentPosition */, snapTarget);
-        verify(mLayoutChangeListener).onSnappedToDismiss(eq(false));
+        verify(mSplitLayoutHandler).onSnappedToDismiss(eq(false));
         snapTarget = getSnapTarget(0 /* position */,
                 DividerSnapAlgorithm.SnapTarget.FLAG_DISMISS_END);
         mSplitLayout.snapToTarget(0 /* currentPosition */, snapTarget);
-        verify(mLayoutChangeListener).onSnappedToDismiss(eq(true));
+        verify(mSplitLayoutHandler).onSnappedToDismiss(eq(true));
     }
 
     private static Configuration getConfiguration(boolean isLandscape) {

@@ -60,4 +60,8 @@ public class UdfpsEnrollView extends UdfpsAnimationView {
     void setEnrollHelper(UdfpsEnrollHelper enrollHelper) {
         mFingerprintDrawable.setEnrollHelper(enrollHelper);
     }
+
+    void onEnrollmentProgress(int remaining, int totalSteps) {
+        mFingerprintDrawable.onEnrollmentProgress(remaining, totalSteps);
+    }
 }

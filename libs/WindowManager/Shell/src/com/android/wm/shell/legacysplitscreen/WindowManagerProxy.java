@@ -41,6 +41,7 @@ import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.ArrayUtils;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.transition.Transitions;
 
@@ -214,8 +215,12 @@ class WindowManagerProxy {
             if (!rootTask.supportsMultiWindow && rootTask.topActivityType != ACTIVITY_TYPE_HOME) {
                 continue;
             }
-            // Only move fullscreen tasks to split secondary.
-            if (rootTask.getWindowingMode() != WINDOWING_MODE_FULLSCREEN) {
+            // Only move split controlling tasks to split secondary.
+            final int windowingMode = rootTask.getWindowingMode();
+            if (!ArrayUtils.contains(CONTROLLED_WINDOWING_MODES, windowingMode)
+                    || !ArrayUtils.contains(CONTROLLED_ACTIVITY_TYPES, rootTask.getActivityType())
+                    // Excludes split screen secondary due to it's the root we're reparenting to.
+                    || windowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY) {
                 continue;
             }
             // Since this iterates from bottom to top, update topHomeTask for every fullscreen task

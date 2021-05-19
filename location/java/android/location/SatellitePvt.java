@@ -45,8 +45,41 @@ import android.os.Parcelable;
  */
 @SystemApi
 public final class SatellitePvt implements Parcelable {
+    /**
+     * Bit mask for {@link #mFlags} indicating valid satellite position, velocity and clock info
+     * fields are stored in the SatellitePvt.
+     */
+    private static final int HAS_POSITION_VELOCITY_CLOCK_INFO = 1 << 0;
+
+    /**
+     * Bit mask for {@link #mFlags} indicating a valid iono delay field is stored in the
+     * SatellitePvt.
+     */
+    private static final int HAS_IONO = 1 << 1;
+
+    /**
+     * Bit mask for {@link #mFlags} indicating a valid tropo delay field is stored in the
+     * SatellitePvt.
+     */
+    private static final int HAS_TROPO = 1 << 2;
+
+    /**
+     * A bitfield of flags indicating the validity of the fields in this SatellitePvt.
+     * The bit masks are defined in the constants with prefix HAS_*
+     *
+     * <p>Fields for which there is no corresponding flag must be filled in with a valid value.
+     * For convenience, these are marked as mandatory.
+     *
+     * <p>Others fields may have invalid information in them, if not marked as valid by the
+     * corresponding bit in flags.
+     */
+    private final int mFlags;
+
+    @Nullable
     private final PositionEcef mPositionEcef;
+    @Nullable
     private final VelocityEcef mVelocityEcef;
+    @Nullable
     private final ClockInfo mClockInfo;
     private final double mIonoDelayMeters;
     private final double mTropoDelayMeters;
@@ -351,20 +384,13 @@ public final class SatellitePvt implements Parcelable {
     }
 
     private SatellitePvt(
-            @NonNull PositionEcef positionEcef,
-            @NonNull VelocityEcef velocityEcef,
-            @NonNull ClockInfo clockInfo,
+            int flags,
+            @Nullable PositionEcef positionEcef,
+            @Nullable VelocityEcef velocityEcef,
+            @Nullable ClockInfo clockInfo,
             double ionoDelayMeters,
             double tropoDelayMeters) {
-        if (positionEcef == null) {
-            throw new IllegalArgumentException("Position Ecef cannot be null.");
-        }
-        if (velocityEcef == null) {
-            throw new IllegalArgumentException("Velocity Ecef cannot be null.");
-        }
-        if (clockInfo == null) {
-            throw new IllegalArgumentException("Clock Info cannot be null.");
-        }
+        mFlags = flags;
         mPositionEcef = positionEcef;
         mVelocityEcef = velocityEcef;
         mClockInfo = clockInfo;
@@ -373,10 +399,17 @@ public final class SatellitePvt implements Parcelable {
     }
 
     /**
+     * Gets a bitmask of fields present in this object
+     */
+    public int getFlags() {
+        return mFlags;
+    }
+
+    /**
      * Returns a {@link PositionEcef} object that contains estimates of the satellite
      * position fields in ECEF coordinate frame.
      */
-    @NonNull
+    @Nullable
     public PositionEcef getPositionEcef() {
         return mPositionEcef;
     }
@@ -385,7 +418,7 @@ public final class SatellitePvt implements Parcelable {
      * Returns a {@link VelocityEcef} object that contains estimates of the satellite
      * velocity fields in the ECEF coordinate frame.
      */
-    @NonNull
+    @Nullable
     public VelocityEcef getVelocityEcef() {
         return mVelocityEcef;
     }
@@ -394,7 +427,7 @@ public final class SatellitePvt implements Parcelable {
      * Returns a {@link ClockInfo} object that contains estimates of the satellite
      * clock info.
      */
-    @NonNull
+    @Nullable
     public ClockInfo getClockInfo() {
         return mClockInfo;
     }
@@ -415,11 +448,29 @@ public final class SatellitePvt implements Parcelable {
         return mTropoDelayMeters;
     }
 
+    /** Returns {@code true} if {@link #getPositionEcef()}, {@link #getVelocityEcef()},
+     * and {@link #getClockInfo()} are valid.
+     */
+    public boolean hasPositionVelocityClockInfo() {
+        return (mFlags & HAS_POSITION_VELOCITY_CLOCK_INFO) != 0;
+    }
+
+    /** Returns {@code true} if {@link #getIonoDelayMeters()} is valid. */
+    public boolean hasIono() {
+        return (mFlags & HAS_IONO) != 0;
+    }
+
+    /** Returns {@code true} if {@link #getTropoDelayMeters()} is valid. */
+    public boolean hasTropo() {
+        return (mFlags & HAS_TROPO) != 0;
+    }
+
     public static final @android.annotation.NonNull Creator<SatellitePvt> CREATOR =
             new Creator<SatellitePvt>() {
                 @Override
                 @Nullable
                 public SatellitePvt createFromParcel(Parcel in) {
+                    int flags = in.readInt();
                     ClassLoader classLoader = getClass().getClassLoader();
                     PositionEcef positionEcef = in.readParcelable(classLoader);
                     VelocityEcef velocityEcef = in.readParcelable(classLoader);
@@ -428,6 +479,7 @@ public final class SatellitePvt implements Parcelable {
                     double tropoDelayMeters = in.readDouble();
 
                     return new SatellitePvt(
+                            flags,
                             positionEcef,
                             velocityEcef,
                             clockInfo,
@@ -448,6 +500,7 @@ public final class SatellitePvt implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel parcel, int flags) {
+        parcel.writeInt(mFlags);
         parcel.writeParcelable(mPositionEcef, flags);
         parcel.writeParcelable(mVelocityEcef, flags);
         parcel.writeParcelable(mClockInfo, flags);
@@ -458,7 +511,8 @@ public final class SatellitePvt implements Parcelable {
     @Override
     public String toString() {
         return "SatellitePvt{"
-                + "PositionEcef=" + mPositionEcef
+                + "Flags=" + mFlags
+                + ", PositionEcef=" + mPositionEcef
                 + ", VelocityEcef=" + mVelocityEcef
                 + ", ClockInfo=" + mClockInfo
                 + ", IonoDelayMeters=" + mIonoDelayMeters
@@ -470,11 +524,28 @@ public final class SatellitePvt implements Parcelable {
      * Builder class for SatellitePvt.
      */
     public static final class Builder {
-        private PositionEcef mPositionEcef;
-        private VelocityEcef mVelocityEcef;
-        private ClockInfo mClockInfo;
+        /**
+         * For documentation of below fields, see corresponding fields in {@link
+         * SatellitePvt}.
+         */
+        private int mFlags;
+        @Nullable private PositionEcef mPositionEcef;
+        @Nullable private VelocityEcef mVelocityEcef;
+        @Nullable private ClockInfo mClockInfo;
         private double mIonoDelayMeters;
         private double mTropoDelayMeters;
+
+        /**
+         * Sets a bitmask of fields present in this object
+         *
+         * @param flags int flags
+         * @return Builder builder object
+         */
+        @NonNull
+        public Builder setFlags(int flags) {
+            mFlags = flags;
+            return this;
+        }
 
         /**
          * Set position ECEF.
@@ -546,7 +617,7 @@ public final class SatellitePvt implements Parcelable {
          */
         @NonNull
         public SatellitePvt build() {
-            return new SatellitePvt(mPositionEcef, mVelocityEcef, mClockInfo,
+            return new SatellitePvt(mFlags, mPositionEcef, mVelocityEcef, mClockInfo,
                     mIonoDelayMeters, mTropoDelayMeters);
         }
     }

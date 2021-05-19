@@ -52,14 +52,18 @@ filegroup {
 java_sdk_library {
     name: "framework-appsearch",
     srcs: [":framework-appsearch-sources"],
-    sdk_version: "core_platform", // TODO(b/146218515) should be module_current
-    impl_only_libs: ["framework-minus-apex"], // TODO(b/146218515) should be removed
+    sdk_version: "module_current",
+    static_libs: [
+        // This list must be kept in sync with jarjar.txt
+        "modules-utils-preconditions",
+    ],
     libs: ["unsupportedappusage"], // TODO(b/181887768) should be removed
     defaults: ["framework-module-defaults"],
     permitted_packages: ["android.app.appsearch"],
     aidl: {
         include_dirs: ["frameworks/base/core/java"], // TODO(b/146218515) should be removed
     },
+    jarjar_rules: "jarjar-rules.txt",
     apex_available: ["com.android.appsearch"],
     unsafe_ignore_missing_latest_api: true, // TODO(b/146218515) should be removed
 }

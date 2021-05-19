@@ -176,6 +176,7 @@ struct MultiAssetsProvider : public AssetsProvider {
 // Does not provide any assets.
 struct EmptyAssetsProvider : public AssetsProvider {
   static std::unique_ptr<AssetsProvider> Create();
+  static std::unique_ptr<AssetsProvider> Create(const std::string& path);
 
   bool ForEachFile(const std::string& path,
                   const std::function<void(const StringPiece&, FileType)>& f) const override;
@@ -188,6 +189,10 @@ struct EmptyAssetsProvider : public AssetsProvider {
  protected:
   std::unique_ptr<Asset> OpenInternal(const std::string& path, Asset::AccessMode mode,
                                       bool* file_exists) const override;
+
+ private:
+  explicit EmptyAssetsProvider(std::optional<std::string>&& path);
+  std::optional<std::string> path_;
 };
 
 }  // namespace android

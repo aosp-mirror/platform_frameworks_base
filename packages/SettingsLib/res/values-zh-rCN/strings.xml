@@ -375,7 +375,7 @@
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"当应用未经有效渠道发布通知时，在屏幕上显示警告"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"强制允许将应用写入外部存储设备"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"允许将任何应用写入外部存储设备（无论清单值是什么）"</string>
-    <string name="force_resizable_activities" msgid="7143612144399959606">"强制将活动设为可调整大小"</string>
+    <string name="force_resizable_activities" msgid="7143612144399959606">"强制将 Activity 设为可调整大小"</string>
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"将所有 Activity 设为可配合多窗口环境调整大小（忽略清单值）。"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"启用可自由调整的窗口"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"启用可自由调整的窗口这一实验性功能。"</string>
@@ -405,6 +405,7 @@
     <string name="transcode_enable_all" msgid="2411165920039166710">"启用转码"</string>
     <string name="transcode_default" msgid="3784803084573509491">"假设应用支持现代格式"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"显示转码通知"</string>
+    <string name="transcode_disable_cache" msgid="3160069309377467045">"停用转码缓存"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"正在运行的服务"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"查看和控制当前正在运行的服务"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView 实现"</string>
@@ -450,19 +451,17 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"平板电脑可能即将关机 (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"设备可能即将关机 (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_remaining_charging_duration_only (8085099012811384899) -->
-    <skip />
-    <!-- no translation found for power_charging_duration (6127154952524919719) -->
-    <skip />
+    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"还需 <xliff:g id="TIME">%1$s</xliff:g>充满"</string>
+    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - 还需 <xliff:g id="TIME">%2$s</xliff:g>充满"</string>
     <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - 正在针对电池状况进行优化"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"未知"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"正在充电"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"正在快速充电"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"正在慢速充电"</string>
+    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"正在无线充电"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"未在充电"</string>
-    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"已插入电源，但是现在无法充电"</string>
-    <!-- no translation found for battery_info_status_full (1339002294876531312) -->
-    <skip />
+    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"已连接，尚未充电"</string>
+    <string name="battery_info_status_full" msgid="1339002294876531312">"已充满电"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"由管理员控制"</string>
     <string name="disabled" msgid="8017887509554714950">"已停用"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"允许"</string>
@@ -505,10 +504,12 @@
     <string name="cancel" msgid="5665114069455378395">"取消"</string>
     <string name="okay" msgid="949938843324579502">"确定"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"闹钟和提醒"</string>
-    <string name="alarms_and_reminders_switch_title" msgid="186992351401152744">"允许设置闹钟或提醒"</string>
-    <string name="alarms_and_reminders_title" msgid="2988400785896875237">"闹钟和提醒"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="5882788882647778753">"允许该应用设置闹钟或其他在指定时间发生的活动。这样一来，即使您并未使用设备，该应用仍会唤醒并运行。请注意，撤消此权限可能会导致该应用出现故障，特别是该应用设置的所有闹钟都将不再生效。"</string>
-    <string name="keywords_alarms_and_reminders" msgid="8882739572152019456">"设置, 闹钟, 提醒, 活动, schedule, alarm, reminder, event"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"允许设置闹钟和提醒"</string>
+    <string name="alarms_and_reminders_title" msgid="8819933264635406032">"闹钟和提醒"</string>
+    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"允许该应用设置闹钟及安排其他操作的执行时间。该应用可能会在您未使用手机时运行，以致手机的电源消耗更快。如果您关闭此权限，该应用可能无法正常运行，已设置的闹钟也无法在排定的时间响起。"</string>
+    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"允许该应用设置闹钟及安排其他操作的执行时间。该应用可能会在您未使用平板电脑时运行，以致平板电脑的电源消耗更快。如果您关闭此权限，该应用可能无法正常运行，已设置的闹钟也无法在排定的时间响起。"</string>
+    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"允许该应用设置闹钟及安排其他操作的执行时间。该应用可能会在您未使用设备时运行，以致设备电源消耗更快。如果您关闭此权限，该应用可能无法正常运行，已设置的闹钟也无法在排定的时间响起。"</string>
+    <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"设置, 闹钟, 提醒, 时钟, schedule, alarm, reminder, clock"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"开启"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"开启勿扰模式"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"永不"</string>
@@ -562,8 +563,7 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"设置屏幕锁定方式"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"切换到<xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"正在创建新用户…"</string>
-    <!-- no translation found for add_user_failed (4809887794313944872) -->
-    <skip />
+    <string name="add_user_failed" msgid="4809887794313944872">"无法创建新用户"</string>
     <string name="user_nickname" msgid="262624187455825083">"昵称"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"添加访客"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"移除访客"</string>

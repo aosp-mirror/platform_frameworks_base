@@ -17,7 +17,6 @@
 package com.android.systemui.wmshell;
 
 import static android.view.Display.DEFAULT_DISPLAY;
-import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BOUNCER_SHOWING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BUBBLES_EXPANDED;
@@ -35,7 +34,6 @@ import android.graphics.drawable.Drawable;
 import android.inputmethodservice.InputMethodService;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
-import android.view.KeyEvent;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.KeyguardUpdateMonitor;
@@ -59,7 +57,6 @@ import com.android.wm.shell.hidedisplaycutout.HideDisplayCutout;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.nano.WmShellTraceProto;
 import com.android.wm.shell.onehanded.OneHanded;
-import com.android.wm.shell.onehanded.OneHandedGestureHandler.OneHandedGestureEventCallback;
 import com.android.wm.shell.onehanded.OneHandedTransitionCallback;
 import com.android.wm.shell.onehanded.OneHandedUiEventLogger;
 import com.android.wm.shell.pip.Pip;
@@ -230,10 +227,6 @@ public final class WMShell extends SystemUI
 
     @VisibleForTesting
     void initOneHanded(OneHanded oneHanded) {
-        int currentMode = mNavigationModeController.addListener(mode ->
-                oneHanded.setThreeButtonModeEnabled(mode == NAV_BAR_MODE_3BUTTON));
-        oneHanded.setThreeButtonModeEnabled(currentMode == NAV_BAR_MODE_3BUTTON);
-
         oneHanded.registerTransitionCallback(new OneHandedTransitionCallback() {
             @Override
             public void onStartTransition(boolean isEntering) {
@@ -256,32 +249,6 @@ public final class WMShell extends SystemUI
                 mSysUiMainExecutor.execute(() -> {
                     mSysUiState.setFlag(SYSUI_STATE_ONE_HANDED_ACTIVE,
                             false).commitUpdate(DEFAULT_DISPLAY);
-                });
-            }
-        });
-
-        oneHanded.registerGestureCallback(new OneHandedGestureEventCallback() {
-            @Override
-            public void onStart() {
-                mSysUiMainExecutor.execute(() -> {
-                    if (oneHanded.isOneHandedEnabled()) {
-                        oneHanded.startOneHanded();
-                    } else if (oneHanded.isSwipeToNotificationEnabled()) {
-                        mCommandQueue.handleSystemKey(KeyEvent.KEYCODE_SYSTEM_NAVIGATION_DOWN);
-                    }
-                });
-            }
-
-            @Override
-            public void onStop() {
-                mSysUiMainExecutor.execute(() -> {
-                    if (oneHanded.isOneHandedEnabled()) {
-                        // Log metrics for 3-button navigation mode.
-                        oneHanded.stopOneHanded(
-                                OneHandedUiEventLogger.EVENT_ONE_HANDED_TRIGGER_GESTURE_OUT);
-                    } else if (oneHanded.isSwipeToNotificationEnabled()) {
-                        mCommandQueue.handleSystemKey(KeyEvent.KEYCODE_SYSTEM_NAVIGATION_UP);
-                    }
                 });
             }
         });

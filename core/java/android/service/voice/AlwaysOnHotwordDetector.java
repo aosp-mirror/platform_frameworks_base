@@ -49,7 +49,6 @@ import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.SharedMemory;
-import android.service.voice.HotwordDetectionService.InitializationStatus;
 import android.util.Log;
 import android.util.Slog;
 
@@ -531,9 +530,12 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
          * Called when the {@link HotwordDetectionService} is created by the system and given a
          * short amount of time to report it's initialization state.
          *
-         * @param status Info about initialization state of {@link HotwordDetectionService}.
+         * @param status Info about initialization state of {@link HotwordDetectionService}; the
+         * allowed values are {@link HotwordDetectionService#INITIALIZATION_STATUS_SUCCESS},
+         * 1<->{@link HotwordDetectionService#getMaxCustomInitializationStatus()},
+         * {@link HotwordDetectionService#INITIALIZATION_STATUS_UNKNOWN}.
          */
-        public void onHotwordDetectionServiceInitialized(@InitializationStatus int status) {
+        public void onHotwordDetectionServiceInitialized(int status) {
         }
 
         /**

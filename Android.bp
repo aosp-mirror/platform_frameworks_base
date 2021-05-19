@@ -313,6 +313,7 @@ java_defaults {
     libs: [
         "app-compat-annotations",
         "ext",
+        "framework-connectivity-annotations",
         "framework-updatable-stubs-module_libs_api",
         "unsupportedappusage",
     ],
@@ -326,6 +327,7 @@ java_defaults {
         "av-types-aidl-java",
         "tv_tuner_resource_manager_aidl_interface-java",
         "soundtrigger_middleware-aidl-java",
+        "modules-utils-preconditions",
         "modules-utils-os",
         "framework-permission-aidl-java",
     ],
@@ -409,6 +411,7 @@ filegroup {
     srcs: [
         // TODO: remove these annotations as soon as we can use andoid.support.annotations.*
         ":framework-annotations",
+        ":modules-utils-preconditions-srcs",
         "core/java/android/net/DhcpResults.java",
         "core/java/android/util/IndentingPrintWriter.java",
         "core/java/android/util/LocalLog.java",
@@ -416,7 +419,6 @@ filegroup {
         "core/java/com/android/internal/util/IndentingPrintWriter.java",
         "core/java/com/android/internal/util/IState.java",
         "core/java/com/android/internal/util/MessageUtils.java",
-        "core/java/com/android/internal/util/Preconditions.java",
         "core/java/com/android/internal/util/RingBufferIndices.java",
         "core/java/com/android/internal/util/State.java",
         "core/java/com/android/internal/util/StateMachine.java",
@@ -446,11 +448,11 @@ java_library {
     sdk_version: "module_current",
     min_sdk_version: "30",
     srcs: [
+        ":modules-utils-preconditions-srcs",
         "core/java/android/os/HandlerExecutor.java",
         "core/java/com/android/internal/util/AsyncChannel.java",
         "core/java/com/android/internal/util/AsyncService.java",
         "core/java/com/android/internal/util/Protocol.java",
-        "core/java/com/android/internal/util/Preconditions.java",
         "telephony/java/android/telephony/Annotation.java",
         ":net-utils-framework-wifi-common-srcs",
     ],

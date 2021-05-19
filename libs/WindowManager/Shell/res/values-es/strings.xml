@@ -43,10 +43,10 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"Superior 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"Superior 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"Pantalla inferior completa"</string>
-    <string name="one_handed_tutorial_title" msgid="4583241688067426350">"Utilizar el modo una mano"</string>
+    <string name="one_handed_tutorial_title" msgid="4583241688067426350">"Usar Modo una mano"</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"Para salir, desliza el dedo hacia arriba desde la parte inferior de la pantalla o toca cualquier zona que haya encima de la aplicación"</string>
-    <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"Iniciar modo una mano"</string>
-    <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"Salir del modo una mano"</string>
+    <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"Iniciar Modo una mano"</string>
+    <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"Salir del Modo una mano"</string>
     <string name="bubbles_settings_button_description" msgid="1301286017420516912">"Ajustes de las burbujas de <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubble_overflow_button_content_description" msgid="8160974472718594382">"Menú adicional"</string>
     <string name="bubble_accessibility_action_add_back" msgid="1830101076853540953">"Volver a añadir a la pila"</string>
@@ -70,5 +70,5 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Gestionar"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Burbuja cerrada."</string>
     <string name="restart_button_description" msgid="5887656107651190519">"Toca para reiniciar esta aplicación e ir a la pantalla completa."</string>
-    <string name="got_it" msgid="4428750913636945527">"Listo"</string>
+    <string name="got_it" msgid="4428750913636945527">"Entendido"</string>
 </resources>

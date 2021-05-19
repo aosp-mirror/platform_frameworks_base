@@ -108,7 +108,58 @@ public class NetworkRanker {
         }
     }
 
-    @Nullable private <T extends Scoreable> T getBestNetworkByPolicy(
+    private <T extends Scoreable> boolean isBadWiFi(@NonNull final T candidate) {
+        return candidate.getScore().hasPolicy(POLICY_EVER_VALIDATED_NOT_AVOIDED_WHEN_BAD)
+                && candidate.getCapsNoCopy().hasTransport(TRANSPORT_WIFI);
+    }
+
+    /**
+     * Apply the "yield to bad WiFi" policy.
+     *
+     * This function must run immediately after the validation policy.
+     *
+     * If any of the accepted networks has the "yield to bad WiFi" policy AND there are some
+     * bad WiFis in the rejected list, then move the networks with the policy to the rejected
+     * list. If this leaves no accepted network, then move the bad WiFis back to the accepted list.
+     *
+     * This function returns nothing, but will have updated accepted and rejected in-place.
+     *
+     * @param accepted networks accepted by the validation policy
+     * @param rejected networks rejected by the validation policy
+     */
+    private <T extends Scoreable> void applyYieldToBadWifiPolicy(@NonNull ArrayList<T> accepted,
+            @NonNull ArrayList<T> rejected) {
+        if (!CollectionUtils.any(accepted, n -> n.getScore().hasPolicy(POLICY_YIELD_TO_BAD_WIFI))) {
+            // No network with the policy : do nothing.
+            return;
+        }
+        if (!CollectionUtils.any(rejected, n -> isBadWiFi(n))) {
+            // No bad WiFi : do nothing.
+            return;
+        }
+        if (CollectionUtils.all(accepted, n -> n.getScore().hasPolicy(POLICY_YIELD_TO_BAD_WIFI))) {
+            // All validated networks yield to bad WiFis : keep bad WiFis alongside with the
+            // yielders. This is important because the yielders need to be compared to the bad
+            // wifis by the following policies (e.g. exiting).
+            final ArrayList<T> acceptedYielders = new ArrayList<>(accepted);
+            final ArrayList<T> rejectedWithBadWiFis = new ArrayList<>(rejected);
+            partitionInto(rejectedWithBadWiFis, n -> isBadWiFi(n), accepted, rejected);
+            accepted.addAll(acceptedYielders);
+            return;
+        }
+        // Only some of the validated networks yield to bad WiFi : keep only the ones who don't.
+        final ArrayList<T> acceptedWithYielders = new ArrayList<>(accepted);
+        partitionInto(acceptedWithYielders, n -> !n.getScore().hasPolicy(POLICY_YIELD_TO_BAD_WIFI),
+                accepted, rejected);
+    }
+
+    /**
+     * Get the best network among a list of candidates according to policy.
+     * @param candidates the candidates
+     * @param currentSatisfier the current satisfier, or null if none
+     * @return the best network
+     */
+    @Nullable public <T extends Scoreable> T getBestNetworkByPolicy(
             @NonNull List<T> candidates,
             @Nullable final T currentSatisfier) {
         // Used as working areas.
@@ -148,24 +199,15 @@ public class NetworkRanker {
         if (accepted.size() == 1) return accepted.get(0);
         if (accepted.size() > 0 && rejected.size() > 0) candidates = new ArrayList<>(accepted);
 
-        // Yield to bad wifi policy : if any wifi has ever been validated (even if it's now
-        // unvalidated), and unless it's been explicitly avoided when bad in UI, then keep only
-        // networks that don't yield to such a wifi network.
-        final boolean anyWiFiEverValidated = CollectionUtils.any(candidates,
-                nai -> nai.getScore().hasPolicy(POLICY_EVER_VALIDATED_NOT_AVOIDED_WHEN_BAD)
-                        && nai.getCapsNoCopy().hasTransport(TRANSPORT_WIFI));
-        if (anyWiFiEverValidated) {
-            partitionInto(candidates, nai -> !nai.getScore().hasPolicy(POLICY_YIELD_TO_BAD_WIFI),
-                    accepted, rejected);
-            if (accepted.size() == 1) return accepted.get(0);
-            if (accepted.size() > 0 && rejected.size() > 0) candidates = new ArrayList<>(accepted);
-        }
-
         // If any network is validated (or should be accepted even if it's not validated), then
         // don't choose one that isn't.
         partitionInto(candidates, nai -> nai.getScore().hasPolicy(POLICY_IS_VALIDATED)
                         || nai.getScore().hasPolicy(POLICY_ACCEPT_UNVALIDATED),
                 accepted, rejected);
+        // Yield to bad wifi policy : if any network has the "yield to bad WiFi" policy and
+        // there are bad WiFis connected, then accept the bad WiFis and reject the networks with
+        // the policy.
+        applyYieldToBadWifiPolicy(accepted, rejected);
         if (accepted.size() == 1) return accepted.get(0);
         if (accepted.size() > 0 && rejected.size() > 0) candidates = new ArrayList<>(accepted);
 
@@ -194,16 +236,26 @@ public class NetworkRanker {
         // subscription with the same transport.
         partitionInto(candidates, nai -> nai.getScore().hasPolicy(POLICY_TRANSPORT_PRIMARY),
                 accepted, rejected);
-        for (final Scoreable defaultSubNai : accepted) {
-            // Remove all networks without the DEFAULT_SUBSCRIPTION policy and the same transports
-            // as a network that has it.
-            final int[] transports = defaultSubNai.getCapsNoCopy().getTransportTypes();
-            candidates.removeIf(nai -> !nai.getScore().hasPolicy(POLICY_TRANSPORT_PRIMARY)
-                    && Arrays.equals(transports, nai.getCapsNoCopy().getTransportTypes()));
+        if (accepted.size() > 0) {
+            // Some networks are primary for their transport. For each transport, keep only the
+            // primary, but also keep all networks for which there isn't a primary (which are now
+            // in the |rejected| array).
+            // So for each primary network, remove from |rejected| all networks with the same
+            // transports as one of the primary networks. The remaining networks should be accepted.
+            for (final T defaultSubNai : accepted) {
+                final int[] transports = defaultSubNai.getCapsNoCopy().getTransportTypes();
+                rejected.removeIf(
+                        nai -> Arrays.equals(transports, nai.getCapsNoCopy().getTransportTypes()));
+            }
+            // Now the |rejected| list contains networks with transports for which there isn't
+            // a primary network. Add them back to the candidates.
+            accepted.addAll(rejected);
+            candidates = new ArrayList<>(accepted);
         }
         if (1 == candidates.size()) return candidates.get(0);
-        // It's guaranteed candidates.size() > 0 because there is at least one with the
-        // TRANSPORT_PRIMARY policy and only those without it were removed.
+        // If there were no primary network, then candidates.size() > 0 because it didn't
+        // change from the previous result. If there were, it's guaranteed candidates.size() > 0
+        // because accepted.size() > 0 above.
 
         // If some of the networks have a better transport than others, keep only the ones with
         // the best transports.

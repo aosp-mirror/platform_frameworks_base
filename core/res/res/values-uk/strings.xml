@@ -544,10 +544,8 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Дозволяє додатку знаходити поблизу пристрої Bluetooth і створювати з ними пару"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"підключатися до пристроїв із Bluetooth, з якими є пара"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Дозволяє додатку підключатися до пристроїв із Bluetooth, з якими створено пару"</string>
-    <!-- no translation found for permlab_bluetooth_advertise (2781147747928853177) -->
-    <skip />
-    <!-- no translation found for permdesc_bluetooth_advertise (6085174451034210183) -->
-    <skip />
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"показувати рекламу на пристроях із Bluetooth поблизу"</string>
+    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Додаток зможе показувати рекламу на пристроях із Bluetooth поблизу"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"визначення відстані між пристроями поблизу з надширокосмуговим зв’язком"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"З цим дозволом додаток може визначати відстань між розташованими поблизу пристроями з надширокосмуговим зв’язком"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Використання інформації з платіжного NFC-сервісу"</string>
@@ -617,10 +615,10 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Значок відбитка пальця"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"керувати апаратним забезпечення для Фейсконтролю"</string>
+    <string name="permlab_manageFace" msgid="4569549381889283282">"керувати апаратним забезпечення фейсконтролю"</string>
     <string name="permdesc_manageFace" msgid="6204569688492710471">"Додаток може активувати способи додавання й видалення шаблонів облич."</string>
     <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"використовувати апаратне забезпечення для Фейсконтролю"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Додаток може використовувати апаратне забезпечення для Фейсконтролю"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Додаток зможе використовувати для автентифікації апаратне забезпечення фейсконтролю"</string>
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Фейсконтроль"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Повторно проскануйте обличчя"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Повторно проскануйте обличчя для ефективнішого розпізнавання"</string>
@@ -651,15 +649,15 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Не вдається перевірити обличчя. Апаратне забезпечення недоступне."</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"Скористайтеся Фейсконтролем ще раз."</string>
+    <string name="face_error_timeout" msgid="522924647742024699">"Спробуйте скористатися фейсконтролем ще раз."</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Не вдається зберегти нові дані про обличчя. Видаліть старі."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Дію з обличчям скасовано."</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"Користувач скасував Фейсконтроль."</string>
+    <string name="face_error_user_canceled" msgid="8553045452825849843">"Фейсконтроль: користувач скасував операцію."</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Забагато спроб. Повторіть пізніше."</string>
     <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Забагато спроб. Фейсконтроль вимкнено."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Не вдається перевірити обличчя. Повторіть спробу."</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"Ви не налаштували Фейсконтроль"</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"На цьому пристрої не підтримується Фейсконтроль."</string>
+    <string name="face_error_not_enrolled" msgid="7369928733504691611">"Ви не налаштували фейсконтроль"</string>
+    <string name="face_error_hw_not_present" msgid="1070600921591729944">"На цьому пристрої не підтримується фейсконтроль."</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Датчик тимчасово вимкнено."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Обличчя <xliff:g id="FACEID">%d</xliff:g>"</string>
     <string name="face_app_setting_name" msgid="8130135875458467243">"Доступ через фейсконтроль"</string>
@@ -1030,7 +1028,7 @@
     <string name="text_copied" msgid="2531420577879738860">"Текст скопійов. в буф. обм."</string>
     <string name="copied" msgid="4675902854553014676">"Скопійовано"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"Дані з додатка <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> вставлено в <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>"</string>
-    <string name="pasted_from_clipboard" msgid="6295556725844421812">"Дані з буфера обміну вставлено в <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>"</string>
+    <string name="pasted_from_clipboard" msgid="7355790625710831847">"Дані з буфера обміну вставлено в додатку <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>"</string>
     <string name="pasted_text" msgid="4298871641549173733">"Скопійований текст вставлено в додатку <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>"</string>
     <string name="pasted_image" msgid="4729097394781491022">"Скопійоване зображення вставлено в додатку <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>"</string>
     <string name="pasted_content" msgid="646276353060777131">"Скопійований контент вставлено в додатку <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>"</string>
@@ -1301,6 +1299,10 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"Підготовка додатка <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Запуск програм."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Завершення завантаження."</string>
+    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"Вимкнути екран?"</string>
+    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"Налаштовуючи відбиток пальця, ви натиснули кнопку живлення.\n\nЗазвичай після цього вимикається екран."</string>
+    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"Вимкнути"</string>
+    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"Скасувати"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"Працює <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Торкніться, щоб повернутися в гру"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Виберіть гру"</string>
@@ -1741,7 +1743,7 @@
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Повний доступ доречний для додатків, які надають спеціальні можливості, але його не варто відкривати для більшості інших додатків."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Перегляд і контроль екрана"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Цей сервіс може переглядати всі дані на екрані й показувати вміст над іншими додатками."</string>
-    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Переглянути й виконати дії"</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Перегляд і виконання дій"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Цей сервіс може відстежувати вашу взаємодію з додатком чи апаратним датчиком, а також взаємодіяти з додатками від вашого імені."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Дозволити"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Заборонити"</string>
@@ -1755,6 +1757,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Використовувати ярлик"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Інверсія кольорів"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Корекція кольорів"</string>
+    <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Режим керування однією рукою"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Додаткове зменшення яскравості"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Утримано клавіші гучності. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> увімкнено."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Утримано клавіші гучності. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> вимкнено."</string>
@@ -1819,6 +1822,17 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"Monarch (Пн. Америка)"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"Quarto (Пн. Америка)"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"Foolscap (Пн. Америка)"</string>
+    <string name="mediasize_na_ansi_c" msgid="3104916921818289618">"ANSI C"</string>
+    <string name="mediasize_na_ansi_d" msgid="254005964819282724">"ANSI D"</string>
+    <string name="mediasize_na_ansi_e" msgid="4424174989686785675">"ANSI E"</string>
+    <string name="mediasize_na_ansi_f" msgid="146980362213260987">"ANSI F"</string>
+    <string name="mediasize_na_arch_a" msgid="5280681822380032361">"Arch A"</string>
+    <string name="mediasize_na_arch_b" msgid="2113344093437297427">"Arch B"</string>
+    <string name="mediasize_na_arch_c" msgid="971002546186856623">"Arch C"</string>
+    <string name="mediasize_na_arch_d" msgid="6450996075335049806">"Arch D"</string>
+    <string name="mediasize_na_arch_e" msgid="6782708486949266519">"Arch E"</string>
+    <string name="mediasize_na_arch_e1" msgid="4707138568738504275">"Arch E1"</string>
+    <string name="mediasize_na_super_b" msgid="6964127155618393178">"Super B"</string>
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K (Китай)"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K (Китай)"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1 (Китай)"</string>
@@ -1855,6 +1869,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu (Японія)"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2 (Японія)"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4 (Японія)"</string>
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"L"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"Невідома книжкова орієнтація"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"Невідома альбомна орієнтація"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"Скасовано"</string>
@@ -1900,8 +1915,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Оновлено адміністратором"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Видалено адміністратором"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ОК"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Щоб подовжити час роботи акумулятора, режим енергозбереження:\n\n• вмикає темну тему;\n• припиняє або обмежує фонову активність, вимикає деякі візуальні ефекти та інші енергозатратні функції, зокрема команду \"Ok Google\".\n\n"<annotation id="url">"Докладніше"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"Щоб подовжити час роботи акумулятора, режим енергозбереження:\n\n• вмикає темну тему;\n• припиняє або обмежує фонову активність, вимикає деякі візуальні ефекти та інші енергозатратні функції, зокрема команду \"Ok Google\"."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"У режимі енергозбереження вмикається Темна тема й обмежуються чи вимикаються дії у фоновому режимі, а також деякі візуальні ефекти, функції та з’єднання з мережами.\n\n"<annotation id="url">"Докладніше"</annotation></string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"У режимі енергозбереження вмикається Темна тема й обмежуються чи вимикаються дії у фоновому режимі, а також деякі візуальні ефекти, функції та з’єднання з мережами."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Щоб зменшити використання трафіку, функція \"Заощадження трафіку\" не дозволяє деяким додаткам надсилати чи отримувати дані у фоновому режимі. Поточний додаток зможе отримувати доступ до таких даних, але рідше. Наприклад, зображення не відображатиметься, доки ви не торкнетеся його."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Увімкнути заощадження трафіку?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Увімкнути"</string>
@@ -1993,6 +2008,7 @@
     <string name="close_button_text" msgid="10603510034455258">"Закрити"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"Відповісти"</string>
+    <string name="call_notification_answer_video_action" msgid="2086030940195382249">"Відео"</string>
     <string name="call_notification_decline_action" msgid="3700345945214000726">"Відхилити"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Завершити"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"Вхідний виклик"</string>
@@ -2021,8 +2037,8 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"Додаток <xliff:g id="APP_NAME_0">%1$s</xliff:g> зараз недоступний. Керує додаток <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Докладніше"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Відновити доступ до додатка"</string>
-    <string name="work_mode_off_title" msgid="5503291976647976560">"Увімкнути робочий профіль?"</string>
-    <string name="work_mode_off_message" msgid="8417484421098563803">"Додатки, сповіщення, дані й інші функції робочого профілю буде ввімкнено"</string>
+    <string name="work_mode_off_title" msgid="961171256005852058">"Увімкнути робочі додатки?"</string>
+    <string name="work_mode_off_message" msgid="7319580997683623309">"Отримайте доступ до своїх робочих додатків і сповіщень"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Увімкнути"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Додаток недоступний"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Додаток <xliff:g id="APP_NAME">%1$s</xliff:g> зараз недоступний."</string>
@@ -2140,6 +2156,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Важливість цього сповіщення знижено до рівня \"Без звуку\". Натисніть, щоб надіслати відгук."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Важливість цього сповіщення підвищено. Натисніть, щоб надіслати відгук."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Важливість цього сповіщення знижено. Натисніть, щоб надіслати відгук."</string>
+    <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"Покращені сповіщення"</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"Тепер пропоновані дії та відповіді можна знайти в покращених сповіщеннях. Адаптивні сповіщення Android більше не підтримуються."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Вимкнути"</string>
+    <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Докладніше"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"У версії ОС Android 12 адаптивні сповіщення замінено на покращені. Ця функція допомагає впорядковувати сповіщення й показує в них пропоновані дії та відповіді.\n\nПокращені сповіщення надають доступ до вмісту сповіщень, зокрема до особистої інформації, наприклад повідомлень та імен контактів. Ця функція може автоматично відхиляти сповіщення чи реагувати на них, наприклад відповідати на телефонні дзвінки або керувати режимом \"Не турбувати\"."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Сповіщення про послідовнсть дій"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Акумулятор може розрядитися раніше ніж зазвичай"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Режим енергозбереження активовано для збільшення часу роботи акумулятора"</string>
@@ -2329,17 +2351,15 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Тепер можна збільшувати частину екрана"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Увімкнути в налаштуваннях"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Закрити"</string>
-    <!-- no translation found for sensor_privacy_start_use_mic_notification_content_title (2420858361276370367) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_camera_notification_content_title (7287720213963466672) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_notification_content_text (7595608891015777346) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_dialog_turn_on_button (7089318886628390827) -->
-    <skip />
+    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Розблокуйте мікрофон пристрою"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Розблокуйте камеру пристрою"</string>
+    <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"Для &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; та всіх додатків і сервісів"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Розблокувати"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Конфіденційність датчиків"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Значок додатка"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Зображення фірмової символіки додатка"</string>
     <string name="view_and_control_notification_title" msgid="4300765399209912240">"Перевірте налаштування доступу"</string>
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> може переглядати екран вашого пристрою та керувати ним. Натисніть, щоб переглянути."</string>
+    <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> (перекладене повідомлення)."</string>
+    <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Повідомлення перекладено (мова оригіналу: <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g>, мова перекладу: <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>)."</string>
 </resources>

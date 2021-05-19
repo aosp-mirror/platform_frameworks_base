@@ -2957,8 +2957,7 @@ public final class PowerManagerService extends SystemService
                 // Group has been removed.
                 return;
             }
-            // TODO (b/175764708): Support per-display doze.
-            wakefulness = getWakefulnessLocked();
+            wakefulness = mDisplayGroupPowerStateMapper.getWakefulnessLocked(groupId);
             if ((wakefulness == WAKEFULNESS_DREAMING || wakefulness == WAKEFULNESS_DOZING) &&
                     mDisplayGroupPowerStateMapper.isSandmanSummoned(groupId)
                     && mDisplayGroupPowerStateMapper.isReady(groupId)) {
@@ -3100,6 +3099,7 @@ public final class PowerManagerService extends SystemService
      * Returns true if the device is allowed to doze in its current state.
      */
     private boolean canDozeLocked() {
+        // TODO (b/175764708): Support per-display doze.
         return getWakefulnessLocked() == WAKEFULNESS_DOZING;
     }
 

@@ -3064,6 +3064,7 @@
     <public name="hotwordDetectionService" />
     <public name="previewLayout" />
     <public name="clipToOutline" />
+    <public name="__removed3" />
     <public name="knownCerts" />
     <public name="windowBackgroundBlurRadius"/>
     <public name="windowSplashScreenBackground"/>
@@ -3095,8 +3096,6 @@
     <!-- @hide @SystemApi -->
     <public name="playHomeTransitionSound" />
     <public name="lStar" />
-    <!-- @hide @SystemApi -->
-    <public name="durationBetweenRequestsMillis" />
     <public name="showInInputMethodPicker" />
     <public name="effectColor" />
     <!-- @hide @TestApi -->

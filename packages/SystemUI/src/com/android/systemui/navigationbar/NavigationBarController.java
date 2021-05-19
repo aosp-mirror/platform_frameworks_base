@@ -184,6 +184,7 @@ public class NavigationBarController implements Callbacks,
         mNavMode = mNavigationModeController.addListener(this);
         mNavigationModeController.addListener(this);
         mTaskbarDelegate = new TaskbarDelegate(mOverviewProxyService);
+        mIsTablet = isTablet(mContext.getResources().getConfiguration());
     }
 
     @Override
@@ -297,6 +298,10 @@ public class NavigationBarController implements Callbacks,
      */
     public void createNavigationBars(final boolean includeDefaultDisplay,
             RegisterStatusBarResult result) {
+        if (updateNavbarForTaskbar()) {
+            return;
+        }
+
         Display[] displays = mDisplayManager.getDisplays();
         for (Display display : displays) {
             if (includeDefaultDisplay || display.getDisplayId() != DEFAULT_DISPLAY) {

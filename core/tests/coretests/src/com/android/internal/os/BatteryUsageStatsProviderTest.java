@@ -45,7 +45,7 @@ public class BatteryUsageStatsProviderTest {
     private static final long MINUTE_IN_MS = 60 * 1000;
 
     @Rule
-    public final BatteryUsageStatsRule mStatsRule = new BatteryUsageStatsRule();
+    public final BatteryUsageStatsRule mStatsRule = new BatteryUsageStatsRule(12345);
 
     @Test
     public void test_getBatteryUsageStats() {
@@ -62,6 +62,8 @@ public class BatteryUsageStatsProviderTest {
         batteryStats.noteUidProcessStateLocked(APP_UID, ActivityManager.PROCESS_STATE_CACHED_EMPTY,
                 40 * MINUTE_IN_MS, 40 * MINUTE_IN_MS);
 
+        mStatsRule.setCurrentTime(54321);
+
         Context context = InstrumentationRegistry.getContext();
         BatteryUsageStatsProvider provider = new BatteryUsageStatsProvider(context, batteryStats);
 
@@ -75,6 +77,9 @@ public class BatteryUsageStatsProviderTest {
                 .isEqualTo(20 * MINUTE_IN_MS);
         assertThat(uidBatteryConsumer.getTimeInStateMs(UidBatteryConsumer.STATE_BACKGROUND))
                 .isEqualTo(10 * MINUTE_IN_MS);
+
+        assertThat(batteryUsageStats.getStatsStartTimestamp()).isEqualTo(12345);
+        assertThat(batteryUsageStats.getStatsEndTimestamp()).isEqualTo(54321);
     }
 
     @Test

@@ -544,8 +544,8 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Aplikaciji omogoča odkrivanje naprav Bluetooth v bližini in seznanjanje z njimi."</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"povezovanje s seznanjenimi napravami Bluetooth"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Aplikaciji omogoča povezovanje s seznanjenimi napravami Bluetooth."</string>
-    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"oglaševanje v napravah Bluetooth v bližini"</string>
-    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Aplikaciji dovoljuje oglaševanje v napravah Bluetooth v bližini."</string>
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"oddajanje napravam Bluetooth v bližini"</string>
+    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Aplikaciji dovoljuje oddajanje napravam Bluetooth v bližini."</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"določanje relativne oddaljenosti med napravami UWB v bližini"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Aplikaciji dovoli, da določi relativno oddaljenost med napravami UWB v bližini."</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Podatki o prednostni storitvi za plačevanje prek povezave NFC"</string>
@@ -1028,7 +1028,7 @@
     <string name="text_copied" msgid="2531420577879738860">"Besedilo, kopirano v odložišče."</string>
     <string name="copied" msgid="4675902854553014676">"Kopirano"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"Aplikacija <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> je prilepila iz aplikacije <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>."</string>
-    <string name="pasted_from_clipboard" msgid="6295556725844421812">"Aplikacija <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> je prilepila iz odložišča."</string>
+    <string name="pasted_from_clipboard" msgid="7355790625710831847">"Aplikacija <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> je prilepila iz odložišča."</string>
     <string name="pasted_text" msgid="4298871641549173733">"Aplikacija <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> je prilepila besedilo iz odložišča."</string>
     <string name="pasted_image" msgid="4729097394781491022">"Aplikacija <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> je prilepila sliko iz odložišča."</string>
     <string name="pasted_content" msgid="646276353060777131">"Aplikacija <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> je prilepila vsebino iz odložišča."</string>
@@ -1299,6 +1299,10 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"Pripravljanje aplikacije <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Zagon aplikacij."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Dokončevanje zagona."</string>
+    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"Želite izklopiti zaslon?"</string>
+    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"Pri nastavljanju prstnega odtisa ste pritisnili gumb za vklop.\n\nS tem običajno izklopite zaslon."</string>
+    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"Izklopi"</string>
+    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"Prekliči"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> se izvaja"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Dotaknite se za vrnitev v igro"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Izberite igro"</string>
@@ -1753,6 +1757,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Uporabi bližnjico"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Inverzija barv"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Popravljanje barv"</string>
+    <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Enoročni način"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Zelo zatemnjeno"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Tipki za glasnost sta pridržani. Storitev <xliff:g id="SERVICE_NAME">%1$s</xliff:g> je vklopljena."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Tipki za glasnost sta pridržani. Storitev <xliff:g id="SERVICE_NAME">%1$s</xliff:g> je izklopljena."</string>
@@ -1817,6 +1822,17 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"Monarch"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"Quarto"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"Foolscap"</string>
+    <string name="mediasize_na_ansi_c" msgid="3104916921818289618">"ANSI C"</string>
+    <string name="mediasize_na_ansi_d" msgid="254005964819282724">"ANSI D"</string>
+    <string name="mediasize_na_ansi_e" msgid="4424174989686785675">"ANSI E"</string>
+    <string name="mediasize_na_ansi_f" msgid="146980362213260987">"ANSI F"</string>
+    <string name="mediasize_na_arch_a" msgid="5280681822380032361">"Arch A"</string>
+    <string name="mediasize_na_arch_b" msgid="2113344093437297427">"Arch B"</string>
+    <string name="mediasize_na_arch_c" msgid="971002546186856623">"Arch C"</string>
+    <string name="mediasize_na_arch_d" msgid="6450996075335049806">"Arch D"</string>
+    <string name="mediasize_na_arch_e" msgid="6782708486949266519">"Arch E"</string>
+    <string name="mediasize_na_arch_e1" msgid="4707138568738504275">"Arch E1"</string>
+    <string name="mediasize_na_super_b" msgid="6964127155618393178">"Super B"</string>
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1"</string>
@@ -1853,6 +1869,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"L"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"Neznano pokončno"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"Neznano ležeče"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"Preklicano"</string>
@@ -1898,11 +1915,11 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Posodobil skrbnik"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Izbrisal skrbnik"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"V redu"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Funkcija varčevanja z energijo baterije podaljša čas delovanja baterije tako:\n\n• vklopi temno temo,\n• izklopi ali omeji dejavnost v ozadju, nekatere vizualne učinke in druge funkcije, kot je »Hey Google«.\n\n"<annotation id="url">"Več o tem"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"Funkcija varčevanja z energijo baterije podaljša čas delovanja baterije tako:\n\n• vklopi temno temo;\n• izklopi ali omeji dejavnost v ozadju, nekatere vizualne učinke in druge funkcije, kot je »Hey Google«."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"Funkcija varčevanja z energijo baterije vklopi temno temo ter omeji ali izklopi dejavnost v ozadju, nekatere vizualne učinke, določene funkcije in nekatere omrežne povezave.\n\n"<annotation id="url">"Več o tem"</annotation></string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"Funkcija varčevanja z energijo baterije vklopi temno temo ter omeji ali izklopi dejavnost v ozadju, nekatere vizualne učinke, določene funkcije in nekatere omrežne povezave."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Zaradi zmanjševanja prenesene količine podatkov funkcija varčevanja s podatki nekaterim aplikacijam preprečuje, da bi v ozadju pošiljale ali prejemale podatke. Aplikacija, ki jo trenutno uporabljate, lahko prenaša podatke, vendar to morda počne manj pogosto. To na primer pomeni, da se slike ne prikažejo, dokler se jih ne dotaknete."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Vklop varčevanja s podatki?"</string>
-    <string name="data_saver_enable_button" msgid="4399405762586419726">"Vklop"</string>
+    <string name="data_saver_enable_button" msgid="4399405762586419726">"Vklopi"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="one">%d minuto (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="two">%d minuti (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
@@ -1991,6 +2008,7 @@
     <string name="close_button_text" msgid="10603510034455258">"Zapri"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"Sprejmi"</string>
+    <string name="call_notification_answer_video_action" msgid="2086030940195382249">"Video"</string>
     <string name="call_notification_decline_action" msgid="3700345945214000726">"Zavrni"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Prekini klic"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"Dohodni klic"</string>
@@ -2019,8 +2037,8 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"Aplikacija <xliff:g id="APP_NAME_0">%1$s</xliff:g> trenutno ni na voljo. To upravlja aplikacija <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Več o tem"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Prekliči začasno zaustavitev aplikacije"</string>
-    <string name="work_mode_off_title" msgid="5503291976647976560">"Želite vklopiti delovni profil?"</string>
-    <string name="work_mode_off_message" msgid="8417484421098563803">"Vklopili boste svoje delovne aplikacije, obvestila, podatke in druge funkcije delovnega profila"</string>
+    <string name="work_mode_off_title" msgid="961171256005852058">"Vklop delovnih aplikacij?"</string>
+    <string name="work_mode_off_message" msgid="7319580997683623309">"Omogočanje dostopa do delovnih aplikacij in obvestil za delovni profil"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Vklop"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplikacija ni na voljo"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> trenutno ni na voljo."</string>
@@ -2119,7 +2137,7 @@
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"VSEENO ODPRI"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Zaznana je bila škodljiva aplikacija"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"Aplikacija <xliff:g id="APP_0">%1$s</xliff:g> želi prikazati izreze aplikacije <xliff:g id="APP_2">%2$s</xliff:g>"</string>
-    <string name="screenshot_edit" msgid="7408934887203689207">"Urejanje"</string>
+    <string name="screenshot_edit" msgid="7408934887203689207">"Uredi"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Vibriranje bo vklopljeno za klice in obvestila"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Zvonjenje bo izklopljeno za klice in obvestila"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Sistemske spremembe"</string>
@@ -2138,6 +2156,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"To obvestilo je bilo uvrščeno nižje – med obvestila brez zvoka. Dotaknite se, če želite poslati povratne informacije."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"To obvestilo je bilo uvrščeno višje. Dotaknite se, če želite poslati povratne informacije."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"To obvestilo je bilo uvrščeno nižje. Dotaknite se, če želite poslati povratne informacije."</string>
+    <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"Pametna obvestila"</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"Predlagana dejanja in odgovore zdaj zagotavljajo pametna obvestila. Prilagodljiva obvestila Android niso več podprta."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"V redu"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Izklopi"</string>
+    <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Več o tem"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"Pametna obvestila so v Androidu 12 zamenjala prilagodljiva obvestila Android. Ta funkcija prikazuje predlagana dejanja in odgovore ter organizira vaša obvestila.\n\nPametna obvestila lahko preberejo vso vsebino obvestil, vključno z osebnimi podatki, kot so imena in sporočila stikov. Ta funkcija lahko tudi opusti obvestila ali se odziva nanja (npr. sprejema telefonske klice in upravlja način »Ne moti«)."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Rutinsko informativno obvestilo o načinu delovanja"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Baterija se bo morda izpraznila, preden jo običajno priključite na polnjenje"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Vklopilo se je varčevanje z energijo baterije za podaljšanje časa delovanja baterije"</string>
@@ -2336,4 +2360,6 @@
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Podoba blagovne znamke aplikacije"</string>
     <string name="view_and_control_notification_title" msgid="4300765399209912240">"Preverite nastavitve dostopa"</string>
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"Storitev <xliff:g id="SERVICE_NAME">%s</xliff:g> si lahko ogleda in upravlja vaš zaslon. Dotaknite se za pregled."</string>
+    <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"Sporočilo »<xliff:g id="MESSAGE">%1$s</xliff:g>« je prevedeno."</string>
+    <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Sporočilo je prevedeno iz jezika »<xliff:g id="FROM_LANGUAGE">%1$s</xliff:g>« v jezik »<xliff:g id="TO_LANGUAGE">%2$s</xliff:g>«."</string>
 </resources>

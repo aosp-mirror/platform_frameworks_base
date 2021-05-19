@@ -1022,7 +1022,7 @@
     <string name="text_copied" msgid="2531420577879738860">"คัดลอกข้อความไปยังคลิปบอร์ด"</string>
     <string name="copied" msgid="4675902854553014676">"คัดลอกแล้ว"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"วาง <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> จาก <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> แล้ว"</string>
-    <string name="pasted_from_clipboard" msgid="6295556725844421812">"วาง <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> จากคลิปบอร์ดแล้ว"</string>
+    <string name="pasted_from_clipboard" msgid="7355790625710831847">"วาง <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> จากคลิปบอร์ดแล้ว"</string>
     <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> วางข้อความที่คุณคัดลอก"</string>
     <string name="pasted_image" msgid="4729097394781491022">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> วางรูปภาพที่คุณคัดลอก"</string>
     <string name="pasted_content" msgid="646276353060777131">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> วางเนื้อหาที่คุณคัดลอก"</string>
@@ -1259,6 +1259,10 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"กำลังเตรียม <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"กำลังเริ่มต้นแอปพลิเคชัน"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"เสร็จสิ้นการบูต"</string>
+    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"ปิดหน้าจอใช่ไหม"</string>
+    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"ขณะตั้งค่าลายนิ้วมือคุณจะต้องกดปุ่มเปิด/ปิด\n\nซึ่งโดยปกติจะเป็นการปิดหน้าจอด้วย"</string>
+    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"ปิด"</string>
+    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"ยกเลิก"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> กำลังทำงาน"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"แตะเพื่อกลับไปที่เกม"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"เลือกเกม"</string>
@@ -1709,6 +1713,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"ใช้ทางลัด"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"การกลับสี"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"การแก้สี"</string>
+    <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"โหมดมือเดียว"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"หรี่แสงเพิ่มเติม"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"กดปุ่มปรับระดับเสียงค้างไว้แล้ว เปิด <xliff:g id="SERVICE_NAME">%1$s</xliff:g> แล้ว"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"กดปุ่มปรับระดับเสียงค้างไว้แล้ว ปิด <xliff:g id="SERVICE_NAME">%1$s</xliff:g> แล้ว"</string>
@@ -1773,6 +1778,17 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"Monarch"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"Quarto"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"กระดาษฟุลสแก๊ป"</string>
+    <string name="mediasize_na_ansi_c" msgid="3104916921818289618">"ANSI C"</string>
+    <string name="mediasize_na_ansi_d" msgid="254005964819282724">"ANSI D"</string>
+    <string name="mediasize_na_ansi_e" msgid="4424174989686785675">"ANSI E"</string>
+    <string name="mediasize_na_ansi_f" msgid="146980362213260987">"ANSI F"</string>
+    <string name="mediasize_na_arch_a" msgid="5280681822380032361">"Arch A"</string>
+    <string name="mediasize_na_arch_b" msgid="2113344093437297427">"Arch B"</string>
+    <string name="mediasize_na_arch_c" msgid="971002546186856623">"Arch C"</string>
+    <string name="mediasize_na_arch_d" msgid="6450996075335049806">"Arch D"</string>
+    <string name="mediasize_na_arch_e" msgid="6782708486949266519">"Arch E"</string>
+    <string name="mediasize_na_arch_e1" msgid="4707138568738504275">"Arch E1"</string>
+    <string name="mediasize_na_super_b" msgid="6964127155618393178">"Super-B"</string>
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1"</string>
@@ -1809,6 +1825,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"L"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"แนวตั้งไม่ทราบขนาด"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"แนวนอนไม่ทราบขนาด"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"ยกเลิก"</string>
@@ -1852,8 +1869,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"อัปเดตโดยผู้ดูแลระบบ"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"ลบโดยผู้ดูแลระบบ"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ตกลง"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"โหมดประหยัดแบตเตอรี่จะดำเนินการดังต่อไปนี้เพื่อยืดอายุการใช้งานแบตเตอรี่\n\n• เปิดธีมมืด\n• ปิดหรือจำกัดกิจกรรมในเบื้องหลัง เอฟเฟกต์ภาพบางอย่าง และฟีเจอร์อื่นๆ อย่างเช่น “Ok Google”\n\n"<annotation id="url">"ดูข้อมูลเพิ่มเติม"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"โหมดประหยัดแบตเตอรี่จะดำเนินการดังต่อไปนี้เพื่อยืดอายุการใช้งานแบตเตอรี่\n\n• เปิดธีมมืด\n• ปิดหรือจำกัดกิจกรรมในเบื้องหลัง เอฟเฟกต์ภาพบางอย่าง และฟีเจอร์อื่นๆ อย่างเช่น \"Ok Google\""</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"โหมดประหยัดแบตเตอรี่จะเปิดธีมมืดและจำกัดหรือปิดกิจกรรมในเบื้องหลัง เอฟเฟกต์ภาพบางอย่าง ฟีเจอร์บางส่วน และการเชื่อมต่อบางเครือข่าย\n\n"<annotation id="url">"ดูข้อมูลเพิ่มเติม"</annotation></string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"โหมดประหยัดแบตเตอรี่จะเปิดธีมมืดและจำกัดหรือปิดกิจกรรมในเบื้องหลัง เอฟเฟกต์ภาพบางอย่าง ฟีเจอร์บางส่วน และการเชื่อมต่อบางเครือข่าย"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"เพื่อช่วยลดปริมาณการใช้อินเทอร์เน็ต โปรแกรมประหยัดอินเทอร์เน็ตจะช่วยป้องกันไม่ให้บางแอปส่งหรือรับข้อมูลโดยการใช้อินเทอร์เน็ตอยู่เบื้องหลัง แอปที่คุณกำลังใช้งานสามารถเข้าถึงอินเทอร์เน็ตได้ แต่อาจไม่บ่อยเท่าเดิม ตัวอย่างเช่น ภาพต่างๆ จะไม่แสดงจนกว่าคุณจะแตะที่ภาพเหล่านั้น"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"เปิดการประหยัดอินเทอร์เน็ตไหม"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"เปิด"</string>
@@ -1929,6 +1946,7 @@
     <string name="close_button_text" msgid="10603510034455258">"ปิด"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"รับสาย"</string>
+    <string name="call_notification_answer_video_action" msgid="2086030940195382249">"วิดีโอ"</string>
     <string name="call_notification_decline_action" msgid="3700345945214000726">"ปฏิเสธ"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"วางสาย"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"สายเรียกเข้า"</string>
@@ -1955,8 +1973,8 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"เปิด <xliff:g id="APP_NAME_0">%1$s</xliff:g> ไม่ได้ในขณะนี้ แอปนี้จัดการโดย <xliff:g id="APP_NAME_1">%2$s</xliff:g>"</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"ดูข้อมูลเพิ่มเติม"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"ยกเลิกการหยุดแอปชั่วคราว"</string>
-    <string name="work_mode_off_title" msgid="5503291976647976560">"เปิดโปรไฟล์งานไหม"</string>
-    <string name="work_mode_off_message" msgid="8417484421098563803">"ระบบจะเปิดแอปงาน การแจ้งเตือน ข้อมูล และฟีเจอร์อื่นๆ ในโปรไฟล์งาน"</string>
+    <string name="work_mode_off_title" msgid="961171256005852058">"เปิดแอปงานใช่ไหม"</string>
+    <string name="work_mode_off_message" msgid="7319580997683623309">"รับสิทธิ์เข้าถึงแอปงานและการแจ้งเตือนต่างๆ"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"เปิด"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"แอปไม่พร้อมใช้งาน"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ไม่พร้อมใช้งานในขณะนี้"</string>
@@ -2072,6 +2090,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"การแจ้งเตือนนี้มีการลดระดับเป็นแบบปิดเสียง แตะเพื่อแสดงความคิดเห็น"</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"การแจ้งเตือนนี้มีการเพิ่มระดับ แตะเพื่อแสดงความคิดเห็น"</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"การแจ้งเตือนนี้มีการลดระดับ แตะเพื่อแสดงความคิดเห็น"</string>
+    <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"การแจ้งเตือนที่เพิ่มประสิทธิภาพ"</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"การดำเนินการและการตอบกลับที่แนะนำจะแสดงผ่านการแจ้งเตือนที่เพิ่มประสิทธิภาพ ไม่รองรับการแจ้งเตือนแบบปรับอัตโนมัติใน Android อีกต่อไป"</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"ตกลง"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"ปิด"</string>
+    <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"ดูข้อมูลเพิ่มเติม"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"การแจ้งเตือนที่เพิ่มประสิทธิภาพมาแทนที่การแจ้งเตือนแบบปรับอัตโนมัติของ Android ใน Android 12 ฟีเจอร์นี้จะแสดงการดำเนินการและการตอบกลับที่แนะนำ ตลอดจนจัดระเบียบการแจ้งเตือน\n\nการแจ้งเตือนที่เพิ่มประสิทธิภาพจะเข้าถึงเนื้อหาของการแจ้งเตือนได้ ซึ่งรวมถึงข้อมูลส่วนบุคคล เช่น ชื่อผู้ติดต่อและข้อความ ฟีเจอร์นี้ยังปิดหรือตอบสนองต่อการแจ้งเตือนได้ด้วย เช่น การรับสายโทรศัพท์และการควบคุมโหมดห้ามรบกวน"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"การแจ้งเตือนข้อมูลโหมดกิจวัตร"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"แบตเตอรี่อาจหมดก่อนการชาร์จปกติ"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"เปิดใช้งานโหมดประหยัดแบตเตอรี่แล้วเพื่อยืดอายุการใช้งานแบตเตอรี่"</string>
@@ -2268,4 +2292,6 @@
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"ภาพลักษณ์ของแบรนด์แอปพลิเคชัน"</string>
     <string name="view_and_control_notification_title" msgid="4300765399209912240">"ตรวจสอบการตั้งค่าการเข้าถึง"</string>
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> จะดูและควบคุมหน้าจอของคุณได้ แตะเพื่อตรวจสอบ"</string>
+    <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> แปลแล้ว"</string>
+    <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"แปลข้อความจากภาษา<xliff:g id="FROM_LANGUAGE">%1$s</xliff:g>เป็นภาษา<xliff:g id="TO_LANGUAGE">%2$s</xliff:g>แล้ว"</string>
 </resources>

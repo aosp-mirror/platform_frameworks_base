@@ -17,6 +17,7 @@
 package com.android.server.appsearch.stats;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.appsearch.exceptions.AppSearchException;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -193,12 +194,22 @@ public final class PlatformLogger implements AppSearchLogger {
 
     @Override
     public void logStats(@NonNull InitializeStats stats) throws AppSearchException {
-        // TODO(b/173532925): Implement
+        Objects.requireNonNull(stats);
+        synchronized (mLock) {
+            if (shouldLogForTypeLocked(CallStats.CALL_TYPE_INITIALIZE)) {
+                logStatsImplLocked(stats);
+            }
+        }
     }
 
     @Override
     public void logStats(@NonNull SearchStats stats) throws AppSearchException {
-        // TODO(b/173532925): Implement
+        Objects.requireNonNull(stats);
+        synchronized (mLock) {
+            if (shouldLogForTypeLocked(CallStats.CALL_TYPE_SEARCH)) {
+                logStatsImplLocked(stats);
+            }
+        }
     }
 
     /**
@@ -242,7 +253,9 @@ public final class PlatformLogger implements AppSearchLogger {
             //
             // Something is wrong while calculating the hash code for database
             // this shouldn't happen since we always use "MD5" and "UTF-8"
-            Log.e(TAG, "Error calculating hash code for database " + database, e);
+            if (database != null) {
+                Log.e(TAG, "Error calculating hash code for database " + database, e);
+            }
         }
     }
 
@@ -277,21 +290,102 @@ public final class PlatformLogger implements AppSearchLogger {
             //
             // Something is wrong while calculating the hash code for database
             // this shouldn't happen since we always use "MD5" and "UTF-8"
-            Log.e(TAG, "Error calculating hash code for database " + database, e);
+            if (database != null) {
+                Log.e(TAG, "Error calculating hash code for database " + database, e);
+            }
         }
+    }
+
+    @GuardedBy("mLock")
+    private void logStatsImplLocked(@NonNull SearchStats stats) {
+        mLastPushTimeMillisLocked = SystemClock.elapsedRealtime();
+        ExtraStats extraStats = createExtraStatsLocked(stats.getPackageName(),
+                CallStats.CALL_TYPE_SEARCH);
+        String database = stats.getDatabase();
+        try {
+            int hashCodeForDatabase = calculateHashCodeMd5(database);
+            FrameworkStatsLog.write(FrameworkStatsLog.APP_SEARCH_QUERY_STATS_REPORTED,
+                    extraStats.mSamplingRatio,
+                    extraStats.mSkippedSampleCount,
+                    extraStats.mPackageUid,
+                    hashCodeForDatabase,
+                    stats.getStatusCode(),
+                    stats.getTotalLatencyMillis(),
+                    stats.getRewriteSearchSpecLatencyMillis(),
+                    stats.getRewriteSearchResultLatencyMillis(),
+                    stats.getVisibilityScope(),
+                    stats.getNativeLatencyMillis(),
+                    stats.getTermCount(),
+                    stats.getQueryLength(),
+                    stats.getFilteredNamespaceCount(),
+                    stats.getFilteredSchemaTypeCount(),
+                    stats.getRequestedPageSize(),
+                    stats.getCurrentPageReturnedResultCount(),
+                    stats.isFirstPage(),
+                    stats.getParseQueryLatencyMillis(),
+                    stats.getRankingStrategy(),
+                    stats.getScoredDocumentCount(),
+                    stats.getScoringLatencyMillis(),
+                    stats.getRankingLatencyMillis(),
+                    stats.getDocumentRetrievingLatencyMillis(),
+                    stats.getResultWithSnippetsCount());
+        } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
+            // TODO(b/184204720) report hashing error to Westworld
+            //  We need to set a special value(e.g. 0xFFFFFFFF) for the hashing of the database,
+            //  so in the dashboard we know there is some error for hashing.
+            //
+            // Something is wrong while calculating the hash code for database
+            // this shouldn't happen since we always use "MD5" and "UTF-8"
+            if (database != null) {
+                Log.e(TAG, "Error calculating hash code for database " + database, e);
+            }
+        }
+    }
+
+    @GuardedBy("mLock")
+    private void logStatsImplLocked(@NonNull InitializeStats stats) {
+        mLastPushTimeMillisLocked = SystemClock.elapsedRealtime();
+        ExtraStats extraStats = createExtraStatsLocked(/*packageName=*/ null,
+                CallStats.CALL_TYPE_INITIALIZE);
+        FrameworkStatsLog.write(FrameworkStatsLog.APP_SEARCH_INITIALIZE_STATS_REPORTED,
+                extraStats.mSamplingRatio,
+                extraStats.mSkippedSampleCount,
+                extraStats.mPackageUid,
+                stats.getStatusCode(),
+                stats.getTotalLatencyMillis(),
+                stats.hasDeSync(),
+                stats.getPrepareSchemaAndNamespacesLatencyMillis(),
+                stats.getPrepareVisibilityStoreLatencyMillis(),
+                stats.getNativeLatencyMillis(),
+                stats.getDocumentStoreRecoveryCause(),
+                stats.getIndexRestorationCause(),
+                stats.getSchemaStoreRecoveryCause(),
+                stats.getDocumentStoreRecoveryLatencyMillis(),
+                stats.getIndexRestorationLatencyMillis(),
+                stats.getSchemaStoreRecoveryLatencyMillis(),
+                stats.getDocumentStoreDataStatus(),
+                stats.getDocumentCount(),
+                stats.getSchemaTypeCount());
     }
 
     /**
      * Calculate the hash code as an integer by returning the last four bytes of its MD5.
      *
      * @param str a string
-     * @return hash code as an integer
+     * @return hash code as an integer. returns -1 if str is null.
      * @throws AppSearchException if either algorithm or encoding does not exist.
      */
     @VisibleForTesting
     @NonNull
-    static int calculateHashCodeMd5(@NonNull String str) throws
+    static int calculateHashCodeMd5(@Nullable String str) throws
             NoSuchAlgorithmException, UnsupportedEncodingException {
+        if (str == null) {
+            // Just return -1 if caller doesn't have database name
+            // For some stats like globalQuery, databaseName can be null.
+            // Since in atom it is an integer, we have to return something here.
+            return -1;
+        }
+
         MessageDigest md = MessageDigest.getInstance("MD5");
         md.update(str.getBytes(/*charsetName=*/ "UTF-8"));
         byte[] digest = md.digest();
@@ -314,12 +408,19 @@ public final class PlatformLogger implements AppSearchLogger {
      * <p>This method is called by most of logToWestworldLocked functions to reduce code
      * duplication.
      */
+    // TODO(b/173532925) Once we add CTS test for logging atoms and can inspect the result, we can
+    // remove this @VisibleForTesting and directly use PlatformLogger.logStats to test sampling and
+    // rate limiting.
     @VisibleForTesting
     @GuardedBy("mLock")
     @NonNull
-    ExtraStats createExtraStatsLocked(@NonNull String packageName,
+    ExtraStats createExtraStatsLocked(@Nullable String packageName,
             @CallStats.CallType int callType) {
-        int packageUid = getPackageUidAsUserLocked(packageName);
+        int packageUid = Process.INVALID_UID;
+        if (packageName != null) {
+            packageUid = getPackageUidAsUserLocked(packageName);
+        }
+
         int samplingRatio = mConfig.mSamplingRatios.get(callType,
                 mConfig.mDefaultSamplingRatio);
 
@@ -337,6 +438,9 @@ public final class PlatformLogger implements AppSearchLogger {
      * stats.
      */
     @GuardedBy("mLock")
+    // TODO(b/173532925) Once we add CTS test for logging atoms and can inspect the result, we can
+    // remove this @VisibleForTesting and directly use PlatformLogger.logStats to test sampling and
+    // rate limiting.
     @VisibleForTesting
     boolean shouldLogForTypeLocked(@CallStats.CallType int callType) {
         int samplingRatio = mConfig.mSamplingRatios.get(callType,

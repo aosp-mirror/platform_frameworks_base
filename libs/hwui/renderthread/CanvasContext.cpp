@@ -195,6 +195,10 @@ void CanvasContext::setSurfaceControl(ASurfaceControl* surfaceControl) {
 
     auto funcs = mRenderThread.getASurfaceControlFunctions();
 
+    if (surfaceControl == nullptr) {
+        setASurfaceTransactionCallback(nullptr);
+    }
+
     if (mSurfaceControl != nullptr) {
         funcs.unregisterListenerFunc(this, &onSurfaceStatsAvailable);
         funcs.releaseFunc(mSurfaceControl);
@@ -673,20 +677,8 @@ void CanvasContext::onSurfaceStatsAvailable(void* context, ASurfaceControl* cont
     }
 
     if (frameInfo != nullptr) {
-        if (gpuCompleteTime == -1) {
-            gpuCompleteTime = frameInfo->get(FrameInfoIndex::SwapBuffersCompleted);
-        }
-        if (gpuCompleteTime < frameInfo->get(FrameInfoIndex::IssueDrawCommandsStart)) {
-            // On Vulkan the GPU commands are flushed to the GPU during IssueDrawCommands rather
-            // than after SwapBuffers. So if the GPU signals before issue draw commands, then
-            // something probably went wrong. Anything after that could just be expected
-            // pipeline differences
-            ALOGW("Impossible GPU complete time issueCommandsStart=%" PRIi64
-                  " gpuComplete=%" PRIi64,
-                  frameInfo->get(FrameInfoIndex::IssueDrawCommandsStart), gpuCompleteTime);
-            gpuCompleteTime = frameInfo->get(FrameInfoIndex::SwapBuffersCompleted);
-        }
-        frameInfo->set(FrameInfoIndex::FrameCompleted) = gpuCompleteTime;
+        frameInfo->set(FrameInfoIndex::FrameCompleted) = std::max(gpuCompleteTime,
+                frameInfo->get(FrameInfoIndex::SwapBuffersCompleted));
         frameInfo->set(FrameInfoIndex::GpuCompleted) = gpuCompleteTime;
         instance->mJankTracker.finishFrame(*frameInfo, instance->mFrameMetricsReporter);
     }

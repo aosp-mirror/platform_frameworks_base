@@ -181,7 +181,7 @@ class SensorUseStartedActivity @Inject constructor(
                     keyguardDismissUtil.executeWhenUnlocked({
                         disableSensorPrivacy()
                         false
-                    }, false)
+                    }, false, false)
                 } else {
                     disableSensorPrivacy()
                 }

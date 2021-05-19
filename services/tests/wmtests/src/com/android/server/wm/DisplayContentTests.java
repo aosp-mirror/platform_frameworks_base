@@ -349,7 +349,9 @@ public class DisplayContentTests extends WindowTestsBase {
         doReturn(imeSurfaceParent).when(mDisplayContent).computeImeParent();
         spyOn(imeContainer);
 
-        mDisplayContent.updateImeParent();
+        mDisplayContent.setImeInputTarget(startingWin);
+        mDisplayContent.onConfigurationChanged(new Configuration());
+        verify(mDisplayContent).updateImeParent();
 
         // Force reassign the relative layer when the IME surface parent is changed.
         verify(imeContainer).assignRelativeLayer(any(), eq(imeSurfaceParent), anyInt(), eq(true));
@@ -1275,6 +1277,7 @@ public class DisplayContentTests extends WindowTestsBase {
         // Assume that the display rotation is changed so it is frozen in preparation for animation.
         doReturn(true).when(rotationAnim).hasScreenshot();
         mWm.mDisplayFrozen = true;
+        displayContent.getDisplayRotation().setRotation((displayContent.getRotation() + 1) % 4);
         displayContent.setRotationAnimation(rotationAnim);
         // The fade rotation animation also starts to hide some non-app windows.
         assertNotNull(displayContent.getFadeRotationAnimationController());
@@ -1904,7 +1907,7 @@ public class DisplayContentTests extends WindowTestsBase {
         mDisplayContent.setImeInputTarget(appWin2);
         mDisplayContent.computeImeTarget(true);
         assertEquals(appWin2, mDisplayContent.getImeTarget(IME_TARGET_LAYERING));
-        assertTrue(mDisplayContent.isImeAttachedToApp());
+        assertTrue(mDisplayContent.shouldImeAttachedToApp());
 
         verify(mDisplayContent, atLeast(1)).attachAndShowImeScreenshotOnTarget();
         verify(mWm.mTaskSnapshotController).snapshotImeFromAttachedTask(appWin1.getTask());

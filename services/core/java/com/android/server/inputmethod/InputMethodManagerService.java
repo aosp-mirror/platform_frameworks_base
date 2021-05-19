@@ -5761,6 +5761,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         final String imeId = shellCommand.getNextArgRequired();
         final PrintWriter out = shellCommand.getOutPrintWriter();
         final PrintWriter error = shellCommand.getErrPrintWriter();
+        boolean hasFailed = false;
         synchronized (mMethodMap) {
             final int[] userIds = InputMethodUtils.resolveUserId(userIdToBeResolved,
                     mSettings.getCurrentUserId(), shellCommand.getErrPrintWriter());
@@ -5768,11 +5769,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 if (!userHasDebugPriv(userId, shellCommand)) {
                     continue;
                 }
-                handleShellCommandEnableDisableInputMethodInternalLocked(userId, imeId, enabled,
-                        out, error);
+                hasFailed |= !handleShellCommandEnableDisableInputMethodInternalLocked(
+                        userId, imeId, enabled, out, error);
             }
         }
-        return ShellCommandResult.SUCCESS;
+        return hasFailed ? ShellCommandResult.FAILURE : ShellCommandResult.SUCCESS;
     }
 
     /**
@@ -5804,8 +5805,18 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         return UserHandle.USER_CURRENT;
     }
 
+    /**
+     * Handles core logic of {@code adb shell ime enable} and {@code adb shell ime disable}.
+     *
+     * @param userId user ID specified to the command.  Pseudo user IDs are not supported.
+     * @param imeId IME ID specified to the command.
+     * @param enabled {@code true} for {@code adb shell ime enable}. {@code false} otherwise.
+     * @param out {@link PrintWriter} to output standard messages.
+     * @param error {@link PrintWriter} to output error messages.
+     * @return {@code false} if it fails to enable the IME.  {@code false} otherwise.
+     */
     @BinderThread
-    private void handleShellCommandEnableDisableInputMethodInternalLocked(
+    private boolean handleShellCommandEnableDisableInputMethodInternalLocked(
             @UserIdInt int userId, String imeId, boolean enabled, PrintWriter out,
             PrintWriter error) {
         boolean failedToEnableUnknownIme = false;
@@ -5851,15 +5862,20 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             error.print("Unknown input method ");
             error.print(imeId);
             error.println(" cannot be enabled for user #" + userId);
-        } else {
-            out.print("Input method ");
-            out.print(imeId);
-            out.print(": ");
-            out.print((enabled == previouslyEnabled) ? "already " : "now ");
-            out.print(enabled ? "enabled" : "disabled");
-            out.print(" for user #");
-            out.println(userId);
+            // Also print this failure into logcat for better debuggability.
+            Slog.e(TAG, "\"ime enable " + imeId + "\" for user #" + userId
+                    + " failed due to its unrecognized IME ID.");
+            return false;
         }
+
+        out.print("Input method ");
+        out.print(imeId);
+        out.print(": ");
+        out.print((enabled == previouslyEnabled) ? "already " : "now ");
+        out.print(enabled ? "enabled" : "disabled");
+        out.print(" for user #");
+        out.println(userId);
+        return true;
     }
 
     /**
@@ -5874,6 +5890,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         final String imeId = shellCommand.getNextArgRequired();
         final PrintWriter out = shellCommand.getOutPrintWriter();
         final PrintWriter error = shellCommand.getErrPrintWriter();
+        boolean hasFailed = false;
         synchronized (mMethodMap) {
             final int[] userIds = InputMethodUtils.resolveUserId(userIdToBeResolved,
                     mSettings.getCurrentUserId(), shellCommand.getErrPrintWriter());
@@ -5887,15 +5904,19 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     error.print(imeId);
                     error.print(" cannot be selected for user #");
                     error.println(userId);
+                    // Also print this failure into logcat for better debuggability.
+                    Slog.e(TAG, "\"ime set " + imeId + "\" for user #" + userId
+                            + " failed due to its unrecognized IME ID.");
                 } else {
                     out.print("Input method ");
                     out.print(imeId);
                     out.print(" selected for user #");
                     out.println(userId);
                 }
+                hasFailed |= failedToSelectUnknownIme;
             }
         }
-        return ShellCommandResult.SUCCESS;
+        return hasFailed ? ShellCommandResult.FAILURE : ShellCommandResult.SUCCESS;
     }
 
     /**

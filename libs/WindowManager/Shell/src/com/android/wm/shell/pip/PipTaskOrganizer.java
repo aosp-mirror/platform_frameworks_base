@@ -147,6 +147,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     private final PipUiEventLogger mPipUiEventLoggerLogger;
     private final int mEnterAnimationDuration;
     private final int mExitAnimationDuration;
+    private final int mCrossFadeAnimationDuration;
     private final PipSurfaceTransactionHelper mSurfaceTransactionHelper;
     private final Optional<LegacySplitScreenController> mSplitScreenOptional;
     protected final ShellTaskOrganizer mTaskOrganizer;
@@ -257,6 +258,12 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
      */
     private boolean mInSwipePipToHomeTransition;
 
+    /**
+     * An optional overlay used to mask content changing between an app in/out of PiP, only set if
+     * {@link #mInSwipePipToHomeTransition} is true.
+     */
+    private SurfaceControl mSwipePipToHomeOverlay;
+
     public PipTaskOrganizer(Context context,
             @NonNull SyncTransactionQueue syncTransactionQueue,
             @NonNull PipBoundsState pipBoundsState,
@@ -280,6 +287,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                 .getInteger(R.integer.config_pipEnterAnimationDuration);
         mExitAnimationDuration = context.getResources()
                 .getInteger(R.integer.config_pipExitAnimationDuration);
+        mCrossFadeAnimationDuration = context.getResources()
+                .getInteger(R.integer.config_pipCrossfadeAnimationDuration);
         mSurfaceTransactionHelper = surfaceTransactionHelper;
         mPipAnimationController = pipAnimationController;
         mPipUiEventLoggerLogger = pipUiEventLogger;
@@ -350,10 +359,12 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
      * Callback when launcher finishes swipe-pip-to-home operation.
      * Expect {@link #onTaskAppeared(ActivityManager.RunningTaskInfo, SurfaceControl)} afterwards.
      */
-    public void stopSwipePipToHome(ComponentName componentName, Rect destinationBounds) {
+    public void stopSwipePipToHome(ComponentName componentName, Rect destinationBounds,
+            SurfaceControl overlay) {
         // do nothing if there is no startSwipePipToHome being called before
         if (mInSwipePipToHomeTransition) {
             mPipBoundsState.setBounds(destinationBounds);
+            mSwipePipToHomeOverlay = overlay;
         }
     }
 
@@ -599,6 +610,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
 
     private void onEndOfSwipePipToHomeTransition() {
         final Rect destinationBounds = mPipBoundsState.getBounds();
+        final SurfaceControl swipeToHomeOverlay = mSwipePipToHomeOverlay;
         final SurfaceControl.Transaction tx = mSurfaceControlTransactionFactory.getTransaction();
         mSurfaceTransactionHelper.resetScale(tx, mLeash, destinationBounds);
         mSurfaceTransactionHelper.crop(tx, mLeash, destinationBounds);
@@ -607,8 +619,14 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             // Ensure menu's settled in its final bounds first.
             finishResizeForMenu(destinationBounds);
             sendOnPipTransitionFinished(TRANSITION_DIRECTION_TO_PIP);
+
+            // Remove the swipe to home overlay
+            if (swipeToHomeOverlay != null) {
+                fadeOutAndRemoveOverlay(swipeToHomeOverlay);
+            }
         }, tx);
         mInSwipePipToHomeTransition = false;
+        mSwipePipToHomeOverlay = null;
     }
 
     private void applyEnterPipSyncTransaction(Rect destinationBounds, Runnable runnable,
@@ -1139,25 +1157,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                 mSurfaceTransactionHelper.scale(t, snapshotSurface, snapshotSrc, snapshotDest);
 
                 // Start animation to fade out the snapshot.
-                final ValueAnimator animator = ValueAnimator.ofFloat(1.0f, 0.0f);
-                animator.setDuration(mEnterAnimationDuration);
-                animator.addUpdateListener(animation -> {
-                    final float alpha = (float) animation.getAnimatedValue();
-                    final SurfaceControl.Transaction transaction =
-                            mSurfaceControlTransactionFactory.getTransaction();
-                    transaction.setAlpha(snapshotSurface, alpha);
-                    transaction.apply();
-                });
-                animator.addListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        final SurfaceControl.Transaction tx =
-                                mSurfaceControlTransactionFactory.getTransaction();
-                        tx.remove(snapshotSurface);
-                        tx.apply();
-                    }
-                });
-                animator.start();
+                fadeOutAndRemoveOverlay(snapshotSurface);
             });
         } else {
             applyFinishBoundsResize(wct, direction);
@@ -1298,6 +1298,35 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         destinationBoundsOut.set(legacySplitScreen.getDividerView()
                 .getNonMinimizedSplitScreenSecondaryBounds());
         return true;
+    }
+
+    /**
+     * Fades out and removes an overlay surface.
+     */
+    private void fadeOutAndRemoveOverlay(SurfaceControl surface) {
+        if (surface == null) {
+            return;
+        }
+
+        final ValueAnimator animator = ValueAnimator.ofFloat(1.0f, 0.0f);
+        animator.setDuration(mCrossFadeAnimationDuration);
+        animator.addUpdateListener(animation -> {
+            final float alpha = (float) animation.getAnimatedValue();
+            final SurfaceControl.Transaction transaction =
+                    mSurfaceControlTransactionFactory.getTransaction();
+            transaction.setAlpha(surface, alpha);
+            transaction.apply();
+        });
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                final SurfaceControl.Transaction tx =
+                        mSurfaceControlTransactionFactory.getTransaction();
+                tx.remove(surface);
+                tx.apply();
+            }
+        });
+        animator.start();
     }
 
     /**

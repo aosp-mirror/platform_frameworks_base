@@ -386,8 +386,15 @@ bool MultiAssetsProvider::IsUpToDate() const {
   return primary_->IsUpToDate() && secondary_->IsUpToDate();
 }
 
+EmptyAssetsProvider::EmptyAssetsProvider(std::optional<std::string>&& path) :
+    path_(std::move(path)) {}
+
 std::unique_ptr<AssetsProvider> EmptyAssetsProvider::Create() {
-  return std::make_unique<EmptyAssetsProvider>();
+  return std::unique_ptr<EmptyAssetsProvider>(new EmptyAssetsProvider({}));
+}
+
+std::unique_ptr<AssetsProvider> EmptyAssetsProvider::Create(const std::string& path) {
+  return std::unique_ptr<EmptyAssetsProvider>(new EmptyAssetsProvider(path));
 }
 
 std::unique_ptr<Asset> EmptyAssetsProvider::OpenInternal(const std::string& /* path */,
@@ -406,10 +413,16 @@ bool EmptyAssetsProvider::ForEachFile(
 }
 
 std::optional<std::string_view> EmptyAssetsProvider::GetPath() const {
+  if (path_.has_value()) {
+    return *path_;
+  }
   return {};
 }
 
 const std::string& EmptyAssetsProvider::GetDebugName() const {
+  if (path_.has_value()) {
+    return *path_;
+  }
   const static std::string kEmpty = kEmptyDebugString;
   return kEmpty;
 }

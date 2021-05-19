@@ -27,6 +27,8 @@
     <!-- Do not translate. Defines the slots for the right-hand side icons.  That is to say, the
          icons in the status bar that are not notifications. -->
     <string-array name="config_statusBarIcons">
+        <item><xliff:g id="id">@string/status_bar_no_calling</xliff:g></item>
+        <item><xliff:g id="id">@string/status_bar_call_strength</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_alarm_clock</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_rotate</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_headset</xliff:g></item>
@@ -58,8 +60,6 @@
         <item><xliff:g id="id">@string/status_bar_hotspot</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_mobile</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_airplane</xliff:g></item>
-        <item><xliff:g id="id">@string/status_bar_no_calling</xliff:g></item>
-        <item><xliff:g id="id">@string/status_bar_call_strength</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_battery</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_sensors_off</xliff:g></item>
     </string-array>
@@ -3936,6 +3936,9 @@
     <!-- Handle volume keys directly in Window Manager without passing them to the foreground app -->
     <bool name="config_handleVolumeKeysInWindowManager">false</bool>
 
+    <!-- Rely or not on hardcoded aliased streams table within AudioService -->
+    <bool name="config_handleVolumeAliasesUsingVolumeGroups">false</bool>
+
     <!-- Volume level of in-call notification tone playback [0..1] -->
     <item name="config_inCallNotificationVolume" format="float" type="dimen">.10</item>
 
@@ -4796,8 +4799,9 @@
     <!-- Whether to select voice/data/sms preference without user confirmation -->
     <bool name="config_voice_data_sms_auto_fallback">false</bool>
 
-    <!-- Whether to enable the one-handed keyguard on the lock screen for wide-screen devices. -->
-    <bool name="config_enableOneHandedKeyguard">false</bool>
+    <!-- Whether to enable dynamic keyguard positioning for wide screen devices (e.g. only using
+         half of the screen, to be accessible using only one hand). -->
+    <bool name="config_enableDynamicKeyguardPositioning">false</bool>
 
     <!-- Whether to allow the caching of the SIM PIN for verification after unattended reboot -->
     <bool name="config_allow_pin_storage_for_unattended_reboot">true</bool>

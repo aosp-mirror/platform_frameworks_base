@@ -45,6 +45,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
 import androidx.constraintlayout.widget.ConstraintSet;
 
+import com.android.settingslib.Utils;
 import com.android.settingslib.widget.AdaptiveIcon;
 import com.android.systemui.R;
 import com.android.systemui.animation.ActivityLaunchAnimator;
@@ -303,11 +304,23 @@ public class MediaControlPanel {
         }
 
         // App icon
-        ImageView appIcon = mPlayerViewHolder.getAppIcon();
-        if (data.getAppIcon() != null) {
-            appIcon.setImageIcon(data.getAppIcon());
+        ImageView appIconView = mPlayerViewHolder.getAppIcon();
+        appIconView.clearColorFilter();
+        if (data.getAppIcon() != null && !data.getResumption()) {
+            appIconView.setImageIcon(data.getAppIcon());
+            int color = Utils.getColorAttrDefaultColor(mContext,
+                    com.android.internal.R.attr.colorAccentTertiary);
+            appIconView.setColorFilter(color);
         } else {
-            appIcon.setImageResource(R.drawable.ic_music_note);
+            appIconView.setColorFilter(getGrayscaleFilter());
+            try {
+                Drawable icon = mContext.getPackageManager().getApplicationIcon(
+                        data.getPackageName());
+                appIconView.setImageDrawable(icon);
+            } catch (PackageManager.NameNotFoundException e) {
+                Log.w(TAG, "Cannot find icon for package " + data.getPackageName(), e);
+                appIconView.setImageResource(R.drawable.ic_music_note);
+            }
         }
 
         // Song name
@@ -400,7 +413,7 @@ public class MediaControlPanel {
             setVisibleAndAlpha(collapsedSet, ACTION_IDS[i], false /*visible */);
             setVisibleAndAlpha(expandedSet, ACTION_IDS[i], false /* visible */);
         }
-        // If no expanded buttons, set the first view as INVISIBLE so z remains constant
+        // If no actions, set the first view as INVISIBLE so expanded height remains constant
         if (actionIcons.size() == 0) {
             expandedSet.setVisibility(ACTION_IDS[0], ConstraintSet.INVISIBLE);
         }
@@ -428,7 +441,7 @@ public class MediaControlPanel {
                     mMediaDataManagerLazy.get().dismissMediaData(mKey,
                             MediaViewController.GUTS_ANIMATION_DURATION + 100);
                     return true;
-                }, /* requiresShadeOpen */ true);
+                }, /* requiresShadeOpen */ true, false);
             } else {
                 Log.w(TAG, "Dismiss media with null notification. Token uid="
                         + data.getToken().getUid());
@@ -514,9 +527,9 @@ public class MediaControlPanel {
                 // Get the logo from app's package name when applicable.
                 String packageName = extras.getString(EXTRAS_MEDIA_SOURCE_PACKAGE_NAME);
                 try {
-                    Drawable drawable = mContext.getPackageManager().getApplicationIcon(
+                    icon = mContext.getPackageManager().getApplicationIcon(
                             packageName);
-                    icon = convertToGrayscale(drawable);
+                    icon.setColorFilter(getGrayscaleFilter());
                 } catch (PackageManager.NameNotFoundException e) {
                     Log.w(TAG, "No media source icon can be fetched via package name", e);
                 }
@@ -564,7 +577,7 @@ public class MediaControlPanel {
                 mMediaDataManagerLazy.get().dismissSmartspaceRecommendation(
                         MediaViewController.GUTS_ANIMATION_DURATION + 100L);
                 return true;
-            }, true /* requiresShadeOpen */);
+            }, true /* requiresShadeOpen */, false);
         });
 
         mController = null;
@@ -646,13 +659,10 @@ public class MediaControlPanel {
         return (state.getState() == PlaybackState.STATE_PLAYING);
     }
 
-    /** Convert the pass-in source drawable to a grayscale one. */
-    private Drawable convertToGrayscale(Drawable drawable) {
+    private ColorMatrixColorFilter getGrayscaleFilter() {
         ColorMatrix matrix = new ColorMatrix();
         matrix.setSaturation(0);
-        ColorMatrixColorFilter filter = new ColorMatrixColorFilter(matrix);
-        drawable.setColorFilter(filter);
-        return drawable;
+        return new ColorMatrixColorFilter(matrix);
     }
 
     private void setVisibleAndAlpha(ConstraintSet set, int actionId, boolean visible) {

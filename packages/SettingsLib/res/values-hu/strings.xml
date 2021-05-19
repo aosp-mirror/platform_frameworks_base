@@ -366,7 +366,7 @@
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Animáció tempója"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"Másodlagos kijelzők szimulálása"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"Alkalmazások"</string>
-    <string name="immediately_destroy_activities" msgid="1826287490705167403">"Törölje a tevékenységeket"</string>
+    <string name="immediately_destroy_activities" msgid="1826287490705167403">"Tevékenységek törlése"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Tevékenységek törlése, amint elhagyják azokat"</string>
     <string name="app_process_limit_title" msgid="8361367869453043007">"Háttérfolyamat-korlátozás"</string>
     <string name="show_all_anrs" msgid="9160563836616468726">"Háttérben lévő ANR-ek"</string>
@@ -405,6 +405,7 @@
     <string name="transcode_enable_all" msgid="2411165920039166710">"Átkódolás engedélyezése"</string>
     <string name="transcode_default" msgid="3784803084573509491">"Annak feltételezése, hogy az alkalmazások támogatják a modern formátumokat"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"Átkódolási értesítések megjelenítése"</string>
+    <string name="transcode_disable_cache" msgid="3160069309377467045">"Átkódolási gyorsítótár kikapcsolása"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Futó szolgáltatások"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"A jelenleg futó szolgáltatások megtekintése és vezérlése"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView-megvalósítás"</string>
@@ -450,19 +451,17 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"Előfordulhat, hogy a táblagép hamarosan kikapcsol (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Előfordulhat, hogy az eszköz hamarosan kikapcsol (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_remaining_charging_duration_only (8085099012811384899) -->
-    <skip />
-    <!-- no translation found for power_charging_duration (6127154952524919719) -->
-    <skip />
+    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> a teljes töltöttségig"</string>
+    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> a teljes töltöttségig"</string>
     <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> – Akkumulátor-élettartam optimalizálása"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Ismeretlen"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Töltés"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Gyorstöltés"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Lassú töltés"</string>
+    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Vezeték nélküli töltés"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Nem tölt"</string>
-    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Csatlakoztatva, jelenleg nem tölt"</string>
-    <!-- no translation found for battery_info_status_full (1339002294876531312) -->
-    <skip />
+    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Csatlakoztatva, nem töltődik"</string>
+    <string name="battery_info_status_full" msgid="1339002294876531312">"Feltöltve"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Rendszergazda által irányítva"</string>
     <string name="disabled" msgid="8017887509554714950">"Letiltva"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Engedélyezett"</string>
@@ -505,10 +504,12 @@
     <string name="cancel" msgid="5665114069455378395">"Mégse"</string>
     <string name="okay" msgid="949938843324579502">"OK"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Ébresztések és emlékeztetők"</string>
-    <string name="alarms_and_reminders_switch_title" msgid="186992351401152744">"Ébresztés/emlékeztető beállításának engedélyezése"</string>
-    <string name="alarms_and_reminders_title" msgid="2988400785896875237">"Ébresztések és emlékeztetők"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="5882788882647778753">"Ez az alkalmazás ütemezhet ébresztéseket és más időzítésalapú eseményeket. Ez lehetővé teszi, hogy az alkalmazás még akkor is felébredjen és fusson, amikor Ön éppen nem használja az eszközt. Az engedély visszavonása esetén előfordulhat, hogy az alkalmazás nem működik majd megfelelően. Ez különösen igaz azokra az ébresztésekre, amelyeket az alkalmazás már ütemezett."</string>
-    <string name="keywords_alarms_and_reminders" msgid="8882739572152019456">"ütemezés, ébresztés, emlékeztető, esemény"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Beállíthat ébresztéseket és emlékeztetőket"</string>
+    <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Ébresztések és emlékeztetők"</string>
+    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"Engedélyezheti ennek az alkalmazásnak, hogy ébresztéseket állítson be és további műveleteket ütemezzen. Ez az alkalmazás használatban lehet, amikor nem használja a telefonját, ami jobban igénybe veheti az akkumulátort. Ha ez az engedély ki van kapcsolva, előfordulhat, hogy az alkalmazás nem működik megfelelően, és az ébresztések nem működnek az ütemezésnek megfelelően."</string>
+    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"Engedélyezheti ennek az alkalmazásnak, hogy ébresztéseket állítson be és további műveleteket ütemezzen. Ez az alkalmazás használatban lehet, amikor nem használja a táblagépét, ami jobban igénybe veheti az akkumulátort. Ha ez az engedély ki van kapcsolva, előfordulhat, hogy az alkalmazás nem működik megfelelően, és az ébresztések nem működnek az ütemezésnek megfelelően."</string>
+    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"Engedélyezheti ennek az alkalmazásnak, hogy ébresztéseket állítson be és további műveleteket ütemezzen. Ez az alkalmazás használatban lehet, amikor nem használja az eszközét, ami jobban igénybe veheti az akkumulátort. Ha ez az engedély ki van kapcsolva, előfordulhat, hogy az alkalmazás nem működik megfelelően, és az ébresztések nem működnek az ütemezésnek megfelelően."</string>
+    <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"ütemezés, ébresztés, emlékeztető, óra"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Bekapcsolás"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"A Ne zavarjanak mód bekapcsolása"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Soha"</string>
@@ -562,8 +563,7 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"Képernyőzár beállítása"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"Váltás erre: <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Új felhasználó létrehozása…"</string>
-    <!-- no translation found for add_user_failed (4809887794313944872) -->
-    <skip />
+    <string name="add_user_failed" msgid="4809887794313944872">"Az új felhasználó létrehozása sikertelen"</string>
     <string name="user_nickname" msgid="262624187455825083">"Becenév"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Vendég hozzáadása"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Vendég munkamenet eltávolítása"</string>

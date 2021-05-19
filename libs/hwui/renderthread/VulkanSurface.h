@@ -15,6 +15,7 @@
  */
 #pragma once
 
+#include <android-base/unique_fd.h>
 #include <system/graphics.h>
 #include <system/window.h>
 #include <vulkan/vulkan.h>
@@ -57,7 +58,7 @@ private:
         // -1 any other time. When valid, we own the fd, and must ensure it is
         // closed: either by closing it explicitly when queueing the buffer,
         // or by passing ownership e.g. to ANativeWindow::cancelBuffer().
-        int dequeue_fence = -1;
+        base::unique_fd dequeue_fence;
         bool dequeued = false;
         uint32_t lastPresentedCount = 0;
         bool hasValidContents = false;

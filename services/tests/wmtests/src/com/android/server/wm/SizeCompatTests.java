@@ -316,14 +316,14 @@ public class SizeCompatTests extends WindowTestsBase {
 
         mActivity.mDisplayContent.setImeLayeringTarget(addWindowToActivity(mActivity));
         // Make sure IME cannot attach to the app, otherwise IME window will also be shifted.
-        assertFalse(mActivity.mDisplayContent.isImeAttachedToApp());
+        assertFalse(mActivity.mDisplayContent.shouldImeAttachedToApp());
 
         // Recompute the natural configuration without resolving size compat configuration.
         mActivity.clearSizeCompatMode();
         mActivity.onConfigurationChanged(mTask.getConfiguration());
         // It should keep non-attachable because the resolved bounds will be computed according to
         // the aspect ratio that won't match its parent bounds.
-        assertFalse(mActivity.mDisplayContent.isImeAttachedToApp());
+        assertFalse(mActivity.mDisplayContent.shouldImeAttachedToApp());
         // Activity max bounds should be sandboxed since it is letterboxed.
         assertActivityMaxBoundsSandboxed();
     }
@@ -358,7 +358,7 @@ public class SizeCompatTests extends WindowTestsBase {
         // Because the aspect ratio of display doesn't exceed the max aspect ratio of activity.
         // The activity should still fill its parent container and IME can attach to the activity.
         assertTrue(mActivity.matchParentBounds());
-        assertTrue(mActivity.mDisplayContent.isImeAttachedToApp());
+        assertTrue(mActivity.mDisplayContent.shouldImeAttachedToApp());
 
         final Rect letterboxInnerBounds = new Rect();
         mActivity.getLetterboxInnerBounds(letterboxInnerBounds);
@@ -521,6 +521,7 @@ public class SizeCompatTests extends WindowTestsBase {
 
         mActivity.setState(STOPPED, "testSizeCompatMode");
         mActivity.mVisibleRequested = false;
+        mActivity.visibleIgnoringKeyguard = false;
         mActivity.app.setReportedProcState(ActivityManager.PROCESS_STATE_CACHED_ACTIVITY);
 
         // Simulate the display changes orientation.

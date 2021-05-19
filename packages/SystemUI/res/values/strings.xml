@@ -691,10 +691,6 @@
     <string name="accessibility_quick_settings_hotspot_changed_on">Mobile hotspot turned on.</string>
     <!-- Announcement made when the screen stopped casting (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_casting_turned_off">Screen casting stopped.</string>
-    <!-- Content description of the work mode title in quick settings when off (not shown on the screen). Paused is used as an adjective [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_work_mode_off">Work mode paused.</string>
-    <!-- Content description of the work mode title in quick settings when on (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_work_mode_on">Work mode on.</string>
     <!-- Announcement made when the work mode changes to off (not shown on the screen). Paused is used as a verb. [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_work_mode_changed_off">Work mode paused.</string>
     <!-- Announcement made when the work mode changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
@@ -953,11 +949,9 @@
     <string name="quick_settings_cellular_detail_data_warning"><xliff:g id="data_limit" example="2.0 GB">%s</xliff:g> warning</string>
     <!-- QuickSettings: This string is in the easy-to-view settings that a user can pull down from
     the top of their phone's screen. This is a label for a toggle to turn the work profile on and
-    off. "Work profile" means a separate profile on a user's phone that's specifically for their
+    off. This means a separate profile on a user's phone that's specifically for their
     work apps and managed by their company. "Work" is used as an adjective. [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_work_mode_label">Work profile</string>
-    <!-- QuickSettings: Secondary label for work mode tile when it's off. [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_work_mode_paused">Paused</string>
+    <string name="quick_settings_work_mode_label">Work apps</string>
     <!-- QuickSettings: Label for the toggle to activate Night display (renamed "Night Light" with title caps). [CHAR LIMIT=20] -->
     <string name="quick_settings_night_display_label">Night Light</string>
     <!-- QuickSettings: Secondary text for when the Night Light will be enabled at sunset. [CHAR LIMIT=20] -->
@@ -2724,15 +2718,8 @@
     <string name="accessibility_floating_button_action_double_tap_to_toggle">toggle</string>
 
     <!-- Device Controls strings -->
-    <!-- Device Controls empty state, title [CHAR LIMIT=30] -->
-    <string name="quick_controls_title">Device controls</string>
-    <!-- Device Controls empty state, subtitle [CHAR LIMIT=100] -->
-    <string name="quick_controls_subtitle">Add controls for your connected devices</string>
-
-    <!-- Device Controls setup, title [CHAR LIMIT=50] -->
-    <string name="quick_controls_setup_title">Set up device controls</string>
-    <!-- Device Controls setup, subtitle [CHAR LIMIT=100] -->
-    <string name="quick_controls_setup_subtitle">Hold the Power button to access your controls</string>
+    <!-- Device Controls, Quick Settings tile title [CHAR LIMIT=30] -->
+    <string name="quick_controls_title">Home controls</string>
 
     <!-- Controls management providers screen title [CHAR LIMIT=60]-->
     <string name="controls_providers_title">Choose app to add controls</string>
@@ -2761,7 +2748,7 @@
     <!-- Controls management controls screen default title [CHAR LIMIT=30] -->
     <string name="controls_favorite_default_title">Controls</string>
     <!-- Controls management controls screen subtitle [CHAR LIMIT=NONE] -->
-    <string name="controls_favorite_subtitle">Choose controls to access from the power menu</string>
+    <string name="controls_favorite_subtitle">Choose controls to access from Quick Settings</string>
     <!-- Controls management editing screen, user direction for rearranging controls [CHAR LIMIT=NONE] -->
     <string name="controls_favorite_rearrange">Hold &amp; drag to rearrange controls</string>
 
@@ -2853,7 +2840,7 @@
     <!-- Stateless control message informing the user that a routine has started [CHAR_LIMIT=30] -->
     <string name="controls_in_progress">In progress</string>
     <!-- Tooltip informing user where the recently added controls are [CHAR_LIMIT=100] -->
-    <string name="controls_added_tooltip">Hold Power button to see new controls</string>
+    <string name="controls_added_tooltip">Open Quick Settings to see new controls</string>
 
     <!-- Controls menu, add [CHAR_LIMIT=30] -->
     <string name="controls_menu_add">Add controls</string>
@@ -2951,8 +2938,6 @@
     <!-- Text to display in a notification when ACTION_BATTERY_CHANGED.EXTRA_PRESENT field is false
     [CHAR LIMIT=NONE] -->
     <string name="battery_state_unknown_notification_text">Tap for more information</string>
-
-    <string name="qs_tile_label_fontFamily" translatable="false">@*android:string/config_headlineFontFamilyMedium</string>
 
     <!-- Secondary label for alarm tile when there is no next alarm information [CHAR LIMIT=20] -->
     <string name="qs_alarm_tile_no_alarm">No alarm set</string>

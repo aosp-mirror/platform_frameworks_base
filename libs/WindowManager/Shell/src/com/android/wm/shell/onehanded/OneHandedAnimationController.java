@@ -19,6 +19,7 @@ package com.android.wm.shell.onehanded;
 import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.annotation.IntDef;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Rect;
 import android.view.SurfaceControl;
@@ -203,8 +204,10 @@ public class OneHandedAnimationController {
         }
 
         OneHandedTransitionAnimator addOneHandedAnimationCallback(
-                OneHandedAnimationCallback callback) {
-            mOneHandedAnimationCallbacks.add(callback);
+                @Nullable OneHandedAnimationCallback callback) {
+            if (callback != null) {
+                mOneHandedAnimationCallbacks.add(callback);
+            }
             return this;
         }
 

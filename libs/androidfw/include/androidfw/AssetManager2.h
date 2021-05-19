@@ -458,6 +458,7 @@ class AssetManager2 {
         INITIAL,
         BETTER_MATCH,
         OVERLAID,
+        OVERLAID_INLINE,
         SKIPPED,
         NO_ENTRY,
       };
@@ -468,10 +469,6 @@ class AssetManager2 {
       // Built name of configuration for this step.
       String8 config_name;
 
-      // Marks the package name of the better resource found in this step.
-      const std::string* package_name;
-
-      //
       ApkAssetsCookie cookie = kInvalidCookie;
     };
 

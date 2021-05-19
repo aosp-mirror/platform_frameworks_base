@@ -221,8 +221,30 @@ WebViewFunctorManager& WebViewFunctorManager::instance() {
     return sInstance;
 }
 
+static void validateCallbacks(const WebViewFunctorCallbacks& callbacks) {
+    // TODO: Should we do a stack peek to see if this is really webview?
+    LOG_ALWAYS_FATAL_IF(callbacks.onSync == nullptr, "onSync is null");
+    LOG_ALWAYS_FATAL_IF(callbacks.onContextDestroyed == nullptr, "onContextDestroyed is null");
+    LOG_ALWAYS_FATAL_IF(callbacks.onDestroyed == nullptr, "onDestroyed is null");
+    LOG_ALWAYS_FATAL_IF(callbacks.removeOverlays == nullptr, "removeOverlays is null");
+    switch (auto mode = WebViewFunctor_queryPlatformRenderMode()) {
+        case RenderMode::OpenGL_ES:
+            LOG_ALWAYS_FATAL_IF(callbacks.gles.draw == nullptr, "gles.draw is null");
+            break;
+        case RenderMode::Vulkan:
+            LOG_ALWAYS_FATAL_IF(callbacks.vk.initialize == nullptr, "vk.initialize is null");
+            LOG_ALWAYS_FATAL_IF(callbacks.vk.draw == nullptr, "vk.draw is null");
+            LOG_ALWAYS_FATAL_IF(callbacks.vk.postDraw == nullptr, "vk.postDraw is null");
+            break;
+        default:
+            LOG_ALWAYS_FATAL("unknown platform mode? %d", (int)mode);
+            break;
+    }
+}
+
 int WebViewFunctorManager::createFunctor(void* data, const WebViewFunctorCallbacks& callbacks,
                                          RenderMode functorMode) {
+    validateCallbacks(callbacks);
     auto object = std::make_unique<WebViewFunctor>(data, callbacks, functorMode);
     int id = object->id();
     auto handle = object->createHandle();

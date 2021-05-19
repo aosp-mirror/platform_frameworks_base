@@ -106,8 +106,17 @@ class LockscreenSmartspaceController @Inject constructor(
         return view
     }
 
+    fun requestSmartspaceUpdate() {
+        session?.requestSmartspaceUpdate()
+    }
+
     private fun buildView(parent: ViewGroup) {
-        if (plugin == null || this::view.isInitialized) {
+        if (plugin == null) {
+            return
+        }
+        if (this::view.isInitialized) {
+            // Due to some oddities with a singleton smartspace view, allow reparenting
+            (view.getParent() as ViewGroup?)?.removeView(view)
             return
         }
 

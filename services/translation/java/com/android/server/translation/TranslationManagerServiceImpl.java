@@ -175,10 +175,9 @@ final class TranslationManagerServiceImpl extends
             return;
         }
         try {
-            // TODO: Pipe uiTranslationSpec through to the UiTranslationController.
             taskTopActivityTokens.getApplicationThread().updateUiTranslationState(
                     taskTopActivityTokens.getActivityToken(), state, sourceSpec, targetSpec,
-                    viewIds);
+                    viewIds, uiTranslationSpec);
         } catch (RemoteException e) {
             Slog.w(TAG, "Update UiTranslationState fail: " + e);
         }

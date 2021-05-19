@@ -197,7 +197,7 @@
     <string name="choose_profile" msgid="343803890897657450">"Wybierz profil"</string>
     <string name="category_personal" msgid="6236798763159385225">"Osobiste"</string>
     <string name="category_work" msgid="4014193632325996115">"Służbowe"</string>
-    <string name="development_settings_title" msgid="140296922921597393">"Opcje programistyczne"</string>
+    <string name="development_settings_title" msgid="140296922921597393">"Opcje programisty"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Włącz opcje dla programistów"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Ustaw opcje związane z programowaniem aplikacji."</string>
     <string name="development_settings_not_available" msgid="355070198089140951">"Opcje programisty są niedostępne dla tego użytkownika"</string>
@@ -348,7 +348,7 @@
     <string name="simulate_color_space" msgid="1206503300335835151">"Symuluj przestrzeń kolorów"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"Włącz śledzenie OpenGL"</string>
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Wyłącz kierowanie dźwiękowe USB"</string>
-    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Wyłącz auto kierowanie do urządzeń peryferyjnych audio USB"</string>
+    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Wyłącz autokierowanie do urządzeń peryferyjnych audio USB"</string>
     <string name="debug_layout" msgid="1659216803043339741">"Pokaż granice układu"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"Pokaż granice przycięcia, marginesy itd."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Układ od prawej do lewej"</string>
@@ -405,6 +405,7 @@
     <string name="transcode_enable_all" msgid="2411165920039166710">"Włącz transkodowanie"</string>
     <string name="transcode_default" msgid="3784803084573509491">"Zakładaj, że aplikacje obsługują nowoczesne formaty"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"Pokaż powiadomienia transkodowania"</string>
+    <string name="transcode_disable_cache" msgid="3160069309377467045">"Wyłącz pamięć podręczną transkodowania"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Uruchomione usługi"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Wyświetl obecnie uruchomione usługi i nimi zarządzaj"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Implementacja WebView"</string>
@@ -450,19 +451,17 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"Tablet może się wkrótce wyłączyć (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Urządzenie może się wkrótce wyłączyć (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_remaining_charging_duration_only (8085099012811384899) -->
-    <skip />
-    <!-- no translation found for power_charging_duration (6127154952524919719) -->
-    <skip />
+    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> do pełnego naładowania"</string>
+    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> do pełnego naładowania"</string>
     <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> – Optymalizuję, aby utrzymać baterię w dobrym stanie"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Nieznane"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Ładowanie"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Szybkie ładowanie"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Wolne ładowanie"</string>
+    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Ładowanie bezprzewodowe"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Nie podłączony"</string>
-    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Podłączony. Nie można teraz ładować"</string>
-    <!-- no translation found for battery_info_status_full (1339002294876531312) -->
-    <skip />
+    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Podłączono, brak ładowania"</string>
+    <string name="battery_info_status_full" msgid="1339002294876531312">"Naładowana"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Kontrolowane przez administratora"</string>
     <string name="disabled" msgid="8017887509554714950">"Wyłączone"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Dozwolone"</string>
@@ -507,10 +506,12 @@
     <string name="cancel" msgid="5665114069455378395">"Anuluj"</string>
     <string name="okay" msgid="949938843324579502">"OK"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmy i przypomnienia"</string>
-    <string name="alarms_and_reminders_switch_title" msgid="186992351401152744">"Zezwól na ustawianie alarmów i przypomnień"</string>
-    <string name="alarms_and_reminders_title" msgid="2988400785896875237">"Alarmy i przypomnienia"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="5882788882647778753">"Zezwól aplikacji na planowanie alarmów lub innych wydarzeń z harmonogramem. Dzięki temu aplikacja będzie się wybudzać i działać nawet na nieużywanym urządzeniu. Pamiętaj, że anulowanie tego upoważnienia może spowodować nieprawidłowości w działaniu aplikacji. Przede wszystkim przestaną działać wszystkie zaplanowane przez nią alarmy."</string>
-    <string name="keywords_alarms_and_reminders" msgid="8882739572152019456">"harmonogram, alarm, przypomnienie, wydarzenie"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Zezwól na ustawianie alarmów i przypomnień"</string>
+    <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmy i przypomnienia"</string>
+    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"Zezwól na ustawianie alarmów i planowanie innych działań przez tę aplikację. Ta aplikacja może być używana, gdy nie korzystasz z telefonu. Może to zwiększyć wykorzystanie baterii. Jeśli nie włączysz tych uprawnień, ta aplikacja może nie działać prawidłowo, a jej alarmy nie będą uruchamiane zgodnie z harmonogramem."</string>
+    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"Zezwól na ustawianie alarmów i planowanie innych działań przez tę aplikację. Ta aplikacja może być używana, gdy nie korzystasz z tabletu. Może to zwiększyć wykorzystanie baterii. Jeśli nie włączysz tych uprawnień, ta aplikacja może nie działać prawidłowo, a jej alarmy nie będą uruchamiane zgodnie z harmonogramem."</string>
+    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"Zezwól na ustawianie alarmów i planowanie innych działań przez tę aplikację. Ta aplikacja może być używana, gdy nie korzystasz z urządzenia. Może to zwiększyć wykorzystanie baterii. Jeśli nie włączysz tych uprawnień, ta aplikacja może nie działać prawidłowo, a jej alarmy nie będą uruchamiane zgodnie z harmonogramem."</string>
+    <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"harmonogram, alarm, przypomnienie, zegar"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Włącz"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Włącz tryb Nie przeszkadzać"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Nigdy"</string>
@@ -564,8 +565,7 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"Ustaw blokadę"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"Przełącz na: <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Tworzę nowego użytkownika…"</string>
-    <!-- no translation found for add_user_failed (4809887794313944872) -->
-    <skip />
+    <string name="add_user_failed" msgid="4809887794313944872">"Nie udało się utworzyć nowego użytkownika"</string>
     <string name="user_nickname" msgid="262624187455825083">"Pseudonim"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Dodaj gościa"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Usuń gościa"</string>

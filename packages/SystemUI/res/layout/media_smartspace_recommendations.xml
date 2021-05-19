@@ -75,7 +75,7 @@
         android:id="@+id/media_logo1"
         android:layout_width="@dimen/qs_media_icon_size"
         android:layout_height="@dimen/qs_media_icon_size"
-        style="@style/MediaPlayer.AppIcon.Recommendation" />
+        style="@style/MediaPlayer.AppIcon" />
 
     <ImageView
         android:id="@+id/media_cover2"
@@ -91,7 +91,7 @@
         android:id="@+id/media_logo2"
         android:layout_width="@dimen/qs_media_icon_size"
         android:layout_height="@dimen/qs_media_icon_size"
-        style="@style/MediaPlayer.AppIcon.Recommendation" />
+        style="@style/MediaPlayer.AppIcon" />
 
     <ImageView
         android:id="@+id/media_cover3"
@@ -107,7 +107,7 @@
         android:id="@+id/media_logo3"
         android:layout_width="@dimen/qs_media_icon_size"
         android:layout_height="@dimen/qs_media_icon_size"
-        style="@style/MediaPlayer.AppIcon.Recommendation" />
+        style="@style/MediaPlayer.AppIcon" />
 
     <ImageView
         android:id="@+id/media_cover4"
@@ -123,7 +123,7 @@
         android:id="@+id/media_logo4"
         android:layout_width="@dimen/qs_media_icon_size"
         android:layout_height="@dimen/qs_media_icon_size"
-        style="@style/MediaPlayer.AppIcon.Recommendation" />
+        style="@style/MediaPlayer.AppIcon" />
 
     <ImageView
         android:id="@+id/media_cover5"
@@ -139,7 +139,7 @@
         android:id="@+id/media_logo5"
         android:layout_width="@dimen/qs_media_icon_size"
         android:layout_height="@dimen/qs_media_icon_size"
-        style="@style/MediaPlayer.AppIcon.Recommendation" />
+        style="@style/MediaPlayer.AppIcon" />
 
     <ImageView
         android:id="@+id/media_cover6"
@@ -155,7 +155,7 @@
         android:id="@+id/media_logo6"
         android:layout_width="@dimen/qs_media_icon_size"
         android:layout_height="@dimen/qs_media_icon_size"
-        style="@style/MediaPlayer.AppIcon.Recommendation" />
+        style="@style/MediaPlayer.AppIcon" />
 
     <!-- Long press menu -->
     <TextView

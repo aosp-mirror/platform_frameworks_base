@@ -24,28 +24,28 @@
 
     <Button
         android:id="@+id/button1"
-        style="@style/SettingsActionButton"
+        style="@style/SettingsLibActionButton"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"/>
 
     <Button
         android:id="@+id/button2"
-        style="@style/SettingsActionButton"
+        style="@style/SettingsLibActionButton"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"/>
 
     <Button
         android:id="@+id/button3"
-        style="@style/SettingsActionButton"
+        style="@style/SettingsLibActionButton"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"/>
 
     <Button
         android:id="@+id/button4"
-        style="@style/SettingsActionButton"
+        style="@style/SettingsLibActionButton"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"/>

@@ -105,12 +105,12 @@ import android.database.ContentObserver;
 import android.net.CaptivePortal;
 import android.net.CaptivePortalData;
 import android.net.ConnectionInfo;
+import android.net.ConnectivityAnnotations.RestrictBackgroundStatus;
 import android.net.ConnectivityDiagnosticsManager.ConnectivityReport;
 import android.net.ConnectivityDiagnosticsManager.DataStallReport;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.BlockedReason;
 import android.net.ConnectivityManager.NetworkCallback;
-import android.net.ConnectivityManager.RestrictBackgroundStatus;
 import android.net.ConnectivityResources;
 import android.net.ConnectivitySettingsManager;
 import android.net.DataStallReportParcelable;
@@ -1045,14 +1045,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
             } else {
                 // ConnectivityService publishes binder service using publishBinderService() with
                 // no priority assigned will be treated as NORMAL priority. Dumpsys does not send
-                // "--dump-priority" arguments to the service. Thus, dump both NORMAL and HIGH to
-                // align the legacy design.
+                // "--dump-priority" arguments to the service. Thus, dump NORMAL only to align the
+                // legacy output for dumpsys connectivity.
                 // TODO: Integrate into signal dump.
                 dumpNormal(fd, pw, args);
-                pw.println();
-                pw.println("DUMP OF SERVICE HIGH connectivity");
-                pw.println();
-                dumpHigh(fd, pw);
             }
         }
     }
@@ -1395,7 +1391,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // arguments like the handler or the DnsResolver.
         // TODO : remove this ; it is probably better handled with a sentinel request.
         mNoServiceNetwork = new NetworkAgentInfo(null,
-                new Network(NO_SERVICE_NET_ID),
+                new Network(INetd.UNREACHABLE_NET_ID),
                 new NetworkInfo(TYPE_NONE, 0, "", ""),
                 new LinkProperties(), new NetworkCapabilities(),
                 new NetworkScore.Builder().setLegacyInt(0).build(), mContext, null,
@@ -2156,10 +2152,22 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private void restrictRequestUidsForCallerAndSetRequestorInfo(NetworkCapabilities nc,
             int callerUid, String callerPackageName) {
+        // There is no need to track the effective UID of the request here. If the caller
+        // lacks the settings permission, the effective UID is the same as the calling ID.
         if (!checkSettingsPermission()) {
-            // There is no need to track the effective UID of the request here. If the caller lacks
-            // the settings permission, the effective UID is the same as the calling ID.
-            nc.setSingleUid(callerUid);
+            // Unprivileged apps can only pass in null or their own UID.
+            if (nc.getUids() == null) {
+                // If the caller passes in null, the callback will also match networks that do not
+                // apply to its UID, similarly to what it would see if it called getAllNetworks.
+                // In this case, redact everything in the request immediately. This ensures that the
+                // app is not able to get any redacted information by filing an unredacted request
+                // and observing whether the request matches something.
+                if (nc.getNetworkSpecifier() != null) {
+                    nc.setNetworkSpecifier(nc.getNetworkSpecifier().redact());
+                }
+            } else {
+                nc.setSingleUid(callerUid);
+            }
         }
         nc.setRequestorUidAndPackageName(callerUid, callerPackageName);
         nc.setAdministratorUids(new int[0]);
@@ -6466,8 +6474,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
     // Request used to optionally keep vehicle internal network always active
     private final NetworkRequest mDefaultVehicleRequest;
 
-    // TODO replace with INetd.UNREACHABLE_NET_ID when available.
-    private static final int NO_SERVICE_NET_ID = 52;
     // Sentinel NAI used to direct apps with default networks that should have no connectivity to a
     // network with no service. This NAI should never be matched against, nor should any public API
     // ever return the associated network. For this reason, this NAI is not in the list of available

@@ -139,9 +139,11 @@ public final class UpdatableFontDirTest {
     private File mUpdatableFontFilesDir;
     private File mConfigFile;
     private List<File> mPreinstalledFontDirs;
-    private Supplier<Long> mCurrentTimeSupplier = () -> CURRENT_TIME;
-    private Function<Map<String, File>, FontConfig> mConfigSupplier =
+    private final Supplier<Long> mCurrentTimeSupplier = () -> CURRENT_TIME;
+    private final Function<Map<String, File>, FontConfig> mConfigSupplier =
             (map) -> SystemFonts.getSystemFontConfig(map, 0, 0);
+    private FakeFontFileParser mParser;
+    private FakeFsverityUtil mFakeFsverityUtil;
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     @Before
@@ -159,6 +161,8 @@ public final class UpdatableFontDirTest {
             dir.mkdir();
         }
         mConfigFile = new File(mCacheDir, "config.xml");
+        mParser = new FakeFontFileParser();
+        mFakeFsverityUtil = new FakeFsverityUtil();
     }
 
     @After
@@ -169,13 +173,11 @@ public final class UpdatableFontDirTest {
     @Test
     public void construct() throws Exception {
         long expectedModifiedDate = CURRENT_TIME / 2;
-        FakeFontFileParser parser = new FakeFontFileParser();
-        FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
         PersistentSystemFontConfig.Config config = new PersistentSystemFontConfig.Config();
         config.lastModifiedMillis = expectedModifiedDate;
         writeConfig(config, mConfigFile);
         UpdatableFontDir dirForPreparation = new UpdatableFontDir(
-                mUpdatableFontFilesDir, parser, fakeFsverityUtil,
+                mUpdatableFontFilesDir, mParser, mFakeFsverityUtil,
                 mConfigFile, mCurrentTimeSupplier, mConfigSupplier);
         dirForPreparation.loadFontFileMap();
         assertThat(dirForPreparation.getSystemFontConfig().getLastModifiedTimeMillis())
@@ -198,13 +200,13 @@ public final class UpdatableFontDirTest {
                 .isNotEqualTo(expectedModifiedDate);
 
         UpdatableFontDir dir = new UpdatableFontDir(
-                mUpdatableFontFilesDir, parser, fakeFsverityUtil,
+                mUpdatableFontFilesDir, mParser, mFakeFsverityUtil,
                 mConfigFile, mCurrentTimeSupplier, mConfigSupplier);
         dir.loadFontFileMap();
         assertThat(dir.getPostScriptMap()).containsKey("foo");
-        assertThat(parser.getRevision(dir.getPostScriptMap().get("foo"))).isEqualTo(3);
+        assertThat(mParser.getRevision(dir.getPostScriptMap().get("foo"))).isEqualTo(3);
         assertThat(dir.getPostScriptMap()).containsKey("bar");
-        assertThat(parser.getRevision(dir.getPostScriptMap().get("bar"))).isEqualTo(4);
+        assertThat(mParser.getRevision(dir.getPostScriptMap().get("bar"))).isEqualTo(4);
         // Outdated font dir should be deleted.
         assertThat(mUpdatableFontFilesDir.list()).hasLength(2);
         assertNamedFamilyExists(dir.getSystemFontConfig(), "foobar");
@@ -219,10 +221,8 @@ public final class UpdatableFontDirTest {
 
     @Test
     public void construct_empty() {
-        FakeFontFileParser parser = new FakeFontFileParser();
-        FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
         UpdatableFontDir dir = new UpdatableFontDir(
-                mUpdatableFontFilesDir, parser, fakeFsverityUtil,
+                mUpdatableFontFilesDir, mParser, mFakeFsverityUtil,
                 mConfigFile, mCurrentTimeSupplier, mConfigSupplier);
         dir.loadFontFileMap();
         assertThat(dir.getPostScriptMap()).isEmpty();
@@ -231,10 +231,8 @@ public final class UpdatableFontDirTest {
 
     @Test
     public void construct_missingFsverity() throws Exception {
-        FakeFontFileParser parser = new FakeFontFileParser();
-        FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
         UpdatableFontDir dirForPreparation = new UpdatableFontDir(
-                mUpdatableFontFilesDir, parser, fakeFsverityUtil,
+                mUpdatableFontFilesDir, mParser, mFakeFsverityUtil,
                 mConfigFile, mCurrentTimeSupplier, mConfigSupplier);
         dirForPreparation.loadFontFileMap();
         dirForPreparation.update(Arrays.asList(
@@ -249,10 +247,10 @@ public final class UpdatableFontDirTest {
         // Four font dirs are created.
         assertThat(mUpdatableFontFilesDir.list()).hasLength(4);
 
-        fakeFsverityUtil.remove(
+        mFakeFsverityUtil.remove(
                 dirForPreparation.getPostScriptMap().get("foo").getAbsolutePath());
         UpdatableFontDir dir = new UpdatableFontDir(
-                mUpdatableFontFilesDir, parser, fakeFsverityUtil,
+                mUpdatableFontFilesDir, mParser, mFakeFsverityUtil,
                 mConfigFile, mCurrentTimeSupplier, mConfigSupplier);
         dir.loadFontFileMap();
         assertThat(dir.getPostScriptMap()).isEmpty();
@@ -263,10 +261,8 @@ public final class UpdatableFontDirTest {
 
     @Test
     public void construct_fontNameMismatch() throws Exception {
-        FakeFontFileParser parser = new FakeFontFileParser();
-        FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
         UpdatableFontDir dirForPreparation = new UpdatableFontDir(
-                mUpdatableFontFilesDir, parser, fakeFsverityUtil,
+                mUpdatableFontFilesDir, mParser, mFakeFsverityUtil,
                 mConfigFile, mCurrentTimeSupplier, mConfigSupplier);
         dirForPreparation.loadFontFileMap();
         dirForPreparation.update(Arrays.asList(
@@ -285,7 +281,7 @@ public final class UpdatableFontDirTest {
         FileUtils.stringToFile(dirForPreparation.getPostScriptMap().get("foo"), "bar,4");
 
         UpdatableFontDir dir = new UpdatableFontDir(
-                mUpdatableFontFilesDir, parser, fakeFsverityUtil,
+                mUpdatableFontFilesDir, mParser, mFakeFsverityUtil,
                 mConfigFile, mCurrentTimeSupplier, mConfigSupplier);
         dir.loadFontFileMap();
         assertThat(dir.getPostScriptMap()).isEmpty();
@@ -296,8 +292,6 @@ public final class UpdatableFontDirTest {
 
     @Test
     public void construct_olderThanPreinstalledFont() throws Exception {
-        FakeFontFileParser parser = new FakeFontFileParser();
-        FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
         Function<Map<String, File>, FontConfig> configSupplier = (map) -> {
             FontConfig.Font fooFont = new FontConfig.Font(
                     new File(mPreinstalledFontDirs.get(0), "foo.ttf"), null, "foo",
@@ -314,7 +308,7 @@ public final class UpdatableFontDirTest {
         };
 
         UpdatableFontDir dirForPreparation = new UpdatableFontDir(
-                mUpdatableFontFilesDir, parser, fakeFsverityUtil,
+                mUpdatableFontFilesDir, mParser, mFakeFsverityUtil,
                 mConfigFile, mCurrentTimeSupplier, configSupplier);
         dirForPreparation.loadFontFileMap();
         dirForPreparation.update(Arrays.asList(
@@ -334,14 +328,14 @@ public final class UpdatableFontDirTest {
         FileUtils.stringToFile(new File(mPreinstalledFontDirs.get(1), "bar.ttf"), "bar,1,bar");
         FileUtils.stringToFile(new File(mPreinstalledFontDirs.get(1), "bar.ttf"), "bar,2,bar");
         UpdatableFontDir dir = new UpdatableFontDir(
-                mUpdatableFontFilesDir, parser, fakeFsverityUtil,
+                mUpdatableFontFilesDir, mParser, mFakeFsverityUtil,
                 mConfigFile, mCurrentTimeSupplier, configSupplier);
         dir.loadFontFileMap();
         // For foo.ttf, preinstalled font (revision 5) should be used.
         assertThat(dir.getPostScriptMap()).doesNotContainKey("foo");
         // For bar.ttf, updated font (revision 4) should be used.
         assertThat(dir.getPostScriptMap()).containsKey("bar");
-        assertThat(parser.getRevision(dir.getPostScriptMap().get("bar"))).isEqualTo(4);
+        assertThat(mParser.getRevision(dir.getPostScriptMap().get("bar"))).isEqualTo(4);
         // Outdated font dir should be deleted.
         // We don't delete bar.ttf in this case, because it's normal that OTA updates preinstalled
         // fonts.
@@ -352,10 +346,8 @@ public final class UpdatableFontDirTest {
 
     @Test
     public void construct_failedToLoadConfig() throws Exception {
-        FakeFontFileParser parser = new FakeFontFileParser();
-        FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
         UpdatableFontDir dir = new UpdatableFontDir(
-                mUpdatableFontFilesDir, parser, fakeFsverityUtil,
+                mUpdatableFontFilesDir, mParser, mFakeFsverityUtil,
                 new File("/dev/null"), mCurrentTimeSupplier, mConfigSupplier);
         dir.loadFontFileMap();
         assertThat(dir.getPostScriptMap()).isEmpty();
@@ -364,10 +356,8 @@ public final class UpdatableFontDirTest {
 
     @Test
     public void construct_afterBatchFailure() throws Exception {
-        FakeFontFileParser parser = new FakeFontFileParser();
-        FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
         UpdatableFontDir dirForPreparation = new UpdatableFontDir(
-                mUpdatableFontFilesDir, parser, fakeFsverityUtil,
+                mUpdatableFontFilesDir, mParser, mFakeFsverityUtil,
                 mConfigFile, mCurrentTimeSupplier, mConfigSupplier);
         dirForPreparation.loadFontFileMap();
         dirForPreparation.update(Arrays.asList(
@@ -389,12 +379,12 @@ public final class UpdatableFontDirTest {
         }
 
         UpdatableFontDir dir = new UpdatableFontDir(
-                mUpdatableFontFilesDir, parser, fakeFsverityUtil,
+                mUpdatableFontFilesDir, mParser, mFakeFsverityUtil,
                 mConfigFile, mCurrentTimeSupplier, mConfigSupplier);
         dir.loadFontFileMap();
         // The state should be rolled back as a whole if one of the update requests fail.
         assertThat(dir.getPostScriptMap()).containsKey("foo");
-        assertThat(parser.getRevision(dir.getPostScriptMap().get("foo"))).isEqualTo(1);
+        assertThat(mParser.getRevision(dir.getPostScriptMap().get("foo"))).isEqualTo(1);
         assertThat(dir.getFontFamilyMap()).containsKey("foobar");
         FontConfig.FontFamily foobar = dir.getFontFamilyMap().get("foobar");
         assertThat(foobar.getFontList()).hasSize(1);
@@ -404,10 +394,8 @@ public final class UpdatableFontDirTest {
 
     @Test
     public void loadFontFileMap_twice() throws Exception {
-        FakeFontFileParser parser = new FakeFontFileParser();
-        FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
         UpdatableFontDir dir = new UpdatableFontDir(
-                mUpdatableFontFilesDir, parser, fakeFsverityUtil,
+                mUpdatableFontFilesDir, mParser, mFakeFsverityUtil,
                 mConfigFile, mCurrentTimeSupplier, mConfigSupplier);
         dir.loadFontFileMap();
         dir.update(Collections.singletonList(newFontUpdateRequest("test.ttf,1,test",
@@ -420,17 +408,15 @@ public final class UpdatableFontDirTest {
 
     @Test
     public void installFontFile() throws Exception {
-        FakeFontFileParser parser = new FakeFontFileParser();
-        FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
         UpdatableFontDir dir = new UpdatableFontDir(
-                mUpdatableFontFilesDir, parser, fakeFsverityUtil,
+                mUpdatableFontFilesDir, mParser, mFakeFsverityUtil,
                 mConfigFile, mCurrentTimeSupplier, mConfigSupplier);
         dir.loadFontFileMap();
 
         dir.update(Collections.singletonList(newFontUpdateRequest("test.ttf,1,test",
                 GOOD_SIGNATURE)));
         assertThat(dir.getPostScriptMap()).containsKey("test");
-        assertThat(parser.getRevision(dir.getPostScriptMap().get("test"))).isEqualTo(1);
+        assertThat(mParser.getRevision(dir.getPostScriptMap().get("test"))).isEqualTo(1);
         File fontFile = dir.getPostScriptMap().get("test");
         assertThat(Os.stat(fontFile.getAbsolutePath()).st_mode & 0777).isEqualTo(0644);
         File fontDir = fontFile.getParentFile();
@@ -439,10 +425,8 @@ public final class UpdatableFontDirTest {
 
     @Test
     public void installFontFile_upgrade() throws Exception {
-        FakeFontFileParser parser = new FakeFontFileParser();
-        FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
         UpdatableFontDir dir = new UpdatableFontDir(
-                mUpdatableFontFilesDir, parser, fakeFsverityUtil,
+                mUpdatableFontFilesDir, mParser, mFakeFsverityUtil,
                 mConfigFile, mCurrentTimeSupplier, mConfigSupplier);
         dir.loadFontFileMap();
 
@@ -452,10 +436,10 @@ public final class UpdatableFontDirTest {
         dir.update(Collections.singletonList(newFontUpdateRequest("test.ttf,2,test",
                 GOOD_SIGNATURE)));
         assertThat(dir.getPostScriptMap()).containsKey("test");
-        assertThat(parser.getRevision(dir.getPostScriptMap().get("test"))).isEqualTo(2);
+        assertThat(mParser.getRevision(dir.getPostScriptMap().get("test"))).isEqualTo(2);
         assertThat(mapBeforeUpgrade).containsKey("test");
         assertWithMessage("Older fonts should not be deleted until next loadFontFileMap")
-                .that(parser.getRevision(mapBeforeUpgrade.get("test"))).isEqualTo(1);
+                .that(mParser.getRevision(mapBeforeUpgrade.get("test"))).isEqualTo(1);
         // Check that updatedFontDirs is pruned.
         assertWithMessage("config.updatedFontDirs should only list latest active dirs")
                 .that(readConfig(mConfigFile).updatedFontDirs)
@@ -464,15 +448,13 @@ public final class UpdatableFontDirTest {
 
     @Test
     public void installFontFile_systemFontHasPSNameDifferentFromFileName() throws Exception {
-        FakeFontFileParser parser = new FakeFontFileParser();
-        FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
 
         // Setup the environment that the system installed font file named "foo.ttf" has PostScript
         // name "bar".
         File file = new File(mPreinstalledFontDirs.get(0), "foo.ttf");
         FileUtils.stringToFile(file, "foo.ttf,1,bar");
         UpdatableFontDir dir = new UpdatableFontDir(
-                mUpdatableFontFilesDir, parser, fakeFsverityUtil,
+                mUpdatableFontFilesDir, mParser, mFakeFsverityUtil,
                 mConfigFile, mCurrentTimeSupplier, (map) -> {
             FontConfig.Font font = new FontConfig.Font(
                     file, null, "bar", new FontStyle(400, FontStyle.FONT_SLANT_UPRIGHT),
@@ -489,7 +471,7 @@ public final class UpdatableFontDirTest {
                 GOOD_SIGNATURE)));
         assertThat(dir.getPostScriptMap()).containsKey("bar");
         assertThat(dir.getPostScriptMap().size()).isEqualTo(1);
-        assertThat(parser.getRevision(dir.getPostScriptMap().get("bar"))).isEqualTo(2);
+        assertThat(mParser.getRevision(dir.getPostScriptMap().get("bar"))).isEqualTo(2);
         File fontFile = dir.getPostScriptMap().get("bar");
         assertThat(Os.stat(fontFile.getAbsolutePath()).st_mode & 0777).isEqualTo(0644);
         File fontDir = fontFile.getParentFile();
@@ -498,10 +480,8 @@ public final class UpdatableFontDirTest {
 
     @Test
     public void installFontFile_sameVersion() throws Exception {
-        FakeFontFileParser parser = new FakeFontFileParser();
-        FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
         UpdatableFontDir dir = new UpdatableFontDir(
-                mUpdatableFontFilesDir, parser, fakeFsverityUtil,
+                mUpdatableFontFilesDir, mParser, mFakeFsverityUtil,
                 mConfigFile, mCurrentTimeSupplier, mConfigSupplier);
         dir.loadFontFileMap();
 
@@ -510,15 +490,13 @@ public final class UpdatableFontDirTest {
         dir.update(Collections.singletonList(newFontUpdateRequest("test.ttf,1,test",
                 GOOD_SIGNATURE)));
         assertThat(dir.getPostScriptMap()).containsKey("test");
-        assertThat(parser.getRevision(dir.getPostScriptMap().get("test"))).isEqualTo(1);
+        assertThat(mParser.getRevision(dir.getPostScriptMap().get("test"))).isEqualTo(1);
     }
 
     @Test
     public void installFontFile_downgrade() throws Exception {
-        FakeFontFileParser parser = new FakeFontFileParser();
-        FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
         UpdatableFontDir dir = new UpdatableFontDir(
-                mUpdatableFontFilesDir, parser, fakeFsverityUtil,
+                mUpdatableFontFilesDir, mParser, mFakeFsverityUtil,
                 mConfigFile, mCurrentTimeSupplier, mConfigSupplier);
         dir.loadFontFileMap();
 
@@ -533,7 +511,7 @@ public final class UpdatableFontDirTest {
         }
         assertThat(dir.getPostScriptMap()).containsKey("test");
         assertWithMessage("Font should not be downgraded to an older revision")
-                .that(parser.getRevision(dir.getPostScriptMap().get("test"))).isEqualTo(2);
+                .that(mParser.getRevision(dir.getPostScriptMap().get("test"))).isEqualTo(2);
         // Check that updatedFontDirs is not updated.
         assertWithMessage("config.updatedFontDirs should only list latest active dirs")
                 .that(readConfig(mConfigFile).updatedFontDirs)
@@ -542,10 +520,8 @@ public final class UpdatableFontDirTest {
 
     @Test
     public void installFontFile_multiple() throws Exception {
-        FakeFontFileParser parser = new FakeFontFileParser();
-        FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
         UpdatableFontDir dir = new UpdatableFontDir(
-                mUpdatableFontFilesDir, parser, fakeFsverityUtil,
+                mUpdatableFontFilesDir, mParser, mFakeFsverityUtil,
                 mConfigFile, mCurrentTimeSupplier, mConfigSupplier);
         dir.loadFontFileMap();
 
@@ -554,17 +530,15 @@ public final class UpdatableFontDirTest {
         dir.update(Collections.singletonList(newFontUpdateRequest("bar.ttf,2,bar",
                 GOOD_SIGNATURE)));
         assertThat(dir.getPostScriptMap()).containsKey("foo");
-        assertThat(parser.getRevision(dir.getPostScriptMap().get("foo"))).isEqualTo(1);
+        assertThat(mParser.getRevision(dir.getPostScriptMap().get("foo"))).isEqualTo(1);
         assertThat(dir.getPostScriptMap()).containsKey("bar");
-        assertThat(parser.getRevision(dir.getPostScriptMap().get("bar"))).isEqualTo(2);
+        assertThat(mParser.getRevision(dir.getPostScriptMap().get("bar"))).isEqualTo(2);
     }
 
     @Test
     public void installFontFile_batch() throws Exception {
-        FakeFontFileParser parser = new FakeFontFileParser();
-        FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
         UpdatableFontDir dir = new UpdatableFontDir(
-                mUpdatableFontFilesDir, parser, fakeFsverityUtil,
+                mUpdatableFontFilesDir, mParser, mFakeFsverityUtil,
                 mConfigFile, mCurrentTimeSupplier, mConfigSupplier);
         dir.loadFontFileMap();
 
@@ -572,17 +546,15 @@ public final class UpdatableFontDirTest {
                 newFontUpdateRequest("foo.ttf,1,foo", GOOD_SIGNATURE),
                 newFontUpdateRequest("bar.ttf,2,bar", GOOD_SIGNATURE)));
         assertThat(dir.getPostScriptMap()).containsKey("foo");
-        assertThat(parser.getRevision(dir.getPostScriptMap().get("foo"))).isEqualTo(1);
+        assertThat(mParser.getRevision(dir.getPostScriptMap().get("foo"))).isEqualTo(1);
         assertThat(dir.getPostScriptMap()).containsKey("bar");
-        assertThat(parser.getRevision(dir.getPostScriptMap().get("bar"))).isEqualTo(2);
+        assertThat(mParser.getRevision(dir.getPostScriptMap().get("bar"))).isEqualTo(2);
     }
 
     @Test
     public void installFontFile_invalidSignature() throws Exception {
-        FakeFontFileParser parser = new FakeFontFileParser();
-        FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
         UpdatableFontDir dir = new UpdatableFontDir(
-                mUpdatableFontFilesDir, parser, fakeFsverityUtil,
+                mUpdatableFontFilesDir, mParser, mFakeFsverityUtil,
                 mConfigFile, mCurrentTimeSupplier, mConfigSupplier);
         dir.loadFontFileMap();
 
@@ -600,46 +572,40 @@ public final class UpdatableFontDirTest {
 
     @Test
     public void installFontFile_preinstalled_upgrade() throws Exception {
-        FakeFontFileParser parser = new FakeFontFileParser();
-        FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
         FileUtils.stringToFile(new File(mPreinstalledFontDirs.get(0), "test.ttf"),
                 "test.ttf,1,test");
         UpdatableFontDir dir = new UpdatableFontDir(
-                mUpdatableFontFilesDir, parser, fakeFsverityUtil,
+                mUpdatableFontFilesDir, mParser, mFakeFsverityUtil,
                 mConfigFile, mCurrentTimeSupplier, mConfigSupplier);
         dir.loadFontFileMap();
 
         dir.update(Collections.singletonList(newFontUpdateRequest("test.ttf,2,test",
                 GOOD_SIGNATURE)));
         assertThat(dir.getPostScriptMap()).containsKey("test");
-        assertThat(parser.getRevision(dir.getPostScriptMap().get("test"))).isEqualTo(2);
+        assertThat(mParser.getRevision(dir.getPostScriptMap().get("test"))).isEqualTo(2);
     }
 
     @Test
     public void installFontFile_preinstalled_sameVersion() throws Exception {
-        FakeFontFileParser parser = new FakeFontFileParser();
-        FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
         FileUtils.stringToFile(new File(mPreinstalledFontDirs.get(0), "test.ttf"),
                 "test.ttf,1,test");
         UpdatableFontDir dir = new UpdatableFontDir(
-                mUpdatableFontFilesDir, parser, fakeFsverityUtil,
+                mUpdatableFontFilesDir, mParser, mFakeFsverityUtil,
                 mConfigFile, mCurrentTimeSupplier, mConfigSupplier);
         dir.loadFontFileMap();
 
         dir.update(Collections.singletonList(newFontUpdateRequest("test.ttf,1,test",
                 GOOD_SIGNATURE)));
         assertThat(dir.getPostScriptMap()).containsKey("test");
-        assertThat(parser.getRevision(dir.getPostScriptMap().get("test"))).isEqualTo(1);
+        assertThat(mParser.getRevision(dir.getPostScriptMap().get("test"))).isEqualTo(1);
     }
 
     @Test
     public void installFontFile_preinstalled_downgrade() throws Exception {
-        FakeFontFileParser parser = new FakeFontFileParser();
-        FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
         File file = new File(mPreinstalledFontDirs.get(0), "test.ttf");
         FileUtils.stringToFile(file, "test.ttf,2,test");
         UpdatableFontDir dir = new UpdatableFontDir(
-                mUpdatableFontFilesDir, parser, fakeFsverityUtil,
+                mUpdatableFontFilesDir, mParser, mFakeFsverityUtil,
                 mConfigFile, mCurrentTimeSupplier, (map) -> {
             FontConfig.Font font = new FontConfig.Font(
                     file, null, "test", new FontStyle(400, FontStyle.FONT_SLANT_UPRIGHT), 0, null,
@@ -664,8 +630,6 @@ public final class UpdatableFontDirTest {
     @Test
     public void installFontFile_failedToWriteConfigXml() throws Exception {
         long expectedModifiedDate = 1234567890;
-        FakeFontFileParser parser = new FakeFontFileParser();
-        FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
         FileUtils.stringToFile(new File(mPreinstalledFontDirs.get(0), "test.ttf"),
                 "test.ttf,1,test");
 
@@ -680,7 +644,7 @@ public final class UpdatableFontDirTest {
         assertThat(readonlyDir.setWritable(false, false)).isTrue();
         try {
             UpdatableFontDir dir = new UpdatableFontDir(
-                    mUpdatableFontFilesDir, parser, fakeFsverityUtil,
+                    mUpdatableFontFilesDir, mParser, mFakeFsverityUtil,
                     readonlyFile, mCurrentTimeSupplier, mConfigSupplier);
             dir.loadFontFileMap();
 
@@ -702,7 +666,6 @@ public final class UpdatableFontDirTest {
 
     @Test
     public void installFontFile_failedToParsePostScript() throws Exception {
-        FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
         UpdatableFontDir dir = new UpdatableFontDir(
                 mUpdatableFontFilesDir,
                 new UpdatableFontDir.FontFileParser() {
@@ -725,7 +688,7 @@ public final class UpdatableFontDirTest {
                     @Override
                     public void tryToCreateTypeface(File file) throws IOException {
                     }
-                }, fakeFsverityUtil, mConfigFile, mCurrentTimeSupplier, mConfigSupplier);
+                }, mFakeFsverityUtil, mConfigFile, mCurrentTimeSupplier, mConfigSupplier);
         dir.loadFontFileMap();
 
         try {
@@ -741,7 +704,6 @@ public final class UpdatableFontDirTest {
 
     @Test
     public void installFontFile_failedToParsePostScriptName_invalidFont() throws Exception {
-        FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
         UpdatableFontDir dir = new UpdatableFontDir(
                 mUpdatableFontFilesDir,
                 new UpdatableFontDir.FontFileParser() {
@@ -763,7 +725,7 @@ public final class UpdatableFontDirTest {
                     @Override
                     public void tryToCreateTypeface(File file) throws IOException {
                     }
-                }, fakeFsverityUtil, mConfigFile, mCurrentTimeSupplier, mConfigSupplier);
+                }, mFakeFsverityUtil, mConfigFile, mCurrentTimeSupplier, mConfigSupplier);
         dir.loadFontFileMap();
 
         try {
@@ -779,31 +741,29 @@ public final class UpdatableFontDirTest {
 
     @Test
     public void installFontFile_failedToCreateTypeface() throws Exception {
-        FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
-        FakeFontFileParser parser = new FakeFontFileParser();
         UpdatableFontDir dir = new UpdatableFontDir(
                 mUpdatableFontFilesDir,
                 new UpdatableFontDir.FontFileParser() {
                     @Override
                     public String getPostScriptName(File file) throws IOException {
-                        return parser.getPostScriptName(file);
+                        return mParser.getPostScriptName(file);
                     }
 
                     @Override
                     public String buildFontFileName(File file) throws IOException {
-                        return parser.buildFontFileName(file);
+                        return mParser.buildFontFileName(file);
                     }
 
                     @Override
                     public long getRevision(File file) throws IOException {
-                        return parser.getRevision(file);
+                        return mParser.getRevision(file);
                     }
 
                     @Override
                     public void tryToCreateTypeface(File file) throws IOException {
                         throw new IOException();
                     }
-                }, fakeFsverityUtil, mConfigFile, mCurrentTimeSupplier, mConfigSupplier);
+                }, mFakeFsverityUtil, mConfigFile, mCurrentTimeSupplier, mConfigSupplier);
         dir.loadFontFileMap();
 
         try {
@@ -820,16 +780,15 @@ public final class UpdatableFontDirTest {
     @Test
     public void installFontFile_renameToPsNameFailure() throws Exception {
         UpdatableFontDir.FsverityUtil fakeFsverityUtil = new UpdatableFontDir.FsverityUtil() {
-            private final FakeFsverityUtil mFake = new FakeFsverityUtil();
 
             @Override
             public boolean hasFsverity(String path) {
-                return mFake.hasFsverity(path);
+                return mFakeFsverityUtil.hasFsverity(path);
             }
 
             @Override
             public void setUpFsverity(String path, byte[] pkcs7Signature) throws IOException {
-                mFake.setUpFsverity(path, pkcs7Signature);
+                mFakeFsverityUtil.setUpFsverity(path, pkcs7Signature);
             }
 
             @Override
@@ -837,9 +796,8 @@ public final class UpdatableFontDirTest {
                 return false;
             }
         };
-        FakeFontFileParser parser = new FakeFontFileParser();
         UpdatableFontDir dir = new UpdatableFontDir(
-                mUpdatableFontFilesDir, parser, fakeFsverityUtil,
+                mUpdatableFontFilesDir, mParser, fakeFsverityUtil,
                 mConfigFile, mCurrentTimeSupplier, mConfigSupplier);
         dir.loadFontFileMap();
 
@@ -856,10 +814,8 @@ public final class UpdatableFontDirTest {
 
     @Test
     public void installFontFile_batchFailure() throws Exception {
-        FakeFontFileParser parser = new FakeFontFileParser();
-        FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
         UpdatableFontDir dir = new UpdatableFontDir(
-                mUpdatableFontFilesDir, parser, fakeFsverityUtil,
+                mUpdatableFontFilesDir, mParser, mFakeFsverityUtil,
                 mConfigFile, mCurrentTimeSupplier, mConfigSupplier);
         dir.loadFontFileMap();
 
@@ -875,15 +831,13 @@ public final class UpdatableFontDirTest {
         }
         // The state should be rolled back as a whole if one of the update requests fail.
         assertThat(dir.getPostScriptMap()).containsKey("foo");
-        assertThat(parser.getRevision(dir.getPostScriptMap().get("foo"))).isEqualTo(1);
+        assertThat(mParser.getRevision(dir.getPostScriptMap().get("foo"))).isEqualTo(1);
     }
 
     @Test
     public void addFontFamily() throws Exception {
-        FakeFontFileParser parser = new FakeFontFileParser();
-        FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
         UpdatableFontDir dir = new UpdatableFontDir(
-                mUpdatableFontFilesDir, parser, fakeFsverityUtil,
+                mUpdatableFontFilesDir, mParser, mFakeFsverityUtil,
                 mConfigFile, mCurrentTimeSupplier, mConfigSupplier);
         dir.loadFontFileMap();
 
@@ -902,10 +856,8 @@ public final class UpdatableFontDirTest {
 
     @Test
     public void addFontFamily_noName() throws Exception {
-        FakeFontFileParser parser = new FakeFontFileParser();
-        FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
         UpdatableFontDir dir = new UpdatableFontDir(
-                mUpdatableFontFilesDir, parser, fakeFsverityUtil,
+                mUpdatableFontFilesDir, mParser, mFakeFsverityUtil,
                 mConfigFile, mCurrentTimeSupplier, mConfigSupplier);
         dir.loadFontFileMap();
 
@@ -924,10 +876,8 @@ public final class UpdatableFontDirTest {
 
     @Test
     public void addFontFamily_fontNotAvailable() throws Exception {
-        FakeFontFileParser parser = new FakeFontFileParser();
-        FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
         UpdatableFontDir dir = new UpdatableFontDir(
-                mUpdatableFontFilesDir, parser, fakeFsverityUtil,
+                mUpdatableFontFilesDir, mParser, mFakeFsverityUtil,
                 mConfigFile, mCurrentTimeSupplier, mConfigSupplier);
         dir.loadFontFileMap();
 
@@ -944,10 +894,8 @@ public final class UpdatableFontDirTest {
 
     @Test
     public void getSystemFontConfig() throws Exception {
-        FakeFontFileParser parser = new FakeFontFileParser();
-        FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
         UpdatableFontDir dir = new UpdatableFontDir(
-                mUpdatableFontFilesDir, parser, fakeFsverityUtil,
+                mUpdatableFontFilesDir, mParser, mFakeFsverityUtil,
                 mConfigFile, mCurrentTimeSupplier, mConfigSupplier);
         dir.loadFontFileMap();
         // We assume we have monospace.
@@ -976,10 +924,8 @@ public final class UpdatableFontDirTest {
 
     @Test
     public void getSystemFontConfig_preserveFirstFontFamily() throws Exception {
-        FakeFontFileParser parser = new FakeFontFileParser();
-        FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
         UpdatableFontDir dir = new UpdatableFontDir(
-                mUpdatableFontFilesDir, parser, fakeFsverityUtil,
+                mUpdatableFontFilesDir, mParser, mFakeFsverityUtil,
                 mConfigFile, mCurrentTimeSupplier, mConfigSupplier);
         dir.loadFontFileMap();
         assertThat(dir.getSystemFontConfig().getFontFamilies()).isNotEmpty();
@@ -1001,6 +947,24 @@ public final class UpdatableFontDirTest {
         assertThat(updated).isNotEqualTo(firstFontFamily);
     }
 
+    @Test
+    public void deleteAllFiles() throws Exception {
+        FakeFontFileParser parser = new FakeFontFileParser();
+        FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
+        UpdatableFontDir dirForPreparation = new UpdatableFontDir(
+                mUpdatableFontFilesDir, parser, fakeFsverityUtil,
+                mConfigFile, mCurrentTimeSupplier, mConfigSupplier);
+        dirForPreparation.loadFontFileMap();
+        dirForPreparation.update(Collections.singletonList(
+                newFontUpdateRequest("foo.ttf,1,foo", GOOD_SIGNATURE)));
+        assertThat(mConfigFile.exists()).isTrue();
+        assertThat(mUpdatableFontFilesDir.list()).hasLength(1);
+
+        UpdatableFontDir.deleteAllFiles(mUpdatableFontFilesDir, mConfigFile);
+        assertThat(mConfigFile.exists()).isFalse();
+        assertThat(mUpdatableFontFilesDir.list()).hasLength(0);
+    }
+
     private FontUpdateRequest newFontUpdateRequest(String content, String signature)
             throws Exception {
         File file = File.createTempFile("font", "ttf", mCacheDir);
@@ -1011,12 +975,12 @@ public final class UpdatableFontDirTest {
     }
 
     private static FontUpdateRequest newAddFontFamilyRequest(String xml) throws Exception {
-        XmlPullParser parser = Xml.newPullParser();
+        XmlPullParser mParser = Xml.newPullParser();
         ByteArrayInputStream is = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8));
-        parser.setInput(is, "UTF-8");
-        parser.nextTag();
+        mParser.setInput(is, "UTF-8");
+        mParser.nextTag();
 
-        FontConfig.FontFamily fontFamily = FontListParser.readFamily(parser, "", null, true);
+        FontConfig.FontFamily fontFamily = FontListParser.readFamily(mParser, "", null, true);
         List<FontUpdateRequest.Font> fonts = new ArrayList<>();
         for (FontConfig.Font font : fontFamily.getFontList()) {
             String name = font.getFile().getName();

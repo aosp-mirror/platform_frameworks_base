@@ -155,8 +155,8 @@
     <string name="running_process_item_user_label" msgid="3988506293099805796">"Korisnik: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"Postavljene su neke zadane postavke"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"Nema zadanih postavki"</string>
-    <string name="tts_settings" msgid="8130616705989351312">"Postavke za tekst u govor"</string>
-    <string name="tts_settings_title" msgid="7602210956640483039">"Tekst u govor"</string>
+    <string name="tts_settings" msgid="8130616705989351312">"Postavke za pretvaranje teksta u govor"</string>
+    <string name="tts_settings_title" msgid="7602210956640483039">"Pretvaranje teksta u govor"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"Brzina govora"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"Brzina kojom se izgovara tekst"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"Visina glasa"</string>
@@ -211,7 +211,7 @@
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Način otklanjanja pogrešaka kad je Wi-Fi povezan"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"Pogreška"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Bežično otklanjanje pogrešaka"</string>
-    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Da biste vidjeli dostupne uređaje i mogli se njima koristiti, uključite bežično otklanjanje pogrešaka"</string>
+    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Da biste vidjeli i upotrebljavali dostupne uređaje, uključite bežično otklanjanje pogrešaka"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Uparivanje uređaja pomoću QR koda"</string>
     <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Uparivanje novih uređaja pomoću čitača QR koda"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Uparivanje uređaja pomoću koda za uparivanje"</string>
@@ -275,7 +275,7 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7274396574659784285">"Pokreni odabir kodeka za Bluetooth Audio\nLDAC: kvaliteta reprodukcije"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="2040810756832027227">"Strujanje: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"Privatni DNS"</string>
-    <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"Odaberi načina privatnog DNS-a"</string>
+    <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"Odaberite način privatnog DNS-a"</string>
     <string name="private_dns_mode_off" msgid="7065962499349997041">"Isključeno"</string>
     <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"Automatski"</string>
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"Naziv hosta davatelja usluge privatnog DNS-a"</string>
@@ -405,6 +405,7 @@
     <string name="transcode_enable_all" msgid="2411165920039166710">"Omogući konvertiranje"</string>
     <string name="transcode_default" msgid="3784803084573509491">"Pretpostavi da aplikacije podržavaju moderne formate"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"Prikaži obavijesti o konvertiranju"</string>
+    <string name="transcode_disable_cache" msgid="3160069309377467045">"Onemogući predmemoriju za konvertiranje"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Pokrenute usluge"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Pregledajte i kontrolirajte pokrenute usluge"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Implementacija WebViewa"</string>
@@ -423,7 +424,7 @@
     <string name="daltonizer_mode_deuteranomaly" msgid="3507284319584683963">"Deuteranomalija (crveno – zeleno)"</string>
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomalija (crveno – zeleno)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomalija (plavo – žuto)"</string>
-    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Korekcija boje"</string>
+    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Korekcija boja"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="2333641630205214702">"Prilagodite način prikazivanja boja na svojem uređaju. To može biti korisno kad želite:&lt;br/&gt;&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;vidjeti boje točnije&lt;/li&gt; &lt;li&gt;&amp;nbsp;ukloniti boje kako biste se lakše usredotočili.&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Premošćeno postavkom <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
@@ -450,19 +451,17 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"Tablet bi se uskoro mogao isključiti (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Uređaj bi se uskoro mogao isključiti (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_remaining_charging_duration_only (8085099012811384899) -->
-    <skip />
-    <!-- no translation found for power_charging_duration (6127154952524919719) -->
-    <skip />
+    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> do napunjenosti"</string>
+    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> do napunjenosti"</string>
     <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> – Optimiziranje radi zdravlja baterije"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Nepoznato"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Punjenje"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Brzo punjenje"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Sporo punjenje"</string>
+    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Bežično punjenje"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Ne puni se"</string>
-    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Uključen, trenutačno se ne može puniti"</string>
-    <!-- no translation found for battery_info_status_full (1339002294876531312) -->
-    <skip />
+    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Povezano, ne puni se"</string>
+    <string name="battery_info_status_full" msgid="1339002294876531312">"Napunjeno"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Kontrolira administrator"</string>
     <string name="disabled" msgid="8017887509554714950">"Onemogućeno"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Dopušteno"</string>
@@ -506,10 +505,12 @@
     <string name="cancel" msgid="5665114069455378395">"Odustani"</string>
     <string name="okay" msgid="949938843324579502">"U redu"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmi i podsjetnici"</string>
-    <string name="alarms_and_reminders_switch_title" msgid="186992351401152744">"Dopusti postavljanje alarma ili podsjetnika"</string>
-    <string name="alarms_and_reminders_title" msgid="2988400785896875237">"Alarmi i podsjetnici"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="5882788882647778753">"Aplikaciji dopustite zakazivanje alarma ili drugih događaja koji se temelje na vremenskom rasporedu. Time će se aplikaciji omogućiti aktiviranje i pokretanje čak i dok ne koristite uređaj. Ako to dopuštenje opozovete, aplikacija bi mogla nepravilno raditi, odnosno nijedan alarm koji je zakazala neće više funkcionirati."</string>
-    <string name="keywords_alarms_and_reminders" msgid="8882739572152019456">"raspored, alarm, podsjetnik, događaj"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Dopusti postavljanje alarma i podsjetnika"</string>
+    <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmi i podsjetnici"</string>
+    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"Aplikaciji omogućuje da postavlja alarme i zakazuje druge radnje. Aplikacija se može koristiti kad ne upotrebljavate telefon, što može dodatno trošiti bateriju. Ako je to dopuštenje isključeno, aplikacija možda neće funkcionirati kako treba i njezini se alarmi neće oglašavati prema rasporedu."</string>
+    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"Aplikaciji omogućuje da postavlja alarme i zakazuje druge radnje. Aplikacija se može koristiti kad ne upotrebljavate tablet, što može dodatno trošiti bateriju. Ako je to dopuštenje isključeno, aplikacija možda neće funkcionirati kako treba i njezini se alarmi neće oglašavati prema rasporedu."</string>
+    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"Aplikaciji omogućuje da postavlja alarme i zakazuje druge radnje. Aplikacija se može koristiti kad ne upotrebljavate uređaj, što može dodatno trošiti bateriju. Ako je to dopuštenje isključeno, aplikacija možda neće funkcionirati kako treba i njezini se alarmi neće oglašavati prema rasporedu."</string>
+    <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"raspored, alarm, podsjetnik, sat"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Uključi"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Uključite opciju Ne uznemiravaj."</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Nikada"</string>
@@ -563,8 +564,7 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"Postavi zaključavanje"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"Prelazak na korisnika <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Izrada novog korisnika…"</string>
-    <!-- no translation found for add_user_failed (4809887794313944872) -->
-    <skip />
+    <string name="add_user_failed" msgid="4809887794313944872">"Izrada novog korisnika nije uspjela"</string>
     <string name="user_nickname" msgid="262624187455825083">"Nadimak"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Dodavanje gosta"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Uklanjanje gosta"</string>

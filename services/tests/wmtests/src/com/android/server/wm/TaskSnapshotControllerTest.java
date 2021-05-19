@@ -193,7 +193,7 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
         Task task = mAppWindow.mActivityRecord.getTask();
         spyOn(task);
         spyOn(mDisplayContent);
-        when(task.getDisplayContent().isImeAttachedToApp()).thenReturn(false);
+        when(task.getDisplayContent().shouldImeAttachedToApp()).thenReturn(false);
         // Intentionally set the SurfaceControl of input method window as null.
         mDisplayContent.mInputMethodWindow.setSurfaceControl(null);
         // Verify no NPE happens when calling createTaskSnapshot.
@@ -213,7 +213,7 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
         spyOn(task);
         spyOn(mDisplayContent);
         spyOn(mDisplayContent.mInputMethodWindow);
-        when(task.getDisplayContent().isImeAttachedToApp()).thenReturn(true);
+        when(task.getDisplayContent().shouldImeAttachedToApp()).thenReturn(true);
         // Intentionally set the IME window is in drawn state.
         doReturn(true).when(mDisplayContent.mInputMethodWindow).isDrawn();
         // Verify no NPE happens when calling createTaskSnapshot.

@@ -54,7 +54,7 @@ java_library {
     sdk_version: "system_server_current",
     min_sdk_version: "30",
     srcs: [
-        ":connectivity-service-srcs",
+        "src/**/*.java",
         ":framework-connectivity-shared-srcs",
         ":services-connectivity-shared-srcs",
         // TODO: move to net-utils-device-common, enable shrink optimization to avoid extra classes
@@ -65,6 +65,7 @@ java_library {
         "stable.core.platform.api.stubs",
         "android_system_server_stubs_current",
         "framework-annotations-lib",
+        "framework-connectivity-annotations",
         "framework-connectivity.impl",
         "framework-tethering.stubs.module_lib",
         "framework-wifi.stubs.module_lib",

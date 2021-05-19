@@ -68,7 +68,7 @@ public class AppSearchLoggerTest {
     }
 
     // Test only not thread safe.
-    public class TestLogger implements AppSearchLogger {
+    public static class TestLogger implements AppSearchLogger {
         @Nullable CallStats mCallStats;
         @Nullable PutDocumentStats mPutDocumentStats;
         @Nullable InitializeStats mInitializeStats;
@@ -193,8 +193,7 @@ public class AppSearchLoggerTest {
     public void testAppSearchLoggerHelper_testCopyNativeStats_search() {
         int nativeLatencyMillis = 4;
         int nativeNumTerms = 5;
-        // TODO(b/185804196) query length needs to be added in the native stats.
-        // int nativeQueryLength = 6;
+        int nativeQueryLength = 6;
         int nativeNumNamespacesFiltered = 7;
         int nativeNumSchemaTypesFiltered = 8;
         int nativeRequestedPageSize = 9;
@@ -211,6 +210,7 @@ public class AppSearchLoggerTest {
                 QueryStatsProto.newBuilder()
                         .setLatencyMs(nativeLatencyMillis)
                         .setNumTerms(nativeNumTerms)
+                        .setQueryLength(nativeQueryLength)
                         .setNumNamespacesFiltered(nativeNumNamespacesFiltered)
                         .setNumSchemaTypesFiltered(nativeNumSchemaTypesFiltered)
                         .setRequestedPageSize(nativeRequestedPageSize)
@@ -235,7 +235,7 @@ public class AppSearchLoggerTest {
         SearchStats sStats = qBuilder.build();
         assertThat(sStats.getNativeLatencyMillis()).isEqualTo(nativeLatencyMillis);
         assertThat(sStats.getTermCount()).isEqualTo(nativeNumTerms);
-        // assertThat(sStats.getNativeQueryLength()).isEqualTo(nativeQueryLength);
+        assertThat(sStats.getQueryLength()).isEqualTo(nativeQueryLength);
         assertThat(sStats.getFilteredNamespaceCount()).isEqualTo(nativeNumNamespacesFiltered);
         assertThat(sStats.getFilteredSchemaTypeCount()).isEqualTo(nativeNumSchemaTypesFiltered);
         assertThat(sStats.getRequestedPageSize()).isEqualTo(nativeRequestedPageSize);

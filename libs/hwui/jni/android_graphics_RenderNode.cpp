@@ -574,7 +574,7 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
 
             uirenderer::Rect bounds(props.getWidth(), props.getHeight());
             bool useStretchShader =
-                    Properties::stretchEffectBehavior != StretchEffectBehavior::UniformScale;
+                    Properties::getStretchEffectBehavior() != StretchEffectBehavior::UniformScale;
             if (useStretchShader && info.stretchEffectCount) {
                 handleStretchEffect(info, bounds);
             }
@@ -680,7 +680,8 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
             stretchTargetBounds(*effect, result.width, result.height,
                                 childRelativeBounds,targetBounds);
 
-            if (Properties::stretchEffectBehavior == StretchEffectBehavior::Shader) {
+            if (Properties::getStretchEffectBehavior() ==
+                StretchEffectBehavior::Shader) {
                 JNIEnv* env = jnienv();
 
                 jobject localref = env->NewLocalRef(mWeakRef);

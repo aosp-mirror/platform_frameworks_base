@@ -115,23 +115,20 @@ fun getPrimaryRegion(dividerRegion: Region, rotation: Int): Region {
     val displayBounds = WindowUtils.getDisplayBounds(rotation)
     return if (rotation == Surface.ROTATION_0 || rotation == Surface.ROTATION_180) {
         Region(0, 0, displayBounds.bounds.right,
-            dividerRegion.bounds.bottom - WindowUtils.dockedStackDividerInset)
+            dividerRegion.bounds.top + WindowUtils.dockedStackDividerInset)
     } else {
-        Region(0, 0, dividerRegion.bounds.left,
-            dividerRegion.bounds.right - WindowUtils.dockedStackDividerInset)
+        Region(0, 0, dividerRegion.bounds.left + WindowUtils.dockedStackDividerInset,
+            displayBounds.bounds.bottom)
     }
 }
 
 fun getSecondaryRegion(dividerRegion: Region, rotation: Int): Region {
     val displayBounds = WindowUtils.getDisplayBounds(rotation)
     return if (rotation == Surface.ROTATION_0 || rotation == Surface.ROTATION_180) {
-        Region(0,
-            dividerRegion.bounds.bottom - WindowUtils.dockedStackDividerInset,
-            displayBounds.bounds.right,
-            displayBounds.bounds.bottom - WindowUtils.dockedStackDividerInset)
+        Region(0, dividerRegion.bounds.bottom - WindowUtils.dockedStackDividerInset,
+            displayBounds.bounds.right, displayBounds.bounds.bottom)
     } else {
-        Region(dividerRegion.bounds.right, 0,
-            displayBounds.bounds.right,
-            displayBounds.bounds.bottom - WindowUtils.dockedStackDividerInset)
+        Region(dividerRegion.bounds.right - WindowUtils.dockedStackDividerInset, 0,
+            displayBounds.bounds.right, displayBounds.bounds.bottom)
     }
 }

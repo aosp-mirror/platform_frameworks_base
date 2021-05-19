@@ -612,6 +612,11 @@ base::expected<FindEntryResult, NullOrIOError> AssetManager2::FindEntry(
         result->entry = overlay_entry.GetInlineValue();
         result->dynamic_ref_table = id_map.overlay_res_maps_.GetOverlayDynamicRefTable();
         result->cookie = id_map.cookie;
+
+        if (UNLIKELY(logging_enabled)) {
+          last_resolution_.steps.push_back(
+              Resolution::Step{Resolution::Step::Type::OVERLAID_INLINE, String8(), result->cookie});
+        }
         continue;
       }
 
@@ -640,7 +645,6 @@ base::expected<FindEntryResult, NullOrIOError> AssetManager2::FindEntry(
       if (UNLIKELY(logging_enabled)) {
         last_resolution_.steps.push_back(
             Resolution::Step{Resolution::Step::Type::OVERLAID, overlay_result->config.toString(),
-                             overlay_result->package_name,
                              overlay_result->cookie});
       }
     }
@@ -723,7 +727,6 @@ base::expected<FindEntryResult, NullOrIOError> AssetManager2::FindEntryInternal(
         if (UNLIKELY(logging_enabled)) {
           resolution_steps.push_back(Resolution::Step{Resolution::Step::Type::SKIPPED,
                                                       this_config.toString(),
-                                                      &loaded_package->GetPackageName(),
                                                       cookie});
         }
         continue;
@@ -741,7 +744,6 @@ base::expected<FindEntryResult, NullOrIOError> AssetManager2::FindEntryInternal(
         if (UNLIKELY(logging_enabled)) {
           resolution_steps.push_back(Resolution::Step{Resolution::Step::Type::NO_ENTRY,
                                                       this_config.toString(),
-                                                      &loaded_package->GetPackageName(),
                                                       cookie});
         }
         continue;
@@ -756,7 +758,6 @@ base::expected<FindEntryResult, NullOrIOError> AssetManager2::FindEntryInternal(
       if (UNLIKELY(logging_enabled)) {
         last_resolution_.steps.push_back(Resolution::Step{resolution_type,
                                                           this_config.toString(),
-                                                          &loaded_package->GetPackageName(),
                                                           cookie});
       }
 
@@ -839,18 +840,18 @@ std::string AssetManager2::GetLastResourceResolution() const {
   }
 
   std::stringstream log_stream;
-  log_stream << base::StringPrintf("Resolution for 0x%08x ", resid)
-            << resource_name_string
-            << "\n\tFor config -"
-            << configuration_.toString();
+  log_stream << base::StringPrintf("Resolution for 0x%08x %s\n"
+                                   "\tFor config - %s", resid, resource_name_string.c_str(),
+                                   configuration_.toString().c_str());
 
   for (const Resolution::Step& step : last_resolution_.steps) {
     const static std::unordered_map<Resolution::Step::Type, const char*> kStepStrings = {
-        {Resolution::Step::Type::INITIAL, "Found initial"},
-        {Resolution::Step::Type::BETTER_MATCH, "Found better"},
-        {Resolution::Step::Type::OVERLAID, "Overlaid"},
-        {Resolution::Step::Type::SKIPPED, "Skipped"},
-        {Resolution::Step::Type::NO_ENTRY, "No entry"}
+        {Resolution::Step::Type::INITIAL,         "Found initial"},
+        {Resolution::Step::Type::BETTER_MATCH,    "Found better"},
+        {Resolution::Step::Type::OVERLAID,        "Overlaid"},
+        {Resolution::Step::Type::OVERLAID_INLINE, "Overlaid inline"},
+        {Resolution::Step::Type::SKIPPED,         "Skipped"},
+        {Resolution::Step::Type::NO_ENTRY,        "No entry"}
     };
 
     const auto prefix = kStepStrings.find(step.type);
@@ -858,10 +859,9 @@ std::string AssetManager2::GetLastResourceResolution() const {
       continue;
     }
 
-    log_stream << "\n\t" << prefix->second << ": " << *step.package_name << " ("
-               << apk_assets_[step.cookie]->GetDebugName() << ")";
+    log_stream << "\n\t" << prefix->second << ": " << apk_assets_[step.cookie]->GetDebugName();
     if (!step.config_name.isEmpty()) {
-      log_stream << " -" << step.config_name;
+      log_stream << " - " << step.config_name;
     }
   }
 

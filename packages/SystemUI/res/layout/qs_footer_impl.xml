@@ -51,7 +51,7 @@
                 android:focusable="true"
                 android:gravity="center_vertical"
                 android:singleLine="true"
-                android:textAppearance="@style/TextAppearance.QS.Build"
+                android:textAppearance="@style/TextAppearance.QS.Status.Build"
                 android:visibility="gone" />
 
             <com.android.systemui.qs.PageIndicator
@@ -87,7 +87,7 @@
                 android:focusable="true"
                 android:padding="@dimen/qs_footer_icon_padding"
                 android:src="@*android:drawable/ic_mode_edit"
-                android:tint="?android:attr/colorForeground" />
+                android:tint="?android:attr/textColorPrimary" />
 
             <com.android.systemui.statusbar.phone.MultiUserSwitch
                 android:id="@+id/multi_user_switch"
@@ -126,7 +126,7 @@
                     android:padding="@dimen/qs_footer_icon_padding"
                     android:scaleType="centerInside"
                     android:src="@drawable/ic_settings"
-                    android:tint="?android:attr/colorForeground" />
+                    android:tint="?android:attr/textColorPrimary" />
 
                 <com.android.systemui.statusbar.AlphaOptimizedImageView
                     android:id="@+id/tuner_icon"
@@ -152,7 +152,7 @@
                 android:padding="@dimen/qs_footer_icon_padding"
                 android:src="@*android:drawable/ic_lock_power_off"
                 android:contentDescription="@string/accessibility_quick_settings_power_menu"
-                android:tint="?android:attr/colorForeground" />
+                android:tint="?android:attr/textColorPrimary" />
 
         </LinearLayout>
     </LinearLayout>

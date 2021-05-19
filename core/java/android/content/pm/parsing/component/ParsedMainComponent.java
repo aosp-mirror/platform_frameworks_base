@@ -39,6 +39,8 @@ public class ParsedMainComponent extends ParsedComponent {
 
     @Nullable
     String splitName;
+    @Nullable
+    String[] attributionTags;
 
     public ParsedMainComponent() {
     }
@@ -51,6 +53,7 @@ public class ParsedMainComponent extends ParsedComponent {
         this.exported = other.exported;
         this.order = other.order;
         this.splitName = other.splitName;
+        this.attributionTags = other.attributionTags;
     }
 
     public ParsedMainComponent setProcessName(String processName) {
@@ -84,6 +87,7 @@ public class ParsedMainComponent extends ParsedComponent {
         dest.writeBoolean(this.exported);
         dest.writeInt(this.order);
         dest.writeString(this.splitName);
+        dest.writeString8Array(this.attributionTags);
     }
 
     protected ParsedMainComponent(Parcel in) {
@@ -94,6 +98,7 @@ public class ParsedMainComponent extends ParsedComponent {
         this.exported = in.readBoolean();
         this.order = in.readInt();
         this.splitName = in.readString();
+        this.attributionTags = in.createString8Array();
     }
 
     public static final Parcelable.Creator<ParsedMainComponent> CREATOR =
@@ -135,6 +140,11 @@ public class ParsedMainComponent extends ParsedComponent {
         return splitName;
     }
 
+    @Nullable
+    public String[] getAttributionTags() {
+        return attributionTags;
+    }
+
     public ParsedMainComponent setDirectBootAware(boolean value) {
         directBootAware = value;
         return this;
@@ -147,6 +157,11 @@ public class ParsedMainComponent extends ParsedComponent {
 
     public ParsedMainComponent setSplitName(@Nullable String value) {
         splitName = value;
+        return this;
+    }
+
+    public ParsedMainComponent setAttributionTags(@Nullable String[] value) {
+        attributionTags = value;
         return this;
     }
 }

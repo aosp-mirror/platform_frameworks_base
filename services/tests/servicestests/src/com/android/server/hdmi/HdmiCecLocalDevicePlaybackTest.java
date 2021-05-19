@@ -137,6 +137,11 @@ public class HdmiCecLocalDevicePlaybackTest {
                     }
 
                     @Override
+                    boolean isPowerStandbyOrTransient() {
+                        return false;
+                    }
+
+                    @Override
                     protected PowerManager getPowerManager() {
                         return new PowerManager(context, mIPowerManagerMock,
                                 mIThermalServiceMock, new Handler(mMyLooper));
@@ -1332,6 +1337,22 @@ public class HdmiCecLocalDevicePlaybackTest {
         assertThat(mHdmiCecLocalDevicePlayback.getActiveSource().logicalAddress).isEqualTo(
                 mHdmiCecLocalDevicePlayback.getDeviceInfo().getLogicalAddress());
         assertThat(mHdmiCecLocalDevicePlayback.isActiveSource()).isTrue();
+    }
+
+    @Test
+    public void handleSetStreamPath_Dreaming() throws RemoteException {
+        when(mIPowerManagerMock.isInteractive()).thenReturn(true);
+
+        mWokenUp = false;
+
+        HdmiCecMessage message =
+                HdmiCecMessageBuilder.buildSetStreamPath(ADDR_TV,
+                        mPlaybackPhysicalAddress);
+
+        assertThat(mHdmiCecLocalDevicePlayback.handleSetStreamPath(message))
+                .isEqualTo(Constants.HANDLED);
+        mTestLooper.dispatchAll();
+        assertThat(mWokenUp).isTrue();
     }
 
     @Test

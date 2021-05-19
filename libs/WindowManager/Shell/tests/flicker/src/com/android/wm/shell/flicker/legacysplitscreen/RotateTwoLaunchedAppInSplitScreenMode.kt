@@ -70,17 +70,17 @@ class RotateTwoLaunchedAppInSplitScreenMode(
             }
         }
 
-    @FlakyTest(bugId = 175687842)
+    @Presubmit
     @Test
     fun dockedStackDividerIsVisible() = testSpec.dockedStackDividerIsVisible()
 
-    @FlakyTest(bugId = 175687842)
+    @Presubmit
     @Test
     fun dockedStackPrimaryBoundsIsVisible() =
         testSpec.dockedStackPrimaryBoundsIsVisible(testSpec.config.startRotation,
             splitScreenApp.defaultWindowName)
 
-    @FlakyTest(bugId = 175687842)
+    @Presubmit
     @Test
     fun dockedStackSecondaryBoundsIsVisible() =
         testSpec.dockedStackSecondaryBoundsIsVisible(testSpec.config.startRotation,

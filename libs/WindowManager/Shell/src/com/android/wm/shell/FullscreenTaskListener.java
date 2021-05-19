@@ -42,7 +42,7 @@ public class FullscreenTaskListener implements ShellTaskOrganizer.TaskListener {
 
     private final SyncTransactionQueue mSyncQueue;
 
-    private final SparseArray<SurfaceControl> mLeashByTaskId = new SparseArray<>();
+    private final SparseArray<TaskData> mDataByTaskId = new SparseArray<>();
 
     public FullscreenTaskListener(SyncTransactionQueue syncQueue) {
         mSyncQueue = syncQueue;
@@ -50,14 +50,14 @@ public class FullscreenTaskListener implements ShellTaskOrganizer.TaskListener {
 
     @Override
     public void onTaskAppeared(ActivityManager.RunningTaskInfo taskInfo, SurfaceControl leash) {
-        if (mLeashByTaskId.get(taskInfo.taskId) != null) {
+        if (mDataByTaskId.get(taskInfo.taskId) != null) {
             throw new IllegalStateException("Task appeared more than once: #" + taskInfo.taskId);
         }
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TASK_ORG, "Fullscreen Task Appeared: #%d",
                 taskInfo.taskId);
-        mLeashByTaskId.put(taskInfo.taskId, leash);
-        if (Transitions.ENABLE_SHELL_TRANSITIONS) return;
         final Point positionInParent = taskInfo.positionInParent;
+        mDataByTaskId.put(taskInfo.taskId, new TaskData(leash, positionInParent));
+        if (Transitions.ENABLE_SHELL_TRANSITIONS) return;
         mSyncQueue.runInSync(t -> {
             // Reset several properties back to fullscreen (PiP, for example, leaves all these
             // properties in a bad state).
@@ -72,45 +72,57 @@ public class FullscreenTaskListener implements ShellTaskOrganizer.TaskListener {
     @Override
     public void onTaskInfoChanged(ActivityManager.RunningTaskInfo taskInfo) {
         if (Transitions.ENABLE_SHELL_TRANSITIONS) return;
-        final SurfaceControl leash = mLeashByTaskId.get(taskInfo.taskId);
+        final TaskData data = mDataByTaskId.get(taskInfo.taskId);
         final Point positionInParent = taskInfo.positionInParent;
-        mSyncQueue.runInSync(t -> {
-            // Reset several properties back. For instance, when an Activity enters PiP with
-            // multiple activities in the same task, a new task will be created from that Activity
-            // and we want reset the leash of the original task.
-            t.setPosition(leash, positionInParent.x, positionInParent.y);
-            t.setWindowCrop(leash, null);
-        });
+        if (!positionInParent.equals(data.positionInParent)) {
+            data.positionInParent.set(positionInParent.x, positionInParent.y);
+            mSyncQueue.runInSync(t -> {
+                t.setPosition(data.surface, positionInParent.x, positionInParent.y);
+            });
+        }
     }
 
     @Override
     public void onTaskVanished(ActivityManager.RunningTaskInfo taskInfo) {
-        if (mLeashByTaskId.get(taskInfo.taskId) == null) {
+        if (mDataByTaskId.get(taskInfo.taskId) == null) {
             Slog.e(TAG, "Task already vanished: #" + taskInfo.taskId);
             return;
         }
-        mLeashByTaskId.remove(taskInfo.taskId);
+        mDataByTaskId.remove(taskInfo.taskId);
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TASK_ORG, "Fullscreen Task Vanished: #%d",
                 taskInfo.taskId);
     }
 
     @Override
     public void attachChildSurfaceToTask(int taskId, SurfaceControl.Builder b) {
-        if (!mLeashByTaskId.contains(taskId)) {
+        if (!mDataByTaskId.contains(taskId)) {
             throw new IllegalArgumentException("There is no surface for taskId=" + taskId);
         }
-        b.setParent(mLeashByTaskId.get(taskId));
+        b.setParent(mDataByTaskId.get(taskId).surface);
     }
 
     @Override
     public void dump(@NonNull PrintWriter pw, String prefix) {
         final String innerPrefix = prefix + "  ";
         pw.println(prefix + this);
-        pw.println(innerPrefix + mLeashByTaskId.size() + " Tasks");
+        pw.println(innerPrefix + mDataByTaskId.size() + " Tasks");
     }
 
     @Override
     public String toString() {
         return TAG + ":" + taskListenerTypeToString(TASK_LISTENER_TYPE_FULLSCREEN);
+    }
+
+    /**
+     * Per-task data for each managed task.
+     */
+    private static class TaskData {
+        public final SurfaceControl surface;
+        public final Point positionInParent;
+
+        public TaskData(SurfaceControl surface, Point positionInParent) {
+            this.surface = surface;
+            this.positionInParent = positionInParent;
+        }
     }
 }

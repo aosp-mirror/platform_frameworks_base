@@ -51,8 +51,6 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
     private final KeyguardVisibilityHelper mKeyguardVisibilityHelper;
     private final Rect mClipBounds = new Rect();
 
-    private int mLockScreenMode = KeyguardUpdateMonitor.LOCK_SCREEN_MODE_NORMAL;
-
     @Inject
     public KeyguardStatusViewController(
             KeyguardStatusView keyguardStatusView,
@@ -192,28 +190,18 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
      * Update position of the view with an optional animation
      */
     public void updatePosition(int x, int y, float scale, boolean animate) {
-        // We animate the status view visible/invisible using Y translation, so don't change it
-        // while the animation is running.
-        if (!mKeyguardVisibilityHelper.isVisibilityAnimating()) {
-            PropertyAnimator.setProperty(mView, AnimatableProperty.Y, y, CLOCK_ANIMATION_PROPERTIES,
-                    animate);
-        }
+        PropertyAnimator.setProperty(mView, AnimatableProperty.Y, y, CLOCK_ANIMATION_PROPERTIES,
+                animate);
 
-        if (mLockScreenMode == KeyguardUpdateMonitor.LOCK_SCREEN_MODE_LAYOUT_1) {
-            // reset any prior movement
-            PropertyAnimator.setProperty(mView, AnimatableProperty.X, 0,
-                    CLOCK_ANIMATION_PROPERTIES, animate);
+        mKeyguardClockSwitchController.updatePosition(x, scale, CLOCK_ANIMATION_PROPERTIES,
+                animate);
+    }
 
-            mKeyguardClockSwitchController.updatePosition(x, scale, CLOCK_ANIMATION_PROPERTIES,
-                    animate);
-        } else {
-            // reset any prior movement
-            mKeyguardClockSwitchController.updatePosition(0, 0f, CLOCK_ANIMATION_PROPERTIES,
-                    animate);
-
-            PropertyAnimator.setProperty(mView, AnimatableProperty.X, x,
-                    CLOCK_ANIMATION_PROPERTIES, animate);
-        }
+    /**
+     * @return {@code true} if we are currently animating the screen off from unlock
+     */
+    public boolean isAnimatingScreenOffFromUnlocked() {
+        return mKeyguardVisibilityHelper.isAnimatingScreenOffFromUnlocked();
     }
 
     /**
@@ -254,7 +242,6 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
     private KeyguardUpdateMonitorCallback mInfoCallback = new KeyguardUpdateMonitorCallback() {
         @Override
         public void onLockScreenModeChanged(int mode) {
-            mLockScreenMode = mode;
             mKeyguardSliceViewController.updateLockScreenMode(mode);
             mView.setCanShowOwnerInfo(false);
             mView.updateLogoutView(false);

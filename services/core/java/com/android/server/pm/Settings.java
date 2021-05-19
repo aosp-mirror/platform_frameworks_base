@@ -4471,7 +4471,23 @@ public final class Settings implements Watchable, Snappable {
         pw.print(prefix); pw.print("  versionCode="); pw.print(ps.versionCode);
         if (pkg != null) {
             pw.print(" minSdk="); pw.print(pkg.getMinSdkVersion());
-            pw.print(" targetSdk="); pw.print(pkg.getTargetSdkVersion());
+            pw.print(" targetSdk="); pw.println(pkg.getTargetSdkVersion());
+
+            SparseIntArray minExtensionVersions = pkg.getMinExtensionVersions();
+
+            pw.print(prefix); pw.print("  minExtensionVersions=[");
+            if (minExtensionVersions != null) {
+                List<String> minExtVerStrings = new ArrayList<>();
+                int size = minExtensionVersions.size();
+                for (int index = 0; index < size; index++) {
+                    int key = minExtensionVersions.keyAt(index);
+                    int value = minExtensionVersions.valueAt(index);
+                    minExtVerStrings.add(key + "=" + value);
+                }
+
+                pw.print(TextUtils.join(", ", minExtVerStrings));
+            }
+            pw.print("]");
         }
         pw.println();
         if (pkg != null) {

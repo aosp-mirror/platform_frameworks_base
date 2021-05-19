@@ -108,9 +108,9 @@ public class BatteryUsageStatsProvider {
         ArrayList<BatteryUsageStats> results = new ArrayList<>(queries.size());
         synchronized (mStats) {
             mStats.prepareForDumpLocked();
-
+            final long currentTimeMillis = currentTimeMillis();
             for (int i = 0; i < queries.size(); i++) {
-                results.add(getBatteryUsageStats(queries.get(i)));
+                results.add(getBatteryUsageStats(queries.get(i), currentTimeMillis));
             }
         }
         return results;
@@ -121,6 +121,11 @@ public class BatteryUsageStatsProvider {
      */
     @VisibleForTesting
     public BatteryUsageStats getBatteryUsageStats(BatteryUsageStatsQuery query) {
+        return getBatteryUsageStats(query, currentTimeMillis());
+    }
+
+    private BatteryUsageStats getBatteryUsageStats(BatteryUsageStatsQuery query,
+            long currentTimeMs) {
         final long realtimeUs = elapsedRealtime() * 1000;
         final long uptimeUs = uptimeMillis() * 1000;
 
@@ -129,7 +134,10 @@ public class BatteryUsageStatsProvider {
 
         final BatteryUsageStats.Builder batteryUsageStatsBuilder = new BatteryUsageStats.Builder(
                 mStats.getCustomEnergyConsumerNames(), includePowerModels);
+        // TODO(b/188068523): use a monotonic clock to ensure resilience of order and duration
+        // of stats sessions to wall-clock adjustments
         batteryUsageStatsBuilder.setStatsStartTimestamp(mStats.getStartClockTime());
+        batteryUsageStatsBuilder.setStatsEndTimestamp(currentTimeMs);
 
         SparseArray<? extends BatteryStats.Uid> uidStats = mStats.getUidStats();
         for (int i = uidStats.size() - 1; i >= 0; i--) {
@@ -215,6 +223,14 @@ public class BatteryUsageStatsProvider {
             return ((BatteryStatsImpl) mStats).mClocks.uptimeMillis();
         } else {
             return SystemClock.uptimeMillis();
+        }
+    }
+
+    private long currentTimeMillis() {
+        if (mStats instanceof BatteryStatsImpl) {
+            return ((BatteryStatsImpl) mStats).mClocks.currentTimeMillis();
+        } else {
+            return System.currentTimeMillis();
         }
     }
 }

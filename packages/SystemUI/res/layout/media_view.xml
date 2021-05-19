@@ -145,6 +145,7 @@
                 android:layout_width="@dimen/qs_seamless_icon_size"
                 android:layout_height="@dimen/qs_seamless_icon_size"
                 android:layout_gravity="center"
+                android:tint="?android:attr/textColorPrimary"
                 android:src="@*android:drawable/ic_media_seamless" />
             <TextView
                 android:id="@+id/media_seamless_text"

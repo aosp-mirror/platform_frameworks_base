@@ -63,6 +63,7 @@ public class WalletView extends FrameLayout implements WalletCardCarousel.OnCard
     private final ViewGroup mEmptyStateView;
     private CharSequence mCenterCardText;
     private boolean mIsDeviceLocked = false;
+    private OnClickListener mDeviceLockedActionOnClickListener;
 
     public WalletView(Context context) {
         this(context, null);
@@ -178,6 +179,10 @@ public class WalletView extends FrameLayout implements WalletCardCarousel.OnCard
         mEmptyStateView.setVisibility(GONE);
     }
 
+    void setDeviceLockedActionOnClickListener(OnClickListener onClickListener) {
+        mDeviceLockedActionOnClickListener = onClickListener;
+    }
+
     void hide() {
         setVisibility(GONE);
     }
@@ -238,6 +243,7 @@ public class WalletView extends FrameLayout implements WalletCardCarousel.OnCard
         if (isDeviceLocked) {
             mActionButton.setVisibility(VISIBLE);
             mActionButton.setText(R.string.wallet_action_button_label_unlock);
+            mActionButton.setOnClickListener(mDeviceLockedActionOnClickListener);
         } else if (actionButtonText != null) {
             mActionButton.setText(actionButtonText);
             mActionButton.setVisibility(VISIBLE);

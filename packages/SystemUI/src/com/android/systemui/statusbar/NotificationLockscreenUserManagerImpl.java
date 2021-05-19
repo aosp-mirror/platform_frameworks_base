@@ -98,6 +98,7 @@ public class NotificationLockscreenUserManagerImpl implements
     private LockPatternUtils mLockPatternUtils;
     protected KeyguardManager mKeyguardManager;
     private int mState = StatusBarState.SHADE;
+    private List<KeyguardNotificationSuppressor> mKeyguardSuppressors = new ArrayList<>();
 
     protected final BroadcastReceiver mAllUsersReceiver = new BroadcastReceiver() {
         @Override
@@ -342,6 +343,11 @@ public class NotificationLockscreenUserManagerImpl implements
         if (getEntryManager() == null) {
             Log.wtf(TAG, "mEntryManager was null!", new Throwable());
             return false;
+        }
+        for (int i = 0; i < mKeyguardSuppressors.size(); i++) {
+            if (mKeyguardSuppressors.get(i).shouldSuppressOnKeyguard(entry)) {
+                return false;
+            }
         }
         boolean exceedsPriorityThreshold;
         if (hideSilentNotificationsOnLockscreen()) {
@@ -618,6 +624,11 @@ public class NotificationLockscreenUserManagerImpl implements
     @Override
     public void addUserChangedListener(UserChangedListener listener) {
         mListeners.add(listener);
+    }
+
+    @Override
+    public void addKeyguardNotificationSuppressor(KeyguardNotificationSuppressor suppressor) {
+        mKeyguardSuppressors.add(suppressor);
     }
 
     @Override

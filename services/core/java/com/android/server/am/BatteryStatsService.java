@@ -468,7 +468,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         synchronized (mStats) {
             mStats.notePowerSaveModeLocked(
                     powerMgr.getLowPowerState(ServiceType.BATTERY_STATS).batterySaverEnabled,
-                    SystemClock.elapsedRealtime(), SystemClock.uptimeMillis());
+                    SystemClock.elapsedRealtime(), SystemClock.uptimeMillis(), true);
         }
         (new WakeupReasonThread()).start();
     }
@@ -511,7 +511,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             mHandler.post(() -> {
                 synchronized (mStats) {
                     mStats.notePowerSaveModeLocked(result.batterySaverEnabled,
-                            elapsedRealtime, uptime);
+                            elapsedRealtime, uptime, false);
                 }
             });
         }

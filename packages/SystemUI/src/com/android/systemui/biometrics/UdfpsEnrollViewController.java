@@ -94,6 +94,7 @@ public class UdfpsEnrollViewController extends UdfpsAnimationViewController<Udfp
                     * Math.max(0, totalSteps + 1 - remaining) / (totalSteps + 1);
 
             mProgressBar.setProgress(interpolatedProgress, true);
+            mView.onEnrollmentProgress(remaining, totalSteps);
         }
     };
 }

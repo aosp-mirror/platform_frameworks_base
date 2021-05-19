@@ -405,6 +405,7 @@
     <string name="transcode_enable_all" msgid="2411165920039166710">"Perkodavimo įgalinimas"</string>
     <string name="transcode_default" msgid="3784803084573509491">"Manoma, kad programos palaiko modernius formatus"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"Rodyti perkodavimo pranešimus"</string>
+    <string name="transcode_disable_cache" msgid="3160069309377467045">"Išjungti talpyklos perkodavimą"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Vykdomos paslaugos"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Žiūrėti ir valdyti dabar vykdomas paslaugas"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"„WebView“ diegimas"</string>
@@ -450,19 +451,17 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"Planšetinis komp. netrukus gali būti išjungtas (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Įrenginys netrukus gali būti išjungtas (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_remaining_charging_duration_only (8085099012811384899) -->
-    <skip />
-    <!-- no translation found for power_charging_duration (6127154952524919719) -->
-    <skip />
+    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"Liko <xliff:g id="TIME">%1$s</xliff:g>, kol bus visiškai įkrauta"</string>
+    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – liko <xliff:g id="TIME">%2$s</xliff:g>, kol bus visiškai įkrauta"</string>
     <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> – optimizuoj. siekiant apsaugoti akum."</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Nežinomas"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Kraunasi..."</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Greitai įkraunama"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Lėtai įkraunama"</string>
+    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Kraunama be laidų"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Nekraunama"</string>
-    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Įjungta į maitinimo lizdą, bet šiuo metu įkrauti neįmanoma"</string>
-    <!-- no translation found for battery_info_status_full (1339002294876531312) -->
-    <skip />
+    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Prijungta, neįkraunama"</string>
+    <string name="battery_info_status_full" msgid="1339002294876531312">"Įkrauta"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Valdo administratorius"</string>
     <string name="disabled" msgid="8017887509554714950">"Neleidžiama"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Leidžiama"</string>
@@ -507,10 +506,12 @@
     <string name="cancel" msgid="5665114069455378395">"Atšaukti"</string>
     <string name="okay" msgid="949938843324579502">"Gerai"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Signalai ir priminimai"</string>
-    <string name="alarms_and_reminders_switch_title" msgid="186992351401152744">"Leisti nustatyti signalus arba priminimus"</string>
-    <string name="alarms_and_reminders_title" msgid="2988400785896875237">"Signalai ir priminimai"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="5882788882647778753">"Leisti šiai programai planuoti signalus ar kitą laiką pagal įvykius. Bus leidžiama pažadinti programą ir vykdyti įvykį, kai nenaudojate įrenginio. Atminkite, kad anuliavus šį leidimą programa gali veikti netinkamai, ypač nebeveiks programos suplanuoti signalai."</string>
-    <string name="keywords_alarms_and_reminders" msgid="8882739572152019456">"tvarkaraštis, signalas, priminimas, įvykis"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Leisti nustatyti signalus ir priminimus"</string>
+    <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Signalai ir priminimai"</string>
+    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"Leiskite šiai programai nustatyti signalus ir suplanuoti kitus veiksmus. Ši programa gali būti naudojama, kai nenaudojate telefono, todėl gali būti išeikvojama daugiau akumuliatoriaus energijos. Jei šis leidimas išjungtas, ši programa gali tinkamai neveikti ir jos signalai neveiks, kaip suplanuota."</string>
+    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"Leiskite šiai programai nustatyti signalus ir suplanuoti kitus veiksmus. Ši programa gali būti naudojama, kai nenaudojate planšetinio kompiuterio, todėl gali būti išeikvojama daugiau akumuliatoriaus energijos. Jei šis leidimas išjungtas, ši programa gali tinkamai neveikti ir jos signalai neveiks, kaip suplanuota."</string>
+    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"Leiskite šiai programai nustatyti signalus ir suplanuoti kitus veiksmus. Ši programa gali būti naudojama, kai nenaudojate įrenginio, todėl gali būti išeikvojama daugiau akumuliatoriaus energijos. Jei šis leidimas išjungtas, ši programa gali tinkamai neveikti ir jos signalai neveiks, kaip suplanuota."</string>
+    <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"tvarkaraštis, signalas, priminimas, laikrodis"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Įjungti"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Netrukdymo režimo įjungimas"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Niekada"</string>
@@ -564,8 +565,7 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"Nustatyti užraktą"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"Perjungti į <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Kuriamas naujas naudotojas…"</string>
-    <!-- no translation found for add_user_failed (4809887794313944872) -->
-    <skip />
+    <string name="add_user_failed" msgid="4809887794313944872">"Nepavyko sukurti naujo naudotojo"</string>
     <string name="user_nickname" msgid="262624187455825083">"Slapyvardis"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Pridėti svečią"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Pašalinti svečią"</string>

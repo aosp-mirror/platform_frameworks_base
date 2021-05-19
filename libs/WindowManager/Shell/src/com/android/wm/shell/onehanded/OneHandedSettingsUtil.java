@@ -29,7 +29,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * APIs for querying or updating one handed settings .
+ * APIs for querying or updating one handed settings.
  */
 public final class OneHandedSettingsUtil {
     private static final String TAG = "OneHandedSettingsUtil";
@@ -62,7 +62,7 @@ public final class OneHandedSettingsUtil {
     public static final int ONE_HANDED_TIMEOUT_LONG_IN_SECONDS = 12;
 
     /**
-     * Register one handed preference settings observer
+     * Registers one handed preference settings observer
      *
      * @param key       Setting key to monitor in observer
      * @param resolver  ContentResolver of context
@@ -82,7 +82,7 @@ public final class OneHandedSettingsUtil {
     }
 
     /**
-     * Unregister one handed preference settings observer
+     * Unregisters one handed preference settings observer.
      *
      * @param resolver  ContentResolver of context
      * @param observer  preference key change observer
@@ -95,7 +95,7 @@ public final class OneHandedSettingsUtil {
     }
 
     /**
-     * Query one handed enable or disable flag from Settings provider.
+     * Queries one handed enable or disable flag from Settings provider.
      *
      * @return enable or disable one handed mode flag.
      */
@@ -105,7 +105,7 @@ public final class OneHandedSettingsUtil {
     }
 
     /**
-     * Query taps app to exit config from Settings provider.
+     * Queries taps app to exit config from Settings provider.
      *
      * @return enable or disable taps app exit.
      */
@@ -115,7 +115,7 @@ public final class OneHandedSettingsUtil {
     }
 
     /**
-     * Query timeout value from Settings provider. Default is
+     * Queries timeout value from Settings provider. Default is.
      * {@link OneHandedSettingsUtil#ONE_HANDED_TIMEOUT_MEDIUM_IN_SECONDS}
      *
      * @return timeout value in seconds.
@@ -135,10 +135,31 @@ public final class OneHandedSettingsUtil {
                 Settings.Secure.SWIPE_BOTTOM_TO_NOTIFICATION_ENABLED, 0, userId) == 1;
     }
 
+
     /**
-     * Sets one handed activated or not to notify state for shortcut
+     * Queries tutorial shown counts from Settings provider. Default is 0.
      *
-     * @return activated or not
+     * @return counts tutorial shown counts.
+     */
+    public int getTutorialShownCounts(ContentResolver resolver, int userId) {
+        return Settings.Secure.getIntForUser(resolver,
+                Settings.Secure.ONE_HANDED_TUTORIAL_SHOW_COUNT, 0, userId);
+    }
+
+    /**
+     * Sets tutorial shown counts.
+     *
+     * @return true if the value was set, false on database errors.
+     */
+    public boolean setTutorialShownCounts(ContentResolver resolver, int shownCounts, int userId) {
+        return Settings.Secure.putIntForUser(resolver,
+                Settings.Secure.ONE_HANDED_TUTORIAL_SHOW_COUNT, shownCounts, userId);
+    }
+
+    /**
+     * Sets one handed activated or not to notify state for shortcut.
+     *
+     * @return true if one handed mode is activated.
      */
     public boolean getOneHandedModeActivated(ContentResolver resolver, int userId) {
         return Settings.Secure.getIntForUser(resolver,
@@ -146,9 +167,9 @@ public final class OneHandedSettingsUtil {
     }
 
     /**
-     * Sets one handed activated or not to notify state for shortcut
+     * Sets one handed activated or not to notify state for shortcut.
      *
-     * @return activated or not
+     * @return true if the value was set, false on database errors.
      */
     public boolean setOneHandedModeActivated(ContentResolver resolver, int state, int userId) {
         return Settings.Secure.putIntForUser(resolver,
@@ -167,6 +188,8 @@ public final class OneHandedSettingsUtil {
         pw.println(getSettingsTapsAppToExit(resolver, userId));
         pw.print(innerPrefix + "shortcutActivated=");
         pw.println(getOneHandedModeActivated(resolver, userId));
+        pw.print(innerPrefix + "tutorialShownCounts=");
+        pw.println(getTutorialShownCounts(resolver, userId));
     }
 
     public OneHandedSettingsUtil() {

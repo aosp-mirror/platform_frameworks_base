@@ -22,60 +22,67 @@
     android:layout_height="match_parent"
     android:clipChildren="false">
     <Toolbar
-      android:id="@+id/action_bar"
-      style="?android:attr/actionBarStyle"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:background="@android:color/transparent"
-      android:navigationContentDescription="@null" />
+        android:id="@+id/action_bar"
+        style="?android:attr/actionBarStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:navigationContentDescription="@null" />
     <LinearLayout
         android:id="@+id/card_carousel_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="48dp"
         android:orientation="vertical">
-        <ImageView
-            android:id="@+id/icon"
-            android:layout_width="@dimen/wallet_screen_header_view_size"
-            android:layout_height="@dimen/wallet_screen_header_view_size"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginVertical="10dp"
-            android:scaleType="center"
-            android:contentDescription="@null"/>
-        <TextView
-            android:id="@+id/label"
+        <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            style="@style/Wallet.TextAppearance"
-            android:textAlignment="center"/>
+            android:layout_height="0dp"
+            android:layout_weight="1">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:orientation="vertical">
+                <ImageView
+                    android:id="@+id/icon"
+                    android:layout_width="@dimen/wallet_screen_header_view_size"
+                    android:layout_height="@dimen/wallet_screen_header_view_size"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginVertical="10dp"
+                    android:scaleType="center"
+                    android:contentDescription="@null"/>
+                <TextView
+                    android:id="@+id/label"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    style="@style/Wallet.TextAppearance"
+                    android:textAlignment="center"/>
 
-        <com.android.systemui.wallet.ui.WalletCardCarousel
-            android:id="@+id/card_carousel"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:transitionName="dotIndicator"
-            android:clipChildren="false"
-            android:clipToPadding="false"
-            android:layout_marginVertical="24dp"/>
-
-        <Button
-            android:id="@+id/wallet_action_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginVertical="16dp"
-            android:paddingVertical="@dimen/wallet_button_vertical_padding"
-            android:paddingHorizontal="@dimen/wallet_button_horizontal_padding"
-            android:background="@drawable/wallet_action_button_bg"
-            android:textColor="?androidprv:attr/textColorPrimaryInverse"
-            android:textAlignment="center"
-            android:visibility="gone"/>
-
+                <com.android.systemui.wallet.ui.WalletCardCarousel
+                    android:id="@+id/card_carousel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:transitionName="dotIndicator"
+                    android:clipChildren="false"
+                    android:clipToPadding="false"
+                    android:layout_marginVertical="24dp"/>
+                <Button
+                    android:id="@+id/wallet_action_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginVertical="16dp"
+                    android:paddingVertical="@dimen/wallet_button_vertical_padding"
+                    android:paddingHorizontal="@dimen/wallet_button_horizontal_padding"
+                    android:background="@drawable/wallet_action_button_bg"
+                    android:textColor="?androidprv:attr/textColorPrimaryInverse"
+                    android:textAlignment="center"
+                    android:visibility="gone"/>
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
         <View
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"/>
-
+            android:layout_weight="0.1"/>
         <Button
             android:id="@+id/wallet_app_button"
             android:layout_width="wrap_content"
@@ -88,7 +95,6 @@
             android:textColor="?androidprv:attr/colorAccentPrimary"
             android:textAlignment="center"
             android:layout_marginVertical="24dp"/>
-
     </LinearLayout>
 
     <include layout="@layout/wallet_empty_state"/>

@@ -760,6 +760,9 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
 
         proto.write(SensorStateProto.SENSOR_ID, mSensorProperties.sensorId);
         proto.write(SensorStateProto.MODALITY, SensorStateProto.FINGERPRINT);
+        if (mSensorProperties.isAnyUdfpsType()) {
+            proto.write(SensorStateProto.MODALITY_FLAGS, SensorStateProto.FINGERPRINT_UDFPS);
+        }
         proto.write(SensorStateProto.CURRENT_STRENGTH,
                 Utils.getCurrentStrength(mSensorProperties.sensorId));
         proto.write(SensorStateProto.SCHEDULER, mScheduler.dumpProtoState(clearSchedulerBuffer));

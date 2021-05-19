@@ -30,6 +30,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Process;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.IntArray;
 import android.util.Log;
 import android.util.LongSparseArray;
@@ -77,6 +78,11 @@ public class UiTranslationController {
     private final ArrayMap<Pair<TranslationSpec, TranslationSpec>, Translator> mTranslators;
     @NonNull
     private final ArrayMap<AutofillId, WeakReference<View>> mViews;
+    /**
+     * Views for which {@link UiTranslationSpec#shouldPadContentForCompat()} is true.
+     */
+    @NonNull
+    private final ArraySet<AutofillId> mViewsToPadContent;
     @NonNull
     private final HandlerThread mWorkerThread;
     @NonNull
@@ -88,6 +94,7 @@ public class UiTranslationController {
         mContext = context;
         mViews = new ArrayMap<>();
         mTranslators = new ArrayMap<>();
+        mViewsToPadContent = new ArraySet<>();
 
         mWorkerThread =
                 new HandlerThread("UiTranslationController_" + mActivity.getComponentName(),
@@ -100,19 +107,27 @@ public class UiTranslationController {
      * Update the Ui translation state.
      */
     public void updateUiTranslationState(@UiTranslationState int state, TranslationSpec sourceSpec,
-            TranslationSpec targetSpec, List<AutofillId> views) {
+            TranslationSpec targetSpec, List<AutofillId> views,
+            UiTranslationSpec uiTranslationSpec) {
         if (!mActivity.isResumed() && (state == STATE_UI_TRANSLATION_STARTED
                 || state == STATE_UI_TRANSLATION_RESUMED)) {
             return;
         }
 
         Log.i(TAG, "updateUiTranslationState state: " + stateToString(state)
-                + (DEBUG ? ", views: " + views : ""));
+                + (DEBUG ? (", views: " + views + ", spec: " + uiTranslationSpec) : ""));
         synchronized (mLock) {
             mCurrentState = state;
         }
         switch (state) {
             case STATE_UI_TRANSLATION_STARTED:
+                if (uiTranslationSpec != null && uiTranslationSpec.shouldPadContentForCompat()) {
+                    synchronized (mLock) {
+                        mViewsToPadContent.addAll(views);
+                        // TODO: Cleanup disappeared views from mViews and mViewsToPadContent at
+                        //  some appropriate place.
+                    }
+                }
                 final Pair<TranslationSpec, TranslationSpec> specs =
                         new Pair<>(sourceSpec, targetSpec);
                 if (!mTranslators.containsKey(specs)) {
@@ -177,6 +192,7 @@ public class UiTranslationController {
                 pw.print(pfx); pw.print("autofillId: "); pw.println(autofillId);
                 pw.print(pfx); pw.print("view:"); pw.println(view);
             }
+            pw.print(outerPrefix); pw.print("padded views: "); pw.println(mViewsToPadContent);
         }
         // TODO(b/182433547): we will remove debug rom condition before S release then we change
         //  change this back to "DEBUG"
@@ -374,8 +390,9 @@ public class UiTranslationController {
                         return;
                     }
 
-                    // TODO: Do this for specific views on request only.
-                    callback.enableContentPadding();
+                    if (mViewsToPadContent.contains(autofillId)) {
+                        callback.enableContentPadding();
+                    }
                     view.onViewTranslationResponse(response);
                     callback.onShowTranslation(view);
                 });

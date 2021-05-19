@@ -190,16 +190,6 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         mEntryManager = new NotificationEntryManager(
                 mLogger,
                 mGroupManager,
-                () -> new NotificationRankingManager(
-                        () -> mNotificationMediaManager,
-                        mGroupManager,
-                        mHeadsUpManager,
-                        mock(NotificationFilter.class),
-                        mLogger,
-                        mock(NotificationSectionsFeatureManager.class),
-                        mock(PeopleNotificationIdentifier.class),
-                        mock(HighPriorityProvider.class)),
-                mEnvironment,
                 mFeatureFlags,
                 () -> mNotificationRowBinder,
                 () -> mRemoteInputManager,
@@ -207,6 +197,17 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
                 mock(ForegroundServiceDismissalFeatureController.class),
                 mock(IStatusBarService.class)
         );
+        mEntryManager.setRanker(
+                new NotificationRankingManager(
+                        () -> mNotificationMediaManager,
+                        mGroupManager,
+                        mHeadsUpManager,
+                        mock(NotificationFilter.class),
+                        mLogger,
+                        mock(NotificationSectionsFeatureManager.class),
+                        mock(PeopleNotificationIdentifier.class),
+                        mock(HighPriorityProvider.class),
+                        mEnvironment));
         mEntryManager.setUpWithPresenter(mPresenter);
         mEntryManager.addNotificationEntryListener(mEntryListener);
         mEntryManager.addNotificationRemoveInterceptor(mRemoveInterceptor);

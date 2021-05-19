@@ -88,7 +88,7 @@ std::unique_ptr<ApkAssets> ApkAssets::LoadOverlay(const std::string& idmap_path,
   if (IsFabricatedOverlay(overlay_path)) {
     // Fabricated overlays do not contain resource definitions. All of the overlay resource values
     // are defined inline in the idmap.
-    overlay_assets = EmptyAssetsProvider::Create();
+    overlay_assets = EmptyAssetsProvider::Create(overlay_path);
   } else {
     // The overlay should be an APK.
     overlay_assets = ZipAssetsProvider::Create(overlay_path);

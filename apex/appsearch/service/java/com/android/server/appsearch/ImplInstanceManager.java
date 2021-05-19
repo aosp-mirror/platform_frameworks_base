@@ -19,6 +19,7 @@ package com.android.server.appsearch;
 import static android.content.pm.PackageManager.MATCH_FACTORY_ONLY;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.appsearch.exceptions.AppSearchException;
 import android.content.Context;
@@ -30,6 +31,7 @@ import android.util.SparseArray;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.appsearch.external.localstorage.AppSearchImpl;
+import com.android.server.appsearch.external.localstorage.AppSearchLogger;
 
 import java.io.File;
 
@@ -88,16 +90,17 @@ public final class ImplInstanceManager {
      * one will be created.
      *
      * @param context The context
-     * @param userId The multi-user userId of the device user calling AppSearch
+     * @param userId  The multi-user userId of the device user calling AppSearch
      * @return An initialized {@link AppSearchImpl} for this user
      */
     @NonNull
     public AppSearchImpl getOrCreateAppSearchImpl(
-            @NonNull Context context, @UserIdInt int userId) throws AppSearchException {
+            @NonNull Context context, @UserIdInt int userId, @Nullable AppSearchLogger logger)
+            throws AppSearchException {
         synchronized (mInstancesLocked) {
             AppSearchImpl instance = mInstancesLocked.get(userId);
             if (instance == null) {
-                instance = createImpl(context, userId);
+                instance = createImpl(context, userId, logger);
                 mInstancesLocked.put(userId, instance);
             }
             return instance;
@@ -164,11 +167,12 @@ public final class ImplInstanceManager {
         }
     }
 
-    private AppSearchImpl createImpl(@NonNull Context context, @UserIdInt int userId)
+    private AppSearchImpl createImpl(@NonNull Context context, @UserIdInt int userId,
+            @Nullable AppSearchLogger logger)
             throws AppSearchException {
         File appSearchDir = getAppSearchDir(userId);
         return AppSearchImpl.create(
-                appSearchDir, context, userId, mGlobalQuerierPackage, /*logger=*/ null);
+                appSearchDir, context, userId, mGlobalQuerierPackage, logger);
     }
 
     /**
@@ -182,10 +186,10 @@ public final class ImplInstanceManager {
                 context.getString(R.string.config_globalAppSearchDataQuerierPackage);
         try {
             if (context.getPackageManager()
-                            .getPackageInfoAsUser(
-                                    globalAppSearchDataQuerierPackage,
-                                    MATCH_FACTORY_ONLY,
-                                    UserHandle.USER_SYSTEM)
+                    .getPackageInfoAsUser(
+                            globalAppSearchDataQuerierPackage,
+                            MATCH_FACTORY_ONLY,
+                            UserHandle.USER_SYSTEM)
                     == null) {
                 return "";
             }

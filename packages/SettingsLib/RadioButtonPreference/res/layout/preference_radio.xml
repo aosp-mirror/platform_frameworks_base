@@ -29,9 +29,9 @@
         android:id="@android:id/widget_frame"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
+        android:paddingHorizontal="20dp"
         android:gravity="center"
         android:minWidth="56dp"
-        android:layout_marginEnd="16dp"
         android:orientation="vertical"/>
 
     <LinearLayout

@@ -199,7 +199,7 @@ public final class GenericDocumentToProtoConverter {
             case AppSearchSchema.PropertyConfig.DATA_TYPE_STRING:
                 documentBuilder.setPropertyString(propertyName, EMPTY_STRING_ARRAY);
                 break;
-            case AppSearchSchema.PropertyConfig.DATA_TYPE_INT64:
+            case AppSearchSchema.PropertyConfig.DATA_TYPE_LONG:
                 documentBuilder.setPropertyLong(propertyName, EMPTY_LONG_ARRAY);
                 break;
             case AppSearchSchema.PropertyConfig.DATA_TYPE_DOUBLE:

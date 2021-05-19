@@ -92,6 +92,7 @@ import java.util.Collections;
 public class QuickAccessWalletTileTest extends SysuiTestCase {
 
     private static final String CARD_ID = "card_id";
+    private static final String LABEL = "QAW";
     private static final Icon CARD_IMAGE =
             Icon.createWithBitmap(Bitmap.createBitmap(70, 50, Bitmap.Config.ARGB_8888));
 
@@ -141,6 +142,7 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
         when(mHost.getContext()).thenReturn(mSpiedContext);
         when(mHost.getUiEventLogger()).thenReturn(mUiEventLogger);
         when(mFeatureFlags.isQuickAccessWalletEnabled()).thenReturn(true);
+        when(mQuickAccessWalletClient.getServiceLabel()).thenReturn(LABEL);
         when(mQuickAccessWalletClient.isWalletFeatureAvailable()).thenReturn(true);
         when(mQuickAccessWalletClient.isWalletServiceAvailable()).thenReturn(true);
 
@@ -248,13 +250,19 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
 
         mTile.handleUpdateState(state, null);
 
-        assertEquals(mContext.getString(R.string.wallet_title), state.label.toString());
+        assertEquals(LABEL, state.label.toString());
         assertTrue(state.label.toString().contentEquals(state.contentDescription));
         assertEquals(icon, state.icon);
     }
 
     @Test
-    public void testGetTileLabel() {
+    public void testGetTileLabel_serviceLabelExists() {
+        assertEquals(LABEL, mTile.getTileLabel().toString());
+    }
+
+    @Test
+    public void testGetTileLabel_serviceLabelDoesNotExist() {
+        when(mQuickAccessWalletClient.getServiceLabel()).thenReturn(null);
         assertEquals(mContext.getString(R.string.wallet_title), mTile.getTileLabel().toString());
     }
 

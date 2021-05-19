@@ -30,7 +30,5 @@ import java.util.List;
 interface IFontManager {
     FontConfig getFontConfig();
 
-    int updateFontFile(in FontUpdateRequest request, int baseVersion);
-
     int updateFontFamily(in List<FontUpdateRequest> request, int baseVersion);
 }

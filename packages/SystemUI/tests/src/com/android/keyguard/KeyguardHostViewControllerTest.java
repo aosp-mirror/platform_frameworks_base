@@ -81,7 +81,7 @@ public class KeyguardHostViewControllerTest extends SysuiTestCase {
         mTestableResources.addOverride(
                 R.bool.can_use_one_handed_bouncer, false);
         mTestableResources.addOverride(
-                com.android.internal.R.bool.config_enableOneHandedKeyguard, false);
+                com.android.internal.R.bool.config_enableDynamicKeyguardPositioning, false);
 
         when(mKeyguardSecurityContainerControllerFactory.create(any(
                 KeyguardSecurityContainer.SecurityCallback.class)))
@@ -150,7 +150,7 @@ public class KeyguardHostViewControllerTest extends SysuiTestCase {
         mTestableResources.addOverride(
                 R.bool.can_use_one_handed_bouncer, false);
         mTestableResources.addOverride(
-                com.android.internal.R.bool.config_enableOneHandedKeyguard, false);
+                com.android.internal.R.bool.config_enableDynamicKeyguardPositioning, false);
 
         mKeyguardHostViewController.init();
         assertEquals(
@@ -161,7 +161,7 @@ public class KeyguardHostViewControllerTest extends SysuiTestCase {
         mTestableResources.addOverride(
                 R.bool.can_use_one_handed_bouncer, true);
         mTestableResources.addOverride(
-                com.android.internal.R.bool.config_enableOneHandedKeyguard, true);
+                com.android.internal.R.bool.config_enableDynamicKeyguardPositioning, true);
 
         mKeyguardHostViewController.updateResources();
         assertEquals(

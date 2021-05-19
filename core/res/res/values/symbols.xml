@@ -3632,6 +3632,7 @@
   <java-symbol type="array" name="config_allowedSecureInstantAppSettings" />
 
   <java-symbol type="bool" name="config_handleVolumeKeysInWindowManager" />
+  <java-symbol type="bool" name="config_handleVolumeAliasesUsingVolumeGroups" />
   <java-symbol type="dimen" name="config_inCallNotificationVolume" />
   <java-symbol type="string" name="config_inCallNotificationSound" />
   <java-symbol type="integer" name="config_autoGroupAtCount" />
@@ -4259,7 +4260,7 @@
 
   <java-symbol type="bool" name="config_voice_data_sms_auto_fallback" />
 
-  <java-symbol type="bool" name="config_enableOneHandedKeyguard" />
+  <java-symbol type="bool" name="config_enableDynamicKeyguardPositioning" />
 
   <java-symbol type="attr" name="colorAccentPrimary" />
   <java-symbol type="attr" name="colorAccentSecondary" />

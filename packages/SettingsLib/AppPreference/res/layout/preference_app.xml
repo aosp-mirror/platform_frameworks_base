@@ -54,7 +54,7 @@
             android:layout_height="wrap_content"
             android:ellipsize="marquee"
             android:fadingEdge="horizontal"
-            android:singleLine="true"
+            android:maxLines="2"
             android:textAppearance="?android:attr/textAppearanceListItem"/>
 
         <TextView

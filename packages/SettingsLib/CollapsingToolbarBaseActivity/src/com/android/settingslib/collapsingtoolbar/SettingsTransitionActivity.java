@@ -18,14 +18,11 @@ package com.android.settingslib.collapsingtoolbar;
 
 import android.app.ActivityOptions;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.MenuItem;
 import android.view.Window;
 import android.widget.Toolbar;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.os.BuildCompat;
 import androidx.fragment.app.FragmentActivity;
@@ -40,117 +37,85 @@ public abstract class SettingsTransitionActivity extends FragmentActivity {
     private static final String TAG = "SettingsTransitionActivity";
     private static final int DEFAULT_REQUEST = -1;
 
+    private Toolbar mToolbar;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        if (BuildCompat.isAtLeastS()) {
+        if (isSettingsTransitionEnabled()) {
             getWindow().requestFeature(Window.FEATURE_ACTIVITY_TRANSITIONS);
             SettingsTransitionHelper.applyForwardTransition(this);
             SettingsTransitionHelper.applyBackwardTransition(this);
         }
+
         super.onCreate(savedInstanceState);
     }
 
     @Override
-    public void startActivity(Intent intent) {
-        if (!BuildCompat.isAtLeastS()) {
-            super.startActivity(intent);
-            return;
-        }
-        final Toolbar toolbar = getToolbar();
-        if (toolbar == null) {
-            Log.w(TAG, "Toolbar is null. Cannot apply settings transition!");
-            super.startActivity(intent);
-            return;
-        }
-        super.startActivity(intent, getActivityOptionsBundle(toolbar));
+    public void setActionBar(@Nullable Toolbar toolbar) {
+        super.setActionBar(toolbar);
 
+        mToolbar = toolbar;
+    }
+
+    @Override
+    public void startActivity(Intent intent) {
+        if (!isSettingsTransitionEnabled()) {
+            super.startActivity(intent);
+            return;
+        }
+
+        super.startActivity(intent, createActivityOptionsBundleForTransition(null));
     }
 
     @Override
     public void startActivity(Intent intent, @Nullable Bundle options) {
-        if (!BuildCompat.isAtLeastS()) {
+        if (!isSettingsTransitionEnabled()) {
             super.startActivity(intent, options);
             return;
         }
-        final Toolbar toolbar = getToolbar();
-        if (toolbar == null) {
-            Log.w(TAG, "Toolbar is null. Cannot apply settings transition!");
-            super.startActivity(intent, options);
-            return;
-        }
-        if (options != null) {
-            super.startActivity(intent, getMergedBundleForTransition(options));
-            return;
-        }
-        super.startActivity(intent, getActivityOptionsBundle(toolbar));
+
+        super.startActivity(intent, createActivityOptionsBundleForTransition(options));
     }
 
     @Override
     public void startActivityForResult(Intent intent, int requestCode) {
-        if (!BuildCompat.isAtLeastS() || requestCode == DEFAULT_REQUEST) {
+        if (!isSettingsTransitionEnabled() || requestCode == DEFAULT_REQUEST) {
             super.startActivityForResult(intent, requestCode);
             return;
         }
 
-        final Toolbar toolbar = getToolbar();
-        if (toolbar == null) {
-            Log.w(TAG, "Toolbar is null. Cannot apply settings transition!");
-            super.startActivityForResult(intent, requestCode);
-            return;
-        }
-        super.startActivityForResult(intent, requestCode, getActivityOptionsBundle(toolbar));
+        super.startActivityForResult(intent, requestCode, createActivityOptionsBundleForTransition(
+                null));
     }
 
     @Override
     public void startActivityForResult(Intent intent, int requestCode, @Nullable Bundle options) {
-        if (!BuildCompat.isAtLeastS() || requestCode == DEFAULT_REQUEST) {
+        if (!isSettingsTransitionEnabled() || requestCode == DEFAULT_REQUEST) {
             super.startActivityForResult(intent, requestCode, options);
             return;
         }
 
-        final Toolbar toolbar = getToolbar();
-        if (toolbar == null) {
-            Log.w(TAG, "Toolbar is null. Cannot apply settings transition!");
-            super.startActivityForResult(intent, requestCode, options);
-            return;
-        }
-        if (options != null) {
-            super.startActivityForResult(intent, requestCode,
-                    getMergedBundleForTransition(options));
-            return;
-        }
-        super.startActivityForResult(intent, requestCode, getActivityOptionsBundle(toolbar));
+        super.startActivityForResult(intent, requestCode, createActivityOptionsBundleForTransition(
+                options));
     }
 
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        final int id = item.getItemId();
-        if (id == android.R.id.home) {
-            // Make the up button behave the same as the back button.
-            onBackPressed();
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
+    protected boolean isSettingsTransitionEnabled() {
+        return BuildCompat.isAtLeastS();
     }
 
-    /**
-     * Subclasses should implement this method and return their {@link Toolbar}.
-     */
-    public abstract Toolbar getToolbar();
-
-    private Bundle getActivityOptionsBundle(Toolbar toolbar) {
-        return ActivityOptions.makeSceneTransitionAnimation(this, toolbar,
-                "shared_element_view").toBundle();
-    }
-
-    private Bundle getMergedBundleForTransition(@NonNull Bundle options) {
-        final Toolbar toolbar = getToolbar();
-        final Bundle mergedBundle = new Bundle();
-        mergedBundle.putAll(options);
-        final Bundle activityOptionsBundle = getActivityOptionsBundle(toolbar);
-        if (activityOptionsBundle != null) {
-            mergedBundle.putAll(activityOptionsBundle);
+    @Nullable
+    private Bundle createActivityOptionsBundleForTransition(@Nullable Bundle options) {
+        if (mToolbar == null) {
+            Log.w(TAG, "setActionBar(Toolbar) is not called. Cannot apply settings transition!");
+            return options;
         }
-        return mergedBundle;
+        final Bundle transitionOptions = ActivityOptions.makeSceneTransitionAnimation(this,
+                mToolbar, "shared_element_view").toBundle();
+        if (options == null) {
+            return transitionOptions;
+        }
+        final Bundle mergedOptions = new Bundle(options);
+        mergedOptions.putAll(transitionOptions);
+        return mergedOptions;
     }
 }

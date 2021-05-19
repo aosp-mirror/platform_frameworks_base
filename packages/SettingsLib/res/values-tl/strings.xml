@@ -405,6 +405,7 @@
     <string name="transcode_enable_all" msgid="2411165920039166710">"I-enable ang pagta-transcode"</string>
     <string name="transcode_default" msgid="3784803084573509491">"Ipagpalagay na sinusuportahan ng mga app ang mga modernong format"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"Ipakita ang mga notification sa pag-transcode"</string>
+    <string name="transcode_disable_cache" msgid="3160069309377467045">"I-disable ang cache ng pag-transcode"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Mga tumatakbong serbisyo"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Tingnan at kontrolin ang mga kasalukuyang tumatakbong serbisyo"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Pagpapatupad sa WebView"</string>
@@ -450,19 +451,17 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"Baka mag-shut down na ang tablet (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Baka mag-shut down na ang device (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_remaining_charging_duration_only (8085099012811384899) -->
-    <skip />
-    <!-- no translation found for power_charging_duration (6127154952524919719) -->
-    <skip />
+    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> na lang bago mapuno"</string>
+    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> na lang bago mapuno"</string>
     <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - Ino-optimize para sa tagal ng baterya"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Hindi Kilala"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Nagcha-charge"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Mabilis na charge"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Mabagal na charge"</string>
+    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Wireless na nagcha-charge"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Hindi nagcha-charge"</string>
-    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Nakasaksak, hindi makapag-charge sa ngayon"</string>
-    <!-- no translation found for battery_info_status_full (1339002294876531312) -->
-    <skip />
+    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Nakakonekta, hindi nagcha-charge"</string>
+    <string name="battery_info_status_full" msgid="1339002294876531312">"Nasingil"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Pinapamahalaan ng admin"</string>
     <string name="disabled" msgid="8017887509554714950">"Naka-disable"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Pinapayagan"</string>
@@ -505,10 +504,12 @@
     <string name="cancel" msgid="5665114069455378395">"Kanselahin"</string>
     <string name="okay" msgid="949938843324579502">"OK"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Mga alarm at paalala"</string>
-    <string name="alarms_and_reminders_switch_title" msgid="186992351401152744">"Payagang magtakda ng mga alarm o paalala"</string>
-    <string name="alarms_and_reminders_title" msgid="2988400785896875237">"Mga alarm at paalala"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="5882788882647778753">"Payagan ang app na ito na mag-iskedyul ng mga alarm o iba pang event na batay sa timing. Magbibigay-daan ito sa app na mag-wake at gumana kahit na hindi mo ginagamit ang device. Tandaang kapag binawi ang pahintulot na ito, posibleng hindi gumana nang maayos ang app, partikular dito, hindi na gagana ang anumang alarm na naiskedyul ng app."</string>
-    <string name="keywords_alarms_and_reminders" msgid="8882739572152019456">"iskedyul, alarm, paalala, event"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Payagan ang pagtakda ng mga alarm at paalala"</string>
+    <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Mga alarm at paalala"</string>
+    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"Payagan ang app na ito na magtakda ng mga alarm at mag-iskedyul ng iba pang aksyon. Posibleng gamitin ang app na ito kapag hindi mo ginagamit ang iyong telepono, na posibleng gumamit ng mas maraming baterya. Kung naka-off ang pahintulot na ito, posibleng hindi gumana nang normal ang app na ito, at hindi gagana ang mga alarm nito gaya ng nakaiskedyul."</string>
+    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"Payagan ang app na ito na magtakda ng mga alarm at mag-iskedyul ng iba pang aksyon. Posibleng gamitin ang app na ito kapag hindi mo ginagamit ang iyong tablet, na posibleng gumamit ng mas maraming baterya. Kung naka-off ang pahintulot na ito, posibleng hindi gumana nang normal ang app na ito, at hindi gagana ang mga alarm nito gaya ng nakaiskedyul."</string>
+    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"Payagan ang app na ito na magtakda ng mga alarm at mag-iskedyul ng iba pang aksyon. Posibleng gamitin ang app na ito kapag hindi mo ginagamit ang iyong device, na posibleng gumamit ng mas maraming baterya. Kung naka-off ang pahintulot na ito, posibleng hindi gumana nang normal ang app na ito, at hindi gagana ang mga alarm nito gaya ng nakaiskedyul."</string>
+    <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"iskedyul, alarm, paalala, orasan"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"I-on"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"I-on ang Huwag Istorbohin"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Hindi kailanman"</string>
@@ -562,8 +563,7 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"Itakda ang lock"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"Lumipat sa <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Gumagawa ng bagong user…"</string>
-    <!-- no translation found for add_user_failed (4809887794313944872) -->
-    <skip />
+    <string name="add_user_failed" msgid="4809887794313944872">"Hindi nakagawa ng bagong user"</string>
     <string name="user_nickname" msgid="262624187455825083">"Nickname"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Magdagdag ng bisita"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Alisin ang bisita"</string>

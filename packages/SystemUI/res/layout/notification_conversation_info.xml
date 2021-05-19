@@ -24,7 +24,7 @@
     android:clipChildren="true"
     android:clipToPadding="true"
     android:orientation="vertical"
-    android:paddingStart="12dp">
+    android:paddingStart="@dimen/notification_shade_content_margin_horizontal">
 
     <!-- Package Info -->
     <LinearLayout

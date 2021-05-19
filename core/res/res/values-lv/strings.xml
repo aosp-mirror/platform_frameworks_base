@@ -1025,7 +1025,7 @@
     <string name="text_copied" msgid="2531420577879738860">"Teksts ir kopēts uz starpliktuvi."</string>
     <string name="copied" msgid="4675902854553014676">"Nokopēts"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"Lietotnē <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> tika ielīmēti dati no lietotnes <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>."</string>
-    <string name="pasted_from_clipboard" msgid="6295556725844421812">"Lietotnē <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> tika ielīmēti dati no starpliktuves."</string>
+    <string name="pasted_from_clipboard" msgid="7355790625710831847">"Lietotne <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ielīmēja datus no starpliktuves."</string>
     <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ielīmēja jūsu nokopēto tekstu"</string>
     <string name="pasted_image" msgid="4729097394781491022">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ielīmēja jūsu nokopēto attēlu"</string>
     <string name="pasted_content" msgid="646276353060777131">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ielīmēja jūsu nokopēto saturu"</string>
@@ -1279,6 +1279,10 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"Notiek lietotnes <xliff:g id="APPNAME">%1$s</xliff:g> sagatavošana."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Notiek lietotņu palaišana."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Tiek pabeigta sāknēšana."</string>
+    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"Vai izslēgt ekrānu?"</string>
+    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"Iestatot pirksta nospiedumu, jūs nospiedāt barošanas pogu.\n\nTādējādi parasti tiek izslēgts ekrāns."</string>
+    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"Izslēgt"</string>
+    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"Atcelt"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> darbojas"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Pieskarieties, lai atgrieztos spēlē"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Spēles izvēlēšanās"</string>
@@ -1731,6 +1735,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Izmantot saīsni"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Krāsu inversija"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Krāsu korekcija"</string>
+    <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Vienas rokas režīms"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Papildu aptumšošana"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Turējāt nospiestas skaļuma pogas. Pakalpojums <xliff:g id="SERVICE_NAME">%1$s</xliff:g> tika ieslēgts."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Turējāt nospiestas skaļuma pogas. Pakalpojums <xliff:g id="SERVICE_NAME">%1$s</xliff:g> tika izslēgts."</string>
@@ -1795,6 +1800,17 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"Monarch"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"Quarto"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"Foolscap"</string>
+    <string name="mediasize_na_ansi_c" msgid="3104916921818289618">"ANSI C"</string>
+    <string name="mediasize_na_ansi_d" msgid="254005964819282724">"ANSI D"</string>
+    <string name="mediasize_na_ansi_e" msgid="4424174989686785675">"ANSI E"</string>
+    <string name="mediasize_na_ansi_f" msgid="146980362213260987">"ANSI F"</string>
+    <string name="mediasize_na_arch_a" msgid="5280681822380032361">"Arch A"</string>
+    <string name="mediasize_na_arch_b" msgid="2113344093437297427">"Arch B"</string>
+    <string name="mediasize_na_arch_c" msgid="971002546186856623">"Arch C"</string>
+    <string name="mediasize_na_arch_d" msgid="6450996075335049806">"Arch D"</string>
+    <string name="mediasize_na_arch_e" msgid="6782708486949266519">"Arch E"</string>
+    <string name="mediasize_na_arch_e1" msgid="4707138568738504275">"Arch E1"</string>
+    <string name="mediasize_na_super_b" msgid="6964127155618393178">"Super B"</string>
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1"</string>
@@ -1831,6 +1847,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"L"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"Nezināma izmēra portrets"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"Nezināma izmēra ainava"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"Atcelts"</string>
@@ -1875,8 +1892,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Atjaunināja administrators"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Dzēsa administrators"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Labi"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Lai paildzinātu akumulatora darbības laiku, ieslēdzot akumulatora enerģijas taupīšanas režīmu, tiek veiktas tālāk norādītās darbības.\n\n• Tiek ieslēgts tumšais motīvs.\n• Tiek izslēgtas vai ierobežotas fonā veiktās darbības, daži vizuālie efekti un citas funkcijas, piemēram, “Ok Google”.\n\n"<annotation id="url">"Uzzināt vairāk"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"Lai paildzinātu akumulatora darbības laiku, ieslēdzot akumulatora enerģijas taupīšanas režīmu, tiek veiktas tālāk norādītās darbības.\n\n• Tiek ieslēgts tumšais motīvs.\n• Tiek izslēgtas vai ierobežotas fonā veiktās darbības, daži vizuālie efekti un citas funkcijas, piemēram, “Ok Google”."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"Akumulatora enerģijas taupīšanas režīmā tiek ieslēgts tumšais motīvs un tiek ierobežotas vai izslēgtas darbības fonā, daži vizuālie efekti, noteiktas funkcijas un noteikti tīkla savienojumi.\n\n"<annotation id="url">"Uzzināt vairāk"</annotation></string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"Akumulatora enerģijas taupīšanas režīmā tiek ieslēgts tumšais motīvs un tiek ierobežotas vai izslēgtas darbības fonā, daži vizuālie efekti, noteiktas funkcijas un noteikti tīkla savienojumi."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Lai samazinātu datu lietojumu, datu lietojuma samazinātājs neļauj dažām lietotnēm fonā nosūtīt vai saņemt datus. Lietotne, kuru pašlaik izmantojat, var piekļūt datiem, bet, iespējams, piekļūs tiem retāk (piemēram, attēli tiks parādīti tikai tad, kad tiem pieskarsieties)."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Vai ieslēgt datu lietojuma samazinātāju?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Ieslēgt"</string>
@@ -1960,6 +1977,7 @@
     <string name="close_button_text" msgid="10603510034455258">"Aizvērt"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"Atbildēt"</string>
+    <string name="call_notification_answer_video_action" msgid="2086030940195382249">"Video"</string>
     <string name="call_notification_decline_action" msgid="3700345945214000726">"Noraidīt"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Pārtraukt"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"Ienākošais zvans"</string>
@@ -1987,8 +2005,8 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> pašlaik nav pieejama. Šo darbību pārvalda <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Uzzināt vairāk"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Atsākt lietotnes darbību"</string>
-    <string name="work_mode_off_title" msgid="5503291976647976560">"Vai ieslēgt darba profilu?"</string>
-    <string name="work_mode_off_message" msgid="8417484421098563803">"Tiks ieslēgtas jūsu darba lietotnes, paziņojumi, dati un citas darba profila funkcijas."</string>
+    <string name="work_mode_off_title" msgid="961171256005852058">"Vai ieslēgt darba lietotnes?"</string>
+    <string name="work_mode_off_message" msgid="7319580997683623309">"Iegūstiet piekļuvi darba lietotnēm un paziņojumiem"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Ieslēgt"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Lietotne nav pieejama"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Lietotne <xliff:g id="APP_NAME">%1$s</xliff:g> pašlaik nav pieejama."</string>
@@ -2105,6 +2123,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Šī paziņojuma svarīgums tika pazemināts, un paziņojums tiks rādīts bez skaņas. Lai sniegtu atsauksmes, pieskarieties."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Šī paziņojuma rangs tika paaugstināts. Lai sniegtu atsauksmes, pieskarieties."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Šī paziņojuma rangs tika pazemināts. Lai sniegtu atsauksmes, pieskarieties."</string>
+    <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"Uzlabotie paziņojumi"</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"Tagad ieteiktās darbības un atbildes nodrošina funkcija Uzlabotie paziņojumi. Android adaptīvie paziņojumi vairs netiek atbalstīti."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"Labi"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Izslēgt"</string>
+    <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Uzzināt vairāk"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"Android 12 versijā Android adaptīvos paziņojumus aizstāja funkcija “Uzlabotie paziņojumi”. Šī funkcija parāda ieteiktās darbības un atbildes, kā arī kārto jūsu paziņojumus.\n\nFunkcija “Uzlabotie paziņojumi” var piekļūt paziņojumu saturam, tostarp personas informācijai, piemēram, kontaktpersonu vārdiem un ziņojumiem. Šī funkcija var arī noraidīt paziņojumus vai atbildēt uz tiem, piemēram, atbildēt uz tālruņa zvaniem vai pārvaldīt funkciju Netraucēt."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Informatīvs paziņojums par akumulatoru"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Akumulators var izlādēties pirms parastā uzlādes laika"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Aktivizēts akumulatora enerģijas taupīšanas režīms, lai palielinātu akumulatora darbības ilgumu"</string>
@@ -2302,4 +2326,6 @@
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Lietojumprogrammas zīmola attēls"</string>
     <string name="view_and_control_notification_title" msgid="4300765399209912240">"Pārbaudiet piekļuves iestatījumus"</string>
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"Pakalpojums <xliff:g id="SERVICE_NAME">%s</xliff:g> var skatīt un kontrolēt jūsu ekrānu. Pieskarieties, lai to pārskatītu."</string>
+    <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"Iztulkots: <xliff:g id="MESSAGE">%1$s</xliff:g>."</string>
+    <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Ziņojums ir iztulkots no šādas valodas: <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> šādā valodā: <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
 </resources>

@@ -71,7 +71,14 @@ public final class ReportUsageRequest {
         private String mDocumentId;
         private Long mUsageTimestampMillis;
 
-        /** Creates a {@link ReportUsageRequest.Builder} instance. */
+        /**
+         * Creates a new {@link ReportUsageRequest.Builder} instance.
+         *
+         * @param namespace The namespace of the document that was used (e.g. from {@link
+         *     GenericDocument#getNamespace}.
+         * @param documentId The ID of document that was used (e.g. from {@link
+         *     GenericDocument#getId}.
+         */
         public Builder(@NonNull String namespace, @NonNull String documentId) {
             mNamespace = Objects.requireNonNull(namespace);
             mDocumentId = Objects.requireNonNull(documentId);

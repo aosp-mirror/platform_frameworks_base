@@ -909,7 +909,8 @@ public class AppWidgetHostView extends FrameLayout {
             return false;
         }
         for (int i = 0; i < oldColors.size(); i++) {
-            if (oldColors.valueAt(i) != newColors.get(oldColors.keyAt(i))) {
+            if (oldColors.keyAt(i) != newColors.keyAt(i)
+                    || oldColors.valueAt(i) != newColors.valueAt(i)) {
                 return false;
             }
         }

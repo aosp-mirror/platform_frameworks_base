@@ -39,6 +39,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
+import android.database.ContentObserver;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -48,11 +49,13 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.service.media.CameraPrewarmService;
 import android.service.quickaccesswallet.GetWalletCardsError;
 import android.service.quickaccesswallet.GetWalletCardsRequest;
 import android.service.quickaccesswallet.GetWalletCardsResponse;
 import android.service.quickaccesswallet.QuickAccessWalletClient;
+import android.service.quickaccesswallet.QuickAccessWalletClientImpl;
 import android.telecom.TelecomManager;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -94,6 +97,7 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.PreviewInflater;
 import com.android.systemui.tuner.LockscreenFragment.LockButtonFactory;
 import com.android.systemui.tuner.TunerService;
+import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.wallet.ui.WalletActivity;
 
 import java.util.concurrent.Executor;
@@ -189,6 +193,8 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private int mBurnInYOffset;
     private ActivityIntentHelper mActivityIntentHelper;
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+    private ContentObserver mWalletPreferenceObserver;
+    private SecureSettings mSecureSettings;
 
     public KeyguardBottomAreaView(Context context) {
         this(context, null);
@@ -251,7 +257,6 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         super.onFinishInflate();
         mPreviewInflater = new PreviewInflater(mContext, new LockPatternUtils(mContext),
                 new ActivityIntentHelper(mContext));
-        mPreviewContainer = findViewById(R.id.preview_container);
         mOverlayContainer = findViewById(R.id.overlay_container);
         mRightAffordanceView = findViewById(R.id.camera_button);
         mLeftAffordanceView = findViewById(R.id.left_button);
@@ -268,7 +273,6 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mKeyguardStateController.addCallback(this);
         setClipChildren(false);
         setClipToPadding(false);
-        inflateCameraPreview();
         mRightAffordanceView.setOnClickListener(this);
         mLeftAffordanceView.setOnClickListener(this);
         initAccessibility();
@@ -276,11 +280,19 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mFlashlightController = Dependency.get(FlashlightController.class);
         mAccessibilityController = Dependency.get(AccessibilityController.class);
         mActivityIntentHelper = new ActivityIntentHelper(getContext());
-        updateLeftAffordance();
 
         mIndicationPadding = getResources().getDimensionPixelSize(
                 R.dimen.keyguard_indication_area_padding);
         updateWalletVisibility();
+    }
+
+    /**
+     * Set the container where the previews are rendered.
+     */
+    public void setPreviewContainer(ViewGroup previewContainer) {
+        mPreviewContainer = previewContainer;
+        inflateCameraPreview();
+        updateLeftAffordance();
     }
 
     @Override
@@ -319,6 +331,10 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mLeftExtension.destroy();
         getContext().unregisterReceiver(mDevicePolicyReceiver);
         mKeyguardUpdateMonitor.removeCallback(mUpdateMonitorCallback);
+
+        if (mWalletPreferenceObserver != null) {
+            mSecureSettings.unregisterContentObserver(mWalletPreferenceObserver);
+        }
     }
 
     private void initAccessibility() {
@@ -560,7 +576,6 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
                 }
             });
         } else {
-
             // We need to delay starting the activity because ResolverActivity finishes itself if
             // launched behind lockscreen.
             mActivityStarter.startActivity(intent, false /* dismissShade */,
@@ -680,6 +695,9 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     }
 
     private void inflateCameraPreview() {
+        if (mPreviewContainer == null) {
+            return;
+        }
         View previewBefore = mCameraPreview;
         boolean visibleBefore = false;
         if (previewBefore != null) {
@@ -697,6 +715,9 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     }
 
     private void updateLeftPreview() {
+        if (mPreviewContainer == null) {
+            return;
+        }
         View previewBefore = mLeftPreview;
         if (previewBefore != null) {
             mPreviewContainer.removeView(previewBefore);
@@ -914,13 +935,38 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     /**
      * Initialize the wallet feature, only enabling if the feature is enabled within the platform.
      */
-    public void initWallet(QuickAccessWalletClient client, Executor uiExecutor, boolean enabled) {
+    public void initWallet(QuickAccessWalletClient client, Executor uiExecutor,
+            SecureSettings secureSettings) {
         mQuickAccessWalletClient = client;
-        mWalletEnabled = enabled && client.isWalletFeatureAvailable();
+        mSecureSettings = secureSettings;
+        setupWalletPreferenceObserver();
+        updateWalletPreference();
+
         mUiExecutor = uiExecutor;
         queryWalletCards();
 
         updateWalletVisibility();
+    }
+
+    private void setupWalletPreferenceObserver() {
+        if (mWalletPreferenceObserver == null) {
+            mWalletPreferenceObserver = new ContentObserver(null /* handler */) {
+                @Override
+                public void onChange(boolean selfChange) {
+                    mUiExecutor.execute(() -> updateWalletPreference());
+                }
+            };
+
+            mSecureSettings.registerContentObserver(
+                    Settings.Secure.getUriFor(QuickAccessWalletClientImpl.SETTING_KEY),
+                    false /* notifyForDescendants */,
+                    mWalletPreferenceObserver);
+        }
+    }
+
+    private void updateWalletPreference() {
+        mWalletEnabled = mQuickAccessWalletClient.isWalletFeatureAvailable()
+                && mQuickAccessWalletClient.isWalletFeatureAvailableWhenDeviceLocked();
     }
 
     private void queryWalletCards() {

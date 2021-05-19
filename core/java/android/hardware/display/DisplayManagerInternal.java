@@ -190,6 +190,8 @@ public abstract class DisplayManagerInternal {
      * has a preference.
      * @param requestedModeId The preferred mode id for the top-most visible window that has a
      * preference.
+     * @param requestedMaxRefreshRate The preferred highest refresh rate for the top-most visible
+     *                                window that has a preference.
      * @param requestedMinimalPostProcessing The preferred minimal post processing setting for the
      * display. This is true when there is at least one visible window that wants minimal post
      * processng on.
@@ -197,8 +199,8 @@ public abstract class DisplayManagerInternal {
      * prior to call to performTraversalInTransactionFromWindowManager.
      */
     public abstract void setDisplayProperties(int displayId, boolean hasContent,
-            float requestedRefreshRate, int requestedModeId, boolean requestedMinimalPostProcessing,
-            boolean inTraversal);
+            float requestedRefreshRate, int requestedModeId, float requestedMaxRefreshRate,
+            boolean requestedMinimalPostProcessing, boolean inTraversal);
 
     /**
      * Applies an offset to the contents of a display, for example to avoid burn-in.

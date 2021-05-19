@@ -23,6 +23,7 @@ import android.app.appsearch.aidl.AppSearchResultParcel;
 import android.app.appsearch.aidl.IAppSearchManager;
 import android.app.appsearch.aidl.IAppSearchResultCallback;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.util.Log;
 
 import com.android.internal.util.Preconditions;
@@ -72,17 +73,20 @@ public class GlobalSearchSession implements Closeable {
             @NonNull @CallbackExecutor Executor executor,
             @NonNull Consumer<AppSearchResult<GlobalSearchSession>> callback) {
         try {
-            mService.initialize(mUserId, new IAppSearchResultCallback.Stub() {
-                @Override
-                public void onResult(AppSearchResultParcel resultParcel) {
-                    executor.execute(() -> {
-                        AppSearchResult<Void> result = resultParcel.getResult();
-                        if (result.isSuccess()) {
-                            callback.accept(
-                                    AppSearchResult.newSuccessfulResult(GlobalSearchSession.this));
-                        } else {
-                            callback.accept(AppSearchResult.newFailedResult(result));
-                        }
+            mService.initialize(mUserId,
+                    /*binderCallStartTimeMillis=*/ SystemClock.elapsedRealtime(),
+                    new IAppSearchResultCallback.Stub() {
+                        @Override
+                        public void onResult(AppSearchResultParcel resultParcel) {
+                            executor.execute(() -> {
+                                AppSearchResult<Void> result = resultParcel.getResult();
+                                if (result.isSuccess()) {
+                                    callback.accept(
+                                            AppSearchResult.newSuccessfulResult(
+                                                    GlobalSearchSession.this));
+                                } else {
+                                    callback.accept(AppSearchResult.newFailedResult(result));
+                                }
                     });
                 }
             });
@@ -182,7 +186,8 @@ public class GlobalSearchSession implements Closeable {
     public void close() {
         if (mIsMutated && !mIsClosed) {
             try {
-                mService.persistToDisk(mUserId);
+                mService.persistToDisk(mUserId,
+                        /*binderCallStartTimeMillis=*/ SystemClock.elapsedRealtime());
                 mIsClosed = true;
             } catch (RemoteException e) {
                 Log.e(TAG, "Unable to close the GlobalSearchSession", e);

@@ -9984,6 +9984,7 @@ public class NotificationManagerService extends SystemService {
         static final String TAG_APPROVED = "allowed";
         static final String TAG_DISALLOWED= "disallowed";
         static final String XML_SEPARATOR = ",";
+        static final String FLAG_SEPARATOR = "\\|";
 
         private final ArraySet<ManagedServiceInfo> mLightTrimListeners = new ArraySet<>();
         ArrayMap<Pair<ComponentName, Integer>, NotificationListenerFilter>
@@ -10255,7 +10256,7 @@ public class NotificationManagerService extends SystemService {
         private int getTypesFromStringList(String typeList) {
             int types = 0;
             if (typeList != null) {
-                String[] typeStrings = typeList.split(XML_SEPARATOR);
+                String[] typeStrings = typeList.split(FLAG_SEPARATOR);
                 for (int i = 0; i < typeStrings.length; i++) {
                     final String typeString = typeStrings[i];
                     if (TextUtils.isEmpty(typeString)) {
