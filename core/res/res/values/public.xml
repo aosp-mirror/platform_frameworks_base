@@ -3242,10 +3242,84 @@
   </staging-public-group>
 
   <!-- ===============================================================
+    Resources added in version S-V2 of the platform
+
+    NOTE: add <public> elements within a <staging-public-group> like so:
+
+    <staging-public-group type="attr" first-id="0x01ff0000">
+        <public name="exampleAttr1" />
+        <public name="exampleAttr2" />
+    </staging-public-group>
+
+    To add a new <staging-public-group> block, find the id value for the
+    last <staging-public-group> block defined for thie API level, and
+    subtract 0x00010000 from it to get to the id of the new block.
+
+    For example, if the block closest to the end of this file has an id of
+    0x01ee0000, the id of the new block should be 0x01ed0000
+    (0x01ee0000 - 0x00010000 = 0x01ed0000).
+    =============================================================== -->
+  <eat-comment />
+
+  <staging-public-group type="attr" first-id="0x01ff0000">
+  </staging-public-group>
+
+  <staging-public-group type="id" first-id="0x01fe0000">
+  </staging-public-group>
+
+  <staging-public-group type="style" first-id="0x01fd0000">
+  </staging-public-group>
+
+  <staging-public-group type="string" first-id="0x01fc0000">
+  </staging-public-group>
+
+  <staging-public-group type="dimen" first-id="0x01fb0000">
+  </staging-public-group>
+
+  <staging-public-group type="color" first-id="0x01fa0000">
+  </staging-public-group>
+
+  <staging-public-group type="array" first-id="0x01f90000">
+  </staging-public-group>
+
+  <staging-public-group type="drawable" first-id="0x01f80000">
+  </staging-public-group>
+
+  <staging-public-group type="layout" first-id="0x01f70000">
+  </staging-public-group>
+
+  <staging-public-group type="anim" first-id="0x01f60000">
+  </staging-public-group>
+
+  <staging-public-group type="animator" first-id="0x01f50000">
+  </staging-public-group>
+
+  <staging-public-group type="interpolator" first-id="0x01f40000">
+  </staging-public-group>
+
+  <staging-public-group type="mipmap" first-id="0x01f30000">
+  </staging-public-group>
+
+  <staging-public-group type="integer" first-id="0x01f20000">
+  </staging-public-group>
+
+  <staging-public-group type="transition" first-id="0x01f10000">
+  </staging-public-group>
+
+  <staging-public-group type="raw" first-id="0x01f00000">
+  </staging-public-group>
+
+  <staging-public-group type="bool" first-id="0x01ef0000">
+  </staging-public-group>
+
+  <staging-public-group type="fraction" first-id="0x01ee0000">
+  </staging-public-group>
+
+  <!-- ===============================================================
        DO NOT ADD UN-GROUPED ITEMS HERE
 
        Any new items (attrs, styles, ids, etc.) *must* be added in a
-       public-group block, as the preceding comment explains.
+       staging-public-group block, as the preceding comment explains.
        Items added outside of a group may have their value recalculated
        every time something new is added to this file.
        =============================================================== -->
