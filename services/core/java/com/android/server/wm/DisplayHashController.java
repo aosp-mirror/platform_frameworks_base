@@ -16,8 +16,8 @@
 
 package com.android.server.wm;
 
+import static android.service.displayhash.DisplayHashingService.EXTRA_INTERVAL_BETWEEN_REQUESTS;
 import static android.service.displayhash.DisplayHashingService.EXTRA_VERIFIED_DISPLAY_HASH;
-import static android.service.displayhash.DisplayHashingService.SERVICE_META_DATA;
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_INVALID_HASH_ALGORITHM;
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_TOO_MANY_REQUESTS;
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_UNKNOWN;
@@ -36,9 +36,6 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
-import android.content.res.Resources;
-import android.content.res.TypedArray;
-import android.content.res.XmlResourceParser;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -54,22 +51,15 @@ import android.os.UserHandle;
 import android.service.displayhash.DisplayHashParams;
 import android.service.displayhash.DisplayHashingService;
 import android.service.displayhash.IDisplayHashingService;
-import android.util.AttributeSet;
 import android.util.Size;
 import android.util.Slog;
-import android.util.Xml;
 import android.view.MagnificationSpec;
 import android.view.SurfaceControl;
 import android.view.displayhash.DisplayHash;
 import android.view.displayhash.VerifiedDisplayHash;
 
-import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -114,25 +104,18 @@ public class DisplayHashController {
     private final Matrix mTmpMatrix = new Matrix();
     private final RectF mTmpRectF = new RectF();
 
-    /**
-     * Lock used when retrieving xml metadata. Lock when retrieving the xml data the first time
-     * since it will be cached after that. Check if {@link #mParsedXml} is set to determine if the
-     * metadata needs to retrieved.
-     */
-    private final Object mParseXmlLock = new Object();
 
     /**
-     * Flag whether the xml metadata has been retrieved and parsed. Once this is set to true,
-     * there's no need to request metadata again.
+     * Lock used for the cached {@link #mIntervalBetweenRequestMillis}
      */
-    @GuardedBy("mParseXmlLock")
-    private boolean mParsedXml;
+    private final Object mIntervalBetweenRequestsLock = new Object();
 
     /**
      * Specified duration between requests to generate a display hash in milliseconds. Requests
      * faster than this delay will be throttled.
      */
-    private int mDurationBetweenRequestMillis = 0;
+    @GuardedBy("mDurationBetweenRequestsLock")
+    private int mIntervalBetweenRequestMillis = -1;
 
     /**
      * The last time an app requested to generate a display hash in System time.
@@ -203,8 +186,8 @@ public class DisplayHashController {
             return true;
         }
 
-        int mDurationBetweenRequestsMs = getDurationBetweenRequestMillis();
-        if (currentTime - mLastRequestTimeMs < mDurationBetweenRequestsMs) {
+        int mIntervalBetweenRequestsMs = getIntervalBetweenRequestMillis();
+        if (currentTime - mLastRequestTimeMs < mIntervalBetweenRequestsMs) {
             return false;
         }
 
@@ -356,61 +339,25 @@ public class DisplayHashController {
         }
     }
 
-    private int getDurationBetweenRequestMillis() {
-        if (!parseXmlProperties()) {
-            return 0;
-        }
-        return mDurationBetweenRequestMillis;
-    }
-
-    private boolean parseXmlProperties() {
-        // We have a separate lock for the xml parsing since it doesn't need to make the
-        // request through the service connection. Instead, we have a lock to ensure we can
-        // properly cache the xml metadata so we don't need to call into the  ExtServices
-        // process for each request.
-        synchronized (mParseXmlLock) {
-            if (mParsedXml) {
-                return true;
+    private int getIntervalBetweenRequestMillis() {
+        // We have a separate lock for the hashing params to ensure we can properly cache the
+        // hashing params so we don't need to call into the ExtServices process for each request.
+        synchronized (mIntervalBetweenRequestsLock) {
+            if (mIntervalBetweenRequestMillis != -1) {
+                return mIntervalBetweenRequestMillis;
             }
 
-            final ServiceInfo serviceInfo = getServiceInfo();
-            if (serviceInfo == null) return false;
-
-            final PackageManager pm = mContext.getPackageManager();
-
-            XmlResourceParser parser;
-            parser = serviceInfo.loadXmlMetaData(pm, SERVICE_META_DATA);
-            if (parser == null) {
-                return false;
-            }
-
-            Resources res;
-            try {
-                res = pm.getResourcesForApplication(serviceInfo.applicationInfo);
-            } catch (PackageManager.NameNotFoundException e) {
-                return false;
-            }
-
-            AttributeSet attrs = Xml.asAttributeSet(parser);
-
-            int type;
-            while (true) {
+            final SyncCommand syncCommand = new SyncCommand();
+            Bundle results = syncCommand.run((service, remoteCallback) -> {
                 try {
-                    if (!((type = parser.next()) != XmlPullParser.END_DOCUMENT
-                            && type != XmlPullParser.START_TAG)) {
-                        break;
-                    }
-                } catch (XmlPullParserException | IOException e) {
-                    return false;
+                    service.getIntervalBetweenRequestsMillis(remoteCallback);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Failed to invoke getDisplayHashAlgorithms command", e);
                 }
-            }
+            });
 
-            TypedArray sa = res.obtainAttributes(attrs, R.styleable.DisplayHashingService);
-            mDurationBetweenRequestMillis = sa.getInt(
-                    R.styleable.DisplayHashingService_durationBetweenRequestsMillis, 0);
-            sa.recycle();
-            mParsedXml = true;
-            return true;
+            mIntervalBetweenRequestMillis = results.getInt(EXTRA_INTERVAL_BETWEEN_REQUESTS, 0);
+            return mIntervalBetweenRequestMillis;
         }
     }
 

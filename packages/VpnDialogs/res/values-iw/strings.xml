@@ -18,6 +18,8 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="prompt" msgid="3183836924226407828">"בקשת חיבור"</string>
     <string name="warning" msgid="809658604548412033">"‏<xliff:g id="APP">%s</xliff:g> רוצה להגדיר חיבור VPN שיאפשר לו לפקח על תעבורת הרשת. אשר את הבקשה רק אם אתה נותן אמון במקור. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; מופיע בחלק העליון של המסך כאשר VPN פעיל."</string>
+    <!-- no translation found for warning (5188957997628124947) -->
+    <skip />
     <string name="legacy_title" msgid="192936250066580964">"‏VPN מחובר"</string>
     <string name="session" msgid="6470628549473641030">"הפעלה"</string>
     <string name="duration" msgid="3584782459928719435">"משך:"</string>

@@ -36,7 +36,6 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Log;
@@ -606,7 +605,6 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         // Re-enable touches after the animation completes
         mTouchHandler.setTouchEnabled(true);
         mTouchHandler.onPinnedStackAnimationEnded(direction);
-        mMenuController.onPinnedStackAnimationEnded();
     }
 
     private void updateMovementBounds(@Nullable Rect toBounds, boolean fromRotation,

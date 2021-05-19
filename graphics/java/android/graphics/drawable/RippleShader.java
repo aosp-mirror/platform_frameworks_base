@@ -50,15 +50,17 @@ final class RippleShader extends RuntimeShader {
             + "}"
             + "const float PI = 3.1415926535897932384626;\n"
             + "\n"
+            + "float threshold(float v, float l, float h) {\n"
+            + "    return step(l, v) * (1.0 - step(h, v));\n"
+            + "}\n"
             + "float sparkles(vec2 uv, float t) {\n"
             + "  float n = triangleNoise(uv);\n"
             + "  float s = 0.0;\n"
             + "  for (float i = 0; i < 4; i += 1) {\n"
-            + "    float l = i * 0.01;\n"
-            + "    float h = l + 0.2;\n"
-            + "    float o = smoothstep(n - l, h, n);\n"
-            + "    o *= abs(sin(PI * o * (t + 0.55 * i)));\n"
-            + "    s += o;\n"
+            + "    float l = i * 0.1;\n"
+            + "    float h = l + 0.025;\n"
+            + "    float o = sin(PI * (t + 0.35 * i));\n"
+            + "    s += threshold(n + o, l, h);\n"
             + "  }\n"
             + "  return saturate(s) * in_sparkleColor.a;\n"
             + "}\n"
@@ -125,9 +127,6 @@ final class RippleShader extends RuntimeShader {
     private static final double PI_ROTATE_RIGHT = Math.PI * 0.0078125;
     private static final double PI_ROTATE_LEFT = Math.PI * -0.0078125;
 
-    private float mNoisePhase;
-    private float mProgress;
-
     RippleShader() {
         super(SHADER, false);
     }
@@ -143,15 +142,6 @@ final class RippleShader extends RuntimeShader {
         setUniform("in_maxRadius", radius);
     }
 
-    /**
-     * Continuous offset used as noise phase.
-     */
-    public void setNoisePhase(float phase) {
-        mNoisePhase = phase;
-        setUniform("in_noisePhase", phase);
-        updateTurbulence();
-    }
-
     public void setOrigin(float x, float y) {
         setUniform("in_origin", new float[] {x, y});
     }
@@ -161,18 +151,20 @@ final class RippleShader extends RuntimeShader {
     }
 
     public void setProgress(float progress) {
-        mProgress = progress;
         setUniform("in_progress", progress);
-        updateTurbulence();
     }
 
-    private void updateTurbulence() {
-        final float turbulencePhase = (float) ((mProgress + mNoisePhase * 0.333f) * 5f * Math.PI);
-        setUniform("in_turbulencePhase", turbulencePhase);
+    /**
+     * Continuous offset used as noise phase.
+     */
+    public void setNoisePhase(float phase) {
+        setUniform("in_noisePhase", phase * 0.001f);
 
         //
         // Keep in sync with: frameworks/base/libs/hwui/pipeline/skia/AnimatedDrawables.h
         //
+        final float turbulencePhase = phase;
+        setUniform("in_turbulencePhase", turbulencePhase);
         final float scale = 1.5f;
         setUniform("in_tCircle1", new float[]{
                 (float) (scale * 0.5 + (turbulencePhase * 0.01 * Math.cos(scale * 0.55))),
