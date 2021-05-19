@@ -999,6 +999,7 @@ void NativeInputManager::displayRemoved(JNIEnv* env, int32_t displayId) {
     // Set an empty list to remove all handles from the specific display.
     std::vector<sp<InputWindowHandle>> windowHandles;
     mInputManager->getDispatcher()->setInputWindows({{displayId, windowHandles}});
+    mInputManager->getDispatcher()->setFocusedApplication(displayId, nullptr);
 }
 
 void NativeInputManager::setFocusedApplication(JNIEnv* env, int32_t displayId,
