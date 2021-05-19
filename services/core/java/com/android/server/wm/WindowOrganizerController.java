@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.Manifest.permission.READ_FRAME_BUFFER;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_CHILDREN_TASKS_REPARENT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_LAUNCH_TASK;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REORDER;
@@ -37,8 +36,6 @@ import android.annotation.Nullable;
 import android.app.WindowConfiguration;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
-import android.graphics.GraphicBuffer;
-import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.Binder;
 import android.os.Bundle;
@@ -53,7 +50,6 @@ import android.window.ITaskOrganizerController;
 import android.window.ITransitionPlayer;
 import android.window.IWindowContainerTransactionCallback;
 import android.window.IWindowOrganizerController;
-import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -784,44 +780,6 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         }
 
         mTransactionCallbacksByPendingSyncId.remove(syncId);
-    }
-
-    @Override
-    public boolean takeScreenshot(WindowContainerToken token, SurfaceControl outSurfaceControl) {
-        mService.mAmInternal.enforceCallingPermission(READ_FRAME_BUFFER, "takeScreenshot()");
-        final WindowContainer wc = WindowContainer.fromBinder(token.asBinder());
-        if (wc == null) {
-            throw new RuntimeException("Invalid token in screenshot transaction");
-        }
-
-        final Rect bounds = new Rect();
-        wc.getBounds(bounds);
-        bounds.offsetTo(0, 0);
-        SurfaceControl.ScreenshotHardwareBuffer buffer = SurfaceControl.captureLayers(
-                wc.getSurfaceControl(), bounds, 1);
-
-        if (buffer == null || buffer.getHardwareBuffer() == null) {
-            return false;
-        }
-
-        GraphicBuffer graphicBuffer = GraphicBuffer.createFromHardwareBuffer(
-                buffer.getHardwareBuffer());
-        SurfaceControl screenshot = mService.mWindowManager.mSurfaceControlFactory.apply(null)
-                .setName(wc.getName() + " - Organizer Screenshot")
-                .setFormat(PixelFormat.TRANSLUCENT)
-                .setParent(wc.getParentSurfaceControl())
-                .setSecure(buffer.containsSecureLayers())
-                .setCallsite("WindowOrganizerController.takeScreenshot")
-                .setBLASTLayer()
-                .build();
-
-        SurfaceControl.Transaction transaction = mService.mWindowManager.mTransactionFactory.get();
-        transaction.setBuffer(screenshot, graphicBuffer);
-        transaction.setColorSpace(screenshot, buffer.getColorSpace());
-        transaction.apply();
-
-        outSurfaceControl.copyFrom(screenshot, "WindowOrganizerController.takeScreenshot");
-        return true;
     }
 
     @Override
