@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright (C) 2021 The Android Open Source Project
+  ~ Copyright (C) 2020 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -15,7 +15,10 @@
   ~ limitations under the License.
   -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android">
-    <solid android:color="?androidprv:attr/colorAccentPrimary" />
-    <corners android:radius="@dimen/people_space_messages_count_radius" />
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
+    android:shape="oval">
+    <size
+        android:height="10dp"
+        android:width="10dp" />
+    <solid android:color="?androidprv:attr/colorAccentPrimaryVariant" />
 </shape>

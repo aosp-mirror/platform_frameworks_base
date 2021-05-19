@@ -35,13 +35,14 @@
             android:layout_height="64dp" />
         <ImageView
             android:id="@+id/availability"
+            android:gravity="top"
             android:layout_marginStart="-2dp"
             android:layout_width="10dp"
             android:layout_height="10dp"
-            android:background="@drawable/circle_green_10dp" />
+            android:background="@drawable/availability_dot_10dp" />
         <LinearLayout
             android:orientation="vertical"
-            android:paddingStart="6dp"
+            android:paddingStart="4dp"
             android:gravity="top"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
@@ -50,7 +51,7 @@
                 android:text="@string/empty_user_name"
                 android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
                 android:textColor="?android:attr/textColorPrimary"
-                android:textSize="14sp"
+                android:textSize="@dimen/empty_name_text_size_for_medium"
                 android:maxLines="1"
                 android:ellipsize="end"
                 android:layout_width="wrap_content"
@@ -60,7 +61,7 @@
                 android:text="@string/empty_status"
                 android:textColor="?android:attr/textColorSecondary"
                 android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
-                android:textSize="12sp"
+                android:textSize="@dimen/content_text_size_for_medium"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:maxLines="3"
