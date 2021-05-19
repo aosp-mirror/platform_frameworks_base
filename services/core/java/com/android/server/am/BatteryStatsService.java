@@ -78,6 +78,7 @@ import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.BatteryStatsHelper;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.os.BatteryUsageStatsProvider;
+import com.android.internal.os.BatteryUsageStatsStore;
 import com.android.internal.os.BinderCallsStats;
 import com.android.internal.os.PowerProfile;
 import com.android.internal.os.RailStats;
@@ -124,10 +125,12 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         Watchdog.Monitor {
     static final String TAG = "BatteryStatsService";
     static final boolean DBG = false;
+    private static final boolean BATTERY_USAGE_STORE_ENABLED = false;
 
     private static IBatteryStats sService;
 
     final BatteryStatsImpl mStats;
+    private final BatteryUsageStatsStore mBatteryUsageStatsStore;
     private final BatteryStatsImpl.UserInfoProvider mUserManagerUserInfoProvider;
     private final Context mContext;
     private final BatteryExternalStatsWorker mWorker;
@@ -341,6 +344,12 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
         mStats = new BatteryStatsImpl(systemDir, handler, this,
                 this, mUserManagerUserInfoProvider);
+        if (BATTERY_USAGE_STORE_ENABLED) {
+            mBatteryUsageStatsStore =
+                    new BatteryUsageStatsStore(context, mStats, systemDir, mHandler);
+        } else {
+            mBatteryUsageStatsStore = null;
+        }
         mWorker = new BatteryExternalStatsWorker(context, mStats);
         mStats.setExternalStatsSyncLocked(mWorker);
         mStats.setRadioScanningTimeoutLocked(mContext.getResources().getInteger(
