@@ -289,6 +289,9 @@ public class TaskTests extends WindowTestsBase {
 
     @Test
     public void testResolveNonResizableTaskWindowingMode() {
+        // Test with no support non-resizable in multi window regardless the screen size.
+        mAtm.mSupportsNonResizableMultiWindow = -1;
+
         final Task task = createTask(mDisplayContent);
         Configuration parentConfig = task.getParent().getConfiguration();
         parentConfig.windowConfiguration.setWindowingMode(WINDOWING_MODE_FREEFORM);
