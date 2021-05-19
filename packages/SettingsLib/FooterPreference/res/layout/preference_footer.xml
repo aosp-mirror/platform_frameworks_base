@@ -48,7 +48,6 @@
         android:layout_height="wrap_content"
         android:paddingBottom="16dp"
         android:paddingTop="16dp"
-        android:maxLines="10"
         android:textColor="?android:attr/textColorSecondary"
         android:ellipsize="marquee" />
 
