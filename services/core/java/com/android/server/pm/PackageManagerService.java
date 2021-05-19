@@ -26514,8 +26514,10 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         @Override
-        public void setDeviceOwnerProtectedPackages(List<String> packageNames) {
-            mProtectedPackages.setDeviceOwnerProtectedPackages(packageNames);
+        public void setDeviceOwnerProtectedPackages(
+                String deviceOwnerPackageName, List<String> packageNames) {
+            mProtectedPackages.setDeviceOwnerProtectedPackages(
+                    deviceOwnerPackageName, packageNames);
         }
 
         @Override
