@@ -1651,7 +1651,8 @@ public final class LoadedApk {
                         intent.setExtrasClassLoader(cl);
                         // TODO: determine at registration time if caller is
                         // protecting themselves with signature permission
-                        intent.prepareToEnterProcess(ActivityThread.isProtectedBroadcast(intent));
+                        intent.prepareToEnterProcess(ActivityThread.isProtectedBroadcast(intent),
+                                mContext.getAttributionSource());
                         setExtrasClassLoader(cl);
                         receiver.setPendingResult(this);
                         receiver.onReceive(mContext, intent);
