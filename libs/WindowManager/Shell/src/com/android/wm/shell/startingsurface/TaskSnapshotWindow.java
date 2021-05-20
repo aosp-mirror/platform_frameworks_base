@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.startingsurface;
 
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.graphics.Color.WHITE;
 import static android.graphics.Color.alpha;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
@@ -63,7 +62,6 @@ import android.graphics.RectF;
 import android.hardware.HardwareBuffer;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.os.SystemClock;
 import android.os.Trace;
 import android.util.MergedConfiguration;
 import android.util.Slog;
@@ -94,9 +92,6 @@ import com.android.wm.shell.common.ShellExecutor;
  * @hide
  */
 public class TaskSnapshotWindow {
-
-    private static final long SIZE_MISMATCH_MINIMUM_TIME_MS = 450;
-
     /**
      * When creating the starting window, we use the exact same layout flags such that we end up
      * with a window with the exact same dimensions etc. However, these flags are not used in layout
@@ -136,10 +131,8 @@ public class TaskSnapshotWindow {
     private final RectF mTmpDstFrame = new RectF();
     private final CharSequence mTitle;
     private boolean mHasDrawn;
-    private long mShownTime;
     private boolean mSizeMismatch;
     private final Paint mBackgroundPaint = new Paint();
-    private final int mActivityType;
     private final int mStatusBarColor;
     private final SystemBarBackgroundPainter mSystemBarBackgroundPainter;
     private final int mOrientationOnCreation;
@@ -195,8 +188,6 @@ public class TaskSnapshotWindow {
         final Point taskSize = snapshot.getTaskSize();
         final Rect taskBounds = new Rect(0, 0, taskSize.x, taskSize.y);
         final int orientation = snapshot.getOrientation();
-
-        final int activityType = runningTaskInfo.topActivityType;
         final int displayId = runningTaskInfo.displayId;
 
         final IWindowSession session = WindowManagerGlobal.getWindowSession();
@@ -216,7 +207,7 @@ public class TaskSnapshotWindow {
 
         final TaskSnapshotWindow snapshotSurface = new TaskSnapshotWindow(
                 surfaceControl, snapshot, layoutParams.getTitle(), taskDescription, appearance,
-                windowFlags, windowPrivateFlags, taskBounds, orientation, activityType,
+                windowFlags, windowPrivateFlags, taskBounds, orientation,
                 topWindowInsetsState, clearWindowHandler, mainExecutor);
         final Window window = snapshotSurface.mWindow;
 
@@ -256,8 +247,8 @@ public class TaskSnapshotWindow {
     public TaskSnapshotWindow(SurfaceControl surfaceControl,
             TaskSnapshot snapshot, CharSequence title, TaskDescription taskDescription,
             int appearance, int windowFlags, int windowPrivateFlags, Rect taskBounds,
-            int currentOrientation, int activityType, InsetsState topWindowInsetsState,
-            Runnable clearWindowHandler, ShellExecutor splashScreenExecutor) {
+            int currentOrientation, InsetsState topWindowInsetsState, Runnable clearWindowHandler,
+            ShellExecutor splashScreenExecutor) {
         mSplashScreenExecutor = splashScreenExecutor;
         mSession = WindowManagerGlobal.getWindowSession();
         mWindow = new Window();
@@ -272,7 +263,6 @@ public class TaskSnapshotWindow {
                 windowPrivateFlags, appearance, taskDescription, 1f, topWindowInsetsState);
         mStatusBarColor = taskDescription.getStatusBarColor();
         mOrientationOnCreation = currentOrientation;
-        mActivityType = activityType;
         mTransaction = new SurfaceControl.Transaction();
         mClearWindowHandler = clearWindowHandler;
     }
@@ -295,17 +285,6 @@ public class TaskSnapshotWindow {
     }
 
     void remove() {
-        final long now = SystemClock.uptimeMillis();
-        if (mSizeMismatch && now - mShownTime < SIZE_MISMATCH_MINIMUM_TIME_MS
-                // Show the latest content as soon as possible for unlocking to home.
-                && mActivityType != ACTIVITY_TYPE_HOME) {
-            final long delayTime = mShownTime + SIZE_MISMATCH_MINIMUM_TIME_MS - now;
-            mSplashScreenExecutor.executeDelayed(() -> remove(), delayTime);
-            if (DEBUG) {
-                Slog.d(TAG, "Defer removing snapshot surface in " + delayTime);
-            }
-            return;
-        }
         try {
             if (DEBUG) {
                 Slog.d(TAG, "Removing snapshot surface, mHasDrawn: " + mHasDrawn);
@@ -346,7 +325,6 @@ public class TaskSnapshotWindow {
         } else {
             drawSizeMatchSnapshot();
         }
-        mShownTime = SystemClock.uptimeMillis();
         mHasDrawn = true;
         reportDrawn();
 

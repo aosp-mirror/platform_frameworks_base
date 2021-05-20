@@ -649,7 +649,7 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Nie można zweryfikować twarzy. Sprzęt niedostępny."</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"Spróbuj rozpoznania twarzy ponownie."</string>
+    <string name="face_error_timeout" msgid="522924647742024699">"Spróbuj rozpoznawania twarzy ponownie."</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Nie można przechowywać nowych danych twarzy. Usuń stare."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Analiza twarzy została anulowana."</string>
     <string name="face_error_user_canceled" msgid="8553045452825849843">"Użytkownik anulował rozpoznawanie twarzy."</string>
@@ -2161,7 +2161,8 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Wyłącz"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Więcej informacji"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"W Androidzie 12 ulepszone powiadomienia zastąpiły powiadomienia adaptacyjne. Ta funkcja pokazuje sugerowane działania i odpowiedzi oraz porządkuje powiadomienia.\n\nUlepszone powiadomienia mogą czytać wszystkie powiadomienia, w tym dane osobowe takie jak nazwy kontaktów i treść wiadomości. Funkcja może też zamykać powiadomienia oraz reagować na nie, np. odbierać połączenia telefoniczne i sterować trybem Nie przeszkadzać."</string>
+    <!-- no translation found for nas_upgrade_notification_learn_more_content (3735480566983530650) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Powiadomienie z informacją o trybie rutynowym"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Bateria może się wyczerpać przed zwykłą porą ładowania"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Włączono Oszczędzanie baterii, by wydłużyć czas pracy na baterii"</string>

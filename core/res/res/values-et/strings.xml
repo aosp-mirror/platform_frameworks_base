@@ -609,14 +609,14 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Sõrmejälje ikoon"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"hallata Face Unlocki riistvara"</string>
+    <string name="permlab_manageFace" msgid="4569549381889283282">"hallata näoga avamise riistvara"</string>
     <string name="permdesc_manageFace" msgid="6204569688492710471">"Lubab rakendusel tühistada meetodid kasutatavate näomallide lisamiseks ja kustutamiseks."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"kasutada Face Unlocki riistvara"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Võimaldab rakendusel autentimiseks kasutada Face Unlocki riistvara"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Face Unlock"</string>
+    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"kasutada näoga avamise riistvara"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Võimaldab rakendusel autentimiseks kasutada näoga avamise riistvara"</string>
+    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Näoga avamine"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Registreerige oma nägu uuesti"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Tuvastamise parandamiseks registreerige oma nägu uuesti"</string>
-    <string name="face_setup_notification_title" msgid="550617822603450009">"Seadistage Face Unlock"</string>
+    <string name="face_setup_notification_title" msgid="550617822603450009">"Seadistage näoga avamine"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Avage telefon seda vaadates"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Seadistage rohkem viise avamiseks"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Puudutage sõrmejälje lisamiseks"</string>
@@ -643,19 +643,19 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Nägu ei saa kinnitada. Riistvara pole saadaval."</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"Proovige Face Unlocki uuesti."</string>
+    <string name="face_error_timeout" msgid="522924647742024699">"Proovige näoga avamist uuesti."</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Uue näo andmeid ei saa salvestada. Kustutage enne vanad."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Näotuvastuse toiming tühistati."</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"Kasutaja tühistas Face Unlocki."</string>
+    <string name="face_error_user_canceled" msgid="8553045452825849843">"Kasutaja tühistas näoga avamise."</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Liiga palju katseid. Proovige hiljem uuesti."</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Liiga palju katseid. Face Unlock on keelatud."</string>
+    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Liiga palju katseid. Näoga avamine on keelatud."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Nägu ei saa kinnitada. Proovige uuesti."</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"Face Unlocki ei ole seadistatud."</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"Seade ei toeta Face Unlocki."</string>
+    <string name="face_error_not_enrolled" msgid="7369928733504691611">"Näoga avamine ei ole seadistatud."</string>
+    <string name="face_error_hw_not_present" msgid="1070600921591729944">"Seade ei toeta näoga avamist."</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Andur on ajutiselt keelatud."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Nägu <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <string name="face_app_setting_name" msgid="8130135875458467243">"Face Unlocki kasutamine"</string>
-    <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Face Unlocki või ekraaniluku kasutamine"</string>
+    <string name="face_app_setting_name" msgid="8130135875458467243">"Näoga avamise kasutamine"</string>
+    <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Näoga avamise või ekraaniluku kasutamine"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Jätkamiseks kasutage oma nägu"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Jätkamiseks kasutage oma nägu või ekraanilukku"</string>
   <string-array name="face_error_vendor">
@@ -887,7 +887,7 @@
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Proovige uuesti"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Proovige uuesti"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Ava kõigi funktsioonide ja andmete nägemiseks"</string>
-    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Maksimaalne teenusega Face Unlock avamise katsete arv on ületatud"</string>
+    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Maksimaalne näoga avamise katsete arv on ületatud"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"SIM-kaarti pole"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"Tahvelarvutis pole SIM-kaarti."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Teie Android TV seadmes pole SIM-kaarti."</string>
@@ -2095,7 +2095,8 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Lülita välja"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Lisateave"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"Androidi versioonis 12 asendasid täiustatud märguanded Androidi kohanduvad märguanded. See funktsioon näitab soovitatud toiminguid ja vastuseid ning korrastab teie märguandeid.\n\nTäiustatud märguanded pääsevad juurde märguande sisule, sh isiklikule teabele, nagu kontaktide nimed ja sõnumid. Samuti saab selle funktsiooni abil märguannetest loobuda või neile vastata (nt vastata telefonikõnedele ja juhtida funktsiooni Mitte segada)."</string>
+    <!-- no translation found for nas_upgrade_notification_learn_more_content (3735480566983530650) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Rutiinirežiimi teabe märguanne"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Aku võib enne tavapärast laadimist tühjaks saada"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Akusäästja aktiveeriti aku tööea pikendamiseks"</string>

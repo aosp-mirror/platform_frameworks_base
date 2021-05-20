@@ -98,13 +98,13 @@ package android.app.appsearch {
     method @NonNull public android.app.appsearch.AppSearchSchema.DoublePropertyConfig.Builder setCardinality(int);
   }
 
-  public static final class AppSearchSchema.Int64PropertyConfig extends android.app.appsearch.AppSearchSchema.PropertyConfig {
+  public static final class AppSearchSchema.LongPropertyConfig extends android.app.appsearch.AppSearchSchema.PropertyConfig {
   }
 
-  public static final class AppSearchSchema.Int64PropertyConfig.Builder {
-    ctor public AppSearchSchema.Int64PropertyConfig.Builder(@NonNull String);
-    method @NonNull public android.app.appsearch.AppSearchSchema.Int64PropertyConfig build();
-    method @NonNull public android.app.appsearch.AppSearchSchema.Int64PropertyConfig.Builder setCardinality(int);
+  public static final class AppSearchSchema.LongPropertyConfig.Builder {
+    ctor public AppSearchSchema.LongPropertyConfig.Builder(@NonNull String);
+    method @NonNull public android.app.appsearch.AppSearchSchema.LongPropertyConfig build();
+    method @NonNull public android.app.appsearch.AppSearchSchema.LongPropertyConfig.Builder setCardinality(int);
   }
 
   public abstract static class AppSearchSchema.PropertyConfig {
@@ -370,13 +370,13 @@ package android.app.appsearch {
     method @NonNull public android.app.appsearch.SearchSpec.Builder addFilterSchemas(@NonNull java.util.Collection<java.lang.String>);
     method @NonNull public android.app.appsearch.SearchSpec.Builder addProjection(@NonNull String, @NonNull java.util.Collection<java.lang.String>);
     method @NonNull public android.app.appsearch.SearchSpec build();
-    method @NonNull public android.app.appsearch.SearchSpec.Builder setMaxSnippetSize(@IntRange(from=0, to=android.app.appsearch.SearchSpec.MAX_SNIPPET_SIZE_LIMIT) int);
+    method @NonNull public android.app.appsearch.SearchSpec.Builder setMaxSnippetSize(@IntRange(from=0, to=0x2710) int);
     method @NonNull public android.app.appsearch.SearchSpec.Builder setOrder(int);
     method @NonNull public android.app.appsearch.SearchSpec.Builder setRankingStrategy(int);
-    method @NonNull public android.app.appsearch.SearchSpec.Builder setResultCountPerPage(@IntRange(from=0, to=android.app.appsearch.SearchSpec.MAX_NUM_PER_PAGE) int);
+    method @NonNull public android.app.appsearch.SearchSpec.Builder setResultCountPerPage(@IntRange(from=0, to=0x2710) int);
     method @NonNull public android.app.appsearch.SearchSpec.Builder setResultGrouping(int, int);
-    method @NonNull public android.app.appsearch.SearchSpec.Builder setSnippetCount(@IntRange(from=0, to=android.app.appsearch.SearchSpec.MAX_SNIPPET_COUNT) int);
-    method @NonNull public android.app.appsearch.SearchSpec.Builder setSnippetCountPerProperty(@IntRange(from=0, to=android.app.appsearch.SearchSpec.MAX_SNIPPET_PER_PROPERTY_COUNT) int);
+    method @NonNull public android.app.appsearch.SearchSpec.Builder setSnippetCount(@IntRange(from=0, to=0x2710) int);
+    method @NonNull public android.app.appsearch.SearchSpec.Builder setSnippetCountPerProperty(@IntRange(from=0, to=0x2710) int);
     method @NonNull public android.app.appsearch.SearchSpec.Builder setTermMatch(int);
   }
 

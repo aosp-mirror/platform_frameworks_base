@@ -611,12 +611,12 @@
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"ഫിംഗർപ്രിന്റ് ഐക്കൺ"</string>
     <string name="permlab_manageFace" msgid="4569549381889283282">"മുഖം തിരിച്ചറിഞ്ഞുള്ള അൺലോക്ക് ഹാർഡ്‌വെയർ മാനേജ് ചെയ്യുക"</string>
     <string name="permdesc_manageFace" msgid="6204569688492710471">"ഉപയോഗിക്കാനായി, മുഖത്തിന്റെ ടെംപ്ലേറ്റുകൾ ചേർക്കാനും ഇല്ലാതാക്കാനുമുള്ള രീതികൾ അഭ്യർത്ഥിക്കാൻ ആപ്പിനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"മുഖം തിരിച്ചറിഞ്ഞുള്ള അൺലോക്ക് ഹാർഡ്‌വെയർ ഉപയോഗിക്കുക"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"പരിശോധിച്ചുറപ്പിക്കാൻ മുഖം തിരിച്ചറിഞ്ഞുള്ള അൺലോക്ക് ഹാർഡ്‌വെയർ ഉപയോഗിക്കാൻ അനുവദിക്കുന്നു"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"മുഖം തിരിച്ചറിഞ്ഞുള്ള അൺലോക്ക്"</string>
+    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"ഫെയ്‌സ് അൺലോക്ക് ഹാർഡ്‌വെയർ ഉപയോഗിക്കുക"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"പരിശോധിച്ചുറപ്പിക്കാൻ ഫെയ്‌സ് അൺലോക്ക് ഹാർഡ്‌വെയർ ഉപയോഗിക്കാൻ അനുവദിക്കുന്നു"</string>
+    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"ഫെയ്‌സ് അൺലോക്ക്"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"നിങ്ങളുടെ മുഖം വീണ്ടും എൻറോൾ ചെയ്യൂ"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"തിരിച്ചറിയൽ മെച്ചപ്പെടുത്താൻ, നിങ്ങളുടെ മുഖം ദയവായി വീണ്ടും എൻറോൾ ചെയ്യൂ"</string>
-    <string name="face_setup_notification_title" msgid="550617822603450009">"മുഖം തിരിച്ചറിഞ്ഞുള്ള അൺലോക്ക് സജ്ജീകരിക്കുക"</string>
+    <string name="face_setup_notification_title" msgid="550617822603450009">"ഫെയ്‌സ് അൺലോക്ക് സജ്ജീകരിക്കുക"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"ഫോണിലേക്ക് നോക്കി അത് അൺലോക്ക് ചെയ്യുക"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"അൺലോക്ക് ചെയ്യുന്നതിനുള്ള കൂടുതൽ വഴികൾ സജ്ജീകരിക്കുക"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"ഫിംഗർപ്രിന്റ് ചേർക്കാൻ ടാപ്പ് ചെയ്യുക"</string>
@@ -643,19 +643,19 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"മുഖം പരിശോധിക്കാൻ കഴിയില്ല. ഹാർഡ്‌വെയർ ലഭ്യമല്ല."</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"മുഖം തിരിച്ചറിഞ്ഞുള്ള അൺലോക്ക് വീണ്ടും പരീക്ഷിക്കൂ"</string>
+    <string name="face_error_timeout" msgid="522924647742024699">"ഫെയ്‌സ് അൺലോക്ക് വീണ്ടും പരീക്ഷിക്കൂ"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"പുതിയ മുഖ ഡാറ്റ സംഭരിക്കാനാകില്ല. ആദ്യം പഴയത് ഇല്ലാതാക്കുക."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"മുഖത്തിന്റെ പ്രവർത്തനം റദ്ദാക്കി."</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"ഉപയോക്താവ് മുഖം തിരിച്ചറിഞ്ഞുള്ള അൺലോക്ക് റദ്ദാക്കി"</string>
+    <string name="face_error_user_canceled" msgid="8553045452825849843">"ഉപയോക്താവ് ഫെയ്‌സ് അൺലോക്ക് റദ്ദാക്കി"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"നിരവധി തവണ ശ്രമിച്ചു. പിന്നീട് വീണ്ടും ശ്രമിക്കുക."</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"വളരെയധികം ശ്രമങ്ങൾ. മുഖം തിരിച്ചറിഞ്ഞുള്ള അൺലോക്ക് പ്രവർത്തനരഹിതമാക്കി"</string>
+    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"വളരെയധികം ശ്രമങ്ങൾ. ഫെയ്‌സ് അൺലോക്ക് പ്രവർത്തനരഹിതമാക്കി"</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"മുഖം പരിശോധിക്കാൻ കഴിയില്ല. വീണ്ടും ശ്രമിക്കൂ."</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"മുഖം തിരിച്ചറിഞ്ഞുള്ള അൺലോക്ക് സജ്ജീകരിച്ചില്ല."</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"മുഖം തിരിച്ചറിഞ്ഞുള്ള അൺലോക്ക് ഈ ഉപകരണം പിന്തുണയ്ക്കുന്നില്ല."</string>
+    <string name="face_error_not_enrolled" msgid="7369928733504691611">"ഫെയ്‌സ് അൺലോക്ക് സജ്ജീകരിച്ചില്ല."</string>
+    <string name="face_error_hw_not_present" msgid="1070600921591729944">"ഫെയ്‌സ് അൺലോക്ക് ഈ ഉപകരണം പിന്തുണയ്ക്കുന്നില്ല."</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"സെൻസർ താൽക്കാലികമായി പ്രവർത്തനരഹിതമാക്കി."</string>
     <string name="face_name_template" msgid="3877037340223318119">"മുഖം <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <string name="face_app_setting_name" msgid="8130135875458467243">"മുഖം തിരിച്ചറിഞ്ഞുള്ള അൺലോക്ക് ഉപയോഗിക്കുക"</string>
-    <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"മുഖം അല്ലെങ്കിൽ സ്‌ക്രീൻ ലോക്ക് ഉപയോഗിക്കുക"</string>
+    <string name="face_app_setting_name" msgid="8130135875458467243">"ഫെയ്‌സ് അൺലോക്ക് ഉപയോഗിക്കുക"</string>
+    <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"ഫെയ്‌സ് അല്ലെങ്കിൽ സ്‌ക്രീൻ ലോക്ക് ഉപയോഗിക്കുക"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"തുടരാൻ നിങ്ങളുടെ മുഖം ഉപയോഗിക്കുക"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"തുടരാൻ നിങ്ങളുടെ മുഖം‌ അല്ലെങ്കിൽ സ്‌ക്രീൻ ലോക്ക് ഉപയോഗിക്കുക"</string>
   <string-array name="face_error_vendor">
@@ -957,7 +957,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"അൺലോക്ക് ഏരിയ വിപുലീകരിക്കുക."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"സ്ലൈഡ് അൺലോക്ക്."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"പാറ്റേൺ അൺലോക്ക്."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"മുഖം തിരിച്ചറിഞ്ഞുള്ള അൺലോക്ക്."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"ഫെയ്‌സ് അൺലോക്ക്."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"പിൻ അൺലോക്ക്."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"സിം പിൻ അൺലോക്ക്."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"സിം Puk അൺലോക്ക്."</string>
@@ -2095,7 +2095,8 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"ശരി"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"ഓഫാക്കുക"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"കൂടുതലറിയുക"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"Android 12-ൽ Android അഡാപ്റ്റീവ് അറിയിപ്പുകൾക്ക് പകരം മെച്ചപ്പെടുത്തിയ അറിയിപ്പുകൾ ഉൾപ്പെടുത്തിയിരിക്കുന്നു. നിർദ്ദേശിക്കുന്ന പ്രവർത്തനങ്ങളും മറുപടികളും കാണിക്കുന്നതിനൊപ്പം ഈ ഫീച്ചർ നിങ്ങളുടെ അറിയിപ്പുകൾ ഓർഗനൈസ് ചെയ്യുന്നു.\n\nമെച്ചപ്പെടുത്തിയ അറിയിപ്പുകൾക്ക്, കോൺടാക്റ്റ് പേരുകളും സന്ദേശങ്ങളും പോലുള്ള വ്യക്തിപരമായ വിവരങ്ങൾ ഉൾപ്പെടെയുള്ള അറിയിപ്പ് ഉള്ളടക്കം ആക്‌സസ് ചെയ്യാനാകും. ഫോൺ കോളുകൾക്ക് മറുപടി നൽകുക, \'ശല്യപ്പെടുത്തരുത്\' നിയന്ത്രിക്കുക എന്നിവ പോലെ, അറിയിപ്പുകൾ ഡിസ്‌മിസ് ചെയ്യാനും അവയ്‌ക്ക് മറുപടി നൽകാനും ഈ ഫീച്ചറിന് കഴിയും."</string>
+    <!-- no translation found for nas_upgrade_notification_learn_more_content (3735480566983530650) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ദിനചര്യ മോഡ് വിവരത്തെ കുറിച്ചുള്ള അറിയിപ്പ്"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"സാധാരണയുള്ളതിലും നേരത്തെ ബാറ്ററിയുടെ ചാർജ് തീർന്നേക്കാം"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"ബാറ്ററി ലൈഫ് വര്‍ദ്ധിപ്പിക്കാൻ, ബാറ്ററി ലാഭിക്കൽ സജീവമാക്കി"</string>

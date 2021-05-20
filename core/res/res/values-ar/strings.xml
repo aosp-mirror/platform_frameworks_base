@@ -350,7 +350,7 @@
     <string name="capability_title_canPerformGestures" msgid="9106545062106728987">"تنفيذ إيماءات"</string>
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"يمكن النقر والتمرير بسرعة والتصغير أو التكبير بإصبعين وتنفيذ إيماءات أخرى."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"إيماءات بصمات الإصبع"</string>
-    <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"يمكن أن تلتقط الإيماءات التي تم تنفيذها على جهاز استشعار بصمات الإصبع في الجهاز."</string>
+    <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"يمكن أن تلتقط الإيماءات التي تم تنفيذها على جهاز استشعار بصمة الإصبع في الجهاز."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"أخذ لقطة شاشة"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"يمكن أخذ لقطة شاشة."</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"إيقاف شريط الحالة أو تعديله"</string>
@@ -621,14 +621,14 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"رمز بصمة الإصبع"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"إدارة أجهزة \"فتح القفل بالوجه\""</string>
+    <string name="permlab_manageFace" msgid="4569549381889283282">"إدارة أجهزة ميزة \"فتح الجهاز بالتعرف على الوجه\""</string>
     <string name="permdesc_manageFace" msgid="6204569688492710471">"السماح للتطبيق باستدعاء طرق لإضافة نماذج من الوجوه وحذفها"</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"استخدام أجهزة \"فتح القفل بالوجه\""</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"السماح للتطبيق باستخدام أجهزة \"فتح القفل بالوجه\" لإجراء المصادقة"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"فتح القفل بالوجه"</string>
+    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"استخدام أجهزة ميزة \"فتح الجهاز بالتعرف على الوجه\""</string>
+    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"السماح للتطبيق باستخدام أجهزة ميزة \"فتح الجهاز بالتعرف على الوجه\" لإجراء المصادقة"</string>
+    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"فتح الجهاز بالتعرف على الوجه"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"إعادة تسجيل وجهك"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"لتحسين قدرة الجهاز على معرفة وجهك، يُرجى إعادة تسجيل الوجه."</string>
-    <string name="face_setup_notification_title" msgid="550617822603450009">"إعداد ميزة \"فتح القفل بالوجه\""</string>
+    <string name="face_setup_notification_title" msgid="550617822603450009">"إعداد ميزة \"فتح الجهاز بالتعرف على الوجه\""</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"يمكنك فتح قفل هاتفك بمجرّد النظر إلى الشاشة."</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"إعداد المزيد من الطرق لفتح قفل الجهاز"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"انقر لإضافة بصمة إصبع."</string>
@@ -655,19 +655,19 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"يتعذّر التحقُّق من الوجه. الجهاز غير مُتاح."</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"حاول استخدام \"فتح القفل بالوجه\" مرة أخرى."</string>
+    <string name="face_error_timeout" msgid="522924647742024699">"جرِّب استخدام ميزة \"فتح الجهاز بالتعرف على الوجه\" مرة أخرى."</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"يتعذَّر تخزين بيانات الوجه الجديد. احذف الوجه القديم أولاً."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"تمّ إلغاء عملية مصادقة الوجه."</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"ألغى المستخدم \"فتح القفل بالوجه\"."</string>
+    <string name="face_error_user_canceled" msgid="8553045452825849843">"ألغى المستخدم ميزة \"فتح الجهاز بالتعرف على الوجه\"."</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"تمّ إجراء محاولات كثيرة. أعِد المحاولة لاحقًا."</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"تم إجراء عدد كبير جدًا من المحاولات. وتم إيقاف \"فتح القفل بالوجه\"."</string>
+    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"تم إجراء محاولات كثيرة، ولذا تم إيقاف ميزة \"فتح الجهاز بالتعرف على الوجه\"."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"يتعذّر التحقق من الوجه. حاول مرة أخرى."</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"لم يسبق لك إعداد \"فتح القفل بالوجه\"."</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"\"فتح القفل بالوجه\" غير متوفر على هذا الجهاز."</string>
+    <string name="face_error_not_enrolled" msgid="7369928733504691611">"لم يسبق لك إعداد ميزة \"فتح الجهاز بالتعرف على الوجه\"."</string>
+    <string name="face_error_hw_not_present" msgid="1070600921591729944">"ميزة \"فتح الجهاز بالتعرف على الوجه\" غير متوفرة بهذا الجهاز."</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"تم إيقاف جهاز الاستشعار مؤقتًا."</string>
     <string name="face_name_template" msgid="3877037340223318119">"الوجه <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <string name="face_app_setting_name" msgid="8130135875458467243">"استخدام \"فتح القفل بالوجه\""</string>
-    <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"استخدام ميزة \"فتح القفل بالوجه\" أو ميزة \"قفل الشاشة\""</string>
+    <string name="face_app_setting_name" msgid="8130135875458467243">"فتح الجهاز بالتعرف على الوجه"</string>
+    <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"استخدام ميزة \"فتح الجهاز بالتعرف على الوجه\" أو ميزة \"قفل الشاشة\""</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"استخدِم الوجه للمتابعة"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"استخدام ميزة \"فتح القفل بالوجه\" أو ميزة \"قفل الشاشة\" للمتابعة"</string>
   <string-array name="face_error_vendor">
@@ -899,7 +899,7 @@
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"أعد المحاولة"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"أعد المحاولة"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"فتح قفل جميع الميزات والبيانات"</string>
-    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"تم تجاوز الحد الأقصى لعدد محاولات تأمين الجهاز بالوجه"</string>
+    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"تم تجاوز الحد الأقصى لعدد محاولات فتح الجهاز بالتعرف على الوجه"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"‏ليست هناك شريحة SIM"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"‏ليس هناك شريحة SIM في الجهاز اللوحي."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"‏لا تتوفر شريحة SIM في جهاز Android TV."</string>
@@ -969,7 +969,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"توسيع منطقة فتح القفل."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"فتح القفل باستخدام التمرير."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"فتح القفل باستخدام النقش."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"تأمين الجهاز بالوجه."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"استخدام ميزة \"فتح الجهاز بالتعرف على الوجه\""</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"‏فتح القفل باستخدام رمز PIN."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"‏فتح قفل رقم التعريف الشخصي لشريحة SIM."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"‏فتح قفل مفتاح PUK لشريحة SIM."</string>
@@ -2227,7 +2227,8 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"حسنًا"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"إيقاف"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"مزيد من المعلومات"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"‏تم إبدال الإشعارات المحسّنة بالإشعارات التكيُّفية لنظام التشغيل Android في الإصدار 12 منه. تعرض هذه الميزة إجراءات وردودًا مقترحة وتنظِّم الإشعارات.\n\nيمكن للإشعارات المحسّنة الوصول إلى محتوى الإشعارات، بما في المعلومات الشخصية، مثلاً أسماء جهات الاتصال والرسائل. يمكن لهذه الميزة أيضًا إغلاق الإشعارات أو الاستجابة لها، مثلاً الردّ على مكالمات الهاتف والتحكّم في ميزة \"عدم الإزعاج\"."</string>
+    <!-- no translation found for nas_upgrade_notification_learn_more_content (3735480566983530650) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"إشعار معلومات \"وضع سلسلة الإجراءات\""</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"قد تنفد طاقة البطارية قبل الشحن المعتاد"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"تم تفعيل \"توفير شحن البطارية\" لإطالة عمرها."</string>

@@ -39,6 +39,7 @@ import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTI
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_USER_RESIZE;
 import static com.android.wm.shell.pip.PipAnimationController.isInPipDirection;
 import static com.android.wm.shell.pip.PipAnimationController.isOutPipDirection;
+import static com.android.wm.shell.pip.PipAnimationController.isRemovePipDirection;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -70,6 +71,7 @@ import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.animation.Interpolators;
 import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.ScreenshotUtils;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.annotations.ShellMainThread;
@@ -185,10 +187,11 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                 mDeferredAnimEndTransaction = tx;
                 return;
             }
-
-            if (mState != State.EXITING_PIP || direction == TRANSITION_DIRECTION_LEAVE_PIP) {
+            final boolean isExitPipDirection = isOutPipDirection(direction)
+                    || isRemovePipDirection(direction);
+            if (mState != State.EXITING_PIP || isExitPipDirection) {
                 // Finish resize as long as we're not exiting PIP, or, if we are, only if this is
-                // the end of the leave PIP animation.
+                // the end of an exit PIP animation.
                 // This is necessary in case there was a resize animation ongoing when exit PIP
                 // started, in which case the first resize will be skipped to let the exit
                 // operation handle the final resize out of PIP mode. See b/185306679.
@@ -1127,6 +1130,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     private void finishResize(SurfaceControl.Transaction tx, Rect destinationBounds,
             @PipAnimationController.TransitionDirection int direction,
             @PipAnimationController.AnimationType int type) {
+        final Rect preResizeBounds = new Rect(mPipBoundsState.getBounds());
         mPipBoundsState.setBounds(destinationBounds);
         if (direction == TRANSITION_DIRECTION_REMOVE_STACK) {
             removePipImmediately();
@@ -1150,23 +1154,26 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                 && mPictureInPictureParams != null
                 && !mPictureInPictureParams.isSeamlessResizeEnabled();
         if (animateCrossFadeResize) {
-            // Take a snapshot of the PIP task and hide it. We'll show it and fade it out after
-            // the wct transaction is applied and the activity is laid out again.
-            final SurfaceControl snapshotSurface = mTaskOrganizer.takeScreenshot(mToken);
-            mSurfaceTransactionHelper.reparentAndShowSurfaceSnapshot(
-                    mSurfaceControlTransactionFactory.getTransaction(), mLeash, snapshotSurface);
-            mSyncTransactionQueue.queue(wct);
-            mSyncTransactionQueue.runInSync(t -> {
-                // Scale the snapshot from its pre-resize bounds to the post-resize bounds.
-                final Rect snapshotSrc = new Rect(0, 0, snapshotSurface.getWidth(),
-                        snapshotSurface.getHeight());
-                final Rect snapshotDest = new Rect(0, 0, destinationBounds.width(),
-                        destinationBounds.height());
-                mSurfaceTransactionHelper.scale(t, snapshotSurface, snapshotSrc, snapshotDest);
+            // Take a snapshot of the PIP task and show it. We'll fade it out after the wct
+            // transaction is applied and the activity is laid out again.
+            preResizeBounds.offsetTo(0, 0);
+            final Rect snapshotDest = new Rect(0, 0, destinationBounds.width(),
+                    destinationBounds.height());
+            final SurfaceControl snapshotSurface = ScreenshotUtils.takeScreenshot(
+                    mSurfaceControlTransactionFactory.getTransaction(), mLeash, preResizeBounds);
+            if (snapshotSurface != null) {
+                mSyncTransactionQueue.queue(wct);
+                mSyncTransactionQueue.runInSync(t -> {
+                    // Scale the snapshot from its pre-resize bounds to the post-resize bounds.
+                    mSurfaceTransactionHelper.scale(t, snapshotSurface, preResizeBounds,
+                            snapshotDest);
 
-                // Start animation to fade out the snapshot.
-                fadeOutAndRemoveOverlay(snapshotSurface);
-            });
+                    // Start animation to fade out the snapshot.
+                    fadeOutAndRemoveOverlay(snapshotSurface);
+                });
+            } else {
+                applyFinishBoundsResize(wct, direction);
+            }
         } else {
             applyFinishBoundsResize(wct, direction);
         }

@@ -517,7 +517,18 @@ public class PipResizeGestureHandler {
                         || mLastResizeBounds.height() >= PINCH_RESIZE_AUTO_MAX_RATIO * mMaxSize.y) {
                     resizeRectAboutCenter(mLastResizeBounds, mMaxSize.x, mMaxSize.y);
                 }
-                final float snapFraction = mPipBoundsAlgorithm.getSnapFraction(mLastResizeBounds);
+                final int leftEdge = mLastResizeBounds.left;
+                final Rect movementBounds =
+                        mPipBoundsAlgorithm.getMovementBounds(mLastResizeBounds);
+                final int fromLeft = Math.abs(leftEdge - movementBounds.left);
+                final int fromRight = Math.abs(movementBounds.right - leftEdge);
+                // The PIP will be snapped to either the right or left edge, so calculate which one
+                // is closest to the current position.
+                final int newLeft = fromLeft < fromRight
+                        ? movementBounds.left : movementBounds.right;
+                mLastResizeBounds.offsetTo(newLeft, mLastResizeBounds.top);
+                final float snapFraction = mPipBoundsAlgorithm.getSnapFraction(
+                        mLastResizeBounds, movementBounds);
                 mPipBoundsAlgorithm.applySnapFraction(mLastResizeBounds, snapFraction);
                 mPipTaskOrganizer.scheduleAnimateResizePip(startBounds, mLastResizeBounds,
                         PINCH_RESIZE_SNAP_DURATION, mAngle, callback);

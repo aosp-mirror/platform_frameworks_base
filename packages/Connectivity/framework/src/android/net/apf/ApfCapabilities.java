@@ -131,43 +131,21 @@ public final class ApfCapabilities implements Parcelable {
      * @return Whether the APF Filter in the device should filter out IEEE 802.3 Frames.
      */
     public static boolean getApfDrop8023Frames() {
-        // TODO(b/183076074): remove reading resources from system resources
+        // TODO: deprecate/remove this method (now unused in the platform), as the resource was
+        // moved to NetworkStack.
         final Resources systemRes = Resources.getSystem();
         final int id = systemRes.getIdentifier("config_apfDrop802_3Frames", "bool", "android");
         return systemRes.getBoolean(id);
     }
 
     /**
-     * @return Whether the APF Filter in the device should filter out IEEE 802.3 Frames.
-     * @hide
-     */
-    public static boolean getApfDrop8023Frames(@NonNull Context context) {
-        final ConnectivityResources res = getResources(context);
-        // TODO(b/183076074): use R.bool.config_apfDrop802_3Frames directly
-        final int id = res.get().getIdentifier("config_apfDrop802_3Frames", "bool",
-                res.getResourcesContext().getPackageName());
-        return res.get().getBoolean(id);
-    }
-
-    /**
      * @return An array of denylisted EtherType, packets with EtherTypes within it will be dropped.
      */
     public static @NonNull int[] getApfEtherTypeBlackList() {
-        // TODO(b/183076074): remove reading resources from system resources
+        // TODO: deprecate/remove this method (now unused in the platform), as the resource was
+        // moved to NetworkStack.
         final Resources systemRes = Resources.getSystem();
         final int id = systemRes.getIdentifier("config_apfEthTypeBlackList", "array", "android");
         return systemRes.getIntArray(id);
-    }
-
-    /**
-     * @return An array of denylisted EtherType, packets with EtherTypes within it will be dropped.
-     * @hide
-     */
-    public static @NonNull int[] getApfEtherTypeDenyList(@NonNull Context context) {
-        final ConnectivityResources res = getResources(context);
-        // TODO(b/183076074): use R.array.config_apfEthTypeDenyList directly
-        final int id = res.get().getIdentifier("config_apfEthTypeDenyList", "array",
-                res.getResourcesContext().getPackageName());
-        return res.get().getIntArray(id);
     }
 }

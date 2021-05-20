@@ -2409,25 +2409,28 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final boolean startingWindow = mAttrs.type == TYPE_APPLICATION_STARTING;
         if (startingWindow) {
             ProtoLog.d(WM_DEBUG_STARTING_WINDOW, "Starting window removed %s", this);
-        }
-
-        if (startingWindow && StartingSurfaceController.DEBUG_ENABLE_SHELL_DRAWER) {
             // Cancel the remove starting window animation on shell. The main window might changed
             // during animating, checking for all windows would be safer.
             if (mActivityRecord != null) {
-                mActivityRecord.forAllWindows(w -> {
+                mActivityRecord.forAllWindowsUnchecked(w -> {
                     if (w.isSelfAnimating(0, ANIMATION_TYPE_STARTING_REVEAL)) {
                         w.cancelAnimation();
+                        return true;
                     }
+                    return false;
                 }, true);
             }
+        } else if (mAttrs.type == TYPE_BASE_APPLICATION
+                && isSelfAnimating(0, ANIMATION_TYPE_STARTING_REVEAL)) {
+            // Cancel the remove starting window animation in case the binder dead before remove
+            // splash window.
+            cancelAnimation();
         }
 
         ProtoLog.v(WM_DEBUG_FOCUS, "Remove client=%x, surfaceController=%s Callers=%s",
                     System.identityHashCode(mClient.asBinder()),
                     mWinAnimator.mSurfaceController,
                     Debug.getCallers(5));
-
 
         final long origId = Binder.clearCallingIdentity();
 
@@ -4852,8 +4855,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // (i.e. Like {@link DisplayContent.ImeContainer#skipImeWindowsDuringTraversal}, the IME
         // window will be ignored to traverse when the IME target is still in split-screen mode).
         if (isImeLayeringTarget()
-                && !getDisplayContent().getDefaultTaskDisplayArea().isSplitScreenModeActivated()) {
-            if (getDisplayContent().forAllImeWindows(callback, traverseTopToBottom)) {
+                && (!mDisplayContent.getDefaultTaskDisplayArea().isSplitScreenModeActivated()
+                         || getTask() == null)) {
+            if (mDisplayContent.forAllImeWindows(callback, traverseTopToBottom)) {
                 return true;
             }
         }

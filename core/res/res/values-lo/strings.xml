@@ -611,7 +611,7 @@
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"ໄອຄອນລາຍນິ້ວມື"</string>
     <string name="permlab_manageFace" msgid="4569549381889283282">"ຈັດການຮາດແວປົດລັອກດ້ວຍໜ້າ"</string>
     <string name="permdesc_manageFace" msgid="6204569688492710471">"ອະນຸຍາດໃຫ້ແອັບເປີດວິທີການຕ່າງໆເພື່ອເພີ່ມ ແລະ ລຶບແມ່ແບບໃບໜ້າສຳລັບການນຳໃຊ້."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"ໃຊ້ຮາດແວການປົດລັອກໃບໜ້າ"</string>
+    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"ໃຊ້ຮາດແວການປົດລັອກດ້ວຍໜ້າ"</string>
     <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"ອະນຸຍາດໃຫ້ແອັບໃຊ້ຮາດແວການປົດລັອກດ້ວຍໜ້າເພື່ອພິສູດຢືນຢັນ"</string>
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"ປົດລັອກດ້ວຍໜ້າ"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"ລົງທະບຽນໃບໜ້າຂອງທ່ານຄືນໃໝ່"</string>
@@ -2095,7 +2095,8 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"ຕົກລົງ"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"ປິດໄວ້"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"ສຶກສາເພີ່ມເຕີມ"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"ການແຈ້ງເຕືອນແບບປັບຕົວໄດ້ຂອງ Android ຖືກແທນທີ່ດ້ວຍການແຈ້ງເຕືອນທີ່ປັບປຸງໃຫ້ດີຂຶ້ນໃນ Android 12 ແລ້ວ. ຄຸນສົມບັດນີ້ສະແດງຄຳສັ່ງ ແລະ ການຕອບກັບທີ່ແນະນຳ ແລະ ຈັດລະບຽບການແຈ້ງເຕືອນຂອງທ່ານ.\n\nການແຈ້ງເຕືອນທີ່ປັບປຸງໃຫ້ດີຂຶ້ນສາມາດເຂົ້າເຖິງເນື້ອຫາການແຈ້ງເຕືອນໄດ້, ຮວມທັງຂໍ້ມູນສ່ວນຕົວ ເຊັ່ນ: ຊື່ຜູ້ຕິດຕໍ່ ແລະ ຂໍ້ຄວາມ. ຄຸນສົມບັດນີ້ສາມາດປິດ ຫຼື ຕອບກັບຫາການແຈ້ງເຕືອນໄດ້ນຳ ເຊັ່ນ: ການຮັບສາຍໂທລະສັບ ແລະ ການຄວບຄຸມໂໝດຫ້າມລົບກວນ."</string>
+    <!-- no translation found for nas_upgrade_notification_learn_more_content (3735480566983530650) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ການແຈ້ງເຕືອນຂໍ້ມູນໂໝດກິດຈະວັດປະຈຳວັນ"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"ແບັດເຕີຣີອາດໝົດກ່ອນການສາກຕາມປົກກະຕິ"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"ເປີດຕົວປະຢັດແບັດເຕີຣີເພື່ອຂະຫຍາຍອາຍຸແບັດເຕີຣີ"</string>

@@ -887,7 +887,7 @@
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Försök igen"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Försök igen"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Lås upp för alla funktioner och all data"</string>
-    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Du har försökt låsa upp med Ansiktslås för många gånger"</string>
+    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Du har försökt låsa upp med ansiktslås för många gånger"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"Inget SIM-kort"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"Inget SIM-kort i surfplattan."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Inget SIM-kort i Android TV-enheten."</string>
@@ -2095,7 +2095,8 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Inaktivera"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Läs mer"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"Förbättrade aviseringar har ersatt Anpassade aviseringar för Android i Android 12. Den här funktionen visar förslag på åtgärder och svar och organiserar dina aviseringar.\n\nFörbättrade aviseringar har åtkomst till allt innehåll i aviseringar, inklusive personliga uppgifter som namn på kontakter och meddelanden. Funktionen kan även ignorera aviseringar eller utföra åtgärder utifrån dem, till exempel svara på telefonsamtal och styra Stör ej."</string>
+    <!-- no translation found for nas_upgrade_notification_learn_more_content (3735480566983530650) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Avisering om rutinläge"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Batteriet kan ta slut innan du brukar ladda det"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Batterisparläget har aktiverats för att utöka batteritiden"</string>

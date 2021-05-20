@@ -588,13 +588,15 @@
             android:label="@string/people_tile_title"
             android:enabled="true"
             android:exported="true"
+            android:windowDisablePreview="true"
             android:theme="@style/Theme.PeopleTileConfigActivity">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE"/>
             </intent-filter>
         </activity>
 
-        <activity android:name=".people.widget.LaunchConversationActivity" />
+        <activity android:name=".people.widget.LaunchConversationActivity"
+            android:windowDisablePreview="true" />
 
         <!-- People Space Widget -->
         <receiver

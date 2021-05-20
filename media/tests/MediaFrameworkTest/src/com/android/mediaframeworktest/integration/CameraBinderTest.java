@@ -262,7 +262,7 @@ public class CameraBinderTest extends AndroidTestCase {
                     mUtils.getCameraService().connectDevice(
                         dummyCallbacks, String.valueOf(cameraId),
                         clientPackageName, clientAttributionTag,
-                        ICameraService.USE_CALLING_UID);
+                        ICameraService.USE_CALLING_UID, 0 /*oomScoreOffset*/);
             assertNotNull(String.format("Camera %s was null", cameraId), cameraUser);
 
             Log.v(TAG, String.format("Camera %s connected", cameraId));

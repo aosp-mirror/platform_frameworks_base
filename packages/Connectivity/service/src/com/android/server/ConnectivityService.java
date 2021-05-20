@@ -1045,14 +1045,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
             } else {
                 // ConnectivityService publishes binder service using publishBinderService() with
                 // no priority assigned will be treated as NORMAL priority. Dumpsys does not send
-                // "--dump-priority" arguments to the service. Thus, dump both NORMAL and HIGH to
-                // align the legacy design.
+                // "--dump-priority" arguments to the service. Thus, dump NORMAL only to align the
+                // legacy output for dumpsys connectivity.
                 // TODO: Integrate into signal dump.
                 dumpNormal(fd, pw, args);
-                pw.println();
-                pw.println("DUMP OF SERVICE HIGH connectivity");
-                pw.println();
-                dumpHigh(fd, pw);
             }
         }
     }
@@ -1501,12 +1497,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 ConnectivitySettingsManager.WIFI_ALWAYS_REQUESTED, false /* defaultValue */);
         final boolean vehicleAlwaysRequested = mResources.get().getBoolean(
                 R.bool.config_vehicleInternalNetworkAlwaysRequested);
-        // TODO (b/183076074): remove legacy fallback after migrating overlays
-        final boolean legacyAlwaysRequested = mContext.getResources().getBoolean(
-                mContext.getResources().getIdentifier(
-                        "config_vehicleInternalNetworkAlwaysRequested", "bool", "android"));
-        handleAlwaysOnNetworkRequest(mDefaultVehicleRequest,
-                vehicleAlwaysRequested || legacyAlwaysRequested);
+        handleAlwaysOnNetworkRequest(mDefaultVehicleRequest, vehicleAlwaysRequested);
     }
 
     private void registerSettingsCallbacks() {
@@ -2156,10 +2147,22 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private void restrictRequestUidsForCallerAndSetRequestorInfo(NetworkCapabilities nc,
             int callerUid, String callerPackageName) {
+        // There is no need to track the effective UID of the request here. If the caller
+        // lacks the settings permission, the effective UID is the same as the calling ID.
         if (!checkSettingsPermission()) {
-            // There is no need to track the effective UID of the request here. If the caller lacks
-            // the settings permission, the effective UID is the same as the calling ID.
-            nc.setSingleUid(callerUid);
+            // Unprivileged apps can only pass in null or their own UID.
+            if (nc.getUids() == null) {
+                // If the caller passes in null, the callback will also match networks that do not
+                // apply to its UID, similarly to what it would see if it called getAllNetworks.
+                // In this case, redact everything in the request immediately. This ensures that the
+                // app is not able to get any redacted information by filing an unredacted request
+                // and observing whether the request matches something.
+                if (nc.getNetworkSpecifier() != null) {
+                    nc.setNetworkSpecifier(nc.getNetworkSpecifier().redact());
+                }
+            } else {
+                nc.setSingleUid(callerUid);
+            }
         }
         nc.setRequestorUidAndPackageName(callerUid, callerPackageName);
         nc.setAdministratorUids(new int[0]);
@@ -2210,7 +2213,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     @NonNull
     public List<NetworkStateSnapshot> getAllNetworkStateSnapshots() {
         // This contains IMSI details, so make sure the caller is privileged.
-        PermissionUtils.enforceNetworkStackPermission(mContext);
+        enforceNetworkStackOrSettingsPermission();
 
         final ArrayList<NetworkStateSnapshot> result = new ArrayList<>();
         for (Network network : getAllNetworks()) {
@@ -6815,14 +6818,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         int mark = mResources.get().getInteger(R.integer.config_networkWakeupPacketMark);
         int mask = mResources.get().getInteger(R.integer.config_networkWakeupPacketMask);
 
-        // TODO (b/183076074): remove legacy fallback after migrating overlays
-        final int legacyMark = mContext.getResources().getInteger(mContext.getResources()
-                .getIdentifier("config_networkWakeupPacketMark", "integer", "android"));
-        final int legacyMask = mContext.getResources().getInteger(mContext.getResources()
-                .getIdentifier("config_networkWakeupPacketMask", "integer", "android"));
-        mark = mark == 0 ? legacyMark : mark;
-        mask = mask == 0 ? legacyMask : mask;
-
         // Mask/mark of zero will not detect anything interesting.
         // Don't install rules unless both values are nonzero.
         if (mark == 0 || mask == 0) {
@@ -8576,11 +8571,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         final UnderlyingNetworkInfo[] underlyingNetworkInfos = getAllVpnInfo();
         try {
             final ArrayList<NetworkStateSnapshot> snapshots = new ArrayList<>();
-            // TODO: Directly use NetworkStateSnapshot when feasible.
-            for (final NetworkState state : getAllNetworkState()) {
-                final NetworkStateSnapshot snapshot = new NetworkStateSnapshot(state.network,
-                        state.networkCapabilities, state.linkProperties, state.subscriberId,
-                        state.legacyNetworkType);
+            for (final NetworkStateSnapshot snapshot : getAllNetworkStateSnapshots()) {
                 snapshots.add(snapshot);
             }
             mStatsManager.notifyNetworkStatus(getDefaultNetworks(),

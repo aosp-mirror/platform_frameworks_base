@@ -152,6 +152,8 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
     private static final String TEST_SSID = "AndroidAP";
 
     private static NetworkTemplate sTemplateWifi = buildTemplateWifi(TEST_SSID);
+    private static NetworkTemplate sTemplateCarrierWifi1 =
+            buildTemplateWifi(NetworkTemplate.WIFI_NETWORKID_ALL, IMSI_1);
     private static NetworkTemplate sTemplateImsi1 = buildTemplateMobileAll(IMSI_1);
     private static NetworkTemplate sTemplateImsi2 = buildTemplateMobileAll(IMSI_2);
 
@@ -297,45 +299,82 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         mHandlerThread.quitSafely();
     }
 
-    @Test
-    public void testNetworkStatsWifi() throws Exception {
+    private void initWifiStats(NetworkStateSnapshot snapshot) throws Exception {
         // pretend that wifi network comes online; service should ask about full
         // network state, and poll any existing interfaces before updating.
         expectDefaultSettings();
-        NetworkStateSnapshot[] states = new NetworkStateSnapshot[] {buildWifiState()};
+        NetworkStateSnapshot[] states = new NetworkStateSnapshot[] {snapshot};
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
 
-        mService.forceUpdateIfaces(NETWORKS_WIFI, states, getActiveIface(states),
+        mService.notifyNetworkStatus(NETWORKS_WIFI, states, getActiveIface(states),
                 new UnderlyingNetworkInfo[0]);
+    }
 
-        // verify service has empty history for wifi
+    private void incrementWifiStats(long durationMillis, String iface,
+            long rxb, long rxp, long txb, long txp) throws Exception {
+        incrementCurrentTime(durationMillis);
+        expectDefaultSettings();
+        expectNetworkStatsSummary(new NetworkStats(getElapsedRealtime(), 1)
+                .insertEntry(iface, rxb, rxp, txb, txp));
+        expectNetworkStatsUidDetail(buildEmptyStats());
+        forcePollAndWaitForIdle();
+    }
+
+    @Test
+    public void testNetworkStatsCarrierWifi() throws Exception {
+        initWifiStats(buildWifiState(true, TEST_IFACE, IMSI_1));
+        // verify service has empty history for carrier merged wifi and non-carrier wifi
+        assertNetworkTotal(sTemplateCarrierWifi1, 0L, 0L, 0L, 0L, 0);
         assertNetworkTotal(sTemplateWifi, 0L, 0L, 0L, 0L, 0);
 
         // modify some number on wifi, and trigger poll event
-        incrementCurrentTime(HOUR_IN_MILLIS);
-        expectDefaultSettings();
-        expectNetworkStatsSummary(new NetworkStats(getElapsedRealtime(), 1)
-                .insertEntry(TEST_IFACE, 1024L, 1L, 2048L, 2L));
-        expectNetworkStatsUidDetail(buildEmptyStats());
-        forcePollAndWaitForIdle();
+        incrementWifiStats(HOUR_IN_MILLIS, TEST_IFACE, 1024L, 1L, 2048L, 2L);
 
         // verify service recorded history
-        assertNetworkTotal(sTemplateWifi, 1024L, 1L, 2048L, 2L, 0);
+        assertNetworkTotal(sTemplateCarrierWifi1, 1024L, 1L, 2048L, 2L, 0);
+
+        // verify service recorded history for wifi with SSID filter
+        assertNetworkTotal(sTemplateWifi,  1024L, 1L, 2048L, 2L, 0);
 
 
         // and bump forward again, with counters going higher. this is
         // important, since polling should correctly subtract last snapshot.
-        incrementCurrentTime(DAY_IN_MILLIS);
-        expectDefaultSettings();
-        expectNetworkStatsSummary(new NetworkStats(getElapsedRealtime(), 1)
-                .insertEntry(TEST_IFACE, 4096L, 4L, 8192L, 8L));
-        expectNetworkStatsUidDetail(buildEmptyStats());
-        forcePollAndWaitForIdle();
+        incrementWifiStats(DAY_IN_MILLIS, TEST_IFACE, 4096L, 4L, 8192L, 8L);
+
+        // verify service recorded history
+        assertNetworkTotal(sTemplateCarrierWifi1, 4096L, 4L, 8192L, 8L, 0);
+        // verify service recorded history for wifi with SSID filter
+        assertNetworkTotal(sTemplateWifi, 4096L, 4L, 8192L, 8L, 0);
+    }
+
+    @Test
+    public void testNetworkStatsNonCarrierWifi() throws Exception {
+        initWifiStats(buildWifiState());
+
+        // verify service has empty history for wifi
+        assertNetworkTotal(sTemplateWifi, 0L, 0L, 0L, 0L, 0);
+        // verify service has empty history for carrier merged wifi
+        assertNetworkTotal(sTemplateCarrierWifi1, 0L, 0L, 0L, 0L, 0);
+
+        // modify some number on wifi, and trigger poll event
+        incrementWifiStats(HOUR_IN_MILLIS, TEST_IFACE, 1024L, 1L, 2048L, 2L);
+
+        // verify service recorded history
+        assertNetworkTotal(sTemplateWifi, 1024L, 1L, 2048L, 2L, 0);
+        // verify service has empty history for carrier wifi since current network is non carrier
+        // wifi
+        assertNetworkTotal(sTemplateCarrierWifi1, 0L, 0L, 0L, 0L, 0);
+
+        // and bump forward again, with counters going higher. this is
+        // important, since polling should correctly subtract last snapshot.
+        incrementWifiStats(DAY_IN_MILLIS, TEST_IFACE, 4096L, 4L, 8192L, 8L);
 
         // verify service recorded history
         assertNetworkTotal(sTemplateWifi, 4096L, 4L, 8192L, 8L, 0);
-
+        // verify service has empty history for carrier wifi since current network is non carrier
+        // wifi
+        assertNetworkTotal(sTemplateCarrierWifi1, 0L, 0L, 0L, 0L, 0);
     }
 
     @Test
@@ -349,7 +388,7 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
 
-        mService.forceUpdateIfaces(NETWORKS_WIFI, states, getActiveIface(states),
+        mService.notifyNetworkStatus(NETWORKS_WIFI, states, getActiveIface(states),
                 new UnderlyingNetworkInfo[0]);
 
         // verify service has empty history for wifi
@@ -423,7 +462,7 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
 
-        mService.forceUpdateIfaces(NETWORKS_WIFI, states, getActiveIface(states),
+        mService.notifyNetworkStatus(NETWORKS_WIFI, states, getActiveIface(states),
                 new UnderlyingNetworkInfo[0]);
 
         // modify some number on wifi, and trigger poll event
@@ -464,7 +503,7 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
 
-        mService.forceUpdateIfaces(NETWORKS_MOBILE, states, getActiveIface(states),
+        mService.notifyNetworkStatus(NETWORKS_MOBILE, states, getActiveIface(states),
                 new UnderlyingNetworkInfo[0]);
 
         // create some traffic on first network
@@ -499,7 +538,7 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
                 .insertEntry(TEST_IFACE, UID_RED, SET_DEFAULT, 0xF00D, 512L, 4L, 512L, 4L, 0L)
                 .insertEntry(TEST_IFACE, UID_BLUE, SET_DEFAULT, TAG_NONE, 512L, 4L, 0L, 0L, 0L));
 
-        mService.forceUpdateIfaces(NETWORKS_MOBILE, states, getActiveIface(states),
+        mService.notifyNetworkStatus(NETWORKS_MOBILE, states, getActiveIface(states),
                 new UnderlyingNetworkInfo[0]);
         forcePollAndWaitForIdle();
 
@@ -539,7 +578,7 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
 
-        mService.forceUpdateIfaces(NETWORKS_WIFI, states, getActiveIface(states),
+        mService.notifyNetworkStatus(NETWORKS_WIFI, states, getActiveIface(states),
                 new UnderlyingNetworkInfo[0]);
 
         // create some traffic
@@ -607,7 +646,7 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         expectNetworkStatsUidDetail(buildEmptyStats());
 
         setMobileRatTypeAndWaitForIdle(TelephonyManager.NETWORK_TYPE_UMTS);
-        mService.forceUpdateIfaces(NETWORKS_MOBILE, states, getActiveIface(states),
+        mService.notifyNetworkStatus(NETWORKS_MOBILE, states, getActiveIface(states),
                 new UnderlyingNetworkInfo[0]);
 
         // Create some traffic.
@@ -699,7 +738,7 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
                 new int[]{NetworkCapabilities.NET_CAPABILITY_OEM_PAID})};
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
-        mService.forceUpdateIfaces(NETWORKS_MOBILE, states, getActiveIface(states),
+        mService.notifyNetworkStatus(NETWORKS_MOBILE, states, getActiveIface(states),
                 new UnderlyingNetworkInfo[0]);
 
         // Create some traffic.
@@ -714,7 +753,7 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
                 new int[]{NetworkCapabilities.NET_CAPABILITY_OEM_PRIVATE})};
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
-        mService.forceUpdateIfaces(NETWORKS_MOBILE, states, getActiveIface(states),
+        mService.notifyNetworkStatus(NETWORKS_MOBILE, states, getActiveIface(states),
                 new UnderlyingNetworkInfo[0]);
 
         // Create some traffic.
@@ -730,7 +769,7 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
                           NetworkCapabilities.NET_CAPABILITY_OEM_PAID})};
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
-        mService.forceUpdateIfaces(NETWORKS_MOBILE, states, getActiveIface(states),
+        mService.notifyNetworkStatus(NETWORKS_MOBILE, states, getActiveIface(states),
                 new UnderlyingNetworkInfo[0]);
 
         // Create some traffic.
@@ -744,7 +783,7 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         states = new NetworkStateSnapshot[]{buildOemManagedMobileState(IMSI_1, false, new int[]{})};
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
-        mService.forceUpdateIfaces(NETWORKS_MOBILE, states, getActiveIface(states),
+        mService.notifyNetworkStatus(NETWORKS_MOBILE, states, getActiveIface(states),
                 new UnderlyingNetworkInfo[0]);
 
         // Create some traffic.
@@ -797,7 +836,7 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
 
-        mService.forceUpdateIfaces(NETWORKS_WIFI, states, getActiveIface(states),
+        mService.notifyNetworkStatus(NETWORKS_WIFI, states, getActiveIface(states),
                 new UnderlyingNetworkInfo[0]);
 
         // create some traffic for two apps
@@ -856,7 +895,7 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
 
-        mService.forceUpdateIfaces(NETWORKS_WIFI, states, getActiveIface(states),
+        mService.notifyNetworkStatus(NETWORKS_WIFI, states, getActiveIface(states),
                 new UnderlyingNetworkInfo[0]);
 
         NetworkStats.Entry entry1 = new NetworkStats.Entry(
@@ -900,7 +939,7 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
 
-        mService.forceUpdateIfaces(NETWORKS_WIFI, states, getActiveIface(states),
+        mService.notifyNetworkStatus(NETWORKS_WIFI, states, getActiveIface(states),
                 new UnderlyingNetworkInfo[0]);
 
         NetworkStats.Entry uidStats = new NetworkStats.Entry(
@@ -931,7 +970,7 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
 
         // mStatsFactory#readNetworkStatsDetail() has the following invocations:
         // 1) NetworkStatsService#systemReady from #setUp.
-        // 2) mService#forceUpdateIfaces in the test above.
+        // 2) mService#notifyNetworkStatus in the test above.
         //
         // Additionally, we should have one call from the above call to mService#getDetailedUidStats
         // with the augmented ifaceFilter.
@@ -955,7 +994,7 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
 
-        mService.forceUpdateIfaces(NETWORKS_WIFI, states, getActiveIface(states),
+        mService.notifyNetworkStatus(NETWORKS_WIFI, states, getActiveIface(states),
                 new UnderlyingNetworkInfo[0]);
 
         // create some initial traffic
@@ -1013,7 +1052,7 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
 
-        mService.forceUpdateIfaces(NETWORKS_WIFI, states, getActiveIface(states),
+        mService.notifyNetworkStatus(NETWORKS_WIFI, states, getActiveIface(states),
                 new UnderlyingNetworkInfo[0]);
 
         // create some initial traffic
@@ -1053,7 +1092,7 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
 
-        mService.forceUpdateIfaces(NETWORKS_MOBILE, states, getActiveIface(states),
+        mService.notifyNetworkStatus(NETWORKS_MOBILE, states, getActiveIface(states),
                 new UnderlyingNetworkInfo[0]);
 
         // Create some traffic
@@ -1092,7 +1131,7 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
 
-        mService.forceUpdateIfaces(NETWORKS_MOBILE, states, getActiveIface(states),
+        mService.notifyNetworkStatus(NETWORKS_MOBILE, states, getActiveIface(states),
                 new UnderlyingNetworkInfo[0]);
 
         // create some tethering traffic
@@ -1149,7 +1188,7 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
 
-        mService.forceUpdateIfaces(NETWORKS_WIFI, states, getActiveIface(states),
+        mService.notifyNetworkStatus(NETWORKS_WIFI, states, getActiveIface(states),
                 new UnderlyingNetworkInfo[0]);
 
         // verify service has empty history for wifi
@@ -1255,7 +1294,7 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
                 mService.registerNetworkStatsProvider("TEST", provider);
         assertNotNull(cb);
 
-        mService.forceUpdateIfaces(NETWORKS_WIFI, states, getActiveIface(states),
+        mService.notifyNetworkStatus(NETWORKS_WIFI, states, getActiveIface(states),
                 new UnderlyingNetworkInfo[0]);
 
         // Verifies that one requestStatsUpdate will be called during iface update.
@@ -1320,7 +1359,7 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
                 mService.registerNetworkStatsProvider("TEST", provider);
         assertNotNull(cb);
 
-        mService.forceUpdateIfaces(NETWORKS_MOBILE, states, getActiveIface(states),
+        mService.notifyNetworkStatus(NETWORKS_MOBILE, states, getActiveIface(states),
                 new UnderlyingNetworkInfo[0]);
 
         // Verifies that one requestStatsUpdate will be called during iface update.
@@ -1378,7 +1417,7 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         expectDefaultSettings();
         NetworkStateSnapshot[] states =
                 new NetworkStateSnapshot[]{buildWifiState(true /* isMetered */, TEST_IFACE)};
-        mService.forceUpdateIfaces(NETWORKS_WIFI, states, getActiveIface(states),
+        mService.notifyNetworkStatus(NETWORKS_WIFI, states, getActiveIface(states),
                 new UnderlyingNetworkInfo[0]);
 
         // Register custom provider and retrieve callback.
@@ -1428,7 +1467,7 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
 
         // 3G network comes online.
         setMobileRatTypeAndWaitForIdle(TelephonyManager.NETWORK_TYPE_UMTS);
-        mService.forceUpdateIfaces(NETWORKS_MOBILE, states, getActiveIface(states),
+        mService.notifyNetworkStatus(NETWORKS_MOBILE, states, getActiveIface(states),
                 new UnderlyingNetworkInfo[0]);
 
         // Create some traffic.
@@ -1450,7 +1489,8 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         setCombineSubtypeEnabled(true);
 
         // Call handleOnCollapsedRatTypeChanged manually to simulate the callback fired
-        // when stopping monitor, this is needed by NetworkStatsService to trigger updateIfaces.
+        // when stopping monitor, this is needed by NetworkStatsService to trigger
+        // handleNotifyNetworkStatus.
         mService.handleOnCollapsedRatTypeChanged();
         HandlerUtils.waitForIdle(mHandlerThread, WAIT_TIMEOUT);
         // Create some traffic.
@@ -1499,7 +1539,7 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         NetworkStateSnapshot[] states = new NetworkStateSnapshot[]{
                 buildWifiState(true /*isMetered*/, TEST_IFACE2), buildMobile3gState(IMSI_1)};
         expectNetworkStatsUidDetail(buildEmptyStats());
-        mService.forceUpdateIfaces(NETWORKS_WIFI, states, getActiveIface(states),
+        mService.notifyNetworkStatus(NETWORKS_WIFI, states, getActiveIface(states),
                 new UnderlyingNetworkInfo[0]);
 
         // Create some traffic on mobile network.
@@ -1661,10 +1701,15 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
     }
 
     private static NetworkStateSnapshot buildWifiState() {
-        return buildWifiState(false, TEST_IFACE);
+        return buildWifiState(false, TEST_IFACE, null);
     }
 
     private static NetworkStateSnapshot buildWifiState(boolean isMetered, @NonNull String iface) {
+        return buildWifiState(isMetered, iface, null);
+    }
+
+    private static NetworkStateSnapshot buildWifiState(boolean isMetered, @NonNull String iface,
+            String subscriberId) {
         final LinkProperties prop = new LinkProperties();
         prop.setInterfaceName(iface);
         final NetworkCapabilities capabilities = new NetworkCapabilities();
@@ -1672,7 +1717,7 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         capabilities.setCapability(NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING, true);
         capabilities.addTransportType(NetworkCapabilities.TRANSPORT_WIFI);
         capabilities.setSSID(TEST_SSID);
-        return new NetworkStateSnapshot(WIFI_NETWORK, capabilities, prop, null, TYPE_WIFI);
+        return new NetworkStateSnapshot(WIFI_NETWORK, capabilities, prop, subscriberId, TYPE_WIFI);
     }
 
     private static NetworkStateSnapshot buildMobile3gState(String subscriberId) {

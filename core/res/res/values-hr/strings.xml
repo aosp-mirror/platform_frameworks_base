@@ -658,7 +658,7 @@
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Senzor je privremeno onemogućen."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Lice <xliff:g id="FACEID">%d</xliff:g>"</string>
     <string name="face_app_setting_name" msgid="8130135875458467243">"Upotreba otključavanja licem"</string>
-    <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Upotreba lica ili zaključavanja zaslona"</string>
+    <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Upotreba otključavanja licem ili zaključavanja zaslona"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Autentificirajte se licem da biste nastavili"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Za nastavak se identificirajte licem ili vjerodajnicom zaključavanja zaslona"</string>
   <string-array name="face_error_vendor">
@@ -890,7 +890,7 @@
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Pokušajte ponovo"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Pokušajte ponovo"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Otključajte za sve značajke i podatke"</string>
-    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Premašen je maksimalni broj Otključavanja licem"</string>
+    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Premašen je maksimalni broj pokušaja otključavanja licem"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"Nema SIM kartice"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"U tabletnom uređaju nema SIM kartice."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Na Android TV uređaju nema SIM kartice."</string>
@@ -2128,7 +2128,8 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"U redu"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Isključi"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Saznajte više"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"U Androidu 12 poboljšane obavijesti zamjenjuju prilagodljive obavijesti za Android. Ta značajka prikazuje predložene radnje i odgovore te organizira vaše obavijesti.\n\nPoboljšane obavijesti mogu pristupiti sadržaju obavijesti, uključujući osobne podatke kao što su imena kontakata i poruke. Ta značajka može i odbacivati obavijesti ili poduzimati radnje u skladu s njima, na primjer može odgovarati na telefonske pozive i upravljati značajkom Ne uznemiravaj."</string>
+    <!-- no translation found for nas_upgrade_notification_learn_more_content (3735480566983530650) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Obavještavanje o informacijama u Rutinskom načinu rada"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Baterija se može isprazniti prije uobičajenog vremena punjenja"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Štednja baterije aktivirana je kako bi se produljilo trajanje baterije"</string>

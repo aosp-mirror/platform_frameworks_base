@@ -106,6 +106,7 @@ import static com.android.server.wm.ActivityTaskManagerService.POWER_MODE_REASON
 import static com.android.server.wm.DisplayContent.IME_TARGET_CONTROL;
 import static com.android.server.wm.DisplayContent.IME_TARGET_INPUT;
 import static com.android.server.wm.DisplayContent.IME_TARGET_LAYERING;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_ALL;
 import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
@@ -8090,8 +8091,13 @@ public class WindowManagerService extends IWindowManager.Stub
             // This could prevent if there is no container animation, we still have to apply the
             // pending transaction and exit waiting.
             mAnimator.mNotifyWhenNoAnimation = true;
-            while ((mAnimator.isAnimationScheduled()
-                    || mRoot.isAnimating(TRANSITION | CHILDREN)) && timeoutRemaining > 0) {
+            WindowContainer animatingContainer = null;
+            while (mAnimator.isAnimationScheduled() || timeoutRemaining > 0) {
+                animatingContainer = mRoot.getAnimatingContainer(TRANSITION | CHILDREN,
+                        ANIMATION_TYPE_ALL);
+                if (animatingContainer == null) {
+                    break;
+                }
                 long startTime = System.currentTimeMillis();
                 try {
                     mGlobalLock.wait(timeoutRemaining);
@@ -8101,9 +8107,13 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             mAnimator.mNotifyWhenNoAnimation = false;
 
-            if (mAnimator.isAnimationScheduled()
-                    || mRoot.isAnimating(TRANSITION | CHILDREN)) {
-                Slog.w(TAG, "Timed out waiting for animations to complete.");
+            if (mAnimator.isAnimationScheduled() || animatingContainer != null) {
+                Slog.w(TAG, "Timed out waiting for animations to complete,"
+                        + " animatingContainer=" + animatingContainer
+                        + " animationType=" + SurfaceAnimator.animationTypeToString(
+                        animatingContainer != null
+                                ? animatingContainer.mSurfaceAnimator.getAnimationType()
+                                : SurfaceAnimator.ANIMATION_TYPE_NONE));
             }
         }
     }

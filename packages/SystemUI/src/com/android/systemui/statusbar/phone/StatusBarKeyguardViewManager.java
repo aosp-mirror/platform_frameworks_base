@@ -365,6 +365,26 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         return false;
     }
 
+    /**
+     * If applicable, shows the alternate authentication bouncer. Else, shows the input
+     * (pin/password/pattern) bouncer.
+     * @param scrimmed true when the input bouncer should show scrimmed, false when the user will be
+     * dragging it and translation should be deferred {@see KeyguardBouncer#show(boolean, boolean)}
+     */
+    public void showGenericBouncer(boolean scrimmed) {
+        if (mAlternateAuthInterceptor != null) {
+            if (mAlternateAuthInterceptor.showAlternateAuthBouncer()) {
+                mStatusBar.updateScrimController();
+            }
+            return;
+        }
+
+        showBouncer(scrimmed);
+    }
+
+    /**
+     * Hides the input bouncer (pin/password/pattern).
+     */
     @VisibleForTesting
     void hideBouncer(boolean destroyView) {
         if (mBouncer == null) {
@@ -380,7 +400,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     /**
-     * Shows the keyguard bouncer - the password challenge on the lock screen
+     * Shows the keyguard input bouncer - the password challenge on the lock screen
      *
      * @param scrimmed true when the bouncer should show scrimmed, false when the user will be
      * dragging it and translation should be deferred {@see KeyguardBouncer#show(boolean, boolean)}

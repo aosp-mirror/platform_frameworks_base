@@ -338,21 +338,24 @@ public final class CompanionDeviceManager {
      *
      * @param packageName the package name of the calling app
      * @param deviceMacAddress the bluetooth device's mac address
-     * @param userId the calling user's identifier
+     * @param user the user handle that currently hosts the package being queried for a companion
+     *             device association
      * @return true if it was recently associated and we can bypass the dialog, false otherwise
      * @hide
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MANAGE_COMPANION_DEVICES)
     public boolean canPairWithoutPrompt(@NonNull String packageName,
-            @NonNull String deviceMacAddress, int userId) {
+            @NonNull String deviceMacAddress, @NonNull UserHandle user) {
         if (!checkFeaturePresent()) {
             return false;
         }
         Objects.requireNonNull(packageName, "package name cannot be null");
         Objects.requireNonNull(deviceMacAddress, "device mac address cannot be null");
+        Objects.requireNonNull(user, "user handle cannot be null");
         try {
-            return mService.canPairWithoutPrompt(packageName, deviceMacAddress, userId);
+            return mService.canPairWithoutPrompt(packageName, deviceMacAddress,
+                    user.getIdentifier());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

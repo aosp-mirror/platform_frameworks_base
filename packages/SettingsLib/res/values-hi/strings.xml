@@ -195,7 +195,7 @@
     <item msgid="581904787661470707">"सबसे तेज़"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"प्रोफ़ाइल चुनें"</string>
-    <string name="category_personal" msgid="6236798763159385225">"व्यक्तिगत"</string>
+    <string name="category_personal" msgid="6236798763159385225">"निजी"</string>
     <string name="category_work" msgid="4014193632325996115">"कार्यालय"</string>
     <string name="development_settings_title" msgid="140296922921597393">"डेवलपर के लिए सेटिंग और टूल"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"डेवलपर के लिए सेटिंग और टूल चालू करें"</string>
@@ -460,8 +460,7 @@
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"धीरे चार्ज हो रही है"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"वायरलेस चार्जिंग"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"चार्ज नहीं हो रही है"</string>
-    <!-- no translation found for battery_info_status_not_charging (3371084153747234837) -->
-    <skip />
+    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"कनेक्ट किया गया, चार्ज नहीं हो रहा है"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"बैटरी चार्ज हो गई"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"इसका नियंत्रण एडमिन के पास है"</string>
     <string name="disabled" msgid="8017887509554714950">"बंद किया गया"</string>

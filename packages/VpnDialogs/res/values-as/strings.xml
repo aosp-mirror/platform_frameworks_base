@@ -18,6 +18,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="prompt" msgid="3183836924226407828">"সংযোগৰ অনুৰোধ"</string>
     <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g>এ নেটৱৰ্ক ট্ৰেফিক নিৰীক্ষণ কৰিবলৈ এটা ভিপিএন সংযোগ ছেট আপ কৰিবলৈ বিচাৰিছে৷ আপুনি কেৱল উৎসটোক বিশ্বাস কৰিলেহে অনুৰোধ স্বীকাৰ কৰিব৷ ভিপিএন সক্ৰিয় থকাৰ সময়ত আপোনাৰ স্ক্ৰীণৰ ওপৰত &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; দৃশ্যমান হয়৷"</string>
+    <string name="warning" product="tv" msgid="5188957997628124947">"<xliff:g id="APP">%s</xliff:g>এ এটা ভিপিএন সংযোগ ছেট আপ কৰিবলৈ বিচাৰে, যিটোৱে ইয়াক নেটৱৰ্ক ট্ৰেফিক নিৰীক্ষণ কৰিবলৈ দিয়ে। আপুনি উৎসটোক বিশ্বাস কৰিলেহে গ্ৰহণ কৰক। ভিপিএনটো সক্ৰিয় হৈ থকাৰ সময়ত আপোনাৰ স্ক্ৰীনত&lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; প্ৰদৰ্শিত হয়।"</string>
     <string name="legacy_title" msgid="192936250066580964">"ভিপিএন সংযোগ হৈ আছে"</string>
     <string name="session" msgid="6470628549473641030">"ছেশ্বন:"</string>
     <string name="duration" msgid="3584782459928719435">"সময়সীমা:"</string>

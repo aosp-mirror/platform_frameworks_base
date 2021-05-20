@@ -2095,7 +2095,8 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"OFF にする"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"詳細"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"Android 12 では Android 通知の自動調整が拡張通知に切り替えられました。この機能により、操作や返信の候補が提示され、通知が整理されます。\n\n拡張通知は通知コンテンツにアクセスできます。これには、連絡先の名前などの個人情報やメッセージも含まれます。また、この機能は、通知を非表示にしたり通知に応答したりすることもできます。たとえば、電話に出ることやサイレント モードを管理することができます。"</string>
+    <!-- no translation found for nas_upgrade_notification_learn_more_content (3735480566983530650) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ルーティン モード情報の通知"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"通常の充電を行う前に電池が切れる可能性があります"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"電池を長持ちさせるため、バッテリー セーバーが有効になりました"</string>

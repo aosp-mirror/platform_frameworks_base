@@ -2718,15 +2718,8 @@
     <string name="accessibility_floating_button_action_double_tap_to_toggle">toggle</string>
 
     <!-- Device Controls strings -->
-    <!-- Device Controls empty state, title [CHAR LIMIT=30] -->
-    <string name="quick_controls_title">Device controls</string>
-    <!-- Device Controls empty state, subtitle [CHAR LIMIT=100] -->
-    <string name="quick_controls_subtitle">Add controls for your connected devices</string>
-
-    <!-- Device Controls setup, title [CHAR LIMIT=50] -->
-    <string name="quick_controls_setup_title">Set up device controls</string>
-    <!-- Device Controls setup, subtitle [CHAR LIMIT=100] -->
-    <string name="quick_controls_setup_subtitle">Hold the Power button to access your controls</string>
+    <!-- Device Controls, Quick Settings tile title [CHAR LIMIT=30] -->
+    <string name="quick_controls_title">Home controls</string>
 
     <!-- Controls management providers screen title [CHAR LIMIT=60]-->
     <string name="controls_providers_title">Choose app to add controls</string>
@@ -2755,7 +2748,7 @@
     <!-- Controls management controls screen default title [CHAR LIMIT=30] -->
     <string name="controls_favorite_default_title">Controls</string>
     <!-- Controls management controls screen subtitle [CHAR LIMIT=NONE] -->
-    <string name="controls_favorite_subtitle">Choose controls to access from the power menu</string>
+    <string name="controls_favorite_subtitle">Choose controls to access from Quick Settings</string>
     <!-- Controls management editing screen, user direction for rearranging controls [CHAR LIMIT=NONE] -->
     <string name="controls_favorite_rearrange">Hold &amp; drag to rearrange controls</string>
 
@@ -2847,7 +2840,7 @@
     <!-- Stateless control message informing the user that a routine has started [CHAR_LIMIT=30] -->
     <string name="controls_in_progress">In progress</string>
     <!-- Tooltip informing user where the recently added controls are [CHAR_LIMIT=100] -->
-    <string name="controls_added_tooltip">Hold Power button to see new controls</string>
+    <string name="controls_added_tooltip">Open Quick Settings to see new controls</string>
 
     <!-- Controls menu, add [CHAR_LIMIT=30] -->
     <string name="controls_menu_add">Add controls</string>
@@ -2888,12 +2881,16 @@
     <string name="recent_conversations">Recent conversations</string>
     <!-- Text for button dismissing configuration activity with no conversations [CHAR LIMIT=20] -->
     <string name="okay">Okay</string>
-    <!-- Timestamp for notification with exact time [CHAR LIMIT=25] -->
-    <string name="timestamp"><xliff:g id="duration" example="5 hours">%1$s</xliff:g> ago</string>
-    <!-- Timestamp for notification when less than a certain time window [CHAR LIMIT=25] -->
-    <string name="less_than_timestamp">Less than <xliff:g id="duration" example="5 hours">%1$s</xliff:g> ago</string>
-    <!-- Timestamp for notification when over a certain time window [CHAR LIMIT=25] -->
-    <string name="over_timestamp">Over <xliff:g id="duration" example="1 week">%1$s</xliff:g> ago</string>
+    <!-- Timestamp for notification with exact time in days plural [CHAR LIMIT=25] -->
+    <string name="days_timestamp"><xliff:g id="duration" example="5">%1$s</xliff:g> days ago</string>
+    <!-- Timestamp for notification from one week ago[CHAR LIMIT=25] -->
+    <string name="one_week_timestamp">1 week ago</string>
+    <!-- Timestamp for notification from two weeks ago [CHAR LIMIT=25] -->
+    <string name="two_weeks_timestamp">2 weeks ago</string>
+    <!-- Timestamp for notification when over one week ago [CHAR LIMIT=25] -->
+    <string name="over_one_week_timestamp">Over 1 week ago</string>
+    <!-- Timestamp for notification when over two weeks ago [CHAR LIMIT=25] -->
+    <string name="over_two_weeks_timestamp">Over 2 weeks ago</string>
     <!-- Status text on the Conversation widget for a birthday today [CHAR LIMIT=20] -->
     <string name="birthday_status">Birthday</string>
     <!-- Content description text on the Conversation widget for a birthday today [CHAR LIMIT=150] -->
@@ -2945,8 +2942,6 @@
     <!-- Text to display in a notification when ACTION_BATTERY_CHANGED.EXTRA_PRESENT field is false
     [CHAR LIMIT=NONE] -->
     <string name="battery_state_unknown_notification_text">Tap for more information</string>
-
-    <string name="qs_tile_label_fontFamily" translatable="false">@*android:string/config_headlineFontFamilyMedium</string>
 
     <!-- Secondary label for alarm tile when there is no next alarm information [CHAR LIMIT=20] -->
     <string name="qs_alarm_tile_no_alarm">No alarm set</string>

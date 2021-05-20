@@ -42,7 +42,7 @@
     <string name="serviceErased" msgid="997354043770513494">"Behar bezala ezabatu da."</string>
     <string name="passwordIncorrect" msgid="917087532676155877">"Pasahitz okerra."</string>
     <string name="mmiComplete" msgid="6341884570892520140">"MMI osatu da."</string>
-    <string name="badPin" msgid="888372071306274355">"Idatzi duzun PIN kode zaharra ez da zuzena."</string>
+    <string name="badPin" msgid="888372071306274355">"Idatzi duzun PIN zaharra ez da zuzena."</string>
     <string name="badPuk" msgid="4232069163733147376">"Idatzi duzun PUK kode zaharra ez da zuzena. Saiatu berriro."</string>
     <string name="mismatchPin" msgid="2929611853228707473">"Idatzi dituzun PIN kodeak ez datoz bat."</string>
     <string name="invalidPin" msgid="7542498253319440408">"Idatzi 4 eta 8 zenbaki bitarteko PIN bat."</string>
@@ -646,7 +646,7 @@
     <string name="face_error_timeout" msgid="522924647742024699">"Saiatu berriro aurpegiaren bidez desblokeatzen."</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Ezin dira gorde aurpegiaren datu berriak. Ezabatu zaharrak."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Utzi da aurpegiaren bidezko eragiketa."</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"Erabiltzaileak bertan behera utzi du aurpegiaren bidez desblokeatzea."</string>
+    <string name="face_error_user_canceled" msgid="8553045452825849843">"Erabiltzaileak aurpegiaren bidez desblokeatzeko aukera utzi du"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Saiakera gehiegi egin dituzu. Saiatu berriro geroago."</string>
     <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Saiakera gehiegi egin dira. Aurpegiaren bidez desblokeatzeko eginbidea desgaitu egin da."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Ezin da egiaztatu aurpegia. Saiatu berriro."</string>
@@ -887,7 +887,7 @@
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Saiatu berriro"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Saiatu berriro"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Desblokeatu eginbide eta datu guztiak erabiltzeko"</string>
-    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Aurpegiaren bidez desblokeatzeko saiakera muga gainditu da"</string>
+    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Gainditu da aurpegiaren bidez desblokeatzeko saiakera-muga"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"Ez dago SIM txartelik"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"Ez dago SIM txartelik tabletan."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Ez dago SIM txartelik Android TV gailuan."</string>
@@ -2095,7 +2095,8 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"Ados"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Desaktibatu"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Lortu informazio gehiago"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"Android 12-n, jakinarazpen hobetuek ordeztu dituzte Android-eko jakinarazpen egokituak. Eginbide horrek iradokitako ekintzak eta erantzunak erakusten, eta zure jakinarazpenak antolatzen ditu.\n\nJakinarazpen hobetuek jakinarazpenen eduki osoa atzi dezakete, informazio pertsonala barne (esaterako, kontaktuen izenak eta mezuak). Halaber, jakinarazpenak baztertu edo haiei erantzun diezaieke eginbideak; adibidez, telefono-deiak erantzun eta ez molestatzeko modua kontrolatu."</string>
+    <!-- no translation found for nas_upgrade_notification_learn_more_content (3735480566983530650) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Ohitura moduaren informazio-jakinarazpena"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Baliteke bateria ohi baino lehenago agortzea"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Bateria-aurrezlea aktibatuta dago bateriaren iraupena luzatzeko"</string>

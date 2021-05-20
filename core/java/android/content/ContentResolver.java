@@ -1551,7 +1551,8 @@ public abstract class ContentResolver implements ContentInterface {
      * on these schemes.
      *
      * @param uri The desired URI.
-     * @param mode May be "w", "wa", "rw", or "rwt".
+     * @param mode The string representation of the file mode. Can be "r", "w", "wt", "wa", "rw"
+     *             or "rwt". See{@link ParcelFileDescriptor#parseMode} for more details.
      * @return an OutputStream or {@code null} if the provider recently crashed.
      * @throws FileNotFoundException if the provided URI could not be opened.
      * @see #openAssetFileDescriptor(Uri, String)
@@ -1607,8 +1608,8 @@ public abstract class ContentResolver implements ContentInterface {
      * provider, use {@link ParcelFileDescriptor#closeWithError(String)}.
      *
      * @param uri The desired URI to open.
-     * @param mode The file mode to use, as per {@link ContentProvider#openFile
-     * ContentProvider.openFile}.
+     * @param mode The string representation of the file mode. Can be "r", "w", "wt", "wa", "rw"
+     *             or "rwt". See{@link ParcelFileDescriptor#parseMode} for more details.
      * @return Returns a new ParcelFileDescriptor pointing to the file or {@code null} if the
      * provider recently crashed. You own this descriptor and are responsible for closing it
      * when done.
@@ -1650,8 +1651,8 @@ public abstract class ContentResolver implements ContentInterface {
      * provider, use {@link ParcelFileDescriptor#closeWithError(String)}.
      *
      * @param uri The desired URI to open.
-     * @param mode The file mode to use, as per {@link ContentProvider#openFile
-     * ContentProvider.openFile}.
+     * @param mode The string representation of the file mode. Can be "r", "w", "wt", "wa", "rw"
+     *             or "rwt". See{@link ParcelFileDescriptor#parseMode} for more details.
      * @param cancellationSignal A signal to cancel the operation in progress,
      *         or null if none. If the operation is canceled, then
      *         {@link OperationCanceledException} will be thrown.
@@ -1744,8 +1745,8 @@ public abstract class ContentResolver implements ContentInterface {
      * from any built-in data conversion that a provider implements.
      *
      * @param uri The desired URI to open.
-     * @param mode The file mode to use, as per {@link ContentProvider#openAssetFile
-     * ContentProvider.openAssetFile}.
+     * @param mode The string representation of the file mode. Can be "r", "w", "wt", "wa", "rw"
+     *             or "rwt". See{@link ParcelFileDescriptor#parseMode} for more details.
      * @return Returns a new ParcelFileDescriptor pointing to the file or {@code null} if the
      * provider recently crashed. You own this descriptor and are responsible for closing it
      * when done.
@@ -1798,8 +1799,8 @@ public abstract class ContentResolver implements ContentInterface {
      * from any built-in data conversion that a provider implements.
      *
      * @param uri The desired URI to open.
-     * @param mode The file mode to use, as per {@link ContentProvider#openAssetFile
-     * ContentProvider.openAssetFile}.
+     * @param mode The string representation of the file mode. Can be "r", "w", "wt", "wa", "rw"
+     *             or "rwt". See{@link ParcelFileDescriptor#parseMode} for more details.
      * @param cancellationSignal A signal to cancel the operation in progress, or null if
      *            none. If the operation is canceled, then
      *            {@link OperationCanceledException} will be thrown.

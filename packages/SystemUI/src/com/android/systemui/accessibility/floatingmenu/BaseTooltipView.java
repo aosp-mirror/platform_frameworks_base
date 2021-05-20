@@ -77,7 +77,6 @@ class BaseTooltipView extends FrameLayout {
         mAnchorView = anchorView;
         mCurrentLayoutParams = createDefaultLayoutParams();
 
-        updateDimensions();
         initViews();
     }
 
@@ -85,14 +84,8 @@ class BaseTooltipView extends FrameLayout {
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
 
-        updateDimensions();
-        updateTextView();
-
         mAnchorView.onConfigurationChanged(newConfig);
-        final Rect anchorViewLocation = mAnchorView.getWindowLocationOnScreen();
-        updateArrowWith(anchorViewLocation);
-        updateWidthWith(anchorViewLocation);
-        updateLocationWith(anchorViewLocation);
+        updateTooltipView();
 
         mWindowManager.updateViewLayout(this, mCurrentLayoutParams);
     }
@@ -129,10 +122,7 @@ class BaseTooltipView extends FrameLayout {
         }
 
         mIsShowing = true;
-        final Rect anchorViewLocation = mAnchorView.getWindowLocationOnScreen();
-        updateArrowWith(anchorViewLocation);
-        updateWidthWith(anchorViewLocation);
-        updateLocationWith(anchorViewLocation);
+        updateTooltipView();
 
         mWindowManager.addView(this, mCurrentLayoutParams);
     }
@@ -205,6 +195,16 @@ class BaseTooltipView extends FrameLayout {
         mTextViewCornerRadius =
                 res.getDimensionPixelSize(
                         R.dimen.accessibility_floating_tooltip_text_corner_radius);
+    }
+
+    private void updateTooltipView() {
+        updateDimensions();
+        updateTextView();
+
+        final Rect anchorViewLocation = mAnchorView.getWindowLocationOnScreen();
+        updateArrowWith(anchorViewLocation);
+        updateWidthWith(anchorViewLocation);
+        updateLocationWith(anchorViewLocation);
     }
 
     private void updateTextView() {

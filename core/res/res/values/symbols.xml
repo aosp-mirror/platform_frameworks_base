@@ -2962,7 +2962,6 @@
   <java-symbol type="string" name="importance_from_person" />
 
   <java-symbol type="layout" name="work_widget_mask_view" />
-  <java-symbol type="id" name="work_widget_mask_frame" />
   <java-symbol type="id" name="work_widget_app_icon" />
   <java-symbol type="id" name="work_widget_badge_icon" />
 
@@ -3632,6 +3631,7 @@
   <java-symbol type="array" name="config_allowedSecureInstantAppSettings" />
 
   <java-symbol type="bool" name="config_handleVolumeKeysInWindowManager" />
+  <java-symbol type="bool" name="config_handleVolumeAliasesUsingVolumeGroups" />
   <java-symbol type="dimen" name="config_inCallNotificationVolume" />
   <java-symbol type="string" name="config_inCallNotificationSound" />
   <java-symbol type="integer" name="config_autoGroupAtCount" />

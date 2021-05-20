@@ -133,7 +133,7 @@ public final class SchemaToProtoConverter {
             case STRING:
                 return toStringPropertyConfig(proto);
             case INT64:
-                return new AppSearchSchema.Int64PropertyConfig.Builder(proto.getPropertyName())
+                return new AppSearchSchema.LongPropertyConfig.Builder(proto.getPropertyName())
                         .setCardinality(proto.getCardinality().getNumber())
                         .build();
             case DOUBLE:

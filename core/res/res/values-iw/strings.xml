@@ -615,14 +615,14 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"סמל טביעת אצבע"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"ניהול החומרה לשחרור נעילה על ידי זיהוי פנים"</string>
+    <string name="permlab_manageFace" msgid="4569549381889283282">"ניהול החומרה לפתיחה ע\"י זיהוי הפנים"</string>
     <string name="permdesc_manageFace" msgid="6204569688492710471">"מאפשרת לאפליקציה להפעיל שיטות להוספה ומחיקה של תבניות פנים שבהן ייעשה שימוש."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"שימוש בחומרה לשחרור נעילה על ידי זיהוי פנים"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"מאפשרת לאפליקציה להשתמש בחומרה לשחרור נעילה על ידי זיהוי פנים לצורך אימות"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"שחרור נעילה על ידי זיהוי פנים"</string>
+    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"שימוש בחומרה לפתיחה ע\"י זיהוי הפנים"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"מאפשרת לאפליקציה להשתמש בחומרה לפתיחה ע\"י זיהוי הפנים"</string>
+    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"פתיחה ע\"י זיהוי הפנים"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"יש לבצע סריקה חוזרת של הפנים שלך"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"לשיפור הזיהוי יש לסרוק מחדש את הפנים שלך"</string>
-    <string name="face_setup_notification_title" msgid="550617822603450009">"הגדרת שחרור נעילה על ידי זיהוי פנים"</string>
+    <string name="face_setup_notification_title" msgid="550617822603450009">"הגדרה של פתיחה ע\"י זיהוי הפנים"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"יש להביט בטלפון כדי לבטל את נעילתו"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"אפשר להגדיר דרכים נוספות לביטול נעילה"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"יש להקיש כדי להוסיף טביעת אצבע"</string>
@@ -649,18 +649,18 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"לא ניתן לאמת את הפנים. החומרה לא זמינה."</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"יש לנסות שוב את שחרור הנעילה על ידי זיהוי פנים."</string>
+    <string name="face_error_timeout" msgid="522924647742024699">"יש לנסות שוב את הפתיחה ע\"י זיהוי הפנים."</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"לא ניתן לאחסן נתוני פנים חדשים. תחילה יש למחוק את הנתונים הישנים."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"הפעולה לאימות הפנים בוטלה."</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"שחרור הנעילה על ידי זיהוי פנים בוטל על ידי המשתמש."</string>
+    <string name="face_error_user_canceled" msgid="8553045452825849843">"פתיחה ע\"י זיהוי הפנים בוטל על ידי המשתמש."</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"יותר מדי ניסיונות. יש לנסות שוב מאוחר יותר."</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"יותר מדי ניסיונות. שחרור נעילה על ידי זיהוי פנים מושבת."</string>
+    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"יותר מדי ניסיונות. \'פתיחה ע\"י זיהוי הפנים\' מושבת."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"לא ניתן לאמת את הפנים. יש לנסות שוב."</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"לא הגדרת שחרור נעילה על ידי זיהוי פנים."</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"המכשיר הזה לא תומך בשחרור נעילה על ידי זיהוי פנים."</string>
+    <string name="face_error_not_enrolled" msgid="7369928733504691611">"לא הגדרת פתיחה ע\"י זיהוי הפנים."</string>
+    <string name="face_error_hw_not_present" msgid="1070600921591729944">"המכשיר הזה לא תומך בפתיחה ע\"י זיהוי הפנים."</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"החיישן מושבת באופן זמני."</string>
     <string name="face_name_template" msgid="3877037340223318119">"פנים <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <string name="face_app_setting_name" msgid="8130135875458467243">"שחרור נעילה על ידי זיהוי פנים"</string>
+    <string name="face_app_setting_name" msgid="8130135875458467243">"פתיחה ע\"י זיהוי הפנים"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"שימוש בזיהוי פנים או בנעילת מסך"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"יש להשתמש באימות פנים כדי להמשיך"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"יש להשתמש בזיהוי הפנים או בנעילת המסך כדי להמשיך"</string>
@@ -893,7 +893,7 @@
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"כדאי לנסות שוב"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"כדאי לנסות שוב"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"צריך לבטל את הנעילה כדי שכל התכונות והנתונים יהיו זמינים"</string>
-    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"חרגת ממספר הניסיונות המרבי לשחרור נעילה על ידי זיהוי פנים"</string>
+    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"חרגת ממספר הניסיונות המרבי לפתיחה ע\"י זיהוי הפנים"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"‏אין כרטיס SIM"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"‏אין כרטיס SIM בטאבלט."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"‏אין כרטיס SIM במכשיר ה-Android TV."</string>
@@ -963,7 +963,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"הרחבה של אזור ביטול הנעילה."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"ביטול נעילה באמצעות הסטה."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"ביטול נעילה על ידי שרטוט קו."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"שחרור נעילה על ידי זיהוי פנים."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"פתיחה ע\"י זיהוי הפנים."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"ביטול נעילה באמצעות קוד אימות."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"‏ביטול הנעילה של קוד האימות ל-SIM."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"‏ביטול נעילה של PUK ל-SIM."</string>
@@ -2161,7 +2161,8 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"אישור"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"השבתה"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"מידע נוסף"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"‏ההתראות המשופרות החליפו את ההתראות המותאמות ל-Android ב-Android 12. התכונה הזו מציגה הצעות לפעולות ולתשובות ומארגנת את ההתראות שלך.\n\nההתראות המשופרות יכולות לקבל גישה לתוכן של התראות, כולל מידע אישי כמו שמות אנשי קשר והודעות. התכונה הזו יכולה גם לסגור התראות או להשיב להן, למשל מענה לשיחות טלפון ושליטה בתכונה \'נא לא להפריע\'."</string>
+    <!-- no translation found for nas_upgrade_notification_learn_more_content (3735480566983530650) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"התראת מידע לגבי מצב שגרתי"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"הסוללה עלולה להתרוקן לפני המועד הרגיל של הטעינה"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"תכונת החיסכון בסוללה הופעלה כדי להאריך את חיי הסוללה"</string>
