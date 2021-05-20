@@ -156,7 +156,7 @@
     <string name="launch_defaults_none" msgid="8049374306261262709">"कुनै डिफल्ट सेट गरिएको छैन"</string>
     <string name="tts_settings" msgid="8130616705989351312">"पाठ-वाचन सेटिङहरू"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"टेक्स्ट टु स्पिच आउटपुट"</string>
-    <string name="tts_default_rate_title" msgid="3964187817364304022">"वाणी दर"</string>
+    <string name="tts_default_rate_title" msgid="3964187817364304022">"बोलीको गति"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"पाठ वाचन हुने गति"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"पिच"</string>
     <string name="tts_default_pitch_summary" msgid="9132719475281551884">"संश्लेषित बोलीको टोनमा प्रभाव पार्छ"</string>
@@ -164,7 +164,7 @@
     <string name="tts_lang_use_system" msgid="6312945299804012406">"प्रणालीको भाषा प्रयोग गर्नुहोस्"</string>
     <string name="tts_lang_not_selected" msgid="7927823081096056147">"भाषा चयन गरिएको छैन"</string>
     <string name="tts_default_lang_summary" msgid="9042620014800063470">"बोली पाठका लागि भाषा-विशेष आवाज सेट गर्दछ"</string>
-    <string name="tts_play_example_title" msgid="1599468547216481684">"एउटा उदाहरणलाई सुन्नुहोस्"</string>
+    <string name="tts_play_example_title" msgid="1599468547216481684">"एउटा उदाहरण सुन्नुहोस्"</string>
     <string name="tts_play_example_summary" msgid="634044730710636383">"वाणी संश्लेषणको एउटा छोटो प्रदर्शन बजाउनुहोस्"</string>
     <string name="tts_install_data_title" msgid="1829942496472751703">"आवाज डेटा स्थापना गर्नुहोस्"</string>
     <string name="tts_install_data_summary" msgid="3608874324992243851">"वाणी संश्लेषणका लागि आवश्यक आवाज डेटा स्थापना गर्नुहोस्"</string>
@@ -172,7 +172,7 @@
     <string name="tts_engine_network_required" msgid="8722087649733906851">"पाठ वाचकको आउटपुटका लागि यस भाषालाई काम गरिरहेको सञ्जाल जडान आवाश्यक पर्छ।"</string>
     <string name="tts_default_sample_string" msgid="6388016028292967973">"यो वाणी संश्लेषणको एउटा उदाहरण हो।"</string>
     <string name="tts_status_title" msgid="8190784181389278640">"डिफल्ट भाषाको वस्तुस्थिति"</string>
-    <string name="tts_status_ok" msgid="8583076006537547379">"<xliff:g id="LOCALE">%1$s</xliff:g> पूर्ण रूपले समर्थित छ"</string>
+    <string name="tts_status_ok" msgid="8583076006537547379">"<xliff:g id="LOCALE">%1$s</xliff:g> पूर्ण रूपमा प्रयोग गर्न मिल्छ"</string>
     <string name="tts_status_requires_network" msgid="8327617638884678896">"<xliff:g id="LOCALE">%1$s</xliff:g> नेटवर्क जडान चाहिन्छ"</string>
     <string name="tts_status_not_supported" msgid="2702997696245523743">"<xliff:g id="LOCALE">%1$s</xliff:g> समर्थित छैन"</string>
     <string name="tts_status_checking" msgid="8026559918948285013">"जाँच गर्दै..."</string>
