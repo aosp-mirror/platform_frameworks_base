@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Process;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.SparseIntArray;
@@ -56,8 +57,8 @@ public final class PlatformLogger implements AppSearchLogger {
     // Context of the system service.
     private final Context mContext;
 
-    // User ID of the caller who we're logging for.
-    private final int mUserId;
+    // User we're logging for.
+    private final UserHandle mUserHandle;
 
     // Configuration for the logger
     private final Config mConfig;
@@ -164,10 +165,11 @@ public final class PlatformLogger implements AppSearchLogger {
     /**
      * Westworld constructor
      */
-    public PlatformLogger(@NonNull Context context, int userId, @NonNull Config config) {
+    public PlatformLogger(
+            @NonNull Context context, @NonNull UserHandle userHandle, @NonNull Config config) {
         mContext = Objects.requireNonNull(context);
+        mUserHandle = Objects.requireNonNull(userHandle);
         mConfig = Objects.requireNonNull(config);
-        mUserId = userId;
     }
 
     /** Logs {@link CallStats}. */
@@ -493,7 +495,8 @@ public final class PlatformLogger implements AppSearchLogger {
         // TODO(b/173532925) since VisibilityStore has the same method, we can make this a
         //  utility function
         try {
-            packageUid = mContext.getPackageManager().getPackageUidAsUser(packageName, mUserId);
+            packageUid = mContext.getPackageManager().getPackageUidAsUser(
+                    packageName, mUserHandle.getIdentifier());
             mPackageUidCacheLocked.put(packageName, packageUid);
             return packageUid;
         } catch (PackageManager.NameNotFoundException e) {
