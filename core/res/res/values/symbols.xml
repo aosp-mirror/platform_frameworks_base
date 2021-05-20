@@ -2963,7 +2963,6 @@
   <java-symbol type="string" name="importance_from_person" />
 
   <java-symbol type="layout" name="work_widget_mask_view" />
-  <java-symbol type="id" name="work_widget_mask_frame" />
   <java-symbol type="id" name="work_widget_app_icon" />
   <java-symbol type="id" name="work_widget_badge_icon" />
 
