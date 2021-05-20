@@ -29,7 +29,6 @@ genrule {
 
 java_library {
     name: "service-appsearch",
-    installable: true,
     srcs: [
         "java/**/*.java",
         ":statslog-appsearch-java-gen",
@@ -37,6 +36,8 @@ java_library {
     static_libs: [
         "icing-java-proto-lite",
         "libicing-java",
+        // This list must be kept in sync with jarjar.txt
+        "modules-utils-preconditions",
     ],
     libs: [
         "framework",
@@ -44,6 +45,7 @@ java_library {
         "framework-statsd.stubs.module_lib",
         "services.core",
         "services.usage",
+        "unsupportedappusage", // TODO(b/181887768) should be removed
     ],
     required: [
         "libicing",
@@ -56,4 +58,5 @@ java_library {
         "//frameworks/base/services/tests/servicestests",
     ],
     apex_available: ["com.android.appsearch"],
+    installable: true,
 }
