@@ -234,6 +234,23 @@ public class VoiceInteractionManagerService extends SystemService {
             VoiceInteractionManagerService.this.mServiceStub.stopLocalVoiceInteraction(
                     callingActivity);
         }
+
+        @Override
+        public boolean hasActiveSession(String packageName) {
+            VoiceInteractionManagerServiceImpl impl =
+                    VoiceInteractionManagerService.this.mServiceStub.mImpl;
+            if (impl == null) {
+                return false;
+            }
+
+            VoiceInteractionSessionConnection session =
+                    impl.mActiveSession;
+            if (session == null) {
+                return false;
+            }
+
+            return TextUtils.equals(packageName, session.mSessionComponentName.getPackageName());
+        }
     }
 
     // implementation entry point and binder service
