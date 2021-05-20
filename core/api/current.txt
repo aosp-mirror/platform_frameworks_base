@@ -9039,7 +9039,7 @@ package android.bluetooth {
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public String getName();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public int getType();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public android.os.ParcelUuid[] getUuids();
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public boolean setAlias(@NonNull String);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public int setAlias(@Nullable String);
     method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public boolean setPairingConfirmation(boolean);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public boolean setPin(byte[]);
     method public void writeToParcel(android.os.Parcel, int);
@@ -9485,6 +9485,15 @@ package android.bluetooth {
     field public static final int TYPE_L2CAP = 3; // 0x3
     field public static final int TYPE_RFCOMM = 1; // 0x1
     field public static final int TYPE_SCO = 2; // 0x2
+  }
+
+  public final class BluetoothStatusCodes {
+    field public static final int ERROR_BLUETOOTH_NOT_ALLOWED = 2; // 0x2
+    field public static final int ERROR_BLUETOOTH_NOT_ENABLED = 1; // 0x1
+    field public static final int ERROR_DEVICE_NOT_BONDED = 3; // 0x3
+    field public static final int ERROR_MISSING_BLUETOOTH_CONNECT_PERMISSION = 6; // 0x6
+    field public static final int ERROR_UNKNOWN = 2147483647; // 0x7fffffff
+    field public static final int SUCCESS = 0; // 0x0
   }
 
 }
