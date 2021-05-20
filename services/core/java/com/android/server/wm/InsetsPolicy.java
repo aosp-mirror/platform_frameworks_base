@@ -22,6 +22,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.view.InsetsController.ANIMATION_TYPE_HIDE;
 import static android.view.InsetsController.ANIMATION_TYPE_SHOW;
+import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.SyncRtSurfaceTransactionApplier.applyParams;
@@ -207,7 +208,8 @@ class InsetsPolicy {
      */
     InsetsState getInsetsForWindow(WindowState target) {
         final InsetsState originalState = mStateController.getInsetsForWindow(target);
-        return adjustVisibilityForTransientTypes(originalState);
+        final InsetsState state = adjustVisibilityForTransientTypes(originalState);
+        return target.mIsImWindow ? adjustVisibilityForIme(state, state == originalState) : state;
     }
 
     /**
@@ -237,6 +239,20 @@ class InsetsPolicy {
         return state;
     }
 
+    // Navigation bar insets is always visible to IME.
+    private static InsetsState adjustVisibilityForIme(InsetsState originalState,
+            boolean copyState) {
+        final InsetsSource originalNavSource = originalState.peekSource(ITYPE_NAVIGATION_BAR);
+        if (originalNavSource != null && !originalNavSource.isVisible()) {
+            final InsetsState state = copyState ? new InsetsState(originalState) : originalState;
+            final InsetsSource navSource = new InsetsSource(originalNavSource);
+            navSource.setVisible(true);
+            state.addSource(navSource);
+            return state;
+        }
+        return originalState;
+    }
+
     void onInsetsModified(InsetsControlTarget caller) {
         mStateController.onInsetsModified(caller);
         checkAbortTransient(caller);
@@ -245,17 +261,21 @@ class InsetsPolicy {
 
     /**
      * Called when a control target modified the insets state. If the target set a insets source to
-     * visible while it is shown transiently, we need to abort the transient state.
+     * visible while it is shown transiently, we need to abort the transient state. While IME is
+     * requested visible, we also need to abort the transient state of navigation bar if it is shown
+     * transiently.
      *
      * @param caller who changed the insets state.
      */
     private void checkAbortTransient(InsetsControlTarget caller) {
         if (mShowingTransientTypes.size() != 0) {
-            IntArray abortTypes = new IntArray();
+            final IntArray abortTypes = new IntArray();
+            final boolean imeRequestedVisible = caller.getRequestedVisibility(ITYPE_IME);
             for (int i = mShowingTransientTypes.size() - 1; i >= 0; i--) {
                 final @InternalInsetsType int type = mShowingTransientTypes.get(i);
-                if (mStateController.isFakeTarget(type, caller)
-                        && caller.getRequestedVisibility(type)) {
+                if ((mStateController.isFakeTarget(type, caller)
+                                && caller.getRequestedVisibility(type))
+                        || (type == ITYPE_NAVIGATION_BAR && imeRequestedVisible)) {
                     mShowingTransientTypes.remove(i);
                     abortTypes.add(type);
                 }
@@ -330,6 +350,11 @@ class InsetsPolicy {
 
     private @Nullable InsetsControlTarget getNavControlTarget(@Nullable WindowState focusedWin,
             boolean forceShowsSystemBarsForWindowingMode) {
+        final WindowState imeWin = mDisplayContent.mInputMethodWindow;
+        if (imeWin != null && imeWin.isVisible()) {
+            // Force showing navigation bar while IME is visible.
+            return null;
+        }
         if (mShowingTransientTypes.indexOf(ITYPE_NAVIGATION_BAR) != -1) {
             return mDummyControlTarget;
         }

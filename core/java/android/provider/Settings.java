@@ -9515,6 +9515,20 @@ public final class Settings {
                 "power_menu_locked_show_content";
 
         /**
+         * Whether home controls should be accessible from the lockscreen
+         *
+         * @hide
+         */
+        public static final String LOCKSCREEN_SHOW_CONTROLS = "lockscreen_show_controls";
+
+        /**
+         * Whether wallet should be accessible from the lockscreen
+         *
+         * @hide
+         */
+        public static final String LOCKSCREEN_SHOW_WALLET = "lockscreen_show_wallet";
+
+        /**
          * Specifies whether the web action API is enabled.
          *
          * @hide

@@ -131,11 +131,10 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
-                mVelocityTracker.addMovement(event);
                 releaseTouching();
-
                 if (!mMoving) break;
 
+                mVelocityTracker.addMovement(event);
                 mVelocityTracker.computeCurrentVelocity(1000 /* units */);
                 final float velocity = isLandscape
                         ? mVelocityTracker.getXVelocity()

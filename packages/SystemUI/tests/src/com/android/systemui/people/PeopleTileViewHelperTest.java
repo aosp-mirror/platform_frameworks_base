@@ -148,8 +148,8 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
         when(mMockContext.getString(R.string.birthday_status)).thenReturn(
                 mContext.getString(R.string.birthday_status));
         when(mMockContext.getPackageManager()).thenReturn(mPackageManager);
-        when(mMockContext.getString(R.string.over_timestamp)).thenReturn(
-                mContext.getString(R.string.over_timestamp));
+        when(mMockContext.getString(R.string.over_two_weeks_timestamp)).thenReturn(
+                mContext.getString(R.string.over_two_weeks_timestamp));
         Configuration configuration = mock(Configuration.class);
         DisplayMetrics displayMetrics = mock(DisplayMetrics.class);
         Resources resources = mock(Resources.class);
@@ -325,7 +325,7 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
         TextView statusContent = (TextView) result.findViewById(R.id.text_content);
         assertEquals(View.VISIBLE, statusContent.getVisibility());
         assertEquals(statusContent.getText(), mContext.getString(R.string.birthday_status));
-        assertThat(statusContent.getMaxLines()).isEqualTo(3);
+        assertThat(statusContent.getMaxLines()).isEqualTo(2);
 
         mOptions.putInt(OPTION_APPWIDGET_MIN_WIDTH,
                 getSizeInDp(R.dimen.required_width_for_medium) - 1);
@@ -364,7 +364,7 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
         statusContent = (TextView) largeResult.findViewById(R.id.text_content);
         assertEquals(View.VISIBLE, statusContent.getVisibility());
         assertEquals(statusContent.getText(), mContext.getString(R.string.birthday_status));
-        assertThat(statusContent.getMaxLines()).isEqualTo(3);
+        assertThat(statusContent.getMaxLines()).isEqualTo(2);
     }
 
     @Test
@@ -390,7 +390,7 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
         // Has status.
         TextView statusContent = (TextView) result.findViewById(R.id.text_content);
         assertEquals(statusContent.getText(), GAME_DESCRIPTION);
-        assertThat(statusContent.getMaxLines()).isEqualTo(3);
+        assertThat(statusContent.getMaxLines()).isEqualTo(2);
 
         mOptions.putInt(OPTION_APPWIDGET_MIN_WIDTH,
                 getSizeInDp(R.dimen.required_width_for_medium) - 1);
@@ -431,7 +431,7 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
         statusContent = (TextView) largeResult.findViewById(R.id.text_content);
         assertEquals(View.VISIBLE, statusContent.getVisibility());
         assertEquals(statusContent.getText(), GAME_DESCRIPTION);
-        assertThat(statusContent.getMaxLines()).isEqualTo(3);
+        assertThat(statusContent.getMaxLines()).isEqualTo(2);
     }
 
     @Test
@@ -620,7 +620,7 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
         TextView statusContent = (TextView) result.findViewById(R.id.text_content);
         assertEquals(View.VISIBLE, statusContent.getVisibility());
         assertEquals(statusContent.getText(), MISSED_CALL);
-        assertThat(statusContent.getMaxLines()).isEqualTo(3);
+        assertThat(statusContent.getMaxLines()).isEqualTo(2);
 
         mOptions.putInt(OPTION_APPWIDGET_MIN_WIDTH,
                 getSizeInDp(R.dimen.required_width_for_medium) - 1);
@@ -658,7 +658,7 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
         statusContent = (TextView) largeResult.findViewById(R.id.text_content);
         assertEquals(View.VISIBLE, statusContent.getVisibility());
         assertEquals(statusContent.getText(), MISSED_CALL);
-        assertThat(statusContent.getMaxLines()).isEqualTo(3);
+        assertThat(statusContent.getMaxLines()).isEqualTo(2);
     }
 
     @Test
@@ -684,7 +684,7 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
         TextView statusContent = (TextView) result.findViewById(R.id.text_content);
         assertEquals(View.VISIBLE, statusContent.getVisibility());
         assertEquals(statusContent.getText(), NOTIFICATION_CONTENT);
-        assertThat(statusContent.getMaxLines()).isEqualTo(3);
+        assertThat(statusContent.getMaxLines()).isEqualTo(2);
 
         // Has a single message, no count shown.
         assertEquals(View.GONE, result.findViewById(R.id.messages_count).getVisibility());
@@ -718,7 +718,7 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
         assertEquals(name.getText(), NAME);
         assertEquals(View.GONE, largeResult.findViewById(R.id.subtext).getVisibility());
         assertEquals(View.GONE, largeResult.findViewById(R.id.predefined_icon).getVisibility());
-        assertEquals(View.GONE, largeResult.findViewById(R.id.scrim_layout).getVisibility());
+        assertEquals(largeResult.findViewById(R.id.scrim_layout), null);
         // Has availability.
         assertEquals(View.VISIBLE, largeResult.findViewById(R.id.availability).getVisibility());
         // Has person icon.
@@ -728,7 +728,7 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
         statusContent = (TextView) largeResult.findViewById(R.id.text_content);
         assertEquals(View.VISIBLE, statusContent.getVisibility());
         assertEquals(statusContent.getText(), NOTIFICATION_CONTENT);
-        assertThat(statusContent.getMaxLines()).isEqualTo(3);
+        assertThat(statusContent.getMaxLines()).isEqualTo(2);
 
         // Has a single message, no count shown.
         assertEquals(View.GONE, largeResult.findViewById(R.id.messages_count).getVisibility());
@@ -761,7 +761,7 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
         assertEquals(statusContent.getText(), NOTIFICATION_CONTENT);
 
         // Subtract one from lines because sender is included.
-        assertThat(statusContent.getMaxLines()).isEqualTo(2);
+        assertThat(statusContent.getMaxLines()).isEqualTo(1);
 
         // Has a single message, no count shown.
         assertEquals(View.GONE, result.findViewById(R.id.messages_count).getVisibility());
@@ -808,7 +808,7 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
         assertEquals(statusContent.getText(), NOTIFICATION_CONTENT);
 
         // Subtract one from lines because sender is included.
-        assertThat(statusContent.getMaxLines()).isEqualTo(2);
+        assertThat(statusContent.getMaxLines()).isEqualTo(1);
 
         // Has a single message, no count shown.
         assertEquals(View.GONE, largeResult.findViewById(R.id.messages_count).getVisibility());
@@ -838,7 +838,7 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
         TextView statusContent = (TextView) result.findViewById(R.id.text_content);
         assertEquals(View.VISIBLE, statusContent.getVisibility());
         assertEquals(statusContent.getText(), NOTIFICATION_CONTENT);
-        assertThat(statusContent.getMaxLines()).isEqualTo(3);
+        assertThat(statusContent.getMaxLines()).isEqualTo(2);
 
         // Has two messages, show count.
         assertEquals(View.VISIBLE, result.findViewById(R.id.messages_count).getVisibility());
@@ -881,7 +881,7 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
         statusContent = (TextView) largeResult.findViewById(R.id.text_content);
         assertEquals(View.VISIBLE, statusContent.getVisibility());
         assertEquals(statusContent.getText(), NOTIFICATION_CONTENT);
-        assertThat(statusContent.getMaxLines()).isEqualTo(3);
+        assertThat(statusContent.getMaxLines()).isEqualTo(2);
 
         // Has two messages, show count.
         assertEquals(View.VISIBLE, largeResult.findViewById(R.id.messages_count).getVisibility());
