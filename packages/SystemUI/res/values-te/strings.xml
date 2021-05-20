@@ -136,8 +136,7 @@
     <string name="accessibility_camera_button" msgid="2938898391716647247">"కెమెరా"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"ఫోన్"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"వాయిస్ అసిస్టెంట్"</string>
-    <!-- no translation found for accessibility_wallet_button (1458258783460555507) -->
-    <skip />
+    <string name="accessibility_wallet_button" msgid="1458258783460555507">"వాలెట్"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"అన్‌లాక్ చేయి"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"పరికరం లాక్ చేయబడింది"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="5209142744692162598">"వేలిముద్ర కోసం వేచి ఉంది"</string>
@@ -291,10 +290,7 @@
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"మొబైల్ హాట్‌స్పాట్ ఆఫ్ చేయబడింది."</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"మొబైల్ హాట్‌స్పాట్ ఆన్ చేయబడింది."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"స్క్రీన్ ప్రసారం ఆపివేయబడింది."</string>
-    <string name="accessibility_quick_settings_work_mode_off" msgid="9106217884005620744">"వర్క్ మోడ్ పాజ్‌లో ఉంది."</string>
-    <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"పని మోడ్ ఆన్‌లో ఉంది."</string>
-    <!-- no translation found for accessibility_quick_settings_work_mode_changed_off (6422896967647049692) -->
-    <skip />
+    <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6422896967647049692">"వర్క్ మోడ్ పాజ్‌లో ఉంది."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"పని మోడ్ ఆన్ చేయబడింది."</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"డేటా సేవర్ ఆఫ్ చేయబడింది."</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"డేటా సేవర్ ఆన్ చేయబడింది."</string>
@@ -412,8 +408,8 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="6798849610647988987">"<xliff:g id="DATA_USED">%s</xliff:g> వినియోగించబడింది"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"<xliff:g id="DATA_LIMIT">%s</xliff:g> పరిమితి"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"<xliff:g id="DATA_LIMIT">%s</xliff:g> హెచ్చరిక"</string>
-    <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"ఆఫీస్ ప్రొఫైల్"</string>
-    <string name="quick_settings_work_mode_paused" msgid="4841109346916998613">"పాజ్ చేయబడింది"</string>
+    <!-- no translation found for quick_settings_work_mode_label (6440531507319809121) -->
+    <skip />
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"రాత్రి కాంతి"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"సూర్యాస్తమయానికి"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"సూర్యోదయం వరకు"</string>
@@ -1045,10 +1041,8 @@
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"అంచుకు తరలించి దాచండి"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"అంచుని తరలించి చూపించు"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"టోగుల్ చేయి"</string>
-    <string name="quick_controls_title" msgid="6839108006171302273">"డివైజ్ కంట్రోల్స్"</string>
-    <string name="quick_controls_subtitle" msgid="1667408093326318053">"మీ కనెక్ట్ అయిన పరికరాలకు కంట్రోల్స్‌ను జోడించండి"</string>
-    <string name="quick_controls_setup_title" msgid="8901436655997849822">"పరికరం నియంత్రణలను సెటప్ చేయడం"</string>
-    <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"మీ నియంత్రణలను యాక్సెస్ చేయడానికి పవర్ బటన్‌ను నొక్కి పట్టుకోండి"</string>
+    <!-- no translation found for quick_controls_title (7095074621086860062) -->
+    <skip />
     <string name="controls_providers_title" msgid="6879775889857085056">"కంట్రోల్స్‌ను యాడ్ చేయడానికి యాప్‌ను ఎంచుకోండి"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> కంట్రోల్‌లు యాడ్ అయ్యాయి.</item>
@@ -1062,7 +1056,8 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"ఇష్టమైనదిగా పెట్టిన గుర్తును తీసివేయి"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"<xliff:g id="NUMBER">%d</xliff:g> పొజిషన్‌కు తరలించండి"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"నియంత్రణలు"</string>
-    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"పవర్ మెనూ నుండి యాక్సెస్ చేయడానికి కంట్రోల్స్‌ను ఎంచుకోండి"</string>
+    <!-- no translation found for controls_favorite_subtitle (6481675111056961083) -->
+    <skip />
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"కంట్రోల్స్ క్రమం మార్చడానికి దేనినైనా పట్టుకుని, లాగి వదిలేయండి"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"అన్ని కంట్రోల్స్ తీసివేయబడ్డాయి"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"మార్పులు సేవ్ చేయబడలేదు"</string>
@@ -1101,7 +1096,8 @@
     <string name="controls_error_generic" msgid="352500456918362905">"స్థితిని లోడ్ చేయడం సాధ్యపడదు"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"ఎర్రర్, మళ్లీ ప్రయత్నించండి"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"పురోగతిలో ఉంది"</string>
-    <string name="controls_added_tooltip" msgid="4842812921719153085">"కొత్త నియంత్రణలను చూడడానికి పవర్ బటన్‌ని నొక్కి పట్టుకోండి"</string>
+    <!-- no translation found for controls_added_tooltip (5866098408470111984) -->
+    <skip />
     <string name="controls_menu_add" msgid="4447246119229920050">"కంట్రోల్స్‌ను జోడించండి"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"కంట్రోల్స్‌ను ఎడిట్ చేయండి"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"అవుట్‌పుట్‌లను జోడించండి"</string>
@@ -1120,9 +1116,16 @@
     <string name="priority_conversations" msgid="3967482288896653039">"ప్రాధాన్య సంభాషణలు"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"ఇటీవలి సంభాషణలు"</string>
     <string name="okay" msgid="6490552955618608554">"సరే"</string>
-    <string name="timestamp" msgid="6577851592534538533">"<xliff:g id="DURATION">%1$s</xliff:g> క్రితం"</string>
-    <string name="less_than_timestamp" msgid="6598972791137724517">"<xliff:g id="DURATION">%1$s</xliff:g> కంటే ముందు"</string>
-    <string name="over_timestamp" msgid="4765793502859358634">"<xliff:g id="DURATION">%1$s</xliff:g> క్రితం"</string>
+    <!-- no translation found for days_timestamp (5821854736213214331) -->
+    <skip />
+    <!-- no translation found for one_week_timestamp (4925600765473875590) -->
+    <skip />
+    <!-- no translation found for two_weeks_timestamp (9111801081871962155) -->
+    <skip />
+    <!-- no translation found for over_one_week_timestamp (3770560704420807142) -->
+    <skip />
+    <!-- no translation found for over_two_weeks_timestamp (6300507859007874050) -->
+    <skip />
     <string name="birthday_status" msgid="2596961629465396761">"పుట్టినరోజు"</string>
     <string name="birthday_status_content_description" msgid="682836371128282925">"ఈ రోజు <xliff:g id="NAME">%1$s</xliff:g> పుట్టిన రోజు"</string>
     <string name="upcoming_birthday_status" msgid="2005452239256870351">"పుట్టినరోజు వస్తోంది"</string>
@@ -1153,8 +1156,6 @@
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"ప్రామాణీకరించండి"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"పరికరాన్ని ఎంటర్ చేయండి"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"తెరవడానికి వేలిముద్రను ఉపయోగించండి"</string>
-    <!-- no translation found for accessibility_fingerprint_bouncer (7189102492498735519) -->
-    <skip />
-    <!-- no translation found for ongoing_phone_call_content_description (5332334388483099947) -->
-    <skip />
+    <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"ప్రామాణీకరణ అవసరం. ప్రామాణీకరించడానికి వేలిముద్ర సెన్సార్‌ను తాకండి."</string>
+    <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"ఫోన్ కాల్ జరుగుతోంది"</string>
 </resources>
