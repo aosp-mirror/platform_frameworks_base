@@ -8244,6 +8244,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     @Override
+    public boolean isAlwaysOnTop() {
+        return mTaskOverlay || super.isAlwaysOnTop();
+    }
+
+    @Override
     boolean showToCurrentUser() {
         return mShowForAllUsers || mWmService.isCurrentProfile(mUserId);
     }
