@@ -31,6 +31,7 @@ import android.telecom.DefaultDialerManager;
 import android.telecom.PhoneAccountHandle;
 import android.telecom.TelecomManager;
 import android.telephony.CarrierConfigManager;
+import android.telephony.SubscriptionManager;
 import android.util.IntArray;
 import android.util.Slog;
 
@@ -43,6 +44,9 @@ import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.pm.UserManagerService;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Starts the telecom component by binding to its ITelecomService implementation. Telecom is setup
@@ -208,13 +212,23 @@ public class TelecomLoaderService extends SystemService {
                     return null;
                 }
             }
+            SubscriptionManager subscriptionManager =
+                    mContext.getSystemService(SubscriptionManager.class);
+            if (subscriptionManager == null) {
+                return null;
+            }
             TelecomManager telecomManager =
                     (TelecomManager) mContext.getSystemService(Context.TELECOM_SERVICE);
-            PhoneAccountHandle phoneAccount = telecomManager.getSimCallManager(userId);
-            if (phoneAccount != null) {
-                return new String[]{phoneAccount.getComponentName().getPackageName()};
+            List<String> packages = new ArrayList<>();
+            int[] subIds = subscriptionManager.getActiveSubscriptionIdList();
+            for (int subId : subIds) {
+                PhoneAccountHandle phoneAccount =
+                        telecomManager.getSimCallManagerForSubscription(subId);
+                if (phoneAccount != null) {
+                    packages.add(phoneAccount.getComponentName().getPackageName());
+                }
             }
-            return null;
+            return packages.toArray(new String[] {});
         });
     }
 

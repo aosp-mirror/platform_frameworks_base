@@ -29,7 +29,7 @@ java_sdk_library {
     name: "android.test.mock",
 
     srcs: [
-        "src/**/*.java",
+        ":android-test-mock-sources",
         // Note: Below are NOT APIs of this library. We only take APIs under
         // the android.test.mock package. They however provide private APIs that
         // android.test.mock APIs references to.
@@ -38,6 +38,7 @@ java_sdk_library {
     ],
     libs: [
         "framework",
+        "framework-annotations-lib",
         "app-compat-annotations",
         "unsupportedappusage",
     ],
@@ -59,4 +60,10 @@ filegroup {
     srcs: [
         "api/current.txt",
     ],
+}
+
+filegroup {
+    name: "android-test-mock-sources",
+    srcs: ["src/**/*.java"],
+    path: "src",
 }

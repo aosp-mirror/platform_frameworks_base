@@ -52,14 +52,18 @@ import java.util.concurrent.TimeUnit;
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class IkeSessionParamsUtilsTest {
-    private static IkeSessionParams.Builder createBuilderMinimum() {
+    // Public for use in VcnGatewayConnectionConfigTest, EncryptedTunnelParamsUtilsTest
+    public static IkeSessionParams.Builder createBuilderMinimum() {
         final InetAddress serverAddress = InetAddresses.parseNumericAddress("192.0.2.100");
 
+        // TODO: b/185941731 Make sure all valid IKE_OPTIONS are added and validated.
         return new IkeSessionParams.Builder()
                 .setServerHostname(serverAddress.getHostAddress())
                 .addSaProposal(SaProposalUtilsTest.buildTestIkeSaProposal())
                 .setLocalIdentification(new IkeFqdnIdentification("client.test.android.net"))
                 .setRemoteIdentification(new IkeFqdnIdentification("server.test.android.net"))
+                .addIkeOption(IkeSessionParams.IKE_OPTION_FORCE_PORT_4500)
+                .addIkeOption(IkeSessionParams.IKE_OPTION_MOBIKE)
                 .setAuthPsk("psk".getBytes());
     }
 

@@ -40,7 +40,8 @@ import java.util.concurrent.TimeUnit;
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class TunnelModeChildSessionParamsUtilsTest {
-    private TunnelModeChildSessionParams.Builder createBuilderMinimum() {
+    // Package private for use in EncryptedTunnelParamsUtilsTest
+    static TunnelModeChildSessionParams.Builder createBuilderMinimum() {
         final ChildSaProposal saProposal = SaProposalUtilsTest.buildTestChildSaProposal();
         return new TunnelModeChildSessionParams.Builder().addSaProposal(saProposal);
     }

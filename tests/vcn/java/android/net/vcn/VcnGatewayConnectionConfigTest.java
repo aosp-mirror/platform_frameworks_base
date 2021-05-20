@@ -16,13 +16,18 @@
 
 package android.net.vcn;
 
+import static android.net.ipsec.ike.IkeSessionParams.IKE_OPTION_MOBIKE;
+
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import android.net.NetworkCapabilities;
+import android.net.ipsec.ike.IkeSessionParams;
+import android.net.ipsec.ike.IkeTunnelConnectionParams;
+import android.net.vcn.persistablebundleutils.IkeSessionParamsUtilsTest;
+import android.net.vcn.persistablebundleutils.TunnelConnectionParamsUtilsTest;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -59,8 +64,8 @@ public class VcnGatewayConnectionConfigTest {
             };
     public static final int MAX_MTU = 1360;
 
-    public static final VcnControlPlaneConfig CONTROL_PLANE_CONFIG =
-            VcnControlPlaneIkeConfigTest.buildTestConfig();
+    public static final IkeTunnelConnectionParams TUNNEL_CONNECTION_PARAMS =
+            TunnelConnectionParamsUtilsTest.buildTestParams();
 
     public static final String GATEWAY_CONNECTION_NAME_PREFIX = "gatewayConnectionName-";
     private static int sGatewayConnectionConfigCount = 0;
@@ -75,20 +80,16 @@ public class VcnGatewayConnectionConfigTest {
         // VcnGatewayConnectionConfigs have a unique name (required by VcnConfig).
         return new VcnGatewayConnectionConfig.Builder(
                 GATEWAY_CONNECTION_NAME_PREFIX + sGatewayConnectionConfigCount++,
-                CONTROL_PLANE_CONFIG);
+                TUNNEL_CONNECTION_PARAMS);
     }
 
     // Public for use in VcnGatewayConnectionTest
     public static VcnGatewayConnectionConfig buildTestConfigWithExposedCaps(int... exposedCaps) {
         final VcnGatewayConnectionConfig.Builder builder =
-                newBuilder().setRetryInterval(RETRY_INTERVALS_MS).setMaxMtu(MAX_MTU);
+                newBuilder().setRetryIntervalsMillis(RETRY_INTERVALS_MS).setMaxMtu(MAX_MTU);
 
         for (int caps : exposedCaps) {
             builder.addExposedCapability(caps);
-        }
-
-        for (int caps : UNDERLYING_CAPS) {
-            builder.addRequiredUnderlyingCapability(caps);
         }
 
         return builder.build();
@@ -98,7 +99,7 @@ public class VcnGatewayConnectionConfigTest {
     public void testBuilderRequiresNonNullGatewayConnectionName() {
         try {
             new VcnGatewayConnectionConfig.Builder(
-                            null /* gatewayConnectionName */, CONTROL_PLANE_CONFIG)
+                            null /* gatewayConnectionName */, TUNNEL_CONNECTION_PARAMS)
                     .build();
 
             fail("Expected exception due to invalid gateway connection name");
@@ -107,23 +108,36 @@ public class VcnGatewayConnectionConfigTest {
     }
 
     @Test
-    public void testBuilderRequiresNonNullControlPlaneConfig() {
+    public void testBuilderRequiresNonNullTunnelConnectionParams() {
         try {
             new VcnGatewayConnectionConfig.Builder(
-                            GATEWAY_CONNECTION_NAME_PREFIX, null /* ctrlPlaneConfig */)
+                            GATEWAY_CONNECTION_NAME_PREFIX, null /* tunnelConnectionParams */)
                     .build();
 
-            fail("Expected exception due to invalid control plane config");
+            fail("Expected exception due to the absence of tunnel connection parameters");
         } catch (NullPointerException e) {
+        }
+    }
+
+    @Test
+    public void testBuilderRequiresMobikeEnabled() {
+        try {
+            final IkeSessionParams ikeParams =
+                    IkeSessionParamsUtilsTest.createBuilderMinimum()
+                            .removeIkeOption(IKE_OPTION_MOBIKE)
+                            .build();
+            final IkeTunnelConnectionParams tunnelParams =
+                    TunnelConnectionParamsUtilsTest.buildTestParams(ikeParams);
+            new VcnGatewayConnectionConfig.Builder(GATEWAY_CONNECTION_NAME_PREFIX, tunnelParams);
+            fail("Expected exception due to MOBIKE not enabled");
+        } catch (IllegalArgumentException e) {
         }
     }
 
     @Test
     public void testBuilderRequiresNonEmptyExposedCaps() {
         try {
-            newBuilder()
-                    .addRequiredUnderlyingCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-                    .build();
+            newBuilder().build();
 
             fail("Expected exception due to invalid exposed capabilities");
         } catch (IllegalArgumentException e) {
@@ -133,7 +147,7 @@ public class VcnGatewayConnectionConfigTest {
     @Test
     public void testBuilderRequiresNonNullRetryInterval() {
         try {
-            newBuilder().setRetryInterval(null);
+            newBuilder().setRetryIntervalsMillis(null);
             fail("Expected exception due to invalid retryIntervalMs");
         } catch (IllegalArgumentException e) {
         }
@@ -142,7 +156,7 @@ public class VcnGatewayConnectionConfigTest {
     @Test
     public void testBuilderRequiresNonEmptyRetryInterval() {
         try {
-            newBuilder().setRetryInterval(new long[0]);
+            newBuilder().setRetryIntervalsMillis(new long[0]);
             fail("Expected exception due to invalid retryIntervalMs");
         } catch (IllegalArgumentException e) {
         }
@@ -167,14 +181,9 @@ public class VcnGatewayConnectionConfigTest {
         Arrays.sort(exposedCaps);
         assertArrayEquals(EXPOSED_CAPS, exposedCaps);
 
-        int[] underlyingCaps = config.getRequiredUnderlyingCapabilities();
-        Arrays.sort(underlyingCaps);
-        assertArrayEquals(UNDERLYING_CAPS, underlyingCaps);
+        assertEquals(TUNNEL_CONNECTION_PARAMS, config.getTunnelConnectionParams());
 
-        assertEquals(CONTROL_PLANE_CONFIG, config.getControlPlaneConfig());
-        assertFalse(CONTROL_PLANE_CONFIG == config.getControlPlaneConfig());
-
-        assertArrayEquals(RETRY_INTERVALS_MS, config.getRetryIntervalsMs());
+        assertArrayEquals(RETRY_INTERVALS_MS, config.getRetryIntervalsMillis());
         assertEquals(MAX_MTU, config.getMaxMtu());
     }
 

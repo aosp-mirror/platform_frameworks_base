@@ -81,16 +81,16 @@
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> akut"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"V: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> akut, P: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> akut"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Aktiivne"</string>
-    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Meedia heli"</string>
+    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Meediaheli"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Telefonikõned"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Failiedastus"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Sisendseade"</string>
-    <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Internetti juurdepääs"</string>
-    <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"Kontakti jagamine"</string>
+    <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Juurdepääs internetile"</string>
+    <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"Kontaktide jagamine"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"Kasutamine kontaktide jagamiseks"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Interneti-ühenduse jagamine"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"Tekstsõnumid"</string>
-    <string name="bluetooth_profile_sap" msgid="8304170950447934386">"SIM-i juurdepääs"</string>
+    <string name="bluetooth_profile_sap" msgid="8304170950447934386">"Juurdepääs SIM-ile"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD-heli: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD-heli"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Kuuldeaparaadid"</string>
@@ -212,7 +212,7 @@
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Juhtmevaba silumine"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Saadaolevate seadmete nägemiseks ja kasutamiseks lülitage sisse juhtmevaba silumine"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Seadme sidumine QR-koodiga"</string>
-    <string name="adb_pair_method_qrcode_summary" msgid="3729901496856458634">"Uute seadmete sidumine QR-koodi skanneriga"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Uute seadmete sidumine QR-koodiskanneriga"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Seadme sidumine sidumiskoodiga"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Uute seadmete sidumine kuuekohalise koodiga"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Seotud seadmed"</string>
@@ -231,7 +231,8 @@
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Seadme sidumine ebaõnnestus. QR-kood oli vale või seade ei ole ühendatud samasse võrku."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP-aadress ja port"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"QR-koodi skannimine"</string>
-    <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"Siduge seade WiFi kaudu, skannides QR-koodi"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Siduge seade WiFi kaudu, skannides QR-koodi"</string>
+    <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Looge ühendus WiFi-võrguga"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, silumine, arendus"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Veaaruande otsetee"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Kuva toitemenüüs veaaruande jäädvustamise nupp"</string>
@@ -250,6 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Juhtmeta ekraaniühenduse sertifitseerimine"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Luba WiFi sõnaline logimine"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"WiFi-skannimise ahendamine"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"WiFi-põhine MAC-i juhuslikustamine"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Hoia mobiilne andmeside alati aktiivne"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Ühenduse jagamise riistvaraline kiirendus"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Kuva ilma nimedeta Bluetoothi seadmed"</string>
@@ -281,6 +283,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Juhtmeta ekraaniühenduse sertifitseerimisvalikute kuvamine"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Suurenda WiFi logimistaset, kuva WiFi valijas SSID RSSI järgi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Aeglustab aku tühjenemist ja parandab võrgu toimivust"</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Kui see režiim on lubatud, võidakse selle seadme MAC-aadressi muuta iga kord, kui see ühendatakse võrguga, milles on juhusliku MAC-aadressi määramine lubatud."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Mahupõhine"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Mittemahupõhine"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Logija puhvri suurused"</string>
@@ -308,6 +311,7 @@
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Kuvatakse ilma nimedeta (ainult MAC-aadressidega) Bluetoothi seadmed"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Keelatakse Bluetoothi absoluutse helitugevuse funktsioon, kui kaugseadmetega on helitugevuse probleeme (nt liiga vali heli või juhitavuse puudumine)."</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Lubab Bluetooth Gabeldorsche\'i funktsiooni virnastamise."</string>
+    <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Lubab täiustatud ühenduvuse funktsiooni."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Kohalik terminal"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Luba kohalikku turvalist juurdepääsu pakkuv terminalirakendus"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP-kontrollimine"</string>
@@ -354,6 +358,8 @@
     <string name="track_frame_time" msgid="522674651937771106">"Profiili HWUI renderdamine"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"GPU silumise kihtide lubamine"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"GPU silumise kihtide laadimise lubamine silumisrakendustele"</string>
+    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Luba paljusõnaline logimine"</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Veaaruannetesse kaasatakse täiendavad seadmepõhised teenusepakkuja logid, mis võivad sisaldada privaatset teavet, kasutada rohkem akut ja/või salvestusruumi."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Akna animatsioonimastaap"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Ülemineku animatsioonimastaap"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Animaatori kestuse mastaap"</string>
@@ -412,7 +418,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomaalia (punane-roheline)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomaalia (sinine-kollane)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Värvide korrigeerimine"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="6178138727195403796">"Värviparanduse funktsioon aitab värvipimedatel värve täpsemini näha"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"Värvide korrigeerimine võimaldab kohandada seadmes kuvatavaid värve"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Alistas <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Ligikaudu <xliff:g id="TIME_REMAINING">%1$s</xliff:g> jäänud"</string>
@@ -426,11 +432,11 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"Peaks kestma kuni <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"Peaks kestma kuni <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Kuni <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_suggestion_extend_battery" msgid="5233928707465237447">"Pikenda aku eluiga üle <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"Jäänud on alla <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
-    <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"Jäänud on alla <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"Jäänud on üle <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_only_more_than_subtext" msgid="3274496164769110480">"Jäänud on üle <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
+    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Aku võib tühjaks saada kell <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"Vähem kui <xliff:g id="THRESHOLD">%1$s</xliff:g> jäänud"</string>
+    <string name="power_remaining_less_than_duration" msgid="318215464914990578">"Vähem kui <xliff:g id="THRESHOLD">%1$s</xliff:g> jäänud (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"Rohkem kui <xliff:g id="TIME_REMAINING">%1$s</xliff:g> jäänud (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"Rohkem kui <xliff:g id="TIME_REMAINING">%1$s</xliff:g> jäänud"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"Telefon võib peagi välja lülituda"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"Tahvelarvuti võib peagi välja lülituda"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"Seade võib peagi välja lülituda"</string>
@@ -440,9 +446,10 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"Täislaadimiseni on jäänud <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> täislaadimiseni"</string>
+    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> – optimeerimine aku seisukorra põhjal"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Tundmatu"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Laadimine"</string>
-    <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Kiiresti laadimine"</string>
+    <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Kiirlaadimine"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Aeglaselt laadimine"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Ei lae"</string>
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Vooluvõrgus, praegu ei saa laadida"</string>
@@ -501,6 +508,50 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Küsi iga kord"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Kuni välja lülitate"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Äsja"</string>
-    <string name="media_transfer_this_device_name" msgid="2858384945459339073">"See seade"</string>
+    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Telefoni kõlar"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Probleem ühendamisel. Lülitage seade välja ja uuesti sisse"</string>
+    <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Juhtmega heliseade"</string>
+    <string name="help_label" msgid="3528360748637781274">"Abi ja tagasiside"</string>
+    <string name="storage_category" msgid="2287342585424631813">"Salvestusruum"</string>
+    <string name="shared_data_title" msgid="1017034836800864953">"Jagatud andmed"</string>
+    <string name="shared_data_summary" msgid="5516326713822885652">"Vaadake ja muutke jagatud andmeid"</string>
+    <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"Selle kasutaja kohta pole jagatud andmeid."</string>
+    <string name="shared_data_query_failure_text" msgid="3489828881998773687">"Jagatud andmete toomisel ilmnes viga. Proovige uuesti."</string>
+    <string name="blob_id_text" msgid="8680078988996308061">"Jagatud andmete ID: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
+    <string name="blob_expires_text" msgid="7882727111491739331">"Aegub <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="shared_data_delete_failure_text" msgid="3842701391009628947">"Jagatud andmete kustutamisel ilmnes viga."</string>
+    <string name="shared_data_no_accessors_dialog_text" msgid="8903738462570715315">"Nende jagatud andmete jaoks pole õigusi hangitud. Kas soovite need kustutada?"</string>
+    <string name="accessor_info_title" msgid="8289823651512477787">"Andmeid jagavad rakendused"</string>
+    <string name="accessor_no_description_text" msgid="7510967452505591456">"Rakendus ei esita kirjeldust."</string>
+    <string name="accessor_expires_text" msgid="4625619273236786252">"Rendiperiood lõpeb <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="delete_blob_text" msgid="2819192607255625697">"Kustuta jagatud andmed"</string>
+    <string name="delete_blob_confirmation_text" msgid="7807446938920827280">"Kas soovite kindlasti need jagatud andmed kustutada?"</string>
+    <string name="user_add_user_item_summary" msgid="5748424612724703400">"Kasutajatel on oma rakendused ja sisu"</string>
+    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"Oma kontol saate piirata juurdepääsu rakendustele ja sisule"</string>
+    <string name="user_add_user_item_title" msgid="2394272381086965029">"Kasutaja"</string>
+    <string name="user_add_profile_item_title" msgid="3111051717414643029">"Piiratud profiil"</string>
+    <string name="user_add_user_title" msgid="5457079143694924885">"Kas lisada uus kasutaja?"</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Võite jagada seda seadet teiste inimestega, luues uusi kasutajaid. Igal kasutajal on oma ruum, mida saab kohandada rakenduste, taustapildi ja muuga. Kasutajad saavad kohandada ka seadme seadeid, näiteks WiFi-valikuid, mis mõjutavad kõiki kasutajaid.\n\nKui lisate uue kasutaja, siis peab ta seadistama oma ruumi.\n\nIga kasutaja saab rakendusi kõigi kasutajate jaoks värskendada. Juurdepääsetavuse seadeid ja teenuseid ei pruugita uuele kasutajale üle kanda."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"Kui lisate uue kasutaja, siis peab ta seadistama oma ruumi.\n\nIga kasutaja saab värskendada rakendusi kõigi kasutajate jaoks."</string>
+    <string name="user_setup_dialog_title" msgid="8037342066381939995">"Kas seadistada kasutaja kohe?"</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"Veenduge, et isik saaks seadet kasutada ja oma ruumi seadistada"</string>
+    <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Kas soovite kohe profiili seadistada?"</string>
+    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"Seadista kohe"</string>
+    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"Mitte praegu"</string>
+    <string name="user_add_user_type_title" msgid="551279664052914497">"Lisamine"</string>
+    <string name="user_new_user_name" msgid="60979820612818840">"Uus kasutaja"</string>
+    <string name="user_new_profile_name" msgid="2405500423304678841">"Uus profiil"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"Kasutajateave"</string>
+    <string name="profile_info_settings_title" msgid="105699672534365099">"Profiili teave"</string>
+    <string name="user_need_lock_message" msgid="4311424336209509301">"Enne piiratud profiili loomist peate seadistama lukustusekraani, et oma rakendusi ja isiklikke andmeid kaitsta."</string>
+    <string name="user_set_lock_button" msgid="1427128184982594856">"Määra lukk"</string>
+    <string name="user_switch_to_user" msgid="6975428297154968543">"Lülita kasutajale <xliff:g id="USER_NAME">%s</xliff:g>"</string>
+    <string name="guest_new_guest" msgid="3482026122932643557">"Lisa külaline"</string>
+    <string name="guest_exit_guest" msgid="5908239569510734136">"Eemalda külaline"</string>
+    <string name="guest_nickname" msgid="6332276931583337261">"Külaline"</string>
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Seadme vaikeseade"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Keelatud"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Lubatud"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Selle muudatuse rakendamiseks tuleb seade taaskäivitada. Taaskäivitage kohe või tühistage."</string>
+    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"Juhtmega kõrvaklapid"</string>
 </resources>

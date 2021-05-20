@@ -1289,6 +1289,7 @@ public class HdmiControlService extends SystemService {
     void setAudioStatus(boolean mute, int volume) {
         if (!isTvDeviceEnabled()
                 || !tv().isSystemAudioActivated()
+                || !tv().isArcEstablished() // Don't update TV volume when SAM is on and ARC is off
                 || !isHdmiCecVolumeControlEnabled()) {
             return;
         }

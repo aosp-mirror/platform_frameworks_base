@@ -20,8 +20,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4567566098528588863">"సెట్టింగ్‌ల నిల్వ"</string>
-    <!-- no translation found for wifi_softap_config_change (5688373762357941645) -->
-    <skip />
-    <!-- no translation found for wifi_softap_config_change_summary (8946397286141531087) -->
-    <skip />
+    <string name="wifi_softap_config_change" msgid="5688373762357941645">"హాట్‌స్పాట్ సెట్టింగ్‌లు మార్చబడ్డాయి"</string>
+    <string name="wifi_softap_config_change_summary" msgid="8946397286141531087">"వివరాలను చూడటానికి ట్యాప్ చేయండి"</string>
 </resources>

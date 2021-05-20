@@ -374,7 +374,7 @@ public class JobStoreTest {
                 .setPersisted(true)
                 .setRequiredNetwork(new NetworkRequest.Builder()
                         .addCapability(NET_CAPABILITY_IMS)
-                        .addUnwantedCapability(NET_CAPABILITY_OEM_PAID)
+                        .addForbiddenCapability(NET_CAPABILITY_OEM_PAID)
                         .build())
                 .build());
     }

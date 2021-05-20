@@ -24,7 +24,6 @@ import static android.content.Intent.ACTION_UID_REMOVED;
 import static android.content.Intent.ACTION_USER_REMOVED;
 import static android.content.Intent.EXTRA_UID;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkIdentity.SUBTYPE_COMBINED;
 import static android.net.NetworkStack.checkNetworkStackPermission;
 import static android.net.NetworkStats.DEFAULT_NETWORK_ALL;
@@ -97,12 +96,12 @@ import android.net.INetworkStatsSession;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkIdentity;
+import android.net.NetworkSpecifier;
 import android.net.NetworkStack;
 import android.net.NetworkStateSnapshot;
 import android.net.NetworkStats;
 import android.net.NetworkStats.NonMonotonicObserver;
 import android.net.NetworkStatsHistory;
-import android.net.NetworkSpecifier;
 import android.net.NetworkTemplate;
 import android.net.TelephonyNetworkSpecifier;
 import android.net.TrafficStats;
@@ -182,7 +181,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     private static final int MSG_PERFORM_POLL = 1;
     // Perform polling, persist network, and register the global alert again.
     private static final int MSG_PERFORM_POLL_REGISTER_ALERT = 2;
-    private static final int MSG_UPDATE_IFACES = 3;
+    private static final int MSG_NOTIFY_NETWORK_STATUS = 3;
     // A message for broadcasting ACTION_NETWORK_STATS_UPDATED in handler thread to prevent
     // deadlock.
     private static final int MSG_BROADCAST_NETWORK_STATS_UPDATED = 4;
@@ -380,11 +379,12 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                     performPoll(FLAG_PERSIST_ALL);
                     break;
                 }
-                case MSG_UPDATE_IFACES: {
+                case MSG_NOTIFY_NETWORK_STATUS: {
                     // If no cached states, ignore.
                     if (mLastNetworkStateSnapshots == null) break;
                     // TODO (b/181642673): Protect mDefaultNetworks from concurrent accessing.
-                    updateIfaces(mDefaultNetworks, mLastNetworkStateSnapshots, mActiveIface);
+                    handleNotifyNetworkStatus(
+                            mDefaultNetworks, mLastNetworkStateSnapshots, mActiveIface);
                     break;
                 }
                 case MSG_PERFORM_POLL_REGISTER_ALERT: {
@@ -475,7 +475,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 @NonNull Looper looper, @NonNull Executor executor,
                 @NonNull NetworkStatsService service) {
             // TODO: Update RatType passively in NSS, instead of querying into the monitor
-            //  when forceUpdateIface.
+            //  when notifyNetworkStatus.
             return new NetworkStatsSubscriptionsMonitor(context, looper, executor,
                     (subscriberId, type) -> service.handleOnCollapsedRatTypeChanged());
         }
@@ -972,16 +972,19 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
     }
 
-    public void forceUpdateIfaces(
-            Network[] defaultNetworks,
-            NetworkStateSnapshot[] networkStates,
-            String activeIface,
-            UnderlyingNetworkInfo[] underlyingNetworkInfos) {
+    /**
+     * Notify {@code NetworkStatsService} about network status changed.
+     */
+    public void notifyNetworkStatus(
+            @NonNull Network[] defaultNetworks,
+            @NonNull NetworkStateSnapshot[] networkStates,
+            @Nullable String activeIface,
+            @NonNull UnderlyingNetworkInfo[] underlyingNetworkInfos) {
         checkNetworkStackPermission(mContext);
 
         final long token = Binder.clearCallingIdentity();
         try {
-            updateIfaces(defaultNetworks, networkStates, activeIface);
+            handleNotifyNetworkStatus(defaultNetworks, networkStates, activeIface);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -1245,12 +1248,12 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     @VisibleForTesting
     public void handleOnCollapsedRatTypeChanged() {
         // Protect service from frequently updating. Remove pending messages if any.
-        mHandler.removeMessages(MSG_UPDATE_IFACES);
+        mHandler.removeMessages(MSG_NOTIFY_NETWORK_STATUS);
         mHandler.sendMessageDelayed(
-                mHandler.obtainMessage(MSG_UPDATE_IFACES), mSettings.getPollDelay());
+                mHandler.obtainMessage(MSG_NOTIFY_NETWORK_STATUS), mSettings.getPollDelay());
     }
 
-    private void updateIfaces(
+    private void handleNotifyNetworkStatus(
             Network[] defaultNetworks,
             NetworkStateSnapshot[] snapshots,
             String activeIface) {
@@ -1258,7 +1261,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             mWakeLock.acquire();
             try {
                 mActiveIface = activeIface;
-                updateIfacesLocked(defaultNetworks, snapshots);
+                handleNotifyNetworkStatusLocked(defaultNetworks, snapshots);
             } finally {
                 mWakeLock.release();
             }
@@ -1271,10 +1274,10 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
      * they are combined under a single {@link NetworkIdentitySet}.
      */
     @GuardedBy("mStatsLock")
-    private void updateIfacesLocked(@NonNull Network[] defaultNetworks,
+    private void handleNotifyNetworkStatusLocked(@NonNull Network[] defaultNetworks,
             @NonNull NetworkStateSnapshot[] snapshots) {
         if (!mSystemReady) return;
-        if (LOGV) Slog.v(TAG, "updateIfacesLocked()");
+        if (LOGV) Slog.v(TAG, "handleNotifyNetworkStatusLocked()");
 
         // take one last stats snapshot before updating iface mapping. this
         // isn't perfect, since the kernel may already be counting traffic from
@@ -1296,9 +1299,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         final ArraySet<String> mobileIfaces = new ArraySet<>();
         for (NetworkStateSnapshot snapshot : snapshots) {
             final int displayTransport =
-                    getDisplayTransport(snapshot.networkCapabilities.getTransportTypes());
+                    getDisplayTransport(snapshot.getNetworkCapabilities().getTransportTypes());
             final boolean isMobile = (NetworkCapabilities.TRANSPORT_CELLULAR == displayTransport);
-            final boolean isDefault = ArrayUtils.contains(mDefaultNetworks, snapshot.network);
+            final boolean isDefault = ArrayUtils.contains(mDefaultNetworks, snapshot.getNetwork());
             final int subType = combineSubtypeEnabled ? SUBTYPE_COMBINED
                     : getSubTypeForStateSnapshot(snapshot);
             final NetworkIdentity ident = NetworkIdentity.buildNetworkIdentity(mContext, snapshot,
@@ -1306,7 +1309,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
             // Traffic occurring on the base interface is always counted for
             // both total usage and UID details.
-            final String baseIface = snapshot.linkProperties.getInterfaceName();
+            final String baseIface = snapshot.getLinkProperties().getInterfaceName();
             if (baseIface != null) {
                 findOrCreateNetworkIdentitySet(mActiveIfaces, baseIface).add(ident);
                 findOrCreateNetworkIdentitySet(mActiveUidIfaces, baseIface).add(ident);
@@ -1316,7 +1319,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 // If IMS is metered, then the IMS network usage has already included VT usage.
                 // VT is considered always metered in framework's layer. If VT is not metered
                 // per carrier's policy, modem will report 0 usage for VT calls.
-                if (snapshot.networkCapabilities.hasCapability(
+                if (snapshot.getNetworkCapabilities().hasCapability(
                         NetworkCapabilities.NET_CAPABILITY_IMS) && !ident.getMetered()) {
 
                     // Copy the identify from IMS one but mark it as metered.
@@ -1364,7 +1367,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             // accounting is explicitly bypassed for traffic from the clat uid.
             //
             // TODO: This code might be combined to above code.
-            for (String iface : snapshot.linkProperties.getAllInterfaceNames()) {
+            for (String iface : snapshot.getLinkProperties().getAllInterfaceNames()) {
                 // baseIface has been handled, so ignore it.
                 if (TextUtils.equals(baseIface, iface)) continue;
                 if (iface != null) {
@@ -1383,11 +1386,11 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     }
 
     private static int getSubIdForMobile(@NonNull NetworkStateSnapshot state) {
-        if (!state.networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
+        if (!state.getNetworkCapabilities().hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
             throw new IllegalArgumentException("Mobile state need capability TRANSPORT_CELLULAR");
         }
 
-        final NetworkSpecifier spec = state.networkCapabilities.getNetworkSpecifier();
+        final NetworkSpecifier spec = state.getNetworkCapabilities().getNetworkSpecifier();
         if (spec instanceof TelephonyNetworkSpecifier) {
              return ((TelephonyNetworkSpecifier) spec).getSubscriptionId();
         } else {
@@ -1402,11 +1405,11 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
      * transport types do not actually fill this value.
      */
     private int getSubTypeForStateSnapshot(@NonNull NetworkStateSnapshot state) {
-        if (!state.networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
+        if (!state.getNetworkCapabilities().hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
             return 0;
         }
 
-        return mNetworkStatsSubscriptionsMonitor.getRatTypeForSubscriberId(state.subscriberId);
+        return mNetworkStatsSubscriptionsMonitor.getRatTypeForSubscriberId(state.getSubscriberId());
     }
 
     private static <K> NetworkIdentitySet findOrCreateNetworkIdentitySet(

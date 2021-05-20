@@ -49,6 +49,7 @@ import android.net.util.NetdService;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
 import android.system.ErrnoException;
@@ -65,6 +66,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 import com.android.net.module.util.NetdUtils;
+import com.android.net.module.util.PermissionUtils;
 
 import libcore.io.IoUtils;
 
@@ -466,8 +468,7 @@ public class IpSecService extends IIpSecService.Stub {
 
         /** Safety method; guards against access of other user's UserRecords */
         private void checkCallerUid(int uid) {
-            if (uid != Binder.getCallingUid()
-                    && android.os.Process.SYSTEM_UID != Binder.getCallingUid()) {
+            if (uid != Binder.getCallingUid() && Process.SYSTEM_UID != Binder.getCallingUid()) {
                 throw new SecurityException("Attempted access of unowned resources");
             }
         }
@@ -1105,10 +1106,14 @@ public class IpSecService extends IIpSecService.Stub {
      * Checks the user-provided direction field and throws an IllegalArgumentException if it is not
      * DIRECTION_IN or DIRECTION_OUT
      */
-    private static void checkDirection(int direction) {
+    private void checkDirection(int direction) {
         switch (direction) {
             case IpSecManager.DIRECTION_OUT:
             case IpSecManager.DIRECTION_IN:
+                return;
+            case IpSecManager.DIRECTION_FWD:
+                // Only NETWORK_STACK or MAINLINE_NETWORK_STACK allowed to use forward policies
+                PermissionUtils.enforceNetworkStackPermission(mContext);
                 return;
         }
         throw new IllegalArgumentException("Invalid Direction: " + direction);
@@ -1347,6 +1352,26 @@ public class IpSecService extends IIpSecService.Stub {
                         callerUid,
                         selAddrFamily,
                         IpSecManager.DIRECTION_IN,
+                        remoteAddr,
+                        localAddr,
+                        0,
+                        ikey,
+                        0xffffffff,
+                        resourceId);
+
+                // Add a forwarding policy on the tunnel interface. In order to support forwarding
+                // the IpSecTunnelInterface must have a forwarding policy matching the incoming SA.
+                //
+                // Unless a IpSecTransform is also applied against this interface in DIRECTION_FWD,
+                // forwarding will be blocked by default (as would be the case if this policy was
+                // absent).
+                //
+                // This is necessary only on the tunnel interface, and not any the interface to
+                // which traffic will be forwarded to.
+                netd.ipSecAddSecurityPolicy(
+                        callerUid,
+                        selAddrFamily,
+                        IpSecManager.DIRECTION_FWD,
                         remoteAddr,
                         localAddr,
                         0,
@@ -1820,7 +1845,7 @@ public class IpSecService extends IIpSecService.Stub {
         int mark =
                 (direction == IpSecManager.DIRECTION_OUT)
                         ? tunnelInterfaceInfo.getOkey()
-                        : tunnelInterfaceInfo.getIkey();
+                        : tunnelInterfaceInfo.getIkey(); // Ikey also used for FWD policies
 
         try {
             // Default to using the invalid SPI of 0 for inbound SAs. This allows policies to skip

@@ -24,3 +24,10 @@ package {
     //   SPDX-license-identifier-Apache-2.0
     default_applicable_licenses: ["frameworks_base_license"],
 }
+
+sdk {
+    name: "media-module-sdk",
+    java_sdk_libs: [
+        "framework-media",
+    ],
+}

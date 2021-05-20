@@ -5327,5 +5327,29 @@ public final class Telephony {
          * @hide
          */
         public static final String COLUMN_RCS_CONFIG = "rcs_config";
+
+        /**
+         * TelephonyProvider column name for device to device sharing status.
+         *
+         * @hide
+         */
+        public static final String COLUMN_D2D_STATUS_SHARING = "d2d_sharing_status";
+
+        /**
+         * TelephonyProvider column name for VoIMS provisioning. Default is 0.
+         * <P>Type: INTEGER </P>
+         *
+         * @hide
+         */
+        public static final String COLUMN_VOIMS_OPT_IN_STATUS = "voims_opt_in_status";
+
+        /**
+         * TelephonyProvider column name for information selected contacts that allow device to
+         * device sharing.
+         *
+         * @hide
+         */
+        public static final String COLUMN_D2D_STATUS_SHARING_SELECTED_CONTACTS =
+                "d2d_sharing_contacts";
     }
 }

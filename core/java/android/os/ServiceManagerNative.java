@@ -94,6 +94,10 @@ class ServiceManagerProxy implements IServiceManager {
         return mServiceManager.getDeclaredInstances(iface);
     }
 
+    public String updatableViaApex(String name) throws RemoteException {
+        return mServiceManager.updatableViaApex(name);
+    }
+
     public void registerClientCallback(String name, IBinder service, IClientCallback cb)
             throws RemoteException {
         throw new RemoteException();

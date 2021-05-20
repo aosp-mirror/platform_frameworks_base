@@ -52,12 +52,17 @@ public final class VcnConfig implements Parcelable {
     private static final String GATEWAY_CONNECTION_CONFIGS_KEY = "mGatewayConnectionConfigs";
     @NonNull private final Set<VcnGatewayConnectionConfig> mGatewayConnectionConfigs;
 
+    private static final String IS_TEST_MODE_PROFILE_KEY = "mIsTestModeProfile";
+    private final boolean mIsTestModeProfile;
+
     private VcnConfig(
             @NonNull String packageName,
-            @NonNull Set<VcnGatewayConnectionConfig> gatewayConnectionConfigs) {
+            @NonNull Set<VcnGatewayConnectionConfig> gatewayConnectionConfigs,
+            boolean isTestModeProfile) {
         mPackageName = packageName;
         mGatewayConnectionConfigs =
                 Collections.unmodifiableSet(new ArraySet<>(gatewayConnectionConfigs));
+        mIsTestModeProfile = isTestModeProfile;
 
         validate();
     }
@@ -77,6 +82,7 @@ public final class VcnConfig implements Parcelable {
                 new ArraySet<>(
                         PersistableBundleUtils.toList(
                                 gatewayConnectionConfigsBundle, VcnGatewayConnectionConfig::new));
+        mIsTestModeProfile = in.getBoolean(IS_TEST_MODE_PROFILE_KEY);
 
         validate();
     }
@@ -104,6 +110,15 @@ public final class VcnConfig implements Parcelable {
     }
 
     /**
+     * Returns whether or not this VcnConfig is restricted to test networks.
+     *
+     * @hide
+     */
+    public boolean isTestModeProfile() {
+        return mIsTestModeProfile;
+    }
+
+    /**
      * Serializes this object to a PersistableBundle.
      *
      * @hide
@@ -119,13 +134,14 @@ public final class VcnConfig implements Parcelable {
                         new ArrayList<>(mGatewayConnectionConfigs),
                         VcnGatewayConnectionConfig::toPersistableBundle);
         result.putPersistableBundle(GATEWAY_CONNECTION_CONFIGS_KEY, gatewayConnectionConfigsBundle);
+        result.putBoolean(IS_TEST_MODE_PROFILE_KEY, mIsTestModeProfile);
 
         return result;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mPackageName, mGatewayConnectionConfigs);
+        return Objects.hash(mPackageName, mGatewayConnectionConfigs, mIsTestModeProfile);
     }
 
     @Override
@@ -136,7 +152,8 @@ public final class VcnConfig implements Parcelable {
 
         final VcnConfig rhs = (VcnConfig) other;
         return mPackageName.equals(rhs.mPackageName)
-                && mGatewayConnectionConfigs.equals(rhs.mGatewayConnectionConfigs);
+                && mGatewayConnectionConfigs.equals(rhs.mGatewayConnectionConfigs)
+                && mIsTestModeProfile == rhs.mIsTestModeProfile;
     }
 
     // Parcelable methods
@@ -171,6 +188,8 @@ public final class VcnConfig implements Parcelable {
 
         @NonNull
         private final Set<VcnGatewayConnectionConfig> mGatewayConnectionConfigs = new ArraySet<>();
+
+        private boolean mIsTestModeProfile = false;
 
         public Builder(@NonNull Context context) {
             Objects.requireNonNull(context, "context was null");
@@ -207,13 +226,29 @@ public final class VcnConfig implements Parcelable {
         }
 
         /**
+         * Restricts this VcnConfig to matching with test networks (only).
+         *
+         * <p>This method is for testing only, and must not be used by apps. Calling {@link
+         * VcnManager#setVcnConfig(ParcelUuid, VcnConfig)} with a VcnConfig where test-network usage
+         * is enabled will require the MANAGE_TEST_NETWORKS permission.
+         *
+         * @return this {@link Builder} instance, for chaining
+         * @hide
+         */
+        @NonNull
+        public Builder setIsTestModeProfile() {
+            mIsTestModeProfile = true;
+            return this;
+        }
+
+        /**
          * Builds and validates the VcnConfig.
          *
          * @return an immutable VcnConfig instance
          */
         @NonNull
         public VcnConfig build() {
-            return new VcnConfig(mPackageName, mGatewayConnectionConfigs);
+            return new VcnConfig(mPackageName, mGatewayConnectionConfigs, mIsTestModeProfile);
         }
     }
 }

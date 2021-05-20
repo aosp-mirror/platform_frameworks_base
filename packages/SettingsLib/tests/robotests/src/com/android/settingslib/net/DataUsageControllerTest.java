@@ -89,7 +89,8 @@ public class DataUsageControllerTest {
 
         mNetworkTemplate = NetworkTemplate.buildTemplateMobileAll(SUB_ID);
         mNetworkTemplate2 = NetworkTemplate.buildTemplateMobileAll(SUB_ID_2);
-        mWifiNetworkTemplate = NetworkTemplate.buildTemplateWifiWildcard();
+        mWifiNetworkTemplate = NetworkTemplate.buildTemplateWifi(
+                NetworkTemplate.WIFI_NETWORKID_ALL, null);
     }
 
     @Test

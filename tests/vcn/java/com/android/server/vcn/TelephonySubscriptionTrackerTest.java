@@ -88,13 +88,13 @@ public class TelephonySubscriptionTrackerTest {
     private static final SubscriptionInfo TEST_SUBINFO_2 = mock(SubscriptionInfo.class);
     private static final Map<ParcelUuid, Set<String>> TEST_PRIVILEGED_PACKAGES =
             Collections.singletonMap(TEST_PARCEL_UUID, Collections.singleton(PACKAGE_NAME));
-    private static final Map<Integer, ParcelUuid> TEST_SUBID_TO_GROUP_MAP;
+    private static final Map<Integer, SubscriptionInfo> TEST_SUBID_TO_INFO_MAP;
 
     static {
-        final Map<Integer, ParcelUuid> subIdToGroupMap = new HashMap<>();
-        subIdToGroupMap.put(TEST_SUBSCRIPTION_ID_1, TEST_PARCEL_UUID);
-        subIdToGroupMap.put(TEST_SUBSCRIPTION_ID_2, TEST_PARCEL_UUID);
-        TEST_SUBID_TO_GROUP_MAP = Collections.unmodifiableMap(subIdToGroupMap);
+        final Map<Integer, SubscriptionInfo> subIdToGroupMap = new HashMap<>();
+        subIdToGroupMap.put(TEST_SUBSCRIPTION_ID_1, TEST_SUBINFO_1);
+        subIdToGroupMap.put(TEST_SUBSCRIPTION_ID_2, TEST_SUBINFO_2);
+        TEST_SUBID_TO_INFO_MAP = Collections.unmodifiableMap(subIdToGroupMap);
     }
 
     @NonNull private final Context mContext;
@@ -190,13 +190,13 @@ public class TelephonySubscriptionTrackerTest {
 
     private TelephonySubscriptionSnapshot buildExpectedSnapshot(
             Map<ParcelUuid, Set<String>> privilegedPackages) {
-        return buildExpectedSnapshot(TEST_SUBID_TO_GROUP_MAP, privilegedPackages);
+        return buildExpectedSnapshot(TEST_SUBID_TO_INFO_MAP, privilegedPackages);
     }
 
     private TelephonySubscriptionSnapshot buildExpectedSnapshot(
-            Map<Integer, ParcelUuid> subIdToGroupMap,
+            Map<Integer, SubscriptionInfo> subIdToInfoMap,
             Map<ParcelUuid, Set<String>> privilegedPackages) {
-        return new TelephonySubscriptionSnapshot(subIdToGroupMap, privilegedPackages);
+        return new TelephonySubscriptionSnapshot(subIdToInfoMap, privilegedPackages);
     }
 
     private void verifyNoActiveSubscriptions() {
@@ -371,7 +371,7 @@ public class TelephonySubscriptionTrackerTest {
     @Test
     public void testTelephonySubscriptionSnapshotGetGroupForSubId() throws Exception {
         final TelephonySubscriptionSnapshot snapshot =
-                new TelephonySubscriptionSnapshot(TEST_SUBID_TO_GROUP_MAP, emptyMap());
+                new TelephonySubscriptionSnapshot(TEST_SUBID_TO_INFO_MAP, emptyMap());
 
         assertEquals(TEST_PARCEL_UUID, snapshot.getGroupForSubId(TEST_SUBSCRIPTION_ID_1));
         assertEquals(TEST_PARCEL_UUID, snapshot.getGroupForSubId(TEST_SUBSCRIPTION_ID_2));
@@ -380,7 +380,7 @@ public class TelephonySubscriptionTrackerTest {
     @Test
     public void testTelephonySubscriptionSnapshotGetAllSubIdsInGroup() throws Exception {
         final TelephonySubscriptionSnapshot snapshot =
-                new TelephonySubscriptionSnapshot(TEST_SUBID_TO_GROUP_MAP, emptyMap());
+                new TelephonySubscriptionSnapshot(TEST_SUBID_TO_INFO_MAP, emptyMap());
 
         assertEquals(
                 new ArraySet<>(Arrays.asList(TEST_SUBSCRIPTION_ID_1, TEST_SUBSCRIPTION_ID_2)),

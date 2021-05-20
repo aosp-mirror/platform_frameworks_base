@@ -26,6 +26,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -53,6 +54,7 @@ import android.net.vcn.VcnGatewayConnectionConfigTest;
 import android.os.ParcelUuid;
 import android.os.PowerManager;
 import android.os.test.TestLooper;
+import android.telephony.SubscriptionInfo;
 
 import com.android.internal.util.State;
 import com.android.internal.util.WakeupMessage;
@@ -72,6 +74,12 @@ import java.util.concurrent.TimeUnit;
 
 public class VcnGatewayConnectionTestBase {
     protected static final ParcelUuid TEST_SUB_GRP = new ParcelUuid(UUID.randomUUID());
+    protected static final SubscriptionInfo TEST_SUB_INFO = mock(SubscriptionInfo.class);
+
+    static {
+        doReturn(TEST_SUB_GRP).when(TEST_SUB_INFO).getGroupUuid();
+    }
+
     protected static final InetAddress TEST_DNS_ADDR =
             InetAddresses.parseNumericAddress("2001:DB8:0:1::");
     protected static final InetAddress TEST_DNS_ADDR_2 =
@@ -93,7 +101,7 @@ public class VcnGatewayConnectionTestBase {
 
     protected static final UnderlyingNetworkRecord TEST_UNDERLYING_NETWORK_RECORD_1 =
             new UnderlyingNetworkRecord(
-                    new Network(0),
+                    mock(Network.class, CALLS_REAL_METHODS),
                     new NetworkCapabilities(),
                     new LinkProperties(),
                     false /* blocked */);
@@ -104,7 +112,7 @@ public class VcnGatewayConnectionTestBase {
 
     protected static final UnderlyingNetworkRecord TEST_UNDERLYING_NETWORK_RECORD_2 =
             new UnderlyingNetworkRecord(
-                    new Network(1),
+                    mock(Network.class, CALLS_REAL_METHODS),
                     new NetworkCapabilities(),
                     new LinkProperties(),
                     false /* blocked */);
@@ -115,7 +123,7 @@ public class VcnGatewayConnectionTestBase {
 
     protected static final TelephonySubscriptionSnapshot TEST_SUBSCRIPTION_SNAPSHOT =
             new TelephonySubscriptionSnapshot(
-                    Collections.singletonMap(TEST_SUB_ID, TEST_SUB_GRP), Collections.EMPTY_MAP);
+                    Collections.singletonMap(TEST_SUB_ID, TEST_SUB_INFO), Collections.EMPTY_MAP);
 
     @NonNull protected final Context mContext;
     @NonNull protected final TestLooper mTestLooper;
@@ -165,7 +173,7 @@ public class VcnGatewayConnectionTestBase {
 
         doReturn(mUnderlyingNetworkTracker)
                 .when(mDeps)
-                .newUnderlyingNetworkTracker(any(), any(), any(), any(), any());
+                .newUnderlyingNetworkTracker(any(), any(), any(), any());
         doReturn(mWakeLock)
                 .when(mDeps)
                 .newWakeLock(eq(mContext), eq(PowerManager.PARTIAL_WAKE_LOCK), any());
@@ -201,6 +209,7 @@ public class VcnGatewayConnectionTestBase {
                         TEST_SUBSCRIPTION_SNAPSHOT,
                         mConfig,
                         mGatewayStatusCallback,
+                        true /* isMobileDataEnabled */,
                         mDeps);
     }
 
@@ -218,7 +227,7 @@ public class VcnGatewayConnectionTestBase {
     protected VcnChildSessionCallback getChildSessionCallback() {
         ArgumentCaptor<ChildSessionCallback> captor =
                 ArgumentCaptor.forClass(ChildSessionCallback.class);
-        verify(mDeps).newIkeSession(any(), any(), any(), any(), captor.capture());
+        verify(mDeps, atLeastOnce()).newIkeSession(any(), any(), any(), any(), captor.capture());
         return (VcnChildSessionCallback) captor.getValue();
     }
 

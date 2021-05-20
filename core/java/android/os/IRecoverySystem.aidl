@@ -23,6 +23,7 @@ import android.os.IRecoverySystemProgressListener;
 /** @hide */
 
 interface IRecoverySystem {
+    boolean allocateSpaceForUpdate(in String packageFilePath);
     boolean uncrypt(in String packageFile, IRecoverySystemProgressListener listener);
     boolean setupBcb(in String command);
     boolean clearBcb();

@@ -16,10 +16,16 @@
 
 package com.android.internal.os;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import android.os.Binder;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
+import android.os.Process;
 import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
 import android.util.ArrayMap;
@@ -46,11 +52,12 @@ import java.util.Random;
 @RunWith(AndroidJUnit4.class)
 @Presubmit
 public class BinderCallsStatsTest {
-    private static final int WORKSOURCE_UID = 1;
+    private static final int WORKSOURCE_UID = Process.FIRST_APPLICATION_UID;
     private static final int CALLING_UID = 2;
     private static final int REQUEST_SIZE = 2;
     private static final int REPLY_SIZE = 3;
     private final CachedDeviceState mDeviceState = new CachedDeviceState(false, true);
+    private final TestHandler mHandler = new TestHandler();
 
     @Test
     public void testDetailedOff() {
@@ -753,6 +760,95 @@ public class BinderCallsStatsTest {
         assertEquals(1, callStats.recordedCallCount);
     }
 
+    @Test
+    public void testCallStatsObserver() {
+        TestBinderCallsStats bcs = new TestBinderCallsStats();
+        bcs.setSamplingInterval(1);
+        bcs.setTrackScreenInteractive(false);
+
+        final ArrayList<BinderCallsStats.CallStat> callStatsList = new ArrayList<>();
+        bcs.setCallStatsObserver(
+                (workSourceUid, incrementalCallCount, callStats) -> callStatsList.addAll(
+                        callStats));
+
+        Binder binder = new Binder();
+
+        CallSession callSession = bcs.callStarted(binder, 1, WORKSOURCE_UID);
+        bcs.time += 10;
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE, WORKSOURCE_UID);
+
+        callSession = bcs.callStarted(binder, 1, WORKSOURCE_UID);
+        bcs.time += 20;
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE, WORKSOURCE_UID);
+
+        callSession = bcs.callStarted(binder, 2, WORKSOURCE_UID);
+        bcs.time += 30;
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE, WORKSOURCE_UID);
+
+        for (Runnable runnable: mHandler.mRunnables) {
+            // Execute all pending runnables. Ignore the delay.
+            runnable.run();
+        }
+
+        assertThat(callStatsList).hasSize(2);
+        for (int i = 0; i < 2; i++) {
+            BinderCallsStats.CallStat callStats = callStatsList.get(i);
+            if (callStats.transactionCode == 1) {
+                assertEquals(2, callStats.callCount);
+                assertEquals(2, callStats.recordedCallCount);
+                assertEquals(30, callStats.cpuTimeMicros);
+                assertEquals(20, callStats.maxCpuTimeMicros);
+            } else {
+                assertEquals(1, callStats.callCount);
+                assertEquals(1, callStats.recordedCallCount);
+                assertEquals(30, callStats.cpuTimeMicros);
+                assertEquals(30, callStats.maxCpuTimeMicros);
+            }
+        }
+    }
+
+    @Test
+    public void testLatencyCollectionEnabled() {
+        TestBinderCallsStats bcs = new TestBinderCallsStats();
+        bcs.setCollectLatencyData(true);
+
+        Binder binder = new Binder();
+        CallSession callSession = bcs.callStarted(binder, 1, WORKSOURCE_UID);
+        bcs.time += 10;
+        bcs.elapsedTime += 20;
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE, WORKSOURCE_UID);
+
+        assertEquals(1, bcs.getLatencyObserver().getLatencyHistograms().size());
+    }
+
+    @Test
+    public void testLatencyCollectionDisabledByDefault() {
+        TestBinderCallsStats bcs = new TestBinderCallsStats();
+        assertEquals(false, bcs.getCollectLatencyData());
+
+        Binder binder = new Binder();
+        CallSession callSession = bcs.callStarted(binder, 1, WORKSOURCE_UID);
+        bcs.time += 10;
+        bcs.elapsedTime += 20;
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE, WORKSOURCE_UID);
+
+        assertEquals(0, bcs.getLatencyObserver().getLatencyHistograms().size());
+    }
+
+    private static class TestHandler extends Handler {
+        ArrayList<Runnable> mRunnables = new ArrayList<>();
+
+        TestHandler() {
+            super(Looper.getMainLooper());
+        }
+
+        @Override
+        public boolean sendMessageAtTime(Message msg, long uptimeMillis) {
+            mRunnables.add(msg.getCallback());
+            return true;
+        }
+    }
+
     class TestBinderCallsStats extends BinderCallsStats {
         public int callingUid = CALLING_UID;
         public long time = 1234;
@@ -773,6 +869,14 @@ public class BinderCallsStatsTest {
                             return mCallCount++;
                         }
                     };
+                }
+
+                public Handler getHandler() {
+                    return mHandler;
+                }
+
+                public BinderLatencyObserver getLatencyObserver() {
+                    return new BinderLatencyObserverTest.TestBinderLatencyObserver();
                 }
             });
             setSamplingInterval(1);

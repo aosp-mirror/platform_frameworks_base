@@ -25,7 +25,12 @@ package android.renderscript;
  * android.renderscript.Allocation#USAGE_GRAPHICS_TEXTURE}; using a Sampler on
  * an {@link android.renderscript.Allocation} that was not created with {@link
  * android.renderscript.Allocation#USAGE_GRAPHICS_TEXTURE} is undefined.
+ *
+ * @deprecated Renderscript has been deprecated in API level 31. Please refer to the <a
+ * href="https://developer.android.com/guide/topics/renderscript/migration-guide">migration
+ * guide</a> for the proposed alternatives.
  **/
+@Deprecated
 public class Sampler extends BaseObj {
     public enum Value {
         NEAREST (0),

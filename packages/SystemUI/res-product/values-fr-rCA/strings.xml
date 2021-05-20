@@ -20,7 +20,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="dock_alignment_slow_charging" product="default" msgid="6997633396534416792">"Réalignez le téléphone pour le recharger plus rapidement"</string>
-    <string name="dock_alignment_not_charging" product="default" msgid="3980752926226749808">"Réalignez le téléphone pour effectuer la recharge sans fil"</string>
+    <string name="dock_alignment_not_charging" product="default" msgid="3980752926226749808">"Réalignez le téléphone pour le recharger sans fil"</string>
     <string name="inattentive_sleep_warning_message" product="tv" msgid="6844464574089665063">"L\'appareil Android TV va bientôt s\'éteindre. Appuyez sur un bouton pour le laisser allumé."</string>
     <string name="inattentive_sleep_warning_message" product="default" msgid="5693904520452332224">"L\'appareil va bientôt s\'éteindre. Interagissez avec lui pour le laisser allumé."</string>
     <string name="keyguard_missing_sim_message" product="tablet" msgid="5018086454277963787">"Aucune carte SIM n\'est insérée dans la tablette."</string>
@@ -40,4 +40,7 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4682221342671290678">"Vous avez tenté de déverrouiller ce téléphone à <xliff:g id="NUMBER">%d</xliff:g> reprises. Le profil professionnel sera supprimé, ce qui entraîne la suppression de toutes ses données."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="1860049973474855672">"Vous avez dessiné un schéma de déverrouillage incorrect à <xliff:g id="NUMBER_0">%1$d</xliff:g> reprises. Si vous échouez encore <xliff:g id="NUMBER_1">%2$d</xliff:g> fois, vous devrez déverrouiller votre tablette à l\'aide d\'un compte de courriel.\n\nVeuillez réessayer dans <xliff:g id="NUMBER_2">%3$d</xliff:g> secondes."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="44112553371516141">"Vous avez dessiné un schéma de déverrouillage incorrect à <xliff:g id="NUMBER_0">%1$d</xliff:g> reprises. Si vous échouez encore <xliff:g id="NUMBER_1">%2$d</xliff:g> fois, vous devrez déverrouiller votre téléphone à l\'aide d\'un compte de courriel.\n\nVeuillez réessayer dans <xliff:g id="NUMBER_2">%3$d</xliff:g> secondes."</string>
+    <string name="global_action_lock_message" product="default" msgid="7092460751050168771">"Déverrouillez votre téléphone pour afficher davantage d\'options"</string>
+    <string name="global_action_lock_message" product="tablet" msgid="1024230056230539493">"Déverrouillez votre tablette pour afficher davantage d\'options"</string>
+    <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"Déverrouillez votre appareil pour afficher davantage d\'options"</string>
 </resources>

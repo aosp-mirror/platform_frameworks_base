@@ -23,6 +23,7 @@ import android.net.IConnectivityDiagnosticsCallback;
 import android.net.INetworkAgent;
 import android.net.IOnCompleteListener;
 import android.net.INetworkActivityListener;
+import android.net.INetworkOfferCallback;
 import android.net.IQosCallback;
 import android.net.ISocketKeepaliveCallback;
 import android.net.LinkProperties;
@@ -81,7 +82,7 @@ interface IConnectivityManager
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     NetworkState[] getAllNetworkState();
 
-    List<NetworkStateSnapshot> getAllNetworkStateSnapshot();
+    List<NetworkStateSnapshot> getAllNetworkStateSnapshots();
 
     boolean isActiveNetworkMetered();
 
@@ -221,4 +222,8 @@ interface IConnectivityManager
             in IOnCompleteListener listener);
 
     int getRestrictBackgroundStatusByCaller();
+
+    void offerNetwork(in Messenger messenger, in NetworkScore score,
+            in NetworkCapabilities caps, in INetworkOfferCallback callback);
+    void unofferNetwork(in INetworkOfferCallback callback);
 }

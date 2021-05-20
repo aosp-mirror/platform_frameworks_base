@@ -74,16 +74,19 @@ public class Authorization {
      * @param locked            - whether it is a lock (true) or unlock (false) event
      * @param syntheticPassword - if it is an unlock event with the password, pass the synthetic
      *                            password provided by the LockSettingService
+     * @param unlockingSids     - KeyMint secure user IDs that should be permitted to unlock
+     *                            UNLOCKED_DEVICE_REQUIRED keys.
      *
      * @return 0 if successful or a {@code ResponseCode}.
      */
     public static int onLockScreenEvent(@NonNull boolean locked, @NonNull int userId,
-            @Nullable byte[] syntheticPassword) {
+            @Nullable byte[] syntheticPassword, @Nullable long[] unlockingSids) {
         try {
             if (locked) {
-                getService().onLockScreenEvent(LockScreenEvent.LOCK, userId, null);
+                getService().onLockScreenEvent(LockScreenEvent.LOCK, userId, null, unlockingSids);
             } else {
-                getService().onLockScreenEvent(LockScreenEvent.UNLOCK, userId, syntheticPassword);
+                getService().onLockScreenEvent(
+                        LockScreenEvent.UNLOCK, userId, syntheticPassword, unlockingSids);
             }
             return 0;
         } catch (RemoteException | NullPointerException e) {

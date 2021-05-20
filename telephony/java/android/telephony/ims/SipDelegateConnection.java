@@ -48,7 +48,7 @@ public interface SipDelegateConnection {
      * sending the message.
      * @param sipMessage The SipMessage to be sent.
      * @param configVersion The SipDelegateImsConfiguration version used to construct the
-     *                      SipMessage. See {@link SipDelegateImsConfiguration#getVersion} for more
+     *                      SipMessage. See {@link SipDelegateConfiguration#getVersion} for more
      */
     void sendMessage(@NonNull SipMessage sipMessage, long configVersion);
 

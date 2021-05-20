@@ -1,5 +1,5 @@
 {
-  "presubmit": [
+  "presubmit-large": [
     {
       "name": "CtsHostsideNetworkTests",
       "file_patterns": ["(/|^)NetworkPolicy[^/]*\\.java"],
@@ -11,7 +11,9 @@
           "exclude-annotation": "androidx.test.filters.FlakyTest"
         }
       ]
-    },
+    }
+  ],
+  "presubmit": [
     {
       "name": "FrameworksServicesTests",
       "file_patterns": ["(/|^)NetworkPolicy[^/]*\\.java"],

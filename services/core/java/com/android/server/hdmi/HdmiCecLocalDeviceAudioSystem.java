@@ -353,7 +353,6 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         super.disableDevice(initiatedByCec, callback);
         assertRunOnServiceThread();
         mService.unregisterTvInputCallback(mTvInputCallback);
-        // TODO(b/129088603): check disableDevice and onStandby behaviors per spec
     }
 
     @Override
@@ -807,7 +806,6 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
                     Arrays.stream(device.getEncodings()).mapToObj(
                             AudioFormat::toLogFriendlyEncoding
                     ).collect(Collectors.joining(", ")));
-            // TODO(b/80297701) use the actual device type that system audio mode is connected to.
             if (device.getType() == AudioDeviceInfo.TYPE_HDMI_ARC) {
                 return device;
             }
@@ -1046,7 +1044,6 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
     }
 
     protected void switchToAudioInput() {
-        // TODO(b/111396634): switch input according to PROPERTY_SYSTEM_AUDIO_MODE_AUDIO_PORT
     }
 
     protected boolean isDirectConnectToTv() {
@@ -1227,7 +1224,6 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         if (isSystemAudioActivated() && port < 0) {
             // If system audio mode is on and the new active source is not under the current device,
             // Will switch to ARC input.
-            // TODO(b/115637145): handle system aduio without ARC
             routeToInputFromPortId(Constants.CEC_SWITCH_ARC);
         } else if (mIsSwitchDevice && port >= 0) {
             // If current device is a switch and the new active source is under it,
@@ -1328,7 +1324,6 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
 
     // Handle the system audio(ARC) part of the logic on receiving routing change or information.
     private void handleRoutingChangeAndInformationForSystemAudio() {
-        // TODO(b/115637145): handle system aduio without ARC
         routeToInputFromPortId(Constants.CEC_SWITCH_ARC);
     }
 

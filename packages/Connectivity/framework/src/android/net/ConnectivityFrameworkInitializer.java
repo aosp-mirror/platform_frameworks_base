@@ -68,5 +68,11 @@ public final class ConnectivityFrameworkInitializer {
                     return cm.startOrGetTestNetworkManager();
                 }
         );
+
+        SystemServiceRegistry.registerContextAwareService(
+                DnsResolverServiceManager.DNS_RESOLVER_SERVICE,
+                DnsResolverServiceManager.class,
+                (context, serviceBinder) -> new DnsResolverServiceManager(serviceBinder)
+        );
     }
 }

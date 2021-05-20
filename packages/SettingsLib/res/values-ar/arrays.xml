@@ -64,19 +64,19 @@
     <item msgid="2779123106632690576">"مفعّل"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_versions">
-    <item msgid="8036025277512210160">"‏AVRCP 1.4 (التلقائي)"</item>
+    <item msgid="6603880723315236832">"‏AVRCP 1.5 (تلقائي)"</item>
     <item msgid="1637054408779685086">"AVRCP 1.3"</item>
-    <item msgid="8317734704797203949">"AVRCP 1.5"</item>
+    <item msgid="5896162189744596291">"AVRCP 1.4"</item>
     <item msgid="7556896992111771426">"AVRCP 1.6"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_version_values">
-    <item msgid="8965800440990431014">"avrcp14"</item>
+    <item msgid="4041937689950033942">"avrcp15"</item>
     <item msgid="1613629084012791988">"avrcp13"</item>
-    <item msgid="4398977131424970917">"avrcp15"</item>
+    <item msgid="99467845610592181">"avrcp14"</item>
     <item msgid="1963366694959681026">"avrcp16"</item>
   </string-array>
   <string-array name="bluetooth_map_versions">
-    <item msgid="8786402640610987099">"‏MAP 1.2 (الإعداد الافتراضي)"</item>
+    <item msgid="8786402640610987099">"‏MAP 1.2 (تلقائي)"</item>
     <item msgid="6817922176194686449">"MAP 1.3"</item>
     <item msgid="3423518690032737851">"MAP 1.4"</item>
   </string-array>
@@ -141,13 +141,13 @@
     <item msgid="1241278021345116816">"تحسين جودة الصوت (٩٩٠ كيلوبت في الثانية / ٩٠٩ كيلوبت في الثانية)"</item>
     <item msgid="3523665555859696539">"جودة متوازنة للصوت والاتصال (660 كيلوبت في الثانية/606 كيلوبت في الثانية)"</item>
     <item msgid="886408010459747589">"تحسين جودة الاتصال (٣٣٠ كيلوبت في الثانية / ٣٠٣ كيلوبت في الثانية)"</item>
-    <item msgid="3808414041654351577">"أفضل جهد (معدل سرعة المعلومات التكيُّفي)"</item>
+    <item msgid="3808414041654351577">"أفضل جهد (معدل نقل البيانات التكيُّفي)"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_summaries">
     <item msgid="804499336721569838">"تحسين جودة الصوت"</item>
     <item msgid="7451422070435297462">"جودة متوازنة للصوت والاتصال"</item>
     <item msgid="6173114545795428901">"تحسين جودة الاتصال"</item>
-    <item msgid="4349908264188040530">"أفضل جهد (معدل سرعة المعلومات التكيُّفي)"</item>
+    <item msgid="4349908264188040530">"أفضل جهد (معدل نقل البيانات التكيُّفي)"</item>
   </string-array>
   <string-array name="bluetooth_audio_active_device_summaries">
     <item msgid="8019740759207729126"></item>
@@ -161,7 +161,7 @@
     <item msgid="2715700596495505626">"٢٥٦ كيلوبايت"</item>
     <item msgid="7099386891713159947">"1 ميغابايت"</item>
     <item msgid="6069075827077845520">"٤ ميغابايت"</item>
-    <item msgid="8243549501764402572">"١٦ ميغابايت"</item>
+    <item msgid="6078203297886482480">"8 ميغابايت"</item>
   </string-array>
   <string-array name="select_logd_size_lowram_titles">
     <item msgid="1145807928339101085">"إيقاف"</item>
@@ -175,7 +175,7 @@
     <item msgid="7464037639415220106">"٢٥٦ كيلوبايت لكل ذاكرة تخزين مؤقت للتسجيل"</item>
     <item msgid="8539423820514360724">"1 ميغابايت لكل ذاكرة تخزين مؤقت للتسجيل"</item>
     <item msgid="1984761927103140651">"٤ ميغابايت لكل ذاكرة تخزين مؤقت للتسجيل"</item>
-    <item msgid="7892098981256010498">"١٦ ميغابايت لكل ذاكرة تخزين مؤقت للتسجيل"</item>
+    <item msgid="2983219471251787208">"8 ميغابايت لكل مخزن مؤقت للتسجيل"</item>
   </string-array>
   <string-array name="select_logpersist_titles">
     <item msgid="704720725704372366">"إيقاف"</item>

@@ -14,6 +14,7 @@ package android {
     field public static final String CONTROL_DEVICE_LIGHTS = "android.permission.CONTROL_DEVICE_LIGHTS";
     field public static final String FORCE_DEVICE_POLICY_MANAGER_LOGS = "android.permission.FORCE_DEVICE_POLICY_MANAGER_LOGS";
     field public static final String FORCE_STOP_PACKAGES = "android.permission.FORCE_STOP_PACKAGES";
+    field public static final String INSTALL_TEST_ONLY_PACKAGE = "android.permission.INSTALL_TEST_ONLY_PACKAGE";
     field public static final String KEEP_UNINSTALLED_PACKAGES = "android.permission.KEEP_UNINSTALLED_PACKAGES";
     field public static final String MANAGE_ACTIVITY_STACKS = "android.permission.MANAGE_ACTIVITY_STACKS";
     field public static final String MANAGE_CRATES = "android.permission.MANAGE_CRATES";
@@ -536,6 +537,10 @@ package android.content.pm {
     field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.ProviderInfoList> CREATOR;
   }
 
+  public final class SharedLibraryInfo implements android.os.Parcelable {
+    method @NonNull public java.util.List<java.lang.String> getAllCodePaths();
+  }
+
   public final class ShortcutInfo implements android.os.Parcelable {
     method public boolean isVisibleToPublisher();
   }
@@ -1009,6 +1014,10 @@ package android.net {
     method public static void setServiceForTest(@Nullable android.os.IBinder);
   }
 
+  public class NetworkWatchlistManager {
+    method @Nullable public byte[] getWatchlistConfigHash();
+  }
+
   public class TrafficStats {
     method public static long getLoopbackRxBytes();
     method public static long getLoopbackRxPackets();
@@ -1186,6 +1195,7 @@ package android.os {
 
   public class VintfObject {
     method public static String[] getHalNamesAndVersions();
+    method @NonNull public static String getPlatformSepolicyVersion();
     method public static String getSepolicyVersion();
     method public static Long getTargetFrameworkCompatibilityMatrixVersion();
     method public static java.util.Map<java.lang.String,java.lang.String[]> getVndkSnapshots();
@@ -1679,6 +1689,7 @@ package android.telephony {
   public class TelephonyManager {
     method public int addDevicePolicyOverrideApn(@NonNull android.content.Context, @NonNull android.telephony.data.ApnSetting);
     method public int getCarrierIdListVersion();
+    method @NonNull @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public java.util.List<java.lang.String> getCertsFromCarrierPrivilegeAccessRules();
     method @NonNull public java.util.List<android.telephony.data.ApnSetting> getDevicePolicyOverrideApns(@NonNull android.content.Context);
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public String getLine1AlphaTag();
     method public android.util.Pair<java.lang.Integer,java.lang.Integer> getRadioHalVersion();

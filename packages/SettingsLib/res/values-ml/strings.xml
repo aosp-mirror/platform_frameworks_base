@@ -117,7 +117,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"റദ്ദാക്കുക"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"കണക്‌റ്റു‌ചെയ്‌തിരിക്കുമ്പോൾ, ജോടിയാക്കുന്നത് നിങ്ങളുടെ കോൺടാക്‌റ്റുകളിലേക്കും കോൾ ചരിത്രത്തിലേക്കും  ആക്‌സസ്സ് അനുവദിക്കുന്നു."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> എന്നതുമായി ജോടിയാക്കാനായില്ല."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"ഒരു തെറ്റായ പിൻ അല്ലെങ്കിൽ പാസ്‌കീ കാരണം <xliff:g id="DEVICE_NAME">%1$s</xliff:g> എന്നതുമായി ജോടിയാക്കാനായില്ല."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"തെറ്റായ പിൻ/പാസ്‌കീ കാരണം <xliff:g id="DEVICE_NAME">%1$s</xliff:g> എന്നതുമായി ജോടിയാക്കാനായില്ല."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> എന്നതുമായി ആശയവിനിമയം നടത്താനായില്ല."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>, ജോടിയാക്കൽ നിരസിച്ചു."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"കമ്പ്യൂട്ടർ"</string>
@@ -145,7 +145,7 @@
     <string name="data_usage_ota" msgid="7984667793701597001">"സിസ്‌റ്റം അപ്‌ഡേറ്റുകൾ"</string>
     <string name="tether_settings_title_usb" msgid="3728686573430917722">"USB ടെതറിംഗ്"</string>
     <string name="tether_settings_title_wifi" msgid="4803402057533895526">"പോർട്ടബിൾ ഹോട്ട്സ്‌പോട്ട്"</string>
-    <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"ബ്ലൂടൂത്ത് ടെതറിംഗ്"</string>
+    <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"Bluetooth ടെതറിംഗ്"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"ടെതറിംഗ്"</string>
     <string name="tether_settings_title_all" msgid="8910259483383010470">"ടെതറിംഗും പോർട്ടബിൾ ഹോട്ട്സ്‌പോട്ടും"</string>
     <string name="managed_user_title" msgid="449081789742645723">"എല്ലാ ഔദ്യോഗിക ആപ്‌സും"</string>
@@ -153,10 +153,10 @@
     <string name="unknown" msgid="3544487229740637809">"അജ്ഞാതം"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"ഉപയോക്താവ്: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"സ്ഥിരമായ ചിലത് സജ്ജീകരിച്ചു"</string>
-    <string name="launch_defaults_none" msgid="8049374306261262709">"സ്ഥിരമായൊന്നും സജ്ജീകരിച്ചിട്ടില്ല"</string>
+    <string name="launch_defaults_none" msgid="8049374306261262709">"ഡിഫോൾട്ടുകളൊന്നും സജ്ജീകരിച്ചിട്ടില്ല"</string>
     <string name="tts_settings" msgid="8130616705989351312">"ടെക്‌സ്റ്റ്-ടു-സ്‌പീച്ച് ക്രമീകരണങ്ങൾ"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"ടെക്‌സ്റ്റ്-ടു-സ്‌പീച്ച് ഔട്ട്‌പുട്ട്"</string>
-    <string name="tts_default_rate_title" msgid="3964187817364304022">"വായനാ നിരക്ക്"</string>
+    <string name="tts_default_rate_title" msgid="3964187817364304022">"വായനയുടെ വേഗത"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"ടെക്സ്റ്റ് ചെയ്യൽ പറയുമ്പോഴുടെക്കുന്ന വേഗത"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"പിച്ച്"</string>
     <string name="tts_default_pitch_summary" msgid="9132719475281551884">"സിന്തസൈസ് ചെയ്ത സംസാരത്തിന്റെ സ്വരഭേദത്തെ ബാധിക്കുന്നു"</string>
@@ -178,7 +178,7 @@
     <string name="tts_status_checking" msgid="8026559918948285013">"പരിശോധിക്കുന്നു…"</string>
     <string name="tts_engine_settings_title" msgid="7849477533103566291">"<xliff:g id="TTS_ENGINE_NAME">%s</xliff:g> എന്നതിനായുള്ള ക്രമീകരണങ്ങൾ"</string>
     <string name="tts_engine_settings_button" msgid="477155276199968948">"എഞ്ചിൻ ക്രമീകരണങ്ങൾ സമാരംഭിക്കുക"</string>
-    <string name="tts_engine_preference_section_title" msgid="3861562305498624904">"തിരഞ്ഞെടുത്ത എഞ്ചിൻ"</string>
+    <string name="tts_engine_preference_section_title" msgid="3861562305498624904">"മുൻഗണന നൽകുന്ന എഞ്ചിൻ"</string>
     <string name="tts_general_section_title" msgid="8919671529502364567">"പൊതുവായ കാര്യങ്ങൾ"</string>
     <string name="tts_reset_speech_pitch_title" msgid="7149398585468413246">"സംസാരത്തിന്റെ ശബ്ദനില പുനഃക്രമീകരിക്കുക"</string>
     <string name="tts_reset_speech_pitch_summary" msgid="6822904157021406449">"ടെക്‌സ്റ്റ് സംസാരിക്കപ്പെടുന്ന ശബ്ദനില \'ഡിഫോൾട്ടി\'ലേക്ക് പുനഃക്രമീകരിക്കുക."</string>
@@ -194,7 +194,7 @@
     <item msgid="581904787661470707">"ഏറ്റവും വേഗത്തിൽ"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"പ്രൊഫൈൽ തിരഞ്ഞെടുക്കുക"</string>
-    <string name="category_personal" msgid="6236798763159385225">"വ്യക്തിഗതം"</string>
+    <string name="category_personal" msgid="6236798763159385225">"വ്യക്തിപരം"</string>
     <string name="category_work" msgid="4014193632325996115">"ഔദ്യോഗികം"</string>
     <string name="development_settings_title" msgid="140296922921597393">"ഡെവലപ്പർ ഓ‌പ്ഷനുകൾ"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"ഡെവലപ്പർ ഓ‌പ്ഷനുകൾ പ്രവർത്തനക്ഷമമാക്കുക"</string>
@@ -206,77 +206,52 @@
     <string name="enable_adb" msgid="8072776357237289039">"USB ഡീബഗ്ഗിംഗ്"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"USB കണ‌ക്റ്റുചെയ്‌തിരിക്കുമ്പോഴുള്ള ഡീബഗ് മോഡ്"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"USB ഡീബഗ്ഗിംഗ് അംഗീകാരം പിൻവലിക്കുക"</string>
-    <!-- no translation found for enable_adb_wireless (6973226350963971018) -->
-    <skip />
-    <!-- no translation found for enable_adb_wireless_summary (7344391423657093011) -->
-    <skip />
-    <!-- no translation found for adb_wireless_error (721958772149779856) -->
-    <skip />
-    <!-- no translation found for adb_wireless_settings (2295017847215680229) -->
-    <skip />
-    <!-- no translation found for adb_wireless_list_empty_off (1713707973837255490) -->
-    <skip />
-    <!-- no translation found for adb_pair_method_qrcode_title (6982904096137468634) -->
-    <skip />
-    <!-- no translation found for adb_pair_method_qrcode_summary (3729901496856458634) -->
-    <skip />
-    <!-- no translation found for adb_pair_method_code_title (1122590300445142904) -->
-    <skip />
-    <!-- no translation found for adb_pair_method_code_summary (6370414511333685185) -->
-    <skip />
-    <!-- no translation found for adb_paired_devices_title (5268997341526217362) -->
-    <skip />
-    <!-- no translation found for adb_wireless_device_connected_summary (3039660790249148713) -->
-    <skip />
-    <!-- no translation found for adb_wireless_device_details_title (7129369670526565786) -->
-    <skip />
-    <!-- no translation found for adb_device_forget (193072400783068417) -->
-    <skip />
-    <!-- no translation found for adb_device_fingerprint_title_format (291504822917843701) -->
-    <skip />
-    <!-- no translation found for adb_wireless_connection_failed_title (664211177427438438) -->
-    <skip />
-    <!-- no translation found for adb_wireless_connection_failed_message (9213896700171602073) -->
-    <skip />
-    <!-- no translation found for adb_pairing_device_dialog_title (7141739231018530210) -->
-    <skip />
-    <!-- no translation found for adb_pairing_device_dialog_pairing_code_label (3639239786669722731) -->
-    <skip />
-    <!-- no translation found for adb_pairing_device_dialog_failed_title (3426758947882091735) -->
-    <skip />
-    <!-- no translation found for adb_pairing_device_dialog_failed_msg (6611097519661997148) -->
-    <skip />
-    <!-- no translation found for adb_wireless_qrcode_summary (8051414549011801917) -->
-    <skip />
-    <!-- no translation found for adb_wireless_verifying_qrcode_text (6123192424916029207) -->
-    <skip />
-    <!-- no translation found for adb_qrcode_pairing_device_failed_msg (6936292092592914132) -->
-    <skip />
-    <!-- no translation found for adb_wireless_ip_addr_preference_title (8335132107715311730) -->
-    <skip />
-    <!-- no translation found for adb_wireless_qrcode_pairing_title (1906409667944674707) -->
-    <skip />
-    <!-- no translation found for adb_wireless_qrcode_pairing_description (8578868049289910131) -->
-    <skip />
-    <!-- no translation found for keywords_adb_wireless (6507505581882171240) -->
-    <skip />
+    <string name="enable_adb_wireless" msgid="6973226350963971018">"വയർലെസ് ഡീബഗ്ഗിംഗ്"</string>
+    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"വൈഫൈ കണക്റ്റ് ചെയ്‌തിരിക്കുമ്പോൾ ഡീബഗ് മോഡിലാക്കുക"</string>
+    <string name="adb_wireless_error" msgid="721958772149779856">"പിശക്"</string>
+    <string name="adb_wireless_settings" msgid="2295017847215680229">"വയർലെസ് ഡീബഗ്ഗിംഗ്"</string>
+    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"ലഭ്യമായ ഉപകരണങ്ങൾ കാണാനും ഉപയോഗിക്കാനും വയർലെസ് ഡീബഗ്ഗിംഗ് ഓണാക്കുക"</string>
+    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"QR കോഡ് ഉപയോഗിച്ച് ഉപകരണം ജോടിയാക്കുക"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"QR കോഡ് സ്‌കാനർ ഉപയോഗിച്ച് പുതിയ ഉപകരണങ്ങൾ ജോടിയാക്കുക"</string>
+    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"ജോടിയാക്കൽ കോഡ് ഉപയോഗിച്ച് ഉപകരണം ജോടിയാക്കുക"</string>
+    <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"ആറക്ക കോഡ് ഉപയോഗിച്ച് പുതിയ ഉപകരണങ്ങൾ ജോടിയാക്കുക"</string>
+    <string name="adb_paired_devices_title" msgid="5268997341526217362">"ജോടിയാക്കിയ ഉപകരണങ്ങൾ"</string>
+    <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"നിലവിൽ കണക്റ്റ് ചെയ്‌തത്"</string>
+    <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"ഉപകരണ വിശദാംശങ്ങൾ"</string>
+    <string name="adb_device_forget" msgid="193072400783068417">"മറക്കുക"</string>
+    <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"ഉപകരണ ഫിംഗർപ്രിന്റ്: <xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
+    <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"കണക്റ്റ് ചെയ്യാനായില്ല"</string>
+    <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"ശരിയായ നെറ്റ്‌വർക്കിൽ ആണ് <xliff:g id="DEVICE_NAME">%1$s</xliff:g> കണക്റ്റ് ചെയ്‌തിട്ടുള്ളത് എന്ന് ഉറപ്പാക്കുക"</string>
+    <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"ഉപകരണവുമായി ജോടിയാക്കുക"</string>
+    <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"വൈഫൈ ജോടിയാക്കൽ കോഡ്"</string>
+    <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"ജോടിയാക്കാനായില്ല"</string>
+    <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"ഒരേ നെറ്റ്‌വർക്കിൽ തന്നെയാണ് ഉപകരണം കണക്റ്റ് ചെയ്‌തിട്ടുള്ളതെന്ന് ഉറപ്പാക്കുക."</string>
+    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"QR കോഡ് സ്‌കാൻ ചെയ്‌ത് വൈഫൈയിലൂടെ ഉപകരണം ജോടിയാക്കുക"</string>
+    <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"ഉപകരണം ജോടിയാക്കുന്നു…"</string>
+    <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"ഉപകരണം ജോടിയാക്കാനായില്ല. ഒന്നുകിൽ QR കോഡ് തെറ്റായിരുന്നു അല്ലെങ്കിൽ ഉപകരണം ഒരേ നെറ്റ്‌വർക്കിൽ അല്ല കണക്റ്റ് ചെയ്‌തിട്ടുള്ളത്."</string>
+    <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP വിലാസവും പോർട്ടും"</string>
+    <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"QR കോഡ് സ്‌കാൻ ചെയ്യുക"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"QR കോഡ് സ്‌കാൻ ചെയ്‌ത് വൈഫൈയിലൂടെ ഉപകരണം ജോടിയാക്കുക"</string>
+    <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"ഒരു വൈഫൈ നെറ്റ്‌വർക്കിലേക്ക് കണക്റ്റ് ചെയ്യുക"</string>
+    <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, debug, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"ബഗ് റിപ്പോർട്ട് കുറുക്കുവഴി"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"ബഗ് റിപ്പോർട്ട് എടുക്കുന്നതിന് പവർ മെനുവിൽ ഒരു ബട്ടൺ കാണിക്കുക"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"സജീവമായി തുടരുക"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"ചാർജ് ചെയ്യുമ്പോൾ സ്‌ക്രീൻ ഒരിക്കലും സ്ലീപ്പ് മോഡിലാകില്ല"</string>
-    <string name="bt_hci_snoop_log" msgid="7291287955649081448">"ബ്ലൂടൂത്ത് HCI സ്‌നൂപ്പ് ലോഗ് സജീവമാക്കൂ"</string>
+    <string name="bt_hci_snoop_log" msgid="7291287955649081448">"ബ്ലൂടൂത്ത് HCI സ്‌നൂപ്പ് ലോഗ് പ്രവർത്തനക്ഷമമാക്കുക"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Bluetooth പായ്ക്കറ്റുകൾ ക്യാപ്‌ചർ ചെയ്യുക. (ഈ ക്രമീകരണം മാറ്റിയ ശേഷം Bluetooth മാറ്റുക)"</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"OEM അൺലോക്ക് ചെയ്യൽ"</string>
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"അൺലോക്കാകാൻ ബൂട്ട്‌ലോഡറിനെ അനുവദിക്കുക"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"OEM അൺലോക്കുചെയ്യൽ അനുവദിക്കണോ?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"മുന്നറിയിപ്പ്: ഈ ക്രമീകരണം ഓണായിരിക്കുമ്പോൾ, ഉപകരണ സുരക്ഷാ ഫീച്ചറുകൾ ഈ ഉപകരണത്തിൽ പ്രവർത്തിക്കില്ല."</string>
     <string name="mock_location_app" msgid="6269380172542248304">"മോക്ക്‌ലൊക്കേഷൻ ആപ്പ് തിരഞ്ഞെടുക്കൂ"</string>
-    <string name="mock_location_app_not_set" msgid="6972032787262831155">"മോക്ക് ലൊക്കേഷൻ ആപ്പ് സജ്ജമാക്കിയിട്ടില്ല"</string>
+    <string name="mock_location_app_not_set" msgid="6972032787262831155">"മോക്ക് ലൊക്കേഷൻ ആപ്പ് സജ്ജീകരിച്ചിട്ടില്ല"</string>
     <string name="mock_location_app_set" msgid="4706722469342913843">"മോക്ക് ലൊക്കേഷൻ ആപ്പ്: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"നെറ്റ്‍വര്‍ക്കിംഗ്"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"വയർലെസ് ഡിസ്‌പ്ലേ സർട്ടിഫിക്കേഷൻ"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"വൈഫൈ വെർബോസ് ലോഗിംഗ് പ്രവർത്തനക്ഷമമാക്കുക"</string>
-    <string name="wifi_scan_throttling" msgid="2985624788509913617">"വൈഫൈ സ്‌കാൻ പ്രവർത്തനരഹിതമാക്കുന്നു"</string>
+    <string name="wifi_scan_throttling" msgid="2985624788509913617">"വൈഫൈ സ്‌കാൻ ത്രോട്ടിലിംഗ്"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"വൈഫൈ മെച്ചപ്പെടുത്തിയ MAC ക്രമരഹിതമാക്കൽ"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"മൊബൈൽ ഡാറ്റ എല്ലായ്‌പ്പോഴും സജീവം"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"ടെതറിംഗ് ഹാർഡ്‌വെയർ ത്വരിതപ്പെടുത്തൽ"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"പേരില്ലാത്ത Bluetooth ഉപകരണങ്ങൾ കാണിക്കുക"</string>
@@ -291,7 +266,7 @@
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="1638623076480928191">"Bluetooth ഓഡിയോ സാമ്പിൾ നിരക്ക്"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5876305103137067798">"Bluetooth Audio Codec\nSelection ട്രിഗ്ഗര്‍ ചെയ്യുക: സാമ്പിൾ റേറ്റ്"</string>
     <string name="bluetooth_select_a2dp_codec_type_help_info" msgid="8647200416514412338">"ചാരനിറത്തിലാക്കിയിട്ടുണ്ടെങ്കിൽ, ഫോണോ ഹെഡ്‌സെറ്റോ പിന്തുണയ്ക്കുന്നില്ലെന്നാണ് അർത്ഥം"</string>
-    <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="6253965294594390806">"പ്രതി സാമ്പിളിലെ Bluetooth ഓഡിയോ ബിറ്റ് നി"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="6253965294594390806">"ഓരോ സാമ്പിളിലെയും Bluetooth ഓഡിയോ ബിറ്റുകൾ"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4898693684282596143">"Bluetooth Audio Codec\nSelection ട്രിഗ്ഗര്‍ ചെയ്യുക: ഓരോ സാമ്പിളിനുള്ള ബിറ്റുകൾ"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="364277285688014427">"Bluetooth ഓഡിയോ ചാനൽ മോഡ്"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="2076949781460359589">"Bluetooth Audio Codec\nSelection ട്രിഗ്ഗര്‍ ചെയ്യുക: ചാനൽ മോഡ്"</string>
@@ -302,13 +277,14 @@
     <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"സ്വകാര്യ DNS മോഡ് തിരഞ്ഞെടുക്കുക"</string>
     <string name="private_dns_mode_off" msgid="7065962499349997041">"ഓഫ്"</string>
     <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"സ്വയമേവ"</string>
-    <string name="private_dns_mode_provider" msgid="3619040641762557028">"സ്വകാര്യ DNS ദാതാവിന്‍റെ ഹോസ്റ്റുനാമം"</string>
-    <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"DNS ദാതാവിന്‍റെ ഹോസ്റ്റുനാമം നൽകുക"</string>
+    <string name="private_dns_mode_provider" msgid="3619040641762557028">"സ്വകാര്യ DNS ദാതാവിന്‍റെ ഹോസ്റ്റ് നാമം"</string>
+    <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"DNS ദാതാവിന്‍റെ ഹോസ്റ്റ് നാമം നൽകുക"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"കണക്റ്റ് ചെയ്യാനായില്ല"</string>
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"വയർലെസ് ഡിസ്‌പ്ലേ സർട്ടിഫിക്കേഷനായി ഓപ്‌ഷനുകൾ ദൃശ്യമാക്കുക"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"വൈഫൈ പിക്കറിൽ ഓരോ SSID RSSI പ്രകാരം കാണിക്കാൻ വൈഫൈ ലോഗിംഗ് നില വർദ്ധിപ്പിക്കുക"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"ബാറ്ററി ചാർജ് വേഗത്തിൽ തീരുന്ന അവസ്ഥ കുറച്ച് നെറ്റ്‌വർക്ക് പ്രകടനം മെച്ചപ്പെടുത്തുന്നു"</string>
-    <string name="wifi_metered_label" msgid="8737187690304098638">"മീറ്റർചെയ്ത"</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"ഈ മോഡ് പ്രവർത്തനക്ഷമമാക്കുമ്പോൾ, MAC ക്രമരഹിതമാക്കൽ പ്രവർത്തനക്ഷമമാക്കിയിരിക്കുന്ന നെറ്റ്‌വർക്കിലേക്ക് കണക്റ്റ് ചെയ്യുമ്പോഴെല്ലാം ഈ ഉപകരണത്തിന്റെ MAC വിലാസം മാറിയേക്കാം."</string>
+    <string name="wifi_metered_label" msgid="8737187690304098638">"മീറ്റർ ചെയ്തത്"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"മീറ്റർമാപകമല്ലാത്തത്"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"ലോഗർ ബഫർ വലുപ്പം"</string>
     <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"ഓരോ ലോഗ് ബഫറിനും വലുപ്പം തിരഞ്ഞെടുക്കൂ"</string>
@@ -320,15 +296,13 @@
     <string name="select_usb_configuration_dialog_title" msgid="3579567144722589237">"USB കോൺഫിഗറേഷൻ തിരഞ്ഞെടുക്കൂ"</string>
     <string name="allow_mock_location" msgid="2102650981552527884">"വ്യാജ ലൊക്കേഷനുകൾ അനുവദിക്കുക"</string>
     <string name="allow_mock_location_summary" msgid="179780881081354579">"വ്യാജ ലൊക്കേഷനുകൾ അനുവദിക്കുക"</string>
-    <string name="debug_view_attributes" msgid="3539609843984208216">"ആട്രിബ്യൂട്ട് പരിശോധന കാണൽ സജീവമാക്കൂ"</string>
+    <string name="debug_view_attributes" msgid="3539609843984208216">"ആട്രിബ്യൂട്ട് പരിശോധന കാണൽ പ്രവർത്തനക്ഷമമാക്കുക"</string>
     <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"വൈഫൈ സജീവമാണെങ്കിലും, മൊബൈൽ ഡാറ്റ സജീവമായി നിർത്തുക (വേഗത്തിൽ നെറ്റ്‌വർക്ക് മാറുന്നതിനായി)."</string>
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"ലഭ്യമാണെങ്കിൽ \'ടെതറിംഗ് ഹാർഡ്‌വെയർ ത്വരിതപ്പെടുത്തൽ\' ഉപയോഗിക്കുക"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"USB ഡീബഗ്ഗുചെയ്യാൻ അനുവദിക്കണോ?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"USB ഡീബഗ്ഗിംഗ് വികസന ആവശ്യകതകൾക്ക് മാത്രമുള്ളതാണ്. നിങ്ങളുടെ കമ്പ്യൂട്ടറിനും ഉപകരണത്തിനുമിടയിൽ ഡാറ്റ പകർത്തുന്നതിനും അറിയിപ്പില്ലാതെ തന്നെ നിങ്ങളുടെ ഉപകരണത്തിൽ അപ്ലിക്കേഷനുകൾ ഇൻസ്‌റ്റാളുചെയ്യുന്നതിനും ലോഗ് ഡാറ്റ റീഡുചെയ്യുന്നതിനും ഇത് ഉപയോഗിക്കുക."</string>
-    <!-- no translation found for adbwifi_warning_title (727104571653031865) -->
-    <skip />
-    <!-- no translation found for adbwifi_warning_message (8005936574322702388) -->
-    <skip />
+    <string name="adbwifi_warning_title" msgid="727104571653031865">"വയർലെസ് ഡീബഗ്ഗിംഗ് അനുവദിക്കണോ?"</string>
+    <string name="adbwifi_warning_message" msgid="8005936574322702388">"വയർലെസ് ഡീബഗ്ഗിംഗ് ഡെവലപ്മെന്റ് ആവശ്യങ്ങൾക്ക് മാത്രമുള്ളതാണ്. നിങ്ങളുടെ കമ്പ്യൂട്ടറിൽ നിന്ന് ഉപകരണത്തിലേക്കും തിരിച്ചും ഡാറ്റ പകർത്തുന്നതിനും അറിയിപ്പില്ലാതെ തന്നെ നിങ്ങളുടെ ഉപകരണത്തിൽ ആപ്പുകൾ ഇൻസ്റ്റാൾ ചെയ്യുന്നതിനും ലോഗ് ഡാറ്റ റീഡ് ചെയ്യുന്നതിനും ഇത് ഉപയോഗിക്കുക."</string>
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"നിങ്ങൾ മുമ്പ് അംഗീകരിച്ച എല്ലാ കമ്പ്യൂട്ടറുകളിൽ നിന്നും USB ഡീബഗ്ഗുചെയ്യുന്നതിനുള്ള ആക്‌സസ്സ് പിൻവലിക്കണോ?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"വികസന ക്രമീകരണങ്ങൾ അനുവദിക്കണോ?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"ഈ ക്രമീകരണങ്ങൾ വികസന ഉപയോഗത്തിന് മാത്രമായുള്ളതാണ്. അവ നിങ്ങളുടെ ഉപകരണവും അതിലെ അപ്ലിക്കേഷനുകളും തകരാറിലാക്കുന്നതിനോ തെറ്റായി പ്രവർത്തിക്കുന്നതിനോ ഇടയാക്കാം."</string>
@@ -337,25 +311,26 @@
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"പേരില്ലാത്ത Bluetooth ഉപകരണങ്ങൾ (MAC വിലാസങ്ങൾ മാത്രം) പ്രദർശിപ്പിക്കും"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"അസ്വീകാര്യമായ തരത്തിൽ ഉയർന്ന വോളിയമോ ശബ്ദ നിയന്ത്രണത്തിന്റെ അഭാവമോ പോലെ, വിദൂര ഉപകരണങ്ങളുമായി ബന്ധപ്പെട്ട വോളിയം പ്രശ്നങ്ങൾ ഉണ്ടാകുന്ന സാഹചര്യത്തിൽ, Bluetooth അബ്‌സൊല്യൂട്ട് വോളിയം ഫീച്ചർ പ്രവർത്തനരഹിതമാക്കുന്നു."</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Bluetooth Gabeldorsche ഫീച്ചർ സ്റ്റാക്ക് പ്രവർത്തനക്ഷമമാക്കുന്നു."</string>
+    <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"മെച്ചപ്പെടുത്തിയ കണക്റ്റിവിറ്റി ഫീച്ചർ പ്രവർത്തനക്ഷമമാക്കുന്നു."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"പ്രാദേശിക ടെർമിനൽ"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"പ്രാദേശിക ഷെൽ ആക്‌സസ് നൽകുന്ന ടെർമിനൽ അപ്ലിക്കേഷൻ പ്രവർത്തനക്ഷമമാക്കുക"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP പരിശോധന"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP ചെക്കിംഗ്‌രീതി സജ്ജമാക്കുക"</string>
-    <string name="debug_debugging_category" msgid="535341063709248842">"ഡീബഗ് ചെയ്യുന്നു"</string>
+    <string name="debug_debugging_category" msgid="535341063709248842">"ഡീബഗ്ഗിംഗ്"</string>
     <string name="debug_app" msgid="8903350241392391766">"ഡീബഗ് ആപ്പ് തിരഞ്ഞെടുക്കുക"</string>
-    <string name="debug_app_not_set" msgid="1934083001283807188">"ഡീബഗ് അപ്ലിക്കേഷനുകളൊന്നും സജ്ജമാക്കിയിട്ടില്ല"</string>
+    <string name="debug_app_not_set" msgid="1934083001283807188">"ഡീബഗ് ആപ്പുകളൊന്നും സജ്ജീകരിച്ചിട്ടില്ല"</string>
     <string name="debug_app_set" msgid="6599535090477753651">"ഡീബഗ്ഗുചെയ്യൽ അപ്ലിക്കേഷൻ: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="2543228890535466325">"ആപ്പ് തിരഞ്ഞെടുക്കൂ"</string>
     <string name="no_application" msgid="9038334538870247690">"ഒന്നുമില്ല"</string>
     <string name="wait_for_debugger" msgid="7461199843335409809">"ഡീബഗ്ഗറിനായി കാത്തിരിക്കുക"</string>
-    <string name="wait_for_debugger_summary" msgid="6846330006113363286">"ഡീബഗ്ഗുചെയ്‌ത അപ്ലിക്കേഷൻ നിർവ്വഹണത്തിനുമുമ്പായി അറ്റാച്ചുചെയ്യുന്നതിന് ഡീബഗ്ഗറിനായി കാത്തിരിക്കുന്നു."</string>
+    <string name="wait_for_debugger_summary" msgid="6846330006113363286">"നിർവ്വഹണത്തിന് മുമ്പായി അറ്റാച്ച് ചെയ്യാൻ ഡീബഗ് ചെയ്ത ആപ്പ്, ഡീബഗ്ഗറിനായി കാത്തിരിക്കുന്നു."</string>
     <string name="debug_input_category" msgid="7349460906970849771">"ഇൻപുട്ട്"</string>
     <string name="debug_drawing_category" msgid="5066171112313666619">"ഡ്രോയിംഗ്"</string>
-    <string name="debug_hw_drawing_category" msgid="5830815169336975162">"ഹാർഡ്‌വെയർ ത്വരിതപ്പെടുത്തിയ റെൻഡർ ചെയ്യൽ"</string>
+    <string name="debug_hw_drawing_category" msgid="5830815169336975162">"ഹാർഡ്‌വെയർ ത്വരിതപ്പെടുത്തിയ റെൻഡറിംഗ്"</string>
     <string name="media_category" msgid="8122076702526144053">"മീഡിയ"</string>
     <string name="debug_monitoring_category" msgid="1597387133765424994">"മോണിറ്ററിംഗ്"</string>
     <string name="strict_mode" msgid="889864762140862437">"ഫോഴ്സ്‌മോഡ് സജീവമാക്കി"</string>
-    <string name="strict_mode_summary" msgid="1838248687233554654">"പ്രധാന ത്രെഡിൽ അപ്ലിക്കേഷനുകൾ ദൈർഘ്യമേറിയ പ്രവർത്തനങ്ങൾ നടത്തുമ്പോൾ സ്‌ക്രീൻ ഫ്ലാഷ് ചെയ്യുക"</string>
+    <string name="strict_mode_summary" msgid="1838248687233554654">"പ്രധാന ത്രെഡിൽ ആപ്പുകൾ ദൈർഘ്യമേറിയ പ്രവർത്തനങ്ങൾ നടത്തുമ്പോൾ സ്‌ക്രീൻ ഫ്ലാഷ് ചെയ്യുക"</string>
     <string name="pointer_location" msgid="7516929526199520173">"പോയിന്റർ ലൊക്കേഷൻ"</string>
     <string name="pointer_location_summary" msgid="957120116989798464">"സ്‌ക്രീൻ ഓവർലേ നിലവിലെ ടച്ച് ഡാറ്റ ദൃശ്യമാക്കുന്നു"</string>
     <string name="show_touches" msgid="8437666942161289025">"ടാപ്പുകൾ കാണിക്കുക"</string>
@@ -379,12 +354,14 @@
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"എല്ലാ ഭാഷകൾക്കുമായി സ്‌ക്രീൻ ലേഔട്ട് ഡയറക്ഷൻ RTL-ലേക്ക് നിർബന്ധമാക്കുക"</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA നിർബന്ധമാക്കുക"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 ആപ്പുകളിൽ 4x MSAA പ്രവർത്തനക്ഷമമാക്കൂ"</string>
-    <string name="show_non_rect_clip" msgid="7499758654867881817">"ചതുരാകൃതിയിലല്ലാത്ത ക്ലിപ്പ്‌പ്രവർത്തനം ഡീബഗുചെയ്യൂ"</string>
+    <string name="show_non_rect_clip" msgid="7499758654867881817">"ചതുരമല്ലാത്ത ക്ലിപ്പ്‌ പ്രവർത്തനം ഡീബഗ്ഗ് ചെയ്യുക"</string>
     <string name="track_frame_time" msgid="522674651937771106">"HWUI റെൻഡറിംഗ് പ്രൊഫൈൽ"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"GPU ഡീബഗ് ലെയറുകൾ പ്രവർത്തനക്ഷമമാക്കൂ"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"ഡീബഗ് ആപ്പുകൾക്കായി GPU ഡീബഗ് ലെയറുകൾ ലോഡ് ചെയ്യാൻ അനുവദിക്കുക"</string>
+    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"വെർബോസ് വെണ്ടർ ലോഗ് ചെയ്യൽ പ്രവർത്തനക്ഷമമാക്കൂ"</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"ബഗ് റിപ്പോർട്ടുകളിൽ ഉപകരണ-നിർദ്ദിഷ്ട വെണ്ടർ അധിക ലോഗുകൾ ഉൾപ്പെടുത്തുക, അതിൽ സ്വകാര്യ വിവരങ്ങൾ അടങ്ങിയിരിക്കാം, കൂടുതൽ ബാറ്ററി ഉപയോഗിക്കാം കൂടാതെ/അല്ലെങ്കിൽ കൂടുതൽ സ്‌റ്റോറേജ് ഇടം ഉപയോഗിക്കാം."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"വിൻഡോ ആനിമേഷൻ സ്‌കെയിൽ"</string>
-    <string name="transition_animation_scale_title" msgid="1278477690695439337">"സംക്രമണ ആനിമേഷൻ സ്‌കെയിൽ"</string>
+    <string name="transition_animation_scale_title" msgid="1278477690695439337">"ട്രാൻസിഷൻ ആനിമേഷൻ സ്‌കെയിൽ"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"ആനിമേറ്റർ ദൈർഘ്യ സ്‌കെയിൽ"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"രണ്ടാം ഡിസ്‌പ്ലേകൾ പ്രവർത്തിപ്പിക്കുക"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"ആപ്പുകൾ"</string>
@@ -440,9 +417,8 @@
     <string name="daltonizer_mode_deuteranomaly" msgid="3507284319584683963">"വർണ്ണാന്ധത (ചുവപ്പ്-പച്ച‌)"</string>
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"പ്രോട്ടാനോമലി (ചുവപ്പ്-പച്ച)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"ട്രിട്ടാനോമലി (നീല-മഞ്ഞ)"</string>
-    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"വർണ്ണം ക്രമീകരിക്കൽ"</string>
-    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (6178138727195403796) -->
-    <skip />
+    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"നിറം ക്രമീകരിക്കൽ"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"നിങ്ങളുടെ ഉപകരണത്തിൽ നിറങ്ങൾ എങ്ങനെ പ്രദർശിപ്പിക്കുന്നു എന്നത് ക്രമീകരിക്കാൻ \'നിറം ക്രമീകരിക്കൽ\' അനുവദിക്കുന്നു"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> ഉപയോഗിച്ച് അസാധുവാക്കി"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"ഏതാണ്ട് <xliff:g id="TIME_REMAINING">%1$s</xliff:g> ശേഷിക്കുന്നു"</string>
@@ -456,32 +432,25 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"ഏകദേശം <xliff:g id="TIME">%1$s</xliff:g> വരെ നീണ്ടുനിൽക്കേണ്ടതാണ് (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"ഏകദേശം <xliff:g id="TIME">%1$s</xliff:g> വരെ നീണ്ടുനിൽക്കേണ്ടതാണ്"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"<xliff:g id="TIME">%1$s</xliff:g> വരെ"</string>
-    <string name="power_suggestion_extend_battery" msgid="5233928707465237447">"ബാറ്ററി ലൈഫ് <xliff:g id="TIME">%1$s</xliff:g>-ൽ കൂടുതൽ വർദ്ധിപ്പിക്കുക"</string>
-    <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"<xliff:g id="THRESHOLD">%1$s</xliff:g>-ൽ കുറവ് സമയം ശേഷിക്കുന്നു"</string>
-    <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"<xliff:g id="THRESHOLD">%1$s</xliff:g>-ൽ കുറവ് സമയം ശേഷിക്കുന്നു (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g>-ൽ കൂടുതൽ സമയം ശേഷിക്കുന്നു (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_only_more_than_subtext" msgid="3274496164769110480">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g>-ൽ കൂടുതൽ സമയം ശേഷിക്കുന്നു"</string>
-    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (137330009791560774) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (145489081521468132) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (1070562682853942350) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_shutdown_imminent (4429259621177089719) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_shutdown_imminent (7703677921000858479) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_shutdown_imminent (4374784375644214578) -->
-    <skip />
+    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"<xliff:g id="TIME">%1$s</xliff:g> ആവുമ്പോഴേക്ക് ബാറ്ററി തീർന്നേക്കാം"</string>
+    <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"<xliff:g id="THRESHOLD">%1$s</xliff:g> എന്നതിൽ കുറവ് സമയം ശേഷിക്കുന്നു"</string>
+    <string name="power_remaining_less_than_duration" msgid="318215464914990578">"<xliff:g id="THRESHOLD">%1$s</xliff:g> എന്നതിൽ കുറവ് സമയം ശേഷിക്കുന്നു (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g>-ൽ കൂടുതൽ ശേഷിക്കുന്നു (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g>-ൽ കൂടുതൽ ശേഷിക്കുന്നു"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"ഫോൺ ഉടൻ ഷട്ട് ഡൗൺ ആയേക്കാം"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"ടാബ്‌ലെറ്റ് ഉടൻ ഷട്ട് ഡൗൺ ആയേക്കാം"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"ഉപകരണം ഉടൻ ഷട്ട് ഡൗൺ ആയേക്കാം"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="4429259621177089719">"ഫോൺ ഉടൻ ഷട്ട് ഡൗൺ ആയേക്കാം (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"ടാബ്‌ലെറ്റ് ഉടൻ ഷട്ട് ഡൗൺ ആയേക്കാം (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"ഉപകരണം ഉടൻ ഷട്ട് ഡൗൺ ആയേക്കാം (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"പൂർണ്ണമായി ചാർജാവാൻ <xliff:g id="TIME">%1$s</xliff:g> ശേഷിക്കുന്നു"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - പൂർണ്ണമായി ചാർജാവാൻ <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - ബാറ്ററിയുടെ ആയുസിനായി ഒപ്റ്റിമൈസ് ചെയ്യുന്നു"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"അജ്ഞാതം"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"ചാർജ് ചെയ്യുന്നു"</string>
-    <!-- no translation found for battery_info_status_charging_fast (8027559755902954885) -->
-    <skip />
-    <!-- no translation found for battery_info_status_charging_slow (3190803837168962319) -->
-    <skip />
+    <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"അതിവേഗ ചാർജിംഗ്"</string>
+    <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"പതുക്കെയുള്ള ചാർജിംഗ്"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"ചാർജ്ജുചെയ്യുന്നില്ല"</string>
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"പ്ലഗ് ഇൻ ചെയ്‌തു, ഇപ്പോൾ ചാർജ് ചെയ്യാനാവില്ല"</string>
     <string name="battery_info_status_full" msgid="4443168946046847468">"നിറഞ്ഞു"</string>
@@ -539,6 +508,50 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"എപ്പോഴും ചോദിക്കുക"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"നിങ്ങൾ ഓഫാക്കുന്നത് വരെ"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"ഇപ്പോൾ"</string>
-    <string name="media_transfer_this_device_name" msgid="2858384945459339073">"ഈ ഉപകരണം"</string>
+    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"ഫോൺ സ്‌പീക്കർ"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"കണക്‌റ്റ് ചെയ്യുന്നതിൽ പ്രശ്‌നമുണ്ടായി. ഉപകരണം ഓഫാക്കി വീണ്ടും ഓണാക്കുക"</string>
+    <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"വയർ മുഖേന ബന്ധിപ്പിച്ച ഓഡിയോ ഉപകരണം"</string>
+    <string name="help_label" msgid="3528360748637781274">"സഹായവും ഫീഡ്‌ബാക്കും"</string>
+    <string name="storage_category" msgid="2287342585424631813">"സ്റ്റോറേജ്"</string>
+    <string name="shared_data_title" msgid="1017034836800864953">"പങ്കിട്ട ഡാറ്റ"</string>
+    <string name="shared_data_summary" msgid="5516326713822885652">"പങ്കിട്ട ഡാറ്റ കാണുക, പരിഷ്‌കരിക്കുക"</string>
+    <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"ഈ ഉപയോക്താവിന്, പങ്കിട്ട ഡാറ്റയൊന്നുമില്ല."</string>
+    <string name="shared_data_query_failure_text" msgid="3489828881998773687">"പങ്കിട്ട ഡാറ്റ ലഭ്യമാക്കുന്നതിൽ ഒരു പിശകുണ്ടായി. വീണ്ടും ശ്രമിക്കുക."</string>
+    <string name="blob_id_text" msgid="8680078988996308061">"പങ്കിട്ട ഡാറ്റാ ഐഡി: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
+    <string name="blob_expires_text" msgid="7882727111491739331">"<xliff:g id="DATE">%s</xliff:g>-ന് കാലഹരണപ്പെടുന്നു"</string>
+    <string name="shared_data_delete_failure_text" msgid="3842701391009628947">"പങ്കിട്ട ഡാറ്റ ഇല്ലാതാക്കുന്നതിൽ എന്തോ പിശകുണ്ടായി."</string>
+    <string name="shared_data_no_accessors_dialog_text" msgid="8903738462570715315">"പങ്കിട്ട ഈ ഡാറ്റയ്‌ക്കായി ലീസുകളൊന്നും നേടിയിട്ടില്ല. അത് ഇല്ലാതാക്കണോ?"</string>
+    <string name="accessor_info_title" msgid="8289823651512477787">"ഡാറ്റ പങ്കിടുന്ന ആപ്പുകൾ"</string>
+    <string name="accessor_no_description_text" msgid="7510967452505591456">"ആപ്പ് വിവരണമൊന്നും നൽകിയിട്ടില്ല."</string>
+    <string name="accessor_expires_text" msgid="4625619273236786252">"<xliff:g id="DATE">%s</xliff:g>-ന് ലീസ് കാലഹരണപ്പെടുന്നു"</string>
+    <string name="delete_blob_text" msgid="2819192607255625697">"പങ്കിട്ട ഡാറ്റ ഇല്ലാതാക്കുക"</string>
+    <string name="delete_blob_confirmation_text" msgid="7807446938920827280">"പങ്കിട്ട ഈ ഡാറ്റ ഇല്ലാതാക്കണമെന്ന് തീർച്ചയാണോ?"</string>
+    <string name="user_add_user_item_summary" msgid="5748424612724703400">"ഉപയോക്താക്കൾക്ക് സ്വന്തമായ അപ്ലിക്കേഷനുകളും ഉള്ളടക്കവും ഉണ്ടായിരിക്കും"</string>
+    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"നിങ്ങളുടെ അക്കൗണ്ടിൽ നിന്നും അപ്ലിക്കേഷനുകളിലേക്കും ഉള്ളടക്കത്തിലേക്കുമുള്ള ആക്‌സസ്സ് നിയന്ത്രിക്കാനാകും"</string>
+    <string name="user_add_user_item_title" msgid="2394272381086965029">"ഉപയോക്താവ്"</string>
+    <string name="user_add_profile_item_title" msgid="3111051717414643029">"നിയന്ത്രിത പ്രൊഫൈൽ"</string>
+    <string name="user_add_user_title" msgid="5457079143694924885">"പുതിയ ഉപയോക്താവിനെ ചേർക്കണോ?"</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"കൂടുതൽ ഉപയോക്താക്കളെ സൃഷ്‌ടിച്ചുകൊണ്ട് ഈ ഉപകരണം മറ്റുള്ളവരുമായി നിങ്ങൾക്ക് പങ്കിടാം. ആപ്പുകളും വാൾപേപ്പറുകളും മറ്റും ഉപയോഗിച്ച് ഇഷ്‌ടാനുസൃതമാക്കാൻ ഓരോ ഉപയോക്താവിനും സാധിക്കും. വൈഫൈ പോലെ എല്ലാവരെയും ബാധിക്കുന്ന ഉപകരണ ക്രമീകരണവും ഉപയോക്താക്കൾക്ക് ക്രമീകരിക്കാം.\n\nനിങ്ങളൊരു പുതിയ ഉപയോക്താവിനെ ചേർക്കുമ്പോൾ, ആ വ്യക്തിക്ക് സ്വന്തമായ ഇടം സജ്ജീകരിക്കേണ്ടതുണ്ട്.\n\n എല്ലാ ഉപയോക്താക്കൾക്കുമായി ആപ്പുകൾ അപ്‌ഡേറ്റ് ചെയ്യാൻ ഏതൊരു ഉപയോക്താവിനുമാവും. ഉപയോഗസഹായി ക്രമീകരണവും സേവനങ്ങളും പുതിയ ഉപയോക്താവിന് കൈമാറുകയില്ല."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"നിങ്ങൾ ഒരു പുതിയ ഉപയോക്താവിനെ ചേർക്കുമ്പോൾ, ആ വ്യക്തിയ്‌ക്ക് അവരുടെ ഇടം സജ്ജീകരിക്കേണ്ടതുണ്ട്.\n\nമറ്റ് എല്ലാ ഉപയോക്താക്കൾക്കുമായി ഏതൊരു ഉപയോക്താവിനും അപ്ലിക്കേഷനുകൾ അപ്‌ഡേറ്റുചെയ്യാനാവും."</string>
+    <string name="user_setup_dialog_title" msgid="8037342066381939995">"ഉപയോക്താവിനെ ഇപ്പോൾ സജ്ജീകരിക്കണോ?"</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"ഉപകരണം എടുത്ത് ഇടം സജ്ജീകരിക്കുന്നതിന് വ്യക്തി ലഭ്യമാണെന്ന് ഉറപ്പാക്കുക"</string>
+    <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"ഇപ്പോൾ പ്രൊഫൈൽ സജ്ജീകരിക്കണോ?"</string>
+    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"ഇപ്പോൾ സജ്ജീകരിക്കുക"</string>
+    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"ഇപ്പോൾ വേണ്ട"</string>
+    <string name="user_add_user_type_title" msgid="551279664052914497">"ചേര്‍ക്കുക"</string>
+    <string name="user_new_user_name" msgid="60979820612818840">"പുതിയ ഉപയോക്താവ്"</string>
+    <string name="user_new_profile_name" msgid="2405500423304678841">"പുതിയ പ്രൊഫൈൽ"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"ഉപയോക്തൃവിവരം"</string>
+    <string name="profile_info_settings_title" msgid="105699672534365099">"പ്രൊഫൈൽ വിവരം"</string>
+    <string name="user_need_lock_message" msgid="4311424336209509301">"ഒരു നിയന്ത്രിത പ്രൊഫൈൽ സൃഷ്‌ടിക്കുന്നതിനുമുമ്പ്, നിങ്ങളുടെ അപ്ലിക്കേഷനുകളും വ്യക്തിഗത ഡാറ്റയും പരിരക്ഷിക്കുന്നതിന് ഒരു സ്‌ക്രീൻ ലോക്ക് സജ്ജീകരിക്കേണ്ടതുണ്ട്."</string>
+    <string name="user_set_lock_button" msgid="1427128184982594856">"ലോക്ക് സജ്ജീകരിക്കുക"</string>
+    <string name="user_switch_to_user" msgid="6975428297154968543">"<xliff:g id="USER_NAME">%s</xliff:g> എന്നതിലേക്ക് മാറുക"</string>
+    <string name="guest_new_guest" msgid="3482026122932643557">"അതിഥിയെ ചേർക്കുക"</string>
+    <string name="guest_exit_guest" msgid="5908239569510734136">"അതിഥിയെ നീക്കം ചെയ്യുക"</string>
+    <string name="guest_nickname" msgid="6332276931583337261">"അതിഥി"</string>
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"ഉപകരണത്തിന്റെ ഡിഫോൾട്ട് പ്രവർത്തനം"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"പ്രവർത്തനരഹിതമാക്കി"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"പ്രവർത്തനക്ഷമമാക്കി"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"ഈ മാറ്റം ബാധകമാകുന്നതിന് നിങ്ങളുടെ ഉപകരണം റീബൂട്ട് ചെയ്യേണ്ടതുണ്ട്. ഇപ്പോൾ റീബൂട്ട് ചെയ്യുകയോ റദ്ദാക്കുകയോ ചെയ്യുക."</string>
+    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"വയേർഡ് ഹെഡ്ഫോൺ"</string>
 </resources>

@@ -110,7 +110,7 @@ public abstract class LockSettingsInternal {
      * #setRebootEscrowListener}, then {@link #armRebootEscrow()} should be called before
      * rebooting to apply the update.
      */
-    public abstract void prepareRebootEscrow();
+    public abstract boolean prepareRebootEscrow();
 
     /**
      * Registers a listener for when the RebootEscrow HAL has stored its data needed for rebooting
@@ -124,7 +124,7 @@ public abstract class LockSettingsInternal {
     /**
      * Requests that any data needed for rebooting is cleared from the RebootEscrow HAL.
      */
-    public abstract void clearRebootEscrow();
+    public abstract boolean clearRebootEscrow();
 
     /**
      * Should be called immediately before rebooting for an update. This depends on {@link

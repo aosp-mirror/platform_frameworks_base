@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -29,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * This class provides information for a shared library. There are
@@ -177,7 +179,8 @@ public final class SharedLibraryInfo implements Parcelable {
      *
      * @hide
      */
-    public List<String> getAllCodePaths() {
+    @TestApi
+    public @NonNull List<String> getAllCodePaths() {
         if (getPath() != null) {
             // Builtin library.
             ArrayList<String> list = new ArrayList<>();
@@ -185,7 +188,7 @@ public final class SharedLibraryInfo implements Parcelable {
             return list;
         } else {
             // Static or dynamic library.
-            return mCodePaths;
+            return Objects.requireNonNull(mCodePaths);
         }
     }
 

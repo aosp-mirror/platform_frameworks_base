@@ -67,6 +67,7 @@ filegroup {
     name: "framework-non-updatable-sources",
     srcs: [
         // Java/AIDL sources under frameworks/base
+        ":framework-annotations",
         ":framework-blobstore-sources",
         ":framework-core-sources",
         ":framework-drm-sources",
@@ -210,6 +211,7 @@ java_library {
         "apex_aidl_interface-java",
         "framework-protos",
         "updatable-driver-protos",
+        "ota_metadata_proto_java",
         "android.hidl.base-V1.0-java",
         "android.hardware.cas-V1.0-java",
         "android.hardware.cas-V1.1-java",
@@ -341,46 +343,6 @@ platform_compat_config {
 }
 
 filegroup {
-    name: "framework-annotations",
-    srcs: [
-        "core/java/android/annotation/AnyThread.java",
-        "core/java/android/annotation/AppIdInt.java",
-        "core/java/android/annotation/BytesLong.java",
-        "core/java/android/annotation/CallbackExecutor.java",
-        "core/java/android/annotation/CallSuper.java",
-        "core/java/android/annotation/CheckResult.java",
-        "core/java/android/annotation/CurrentTimeMillisLong.java",
-        "core/java/android/annotation/CurrentTimeSecondsLong.java",
-        "core/java/android/annotation/DrawableRes.java",
-        "core/java/android/annotation/DurationMillisLong.java",
-        "core/java/android/annotation/Hide.java",
-        "core/java/android/annotation/IntDef.java",
-        "core/java/android/annotation/IntRange.java",
-        "core/java/android/annotation/LongDef.java",
-        "core/java/android/annotation/MainThread.java",
-        "core/java/android/annotation/NonNull.java",
-        "core/java/android/annotation/Nullable.java",
-        "core/java/android/annotation/RequiresPermission.java",
-        "core/java/android/annotation/SdkConstant.java",
-        "core/java/android/annotation/StringDef.java",
-        "core/java/android/annotation/SystemApi.java",
-        "core/java/android/annotation/SystemService.java",
-        "core/java/android/annotation/TestApi.java",
-        "core/java/android/annotation/UserIdInt.java",
-        "core/java/android/annotation/WorkerThread.java",
-        "core/java/com/android/internal/annotations/GuardedBy.java",
-        "core/java/com/android/internal/annotations/Immutable.java",
-        "core/java/com/android/internal/annotations/VisibleForTesting.java",
-    ],
-}
-
-java_library {
-    name: "framework-annotations-lib",
-    srcs: [":framework-annotations"],
-    sdk_version: "core_current",
-}
-
-filegroup {
     name: "framework-ike-shared-srcs",
     visibility: ["//packages/modules/IPsec"],
     srcs: [
@@ -473,8 +435,21 @@ metalava_framework_docs_args = "--manifest $(location core/res/AndroidManifest.x
     "--api-lint-ignore-prefix junit. " +
     "--api-lint-ignore-prefix org. "
 
+packages_to_document = [
+    "android",
+    "dalvik",
+    "java",
+    "javax",
+    "junit",
+    "org.apache.http",
+    "org.json",
+    "org.w3c.dom",
+    "org.xml.sax",
+    "org.xmlpull",
+]
+
 filegroup {
-    name: "framework-non-updatable-stub-sources",
+    name: "android-non-updatable-stub-sources",
     srcs: [
         ":framework-mime-sources", // mimemap builds separately but has no separate droidstubs.
         ":framework-non-updatable-sources",
@@ -484,6 +459,61 @@ filegroup {
         "**/package.html",
     ],
     visibility: ["//visibility:private"],
+}
+
+// These defaults are used for both the jar stubs and the doc stubs.
+stubs_defaults {
+    name: "android-non-updatable-stubs-defaults",
+    srcs: [":android-non-updatable-stub-sources"],
+    sdk_version: "none",
+    system_modules: "none",
+    java_version: "1.8",
+    arg_files: ["core/res/AndroidManifest.xml"],
+    // TODO(b/147699819): remove below aidl includes.
+    aidl: {
+        local_include_dirs: [
+            "apex/media/aidl/stable",
+            // TODO: move to include-dirs for packages/modules/Connectivity when this moves out of
+            // frameworks/base
+            "packages/Connectivity/framework/aidl-export",
+            "telephony/java",
+        ],
+    },
+    // These are libs from framework-internal-utils that are required (i.e. being referenced)
+    // from framework-non-updatable-sources. Add more here when there's a need.
+    // DO NOT add the entire framework-internal-utils. It might cause unnecessary circular
+    // dependencies gets bigger.
+    libs: [
+        "android.hardware.cas-V1.2-java",
+        "android.hardware.health-V1.0-java-constants",
+        "android.hardware.radio-V1.5-java",
+        "android.hardware.radio-V1.6-java",
+        "android.hardware.thermal-V1.0-java-constants",
+        "android.hardware.thermal-V2.0-java",
+        "android.hardware.tv.input-V1.0-java-constants",
+        "android.hardware.tv.tuner-V1.0-java-constants",
+        "android.hardware.usb-V1.0-java-constants",
+        "android.hardware.usb-V1.1-java-constants",
+        "android.hardware.usb.gadget-V1.0-java",
+        "android.hardware.vibrator-V1.3-java",
+        "framework-protos",
+        "art.module.public.api",
+        // There are a few classes from modules used by the core that
+        // need to be resolved by metalava. We use a prebuilt stub of the
+        // full sdk to ensure we can resolve them. If a new class gets added,
+        // the prebuilts/sdk/current needs to be updated.
+        "sdk_system_current_android",
+        // NOTE: The below can be removed once the prebuilt stub contains IKE.
+        "sdk_system_current_android.net.ipsec.ike",
+    ],
+    filter_packages: packages_to_document,
+    high_mem: true, // Lots of sources => high memory use, see b/170701554
+    installable: false,
+    annotations_enabled: true,
+    previous_api: ":android.api.public.latest",
+    merge_annotations_dirs: ["metalava-manual"],
+    defaults_visibility: ["//visibility:private"],
+    visibility: ["//frameworks/base/api"],
 }
 
 build = [

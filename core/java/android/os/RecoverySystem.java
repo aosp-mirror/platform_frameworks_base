@@ -672,6 +672,14 @@ public class RecoverySystem {
             if (!rs.setupBcb(command)) {
                 throw new IOException("Setup BCB failed");
             }
+            try {
+                if (!rs.allocateSpaceForUpdate(packageFile)) {
+                    throw new IOException("Failed to allocate space for update "
+                            + packageFile.getAbsolutePath());
+                }
+            } catch (RemoteException e) {
+                e.rethrowAsRuntimeException();
+            }
 
             // Having set up the BCB (bootloader control block), go ahead and reboot
             PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
@@ -1392,6 +1400,13 @@ public class RecoverySystem {
     }
 
     /**
+     * Talks to RecoverySystemService via Binder to allocate space
+     */
+    private boolean allocateSpaceForUpdate(File packageFile) throws RemoteException {
+        return mService.allocateSpaceForUpdate(packageFile.getAbsolutePath());
+    }
+
+    /**
      * Talks to RecoverySystemService via Binder to clear up the BCB.
      */
     private boolean clearBcb() {
@@ -1423,8 +1438,8 @@ public class RecoverySystem {
     private boolean requestLskf(String packageName, IntentSender sender) throws IOException {
         try {
             return mService.requestLskf(packageName, sender);
-        } catch (RemoteException e) {
-            throw new IOException("could request LSKF capture");
+        } catch (RemoteException | SecurityException e) {
+            throw new IOException("could not request LSKF capture", e);
         }
     }
 
@@ -1437,8 +1452,8 @@ public class RecoverySystem {
     private boolean clearLskf(String packageName) throws IOException {
         try {
             return mService.clearLskf(packageName);
-        } catch (RemoteException e) {
-            throw new IOException("could not clear LSKF");
+        } catch (RemoteException | SecurityException e) {
+            throw new IOException("could not clear LSKF", e);
         }
     }
 
@@ -1452,8 +1467,8 @@ public class RecoverySystem {
     private boolean isLskfCaptured(String packageName) throws IOException {
         try {
             return mService.isLskfCaptured(packageName);
-        } catch (RemoteException e) {
-            throw new IOException("could not get LSKF capture state");
+        } catch (RemoteException | SecurityException e) {
+            throw new IOException("could not get LSKF capture state", e);
         }
     }
 
@@ -1465,11 +1480,10 @@ public class RecoverySystem {
             boolean slotSwitch) throws IOException {
         try {
             return mService.rebootWithLskf(packageName, reason, slotSwitch);
-        } catch (RemoteException e) {
-            throw new IOException("could not reboot for update");
+        } catch (RemoteException | SecurityException e) {
+            throw new IOException("could not reboot for update", e);
         }
     }
-
 
     /**
      * Calls the recovery system service to reboot and apply update. This is the legacy API and
@@ -1480,8 +1494,8 @@ public class RecoverySystem {
             String reason) throws IOException {
         try {
             return mService.rebootWithLskfAssumeSlotSwitch(packageName, reason);
-        } catch (RemoteException e) {
-            throw new IOException("could not reboot for update");
+        } catch (RemoteException | RuntimeException e) {
+            throw new IOException("could not reboot for update", e);
         }
     }
 

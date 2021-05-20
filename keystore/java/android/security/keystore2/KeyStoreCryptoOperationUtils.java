@@ -40,6 +40,7 @@ import java.security.InvalidKeyException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Assorted utility methods for implementing crypto operations on top of KeyStore.
@@ -49,6 +50,7 @@ import java.util.List;
 abstract class KeyStoreCryptoOperationUtils {
 
     private static volatile SecureRandom sRng;
+    private static final Random sRandom = new Random();
 
     private KeyStoreCryptoOperationUtils() {}
 
@@ -211,7 +213,7 @@ abstract class KeyStoreCryptoOperationUtils {
         } else {
             // Keystore won't give us an operation challenge if the operation doesn't
             // need user authorization. So we make our own.
-            return Math.randomLongInternal();
+            return sRandom.nextLong();
         }
     }
 }

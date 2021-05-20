@@ -1,5 +1,6 @@
 per-file AsyncChannel* = lorenzo@google.com, satk@google.com, etancohen@google.com
 per-file MessageUtils*, Protocol*, RingBuffer*, TokenBucket* = jchalard@google.com, lorenzo@google.com, satk@google.com
+per-file *Notification* = file:/services/core/java/com/android/server/notification/OWNERS
 per-file Protocol* = etancohen@google.com, lorenzo@google.com
 per-file State* = jchalard@google.com, lorenzo@google.com, satk@google.com
 per-file DataClass* = eugenesusla@google.com

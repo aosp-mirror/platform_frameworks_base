@@ -52,22 +52,6 @@
         <item>12,60000</item><!-- mobile_cbs -->
     </string-array>
 
-    <!-- Whether the APF Filter in the device should filter out IEEE 802.3 Frames
-         Those frames are identified by the field Eth-type having values
-         less than 0x600 -->
-    <bool translatable="false" name="config_apfDrop802_3Frames">true</bool>
-
-    <!-- An array of Denylisted EtherType, packets with EtherTypes within this array
-         will be dropped
-         TODO: need to put proper values, these are for testing purposes only -->
-    <integer-array translatable="false" name="config_apfEthTypeDenyList">
-        <item>0x88A2</item>
-        <item>0x88A4</item>
-        <item>0x88B8</item>
-        <item>0x88CD</item>
-        <item>0x88E3</item>
-    </integer-array>
-
     <!-- Default supported concurrent socket keepalive slots per transport type, used by
          ConnectivityManager.createSocketKeepalive() for calculating the number of keepalive
          offload slots that should be reserved for privileged access. This string array should be
@@ -78,6 +62,11 @@
         <item>1,3</item>
     </string-array>
 
+    <!-- Reserved privileged keepalive slots per transport. -->
+    <integer translatable="false" name="config_reservedPrivilegedKeepaliveSlots">2</integer>
+
+    <!-- Allowed unprivileged keepalive slots per uid. -->
+    <integer translatable="false" name="config_allowedUnprivilegedKeepalivePerUid">2</integer>
 
     <!-- Default value for ConnectivityManager.getMultipathPreference() on metered networks. Actual
          device behaviour is controlled by the metered multipath preference in
@@ -88,5 +77,34 @@
          Internet access. Actual device behaviour is controlled by
          Settings.Global.NETWORK_AVOID_BAD_WIFI. This is the default value of that setting. -->
     <integer translatable="false" name="config_networkAvoidBadWifi">1</integer>
+
+    <!-- Array of ConnectivityManager.TYPE_xxxx constants for networks that may only
+         be controlled by systemOrSignature apps.  -->
+    <integer-array translatable="false" name="config_protectedNetworks">
+        <item>10</item>
+        <item>11</item>
+        <item>12</item>
+        <item>14</item>
+        <item>15</item>
+    </integer-array>
+
+    <!-- Whether the internal vehicle network should remain active even when no
+         apps requested it. -->
+    <bool name="config_vehicleInternalNetworkAlwaysRequested">false</bool>
+
+
+    <!-- If the hardware supports specially marking packets that caused a wakeup of the
+         main CPU, set this value to the mark used. -->
+    <integer name="config_networkWakeupPacketMark">0</integer>
+
+    <!-- Mask to use when checking skb mark defined in config_networkWakeupPacketMark above. -->
+    <integer name="config_networkWakeupPacketMask">0</integer>
+
+    <!-- Whether/how to notify the user on network switches. See LingerMonitor.java. -->
+    <integer translatable="false" name="config_networkNotifySwitchType">0</integer>
+
+    <!-- What types of network switches to notify. See LingerMonitor.java. -->
+    <string-array translatable="false" name="config_networkNotifySwitches">
+    </string-array>
 
 </resources>

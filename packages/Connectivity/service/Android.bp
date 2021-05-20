@@ -52,8 +52,8 @@ cc_library_shared {
 java_library {
     name: "service-connectivity-pre-jarjar",
     srcs: [
+        "src/**/*.java",
         ":framework-connectivity-shared-srcs",
-        ":connectivity-service-srcs",
     ],
     libs: [
         "android.net.ipsec.ike",

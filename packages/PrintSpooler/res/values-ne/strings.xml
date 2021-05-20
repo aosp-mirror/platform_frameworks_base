@@ -33,18 +33,18 @@
     <string name="pages_range_example" msgid="8558694453556945172">"उदाहरण १-५,८,११-१३"</string>
     <string name="print_preview" msgid="8010217796057763343">"प्रिन्ट पूर्वावलोकन"</string>
     <string name="install_for_print_preview" msgid="6366303997385509332">"पूर्वावलोकनको लागि PDF भ्यूअर स्थापना गर्नुहोस्"</string>
-    <string name="printing_app_crashed" msgid="854477616686566398">"मुद्रण अनुप्रयोग क्र्यास भयो"</string>
+    <string name="printing_app_crashed" msgid="854477616686566398">"प्रिन्टिङ एप क्र्यास भयो"</string>
     <string name="generating_print_job" msgid="3119608742651698916">"प्रिन्ट कार्य निर्माण गरिँदै"</string>
-    <string name="save_as_pdf" msgid="5718454119847596853">"PDF को रूपमा सुरक्षित गर्नुहोस्"</string>
+    <string name="save_as_pdf" msgid="5718454119847596853">"PDF को रूपमा सेभ गर्नुहोस्"</string>
     <string name="all_printers" msgid="5018829726861876202">"सबै प्रिन्टरहरू..."</string>
-    <string name="print_dialog" msgid="32628687461331979">"सम्वाद छाप्नुहोस्"</string>
+    <string name="print_dialog" msgid="32628687461331979">"सम्वाद प्रिन्ट गर्नुहोस्"</string>
     <string name="current_page_template" msgid="5145005201131935302">"<xliff:g id="CURRENT_PAGE">%1$d</xliff:g>/<xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
     <string name="page_description_template" msgid="6831239682256197161">"<xliff:g id="PAGE_COUNT">%2$d</xliff:g> को <xliff:g id="CURRENT_PAGE">%1$d</xliff:g> पृष्ठ"</string>
     <string name="summary_template" msgid="8899734908625669193">"सारांश, प्रतिहरू <xliff:g id="COPIES">%1$s</xliff:g> , कागज आकार <xliff:g id="PAPER_SIZE">%2$s</xliff:g>"</string>
     <string name="expand_handle" msgid="7282974448109280522">"ह्यान्डल विस्तार गर्नुहोस्"</string>
     <string name="collapse_handle" msgid="6886637989442507451">"ह्यान्डल कोल्याप्स गर्नुहोस्"</string>
     <string name="print_button" msgid="645164566271246268">"प्रिन्ट गर्नुहोस्"</string>
-    <string name="savetopdf_button" msgid="2976186791686924743">"PDF सुरक्षित गर्नुहोस्"</string>
+    <string name="savetopdf_button" msgid="2976186791686924743">"PDF सेभ गर्नुहोस्"</string>
     <string name="print_options_expanded" msgid="6944679157471691859">"विस्तार गरेका विकल्पहरू प्रिन्ट गर्नुहोस्"</string>
     <string name="print_options_collapsed" msgid="7455930445670414332">"कोल्याप्स गरेका विकल्पहरू प्रिन्ट गर्नुहोस्"</string>
     <string name="search" msgid="5421724265322228497">"खोज्नुहोस्"</string>
@@ -64,9 +64,9 @@
     <string name="notification_channel_progress" msgid="872788690775721436">"चलिरहेका छपाइका कार्यहरू"</string>
     <string name="notification_channel_failure" msgid="9042250774797916414">"कार्यहरूलाई छाप्न सकिएन"</string>
     <string name="could_not_create_file" msgid="3425025039427448443">"फाइल सिर्जना गर्न सकिएन"</string>
-    <string name="print_services_disabled_toast" msgid="9089060734685174685">"केही मुद्रण सम्बन्धी सेवाहरूलाई असक्षम गरिएको छ"</string>
-    <string name="print_searching_for_printers" msgid="6550424555079932867">"प्रिन्टरहरू खोज्दै"</string>
-    <string name="print_no_print_services" msgid="8561247706423327966">"कुनै पनि मुद्रण सेवाहरू सक्रिय छैनन्"</string>
+    <string name="print_services_disabled_toast" msgid="9089060734685174685">"केही प्रिन्टिङ सम्बन्धी सेवाहरूलाई असक्षम गरिएको छ"</string>
+    <string name="print_searching_for_printers" msgid="6550424555079932867">"प्रिन्टरहरू खोजिँदै छ"</string>
+    <string name="print_no_print_services" msgid="8561247706423327966">"कुनै पनि प्रिन्टिङ सेवाहरू सक्रिय छैनन्"</string>
     <string name="print_no_printers" msgid="4869403323900054866">"कुनै प्रिन्टरहरू भेटाइएन"</string>
     <string name="cannot_add_printer" msgid="7840348733668023106">"प्रिन्टरहरू थप्न सक्दैन"</string>
     <string name="select_to_add_printers" msgid="3800709038689830974">"प्रिन्टर थप्नका लागि चयन गर्नुहोस्"</string>

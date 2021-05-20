@@ -16,16 +16,24 @@
 
 package com.android.server.vcn;
 
+import static android.net.NetworkCapabilities.NET_CAPABILITY_CBS;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_DUN;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_FOTA;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_IMS;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_MMS;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.vcn.VcnManager.VCN_STATUS_CODE_ACTIVE;
 import static android.net.vcn.VcnManager.VCN_STATUS_CODE_SAFE_MODE;
 
+import static com.android.server.vcn.Vcn.VcnContentResolver;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
@@ -35,12 +43,16 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.content.Context;
+import android.database.ContentObserver;
 import android.net.NetworkRequest;
+import android.net.Uri;
 import android.net.vcn.VcnConfig;
 import android.net.vcn.VcnGatewayConnectionConfig;
 import android.net.vcn.VcnGatewayConnectionConfigTest;
 import android.os.ParcelUuid;
 import android.os.test.TestLooper;
+import android.provider.Settings;
+import android.telephony.TelephonyManager;
 import android.util.ArraySet;
 
 import com.android.server.VcnManagementService.VcnCallback;
@@ -53,23 +65,31 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 
 public class VcnTest {
     private static final String PKG_NAME = VcnTest.class.getPackage().getName();
     private static final ParcelUuid TEST_SUB_GROUP = new ParcelUuid(new UUID(0, 0));
-    private static final int NETWORK_SCORE = 0;
-    private static final int PROVIDER_ID = 5;
+    private static final boolean MOBILE_DATA_ENABLED = true;
+    private static final Set<Integer> TEST_SUB_IDS_IN_GROUP =
+            new ArraySet<>(Arrays.asList(1, 2, 3));
     private static final int[][] TEST_CAPS =
             new int[][] {
-                new int[] {NET_CAPABILITY_MMS, NET_CAPABILITY_INTERNET},
-                new int[] {NET_CAPABILITY_DUN}
+                new int[] {NET_CAPABILITY_IMS, NET_CAPABILITY_INTERNET, NET_CAPABILITY_DUN},
+                new int[] {NET_CAPABILITY_CBS, NET_CAPABILITY_INTERNET},
+                new int[] {NET_CAPABILITY_FOTA, NET_CAPABILITY_DUN},
+                new int[] {NET_CAPABILITY_MMS}
             };
 
     private Context mContext;
     private VcnContext mVcnContext;
+    private TelephonyManager mTelephonyManager;
+    private VcnContentResolver mContentResolver;
     private TelephonySubscriptionSnapshot mSubscriptionSnapshot;
     private VcnNetworkProvider mVcnNetworkProvider;
     private VcnCallback mVcnCallback;
@@ -86,6 +106,9 @@ public class VcnTest {
     public void setUp() {
         mContext = mock(Context.class);
         mVcnContext = mock(VcnContext.class);
+        mTelephonyManager =
+                setupAndGetTelephonyManager(MOBILE_DATA_ENABLED /* isMobileDataEnabled */);
+        mContentResolver = mock(VcnContentResolver.class);
         mSubscriptionSnapshot = mock(TelephonySubscriptionSnapshot.class);
         mVcnNetworkProvider = mock(VcnNetworkProvider.class);
         mVcnCallback = mock(VcnCallback.class);
@@ -97,12 +120,15 @@ public class VcnTest {
         doReturn(mContext).when(mVcnContext).getContext();
         doReturn(mTestLooper.getLooper()).when(mVcnContext).getLooper();
         doReturn(mVcnNetworkProvider).when(mVcnContext).getVcnNetworkProvider();
+        doReturn(mContentResolver).when(mDeps).newVcnContentResolver(eq(mVcnContext));
 
         // Setup VcnGatewayConnection instance generation
         doAnswer((invocation) -> {
             // Mock-within a doAnswer is safe, because it doesn't actually run nested.
             return mock(VcnGatewayConnection.class);
-        }).when(mDeps).newVcnGatewayConnection(any(), any(), any(), any(), any());
+        }).when(mDeps).newVcnGatewayConnection(any(), any(), any(), any(), any(), anyBoolean());
+
+        doReturn(TEST_SUB_IDS_IN_GROUP).when(mSubscriptionSnapshot).getAllSubIdsInGroup(any());
 
         mGatewayStatusCallbackCaptor = ArgumentCaptor.forClass(VcnGatewayStatusCallback.class);
 
@@ -123,6 +149,16 @@ public class VcnTest {
                         mDeps);
     }
 
+    private TelephonyManager setupAndGetTelephonyManager(boolean isMobileDataEnabled) {
+        final TelephonyManager telephonyManager = mock(TelephonyManager.class);
+        VcnTestUtils.setupSystemService(
+                mContext, telephonyManager, Context.TELEPHONY_SERVICE, TelephonyManager.class);
+        doReturn(telephonyManager).when(telephonyManager).createForSubscriptionId(anyInt());
+        doReturn(isMobileDataEnabled).when(telephonyManager).isDataEnabled();
+
+        return telephonyManager;
+    }
+
     private NetworkRequestListener verifyAndGetRequestListener() {
         ArgumentCaptor<NetworkRequestListener> mNetworkRequestListenerCaptor =
                 ArgumentCaptor.forClass(NetworkRequestListener.class);
@@ -139,7 +175,7 @@ public class VcnTest {
             requestBuilder.addCapability(netCapability);
         }
 
-        requestListener.onNetworkRequested(requestBuilder.build(), NETWORK_SCORE, PROVIDER_ID);
+        requestListener.onNetworkRequested(requestBuilder.build());
         mTestLooper.dispatchAll();
     }
 
@@ -161,6 +197,39 @@ public class VcnTest {
         for (final VcnGatewayConnection gateway : gatewayConnections) {
             verify(gateway).updateSubscriptionSnapshot(eq(updatedSnapshot));
         }
+    }
+
+    @Test
+    public void testContentObserverRegistered() {
+        // Validate state from setUp()
+        final Uri uri = Settings.Global.getUriFor(Settings.Global.MOBILE_DATA);
+        verify(mContentResolver)
+                .registerContentObserver(eq(uri), eq(true), any(ContentObserver.class));
+    }
+
+    @Test
+    public void testMobileDataStateCheckedOnInitialization_enabled() {
+        // Validate state from setUp()
+        assertTrue(mVcn.isMobileDataEnabled());
+        verify(mTelephonyManager).isDataEnabled();
+    }
+
+    @Test
+    public void testMobileDataStateCheckedOnInitialization_disabled() {
+        // Build and setup new telephonyManager to ensure method call count is reset.
+        final TelephonyManager telephonyManager =
+                setupAndGetTelephonyManager(false /* isMobileDataEnabled */);
+        final Vcn vcn =
+                new Vcn(
+                        mVcnContext,
+                        TEST_SUB_GROUP,
+                        mConfig,
+                        mSubscriptionSnapshot,
+                        mVcnCallback,
+                        mDeps);
+
+        assertFalse(vcn.isMobileDataEnabled());
+        verify(mTelephonyManager).isDataEnabled();
     }
 
     @Test
@@ -193,7 +262,8 @@ public class VcnTest {
                         eq(TEST_SUB_GROUP),
                         eq(mSubscriptionSnapshot),
                         any(),
-                        mGatewayStatusCallbackCaptor.capture());
+                        mGatewayStatusCallbackCaptor.capture(),
+                        eq(MOBILE_DATA_ENABLED));
 
         return gatewayConnections;
     }
@@ -256,20 +326,21 @@ public class VcnTest {
         mTestLooper.dispatchAll();
 
         // Verify that the VCN requests the networkRequests be resent
-        assertEquals(1, mVcn.getVcnGatewayConnections().size());
+        assertEquals(gatewayConnections.size() - 1, mVcn.getVcnGatewayConnections().size());
         verify(mVcnNetworkProvider).resendAllRequests(requestListener);
 
         // Verify that the VcnGatewayConnection is restarted if a request exists for it
         triggerVcnRequestListeners(requestListener);
         mTestLooper.dispatchAll();
-        assertEquals(2, mVcn.getVcnGatewayConnections().size());
+        assertEquals(gatewayConnections.size(), mVcn.getVcnGatewayConnections().size());
         verify(mDeps, times(gatewayConnections.size() + 1))
                 .newVcnGatewayConnection(
                         eq(mVcnContext),
                         eq(TEST_SUB_GROUP),
                         eq(mSubscriptionSnapshot),
                         any(),
-                        mGatewayStatusCallbackCaptor.capture());
+                        mGatewayStatusCallbackCaptor.capture(),
+                        anyBoolean());
     }
 
     @Test
@@ -286,7 +357,7 @@ public class VcnTest {
     public void testUpdateConfigReevaluatesGatewayConnections() {
         final NetworkRequestListener requestListener = verifyAndGetRequestListener();
         startGatewaysAndGetGatewayConnections(requestListener);
-        assertEquals(2, mVcn.getVcnGatewayConnectionConfigMap().size());
+        assertEquals(TEST_CAPS.length, mVcn.getVcnGatewayConnectionConfigMap().size());
 
         // Create VcnConfig with only one VcnGatewayConnectionConfig so a gateway connection is torn
         // down. Reuse existing VcnGatewayConnectionConfig so that the gateway connection name
@@ -308,5 +379,62 @@ public class VcnTest {
         verify(activeGatewayConnection, never()).teardownAsynchronously();
         verify(removedGatewayConnection).teardownAsynchronously();
         verify(mVcnNetworkProvider).resendAllRequests(requestListener);
+    }
+
+    private void verifyMobileDataToggled(boolean startingToggleState, boolean endingToggleState) {
+        final ArgumentCaptor<ContentObserver> captor =
+                ArgumentCaptor.forClass(ContentObserver.class);
+        verify(mContentResolver).registerContentObserver(any(), anyBoolean(), captor.capture());
+        final ContentObserver contentObserver = captor.getValue();
+
+        // Start VcnGatewayConnections
+        final NetworkRequestListener requestListener = verifyAndGetRequestListener();
+        mVcn.setMobileDataEnabled(startingToggleState);
+        triggerVcnRequestListeners(requestListener);
+        final Map<VcnGatewayConnectionConfig, VcnGatewayConnection> gateways =
+                mVcn.getVcnGatewayConnectionConfigMap();
+
+        // Trigger data toggle change.
+        doReturn(endingToggleState).when(mTelephonyManager).isDataEnabled();
+        contentObserver.onChange(false /* selfChange, ignored */);
+        mTestLooper.dispatchAll();
+
+        // Verify that data toggle changes restart ONLY INTERNET or DUN networks, and only if the
+        // toggle state changed.
+        for (Entry<VcnGatewayConnectionConfig, VcnGatewayConnection> entry : gateways.entrySet()) {
+            final Set<Integer> exposedCaps = entry.getKey().getAllExposedCapabilities();
+            if (startingToggleState != endingToggleState
+                    && (exposedCaps.contains(NET_CAPABILITY_INTERNET)
+                            || exposedCaps.contains(NET_CAPABILITY_DUN))) {
+                verify(entry.getValue()).teardownAsynchronously();
+            } else {
+                verify(entry.getValue(), never()).teardownAsynchronously();
+            }
+        }
+
+        if (startingToggleState != endingToggleState) {
+            verify(mVcnNetworkProvider).resendAllRequests(requestListener);
+        }
+        assertEquals(endingToggleState, mVcn.isMobileDataEnabled());
+    }
+
+    @Test
+    public void testMobileDataEnabled() {
+        verifyMobileDataToggled(false /* startingToggleState */, true /* endingToggleState */);
+    }
+
+    @Test
+    public void testMobileDataDisabled() {
+        verifyMobileDataToggled(true /* startingToggleState */, false /* endingToggleState */);
+    }
+
+    @Test
+    public void testMobileDataObserverFiredWithoutChanges_dataEnabled() {
+        verifyMobileDataToggled(false /* startingToggleState */, false /* endingToggleState */);
+    }
+
+    @Test
+    public void testMobileDataObserverFiredWithoutChanges_dataDisabled() {
+        verifyMobileDataToggled(true /* startingToggleState */, true /* endingToggleState */);
     }
 }

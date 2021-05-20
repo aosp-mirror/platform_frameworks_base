@@ -2370,11 +2370,12 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
      * Send a notification to registrants that the configs of physical channel has changed for
      * a particular subscription.
      *
+     * @param phoneId the phone id.
      * @param subId the subId
      * @param configs a list of {@link PhysicalChannelConfig}, the configs of physical channel.
      */
-    public void notifyPhysicalChannelConfigForSubscriber(
-            int subId, List<PhysicalChannelConfig> configs) {
+    public void notifyPhysicalChannelConfigForSubscriber(int phoneId, int subId,
+            List<PhysicalChannelConfig> configs) {
         if (!checkNotifyPermission("notifyPhysicalChannelConfig()")) {
             return;
         }
@@ -2386,7 +2387,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
 
         synchronized (mRecords) {
-            int phoneId = SubscriptionManager.getPhoneId(subId);
             if (validatePhoneId(phoneId)) {
                 mPhysicalChannelConfigs.set(phoneId, configs);
                 for (Record r : mRecords) {
@@ -2873,6 +2873,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             // If we're enforcing fine starting in Q, we also want to enforce coarse even for
             // older SDK versions.
             locationQueryBuilder.setMinSdkVersionForCoarse(0);
+            locationQueryBuilder.setMinSdkVersionForCoarse(0);
+            locationQueryBuilder.setMinSdkVersionForEnforcement(0);
             shouldCheckLocationPermissions = true;
         }
 
@@ -3001,6 +3003,14 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
     }
 
+    private boolean checkFineLocationAccess(Record r) {
+        return checkFineLocationAccess(r, Build.VERSION_CODES.BASE);
+    }
+
+    private boolean checkCoarseLocationAccess(Record r) {
+        return checkCoarseLocationAccess(r, Build.VERSION_CODES.BASE);
+    }
+
     /**
      * Note -- this method should only be used at the site of a permission check if you need to
      * explicitly allow apps below a certain SDK level access regardless of location permissions.
@@ -3016,6 +3026,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                         .setMethod("TelephonyRegistry push")
                         .setLogAsInfo(true) // we don't need to log an error every time we push
                         .setMinSdkVersionForFine(minSdk)
+                        .setMinSdkVersionForCoarse(minSdk)
+                        .setMinSdkVersionForEnforcement(minSdk)
                         .build();
 
         return Binder.withCleanCallingIdentity(() -> {
@@ -3040,6 +3052,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                         .setMethod("TelephonyRegistry push")
                         .setLogAsInfo(true) // we don't need to log an error every time we push
                         .setMinSdkVersionForCoarse(minSdk)
+                        .setMinSdkVersionForFine(Integer.MAX_VALUE)
+                        .setMinSdkVersionForEnforcement(minSdk)
                         .build();
 
         return Binder.withCleanCallingIdentity(() -> {

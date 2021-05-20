@@ -1560,6 +1560,20 @@
        <enum name="always" value="1" />
     </attr>
 
+    <!-- Enable hardware memory tagging (ARM MTE) in this process.
+         When enabled, heap memory bugs like use-after-free and buffer overlow
+         are detected and result in an immediate ("sync" mode) or delayed ("async"
+         mode) crash instead of a silent memory corruption. Sync mode, while slower,
+         provides enhanced bug reports including stack traces at the time of allocation
+         and deallocation of memory, similar to AddressSanitizer.
+
+         See the <a href="https://community.arm.com/developer/ip-products/processors/b/processors-ip-blog/posts/enhancing-memory-safety">ARM announcement</a>
+         for more details.
+
+         <p>This attribute can be applied to a
+         {@link android.R.styleable#AndroidManifestProcess process} tag, or to an
+         {@link android.R.styleable#AndroidManifestApplication application} tag (to supply
+         a default setting for all application components). -->
     <attr name="memtagMode">
        <enum name="default" value="-1" />
        <enum name="off" value="0" />
@@ -1836,7 +1850,9 @@
 
         <attr name="memtagMode" />
 
-        <attr name="nativeHeapZeroInit" format="boolean" />
+        <!-- If {@code true} enables automatic zero initialization of all native heap
+             allocations. -->
+        <attr name="nativeHeapZeroInitialized" format="boolean" />
 
         <!-- @hide no longer used, kept to preserve padding -->
         <attr name="allowAutoRevokePermissionsExemption" format="boolean" />
@@ -2362,7 +2378,7 @@
         <attr name="process" />
         <attr name="gwpAsanMode" />
         <attr name="memtagMode" />
-        <attr name="nativeHeapZeroInit" />
+        <attr name="nativeHeapZeroInitialized" />
     </declare-styleable>
 
     <!-- The <code>deny-permission</code> tag specifies that a permission is to be denied

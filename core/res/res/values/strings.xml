@@ -4645,6 +4645,28 @@
     <string name="mediasize_na_quarto">Quarto</string>
     <!-- North America Foolscap media (paper) size: 8" x 13" (203mm x 330mm) -->
     <string name="mediasize_na_foolscap">Foolscap</string>
+    <!-- North America ANSI C media (paper) size: 17" x 22" (432mm x 559mm) [CHAR LIMIT=none] -->
+    <string name="mediasize_na_ansi_c">ANSI C</string>
+    <!-- North America ANSI D media (paper) size: 22" x 34" (559mm x 864mm) [CHAR LIMIT=none] -->
+    <string name="mediasize_na_ansi_d">ANSI D</string>
+    <!-- North America ANSI E media (paper) size: 34" x 44" (864mm x 1118mm) [CHAR LIMIT=none] -->
+    <string name="mediasize_na_ansi_e">ANSI E</string>
+    <!-- North America ANSI F media (paper) size: 28" x 40" (711mm x 1016mm) [CHAR LIMIT=none] -->
+    <string name="mediasize_na_ansi_f">ANSI F</string>
+    <!-- North America Arch A media (paper) size: 9" x 12" (229mm x 305mm) [CHAR LIMIT=none] -->
+    <string name="mediasize_na_arch_a">Arch A</string>
+    <!-- North America Arch B media (paper) size: 12" x 18" (305mm x 457mm) [CHAR LIMIT=none] -->
+    <string name="mediasize_na_arch_b">Arch B</string>
+    <!-- North America Arch C media (paper) size: 18" x 24" (457mm x 610mm) [CHAR LIMIT=none] -->
+    <string name="mediasize_na_arch_c">Arch C</string>
+    <!-- North America Arch D media (paper) size: 24" x 36" (610mm x 914mm) [CHAR LIMIT=none] -->
+    <string name="mediasize_na_arch_d">Arch D</string>
+    <!-- North America Arch E media (paper) size: 36" x 48" (914mm x 1219mm) [CHAR LIMIT=none] -->
+    <string name="mediasize_na_arch_e">Arch E</string>
+    <!-- North America Arch E1 media (paper) size: 30" x 42" (762mm x 1067mm) [CHAR LIMIT=none] -->
+    <string name="mediasize_na_arch_e1">Arch E1</string>
+    <!-- North America Super B media (paper) size: 13" x 19" (330mm x 483mm) [CHAR LIMIT=none] -->
+    <string name="mediasize_na_super_b">Super B</string>
 
     <!-- Chinese Roc 8k media (paper) size: 270mm x 390mm (10.629" x 15.3543") -->
     <string name="mediasize_chinese_roc_8k">ROC 8K</string>
@@ -4724,6 +4746,8 @@
     <string name="mediasize_japanese_kaku2">Kaku2</string>
     <!-- Japanese You4 media (paper) size: 105mm x 235mm (4.134" x 9.252") -->
     <string name="mediasize_japanese_you4">You4</string>
+    <!-- Japanese Photo L (paper) size: 89mm x 127mm (3.5 x 5") [CHAR LIMIT=20] -->
+    <string name="mediasize_japanese_l">L</string>
 
     <!-- Media (paper) size for specifying any paper size in portrait.-->
     <string name="mediasize_unknown_portrait">Unknown portrait</string>
