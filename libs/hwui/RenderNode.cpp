@@ -478,7 +478,7 @@ void RenderNode::applyViewPropertyTransforms(mat4& matrix, bool true3dTransform)
         }
     }
 
-    if (Properties::stretchEffectBehavior == StretchEffectBehavior::UniformScale) {
+    if (Properties::getStretchEffectBehavior() == StretchEffectBehavior::UniformScale) {
         const StretchEffect& stretch = properties().layerProperties().getStretchEffect();
         if (!stretch.isEmpty()) {
             matrix.multiply(
