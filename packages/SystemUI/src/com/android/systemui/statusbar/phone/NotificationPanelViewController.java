@@ -54,7 +54,6 @@ import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.UserManager;
 import android.os.VibrationEffect;
-import android.service.quickaccesswallet.QuickAccessWalletClient;
 import android.util.Log;
 import android.util.MathUtils;
 import android.view.DisplayCutout;
@@ -153,6 +152,7 @@ import com.android.systemui.statusbar.policy.KeyguardUserSwitcherView;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.util.Utils;
 import com.android.systemui.util.settings.SecureSettings;
+import com.android.systemui.wallet.controller.QuickAccessWalletController;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 
 import java.io.FileDescriptor;
@@ -310,6 +310,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private final FeatureFlags mFeatureFlags;
     private final ScrimController mScrimController;
     private final PrivacyDotViewController mPrivacyDotViewController;
+    private final QuickAccessWalletController mQuickAccessWalletController;
 
     // Maximum # notifications to show on Keyguard; extras will be collapsed in an overflow card.
     // If there are exactly 1 + mMaxKeyguardNotifications, then still shows all notifications
@@ -583,7 +584,6 @@ public class NotificationPanelViewController extends PanelViewController {
     private int mScreenCornerRadius;
     private int mNotificationScrimPadding;
 
-    private final QuickAccessWalletClient mQuickAccessWalletClient;
     private final Executor mUiExecutor;
     private final SecureSettings mSecureSettings;
 
@@ -664,11 +664,11 @@ public class NotificationPanelViewController extends PanelViewController {
             AmbientState ambientState,
             LockIconViewController lockIconViewController,
             FeatureFlags featureFlags,
-            QuickAccessWalletClient quickAccessWalletClient,
             KeyguardMediaController keyguardMediaController,
             PrivacyDotViewController privacyDotViewController,
             TapAgainViewController tapAgainViewController,
             FragmentService fragmentService,
+            QuickAccessWalletController quickAccessWalletController,
             @Main Executor uiExecutor,
             SecureSettings secureSettings) {
         super(view, falsingManager, dozeLog, keyguardStateController,
@@ -679,6 +679,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mVibratorHelper = vibratorHelper;
         mKeyguardMediaController = keyguardMediaController;
         mPrivacyDotViewController = privacyDotViewController;
+        mQuickAccessWalletController = quickAccessWalletController;
         mMetricsLogger = metricsLogger;
         mActivityManager = activityManager;
         mConfigurationController = configurationController;
@@ -721,7 +722,6 @@ public class NotificationPanelViewController extends PanelViewController {
         mScrimController.setClipsQsScrim(!mShouldUseSplitNotificationShade);
         mUserManager = userManager;
         mMediaDataManager = mediaDataManager;
-        mQuickAccessWalletClient = quickAccessWalletClient;
         mTapAgainViewController = tapAgainViewController;
         mUiExecutor = uiExecutor;
         mSecureSettings = secureSettings;
@@ -1122,7 +1122,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mKeyguardBottomArea.setFalsingManager(mFalsingManager);
 
         if (mFeatureFlags.isQuickAccessWalletEnabled()) {
-            mKeyguardBottomArea.initWallet(mQuickAccessWalletClient, mUiExecutor, mSecureSettings);
+            mKeyguardBottomArea.initWallet(mQuickAccessWalletController);
         }
     }
 
