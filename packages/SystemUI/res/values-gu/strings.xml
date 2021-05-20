@@ -294,8 +294,7 @@
     <!-- no translation found for accessibility_quick_settings_work_mode_off (9106217884005620744) -->
     <skip />
     <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"કાર્ય મોડ ચાલુ."</string>
-    <!-- no translation found for accessibility_quick_settings_work_mode_changed_off (6422896967647049692) -->
-    <skip />
+    <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6422896967647049692">"કાર્ય મોડ થોભાવ્યો."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"કાર્ય મોડ ચાલુ કર્યો."</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"ડેટા સેવર બંધ કર્યું."</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"ડેટા સેવર ચાલુ કર્યું."</string>

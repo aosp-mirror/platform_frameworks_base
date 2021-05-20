@@ -136,8 +136,7 @@
     <string name="accessibility_camera_button" msgid="2938898391716647247">"Камера"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"Телефон."</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Аудиоподсказки"</string>
-    <!-- no translation found for accessibility_wallet_button (1458258783460555507) -->
-    <skip />
+    <string name="accessibility_wallet_button" msgid="1458258783460555507">"Кошелек"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"Разблокировать."</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Устройство заблокировано"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="5209142744692162598">"Отсканируйте отпечаток пальца"</string>
@@ -982,7 +981,7 @@
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"Приложение готово к работе, установка не требуется. Нажмите, чтобы узнать больше."</string>
     <string name="app_info" msgid="5153758994129963243">"О приложении"</string>
     <string name="go_to_web" msgid="636673528981366511">"Перейти в браузер"</string>
-    <string name="mobile_data" msgid="4564407557775397216">"Моб. Интернет"</string>
+    <string name="mobile_data" msgid="4564407557775397216">"Моб. интернет"</string>
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> – <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="5389597396308001471">"Модуль Wi-Fi отключен"</string>
@@ -1164,8 +1163,6 @@
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"выполнить аутентификацию"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"указать устройство"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Используйте отпечаток пальца для входа."</string>
-    <!-- no translation found for accessibility_fingerprint_bouncer (7189102492498735519) -->
-    <skip />
-    <!-- no translation found for ongoing_phone_call_content_description (5332334388483099947) -->
-    <skip />
+    <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Требуется аутентификация. Приложите палец к сканеру отпечатков."</string>
+    <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Текущий вызов"</string>
 </resources>
