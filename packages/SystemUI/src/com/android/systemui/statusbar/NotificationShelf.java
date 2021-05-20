@@ -336,8 +336,13 @@ public class NotificationShelf extends ActivatableNotificationView implements
                 ActivatableNotificationView anv =
                         (ActivatableNotificationView) child;
 
+                final boolean isUnlockedHeadsUp = !mAmbientState.isOnKeyguard()
+                        && !mAmbientState.isShadeExpanded()
+                        && child instanceof ExpandableView
+                        && ((ExpandableNotificationRow) child).isHeadsUp();
                 if (viewStart < shelfStart
                         && !mHostLayoutController.isViewAffectedBySwipe(anv)
+                        && !isUnlockedHeadsUp
                         && !mAmbientState.isPulsing()
                         && !mAmbientState.isDozing()) {
 
