@@ -852,7 +852,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
             setScrimAlpha(mScrimForBubble, mBubbleAlpha);
         }
         // The animation could have all already finished, let's call onFinished just in case
-        onFinished();
+        onFinished(mState);
         dispatchScrimsVisible();
     }
 
@@ -919,7 +919,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
 
             Trace.traceCounter(Trace.TRACE_TAG_APP, getScrimName(scrimView) + "_tint",
                     Color.alpha(tint));
-
             scrimView.setTint(tint);
             scrimView.setViewAlpha(alpha);
         } else {
@@ -950,12 +949,13 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         anim.setStartDelay(mAnimationDelay);
         anim.setDuration(mAnimationDuration);
         anim.addListener(new AnimatorListenerAdapter() {
-            private Callback lastCallback = mCallback;
+            private final ScrimState mLastState = mState;
+            private final Callback mLastCallback = mCallback;
 
             @Override
             public void onAnimationEnd(Animator animation) {
                 scrim.setTag(TAG_KEY_ANIM, null);
-                onFinished(lastCallback);
+                onFinished(mLastCallback, mLastState);
 
                 dispatchScrimsVisible();
             }
@@ -1009,11 +1009,14 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         return true;
     }
 
-    private void onFinished() {
-        onFinished(mCallback);
+    /**
+     * @param state that finished
+     */
+    private void onFinished(ScrimState state) {
+        onFinished(mCallback, state);
     }
 
-    private void onFinished(Callback callback) {
+    private void onFinished(Callback callback, ScrimState state) {
         if (mPendingFrameCallback != null) {
             // No animations can finish while we're waiting on the blanking to finish
             return;
@@ -1045,7 +1048,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
 
         // When unlocking with fingerprint, we'll fade the scrims from black to transparent.
         // At the end of the animation we need to remove the tint.
-        if (mState == ScrimState.UNLOCKED) {
+        if (state == ScrimState.UNLOCKED) {
             mInFrontTint = Color.TRANSPARENT;
             mBehindTint = mState.getBehindTint();
             mNotificationsTint = mState.getNotifTint();
