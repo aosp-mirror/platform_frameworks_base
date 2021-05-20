@@ -41,7 +41,7 @@
         android:ellipsize="end"
         android:gravity="start"
         android:textAlignment="viewStart"
-        android:textColor="?android:attr/textColorPrimaryInverse"
+        android:textColor="@android:color/system_neutral1_900"
         android:text="@string/bubbles_user_education_manage_title"
         android:textAppearance="@*android:style/TextAppearance.DeviceDefault.Headline"/>
 
@@ -56,7 +56,7 @@
         android:ellipsize="end"
         android:gravity="start"
         android:textAlignment="viewStart"
-        android:textColor="?android:attr/textColorPrimaryInverse"
+        android:textColor="@android:color/system_neutral1_900"
         android:fontFamily="@*android:string/config_bodyFontFamily"
         android:textAppearance="@*android:style/TextAppearance.DeviceDefault.Body2"/>
 
@@ -75,7 +75,7 @@
             android:focusable="true"
             android:clickable="false"
             android:text="@string/manage_bubbles_text"
-            android:textColor="?android:attr/textColorPrimaryInverse"
+            android:textColor="@android:color/system_neutral1_900"
             />
 
         <com.android.wm.shell.common.AlphaOptimizedButton
@@ -86,7 +86,7 @@
             android:layout_height="wrap_content"
             android:focusable="true"
             android:text="@string/bubbles_user_education_got_it"
-            android:textColor="?android:attr/textColorPrimaryInverse"
+            android:textColor="@android:color/system_neutral1_900"
             />
     </LinearLayout>
 </LinearLayout>

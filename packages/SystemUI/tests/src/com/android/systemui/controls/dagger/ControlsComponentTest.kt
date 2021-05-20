@@ -115,7 +115,7 @@ class ControlsComponentTest : SysuiTestCase() {
         `when`(lockPatternUtils.getStrongAuthForUser(anyInt()))
             .thenReturn(STRONG_AUTH_NOT_REQUIRED)
         `when`(keyguardStateController.isUnlocked()).thenReturn(false)
-        `when`(secureSettings.getInt(eq(Settings.Secure.POWER_MENU_LOCKED_SHOW_CONTENT), anyInt()))
+        `when`(secureSettings.getInt(eq(Settings.Secure.LOCKSCREEN_SHOW_CONTROLS), anyInt()))
             .thenReturn(0)
         val component = setupComponent(true)
 
@@ -127,7 +127,7 @@ class ControlsComponentTest : SysuiTestCase() {
         `when`(lockPatternUtils.getStrongAuthForUser(anyInt()))
             .thenReturn(STRONG_AUTH_NOT_REQUIRED)
         `when`(keyguardStateController.isUnlocked()).thenReturn(false)
-        `when`(secureSettings.getInt(eq(Settings.Secure.POWER_MENU_LOCKED_SHOW_CONTENT), anyInt()))
+        `when`(secureSettings.getInt(eq(Settings.Secure.LOCKSCREEN_SHOW_CONTROLS), anyInt()))
             .thenReturn(1)
         val component = setupComponent(true)
 
@@ -136,7 +136,7 @@ class ControlsComponentTest : SysuiTestCase() {
 
     @Test
     fun testFeatureEnabledAndCanShowWhileUnlockedVisibility() {
-        `when`(secureSettings.getInt(eq(Settings.Secure.POWER_MENU_LOCKED_SHOW_CONTENT), anyInt()))
+        `when`(secureSettings.getInt(eq(Settings.Secure.LOCKSCREEN_SHOW_CONTROLS), anyInt()))
             .thenReturn(0)
         `when`(lockPatternUtils.getStrongAuthForUser(anyInt()))
             .thenReturn(STRONG_AUTH_NOT_REQUIRED)

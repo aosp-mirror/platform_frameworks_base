@@ -7483,7 +7483,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (mVisibleRequested) {
             // It may toggle the UI for user to restart the size compatibility mode activity.
             display.handleActivitySizeCompatModeIfNeeded(this);
-        } else if (mCompatDisplayInsets != null) {
+        } else if (mCompatDisplayInsets != null && !visibleIgnoringKeyguard) {
+            // visibleIgnoringKeyguard is checked to avoid clearing mCompatDisplayInsets during
+            // displays change. Displays are turned off during the change so mVisibleRequested
+            // can be false.
             // The override changes can only be obtained from display, because we don't have the
             // difference of full configuration in each hierarchy.
             final int displayChanges = display.getCurrentOverrideConfigurationChanges();

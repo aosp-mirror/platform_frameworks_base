@@ -69,7 +69,8 @@ public class UdfpsKeyguardDrawable extends UdfpsDrawable implements DozeReceiver
         mHintAnimator.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
         mHintAnimator.addUpdateListener(anim -> setStrokeWidth((float) anim.getAnimatedValue()));
 
-        mLockScreenColor = Utils.getColorAttrDefaultColor(mContext, R.attr.wallpaperTextColor);
+        mLockScreenColor = Utils.getColorAttrDefaultColor(mContext,
+                R.attr.wallpaperTextColorAccent);
         mAmbientDisplayColor = Color.WHITE;
 
         updateIcon();

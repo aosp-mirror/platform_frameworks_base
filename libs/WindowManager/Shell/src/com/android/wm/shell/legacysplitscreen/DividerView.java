@@ -521,12 +521,14 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
-                mVelocityTracker.addMovement(event);
-
-                if (!mMoving) break;
+                if (!mMoving) {
+                    stopDragging();
+                    break;
+                }
 
                 x = (int) event.getRawX();
                 y = (int) event.getRawY();
+                mVelocityTracker.addMovement(event);
                 mVelocityTracker.computeCurrentVelocity(1000);
                 int position = calculatePosition(x, y);
                 stopDragging(position, isHorizontalDivision() ? mVelocityTracker.getYVelocity()
@@ -685,9 +687,9 @@ public class DividerView extends FrameLayout implements OnTouchListener,
 
         mTmpRect.set(mHandle.getLeft(), mHandle.getTop(), mHandle.getRight(), mHandle.getBottom());
         if (isHorizontalDivision()) {
-            mTmpRect.offsetTo(0, mDividerPositionY);
+            mTmpRect.offsetTo(mHandle.getLeft(), mDividerPositionY);
         } else {
-            mTmpRect.offsetTo(mDividerPositionX, 0);
+            mTmpRect.offsetTo(mDividerPositionX, mHandle.getTop());
         }
         mWindowManagerProxy.setTouchRegion(mTmpRect);
 

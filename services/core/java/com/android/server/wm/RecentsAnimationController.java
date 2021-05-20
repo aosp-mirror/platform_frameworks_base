@@ -628,6 +628,7 @@ public class RecentsAnimationController implements DeathRecipient {
             return;
         }
         mNavigationBarAttachedToApp = true;
+        navWindow.mToken.cancelAnimation();
         final SurfaceControl.Transaction t = navWindow.mToken.getPendingTransaction();
         final SurfaceControl navSurfaceControl = navWindow.mToken.getSurfaceControl();
         if (shouldTranslateNavBar) {
@@ -648,7 +649,8 @@ public class RecentsAnimationController implements DeathRecipient {
         }
     }
 
-    private void restoreNavigationBarFromApp(boolean animate) {
+    @VisibleForTesting
+    void restoreNavigationBarFromApp(boolean animate) {
         if (!mNavigationBarAttachedToApp) {
             return;
         }
@@ -671,23 +673,9 @@ public class RecentsAnimationController implements DeathRecipient {
         t.setLayer(navToken.getSurfaceControl(), navToken.getLastLayer());
 
         if (animate) {
-            final NavBarFadeAnimationController navBarFadeAnimationController =
-                    mDisplayContent.getDisplayPolicy().getNavBarFadeAnimationController();
-            final Runnable fadeInAnim = () -> {
-                // Reparent the SurfaceControl of nav bar token back.
-                t.reparent(navToken.getSurfaceControl(), parent.getSurfaceControl());
-                // Run fade-in animation to show navigation bar back to bottom of the display.
-                if (navBarFadeAnimationController != null) {
-                    navBarFadeAnimationController.fadeWindowToken(true);
-                }
-            };
-            final FadeRotationAnimationController fadeRotationAnimationController =
-                    mDisplayContent.getFadeRotationAnimationController();
-            if (fadeRotationAnimationController != null) {
-                fadeRotationAnimationController.setOnShowRunnable(fadeInAnim);
-            } else {
-                fadeInAnim.run();
-            }
+            final NavBarFadeAnimationController controller =
+                        new NavBarFadeAnimationController(mDisplayContent);
+            controller.fadeWindowToken(true);
         } else {
             // Reparent the SurfaceControl of nav bar token back.
             t.reparent(navToken.getSurfaceControl(), parent.getSurfaceControl());

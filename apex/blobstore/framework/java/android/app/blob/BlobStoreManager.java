@@ -258,8 +258,7 @@ public class BlobStoreManager {
     public @NonNull ParcelFileDescriptor openBlob(@NonNull BlobHandle blobHandle)
             throws IOException {
         try {
-            return mService.openBlob(blobHandle, mContext.getOpPackageName(),
-                    mContext.getAttributionTag());
+            return mService.openBlob(blobHandle, mContext.getOpPackageName());
         } catch (ParcelableException e) {
             e.maybeRethrow(IOException.class);
             throw new RuntimeException(e);
@@ -316,7 +315,7 @@ public class BlobStoreManager {
             @CurrentTimeMillisLong long leaseExpiryTimeMillis) throws IOException {
         try {
             mService.acquireLease(blobHandle, descriptionResId, null, leaseExpiryTimeMillis,
-                    mContext.getOpPackageName(), mContext.getAttributionTag());
+                    mContext.getOpPackageName());
         } catch (ParcelableException e) {
             e.maybeRethrow(IOException.class);
             e.maybeRethrow(LimitExceededException.class);
@@ -379,7 +378,7 @@ public class BlobStoreManager {
             @CurrentTimeMillisLong long leaseExpiryTimeMillis) throws IOException {
         try {
             mService.acquireLease(blobHandle, INVALID_RES_ID, description, leaseExpiryTimeMillis,
-                    mContext.getOpPackageName(), mContext.getAttributionTag());
+                    mContext.getOpPackageName());
         } catch (ParcelableException e) {
             e.maybeRethrow(IOException.class);
             e.maybeRethrow(LimitExceededException.class);
@@ -498,8 +497,7 @@ public class BlobStoreManager {
      */
     public void releaseLease(@NonNull BlobHandle blobHandle) throws IOException {
         try {
-            mService.releaseLease(blobHandle, mContext.getOpPackageName(),
-                    mContext.getAttributionTag());
+            mService.releaseLease(blobHandle, mContext.getOpPackageName());
         } catch (ParcelableException e) {
             e.maybeRethrow(IOException.class);
             throw new RuntimeException(e);
@@ -604,8 +602,7 @@ public class BlobStoreManager {
     @Nullable
     public LeaseInfo getLeaseInfo(@NonNull BlobHandle blobHandle) throws IOException {
         try {
-            return mService.getLeaseInfo(blobHandle, mContext.getOpPackageName(),
-                    mContext.getAttributionTag());
+            return mService.getLeaseInfo(blobHandle, mContext.getOpPackageName());
         } catch (ParcelableException e) {
             e.maybeRethrow(IOException.class);
             throw new RuntimeException(e);
@@ -891,64 +888,6 @@ public class BlobStoreManager {
         public boolean isPublicAccessAllowed() throws IOException {
             try {
                 return mSession.isPublicAccessAllowed();
-            } catch (ParcelableException e) {
-                e.maybeRethrow(IOException.class);
-                throw new RuntimeException(e);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        }
-
-        /**
-         * Allow apps with location permission to access this blob data once it is committed using
-         * a {@link BlobHandle} representing the blob.
-         *
-         * <p> This needs to be called before committing the blob using
-         * {@link #commit(Executor, Consumer)}.
-         *
-         * Note that if a caller allows access to the blob using this API in addition to other APIs
-         * like {@link #allowPackageAccess(String, byte[])}, then apps satisfying any one of these
-         * access conditions will be allowed to access the blob.
-         *
-         * @param permissionName the name of the location permission that needs to be granted
-         *                       for the app. This can be either one of
-         *                       {@link android.Manifest.permission#ACCESS_FINE_LOCATION} or
-         *                       {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}.
-         *
-         * @throws IOException when there is an I/O error while changing the access.
-         * @throws SecurityException when the caller is not the owner of the session.
-         * @throws IllegalStateException when the caller tries to change access for a blob which is
-         *                               already committed.
-         */
-        public void allowPackagesWithLocationPermission(@NonNull String permissionName)
-                throws IOException {
-            try {
-                mSession.allowPackagesWithLocationPermission(permissionName);
-            } catch (ParcelableException e) {
-                e.maybeRethrow(IOException.class);
-                throw new RuntimeException(e);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        }
-
-        /**
-         * Returns {@code true} if access has been allowed for apps with location permission by
-         * using {@link #allowPackagesWithLocationPermission(String)}.
-         *
-         * @param permissionName the name of the location permission that needs to be granted
-         *                       for the app. This can be either one of
-         *                       {@link android.Manifest.permission#ACCESS_FINE_LOCATION} or
-         *                       {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}.
-         *
-         * @throws IOException when there is an I/O error while getting the access type.
-         * @throws IllegalStateException when the caller tries to get access type from a session
-         *                               which is closed or abandoned.
-         */
-        public boolean arePackagesWithLocationPermissionAllowed(@NonNull String permissionName)
-                throws IOException {
-            try {
-                return mSession.arePackagesWithLocationPermissionAllowed(permissionName);
             } catch (ParcelableException e) {
                 e.maybeRethrow(IOException.class);
                 throw new RuntimeException(e);

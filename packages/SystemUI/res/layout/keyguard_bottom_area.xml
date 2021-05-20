@@ -21,8 +21,7 @@
     android:id="@+id/keyguard_bottom_area"
     android:layout_height="match_parent"
     android:layout_width="match_parent"
-    android:outlineProvider="none"
-    android:elevation="5dp" > <!-- Put it above the status bar header -->
+    android:outlineProvider="none" > <!-- Put it above the status bar header -->
 
     <LinearLayout
         android:id="@+id/keyguard_indication_area"
@@ -57,12 +56,6 @@
             android:visibility="gone"/>
 
     </LinearLayout>
-
-    <FrameLayout
-        android:id="@+id/preview_container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-    </FrameLayout>
 
     <com.android.systemui.statusbar.KeyguardAffordanceView
         android:id="@+id/camera_button"

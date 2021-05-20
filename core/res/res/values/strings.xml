@@ -5574,7 +5574,7 @@
     <!-- Label of notification action button to learn more about the enhanced notifications [CHAR LIMIT=20] -->
     <string name="nas_upgrade_notification_learn_more_action">Learn more</string>
     <!-- Content of notification learn more dialog about the enhanced notifications [CHAR LIMIT=NONE] -->
-    <string name="nas_upgrade_notification_learn_more_content">Enhanced notifications replaced Android Adaptive Notifications in Android 12. This feature shows suggested actions and replies, and organizes your notifications.\n\nEnhanced notifications can access notification content, including personal information like contact names and messages. This feature can also dismiss or respond to notifications, such as answering phone calls and controlling Do Not Disturb.</string>
+    <string name="nas_upgrade_notification_learn_more_content">Enhanced notifications replaced Android Adaptive Notifications in Android 12. This feature shows suggested actions and replies, and organizes your notifications.\n\nEnhanced notifications can access notification content, including personal information like contact names and messages. This feature can also dismiss or respond to notifications, such as answering phone calls, and control Do Not Disturb.</string>
 
 
     <!-- Dynamic mode battery saver strings -->

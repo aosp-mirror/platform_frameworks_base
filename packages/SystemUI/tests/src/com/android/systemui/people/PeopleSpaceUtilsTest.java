@@ -220,8 +220,8 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
         when(mMockContext.getString(R.string.basic_status)).thenReturn(
                 mContext.getString(R.string.basic_status));
         when(mMockContext.getPackageManager()).thenReturn(mPackageManager);
-        when(mMockContext.getString(R.string.over_timestamp)).thenReturn(
-                mContext.getString(R.string.over_timestamp));
+        when(mMockContext.getString(R.string.over_two_weeks_timestamp)).thenReturn(
+                mContext.getString(R.string.over_two_weeks_timestamp));
         when(mPackageManager.getApplicationIcon(anyString())).thenReturn(null);
         when(mNotificationEntryManager.getVisibleNotifications())
                 .thenReturn(List.of(mNotificationEntry1, mNotificationEntry2, mNotificationEntry3));

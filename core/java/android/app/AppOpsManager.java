@@ -7394,20 +7394,27 @@ public class AppOpsManager {
 
     /** @hide */
     public void setUserRestriction(int code, boolean restricted, IBinder token) {
-        setUserRestriction(code, restricted, token, /*exceptionPackages*/null);
+        setUserRestriction(code, restricted, token, (Map<String, String[]>) null);
     }
 
-    /** @hide */
+    /**
+     * An empty array of attribution tags means exclude all tags under that package.
+     * @hide
+     */
     public void setUserRestriction(int code, boolean restricted, IBinder token,
-            String[] exceptionPackages) {
-        setUserRestrictionForUser(code, restricted, token, exceptionPackages, mContext.getUserId());
+            @Nullable Map<String, String[]> excludedPackageTags) {
+        setUserRestrictionForUser(code, restricted, token, excludedPackageTags,
+                mContext.getUserId());
     }
 
-    /** @hide */
+    /**
+     * An empty array of attribution tags means exclude all tags under that package.
+     * @hide
+     */
     public void setUserRestrictionForUser(int code, boolean restricted, IBinder token,
-            String[] exceptionPackages, int userId) {
+            @Nullable Map<String, String[]> excludedPackageTags, int userId) {
         try {
-            mService.setUserRestriction(code, restricted, token, userId, exceptionPackages);
+            mService.setUserRestriction(code, restricted, token, userId, excludedPackageTags);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -7949,7 +7956,7 @@ public class AppOpsManager {
      */
     public int unsafeCheckOpRawNoThrow(int op, int uid, @NonNull String packageName) {
         try {
-            return mService.checkOperationRaw(op, uid, packageName);
+            return mService.checkOperationRaw(op, uid, packageName, null);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

@@ -41,4 +41,9 @@ public abstract class VoiceInteractionManagerInternal {
     public abstract boolean supportsLocalVoiceInteraction();
 
     public abstract void stopLocalVoiceInteraction(IBinder callingActivity);
+
+    /**
+     * Returns whether the given package is currently in an active session
+     */
+    public abstract boolean hasActiveSession(String packageName);
 }

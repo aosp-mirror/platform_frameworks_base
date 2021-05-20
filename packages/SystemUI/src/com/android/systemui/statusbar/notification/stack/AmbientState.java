@@ -95,6 +95,7 @@ public class AmbientState {
 
     /** Height of the notifications panel without top padding when expansion completes. */
     private float mStackEndHeight;
+    private float mTransitionToFullShadeAmount;
 
     /**
      * @return Height of the notifications panel without top padding when expansion completes.
@@ -592,6 +593,21 @@ public class AmbientState {
 
     public void setTrackedHeadsUpRow(ExpandableNotificationRow row) {
         mTrackedHeadsUpRow = row;
+    }
+
+    /**
+     * Set the amount of pixels we have currently dragged down if we're transitioning to the full
+     * shade. 0.0f means we're not transitioning yet.
+     */
+    public void setTransitionToFullShadeAmount(float transitionToFullShadeAmount) {
+        mTransitionToFullShadeAmount = transitionToFullShadeAmount;
+    }
+
+    /**
+     * get
+     */
+    public float getTransitionToFullShadeAmount() {
+        return mTransitionToFullShadeAmount;
     }
 
     /**

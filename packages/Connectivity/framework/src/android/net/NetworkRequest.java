@@ -200,8 +200,9 @@ public class NetworkRequest implements Parcelable {
 
         private final NetworkCapabilities mNetworkCapabilities;
 
-        // A boolean that represents the user modified NOT_VCN_MANAGED capability.
-        private boolean mModifiedNotVcnManaged = false;
+        // A boolean that represents whether the NOT_VCN_MANAGED capability should be deduced when
+        // the NetworkRequest object is built.
+        private boolean mShouldDeduceNotVcnManaged = true;
 
         /**
          * Default constructor for Builder.
@@ -223,7 +224,7 @@ public class NetworkRequest implements Parcelable {
             // If the caller constructed the builder from a request, it means the user
             // might explicitly want the capabilities from the request. Thus, the NOT_VCN_MANAGED
             // capabilities should not be touched later.
-            mModifiedNotVcnManaged = true;
+            mShouldDeduceNotVcnManaged = false;
         }
 
         /**
@@ -254,7 +255,7 @@ public class NetworkRequest implements Parcelable {
         public Builder addCapability(@NetworkCapabilities.NetCapability int capability) {
             mNetworkCapabilities.addCapability(capability);
             if (capability == NetworkCapabilities.NET_CAPABILITY_NOT_VCN_MANAGED) {
-                mModifiedNotVcnManaged = true;
+                mShouldDeduceNotVcnManaged = false;
             }
             return this;
         }
@@ -268,7 +269,7 @@ public class NetworkRequest implements Parcelable {
         public Builder removeCapability(@NetworkCapabilities.NetCapability int capability) {
             mNetworkCapabilities.removeCapability(capability);
             if (capability == NetworkCapabilities.NET_CAPABILITY_NOT_VCN_MANAGED) {
-                mModifiedNotVcnManaged = true;
+                mShouldDeduceNotVcnManaged = false;
             }
             return this;
         }
@@ -287,10 +288,15 @@ public class NetworkRequest implements Parcelable {
         }
 
         /**
-         * Set the watched UIDs for this request. This will be reset and wiped out unless
-         * the calling app holds the CHANGE_NETWORK_STATE permission.
+         * Sets this request to match only networks that apply to the specified UIDs.
          *
-         * @param uids The watched UIDs as a set of {@code Range<Integer>}, or null for everything.
+         * By default, the set of UIDs is the UID of the calling app, and this request will match
+         * any network that applies to the app. Setting it to {@code null} will observe any
+         * network on the system, even if it does not apply to this app. In this case, any
+         * {@link NetworkSpecifier} set on this request will be redacted or removed to prevent the
+         * application deducing restricted information such as location.
+         *
+         * @param uids The UIDs as a set of {@code Range<Integer>}, or null for everything.
          * @return The builder to facilitate chaining.
          * @hide
          */
@@ -352,7 +358,7 @@ public class NetworkRequest implements Parcelable {
             mNetworkCapabilities.clearAll();
             // If the caller explicitly clear all capabilities, the NOT_VCN_MANAGED capabilities
             // should not be add back later.
-            mModifiedNotVcnManaged = true;
+            mShouldDeduceNotVcnManaged = false;
             return this;
         }
 
@@ -453,6 +459,9 @@ public class NetworkRequest implements Parcelable {
                 throw new IllegalArgumentException("A MatchAllNetworkSpecifier is not permitted");
             }
             mNetworkCapabilities.setNetworkSpecifier(networkSpecifier);
+            // Do not touch NOT_VCN_MANAGED if the caller needs to access to a very specific
+            // Network.
+            mShouldDeduceNotVcnManaged = false;
             return this;
         }
 
@@ -486,12 +495,13 @@ public class NetworkRequest implements Parcelable {
          *      {@link #VCN_SUPPORTED_CAPABILITIES}, add the NET_CAPABILITY_NOT_VCN_MANAGED to
          *      allow the callers automatically utilize VCN networks if available.
          *   2. For the requests that explicitly add or remove NET_CAPABILITY_NOT_VCN_MANAGED,
+         *      or has clear intention of tracking specific network,
          *      do not alter them to allow user fire request that suits their need.
          *
          * @hide
          */
         private void deduceNotVcnManagedCapability(final NetworkCapabilities nc) {
-            if (mModifiedNotVcnManaged) return;
+            if (!mShouldDeduceNotVcnManaged) return;
             for (final int cap : nc.getCapabilities()) {
                 if (!VCN_SUPPORTED_CAPABILITIES.contains(cap)) return;
             }
@@ -515,6 +525,30 @@ public class NetworkRequest implements Parcelable {
         @SystemApi
         public Builder setSubscriptionIds(@NonNull Set<Integer> subIds) {
             mNetworkCapabilities.setSubscriptionIds(subIds);
+            return this;
+        }
+
+        /**
+         * Specifies whether the built request should also match networks that do not apply to the
+         * calling UID.
+         *
+         * By default, the built request will only match networks that apply to the calling UID.
+         * If this method is called with {@code true}, the built request will match any network on
+         * the system that matches the other parameters of the request. In this case, any
+         * information in the built request that is subject to redaction for security or privacy
+         * purposes, such as a {@link NetworkSpecifier}, will be redacted or removed to prevent the
+         * application deducing sensitive information.
+         *
+         * @param include Whether to match networks that do not apply to the calling UID.
+         * @return The builder to facilitate chaining.
+         */
+        @NonNull
+        public Builder setIncludeOtherUidNetworks(boolean include) {
+            if (include) {
+                mNetworkCapabilities.setUids(null);
+            } else {
+                mNetworkCapabilities.setSingleUid(Process.myUid());
+            }
             return this;
         }
     }

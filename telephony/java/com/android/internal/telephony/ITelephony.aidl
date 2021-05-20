@@ -2347,6 +2347,12 @@ interface ITelephony {
     void setActiveDeviceToDeviceTransport(String transport);
 
     /**
+     * Forces Device to Device communication to be enabled, even if the device config has it
+     * disabled.
+     */
+    void setDeviceToDeviceForceEnabled(boolean isForceEnabled);
+
+    /**
      * Gets the config of RCS VoLTE single registration enabled for the carrier/subscription.
      */
     boolean getCarrierSingleRegistrationEnabled(int subId);

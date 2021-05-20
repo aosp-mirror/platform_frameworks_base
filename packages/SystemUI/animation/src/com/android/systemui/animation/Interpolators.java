@@ -16,6 +16,7 @@
 
 package com.android.systemui.animation;
 
+import android.util.MathUtils;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.BounceInterpolator;
@@ -70,6 +71,27 @@ public class Interpolators {
      */
     public static final Interpolator TOUCH_RESPONSE_REVERSE =
             new PathInterpolator(0.9f, 0f, 0.7f, 1f);
+
+    /**
+     * Calculate the amount of overshoot using an exponential falloff function with desired
+     * properties, where the overshoot smoothly transitions at the 1.0f boundary into the
+     * overshoot, retaining its acceleration.
+     *
+     * @param progress a progress value going from 0 to 1
+     * @param overshootAmount the amount > 0 of overshoot desired. A value of 0.1 means the max
+     *                        value of the overall progress will be at 1.1.
+     * @param overshootStart the point in (0,1] where the result should reach 1
+     * @return the interpolated overshoot
+     */
+    public static float getOvershootInterpolation(float progress, float overshootAmount,
+            float overshootStart) {
+        if (overshootAmount == 0.0f || overshootStart == 0.0f) {
+            throw new IllegalArgumentException("Invalid values for overshoot");
+        }
+        float b = MathUtils.log((overshootAmount + 1) / (overshootAmount)) / overshootStart;
+        return MathUtils.max(0.0f,
+                (float) (1.0f - Math.exp(-b * progress)) * (overshootAmount + 1.0f));
+    }
 
     /**
      * Interpolate alpha for notifications background scrim during shade expansion.

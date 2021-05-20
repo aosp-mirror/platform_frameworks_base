@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.phone;
 
 import android.util.Log;
-import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 
@@ -179,12 +178,6 @@ public class ShadeControllerImpl implements ShadeController {
             clonedList.get(i).run();
         }
         mStatusBarKeyguardViewManager.readyForKeyguardDone();
-    }
-
-    @Override
-    public void goToLockedShade(View startingChild) {
-        // TODO: Move this code out of StatusBar into ShadeController.
-        getStatusBar().goToLockedShade(startingChild);
     }
 
     @Override

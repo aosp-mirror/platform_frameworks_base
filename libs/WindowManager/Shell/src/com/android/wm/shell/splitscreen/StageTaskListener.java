@@ -29,11 +29,13 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.SparseArray;
 import android.view.SurfaceControl;
+import android.view.SurfaceSession;
 import android.window.WindowContainerTransaction;
 
 import androidx.annotation.NonNull;
 
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.common.SurfaceUtils;
 import com.android.wm.shell.common.SyncTransactionQueue;
 
 import java.io.PrintWriter;
@@ -44,6 +46,7 @@ import java.io.PrintWriter;
  * They only serve to hold a collection of tasks and provide APIs like
  * {@link #setBounds(Rect, WindowContainerTransaction)} for the centralized {@link StageCoordinator}
  * to perform operations in-sync with other containers.
+ *
  * @see StageCoordinator
  */
 class StageTaskListener implements ShellTaskOrganizer.TaskListener {
@@ -58,23 +61,31 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     /** Callback interface for listening to changes in a split-screen stage. */
     public interface StageListenerCallbacks {
         void onRootTaskAppeared();
+
         void onStatusChanged(boolean visible, boolean hasChildren);
+
         void onChildTaskStatusChanged(int taskId, boolean present, boolean visible);
+
         void onRootTaskVanished();
         void onNoLongerSupportMultiWindow();
     }
+
     private final StageListenerCallbacks mCallbacks;
     private final SyncTransactionQueue mSyncQueue;
+    private final SurfaceSession mSurfaceSession;
 
     protected ActivityManager.RunningTaskInfo mRootTaskInfo;
     protected SurfaceControl mRootLeash;
+    protected SurfaceControl mDimLayer;
     protected SparseArray<ActivityManager.RunningTaskInfo> mChildrenTaskInfo = new SparseArray<>();
     private final SparseArray<SurfaceControl> mChildrenLeashes = new SparseArray<>();
 
     StageTaskListener(ShellTaskOrganizer taskOrganizer, int displayId,
-            StageListenerCallbacks callbacks, SyncTransactionQueue syncQueue) {
+            StageListenerCallbacks callbacks, SyncTransactionQueue syncQueue,
+            SurfaceSession surfaceSession) {
         mCallbacks = callbacks;
         mSyncQueue = syncQueue;
+        mSurfaceSession = surfaceSession;
         taskOrganizer.createRootTask(displayId, WINDOWING_MODE_MULTI_WINDOW, this);
     }
 
@@ -94,6 +105,8 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
             mRootTaskInfo = taskInfo;
             mCallbacks.onRootTaskAppeared();
             sendStatusChanged();
+            mSyncQueue.runInSync(t -> mDimLayer =
+                    SurfaceUtils.makeDimLayer(t, mRootLeash, "Dim layer", mSurfaceSession));
         } else if (taskInfo.parentTaskId == mRootTaskInfo.taskId) {
             final int taskId = taskInfo.taskId;
             mChildrenLeashes.put(taskId, leash);
@@ -146,6 +159,7 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
         final int taskId = taskInfo.taskId;
         if (mRootTaskInfo.taskId == taskId) {
             mCallbacks.onRootTaskVanished();
+            mSyncQueue.runInSync(t -> t.remove(mDimLayer));
             mRootTaskInfo = null;
         } else if (mChildrenTaskInfo.contains(taskId)) {
             mChildrenTaskInfo.remove(taskId);

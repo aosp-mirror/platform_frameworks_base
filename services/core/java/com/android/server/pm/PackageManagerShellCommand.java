@@ -304,6 +304,8 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runLogVisibility();
                 case "bypass-staged-installer-check":
                     return runBypassStagedInstallerCheck();
+                case "allow-unlimited-silent-updates":
+                    return runAllowUnlimitedSilentUpdates();
                 default: {
                     Boolean domainVerificationResult =
                             mDomainVerificationShell.runCommand(this, cmd);
@@ -2978,6 +2980,33 @@ class PackageManagerShellCommand extends ShellCommand {
         }
     }
 
+    private int runAllowUnlimitedSilentUpdates() {
+        final PrintWriter pw = getOutPrintWriter();
+        String opt;
+        boolean reset = false;
+        while ((opt = getNextOption()) != null) {
+            switch (opt) {
+                case "--reset":
+                    reset = true;
+                    break;
+                default:
+                    pw.println("Error: Unknown option: " + opt);
+                    return -1;
+            }
+        }
+
+        final String installerPackageName = reset ? null : getNextArgRequired();
+        try {
+            mInterface.getPackageInstaller().setAllowUnlimitedSilentUpdates(installerPackageName);
+        } catch (RemoteException e) {
+            pw.println("Failure ["
+                    + e.getClass().getName() + " - "
+                    + e.getMessage() + "]");
+            return -1;
+        }
+        return 1;
+    }
+
     private static String checkAbiArgument(String abi) {
         if (TextUtils.isEmpty(abi)) {
             throw new IllegalArgumentException("Missing ABI argument");
@@ -3791,6 +3820,12 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("    Turns on debug logging when visibility is blocked for the given package.");
         pw.println("      --enable: turn on debug logging (default)");
         pw.println("      --disable: turn off debug logging");
+        pw.println("");
+        pw.println("  allow-unlimited-silent-updates (--reset | <INSTALLER>)");
+        pw.println("    Allows unlimited silent updated installation requests from the installer");
+        pw.println("    without the throttle time.");
+        pw.println("      --reset: clear the allowed installer and tracks of silent updates in");
+        pw.println("        the system.");
         pw.println("");
         mDomainVerificationShell.printHelp(pw);
         pw.println("");

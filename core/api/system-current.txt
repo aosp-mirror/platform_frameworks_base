@@ -318,7 +318,6 @@ package android {
 
   public static final class R.attr {
     field public static final int allowClearUserDataOnFailedRestore = 16844288; // 0x1010600
-    field public static final int durationBetweenRequestsMillis;
     field public static final int hotwordDetectionService;
     field public static final int isVrOnly = 16844152; // 0x1010578
     field public static final int minExtensionVersion = 16844305; // 0x1010611
@@ -4998,11 +4997,15 @@ package android.location {
 
   public final class SatellitePvt implements android.os.Parcelable {
     method public int describeContents();
-    method @NonNull public android.location.SatellitePvt.ClockInfo getClockInfo();
+    method @Nullable public android.location.SatellitePvt.ClockInfo getClockInfo();
+    method public int getFlags();
     method @FloatRange public double getIonoDelayMeters();
-    method @NonNull public android.location.SatellitePvt.PositionEcef getPositionEcef();
+    method @Nullable public android.location.SatellitePvt.PositionEcef getPositionEcef();
     method @FloatRange public double getTropoDelayMeters();
-    method @NonNull public android.location.SatellitePvt.VelocityEcef getVelocityEcef();
+    method @Nullable public android.location.SatellitePvt.VelocityEcef getVelocityEcef();
+    method public boolean hasIono();
+    method public boolean hasPositionVelocityClockInfo();
+    method public boolean hasTropo();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.location.SatellitePvt> CREATOR;
   }
@@ -5011,6 +5014,7 @@ package android.location {
     ctor public SatellitePvt.Builder();
     method @NonNull public android.location.SatellitePvt build();
     method @NonNull public android.location.SatellitePvt.Builder setClockInfo(@NonNull android.location.SatellitePvt.ClockInfo);
+    method @NonNull public android.location.SatellitePvt.Builder setFlags(int);
     method @NonNull public android.location.SatellitePvt.Builder setIonoDelayMeters(@FloatRange double);
     method @NonNull public android.location.SatellitePvt.Builder setPositionEcef(@NonNull android.location.SatellitePvt.PositionEcef);
     method @NonNull public android.location.SatellitePvt.Builder setTropoDelayMeters(@FloatRange double);
@@ -9891,9 +9895,9 @@ package android.service.displayhash {
     method @NonNull public final android.os.IBinder onBind(@NonNull android.content.Intent);
     method public abstract void onGenerateDisplayHash(@NonNull byte[], @NonNull android.hardware.HardwareBuffer, @NonNull android.graphics.Rect, @NonNull String, @NonNull android.view.displayhash.DisplayHashResultCallback);
     method @NonNull public abstract java.util.Map<java.lang.String,android.service.displayhash.DisplayHashParams> onGetDisplayHashAlgorithms();
+    method public abstract int onGetIntervalBetweenRequestsMillis();
     method @Nullable public abstract android.view.displayhash.VerifiedDisplayHash onVerifyDisplayHash(@NonNull byte[], @NonNull android.view.displayhash.DisplayHash);
     field public static final String SERVICE_INTERFACE = "android.service.displayhash.DisplayHashingService";
-    field public static final String SERVICE_META_DATA = "android.displayhash.display_hashing_service";
   }
 
 }
@@ -14731,7 +14735,7 @@ package android.webkit {
     method public String getDataDirectorySuffix();
     method public String getErrorString(android.content.Context, int);
     method public int getPackageId(android.content.res.Resources, String);
-    method @NonNull public long[] getTimestamps();
+    method @NonNull public android.webkit.WebViewFactory.StartupTimestamps getStartupTimestamps();
     method @Deprecated public void invokeDrawGlFunctor(android.view.View, long, boolean);
     method public boolean isMultiProcessEnabled();
     method public boolean isTraceTagEnabled();
@@ -14747,12 +14751,6 @@ package android.webkit {
     method public static android.content.pm.PackageInfo getLoadedPackageInfo();
     method public static int loadWebViewNativeLibraryFromPackage(String, ClassLoader);
     method public static void prepareWebViewInZygote();
-    field public static final int ADD_ASSETS_END = 4; // 0x4
-    field public static final int ADD_ASSETS_START = 3; // 0x3
-    field public static final int CREATE_CONTEXT_END = 2; // 0x2
-    field public static final int CREATE_CONTEXT_START = 1; // 0x1
-    field public static final int GET_CLASS_LOADER_END = 6; // 0x6
-    field public static final int GET_CLASS_LOADER_START = 5; // 0x5
     field public static final int LIBLOAD_ADDRESS_SPACE_NOT_RESERVED = 2; // 0x2
     field public static final int LIBLOAD_FAILED_JNI_CALL = 7; // 0x7
     field public static final int LIBLOAD_FAILED_LISTING_WEBVIEW_PACKAGES = 4; // 0x4
@@ -14763,11 +14761,20 @@ package android.webkit {
     field public static final int LIBLOAD_FAILED_WAITING_FOR_WEBVIEW_REASON_UNKNOWN = 8; // 0x8
     field public static final int LIBLOAD_SUCCESS = 0; // 0x0
     field public static final int LIBLOAD_WRONG_PACKAGE_NAME = 1; // 0x1
-    field public static final int NATIVE_LOAD_END = 8; // 0x8
-    field public static final int NATIVE_LOAD_START = 7; // 0x7
-    field public static final int PROVIDER_CLASS_FOR_NAME_END = 10; // 0xa
-    field public static final int PROVIDER_CLASS_FOR_NAME_START = 9; // 0x9
-    field public static final int WEBVIEW_LOAD_START = 0; // 0x0
+  }
+
+  public static class WebViewFactory.StartupTimestamps {
+    method public long getAddAssetsEnd();
+    method public long getAddAssetsStart();
+    method public long getCreateContextEnd();
+    method public long getCreateContextStart();
+    method public long getGetClassLoaderEnd();
+    method public long getGetClassLoaderStart();
+    method public long getNativeLoadEnd();
+    method public long getNativeLoadStart();
+    method public long getProviderClassForNameEnd();
+    method public long getProviderClassForNameStart();
+    method public long getWebViewLoadStart();
   }
 
   public interface WebViewFactoryProvider {

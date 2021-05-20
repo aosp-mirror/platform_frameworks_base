@@ -699,7 +699,7 @@ public class Watchdog {
                         if (mActivity != null) {
                             mActivity.addErrorToDropBox(
                                     "watchdog", null, "system_server", null, null, null,
-                                    localSubject, report.toString(), stack, null, null, null);
+                                    localSubject, report.toString(), stack, null, null, null, null);
                         }
                         FrameworkStatsLog.write(FrameworkStatsLog.SYSTEM_SERVER_WATCHDOG_OCCURRED,
                                 localSubject);

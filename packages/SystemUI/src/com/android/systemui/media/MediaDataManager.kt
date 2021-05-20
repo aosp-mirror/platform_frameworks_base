@@ -817,8 +817,17 @@ class MediaDataManager(
          */
         fun onMediaDataLoaded(key: String, oldKey: String?, data: MediaData) {}
 
-        /** Called whenever there's new Smartspace media data loaded. */
-        fun onSmartspaceMediaDataLoaded(key: String, data: SmartspaceTarget) {}
+        /**
+         * Called whenever there's new Smartspace media data loaded.
+         *
+         * shouldPrioritize indicates the sorting priority of the Smartspace card. If true, it will
+         * be prioritized as the first card. Otherwise, it will show up as the last card as default.
+         */
+        fun onSmartspaceMediaDataLoaded(
+            key: String,
+            data: SmartspaceTarget,
+            shouldPrioritize: Boolean = false
+        ) {}
 
         /**
          * Called whenever a previously existing Media notification was removed

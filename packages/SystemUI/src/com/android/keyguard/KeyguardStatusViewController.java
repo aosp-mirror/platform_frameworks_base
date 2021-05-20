@@ -198,6 +198,13 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
     }
 
     /**
+     * @return {@code true} if we are currently animating the screen off from unlock
+     */
+    public boolean isAnimatingScreenOffFromUnlocked() {
+        return mKeyguardVisibilityHelper.isAnimatingScreenOffFromUnlocked();
+    }
+
+    /**
      * Set the visibility of the keyguard status view based on some new state.
      */
     public void setKeyguardStatusViewVisibility(
