@@ -2998,6 +2998,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // Hide the windows which are not significant in rotation animation. So that the windows
         // don't need to block the unfreeze time.
         if (screenRotationAnimation != null && screenRotationAnimation.hasScreenshot()
+                // Do not fade for freezing without rotation change.
+                && mDisplayRotation.getRotation() != getWindowConfiguration().getRotation()
                 && mFadeRotationAnimationController == null) {
             startFadeRotationAnimation(false /* shouldDebounce */);
         }
