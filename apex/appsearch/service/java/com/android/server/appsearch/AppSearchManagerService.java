@@ -21,7 +21,6 @@ import static android.os.UserHandle.USER_NULL;
 
 import android.annotation.ElapsedRealtimeLong;
 import android.annotation.NonNull;
-import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.appsearch.AppSearchBatchResult;
 import android.app.appsearch.AppSearchMigrationHelper;
@@ -45,7 +44,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageStats;
 import android.os.Binder;
 import android.os.Bundle;
@@ -60,7 +58,6 @@ import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.LocalManagerRegistry;
-import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.appsearch.external.localstorage.AppSearchImpl;
 import com.android.server.appsearch.external.localstorage.stats.CallStats;
@@ -91,7 +88,6 @@ public class AppSearchManagerService extends SystemService {
     private static final String TAG = "AppSearchManagerService";
     private final Context mContext;
     private PackageManager mPackageManager;
-    private PackageManagerInternal mPackageManagerInternal;
     private ImplInstanceManager mImplInstanceManager;
     private UserManager mUserManager;
     private LoggerInstanceManager mLoggerInstanceManager;
@@ -104,11 +100,11 @@ public class AppSearchManagerService extends SystemService {
             Runtime.getRuntime().availableProcessors(), /*keepAliveTime*/ 60L, TimeUnit.SECONDS,
             new LinkedBlockingQueue<>());
 
-    // Cache of unlocked user ids so we don't have to query UserManager service each time. The
-    // "locked" suffix refers to the fact that access to the field should be locked; unrelated to
-    // the unlocked status of user ids.
-    @GuardedBy("mUnlockedUserIdsLocked")
-    private final Set<Integer> mUnlockedUserIdsLocked = new ArraySet<>();
+    // Cache of unlocked users so we don't have to query UserManager service each time. The "locked"
+    // suffix refers to the fact that access to the field should be locked; unrelated to the
+    // unlocked status of users.
+    @GuardedBy("mUnlockedUsersLocked")
+    private final Set<UserHandle> mUnlockedUsersLocked = new ArraySet<>();
 
     public AppSearchManagerService(Context context) {
         super(context);
@@ -119,7 +115,6 @@ public class AppSearchManagerService extends SystemService {
     public void onStart() {
         publishBinderService(Context.APP_SEARCH_SERVICE, new Stub());
         mPackageManager = getContext().getPackageManager();
-        mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
         mImplInstanceManager = ImplInstanceManager.getInstance(mContext);
         mUserManager = mContext.getSystemService(UserManager.class);
         mLoggerInstanceManager = LoggerInstanceManager.getInstance();
@@ -148,6 +143,9 @@ public class AppSearchManagerService extends SystemService {
     private class UserActionReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(@NonNull Context context, @NonNull Intent intent) {
+            Objects.requireNonNull(context);
+            Objects.requireNonNull(intent);
+
             switch (intent.getAction()) {
                 case Intent.ACTION_USER_REMOVED:
                     int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, USER_NULL);
@@ -155,7 +153,7 @@ public class AppSearchManagerService extends SystemService {
                         Log.e(TAG, "userId is missing in the intent: " + intent);
                         return;
                     }
-                    handleUserRemoved(userId);
+                    handleUserRemoved(UserHandle.of(userId));
                     break;
                 default:
                     Log.e(TAG, "Received unknown intent: " + intent);
@@ -170,23 +168,26 @@ public class AppSearchManagerService extends SystemService {
      * "credential encrypted" system directory of each user. That directory will be auto-deleted
      * when a user is removed.
      *
-     * @param userId The multi-user userId of the user that need to be removed.
+     * @param userHandle The multi-user handle of the user that need to be removed.
      *
      * @see android.os.Environment#getDataSystemCeDirectory
      */
-    private void handleUserRemoved(@UserIdInt int userId) {
+    private void handleUserRemoved(@NonNull UserHandle userHandle) {
         try {
-            mImplInstanceManager.removeAppSearchImplForUser(userId);
-            mLoggerInstanceManager.removePlatformLoggerForUser(userId);
-            Log.i(TAG, "Removed AppSearchImpl instance for user: " + userId);
+            mImplInstanceManager.removeAppSearchImplForUser(userHandle);
+            mLoggerInstanceManager.removePlatformLoggerForUser(userHandle);
+            Log.i(TAG, "Removed AppSearchImpl instance for: " + userHandle);
         } catch (Throwable t) {
-            Log.e(TAG, "Unable to remove data for user: " + userId, t);
+            Log.e(TAG, "Unable to remove data for: " + userHandle, t);
         }
     }
 
     private class PackageChangedReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(@NonNull Context context, @NonNull Intent intent) {
+            Objects.requireNonNull(context);
+            Objects.requireNonNull(intent);
+
             switch (intent.getAction()) {
                 case Intent.ACTION_PACKAGE_FULLY_REMOVED:
                 case Intent.ACTION_PACKAGE_DATA_CLEARED:
@@ -208,19 +209,19 @@ public class AppSearchManagerService extends SystemService {
         }
     }
 
-    private void handlePackageRemoved(String packageName, int uid) {
-        int userId = UserHandle.getUserId(uid);
+    private void handlePackageRemoved(@NonNull String packageName, int uid) {
+        UserHandle userHandle = UserHandle.getUserHandleForUid(uid);
         try {
-            if (isUserLocked(userId)) {
+            if (isUserLocked(userHandle)) {
                 //TODO(b/186151459) clear the uninstalled package data when user is unlocked.
                 return;
             }
-            if (ImplInstanceManager.getAppSearchDir(userId).exists()) {
+            if (ImplInstanceManager.getAppSearchDir(userHandle).exists()) {
                 // Only clear the package's data if AppSearch exists for this user.
                 PlatformLogger logger = mLoggerInstanceManager.getOrCreatePlatformLogger(mContext,
-                        userId);
+                        userHandle);
                 AppSearchImpl impl = mImplInstanceManager.getOrCreateAppSearchImpl(mContext,
-                        userId, logger);
+                        userHandle, logger);
                 //TODO(b/145759910) clear visibility setting for package.
                 impl.clearPackageData(packageName);
                 logger.removeCachedUidForPackage(packageName);
@@ -232,38 +233,42 @@ public class AppSearchManagerService extends SystemService {
 
     @Override
     public void onUserUnlocking(@NonNull TargetUser user) {
-        synchronized (mUnlockedUserIdsLocked) {
-            mUnlockedUserIdsLocked.add(user.getUserIdentifier());
+        Objects.requireNonNull(user);
+        synchronized (mUnlockedUsersLocked) {
+            mUnlockedUsersLocked.add(user.getUserHandle());
         }
     }
 
     @Override
     public void onUserStopping(@NonNull TargetUser user) {
-        synchronized (mUnlockedUserIdsLocked) {
-            mUnlockedUserIdsLocked.remove(user.getUserIdentifier());
+        Objects.requireNonNull(user);
+
+        synchronized (mUnlockedUsersLocked) {
+            UserHandle userHandle = user.getUserHandle();
+            mUnlockedUsersLocked.remove(userHandle);
             try {
-                mImplInstanceManager.closeAndRemoveAppSearchImplForUser(user.getUserIdentifier());
+                mImplInstanceManager.closeAndRemoveAppSearchImplForUser(userHandle);
             } catch (Throwable t) {
                 Log.e(TAG, "Error handling user stopping.", t);
             }
         }
     }
 
-    private void verifyUserUnlocked(int callingUserId) {
-        if (isUserLocked(callingUserId)) {
-            throw new IllegalStateException("User " + callingUserId + " is locked or not running.");
+    private void verifyUserUnlocked(@NonNull UserHandle callingUser) {
+        if (isUserLocked(callingUser)) {
+            throw new IllegalStateException(callingUser + " is locked or not running.");
         }
     }
 
-    private boolean isUserLocked(int callingUserId) {
-        synchronized (mUnlockedUserIdsLocked) {
+    private boolean isUserLocked(@NonNull UserHandle callingUser) {
+        synchronized (mUnlockedUsersLocked) {
             // First, check the local copy.
-            if (mUnlockedUserIdsLocked.contains(callingUserId)) {
+            if (mUnlockedUsersLocked.contains(callingUser)) {
                 return false;
             }
             // If the local copy says the user is locked, check with UM for the actual state,
             // since the user might just have been unlocked.
-            return !mUserManager.isUserUnlockingOrUnlocked(UserHandle.of(callingUserId));
+            return !mUserManager.isUserUnlockingOrUnlocked(callingUser);
         }
     }
 
@@ -277,24 +282,28 @@ public class AppSearchManagerService extends SystemService {
                 @NonNull Map<String, List<Bundle>> schemasPackageAccessibleBundles,
                 boolean forceOverride,
                 int schemaVersion,
-                @UserIdInt int userId,
+                @NonNull UserHandle userHandle,
                 @ElapsedRealtimeLong long binderCallStartTimeMillis,
                 @NonNull IAppSearchResultCallback callback) {
             Objects.requireNonNull(packageName);
             Objects.requireNonNull(databaseName);
             Objects.requireNonNull(schemaBundles);
+            Objects.requireNonNull(schemasNotDisplayedBySystem);
+            Objects.requireNonNull(schemasPackageAccessibleBundles);
+            Objects.requireNonNull(userHandle);
             Objects.requireNonNull(callback);
+
             long totalLatencyStartTimeMillis = SystemClock.elapsedRealtime();
             int callingUid = Binder.getCallingUid();
-            int callingUserId = handleIncomingUser(userId, callingUid);
+            UserHandle callingUser = handleIncomingUser(userHandle, callingUid);
             EXECUTOR.execute(() -> {
                 @AppSearchResult.ResultCode int statusCode = AppSearchResult.RESULT_OK;
                 PlatformLogger logger = null;
                 int operationSuccessCount = 0;
                 int operationFailureCount = 0;
                 try {
-                    verifyUserUnlocked(callingUserId);
-                    verifyCallingPackage(callingUid, packageName);
+                    verifyUserUnlocked(callingUser);
+                    verifyCallingPackage(callingUser, callingUid, packageName);
                     List<AppSearchSchema> schemas = new ArrayList<>(schemaBundles.size());
                     for (int i = 0; i < schemaBundles.size(); i++) {
                         schemas.add(new AppSearchSchema(schemaBundles.get(i)));
@@ -311,8 +320,8 @@ public class AppSearchManagerService extends SystemService {
                         }
                         schemasPackageAccessible.put(entry.getKey(), packageIdentifiers);
                     }
-                    AppSearchImpl impl = mImplInstanceManager.getAppSearchImpl(callingUserId);
-                    logger = mLoggerInstanceManager.getPlatformLogger(callingUserId);
+                    AppSearchImpl impl = mImplInstanceManager.getAppSearchImpl(callingUser);
+                    logger = mLoggerInstanceManager.getPlatformLogger(callingUser);
                     SetSchemaResponse setSchemaResponse = impl.setSchema(
                             packageName,
                             databaseName,
@@ -356,19 +365,20 @@ public class AppSearchManagerService extends SystemService {
         public void getSchema(
                 @NonNull String packageName,
                 @NonNull String databaseName,
-                @UserIdInt int userId,
+                @NonNull UserHandle userHandle,
                 @NonNull IAppSearchResultCallback callback) {
             Objects.requireNonNull(packageName);
             Objects.requireNonNull(databaseName);
+            Objects.requireNonNull(userHandle);
             Objects.requireNonNull(callback);
+
             int callingUid = Binder.getCallingUid();
-            int callingUserId = handleIncomingUser(userId, callingUid);
+            UserHandle callingUser = handleIncomingUser(userHandle, callingUid);
             EXECUTOR.execute(() -> {
                 try {
-                    verifyUserUnlocked(callingUserId);
-                    verifyCallingPackage(callingUid, packageName);
-                    AppSearchImpl impl =
-                            mImplInstanceManager.getAppSearchImpl(callingUserId);
+                    verifyUserUnlocked(callingUser);
+                    verifyCallingPackage(callingUser, callingUid, packageName);
+                    AppSearchImpl impl = mImplInstanceManager.getAppSearchImpl(callingUser);
                     GetSchemaResponse response = impl.getSchema(packageName, databaseName);
                     invokeCallbackOnResult(
                             callback,
@@ -383,19 +393,20 @@ public class AppSearchManagerService extends SystemService {
         public void getNamespaces(
                 @NonNull String packageName,
                 @NonNull String databaseName,
-                @UserIdInt int userId,
+                @NonNull UserHandle userHandle,
                 @NonNull IAppSearchResultCallback callback) {
             Objects.requireNonNull(packageName);
             Objects.requireNonNull(databaseName);
+            Objects.requireNonNull(userHandle);
             Objects.requireNonNull(callback);
+
             int callingUid = Binder.getCallingUid();
-            int callingUserId = handleIncomingUser(userId, callingUid);
+            UserHandle callingUser = handleIncomingUser(userHandle, callingUid);
             EXECUTOR.execute(() -> {
                 try {
-                    verifyUserUnlocked(callingUserId);
-                    verifyCallingPackage(callingUid, packageName);
-                    AppSearchImpl impl =
-                            mImplInstanceManager.getAppSearchImpl(callingUserId);
+                    verifyUserUnlocked(callingUser);
+                    verifyCallingPackage(callingUser, callingUid, packageName);
+                    AppSearchImpl impl = mImplInstanceManager.getAppSearchImpl(callingUser);
                     List<String> namespaces = impl.getNamespaces(packageName, databaseName);
                     invokeCallbackOnResult(callback,
                             AppSearchResult.newSuccessfulResult(namespaces));
@@ -410,29 +421,30 @@ public class AppSearchManagerService extends SystemService {
                 @NonNull String packageName,
                 @NonNull String databaseName,
                 @NonNull List<Bundle> documentBundles,
-                @UserIdInt int userId,
+                @NonNull UserHandle userHandle,
                 @ElapsedRealtimeLong long binderCallStartTimeMillis,
                 @NonNull IAppSearchBatchResultCallback callback) {
             Objects.requireNonNull(packageName);
             Objects.requireNonNull(databaseName);
             Objects.requireNonNull(documentBundles);
+            Objects.requireNonNull(userHandle);
             Objects.requireNonNull(callback);
+
             long totalLatencyStartTimeMillis = SystemClock.elapsedRealtime();
             int callingUid = Binder.getCallingUid();
-            int callingUserId = handleIncomingUser(userId, callingUid);
+            UserHandle callingUser = handleIncomingUser(userHandle, callingUid);
             EXECUTOR.execute(() -> {
                 @AppSearchResult.ResultCode int statusCode = AppSearchResult.RESULT_OK;
                 PlatformLogger logger = null;
                 int operationSuccessCount = 0;
                 int operationFailureCount = 0;
                 try {
-                    verifyUserUnlocked(callingUserId);
-                    verifyCallingPackage(callingUid, packageName);
+                    verifyUserUnlocked(callingUser);
+                    verifyCallingPackage(callingUser, callingUid, packageName);
                     AppSearchBatchResult.Builder<String, Void> resultBuilder =
                             new AppSearchBatchResult.Builder<>();
-                    AppSearchImpl impl =
-                            mImplInstanceManager.getAppSearchImpl(callingUserId);
-                    logger = mLoggerInstanceManager.getPlatformLogger(callingUserId);
+                    AppSearchImpl impl = mImplInstanceManager.getAppSearchImpl(callingUser);
+                    logger = mLoggerInstanceManager.getPlatformLogger(callingUser);
                     for (int i = 0; i < documentBundles.size(); i++) {
                         GenericDocument document = new GenericDocument(documentBundles.get(i));
                         try {
@@ -488,30 +500,32 @@ public class AppSearchManagerService extends SystemService {
                 @NonNull String namespace,
                 @NonNull List<String> ids,
                 @NonNull Map<String, List<String>> typePropertyPaths,
-                @UserIdInt int userId,
+                @NonNull UserHandle userHandle,
                 @ElapsedRealtimeLong long binderCallStartTimeMillis,
                 @NonNull IAppSearchBatchResultCallback callback) {
             Objects.requireNonNull(packageName);
             Objects.requireNonNull(databaseName);
             Objects.requireNonNull(namespace);
             Objects.requireNonNull(ids);
+            Objects.requireNonNull(typePropertyPaths);
+            Objects.requireNonNull(userHandle);
             Objects.requireNonNull(callback);
+
             long totalLatencyStartTimeMillis = SystemClock.elapsedRealtime();
             int callingUid = Binder.getCallingUid();
-            int callingUserId = handleIncomingUser(userId, callingUid);
+            UserHandle callingUser = handleIncomingUser(userHandle, callingUid);
             EXECUTOR.execute(() -> {
                 @AppSearchResult.ResultCode int statusCode = AppSearchResult.RESULT_OK;
                 PlatformLogger logger = null;
                 int operationSuccessCount = 0;
                 int operationFailureCount = 0;
                 try {
-                    verifyUserUnlocked(callingUserId);
-                    verifyCallingPackage(callingUid, packageName);
+                    verifyUserUnlocked(callingUser);
+                    verifyCallingPackage(callingUser, callingUid, packageName);
                     AppSearchBatchResult.Builder<String, Bundle> resultBuilder =
                             new AppSearchBatchResult.Builder<>();
-                    AppSearchImpl impl =
-                            mImplInstanceManager.getAppSearchImpl(callingUserId);
-                    logger = mLoggerInstanceManager.getPlatformLogger(callingUserId);
+                    AppSearchImpl impl = mImplInstanceManager.getAppSearchImpl(callingUser);
+                    logger = mLoggerInstanceManager.getPlatformLogger(callingUser);
                     for (int i = 0; i < ids.size(); i++) {
                         String id = ids.get(i);
                         try {
@@ -568,28 +582,29 @@ public class AppSearchManagerService extends SystemService {
                 @NonNull String databaseName,
                 @NonNull String queryExpression,
                 @NonNull Bundle searchSpecBundle,
-                @UserIdInt int userId,
+                @NonNull UserHandle userHandle,
                 @ElapsedRealtimeLong long binderCallStartTimeMillis,
                 @NonNull IAppSearchResultCallback callback) {
             Objects.requireNonNull(packageName);
             Objects.requireNonNull(databaseName);
             Objects.requireNonNull(queryExpression);
             Objects.requireNonNull(searchSpecBundle);
+            Objects.requireNonNull(userHandle);
             Objects.requireNonNull(callback);
+
             long totalLatencyStartTimeMillis = SystemClock.elapsedRealtime();
             int callingUid = Binder.getCallingUid();
-            int callingUserId = handleIncomingUser(userId, callingUid);
+            UserHandle callingUser = handleIncomingUser(userHandle, callingUid);
             EXECUTOR.execute(() -> {
                 @AppSearchResult.ResultCode int statusCode = AppSearchResult.RESULT_OK;
                 PlatformLogger logger = null;
                 int operationSuccessCount = 0;
                 int operationFailureCount = 0;
                 try {
-                    verifyUserUnlocked(callingUserId);
-                    verifyCallingPackage(callingUid, packageName);
-                    AppSearchImpl impl =
-                            mImplInstanceManager.getAppSearchImpl(callingUserId);
-                    logger = mLoggerInstanceManager.getPlatformLogger(callingUserId);
+                    verifyUserUnlocked(callingUser);
+                    verifyCallingPackage(callingUser, callingUid, packageName);
+                    AppSearchImpl impl = mImplInstanceManager.getAppSearchImpl(callingUser);
+                    logger = mLoggerInstanceManager.getPlatformLogger(callingUser);
                     SearchResultPage searchResultPage =
                             impl.query(
                                     packageName,
@@ -634,27 +649,28 @@ public class AppSearchManagerService extends SystemService {
                 @NonNull String packageName,
                 @NonNull String queryExpression,
                 @NonNull Bundle searchSpecBundle,
-                @UserIdInt int userId,
+                @NonNull UserHandle userHandle,
                 @ElapsedRealtimeLong long binderCallStartTimeMillis,
                 @NonNull IAppSearchResultCallback callback) {
             Objects.requireNonNull(packageName);
             Objects.requireNonNull(queryExpression);
             Objects.requireNonNull(searchSpecBundle);
+            Objects.requireNonNull(userHandle);
             Objects.requireNonNull(callback);
+
             long totalLatencyStartTimeMillis = SystemClock.elapsedRealtime();
             int callingUid = Binder.getCallingUid();
-            int callingUserId = handleIncomingUser(userId, callingUid);
+            UserHandle callingUser = handleIncomingUser(userHandle, callingUid);
             EXECUTOR.execute(() -> {
                 @AppSearchResult.ResultCode int statusCode = AppSearchResult.RESULT_OK;
                 PlatformLogger logger = null;
                 int operationSuccessCount = 0;
                 int operationFailureCount = 0;
                 try {
-                    verifyUserUnlocked(callingUserId);
-                    verifyCallingPackage(callingUid, packageName);
-                    logger = mLoggerInstanceManager.getPlatformLogger(callingUserId);
-                    AppSearchImpl impl =
-                            mImplInstanceManager.getAppSearchImpl(callingUserId);
+                    verifyUserUnlocked(callingUser);
+                    verifyCallingPackage(callingUser, callingUid, packageName);
+                    logger = mLoggerInstanceManager.getPlatformLogger(callingUser);
+                    AppSearchImpl impl = mImplInstanceManager.getAppSearchImpl(callingUser);
                     SearchResultPage searchResultPage =
                             impl.globalQuery(
                                     queryExpression,
@@ -698,18 +714,19 @@ public class AppSearchManagerService extends SystemService {
         @Override
         public void getNextPage(
                 long nextPageToken,
-                @UserIdInt int userId,
+                @NonNull UserHandle userHandle,
                 @NonNull IAppSearchResultCallback callback) {
+            Objects.requireNonNull(userHandle);
             Objects.requireNonNull(callback);
+
             int callingUid = Binder.getCallingUid();
-            int callingUserId = handleIncomingUser(userId, callingUid);
+            UserHandle callingUser = handleIncomingUser(userHandle, callingUid);
             // TODO(b/162450968) check nextPageToken is being advanced by the same uid as originally
             // opened it
             EXECUTOR.execute(() -> {
                 try {
-                    verifyUserUnlocked(callingUserId);
-                    AppSearchImpl impl =
-                            mImplInstanceManager.getAppSearchImpl(callingUserId);
+                    verifyUserUnlocked(callingUser);
+                    AppSearchImpl impl = mImplInstanceManager.getAppSearchImpl(callingUser);
                     SearchResultPage searchResultPage = impl.getNextPage(nextPageToken);
                     invokeCallbackOnResult(
                             callback,
@@ -721,14 +738,15 @@ public class AppSearchManagerService extends SystemService {
         }
 
         @Override
-        public void invalidateNextPageToken(long nextPageToken, @UserIdInt int userId) {
+        public void invalidateNextPageToken(long nextPageToken, @NonNull UserHandle userHandle) {
+            Objects.requireNonNull(userHandle);
+
             int callingUid = Binder.getCallingUid();
-            int callingUserId = handleIncomingUser(userId, callingUid);
+            UserHandle callingUser = handleIncomingUser(userHandle, callingUid);
             EXECUTOR.execute(() -> {
                 try {
-                    verifyUserUnlocked(callingUserId);
-                    AppSearchImpl impl =
-                            mImplInstanceManager.getAppSearchImpl(callingUserId);
+                    verifyUserUnlocked(callingUser);
+                    AppSearchImpl impl = mImplInstanceManager.getAppSearchImpl(callingUser);
                     impl.invalidateNextPageToken(nextPageToken);
                 } catch (Throwable t) {
                     Log.e(TAG, "Unable to invalidate the query page token", t);
@@ -743,15 +761,22 @@ public class AppSearchManagerService extends SystemService {
                 @NonNull ParcelFileDescriptor fileDescriptor,
                 @NonNull String queryExpression,
                 @NonNull Bundle searchSpecBundle,
-                @UserIdInt int userId,
+                @NonNull UserHandle userHandle,
                 @NonNull IAppSearchResultCallback callback) {
+            Objects.requireNonNull(packageName);
+            Objects.requireNonNull(databaseName);
+            Objects.requireNonNull(fileDescriptor);
+            Objects.requireNonNull(queryExpression);
+            Objects.requireNonNull(searchSpecBundle);
+            Objects.requireNonNull(userHandle);
+            Objects.requireNonNull(callback);
+
             int callingUid = Binder.getCallingUid();
-            int callingUserId = handleIncomingUser(userId, callingUid);
+            UserHandle callingUser = handleIncomingUser(userHandle, callingUid);
             EXECUTOR.execute(() -> {
                 try {
-                    verifyCallingPackage(callingUid, packageName);
-                    AppSearchImpl impl =
-                            mImplInstanceManager.getAppSearchImpl(callingUserId);
+                    verifyCallingPackage(callingUser, callingUid, packageName);
+                    AppSearchImpl impl = mImplInstanceManager.getAppSearchImpl(callingUser);
                     // we don't need to append the file. The file is always brand new.
                     try (DataOutputStream outputStream = new DataOutputStream(
                             new FileOutputStream(fileDescriptor.getFileDescriptor()))) {
@@ -783,15 +808,20 @@ public class AppSearchManagerService extends SystemService {
                 @NonNull String packageName,
                 @NonNull String databaseName,
                 @NonNull ParcelFileDescriptor fileDescriptor,
-                @UserIdInt int userId,
+                @NonNull UserHandle userHandle,
                 @NonNull IAppSearchResultCallback callback) {
+            Objects.requireNonNull(packageName);
+            Objects.requireNonNull(databaseName);
+            Objects.requireNonNull(fileDescriptor);
+            Objects.requireNonNull(userHandle);
+            Objects.requireNonNull(callback);
+
             int callingUid = Binder.getCallingUid();
-            int callingUserId = handleIncomingUser(userId, callingUid);
+            UserHandle callingUser = handleIncomingUser(userHandle, callingUid);
             EXECUTOR.execute(() -> {
                 try {
-                    verifyCallingPackage(callingUid, packageName);
-                    AppSearchImpl impl =
-                            mImplInstanceManager.getAppSearchImpl(callingUserId);
+                    verifyCallingPackage(callingUser, callingUid, packageName);
+                    AppSearchImpl impl = mImplInstanceManager.getAppSearchImpl(callingUser);
 
                     GenericDocument document;
                     ArrayList<Bundle> migrationFailureBundles = new ArrayList<>();
@@ -835,24 +865,26 @@ public class AppSearchManagerService extends SystemService {
                 @NonNull String documentId,
                 long usageTimeMillis,
                 boolean systemUsage,
-                @UserIdInt int userId,
+                @NonNull UserHandle userHandle,
                 @NonNull IAppSearchResultCallback callback) {
+            Objects.requireNonNull(packageName);
             Objects.requireNonNull(databaseName);
             Objects.requireNonNull(namespace);
             Objects.requireNonNull(documentId);
+            Objects.requireNonNull(userHandle);
             Objects.requireNonNull(callback);
+
             int callingUid = Binder.getCallingUid();
-            int callingUserId = handleIncomingUser(userId, callingUid);
+            UserHandle callingUser = handleIncomingUser(userHandle, callingUid);
             EXECUTOR.execute(() -> {
                 try {
-                    verifyUserUnlocked(callingUserId);
+                    verifyUserUnlocked(callingUser);
 
                     if (systemUsage) {
                         // TODO(b/183031844): Validate that the call comes from the system
                     }
 
-                    AppSearchImpl impl =
-                            mImplInstanceManager.getAppSearchImpl(callingUserId);
+                    AppSearchImpl impl = mImplInstanceManager.getAppSearchImpl(callingUser);
                     impl.reportUsage(
                             packageName, databaseName, namespace, documentId,
                             usageTimeMillis, systemUsage);
@@ -870,29 +902,31 @@ public class AppSearchManagerService extends SystemService {
                 @NonNull String databaseName,
                 @NonNull String namespace,
                 @NonNull List<String> ids,
-                @UserIdInt int userId,
+                @NonNull UserHandle userHandle,
                 @ElapsedRealtimeLong long binderCallStartTimeMillis,
                 @NonNull IAppSearchBatchResultCallback callback) {
             Objects.requireNonNull(packageName);
             Objects.requireNonNull(databaseName);
+            Objects.requireNonNull(namespace);
             Objects.requireNonNull(ids);
+            Objects.requireNonNull(userHandle);
             Objects.requireNonNull(callback);
+
             long totalLatencyStartTimeMillis = SystemClock.elapsedRealtime();
             int callingUid = Binder.getCallingUid();
-            int callingUserId = handleIncomingUser(userId, callingUid);
+            UserHandle callingUser = handleIncomingUser(userHandle, callingUid);
             EXECUTOR.execute(() -> {
                 @AppSearchResult.ResultCode int statusCode = AppSearchResult.RESULT_OK;
                 PlatformLogger logger = null;
                 int operationSuccessCount = 0;
                 int operationFailureCount = 0;
                 try {
-                    verifyUserUnlocked(callingUserId);
-                    verifyCallingPackage(callingUid, packageName);
+                    verifyUserUnlocked(callingUser);
+                    verifyCallingPackage(callingUser, callingUid, packageName);
                     AppSearchBatchResult.Builder<String, Void> resultBuilder =
                             new AppSearchBatchResult.Builder<>();
-                    AppSearchImpl impl =
-                            mImplInstanceManager.getAppSearchImpl(callingUserId);
-                    logger = mLoggerInstanceManager.getPlatformLogger(callingUserId);
+                    AppSearchImpl impl = mImplInstanceManager.getAppSearchImpl(callingUser);
+                    logger = mLoggerInstanceManager.getPlatformLogger(callingUser);
                     for (int i = 0; i < ids.size(); i++) {
                         String id = ids.get(i);
                         try {
@@ -945,7 +979,7 @@ public class AppSearchManagerService extends SystemService {
                 @NonNull String databaseName,
                 @NonNull String queryExpression,
                 @NonNull Bundle searchSpecBundle,
-                @UserIdInt int userId,
+                @NonNull UserHandle userHandle,
                 @ElapsedRealtimeLong long binderCallStartTimeMillis,
                 @NonNull IAppSearchResultCallback callback) {
             // TODO(b/173532925) log CallStats once we have CALL_TYPE_REMOVE_BY_QUERY added
@@ -953,21 +987,22 @@ public class AppSearchManagerService extends SystemService {
             Objects.requireNonNull(databaseName);
             Objects.requireNonNull(queryExpression);
             Objects.requireNonNull(searchSpecBundle);
+            Objects.requireNonNull(userHandle);
             Objects.requireNonNull(callback);
+
             long totalLatencyStartTimeMillis = SystemClock.elapsedRealtime();
             int callingUid = Binder.getCallingUid();
-            int callingUserId = handleIncomingUser(userId, callingUid);
+            UserHandle callingUser = handleIncomingUser(userHandle, callingUid);
             EXECUTOR.execute(() -> {
                 @AppSearchResult.ResultCode int statusCode = AppSearchResult.RESULT_OK;
                 PlatformLogger logger = null;
                 int operationSuccessCount = 0;
                 int operationFailureCount = 0;
                 try {
-                    verifyUserUnlocked(callingUserId);
-                    verifyCallingPackage(callingUid, packageName);
-                    AppSearchImpl impl =
-                            mImplInstanceManager.getAppSearchImpl(callingUserId);
-                    logger = mLoggerInstanceManager.getPlatformLogger(callingUserId);
+                    verifyUserUnlocked(callingUser);
+                    verifyCallingPackage(callingUser, callingUid, packageName);
+                    AppSearchImpl impl = mImplInstanceManager.getAppSearchImpl(callingUser);
+                    logger = mLoggerInstanceManager.getPlatformLogger(callingUser);
                     impl.removeByQuery(
                             packageName,
                             databaseName,
@@ -1009,19 +1044,20 @@ public class AppSearchManagerService extends SystemService {
         public void getStorageInfo(
                 @NonNull String packageName,
                 @NonNull String databaseName,
-                @UserIdInt int userId,
+                @NonNull UserHandle userHandle,
                 @NonNull IAppSearchResultCallback callback) {
             Objects.requireNonNull(packageName);
             Objects.requireNonNull(databaseName);
+            Objects.requireNonNull(userHandle);
             Objects.requireNonNull(callback);
+
             int callingUid = Binder.getCallingUid();
-            int callingUserId = handleIncomingUser(userId, callingUid);
+            UserHandle callingUser = handleIncomingUser(userHandle, callingUid);
             EXECUTOR.execute(() -> {
                 try {
-                    verifyUserUnlocked(callingUserId);
-                    verifyCallingPackage(callingUid, packageName);
-                    AppSearchImpl impl =
-                            mImplInstanceManager.getAppSearchImpl(callingUserId);
+                    verifyUserUnlocked(callingUser);
+                    verifyCallingPackage(callingUser, callingUid, packageName);
+                    AppSearchImpl impl = mImplInstanceManager.getAppSearchImpl(callingUser);
                     StorageInfo storageInfo = impl.getStorageInfoForDatabase(packageName,
                             databaseName);
                     Bundle storageInfoBundle = storageInfo.getBundle();
@@ -1034,21 +1070,23 @@ public class AppSearchManagerService extends SystemService {
         }
 
         @Override
-        public void persistToDisk(@UserIdInt int userId,
+        public void persistToDisk(
+                @NonNull UserHandle userHandle,
                 @ElapsedRealtimeLong long binderCallStartTimeMillis) {
+            Objects.requireNonNull(userHandle);
+
             long totalLatencyStartTimeMillis = SystemClock.elapsedRealtime();
             int callingUid = Binder.getCallingUid();
-            int callingUserId = handleIncomingUser(userId, callingUid);
+            UserHandle callingUser = handleIncomingUser(userHandle, callingUid);
             EXECUTOR.execute(() -> {
                 @AppSearchResult.ResultCode int statusCode = AppSearchResult.RESULT_OK;
                 PlatformLogger logger = null;
                 int operationSuccessCount = 0;
                 int operationFailureCount = 0;
                 try {
-                    verifyUserUnlocked(callingUserId);
-                    AppSearchImpl impl =
-                            mImplInstanceManager.getAppSearchImpl(callingUserId);
-                    logger = mLoggerInstanceManager.getPlatformLogger(callingUserId);
+                    verifyUserUnlocked(callingUser);
+                    AppSearchImpl impl = mImplInstanceManager.getAppSearchImpl(callingUser);
+                    logger = mLoggerInstanceManager.getPlatformLogger(callingUser);
                     impl.persistToDisk(PersistType.Code.FULL);
                     ++operationSuccessCount;
                 } catch (Throwable t) {
@@ -1080,23 +1118,26 @@ public class AppSearchManagerService extends SystemService {
         }
 
         @Override
-        public void initialize(@UserIdInt int userId,
+        public void initialize(
+                @NonNull UserHandle userHandle,
                 @ElapsedRealtimeLong long binderCallStartTimeMillis,
                 @NonNull IAppSearchResultCallback callback) {
+            Objects.requireNonNull(userHandle);
             Objects.requireNonNull(callback);
+
             long totalLatencyStartTimeMillis = SystemClock.elapsedRealtime();
             int callingUid = Binder.getCallingUid();
-            int callingUserId = handleIncomingUser(userId, callingUid);
+            UserHandle callingUser = handleIncomingUser(userHandle, callingUid);
             EXECUTOR.execute(() -> {
                 @AppSearchResult.ResultCode int statusCode = AppSearchResult.RESULT_OK;
                 PlatformLogger logger = null;
                 int operationSuccessCount = 0;
                 int operationFailureCount = 0;
                 try {
-                    verifyUserUnlocked(callingUserId);
-                    logger = mLoggerInstanceManager.getOrCreatePlatformLogger(mContext,
-                            callingUserId);
-                    mImplInstanceManager.getOrCreateAppSearchImpl(mContext, callingUserId, logger);
+                    verifyUserUnlocked(callingUser);
+                    logger = mLoggerInstanceManager.getOrCreatePlatformLogger(
+                            mContext, callingUser);
+                    mImplInstanceManager.getOrCreateAppSearchImpl(mContext, callingUser, logger);
                     ++operationSuccessCount;
                     invokeCallbackOnResult(callback, AppSearchResult.newSuccessfulResult(null));
                 } catch (Throwable t) {
@@ -1129,16 +1170,29 @@ public class AppSearchManagerService extends SystemService {
             });
         }
 
-        private void verifyCallingPackage(int callingUid, @NonNull String callingPackage) {
-            Objects.requireNonNull(callingPackage);
-            if (mPackageManagerInternal.getPackageUid(
-                    callingPackage, /*flags=*/ 0, UserHandle.getUserId(callingUid))
-                    != callingUid) {
+        private void verifyCallingPackage(
+                @NonNull UserHandle actualCallingUser,
+                int actualCallingUid,
+                @NonNull String claimedCallingPackage) {
+            Objects.requireNonNull(actualCallingUser);
+            Objects.requireNonNull(claimedCallingPackage);
+
+            int claimedCallingUid;
+            try {
+                Context claimedCallingContext =
+                        mContext.createContextAsUser(actualCallingUser, /*flags=*/ 0);
+                claimedCallingUid = claimedCallingContext.getPackageManager().getPackageUid(
+                        claimedCallingPackage, /*flags=*/ 0);
+            } catch (PackageManager.NameNotFoundException e) {
+                throw new SecurityException(
+                        "Specified calling package [" + claimedCallingPackage + "] not found");
+            }
+            if (claimedCallingUid != actualCallingUid) {
                 throw new SecurityException(
                         "Specified calling package ["
-                                + callingPackage
+                                + claimedCallingPackage
                                 + "] does not match the calling uid "
-                                + callingUid);
+                                + actualCallingUid);
             }
         }
 
@@ -1192,19 +1246,28 @@ public class AppSearchManagerService extends SystemService {
         }
     }
 
+    /**
+     * Helper for dealing with incoming user arguments to system service calls.
+     *
+     * <p>Takes care of checking permissions and converting USER_CURRENT to the actual current user.
+     *
+     * @return the user handle that the call should run as. Will always be a concrete user.
+     */
     // TODO(b/173553485) verifying that the caller has permission to access target user's data
     // TODO(b/173553485) Handle ACTION_USER_REMOVED broadcast
     // TODO(b/173553485) Implement SystemService.onUserStopping()
-    private static int handleIncomingUser(@UserIdInt int userId, int callingUid) {
+    @NonNull
+    private static UserHandle handleIncomingUser(@NonNull UserHandle userHandle, int callingUid) {
         int callingPid = Binder.getCallingPid();
-        return ActivityManager.handleIncomingUser(
+        int finalUserId = ActivityManager.handleIncomingUser(
                 callingPid,
                 callingUid,
-                userId,
+                userHandle.getIdentifier(),
                 /*allowAll=*/ false,
                 /*requireFull=*/ false,
                 /*name=*/ null,
                 /*callerPackage=*/ null);
+        return UserHandle.of(finalUserId);
     }
 
     // TODO(b/179160886): Cache the previous storage stats.
@@ -1218,19 +1281,19 @@ public class AppSearchManagerService extends SystemService {
             Objects.requireNonNull(stats);
             Objects.requireNonNull(packageName);
             Objects.requireNonNull(userHandle);
-            int userId = userHandle.getIdentifier();
+
             try {
-                verifyUserUnlocked(userId);
-                PlatformLogger logger = mLoggerInstanceManager.getOrCreatePlatformLogger(mContext,
-                        userId);
-                AppSearchImpl impl = mImplInstanceManager.getOrCreateAppSearchImpl(mContext,
-                        userId, logger);
+                verifyUserUnlocked(userHandle);
+                PlatformLogger logger = mLoggerInstanceManager.getOrCreatePlatformLogger(
+                        mContext, userHandle);
+                AppSearchImpl impl = mImplInstanceManager.getOrCreateAppSearchImpl(
+                        mContext, userHandle, logger);
                 stats.dataSize += impl.getStorageInfoForPackage(packageName).getSizeBytes();
             } catch (Throwable t) {
                 Log.e(
                         TAG,
-                        "Unable to augment storage stats for userId "
-                                + userId
+                        "Unable to augment storage stats for "
+                                + userHandle
                                 + " packageName "
                                 + packageName,
                         t);
@@ -1241,17 +1304,18 @@ public class AppSearchManagerService extends SystemService {
         public void augmentStatsForUid(
                 @NonNull PackageStats stats, int uid, boolean canCallerAccessAllStats) {
             Objects.requireNonNull(stats);
-            int userId = UserHandle.getUserId(uid);
+
+            UserHandle userHandle = UserHandle.getUserHandleForUid(uid);
             try {
-                verifyUserUnlocked(userId);
+                verifyUserUnlocked(userHandle);
                 String[] packagesForUid = mPackageManager.getPackagesForUid(uid);
                 if (packagesForUid == null) {
                     return;
                 }
-                PlatformLogger logger = mLoggerInstanceManager.getOrCreatePlatformLogger(mContext,
-                        userId);
-                AppSearchImpl impl = mImplInstanceManager.getOrCreateAppSearchImpl(mContext,
-                        userId, logger);
+                PlatformLogger logger = mLoggerInstanceManager.getOrCreatePlatformLogger(
+                        mContext, userHandle);
+                AppSearchImpl impl = mImplInstanceManager.getOrCreateAppSearchImpl(
+                        mContext, userHandle, logger);
                 for (int i = 0; i < packagesForUid.length; i++) {
                     stats.dataSize +=
                             impl.getStorageInfoForPackage(packagesForUid[i]).getSizeBytes();
@@ -1269,24 +1333,24 @@ public class AppSearchManagerService extends SystemService {
             //  size of the icing dir (or use the overall StorageInfo without interpolating it).
             Objects.requireNonNull(stats);
             Objects.requireNonNull(userHandle);
-            int userId = userHandle.getIdentifier();
+
             try {
-                verifyUserUnlocked(userId);
-                List<PackageInfo> packagesForUser =
-                        mPackageManager.getInstalledPackagesAsUser(/*flags=*/0, userId);
+                verifyUserUnlocked(userHandle);
+                List<PackageInfo> packagesForUser = mPackageManager.getInstalledPackagesAsUser(
+                        /*flags=*/0, userHandle.getIdentifier());
                 if (packagesForUser == null) {
                     return;
                 }
-                PlatformLogger logger = mLoggerInstanceManager.getOrCreatePlatformLogger(mContext,
-                        userId);
+                PlatformLogger logger = mLoggerInstanceManager.getOrCreatePlatformLogger(
+                        mContext, userHandle);
                 AppSearchImpl impl =
-                        mImplInstanceManager.getOrCreateAppSearchImpl(mContext, userId, logger);
+                        mImplInstanceManager.getOrCreateAppSearchImpl(mContext, userHandle, logger);
                 for (int i = 0; i < packagesForUser.size(); i++) {
                     String packageName = packagesForUser.get(i).packageName;
                     stats.dataSize += impl.getStorageInfoForPackage(packageName).getSizeBytes();
                 }
             } catch (Throwable t) {
-                Log.e(TAG, "Unable to augment storage stats for user " + userId, t);
+                Log.e(TAG, "Unable to augment storage stats for " + userHandle, t);
             }
         }
     }
