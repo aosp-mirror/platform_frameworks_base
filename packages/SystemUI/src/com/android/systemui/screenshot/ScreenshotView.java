@@ -60,6 +60,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.TouchDelegate;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewOutlineProvider;
 import android.view.ViewTreeObserver;
 import android.view.WindowInsets;
@@ -348,6 +349,23 @@ public class ScreenshotView extends FrameLayout implements
 
     void setScreenshot(Bitmap bitmap, Insets screenInsets) {
         mScreenshotPreview.setImageDrawable(createScreenDrawable(mResources, bitmap, screenInsets));
+    }
+
+    void updateOrientation(boolean portrait) {
+        mOrientationPortrait = portrait;
+        int screenshotFixedSize =
+                mContext.getResources().getDimensionPixelSize(R.dimen.global_screenshot_x_scale);
+        ViewGroup.LayoutParams params = mScreenshotPreview.getLayoutParams();
+        if (portrait) {
+            params.width = screenshotFixedSize;
+            params.height = LayoutParams.WRAP_CONTENT;
+            mScreenshotPreview.setScaleType(ImageView.ScaleType.FIT_START);
+        } else {
+            params.width = LayoutParams.WRAP_CONTENT;
+            params.height = screenshotFixedSize;
+            mScreenshotPreview.setScaleType(ImageView.ScaleType.FIT_END);
+        }
+        mScreenshotPreview.setLayoutParams(params);
     }
 
     AnimatorSet createScreenshotDropInAnimation(Rect bounds, boolean showFlash) {

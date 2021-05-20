@@ -401,9 +401,6 @@ public class ScreenshotController {
         if (DEBUG_UI) {
             Log.d(TAG, "reloadAssets()");
         }
-        if (mScreenshotView != null && mScreenshotView.isAttachedToWindow()) {
-            mWindow.clearContentView(); // Is there a simpler way to say "remove screenshotView?"
-        }
 
         // respect the display cutout in landscape (since we'd otherwise overlap) but not portrait
         int orientation = mContext.getResources().getConfiguration().orientation;
@@ -497,6 +494,17 @@ public class ScreenshotController {
         saveScreenshot(screenshot, finisher, screenRect, Insets.NONE, true);
     }
 
+    private void updateDisplayCutout() {
+        // respect the display cutout in landscape (since we'd otherwise overlap) but not portrait
+        int orientation = mContext.getResources().getConfiguration().orientation;
+        mWindowLayoutParams.setFitInsetsTypes(
+                orientation == ORIENTATION_PORTRAIT ? 0 : WindowInsets.Type.displayCutout());
+        final View decorView = mWindow.peekDecorView();
+        if (decorView != null && decorView.isAttachedToWindow()) {
+            mWindowManager.updateViewLayout(decorView, mWindowLayoutParams);
+        }
+    }
+
     private void saveScreenshot(Bitmap screenshot, Consumer<Uri> finisher, Rect screenRect,
             Insets screenInsets, boolean showFlash) {
         if (mAccessibilityManager.isEnabled()) {
@@ -507,12 +515,6 @@ public class ScreenshotController {
             mAccessibilityManager.sendAccessibilityEvent(event);
         }
 
-        if (mConfigChanges.applyNewConfig(mContext.getResources())) {
-            if (DEBUG_UI) {
-                Log.d(TAG, "saveScreenshot: reloading assets");
-            }
-            reloadAssets();
-        }
 
         if (mScreenshotView.isAttachedToWindow()) {
             // if we didn't already dismiss for another reason
@@ -525,6 +527,9 @@ public class ScreenshotController {
             }
             mScreenshotView.reset();
         }
+
+        int orientation = mContext.getResources().getConfiguration().orientation;
+        mScreenshotView.updateOrientation(orientation == ORIENTATION_PORTRAIT);
 
         mScreenBitmap = screenshot;
 
@@ -556,6 +561,12 @@ public class ScreenshotController {
             mLastScrollCaptureRequest = mScrollCaptureClient.request(DEFAULT_DISPLAY);
             mLastScrollCaptureRequest.addListener(() ->
                     onScrollCaptureResponseReady(mLastScrollCaptureRequest), mMainExecutor);
+            mWindow.peekDecorView().getViewRootImpl().setActivityConfigCallback(
+                    (overrideConfig, newDisplayId) -> {
+                        if (mConfigChanges.applyNewConfig(mContext.getResources())) {
+                            updateDisplayCutout();
+                        }
+                    });
         });
 
         attachWindow();
