@@ -791,7 +791,7 @@
     <string name="imProtocolIcq" msgid="2410325380427389521">"ICQ"</string>
     <string name="imProtocolJabber" msgid="7919269388889582015">"Jabber"</string>
     <string name="imProtocolNetMeeting" msgid="4985002408136148256">"NetMeeting"</string>
-    <string name="orgTypeWork" msgid="8684458700669564172">"कार्यालय"</string>
+    <string name="orgTypeWork" msgid="8684458700669564172">"वर्क प्रोफ़ाइल"</string>
     <string name="orgTypeOther" msgid="5450675258408005553">"अन्य"</string>
     <string name="orgTypeCustom" msgid="1126322047677329218">"कस्टम"</string>
     <string name="relationTypeCustom" msgid="282938315217441351">"कस्टम"</string>
