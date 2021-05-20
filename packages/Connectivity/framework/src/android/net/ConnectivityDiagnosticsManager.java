@@ -713,7 +713,9 @@ public class ConnectivityDiagnosticsManager {
      * <p>Callbacks registered by apps not meeting the above criteria will not be invoked.
      *
      * <p>If a registering app loses its relevant permissions, any callbacks it registered will
-     * silently stop receiving callbacks.
+     * silently stop receiving callbacks. Note that registering apps must also have location
+     * permissions to receive callbacks as some Networks may be location-bound (such as WiFi
+     * networks).
      *
      * <p>Each register() call <b>MUST</b> use a ConnectivityDiagnosticsCallback instance that is
      * not currently registered. If a ConnectivityDiagnosticsCallback instance is registered with
