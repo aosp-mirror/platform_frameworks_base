@@ -488,7 +488,7 @@
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"כן, להמשיך"</string>
     <string name="guest_notification_title" msgid="4434456703930764167">"משתמש אורח"</string>
     <string name="guest_notification_text" msgid="4202692942089571351">"יש להסיר את המשתמש האורח כדי למחוק אפליקציות ונתונים"</string>
-    <string name="guest_notification_remove_action" msgid="4153019027696868099">"הסרת אורח"</string>
+    <string name="guest_notification_remove_action" msgid="4153019027696868099">"הסרת אורח/ת"</string>
     <string name="user_logout_notification_title" msgid="3644848998053832589">"ניתוק משתמש"</string>
     <string name="user_logout_notification_text" msgid="7441286737342997991">"ניתוק המשתמש הנוכחי"</string>
     <string name="user_logout_notification_action" msgid="7974458760719361881">"ניתוק משתמש"</string>
