@@ -105,8 +105,7 @@ public class HighPriorityProvider {
     }
 
     private boolean isMessagingStyle(NotificationEntry entry) {
-        return Notification.MessagingStyle.class.equals(
-                entry.getSbn().getNotification().getNotificationStyle());
+        return entry.getSbn().getNotification().isStyle(Notification.MessagingStyle.class);
     }
 
     private boolean isPeopleNotification(NotificationEntry entry) {
