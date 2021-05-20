@@ -43,6 +43,7 @@ abstract class DisplayDevice {
     // The display device does not manage these properties itself, they are set by
     // the display manager service.  The display device shouldn't really be looking at these.
     private int mCurrentLayerStack = -1;
+    private int mCurrentFlags = 0;
     private int mCurrentOrientation = -1;
     private Rect mCurrentLayerStackRect;
     private Rect mCurrentDisplayRect;
@@ -212,6 +213,19 @@ abstract class DisplayDevice {
     }
 
     /**
+     * Sets the display flags while in a transaction.
+     *
+     * Valid display flags:
+     *  {@link SurfaceControl#DISPLAY_RECEIVES_INPUT}
+     */
+    public final void setDisplayFlagsLocked(SurfaceControl.Transaction t, int flags) {
+        if (mCurrentFlags != flags) {
+            mCurrentFlags = flags;
+            t.setDisplayFlags(mDisplayToken, flags);
+        }
+    }
+
+    /**
      * Sets the display projection while in a transaction.
      *
      * @param orientation defines the display's orientation
@@ -298,6 +312,7 @@ abstract class DisplayDevice {
         pw.println("mUniqueId=" + mUniqueId);
         pw.println("mDisplayToken=" + mDisplayToken);
         pw.println("mCurrentLayerStack=" + mCurrentLayerStack);
+        pw.println("mCurrentFlags=" + mCurrentFlags);
         pw.println("mCurrentOrientation=" + mCurrentOrientation);
         pw.println("mCurrentLayerStackRect=" + mCurrentLayerStackRect);
         pw.println("mCurrentDisplayRect=" + mCurrentDisplayRect);
