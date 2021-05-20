@@ -38,7 +38,7 @@
         android:gravity="start"
         android:textAlignment="viewStart"
         android:text="@string/bubbles_user_education_title"
-        android:textColor="?android:attr/textColorPrimaryInverse"
+        android:textColor="@android:color/system_neutral1_900"
         android:textAppearance="@*android:style/TextAppearance.DeviceDefault.Headline"/>
 
     <TextView
@@ -49,7 +49,7 @@
         android:gravity="start"
         android:textAlignment="viewStart"
         android:text="@string/bubbles_user_education_description"
-        android:textColor="?android:attr/textColorPrimaryInverse"
+        android:textColor="@android:color/system_neutral1_900"
         android:fontFamily="@*android:string/config_bodyFontFamily"
         android:textAppearance="@*android:style/TextAppearance.DeviceDefault.Body2"/>
 </LinearLayout>

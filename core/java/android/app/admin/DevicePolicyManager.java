@@ -10369,11 +10369,11 @@ public class DevicePolicyManager {
     /**
      * Called by device owners to set the user's global location setting.
      *
-     * <p><b>Note: </b> this call is ignored on
-     * {@link android.content.pm.PackageManager#FEATURE_AUTOMOTIVE automotive builds}.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with
-     * @param locationEnabled whether location should be enabled or disabled
+     * @param locationEnabled whether location should be enabled or disabled. <b>Note: </b> on
+     * {@link android.content.pm.PackageManager#FEATURE_AUTOMOTIVE automotive builds}, calls to
+     * disable will be ignored.
      * @throws SecurityException if {@code admin} is not a device owner.
      */
     public void setLocationEnabled(@NonNull ComponentName admin, boolean locationEnabled) {

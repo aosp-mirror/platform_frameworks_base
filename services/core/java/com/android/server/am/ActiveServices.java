@@ -16,6 +16,8 @@
 
 package com.android.server.am;
 
+import static android.Manifest.permission.REQUEST_COMPANION_RUN_IN_BACKGROUND;
+import static android.Manifest.permission.REQUEST_COMPANION_START_FOREGROUND_SERVICES_FROM_BACKGROUND;
 import static android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND;
 import static android.Manifest.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND;
 import static android.app.ActivityManager.PROCESS_STATE_HEAVY_WEIGHT;
@@ -5831,6 +5833,26 @@ public final class ActiveServices {
             }
         }
 
+        // Check for CDM apps with either REQUEST_COMPANION_RUN_IN_BACKGROUND or
+        // REQUEST_COMPANION_START_FOREGROUND_SERVICES_FROM_BACKGROUND.
+        // Note: When a CDM app has REQUEST_COMPANION_RUN_IN_BACKGROUND, the app is also put
+        // in the user-allowlist. However, in this case, we want to use the reason code
+        // REASON_COMPANION_DEVICE_MANAGER, so this check needs to be before the
+        // isAllowlistedForFgsStartLOSP check.
+        if (ret == REASON_DENIED) {
+            final boolean isCompanionApp = mAm.mInternal.isAssociatedCompanionApp(
+                    UserHandle.getUserId(callingUid), callingUid);
+            if (isCompanionApp) {
+                if (isPermissionGranted(
+                        REQUEST_COMPANION_START_FOREGROUND_SERVICES_FROM_BACKGROUND,
+                        callingPid, callingUid)
+                        || isPermissionGranted(REQUEST_COMPANION_RUN_IN_BACKGROUND,
+                        callingPid, callingUid)) {
+                    ret = REASON_COMPANION_DEVICE_MANAGER;
+                }
+            }
+        }
+
         if (ret == REASON_DENIED) {
             ActivityManagerService.FgsTempAllowListItem item =
                     mAm.isAllowlistedForFgsStartLOSP(callingUid);
@@ -5858,14 +5880,6 @@ public final class ActiveServices {
         }
 
         if (ret == REASON_DENIED) {
-            final boolean isCompanionApp = mAm.mInternal.isAssociatedCompanionApp(
-                    UserHandle.getUserId(callingUid), callingUid);
-            if (isCompanionApp) {
-                ret = REASON_COMPANION_DEVICE_MANAGER;
-            }
-        }
-
-        if (ret == REASON_DENIED) {
             final AppOpsManager appOpsManager = mAm.getAppOpsManager();
             if (appOpsManager.checkOpNoThrow(AppOpsManager.OP_ACTIVATE_VPN, callingUid,
                     callingPackage) == AppOpsManager.MODE_ALLOWED) {
@@ -5882,6 +5896,10 @@ public final class ActiveServices {
             }
         }
         return ret;
+    }
+
+    private boolean isPermissionGranted(String permission, int callingPid, int callingUid) {
+        return mAm.checkPermission(permission, callingPid, callingUid) == PERMISSION_GRANTED;
     }
 
     private static boolean isFgsBgStart(@ReasonCode int code) {

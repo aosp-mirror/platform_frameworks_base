@@ -39,6 +39,7 @@ import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.logging.QSLogger
+import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
@@ -87,6 +88,8 @@ class DeviceControlsTileTest : SysuiTestCase() {
     private lateinit var serviceInfo: ControlsServiceInfo
     @Mock
     private lateinit var uiEventLogger: UiEventLogger
+    @Mock
+    private lateinit var keyguardStateController: KeyguardStateController
     @Captor
     private lateinit var listingCallbackCaptor:
             ArgumentCaptor<ControlsListingController.ControlsListingCallback>
@@ -109,7 +112,8 @@ class DeviceControlsTileTest : SysuiTestCase() {
         `when`(qsHost.context).thenReturn(spiedContext)
         `when`(qsHost.uiEventLogger).thenReturn(uiEventLogger)
         `when`(controlsComponent.isEnabled()).thenReturn(true)
-        secureSettings.putInt(Settings.Secure.POWER_MENU_LOCKED_SHOW_CONTENT, 1)
+        `when`(keyguardStateController.isUnlocked()).thenReturn(true)
+        secureSettings.putInt(Settings.Secure.LOCKSCREEN_SHOW_CONTROLS, 1)
 
         setupControlsComponent()
 
@@ -306,7 +310,8 @@ class DeviceControlsTileTest : SysuiTestCase() {
                 statusBarStateController,
                 activityStarter,
                 qsLogger,
-                controlsComponent
+                controlsComponent,
+                keyguardStateController
         )
     }
 }

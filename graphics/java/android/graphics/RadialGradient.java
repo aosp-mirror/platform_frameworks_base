@@ -122,14 +122,18 @@ public class RadialGradient extends Shader {
      *                 between the center and edge of the circle.
      * @param tileMode The Shader tiling mode
      *
-     * @throws IllegalArgumentException If one of the following circumstances:
-     *      - There are less than two colors
-     *      - The colors do not share the same {@link ColorSpace}
-     *      - The colors do not use a valid {@link ColorSpace}
-     *      - The {@code stops} parameter is not {@code null} and has a different length
-     *        from {@code colors}.
-     *      - The {@param startRadius} is negative
-     *      - The {@param endRadius} is less than or equal to zero
+     * @throws IllegalArgumentException In one of the following circumstances:
+     *      <ul>
+     *          <li>There are less than two colors</li>
+     *          <li>The colors do not share the same {@link ColorSpace}</li>
+     *          <li>The colors do not use a valid {@link ColorSpace}</li>
+     *          <li>
+     *              The {@code stops} parameter is not {@code null} and has a different length from
+     *              {@code colors}.
+     *          </li>
+     *          <li>The {@code startRadius} is negative</li>
+     *          <li>The {@code endRadius} is less than or equal to zero</li>
+     *       </ul>
      */
     public RadialGradient(float startX, float startY, @FloatRange(from = 0.0f) float startRadius,
             float endX, float endY, @FloatRange(from = 0.0f, fromInclusive = false) float endRadius,

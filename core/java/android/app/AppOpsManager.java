@@ -7413,8 +7413,18 @@ public class AppOpsManager {
      */
     public void setUserRestrictionForUser(int code, boolean restricted, IBinder token,
             @Nullable Map<String, String[]> excludedPackageTags, int userId) {
+        setUserRestrictionForUser(code, restricted, token, excludedPackageTags, userId, false);
+    }
+
+    /**
+     * An empty array of attribution tags means exclude all tags under that package.
+     * @hide
+     */
+    public void setUserRestrictionForUser(int code, boolean restricted, IBinder token,
+            @Nullable Map<String, String[]> excludedPackageTags, int userId, boolean rejectBypass) {
         try {
-            mService.setUserRestriction(code, restricted, token, userId, excludedPackageTags);
+            mService.setUserRestriction(code, restricted, token, userId, excludedPackageTags,
+                    rejectBypass);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
