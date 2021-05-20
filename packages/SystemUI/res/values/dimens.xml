@@ -1333,6 +1333,7 @@
     <dimen name="controls_setup_title">22sp</dimen>
     <dimen name="controls_setup_subtitle">14sp</dimen>
     <dimen name="controls_setup_vertical_padding">52dp</dimen>
+    <dimen name="controls_detail_dialog_header_height">52dp</dimen>
 
     <!-- Home Controls activity view detail panel-->
     <dimen name="controls_activity_view_top_offset">100dp</dimen>
