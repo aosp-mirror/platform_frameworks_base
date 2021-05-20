@@ -352,6 +352,10 @@ void StatsdStats::noteAtomLogged(int atomId, int32_t timeSec) {
         ALOGW("not interested in atom %d", atomId);
         return;
     }
+    if (atomId < 0) {
+        android_errorWriteLog(0x534e4554, "187957589");
+        return;
+    }
 
     mPushedAtomStats[atomId]++;
 }
