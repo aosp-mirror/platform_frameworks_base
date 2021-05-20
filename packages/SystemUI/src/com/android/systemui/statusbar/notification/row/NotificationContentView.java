@@ -31,7 +31,6 @@ import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
-import android.view.NotificationHeaderView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
@@ -248,9 +247,6 @@ public class NotificationContentView extends FrameLayout {
                 measureChildWithMargins(mContractedChild, widthMeasureSpec, 0, heightSpec, 0);
             }
             maxChildHeight = Math.max(maxChildHeight, measuredHeight);
-            if (updateContractedHeaderWidth()) {
-                measureChildWithMargins(mContractedChild, widthMeasureSpec, 0, heightSpec, 0);
-            }
             if (mExpandedChild != null
                     && mContractedChild.getMeasuredHeight() > mExpandedChild.getMeasuredHeight()) {
                 // the Expanded child is smaller then the collapsed. Let's remeasure it.
@@ -309,22 +305,6 @@ public class NotificationContentView extends FrameLayout {
                     com.android.internal.R.dimen.notification_content_margin);
         }
         return 0;
-    }
-
-    private boolean updateContractedHeaderWidth() {
-        // We need to update the expanded and the collapsed header to have exactly the same with to
-        // have the expand buttons laid out at the same location.
-        NotificationHeaderView contractedHeader = mContractedWrapper.getNotificationHeader();
-        if (contractedHeader != null && mExpandedWrapper != null
-                && mExpandedWrapper.getNotificationHeader() != null) {
-            NotificationHeaderView expandedHeader = mExpandedWrapper.getNotificationHeader();
-            int headerTextMargin = expandedHeader.getTopLineExtraMarginEnd();
-            if (headerTextMargin != contractedHeader.getTopLineExtraMarginEnd()) {
-                contractedHeader.setTopLineExtraMarginEnd(headerTextMargin);
-                return true;
-            }
-        }
-        return false;
     }
 
     private boolean shouldContractedBeFixedSize() {

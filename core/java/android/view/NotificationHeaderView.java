@@ -44,7 +44,6 @@ import java.util.ArrayList;
  */
 @RemoteViews.RemoteView
 public class NotificationHeaderView extends RelativeLayout {
-    private final int mHeadingEndMargin;
     private final int mTouchableHeight;
     private OnClickListener mExpandClickListener;
     private HeaderTouchListener mTouchListener = new HeaderTouchListener();
@@ -84,7 +83,6 @@ public class NotificationHeaderView extends RelativeLayout {
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         Resources res = getResources();
-        mHeadingEndMargin = res.getDimensionPixelSize(R.dimen.notification_heading_margin_end);
         mTouchableHeight = res.getDimensionPixelSize(R.dimen.notification_header_touchable_height);
         mEntireHeaderClickable = res.getBoolean(R.bool.config_notificationHeaderClickableForExpand);
     }
@@ -195,29 +193,6 @@ public class NotificationHeaderView extends RelativeLayout {
         if (appNameText instanceof TextView) {
             ((TextView) appNameText).setTextAppearance(styleResId);
         }
-    }
-
-    /**
-     * Get the current margin end value for the header text.
-     * Add this to {@link #getTopLineBaseMarginEnd()} to get the total margin of the top line.
-     *
-     * @return extra margin
-     */
-    public int getTopLineExtraMarginEnd() {
-        return mTopLineView.getHeaderTextMarginEnd();
-    }
-
-    /**
-     * Get the base margin at the end of the top line view.
-     * Add this to {@link #getTopLineExtraMarginEnd()} to get the total margin of the top line.
-     * <p>
-     * NOTE: This method's result is only valid if the expander does not have a number. Currently
-     * only groups headers and conversations have numbers, so this is safe to use by MediaStyle.
-     *
-     * @return base margin
-     */
-    public int getTopLineBaseMarginEnd() {
-        return mHeadingEndMargin;
     }
 
     /**
