@@ -8467,7 +8467,7 @@ public class PackageManagerService extends IPackageManager.Stub
                             libInfo.getPackageName(), libInfo.getAllCodePaths(),
                             libInfo.getName(), libInfo.getLongVersion(),
                             libInfo.getType(), libInfo.getDeclaringPackage(),
-                            getPackagesUsingSharedLibraryLPr(libInfo, flags, userId),
+                            getPackagesUsingSharedLibraryLPr(libInfo, flags, callingUid, userId),
                             (libInfo.getDependencies() == null
                                     ? null
                                     : new ArrayList<>(libInfo.getDependencies())),
@@ -8539,9 +8539,11 @@ public class PackageManagerService extends IPackageManager.Stub
                             libraryInfo.getPath(), libraryInfo.getPackageName(),
                             libraryInfo.getAllCodePaths(), libraryInfo.getName(),
                             libraryInfo.getLongVersion(), libraryInfo.getType(),
-                            libraryInfo.getDeclaringPackage(), getPackagesUsingSharedLibraryLPr(
-                            libraryInfo, flags, userId), libraryInfo.getDependencies() == null
-                            ? null : new ArrayList<>(libraryInfo.getDependencies()),
+                            libraryInfo.getDeclaringPackage(),
+                            getPackagesUsingSharedLibraryLPr(
+                                    libraryInfo, flags, callingUid, userId),
+                            libraryInfo.getDependencies() == null
+                                    ? null : new ArrayList<>(libraryInfo.getDependencies()),
                             libraryInfo.isNative());
 
                     if (result == null) {
@@ -8557,7 +8559,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @GuardedBy("mLock")
     private List<VersionedPackage> getPackagesUsingSharedLibraryLPr(
-            SharedLibraryInfo libInfo, int flags, int userId) {
+            SharedLibraryInfo libInfo, int flags, int callingUid, int userId) {
         List<VersionedPackage> versionedPackages = null;
         final int packageCount = mSettings.getPackagesLocked().size();
         for (int i = 0; i < packageCount; i++) {
@@ -8580,6 +8582,9 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (ps.usesStaticLibrariesVersions[libIdx] != libInfo.getLongVersion()) {
                     continue;
                 }
+                if (shouldFilterApplicationLocked(ps, callingUid, userId)) {
+                    continue;
+                }
                 if (versionedPackages == null) {
                     versionedPackages = new ArrayList<>();
                 }
@@ -8592,6 +8597,9 @@ public class PackageManagerService extends IPackageManager.Stub
             } else if (ps.pkg != null) {
                 if (ArrayUtils.contains(ps.pkg.getUsesLibraries(), libName)
                         || ArrayUtils.contains(ps.pkg.getUsesOptionalLibraries(), libName)) {
+                    if (shouldFilterApplicationLocked(ps, callingUid, userId)) {
+                        continue;
+                    }
                     if (versionedPackages == null) {
                         versionedPackages = new ArrayList<>();
                     }
@@ -14316,7 +14324,7 @@ public class PackageManagerService extends IPackageManager.Stub
         // Remove the shared library overlays from its dependent packages.
         for (int currentUserId : UserManagerService.getInstance().getUserIds()) {
             final List<VersionedPackage> dependents = getPackagesUsingSharedLibraryLPr(
-                    libraryInfo, 0, currentUserId);
+                    libraryInfo, 0, Process.SYSTEM_UID, currentUserId);
             if (dependents == null) {
                 continue;
             }
@@ -20605,7 +20613,7 @@ public class PackageManagerService extends IPackageManager.Stub
                             continue;
                         }
                         List<VersionedPackage> libClientPackages = getPackagesUsingSharedLibraryLPr(
-                                libraryInfo, MATCH_KNOWN_PACKAGES, currUserId);
+                                libraryInfo, MATCH_KNOWN_PACKAGES, Process.SYSTEM_UID, currUserId);
                         if (!ArrayUtils.isEmpty(libClientPackages)) {
                             Slog.w(TAG, "Not removing package " + pkg.getManifestPackageName()
                                     + " hosting lib " + libraryInfo.getName() + " version "
@@ -26716,7 +26724,7 @@ public class PackageManagerService extends IPackageManager.Stub
                             continue;
                         }
                         final List<VersionedPackage> dependents = getPackagesUsingSharedLibraryLPr(
-                                info, 0, userId);
+                                info, 0, Process.SYSTEM_UID, userId);
                         if (dependents == null) {
                             continue;
                         }
