@@ -43,6 +43,8 @@ android_robolectric_test {
     srcs: ["src/**/*.java"],
     static_libs: [
         "SettingsLib-robo-testutils",
+        "androidx.test.core",
+        "androidx.core_core",
     ],
     java_resource_dirs: ["config"],
     instrumentation_for: "SettingsLibShell",
