@@ -612,7 +612,7 @@ public abstract class AuthBiometricView extends LinearLayout {
         mIndicatorView.setTextColor(mTextColorError);
         mIndicatorView.setVisibility(View.VISIBLE);
         mIndicatorView.setSelected(true);
-        mHandler.postDelayed(resetMessageRunnable, BiometricPrompt.HIDE_DIALOG_DELAY);
+        mHandler.postDelayed(resetMessageRunnable, mInjector.getDelayAfterError());
 
         Utils.notifyAccessibilityContentChanged(mAccessibilityManager, this);
     }
