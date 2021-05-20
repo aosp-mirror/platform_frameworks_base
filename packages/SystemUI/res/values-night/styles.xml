@@ -34,6 +34,7 @@
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:windowLightNavigationBar">false</item>
+        <item name="android:navigationBarColor">?android:attr/colorBackgroundFloating</item>
     </style>
 
 </resources>
