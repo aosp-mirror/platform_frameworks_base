@@ -871,14 +871,6 @@
         <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style>
 
-    <style name="UdfpsProgressBarStyle"
-        parent="android:style/Widget.Material.ProgressBar.Horizontal">
-        <item name="android:indeterminate">false</item>
-        <item name="android:max">10000</item>
-        <item name="android:mirrorForRtl">false</item>
-        <item name="android:progressDrawable">@drawable/udfps_progress_bar</item>
-    </style>
-
     <!-- Wallet styles -->
     <style name="Wallet" />
 
