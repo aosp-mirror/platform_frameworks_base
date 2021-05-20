@@ -28,6 +28,10 @@
     <string name="pip_skip_to_next" msgid="8403429188794867653">"Treceți la următorul"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"Treceți la cel anterior"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"Redimensionați"</string>
+    <!-- no translation found for accessibility_action_pip_stash (4060775037619702641) -->
+    <skip />
+    <!-- no translation found for accessibility_action_pip_unstash (7467499339610437646) -->
+    <skip />
     <string name="dock_forced_resizable" msgid="1749750436092293116">"Este posibil ca aplicația să nu funcționeze cu ecranul împărțit."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Aplicația nu acceptă ecranul împărțit."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Este posibil ca aplicația să nu funcționeze pe un ecran secundar."</string>
