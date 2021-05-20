@@ -635,8 +635,8 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         }
 
         @Override
-        PendingIntent injectCreatePendingIntent(Context context, int requestCode,
-                @NonNull Intent[] intents, int flags, Bundle options, UserHandle user) {
+        PendingIntent injectCreatePendingIntent(int requestCode, @NonNull Intent[] intents,
+                int flags, Bundle options, String ownerPackage, int ownerUserId) {
             return new PendingIntent(mock(IIntentSender.class));
         }
     }
