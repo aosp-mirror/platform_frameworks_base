@@ -51,6 +51,7 @@ import androidx.annotation.BinderThread;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.wm.shell.R;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.common.DisplayChangeController;
@@ -168,7 +169,8 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         }
     };
 
-    private final DisplayController.OnDisplaysChangedListener mDisplaysChangedListener =
+    @VisibleForTesting
+    final DisplayController.OnDisplaysChangedListener mDisplaysChangedListener =
             new DisplayController.OnDisplaysChangedListener() {
                 @Override
                 public void onFixedRotationStarted(int displayId, int newRotation) {
