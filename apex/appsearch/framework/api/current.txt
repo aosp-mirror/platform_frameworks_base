@@ -206,7 +206,7 @@ package android.app.appsearch {
     method @NonNull public android.app.appsearch.GetByDocumentIdRequest build();
   }
 
-  public class GetSchemaResponse {
+  public final class GetSchemaResponse {
     method @NonNull public java.util.Set<android.app.appsearch.AppSearchSchema> getSchemas();
     method @IntRange(from=0) public int getVersion();
   }
