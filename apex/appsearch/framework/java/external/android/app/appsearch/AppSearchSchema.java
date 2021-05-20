@@ -490,8 +490,8 @@ public final class AppSearchSchema {
      * @hide
      */
     @Deprecated
-    @UnsupportedAppUsage(implicitMember = "")
     public static class Int64PropertyConfig extends PropertyConfig {
+        @UnsupportedAppUsage
         Int64PropertyConfig(@NonNull Bundle bundle) {
             super(bundle);
         }
