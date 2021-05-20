@@ -2161,7 +2161,8 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Vypnout"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Další informace"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"Adaptivní oznámení pro Android byla v systému Android 12 nahrazena vylepšenými oznámeními. Tato funkce ukazuje navrhované akce a odpovědi a uspořádává oznámení.\n\nVylepšená oznámení mají přístup k obsahu oznámení, včetně osobních údajů, jako jsou jména kontaktů a zprávy. Tato funkce také může zavírat oznámení nebo na ně odpovídat, například přijímat telefonní hovory a ovládat režim Nerušit."</string>
+    <!-- no translation found for nas_upgrade_notification_learn_more_content (3735480566983530650) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Informační oznámení režimu sledu činností"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Baterie se možná vybije před obvyklým časem nabití"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Byl aktivován spořič baterie za účelem prodloužení výdrže"</string>

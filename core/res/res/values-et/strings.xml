@@ -2095,7 +2095,8 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Lülita välja"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Lisateave"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"Androidi versioonis 12 asendasid täiustatud märguanded Androidi kohanduvad märguanded. See funktsioon näitab soovitatud toiminguid ja vastuseid ning korrastab teie märguandeid.\n\nTäiustatud märguanded pääsevad juurde märguande sisule, sh isiklikule teabele, nagu kontaktide nimed ja sõnumid. Samuti saab selle funktsiooni abil märguannetest loobuda või neile vastata (nt vastata telefonikõnedele ja juhtida funktsiooni Mitte segada)."</string>
+    <!-- no translation found for nas_upgrade_notification_learn_more_content (3735480566983530650) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Rutiinirežiimi teabe märguanne"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Aku võib enne tavapärast laadimist tühjaks saada"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Akusäästja aktiveeriti aku tööea pikendamiseks"</string>

@@ -2128,7 +2128,8 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"Labi"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Izslēgt"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Uzzināt vairāk"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"Android 12 versijā Android adaptīvos paziņojumus aizstāja funkcija “Uzlabotie paziņojumi”. Šī funkcija parāda ieteiktās darbības un atbildes, kā arī kārto jūsu paziņojumus.\n\nFunkcija “Uzlabotie paziņojumi” var piekļūt paziņojumu saturam, tostarp personas informācijai, piemēram, kontaktpersonu vārdiem un ziņojumiem. Šī funkcija var arī noraidīt paziņojumus vai atbildēt uz tiem, piemēram, atbildēt uz tālruņa zvaniem vai pārvaldīt funkciju Netraucēt."</string>
+    <!-- no translation found for nas_upgrade_notification_learn_more_content (3735480566983530650) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Informatīvs paziņojums par akumulatoru"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Akumulators var izlādēties pirms parastā uzlādes laika"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Aktivizēts akumulatora enerģijas taupīšanas režīms, lai palielinātu akumulatora darbības ilgumu"</string>
