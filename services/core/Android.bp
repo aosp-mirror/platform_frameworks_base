@@ -107,6 +107,7 @@ java_library_static {
         ":display-device-config",
         ":display-layout-config",
         ":device-state-config",
+        ":guiconstants_aidl",
         "java/com/android/server/EventLogTags.logtags",
         "java/com/android/server/am/EventLogTags.logtags",
         "java/com/android/server/wm/EventLogTags.logtags",

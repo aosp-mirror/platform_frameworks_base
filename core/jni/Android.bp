@@ -230,6 +230,7 @@ cc_library_shared {
                 "libbinderthreadstateutils",
                 "libdmabufinfo",
                 "libgif",
+                "libgui_window_info_static",
                 "libseccomp_policy",
                 "libgrallocusage",
                 "libscrypt_static",
@@ -370,6 +371,7 @@ cc_library_shared {
                 "libinput",
                 "libbinderthreadstateutils",
                 "libsqlite",
+                "libgui_window_info_static",
             ],
             shared_libs: [
                 // libbinder needs to be shared since it has global state
