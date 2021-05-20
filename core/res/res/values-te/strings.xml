@@ -567,10 +567,10 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"వేలిముద్ర చిహ్నం"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"ముఖంతో అన్‌లాక్ చేయగల హార్డ్‌వేర్ నిర్వహణ"</string>
+    <string name="permlab_manageFace" msgid="4569549381889283282">"ఫేస్ అన్‌లాక్ చేయగల హార్డ్‌వేర్‌ను మేనేజ్‌ చేయడం"</string>
     <string name="permdesc_manageFace" msgid="6204569688492710471">"వినియోగం కోసం ముఖ టెంప్లేట్‌లను జోడించే మరియు తొలగించే పద్ధతులను అమలు చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"ముఖంతో అన్‌లాక్ చేయగల హార్డ్‌వేర్ వినియోగం"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"ప్రమాణీకరణ కోసం ముఖంతో అన్‌లాక్ చేయగల హార్డ్‌వేర్‌ను ఉపయోగించడానికి యాప్‌ను అనుమతిస్తుంది"</string>
+    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"ఫేస్ అన్‌లాక్ హార్డ్‌వేర్‌ను ఉపయోగించడం"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"ప్రామాణీకరణ కోసం ఫేస్‌తో అన్‌లాక్ చేయగల హార్డ్‌వేర్‌ ఉపయోగానికి యాప్‌ను అనుమతిస్తుంది"</string>
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"ఫేస్ అన్‌లాక్"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"మీ ముఖాన్ని తిరిగి నమోదు చేయండి"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"గుర్తింపును మెరుగుపరచడానికి, దయచేసి మీ ముఖంను తిరిగి నమోదు చేసుకోండి"</string>
@@ -597,15 +597,15 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"ముఖం ధృవీకరించలేరు. హార్డ్‌వేర్ అందుబాటులో లేదు."</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"ముఖంతో అన్‌లాక్‌ను మళ్లీ ప్రయత్నించండి."</string>
+    <string name="face_error_timeout" msgid="522924647742024699">"ఫేస్ అన్‌లాక్‌ను మళ్లీ ప్రయత్నించండి."</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"కొత్త ముఖం డేటాను నిల్వ చేయడం కాదు. మొదట పాతది తొలిగించండి."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"ముఖ కార్యకలాపం రద్దయింది."</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"ముఖంతో అన్‌లాక్‌ను వినియోగదారు రద్దు చేశారు."</string>
+    <string name="face_error_user_canceled" msgid="8553045452825849843">"ఫేస్ అన్‌లాక్‌ను యూజర్‌ రద్దు చేశారు."</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"చాలా ఎక్కువ ప్రయత్నాలు చేసారు. తర్వాత మళ్లీ ప్రయత్నించండి."</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"అనేకసార్లు ప్రయత్నించారు. ముఖంతో అన్‌లాక్ నిలిపివేయబడింది."</string>
+    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"చాలా సార్లు ప్రయత్నించారు. ఫేస్ అన్‌లాక్ డిజేబుల్ చేయబడింది."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"ముఖం ధృవీకరించలేకపోయింది. మళ్లీ ప్రయత్నించండి."</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"మీరు ముఖంతో అన్‌లాక్‌ను సెటప్ చేయలేదు."</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"ఈ పరికరంలో ముఖంతో అన్‌లాక్‌ను ఉపయోగించడానికి మద్దతు లేదు."</string>
+    <string name="face_error_not_enrolled" msgid="7369928733504691611">"మీరు ఫేస్ అన్‌లాక్‌ను సెటప్ చేయలేదు."</string>
+    <string name="face_error_hw_not_present" msgid="1070600921591729944">"ఈ పరికరంలో ఫేస్ అన్‌లాక్‌ను ఉపయోగించడానికి సపోర్ట్ లేదు."</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"సెన్సార్ తాత్కాలికంగా డిజేబుల్ చేయబడింది."</string>
     <string name="face_name_template" msgid="3877037340223318119">"ముఖ <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
@@ -835,7 +835,7 @@
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"మళ్లీ ప్రయత్నించండి"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"మళ్లీ ప్రయత్నించండి"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"అన్ని లక్షణాలు మరియు డేటా కోసం అన్‌లాక్ చేయండి"</string>
-    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"ముఖంతో అన్‌లాక్ ప్రయత్నాల గరిష్ట పరిమితి మించిపోయారు"</string>
+    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"ఫేస్ అన్‌లాక్ ప్రయత్నాల గరిష్ఠ పరిమితిని మించిపోయారు"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"సిమ్ కార్డు లేదు"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"టాబ్లెట్‌లో సిమ్ కార్డు లేదు."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"మీ Android TV పరికరంలో SIM కార్డ్ లేదు."</string>
@@ -1498,8 +1498,8 @@
     <string name="keyboardview_keycode_enter" msgid="168054869339091055">"Enter"</string>
     <string name="activitychooserview_choose_application" msgid="3500574466367891463">"యాప్‌ను ఎంచుకోండి"</string>
     <string name="activitychooserview_choose_application_error" msgid="6937782107559241734">"<xliff:g id="APPLICATION_NAME">%s</xliff:g>ని ప్రారంభించడం సాధ్యపడలేదు"</string>
-    <string name="shareactionprovider_share_with" msgid="2753089758467748982">"వీటితో భాగస్వామ్యం చేయండి"</string>
-    <string name="shareactionprovider_share_with_application" msgid="4902832247173666973">"<xliff:g id="APPLICATION_NAME">%s</xliff:g>తో భాగస్వామ్యం చేయండి"</string>
+    <string name="shareactionprovider_share_with" msgid="2753089758467748982">"వీటితో షేర్ చేయండి"</string>
+    <string name="shareactionprovider_share_with_application" msgid="4902832247173666973">"<xliff:g id="APPLICATION_NAME">%s</xliff:g>తో షేర్ చేయండి"</string>
     <string name="content_description_sliding_handle" msgid="982510275422590757">"స్లైడింగ్ హ్యాండిల్. తాకి, ఆపై నొక్కి ఉంచండి."</string>
     <string name="description_target_unlock_tablet" msgid="7431571180065859551">"అన్‌లాక్ చేయడానికి స్వైప్ చేయండి."</string>
     <string name="action_bar_home_description" msgid="1501655419158631974">"హోమ్‌కు నావిగేట్ చేయండి"</string>
@@ -1543,7 +1543,7 @@
     <string name="sha1_fingerprint" msgid="2339915142825390774">"SHA-1 వేలిముద్ర:"</string>
     <string name="activity_chooser_view_see_all" msgid="3917045206812726099">"అన్నీ చూడండి"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="8880731437191978314">"కార్యాచరణను ఎంచుకోండి"</string>
-    <string name="share_action_provider_share_with" msgid="1904096863622941880">"వీటితో భాగస్వామ్యం చేయండి"</string>
+    <string name="share_action_provider_share_with" msgid="1904096863622941880">"వీటితో షేర్ చేయండి"</string>
     <string name="sending" msgid="206925243621664438">"పంపుతోంది..."</string>
     <string name="launchBrowserDefault" msgid="6328349989932924119">"బ్రౌజర్‌ను ప్రారంభించాలా?"</string>
     <string name="SetupCallDefault" msgid="5581740063237175247">"కాల్‌ను ఆమోదించాలా?"</string>

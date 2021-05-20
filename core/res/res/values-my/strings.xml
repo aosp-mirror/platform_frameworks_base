@@ -211,7 +211,7 @@
     <string name="silent_mode" msgid="8796112363642579333">"အသံတိတ်စနစ်"</string>
     <string name="turn_on_radio" msgid="2961717788170634233">"wirelessအားဖွင့်မည်"</string>
     <string name="turn_off_radio" msgid="7222573978109933360">"wirelessအားပိတ်မည်"</string>
-    <string name="screen_lock" msgid="2072642720826409809">"ဖန်သားပြင် လော့ခ်ချခြင်း"</string>
+    <string name="screen_lock" msgid="2072642720826409809">"ဖန်သားပြင် လော့ခ်ချရန်"</string>
     <string name="power_off" msgid="4111692782492232778">"စက်ပိတ်ပါ"</string>
     <string name="silent_mode_silent" msgid="5079789070221150912">"ဖုန်းမြည်သံပိတ်ထားသည်"</string>
     <string name="silent_mode_vibrate" msgid="8821830448369552678">"တုန်ခါခြင်း ဖုန်းမြည်သံ"</string>
@@ -567,11 +567,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"လက်ဗွေ သင်္ကေတ"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"မျက်နှာမှတ် သော့ဖွင့်ခြင်း စက်ပစ္စည်းကို စီမံခြင်း"</string>
+    <string name="permlab_manageFace" msgid="4569549381889283282">"မျက်နှာပြလော့ခ်ဖွင့်သည့် စက်ပစ္စည်းကို စီမံခြင်း"</string>
     <string name="permdesc_manageFace" msgid="6204569688492710471">"အသုံးပြုရန်အတွက် မျက်နှာပုံစံထည့်ရန် (သို့) ဖျက်ရန်နည်းလမ်းကို အက်ပ်အား သုံးခွင့်ပြုသည်။"</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"မျက်နှာမှတ် သော့ဖွင့်ခြင်း စက်ပစ္စည်းကို သုံးပါ"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"အထောက်အထားစိစစ်ရန်အတွက် ဤအက်ပ်အား မျက်နှာမှတ်သော့ဖွင့်ခြင်း စက်ပစ္စည်းကိုသုံးခွင့်ပြုသည်"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"မျက်နှာမှတ် သော့ဖွင့်ခြင်း"</string>
+    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"မျက်နှာပြ လော့ခ်ဖွင့်သည့် စက်ပစ္စည်းကို သုံးပါ"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"အထောက်အထားစိစစ်ရန်အတွက် ဤအက်ပ်အား မျက်နှာပြ လော့ခ်ဖွင့်ခြင်း စက်ပစ္စည်းကိုသုံးခွင့်ပြုသည်"</string>
+    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"မျက်နှာပြ လော့ခ်ဖွင့်ခြင်း"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"သင့်မျက်နှာကို စာရင်းပြန်သွင်းပါ"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"ပိုမှတ်မိစေရန် သင့်မျက်နှာကို စာရင်းပြန်သွင်းပါ"</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"မျက်နှာဒေတာ အမှန် မရိုက်ယူနိုင်ပါ၊ ထပ်စမ်းကြည့်ပါ။"</string>
@@ -597,15 +597,15 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"မျက်နှာကို အတည်ပြု၍ မရပါ။ ဟာ့ဒ်ဝဲ မရနိုင်ပါ။"</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"မျက်နှာမှတ် သော့ဖွင့်ခြင်းကို ထပ်စမ်းကြည့်ပါ။"</string>
+    <string name="face_error_timeout" msgid="522924647742024699">"မျက်နှာပြ လော့ခ်ဖွင့်ခြင်းကို ထပ်စမ်းကြည့်ပါ။"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"မျက်နှာဒေတာအသစ် သိမ်း၍မရပါ။ အဟောင်းကို အရင်ဖျက်ပါ။"</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"မျက်နှာ ဆောင်ရွက်ခြင်းကို ပယ်ဖျက်လိုက်ပါပြီ။"</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"မှတ်နှာမှတ် သော့ဖွင့်ခြင်းကို အသုံးပြုသူက မလုပ်တော့ပါ။"</string>
+    <string name="face_error_user_canceled" msgid="8553045452825849843">"မှတ်နှာပြ လော့ခ်ဖွင့်ခြင်းကို မလုပ်တော့ပါ။"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"အကြိမ်များစွာ စမ်းပြီးပါပြီ။ နောက်မှထပ်စမ်းပါ။"</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"စမ်းသပ်ကြိမ် များနေပြီ။ မျက်နှာမှတ် သော့ဖွင့်ခြင်းကို ပိတ်လိုက်ပါပြီ။"</string>
+    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"စမ်းသပ်ကြိမ် များနေပြီ။ မျက်နှာပြ လော့ခ်ဖွင့်ခြင်း ပိတ်လိုက်ပါပြီ။"</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"မျက်နှာကို အတည်ပြု၍ မရပါ။ ထပ်စမ်းကြည့်ပါ။"</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"မျက်နှာမှတ် သော့ဖွင့်ခြင်းကို ထည့်သွင်းမထားပါ"</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"ဤစက်ပစ္စည်းတွင် မျက်နှာမှတ် သော့ဖွင့်ခြင်းကို သုံး၍မရပါ။"</string>
+    <string name="face_error_not_enrolled" msgid="7369928733504691611">"မျက်နှာပြ လော့ခ်ဖွင့်ခြင်း ထည့်သွင်းမထားပါ"</string>
+    <string name="face_error_hw_not_present" msgid="1070600921591729944">"ဤစက်ပစ္စည်းတွင် မျက်နှာပြ လော့ခ်ဖွင့်ခြင်းကို သုံး၍မရပါ။"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"အာရုံခံကိရိယာကို ယာယီပိတ်ထားသည်။"</string>
     <string name="face_name_template" msgid="3877037340223318119">"မျက်နှာ <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
@@ -835,7 +835,7 @@
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"ထပ် စမ်းပါ"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"ထပ် စမ်းပါ"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"ဝန်ဆောင်မှုနှင့် ဒေတာအားလုံးအတွက် လော့ခ်ဖွင့်ပါ"</string>
-    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"မျက်မှာမှတ် သော့ဖွင့်ခြင်း ခွင့်ပြုသော အကြိမ်ရေထက် ကျော်လွန်သွားပါပြီ"</string>
+    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"မျက်မှာပြ လော့ခ်ဖွင့်ခြင်း ခွင့်ပြုသော အကြိမ်ရေထက် ကျော်လွန်သွားပါပြီ"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"ဆင်းကဒ် မရှိပါ"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"တက်ပလက်ထဲတွင်း ဆင်းကဒ် မရှိပါ"</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"သင့် Android TV စက်ပစ္စည်းပေါ်တွင် ဆင်းမ်ကတ်မရှိပါ။"</string>
@@ -905,7 +905,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"သော့မချထားသာ နယ်ပယ်ကို ချဲ့ပါ"</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"ဘေးတိုက်ပွတ်ဆွဲ၍ သော့ဖွင့်ခြင်း"</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"ပုံစံဖြင့် သော့ဖွင့်ခြင်း"</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"မျက်နှာမှတ် သော့ဖွင့်ခြင်း"</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"မျက်နှာပြ လော့ခ်ဖွင့်ခြင်း"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"ပင်နံပါတ်ဖြင့် သော့ဖွင့်ခြင်း"</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"ဆင်းမ်ကဒ် ပင်နံပါတ်လော့ခ်ဖွင့်ပါ။"</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"ဆင်းမ်ကဒ် Puk လော့ခ်ဖွင့်ပါ။"</string>

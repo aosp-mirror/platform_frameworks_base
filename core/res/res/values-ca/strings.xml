@@ -567,10 +567,10 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Icona d\'empremta digital"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"gestiona el maquinari de desbloqueig facial"</string>
+    <string name="permlab_manageFace" msgid="4569549381889283282">"gestiona el maquinari de Desbloqueig facial"</string>
     <string name="permdesc_manageFace" msgid="6204569688492710471">"Permet que l\'aplicació afegeixi i suprimeixi plantilles de cares que es puguin fer servir."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"utilitza el maquinari de desbloqueig facial"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Permet que l\'aplicació faci servir el maquinari de desbloqueig facial per a l\'autenticació"</string>
+    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"utilitza el maquinari de Desbloqueig facial"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Permet que l\'aplicació faci servir el maquinari de Desbloqueig facial per a l\'autenticació"</string>
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Desbloqueig facial"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Torna a registrar la cara"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Per millorar el reconeixement, torna a registrar la cara"</string>
@@ -602,7 +602,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"S\'ha cancel·lat el reconeixement facial."</string>
     <string name="face_error_user_canceled" msgid="8553045452825849843">"L\'usuari ha cancel·lat el desbloqueig facial."</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Massa intents. Torna-ho a provar més tard."</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Massa intents. S\'ha desactivat el desbloqueig facial."</string>
+    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Massa intents. S\'ha desactivat Desbloqueig facial."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"No es pot verificar la cara. Torna-ho a provar."</string>
     <string name="face_error_not_enrolled" msgid="7369928733504691611">"No has configurat el desbloqueig facial"</string>
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"El desbloqueig facial no és compatible amb el dispositiu."</string>
@@ -835,7 +835,7 @@
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Torna-ho a provar"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Torna-ho a provar"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Desbl. per accedir a totes les funcions i dades"</string>
-    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"S\'ha superat el nombre màxim d\'intents de desbloqueig facial"</string>
+    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"S\'ha superat el nombre màxim d\'intents de Desbloqueig facial"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"No hi ha cap SIM"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"No hi ha cap SIM a la tauleta."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"No hi ha cap targeta SIM al dispositiu Android TV."</string>
