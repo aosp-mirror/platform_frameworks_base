@@ -18,6 +18,7 @@ package com.android.wm.shell.pip;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 
 import static com.android.wm.shell.pip.PipAnimationController.ANIM_TYPE_ALPHA;
 import static com.android.wm.shell.pip.PipAnimationController.ANIM_TYPE_BOUNDS;
@@ -90,17 +91,32 @@ public class PipTransition extends PipTransitionController {
             return success;
         }
 
+        // Search for an Enter PiP transition (along with a show wallpaper one)
+        TransitionInfo.Change enterPip = null;
+        TransitionInfo.Change wallpaper = null;
         for (int i = info.getChanges().size() - 1; i >= 0; --i) {
             final TransitionInfo.Change change = info.getChanges().get(i);
             if (change.getTaskInfo() != null
                     && change.getTaskInfo().configuration.windowConfiguration.getWindowingMode()
                     == WINDOWING_MODE_PINNED) {
-                mFinishCallback = finishCallback;
-                return startEnterAnimation(change.getTaskInfo(), change.getLeash(),
-                        startTransaction, finishTransaction);
+                enterPip = change;
+            } else if ((change.getFlags() & FLAG_IS_WALLPAPER) != 0) {
+                wallpaper = change;
             }
         }
-        return false;
+        if (enterPip == null) {
+            return false;
+        }
+
+        // Show the wallpaper if there is a wallpaper change.
+        if (wallpaper != null) {
+            startTransaction.show(wallpaper.getLeash());
+            startTransaction.setAlpha(wallpaper.getLeash(), 1.f);
+        }
+
+        mFinishCallback = finishCallback;
+        return startEnterAnimation(enterPip.getTaskInfo(), enterPip.getLeash(),
+                startTransaction, finishTransaction);
     }
 
     @Nullable
@@ -160,7 +176,6 @@ public class PipTransition extends PipTransitionController {
                     0 /* startingAngle */, Surface.ROTATION_0);
         } else if (mOneShotAnimationType == ANIM_TYPE_ALPHA) {
             startTransaction.setAlpha(leash, 0f);
-            startTransaction.apply();
             animator = mPipAnimationController.getAnimator(taskInfo, leash, destinationBounds,
                     0f, 1f);
             mOneShotAnimationType = ANIM_TYPE_BOUNDS;
@@ -168,6 +183,7 @@ public class PipTransition extends PipTransitionController {
             throw new RuntimeException("Unrecognized animation type: "
                     + mOneShotAnimationType);
         }
+        startTransaction.apply();
         animator.setTransitionDirection(TRANSITION_DIRECTION_TO_PIP)
                 .setPipAnimationCallback(mPipAnimationCallback)
                 .setDuration(mEnterExitAnimationDuration)
