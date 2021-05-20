@@ -3552,8 +3552,8 @@
     -->
     <integer name="config_largeScreenSmallestScreenWidthDp">600</integer>
 
-    <!-- True if the device is using leagacy split. -->
-    <bool name="config_useLegacySplit">true</bool>
+    <!-- True if the device is using legacy split. -->
+    <bool name="config_useLegacySplit">false</bool>
 
     <!-- True if the device supports running activities on secondary displays. -->
     <bool name="config_supportsMultiDisplay">true</bool>
