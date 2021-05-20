@@ -40,7 +40,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Rect;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -279,10 +278,16 @@ public class PipMenuView extends FrameLayout {
             mMenuContainerAnimator.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
+                    mAllowTouches = true;
                     notifyMenuStateChangeFinish(menuState);
                     if (allowMenuTimeout) {
                         repostDelayedHide(INITIAL_DISMISS_DELAY);
                     }
+                }
+
+                @Override
+                public void onAnimationCancel(Animator animation) {
+                    mAllowTouches = true;
                 }
             });
             if (withDelay) {
@@ -324,10 +329,6 @@ public class PipMenuView extends FrameLayout {
 
     void pokeMenu() {
         cancelDelayedHide();
-    }
-
-    void onPipAnimationEnded() {
-        mAllowTouches = true;
     }
 
     void updateMenuLayout(Rect bounds) {
