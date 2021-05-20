@@ -33,11 +33,12 @@
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"Şifrənizi daxil edin"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="3514267777289393046">"Yanlış PIN kod."</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Yanlış Kart."</string>
-    <string name="keyguard_charged" msgid="5478247181205188995">"Enerji yığdı"</string>
+    <string name="keyguard_charged" msgid="5478247181205188995">"Enerji yığılıb"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Simsiz şəkildə batareya yığır"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Enerji yığır"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Sürətlə enerji yığır"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Yavaş enerji yığır"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="1158086783302116604">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Enerjiyə qənaət üçün optimallaşdırma"</string>
     <string name="keyguard_low_battery" msgid="1868012396800230904">"Adapteri qoşun."</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Kilidi açmaq üçün Menyu düyməsinə basın."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Şəbəkə kilidlidir"</string>

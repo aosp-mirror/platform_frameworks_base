@@ -38,6 +38,7 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • အားသွင်းနေသည်"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • အမြန်အားသွင်းနေသည်"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • နှေးကွေးစွာ အားသွင်းနေသည်"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="1158086783302116604">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ဘက်ထရီအခြေအနေကို အကောင်းဆုံးဖြစ်အောင် လုပ်နေသည်"</string>
     <string name="keyguard_low_battery" msgid="1868012396800230904">"အားသွင်းကိရိယာကို ချိတ်ဆက်ပါ။"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"မီနူးကို နှိပ်၍ လော့ခ်ဖွင့်ပါ။"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"ကွန်ရက်ကို လော့ခ်ချထားသည်"</string>
@@ -136,5 +137,5 @@
     </plurals>
     <string name="clock_title_default" msgid="6342735240617459864">"မူလ"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"ပူဖောင်းကွက်"</string>
-    <string name="clock_title_analog" msgid="8409262532900918273">"လက်တံနာရီ"</string>
+    <string name="clock_title_analog" msgid="8409262532900918273">"ရိုးရိုး"</string>
 </resources>

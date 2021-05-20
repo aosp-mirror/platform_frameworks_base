@@ -26,7 +26,7 @@ LOCAL_C_INCLUDES += \
     frameworks/rs
 
 LOCAL_CFLAGS += -Wno-unused-parameter
-LOCAL_CFLAGS += -Wall -Werror -Wunused -Wunreachable-code
+LOCAL_CFLAGS += -Wall -Werror -Wunused -Wunreachable-code -Wno-deprecated-declarations
 
 LOCAL_MODULE:= librs_jni
 LOCAL_LICENSE_KINDS:= SPDX-license-identifier-Apache-2.0

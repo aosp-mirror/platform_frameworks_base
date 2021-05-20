@@ -424,7 +424,8 @@ public class Build {
          * Magic version number for a current development build, which has
          * not yet turned into an official release.
          */
-        public static final int CUR_DEVELOPMENT = VMRuntime.SDK_VERSION_CUR_DEVELOPMENT;
+        // This must match VMRuntime.SDK_VERSION_CUR_DEVELOPMENT.
+        public static final int CUR_DEVELOPMENT = 10000;
 
         /**
          * October 2008: The original, first, version of Android.  Yay!
@@ -1311,6 +1312,7 @@ public class Build {
      * selinux into "permissive" mode in particular.
      * @hide
      */
+    @UnsupportedAppUsage
     public static final boolean IS_DEBUGGABLE =
             SystemProperties.getInt("ro.debuggable", 0) == 1;
 

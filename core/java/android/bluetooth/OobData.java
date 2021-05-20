@@ -25,7 +25,6 @@ import android.os.Parcelable;
 
 import com.android.internal.util.Preconditions;
 
-import java.lang.IllegalArgumentException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -165,68 +164,6 @@ public final class OobData implements Parcelable {
     public static final int LE_FLAG_SIMULTANEOUS_HOST = 0x04;
 
     /**
-     * Main creation method for creating a Classic version of {@link OobData}.
-     *
-     * <p>This object will allow the caller to call {@link ClassicBuilder#build()}
-     * to build the data object or add any option information to the builder.
-     *
-     * @param confirmationHash byte array consisting of {@link OobData#CONFIRMATION_OCTETS} octets
-     * of data. Data is derived from controller/host stack and is required for pairing OOB.
-     * @param classicLength byte array representing the length of data from 8-65535 across 2
-     * octets (0xXXXX).
-     * @param deviceAddressWithType byte array representing the Bluetooth Address of the device
-     * that owns the OOB data. (i.e. the originator) [6 octets]
-     *
-     * @return a Classic Builder instance with all the given data set or null.
-     *
-     * @throws IllegalArgumentException if any of the values fail to be set.
-     * @throws NullPointerException if any argument is null.
-     *
-     * @hide
-     */
-    @NonNull
-    @SystemApi
-    public static ClassicBuilder createClassicBuilder(@NonNull byte[] confirmationHash,
-            @NonNull byte[] classicLength, @NonNull byte[] deviceAddressWithType) {
-        return new ClassicBuilder(confirmationHash, classicLength, deviceAddressWithType);
-    }
-
-    /**
-     * Main creation method for creating a LE version of {@link OobData}.
-     *
-     * <p>This object will allow the caller to call {@link LeBuilder#build()}
-     * to build the data object or add any option information to the builder.
-     *
-     * @param deviceAddressWithType the LE device address plus the address type (7 octets);
-     * not null.
-     * @param leDeviceRole whether the device supports Peripheral, Central,
-     * Both including preference; not null. (1 octet)
-     * @param confirmationHash Array consisting of {@link OobData#CONFIRMATION_OCTETS} octets
-     * of data. Data is derived from controller/host stack and is
-     * required for pairing OOB.
-     *
-     * <p>Possible LE Device Role Values:
-     * 0x00 Only Peripheral supported
-     * 0x01 Only Central supported
-     * 0x02 Central & Peripheral supported; Peripheral Preferred
-     * 0x03 Only peripheral supported; Central Preferred
-     * 0x04 - 0xFF Reserved
-     *
-     * @return a LeBuilder instance with all the given data set or null.
-     *
-     * @throws IllegalArgumentException if any of the values fail to be set.
-     * @throws NullPointerException if any argument is null.
-     *
-     * @hide
-     */
-    @NonNull
-    @SystemApi
-    public static LeBuilder createLeBuilder(@NonNull byte[] confirmationHash,
-            @NonNull byte[] deviceAddressWithType, @LeRole int leDeviceRole) {
-        return new LeBuilder(confirmationHash, deviceAddressWithType, leDeviceRole);
-    }
-
-    /**
      * Builds an {@link OobData} object and validates that the required combination
      * of values are present to create the LE specific OobData type.
      *
@@ -342,16 +279,18 @@ public final class OobData implements Parcelable {
         private @LeFlag int mLeFlags = LE_FLAG_GENERAL_DISCOVERY_MODE; // Invalid default
 
         /**
-         * Constructing an OobData object for use with LE requires
-         * a LE Device Address and LE Device Role as well as the Confirmation
-         * and optionally, the Randomizer, however it is recommended to use.
+         * Main creation method for creating a LE version of {@link OobData}.
          *
-         * @param confirmationHash byte array consisting of {@link OobData#CONFIRMATION_OCTETS}
-         * octets of data. Data is derived from controller/host stack and is required for
-         * pairing OOB.
-         * @param deviceAddressWithType 7 bytes containing the 6 byte address with the 1 byte
-         * address type.
-         * @param leDeviceRole indicating device's role and preferences (Central or Peripheral)
+         * <p>This object will allow the caller to call {@link LeBuilder#build()}
+         * to build the data object or add any option information to the builder.
+         *
+         * @param deviceAddressWithType the LE device address plus the address type (7 octets);
+         * not null.
+         * @param leDeviceRole whether the device supports Peripheral, Central,
+         * Both including preference; not null. (1 octet)
+         * @param confirmationHash Array consisting of {@link OobData#CONFIRMATION_OCTETS} octets
+         * of data. Data is derived from controller/host stack and is
+         * required for pairing OOB.
          *
          * <p>Possible Values:
          * {@link LE_DEVICE_ROLE_PERIPHERAL_ONLY} Only Peripheral supported
@@ -361,11 +300,13 @@ public final class OobData implements Parcelable {
          * {@link LE_DEVICE_ROLE_BOTH_PREFER_CENTRAL} Only peripheral supported; Central Preferred
          * 0x04 - 0xFF Reserved
          *
-         * @throws IllegalArgumentException if deviceAddressWithType is not
-         *                                  {@link LE_DEVICE_ADDRESS_OCTETS} octets
+         * @throws IllegalArgumentException if any of the values fail to be set.
          * @throws NullPointerException if any argument is null.
+         *
+         * @hide
          */
-        private LeBuilder(@NonNull byte[] confirmationHash, @NonNull byte[] deviceAddressWithType,
+        @SystemApi
+        public LeBuilder(@NonNull byte[] confirmationHash, @NonNull byte[] deviceAddressWithType,
                 @LeRole int leDeviceRole) {
             Preconditions.checkNotNull(confirmationHash);
             Preconditions.checkNotNull(deviceAddressWithType);
@@ -572,25 +513,26 @@ public final class OobData implements Parcelable {
         private byte[] mClassOfDevice = null;
 
         /**
+         * Main creation method for creating a Classic version of {@link OobData}.
+         *
+         * <p>This object will allow the caller to call {@link ClassicBuilder#build()}
+         * to build the data object or add any option information to the builder.
+         *
          * @param confirmationHash byte array consisting of {@link OobData#CONFIRMATION_OCTETS}
          * octets of data. Data is derived from controller/host stack and is required for pairing
          * OOB.
-         * @param randomizerHash byte array consisting of {@link OobData#RANDOMIZER_OCTETS} octets
-         * of data. Data is derived from controller/host stack and is required
-         * for pairing OOB. Also, randomizerHash may be all 0s or null in which case
-         * it becomes all 0s.
          * @param classicLength byte array representing the length of data from 8-65535 across 2
-         * octets (0xXXXX). Inclusive of this value in the length.
+         * octets (0xXXXX).
          * @param deviceAddressWithType byte array representing the Bluetooth Address of the device
-         * that owns the OOB data. (i.e. the originator) [7 octets] this includes the Address Type
-         * as the last octet.
+         * that owns the OOB data. (i.e. the originator) [6 octets]
          *
-         * @throws IllegalArgumentException if any value is not the correct length
-         * @throws NullPointerException if anything passed is null
+         * @throws IllegalArgumentException if any of the values fail to be set.
+         * @throws NullPointerException if any argument is null.
          *
          * @hide
          */
-        private ClassicBuilder(@NonNull byte[] confirmationHash, @NonNull byte[] classicLength,
+        @SystemApi
+        public ClassicBuilder(@NonNull byte[] confirmationHash, @NonNull byte[] classicLength,
                 @NonNull byte[] deviceAddressWithType) {
             Preconditions.checkNotNull(confirmationHash);
             Preconditions.checkNotNull(classicLength);

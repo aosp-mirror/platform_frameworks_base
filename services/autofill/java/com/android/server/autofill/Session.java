@@ -1204,7 +1204,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     @Override
     public void onServiceDied(@NonNull RemoteFillService service) {
         Slog.w(TAG, "removing session because service died");
-        forceRemoveSelfLocked();
+        synchronized (mLock) {
+            forceRemoveSelfLocked();
+        }
     }
 
     // AutoFillUiCallback

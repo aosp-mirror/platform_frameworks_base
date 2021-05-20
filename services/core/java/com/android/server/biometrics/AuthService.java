@@ -289,7 +289,7 @@ public class AuthService extends SystemService {
         }
 
         @Override
-        public long[] getAuthenticatorIds() throws RemoteException {
+        public long[] getAuthenticatorIds(int userId) throws RemoteException {
             // In this method, we're not checking whether the caller is permitted to use face
             // API because current authenticator ID is leaked (in a more contrived way) via Android
             // Keystore (android.security.keystore package): the user of that API can create a key
@@ -307,9 +307,13 @@ public class AuthService extends SystemService {
             // method from inside app processes.
 
             final int callingUserId = UserHandle.getCallingUserId();
+            if (userId != callingUserId) {
+                getContext().enforceCallingOrSelfPermission(USE_BIOMETRIC_INTERNAL,
+                        "Must have " + USE_BIOMETRIC_INTERNAL + " permission.");
+            }
             final long identity = Binder.clearCallingIdentity();
             try {
-                return mBiometricService.getAuthenticatorIds(callingUserId);
+                return mBiometricService.getAuthenticatorIds(userId);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }

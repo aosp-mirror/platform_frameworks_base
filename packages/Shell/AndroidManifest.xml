@@ -155,6 +155,7 @@
     <uses-permission android:name="android.permission.INSTALL_PACKAGES" />
     <!--  TODO(b/152310230): remove once APIs are confirmed to be sufficient -->
     <uses-permission android:name="com.android.permission.USE_INSTALLER_V2" />
+    <uses-permission android:name="android.permission.INSTALL_TEST_ONLY_PACKAGE" />
     <uses-permission android:name="android.permission.MOVE_PACKAGE" />
     <uses-permission android:name="android.permission.KEEP_UNINSTALLED_PACKAGES" />
     <uses-permission android:name="android.permission.CLEAR_APP_USER_DATA" />
@@ -391,6 +392,9 @@
     <!-- Permission required for testing system audio effect APIs. -->
     <uses-permission android:name="android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS"/>
 
+    <!-- Permission required for running networking unit tests -->
+    <uses-permission android:name="android.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS" />
+
     <!-- Permissions required for CTS test - TunerTest -->
     <uses-permission android:name="android.permission.ACCESS_TV_DESCRAMBLER" />
     <uses-permission android:name="android.permission.ACCESS_TV_TUNER" />
@@ -423,8 +427,9 @@
     <!-- Permission needed for CTS test - DisplayTest -->
     <uses-permission android:name="android.permission.OVERRIDE_DISPLAY_MODE_REQUESTS" />
 
-    <!-- Permission needed for CTS test - TimeManagerTest -->
+    <!-- Permissions needed for CTS test - TimeManagerTest -->
     <uses-permission android:name="android.permission.MANAGE_TIME_AND_ZONE_DETECTION" />
+    <uses-permission android:name="android.permission.SUGGEST_EXTERNAL_TIME" />
 
     <!-- Permission needed for CTS test - CtsHdmiCecHostTestCases -->
     <uses-permission android:name="android.permission.HDMI_CEC" />
@@ -458,6 +463,13 @@
 
     <!-- Permission required for CTS test - CtsUwbTestCases -->
     <uses-permission android:name="android.permission.UWB_PRIVILEGED" />
+    <uses-permission android:name="android.permission.UWB_RANGING" />
+
+    <!-- Permission required for CTS test - CtsAlarmManagerTestCases -->
+    <uses-permission android:name="android.permission.UPDATE_DEVICE_STATS" />
+
+    <!-- Permission required for CTS test - GlobalSearchSessionPlatformCtsTests -->
+    <uses-permission android:name="android.permission.READ_GLOBAL_APP_SEARCH_DATA" />
 
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"

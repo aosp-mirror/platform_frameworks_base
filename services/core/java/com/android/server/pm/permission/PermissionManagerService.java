@@ -206,6 +206,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     private static final int USER_PERMISSION_FLAGS = FLAG_PERMISSION_USER_SET
             | FLAG_PERMISSION_USER_FIXED;
 
+    /** All storage permissions */
+    private static final List<String> STORAGE_PERMISSIONS = new ArrayList<>();
+
     /** If the permission of the value is granted, so is the key */
     private static final Map<String, String> FULLER_PERMISSION_MAP = new HashMap<>();
 
@@ -214,6 +217,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 Manifest.permission.ACCESS_FINE_LOCATION);
         FULLER_PERMISSION_MAP.put(Manifest.permission.INTERACT_ACROSS_USERS,
                 Manifest.permission.INTERACT_ACROSS_USERS_FULL);
+        STORAGE_PERMISSIONS.add(Manifest.permission.READ_EXTERNAL_STORAGE);
+        STORAGE_PERMISSIONS.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        STORAGE_PERMISSIONS.add(Manifest.permission.ACCESS_MEDIA_LOCATION);
     }
 
     /** Lock to protect internal data access */
@@ -2263,6 +2269,49 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             return protectionLevel;
         }
         return protectionLevel;
+    }
+
+    /**
+     * If the app is updated, and has scoped storage permissions, then it is possible that the
+     * app updated in an attempt to get unscoped storage. If so, revoke all storage permissions.
+     * @param newPackage The new package that was installed
+     * @param oldPackage The old package that was updated
+     */
+    private void revokeStoragePermissionsIfScopeExpanded(
+            @NonNull AndroidPackage newPackage,
+            @NonNull AndroidPackage oldPackage,
+            @NonNull PermissionCallback permissionCallback) {
+        boolean downgradedSdk = oldPackage.getTargetSdkVersion() >= Build.VERSION_CODES.Q
+                && newPackage.getTargetSdkVersion() < Build.VERSION_CODES.Q;
+        boolean upgradedSdk = oldPackage.getTargetSdkVersion() < Build.VERSION_CODES.Q
+                && newPackage.getTargetSdkVersion() >= Build.VERSION_CODES.Q;
+        boolean newlyRequestsLegacy = !upgradedSdk && !oldPackage.isRequestLegacyExternalStorage()
+                && newPackage.isRequestLegacyExternalStorage();
+
+        if (!newlyRequestsLegacy && !downgradedSdk) {
+            return;
+        }
+
+        final int callingUid = Binder.getCallingUid();
+        final int userId = UserHandle.getUserId(newPackage.getUid());
+        int numRequestedPermissions = newPackage.getRequestedPermissions().size();
+        for (int i = 0; i < numRequestedPermissions; i++) {
+            PermissionInfo permInfo = getPermissionInfo(newPackage.getRequestedPermissions().get(i),
+                    newPackage.getPackageName(), 0);
+            if (permInfo == null || !STORAGE_PERMISSIONS.contains(permInfo.name)) {
+                continue;
+            }
+
+            EventLog.writeEvent(0x534e4554, "171430330", newPackage.getUid(),
+                    "Revoking permission " + permInfo.name + " from package "
+                            + newPackage.getPackageName() + " as either the sdk downgraded "
+                            + downgradedSdk + " or newly requested legacy full storage "
+                            + newlyRequestsLegacy);
+
+            revokeRuntimePermissionInternal(permInfo.name, newPackage.getPackageName(),
+                    false, callingUid, userId, null, permissionCallback);
+        }
+
     }
 
     /**
@@ -4733,6 +4782,19 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         public boolean isPermissionsReviewRequired(@NonNull AndroidPackage pkg,
                 @UserIdInt int userId) {
             return PermissionManagerService.this.isPermissionsReviewRequired(pkg, userId);
+        }
+        /**
+         * If the app is updated, and has scoped storage permissions, then it is possible that the
+         * app updated in an attempt to get unscoped storage. If so, revoke all storage permissions.
+         * @param newPackage The new package that was installed
+         * @param oldPackage The old package that was updated
+         */
+        public void revokeStoragePermissionsIfScopeExpanded(
+                @NonNull AndroidPackage newPackage,
+                @NonNull AndroidPackage oldPackage
+        ) {
+            PermissionManagerService.this.revokeStoragePermissionsIfScopeExpanded(newPackage,
+                    oldPackage, mDefaultPermissionCallback);
         }
 
         @Override

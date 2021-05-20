@@ -193,7 +193,8 @@ public class HotspotControllerImpl implements HotspotController, WifiManager.Sof
         if (enabled) {
             mWaitingForTerminalState = true;
             if (DEBUG) Log.d(TAG, "Starting tethering");
-            mTetheringManager.startTethering(new TetheringRequest.Builder(TETHERING_WIFI).build(),
+            mTetheringManager.startTethering(new TetheringRequest.Builder(
+                    TETHERING_WIFI).setShouldShowEntitlementUi(false).build(),
                     ConcurrentUtils.DIRECT_EXECUTOR,
                     new TetheringManager.StartTetheringCallback() {
                         @Override

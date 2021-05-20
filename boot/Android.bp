@@ -44,6 +44,19 @@ package {
 platform_bootclasspath {
     name: "platform-bootclasspath",
 
+    // The bootclasspath_fragments that contribute to the platform
+    // bootclasspath.
+    fragments: [
+        {
+            apex: "com.android.art",
+            module: "art-bootclasspath-fragment",
+        },
+        {
+            apex: "com.android.i18n",
+            module: "i18n-bootclasspath-fragment",
+        },
+    ],
+
     // Additional information needed by hidden api processing.
     hidden_api: {
         unsupported: [
@@ -63,9 +76,6 @@ platform_bootclasspath {
         ],
         max_target_o_low_priority: [
             "hiddenapi/hiddenapi-max-target-o.txt",
-        ],
-        blocked: [
-            "hiddenapi/hiddenapi-force-blocked.txt",
         ],
         unsupported_packages: [
             "hiddenapi/hiddenapi-unsupported-packages.txt",
@@ -88,4 +98,12 @@ platform_bootclasspath {
             dest: "hiddenapi-unsupported.csv",
         },
     ],
+
+    required: [
+        "platform-systemserverclasspath",
+    ],
+}
+
+platform_systemserverclasspath {
+    name: "platform-systemserverclasspath",
 }

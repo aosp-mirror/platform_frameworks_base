@@ -545,7 +545,7 @@ public final class JobStore {
                 out.attribute(null, "net-capabilities", Long.toString(
                         BitUtils.packBits(network.getCapabilities())));
                 out.attribute(null, "net-unwanted-capabilities", Long.toString(
-                        BitUtils.packBits(network.getUnwantedCapabilities())));
+                        BitUtils.packBits(network.getForbiddenCapabilities())));
 
                 out.attribute(null, "net-transport-types", Long.toString(
                         BitUtils.packBits(network.getTransportTypes())));
@@ -968,22 +968,22 @@ public final class JobStore {
             String val;
 
             final String netCapabilities = parser.getAttributeValue(null, "net-capabilities");
-            final String netUnwantedCapabilities = parser.getAttributeValue(
+            final String netforbiddenCapabilities = parser.getAttributeValue(
                     null, "net-unwanted-capabilities");
             final String netTransportTypes = parser.getAttributeValue(null, "net-transport-types");
             if (netCapabilities != null && netTransportTypes != null) {
                 final NetworkRequest.Builder builder = new NetworkRequest.Builder()
                         .clearCapabilities();
-                final long unwantedCapabilities = netUnwantedCapabilities != null
-                        ? Long.parseLong(netUnwantedCapabilities)
-                        : BitUtils.packBits(builder.build().getUnwantedCapabilities());
+                final long forbiddenCapabilities = netforbiddenCapabilities != null
+                        ? Long.parseLong(netforbiddenCapabilities)
+                        : BitUtils.packBits(builder.build().getForbiddenCapabilities());
                 // We're okay throwing NFE here; caught by caller
                 for (int capability : BitUtils.unpackBits(Long.parseLong(netCapabilities))) {
                     builder.addCapability(capability);
                 }
-                for (int unwantedCapability : BitUtils.unpackBits(
-                        Long.parseLong(netUnwantedCapabilities))) {
-                    builder.addUnwantedCapability(unwantedCapability);
+                for (int forbiddenCapability : BitUtils.unpackBits(
+                        Long.parseLong(netforbiddenCapabilities))) {
+                    builder.addForbiddenCapability(forbiddenCapability);
                 }
                 for (int transport : BitUtils.unpackBits(Long.parseLong(netTransportTypes))) {
                     builder.addTransportType(transport);

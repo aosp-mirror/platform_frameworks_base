@@ -70,6 +70,16 @@ public final class UwbManager {
         @interface StateChangedReason {}
 
         /**
+         * @hide
+         */
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef(value = {
+                STATE_ENABLED_INACTIVE,
+                STATE_ENABLED_ACTIVE,
+                STATE_DISABLED})
+        @interface State {}
+
+        /**
          * Indicates that the state change was due to opening of first UWB session
          */
         int STATE_CHANGED_REASON_SESSION_STARTED = 0;
@@ -95,22 +105,41 @@ public final class UwbManager {
         int STATE_CHANGED_REASON_ERROR_UNKNOWN = 4;
 
         /**
+         * Indicates that UWB is disabled on device
+         */
+        int STATE_DISABLED = 0;
+        /**
+         * Indicates that UWB is enabled on device but has no active ranging sessions
+         */
+        int STATE_ENABLED_INACTIVE = 1;
+
+        /**
+         * Indicates that UWB is enabled and has active ranging session
+         */
+        int STATE_ENABLED_ACTIVE = 2;
+
+        /**
          * Invoked when underlying UWB adapter's state is changed
          * <p>Invoked with the adapter's current state after registering an
          * {@link AdapterStateCallback} using
          * {@link UwbManager#registerAdapterStateCallback(Executor, AdapterStateCallback)}.
          *
-         * <p>Possible values for the state to change are
+         * <p>Possible reasons for the state to change are
          * {@link #STATE_CHANGED_REASON_SESSION_STARTED},
          * {@link #STATE_CHANGED_REASON_ALL_SESSIONS_CLOSED},
          * {@link #STATE_CHANGED_REASON_SYSTEM_POLICY},
          * {@link #STATE_CHANGED_REASON_SYSTEM_BOOT},
          * {@link #STATE_CHANGED_REASON_ERROR_UNKNOWN}.
          *
-         * @param isEnabled true when UWB adapter is enabled, false when it is disabled
+         * <p>Possible values for the UWB state are
+         * {@link #STATE_ENABLED_INACTIVE},
+         * {@link #STATE_ENABLED_ACTIVE},
+         * {@link #STATE_DISABLED}.
+         *
+         * @param state the UWB state; inactive, active or disabled
          * @param reason the reason for the state change
          */
-        void onStateChanged(boolean isEnabled, @StateChangedReason int reason);
+        void onStateChanged(@State int state, @StateChangedReason int reason);
     }
 
     /**
@@ -146,7 +175,7 @@ public final class UwbManager {
      * <p>The provided callback will be invoked by the given {@link Executor}.
      *
      * <p>When first registering a callback, the callbacks's
-     * {@link AdapterStateCallback#onStateChanged(boolean, int)} is immediately invoked to indicate
+     * {@link AdapterStateCallback#onStateChanged(int, int)} is immediately invoked to indicate
      * the current state of the underlying UWB adapter with the most recent
      * {@link AdapterStateCallback.StateChangedReason} that caused the change.
      *
@@ -240,5 +269,33 @@ public final class UwbManager {
             @NonNull @CallbackExecutor Executor executor,
             @NonNull RangingSession.Callback callbacks) {
         return mRangingManager.openSession(parameters, executor, callbacks);
+    }
+
+    /**
+     * Returns the current enabled/disabled state for UWB.
+     *
+     * Possible values are:
+     * AdapterStateCallback#STATE_DISABLED
+     * AdapterStateCallback#STATE_ENABLED_INACTIVE
+     * AdapterStateCallback#STATE_ENABLED_ACTIVE
+     *
+     * @return value representing current enabled/disabled state for UWB.
+     * @hide
+     */
+    public @AdapterStateCallback.State int getAdapterState() {
+        return mAdapterStateListener.getAdapterState();
+    }
+
+    /**
+     * Disables or enables UWB for a user
+     *
+     * @param enabled value representing intent to disable or enable UWB. If true any subsequent
+     * calls to IUwbAdapter#openRanging will be allowed. If false, all active ranging sessions will
+     * be closed and subsequent calls to IUwbAdapter#openRanging will be disallowed.
+     *
+     * @hide
+     */
+    public void setUwbEnabled(boolean enabled) {
+        mAdapterStateListener.setEnabled(enabled);
     }
 }

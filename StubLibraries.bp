@@ -27,72 +27,11 @@
 // Common metalava configs
 /////////////////////////////////////////////////////////////////////
 
-packages_to_document = [
-    "android",
-    "dalvik",
-    "java",
-    "javax",
-    "junit",
-    "org.apache.http",
-    "org.json",
-    "org.w3c.dom",
-    "org.xml.sax",
-    "org.xmlpull",
-]
-
 stubs_defaults {
     name: "metalava-non-updatable-api-stubs-default",
-    srcs: [":framework-non-updatable-stub-sources"],
-    sdk_version: "none",
-    system_modules: "none",
-    java_version: "1.8",
-    arg_files: ["core/res/AndroidManifest.xml"],
-    // TODO(b/147699819): remove below aidl includes.
-    aidl: {
-        local_include_dirs: [
-            "apex/media/aidl/stable",
-            // TODO: move to include-dirs for packages/modules/Connectivity when this moves out of
-            // frameworks/base
-            "packages/Connectivity/framework/aidl-export",
-            "telephony/java",
-        ],
-    },
-    // These are libs from framework-internal-utils that are required (i.e. being referenced)
-    // from framework-non-updatable-sources. Add more here when there's a need.
-    // DO NOT add the entire framework-internal-utils. It might cause unnecessary circular
-    // dependencies gets bigger.
-    libs: [
-        "android.hardware.cas-V1.2-java",
-        "android.hardware.health-V1.0-java-constants",
-        "android.hardware.radio-V1.5-java",
-        "android.hardware.radio-V1.6-java",
-        "android.hardware.thermal-V1.0-java-constants",
-        "android.hardware.thermal-V2.0-java",
-        "android.hardware.tv.input-V1.0-java-constants",
-        "android.hardware.tv.tuner-V1.0-java-constants",
-        "android.hardware.usb-V1.0-java-constants",
-        "android.hardware.usb-V1.1-java-constants",
-        "android.hardware.usb.gadget-V1.0-java",
-        "android.hardware.vibrator-V1.3-java",
-        "framework-protos",
-        "stable.core.platform.api.stubs",
-        // There are a few classes from modules used by the core that
-        // need to be resolved by metalava. We use a prebuilt stub of the
-        // full sdk to ensure we can resolve them. If a new class gets added,
-        // the prebuilts/sdk/current needs to be updated.
-        "sdk_system_current_android",
-        // NOTE: The below can be removed once the prebuilt stub contains IKE.
-        "sdk_system_current_android.net.ipsec.ike",
-    ],
-    high_mem: true, // Lots of sources => high memory use, see b/170701554
-    installable: false,
-    annotations_enabled: true,
-    previous_api: ":android.api.public.latest",
-    merge_annotations_dirs: [
-        "metalava-manual",
-    ],
+    defaults: ["android-non-updatable-stubs-defaults"],
     api_levels_annotations_enabled: false,
-    filter_packages: packages_to_document,
+    defaults_visibility: ["//visibility:private"],
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -312,7 +251,7 @@ modules_public_stubs = [
 
 modules_system_stubs = [
     "android.net.ipsec.ike.stubs.system",
-    "art.module.public.api.stubs", // Only has public stubs
+    "art.module.public.api.stubs.system",
     "conscrypt.module.public.api.stubs", // Only has public stubs
     "framework-connectivity.stubs.system",
     "framework-media.stubs.system",
@@ -341,9 +280,11 @@ java_defaults {
         tag: ".jar",
         dest: "android-non-updatable.jar",
     },
+    defaults_visibility: ["//visibility:private"],
+    visibility: ["//visibility:private"],
 }
 
-java_library_static {
+java_library {
     name: "android-non-updatable.stubs",
     defaults: ["android-non-updatable_defaults_stubs_current"],
     srcs: [":api-stubs-docs-non-updatable"],
@@ -353,7 +294,7 @@ java_library_static {
     },
 }
 
-java_library_static {
+java_library {
     name: "android-non-updatable.stubs.system",
     defaults: ["android-non-updatable_defaults_stubs_current"],
     srcs: [":system-api-stubs-docs-non-updatable"],
@@ -363,7 +304,7 @@ java_library_static {
     },
 }
 
-java_library_static {
+java_library {
     name: "android-non-updatable.stubs.module_lib",
     defaults: ["android-non-updatable_defaults_stubs_current"],
     srcs: [":module-lib-api-stubs-docs-non-updatable"],
@@ -377,7 +318,7 @@ java_library_static {
     },
 }
 
-java_library_static {
+java_library {
     name: "android-non-updatable.stubs.test",
     defaults: ["android-non-updatable_defaults_stubs_current"],
     srcs: [":test-api-stubs-docs-non-updatable"],
@@ -385,15 +326,6 @@ java_library_static {
     dist: {
         dir: "apistubs/android/test",
     },
-}
-
-java_defaults {
-    name: "android_defaults_stubs_current",
-    static_libs: ["art-notices-for-framework-stubs-jar"], // License notices from art module
-    sdk_version: "none",
-    system_modules: "none",
-    java_version: "1.8",
-    compile_dex: true,
 }
 
 java_defaults {
@@ -406,25 +338,26 @@ java_defaults {
         tag: ".jar",
         dest: "android.jar",
     },
+    defaults_visibility: ["//frameworks/base/services"],
 }
 
-java_library_static {
+java_library {
     name: "android_stubs_current",
     static_libs: modules_public_stubs + [
         "android-non-updatable.stubs",
         "private-stub-annotations-jar",
     ],
-    defaults: ["android_defaults_stubs_current"],
+    defaults: ["android.jar_defaults"],
 }
 
-java_library_static {
+java_library {
     name: "android_system_stubs_current",
     static_libs: modules_system_stubs + [
         "android-non-updatable.stubs.system",
         "private-stub-annotations-jar",
     ],
     defaults: [
-        "android_defaults_stubs_current",
+        "android.jar_defaults",
         "android_stubs_dists_default",
     ],
     dist: {
@@ -443,7 +376,7 @@ java_library_static {
     ],
 }
 
-java_library_static {
+java_library {
     name: "android_test_stubs_current",
     // Modules do not have test APIs, but we want to include their SystemApis, like we include
     // the SystemApi of framework-non-updatable-sources.
@@ -452,7 +385,7 @@ java_library_static {
         "private-stub-annotations-jar",
     ],
     defaults: [
-        "android_defaults_stubs_current",
+        "android.jar_defaults",
         "android_stubs_dists_default",
     ],
     dist: {
@@ -460,10 +393,10 @@ java_library_static {
     },
 }
 
-java_library_static {
+java_library {
     name: "android_module_lib_stubs_current",
     defaults: [
-        "android_defaults_stubs_current",
+        "android.jar_defaults",
         "android_stubs_dists_default",
     ],
     static_libs: [
@@ -472,6 +405,22 @@ java_library_static {
     ],
     dist: {
         dir: "apistubs/android/module-lib",
+    },
+}
+
+java_library {
+    name: "android_system_server_stubs_current",
+    defaults: ["android_stubs_dists_default"],
+    srcs: [":services-non-updatable-stubs"],
+    installable: false,
+    static_libs: [
+        "android_module_lib_stubs_current",
+    ],
+    sdk_version: "none",
+    system_modules: "none",
+    java_version: "1.8",
+    dist: {
+        dir: "apistubs/android/system-server",
     },
 }
 
@@ -505,13 +454,15 @@ droidstubs {
         "metalava-manual",
     ],
     args: priv_apps,
+    visibility: ["//visibility:private"],
 }
 
-java_library_static {
+java_library {
     name: "hwbinder.stubs",
     sdk_version: "core_current",
     libs: ["framework-annotations-lib"],
     srcs: [
         ":hwbinder-stubs-docs",
     ],
+    visibility: ["//visibility:public"],
 }

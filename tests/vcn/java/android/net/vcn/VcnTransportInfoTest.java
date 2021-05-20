@@ -16,13 +16,17 @@
 
 package android.net.vcn;
 
+import static android.net.NetworkCapabilities.REDACT_FOR_ACCESS_FINE_LOCATION;
+import static android.net.NetworkCapabilities.REDACT_NONE;
 import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 
+import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
+import android.os.Build;
 import android.os.Parcel;
 
 import org.junit.Test;
@@ -51,6 +55,22 @@ public class VcnTransportInfoTest {
     }
 
     @Test
+    public void testMakeCopyRedactForAccessFineLocation() {
+        assertEquals(
+                SUB_ID,
+                ((VcnTransportInfo) CELL_UNDERLYING_INFO.makeCopy(REDACT_FOR_ACCESS_FINE_LOCATION))
+                        .getSubId());
+
+        // TODO: remove the if statement when S pushes to AOSP.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            assertEquals(
+                    WifiConfiguration.INVALID_NETWORK_ID,
+                    ((VcnTransportInfo) WIFI_UNDERLYING_INFO.makeCopy(
+                            REDACT_FOR_ACCESS_FINE_LOCATION)).getWifiInfo().getNetworkId());
+        }
+    }
+
+    @Test
     public void testEquals() {
         assertEquals(CELL_UNDERLYING_INFO, CELL_UNDERLYING_INFO);
         assertEquals(WIFI_UNDERLYING_INFO, WIFI_UNDERLYING_INFO);
@@ -58,14 +78,31 @@ public class VcnTransportInfoTest {
     }
 
     @Test
-    public void testParcelUnparcel() {
-        verifyParcelingIsNull(CELL_UNDERLYING_INFO);
-        verifyParcelingIsNull(WIFI_UNDERLYING_INFO);
+    public void testApplicableRedactions() {
+        assertEquals(REDACT_NONE, CELL_UNDERLYING_INFO.getApplicableRedactions());
+
+        final long wifiRedactions = WIFI_INFO.getApplicableRedactions();
+        assertEquals(wifiRedactions, WIFI_UNDERLYING_INFO.getApplicableRedactions());
     }
 
-    private void verifyParcelingIsNull(VcnTransportInfo vcnTransportInfo) {
-        Parcel parcel = Parcel.obtain();
-        vcnTransportInfo.writeToParcel(parcel, 0 /* flags */);
-        assertNull(VcnTransportInfo.CREATOR.createFromParcel(parcel));
+    @Test
+    public void testParcelNotRedactedForSysUi() {
+        VcnTransportInfo cellRedacted = parcelForSysUi(CELL_UNDERLYING_INFO);
+        assertEquals(SUB_ID, cellRedacted.getSubId());
+        VcnTransportInfo wifiRedacted = parcelForSysUi(WIFI_UNDERLYING_INFO);
+        assertEquals(NETWORK_ID, wifiRedacted.getWifiInfo().getNetworkId());
+    }
+
+    private VcnTransportInfo parcelForSysUi(VcnTransportInfo vcnTransportInfo) {
+        // Allow fully unredacted; SysUI will have all the relevant permissions.
+        final VcnTransportInfo unRedacted = (VcnTransportInfo) vcnTransportInfo.makeCopy(
+                REDACT_NONE);
+        final Parcel parcel = Parcel.obtain();
+        unRedacted.writeToParcel(parcel, 0 /* flags */);
+        parcel.setDataPosition(0);
+
+        final VcnTransportInfo unparceled = VcnTransportInfo.CREATOR.createFromParcel(parcel);
+        assertEquals(vcnTransportInfo, unparceled);
+        return unparceled;
     }
 }

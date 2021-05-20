@@ -24,12 +24,12 @@ package {
 
 filegroup {
     name: "non-updatable-system-server-current.txt",
-    srcs: ["non-updatable-current.txt"],
+    srcs: ["current.txt"],
     visibility: ["//frameworks/base/api"],
 }
 
 filegroup {
     name: "non-updatable-system-server-removed.txt",
-    srcs: ["non-updatable-removed.txt"],
+    srcs: ["removed.txt"],
     visibility: ["//frameworks/base/api"],
 }

@@ -67,8 +67,8 @@
     <string name="uninstall_done_app" msgid="4588850984473605768">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ကို ဖယ်ရှားလိုက်ပါပြီ"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"ဖယ်ရှား၍ မရပါ။"</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ကို ဖယ်ရှား၍မရပါ။"</string>
-    <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"ဖွင့်ထားသော စက်ပစ္စည်းစီမံခန့်ခွဲမှုအက်ပ်အား ဖယ်ရှား၍မရပါ"</string>
-    <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"<xliff:g id="USERNAME">%1$s</xliff:g> အတွက် ဖွင့်ထားသော စက်ပစ္စည်းစီမံခန့်ခွဲမှုအက်ပ်အား ဖယ်ရှား၍မရပါ"</string>
+    <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"အသုံးပြုနေသော စက်စီမံအက်ပ်ကို ဖယ်ရှား၍မရပါ"</string>
+    <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"<xliff:g id="USERNAME">%1$s</xliff:g> အတွက် ဖွင့်ထားသော စက်စီမံအက်ပ်ကို ဖယ်ရှား၍မရပါ"</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"ဤအက်ပ်သည် အချို့အသုံးပြုသူများ သို့မဟုတ် ပရိုဖိုင်များအတွက် လိုအပ်ပြီး အခြားသူများအတွက် ဖယ်ရှားထားသည်"</string>
     <string name="uninstall_blocked_profile_owner" msgid="6373897407002404848">"သင့်ပရိုဖိုင်အတွက် ဤအက်ပ်ကိုလိုအပ်သောကြောင့် ဖယ်ရှား၍မရပါ။"</string>
     <string name="uninstall_blocked_device_owner" msgid="6724602931761073901">"ဤအက်ပ်ကို သင်၏ စီမံခန့်ခွဲသူကလိုအပ်သောကြောင့် ၎င်းကို ဖယ်ရှား၍မရပါ။"</string>

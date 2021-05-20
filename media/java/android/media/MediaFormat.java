@@ -108,6 +108,15 @@ import java.util.stream.Collectors;
  * <tr><td>{@link #KEY_ENCODER_DELAY}</td><td>Integer</td><td>optional, the number of frames to trim from the start of the decoded audio stream.</td></tr>
  * <tr><td>{@link #KEY_ENCODER_PADDING}</td><td>Integer</td><td>optional, the number of frames to trim from the end of the decoded audio stream.</td></tr>
  * <tr><td>{@link #KEY_FLAC_COMPRESSION_LEVEL}</td><td>Integer</td><td><b>encoder-only</b>, optional, if content is FLAC audio, specifies the desired compression level.</td></tr>
+ * <tr><td>{@link #KEY_MPEGH_PROFILE_LEVEL_INDICATION}</td><td>Integer</td>
+ *     <td><b>decoder-only</b>, optional, if content is MPEG-H audio,
+ *         specifies the profile and level of the stream.</td></tr>
+ * <tr><td>{@link #KEY_MPEGH_COMPATIBLE_SETS}</td><td>ByteBuffer</td>
+ *     <td><b>decoder-only</b>, optional, if content is MPEG-H audio,
+ *         specifies the compatible sets (profile and level) of the stream.</td></tr>
+ * <tr><td>{@link #KEY_MPEGH_REFERENCE_CHANNEL_LAYOUT}</td>
+ *     <td>Integer</td><td><b>decoder-only</b>, optional, if content is MPEG-H audio,
+ *         specifies the preferred reference channel layout of the stream.</td></tr>
  * </table>
  *
  * Subtitle formats have the following keys:
@@ -160,6 +169,10 @@ public final class MediaFormat {
     public static final String MIMETYPE_AUDIO_EAC3_JOC = "audio/eac3-joc";
     public static final String MIMETYPE_AUDIO_AC4 = "audio/ac4";
     public static final String MIMETYPE_AUDIO_SCRAMBLED = "audio/scrambled";
+    /** MIME type for MPEG-H Audio single stream */
+    public static final String MIMETYPE_AUDIO_MPEGH_MHA1 = "audio/mha1";
+    /** MIME type for MPEG-H Audio single stream, encapsulated in MHAS */
+    public static final String MIMETYPE_AUDIO_MPEGH_MHM1 = "audio/mhm1";
 
     /**
      * MIME type for HEIF still image data encoded in HEVC.
@@ -805,6 +818,30 @@ public final class MediaFormat {
      * to 8 (slowest, most compression).
      */
     public static final String KEY_FLAC_COMPRESSION_LEVEL = "flac-compression-level";
+
+    /**
+     * A key describing the MPEG-H stream profile-level indication.
+     *
+     * See ISO_IEC_23008-3;2019 MHADecoderConfigurationRecord mpegh3daProfileLevelIndication.
+     */
+    public static final String KEY_MPEGH_PROFILE_LEVEL_INDICATION =
+            "mpegh-profile-level-indication";
+
+    /**
+     * A key describing the MPEG-H stream compatible sets.
+     *
+     * See FDAmd_2 of ISO_IEC_23008-3;2019 MHAProfileAndLevelCompatibilitySetBox.
+     */
+    public static final String KEY_MPEGH_COMPATIBLE_SETS = "mpegh-compatible-sets";
+
+    /**
+     * A key describing the MPEG-H stream reference channel layout.
+     *
+     * See ISO_IEC_23008-3;2019 MHADecoderConfigurationRecord referenceChannelLayout
+     * and ISO_IEC_23001‐8 ChannelConfiguration value.
+     */
+    public static final String KEY_MPEGH_REFERENCE_CHANNEL_LAYOUT =
+            "mpegh-reference-channel-layout";
 
     /**
      * A key describing the encoding complexity.

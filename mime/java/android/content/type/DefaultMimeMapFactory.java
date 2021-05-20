@@ -96,7 +96,7 @@ public class DefaultMimeMapFactory {
                     specs.add(spec);
                     startIdx = endIdx + 1; // skip over the space
                 } while (startIdx < line.length());
-                builder.put(specs.get(0), specs.subList(1, specs.size()));
+                builder.addMimeMapping(specs.get(0), specs.subList(1, specs.size()));
             }
         } catch (IOException | RuntimeException e) {
             throw new RuntimeException("Failed to parse " + resourceName, e);

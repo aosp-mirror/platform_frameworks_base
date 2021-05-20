@@ -238,7 +238,7 @@ package android.net {
     method public final void sendQosSessionLost(int, int, int);
     method public final void sendSocketKeepaliveEvent(int, int);
     method @Deprecated public void setLegacySubtype(int, @NonNull String);
-    method public void setTeardownDelayMs(@IntRange(from=0, to=0x1388) int);
+    method public void setTeardownDelayMillis(@IntRange(from=0, to=0x1388) int);
     method public final void setUnderlyingNetworks(@Nullable java.util.List<android.net.Network>);
     method public void unregister();
     field public static final int VALIDATION_STATUS_NOT_VALID = 2; // 0x2
@@ -275,7 +275,7 @@ package android.net {
     method @NonNull public int[] getAdministratorUids();
     method @Nullable public static String getCapabilityCarrierName(int);
     method @Nullable public String getSsid();
-    method @NonNull public java.util.Set<java.lang.Integer> getSubIds();
+    method @NonNull public java.util.Set<java.lang.Integer> getSubscriptionIds();
     method @NonNull public int[] getTransportTypes();
     method public boolean isPrivateDnsBroken();
     method public boolean satisfiedByNetworkCapabilities(@Nullable android.net.NetworkCapabilities);
@@ -294,7 +294,6 @@ package android.net {
     method @NonNull public android.net.NetworkCapabilities.Builder addCapability(int);
     method @NonNull public android.net.NetworkCapabilities.Builder addTransportType(int);
     method @NonNull public android.net.NetworkCapabilities build();
-    method @NonNull public android.net.NetworkCapabilities.Builder clearAll();
     method @NonNull public android.net.NetworkCapabilities.Builder removeCapability(int);
     method @NonNull public android.net.NetworkCapabilities.Builder removeTransportType(int);
     method @NonNull @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY) public android.net.NetworkCapabilities.Builder setAdministratorUids(@NonNull int[]);
@@ -306,8 +305,9 @@ package android.net {
     method @NonNull @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY) public android.net.NetworkCapabilities.Builder setRequestorUid(int);
     method @NonNull @RequiresPermission(android.Manifest.permission.NETWORK_SIGNAL_STRENGTH_WAKEUP) public android.net.NetworkCapabilities.Builder setSignalStrength(int);
     method @NonNull @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY) public android.net.NetworkCapabilities.Builder setSsid(@Nullable String);
-    method @NonNull public android.net.NetworkCapabilities.Builder setSubIds(@NonNull java.util.Set<java.lang.Integer>);
+    method @NonNull public android.net.NetworkCapabilities.Builder setSubscriptionIds(@NonNull java.util.Set<java.lang.Integer>);
     method @NonNull public android.net.NetworkCapabilities.Builder setTransportInfo(@Nullable android.net.TransportInfo);
+    method @NonNull public static android.net.NetworkCapabilities.Builder withoutDefaultCapabilities();
   }
 
   public class NetworkProvider {
@@ -329,7 +329,7 @@ package android.net {
 
   public static class NetworkRequest.Builder {
     method @NonNull @RequiresPermission(android.Manifest.permission.NETWORK_SIGNAL_STRENGTH_WAKEUP) public android.net.NetworkRequest.Builder setSignalStrength(int);
-    method @NonNull public android.net.NetworkRequest.Builder setSubIds(@NonNull java.util.Set<java.lang.Integer>);
+    method @NonNull public android.net.NetworkRequest.Builder setSubscriptionIds(@NonNull java.util.Set<java.lang.Integer>);
   }
 
   public final class NetworkScore implements android.os.Parcelable {
@@ -381,6 +381,7 @@ package android.net {
   public abstract class QosFilter {
     method @NonNull public abstract android.net.Network getNetwork();
     method public abstract boolean matchesLocalAddress(@NonNull java.net.InetAddress, int, int);
+    method public abstract boolean matchesRemoteAddress(@NonNull java.net.InetAddress, int, int);
   }
 
   public final class QosSession implements android.os.Parcelable {
@@ -403,6 +404,7 @@ package android.net {
     method public int describeContents();
     method @NonNull public java.net.InetSocketAddress getLocalSocketAddress();
     method @NonNull public android.net.Network getNetwork();
+    method @Nullable public java.net.InetSocketAddress getRemoteSocketAddress();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.QosSocketInfo> CREATOR;
   }

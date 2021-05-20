@@ -21,7 +21,7 @@ package {
 
 android_app {
     name: "ServiceConnectivityResources",
-    sdk_version: "module_current",
+    sdk_version: "module_30",
     resource_dirs: [
         "res",
     ],
@@ -30,6 +30,10 @@ android_app {
     apex_available: [
         "com.android.tethering",
     ],
-    // TODO: use a dedicated cert once generated
-    certificate: "platform",
+    certificate: ":com.android.connectivity.resources.certificate",
+}
+
+android_app_certificate {
+    name: "com.android.connectivity.resources.certificate",
+    certificate: "resources-certs/com.android.connectivity.resources",
 }

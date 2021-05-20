@@ -134,7 +134,7 @@ public final class CellSignalStrengthNr extends CellSignalStrength implements Pa
      *
      * Range [0, 15] for each CQI.
      */
-    private List<Integer> mCsiCqiReport;;
+    private List<Integer> mCsiCqiReport;
     private int mSsRsrp;
     private int mSsRsrq;
     private int mSsSinr;
@@ -172,13 +172,13 @@ public final class CellSignalStrengthNr extends CellSignalStrength implements Pa
      * @hide
      */
     public CellSignalStrengthNr(int csiRsrp, int csiRsrq, int csiSinr, int csiCqiTableIndex,
-            List<Integer> csiCqiReport, int ssRsrp, int ssRsrq, int ssSinr) {
+            List<Byte> csiCqiReport, int ssRsrp, int ssRsrq, int ssSinr) {
         mCsiRsrp = inRangeOrUnavailable(csiRsrp, -140, -44);
         mCsiRsrq = inRangeOrUnavailable(csiRsrq, -20, -3);
         mCsiSinr = inRangeOrUnavailable(csiSinr, -23, 23);
         mCsiCqiTableIndex = inRangeOrUnavailable(csiCqiTableIndex, 1, 3);
-        mCsiCqiReport =  csiCqiReport.stream()
-                .map(cqi -> new Integer(inRangeOrUnavailable(cqi.intValue(), 1, 3)))
+        mCsiCqiReport = csiCqiReport.stream()
+                .map(cqi -> new Integer(inRangeOrUnavailable(Byte.toUnsignedInt(cqi), 1, 3)))
                 .collect(Collectors.toList());
         mSsRsrp = inRangeOrUnavailable(ssRsrp, -140, -44);
         mSsRsrq = inRangeOrUnavailable(ssRsrq, -43, 20);

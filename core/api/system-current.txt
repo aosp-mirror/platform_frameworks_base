@@ -1124,10 +1124,11 @@ package android.app.backup {
 package android.app.compat {
 
   public final class CompatChanges {
+    method @RequiresPermission(android.Manifest.permission.OVERRIDE_COMPAT_CHANGE_CONFIG_ON_RELEASE_BUILD) public static void addPackageOverrides(@NonNull String, @NonNull java.util.Map<java.lang.Long,android.app.compat.PackageOverride>);
     method public static boolean isChangeEnabled(long);
     method @RequiresPermission(allOf={"android.permission.READ_COMPAT_CHANGE_CONFIG", "android.permission.LOG_COMPAT_CHANGE"}) public static boolean isChangeEnabled(long, @NonNull String, @NonNull android.os.UserHandle);
     method @RequiresPermission(allOf={"android.permission.READ_COMPAT_CHANGE_CONFIG", "android.permission.LOG_COMPAT_CHANGE"}) public static boolean isChangeEnabled(long, int);
-    method @RequiresPermission(android.Manifest.permission.OVERRIDE_COMPAT_CHANGE_CONFIG_ON_RELEASE_BUILD) public static void setPackageOverride(@NonNull String, @NonNull java.util.Map<java.lang.Long,android.app.compat.PackageOverride>);
+    method @RequiresPermission(android.Manifest.permission.OVERRIDE_COMPAT_CHANGE_CONFIG_ON_RELEASE_BUILD) public static void removePackageOverrides(@NonNull String, @NonNull java.util.Set<java.lang.Long>);
   }
 
   public final class PackageOverride {
@@ -1502,6 +1503,8 @@ package android.bluetooth {
   }
 
   public static interface BluetoothAdapter.OobDataCallback {
+    method public void onError(int);
+    method public void onOobData(int, @NonNull android.bluetooth.OobData);
   }
 
   public final class BluetoothDevice implements android.os.Parcelable {
@@ -1683,8 +1686,6 @@ package android.bluetooth {
   }
 
   public final class OobData implements android.os.Parcelable {
-    method @NonNull public static android.bluetooth.OobData.ClassicBuilder createClassicBuilder(@NonNull byte[], @NonNull byte[], @NonNull byte[]);
-    method @NonNull public static android.bluetooth.OobData.LeBuilder createLeBuilder(@NonNull byte[], @NonNull byte[], int);
     method @NonNull public byte[] getClassOfDevice();
     method @NonNull public byte[] getClassicLength();
     method @NonNull public byte[] getConfirmationHash();
@@ -1717,6 +1718,7 @@ package android.bluetooth {
   }
 
   public static final class OobData.ClassicBuilder {
+    ctor public OobData.ClassicBuilder(@NonNull byte[], @NonNull byte[], @NonNull byte[]);
     method @NonNull public android.bluetooth.OobData build();
     method @NonNull public android.bluetooth.OobData.ClassicBuilder setClassOfDevice(@NonNull byte[]);
     method @NonNull public android.bluetooth.OobData.ClassicBuilder setDeviceName(@NonNull byte[]);
@@ -1724,6 +1726,7 @@ package android.bluetooth {
   }
 
   public static final class OobData.LeBuilder {
+    ctor public OobData.LeBuilder(@NonNull byte[], @NonNull byte[], int);
     method @NonNull public android.bluetooth.OobData build();
     method @NonNull public android.bluetooth.OobData.LeBuilder setDeviceName(@NonNull byte[]);
     method @NonNull public android.bluetooth.OobData.LeBuilder setLeFlags(int);
@@ -6099,10 +6102,6 @@ package android.metrics {
 
 package android.net {
 
-  public class DnsResolverServiceManager {
-    method @NonNull @RequiresPermission(android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK) public static android.os.IBinder getService(@NonNull android.content.Context);
-  }
-
   public class EthernetManager {
     method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_STACK, android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK}) public android.net.EthernetManager.TetheredInterfaceRequest requestTetheredInterface(@NonNull java.util.concurrent.Executor, @NonNull android.net.EthernetManager.TetheredInterfaceCallback);
   }
@@ -9463,10 +9462,6 @@ package android.telephony {
     field public static final String KEY_SUPPORT_CDMA_1X_VOICE_CALLS_BOOL = "support_cdma_1x_voice_calls_bool";
   }
 
-  public static final class CarrierConfigManager.Ims {
-    field public static final String KEY_PUBLISH_SERVICE_DESC_FEATURE_TAG_MAP_OVERRIDE_STRING_ARRAY = "ims.publish_service_desc_feature_tag_map_override_string_array";
-  }
-
   public static final class CarrierConfigManager.Wifi {
     field public static final String KEY_HOTSPOT_MAX_CLIENT_COUNT = "wifi.hotspot_maximum_client_count";
     field public static final String KEY_PREFIX = "wifi.";
@@ -10075,6 +10070,7 @@ package android.telephony {
     method public boolean canManageSubscription(@NonNull android.telephony.SubscriptionInfo, @NonNull String);
     method @NonNull @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int[] getActiveSubscriptionIdList();
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public android.telephony.SubscriptionInfo getActiveSubscriptionInfoForIcc(@NonNull String);
+    method @NonNull @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public byte[] getAllSimSpecificSettingsForBackup();
     method public java.util.List<android.telephony.SubscriptionInfo> getAvailableSubscriptionInfoList();
     method @NonNull @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int[] getCompleteActiveSubscriptionIdList();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getEnabledSubscriptionId(int);
@@ -10082,6 +10078,7 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isSubscriptionEnabled(int);
     method public void requestEmbeddedSubscriptionInfoListRefresh();
     method public void requestEmbeddedSubscriptionInfoListRefresh(int);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void restoreAllSimSpecificSettingsFromBackup(@NonNull byte[]);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDefaultDataSubId(int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDefaultSmsSubId(int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDefaultVoiceSubscriptionId(int);
@@ -11159,10 +11156,11 @@ package android.telephony.ims {
   }
 
   public interface DelegateStateCallback {
+    method public void onConfigurationChanged(@NonNull android.telephony.ims.SipDelegateConfiguration);
     method public void onCreated(@NonNull android.telephony.ims.stub.SipDelegate, @Nullable java.util.Set<android.telephony.ims.FeatureTagState>);
     method public void onDestroyed(int);
     method public void onFeatureTagRegistrationChanged(@NonNull android.telephony.ims.DelegateRegistrationState);
-    method public void onImsConfigurationChanged(@NonNull android.telephony.ims.SipDelegateImsConfiguration);
+    method @Deprecated public void onImsConfigurationChanged(@NonNull android.telephony.ims.SipDelegateImsConfiguration);
   }
 
   public final class FeatureTagState implements android.os.Parcelable {
@@ -11901,6 +11899,76 @@ package android.telephony.ims {
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ims.RtpHeaderExtensionType> CREATOR;
   }
 
+  public final class SipDelegateConfiguration implements android.os.Parcelable {
+    method public int describeContents();
+    method @Nullable public String getHomeDomain();
+    method @Nullable public String getImei();
+    method @Nullable public android.telephony.ims.SipDelegateConfiguration.IpSecConfiguration getIpSecConfiguration();
+    method @NonNull public java.net.InetSocketAddress getLocalAddress();
+    method public int getMaxUdpPayloadSizeBytes();
+    method @Nullable public java.net.InetSocketAddress getNatSocketAddress();
+    method @Nullable public String getPrivateUserIdentifier();
+    method @Nullable public android.net.Uri getPublicGruuUri();
+    method @Nullable public String getPublicUserIdentifier();
+    method @Nullable public String getSipAssociatedUriHeader();
+    method @Nullable public String getSipAuthenticationHeader();
+    method @Nullable public String getSipAuthenticationNonce();
+    method @Nullable public String getSipCniHeader();
+    method @Nullable public String getSipContactUserParameter();
+    method @Nullable public String getSipPaniHeader();
+    method @Nullable public String getSipPathHeader();
+    method @Nullable public String getSipPlaniHeader();
+    method @NonNull public java.net.InetSocketAddress getSipServerAddress();
+    method @Nullable public String getSipServiceRouteHeader();
+    method @Nullable public String getSipUserAgentHeader();
+    method public int getTransportType();
+    method @IntRange(from=0) public long getVersion();
+    method public boolean isSipCompactFormEnabled();
+    method public boolean isSipKeepaliveEnabled();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ims.SipDelegateConfiguration> CREATOR;
+    field public static final int SIP_TRANSPORT_TCP = 1; // 0x1
+    field public static final int SIP_TRANSPORT_UDP = 0; // 0x0
+    field public static final int UDP_PAYLOAD_SIZE_UNDEFINED = -1; // 0xffffffff
+  }
+
+  public static final class SipDelegateConfiguration.Builder {
+    ctor public SipDelegateConfiguration.Builder(@IntRange(from=0) long, int, @NonNull java.net.InetSocketAddress, @NonNull java.net.InetSocketAddress);
+    ctor public SipDelegateConfiguration.Builder(@NonNull android.telephony.ims.SipDelegateConfiguration);
+    method @NonNull public android.telephony.ims.SipDelegateConfiguration build();
+    method @NonNull public android.telephony.ims.SipDelegateConfiguration.Builder setHomeDomain(@Nullable String);
+    method @NonNull public android.telephony.ims.SipDelegateConfiguration.Builder setImei(@Nullable String);
+    method @NonNull public android.telephony.ims.SipDelegateConfiguration.Builder setIpSecConfiguration(@Nullable android.telephony.ims.SipDelegateConfiguration.IpSecConfiguration);
+    method @NonNull public android.telephony.ims.SipDelegateConfiguration.Builder setMaxUdpPayloadSizeBytes(@IntRange(from=1) int);
+    method @NonNull public android.telephony.ims.SipDelegateConfiguration.Builder setNatSocketAddress(@Nullable java.net.InetSocketAddress);
+    method @NonNull public android.telephony.ims.SipDelegateConfiguration.Builder setPrivateUserIdentifier(@Nullable String);
+    method @NonNull public android.telephony.ims.SipDelegateConfiguration.Builder setPublicGruuUri(@Nullable android.net.Uri);
+    method @NonNull public android.telephony.ims.SipDelegateConfiguration.Builder setPublicUserIdentifier(@Nullable String);
+    method @NonNull public android.telephony.ims.SipDelegateConfiguration.Builder setSipAssociatedUriHeader(@Nullable String);
+    method @NonNull public android.telephony.ims.SipDelegateConfiguration.Builder setSipAuthenticationHeader(@Nullable String);
+    method @NonNull public android.telephony.ims.SipDelegateConfiguration.Builder setSipAuthenticationNonce(@Nullable String);
+    method @NonNull public android.telephony.ims.SipDelegateConfiguration.Builder setSipCniHeader(@Nullable String);
+    method @NonNull public android.telephony.ims.SipDelegateConfiguration.Builder setSipCompactFormEnabled(boolean);
+    method @NonNull public android.telephony.ims.SipDelegateConfiguration.Builder setSipContactUserParameter(@Nullable String);
+    method @NonNull public android.telephony.ims.SipDelegateConfiguration.Builder setSipKeepaliveEnabled(boolean);
+    method @NonNull public android.telephony.ims.SipDelegateConfiguration.Builder setSipPaniHeader(@Nullable String);
+    method @NonNull public android.telephony.ims.SipDelegateConfiguration.Builder setSipPathHeader(@Nullable String);
+    method @NonNull public android.telephony.ims.SipDelegateConfiguration.Builder setSipPlaniHeader(@Nullable String);
+    method @NonNull public android.telephony.ims.SipDelegateConfiguration.Builder setSipServiceRouteHeader(@Nullable String);
+    method @NonNull public android.telephony.ims.SipDelegateConfiguration.Builder setSipUserAgentHeader(@Nullable String);
+  }
+
+  public static final class SipDelegateConfiguration.IpSecConfiguration {
+    ctor public SipDelegateConfiguration.IpSecConfiguration(int, int, int, int, int, int, @NonNull String);
+    method public int getLastLocalTxPort();
+    method public int getLastRemoteTxPort();
+    method public int getLocalRxPort();
+    method public int getLocalTxPort();
+    method public int getRemoteRxPort();
+    method public int getRemoteTxPort();
+    method @NonNull public String getSipSecurityVerifyHeader();
+  }
+
   public interface SipDelegateConnection {
     method public default void cleanupSession(@NonNull String);
     method @Deprecated public default void closeDialog(@NonNull String);
@@ -11909,65 +11977,65 @@ package android.telephony.ims {
     method public void sendMessage(@NonNull android.telephony.ims.SipMessage, long);
   }
 
-  public final class SipDelegateImsConfiguration implements android.os.Parcelable {
-    method public boolean containsKey(@NonNull String);
-    method @NonNull public android.os.PersistableBundle copyBundle();
-    method public int describeContents();
-    method public boolean getBoolean(@NonNull String, boolean);
-    method public int getInt(@NonNull String, int);
-    method @Nullable public String getString(@NonNull String);
-    method public long getVersion();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ims.SipDelegateImsConfiguration> CREATOR;
-    field public static final String IPTYPE_IPV4 = "IPV4";
-    field public static final String IPTYPE_IPV6 = "IPV6";
-    field public static final String KEY_SIP_CONFIG_AUTHENTICATION_HEADER_STRING = "sip_config_auhentication_header_string";
-    field public static final String KEY_SIP_CONFIG_AUTHENTICATION_NONCE_STRING = "sip_config_authentication_nonce_string";
-    field public static final String KEY_SIP_CONFIG_CELLULAR_NETWORK_INFO_HEADER_STRING = "sip_config_cellular_network_info_header_string";
-    field public static final String KEY_SIP_CONFIG_HOME_DOMAIN_STRING = "sip_config_home_domain_string";
-    field public static final String KEY_SIP_CONFIG_IMEI_STRING = "sip_config_imei_string";
-    field public static final String KEY_SIP_CONFIG_IPTYPE_STRING = "sip_config_iptype_string";
-    field public static final String KEY_SIP_CONFIG_IS_COMPACT_FORM_ENABLED_BOOL = "sip_config_is_compact_form_enabled_bool";
-    field public static final String KEY_SIP_CONFIG_IS_GRUU_ENABLED_BOOL = "sip_config_is_gruu_enabled_bool";
-    field public static final String KEY_SIP_CONFIG_IS_IPSEC_ENABLED_BOOL = "sip_config_is_ipsec_enabled_bool";
-    field public static final String KEY_SIP_CONFIG_IS_KEEPALIVE_ENABLED_BOOL = "sip_config_is_keepalive_enabled_bool";
-    field public static final String KEY_SIP_CONFIG_IS_NAT_ENABLED_BOOL = "sip_config_is_nat_enabled_bool";
-    field public static final String KEY_SIP_CONFIG_MAX_PAYLOAD_SIZE_ON_UDP_INT = "sip_config_udp_max_payload_size_int";
-    field public static final String KEY_SIP_CONFIG_PATH_HEADER_STRING = "sip_config_path_header_string";
-    field public static final String KEY_SIP_CONFIG_P_ACCESS_NETWORK_INFO_HEADER_STRING = "sip_config_p_access_network_info_header_string";
-    field public static final String KEY_SIP_CONFIG_P_ASSOCIATED_URI_HEADER_STRING = "sip_config_p_associated_uri_header_string";
-    field public static final String KEY_SIP_CONFIG_P_LAST_ACCESS_NETWORK_INFO_HEADER_STRING = "sip_config_p_last_access_network_info_header_string";
-    field public static final String KEY_SIP_CONFIG_SECURITY_VERIFY_HEADER_STRING = "sip_config_security_verify_header_string";
-    field public static final String KEY_SIP_CONFIG_SERVER_DEFAULT_IPADDRESS_STRING = "sip_config_server_default_ipaddress_string";
-    field public static final String KEY_SIP_CONFIG_SERVER_DEFAULT_PORT_INT = "sip_config_server_default_port_int";
-    field public static final String KEY_SIP_CONFIG_SERVER_IPSEC_CLIENT_PORT_INT = "sip_config_server_ipsec_client_port_int";
-    field public static final String KEY_SIP_CONFIG_SERVER_IPSEC_OLD_CLIENT_PORT_INT = "sip_config_server_ipsec_old_client_port_int";
-    field public static final String KEY_SIP_CONFIG_SERVER_IPSEC_SERVER_PORT_INT = "sip_config_server_ipsec_server_port_int";
-    field public static final String KEY_SIP_CONFIG_SERVICE_ROUTE_HEADER_STRING = "sip_config_service_route_header_string";
-    field public static final String KEY_SIP_CONFIG_TRANSPORT_TYPE_STRING = "sip_config_protocol_type_string";
-    field public static final String KEY_SIP_CONFIG_UE_DEFAULT_IPADDRESS_STRING = "sip_config_ue_default_ipaddress_string";
-    field public static final String KEY_SIP_CONFIG_UE_DEFAULT_PORT_INT = "sip_config_ue_default_port_int";
-    field public static final String KEY_SIP_CONFIG_UE_IPSEC_CLIENT_PORT_INT = "sip_config_ue_ipsec_client_port_int";
-    field public static final String KEY_SIP_CONFIG_UE_IPSEC_OLD_CLIENT_PORT_INT = "sip_config_ue_ipsec_old_client_port_int";
-    field public static final String KEY_SIP_CONFIG_UE_IPSEC_SERVER_PORT_INT = "sip_config_ue_ipsec_server_port_int";
-    field public static final String KEY_SIP_CONFIG_UE_PRIVATE_USER_ID_STRING = "sip_config_ue_private_user_id_string";
-    field public static final String KEY_SIP_CONFIG_UE_PUBLIC_GRUU_STRING = "sip_config_ue_public_gruu_string";
-    field public static final String KEY_SIP_CONFIG_UE_PUBLIC_IPADDRESS_WITH_NAT_STRING = "sip_config_ue_public_ipaddress_with_nat_string";
-    field public static final String KEY_SIP_CONFIG_UE_PUBLIC_PORT_WITH_NAT_INT = "sip_config_ue_public_port_with_nat_int";
-    field public static final String KEY_SIP_CONFIG_UE_PUBLIC_USER_ID_STRING = "sip_config_ue_public_user_id_string";
-    field public static final String KEY_SIP_CONFIG_URI_USER_PART_STRING = "sip_config_uri_user_part_string";
-    field public static final String KEY_SIP_CONFIG_USER_AGENT_HEADER_STRING = "sip_config_sip_user_agent_header_string";
-    field public static final String SIP_TRANSPORT_TCP = "TCP";
-    field public static final String SIP_TRANSPORT_UDP = "UDP";
+  @Deprecated public final class SipDelegateImsConfiguration implements android.os.Parcelable {
+    method @Deprecated public boolean containsKey(@NonNull String);
+    method @Deprecated @NonNull public android.os.PersistableBundle copyBundle();
+    method @Deprecated public int describeContents();
+    method @Deprecated public boolean getBoolean(@NonNull String, boolean);
+    method @Deprecated public int getInt(@NonNull String, int);
+    method @Deprecated @Nullable public String getString(@NonNull String);
+    method @Deprecated public long getVersion();
+    method @Deprecated public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @Deprecated @NonNull public static final android.os.Parcelable.Creator<android.telephony.ims.SipDelegateImsConfiguration> CREATOR;
+    field @Deprecated public static final String IPTYPE_IPV4 = "IPV4";
+    field @Deprecated public static final String IPTYPE_IPV6 = "IPV6";
+    field @Deprecated public static final String KEY_SIP_CONFIG_AUTHENTICATION_HEADER_STRING = "sip_config_auhentication_header_string";
+    field @Deprecated public static final String KEY_SIP_CONFIG_AUTHENTICATION_NONCE_STRING = "sip_config_authentication_nonce_string";
+    field @Deprecated public static final String KEY_SIP_CONFIG_CELLULAR_NETWORK_INFO_HEADER_STRING = "sip_config_cellular_network_info_header_string";
+    field @Deprecated public static final String KEY_SIP_CONFIG_HOME_DOMAIN_STRING = "sip_config_home_domain_string";
+    field @Deprecated public static final String KEY_SIP_CONFIG_IMEI_STRING = "sip_config_imei_string";
+    field @Deprecated public static final String KEY_SIP_CONFIG_IPTYPE_STRING = "sip_config_iptype_string";
+    field @Deprecated public static final String KEY_SIP_CONFIG_IS_COMPACT_FORM_ENABLED_BOOL = "sip_config_is_compact_form_enabled_bool";
+    field @Deprecated public static final String KEY_SIP_CONFIG_IS_GRUU_ENABLED_BOOL = "sip_config_is_gruu_enabled_bool";
+    field @Deprecated public static final String KEY_SIP_CONFIG_IS_IPSEC_ENABLED_BOOL = "sip_config_is_ipsec_enabled_bool";
+    field @Deprecated public static final String KEY_SIP_CONFIG_IS_KEEPALIVE_ENABLED_BOOL = "sip_config_is_keepalive_enabled_bool";
+    field @Deprecated public static final String KEY_SIP_CONFIG_IS_NAT_ENABLED_BOOL = "sip_config_is_nat_enabled_bool";
+    field @Deprecated public static final String KEY_SIP_CONFIG_MAX_PAYLOAD_SIZE_ON_UDP_INT = "sip_config_udp_max_payload_size_int";
+    field @Deprecated public static final String KEY_SIP_CONFIG_PATH_HEADER_STRING = "sip_config_path_header_string";
+    field @Deprecated public static final String KEY_SIP_CONFIG_P_ACCESS_NETWORK_INFO_HEADER_STRING = "sip_config_p_access_network_info_header_string";
+    field @Deprecated public static final String KEY_SIP_CONFIG_P_ASSOCIATED_URI_HEADER_STRING = "sip_config_p_associated_uri_header_string";
+    field @Deprecated public static final String KEY_SIP_CONFIG_P_LAST_ACCESS_NETWORK_INFO_HEADER_STRING = "sip_config_p_last_access_network_info_header_string";
+    field @Deprecated public static final String KEY_SIP_CONFIG_SECURITY_VERIFY_HEADER_STRING = "sip_config_security_verify_header_string";
+    field @Deprecated public static final String KEY_SIP_CONFIG_SERVER_DEFAULT_IPADDRESS_STRING = "sip_config_server_default_ipaddress_string";
+    field @Deprecated public static final String KEY_SIP_CONFIG_SERVER_DEFAULT_PORT_INT = "sip_config_server_default_port_int";
+    field @Deprecated public static final String KEY_SIP_CONFIG_SERVER_IPSEC_CLIENT_PORT_INT = "sip_config_server_ipsec_client_port_int";
+    field @Deprecated public static final String KEY_SIP_CONFIG_SERVER_IPSEC_OLD_CLIENT_PORT_INT = "sip_config_server_ipsec_old_client_port_int";
+    field @Deprecated public static final String KEY_SIP_CONFIG_SERVER_IPSEC_SERVER_PORT_INT = "sip_config_server_ipsec_server_port_int";
+    field @Deprecated public static final String KEY_SIP_CONFIG_SERVICE_ROUTE_HEADER_STRING = "sip_config_service_route_header_string";
+    field @Deprecated public static final String KEY_SIP_CONFIG_TRANSPORT_TYPE_STRING = "sip_config_protocol_type_string";
+    field @Deprecated public static final String KEY_SIP_CONFIG_UE_DEFAULT_IPADDRESS_STRING = "sip_config_ue_default_ipaddress_string";
+    field @Deprecated public static final String KEY_SIP_CONFIG_UE_DEFAULT_PORT_INT = "sip_config_ue_default_port_int";
+    field @Deprecated public static final String KEY_SIP_CONFIG_UE_IPSEC_CLIENT_PORT_INT = "sip_config_ue_ipsec_client_port_int";
+    field @Deprecated public static final String KEY_SIP_CONFIG_UE_IPSEC_OLD_CLIENT_PORT_INT = "sip_config_ue_ipsec_old_client_port_int";
+    field @Deprecated public static final String KEY_SIP_CONFIG_UE_IPSEC_SERVER_PORT_INT = "sip_config_ue_ipsec_server_port_int";
+    field @Deprecated public static final String KEY_SIP_CONFIG_UE_PRIVATE_USER_ID_STRING = "sip_config_ue_private_user_id_string";
+    field @Deprecated public static final String KEY_SIP_CONFIG_UE_PUBLIC_GRUU_STRING = "sip_config_ue_public_gruu_string";
+    field @Deprecated public static final String KEY_SIP_CONFIG_UE_PUBLIC_IPADDRESS_WITH_NAT_STRING = "sip_config_ue_public_ipaddress_with_nat_string";
+    field @Deprecated public static final String KEY_SIP_CONFIG_UE_PUBLIC_PORT_WITH_NAT_INT = "sip_config_ue_public_port_with_nat_int";
+    field @Deprecated public static final String KEY_SIP_CONFIG_UE_PUBLIC_USER_ID_STRING = "sip_config_ue_public_user_id_string";
+    field @Deprecated public static final String KEY_SIP_CONFIG_URI_USER_PART_STRING = "sip_config_uri_user_part_string";
+    field @Deprecated public static final String KEY_SIP_CONFIG_USER_AGENT_HEADER_STRING = "sip_config_sip_user_agent_header_string";
+    field @Deprecated public static final String SIP_TRANSPORT_TCP = "TCP";
+    field @Deprecated public static final String SIP_TRANSPORT_UDP = "UDP";
   }
 
-  public static final class SipDelegateImsConfiguration.Builder {
-    ctor public SipDelegateImsConfiguration.Builder(int);
-    ctor public SipDelegateImsConfiguration.Builder(@NonNull android.telephony.ims.SipDelegateImsConfiguration);
-    method @NonNull public android.telephony.ims.SipDelegateImsConfiguration.Builder addBoolean(@NonNull String, boolean);
-    method @NonNull public android.telephony.ims.SipDelegateImsConfiguration.Builder addInt(@NonNull String, int);
-    method @NonNull public android.telephony.ims.SipDelegateImsConfiguration.Builder addString(@NonNull String, @NonNull String);
-    method @NonNull public android.telephony.ims.SipDelegateImsConfiguration build();
+  @Deprecated public static final class SipDelegateImsConfiguration.Builder {
+    ctor @Deprecated public SipDelegateImsConfiguration.Builder(int);
+    ctor @Deprecated public SipDelegateImsConfiguration.Builder(@NonNull android.telephony.ims.SipDelegateImsConfiguration);
+    method @Deprecated @NonNull public android.telephony.ims.SipDelegateImsConfiguration.Builder addBoolean(@NonNull String, boolean);
+    method @Deprecated @NonNull public android.telephony.ims.SipDelegateImsConfiguration.Builder addInt(@NonNull String, int);
+    method @Deprecated @NonNull public android.telephony.ims.SipDelegateImsConfiguration.Builder addString(@NonNull String, @NonNull String);
+    method @Deprecated @NonNull public android.telephony.ims.SipDelegateImsConfiguration build();
   }
 
   public class SipDelegateManager {
@@ -12137,10 +12205,11 @@ package android.telephony.ims.stub {
   }
 
   public interface DelegateConnectionStateCallback {
+    method public default void onConfigurationChanged(@NonNull android.telephony.ims.SipDelegateConfiguration);
     method public void onCreated(@NonNull android.telephony.ims.SipDelegateConnection);
     method public void onDestroyed(int);
     method public void onFeatureTagStatusChanged(@NonNull android.telephony.ims.DelegateRegistrationState, @NonNull java.util.Set<android.telephony.ims.FeatureTagState>);
-    method public void onImsConfigurationChanged(@NonNull android.telephony.ims.SipDelegateImsConfiguration);
+    method @Deprecated public default void onImsConfigurationChanged(@NonNull android.telephony.ims.SipDelegateImsConfiguration);
   }
 
   public class ImsCallSessionImplBase implements java.lang.AutoCloseable {
@@ -12262,6 +12331,7 @@ package android.telephony.ims.stub {
     field public static final int REGISTRATION_TECH_IWLAN = 1; // 0x1
     field public static final int REGISTRATION_TECH_LTE = 0; // 0x0
     field public static final int REGISTRATION_TECH_NONE = -1; // 0xffffffff
+    field public static final int REGISTRATION_TECH_NR = 3; // 0x3
   }
 
   public class ImsSmsImplBase {
@@ -12612,12 +12682,15 @@ package android.uwb {
   }
 
   public static interface UwbManager.AdapterStateCallback {
-    method public void onStateChanged(boolean, int);
+    method public void onStateChanged(int, int);
     field public static final int STATE_CHANGED_REASON_ALL_SESSIONS_CLOSED = 1; // 0x1
     field public static final int STATE_CHANGED_REASON_ERROR_UNKNOWN = 4; // 0x4
     field public static final int STATE_CHANGED_REASON_SESSION_STARTED = 0; // 0x0
     field public static final int STATE_CHANGED_REASON_SYSTEM_BOOT = 3; // 0x3
     field public static final int STATE_CHANGED_REASON_SYSTEM_POLICY = 2; // 0x2
+    field public static final int STATE_DISABLED = 0; // 0x0
+    field public static final int STATE_ENABLED_ACTIVE = 2; // 0x2
+    field public static final int STATE_ENABLED_INACTIVE = 1; // 0x1
   }
 
 }

@@ -16,8 +16,6 @@
 package android.net;
 
 import static android.annotation.SystemApi.Client.MODULE_LIBRARIES;
-import static android.net.ConnectivitySettingsManager.PRIVATE_DNS_DEFAULT_MODE;
-import static android.net.ConnectivitySettingsManager.PRIVATE_DNS_MODE;
 import static android.net.NetworkRequest.Type.BACKGROUND_REQUEST;
 import static android.net.NetworkRequest.Type.LISTEN;
 import static android.net.NetworkRequest.Type.LISTEN_FOR_BEST;
@@ -33,7 +31,6 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
-import android.annotation.StringDef;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
@@ -41,7 +38,6 @@ import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityDiagnosticsManager.DataStallReport.DetectionMethod;
@@ -70,7 +66,6 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
-import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Range;
@@ -424,6 +419,9 @@ public class ConnectivityManager {
      * Action used to display a dialog that asks the user whether to connect to a network that is
      * not validated. This intent is used to start the dialog in settings via startActivity.
      *
+     * This action includes a {@link Network} typed extra which is called
+     * {@link ConnectivityManager#EXTRA_NETWORK} that represents the network which is unvalidated.
+     *
      * @hide
      */
     @SystemApi(client = MODULE_LIBRARIES)
@@ -432,6 +430,10 @@ public class ConnectivityManager {
     /**
      * Action used to display a dialog that asks the user whether to avoid a network that is no
      * longer validated. This intent is used to start the dialog in settings via startActivity.
+     *
+     * This action includes a {@link Network} typed extra which is called
+     * {@link ConnectivityManager#EXTRA_NETWORK} that represents the network which is no longer
+     * validated.
      *
      * @hide
      */
@@ -443,6 +445,10 @@ public class ConnectivityManager {
      * Action used to display a dialog that asks the user whether to stay connected to a network
      * that has not validated. This intent is used to start the dialog in settings via
      * startActivity.
+     *
+     * This action includes a {@link Network} typed extra which is called
+     * {@link ConnectivityManager#EXTRA_NETWORK} that represents the network which has partial
+     * connectivity.
      *
      * @hide
      */
@@ -808,38 +814,6 @@ public class ConnectivityManager {
      * @hide
      */
     public static final int NETID_UNSET = 0;
-
-    /**
-     * Private DNS Mode values.
-     *
-     * The "private_dns_mode" global setting stores a String value which is
-     * expected to be one of the following.
-     */
-
-    /**
-     * @hide
-     */
-    @SystemApi(client = MODULE_LIBRARIES)
-    public static final String PRIVATE_DNS_MODE_OFF = "off";
-    /**
-     * @hide
-     */
-    @SystemApi(client = MODULE_LIBRARIES)
-    public static final String PRIVATE_DNS_MODE_OPPORTUNISTIC = "opportunistic";
-    /**
-     * @hide
-     */
-    @SystemApi(client = MODULE_LIBRARIES)
-    public static final String PRIVATE_DNS_MODE_PROVIDER_HOSTNAME = "hostname";
-
-    /** @hide */
-    @Retention(RetentionPolicy.SOURCE)
-    @StringDef(value = {
-            PRIVATE_DNS_MODE_OFF,
-            PRIVATE_DNS_MODE_OPPORTUNISTIC,
-            PRIVATE_DNS_MODE_PROVIDER_HOSTNAME,
-    })
-    public @interface PrivateDnsMode {}
 
     /**
      * Flag to indicate that an app is not subject to any restrictions that could result in its
@@ -1424,9 +1398,9 @@ public class ConnectivityManager {
             android.Manifest.permission.NETWORK_STACK,
             android.Manifest.permission.NETWORK_SETTINGS})
     @NonNull
-    public List<NetworkStateSnapshot> getAllNetworkStateSnapshot() {
+    public List<NetworkStateSnapshot> getAllNetworkStateSnapshots() {
         try {
-            return mService.getAllNetworkStateSnapshot();
+            return mService.getAllNetworkStateSnapshots();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1550,7 +1524,7 @@ public class ConnectivityManager {
 
     /**
      * Get the {@link NetworkCapabilities} for the given {@link Network}.  This
-     * will return {@code null} if the network is unknown.
+     * will return {@code null} if the network is unknown or if the |network| argument is null.
      *
      * This will remove any location sensitive data in {@link TransportInfo} embedded in
      * {@link NetworkCapabilities#getTransportInfo()}. Some transport info instances like
@@ -3363,7 +3337,60 @@ public class ConnectivityManager {
         provider.setProviderId(NetworkProvider.ID_NONE);
     }
 
+    /**
+     * Register or update a network offer with ConnectivityService.
+     *
+     * ConnectivityService keeps track of offers made by the various providers and matches
+     * them to networking requests made by apps or the system. The provider supplies a score
+     * and the capabilities of the network it might be able to bring up ; these act as filters
+     * used by ConnectivityService to only send those requests that can be fulfilled by the
+     * provider.
+     *
+     * The provider is under no obligation to be able to bring up the network it offers at any
+     * given time. Instead, this mechanism is meant to limit requests received by providers
+     * to those they actually have a chance to fulfill, as providers don't have a way to compare
+     * the quality of the network satisfying a given request to their own offer.
+     *
+     * An offer can be updated by calling this again with the same callback object. This is
+     * similar to calling unofferNetwork and offerNetwork again, but will only update the
+     * provider with the changes caused by the changes in the offer.
+     *
+     * @param provider The provider making this offer.
+     * @param score The prospective score of the network.
+     * @param caps The prospective capabilities of the network.
+     * @param callback The callback to call when this offer is needed or unneeded.
+     * @hide
+     */
+    @RequiresPermission(anyOf = {
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+            android.Manifest.permission.NETWORK_FACTORY})
+    public void offerNetwork(@NonNull final NetworkProvider provider,
+            @NonNull final NetworkScore score, @NonNull final NetworkCapabilities caps,
+            @NonNull final INetworkOfferCallback callback) {
+        try {
+            mService.offerNetwork(Objects.requireNonNull(provider.getMessenger(), "null messenger"),
+                    Objects.requireNonNull(score, "null score"),
+                    Objects.requireNonNull(caps, "null caps"),
+                    Objects.requireNonNull(callback, "null callback"));
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 
+    /**
+     * Withdraw a network offer made with {@link #offerNetwork}.
+     *
+     * @param callback The callback passed at registration time. This must be the same object
+     *                 that was passed to {@link #offerNetwork}
+     * @hide
+     */
+    public void unofferNetwork(@NonNull final INetworkOfferCallback callback) {
+        try {
+            mService.unofferNetwork(Objects.requireNonNull(callback));
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
     /** @hide exposed via the NetworkProvider class. */
     @RequiresPermission(anyOf = {
             NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
@@ -4407,7 +4434,7 @@ public class ConnectivityManager {
     @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
     public void registerDefaultNetworkCallback(@NonNull NetworkCallback networkCallback,
             @NonNull Handler handler) {
-        registerDefaultNetworkCallbackAsUid(Process.INVALID_UID, networkCallback, handler);
+        registerDefaultNetworkCallbackForUid(Process.INVALID_UID, networkCallback, handler);
     }
 
     /**
@@ -4437,7 +4464,7 @@ public class ConnectivityManager {
     @RequiresPermission(anyOf = {
             NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
             android.Manifest.permission.NETWORK_SETTINGS})
-    public void registerDefaultNetworkCallbackAsUid(int uid,
+    public void registerDefaultNetworkCallbackForUid(int uid,
             @NonNull NetworkCallback networkCallback, @NonNull Handler handler) {
         CallbackHandler cbHandler = new CallbackHandler(handler);
         sendRequestForNetwork(uid, null /* need */, networkCallback, 0 /* timeoutMs */,
@@ -5307,10 +5334,10 @@ public class ConnectivityManager {
      * {@link #unregisterNetworkCallback(NetworkCallback)}.
      *
      * @param request {@link NetworkRequest} describing this request.
-     * @param handler {@link Handler} to specify the thread upon which the callback will be invoked.
-     *                If null, the callback is invoked on the default internal Handler.
      * @param networkCallback The {@link NetworkCallback} to be utilized for this request. Note
      *                        the callback must not be shared - it uniquely specifies this request.
+     * @param handler {@link Handler} to specify the thread upon which the callback will be invoked.
+     *                If null, the callback is invoked on the default internal Handler.
      * @throws IllegalArgumentException if {@code request} contains invalid network capabilities.
      * @throws SecurityException if missing the appropriate permissions.
      * @throws RuntimeException if the app already has too many callbacks registered.
@@ -5325,7 +5352,8 @@ public class ConnectivityManager {
             NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK
     })
     public void requestBackgroundNetwork(@NonNull NetworkRequest request,
-            @NonNull Handler handler, @NonNull NetworkCallback networkCallback) {
+            @NonNull NetworkCallback networkCallback,
+            @SuppressLint("ListenerLast") @NonNull Handler handler) {
         final NetworkCapabilities nc = request.networkCapabilities;
         sendRequestForNetwork(nc, networkCallback, 0, BACKGROUND_REQUEST,
                 TYPE_NONE, new CallbackHandler(handler));
@@ -5435,45 +5463,5 @@ public class ConnectivityManager {
     @NonNull
     public static Range<Integer> getIpSecNetIdRange() {
         return new Range(TUN_INTF_NETID_START, TUN_INTF_NETID_START + TUN_INTF_NETID_RANGE - 1);
-    }
-
-    /**
-     * Get private DNS mode from settings.
-     *
-     * @param context The Context to query the private DNS mode from settings.
-     * @return A string of private DNS mode as one of the PRIVATE_DNS_MODE_* constants.
-     *
-     * @hide
-     */
-    @SystemApi(client = MODULE_LIBRARIES)
-    @NonNull
-    @PrivateDnsMode
-    public static String getPrivateDnsMode(@NonNull Context context) {
-        final ContentResolver cr = context.getContentResolver();
-        String mode = Settings.Global.getString(cr, PRIVATE_DNS_MODE);
-        if (TextUtils.isEmpty(mode)) mode = Settings.Global.getString(cr, PRIVATE_DNS_DEFAULT_MODE);
-        // If both PRIVATE_DNS_MODE and PRIVATE_DNS_DEFAULT_MODE are not set, choose
-        // PRIVATE_DNS_MODE_OPPORTUNISTIC as default mode.
-        if (TextUtils.isEmpty(mode)) mode = PRIVATE_DNS_MODE_OPPORTUNISTIC;
-        return mode;
-    }
-
-    /**
-     * Set private DNS mode to settings.
-     *
-     * @param context The {@link Context} to set the private DNS mode.
-     * @param mode The private dns mode. This should be one of the PRIVATE_DNS_MODE_* constants.
-     *
-     * @hide
-     */
-    @SystemApi(client = MODULE_LIBRARIES)
-    public static void setPrivateDnsMode(@NonNull Context context,
-            @NonNull @PrivateDnsMode String mode) {
-        if (!(mode == PRIVATE_DNS_MODE_OFF
-                || mode == PRIVATE_DNS_MODE_OPPORTUNISTIC
-                || mode == PRIVATE_DNS_MODE_PROVIDER_HOSTNAME)) {
-            throw new IllegalArgumentException("Invalid private dns mode");
-        }
-        Settings.Global.putString(context.getContentResolver(), PRIVATE_DNS_MODE, mode);
     }
 }

@@ -70,3 +70,7 @@ per-file Android.bp = file:/graphics/java/android/graphics/OWNERS
 per-file AndroidRuntime.cpp = file:/graphics/java/android/graphics/OWNERS
 # Although marked "view" this is mostly graphics stuff
 per-file android_view_* = file:/graphics/java/android/graphics/OWNERS
+
+# VINTF
+per-file android_os_VintfObject* = file:platform/system/libvintf:/OWNERS
+per-file android_os_VintfRuntimeInfo* = file:platform/system/libvintf:/OWNERS

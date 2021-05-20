@@ -19,20 +19,20 @@ package android.net;
 import static android.net.ConnectivityManager.MULTIPATH_PREFERENCE_HANDOVER;
 import static android.net.ConnectivityManager.MULTIPATH_PREFERENCE_PERFORMANCE;
 import static android.net.ConnectivityManager.MULTIPATH_PREFERENCE_RELIABILITY;
-import static android.net.ConnectivityManager.PRIVATE_DNS_MODE_OFF;
-import static android.net.ConnectivityManager.PRIVATE_DNS_MODE_OPPORTUNISTIC;
-import static android.net.ConnectivityManager.PRIVATE_DNS_MODE_PROVIDER_HOSTNAME;
 
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.net.ConnectivityManager.MultipathPreference;
-import android.net.ConnectivityManager.PrivateDnsMode;
+import android.os.Process;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.ArraySet;
 import android.util.Range;
 
 import com.android.net.module.util.ProxyUtils;
@@ -41,6 +41,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.time.Duration;
 import java.util.List;
+import java.util.Set;
+import java.util.StringJoiner;
 
 /**
  * A manager class for connectivity module settings.
@@ -333,12 +335,51 @@ public class ConnectivitySettingsManager {
             "network_metered_multipath_preference";
 
     /**
-     * A list of apps that should go on cellular networks in preference even when higher-priority
+     * A list of uids that should go on cellular networks in preference even when higher-priority
      * networks are connected.
      *
      * @hide
      */
-    public static final String MOBILE_DATA_PREFERRED_APPS = "mobile_data_preferred_apps";
+    public static final String MOBILE_DATA_PREFERRED_UIDS = "mobile_data_preferred_uids";
+
+    /**
+     * One of the private DNS modes that indicates the private DNS mode is off.
+     */
+    public static final int PRIVATE_DNS_MODE_OFF = 1;
+
+    /**
+     * One of the private DNS modes that indicates the private DNS mode is automatic, which
+     * will try to use the current DNS as private DNS.
+     */
+    public static final int PRIVATE_DNS_MODE_OPPORTUNISTIC = 2;
+
+    /**
+     * One of the private DNS modes that indicates the private DNS mode is strict and the
+     * {@link #PRIVATE_DNS_SPECIFIER} is required, which will try to use the value of
+     * {@link #PRIVATE_DNS_SPECIFIER} as private DNS.
+     */
+    public static final int PRIVATE_DNS_MODE_PROVIDER_HOSTNAME = 3;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(value = {
+            PRIVATE_DNS_MODE_OFF,
+            PRIVATE_DNS_MODE_OPPORTUNISTIC,
+            PRIVATE_DNS_MODE_PROVIDER_HOSTNAME,
+    })
+    public @interface PrivateDnsMode {}
+
+    private static final String PRIVATE_DNS_MODE_OFF_STRING = "off";
+    private static final String PRIVATE_DNS_MODE_OPPORTUNISTIC_STRING = "opportunistic";
+    private static final String PRIVATE_DNS_MODE_PROVIDER_HOSTNAME_STRING = "hostname";
+
+    /**
+     * A list of apps that is allowed on restricted networks.
+     *
+     * @hide
+     */
+    public static final String APPS_ALLOWED_ON_RESTRICTED_NETWORKS =
+            "apps_allowed_on_restricted_networks";
 
     /**
      * Get mobile data activity timeout from {@link Settings}.
@@ -689,6 +730,65 @@ public class ConnectivitySettingsManager {
                 context.getContentResolver(), GLOBAL_HTTP_PROXY_PAC, "" /* value */);
     }
 
+    private static String getPrivateDnsModeAsString(@PrivateDnsMode int mode) {
+        switch (mode) {
+            case PRIVATE_DNS_MODE_OFF:
+                return PRIVATE_DNS_MODE_OFF_STRING;
+            case PRIVATE_DNS_MODE_OPPORTUNISTIC:
+                return PRIVATE_DNS_MODE_OPPORTUNISTIC_STRING;
+            case PRIVATE_DNS_MODE_PROVIDER_HOSTNAME:
+                return PRIVATE_DNS_MODE_PROVIDER_HOSTNAME_STRING;
+            default:
+                throw new IllegalArgumentException("Invalid private dns mode: " + mode);
+        }
+    }
+
+    private static int getPrivateDnsModeAsInt(String mode) {
+        switch (mode) {
+            case "off":
+                return PRIVATE_DNS_MODE_OFF;
+            case "hostname":
+                return PRIVATE_DNS_MODE_PROVIDER_HOSTNAME;
+            case "opportunistic":
+                return PRIVATE_DNS_MODE_OPPORTUNISTIC;
+            default:
+                throw new IllegalArgumentException("Invalid private dns mode: " + mode);
+        }
+    }
+
+    /**
+     * Get private DNS mode from settings.
+     *
+     * @param context The Context to query the private DNS mode from settings.
+     * @return A string of private DNS mode.
+     */
+    @PrivateDnsMode
+    public static int getPrivateDnsMode(@NonNull Context context) {
+        final ContentResolver cr = context.getContentResolver();
+        String mode = Settings.Global.getString(cr, PRIVATE_DNS_MODE);
+        if (TextUtils.isEmpty(mode)) mode = Settings.Global.getString(cr, PRIVATE_DNS_DEFAULT_MODE);
+        // If both PRIVATE_DNS_MODE and PRIVATE_DNS_DEFAULT_MODE are not set, choose
+        // PRIVATE_DNS_MODE_OPPORTUNISTIC as default mode.
+        if (TextUtils.isEmpty(mode)) return PRIVATE_DNS_MODE_OPPORTUNISTIC;
+        return getPrivateDnsModeAsInt(mode);
+    }
+
+    /**
+     * Set private DNS mode to settings.
+     *
+     * @param context The {@link Context} to set the private DNS mode.
+     * @param mode The private dns mode. This should be one of the PRIVATE_DNS_MODE_* constants.
+     */
+    public static void setPrivateDnsMode(@NonNull Context context, @PrivateDnsMode int mode) {
+        if (!(mode == PRIVATE_DNS_MODE_OFF
+                || mode == PRIVATE_DNS_MODE_OPPORTUNISTIC
+                || mode == PRIVATE_DNS_MODE_PROVIDER_HOSTNAME)) {
+            throw new IllegalArgumentException("Invalid private dns mode: " + mode);
+        }
+        Settings.Global.putString(context.getContentResolver(), PRIVATE_DNS_MODE,
+                getPrivateDnsModeAsString(mode));
+    }
+
     /**
      * Get specific private dns provider name from {@link Settings}.
      *
@@ -731,13 +831,14 @@ public class ConnectivitySettingsManager {
      *             constants.
      */
     public static void setPrivateDnsDefaultMode(@NonNull Context context,
-            @NonNull @PrivateDnsMode String mode) {
+            @NonNull @PrivateDnsMode int mode) {
         if (!(mode == PRIVATE_DNS_MODE_OFF
                 || mode == PRIVATE_DNS_MODE_OPPORTUNISTIC
                 || mode == PRIVATE_DNS_MODE_PROVIDER_HOSTNAME)) {
             throw new IllegalArgumentException("Invalid private dns mode");
         }
-        Settings.Global.putString(context.getContentResolver(), PRIVATE_DNS_DEFAULT_MODE, mode);
+        Settings.Global.putString(context.getContentResolver(), PRIVATE_DNS_DEFAULT_MODE,
+                getPrivateDnsModeAsString(mode));
     }
 
     /**
@@ -903,27 +1004,84 @@ public class ConnectivitySettingsManager {
     }
 
     /**
-     * Get the list of apps(from {@link Settings}) that should go on cellular networks in preference
+     * Get the list of uids(from {@link Settings}) that should go on cellular networks in preference
      * even when higher-priority networks are connected.
      *
      * @param context The {@link Context} to query the setting.
-     * @return A list of apps that should go on cellular networks in preference even when
+     * @return A list of uids that should go on cellular networks in preference even when
      *         higher-priority networks are connected or null if no setting value.
      */
-    @Nullable
-    public static String getMobileDataPreferredApps(@NonNull Context context) {
-        return Settings.Secure.getString(context.getContentResolver(), MOBILE_DATA_PREFERRED_APPS);
+    @NonNull
+    public static Set<Integer> getMobileDataPreferredUids(@NonNull Context context) {
+        final String uidList = Settings.Secure.getString(
+                context.getContentResolver(), MOBILE_DATA_PREFERRED_UIDS);
+        final Set<Integer> uids = new ArraySet<>();
+        if (TextUtils.isEmpty(uidList)) {
+            return uids;
+        }
+        for (String uid : uidList.split(";")) {
+            uids.add(Integer.valueOf(uid));
+        }
+        return uids;
     }
 
     /**
-     * Set the list of apps(to {@link Settings}) that should go on cellular networks in preference
+     * Set the list of uids(to {@link Settings}) that should go on cellular networks in preference
      * even when higher-priority networks are connected.
      *
      * @param context The {@link Context} to set the setting.
-     * @param list A list of apps that should go on cellular networks in preference even when
+     * @param uidList A list of uids that should go on cellular networks in preference even when
      *             higher-priority networks are connected.
      */
-    public static void setMobileDataPreferredApps(@NonNull Context context, @Nullable String list) {
-        Settings.Secure.putString(context.getContentResolver(), MOBILE_DATA_PREFERRED_APPS, list);
+    public static void setMobileDataPreferredUids(@NonNull Context context,
+            @NonNull Set<Integer> uidList) {
+        final StringJoiner joiner = new StringJoiner(";");
+        for (Integer uid : uidList) {
+            if (uid < 0 || UserHandle.getAppId(uid) > Process.LAST_APPLICATION_UID) {
+                throw new IllegalArgumentException("Invalid uid");
+            }
+            joiner.add(uid.toString());
+        }
+        Settings.Secure.putString(
+                context.getContentResolver(), MOBILE_DATA_PREFERRED_UIDS, joiner.toString());
+    }
+
+    /**
+     * Get the list of apps(from {@link Settings}) that is allowed on restricted networks.
+     *
+     * @param context The {@link Context} to query the setting.
+     * @return A list of apps that is allowed on restricted networks or null if no setting
+     *         value.
+     */
+    @NonNull
+    public static Set<String> getAppsAllowedOnRestrictedNetworks(@NonNull Context context) {
+        final String appList = Settings.Secure.getString(
+                context.getContentResolver(), APPS_ALLOWED_ON_RESTRICTED_NETWORKS);
+        if (TextUtils.isEmpty(appList)) {
+            return new ArraySet<>();
+        }
+        return new ArraySet<>(appList.split(";"));
+    }
+
+    /**
+     * Set the list of apps(from {@link Settings}) that is allowed on restricted networks.
+     *
+     * Note: Please refer to android developer guidelines for valid app(package name).
+     * https://developer.android.com/guide/topics/manifest/manifest-element.html#package
+     *
+     * @param context The {@link Context} to set the setting.
+     * @param list A list of apps that is allowed on restricted networks.
+     */
+    public static void setAppsAllowedOnRestrictedNetworks(@NonNull Context context,
+            @NonNull Set<String> list) {
+        final StringJoiner joiner = new StringJoiner(";");
+        for (String app : list) {
+            if (app == null || app.contains(";")) {
+                throw new IllegalArgumentException("Invalid app(package name)");
+            }
+            joiner.add(app);
+        }
+        Settings.Secure.putString(context.getContentResolver(), APPS_ALLOWED_ON_RESTRICTED_NETWORKS,
+                joiner.toString());
     }
 }

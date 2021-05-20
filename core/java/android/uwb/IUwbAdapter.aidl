@@ -145,6 +145,31 @@ interface IUwbAdapter {
    */
   void closeRanging(in SessionHandle sessionHandle);
 
+   /**
+     * Disables or enables UWB for a user
+     *
+     * The provided callback's IUwbAdapterStateCallbacks#onAdapterStateChanged
+     * function must be called immediately following state change.
+     *
+     * @param enabled value representing intent to disable or enable UWB. If
+     * true, any subsequent calls to #openRanging will be allowed. If false,
+     * all active ranging sessions will be closed and subsequent calls to
+     * #openRanging will be disallowed.
+     */
+    void setEnabled(boolean enabled);
+
+   /**
+    * Returns the current enabled/disabled UWB state.
+    *
+    * Possible values are:
+    * IUwbAdapterState#STATE_DISABLED
+    * IUwbAdapterState#STATE_ENABLED_ACTIVE
+    * IUwbAdapterState#STATE_ENABLED_INACTIVE
+    *
+    * @return value representing enabled/disabled UWB state.
+    */
+   int getAdapterState();
+
   /**
    * The maximum allowed time to open a ranging session.
    */

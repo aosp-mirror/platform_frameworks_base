@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="keyguard_description" msgid="8582605799129954556">"请输入您的密码，以便继续使用动态系统更新"</string>
+    <string name="notification_install_completed" msgid="6252047868415172643">"动态系统已准备就绪。重启您的设备即可开始使用动态系统。"</string>
+    <string name="notification_install_inprogress" msgid="7383334330065065017">"正在安装"</string>
+    <string name="notification_install_failed" msgid="4066039210317521404">"安装失败"</string>
+    <string name="notification_image_validation_failed" msgid="2720357826403917016">"映像验证失败。安装将中止。"</string>
+    <string name="notification_dynsystem_in_use" msgid="1053194595682188396">"目前正在运行动态系统。需重启才能使用原 Android 版本。"</string>
+    <string name="notification_action_cancel" msgid="5929299408545961077">"取消"</string>
+    <string name="notification_action_discard" msgid="1817481003134947493">"舍弃"</string>
+    <string name="notification_action_reboot_to_dynsystem" msgid="4015817159115912479">"重启"</string>
+    <string name="notification_action_reboot_to_origin" msgid="4013901243271889897">"重启"</string>
+    <string name="toast_dynsystem_discarded" msgid="1733249860276017050">"已舍弃动态系统"</string>
+    <string name="toast_failed_to_reboot_to_dynsystem" msgid="6336737274625452067">"无法重启或加载动态系统"</string>
+    <string name="toast_failed_to_disable_dynsystem" msgid="3285742944977744413">"无法停用动态系统"</string>
+</resources>

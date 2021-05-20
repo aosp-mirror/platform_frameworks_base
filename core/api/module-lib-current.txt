@@ -44,7 +44,6 @@ package android.net {
   }
 
   public class NetworkPolicyManager {
-    method @NonNull public static String blockedReasonsToString(int);
     method @RequiresPermission(android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK) public int getMultipathPreference(@NonNull android.net.Network);
     method @RequiresPermission(android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK) public int getRestrictBackgroundStatus(int);
     method @RequiresPermission(android.Manifest.permission.OBSERVE_NETWORK_POLICY) public boolean isUidNetworkingBlocked(int, boolean);
@@ -60,13 +59,13 @@ package android.net {
   public final class NetworkStateSnapshot implements android.os.Parcelable {
     ctor public NetworkStateSnapshot(@NonNull android.net.Network, @NonNull android.net.NetworkCapabilities, @NonNull android.net.LinkProperties, @Nullable String, int);
     method public int describeContents();
+    method public int getLegacyType();
+    method @NonNull public android.net.LinkProperties getLinkProperties();
+    method @NonNull public android.net.Network getNetwork();
+    method @NonNull public android.net.NetworkCapabilities getNetworkCapabilities();
+    method @Nullable public String getSubscriberId();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.NetworkStateSnapshot> CREATOR;
-    field public final int legacyType;
-    field @NonNull public final android.net.LinkProperties linkProperties;
-    field @NonNull public final android.net.Network network;
-    field @NonNull public final android.net.NetworkCapabilities networkCapabilities;
-    field @Nullable public final String subscriberId;
   }
 
   public class NetworkWatchlistManager {
@@ -90,11 +89,11 @@ package android.net {
   public final class UnderlyingNetworkInfo implements android.os.Parcelable {
     ctor public UnderlyingNetworkInfo(int, @NonNull String, @NonNull java.util.List<java.lang.String>);
     method public int describeContents();
+    method @NonNull public String getInterface();
+    method public int getOwnerUid();
+    method @NonNull public java.util.List<java.lang.String> getUnderlyingInterfaces();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.UnderlyingNetworkInfo> CREATOR;
-    field @NonNull public final String iface;
-    field public final int ownerUid;
-    field @NonNull public final java.util.List<java.lang.String> underlyingIfaces;
   }
 
   public class VpnManager {

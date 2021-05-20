@@ -85,7 +85,7 @@
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Telefonatat"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Transferimi i skedarëve"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Pajisja e hyrjes"</string>
-    <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Qasja në internet"</string>
+    <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Qasje në internet"</string>
     <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"Ndarja e kontakteve"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"Përdore për ndarjen e kontakteve"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Ndarja e lidhjes së internetit"</string>
@@ -117,7 +117,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Anulo"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Çiftimi lejon qasjen te kontaktet dhe historiku yt i telefonatave."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Nuk mundi të çiftohej me <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Nuk mundi të çiftohej me <xliff:g id="DEVICE_NAME">%1$s</xliff:g> për shkak të një kodi PIN ose një kodi të pasaktë."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Nuk mundi të çiftohej me <xliff:g id="DEVICE_NAME">%1$s</xliff:g> për shkak të një kodi PIN ose çelësi kalimi të pasaktë."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Nuk mund të komunikohet me <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Çiftimi u refuzua nga <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Kompjuteri"</string>
@@ -203,16 +203,16 @@
     <string name="vpn_settings_not_available" msgid="2894137119965668920">"Cilësimet e VPN-së nuk ofrohen për këtë përdorues"</string>
     <string name="tethering_settings_not_available" msgid="266821736434699780">"Cilësimet e ndarjes nuk ofrohen për këtë përdorues"</string>
     <string name="apn_settings_not_available" msgid="1147111671403342300">"Cilësimet e \"Emrit të pikës së qasjes\" nuk mund të përdoren për këtë përdorues"</string>
-    <string name="enable_adb" msgid="8072776357237289039">"Korrigjimi i USB-së"</string>
+    <string name="enable_adb" msgid="8072776357237289039">"Korrigjimi përmes USB-së"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"Korrigjo gabimet e modalitetit kur UBS-ja është e lidhur"</string>
-    <string name="clear_adb_keys" msgid="3010148733140369917">"Anulo autorizimet e korrigjimeve të gabimeve të USB-së"</string>
-    <string name="enable_adb_wireless" msgid="6973226350963971018">"Korrigjimi me valë"</string>
-    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Regjimi i korrigjimit kur Wi‑Fi është i lidhur"</string>
+    <string name="clear_adb_keys" msgid="3010148733140369917">"Anulo autorizimet e korrigjimeve përmes USB-së"</string>
+    <string name="enable_adb_wireless" msgid="6973226350963971018">"Korrigjimi përmes Wi-Fi"</string>
+    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Modaliteti i korrigjimit kur Wi‑Fi është i lidhur"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"Gabim"</string>
-    <string name="adb_wireless_settings" msgid="2295017847215680229">"Korrigjimi me valë"</string>
-    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Për të parë dhe përdorur pajisjet e disponueshme, aktivizo korrigjimin me valë"</string>
+    <string name="adb_wireless_settings" msgid="2295017847215680229">"Korrigjimi përmes Wi-Fi"</string>
+    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Për të parë dhe përdorur pajisjet e disponueshme, aktivizo korrigjimin përmes Wi-Fi"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Çifto pajisjen me kod QR"</string>
-    <string name="adb_pair_method_qrcode_summary" msgid="3729901496856458634">"Çifto pajisjet e reja duke përdorur skanerin e kodeve QR"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Çifto pajisjet e reja duke përdorur skanerin e kodeve QR"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Çifto pajisjen me kodin e çiftimit"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Çifto pajisjet e reja duke përdorur kodin me gjashtë shifra"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Pajisjet e çiftuara"</string>
@@ -225,13 +225,14 @@
     <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"Çifto me pajisjen"</string>
     <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Kodi i çiftimit të Wi‑Fi"</string>
     <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"Çiftimi ishte i pasuksesshëm"</string>
-    <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Sigurohu që pajisja të jetë e lidhur me të njëjtin rrjet"</string>
+    <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Sigurohu që pajisja të jetë e lidhur me të njëjtin rrjet."</string>
     <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Çifto pajisjen përmes Wi‑Fi duke skanuar një kod QR"</string>
     <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Po çifton pajisjen…"</string>
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Çiftimi i pajisjes dështoi. Ose kodi QR nuk ishte i saktë, ose pajisja nuk është e lidhur me të njëjtin rrjet."</string>
-    <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"Adresa e IP-së dhe porta"</string>
+    <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"Adresa IP dhe porta"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Skano kodin QR"</string>
-    <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"Çifto pajisjen përmes Wi‑Fi duke skanuar një kod QR"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Çifto pajisjen përmes Wi‑Fi duke skanuar një kod QR"</string>
+    <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Lidhu me një rrjet Wi-Fi"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, korrigjimi, zhvilluesi"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Shkurtorja e raportit të defektit në kod"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Shfaq një buton në menynë e fikjes për marrjen e raportit të defekteve"</string>
@@ -242,14 +243,15 @@
     <string name="oem_unlock_enable" msgid="5334869171871566731">"Shkyçja e OEM-së"</string>
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Lejo shkyçjen e ngarkimit të sistemit"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"Të lejohet shkyçja e OEM-së?"</string>
-    <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"PARALAJMËRIM! Funksionet e mbrojtjes së pajisjes nuk do të punojnë në këtë pajisje gjatë kohës që ky cilësim është i aktivizuar."</string>
+    <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"PARALAJMËRIM! Veçoritë e mbrojtjes së pajisjes nuk do të punojnë në këtë pajisje gjatë kohës që ky cilësim është i aktivizuar."</string>
     <string name="mock_location_app" msgid="6269380172542248304">"Zgjidh apl. që simulon vendndodhjen"</string>
     <string name="mock_location_app_not_set" msgid="6972032787262831155">"Nuk është vendosur asnjë aplikacion që simulon vendndodhjen"</string>
     <string name="mock_location_app_set" msgid="4706722469342913843">"Aplikacioni për simulimin e vendndodhjes: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"Rrjetet"</string>
-    <string name="wifi_display_certification" msgid="1805579519992520381">"Certifikimi i ekranit valor"</string>
+    <string name="wifi_display_certification" msgid="1805579519992520381">"Certifikimi i ekranit pa tel"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Aktivizo hyrjen Wi-Fi Verbose"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Përshpejtimi i skanimit të Wi‑Fi"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Renditja e rastësishme e adresave MAC të përmirësuara me Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Të dhënat celulare gjithmonë aktive"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Përshpejtimi i harduerit për ndarjen e lidhjes (internet)"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Shfaq pajisjet me Bluetooth pa emra"</string>
@@ -278,9 +280,10 @@
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"Emri i pritësit të ofruesit të DNS-së private"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Fut emrin e pritësit të ofruesit të DNS-së"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"Nuk mund të lidhej"</string>
-    <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Shfaq opsionet për certifikimin e ekranit valor"</string>
+    <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Shfaq opsionet për certifikimin e ekranit pa tel"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Rrit nivelin regjistrues të Wi‑Fi duke shfaqur SSID RSSI-në te Zgjedhësi i Wi‑Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Zvogëlon shkarkimin e baterisë dhe përmirëson cilësinë e funksionimit të rrjetit"</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Kur ky modalitet është i aktivizuar, adresa MAC e kësaj pajisjeje mund të ndryshojë çdo herë që lidhet me një rrjet që ka të aktivizuar renditjen e rastësishme të adresave MAC."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Me matje"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Pa matje"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Madhësitë e regjistruesit"</string>
@@ -296,11 +299,11 @@
     <string name="debug_view_attributes" msgid="3539609843984208216">"Aktivizo shikimin e inspektimit të atributeve"</string>
     <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"Mbaji të dhënat celulare gjithmonë aktive edhe kur Wi‑Fi është aktiv (për ndërrim të shpejtë të rrjetit)."</string>
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Përdor përshpejtimin e harduerit për ndarjen e lidhjes (internet) nëse është i disponueshëm"</string>
-    <string name="adb_warning_title" msgid="7708653449506485728">"Të lejohet korrigjimi i USB-së?"</string>
-    <string name="adb_warning_message" msgid="8145270656419669221">"Korrigjuesi i USB-së është vetëm për qëllime zhvillimore. Përdore për të kopjuar të dhëna mes kompjuterit dhe pajisjes tënde, për të instaluar aplikacione në pajisjen tënde pa asnjë njoftim si dhe për të lexuar të dhënat e ditarit."</string>
-    <string name="adbwifi_warning_title" msgid="727104571653031865">"Të lejohet korrigjimi me valë?"</string>
-    <string name="adbwifi_warning_message" msgid="8005936574322702388">"Korrigjimi me valë është vetëm për qëllime zhvillimore. Përdore për të kopjuar të dhëna mes kompjuterit dhe pajisjes sate, për të instaluar aplikacione në pajisjen tënde pa asnjë njoftim si dhe për të lexuar të dhënat e regjistrit."</string>
-    <string name="adb_keys_warning_message" msgid="2968555274488101220">"Të bllokohet qasja për korrigjim të USB-së nga të gjithë kompjuterët që ke autorizuar më parë?"</string>
+    <string name="adb_warning_title" msgid="7708653449506485728">"Të lejohet korrigjimi përmes USB-së?"</string>
+    <string name="adb_warning_message" msgid="8145270656419669221">"Korrigjuesi përmes USB-së është vetëm për qëllime zhvillimore. Përdore për të kopjuar të dhëna mes kompjuterit dhe pajisjes tënde, për të instaluar aplikacione në pajisjen tënde pa asnjë njoftim si dhe për të lexuar të dhënat e evidencave."</string>
+    <string name="adbwifi_warning_title" msgid="727104571653031865">"Të lejohet korrigjimi përmes Wi-Fi?"</string>
+    <string name="adbwifi_warning_message" msgid="8005936574322702388">"Korrigjimin përmes Wi-Fi është vetëm për qëllime zhvillimore. Përdore për të kopjuar të dhëna mes kompjuterit dhe pajisjes sate, për të instaluar aplikacione në pajisjen tënde pa asnjë njoftim si dhe për të lexuar të dhënat e regjistrit."</string>
+    <string name="adb_keys_warning_message" msgid="2968555274488101220">"Të bllokohet qasja për korrigjim përmes USB-së nga të gjithë kompjuterët që ke autorizuar më parë?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"Të lejohen cilësimet e zhvillimit?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"Këto cilësime janë të projektuara vetëm për përdorim në programim. Ato mund të shkaktojnë që pajisja dhe aplikacionet në të, të mos punojnë ose të veprojnë në mënyrë të gabuar."</string>
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"Verifiko apl. përmes USB-së"</string>
@@ -308,6 +311,7 @@
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Pajisjet me Bluetooth do të shfaqen pa emra (vetëm adresat MAC)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Çaktivizon funksionin e volumit absolut të Bluetooth në rast të problemeve të volumit me pajisjet në largësi, si p.sh. një volum i lartë i papranueshëm ose mungesa e kontrollit."</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Aktivizon grupin e veçorive të Bluetooth Gabeldorsche."</string>
+    <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Aktivizon veçorinë e \"Lidhshmërisë së përmirësuar\"."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Terminali lokal"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Aktivizo aplikacionin terminal që ofron qasje në guaskën lokale"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"Kontrolli HDCP"</string>
@@ -342,8 +346,8 @@
     <string name="disable_overlays_summary" msgid="1954852414363338166">"Përdor gjithmonë GPU-në për përbërjen e ekranit"</string>
     <string name="simulate_color_space" msgid="1206503300335835151">"Simulo hapësirën e ngjyrës"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"Aktivizo gjurmët e OpenGL-së"</string>
-    <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Çaktivizo rrugëzuezin e audios përmes USB-së"</string>
-    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Çaktivizo router-in automatik për te kufjet ose altoparlantët"</string>
+    <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Çaktivizo kalimin e audios përmes USB-së"</string>
+    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Çaktivizo kalimin automatik për te kufjet ose altoparlantët"</string>
     <string name="debug_layout" msgid="1659216803043339741">"Shfaq konturet e kuadrit"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"Shfaq konturet e klipit, hapësirat etj."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Detyro drejtimin e shkrimit nga e djathta në të majtë"</string>
@@ -354,6 +358,8 @@
     <string name="track_frame_time" msgid="522674651937771106">"Interpretimi i profilit me HWUI"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Aktivizo shtresat e korrigjimit të GPU-së"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Lejo ngarkimin e shtresave të korrigjimit të GPU-së për aplikacionet e korrigjimit"</string>
+    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Aktivizo evidencat e tregtuesit me shumë fjalë"</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Përfshi evidenca shtesë të treguesve specifike për pajisjen në raportet e defekteve, që mund të përfshijnë informacion privat, mund të përdorin më shumë bateri dhe/ose të përdorin më shumë hapësirë ruajtëse."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Animacioni i dritares"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Animacioni kalimtar"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Kohëzgjatja e animatorit"</string>
@@ -412,7 +418,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomali (e kuqe - e gjelbër)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomali (e kaltër - e verdhë)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Korrigjimi i ngjyrës"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="6178138727195403796">"Korrigjimi i ngjyrës i ndihmon njerëzit me daltonizëm të shohin ngjyra më të sakta"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"Korrigjimi i ngjyrave të lejon të rregullosh mënyrën se si shfaqen ngjyrat në pajisjen tënde"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Mbivendosur nga <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Rreth <xliff:g id="TIME_REMAINING">%1$s</xliff:g> të mbetura"</string>
@@ -426,11 +432,11 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"Duhet të zgjasë deri në rreth <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"Duhet të zgjasë deri në rreth <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Deri në <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_suggestion_extend_battery" msgid="5233928707465237447">"Rrite kohëzgjatjen e baterisë pas orës <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"Më pak se <xliff:g id="THRESHOLD">%1$s</xliff:g> të mbetura"</string>
-    <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"Mbeten më pak se <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"Mbeten më shumë se <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_only_more_than_subtext" msgid="3274496164769110480">"Mbeten më shumë se <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
+    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Bateria mund të mbarojë deri në <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"Më pak se <xliff:g id="THRESHOLD">%1$s</xliff:g> e mbetur"</string>
+    <string name="power_remaining_less_than_duration" msgid="318215464914990578">"Më pak se <xliff:g id="THRESHOLD">%1$s</xliff:g> e mbetur (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"Më shumë se <xliff:g id="TIME_REMAINING">%1$s</xliff:g> e mbetur (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"Më shumë se <xliff:g id="TIME_REMAINING">%1$s</xliff:g> e mbetur"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"Telefoni mund të fiket së shpejti"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"Tableti mund të fiket së shpejti"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"Pajisja mund të fiket së shpejti"</string>
@@ -438,14 +444,15 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"Tableti mund të fiket së shpejti (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Pajisja mund të fiket së shpejti (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"<xliff:g id="TIME">%1$s</xliff:g> të mbetura për karikimin"</string>
-    <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> deri sa të karikohen"</string>
+    <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"<xliff:g id="TIME">%1$s</xliff:g> të mbetura deri në karikim"</string>
+    <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> derisa të karikohet"</string>
+    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - Po optimizohet për integritetin e baterisë"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"I panjohur"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Po karikohet"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Po ngarkon me shpejtësi"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Po karikohet ngadalë"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Nuk po karikohet"</string>
-    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Në prizë, por nuk mund të ngarkohet për momentin"</string>
+    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Në prizë, por nuk mund të karikohet për momentin"</string>
     <string name="battery_info_status_full" msgid="4443168946046847468">"E mbushur"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Kontrolluar nga administratori"</string>
     <string name="disabled" msgid="8017887509554714950">"Çaktivizuar"</string>
@@ -461,7 +468,7 @@
     <string name="charge_length_format" msgid="6941645744588690932">"<xliff:g id="ID_1">%1$s</xliff:g> më parë"</string>
     <string name="remaining_length_format" msgid="4310625772926171089">"<xliff:g id="ID_1">%1$s</xliff:g> të mbetura"</string>
     <string name="screen_zoom_summary_small" msgid="6050633151263074260">"I vogël"</string>
-    <string name="screen_zoom_summary_default" msgid="1888865694033865408">"I parazgjedhur"</string>
+    <string name="screen_zoom_summary_default" msgid="1888865694033865408">"E parazgjedhur"</string>
     <string name="screen_zoom_summary_large" msgid="4706951482598978984">"I madh"</string>
     <string name="screen_zoom_summary_very_large" msgid="7317423942896999029">"Më i madh"</string>
     <string name="screen_zoom_summary_extremely_large" msgid="1438045624562358554">"Më i madhi"</string>
@@ -499,8 +506,52 @@
     <string name="alarm_template_far" msgid="6382760514842998629">"ditën <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"Kohëzgjatja"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Pyet çdo herë"</string>
-    <string name="zen_mode_forever" msgid="3339224497605461291">"Deri sa ta çaktivizosh"</string>
+    <string name="zen_mode_forever" msgid="3339224497605461291">"Derisa ta çaktivizosh"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Pikërisht tani"</string>
-    <string name="media_transfer_this_device_name" msgid="2858384945459339073">"Kjo pajisje"</string>
+    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Altoparlanti i telefonit"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Problem me lidhjen. Fike dhe ndize përsëri pajisjen"</string>
+    <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Pajisja audio me tel"</string>
+    <string name="help_label" msgid="3528360748637781274">"Ndihma dhe komentet"</string>
+    <string name="storage_category" msgid="2287342585424631813">"Hapësira ruajtëse"</string>
+    <string name="shared_data_title" msgid="1017034836800864953">"Të dhënat e ndara"</string>
+    <string name="shared_data_summary" msgid="5516326713822885652">"Shiko dhe modifiko të dhënat e ndara"</string>
+    <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"Nuk ka të dhëna të ndara për këtë përdorues."</string>
+    <string name="shared_data_query_failure_text" msgid="3489828881998773687">"Ndodhi një gabim gjatë marrjes së të dhënave të ndara. Provo sërish."</string>
+    <string name="blob_id_text" msgid="8680078988996308061">"ID-ja e të dhënave të ndara: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
+    <string name="blob_expires_text" msgid="7882727111491739331">"Skadon më <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="shared_data_delete_failure_text" msgid="3842701391009628947">"Ndodhi një gabim gjatë fshirjes së të dhënave të ndara."</string>
+    <string name="shared_data_no_accessors_dialog_text" msgid="8903738462570715315">"Nuk është marrë qira për këto të dhëna të ndara. Dëshiron ta fshish?"</string>
+    <string name="accessor_info_title" msgid="8289823651512477787">"Aplikacionet që ndajnë të dhënat"</string>
+    <string name="accessor_no_description_text" msgid="7510967452505591456">"Nuk jepet asnjë përshkrim nga aplikacioni."</string>
+    <string name="accessor_expires_text" msgid="4625619273236786252">"Qiraja skadon në <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="delete_blob_text" msgid="2819192607255625697">"Fshi të dhënat e ndara"</string>
+    <string name="delete_blob_confirmation_text" msgid="7807446938920827280">"Je i sigurt që dëshiron ta fshish këto të dhëna të ndara?"</string>
+    <string name="user_add_user_item_summary" msgid="5748424612724703400">"Përdoruesit kanë aplikacionet dhe përmbajtjet e tyre"</string>
+    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"Mund të kufizosh qasjen në aplikacione dhe përmbajtje nga llogaria jote"</string>
+    <string name="user_add_user_item_title" msgid="2394272381086965029">"Përdoruesi"</string>
+    <string name="user_add_profile_item_title" msgid="3111051717414643029">"Profil i kufizuar"</string>
+    <string name="user_add_user_title" msgid="5457079143694924885">"Të shtohet përdorues i ri?"</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Mund ta ndash këtë pajisje me persona të tjerë duke krijuar përdorues shtesë. Çdo përdorues ka hapësirën e vet, të cilën mund ta personalizojë me aplikacione, me imazhin e sfondit etj. Përdoruesit mund të rregullojnë po ashtu cilësimet e pajisjes, si Wi‑Fi, të cilat ndikojnë te të gjithë.\n\nKur shton një përdorues të ri, ai person duhet të konfigurojë hapësirën e vet.\n\nÇdo përdorues mund t\'i përditësojë aplikacionet për të gjithë përdoruesit e tjerë. Cilësimet e qasshmërisë dhe shërbimet mund të mos transferohen te përdoruesi i ri."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"Kur shton një përdorues të ri, ai person duhet të konfigurojë hapësirën e vet.\n\nÇdo përdorues mund t\'i përditësojë aplikacionet për të gjithë përdoruesit e tjerë."</string>
+    <string name="user_setup_dialog_title" msgid="8037342066381939995">"Të konfig. përdoruesi tani?"</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"Sigurohu që personi të jetë i gatshëm të marrë pajisjen dhe të caktojë hapësirën e vet"</string>
+    <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Të konfigurohet tani profili?"</string>
+    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"Konfiguro tani"</string>
+    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"Jo tani"</string>
+    <string name="user_add_user_type_title" msgid="551279664052914497">"Shto"</string>
+    <string name="user_new_user_name" msgid="60979820612818840">"Përdorues i ri"</string>
+    <string name="user_new_profile_name" msgid="2405500423304678841">"Profili i ri"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"Informacioni i përdoruesit"</string>
+    <string name="profile_info_settings_title" msgid="105699672534365099">"Inform. i profilit"</string>
+    <string name="user_need_lock_message" msgid="4311424336209509301">"Para se të mund të krijosh një profil të kufizuar, duhet të konfigurosh një kyçje të ekranit për të mbrojtur aplikacionet dhe të dhënat e tua personale."</string>
+    <string name="user_set_lock_button" msgid="1427128184982594856">"Cakto kyçjen"</string>
+    <string name="user_switch_to_user" msgid="6975428297154968543">"Kalo te <xliff:g id="USER_NAME">%s</xliff:g>"</string>
+    <string name="guest_new_guest" msgid="3482026122932643557">"Shto të ftuar"</string>
+    <string name="guest_exit_guest" msgid="5908239569510734136">"Hiq të ftuarin"</string>
+    <string name="guest_nickname" msgid="6332276931583337261">"I ftuar"</string>
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Parazgjedhja e pajisjes"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Joaktiv"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Aktiv"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Pajisja jote duhet të riniset që ky ndryshim të zbatohet. Rinise tani ose anuloje."</string>
+    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"Kufje me tela"</string>
 </resources>

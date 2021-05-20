@@ -112,13 +112,12 @@ public class RebootEscrowManagerTests {
     private MockableRebootEscrowInjected mInjected;
     private RebootEscrowManager mService;
     private SecretKey mAesKey;
+    private MockInjector mMockInjector;
 
     public interface MockableRebootEscrowInjected {
         int getBootCount();
 
         long getCurrentTimeMillis();
-
-        boolean forceServerBased();
 
         void reportMetric(boolean success, int errorCode, int serviceType, int attemptCount,
                 int escrowDurationInSeconds, int vbmetaDigestStatus, int durationSinceBootComplete);
@@ -127,11 +126,12 @@ public class RebootEscrowManagerTests {
     static class MockInjector extends RebootEscrowManager.Injector {
         private final IRebootEscrow mRebootEscrow;
         private final ResumeOnRebootServiceConnection mServiceConnection;
-        private final RebootEscrowProviderInterface mRebootEscrowProvider;
+        private final RebootEscrowProviderInterface mDefaultRebootEscrowProvider;
         private final UserManager mUserManager;
         private final MockableRebootEscrowInjected mInjected;
         private final RebootEscrowKeyStoreManager mKeyStoreManager;
-        private final boolean mServerBased;
+        private boolean mServerBased;
+        private RebootEscrowProviderInterface mRebootEscrowProviderInUse;
 
         MockInjector(Context context, UserManager userManager,
                 IRebootEscrow rebootEscrow,
@@ -149,7 +149,7 @@ public class RebootEscrowManagerTests {
                             return mRebootEscrow;
                         }
                     };
-            mRebootEscrowProvider = new RebootEscrowProviderHalImpl(halInjector);
+            mDefaultRebootEscrowProvider = new RebootEscrowProviderHalImpl(halInjector);
             mUserManager = userManager;
             mKeyStoreManager = keyStoreManager;
             mInjected = injected;
@@ -166,7 +166,8 @@ public class RebootEscrowManagerTests {
             mServerBased = true;
             RebootEscrowProviderServerBasedImpl.Injector injector =
                     new RebootEscrowProviderServerBasedImpl.Injector(serviceConnection);
-            mRebootEscrowProvider = new RebootEscrowProviderServerBasedImpl(storage, injector);
+            mDefaultRebootEscrowProvider = new RebootEscrowProviderServerBasedImpl(
+                    storage, injector);
             mUserManager = userManager;
             mKeyStoreManager = keyStoreManager;
             mInjected = injected;
@@ -184,15 +185,23 @@ public class RebootEscrowManagerTests {
 
         @Override
         public boolean serverBasedResumeOnReboot() {
-            if (mInjected.forceServerBased()) {
-                return true;
-            }
             return mServerBased;
         }
 
         @Override
+        public RebootEscrowProviderInterface createRebootEscrowProviderIfNeeded() {
+            mRebootEscrowProviderInUse = mDefaultRebootEscrowProvider;
+            return mRebootEscrowProviderInUse;
+        }
+
+        @Override
         public RebootEscrowProviderInterface getRebootEscrowProvider() {
-            return mRebootEscrowProvider;
+            return mRebootEscrowProviderInUse;
+        }
+
+        @Override
+        public void clearRebootEscrowProvider() {
+            mRebootEscrowProviderInUse = null;
         }
 
         @Override
@@ -264,13 +273,15 @@ public class RebootEscrowManagerTests {
         when(mCallbacks.isUserSecure(NONSECURE_SECONDARY_USER_ID)).thenReturn(false);
         when(mCallbacks.isUserSecure(SECURE_SECONDARY_USER_ID)).thenReturn(true);
         mInjected = mock(MockableRebootEscrowInjected.class);
-        mService = new RebootEscrowManager(new MockInjector(mContext, mUserManager, mRebootEscrow,
-                mKeyStoreManager, mStorage, mInjected), mCallbacks, mStorage);
+        mMockInjector = new MockInjector(mContext, mUserManager, mRebootEscrow,
+                mKeyStoreManager, mStorage, mInjected);
+        mService = new RebootEscrowManager(mMockInjector, mCallbacks, mStorage);
     }
 
     private void setServerBasedRebootEscrowProvider() throws Exception {
-        mService = new RebootEscrowManager(new MockInjector(mContext, mUserManager,
-                mServiceConnection, mKeyStoreManager, mStorage, mInjected), mCallbacks, mStorage);
+        mMockInjector = new MockInjector(mContext, mUserManager, mServiceConnection,
+                mKeyStoreManager, mStorage, mInjected);
+        mService = new RebootEscrowManager(mMockInjector, mCallbacks, mStorage);
     }
 
     @Test
@@ -317,6 +328,7 @@ public class RebootEscrowManagerTests {
         doThrow(ServiceSpecificException.class).when(mRebootEscrow).storeKey(any());
         mService.clearRebootEscrow();
         verify(mRebootEscrow).storeKey(eq(new byte[32]));
+        assertNull(mMockInjector.getRebootEscrowProvider());
     }
 
     @Test
@@ -785,7 +797,7 @@ public class RebootEscrowManagerTests {
         assertNull(
                 mStorage.getString(RebootEscrowManager.REBOOT_ESCROW_ARMED_KEY, null, USER_SYSTEM));
         // Change the provider to server based, expect the reboot to fail
-        when(mInjected.forceServerBased()).thenReturn(true);
+        mMockInjector.mServerBased = true;
         assertEquals(ARM_REBOOT_ERROR_PROVIDER_MISMATCH, mService.armRebootEscrowIfNeeded());
         assertNull(
                 mStorage.getString(RebootEscrowManager.REBOOT_ESCROW_ARMED_KEY, null, USER_SYSTEM));

@@ -80,6 +80,7 @@ public class PipBoundsHandler {
     private int mImeHeight;
     private boolean mIsShelfShowing;
     private int mShelfHeight;
+    private boolean mDefaultLandscape;
 
     private final DisplayController.OnDisplaysChangedListener mDisplaysChangedListener =
             new DisplayController.OnDisplaysChangedListener() {
@@ -87,6 +88,7 @@ public class PipBoundsHandler {
         public void onDisplayAdded(int displayId) {
             if (displayId == mContext.getDisplayId()) {
                 mDisplayLayout.set(mDisplayController.getDisplayLayout(displayId));
+                mDefaultLandscape = (mDisplayInfo.logicalWidth > mDisplayInfo.logicalHeight);
             }
         }
     };
@@ -362,9 +364,17 @@ public class PipBoundsHandler {
     private void updateDisplayInfoIfNeeded() {
         final boolean updateNeeded;
         if ((mDisplayInfo.rotation == ROTATION_0) || (mDisplayInfo.rotation == ROTATION_180)) {
-            updateNeeded = (mDisplayInfo.logicalWidth > mDisplayInfo.logicalHeight);
+            if (!mDefaultLandscape) {
+                updateNeeded = (mDisplayInfo.logicalWidth > mDisplayInfo.logicalHeight);
+            } else {
+                updateNeeded = (mDisplayInfo.logicalWidth < mDisplayInfo.logicalHeight);
+            }
         } else {
-            updateNeeded = (mDisplayInfo.logicalWidth < mDisplayInfo.logicalHeight);
+            if (!mDefaultLandscape) {
+                updateNeeded = (mDisplayInfo.logicalWidth < mDisplayInfo.logicalHeight);
+            } else {
+                updateNeeded = (mDisplayInfo.logicalWidth > mDisplayInfo.logicalHeight);
+            }
         }
         if (updateNeeded) {
             final int newLogicalHeight = mDisplayInfo.logicalWidth;

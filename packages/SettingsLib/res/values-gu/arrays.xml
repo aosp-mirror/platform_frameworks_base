@@ -64,15 +64,15 @@
     <item msgid="2779123106632690576">"ચાલુ છે"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_versions">
-    <item msgid="8036025277512210160">"AVRCP 1.4 (ડિફૉલ્ટ)"</item>
+    <item msgid="6603880723315236832">"AVRCP 1.5 (ડિફૉલ્ટ)"</item>
     <item msgid="1637054408779685086">"AVRCP 1.3"</item>
-    <item msgid="8317734704797203949">"AVRCP 1.5"</item>
+    <item msgid="5896162189744596291">"AVRCP 1.4"</item>
     <item msgid="7556896992111771426">"AVRCP 1.6"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_version_values">
-    <item msgid="8965800440990431014">"avrcp14"</item>
+    <item msgid="4041937689950033942">"avrcp15"</item>
     <item msgid="1613629084012791988">"avrcp13"</item>
-    <item msgid="4398977131424970917">"avrcp15"</item>
+    <item msgid="99467845610592181">"avrcp14"</item>
     <item msgid="1963366694959681026">"avrcp16"</item>
   </string-array>
   <string-array name="bluetooth_map_versions">
@@ -89,16 +89,16 @@
     <item msgid="2494959071796102843">"સિસ્ટમ પસંદગીનો ઉપયોગ કરો (ડિફૉલ્ટ)"</item>
     <item msgid="4055460186095649420">"SBC"</item>
     <item msgid="720249083677397051">"AAC"</item>
-    <item msgid="1049450003868150455">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX">aptX™</xliff:g> ઑડિઓ"</item>
-    <item msgid="2908219194098827570">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX_HD">aptX™ HD</xliff:g> ઑડિઓ"</item>
+    <item msgid="1049450003868150455">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX">aptX™</xliff:g> ઑડિયો"</item>
+    <item msgid="2908219194098827570">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX_HD">aptX™ HD</xliff:g> ઑડિયો"</item>
     <item msgid="3825367753087348007">"LDAC"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_summaries">
     <item msgid="8868109554557331312">"સિસ્ટમ પસંદગીનો ઉપયોગ કરો (ડિફૉલ્ટ)"</item>
     <item msgid="9024885861221697796">"SBC"</item>
     <item msgid="4688890470703790013">"AAC"</item>
-    <item msgid="8627333814413492563">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX">aptX™</xliff:g> ઑડિઓ"</item>
-    <item msgid="3517061573669307965">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX_HD">aptX™ HD</xliff:g> ઑડિઓ"</item>
+    <item msgid="8627333814413492563">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX">aptX™</xliff:g> ઑડિયો"</item>
+    <item msgid="3517061573669307965">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX_HD">aptX™ HD</xliff:g> ઑડિયો"</item>
     <item msgid="2553206901068987657">"LDAC"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_sample_rate_titles">
@@ -161,7 +161,7 @@
     <item msgid="2715700596495505626">"256K"</item>
     <item msgid="7099386891713159947">"1M"</item>
     <item msgid="6069075827077845520">"4M"</item>
-    <item msgid="8243549501764402572">"16M"</item>
+    <item msgid="6078203297886482480">"8M"</item>
   </string-array>
   <string-array name="select_logd_size_lowram_titles">
     <item msgid="1145807928339101085">"બંધ"</item>
@@ -175,7 +175,7 @@
     <item msgid="7464037639415220106">"લૉગ બફર દીઠ 256K"</item>
     <item msgid="8539423820514360724">"લૉગ બફર દીઠ 1M"</item>
     <item msgid="1984761927103140651">"લૉગ બફર દીઠ 4M"</item>
-    <item msgid="7892098981256010498">"લૉગ બફર દીઠ 16M"</item>
+    <item msgid="2983219471251787208">"લૉગ બફર દીઠ 8M"</item>
   </string-array>
   <string-array name="select_logpersist_titles">
     <item msgid="704720725704372366">"બંધ"</item>
@@ -185,7 +185,7 @@
   </string-array>
   <string-array name="select_logpersist_summaries">
     <item msgid="97587758561106269">"બંધ"</item>
-    <item msgid="7126170197336963369">"તમામ લૉગ બફર્સ"</item>
+    <item msgid="7126170197336963369">"તમામ લૉગ બફર"</item>
     <item msgid="7167543126036181392">"તમામ પરંતુ રેડિઓ લૉગ બફર્સ"</item>
     <item msgid="5135340178556563979">"ફક્ત કર્નલ લૉગ બફર"</item>
   </string-array>
@@ -210,7 +210,7 @@
   <string-array name="animator_duration_scale_entries">
     <item msgid="6416998593844817378">"એનિમેશન બંધ"</item>
     <item msgid="875345630014338616">"એનિમેશન સ્કેલ .5x"</item>
-    <item msgid="2753729231187104962">"એનિમેશન સ્કેલ 1x"</item>
+    <item msgid="2753729231187104962">"ઍનિમેશન સ્કેલ 1x"</item>
     <item msgid="1368370459723665338">"એનિમેશન સ્કેલ 1.5x"</item>
     <item msgid="5768005350534383389">"એનિમેશન સ્કેલ 2x"</item>
     <item msgid="3728265127284005444">"એનિમેશન સ્કેલ 5x"</item>
@@ -252,7 +252,7 @@
     <item msgid="3474333938380896988">"Deuteranomaly માટેના ક્ષેત્રો બતાવો"</item>
   </string-array>
   <string-array name="app_process_limit_entries">
-    <item msgid="794656271086646068">"માનક સીમા"</item>
+    <item msgid="794656271086646068">"સ્ટૅન્ડર્ડ સીમા"</item>
     <item msgid="8628438298170567201">"કોઈ બૅકગ્રાઉન્ડ પ્રક્રિયાઓ નથી"</item>
     <item msgid="915752993383950932">"સૌથી વધુ 1 પ્રક્રિયા"</item>
     <item msgid="8554877790859095133">"સૌથી વધુ 2 પ્રક્રિયા"</item>

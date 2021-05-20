@@ -80,6 +80,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 /**
  * Helper class for running dexopt command on packages.
@@ -103,6 +104,8 @@ public class PackageDexOptimizer {
     private volatile boolean mSystemReady;
 
     private final ArtStatsLogger mArtStatsLogger = new ArtStatsLogger();
+
+    private static final Random sRandom = new Random();
 
     PackageDexOptimizer(Installer installer, Object installLock, Context context,
             String wakeLockTag) {
@@ -262,7 +265,7 @@ public class PackageDexOptimizer {
                 if (packageStats != null) {
                     Trace.traceBegin(Trace.TRACE_TAG_PACKAGE_MANAGER, "dex2oat-metrics");
                     try {
-                        long sessionId = Math.randomLongInternal();
+                        long sessionId = sRandom.nextLong();
                         ArtStatsLogUtils.writeStatsLog(
                                 mArtStatsLogger,
                                 sessionId,

@@ -444,6 +444,7 @@ applications that come with the platform
         <permission name="android.permission.MANAGE_DEBUGGING" />
         <!-- Permissions required for CTS test - TimeManagerTest -->
         <permission name="android.permission.MANAGE_TIME_AND_ZONE_DETECTION" />
+        <permission name="android.permission.SUGGEST_EXTERNAL_TIME" />
         <!-- Permissions required for CTS test - CtsHdmiCecHostTestCases -->
         <permission name="android.permission.HDMI_CEC"/>
         <!-- Permission required for CTS test - MediaPlayerTest -->
@@ -468,7 +469,9 @@ applications that come with the platform
         <permission name="android.permission.CONFIGURE_DISPLAY_BRIGHTNESS" />
         <permission name="android.permission.SET_VOLUME_KEY_LONG_PRESS_LISTENER" />
         <permission name="android.permission.SET_MEDIA_KEY_LISTENER" />
-        <permission name="android.permission.SET_VOLUME_KEY_LONG_PRESS_LISTENER" />
+        <permission name="android.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS" />
+        <!-- Permission required for CTS test - CtsAlarmManagerTestCases -->
+        <permission name="android.permission.UPDATE_DEVICE_STATS" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">

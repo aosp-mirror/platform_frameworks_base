@@ -978,7 +978,7 @@ package android {
     field public static final int multiArch = 16843918; // 0x101048e
     field public static final int multiprocess = 16842771; // 0x1010013
     field public static final int name = 16842755; // 0x1010003
-    field public static final int nativeHeapZeroInit = 16844314; // 0x101061a
+    field public static final int nativeHeapZeroInitialized = 16844314; // 0x101061a
     field public static final int navigationBarColor = 16843858; // 0x1010452
     field public static final int navigationBarDividerColor = 16844141; // 0x101056d
     field public static final int navigationContentDescription = 16843969; // 0x10104c1
@@ -11466,7 +11466,7 @@ package android.content.pm {
     method public static CharSequence getCategoryTitle(android.content.Context, int);
     method public int getGwpAsanMode();
     method public int getMemtagMode();
-    method @Nullable public Boolean isNativeHeapZeroInit();
+    method public int getNativeHeapZeroInitialized();
     method public boolean isProfileableByShell();
     method public boolean isResourceOverlay();
     method public boolean isVirtualPreload();
@@ -11520,6 +11520,9 @@ package android.content.pm {
     field public static final int MEMTAG_DEFAULT = -1; // 0xffffffff
     field public static final int MEMTAG_OFF = 0; // 0x0
     field public static final int MEMTAG_SYNC = 2; // 0x2
+    field public static final int ZEROINIT_DEFAULT = -1; // 0xffffffff
+    field public static final int ZEROINIT_DISABLED = 0; // 0x0
+    field public static final int ZEROINIT_ENABLED = 1; // 0x1
     field public String appComponentFactory;
     field public String backupAgentName;
     field public int category;
@@ -19374,15 +19377,23 @@ package android.media {
     field public static final int ENCODING_DEFAULT = 1; // 0x1
     field public static final int ENCODING_DOLBY_MAT = 19; // 0x13
     field public static final int ENCODING_DOLBY_TRUEHD = 14; // 0xe
+    field public static final int ENCODING_DRA = 28; // 0x1c
     field public static final int ENCODING_DTS = 7; // 0x7
     field public static final int ENCODING_DTS_HD = 8; // 0x8
+    field public static final int ENCODING_DTS_UHD = 27; // 0x1b
     field public static final int ENCODING_E_AC3 = 6; // 0x6
     field public static final int ENCODING_E_AC3_JOC = 18; // 0x12
     field public static final int ENCODING_IEC61937 = 13; // 0xd
     field public static final int ENCODING_INVALID = 0; // 0x0
     field public static final int ENCODING_MP3 = 9; // 0x9
+    field public static final int ENCODING_MPEGH_BL_L3 = 23; // 0x17
+    field public static final int ENCODING_MPEGH_BL_L4 = 24; // 0x18
+    field public static final int ENCODING_MPEGH_LC_L3 = 25; // 0x19
+    field public static final int ENCODING_MPEGH_LC_L4 = 26; // 0x1a
     field public static final int ENCODING_OPUS = 20; // 0x14
     field public static final int ENCODING_PCM_16BIT = 2; // 0x2
+    field public static final int ENCODING_PCM_24BIT_PACKED = 21; // 0x15
+    field public static final int ENCODING_PCM_32BIT = 22; // 0x16
     field public static final int ENCODING_PCM_8BIT = 3; // 0x3
     field public static final int ENCODING_PCM_FLOAT = 4; // 0x4
     field public static final int SAMPLE_RATE_UNSPECIFIED = 0; // 0x0
@@ -21401,6 +21412,9 @@ package android.media {
     field public static final String KEY_MAX_PTS_GAP_TO_ENCODER = "max-pts-gap-to-encoder";
     field public static final String KEY_MAX_WIDTH = "max-width";
     field public static final String KEY_MIME = "mime";
+    field public static final String KEY_MPEGH_COMPATIBLE_SETS = "mpegh-compatible-sets";
+    field public static final String KEY_MPEGH_PROFILE_LEVEL_INDICATION = "mpegh-profile-level-indication";
+    field public static final String KEY_MPEGH_REFERENCE_CHANNEL_LAYOUT = "mpegh-reference-channel-layout";
     field public static final String KEY_OPERATING_RATE = "operating-rate";
     field public static final String KEY_OUTPUT_REORDER_DEPTH = "output-reorder-depth";
     field public static final String KEY_PCM_ENCODING = "pcm-encoding";
@@ -21432,6 +21446,8 @@ package android.media {
     field public static final String MIMETYPE_AUDIO_G711_ALAW = "audio/g711-alaw";
     field public static final String MIMETYPE_AUDIO_G711_MLAW = "audio/g711-mlaw";
     field public static final String MIMETYPE_AUDIO_MPEG = "audio/mpeg";
+    field public static final String MIMETYPE_AUDIO_MPEGH_MHA1 = "audio/mha1";
+    field public static final String MIMETYPE_AUDIO_MPEGH_MHM1 = "audio/mhm1";
     field public static final String MIMETYPE_AUDIO_MSGSM = "audio/gsm";
     field public static final String MIMETYPE_AUDIO_OPUS = "audio/opus";
     field public static final String MIMETYPE_AUDIO_QCELP = "audio/qcelp";
@@ -25692,33 +25708,25 @@ package android.net.vcn {
     method @NonNull public android.net.vcn.VcnConfig build();
   }
 
-  public abstract class VcnControlPlaneConfig {
-  }
-
-  public final class VcnControlPlaneIkeConfig extends android.net.vcn.VcnControlPlaneConfig {
-    ctor public VcnControlPlaneIkeConfig(@NonNull android.net.ipsec.ike.IkeSessionParams, @NonNull android.net.ipsec.ike.TunnelModeChildSessionParams);
-    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionParams getChildSessionParams();
-    method @NonNull public android.net.ipsec.ike.IkeSessionParams getIkeSessionParams();
-  }
-
   public final class VcnGatewayConnectionConfig {
     method @NonNull public int[] getExposedCapabilities();
     method @NonNull public String getGatewayConnectionName();
-    method @IntRange(from=android.net.vcn.VcnGatewayConnectionConfig.MIN_MTU_V6) public int getMaxMtu();
-    method @NonNull public long[] getRetryInterval();
+    method @IntRange(from=0x500) public int getMaxMtu();
+    method @NonNull public long[] getRetryIntervalsMillis();
   }
 
   public static final class VcnGatewayConnectionConfig.Builder {
-    ctor public VcnGatewayConnectionConfig.Builder(@NonNull String, @NonNull android.net.vcn.VcnControlPlaneConfig);
+    ctor public VcnGatewayConnectionConfig.Builder(@NonNull String, @NonNull android.net.ipsec.ike.IkeTunnelConnectionParams);
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder addExposedCapability(int);
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig build();
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder removeExposedCapability(int);
-    method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder setMaxMtu(@IntRange(from=android.net.vcn.VcnGatewayConnectionConfig.MIN_MTU_V6) int);
-    method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder setRetryInterval(@NonNull long[]);
+    method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder setMaxMtu(@IntRange(from=0x500) int);
+    method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder setRetryIntervalsMillis(@NonNull long[]);
   }
 
   public class VcnManager {
     method @RequiresPermission("carrier privileges") public void clearVcnConfig(@NonNull android.os.ParcelUuid) throws java.io.IOException;
+    method @NonNull public java.util.List<android.os.ParcelUuid> getConfiguredSubscriptionGroups();
     method public void registerVcnStatusCallback(@NonNull android.os.ParcelUuid, @NonNull java.util.concurrent.Executor, @NonNull android.net.vcn.VcnManager.VcnStatusCallback);
     method @RequiresPermission("carrier privileges") public void setVcnConfig(@NonNull android.os.ParcelUuid, @NonNull android.net.vcn.VcnConfig) throws java.io.IOException;
     method public void unregisterVcnStatusCallback(@NonNull android.net.vcn.VcnManager.VcnStatusCallback);
@@ -31417,6 +31425,10 @@ package android.print {
     method @NonNull public String getLabel(@NonNull android.content.pm.PackageManager);
     method @IntRange(from=1) public int getWidthMils();
     method public boolean isPortrait();
+    field @NonNull public static final android.print.PrintAttributes.MediaSize ANSI_C;
+    field @NonNull public static final android.print.PrintAttributes.MediaSize ANSI_D;
+    field @NonNull public static final android.print.PrintAttributes.MediaSize ANSI_E;
+    field @NonNull public static final android.print.PrintAttributes.MediaSize ANSI_F;
     field public static final android.print.PrintAttributes.MediaSize ISO_A0;
     field public static final android.print.PrintAttributes.MediaSize ISO_A1;
     field public static final android.print.PrintAttributes.MediaSize ISO_A10;
@@ -31468,8 +31480,15 @@ package android.print {
     field public static final android.print.PrintAttributes.MediaSize JPN_HAGAKI;
     field public static final android.print.PrintAttributes.MediaSize JPN_KAHU;
     field public static final android.print.PrintAttributes.MediaSize JPN_KAKU2;
+    field @NonNull public static final android.print.PrintAttributes.MediaSize JPN_OE_PHOTO_L;
     field public static final android.print.PrintAttributes.MediaSize JPN_OUFUKU;
     field public static final android.print.PrintAttributes.MediaSize JPN_YOU4;
+    field @NonNull public static final android.print.PrintAttributes.MediaSize NA_ARCH_A;
+    field @NonNull public static final android.print.PrintAttributes.MediaSize NA_ARCH_B;
+    field @NonNull public static final android.print.PrintAttributes.MediaSize NA_ARCH_C;
+    field @NonNull public static final android.print.PrintAttributes.MediaSize NA_ARCH_D;
+    field @NonNull public static final android.print.PrintAttributes.MediaSize NA_ARCH_E;
+    field @NonNull public static final android.print.PrintAttributes.MediaSize NA_ARCH_E1;
     field public static final android.print.PrintAttributes.MediaSize NA_FOOLSCAP;
     field public static final android.print.PrintAttributes.MediaSize NA_GOVT_LETTER;
     field public static final android.print.PrintAttributes.MediaSize NA_INDEX_3X5;
@@ -31481,6 +31500,7 @@ package android.print {
     field public static final android.print.PrintAttributes.MediaSize NA_LETTER;
     field public static final android.print.PrintAttributes.MediaSize NA_MONARCH;
     field public static final android.print.PrintAttributes.MediaSize NA_QUARTO;
+    field @NonNull public static final android.print.PrintAttributes.MediaSize NA_SUPER_B;
     field public static final android.print.PrintAttributes.MediaSize NA_TABLOID;
     field public static final android.print.PrintAttributes.MediaSize OM_DAI_PA_KAI;
     field public static final android.print.PrintAttributes.MediaSize OM_JUURO_KU_KAI;
@@ -34454,721 +34474,721 @@ package android.provider {
 
 package android.renderscript {
 
-  public class Allocation extends android.renderscript.BaseObj {
-    method public void copy1DRangeFrom(int, int, Object);
-    method public void copy1DRangeFrom(int, int, int[]);
-    method public void copy1DRangeFrom(int, int, short[]);
-    method public void copy1DRangeFrom(int, int, byte[]);
-    method public void copy1DRangeFrom(int, int, float[]);
-    method public void copy1DRangeFrom(int, int, android.renderscript.Allocation, int);
-    method public void copy1DRangeFromUnchecked(int, int, Object);
-    method public void copy1DRangeFromUnchecked(int, int, int[]);
-    method public void copy1DRangeFromUnchecked(int, int, short[]);
-    method public void copy1DRangeFromUnchecked(int, int, byte[]);
-    method public void copy1DRangeFromUnchecked(int, int, float[]);
-    method public void copy1DRangeTo(int, int, Object);
-    method public void copy1DRangeTo(int, int, int[]);
-    method public void copy1DRangeTo(int, int, short[]);
-    method public void copy1DRangeTo(int, int, byte[]);
-    method public void copy1DRangeTo(int, int, float[]);
-    method public void copy1DRangeToUnchecked(int, int, Object);
-    method public void copy1DRangeToUnchecked(int, int, int[]);
-    method public void copy1DRangeToUnchecked(int, int, short[]);
-    method public void copy1DRangeToUnchecked(int, int, byte[]);
-    method public void copy1DRangeToUnchecked(int, int, float[]);
-    method public void copy2DRangeFrom(int, int, int, int, Object);
-    method public void copy2DRangeFrom(int, int, int, int, byte[]);
-    method public void copy2DRangeFrom(int, int, int, int, short[]);
-    method public void copy2DRangeFrom(int, int, int, int, int[]);
-    method public void copy2DRangeFrom(int, int, int, int, float[]);
-    method public void copy2DRangeFrom(int, int, int, int, android.renderscript.Allocation, int, int);
-    method public void copy2DRangeFrom(int, int, android.graphics.Bitmap);
-    method public void copy2DRangeTo(int, int, int, int, Object);
-    method public void copy2DRangeTo(int, int, int, int, byte[]);
-    method public void copy2DRangeTo(int, int, int, int, short[]);
-    method public void copy2DRangeTo(int, int, int, int, int[]);
-    method public void copy2DRangeTo(int, int, int, int, float[]);
-    method public void copy3DRangeFrom(int, int, int, int, int, int, Object);
-    method public void copy3DRangeFrom(int, int, int, int, int, int, android.renderscript.Allocation, int, int, int);
-    method public void copy3DRangeTo(int, int, int, int, int, int, Object);
-    method public void copyFrom(android.renderscript.BaseObj[]);
-    method public void copyFrom(Object);
-    method public void copyFrom(int[]);
-    method public void copyFrom(short[]);
-    method public void copyFrom(byte[]);
-    method public void copyFrom(float[]);
-    method public void copyFrom(android.graphics.Bitmap);
-    method public void copyFrom(android.renderscript.Allocation);
-    method public void copyFromUnchecked(Object);
-    method public void copyFromUnchecked(int[]);
-    method public void copyFromUnchecked(short[]);
-    method public void copyFromUnchecked(byte[]);
-    method public void copyFromUnchecked(float[]);
-    method public void copyTo(android.graphics.Bitmap);
-    method public void copyTo(Object);
-    method public void copyTo(byte[]);
-    method public void copyTo(short[]);
-    method public void copyTo(int[]);
-    method public void copyTo(float[]);
-    method public static android.renderscript.Allocation[] createAllocations(android.renderscript.RenderScript, android.renderscript.Type, int, int);
-    method public static android.renderscript.Allocation createCubemapFromBitmap(android.renderscript.RenderScript, android.graphics.Bitmap, android.renderscript.Allocation.MipmapControl, int);
-    method public static android.renderscript.Allocation createCubemapFromBitmap(android.renderscript.RenderScript, android.graphics.Bitmap);
-    method public static android.renderscript.Allocation createCubemapFromCubeFaces(android.renderscript.RenderScript, android.graphics.Bitmap, android.graphics.Bitmap, android.graphics.Bitmap, android.graphics.Bitmap, android.graphics.Bitmap, android.graphics.Bitmap, android.renderscript.Allocation.MipmapControl, int);
-    method public static android.renderscript.Allocation createCubemapFromCubeFaces(android.renderscript.RenderScript, android.graphics.Bitmap, android.graphics.Bitmap, android.graphics.Bitmap, android.graphics.Bitmap, android.graphics.Bitmap, android.graphics.Bitmap);
-    method public static android.renderscript.Allocation createFromBitmap(android.renderscript.RenderScript, android.graphics.Bitmap, android.renderscript.Allocation.MipmapControl, int);
-    method public static android.renderscript.Allocation createFromBitmap(android.renderscript.RenderScript, android.graphics.Bitmap);
-    method public static android.renderscript.Allocation createFromBitmapResource(android.renderscript.RenderScript, android.content.res.Resources, int, android.renderscript.Allocation.MipmapControl, int);
-    method public static android.renderscript.Allocation createFromBitmapResource(android.renderscript.RenderScript, android.content.res.Resources, int);
-    method public static android.renderscript.Allocation createFromString(android.renderscript.RenderScript, String, int);
-    method public static android.renderscript.Allocation createSized(android.renderscript.RenderScript, android.renderscript.Element, int, int);
-    method public static android.renderscript.Allocation createSized(android.renderscript.RenderScript, android.renderscript.Element, int);
-    method public static android.renderscript.Allocation createTyped(android.renderscript.RenderScript, android.renderscript.Type, android.renderscript.Allocation.MipmapControl, int);
-    method public static android.renderscript.Allocation createTyped(android.renderscript.RenderScript, android.renderscript.Type, int);
-    method public static android.renderscript.Allocation createTyped(android.renderscript.RenderScript, android.renderscript.Type);
-    method public void generateMipmaps();
-    method public java.nio.ByteBuffer getByteBuffer();
-    method public int getBytesSize();
-    method public android.renderscript.Element getElement();
-    method public long getStride();
-    method public android.view.Surface getSurface();
-    method public long getTimeStamp();
-    method public android.renderscript.Type getType();
-    method public int getUsage();
-    method public void ioReceive();
-    method public void ioSend();
+  @Deprecated public class Allocation extends android.renderscript.BaseObj {
+    method @Deprecated public void copy1DRangeFrom(int, int, Object);
+    method @Deprecated public void copy1DRangeFrom(int, int, int[]);
+    method @Deprecated public void copy1DRangeFrom(int, int, short[]);
+    method @Deprecated public void copy1DRangeFrom(int, int, byte[]);
+    method @Deprecated public void copy1DRangeFrom(int, int, float[]);
+    method @Deprecated public void copy1DRangeFrom(int, int, android.renderscript.Allocation, int);
+    method @Deprecated public void copy1DRangeFromUnchecked(int, int, Object);
+    method @Deprecated public void copy1DRangeFromUnchecked(int, int, int[]);
+    method @Deprecated public void copy1DRangeFromUnchecked(int, int, short[]);
+    method @Deprecated public void copy1DRangeFromUnchecked(int, int, byte[]);
+    method @Deprecated public void copy1DRangeFromUnchecked(int, int, float[]);
+    method @Deprecated public void copy1DRangeTo(int, int, Object);
+    method @Deprecated public void copy1DRangeTo(int, int, int[]);
+    method @Deprecated public void copy1DRangeTo(int, int, short[]);
+    method @Deprecated public void copy1DRangeTo(int, int, byte[]);
+    method @Deprecated public void copy1DRangeTo(int, int, float[]);
+    method @Deprecated public void copy1DRangeToUnchecked(int, int, Object);
+    method @Deprecated public void copy1DRangeToUnchecked(int, int, int[]);
+    method @Deprecated public void copy1DRangeToUnchecked(int, int, short[]);
+    method @Deprecated public void copy1DRangeToUnchecked(int, int, byte[]);
+    method @Deprecated public void copy1DRangeToUnchecked(int, int, float[]);
+    method @Deprecated public void copy2DRangeFrom(int, int, int, int, Object);
+    method @Deprecated public void copy2DRangeFrom(int, int, int, int, byte[]);
+    method @Deprecated public void copy2DRangeFrom(int, int, int, int, short[]);
+    method @Deprecated public void copy2DRangeFrom(int, int, int, int, int[]);
+    method @Deprecated public void copy2DRangeFrom(int, int, int, int, float[]);
+    method @Deprecated public void copy2DRangeFrom(int, int, int, int, android.renderscript.Allocation, int, int);
+    method @Deprecated public void copy2DRangeFrom(int, int, android.graphics.Bitmap);
+    method @Deprecated public void copy2DRangeTo(int, int, int, int, Object);
+    method @Deprecated public void copy2DRangeTo(int, int, int, int, byte[]);
+    method @Deprecated public void copy2DRangeTo(int, int, int, int, short[]);
+    method @Deprecated public void copy2DRangeTo(int, int, int, int, int[]);
+    method @Deprecated public void copy2DRangeTo(int, int, int, int, float[]);
+    method @Deprecated public void copy3DRangeFrom(int, int, int, int, int, int, Object);
+    method @Deprecated public void copy3DRangeFrom(int, int, int, int, int, int, android.renderscript.Allocation, int, int, int);
+    method @Deprecated public void copy3DRangeTo(int, int, int, int, int, int, Object);
+    method @Deprecated public void copyFrom(android.renderscript.BaseObj[]);
+    method @Deprecated public void copyFrom(Object);
+    method @Deprecated public void copyFrom(int[]);
+    method @Deprecated public void copyFrom(short[]);
+    method @Deprecated public void copyFrom(byte[]);
+    method @Deprecated public void copyFrom(float[]);
+    method @Deprecated public void copyFrom(android.graphics.Bitmap);
+    method @Deprecated public void copyFrom(android.renderscript.Allocation);
+    method @Deprecated public void copyFromUnchecked(Object);
+    method @Deprecated public void copyFromUnchecked(int[]);
+    method @Deprecated public void copyFromUnchecked(short[]);
+    method @Deprecated public void copyFromUnchecked(byte[]);
+    method @Deprecated public void copyFromUnchecked(float[]);
+    method @Deprecated public void copyTo(android.graphics.Bitmap);
+    method @Deprecated public void copyTo(Object);
+    method @Deprecated public void copyTo(byte[]);
+    method @Deprecated public void copyTo(short[]);
+    method @Deprecated public void copyTo(int[]);
+    method @Deprecated public void copyTo(float[]);
+    method @Deprecated public static android.renderscript.Allocation[] createAllocations(android.renderscript.RenderScript, android.renderscript.Type, int, int);
+    method @Deprecated public static android.renderscript.Allocation createCubemapFromBitmap(android.renderscript.RenderScript, android.graphics.Bitmap, android.renderscript.Allocation.MipmapControl, int);
+    method @Deprecated public static android.renderscript.Allocation createCubemapFromBitmap(android.renderscript.RenderScript, android.graphics.Bitmap);
+    method @Deprecated public static android.renderscript.Allocation createCubemapFromCubeFaces(android.renderscript.RenderScript, android.graphics.Bitmap, android.graphics.Bitmap, android.graphics.Bitmap, android.graphics.Bitmap, android.graphics.Bitmap, android.graphics.Bitmap, android.renderscript.Allocation.MipmapControl, int);
+    method @Deprecated public static android.renderscript.Allocation createCubemapFromCubeFaces(android.renderscript.RenderScript, android.graphics.Bitmap, android.graphics.Bitmap, android.graphics.Bitmap, android.graphics.Bitmap, android.graphics.Bitmap, android.graphics.Bitmap);
+    method @Deprecated public static android.renderscript.Allocation createFromBitmap(android.renderscript.RenderScript, android.graphics.Bitmap, android.renderscript.Allocation.MipmapControl, int);
+    method @Deprecated public static android.renderscript.Allocation createFromBitmap(android.renderscript.RenderScript, android.graphics.Bitmap);
+    method @Deprecated public static android.renderscript.Allocation createFromBitmapResource(android.renderscript.RenderScript, android.content.res.Resources, int, android.renderscript.Allocation.MipmapControl, int);
+    method @Deprecated public static android.renderscript.Allocation createFromBitmapResource(android.renderscript.RenderScript, android.content.res.Resources, int);
+    method @Deprecated public static android.renderscript.Allocation createFromString(android.renderscript.RenderScript, String, int);
+    method @Deprecated public static android.renderscript.Allocation createSized(android.renderscript.RenderScript, android.renderscript.Element, int, int);
+    method @Deprecated public static android.renderscript.Allocation createSized(android.renderscript.RenderScript, android.renderscript.Element, int);
+    method @Deprecated public static android.renderscript.Allocation createTyped(android.renderscript.RenderScript, android.renderscript.Type, android.renderscript.Allocation.MipmapControl, int);
+    method @Deprecated public static android.renderscript.Allocation createTyped(android.renderscript.RenderScript, android.renderscript.Type, int);
+    method @Deprecated public static android.renderscript.Allocation createTyped(android.renderscript.RenderScript, android.renderscript.Type);
+    method @Deprecated public void generateMipmaps();
+    method @Deprecated public java.nio.ByteBuffer getByteBuffer();
+    method @Deprecated public int getBytesSize();
+    method @Deprecated public android.renderscript.Element getElement();
+    method @Deprecated public long getStride();
+    method @Deprecated public android.view.Surface getSurface();
+    method @Deprecated public long getTimeStamp();
+    method @Deprecated public android.renderscript.Type getType();
+    method @Deprecated public int getUsage();
+    method @Deprecated public void ioReceive();
+    method @Deprecated public void ioSend();
     method @Deprecated public void resize(int);
-    method public void setAutoPadding(boolean);
-    method public void setFromFieldPacker(int, android.renderscript.FieldPacker);
-    method public void setFromFieldPacker(int, int, android.renderscript.FieldPacker);
-    method public void setFromFieldPacker(int, int, int, int, android.renderscript.FieldPacker);
-    method public void setOnBufferAvailableListener(android.renderscript.Allocation.OnBufferAvailableListener);
-    method public void setSurface(android.view.Surface);
-    method public void syncAll(int);
-    field public static final int USAGE_GRAPHICS_CONSTANTS = 8; // 0x8
-    field public static final int USAGE_GRAPHICS_RENDER_TARGET = 16; // 0x10
-    field public static final int USAGE_GRAPHICS_TEXTURE = 2; // 0x2
-    field public static final int USAGE_GRAPHICS_VERTEX = 4; // 0x4
-    field public static final int USAGE_IO_INPUT = 32; // 0x20
-    field public static final int USAGE_IO_OUTPUT = 64; // 0x40
-    field public static final int USAGE_SCRIPT = 1; // 0x1
-    field public static final int USAGE_SHARED = 128; // 0x80
+    method @Deprecated public void setAutoPadding(boolean);
+    method @Deprecated public void setFromFieldPacker(int, android.renderscript.FieldPacker);
+    method @Deprecated public void setFromFieldPacker(int, int, android.renderscript.FieldPacker);
+    method @Deprecated public void setFromFieldPacker(int, int, int, int, android.renderscript.FieldPacker);
+    method @Deprecated public void setOnBufferAvailableListener(android.renderscript.Allocation.OnBufferAvailableListener);
+    method @Deprecated public void setSurface(android.view.Surface);
+    method @Deprecated public void syncAll(int);
+    field @Deprecated public static final int USAGE_GRAPHICS_CONSTANTS = 8; // 0x8
+    field @Deprecated public static final int USAGE_GRAPHICS_RENDER_TARGET = 16; // 0x10
+    field @Deprecated public static final int USAGE_GRAPHICS_TEXTURE = 2; // 0x2
+    field @Deprecated public static final int USAGE_GRAPHICS_VERTEX = 4; // 0x4
+    field @Deprecated public static final int USAGE_IO_INPUT = 32; // 0x20
+    field @Deprecated public static final int USAGE_IO_OUTPUT = 64; // 0x40
+    field @Deprecated public static final int USAGE_SCRIPT = 1; // 0x1
+    field @Deprecated public static final int USAGE_SHARED = 128; // 0x80
   }
 
-  public enum Allocation.MipmapControl {
-    enum_constant public static final android.renderscript.Allocation.MipmapControl MIPMAP_FULL;
-    enum_constant public static final android.renderscript.Allocation.MipmapControl MIPMAP_NONE;
-    enum_constant public static final android.renderscript.Allocation.MipmapControl MIPMAP_ON_SYNC_TO_TEXTURE;
+  @Deprecated public enum Allocation.MipmapControl {
+    enum_constant @Deprecated public static final android.renderscript.Allocation.MipmapControl MIPMAP_FULL;
+    enum_constant @Deprecated public static final android.renderscript.Allocation.MipmapControl MIPMAP_NONE;
+    enum_constant @Deprecated public static final android.renderscript.Allocation.MipmapControl MIPMAP_ON_SYNC_TO_TEXTURE;
   }
 
-  public static interface Allocation.OnBufferAvailableListener {
-    method public void onBufferAvailable(android.renderscript.Allocation);
+  @Deprecated public static interface Allocation.OnBufferAvailableListener {
+    method @Deprecated public void onBufferAvailable(android.renderscript.Allocation);
   }
 
-  public class AllocationAdapter extends android.renderscript.Allocation {
-    method public static android.renderscript.AllocationAdapter create1D(android.renderscript.RenderScript, android.renderscript.Allocation);
-    method public static android.renderscript.AllocationAdapter create2D(android.renderscript.RenderScript, android.renderscript.Allocation);
-    method public static android.renderscript.AllocationAdapter createTyped(android.renderscript.RenderScript, android.renderscript.Allocation, android.renderscript.Type);
-    method public void resize(int);
-    method public void setFace(android.renderscript.Type.CubemapFace);
-    method public void setLOD(int);
-    method public void setX(int);
-    method public void setY(int);
-    method public void setZ(int);
+  @Deprecated public class AllocationAdapter extends android.renderscript.Allocation {
+    method @Deprecated public static android.renderscript.AllocationAdapter create1D(android.renderscript.RenderScript, android.renderscript.Allocation);
+    method @Deprecated public static android.renderscript.AllocationAdapter create2D(android.renderscript.RenderScript, android.renderscript.Allocation);
+    method @Deprecated public static android.renderscript.AllocationAdapter createTyped(android.renderscript.RenderScript, android.renderscript.Allocation, android.renderscript.Type);
+    method @Deprecated public void resize(int);
+    method @Deprecated public void setFace(android.renderscript.Type.CubemapFace);
+    method @Deprecated public void setLOD(int);
+    method @Deprecated public void setX(int);
+    method @Deprecated public void setY(int);
+    method @Deprecated public void setZ(int);
   }
 
-  public class BaseObj {
-    method public void destroy();
-    method public String getName();
-    method public void setName(String);
+  @Deprecated public class BaseObj {
+    method @Deprecated public void destroy();
+    method @Deprecated public String getName();
+    method @Deprecated public void setName(String);
   }
 
-  public class Byte2 {
-    ctor public Byte2();
-    ctor public Byte2(byte, byte);
-    field public byte x;
-    field public byte y;
+  @Deprecated public class Byte2 {
+    ctor @Deprecated public Byte2();
+    ctor @Deprecated public Byte2(byte, byte);
+    field @Deprecated public byte x;
+    field @Deprecated public byte y;
   }
 
-  public class Byte3 {
-    ctor public Byte3();
-    ctor public Byte3(byte, byte, byte);
-    field public byte x;
-    field public byte y;
-    field public byte z;
+  @Deprecated public class Byte3 {
+    ctor @Deprecated public Byte3();
+    ctor @Deprecated public Byte3(byte, byte, byte);
+    field @Deprecated public byte x;
+    field @Deprecated public byte y;
+    field @Deprecated public byte z;
   }
 
-  public class Byte4 {
-    ctor public Byte4();
-    ctor public Byte4(byte, byte, byte, byte);
-    field public byte w;
-    field public byte x;
-    field public byte y;
-    field public byte z;
+  @Deprecated public class Byte4 {
+    ctor @Deprecated public Byte4();
+    ctor @Deprecated public Byte4(byte, byte, byte, byte);
+    field @Deprecated public byte w;
+    field @Deprecated public byte x;
+    field @Deprecated public byte y;
+    field @Deprecated public byte z;
   }
 
-  public class Double2 {
-    ctor public Double2();
-    ctor public Double2(double, double);
-    field public double x;
-    field public double y;
+  @Deprecated public class Double2 {
+    ctor @Deprecated public Double2();
+    ctor @Deprecated public Double2(double, double);
+    field @Deprecated public double x;
+    field @Deprecated public double y;
   }
 
-  public class Double3 {
-    ctor public Double3();
-    ctor public Double3(double, double, double);
-    field public double x;
-    field public double y;
-    field public double z;
+  @Deprecated public class Double3 {
+    ctor @Deprecated public Double3();
+    ctor @Deprecated public Double3(double, double, double);
+    field @Deprecated public double x;
+    field @Deprecated public double y;
+    field @Deprecated public double z;
   }
 
-  public class Double4 {
-    ctor public Double4();
-    ctor public Double4(double, double, double, double);
-    field public double w;
-    field public double x;
-    field public double y;
-    field public double z;
+  @Deprecated public class Double4 {
+    ctor @Deprecated public Double4();
+    ctor @Deprecated public Double4(double, double, double, double);
+    field @Deprecated public double w;
+    field @Deprecated public double x;
+    field @Deprecated public double y;
+    field @Deprecated public double z;
   }
 
-  public class Element extends android.renderscript.BaseObj {
-    method public static android.renderscript.Element ALLOCATION(android.renderscript.RenderScript);
-    method public static android.renderscript.Element A_8(android.renderscript.RenderScript);
-    method public static android.renderscript.Element BOOLEAN(android.renderscript.RenderScript);
-    method public static android.renderscript.Element ELEMENT(android.renderscript.RenderScript);
-    method public static android.renderscript.Element F16(android.renderscript.RenderScript);
-    method public static android.renderscript.Element F16_2(android.renderscript.RenderScript);
-    method public static android.renderscript.Element F16_3(android.renderscript.RenderScript);
-    method public static android.renderscript.Element F16_4(android.renderscript.RenderScript);
-    method public static android.renderscript.Element F32(android.renderscript.RenderScript);
-    method public static android.renderscript.Element F32_2(android.renderscript.RenderScript);
-    method public static android.renderscript.Element F32_3(android.renderscript.RenderScript);
-    method public static android.renderscript.Element F32_4(android.renderscript.RenderScript);
-    method public static android.renderscript.Element F64(android.renderscript.RenderScript);
-    method public static android.renderscript.Element F64_2(android.renderscript.RenderScript);
-    method public static android.renderscript.Element F64_3(android.renderscript.RenderScript);
-    method public static android.renderscript.Element F64_4(android.renderscript.RenderScript);
-    method public static android.renderscript.Element FONT(android.renderscript.RenderScript);
-    method public static android.renderscript.Element I16(android.renderscript.RenderScript);
-    method public static android.renderscript.Element I16_2(android.renderscript.RenderScript);
-    method public static android.renderscript.Element I16_3(android.renderscript.RenderScript);
-    method public static android.renderscript.Element I16_4(android.renderscript.RenderScript);
-    method public static android.renderscript.Element I32(android.renderscript.RenderScript);
-    method public static android.renderscript.Element I32_2(android.renderscript.RenderScript);
-    method public static android.renderscript.Element I32_3(android.renderscript.RenderScript);
-    method public static android.renderscript.Element I32_4(android.renderscript.RenderScript);
-    method public static android.renderscript.Element I64(android.renderscript.RenderScript);
-    method public static android.renderscript.Element I64_2(android.renderscript.RenderScript);
-    method public static android.renderscript.Element I64_3(android.renderscript.RenderScript);
-    method public static android.renderscript.Element I64_4(android.renderscript.RenderScript);
-    method public static android.renderscript.Element I8(android.renderscript.RenderScript);
-    method public static android.renderscript.Element I8_2(android.renderscript.RenderScript);
-    method public static android.renderscript.Element I8_3(android.renderscript.RenderScript);
-    method public static android.renderscript.Element I8_4(android.renderscript.RenderScript);
+  @Deprecated public class Element extends android.renderscript.BaseObj {
+    method @Deprecated public static android.renderscript.Element ALLOCATION(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element A_8(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element BOOLEAN(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element ELEMENT(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element F16(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element F16_2(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element F16_3(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element F16_4(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element F32(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element F32_2(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element F32_3(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element F32_4(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element F64(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element F64_2(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element F64_3(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element F64_4(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element FONT(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element I16(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element I16_2(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element I16_3(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element I16_4(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element I32(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element I32_2(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element I32_3(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element I32_4(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element I64(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element I64_2(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element I64_3(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element I64_4(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element I8(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element I8_2(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element I8_3(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element I8_4(android.renderscript.RenderScript);
     method @Deprecated public static android.renderscript.Element MATRIX4X4(android.renderscript.RenderScript);
-    method public static android.renderscript.Element MATRIX_2X2(android.renderscript.RenderScript);
-    method public static android.renderscript.Element MATRIX_3X3(android.renderscript.RenderScript);
-    method public static android.renderscript.Element MATRIX_4X4(android.renderscript.RenderScript);
-    method public static android.renderscript.Element MESH(android.renderscript.RenderScript);
-    method public static android.renderscript.Element PROGRAM_FRAGMENT(android.renderscript.RenderScript);
-    method public static android.renderscript.Element PROGRAM_RASTER(android.renderscript.RenderScript);
-    method public static android.renderscript.Element PROGRAM_STORE(android.renderscript.RenderScript);
-    method public static android.renderscript.Element PROGRAM_VERTEX(android.renderscript.RenderScript);
-    method public static android.renderscript.Element RGBA_4444(android.renderscript.RenderScript);
-    method public static android.renderscript.Element RGBA_5551(android.renderscript.RenderScript);
-    method public static android.renderscript.Element RGBA_8888(android.renderscript.RenderScript);
-    method public static android.renderscript.Element RGB_565(android.renderscript.RenderScript);
-    method public static android.renderscript.Element RGB_888(android.renderscript.RenderScript);
-    method public static android.renderscript.Element SAMPLER(android.renderscript.RenderScript);
-    method public static android.renderscript.Element SCRIPT(android.renderscript.RenderScript);
-    method public static android.renderscript.Element TYPE(android.renderscript.RenderScript);
-    method public static android.renderscript.Element U16(android.renderscript.RenderScript);
-    method public static android.renderscript.Element U16_2(android.renderscript.RenderScript);
-    method public static android.renderscript.Element U16_3(android.renderscript.RenderScript);
-    method public static android.renderscript.Element U16_4(android.renderscript.RenderScript);
-    method public static android.renderscript.Element U32(android.renderscript.RenderScript);
-    method public static android.renderscript.Element U32_2(android.renderscript.RenderScript);
-    method public static android.renderscript.Element U32_3(android.renderscript.RenderScript);
-    method public static android.renderscript.Element U32_4(android.renderscript.RenderScript);
-    method public static android.renderscript.Element U64(android.renderscript.RenderScript);
-    method public static android.renderscript.Element U64_2(android.renderscript.RenderScript);
-    method public static android.renderscript.Element U64_3(android.renderscript.RenderScript);
-    method public static android.renderscript.Element U64_4(android.renderscript.RenderScript);
-    method public static android.renderscript.Element U8(android.renderscript.RenderScript);
-    method public static android.renderscript.Element U8_2(android.renderscript.RenderScript);
-    method public static android.renderscript.Element U8_3(android.renderscript.RenderScript);
-    method public static android.renderscript.Element U8_4(android.renderscript.RenderScript);
-    method public static android.renderscript.Element YUV(android.renderscript.RenderScript);
-    method public static android.renderscript.Element createPixel(android.renderscript.RenderScript, android.renderscript.Element.DataType, android.renderscript.Element.DataKind);
-    method public static android.renderscript.Element createVector(android.renderscript.RenderScript, android.renderscript.Element.DataType, int);
-    method public int getBytesSize();
-    method public android.renderscript.Element.DataKind getDataKind();
-    method public android.renderscript.Element.DataType getDataType();
-    method public android.renderscript.Element getSubElement(int);
-    method public int getSubElementArraySize(int);
-    method public int getSubElementCount();
-    method public String getSubElementName(int);
-    method public int getSubElementOffsetBytes(int);
-    method public int getVectorSize();
-    method public boolean isCompatible(android.renderscript.Element);
-    method public boolean isComplex();
+    method @Deprecated public static android.renderscript.Element MATRIX_2X2(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element MATRIX_3X3(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element MATRIX_4X4(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element MESH(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element PROGRAM_FRAGMENT(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element PROGRAM_RASTER(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element PROGRAM_STORE(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element PROGRAM_VERTEX(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element RGBA_4444(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element RGBA_5551(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element RGBA_8888(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element RGB_565(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element RGB_888(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element SAMPLER(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element SCRIPT(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element TYPE(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element U16(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element U16_2(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element U16_3(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element U16_4(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element U32(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element U32_2(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element U32_3(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element U32_4(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element U64(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element U64_2(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element U64_3(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element U64_4(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element U8(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element U8_2(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element U8_3(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element U8_4(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element YUV(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Element createPixel(android.renderscript.RenderScript, android.renderscript.Element.DataType, android.renderscript.Element.DataKind);
+    method @Deprecated public static android.renderscript.Element createVector(android.renderscript.RenderScript, android.renderscript.Element.DataType, int);
+    method @Deprecated public int getBytesSize();
+    method @Deprecated public android.renderscript.Element.DataKind getDataKind();
+    method @Deprecated public android.renderscript.Element.DataType getDataType();
+    method @Deprecated public android.renderscript.Element getSubElement(int);
+    method @Deprecated public int getSubElementArraySize(int);
+    method @Deprecated public int getSubElementCount();
+    method @Deprecated public String getSubElementName(int);
+    method @Deprecated public int getSubElementOffsetBytes(int);
+    method @Deprecated public int getVectorSize();
+    method @Deprecated public boolean isCompatible(android.renderscript.Element);
+    method @Deprecated public boolean isComplex();
   }
 
-  public static class Element.Builder {
-    ctor public Element.Builder(android.renderscript.RenderScript);
-    method public android.renderscript.Element.Builder add(android.renderscript.Element, String, int);
-    method public android.renderscript.Element.Builder add(android.renderscript.Element, String);
-    method public android.renderscript.Element create();
+  @Deprecated public static class Element.Builder {
+    ctor @Deprecated public Element.Builder(android.renderscript.RenderScript);
+    method @Deprecated public android.renderscript.Element.Builder add(android.renderscript.Element, String, int);
+    method @Deprecated public android.renderscript.Element.Builder add(android.renderscript.Element, String);
+    method @Deprecated public android.renderscript.Element create();
   }
 
-  public enum Element.DataKind {
-    enum_constant public static final android.renderscript.Element.DataKind PIXEL_A;
-    enum_constant public static final android.renderscript.Element.DataKind PIXEL_DEPTH;
-    enum_constant public static final android.renderscript.Element.DataKind PIXEL_L;
-    enum_constant public static final android.renderscript.Element.DataKind PIXEL_LA;
-    enum_constant public static final android.renderscript.Element.DataKind PIXEL_RGB;
-    enum_constant public static final android.renderscript.Element.DataKind PIXEL_RGBA;
-    enum_constant public static final android.renderscript.Element.DataKind PIXEL_YUV;
-    enum_constant public static final android.renderscript.Element.DataKind USER;
+  @Deprecated public enum Element.DataKind {
+    enum_constant @Deprecated public static final android.renderscript.Element.DataKind PIXEL_A;
+    enum_constant @Deprecated public static final android.renderscript.Element.DataKind PIXEL_DEPTH;
+    enum_constant @Deprecated public static final android.renderscript.Element.DataKind PIXEL_L;
+    enum_constant @Deprecated public static final android.renderscript.Element.DataKind PIXEL_LA;
+    enum_constant @Deprecated public static final android.renderscript.Element.DataKind PIXEL_RGB;
+    enum_constant @Deprecated public static final android.renderscript.Element.DataKind PIXEL_RGBA;
+    enum_constant @Deprecated public static final android.renderscript.Element.DataKind PIXEL_YUV;
+    enum_constant @Deprecated public static final android.renderscript.Element.DataKind USER;
   }
 
-  public enum Element.DataType {
-    enum_constant public static final android.renderscript.Element.DataType BOOLEAN;
-    enum_constant public static final android.renderscript.Element.DataType FLOAT_16;
-    enum_constant public static final android.renderscript.Element.DataType FLOAT_32;
-    enum_constant public static final android.renderscript.Element.DataType FLOAT_64;
-    enum_constant public static final android.renderscript.Element.DataType MATRIX_2X2;
-    enum_constant public static final android.renderscript.Element.DataType MATRIX_3X3;
-    enum_constant public static final android.renderscript.Element.DataType MATRIX_4X4;
-    enum_constant public static final android.renderscript.Element.DataType NONE;
-    enum_constant public static final android.renderscript.Element.DataType RS_ALLOCATION;
-    enum_constant public static final android.renderscript.Element.DataType RS_ELEMENT;
-    enum_constant public static final android.renderscript.Element.DataType RS_FONT;
-    enum_constant public static final android.renderscript.Element.DataType RS_MESH;
-    enum_constant public static final android.renderscript.Element.DataType RS_PROGRAM_FRAGMENT;
-    enum_constant public static final android.renderscript.Element.DataType RS_PROGRAM_RASTER;
-    enum_constant public static final android.renderscript.Element.DataType RS_PROGRAM_STORE;
-    enum_constant public static final android.renderscript.Element.DataType RS_PROGRAM_VERTEX;
-    enum_constant public static final android.renderscript.Element.DataType RS_SAMPLER;
-    enum_constant public static final android.renderscript.Element.DataType RS_SCRIPT;
-    enum_constant public static final android.renderscript.Element.DataType RS_TYPE;
-    enum_constant public static final android.renderscript.Element.DataType SIGNED_16;
-    enum_constant public static final android.renderscript.Element.DataType SIGNED_32;
-    enum_constant public static final android.renderscript.Element.DataType SIGNED_64;
-    enum_constant public static final android.renderscript.Element.DataType SIGNED_8;
-    enum_constant public static final android.renderscript.Element.DataType UNSIGNED_16;
-    enum_constant public static final android.renderscript.Element.DataType UNSIGNED_32;
-    enum_constant public static final android.renderscript.Element.DataType UNSIGNED_4_4_4_4;
-    enum_constant public static final android.renderscript.Element.DataType UNSIGNED_5_5_5_1;
-    enum_constant public static final android.renderscript.Element.DataType UNSIGNED_5_6_5;
-    enum_constant public static final android.renderscript.Element.DataType UNSIGNED_64;
-    enum_constant public static final android.renderscript.Element.DataType UNSIGNED_8;
+  @Deprecated public enum Element.DataType {
+    enum_constant @Deprecated public static final android.renderscript.Element.DataType BOOLEAN;
+    enum_constant @Deprecated public static final android.renderscript.Element.DataType FLOAT_16;
+    enum_constant @Deprecated public static final android.renderscript.Element.DataType FLOAT_32;
+    enum_constant @Deprecated public static final android.renderscript.Element.DataType FLOAT_64;
+    enum_constant @Deprecated public static final android.renderscript.Element.DataType MATRIX_2X2;
+    enum_constant @Deprecated public static final android.renderscript.Element.DataType MATRIX_3X3;
+    enum_constant @Deprecated public static final android.renderscript.Element.DataType MATRIX_4X4;
+    enum_constant @Deprecated public static final android.renderscript.Element.DataType NONE;
+    enum_constant @Deprecated public static final android.renderscript.Element.DataType RS_ALLOCATION;
+    enum_constant @Deprecated public static final android.renderscript.Element.DataType RS_ELEMENT;
+    enum_constant @Deprecated public static final android.renderscript.Element.DataType RS_FONT;
+    enum_constant @Deprecated public static final android.renderscript.Element.DataType RS_MESH;
+    enum_constant @Deprecated public static final android.renderscript.Element.DataType RS_PROGRAM_FRAGMENT;
+    enum_constant @Deprecated public static final android.renderscript.Element.DataType RS_PROGRAM_RASTER;
+    enum_constant @Deprecated public static final android.renderscript.Element.DataType RS_PROGRAM_STORE;
+    enum_constant @Deprecated public static final android.renderscript.Element.DataType RS_PROGRAM_VERTEX;
+    enum_constant @Deprecated public static final android.renderscript.Element.DataType RS_SAMPLER;
+    enum_constant @Deprecated public static final android.renderscript.Element.DataType RS_SCRIPT;
+    enum_constant @Deprecated public static final android.renderscript.Element.DataType RS_TYPE;
+    enum_constant @Deprecated public static final android.renderscript.Element.DataType SIGNED_16;
+    enum_constant @Deprecated public static final android.renderscript.Element.DataType SIGNED_32;
+    enum_constant @Deprecated public static final android.renderscript.Element.DataType SIGNED_64;
+    enum_constant @Deprecated public static final android.renderscript.Element.DataType SIGNED_8;
+    enum_constant @Deprecated public static final android.renderscript.Element.DataType UNSIGNED_16;
+    enum_constant @Deprecated public static final android.renderscript.Element.DataType UNSIGNED_32;
+    enum_constant @Deprecated public static final android.renderscript.Element.DataType UNSIGNED_4_4_4_4;
+    enum_constant @Deprecated public static final android.renderscript.Element.DataType UNSIGNED_5_5_5_1;
+    enum_constant @Deprecated public static final android.renderscript.Element.DataType UNSIGNED_5_6_5;
+    enum_constant @Deprecated public static final android.renderscript.Element.DataType UNSIGNED_64;
+    enum_constant @Deprecated public static final android.renderscript.Element.DataType UNSIGNED_8;
   }
 
-  public class FieldPacker {
-    ctor public FieldPacker(int);
-    ctor public FieldPacker(byte[]);
-    method public void addBoolean(boolean);
-    method public void addF32(float);
-    method public void addF32(android.renderscript.Float2);
-    method public void addF32(android.renderscript.Float3);
-    method public void addF32(android.renderscript.Float4);
-    method public void addF64(double);
-    method public void addF64(android.renderscript.Double2);
-    method public void addF64(android.renderscript.Double3);
-    method public void addF64(android.renderscript.Double4);
-    method public void addI16(short);
-    method public void addI16(android.renderscript.Short2);
-    method public void addI16(android.renderscript.Short3);
-    method public void addI16(android.renderscript.Short4);
-    method public void addI32(int);
-    method public void addI32(android.renderscript.Int2);
-    method public void addI32(android.renderscript.Int3);
-    method public void addI32(android.renderscript.Int4);
-    method public void addI64(long);
-    method public void addI64(android.renderscript.Long2);
-    method public void addI64(android.renderscript.Long3);
-    method public void addI64(android.renderscript.Long4);
-    method public void addI8(byte);
-    method public void addI8(android.renderscript.Byte2);
-    method public void addI8(android.renderscript.Byte3);
-    method public void addI8(android.renderscript.Byte4);
-    method public void addMatrix(android.renderscript.Matrix4f);
-    method public void addMatrix(android.renderscript.Matrix3f);
-    method public void addMatrix(android.renderscript.Matrix2f);
-    method public void addObj(android.renderscript.BaseObj);
-    method public void addU16(int);
-    method public void addU16(android.renderscript.Int2);
-    method public void addU16(android.renderscript.Int3);
-    method public void addU16(android.renderscript.Int4);
-    method public void addU32(long);
-    method public void addU32(android.renderscript.Long2);
-    method public void addU32(android.renderscript.Long3);
-    method public void addU32(android.renderscript.Long4);
-    method public void addU64(long);
-    method public void addU64(android.renderscript.Long2);
-    method public void addU64(android.renderscript.Long3);
-    method public void addU64(android.renderscript.Long4);
-    method public void addU8(short);
-    method public void addU8(android.renderscript.Short2);
-    method public void addU8(android.renderscript.Short3);
-    method public void addU8(android.renderscript.Short4);
-    method public void align(int);
-    method public final byte[] getData();
-    method public void reset();
-    method public void reset(int);
-    method public void skip(int);
-    method public boolean subBoolean();
-    method public android.renderscript.Byte2 subByte2();
-    method public android.renderscript.Byte3 subByte3();
-    method public android.renderscript.Byte4 subByte4();
-    method public android.renderscript.Double2 subDouble2();
-    method public android.renderscript.Double3 subDouble3();
-    method public android.renderscript.Double4 subDouble4();
-    method public float subF32();
-    method public double subF64();
-    method public android.renderscript.Float2 subFloat2();
-    method public android.renderscript.Float3 subFloat3();
-    method public android.renderscript.Float4 subFloat4();
-    method public short subI16();
-    method public int subI32();
-    method public long subI64();
-    method public byte subI8();
-    method public android.renderscript.Int2 subInt2();
-    method public android.renderscript.Int3 subInt3();
-    method public android.renderscript.Int4 subInt4();
-    method public android.renderscript.Long2 subLong2();
-    method public android.renderscript.Long3 subLong3();
-    method public android.renderscript.Long4 subLong4();
-    method public android.renderscript.Matrix2f subMatrix2f();
-    method public android.renderscript.Matrix3f subMatrix3f();
-    method public android.renderscript.Matrix4f subMatrix4f();
-    method public android.renderscript.Short2 subShort2();
-    method public android.renderscript.Short3 subShort3();
-    method public android.renderscript.Short4 subShort4();
-    method public void subalign(int);
+  @Deprecated public class FieldPacker {
+    ctor @Deprecated public FieldPacker(int);
+    ctor @Deprecated public FieldPacker(byte[]);
+    method @Deprecated public void addBoolean(boolean);
+    method @Deprecated public void addF32(float);
+    method @Deprecated public void addF32(android.renderscript.Float2);
+    method @Deprecated public void addF32(android.renderscript.Float3);
+    method @Deprecated public void addF32(android.renderscript.Float4);
+    method @Deprecated public void addF64(double);
+    method @Deprecated public void addF64(android.renderscript.Double2);
+    method @Deprecated public void addF64(android.renderscript.Double3);
+    method @Deprecated public void addF64(android.renderscript.Double4);
+    method @Deprecated public void addI16(short);
+    method @Deprecated public void addI16(android.renderscript.Short2);
+    method @Deprecated public void addI16(android.renderscript.Short3);
+    method @Deprecated public void addI16(android.renderscript.Short4);
+    method @Deprecated public void addI32(int);
+    method @Deprecated public void addI32(android.renderscript.Int2);
+    method @Deprecated public void addI32(android.renderscript.Int3);
+    method @Deprecated public void addI32(android.renderscript.Int4);
+    method @Deprecated public void addI64(long);
+    method @Deprecated public void addI64(android.renderscript.Long2);
+    method @Deprecated public void addI64(android.renderscript.Long3);
+    method @Deprecated public void addI64(android.renderscript.Long4);
+    method @Deprecated public void addI8(byte);
+    method @Deprecated public void addI8(android.renderscript.Byte2);
+    method @Deprecated public void addI8(android.renderscript.Byte3);
+    method @Deprecated public void addI8(android.renderscript.Byte4);
+    method @Deprecated public void addMatrix(android.renderscript.Matrix4f);
+    method @Deprecated public void addMatrix(android.renderscript.Matrix3f);
+    method @Deprecated public void addMatrix(android.renderscript.Matrix2f);
+    method @Deprecated public void addObj(android.renderscript.BaseObj);
+    method @Deprecated public void addU16(int);
+    method @Deprecated public void addU16(android.renderscript.Int2);
+    method @Deprecated public void addU16(android.renderscript.Int3);
+    method @Deprecated public void addU16(android.renderscript.Int4);
+    method @Deprecated public void addU32(long);
+    method @Deprecated public void addU32(android.renderscript.Long2);
+    method @Deprecated public void addU32(android.renderscript.Long3);
+    method @Deprecated public void addU32(android.renderscript.Long4);
+    method @Deprecated public void addU64(long);
+    method @Deprecated public void addU64(android.renderscript.Long2);
+    method @Deprecated public void addU64(android.renderscript.Long3);
+    method @Deprecated public void addU64(android.renderscript.Long4);
+    method @Deprecated public void addU8(short);
+    method @Deprecated public void addU8(android.renderscript.Short2);
+    method @Deprecated public void addU8(android.renderscript.Short3);
+    method @Deprecated public void addU8(android.renderscript.Short4);
+    method @Deprecated public void align(int);
+    method @Deprecated public final byte[] getData();
+    method @Deprecated public void reset();
+    method @Deprecated public void reset(int);
+    method @Deprecated public void skip(int);
+    method @Deprecated public boolean subBoolean();
+    method @Deprecated public android.renderscript.Byte2 subByte2();
+    method @Deprecated public android.renderscript.Byte3 subByte3();
+    method @Deprecated public android.renderscript.Byte4 subByte4();
+    method @Deprecated public android.renderscript.Double2 subDouble2();
+    method @Deprecated public android.renderscript.Double3 subDouble3();
+    method @Deprecated public android.renderscript.Double4 subDouble4();
+    method @Deprecated public float subF32();
+    method @Deprecated public double subF64();
+    method @Deprecated public android.renderscript.Float2 subFloat2();
+    method @Deprecated public android.renderscript.Float3 subFloat3();
+    method @Deprecated public android.renderscript.Float4 subFloat4();
+    method @Deprecated public short subI16();
+    method @Deprecated public int subI32();
+    method @Deprecated public long subI64();
+    method @Deprecated public byte subI8();
+    method @Deprecated public android.renderscript.Int2 subInt2();
+    method @Deprecated public android.renderscript.Int3 subInt3();
+    method @Deprecated public android.renderscript.Int4 subInt4();
+    method @Deprecated public android.renderscript.Long2 subLong2();
+    method @Deprecated public android.renderscript.Long3 subLong3();
+    method @Deprecated public android.renderscript.Long4 subLong4();
+    method @Deprecated public android.renderscript.Matrix2f subMatrix2f();
+    method @Deprecated public android.renderscript.Matrix3f subMatrix3f();
+    method @Deprecated public android.renderscript.Matrix4f subMatrix4f();
+    method @Deprecated public android.renderscript.Short2 subShort2();
+    method @Deprecated public android.renderscript.Short3 subShort3();
+    method @Deprecated public android.renderscript.Short4 subShort4();
+    method @Deprecated public void subalign(int);
   }
 
-  public class Float2 {
-    ctor public Float2();
-    ctor public Float2(float, float);
-    field public float x;
-    field public float y;
+  @Deprecated public class Float2 {
+    ctor @Deprecated public Float2();
+    ctor @Deprecated public Float2(float, float);
+    field @Deprecated public float x;
+    field @Deprecated public float y;
   }
 
-  public class Float3 {
-    ctor public Float3();
-    ctor public Float3(float, float, float);
-    field public float x;
-    field public float y;
-    field public float z;
+  @Deprecated public class Float3 {
+    ctor @Deprecated public Float3();
+    ctor @Deprecated public Float3(float, float, float);
+    field @Deprecated public float x;
+    field @Deprecated public float y;
+    field @Deprecated public float z;
   }
 
-  public class Float4 {
-    ctor public Float4();
-    ctor public Float4(float, float, float, float);
-    field public float w;
-    field public float x;
-    field public float y;
-    field public float z;
+  @Deprecated public class Float4 {
+    ctor @Deprecated public Float4();
+    ctor @Deprecated public Float4(float, float, float, float);
+    field @Deprecated public float w;
+    field @Deprecated public float x;
+    field @Deprecated public float y;
+    field @Deprecated public float z;
   }
 
-  public class Int2 {
-    ctor public Int2();
-    ctor public Int2(int, int);
-    field public int x;
-    field public int y;
+  @Deprecated public class Int2 {
+    ctor @Deprecated public Int2();
+    ctor @Deprecated public Int2(int, int);
+    field @Deprecated public int x;
+    field @Deprecated public int y;
   }
 
-  public class Int3 {
-    ctor public Int3();
-    ctor public Int3(int, int, int);
-    field public int x;
-    field public int y;
-    field public int z;
+  @Deprecated public class Int3 {
+    ctor @Deprecated public Int3();
+    ctor @Deprecated public Int3(int, int, int);
+    field @Deprecated public int x;
+    field @Deprecated public int y;
+    field @Deprecated public int z;
   }
 
-  public class Int4 {
-    ctor public Int4();
-    ctor public Int4(int, int, int, int);
-    field public int w;
-    field public int x;
-    field public int y;
-    field public int z;
+  @Deprecated public class Int4 {
+    ctor @Deprecated public Int4();
+    ctor @Deprecated public Int4(int, int, int, int);
+    field @Deprecated public int w;
+    field @Deprecated public int x;
+    field @Deprecated public int y;
+    field @Deprecated public int z;
   }
 
-  public class Long2 {
-    ctor public Long2();
-    ctor public Long2(long, long);
-    field public long x;
-    field public long y;
+  @Deprecated public class Long2 {
+    ctor @Deprecated public Long2();
+    ctor @Deprecated public Long2(long, long);
+    field @Deprecated public long x;
+    field @Deprecated public long y;
   }
 
-  public class Long3 {
-    ctor public Long3();
-    ctor public Long3(long, long, long);
-    field public long x;
-    field public long y;
-    field public long z;
+  @Deprecated public class Long3 {
+    ctor @Deprecated public Long3();
+    ctor @Deprecated public Long3(long, long, long);
+    field @Deprecated public long x;
+    field @Deprecated public long y;
+    field @Deprecated public long z;
   }
 
-  public class Long4 {
-    ctor public Long4();
-    ctor public Long4(long, long, long, long);
-    field public long w;
-    field public long x;
-    field public long y;
-    field public long z;
+  @Deprecated public class Long4 {
+    ctor @Deprecated public Long4();
+    ctor @Deprecated public Long4(long, long, long, long);
+    field @Deprecated public long w;
+    field @Deprecated public long x;
+    field @Deprecated public long y;
+    field @Deprecated public long z;
   }
 
-  public class Matrix2f {
-    ctor public Matrix2f();
-    ctor public Matrix2f(float[]);
-    method public float get(int, int);
-    method public float[] getArray();
-    method public void load(android.renderscript.Matrix2f);
-    method public void loadIdentity();
-    method public void loadMultiply(android.renderscript.Matrix2f, android.renderscript.Matrix2f);
-    method public void loadRotate(float);
-    method public void loadScale(float, float);
-    method public void multiply(android.renderscript.Matrix2f);
-    method public void rotate(float);
-    method public void scale(float, float);
-    method public void set(int, int, float);
-    method public void transpose();
+  @Deprecated public class Matrix2f {
+    ctor @Deprecated public Matrix2f();
+    ctor @Deprecated public Matrix2f(float[]);
+    method @Deprecated public float get(int, int);
+    method @Deprecated public float[] getArray();
+    method @Deprecated public void load(android.renderscript.Matrix2f);
+    method @Deprecated public void loadIdentity();
+    method @Deprecated public void loadMultiply(android.renderscript.Matrix2f, android.renderscript.Matrix2f);
+    method @Deprecated public void loadRotate(float);
+    method @Deprecated public void loadScale(float, float);
+    method @Deprecated public void multiply(android.renderscript.Matrix2f);
+    method @Deprecated public void rotate(float);
+    method @Deprecated public void scale(float, float);
+    method @Deprecated public void set(int, int, float);
+    method @Deprecated public void transpose();
   }
 
-  public class Matrix3f {
-    ctor public Matrix3f();
-    ctor public Matrix3f(float[]);
-    method public float get(int, int);
-    method public float[] getArray();
-    method public void load(android.renderscript.Matrix3f);
-    method public void loadIdentity();
-    method public void loadMultiply(android.renderscript.Matrix3f, android.renderscript.Matrix3f);
-    method public void loadRotate(float, float, float, float);
-    method public void loadRotate(float);
-    method public void loadScale(float, float);
-    method public void loadScale(float, float, float);
-    method public void loadTranslate(float, float);
-    method public void multiply(android.renderscript.Matrix3f);
-    method public void rotate(float, float, float, float);
-    method public void rotate(float);
-    method public void scale(float, float);
-    method public void scale(float, float, float);
-    method public void set(int, int, float);
-    method public void translate(float, float);
-    method public void transpose();
+  @Deprecated public class Matrix3f {
+    ctor @Deprecated public Matrix3f();
+    ctor @Deprecated public Matrix3f(float[]);
+    method @Deprecated public float get(int, int);
+    method @Deprecated public float[] getArray();
+    method @Deprecated public void load(android.renderscript.Matrix3f);
+    method @Deprecated public void loadIdentity();
+    method @Deprecated public void loadMultiply(android.renderscript.Matrix3f, android.renderscript.Matrix3f);
+    method @Deprecated public void loadRotate(float, float, float, float);
+    method @Deprecated public void loadRotate(float);
+    method @Deprecated public void loadScale(float, float);
+    method @Deprecated public void loadScale(float, float, float);
+    method @Deprecated public void loadTranslate(float, float);
+    method @Deprecated public void multiply(android.renderscript.Matrix3f);
+    method @Deprecated public void rotate(float, float, float, float);
+    method @Deprecated public void rotate(float);
+    method @Deprecated public void scale(float, float);
+    method @Deprecated public void scale(float, float, float);
+    method @Deprecated public void set(int, int, float);
+    method @Deprecated public void translate(float, float);
+    method @Deprecated public void transpose();
   }
 
-  public class Matrix4f {
-    ctor public Matrix4f();
-    ctor public Matrix4f(float[]);
-    method public float get(int, int);
-    method public float[] getArray();
-    method public boolean inverse();
-    method public boolean inverseTranspose();
-    method public void load(android.renderscript.Matrix4f);
-    method public void loadFrustum(float, float, float, float, float, float);
-    method public void loadIdentity();
-    method public void loadMultiply(android.renderscript.Matrix4f, android.renderscript.Matrix4f);
-    method public void loadOrtho(float, float, float, float, float, float);
-    method public void loadOrthoWindow(int, int);
-    method public void loadPerspective(float, float, float, float);
-    method public void loadProjectionNormalized(int, int);
-    method public void loadRotate(float, float, float, float);
-    method public void loadScale(float, float, float);
-    method public void loadTranslate(float, float, float);
-    method public void multiply(android.renderscript.Matrix4f);
-    method public void rotate(float, float, float, float);
-    method public void scale(float, float, float);
-    method public void set(int, int, float);
-    method public void translate(float, float, float);
-    method public void transpose();
+  @Deprecated public class Matrix4f {
+    ctor @Deprecated public Matrix4f();
+    ctor @Deprecated public Matrix4f(float[]);
+    method @Deprecated public float get(int, int);
+    method @Deprecated public float[] getArray();
+    method @Deprecated public boolean inverse();
+    method @Deprecated public boolean inverseTranspose();
+    method @Deprecated public void load(android.renderscript.Matrix4f);
+    method @Deprecated public void loadFrustum(float, float, float, float, float, float);
+    method @Deprecated public void loadIdentity();
+    method @Deprecated public void loadMultiply(android.renderscript.Matrix4f, android.renderscript.Matrix4f);
+    method @Deprecated public void loadOrtho(float, float, float, float, float, float);
+    method @Deprecated public void loadOrthoWindow(int, int);
+    method @Deprecated public void loadPerspective(float, float, float, float);
+    method @Deprecated public void loadProjectionNormalized(int, int);
+    method @Deprecated public void loadRotate(float, float, float, float);
+    method @Deprecated public void loadScale(float, float, float);
+    method @Deprecated public void loadTranslate(float, float, float);
+    method @Deprecated public void multiply(android.renderscript.Matrix4f);
+    method @Deprecated public void rotate(float, float, float, float);
+    method @Deprecated public void scale(float, float, float);
+    method @Deprecated public void set(int, int, float);
+    method @Deprecated public void translate(float, float, float);
+    method @Deprecated public void transpose();
   }
 
-  public class RSDriverException extends android.renderscript.RSRuntimeException {
-    ctor public RSDriverException(String);
+  @Deprecated public class RSDriverException extends android.renderscript.RSRuntimeException {
+    ctor @Deprecated public RSDriverException(String);
   }
 
-  public class RSIllegalArgumentException extends android.renderscript.RSRuntimeException {
-    ctor public RSIllegalArgumentException(String);
+  @Deprecated public class RSIllegalArgumentException extends android.renderscript.RSRuntimeException {
+    ctor @Deprecated public RSIllegalArgumentException(String);
   }
 
-  public class RSInvalidStateException extends android.renderscript.RSRuntimeException {
-    ctor public RSInvalidStateException(String);
+  @Deprecated public class RSInvalidStateException extends android.renderscript.RSRuntimeException {
+    ctor @Deprecated public RSInvalidStateException(String);
   }
 
-  public class RSRuntimeException extends java.lang.RuntimeException {
-    ctor public RSRuntimeException(String);
+  @Deprecated public class RSRuntimeException extends java.lang.RuntimeException {
+    ctor @Deprecated public RSRuntimeException(String);
   }
 
-  public class RenderScript {
-    method public void contextDump();
-    method public static android.renderscript.RenderScript create(android.content.Context);
-    method public static android.renderscript.RenderScript create(android.content.Context, android.renderscript.RenderScript.ContextType);
-    method public static android.renderscript.RenderScript create(android.content.Context, android.renderscript.RenderScript.ContextType, int);
-    method public static android.renderscript.RenderScript createMultiContext(android.content.Context, android.renderscript.RenderScript.ContextType, int, int);
-    method public void destroy();
-    method public void finish();
-    method public final android.content.Context getApplicationContext();
-    method public android.renderscript.RenderScript.RSErrorHandler getErrorHandler();
-    method public android.renderscript.RenderScript.RSMessageHandler getMessageHandler();
-    method public static long getMinorVersion();
-    method public static void releaseAllContexts();
-    method public void sendMessage(int, int[]);
-    method public void setErrorHandler(android.renderscript.RenderScript.RSErrorHandler);
-    method public void setMessageHandler(android.renderscript.RenderScript.RSMessageHandler);
-    method public void setPriority(android.renderscript.RenderScript.Priority);
-    field public static final int CREATE_FLAG_LOW_LATENCY = 2; // 0x2
-    field public static final int CREATE_FLAG_LOW_POWER = 4; // 0x4
-    field public static final int CREATE_FLAG_NONE = 0; // 0x0
+  @Deprecated public class RenderScript {
+    method @Deprecated public void contextDump();
+    method @Deprecated public static android.renderscript.RenderScript create(android.content.Context);
+    method @Deprecated public static android.renderscript.RenderScript create(android.content.Context, android.renderscript.RenderScript.ContextType);
+    method @Deprecated public static android.renderscript.RenderScript create(android.content.Context, android.renderscript.RenderScript.ContextType, int);
+    method @Deprecated public static android.renderscript.RenderScript createMultiContext(android.content.Context, android.renderscript.RenderScript.ContextType, int, int);
+    method @Deprecated public void destroy();
+    method @Deprecated public void finish();
+    method @Deprecated public final android.content.Context getApplicationContext();
+    method @Deprecated public android.renderscript.RenderScript.RSErrorHandler getErrorHandler();
+    method @Deprecated public android.renderscript.RenderScript.RSMessageHandler getMessageHandler();
+    method @Deprecated public static long getMinorVersion();
+    method @Deprecated public static void releaseAllContexts();
+    method @Deprecated public void sendMessage(int, int[]);
+    method @Deprecated public void setErrorHandler(android.renderscript.RenderScript.RSErrorHandler);
+    method @Deprecated public void setMessageHandler(android.renderscript.RenderScript.RSMessageHandler);
+    method @Deprecated public void setPriority(android.renderscript.RenderScript.Priority);
+    field @Deprecated public static final int CREATE_FLAG_LOW_LATENCY = 2; // 0x2
+    field @Deprecated public static final int CREATE_FLAG_LOW_POWER = 4; // 0x4
+    field @Deprecated public static final int CREATE_FLAG_NONE = 0; // 0x0
   }
 
-  public enum RenderScript.ContextType {
-    enum_constant public static final android.renderscript.RenderScript.ContextType DEBUG;
-    enum_constant public static final android.renderscript.RenderScript.ContextType NORMAL;
-    enum_constant public static final android.renderscript.RenderScript.ContextType PROFILE;
+  @Deprecated public enum RenderScript.ContextType {
+    enum_constant @Deprecated public static final android.renderscript.RenderScript.ContextType DEBUG;
+    enum_constant @Deprecated public static final android.renderscript.RenderScript.ContextType NORMAL;
+    enum_constant @Deprecated public static final android.renderscript.RenderScript.ContextType PROFILE;
   }
 
-  public enum RenderScript.Priority {
-    enum_constant public static final android.renderscript.RenderScript.Priority LOW;
-    enum_constant public static final android.renderscript.RenderScript.Priority NORMAL;
+  @Deprecated public enum RenderScript.Priority {
+    enum_constant @Deprecated public static final android.renderscript.RenderScript.Priority LOW;
+    enum_constant @Deprecated public static final android.renderscript.RenderScript.Priority NORMAL;
   }
 
-  public static class RenderScript.RSErrorHandler implements java.lang.Runnable {
-    ctor public RenderScript.RSErrorHandler();
-    method public void run();
-    field protected String mErrorMessage;
-    field protected int mErrorNum;
+  @Deprecated public static class RenderScript.RSErrorHandler implements java.lang.Runnable {
+    ctor @Deprecated public RenderScript.RSErrorHandler();
+    method @Deprecated public void run();
+    field @Deprecated protected String mErrorMessage;
+    field @Deprecated protected int mErrorNum;
   }
 
-  public static class RenderScript.RSMessageHandler implements java.lang.Runnable {
-    ctor public RenderScript.RSMessageHandler();
-    method public void run();
-    field protected int[] mData;
-    field protected int mID;
-    field protected int mLength;
+  @Deprecated public static class RenderScript.RSMessageHandler implements java.lang.Runnable {
+    ctor @Deprecated public RenderScript.RSMessageHandler();
+    method @Deprecated public void run();
+    field @Deprecated protected int[] mData;
+    field @Deprecated protected int mID;
+    field @Deprecated protected int mLength;
   }
 
-  public class Sampler extends android.renderscript.BaseObj {
-    method public static android.renderscript.Sampler CLAMP_LINEAR(android.renderscript.RenderScript);
-    method public static android.renderscript.Sampler CLAMP_LINEAR_MIP_LINEAR(android.renderscript.RenderScript);
-    method public static android.renderscript.Sampler CLAMP_NEAREST(android.renderscript.RenderScript);
-    method public static android.renderscript.Sampler MIRRORED_REPEAT_LINEAR(android.renderscript.RenderScript);
-    method public static android.renderscript.Sampler MIRRORED_REPEAT_LINEAR_MIP_LINEAR(android.renderscript.RenderScript);
-    method public static android.renderscript.Sampler MIRRORED_REPEAT_NEAREST(android.renderscript.RenderScript);
-    method public static android.renderscript.Sampler WRAP_LINEAR(android.renderscript.RenderScript);
-    method public static android.renderscript.Sampler WRAP_LINEAR_MIP_LINEAR(android.renderscript.RenderScript);
-    method public static android.renderscript.Sampler WRAP_NEAREST(android.renderscript.RenderScript);
-    method public float getAnisotropy();
-    method public android.renderscript.Sampler.Value getMagnification();
-    method public android.renderscript.Sampler.Value getMinification();
-    method public android.renderscript.Sampler.Value getWrapS();
-    method public android.renderscript.Sampler.Value getWrapT();
+  @Deprecated public class Sampler extends android.renderscript.BaseObj {
+    method @Deprecated public static android.renderscript.Sampler CLAMP_LINEAR(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Sampler CLAMP_LINEAR_MIP_LINEAR(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Sampler CLAMP_NEAREST(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Sampler MIRRORED_REPEAT_LINEAR(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Sampler MIRRORED_REPEAT_LINEAR_MIP_LINEAR(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Sampler MIRRORED_REPEAT_NEAREST(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Sampler WRAP_LINEAR(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Sampler WRAP_LINEAR_MIP_LINEAR(android.renderscript.RenderScript);
+    method @Deprecated public static android.renderscript.Sampler WRAP_NEAREST(android.renderscript.RenderScript);
+    method @Deprecated public float getAnisotropy();
+    method @Deprecated public android.renderscript.Sampler.Value getMagnification();
+    method @Deprecated public android.renderscript.Sampler.Value getMinification();
+    method @Deprecated public android.renderscript.Sampler.Value getWrapS();
+    method @Deprecated public android.renderscript.Sampler.Value getWrapT();
   }
 
-  public static class Sampler.Builder {
-    ctor public Sampler.Builder(android.renderscript.RenderScript);
-    method public android.renderscript.Sampler create();
-    method public void setAnisotropy(float);
-    method public void setMagnification(android.renderscript.Sampler.Value);
-    method public void setMinification(android.renderscript.Sampler.Value);
-    method public void setWrapS(android.renderscript.Sampler.Value);
-    method public void setWrapT(android.renderscript.Sampler.Value);
+  @Deprecated public static class Sampler.Builder {
+    ctor @Deprecated public Sampler.Builder(android.renderscript.RenderScript);
+    method @Deprecated public android.renderscript.Sampler create();
+    method @Deprecated public void setAnisotropy(float);
+    method @Deprecated public void setMagnification(android.renderscript.Sampler.Value);
+    method @Deprecated public void setMinification(android.renderscript.Sampler.Value);
+    method @Deprecated public void setWrapS(android.renderscript.Sampler.Value);
+    method @Deprecated public void setWrapT(android.renderscript.Sampler.Value);
   }
 
-  public enum Sampler.Value {
-    enum_constant public static final android.renderscript.Sampler.Value CLAMP;
-    enum_constant public static final android.renderscript.Sampler.Value LINEAR;
-    enum_constant public static final android.renderscript.Sampler.Value LINEAR_MIP_LINEAR;
-    enum_constant public static final android.renderscript.Sampler.Value LINEAR_MIP_NEAREST;
-    enum_constant public static final android.renderscript.Sampler.Value MIRRORED_REPEAT;
-    enum_constant public static final android.renderscript.Sampler.Value NEAREST;
-    enum_constant public static final android.renderscript.Sampler.Value WRAP;
+  @Deprecated public enum Sampler.Value {
+    enum_constant @Deprecated public static final android.renderscript.Sampler.Value CLAMP;
+    enum_constant @Deprecated public static final android.renderscript.Sampler.Value LINEAR;
+    enum_constant @Deprecated public static final android.renderscript.Sampler.Value LINEAR_MIP_LINEAR;
+    enum_constant @Deprecated public static final android.renderscript.Sampler.Value LINEAR_MIP_NEAREST;
+    enum_constant @Deprecated public static final android.renderscript.Sampler.Value MIRRORED_REPEAT;
+    enum_constant @Deprecated public static final android.renderscript.Sampler.Value NEAREST;
+    enum_constant @Deprecated public static final android.renderscript.Sampler.Value WRAP;
   }
 
-  public class Script extends android.renderscript.BaseObj {
-    method public void bindAllocation(android.renderscript.Allocation, int);
-    method protected android.renderscript.Script.FieldID createFieldID(int, android.renderscript.Element);
-    method protected android.renderscript.Script.InvokeID createInvokeID(int);
-    method protected android.renderscript.Script.KernelID createKernelID(int, int, android.renderscript.Element, android.renderscript.Element);
-    method protected void forEach(int, android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.FieldPacker);
-    method protected void forEach(int, android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.FieldPacker, android.renderscript.Script.LaunchOptions);
-    method protected void forEach(int, android.renderscript.Allocation[], android.renderscript.Allocation, android.renderscript.FieldPacker);
-    method protected void forEach(int, android.renderscript.Allocation[], android.renderscript.Allocation, android.renderscript.FieldPacker, android.renderscript.Script.LaunchOptions);
-    method public boolean getVarB(int);
-    method public double getVarD(int);
-    method public float getVarF(int);
-    method public int getVarI(int);
-    method public long getVarJ(int);
-    method public void getVarV(int, android.renderscript.FieldPacker);
-    method protected void invoke(int);
-    method protected void invoke(int, android.renderscript.FieldPacker);
-    method protected void reduce(int, android.renderscript.Allocation[], android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
-    method public void setTimeZone(String);
-    method public void setVar(int, float);
-    method public void setVar(int, double);
-    method public void setVar(int, int);
-    method public void setVar(int, long);
-    method public void setVar(int, boolean);
-    method public void setVar(int, android.renderscript.BaseObj);
-    method public void setVar(int, android.renderscript.FieldPacker);
-    method public void setVar(int, android.renderscript.FieldPacker, android.renderscript.Element, int[]);
+  @Deprecated public class Script extends android.renderscript.BaseObj {
+    method @Deprecated public void bindAllocation(android.renderscript.Allocation, int);
+    method @Deprecated protected android.renderscript.Script.FieldID createFieldID(int, android.renderscript.Element);
+    method @Deprecated protected android.renderscript.Script.InvokeID createInvokeID(int);
+    method @Deprecated protected android.renderscript.Script.KernelID createKernelID(int, int, android.renderscript.Element, android.renderscript.Element);
+    method @Deprecated protected void forEach(int, android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.FieldPacker);
+    method @Deprecated protected void forEach(int, android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.FieldPacker, android.renderscript.Script.LaunchOptions);
+    method @Deprecated protected void forEach(int, android.renderscript.Allocation[], android.renderscript.Allocation, android.renderscript.FieldPacker);
+    method @Deprecated protected void forEach(int, android.renderscript.Allocation[], android.renderscript.Allocation, android.renderscript.FieldPacker, android.renderscript.Script.LaunchOptions);
+    method @Deprecated public boolean getVarB(int);
+    method @Deprecated public double getVarD(int);
+    method @Deprecated public float getVarF(int);
+    method @Deprecated public int getVarI(int);
+    method @Deprecated public long getVarJ(int);
+    method @Deprecated public void getVarV(int, android.renderscript.FieldPacker);
+    method @Deprecated protected void invoke(int);
+    method @Deprecated protected void invoke(int, android.renderscript.FieldPacker);
+    method @Deprecated protected void reduce(int, android.renderscript.Allocation[], android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
+    method @Deprecated public void setTimeZone(String);
+    method @Deprecated public void setVar(int, float);
+    method @Deprecated public void setVar(int, double);
+    method @Deprecated public void setVar(int, int);
+    method @Deprecated public void setVar(int, long);
+    method @Deprecated public void setVar(int, boolean);
+    method @Deprecated public void setVar(int, android.renderscript.BaseObj);
+    method @Deprecated public void setVar(int, android.renderscript.FieldPacker);
+    method @Deprecated public void setVar(int, android.renderscript.FieldPacker, android.renderscript.Element, int[]);
   }
 
-  public static class Script.Builder {
+  @Deprecated public static class Script.Builder {
   }
 
-  public static class Script.FieldBase {
-    ctor protected Script.FieldBase();
-    method public android.renderscript.Allocation getAllocation();
-    method public android.renderscript.Element getElement();
-    method public android.renderscript.Type getType();
-    method protected void init(android.renderscript.RenderScript, int);
-    method protected void init(android.renderscript.RenderScript, int, int);
-    method public void updateAllocation();
-    field protected android.renderscript.Allocation mAllocation;
-    field protected android.renderscript.Element mElement;
+  @Deprecated public static class Script.FieldBase {
+    ctor @Deprecated protected Script.FieldBase();
+    method @Deprecated public android.renderscript.Allocation getAllocation();
+    method @Deprecated public android.renderscript.Element getElement();
+    method @Deprecated public android.renderscript.Type getType();
+    method @Deprecated protected void init(android.renderscript.RenderScript, int);
+    method @Deprecated protected void init(android.renderscript.RenderScript, int, int);
+    method @Deprecated public void updateAllocation();
+    field @Deprecated protected android.renderscript.Allocation mAllocation;
+    field @Deprecated protected android.renderscript.Element mElement;
   }
 
-  public static final class Script.FieldID extends android.renderscript.BaseObj {
+  @Deprecated public static final class Script.FieldID extends android.renderscript.BaseObj {
   }
 
-  public static final class Script.InvokeID extends android.renderscript.BaseObj {
+  @Deprecated public static final class Script.InvokeID extends android.renderscript.BaseObj {
   }
 
-  public static final class Script.KernelID extends android.renderscript.BaseObj {
+  @Deprecated public static final class Script.KernelID extends android.renderscript.BaseObj {
   }
 
-  public static final class Script.LaunchOptions {
-    ctor public Script.LaunchOptions();
-    method public int getXEnd();
-    method public int getXStart();
-    method public int getYEnd();
-    method public int getYStart();
-    method public int getZEnd();
-    method public int getZStart();
-    method public android.renderscript.Script.LaunchOptions setX(int, int);
-    method public android.renderscript.Script.LaunchOptions setY(int, int);
-    method public android.renderscript.Script.LaunchOptions setZ(int, int);
+  @Deprecated public static final class Script.LaunchOptions {
+    ctor @Deprecated public Script.LaunchOptions();
+    method @Deprecated public int getXEnd();
+    method @Deprecated public int getXStart();
+    method @Deprecated public int getYEnd();
+    method @Deprecated public int getYStart();
+    method @Deprecated public int getZEnd();
+    method @Deprecated public int getZStart();
+    method @Deprecated public android.renderscript.Script.LaunchOptions setX(int, int);
+    method @Deprecated public android.renderscript.Script.LaunchOptions setY(int, int);
+    method @Deprecated public android.renderscript.Script.LaunchOptions setZ(int, int);
   }
 
-  public class ScriptC extends android.renderscript.Script {
-    ctor protected ScriptC(int, android.renderscript.RenderScript);
-    ctor protected ScriptC(long, android.renderscript.RenderScript);
-    ctor protected ScriptC(android.renderscript.RenderScript, android.content.res.Resources, int);
-    ctor protected ScriptC(android.renderscript.RenderScript, String, byte[], byte[]);
+  @Deprecated public class ScriptC extends android.renderscript.Script {
+    ctor @Deprecated protected ScriptC(int, android.renderscript.RenderScript);
+    ctor @Deprecated protected ScriptC(long, android.renderscript.RenderScript);
+    ctor @Deprecated protected ScriptC(android.renderscript.RenderScript, android.content.res.Resources, int);
+    ctor @Deprecated protected ScriptC(android.renderscript.RenderScript, String, byte[], byte[]);
   }
 
-  public final class ScriptGroup extends android.renderscript.BaseObj {
-    method public Object[] execute(java.lang.Object...);
+  @Deprecated public final class ScriptGroup extends android.renderscript.BaseObj {
+    method @Deprecated public Object[] execute(java.lang.Object...);
     method @Deprecated public void execute();
     method @Deprecated public void setInput(android.renderscript.Script.KernelID, android.renderscript.Allocation);
     method @Deprecated public void setOutput(android.renderscript.Script.KernelID, android.renderscript.Allocation);
   }
 
-  public static final class ScriptGroup.Binding {
-    ctor public ScriptGroup.Binding(android.renderscript.Script.FieldID, Object);
+  @Deprecated public static final class ScriptGroup.Binding {
+    ctor @Deprecated public ScriptGroup.Binding(android.renderscript.Script.FieldID, Object);
   }
 
   @Deprecated public static final class ScriptGroup.Builder {
@@ -35179,336 +35199,336 @@ package android.renderscript {
     method @Deprecated public android.renderscript.ScriptGroup create();
   }
 
-  public static final class ScriptGroup.Builder2 {
-    ctor public ScriptGroup.Builder2(android.renderscript.RenderScript);
-    method public android.renderscript.ScriptGroup.Input addInput();
-    method public android.renderscript.ScriptGroup.Closure addInvoke(android.renderscript.Script.InvokeID, java.lang.Object...);
-    method public android.renderscript.ScriptGroup.Closure addKernel(android.renderscript.Script.KernelID, android.renderscript.Type, java.lang.Object...);
-    method public android.renderscript.ScriptGroup create(String, android.renderscript.ScriptGroup.Future...);
+  @Deprecated public static final class ScriptGroup.Builder2 {
+    ctor @Deprecated public ScriptGroup.Builder2(android.renderscript.RenderScript);
+    method @Deprecated public android.renderscript.ScriptGroup.Input addInput();
+    method @Deprecated public android.renderscript.ScriptGroup.Closure addInvoke(android.renderscript.Script.InvokeID, java.lang.Object...);
+    method @Deprecated public android.renderscript.ScriptGroup.Closure addKernel(android.renderscript.Script.KernelID, android.renderscript.Type, java.lang.Object...);
+    method @Deprecated public android.renderscript.ScriptGroup create(String, android.renderscript.ScriptGroup.Future...);
   }
 
-  public static final class ScriptGroup.Closure extends android.renderscript.BaseObj {
-    method public android.renderscript.ScriptGroup.Future getGlobal(android.renderscript.Script.FieldID);
-    method public android.renderscript.ScriptGroup.Future getReturn();
+  @Deprecated public static final class ScriptGroup.Closure extends android.renderscript.BaseObj {
+    method @Deprecated public android.renderscript.ScriptGroup.Future getGlobal(android.renderscript.Script.FieldID);
+    method @Deprecated public android.renderscript.ScriptGroup.Future getReturn();
   }
 
-  public static final class ScriptGroup.Future {
+  @Deprecated public static final class ScriptGroup.Future {
   }
 
-  public static final class ScriptGroup.Input {
+  @Deprecated public static final class ScriptGroup.Input {
   }
 
-  public abstract class ScriptIntrinsic extends android.renderscript.Script {
+  @Deprecated public abstract class ScriptIntrinsic extends android.renderscript.Script {
   }
 
-  public final class ScriptIntrinsic3DLUT extends android.renderscript.ScriptIntrinsic {
-    method public static android.renderscript.ScriptIntrinsic3DLUT create(android.renderscript.RenderScript, android.renderscript.Element);
-    method public void forEach(android.renderscript.Allocation, android.renderscript.Allocation);
-    method public void forEach(android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
-    method public android.renderscript.Script.KernelID getKernelID();
-    method public void setLUT(android.renderscript.Allocation);
+  @Deprecated public final class ScriptIntrinsic3DLUT extends android.renderscript.ScriptIntrinsic {
+    method @Deprecated public static android.renderscript.ScriptIntrinsic3DLUT create(android.renderscript.RenderScript, android.renderscript.Element);
+    method @Deprecated public void forEach(android.renderscript.Allocation, android.renderscript.Allocation);
+    method @Deprecated public void forEach(android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
+    method @Deprecated public android.renderscript.Script.KernelID getKernelID();
+    method @Deprecated public void setLUT(android.renderscript.Allocation);
   }
 
-  public final class ScriptIntrinsicBLAS extends android.renderscript.ScriptIntrinsic {
-    method public void BNNM(android.renderscript.Allocation, int, android.renderscript.Allocation, int, android.renderscript.Allocation, int, int);
-    method public void CGBMV(int, int, int, android.renderscript.Float2, android.renderscript.Allocation, android.renderscript.Allocation, int, android.renderscript.Float2, android.renderscript.Allocation, int);
-    method public void CGEMM(int, int, android.renderscript.Float2, android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Float2, android.renderscript.Allocation);
-    method public void CGEMV(int, android.renderscript.Float2, android.renderscript.Allocation, android.renderscript.Allocation, int, android.renderscript.Float2, android.renderscript.Allocation, int);
-    method public void CGERC(android.renderscript.Float2, android.renderscript.Allocation, int, android.renderscript.Allocation, int, android.renderscript.Allocation);
-    method public void CGERU(android.renderscript.Float2, android.renderscript.Allocation, int, android.renderscript.Allocation, int, android.renderscript.Allocation);
-    method public void CHBMV(int, int, android.renderscript.Float2, android.renderscript.Allocation, android.renderscript.Allocation, int, android.renderscript.Float2, android.renderscript.Allocation, int);
-    method public void CHEMM(int, int, android.renderscript.Float2, android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Float2, android.renderscript.Allocation);
-    method public void CHEMV(int, android.renderscript.Float2, android.renderscript.Allocation, android.renderscript.Allocation, int, android.renderscript.Float2, android.renderscript.Allocation, int);
-    method public void CHER(int, float, android.renderscript.Allocation, int, android.renderscript.Allocation);
-    method public void CHER2(int, android.renderscript.Float2, android.renderscript.Allocation, int, android.renderscript.Allocation, int, android.renderscript.Allocation);
-    method public void CHER2K(int, int, android.renderscript.Float2, android.renderscript.Allocation, android.renderscript.Allocation, float, android.renderscript.Allocation);
-    method public void CHERK(int, int, float, android.renderscript.Allocation, float, android.renderscript.Allocation);
-    method public void CHPMV(int, android.renderscript.Float2, android.renderscript.Allocation, android.renderscript.Allocation, int, android.renderscript.Float2, android.renderscript.Allocation, int);
-    method public void CHPR(int, float, android.renderscript.Allocation, int, android.renderscript.Allocation);
-    method public void CHPR2(int, android.renderscript.Float2, android.renderscript.Allocation, int, android.renderscript.Allocation, int, android.renderscript.Allocation);
-    method public void CSYMM(int, int, android.renderscript.Float2, android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Float2, android.renderscript.Allocation);
-    method public void CSYR2K(int, int, android.renderscript.Float2, android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Float2, android.renderscript.Allocation);
-    method public void CSYRK(int, int, android.renderscript.Float2, android.renderscript.Allocation, android.renderscript.Float2, android.renderscript.Allocation);
-    method public void CTBMV(int, int, int, int, android.renderscript.Allocation, android.renderscript.Allocation, int);
-    method public void CTBSV(int, int, int, int, android.renderscript.Allocation, android.renderscript.Allocation, int);
-    method public void CTPMV(int, int, int, android.renderscript.Allocation, android.renderscript.Allocation, int);
-    method public void CTPSV(int, int, int, android.renderscript.Allocation, android.renderscript.Allocation, int);
-    method public void CTRMM(int, int, int, int, android.renderscript.Float2, android.renderscript.Allocation, android.renderscript.Allocation);
-    method public void CTRMV(int, int, int, android.renderscript.Allocation, android.renderscript.Allocation, int);
-    method public void CTRSM(int, int, int, int, android.renderscript.Float2, android.renderscript.Allocation, android.renderscript.Allocation);
-    method public void CTRSV(int, int, int, android.renderscript.Allocation, android.renderscript.Allocation, int);
-    method public void DGBMV(int, int, int, double, android.renderscript.Allocation, android.renderscript.Allocation, int, double, android.renderscript.Allocation, int);
-    method public void DGEMM(int, int, double, android.renderscript.Allocation, android.renderscript.Allocation, double, android.renderscript.Allocation);
-    method public void DGEMV(int, double, android.renderscript.Allocation, android.renderscript.Allocation, int, double, android.renderscript.Allocation, int);
-    method public void DGER(double, android.renderscript.Allocation, int, android.renderscript.Allocation, int, android.renderscript.Allocation);
-    method public void DSBMV(int, int, double, android.renderscript.Allocation, android.renderscript.Allocation, int, double, android.renderscript.Allocation, int);
-    method public void DSPMV(int, double, android.renderscript.Allocation, android.renderscript.Allocation, int, double, android.renderscript.Allocation, int);
-    method public void DSPR(int, double, android.renderscript.Allocation, int, android.renderscript.Allocation);
-    method public void DSPR2(int, double, android.renderscript.Allocation, int, android.renderscript.Allocation, int, android.renderscript.Allocation);
-    method public void DSYMM(int, int, double, android.renderscript.Allocation, android.renderscript.Allocation, double, android.renderscript.Allocation);
-    method public void DSYMV(int, double, android.renderscript.Allocation, android.renderscript.Allocation, int, double, android.renderscript.Allocation, int);
-    method public void DSYR(int, double, android.renderscript.Allocation, int, android.renderscript.Allocation);
-    method public void DSYR2(int, double, android.renderscript.Allocation, int, android.renderscript.Allocation, int, android.renderscript.Allocation);
-    method public void DSYR2K(int, int, double, android.renderscript.Allocation, android.renderscript.Allocation, double, android.renderscript.Allocation);
-    method public void DSYRK(int, int, double, android.renderscript.Allocation, double, android.renderscript.Allocation);
-    method public void DTBMV(int, int, int, int, android.renderscript.Allocation, android.renderscript.Allocation, int);
-    method public void DTBSV(int, int, int, int, android.renderscript.Allocation, android.renderscript.Allocation, int);
-    method public void DTPMV(int, int, int, android.renderscript.Allocation, android.renderscript.Allocation, int);
-    method public void DTPSV(int, int, int, android.renderscript.Allocation, android.renderscript.Allocation, int);
-    method public void DTRMM(int, int, int, int, double, android.renderscript.Allocation, android.renderscript.Allocation);
-    method public void DTRMV(int, int, int, android.renderscript.Allocation, android.renderscript.Allocation, int);
-    method public void DTRSM(int, int, int, int, double, android.renderscript.Allocation, android.renderscript.Allocation);
-    method public void DTRSV(int, int, int, android.renderscript.Allocation, android.renderscript.Allocation, int);
-    method public void SGBMV(int, int, int, float, android.renderscript.Allocation, android.renderscript.Allocation, int, float, android.renderscript.Allocation, int);
-    method public void SGEMM(int, int, float, android.renderscript.Allocation, android.renderscript.Allocation, float, android.renderscript.Allocation);
-    method public void SGEMV(int, float, android.renderscript.Allocation, android.renderscript.Allocation, int, float, android.renderscript.Allocation, int);
-    method public void SGER(float, android.renderscript.Allocation, int, android.renderscript.Allocation, int, android.renderscript.Allocation);
-    method public void SSBMV(int, int, float, android.renderscript.Allocation, android.renderscript.Allocation, int, float, android.renderscript.Allocation, int);
-    method public void SSPMV(int, float, android.renderscript.Allocation, android.renderscript.Allocation, int, float, android.renderscript.Allocation, int);
-    method public void SSPR(int, float, android.renderscript.Allocation, int, android.renderscript.Allocation);
-    method public void SSPR2(int, float, android.renderscript.Allocation, int, android.renderscript.Allocation, int, android.renderscript.Allocation);
-    method public void SSYMM(int, int, float, android.renderscript.Allocation, android.renderscript.Allocation, float, android.renderscript.Allocation);
-    method public void SSYMV(int, float, android.renderscript.Allocation, android.renderscript.Allocation, int, float, android.renderscript.Allocation, int);
-    method public void SSYR(int, float, android.renderscript.Allocation, int, android.renderscript.Allocation);
-    method public void SSYR2(int, float, android.renderscript.Allocation, int, android.renderscript.Allocation, int, android.renderscript.Allocation);
-    method public void SSYR2K(int, int, float, android.renderscript.Allocation, android.renderscript.Allocation, float, android.renderscript.Allocation);
-    method public void SSYRK(int, int, float, android.renderscript.Allocation, float, android.renderscript.Allocation);
-    method public void STBMV(int, int, int, int, android.renderscript.Allocation, android.renderscript.Allocation, int);
-    method public void STBSV(int, int, int, int, android.renderscript.Allocation, android.renderscript.Allocation, int);
-    method public void STPMV(int, int, int, android.renderscript.Allocation, android.renderscript.Allocation, int);
-    method public void STPSV(int, int, int, android.renderscript.Allocation, android.renderscript.Allocation, int);
-    method public void STRMM(int, int, int, int, float, android.renderscript.Allocation, android.renderscript.Allocation);
-    method public void STRMV(int, int, int, android.renderscript.Allocation, android.renderscript.Allocation, int);
-    method public void STRSM(int, int, int, int, float, android.renderscript.Allocation, android.renderscript.Allocation);
-    method public void STRSV(int, int, int, android.renderscript.Allocation, android.renderscript.Allocation, int);
-    method public void ZGBMV(int, int, int, android.renderscript.Double2, android.renderscript.Allocation, android.renderscript.Allocation, int, android.renderscript.Double2, android.renderscript.Allocation, int);
-    method public void ZGEMM(int, int, android.renderscript.Double2, android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Double2, android.renderscript.Allocation);
-    method public void ZGEMV(int, android.renderscript.Double2, android.renderscript.Allocation, android.renderscript.Allocation, int, android.renderscript.Double2, android.renderscript.Allocation, int);
-    method public void ZGERC(android.renderscript.Double2, android.renderscript.Allocation, int, android.renderscript.Allocation, int, android.renderscript.Allocation);
-    method public void ZGERU(android.renderscript.Double2, android.renderscript.Allocation, int, android.renderscript.Allocation, int, android.renderscript.Allocation);
-    method public void ZHBMV(int, int, android.renderscript.Double2, android.renderscript.Allocation, android.renderscript.Allocation, int, android.renderscript.Double2, android.renderscript.Allocation, int);
-    method public void ZHEMM(int, int, android.renderscript.Double2, android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Double2, android.renderscript.Allocation);
-    method public void ZHEMV(int, android.renderscript.Double2, android.renderscript.Allocation, android.renderscript.Allocation, int, android.renderscript.Double2, android.renderscript.Allocation, int);
-    method public void ZHER(int, double, android.renderscript.Allocation, int, android.renderscript.Allocation);
-    method public void ZHER2(int, android.renderscript.Double2, android.renderscript.Allocation, int, android.renderscript.Allocation, int, android.renderscript.Allocation);
-    method public void ZHER2K(int, int, android.renderscript.Double2, android.renderscript.Allocation, android.renderscript.Allocation, double, android.renderscript.Allocation);
-    method public void ZHERK(int, int, double, android.renderscript.Allocation, double, android.renderscript.Allocation);
-    method public void ZHPMV(int, android.renderscript.Double2, android.renderscript.Allocation, android.renderscript.Allocation, int, android.renderscript.Double2, android.renderscript.Allocation, int);
-    method public void ZHPR(int, double, android.renderscript.Allocation, int, android.renderscript.Allocation);
-    method public void ZHPR2(int, android.renderscript.Double2, android.renderscript.Allocation, int, android.renderscript.Allocation, int, android.renderscript.Allocation);
-    method public void ZSYMM(int, int, android.renderscript.Double2, android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Double2, android.renderscript.Allocation);
-    method public void ZSYR2K(int, int, android.renderscript.Double2, android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Double2, android.renderscript.Allocation);
-    method public void ZSYRK(int, int, android.renderscript.Double2, android.renderscript.Allocation, android.renderscript.Double2, android.renderscript.Allocation);
-    method public void ZTBMV(int, int, int, int, android.renderscript.Allocation, android.renderscript.Allocation, int);
-    method public void ZTBSV(int, int, int, int, android.renderscript.Allocation, android.renderscript.Allocation, int);
-    method public void ZTPMV(int, int, int, android.renderscript.Allocation, android.renderscript.Allocation, int);
-    method public void ZTPSV(int, int, int, android.renderscript.Allocation, android.renderscript.Allocation, int);
-    method public void ZTRMM(int, int, int, int, android.renderscript.Double2, android.renderscript.Allocation, android.renderscript.Allocation);
-    method public void ZTRMV(int, int, int, android.renderscript.Allocation, android.renderscript.Allocation, int);
-    method public void ZTRSM(int, int, int, int, android.renderscript.Double2, android.renderscript.Allocation, android.renderscript.Allocation);
-    method public void ZTRSV(int, int, int, android.renderscript.Allocation, android.renderscript.Allocation, int);
-    method public static android.renderscript.ScriptIntrinsicBLAS create(android.renderscript.RenderScript);
-    field public static final int CONJ_TRANSPOSE = 113; // 0x71
-    field public static final int LEFT = 141; // 0x8d
-    field public static final int LOWER = 122; // 0x7a
-    field public static final int NON_UNIT = 131; // 0x83
-    field public static final int NO_TRANSPOSE = 111; // 0x6f
-    field public static final int RIGHT = 142; // 0x8e
-    field public static final int TRANSPOSE = 112; // 0x70
-    field public static final int UNIT = 132; // 0x84
-    field public static final int UPPER = 121; // 0x79
+  @Deprecated public final class ScriptIntrinsicBLAS extends android.renderscript.ScriptIntrinsic {
+    method @Deprecated public void BNNM(android.renderscript.Allocation, int, android.renderscript.Allocation, int, android.renderscript.Allocation, int, int);
+    method @Deprecated public void CGBMV(int, int, int, android.renderscript.Float2, android.renderscript.Allocation, android.renderscript.Allocation, int, android.renderscript.Float2, android.renderscript.Allocation, int);
+    method @Deprecated public void CGEMM(int, int, android.renderscript.Float2, android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Float2, android.renderscript.Allocation);
+    method @Deprecated public void CGEMV(int, android.renderscript.Float2, android.renderscript.Allocation, android.renderscript.Allocation, int, android.renderscript.Float2, android.renderscript.Allocation, int);
+    method @Deprecated public void CGERC(android.renderscript.Float2, android.renderscript.Allocation, int, android.renderscript.Allocation, int, android.renderscript.Allocation);
+    method @Deprecated public void CGERU(android.renderscript.Float2, android.renderscript.Allocation, int, android.renderscript.Allocation, int, android.renderscript.Allocation);
+    method @Deprecated public void CHBMV(int, int, android.renderscript.Float2, android.renderscript.Allocation, android.renderscript.Allocation, int, android.renderscript.Float2, android.renderscript.Allocation, int);
+    method @Deprecated public void CHEMM(int, int, android.renderscript.Float2, android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Float2, android.renderscript.Allocation);
+    method @Deprecated public void CHEMV(int, android.renderscript.Float2, android.renderscript.Allocation, android.renderscript.Allocation, int, android.renderscript.Float2, android.renderscript.Allocation, int);
+    method @Deprecated public void CHER(int, float, android.renderscript.Allocation, int, android.renderscript.Allocation);
+    method @Deprecated public void CHER2(int, android.renderscript.Float2, android.renderscript.Allocation, int, android.renderscript.Allocation, int, android.renderscript.Allocation);
+    method @Deprecated public void CHER2K(int, int, android.renderscript.Float2, android.renderscript.Allocation, android.renderscript.Allocation, float, android.renderscript.Allocation);
+    method @Deprecated public void CHERK(int, int, float, android.renderscript.Allocation, float, android.renderscript.Allocation);
+    method @Deprecated public void CHPMV(int, android.renderscript.Float2, android.renderscript.Allocation, android.renderscript.Allocation, int, android.renderscript.Float2, android.renderscript.Allocation, int);
+    method @Deprecated public void CHPR(int, float, android.renderscript.Allocation, int, android.renderscript.Allocation);
+    method @Deprecated public void CHPR2(int, android.renderscript.Float2, android.renderscript.Allocation, int, android.renderscript.Allocation, int, android.renderscript.Allocation);
+    method @Deprecated public void CSYMM(int, int, android.renderscript.Float2, android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Float2, android.renderscript.Allocation);
+    method @Deprecated public void CSYR2K(int, int, android.renderscript.Float2, android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Float2, android.renderscript.Allocation);
+    method @Deprecated public void CSYRK(int, int, android.renderscript.Float2, android.renderscript.Allocation, android.renderscript.Float2, android.renderscript.Allocation);
+    method @Deprecated public void CTBMV(int, int, int, int, android.renderscript.Allocation, android.renderscript.Allocation, int);
+    method @Deprecated public void CTBSV(int, int, int, int, android.renderscript.Allocation, android.renderscript.Allocation, int);
+    method @Deprecated public void CTPMV(int, int, int, android.renderscript.Allocation, android.renderscript.Allocation, int);
+    method @Deprecated public void CTPSV(int, int, int, android.renderscript.Allocation, android.renderscript.Allocation, int);
+    method @Deprecated public void CTRMM(int, int, int, int, android.renderscript.Float2, android.renderscript.Allocation, android.renderscript.Allocation);
+    method @Deprecated public void CTRMV(int, int, int, android.renderscript.Allocation, android.renderscript.Allocation, int);
+    method @Deprecated public void CTRSM(int, int, int, int, android.renderscript.Float2, android.renderscript.Allocation, android.renderscript.Allocation);
+    method @Deprecated public void CTRSV(int, int, int, android.renderscript.Allocation, android.renderscript.Allocation, int);
+    method @Deprecated public void DGBMV(int, int, int, double, android.renderscript.Allocation, android.renderscript.Allocation, int, double, android.renderscript.Allocation, int);
+    method @Deprecated public void DGEMM(int, int, double, android.renderscript.Allocation, android.renderscript.Allocation, double, android.renderscript.Allocation);
+    method @Deprecated public void DGEMV(int, double, android.renderscript.Allocation, android.renderscript.Allocation, int, double, android.renderscript.Allocation, int);
+    method @Deprecated public void DGER(double, android.renderscript.Allocation, int, android.renderscript.Allocation, int, android.renderscript.Allocation);
+    method @Deprecated public void DSBMV(int, int, double, android.renderscript.Allocation, android.renderscript.Allocation, int, double, android.renderscript.Allocation, int);
+    method @Deprecated public void DSPMV(int, double, android.renderscript.Allocation, android.renderscript.Allocation, int, double, android.renderscript.Allocation, int);
+    method @Deprecated public void DSPR(int, double, android.renderscript.Allocation, int, android.renderscript.Allocation);
+    method @Deprecated public void DSPR2(int, double, android.renderscript.Allocation, int, android.renderscript.Allocation, int, android.renderscript.Allocation);
+    method @Deprecated public void DSYMM(int, int, double, android.renderscript.Allocation, android.renderscript.Allocation, double, android.renderscript.Allocation);
+    method @Deprecated public void DSYMV(int, double, android.renderscript.Allocation, android.renderscript.Allocation, int, double, android.renderscript.Allocation, int);
+    method @Deprecated public void DSYR(int, double, android.renderscript.Allocation, int, android.renderscript.Allocation);
+    method @Deprecated public void DSYR2(int, double, android.renderscript.Allocation, int, android.renderscript.Allocation, int, android.renderscript.Allocation);
+    method @Deprecated public void DSYR2K(int, int, double, android.renderscript.Allocation, android.renderscript.Allocation, double, android.renderscript.Allocation);
+    method @Deprecated public void DSYRK(int, int, double, android.renderscript.Allocation, double, android.renderscript.Allocation);
+    method @Deprecated public void DTBMV(int, int, int, int, android.renderscript.Allocation, android.renderscript.Allocation, int);
+    method @Deprecated public void DTBSV(int, int, int, int, android.renderscript.Allocation, android.renderscript.Allocation, int);
+    method @Deprecated public void DTPMV(int, int, int, android.renderscript.Allocation, android.renderscript.Allocation, int);
+    method @Deprecated public void DTPSV(int, int, int, android.renderscript.Allocation, android.renderscript.Allocation, int);
+    method @Deprecated public void DTRMM(int, int, int, int, double, android.renderscript.Allocation, android.renderscript.Allocation);
+    method @Deprecated public void DTRMV(int, int, int, android.renderscript.Allocation, android.renderscript.Allocation, int);
+    method @Deprecated public void DTRSM(int, int, int, int, double, android.renderscript.Allocation, android.renderscript.Allocation);
+    method @Deprecated public void DTRSV(int, int, int, android.renderscript.Allocation, android.renderscript.Allocation, int);
+    method @Deprecated public void SGBMV(int, int, int, float, android.renderscript.Allocation, android.renderscript.Allocation, int, float, android.renderscript.Allocation, int);
+    method @Deprecated public void SGEMM(int, int, float, android.renderscript.Allocation, android.renderscript.Allocation, float, android.renderscript.Allocation);
+    method @Deprecated public void SGEMV(int, float, android.renderscript.Allocation, android.renderscript.Allocation, int, float, android.renderscript.Allocation, int);
+    method @Deprecated public void SGER(float, android.renderscript.Allocation, int, android.renderscript.Allocation, int, android.renderscript.Allocation);
+    method @Deprecated public void SSBMV(int, int, float, android.renderscript.Allocation, android.renderscript.Allocation, int, float, android.renderscript.Allocation, int);
+    method @Deprecated public void SSPMV(int, float, android.renderscript.Allocation, android.renderscript.Allocation, int, float, android.renderscript.Allocation, int);
+    method @Deprecated public void SSPR(int, float, android.renderscript.Allocation, int, android.renderscript.Allocation);
+    method @Deprecated public void SSPR2(int, float, android.renderscript.Allocation, int, android.renderscript.Allocation, int, android.renderscript.Allocation);
+    method @Deprecated public void SSYMM(int, int, float, android.renderscript.Allocation, android.renderscript.Allocation, float, android.renderscript.Allocation);
+    method @Deprecated public void SSYMV(int, float, android.renderscript.Allocation, android.renderscript.Allocation, int, float, android.renderscript.Allocation, int);
+    method @Deprecated public void SSYR(int, float, android.renderscript.Allocation, int, android.renderscript.Allocation);
+    method @Deprecated public void SSYR2(int, float, android.renderscript.Allocation, int, android.renderscript.Allocation, int, android.renderscript.Allocation);
+    method @Deprecated public void SSYR2K(int, int, float, android.renderscript.Allocation, android.renderscript.Allocation, float, android.renderscript.Allocation);
+    method @Deprecated public void SSYRK(int, int, float, android.renderscript.Allocation, float, android.renderscript.Allocation);
+    method @Deprecated public void STBMV(int, int, int, int, android.renderscript.Allocation, android.renderscript.Allocation, int);
+    method @Deprecated public void STBSV(int, int, int, int, android.renderscript.Allocation, android.renderscript.Allocation, int);
+    method @Deprecated public void STPMV(int, int, int, android.renderscript.Allocation, android.renderscript.Allocation, int);
+    method @Deprecated public void STPSV(int, int, int, android.renderscript.Allocation, android.renderscript.Allocation, int);
+    method @Deprecated public void STRMM(int, int, int, int, float, android.renderscript.Allocation, android.renderscript.Allocation);
+    method @Deprecated public void STRMV(int, int, int, android.renderscript.Allocation, android.renderscript.Allocation, int);
+    method @Deprecated public void STRSM(int, int, int, int, float, android.renderscript.Allocation, android.renderscript.Allocation);
+    method @Deprecated public void STRSV(int, int, int, android.renderscript.Allocation, android.renderscript.Allocation, int);
+    method @Deprecated public void ZGBMV(int, int, int, android.renderscript.Double2, android.renderscript.Allocation, android.renderscript.Allocation, int, android.renderscript.Double2, android.renderscript.Allocation, int);
+    method @Deprecated public void ZGEMM(int, int, android.renderscript.Double2, android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Double2, android.renderscript.Allocation);
+    method @Deprecated public void ZGEMV(int, android.renderscript.Double2, android.renderscript.Allocation, android.renderscript.Allocation, int, android.renderscript.Double2, android.renderscript.Allocation, int);
+    method @Deprecated public void ZGERC(android.renderscript.Double2, android.renderscript.Allocation, int, android.renderscript.Allocation, int, android.renderscript.Allocation);
+    method @Deprecated public void ZGERU(android.renderscript.Double2, android.renderscript.Allocation, int, android.renderscript.Allocation, int, android.renderscript.Allocation);
+    method @Deprecated public void ZHBMV(int, int, android.renderscript.Double2, android.renderscript.Allocation, android.renderscript.Allocation, int, android.renderscript.Double2, android.renderscript.Allocation, int);
+    method @Deprecated public void ZHEMM(int, int, android.renderscript.Double2, android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Double2, android.renderscript.Allocation);
+    method @Deprecated public void ZHEMV(int, android.renderscript.Double2, android.renderscript.Allocation, android.renderscript.Allocation, int, android.renderscript.Double2, android.renderscript.Allocation, int);
+    method @Deprecated public void ZHER(int, double, android.renderscript.Allocation, int, android.renderscript.Allocation);
+    method @Deprecated public void ZHER2(int, android.renderscript.Double2, android.renderscript.Allocation, int, android.renderscript.Allocation, int, android.renderscript.Allocation);
+    method @Deprecated public void ZHER2K(int, int, android.renderscript.Double2, android.renderscript.Allocation, android.renderscript.Allocation, double, android.renderscript.Allocation);
+    method @Deprecated public void ZHERK(int, int, double, android.renderscript.Allocation, double, android.renderscript.Allocation);
+    method @Deprecated public void ZHPMV(int, android.renderscript.Double2, android.renderscript.Allocation, android.renderscript.Allocation, int, android.renderscript.Double2, android.renderscript.Allocation, int);
+    method @Deprecated public void ZHPR(int, double, android.renderscript.Allocation, int, android.renderscript.Allocation);
+    method @Deprecated public void ZHPR2(int, android.renderscript.Double2, android.renderscript.Allocation, int, android.renderscript.Allocation, int, android.renderscript.Allocation);
+    method @Deprecated public void ZSYMM(int, int, android.renderscript.Double2, android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Double2, android.renderscript.Allocation);
+    method @Deprecated public void ZSYR2K(int, int, android.renderscript.Double2, android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Double2, android.renderscript.Allocation);
+    method @Deprecated public void ZSYRK(int, int, android.renderscript.Double2, android.renderscript.Allocation, android.renderscript.Double2, android.renderscript.Allocation);
+    method @Deprecated public void ZTBMV(int, int, int, int, android.renderscript.Allocation, android.renderscript.Allocation, int);
+    method @Deprecated public void ZTBSV(int, int, int, int, android.renderscript.Allocation, android.renderscript.Allocation, int);
+    method @Deprecated public void ZTPMV(int, int, int, android.renderscript.Allocation, android.renderscript.Allocation, int);
+    method @Deprecated public void ZTPSV(int, int, int, android.renderscript.Allocation, android.renderscript.Allocation, int);
+    method @Deprecated public void ZTRMM(int, int, int, int, android.renderscript.Double2, android.renderscript.Allocation, android.renderscript.Allocation);
+    method @Deprecated public void ZTRMV(int, int, int, android.renderscript.Allocation, android.renderscript.Allocation, int);
+    method @Deprecated public void ZTRSM(int, int, int, int, android.renderscript.Double2, android.renderscript.Allocation, android.renderscript.Allocation);
+    method @Deprecated public void ZTRSV(int, int, int, android.renderscript.Allocation, android.renderscript.Allocation, int);
+    method @Deprecated public static android.renderscript.ScriptIntrinsicBLAS create(android.renderscript.RenderScript);
+    field @Deprecated public static final int CONJ_TRANSPOSE = 113; // 0x71
+    field @Deprecated public static final int LEFT = 141; // 0x8d
+    field @Deprecated public static final int LOWER = 122; // 0x7a
+    field @Deprecated public static final int NON_UNIT = 131; // 0x83
+    field @Deprecated public static final int NO_TRANSPOSE = 111; // 0x6f
+    field @Deprecated public static final int RIGHT = 142; // 0x8e
+    field @Deprecated public static final int TRANSPOSE = 112; // 0x70
+    field @Deprecated public static final int UNIT = 132; // 0x84
+    field @Deprecated public static final int UPPER = 121; // 0x79
   }
 
-  public class ScriptIntrinsicBlend extends android.renderscript.ScriptIntrinsic {
-    method public static android.renderscript.ScriptIntrinsicBlend create(android.renderscript.RenderScript, android.renderscript.Element);
-    method public void forEachAdd(android.renderscript.Allocation, android.renderscript.Allocation);
-    method public void forEachAdd(android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
-    method public void forEachClear(android.renderscript.Allocation, android.renderscript.Allocation);
-    method public void forEachClear(android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
-    method public void forEachDst(android.renderscript.Allocation, android.renderscript.Allocation);
-    method public void forEachDst(android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
-    method public void forEachDstAtop(android.renderscript.Allocation, android.renderscript.Allocation);
-    method public void forEachDstAtop(android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
-    method public void forEachDstIn(android.renderscript.Allocation, android.renderscript.Allocation);
-    method public void forEachDstIn(android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
-    method public void forEachDstOut(android.renderscript.Allocation, android.renderscript.Allocation);
-    method public void forEachDstOut(android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
-    method public void forEachDstOver(android.renderscript.Allocation, android.renderscript.Allocation);
-    method public void forEachDstOver(android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
-    method public void forEachMultiply(android.renderscript.Allocation, android.renderscript.Allocation);
-    method public void forEachMultiply(android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
-    method public void forEachSrc(android.renderscript.Allocation, android.renderscript.Allocation);
-    method public void forEachSrc(android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
-    method public void forEachSrcAtop(android.renderscript.Allocation, android.renderscript.Allocation);
-    method public void forEachSrcAtop(android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
-    method public void forEachSrcIn(android.renderscript.Allocation, android.renderscript.Allocation);
-    method public void forEachSrcIn(android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
-    method public void forEachSrcOut(android.renderscript.Allocation, android.renderscript.Allocation);
-    method public void forEachSrcOut(android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
-    method public void forEachSrcOver(android.renderscript.Allocation, android.renderscript.Allocation);
-    method public void forEachSrcOver(android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
-    method public void forEachSubtract(android.renderscript.Allocation, android.renderscript.Allocation);
-    method public void forEachSubtract(android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
-    method public void forEachXor(android.renderscript.Allocation, android.renderscript.Allocation);
-    method public void forEachXor(android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
-    method public android.renderscript.Script.KernelID getKernelIDAdd();
-    method public android.renderscript.Script.KernelID getKernelIDClear();
-    method public android.renderscript.Script.KernelID getKernelIDDst();
-    method public android.renderscript.Script.KernelID getKernelIDDstAtop();
-    method public android.renderscript.Script.KernelID getKernelIDDstIn();
-    method public android.renderscript.Script.KernelID getKernelIDDstOut();
-    method public android.renderscript.Script.KernelID getKernelIDDstOver();
-    method public android.renderscript.Script.KernelID getKernelIDMultiply();
-    method public android.renderscript.Script.KernelID getKernelIDSrc();
-    method public android.renderscript.Script.KernelID getKernelIDSrcAtop();
-    method public android.renderscript.Script.KernelID getKernelIDSrcIn();
-    method public android.renderscript.Script.KernelID getKernelIDSrcOut();
-    method public android.renderscript.Script.KernelID getKernelIDSrcOver();
-    method public android.renderscript.Script.KernelID getKernelIDSubtract();
-    method public android.renderscript.Script.KernelID getKernelIDXor();
+  @Deprecated public class ScriptIntrinsicBlend extends android.renderscript.ScriptIntrinsic {
+    method @Deprecated public static android.renderscript.ScriptIntrinsicBlend create(android.renderscript.RenderScript, android.renderscript.Element);
+    method @Deprecated public void forEachAdd(android.renderscript.Allocation, android.renderscript.Allocation);
+    method @Deprecated public void forEachAdd(android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
+    method @Deprecated public void forEachClear(android.renderscript.Allocation, android.renderscript.Allocation);
+    method @Deprecated public void forEachClear(android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
+    method @Deprecated public void forEachDst(android.renderscript.Allocation, android.renderscript.Allocation);
+    method @Deprecated public void forEachDst(android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
+    method @Deprecated public void forEachDstAtop(android.renderscript.Allocation, android.renderscript.Allocation);
+    method @Deprecated public void forEachDstAtop(android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
+    method @Deprecated public void forEachDstIn(android.renderscript.Allocation, android.renderscript.Allocation);
+    method @Deprecated public void forEachDstIn(android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
+    method @Deprecated public void forEachDstOut(android.renderscript.Allocation, android.renderscript.Allocation);
+    method @Deprecated public void forEachDstOut(android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
+    method @Deprecated public void forEachDstOver(android.renderscript.Allocation, android.renderscript.Allocation);
+    method @Deprecated public void forEachDstOver(android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
+    method @Deprecated public void forEachMultiply(android.renderscript.Allocation, android.renderscript.Allocation);
+    method @Deprecated public void forEachMultiply(android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
+    method @Deprecated public void forEachSrc(android.renderscript.Allocation, android.renderscript.Allocation);
+    method @Deprecated public void forEachSrc(android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
+    method @Deprecated public void forEachSrcAtop(android.renderscript.Allocation, android.renderscript.Allocation);
+    method @Deprecated public void forEachSrcAtop(android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
+    method @Deprecated public void forEachSrcIn(android.renderscript.Allocation, android.renderscript.Allocation);
+    method @Deprecated public void forEachSrcIn(android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
+    method @Deprecated public void forEachSrcOut(android.renderscript.Allocation, android.renderscript.Allocation);
+    method @Deprecated public void forEachSrcOut(android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
+    method @Deprecated public void forEachSrcOver(android.renderscript.Allocation, android.renderscript.Allocation);
+    method @Deprecated public void forEachSrcOver(android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
+    method @Deprecated public void forEachSubtract(android.renderscript.Allocation, android.renderscript.Allocation);
+    method @Deprecated public void forEachSubtract(android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
+    method @Deprecated public void forEachXor(android.renderscript.Allocation, android.renderscript.Allocation);
+    method @Deprecated public void forEachXor(android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
+    method @Deprecated public android.renderscript.Script.KernelID getKernelIDAdd();
+    method @Deprecated public android.renderscript.Script.KernelID getKernelIDClear();
+    method @Deprecated public android.renderscript.Script.KernelID getKernelIDDst();
+    method @Deprecated public android.renderscript.Script.KernelID getKernelIDDstAtop();
+    method @Deprecated public android.renderscript.Script.KernelID getKernelIDDstIn();
+    method @Deprecated public android.renderscript.Script.KernelID getKernelIDDstOut();
+    method @Deprecated public android.renderscript.Script.KernelID getKernelIDDstOver();
+    method @Deprecated public android.renderscript.Script.KernelID getKernelIDMultiply();
+    method @Deprecated public android.renderscript.Script.KernelID getKernelIDSrc();
+    method @Deprecated public android.renderscript.Script.KernelID getKernelIDSrcAtop();
+    method @Deprecated public android.renderscript.Script.KernelID getKernelIDSrcIn();
+    method @Deprecated public android.renderscript.Script.KernelID getKernelIDSrcOut();
+    method @Deprecated public android.renderscript.Script.KernelID getKernelIDSrcOver();
+    method @Deprecated public android.renderscript.Script.KernelID getKernelIDSubtract();
+    method @Deprecated public android.renderscript.Script.KernelID getKernelIDXor();
   }
 
-  public final class ScriptIntrinsicBlur extends android.renderscript.ScriptIntrinsic {
-    method public static android.renderscript.ScriptIntrinsicBlur create(android.renderscript.RenderScript, android.renderscript.Element);
-    method public void forEach(android.renderscript.Allocation);
-    method public void forEach(android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
-    method public android.renderscript.Script.FieldID getFieldID_Input();
-    method public android.renderscript.Script.KernelID getKernelID();
-    method public void setInput(android.renderscript.Allocation);
-    method public void setRadius(float);
+  @Deprecated public final class ScriptIntrinsicBlur extends android.renderscript.ScriptIntrinsic {
+    method @Deprecated public static android.renderscript.ScriptIntrinsicBlur create(android.renderscript.RenderScript, android.renderscript.Element);
+    method @Deprecated public void forEach(android.renderscript.Allocation);
+    method @Deprecated public void forEach(android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
+    method @Deprecated public android.renderscript.Script.FieldID getFieldID_Input();
+    method @Deprecated public android.renderscript.Script.KernelID getKernelID();
+    method @Deprecated public void setInput(android.renderscript.Allocation);
+    method @Deprecated public void setRadius(float);
   }
 
-  public final class ScriptIntrinsicColorMatrix extends android.renderscript.ScriptIntrinsic {
+  @Deprecated public final class ScriptIntrinsicColorMatrix extends android.renderscript.ScriptIntrinsic {
     method @Deprecated public static android.renderscript.ScriptIntrinsicColorMatrix create(android.renderscript.RenderScript, android.renderscript.Element);
-    method public static android.renderscript.ScriptIntrinsicColorMatrix create(android.renderscript.RenderScript);
-    method public void forEach(android.renderscript.Allocation, android.renderscript.Allocation);
-    method public void forEach(android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
-    method public android.renderscript.Script.KernelID getKernelID();
-    method public void setAdd(android.renderscript.Float4);
-    method public void setAdd(float, float, float, float);
-    method public void setColorMatrix(android.renderscript.Matrix4f);
-    method public void setColorMatrix(android.renderscript.Matrix3f);
-    method public void setGreyscale();
-    method public void setRGBtoYUV();
-    method public void setYUVtoRGB();
+    method @Deprecated public static android.renderscript.ScriptIntrinsicColorMatrix create(android.renderscript.RenderScript);
+    method @Deprecated public void forEach(android.renderscript.Allocation, android.renderscript.Allocation);
+    method @Deprecated public void forEach(android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
+    method @Deprecated public android.renderscript.Script.KernelID getKernelID();
+    method @Deprecated public void setAdd(android.renderscript.Float4);
+    method @Deprecated public void setAdd(float, float, float, float);
+    method @Deprecated public void setColorMatrix(android.renderscript.Matrix4f);
+    method @Deprecated public void setColorMatrix(android.renderscript.Matrix3f);
+    method @Deprecated public void setGreyscale();
+    method @Deprecated public void setRGBtoYUV();
+    method @Deprecated public void setYUVtoRGB();
   }
 
-  public final class ScriptIntrinsicConvolve3x3 extends android.renderscript.ScriptIntrinsic {
-    method public static android.renderscript.ScriptIntrinsicConvolve3x3 create(android.renderscript.RenderScript, android.renderscript.Element);
-    method public void forEach(android.renderscript.Allocation);
-    method public void forEach(android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
-    method public android.renderscript.Script.FieldID getFieldID_Input();
-    method public android.renderscript.Script.KernelID getKernelID();
-    method public void setCoefficients(float[]);
-    method public void setInput(android.renderscript.Allocation);
+  @Deprecated public final class ScriptIntrinsicConvolve3x3 extends android.renderscript.ScriptIntrinsic {
+    method @Deprecated public static android.renderscript.ScriptIntrinsicConvolve3x3 create(android.renderscript.RenderScript, android.renderscript.Element);
+    method @Deprecated public void forEach(android.renderscript.Allocation);
+    method @Deprecated public void forEach(android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
+    method @Deprecated public android.renderscript.Script.FieldID getFieldID_Input();
+    method @Deprecated public android.renderscript.Script.KernelID getKernelID();
+    method @Deprecated public void setCoefficients(float[]);
+    method @Deprecated public void setInput(android.renderscript.Allocation);
   }
 
-  public final class ScriptIntrinsicConvolve5x5 extends android.renderscript.ScriptIntrinsic {
-    method public static android.renderscript.ScriptIntrinsicConvolve5x5 create(android.renderscript.RenderScript, android.renderscript.Element);
-    method public void forEach(android.renderscript.Allocation);
-    method public void forEach(android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
-    method public android.renderscript.Script.FieldID getFieldID_Input();
-    method public android.renderscript.Script.KernelID getKernelID();
-    method public void setCoefficients(float[]);
-    method public void setInput(android.renderscript.Allocation);
+  @Deprecated public final class ScriptIntrinsicConvolve5x5 extends android.renderscript.ScriptIntrinsic {
+    method @Deprecated public static android.renderscript.ScriptIntrinsicConvolve5x5 create(android.renderscript.RenderScript, android.renderscript.Element);
+    method @Deprecated public void forEach(android.renderscript.Allocation);
+    method @Deprecated public void forEach(android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
+    method @Deprecated public android.renderscript.Script.FieldID getFieldID_Input();
+    method @Deprecated public android.renderscript.Script.KernelID getKernelID();
+    method @Deprecated public void setCoefficients(float[]);
+    method @Deprecated public void setInput(android.renderscript.Allocation);
   }
 
-  public final class ScriptIntrinsicHistogram extends android.renderscript.ScriptIntrinsic {
-    method public static android.renderscript.ScriptIntrinsicHistogram create(android.renderscript.RenderScript, android.renderscript.Element);
-    method public void forEach(android.renderscript.Allocation);
-    method public void forEach(android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
-    method public void forEach_Dot(android.renderscript.Allocation);
-    method public void forEach_Dot(android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
-    method public android.renderscript.Script.FieldID getFieldID_Input();
-    method public android.renderscript.Script.KernelID getKernelID_Separate();
-    method public void setDotCoefficients(float, float, float, float);
-    method public void setOutput(android.renderscript.Allocation);
+  @Deprecated public final class ScriptIntrinsicHistogram extends android.renderscript.ScriptIntrinsic {
+    method @Deprecated public static android.renderscript.ScriptIntrinsicHistogram create(android.renderscript.RenderScript, android.renderscript.Element);
+    method @Deprecated public void forEach(android.renderscript.Allocation);
+    method @Deprecated public void forEach(android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
+    method @Deprecated public void forEach_Dot(android.renderscript.Allocation);
+    method @Deprecated public void forEach_Dot(android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
+    method @Deprecated public android.renderscript.Script.FieldID getFieldID_Input();
+    method @Deprecated public android.renderscript.Script.KernelID getKernelID_Separate();
+    method @Deprecated public void setDotCoefficients(float, float, float, float);
+    method @Deprecated public void setOutput(android.renderscript.Allocation);
   }
 
-  public final class ScriptIntrinsicLUT extends android.renderscript.ScriptIntrinsic {
-    method public static android.renderscript.ScriptIntrinsicLUT create(android.renderscript.RenderScript, android.renderscript.Element);
-    method public void forEach(android.renderscript.Allocation, android.renderscript.Allocation);
-    method public void forEach(android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
-    method public android.renderscript.Script.KernelID getKernelID();
-    method public void setAlpha(int, int);
-    method public void setBlue(int, int);
-    method public void setGreen(int, int);
-    method public void setRed(int, int);
+  @Deprecated public final class ScriptIntrinsicLUT extends android.renderscript.ScriptIntrinsic {
+    method @Deprecated public static android.renderscript.ScriptIntrinsicLUT create(android.renderscript.RenderScript, android.renderscript.Element);
+    method @Deprecated public void forEach(android.renderscript.Allocation, android.renderscript.Allocation);
+    method @Deprecated public void forEach(android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
+    method @Deprecated public android.renderscript.Script.KernelID getKernelID();
+    method @Deprecated public void setAlpha(int, int);
+    method @Deprecated public void setBlue(int, int);
+    method @Deprecated public void setGreen(int, int);
+    method @Deprecated public void setRed(int, int);
   }
 
-  public final class ScriptIntrinsicResize extends android.renderscript.ScriptIntrinsic {
-    method public static android.renderscript.ScriptIntrinsicResize create(android.renderscript.RenderScript);
-    method public void forEach_bicubic(android.renderscript.Allocation);
-    method public void forEach_bicubic(android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
-    method public android.renderscript.Script.FieldID getFieldID_Input();
-    method public android.renderscript.Script.KernelID getKernelID_bicubic();
-    method public void setInput(android.renderscript.Allocation);
+  @Deprecated public final class ScriptIntrinsicResize extends android.renderscript.ScriptIntrinsic {
+    method @Deprecated public static android.renderscript.ScriptIntrinsicResize create(android.renderscript.RenderScript);
+    method @Deprecated public void forEach_bicubic(android.renderscript.Allocation);
+    method @Deprecated public void forEach_bicubic(android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
+    method @Deprecated public android.renderscript.Script.FieldID getFieldID_Input();
+    method @Deprecated public android.renderscript.Script.KernelID getKernelID_bicubic();
+    method @Deprecated public void setInput(android.renderscript.Allocation);
   }
 
-  public final class ScriptIntrinsicYuvToRGB extends android.renderscript.ScriptIntrinsic {
-    method public static android.renderscript.ScriptIntrinsicYuvToRGB create(android.renderscript.RenderScript, android.renderscript.Element);
-    method public void forEach(android.renderscript.Allocation);
-    method public android.renderscript.Script.FieldID getFieldID_Input();
-    method public android.renderscript.Script.KernelID getKernelID();
-    method public void setInput(android.renderscript.Allocation);
+  @Deprecated public final class ScriptIntrinsicYuvToRGB extends android.renderscript.ScriptIntrinsic {
+    method @Deprecated public static android.renderscript.ScriptIntrinsicYuvToRGB create(android.renderscript.RenderScript, android.renderscript.Element);
+    method @Deprecated public void forEach(android.renderscript.Allocation);
+    method @Deprecated public android.renderscript.Script.FieldID getFieldID_Input();
+    method @Deprecated public android.renderscript.Script.KernelID getKernelID();
+    method @Deprecated public void setInput(android.renderscript.Allocation);
   }
 
-  public class Short2 {
-    ctor public Short2();
-    ctor public Short2(short, short);
-    field public short x;
-    field public short y;
+  @Deprecated public class Short2 {
+    ctor @Deprecated public Short2();
+    ctor @Deprecated public Short2(short, short);
+    field @Deprecated public short x;
+    field @Deprecated public short y;
   }
 
-  public class Short3 {
-    ctor public Short3();
-    ctor public Short3(short, short, short);
-    field public short x;
-    field public short y;
-    field public short z;
+  @Deprecated public class Short3 {
+    ctor @Deprecated public Short3();
+    ctor @Deprecated public Short3(short, short, short);
+    field @Deprecated public short x;
+    field @Deprecated public short y;
+    field @Deprecated public short z;
   }
 
-  public class Short4 {
-    ctor public Short4();
-    ctor public Short4(short, short, short, short);
-    field public short w;
-    field public short x;
-    field public short y;
-    field public short z;
+  @Deprecated public class Short4 {
+    ctor @Deprecated public Short4();
+    ctor @Deprecated public Short4(short, short, short, short);
+    field @Deprecated public short w;
+    field @Deprecated public short x;
+    field @Deprecated public short y;
+    field @Deprecated public short z;
   }
 
-  public class Type extends android.renderscript.BaseObj {
-    method public static android.renderscript.Type createX(android.renderscript.RenderScript, android.renderscript.Element, int);
-    method public static android.renderscript.Type createXY(android.renderscript.RenderScript, android.renderscript.Element, int, int);
-    method public static android.renderscript.Type createXYZ(android.renderscript.RenderScript, android.renderscript.Element, int, int, int);
-    method public int getCount();
-    method public android.renderscript.Element getElement();
-    method public int getX();
-    method public int getY();
-    method public int getYuv();
-    method public int getZ();
-    method public boolean hasFaces();
-    method public boolean hasMipmaps();
+  @Deprecated public class Type extends android.renderscript.BaseObj {
+    method @Deprecated public static android.renderscript.Type createX(android.renderscript.RenderScript, android.renderscript.Element, int);
+    method @Deprecated public static android.renderscript.Type createXY(android.renderscript.RenderScript, android.renderscript.Element, int, int);
+    method @Deprecated public static android.renderscript.Type createXYZ(android.renderscript.RenderScript, android.renderscript.Element, int, int, int);
+    method @Deprecated public int getCount();
+    method @Deprecated public android.renderscript.Element getElement();
+    method @Deprecated public int getX();
+    method @Deprecated public int getY();
+    method @Deprecated public int getYuv();
+    method @Deprecated public int getZ();
+    method @Deprecated public boolean hasFaces();
+    method @Deprecated public boolean hasMipmaps();
   }
 
-  public static class Type.Builder {
-    ctor public Type.Builder(android.renderscript.RenderScript, android.renderscript.Element);
-    method public android.renderscript.Type create();
-    method public android.renderscript.Type.Builder setFaces(boolean);
-    method public android.renderscript.Type.Builder setMipmaps(boolean);
-    method public android.renderscript.Type.Builder setX(int);
-    method public android.renderscript.Type.Builder setY(int);
-    method public android.renderscript.Type.Builder setYuvFormat(int);
-    method public android.renderscript.Type.Builder setZ(int);
+  @Deprecated public static class Type.Builder {
+    ctor @Deprecated public Type.Builder(android.renderscript.RenderScript, android.renderscript.Element);
+    method @Deprecated public android.renderscript.Type create();
+    method @Deprecated public android.renderscript.Type.Builder setFaces(boolean);
+    method @Deprecated public android.renderscript.Type.Builder setMipmaps(boolean);
+    method @Deprecated public android.renderscript.Type.Builder setX(int);
+    method @Deprecated public android.renderscript.Type.Builder setY(int);
+    method @Deprecated public android.renderscript.Type.Builder setYuvFormat(int);
+    method @Deprecated public android.renderscript.Type.Builder setZ(int);
   }
 
-  public enum Type.CubemapFace {
-    enum_constant public static final android.renderscript.Type.CubemapFace NEGATIVE_X;
-    enum_constant public static final android.renderscript.Type.CubemapFace NEGATIVE_Y;
-    enum_constant public static final android.renderscript.Type.CubemapFace NEGATIVE_Z;
-    enum_constant public static final android.renderscript.Type.CubemapFace POSITIVE_X;
-    enum_constant public static final android.renderscript.Type.CubemapFace POSITIVE_Y;
-    enum_constant public static final android.renderscript.Type.CubemapFace POSITIVE_Z;
+  @Deprecated public enum Type.CubemapFace {
+    enum_constant @Deprecated public static final android.renderscript.Type.CubemapFace NEGATIVE_X;
+    enum_constant @Deprecated public static final android.renderscript.Type.CubemapFace NEGATIVE_Y;
+    enum_constant @Deprecated public static final android.renderscript.Type.CubemapFace NEGATIVE_Z;
+    enum_constant @Deprecated public static final android.renderscript.Type.CubemapFace POSITIVE_X;
+    enum_constant @Deprecated public static final android.renderscript.Type.CubemapFace POSITIVE_Y;
+    enum_constant @Deprecated public static final android.renderscript.Type.CubemapFace POSITIVE_Z;
     enum_constant @Deprecated public static final android.renderscript.Type.CubemapFace POSITVE_X;
     enum_constant @Deprecated public static final android.renderscript.Type.CubemapFace POSITVE_Y;
     enum_constant @Deprecated public static final android.renderscript.Type.CubemapFace POSITVE_Z;
@@ -40388,7 +40408,6 @@ package android.telephony {
     method @IntRange(from=1, to=261) public int getBand();
     method @IntRange(from=1) public int getCellBandwidthDownlinkKhz();
     method @IntRange(from=1) public int getCellBandwidthUplinkKhz();
-    method @Deprecated public int getChannelNumber();
     method public int getConnectionStatus();
     method @IntRange(from=0) public int getDownlinkChannelNumber();
     method @IntRange(from=0) public int getDownlinkFrequencyKhz();
@@ -40777,6 +40796,8 @@ package android.telephony {
     method public static int getDefaultSmsSubscriptionId();
     method public static int getDefaultSubscriptionId();
     method public static int getDefaultVoiceSubscriptionId();
+    method public int getDeviceToDeviceStatusSharing(int);
+    method @NonNull public java.util.List<android.net.Uri> getDeviceToDeviceStatusSharingContacts(int);
     method @NonNull @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public java.util.List<android.telephony.SubscriptionInfo> getOpportunisticSubscriptions();
     method public static int getSlotIndex(int);
     method @Nullable public int[] getSubscriptionIds(int);
@@ -40789,6 +40810,8 @@ package android.telephony {
     method public void removeOnOpportunisticSubscriptionsChangedListener(@NonNull android.telephony.SubscriptionManager.OnOpportunisticSubscriptionsChangedListener);
     method public void removeOnSubscriptionsChangedListener(android.telephony.SubscriptionManager.OnSubscriptionsChangedListener);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void removeSubscriptionsFromGroup(@NonNull java.util.List<java.lang.Integer>, @NonNull android.os.ParcelUuid);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDeviceToDeviceStatusSharing(int, int);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDeviceToDeviceStatusSharingContacts(@NonNull java.util.List<android.net.Uri>, int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setOpportunistic(boolean, int);
     method public void setSubscriptionOverrideCongested(int, boolean, long);
     method public void setSubscriptionOverrideCongested(int, boolean, @NonNull int[], long);
@@ -40800,6 +40823,12 @@ package android.telephony {
     field public static final String ACTION_DEFAULT_SUBSCRIPTION_CHANGED = "android.telephony.action.DEFAULT_SUBSCRIPTION_CHANGED";
     field public static final String ACTION_MANAGE_SUBSCRIPTION_PLANS = "android.telephony.action.MANAGE_SUBSCRIPTION_PLANS";
     field public static final String ACTION_REFRESH_SUBSCRIPTION_PLANS = "android.telephony.action.REFRESH_SUBSCRIPTION_PLANS";
+    field public static final int D2D_SHARING_ALL = 3; // 0x3
+    field public static final int D2D_SHARING_ALL_CONTACTS = 1; // 0x1
+    field public static final int D2D_SHARING_DISABLED = 0; // 0x0
+    field public static final int D2D_SHARING_SELECTED_CONTACTS = 2; // 0x2
+    field public static final String D2D_STATUS_SHARING = "d2d_sharing_status";
+    field public static final String D2D_STATUS_SHARING_SELECTED_CONTACTS = "d2d_sharing_contacts";
     field public static final int DATA_ROAMING_DISABLE = 0; // 0x0
     field public static final int DATA_ROAMING_ENABLE = 1; // 0x1
     field public static final int DEFAULT_SUBSCRIPTION_ID = 2147483647; // 0x7fffffff

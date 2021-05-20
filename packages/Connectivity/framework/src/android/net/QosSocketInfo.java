@@ -17,6 +17,7 @@
 package android.net;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
@@ -32,7 +33,8 @@ import java.util.Objects;
 /**
  * Used in conjunction with
  * {@link ConnectivityManager#registerQosCallback}
- * in order to receive Qos Sessions related to the local address and port of a bound {@link Socket}.
+ * in order to receive Qos Sessions related to the local address and port of a bound {@link Socket}
+ * and/or remote address and port of a connected {@link Socket}.
  *
  * @hide
  */
@@ -47,6 +49,9 @@ public final class QosSocketInfo implements Parcelable {
 
     @NonNull
     private final InetSocketAddress mLocalSocketAddress;
+
+    @Nullable
+    private final InetSocketAddress mRemoteSocketAddress;
 
     /**
      * The {@link Network} the socket is on.
@@ -81,6 +86,18 @@ public final class QosSocketInfo implements Parcelable {
     }
 
     /**
+     * The remote address of the socket passed into {@link QosSocketInfo(Network, Socket)}.
+     * The value does not reflect any changes that occur to the socket after it is first set
+     * in the constructor.
+     *
+     * @return the remote address of the socket if socket is connected, null otherwise
+     */
+    @Nullable
+    public InetSocketAddress getRemoteSocketAddress() {
+        return mRemoteSocketAddress;
+    }
+
+    /**
      * Creates a {@link QosSocketInfo} given a {@link Network} and bound {@link Socket}.  The
      * {@link Socket} must remain bound in order to receive {@link QosSession}s.
      *
@@ -95,6 +112,12 @@ public final class QosSocketInfo implements Parcelable {
         mParcelFileDescriptor = ParcelFileDescriptor.fromSocket(socket);
         mLocalSocketAddress =
                 new InetSocketAddress(socket.getLocalAddress(), socket.getLocalPort());
+
+        if (socket.isConnected()) {
+            mRemoteSocketAddress = (InetSocketAddress) socket.getRemoteSocketAddress();
+        } else {
+            mRemoteSocketAddress = null;
+        }
     }
 
     /* Parcelable methods */
@@ -102,11 +125,15 @@ public final class QosSocketInfo implements Parcelable {
         mNetwork = Objects.requireNonNull(Network.CREATOR.createFromParcel(in));
         mParcelFileDescriptor = ParcelFileDescriptor.CREATOR.createFromParcel(in);
 
-        final int addressLength = in.readInt();
-        mLocalSocketAddress = readSocketAddress(in, addressLength);
+        final int localAddressLength = in.readInt();
+        mLocalSocketAddress = readSocketAddress(in, localAddressLength);
+
+        final int remoteAddressLength = in.readInt();
+        mRemoteSocketAddress = remoteAddressLength == 0 ? null
+                : readSocketAddress(in, remoteAddressLength);
     }
 
-    private InetSocketAddress readSocketAddress(final Parcel in, final int addressLength) {
+    private @NonNull InetSocketAddress readSocketAddress(final Parcel in, final int addressLength) {
         final byte[] address = new byte[addressLength];
         in.readByteArray(address);
         final int port = in.readInt();
@@ -130,10 +157,19 @@ public final class QosSocketInfo implements Parcelable {
         mNetwork.writeToParcel(dest, 0);
         mParcelFileDescriptor.writeToParcel(dest, 0);
 
-        final byte[] address = mLocalSocketAddress.getAddress().getAddress();
-        dest.writeInt(address.length);
-        dest.writeByteArray(address);
+        final byte[] localAddress = mLocalSocketAddress.getAddress().getAddress();
+        dest.writeInt(localAddress.length);
+        dest.writeByteArray(localAddress);
         dest.writeInt(mLocalSocketAddress.getPort());
+
+        if (mRemoteSocketAddress == null) {
+            dest.writeInt(0);
+        } else {
+            final byte[] remoteAddress = mRemoteSocketAddress.getAddress().getAddress();
+            dest.writeInt(remoteAddress.length);
+            dest.writeByteArray(remoteAddress);
+            dest.writeInt(mRemoteSocketAddress.getPort());
+        }
     }
 
     @NonNull

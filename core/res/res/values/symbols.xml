@@ -1143,6 +1143,17 @@
   <java-symbol type="string" name="mediasize_na_monarch" />
   <java-symbol type="string" name="mediasize_na_quarto" />
   <java-symbol type="string" name="mediasize_na_foolscap" />
+  <java-symbol type="string" name="mediasize_na_ansi_c" />
+  <java-symbol type="string" name="mediasize_na_ansi_d" />
+  <java-symbol type="string" name="mediasize_na_ansi_e" />
+  <java-symbol type="string" name="mediasize_na_ansi_f" />
+  <java-symbol type="string" name="mediasize_na_arch_a" />
+  <java-symbol type="string" name="mediasize_na_arch_b" />
+  <java-symbol type="string" name="mediasize_na_arch_c" />
+  <java-symbol type="string" name="mediasize_na_arch_d" />
+  <java-symbol type="string" name="mediasize_na_arch_e" />
+  <java-symbol type="string" name="mediasize_na_arch_e1" />
+  <java-symbol type="string" name="mediasize_na_super_b" />
   <java-symbol type="string" name="mediasize_chinese_roc_8k" />
   <java-symbol type="string" name="mediasize_chinese_roc_16k" />
   <java-symbol type="string" name="mediasize_chinese_prc_1" />
@@ -1179,6 +1190,7 @@
   <java-symbol type="string" name="mediasize_japanese_kahu" />
   <java-symbol type="string" name="mediasize_japanese_kaku2" />
   <java-symbol type="string" name="mediasize_japanese_you4" />
+  <java-symbol type="string" name="mediasize_japanese_l" />
   <java-symbol type="string" name="network_partial_connectivity" />
   <java-symbol type="string" name="network_partial_connectivity_detailed" />
   <java-symbol type="string" name="reason_service_unavailable" />
@@ -1929,6 +1941,7 @@
   <java-symbol type="fraction" name="config_dimBehindFadeDuration" />
   <java-symbol type="dimen" name="default_minimal_size_resizable_task" />
   <java-symbol type="dimen" name="default_minimal_size_pip_resizable_task" />
+  <java-symbol type="dimen" name="overridable_minimal_size_pip_resizable_task" />
   <java-symbol type="dimen" name="task_height_of_minimized_mode" />
   <java-symbol type="fraction" name="config_screenAutoBrightnessDozeScaleFactor" />
   <java-symbol type="bool" name="config_allowPriorityVibrationsInLowPowerMode" />
