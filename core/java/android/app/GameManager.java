@@ -135,6 +135,7 @@ public final class GameManager {
             throw e.rethrowFromSystemServer();
         }
     }
+
     /**
      * Returns a list of supported game modes for a given package.
      * <p>
@@ -151,4 +152,19 @@ public final class GameManager {
         }
     }
 
+    /**
+     * Returns if ANGLE is enabled for a given package and user ID.
+     * <p>
+     * The caller must have {@link android.Manifest.permission#MANAGE_GAME_MODE}.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_GAME_MODE)
+    public @GameMode boolean getAngleEnabled(@NonNull String packageName) {
+        try {
+            return mService.getAngleEnabled(packageName, mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 }
