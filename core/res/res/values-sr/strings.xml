@@ -2128,7 +2128,8 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"Потврди"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Искључи"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Сазнајте више"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"Побољшана обавештења су заменила Android прилагодљива обавештења у Android-у 12. Ова функција показује предложене радње и одговоре и организује обавештења.\n\nПобољшана обавештења могу да приступају садржају обавештења, укључујући личне информације попут имена контаката и порука. Ова функција може и да одбацује обавештења или да одговара на њих, на пример, да се јавља на телефонске позиве и контролише режим Не узнемиравај."</string>
+    <!-- no translation found for nas_upgrade_notification_learn_more_content (3735480566983530650) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Обавештење о информацијама Рутинског режима"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Батерија ће се можда испразнити пре уобичајеног пуњења"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Уштеда батерије је активирана да би се продужило трајање батерије"</string>

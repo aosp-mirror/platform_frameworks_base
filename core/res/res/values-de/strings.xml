@@ -2095,7 +2095,8 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Ausschalten"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Weitere Informationen"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"Die Adaptiven Benachrichtigungen wurden in Android 12 durch die Funktion „Erweiterte Benachrichtigungen“ ersetzt. Diese Funktion zeigt Vorschläge für Aktionen und Antworten an und sortiert Benachrichtigungen.\n\nDie Funktion „Erweiterte Benachrichtigungen“ kann alle Benachrichtigungen lesen, darunter auch personenbezogene Daten wie Kontaktnamen und Nachrichten. Außerdem kann sie auf Benachrichtigungen antworten oder diese schließen und so beispielsweise Anrufe entgegennehmen oder „Bitte nicht stören“ steuern."</string>
+    <!-- no translation found for nas_upgrade_notification_learn_more_content (3735480566983530650) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Infomitteilung zum Ablaufmodus"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Dein Akku könnte vor der gewöhnlichen Ladezeit leer sein"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Energiesparmodus aktiviert, um die Akkulaufzeit zu verlängern"</string>

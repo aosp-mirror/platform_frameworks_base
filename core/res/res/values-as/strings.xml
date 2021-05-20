@@ -2095,7 +2095,8 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"ঠিক আছে"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"অফ কৰক"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"অধিক জানক"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"Android 12ত Androidৰ অভিযোজিত জাননীক উন্নত জাননীৰ দ্বাৰা সলনি কৰা হৈছে। এই সুবিধাটোৱে পৰামৰ্শ দিয়া কাৰ্য আৰু প্ৰত্যুত্তৰ দেখুৱায় আৰু আপোনাৰ জাননীসমূহ শৃংখলাবদ্ধ কৰে।\n\nউন্নত জাননীয়ে সম্পৰ্কৰ নাম আৰু বাৰ্তাৰ দৰে ব্যক্তিগত তথ্যকে ধৰি জাননীৰ সমল এক্সেছ কৰিব পাৰে। এই সুবিধাটোৱে জাননী অগ্ৰাহ্য কৰিব অথবা জাননীৰ প্ৰতি সঁহাৰি জনাবও পাৰে, যেনে ফ’ন কলৰ উত্তৰ দিয়া আৰু অসুবিধা নিদিব সুবিধাটো নিয়ন্ত্ৰণ কৰা আদি।"</string>
+    <!-- no translation found for nas_upgrade_notification_learn_more_content (3735480566983530650) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ৰুটিন ম’ডৰ তথ্য জাননী"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"চ্চাৰ্জ কৰাৰ সচৰাচৰ সময়ৰ আগতেই বেটাৰি শেষ হ’ব পাৰে"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"বেটাৰিৰ খৰচ কমাবলৈ বেটাৰি সঞ্চয়কাৰী অন কৰা হৈছে"</string>

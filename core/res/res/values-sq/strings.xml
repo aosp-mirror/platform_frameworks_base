@@ -332,7 +332,7 @@
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Aktivizojë funksionin \"Eksploro me prekje\""</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"Artikujt e trokitur do të lexohen me zë të lartë dhe ekrani mund të eksplorohet duke përdorur gjestet."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"Vëzhgojë tekstin që shkruan"</string>
-    <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"Përfshi të dhënat personale si numrat e kartave të kreditit si dhe fjalëkalimet."</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"Përfshin të dhëna personale, si numrat e kartave të kreditit dhe fjalëkalimet."</string>
     <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"Kontrollo zmadhimin e ekranit"</string>
     <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"Kontrollo nivelin dhe pozicionimin e zmadhimit të ekranit."</string>
     <string name="capability_title_canPerformGestures" msgid="9106545062106728987">"Kryen gjeste"</string>
@@ -730,11 +730,11 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Monitoro numrin e fjalëkalimeve të shkruara gabim kur shkyç ekranin. Kyçe tabletin ose spastro të gjitha të dhënat e këtij përdoruesi nëse shkruhen shumë fjalëkalime të gabuara."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Monitoro numrin e fjalëkalimeve të shkruara gabim kur shkyç ekranin dhe kyçe pajisjen tënde Android TV ose spastro të gjitha të dhënat e këtij përdoruesi nëse shkruhen shumë fjalëkalime të gabuara."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Monitoro numrin e fjalëkalimeve të shkruara gabim kur shkyç ekranin. Kyçe telefonin ose spastro të gjitha të dhënat e këtij përdoruesi nëse shkruhen shumë fjalëkalime të gabuara."</string>
-    <string name="policylab_resetPassword" msgid="214556238645096520">"Ndryshimin e kyçjes"</string>
+    <string name="policylab_resetPassword" msgid="214556238645096520">"Ndryshimin e kyçjes së ekranit"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Ndryshon kyçjen e ekranit."</string>
     <string name="policylab_forceLock" msgid="7360335502968476434">"Kyçjen e ekranit"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"Kontrollon si dhe kur të kyçet ekrani."</string>
-    <string name="policylab_wipeData" msgid="1359485247727537311">"Fshirjen e të dhënave"</string>
+    <string name="policylab_wipeData" msgid="1359485247727537311">"Spastrimin e të gjitha të dhënave"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Fshi të dhënat e tabletit pa paralajmërim duke kryer një rivendosje të të dhënave në gjendje fabrike."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Spastro të dhënat e pajisjes Android TV pa paralajmërim duke kryer një rivendosje të të dhënave në gjendje fabrike."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Fshin të dhënat e telefonit pa paralajmërim, duke kryer rivendosje të të dhënave në gjendje fabrike."</string>
@@ -751,7 +751,7 @@
     <string name="policylab_disableCamera" msgid="5749486347810162018">"Çaktivizo kamerat"</string>
     <string name="policydesc_disableCamera" msgid="3204405908799676104">"Parandalo përdorimin e të gjitha kamerave të pajisjes."</string>
     <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"Çaktivizimin e disa veçorive të kyçjes së ekranit"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"Parandalo përdorimin e disa veçorive të kyçjes së ekranit."</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"Parandalon përdorimin e disa veçorive të kyçjes së ekranit."</string>
   <string-array name="phoneTypes">
     <item msgid="8996339953292723951">"Shtëpia"</item>
     <item msgid="7740243458912727194">"Celulari"</item>
@@ -1869,10 +1869,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Përditësuar nga administratori"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Fshirë nga administratori"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Në rregull"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (4877297130366222145) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (8518809702138617167) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"\"Kursyesi i baterisë\" aktivizon \"Temën e errët\" dhe kufizon ose çaktivizon aktivitetin në sfond, disa efekte vizuale, veçori të caktuara dhe disa lidhje të rrjetit.\n\n"<annotation id="url">"Mëso më shumë"</annotation></string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"\"Kursyesi i baterisë\" aktivizon \"Temën e errët\" dhe kufizon ose çaktivizon aktivitetin në sfond, disa efekte vizuale, veçori të caktuara dhe disa lidhje të rrjetit."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Për të ndihmuar në reduktimin e përdorimit të të dhënave, \"Kursyesi i të dhënave\" pengon që disa aplikacione të dërgojnë apo të marrin të dhëna në sfond. Një aplikacion që po përdor aktualisht mund të ketë qasje te të dhënat, por këtë mund ta bëjë më rrallë. Kjo mund të nënkuptojë, për shembull, se imazhet nuk shfaqen kur troket mbi to."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Të aktivizohet \"Kursyesi i të dhënave\"?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Aktivizo"</string>
@@ -1975,10 +1973,8 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> nuk ofrohet në këtë moment. Kjo menaxhohet nga <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Mëso më shumë"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Anulo pauzën për aplikacionin"</string>
-    <!-- no translation found for work_mode_off_title (961171256005852058) -->
-    <skip />
-    <!-- no translation found for work_mode_off_message (7319580997683623309) -->
-    <skip />
+    <string name="work_mode_off_title" msgid="961171256005852058">"Të aktivizohen aplikacionet e punës?"</string>
+    <string name="work_mode_off_message" msgid="7319580997683623309">"Merr qasjen tek aplikacionet e punës dhe njoftimet e tua"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Aktivizo"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplikacioni nuk ofrohet"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> nuk ofrohet për momentin."</string>
@@ -2099,7 +2095,8 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"Në rregull"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Çaktivizo"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Mëso më shumë"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"Njoftimet e përmirësuara kanë zëvendësuar \"Njoftimet me përshtatje të Android\" në Android 12. Kjo veçori shfaq veprimet dhe përgjigjet e sugjeruara dhe organizon njoftimet e tua.\n\nNjoftimet e përmirësuara mund të kenë qasje te përmbajtja e njoftimeve, duke përfshirë informacionet personale si emrat e kontakteve dhe mesazhet. Kjo veçori mund t\'i heqë ose të përgjigjet po ashtu për njoftimet, si p.sh. t\'u përgjigjet telefonatave ose të kontrollojë modalitetin \"Mos shqetëso\"."</string>
+    <!-- no translation found for nas_upgrade_notification_learn_more_content (3735480566983530650) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Njoftimi i informacionit të \"Modalitetit rutinë\""</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Bateria mund të mbarojë përpara ngarkimit të zakonshëm"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"\"Kursyesi i baterisë\" u aktivizua për të rritur kohëzgjatjen e baterisë"</string>

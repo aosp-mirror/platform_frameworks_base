@@ -2095,7 +2095,8 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"சரி"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"ஆஃப் செய்"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"மேலும் அறிக"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"Android 12 பதிப்பில் Android அடாப்டிவ் அறிவிப்புகள் இப்போது \'மேம்பட்ட அறிவிப்புகளாக\' மாற்றப்பட்டுள்ளது. இந்த அம்சம், பரிந்துரைக்கப்படும் செயல்களையும் பதில்களையும் காட்டும். மேலும் உங்கள் அறிவிப்புகளை ஒருங்கிணைக்கும்.\n\nமேம்பட்ட அறிவிப்புகளால் அனைத்து அறிவிப்புகளின் உள்ளடக்கத்தையும் (தொடர்புகளின் பெயர்கள், மெசேஜ்கள் போன்ற தனிப்பட்ட தகவல்கள் உட்பட) அணுக முடியும். இந்த அம்சத்தால் அறிவிப்புகளை நிராகரிக்கவும் அவற்றுக்குப் பதிலளிக்கவும்கூட (அழைப்புகளுக்குப் பதிலளிப்பது, தொந்தரவு செய்ய வேண்டாம் அம்சத்தைக் கட்டுப்படுத்துவது போன்றவை) முடியும்."</string>
+    <!-- no translation found for nas_upgrade_notification_learn_more_content (3735480566983530650) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"வழக்கமான பேட்டரி சேமிப்பானுக்கான விவர அறிவிப்பு"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"வழக்கமாகச் சார்ஜ் செய்வதற்கு முன்பே பேட்டரி தீர்ந்துபோகக்கூடும்"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"பேட்டரி நிலையை நீட்டிக்க பேட்டரி சேமிப்பான் இயக்கப்பட்டுள்ளது"</string>
