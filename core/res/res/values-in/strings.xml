@@ -190,7 +190,7 @@
     <string name="work_profile_deleted" msgid="5891181538182009328">"Profil kerja dihapus"</string>
     <string name="work_profile_deleted_details" msgid="3773706828364418016">"Aplikasi admin profil kerja tidak ada atau rusak. Akibatnya, profil kerja dan data terkait telah dihapus. Hubungi admin untuk meminta bantuan."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"Profil kerja tidak tersedia lagi di perangkat ini"</string>
-    <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"Terlalu banyak percobaan memasukkan sandi"</string>
+    <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"Terlalu banyak kesalahan sandi"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Admin melepaskan perangkat untuk penggunaan pribadi"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Perangkat ini ada yang mengelola"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Organisasi mengelola perangkat ini dan mungkin memantau traffic jaringan. Ketuk untuk melihat detailnya."</string>
