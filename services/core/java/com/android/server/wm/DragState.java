@@ -497,9 +497,10 @@ class DragState {
         if (targetWin == null) {
             return false;
         }
-        if (!interceptsGlobalDrag && containsAppExtras) {
-            // App-drags can only go to windows that can intercept global drag, and not to normal
-            // app windows
+        final boolean isLocalWindow = mLocalWin == targetWin.mClient.asBinder();
+        if (!isLocalWindow && !interceptsGlobalDrag && containsAppExtras) {
+            // App-drags can only go to local windows or windows that can intercept global drag, and
+            // not to other app windows
             return false;
         }
         if (!targetWin.isPotentialDragTarget(interceptsGlobalDrag)) {
@@ -507,7 +508,7 @@ class DragState {
         }
         if ((mFlags & View.DRAG_FLAG_GLOBAL) == 0 || !targetWindowSupportsGlobalDrag(targetWin)) {
             // Drag is limited to the current window.
-            if (mLocalWin != targetWin.mClient.asBinder()) {
+            if (!isLocalWindow) {
                 return false;
             }
         }

@@ -18,6 +18,8 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="prompt" msgid="3183836924226407828">"Байланысты сұрау"</string>
     <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> VPN байланысын орнатқысы келеді, бұл оған желілік трафикті бақылауға мүмкіндік береді. Көзге сенсеңіз ғана қабылдаңыз. VPN белсенді болғанда экранның жоғарғы жағында &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; көрсетіледі."</string>
+    <!-- no translation found for warning (5188957997628124947) -->
+    <skip />
     <string name="legacy_title" msgid="192936250066580964">"ВЖЖ қосылған"</string>
     <string name="session" msgid="6470628549473641030">"Сессия:"</string>
     <string name="duration" msgid="3584782459928719435">"Ұзақтығы:"</string>

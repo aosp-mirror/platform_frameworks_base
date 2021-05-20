@@ -204,7 +204,8 @@ public class PipTouchHandler {
                 mainExecutor);
         mConnection = new PipAccessibilityInteractionConnection(mContext, pipBoundsState,
                 mMotionHelper, pipTaskOrganizer, mPipBoundsAlgorithm.getSnapAlgorithm(),
-                this::onAccessibilityShowMenu, this::updateMovementBounds, mainExecutor);
+                this::onAccessibilityShowMenu, this::updateMovementBounds,
+                this::animateToUnStashedState, mainExecutor);
     }
 
     public void init() {

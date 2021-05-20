@@ -1180,8 +1180,17 @@ public class BubbleStackView extends FrameLayout
         addView(mFlyout, new FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT));
     }
 
-    void updateFontScale(float fontScale) {
-        mFlyout.updateFontSize(fontScale);
+    void updateFontScale() {
+        setUpManageMenu();
+        mFlyout.updateFontSize();
+        for (Bubble b : mBubbleData.getBubbles()) {
+            if (b.getExpandedView() != null) {
+                b.getExpandedView().updateFontSize();
+            }
+        }
+        if (mBubbleOverflow != null) {
+            mBubbleOverflow.getExpandedView().updateFontSize();
+        }
     }
 
     private void updateOverflow() {
@@ -1244,6 +1253,8 @@ public class BubbleStackView extends FrameLayout
     /** Respond to the display size change by recalculating view size and location. */
     public void onDisplaySizeChanged() {
         updateOverflow();
+        setUpManageMenu();
+        setUpFlyout();
         mBubbleSize = mPositioner.getBubbleSize();
         for (Bubble b : mBubbleData.getBubbles()) {
             if (b.getIconView() == null) {
@@ -1251,6 +1262,9 @@ public class BubbleStackView extends FrameLayout
                 continue;
             }
             b.getIconView().setLayoutParams(new LayoutParams(mBubbleSize, mBubbleSize));
+            if (b.getExpandedView() != null) {
+                b.getExpandedView().updateDimensions();
+            }
         }
         mBubbleOverflow.getIconView().setLayoutParams(new LayoutParams(mBubbleSize, mBubbleSize));
         mExpandedAnimationController.updateResources();

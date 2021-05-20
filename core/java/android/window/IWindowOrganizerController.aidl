@@ -78,17 +78,6 @@ interface IWindowOrganizerController {
     IDisplayAreaOrganizerController getDisplayAreaOrganizerController();
 
     /**
-     * Take a screenshot of the requested Window token and place the content of the screenshot into
-     * outSurfaceControl. The SurfaceControl will be a child of the token's parent, so it will be
-     * a sibling of the token's window
-     * @param token The token for the WindowContainer that should get a screenshot taken.
-     * @param outSurfaceControl The SurfaceControl where the screenshot will be attached.
-     *
-     * @return true if the screenshot was successful, false otherwise.
-     */
-    boolean takeScreenshot(in WindowContainerToken token, out SurfaceControl outSurfaceControl);
-
-    /**
      * Registers a transition player with Core. There is only one of these at a time and calling
      * this will replace the existing one if set.
      */

@@ -21,6 +21,7 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -185,7 +186,7 @@ public class FalsingCollectorImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void testAvoidDozing() {
+    public void testAvoidDozingNotPulsing() {
         MotionEvent down = MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0, 0, 0);
         MotionEvent up = MotionEvent.obtain(0, 0, MotionEvent.ACTION_UP, 0, 0, 0);
 
@@ -198,5 +199,22 @@ public class FalsingCollectorImplTest extends SysuiTestCase {
         // Up event would normally flush the up event, but doesn't.
         mFalsingCollector.onTouchEvent(up);
         verify(mFalsingDataProvider, never()).onMotionEvent(any(MotionEvent.class));
+    }
+
+    @Test
+    public void testAvoidDozingButPulsing() {
+        MotionEvent down = MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0, 0, 0);
+        MotionEvent up = MotionEvent.obtain(0, 0, MotionEvent.ACTION_UP, 0, 0, 0);
+
+        when(mStatusBarStateController.isDozing()).thenReturn(true);
+        when(mStatusBarStateController.isPulsing()).thenReturn(true);
+
+        // Nothing passed initially
+        mFalsingCollector.onTouchEvent(down);
+        verify(mFalsingDataProvider, never()).onMotionEvent(any(MotionEvent.class));
+
+        // Up event would flushes
+        mFalsingCollector.onTouchEvent(up);
+        verify(mFalsingDataProvider, times(2)).onMotionEvent(any(MotionEvent.class));
     }
 }

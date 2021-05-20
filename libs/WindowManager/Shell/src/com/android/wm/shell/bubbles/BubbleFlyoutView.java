@@ -216,12 +216,11 @@ public class BubbleFlyoutView extends FrameLayout {
         super.onDraw(canvas);
     }
 
-    void updateFontSize(float fontScale) {
+    void updateFontSize() {
         final float fontSize = mContext.getResources()
                 .getDimensionPixelSize(com.android.internal.R.dimen.text_size_body_2_material);
-        final float newFontSize = fontSize * fontScale;
-        mMessageText.setTextSize(TypedValue.COMPLEX_UNIT_PX, newFontSize);
-        mSenderText.setTextSize(TypedValue.COMPLEX_UNIT_PX, newFontSize);
+        mMessageText.setTextSize(TypedValue.COMPLEX_UNIT_PX, fontSize);
+        mSenderText.setTextSize(TypedValue.COMPLEX_UNIT_PX, fontSize);
     }
 
     /*
