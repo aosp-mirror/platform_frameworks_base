@@ -2659,6 +2659,7 @@ public class NotificationManagerService extends SystemService {
         final Set<String> dndApprovedPackages = mConditionProviders.getAllowedPackages();
         for (String pkg : dndApprovedPackages) {
             intent.setPackage(pkg);
+            intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
             getContext().sendBroadcastAsUser(intent, UserHandle.ALL);
         }
     }
