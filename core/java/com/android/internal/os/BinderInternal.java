@@ -141,7 +141,8 @@ public class BinderInternal {
         /**
          * Notes incoming binder call stats associated with this work source UID.
          */
-        void noteCallStats(int workSourceUid, Collection<BinderCallsStats.CallStat> callStats);
+        void noteCallStats(int workSourceUid, long incrementalCallCount,
+                Collection<BinderCallsStats.CallStat> callStats);
     }
 
     /**
