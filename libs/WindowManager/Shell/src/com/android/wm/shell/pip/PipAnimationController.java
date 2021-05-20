@@ -89,6 +89,11 @@ public class PipAnimationController {
                 || direction == TRANSITION_DIRECTION_LEAVE_PIP_TO_SPLIT_SCREEN;
     }
 
+    /** Whether the given direction represents removing PIP. */
+    public static boolean isRemovePipDirection(@TransitionDirection int direction) {
+        return direction == TRANSITION_DIRECTION_REMOVE_STACK;
+    }
+
     private final PipSurfaceTransactionHelper mSurfaceTransactionHelper;
 
     private final ThreadLocal<AnimationHandler> mSfAnimationHandlerThreadLocal =

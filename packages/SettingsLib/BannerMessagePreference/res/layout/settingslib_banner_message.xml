@@ -30,8 +30,10 @@
         android:orientation="horizontal">
 
         <ImageView
+            android:id="@+id/banner_icon"
             android:layout_width="24dp"
             android:layout_height="24dp"
+            android:importantForAccessibility="no"
             android:src="@drawable/ic_warning"/>
 
         <LinearLayout
@@ -70,4 +72,19 @@
             android:layout_height="wrap_content"
             style="@android:style/Widget.DeviceDefault.Button.Borderless.Colored"/>
     </LinearLayout>
+
+    <!-- Not supported before v31 -->
+    <TextView
+        android:id="@+id/banner_subtitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"/>
+
+    <!-- Not supported before v31 -->
+    <ImageButton
+        android:id="@+id/banner_dismiss_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/accessibility_banner_message_dismiss"
+        android:visibility="gone"/>
 </LinearLayout>

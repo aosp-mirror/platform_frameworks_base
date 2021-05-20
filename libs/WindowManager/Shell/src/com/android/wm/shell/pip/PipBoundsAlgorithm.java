@@ -367,7 +367,15 @@ public class PipBoundsAlgorithm {
      *         the default stack bounds when first entering PiP.
      */
     public float getSnapFraction(Rect stackBounds) {
-        return mSnapAlgorithm.getSnapFraction(stackBounds, getMovementBounds(stackBounds));
+        return getSnapFraction(stackBounds, getMovementBounds(stackBounds));
+    }
+
+    /**
+     * @return the default snap fraction to apply instead of the default gravity when calculating
+     *         the default stack bounds when first entering PiP.
+     */
+    public float getSnapFraction(Rect stackBounds, Rect movementBounds) {
+        return mSnapAlgorithm.getSnapFraction(stackBounds, movementBounds);
     }
 
     /**

@@ -299,11 +299,13 @@ public class GameManagerServiceTests {
     public void testGameMode() {
         GameManagerService gameManagerService = new GameManagerService(mMockContext);
         gameManagerService.onUserStarting(USER_ID_1);
-
+        gameManagerService.updateConfigsForUser(USER_ID_1, mPackageName);
         mockModifyGameModeGranted();
-
         assertEquals(GameManager.GAME_MODE_UNSUPPORTED,
                 gameManagerService.getGameMode(mPackageName, USER_ID_1));
+        // We need to make sure the mode is supported before setting it.
+        mockDeviceConfigAll();
+        gameManagerService.updateConfigsForUser(USER_ID_1, mPackageName);
         gameManagerService.setGameMode(mPackageName, GameManager.GAME_MODE_STANDARD, USER_ID_1);
         assertEquals(GameManager.GAME_MODE_STANDARD,
                 gameManagerService.getGameMode(mPackageName, USER_ID_1));
@@ -370,11 +372,13 @@ public class GameManagerServiceTests {
      */
     @Test
     public void testGameModeMultipleUsers() {
+        mockModifyGameModeGranted();
+        mockDeviceConfigAll();
         GameManagerService gameManagerService = new GameManagerService(mMockContext);
         gameManagerService.onUserStarting(USER_ID_1);
         gameManagerService.onUserStarting(USER_ID_2);
-
-        mockModifyGameModeGranted();
+        gameManagerService.updateConfigsForUser(USER_ID_1, mPackageName);
+        gameManagerService.updateConfigsForUser(USER_ID_2, mPackageName);
 
         // Set User 1 to Standard
         gameManagerService.setGameMode(mPackageName, GameManager.GAME_MODE_STANDARD, USER_ID_1);
@@ -602,5 +606,53 @@ public class GameManagerServiceTests {
         GameManagerService.GamePackageConfiguration config =
                 gameManagerService.getConfig(mPackageName);
         assertNull(config.getGameModeConfiguration(GameManager.GAME_MODE_PERFORMANCE));
+    }
+
+    /**
+     * Ensure that, if a game no longer supports any game modes, we set the game mode to
+     * UNSUPPORTED
+     */
+    @Test
+    public void testUnsetInvalidGameMode() throws Exception {
+        mockDeviceConfigNone();
+        mockModifyGameModeGranted();
+        GameManagerService gameManagerService = new GameManagerService(mMockContext);
+        gameManagerService.onUserStarting(USER_ID_1);
+        gameManagerService.setGameMode(mPackageName, GameManager.GAME_MODE_PERFORMANCE, USER_ID_1);
+        gameManagerService.updateConfigsForUser(USER_ID_1, mPackageName);
+        assertEquals(GameManager.GAME_MODE_UNSUPPORTED,
+                gameManagerService.getGameMode(mPackageName, USER_ID_1));
+    }
+
+    /**
+     * Ensure that, if a game no longer supports a specific game mode, but supports STANDARD, we set
+     * the game mode to STANDARD.
+     */
+    @Test
+    public void testResetInvalidGameMode() throws Exception {
+        mockDeviceConfigPerformance();
+        mockModifyGameModeGranted();
+        GameManagerService gameManagerService = new GameManagerService(mMockContext);
+        gameManagerService.onUserStarting(USER_ID_1);
+        gameManagerService.setGameMode(mPackageName, GameManager.GAME_MODE_BATTERY, USER_ID_1);
+        gameManagerService.updateConfigsForUser(USER_ID_1, mPackageName);
+        assertEquals(GameManager.GAME_MODE_STANDARD,
+                gameManagerService.getGameMode(mPackageName, USER_ID_1));
+    }
+
+    /**
+     * Ensure that if a game supports STANDARD, but is currently set to UNSUPPORTED, we set the game
+     * mode to STANDARD
+     */
+    @Test
+    public void testSetValidGameMode() throws Exception {
+        mockDeviceConfigPerformance();
+        mockModifyGameModeGranted();
+        GameManagerService gameManagerService = new GameManagerService(mMockContext);
+        gameManagerService.onUserStarting(USER_ID_1);
+        gameManagerService.setGameMode(mPackageName, GameManager.GAME_MODE_UNSUPPORTED, USER_ID_1);
+        gameManagerService.updateConfigsForUser(USER_ID_1, mPackageName);
+        assertEquals(GameManager.GAME_MODE_STANDARD,
+                gameManagerService.getGameMode(mPackageName, USER_ID_1));
     }
 }

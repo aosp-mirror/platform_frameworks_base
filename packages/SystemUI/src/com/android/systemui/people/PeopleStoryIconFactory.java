@@ -28,7 +28,6 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.util.IconDrawableFactory;
 import android.util.Log;
-import android.util.TypedValue;
 
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
@@ -37,7 +36,7 @@ class PeopleStoryIconFactory implements AutoCloseable {
 
     private static final int PADDING = 2;
     private static final int RING_WIDTH = 2;
-    private static final int MAX_BADGE_SIZE = 36;
+    private static final int MAX_BADGE_SIZE = 40;
 
     final PackageManager mPackageManager;
     final IconDrawableFactory mIconDrawableFactory;
@@ -51,15 +50,15 @@ class PeopleStoryIconFactory implements AutoCloseable {
 
     PeopleStoryIconFactory(Context context, PackageManager pm,
             IconDrawableFactory iconDrawableFactory, int iconSizeDp) {
+        context.setTheme(android.R.style.Theme_DeviceDefault_DayNight);
         mIconBitmapSize = (int) (iconSizeDp * context.getResources().getDisplayMetrics().density);
         mDensity = context.getResources().getDisplayMetrics().density;
         mIconSize = mDensity * iconSizeDp;
         mPackageManager = pm;
         mIconDrawableFactory = iconDrawableFactory;
         mImportantConversationColor = context.getColor(R.color.important_conversation);
-        TypedValue typedValue = new TypedValue();
-        context.getTheme().resolveAttribute(android.R.attr.colorAccent, typedValue, true);
-        mAccentColor = context.getColor(typedValue.resourceId);
+        mAccentColor = Utils.getColorAttr(context,
+                com.android.internal.R.attr.colorAccentPrimary).getDefaultColor();
         mContext = context;
     }
 

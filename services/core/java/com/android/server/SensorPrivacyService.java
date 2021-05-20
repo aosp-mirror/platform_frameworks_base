@@ -26,7 +26,6 @@ import static android.app.AppOpsManager.OP_CAMERA;
 import static android.app.AppOpsManager.OP_PHONE_CALL_CAMERA;
 import static android.app.AppOpsManager.OP_PHONE_CALL_MICROPHONE;
 import static android.app.AppOpsManager.OP_RECORD_AUDIO;
-import static android.app.AppOpsManager.OP_RECORD_AUDIO_HOTWORD;
 import static android.content.Intent.EXTRA_PACKAGE_NAME;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
@@ -55,12 +54,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.pm.UserInfo;
 import android.graphics.drawable.Icon;
 import android.hardware.ISensorPrivacyListener;
 import android.hardware.ISensorPrivacyManager;
 import android.hardware.SensorPrivacyManager;
 import android.hardware.SensorPrivacyManagerInternal;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
@@ -72,10 +73,12 @@ import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.os.ShellCommand;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.Settings;
 import android.service.SensorPrivacyIndividualEnabledSensorProto;
 import android.service.SensorPrivacyServiceDumpProto;
 import android.service.SensorPrivacyUserProto;
+import android.service.voice.VoiceInteractionManagerInternal;
 import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyManager;
 import android.telephony.emergency.EmergencyNumber;
@@ -164,6 +167,8 @@ public final class SensorPrivacyService extends SystemService {
     private EmergencyCallHelper mEmergencyCallHelper;
     private KeyguardManager mKeyguardManager;
 
+    private int mCurrentUser = -1;
+
     public SensorPrivacyService(Context context) {
         super(context);
         mContext = context;
@@ -172,7 +177,21 @@ public final class SensorPrivacyService extends SystemService {
         mActivityManager = context.getSystemService(ActivityManager.class);
         mActivityTaskManager = context.getSystemService(ActivityTaskManager.class);
         mTelephonyManager = context.getSystemService(TelephonyManager.class);
+
         mSensorPrivacyServiceImpl = new SensorPrivacyServiceImpl();
+
+        mUserManagerInternal.addUserLifecycleListener(
+                new UserManagerInternal.UserLifecycleListener() {
+                    @Override
+                    public void onUserCreated(UserInfo user, Object token) {
+                        setCurrentUserRestriction();
+                    }
+
+                    @Override
+                    public void onUserRemoved(UserInfo user) {
+                        removeUserRestrictions(user.id);
+                    }
+                });
     }
 
     @Override
@@ -191,9 +210,23 @@ public final class SensorPrivacyService extends SystemService {
         }
     }
 
+    @Override
+    public void onUserStarting(TargetUser user) {
+        if (mCurrentUser == -1) {
+            mCurrentUser = user.getUserIdentifier();
+            setCurrentUserRestriction();
+        }
+    }
+
+    @Override
+    public void onUserSwitching(TargetUser from, TargetUser to) {
+        mCurrentUser = to.getUserIdentifier();
+        setCurrentUserRestriction();
+    }
+
     class SensorPrivacyServiceImpl extends ISensorPrivacyManager.Stub implements
             AppOpsManager.OnOpNotedListener, AppOpsManager.OnOpStartedListener,
-            IBinder.DeathRecipient {
+            IBinder.DeathRecipient, UserManagerInternal.UserRestrictionsListener {
 
         private final SensorPrivacyHandler mHandler;
         private final Object mLock = new Object();
@@ -280,6 +313,21 @@ public final class SensorPrivacyService extends SystemService {
                 }
             }, new IntentFilter(ACTION_DISABLE_INDIVIDUAL_SENSOR_PRIVACY),
                     MANAGE_SENSOR_PRIVACY, null);
+            mUserManagerInternal.addUserRestrictionsListener(this);
+        }
+
+        @Override
+        public void onUserRestrictionsChanged(int userId, Bundle newRestrictions,
+                Bundle prevRestrictions) {
+            // Reset sensor privacy when restriction is added
+            if (!prevRestrictions.getBoolean(UserManager.DISALLOW_CAMERA_TOGGLE)
+                    && newRestrictions.getBoolean(UserManager.DISALLOW_CAMERA_TOGGLE)) {
+                setIndividualSensorPrivacyUnchecked(userId, CAMERA, false);
+            }
+            if (!prevRestrictions.getBoolean(UserManager.DISALLOW_MICROPHONE_TOGGLE)
+                    && newRestrictions.getBoolean(UserManager.DISALLOW_MICROPHONE_TOGGLE)) {
+                setIndividualSensorPrivacyUnchecked(userId, MICROPHONE, false);
+            }
         }
 
         @Override
@@ -400,6 +448,15 @@ public final class SensorPrivacyService extends SystemService {
                     showSensorUseReminderNotification(user, packageName, sensor);
                     return;
                 }
+            }
+
+            VoiceInteractionManagerInternal voiceInteractionManagerInternal =
+                    LocalServices.getService(VoiceInteractionManagerInternal.class);
+
+            if (sensor == MICROPHONE && voiceInteractionManagerInternal != null
+                    && voiceInteractionManagerInternal.hasActiveSession(packageName)) {
+                enqueueSensorUseReminderDialogAsync(-1, user, packageName, sensor);
+                return;
             }
 
             Log.i(TAG, packageName + "/" + uid + " started using sensor " + sensor
@@ -608,6 +665,17 @@ public final class SensorPrivacyService extends SystemService {
                 return false;
             }
 
+            if (sensor == MICROPHONE && mUserManagerInternal.getUserRestriction(userId,
+                    UserManager.DISALLOW_MICROPHONE_TOGGLE)) {
+                Log.i(TAG, "Can't change mic toggle due to admin restriction");
+                return false;
+            }
+
+            if (sensor == CAMERA && mUserManagerInternal.getUserRestriction(userId,
+                    UserManager.DISALLOW_CAMERA_TOGGLE)) {
+                Log.i(TAG, "Can't change camera toggle due to admin restriction");
+                return false;
+            }
             return true;
         }
 
@@ -1318,15 +1386,43 @@ public final class SensorPrivacyService extends SystemService {
     }
 
     private void setUserRestriction(int userId, int sensor, boolean enabled) {
-        if (sensor == CAMERA) {
-            mAppOpsManager.setUserRestrictionForUser(OP_CAMERA, enabled,
-                    mAppOpsRestrictionToken, null, userId);
-        } else if (sensor == MICROPHONE) {
-            mAppOpsManager.setUserRestrictionForUser(OP_RECORD_AUDIO, enabled,
-                    mAppOpsRestrictionToken, null, userId);
-            mAppOpsManager.setUserRestrictionForUser(OP_RECORD_AUDIO_HOTWORD, enabled,
-                    mAppOpsRestrictionToken, null, userId);
+        if (userId == mCurrentUser) {
+            setCurrentUserRestriction(sensor, enabled);
         }
+    }
+
+    private void setCurrentUserRestriction() {
+        boolean micState = mSensorPrivacyServiceImpl
+                .isIndividualSensorPrivacyEnabled(mCurrentUser, MICROPHONE);
+        boolean camState = mSensorPrivacyServiceImpl
+                .isIndividualSensorPrivacyEnabled(mCurrentUser, CAMERA);
+
+        setCurrentUserRestriction(MICROPHONE, micState);
+        setCurrentUserRestriction(CAMERA, camState);
+    }
+
+    private void setCurrentUserRestriction(int sensor, boolean enabled) {
+        int[] userIds = mUserManagerInternal.getUserIds();
+        int code;
+        if (sensor == MICROPHONE) {
+            code = OP_RECORD_AUDIO;
+        } else if (sensor == CAMERA) {
+            code = OP_CAMERA;
+        } else {
+            Log.w(TAG, "Invalid sensor id: " + sensor, new RuntimeException());
+            return;
+        }
+        for (int i = 0; i < userIds.length; i++) {
+            mAppOpsManager.setUserRestrictionForUser(code, enabled,
+                    mAppOpsRestrictionToken, null, userIds[i], true);
+        }
+    }
+
+    private void removeUserRestrictions(int userId) {
+        mAppOpsManager.setUserRestrictionForUser(OP_RECORD_AUDIO, false,
+                mAppOpsRestrictionToken, null, userId, true);
+        mAppOpsManager.setUserRestrictionForUser(OP_CAMERA, false,
+                mAppOpsRestrictionToken, null, userId, true);
     }
 
     private final class DeathRecipient implements IBinder.DeathRecipient {
