@@ -196,7 +196,7 @@ public class NotificationHelper {
         if (notification == null) {
             return null;
         }
-        if (Notification.MessagingStyle.class.equals(notification.getNotificationStyle())
+        if (notification.isStyle(Notification.MessagingStyle.class)
                 && notification.extras != null) {
             final Parcelable[] messages = notification.extras.getParcelableArray(EXTRA_MESSAGES);
             if (!ArrayUtils.isEmpty(messages)) {
