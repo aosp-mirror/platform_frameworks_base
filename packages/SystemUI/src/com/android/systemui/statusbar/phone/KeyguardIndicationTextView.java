@@ -142,7 +142,6 @@ public class KeyguardIndicationTextView extends TextView {
         Animator yTranslate =
                 ObjectAnimator.ofFloat(this, View.TRANSLATION_Y, 0, -getYTranslationPixels());
         yTranslate.setDuration(getFadeOutDuration());
-        fadeOut.setInterpolator(Interpolators.FAST_OUT_LINEAR_IN);
         animatorSet.playTogether(fadeOut, yTranslate);
 
         return animatorSet;
