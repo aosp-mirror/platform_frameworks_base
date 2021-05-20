@@ -19,11 +19,13 @@ package android.widget;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Build;
+import android.text.TextUtils;
 import android.text.method.TranslationTransformationMethod;
 import android.util.Log;
 import android.view.View;
 import android.view.translation.UiTranslationManager;
 import android.view.translation.ViewTranslationCallback;
+import android.view.translation.ViewTranslationRequest;
 import android.view.translation.ViewTranslationResponse;
 
 /**
@@ -45,6 +47,8 @@ public class TextViewTranslationCallback implements ViewTranslationCallback {
     private boolean mIsShowingTranslation = false;
     private boolean mIsTextPaddingEnabled = false;
     private CharSequence mPaddedText;
+
+    private CharSequence mContentDescription;
 
     /**
      * Invoked by the platform when receiving the successful {@link ViewTranslationResponse} for the
@@ -86,6 +90,15 @@ public class TextViewTranslationCallback implements ViewTranslationCallback {
         }
         if (mTranslationTransformation != null) {
             ((TextView) view).setTransformationMethod(mTranslationTransformation);
+            ViewTranslationResponse response = view.getViewTranslationResponse();
+            if (response.getKeys().contains(ViewTranslationRequest.ID_CONTENT_DESCRIPTION)) {
+                CharSequence translatedContentDescription =
+                        response.getValue(ViewTranslationRequest.ID_CONTENT_DESCRIPTION).getText();
+                if (!TextUtils.isEmpty(translatedContentDescription)) {
+                    mContentDescription = view.getContentDescription();
+                    view.setContentDescription(translatedContentDescription);
+                }
+            }
         } else {
             if (DEBUG) {
                 // TODO(b/182433547): remove before S release
@@ -111,6 +124,9 @@ public class TextViewTranslationCallback implements ViewTranslationCallback {
         if (mTranslationTransformation != null) {
             ((TextView) view).setTransformationMethod(
                     mTranslationTransformation.getOriginalTransformationMethod());
+            if (!TextUtils.isEmpty(mContentDescription)) {
+                view.setContentDescription(mContentDescription);
+            }
         } else {
             if (DEBUG) {
                 // TODO(b/182433547): remove before S release
@@ -131,6 +147,7 @@ public class TextViewTranslationCallback implements ViewTranslationCallback {
             onHideTranslation(view);
             clearTranslationTransformation();
             mPaddedText = null;
+            mContentDescription = null;
         } else {
             if (DEBUG) {
                 // TODO(b/182433547): remove before S release
