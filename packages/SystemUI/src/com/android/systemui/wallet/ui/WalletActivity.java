@@ -24,6 +24,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.service.quickaccesswallet.QuickAccessWalletClient;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Window;
@@ -52,7 +53,7 @@ import javax.inject.Inject;
  */
 public class WalletActivity extends LifecycleActivity {
 
-    private final QuickAccessWalletClient mQuickAccessWalletClient;
+    private static final String TAG = "WalletActivity";
     private final KeyguardStateController mKeyguardStateController;
     private final KeyguardDismissUtil mKeyguardDismissUtil;
     private final ActivityStarter mActivityStarter;
@@ -65,7 +66,6 @@ public class WalletActivity extends LifecycleActivity {
 
     @Inject
     public WalletActivity(
-            QuickAccessWalletClient quickAccessWalletClient,
             KeyguardStateController keyguardStateController,
             KeyguardDismissUtil keyguardDismissUtil,
             ActivityStarter activityStarter,
@@ -74,7 +74,6 @@ public class WalletActivity extends LifecycleActivity {
             FalsingManager falsingManager,
             UserTracker userTracker,
             StatusBarKeyguardViewManager keyguardViewManager) {
-        mQuickAccessWalletClient = quickAccessWalletClient;
         mKeyguardStateController = keyguardStateController;
         mKeyguardDismissUtil = keyguardDismissUtil;
         mActivityStarter = activityStarter;
@@ -103,10 +102,11 @@ public class WalletActivity extends LifecycleActivity {
         getActionBar().setHomeActionContentDescription(R.string.accessibility_desc_close);
         WalletView walletView = requireViewById(R.id.wallet_view);
 
+        QuickAccessWalletClient walletClient = QuickAccessWalletClient.create(this);
         mWalletScreenController = new WalletScreenController(
                 this,
                 walletView,
-                mQuickAccessWalletClient,
+                walletClient,
                 mActivityStarter,
                 mExecutor,
                 mHandler,
@@ -116,6 +116,10 @@ public class WalletActivity extends LifecycleActivity {
 
         walletView.getAppButton().setOnClickListener(
                 v -> {
+                    if (walletClient.createWalletIntent() == null) {
+                        Log.w(TAG, "Unable to create wallet app intent.");
+                        return;
+                    }
                     if (!mKeyguardStateController.isUnlocked()
                             && mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
                         return;
@@ -123,12 +127,12 @@ public class WalletActivity extends LifecycleActivity {
 
                     if (mKeyguardStateController.isUnlocked()) {
                         mActivityStarter.startActivity(
-                                mQuickAccessWalletClient.createWalletIntent(), true);
+                                walletClient.createWalletIntent(), true);
                         finish();
                     } else {
                         mKeyguardDismissUtil.executeWhenUnlocked(() -> {
                             mActivityStarter.startActivity(
-                                    mQuickAccessWalletClient.createWalletIntent(), true);
+                                    walletClient.createWalletIntent(), true);
                             finish();
                             return false;
                         }, false, true);
