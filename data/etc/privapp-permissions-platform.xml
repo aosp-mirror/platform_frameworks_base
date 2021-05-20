@@ -154,6 +154,9 @@ applications that come with the platform
         <permission name="android.permission.CHANGE_COMPONENT_ENABLED_STATE" />
         <permission name="android.permission.MODIFY_AUDIO_ROUTING" />
         <permission name="android.permission.GET_RUNTIME_PERMISSION_GROUP_MAPPING" />
+
+        <!-- For permission hub 2 debugging only -->
+        <permission name="android.permission.GET_ACCOUNTS_PRIVILEGED"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.phone">
