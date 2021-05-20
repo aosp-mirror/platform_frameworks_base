@@ -28,6 +28,10 @@
     <string name="pip_skip_to_next" msgid="8403429188794867653">"다음으로 건너뛰기"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"이전으로 건너뛰기"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"크기 조절"</string>
+    <!-- no translation found for accessibility_action_pip_stash (4060775037619702641) -->
+    <skip />
+    <!-- no translation found for accessibility_action_pip_unstash (7467499339610437646) -->
+    <skip />
     <string name="dock_forced_resizable" msgid="1749750436092293116">"앱이 분할 화면에서 작동하지 않을 수 있습니다."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"앱이 화면 분할을 지원하지 않습니다."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"앱이 보조 디스플레이에서 작동하지 않을 수도 있습니다."</string>
