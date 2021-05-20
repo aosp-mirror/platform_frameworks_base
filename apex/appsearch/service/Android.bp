@@ -20,19 +20,30 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
+genrule {
+    name: "statslog-appsearch-java-gen",
+    tools: ["stats-log-api-gen"],
+    cmd: "$(location stats-log-api-gen) --java $(out) --module appsearch --javaPackage com.android.server.appsearch.stats --javaClass AppSearchStatsLog",
+    out: ["com/android/server/appsearch/stats/AppSearchStatsLog.java"],
+}
+
 java_library {
     name: "service-appsearch",
     installable: true,
-    srcs: ["java/**/*.java"],
-    libs: [
-        "framework",
-        "framework-appsearch",
-        "services.core",
-        "services.usage",
+    srcs: [
+        "java/**/*.java",
+        ":statslog-appsearch-java-gen",
     ],
     static_libs: [
         "icing-java-proto-lite",
         "libicing-java",
+    ],
+    libs: [
+        "framework",
+        "framework-appsearch",
+        "framework-statsd.stubs.module_lib",
+        "services.core",
+        "services.usage",
     ],
     required: [
         "libicing",
