@@ -625,7 +625,7 @@ public class SnapshotStatistics {
      * output.
      */
     public void dump(PrintWriter pw, String indent, long now, int unrecorded,
-                     int corkLevel, boolean full) {
+                     int corkLevel, boolean brief) {
         // Grab the raw statistics under lock, but print them outside of the lock.
         Stats[] l;
         Stats[] s;
@@ -639,7 +639,7 @@ public class SnapshotStatistics {
                   unrecorded, corkLevel);
         pw.println();
         dump(pw, indent, now, l, s, "stats");
-        if (!full) {
+        if (brief) {
             return;
         }
         pw.println();
