@@ -30,7 +30,6 @@ import android.util.SparseIntArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.appsearch.external.localstorage.AppSearchLogger;
 import com.android.server.appsearch.external.localstorage.stats.CallStats;
 import com.android.server.appsearch.external.localstorage.stats.InitializeStats;
@@ -237,7 +236,7 @@ public final class PlatformLogger implements AppSearchLogger {
         String database = stats.getGeneralStats().getDatabase();
         try {
             int hashCodeForDatabase = calculateHashCodeMd5(database);
-            FrameworkStatsLog.write(FrameworkStatsLog.APP_SEARCH_CALL_STATS_REPORTED,
+            AppSearchStatsLog.write(AppSearchStatsLog.APP_SEARCH_CALL_STATS_REPORTED,
                     extraStats.mSamplingRatio,
                     extraStats.mSkippedSampleCount,
                     extraStats.mPackageUid,
@@ -269,7 +268,7 @@ public final class PlatformLogger implements AppSearchLogger {
         String database = stats.getGeneralStats().getDatabase();
         try {
             int hashCodeForDatabase = calculateHashCodeMd5(database);
-            FrameworkStatsLog.write(FrameworkStatsLog.APP_SEARCH_PUT_DOCUMENT_STATS_REPORTED,
+            AppSearchStatsLog.write(AppSearchStatsLog.APP_SEARCH_PUT_DOCUMENT_STATS_REPORTED,
                     extraStats.mSamplingRatio,
                     extraStats.mSkippedSampleCount,
                     extraStats.mPackageUid,
@@ -306,7 +305,7 @@ public final class PlatformLogger implements AppSearchLogger {
         String database = stats.getDatabase();
         try {
             int hashCodeForDatabase = calculateHashCodeMd5(database);
-            FrameworkStatsLog.write(FrameworkStatsLog.APP_SEARCH_QUERY_STATS_REPORTED,
+            AppSearchStatsLog.write(AppSearchStatsLog.APP_SEARCH_QUERY_STATS_REPORTED,
                     extraStats.mSamplingRatio,
                     extraStats.mSkippedSampleCount,
                     extraStats.mPackageUid,
@@ -349,7 +348,7 @@ public final class PlatformLogger implements AppSearchLogger {
         mLastPushTimeMillisLocked = SystemClock.elapsedRealtime();
         ExtraStats extraStats = createExtraStatsLocked(/*packageName=*/ null,
                 CallStats.CALL_TYPE_INITIALIZE);
-        FrameworkStatsLog.write(FrameworkStatsLog.APP_SEARCH_INITIALIZE_STATS_REPORTED,
+        AppSearchStatsLog.write(AppSearchStatsLog.APP_SEARCH_INITIALIZE_STATS_REPORTED,
                 extraStats.mSamplingRatio,
                 extraStats.mSkippedSampleCount,
                 extraStats.mPackageUid,
