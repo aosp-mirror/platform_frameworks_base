@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Copyright (C) 2020 The Android Open Source Project
+  Copyright (C) 2021 The Android Open Source Project
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -15,9 +15,13 @@
   limitations under the License.
   -->
 
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.android.settingslib.widget">
-
-    <uses-sdk android:minSdkVersion="28"/>
-
-</manifest>
+<resources>
+    <declare-styleable name="BannerMessagePreference">
+        <attr format="enum" name="attentionLevel">
+            <enum name="high" value="0"/>
+            <enum name="medium" value="1"/>
+            <enum name="low" value="2"/>
+        </attr>
+        <attr format="string" name="subtitle" />
+    </declare-styleable>
+</resources>
