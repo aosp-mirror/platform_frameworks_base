@@ -18,6 +18,7 @@ package android.widget;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.AppGlobals;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -61,8 +62,9 @@ import java.util.Locale;
 @Deprecated
 public class AnalogClock extends View {
     private static final String LOG_TAG = "AnalogClock";
+
     /** How many times per second that the seconds hand advances. */
-    private static final long SECONDS_HAND_FPS = 30;
+    private final int mSecondsHandFps;
 
     private Clock mClock;
     @Nullable
@@ -105,6 +107,10 @@ public class AnalogClock extends View {
 
     public AnalogClock(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+
+        mSecondsHandFps = AppGlobals.getIntCoreSetting(
+                WidgetFlags.KEY_ANALOG_CLOCK_SECONDS_HAND_FPS,
+                WidgetFlags.ANALOG_CLOCK_SECONDS_HAND_FPS_DEFAULT);
 
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, com.android.internal.R.styleable.AnalogClock, defStyleAttr, defStyleRes);
@@ -728,7 +734,7 @@ public class AnalogClock extends View {
         // n positions between two given numbers, where n is the number of ticks per second. This
         // ensures the second hand advances by a consistent distance despite our handler callbacks
         // occurring at inconsistent frequencies.
-        mSeconds = Math.round(rawSeconds * SECONDS_HAND_FPS) / (float) SECONDS_HAND_FPS;
+        mSeconds = Math.round(rawSeconds * mSecondsHandFps) / (float) mSecondsHandFps;
         mMinutes = localTime.getMinute() + mSeconds / 60.0f;
         mHour = localTime.getHour() + mMinutes / 60.0f;
         mChanged = true;
@@ -765,7 +771,7 @@ public class AnalogClock extends View {
             // How many milliseconds through the second we currently are.
             long millisOfSecond = Duration.ofNanos(localTime.getNano()).toMillis();
             // How many milliseconds there are between tick positions for the seconds hand.
-            double millisPerTick = 1000 / (double) SECONDS_HAND_FPS;
+            double millisPerTick = 1000 / (double) mSecondsHandFps;
             // How many milliseconds we are past the last tick position.
             long millisPastLastTick = Math.round(millisOfSecond % millisPerTick);
             // How many milliseconds there are until the next tick position.
