@@ -35,8 +35,178 @@ using namespace android::uirenderer::renderthread;
 namespace android {
 namespace uirenderer {
 
-CopyResult Readback::copySurfaceInto(ANativeWindow* window, const Rect& srcRect, SkBitmap* bitmap) {
+#define ARECT_ARGS(r) float((r).left), float((r).top), float((r).right), float((r).bottom)
+
+CopyResult Readback::copySurfaceInto(ANativeWindow* window, const Rect& inSrcRect,
+                                     SkBitmap* bitmap) {
     ATRACE_CALL();
+    // Setup the source
+    AHardwareBuffer* rawSourceBuffer;
+    int rawSourceFence;
+    ARect cropRect;
+    uint32_t windowTransform;
+    status_t err = ANativeWindow_getLastQueuedBuffer2(window, &rawSourceBuffer, &rawSourceFence,
+                                                      &cropRect, &windowTransform);
+    base::unique_fd sourceFence(rawSourceFence);
+    // Really this shouldn't ever happen, but better safe than sorry.
+    if (err == UNKNOWN_TRANSACTION) {
+        ALOGW("Readback failed to ANativeWindow_getLastQueuedBuffer2 - who are we talking to?");
+        return copySurfaceIntoLegacy(window, inSrcRect, bitmap);
+    }
+    ALOGV("Using new path, cropRect=" RECT_STRING ", transform=%x", ARECT_ARGS(cropRect),
+          windowTransform);
+
+    if (err != NO_ERROR) {
+        ALOGW("Failed to get last queued buffer, error = %d", err);
+        return CopyResult::UnknownError;
+    }
+    if (rawSourceBuffer == nullptr) {
+        ALOGW("Surface doesn't have any previously queued frames, nothing to readback from");
+        return CopyResult::SourceEmpty;
+    }
+    UniqueAHardwareBuffer sourceBuffer{rawSourceBuffer};
+    AHardwareBuffer_Desc description;
+    AHardwareBuffer_describe(sourceBuffer.get(), &description);
+    if (description.usage & AHARDWAREBUFFER_USAGE_PROTECTED_CONTENT) {
+        ALOGW("Surface is protected, unable to copy from it");
+        return CopyResult::SourceInvalid;
+    }
+
+    if (sourceFence != -1 && sync_wait(sourceFence.get(), 500 /* ms */) != NO_ERROR) {
+        ALOGE("Timeout (500ms) exceeded waiting for buffer fence, abandoning readback attempt");
+        return CopyResult::Timeout;
+    }
+
+    sk_sp<SkColorSpace> colorSpace = DataSpaceToColorSpace(
+            static_cast<android_dataspace>(ANativeWindow_getBuffersDataSpace(window)));
+    sk_sp<SkImage> image =
+            SkImage::MakeFromAHardwareBuffer(sourceBuffer.get(), kPremul_SkAlphaType, colorSpace);
+
+    if (!image.get()) {
+        return CopyResult::UnknownError;
+    }
+
+    sk_sp<GrDirectContext> grContext = mRenderThread.requireGrContext();
+
+    SkRect srcRect = inSrcRect.toSkRect();
+
+    SkRect imageSrcRect =
+            SkRect::MakeLTRB(cropRect.left, cropRect.top, cropRect.right, cropRect.bottom);
+    if (imageSrcRect.isEmpty()) {
+        imageSrcRect = SkRect::MakeIWH(description.width, description.height);
+    }
+    ALOGV("imageSrcRect = " RECT_STRING, SK_RECT_ARGS(imageSrcRect));
+
+    // Represents the "logical" width/height of the texture. That is, the dimensions of the buffer
+    // after respecting crop & rotate. flipV/flipH still result in the same width & height
+    // so we can ignore those for this.
+    const SkRect textureRect =
+            (windowTransform & NATIVE_WINDOW_TRANSFORM_ROT_90)
+                    ? SkRect::MakeIWH(imageSrcRect.height(), imageSrcRect.width())
+                    : SkRect::MakeIWH(imageSrcRect.width(), imageSrcRect.height());
+
+    if (srcRect.isEmpty()) {
+        srcRect = textureRect;
+    } else {
+        ALOGV("intersecting " RECT_STRING " with " RECT_STRING, SK_RECT_ARGS(srcRect),
+              SK_RECT_ARGS(textureRect));
+        if (!srcRect.intersect(textureRect)) {
+            return CopyResult::UnknownError;
+        }
+    }
+
+    sk_sp<SkSurface> tmpSurface =
+            SkSurface::MakeRenderTarget(mRenderThread.getGrContext(), SkBudgeted::kYes,
+                                        bitmap->info(), 0, kTopLeft_GrSurfaceOrigin, nullptr);
+
+    // if we can't generate a GPU surface that matches the destination bitmap (e.g. 565) then we
+    // attempt to do the intermediate rendering step in 8888
+    if (!tmpSurface.get()) {
+        SkImageInfo tmpInfo = bitmap->info().makeColorType(SkColorType::kN32_SkColorType);
+        tmpSurface = SkSurface::MakeRenderTarget(mRenderThread.getGrContext(), SkBudgeted::kYes,
+                                                 tmpInfo, 0, kTopLeft_GrSurfaceOrigin, nullptr);
+        if (!tmpSurface.get()) {
+            ALOGW("Unable to generate GPU buffer in a format compatible with the provided bitmap");
+            return CopyResult::UnknownError;
+        }
+    }
+
+    /*
+     * The grand ordering of events.
+     * First we apply the buffer's crop, done by using a srcRect of the crop with a dstRect of the
+     * same width/height as the srcRect but with a 0x0 origin
+     *
+     * Second we apply the window transform via a Canvas matrix. Ordering for that is as follows:
+     *  1) FLIP_H
+     *  2) FLIP_V
+     *  3) ROT_90
+     * as per GLConsumer::computeTransformMatrix
+     *
+     * Third we apply the user's supplied cropping & scale to the output by doing a RectToRect
+     * matrix transform from srcRect to {0,0, bitmapWidth, bitmapHeight}
+     *
+     * Finally we're done messing with this bloody thing for hopefully the last time.
+     *
+     * That's a lie since...
+     * TODO: Do all this same stuff for TextureView as it's strictly more correct & easier
+     * to rationalize. And we can fix the 1-px crop bug.
+     */
+
+    SkMatrix m;
+    const SkRect imageDstRect = SkRect::MakeIWH(imageSrcRect.width(), imageSrcRect.height());
+    const float px = imageDstRect.centerX();
+    const float py = imageDstRect.centerY();
+    if (windowTransform & NATIVE_WINDOW_TRANSFORM_FLIP_H) {
+        m.postScale(-1.f, 1.f, px, py);
+    }
+    if (windowTransform & NATIVE_WINDOW_TRANSFORM_FLIP_V) {
+        m.postScale(1.f, -1.f, px, py);
+    }
+    if (windowTransform & NATIVE_WINDOW_TRANSFORM_ROT_90) {
+        m.postRotate(90, 0, 0);
+        m.postTranslate(imageDstRect.height(), 0);
+    }
+
+    SkSamplingOptions sampling(SkFilterMode::kNearest);
+    ALOGV("Mapping from " RECT_STRING " to " RECT_STRING, SK_RECT_ARGS(srcRect),
+          SK_RECT_ARGS(SkRect::MakeWH(bitmap->width(), bitmap->height())));
+    m.postConcat(SkMatrix::MakeRectToRect(srcRect,
+                                          SkRect::MakeWH(bitmap->width(), bitmap->height()),
+                                          SkMatrix::kFill_ScaleToFit));
+    if (srcRect.width() != bitmap->width() || srcRect.height() != bitmap->height()) {
+        sampling = SkSamplingOptions(SkFilterMode::kLinear);
+    }
+
+    SkCanvas* canvas = tmpSurface->getCanvas();
+    canvas->save();
+    canvas->concat(m);
+    SkPaint paint;
+    paint.setAlpha(255);
+    paint.setBlendMode(SkBlendMode::kSrc);
+    canvas->drawImageRect(image, imageSrcRect, imageDstRect, sampling, &paint,
+                          SkCanvas::kFast_SrcRectConstraint);
+    canvas->restore();
+
+    if (!tmpSurface->readPixels(*bitmap, 0, 0)) {
+        // if we fail to readback from the GPU directly (e.g. 565) then we attempt to read into
+        // 8888 and then convert that into the destination format before giving up.
+        SkBitmap tmpBitmap;
+        SkImageInfo tmpInfo = bitmap->info().makeColorType(SkColorType::kN32_SkColorType);
+        if (bitmap->info().colorType() == SkColorType::kN32_SkColorType ||
+            !tmpBitmap.tryAllocPixels(tmpInfo) || !tmpSurface->readPixels(tmpBitmap, 0, 0) ||
+            !tmpBitmap.readPixels(bitmap->info(), bitmap->getPixels(), bitmap->rowBytes(), 0, 0)) {
+            ALOGW("Unable to convert content into the provided bitmap");
+            return CopyResult::UnknownError;
+        }
+    }
+
+    bitmap->notifyPixelsChanged();
+
+    return CopyResult::Success;
+}
+
+CopyResult Readback::copySurfaceIntoLegacy(ANativeWindow* window, const Rect& srcRect,
+                                           SkBitmap* bitmap) {
     // Setup the source
     AHardwareBuffer* rawSourceBuffer;
     int rawSourceFence;
