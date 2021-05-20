@@ -3176,11 +3176,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         updatePermissionPolicyCache(userId);
         updateAdminCanGrantSensorsPermissionCache(userId);
 
-        boolean preferentialNetworkServiceEnabled = true;
+        final boolean preferentialNetworkServiceEnabled;
         synchronized (getLockObject()) {
             ActiveAdmin owner = getDeviceOrProfileOwnerAdminLocked(userId);
             preferentialNetworkServiceEnabled = owner != null
-                    ? owner.mPreferentialNetworkServiceEnabled : true;
+                    ? owner.mPreferentialNetworkServiceEnabled
+                             : DevicePolicyManager.PREFERENTIAL_NETWORK_SERVICE_ENABLED_DEFAULT;
         }
         updateNetworkPreferenceForUser(userId, preferentialNetworkServiceEnabled);
 
