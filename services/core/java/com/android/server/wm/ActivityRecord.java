@@ -4213,6 +4213,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     void clearAllDrawn() {
         allDrawn = false;
+        mLastAllDrawn = false;
     }
 
     /**
