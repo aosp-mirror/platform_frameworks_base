@@ -18,8 +18,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="prompt" msgid="3183836924226407828">"ସଂଯୋଗ ଅନୁରୋଧ"</string>
     <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> ଏକ VPN ସଂଯୋଗ ସେଟ୍ ଅପ୍ କରିବାକୁ ଚାହେଁ, ଯାହା ଏହି ନେଟ୍‌ୱର୍କର ଟ୍ରାଫିକକୁ ମନିଟର୍ କରିବାକୁ ଅନୁମତି ଦିଏ। ଆପଣ ସୋର୍ସ ଉପରେ ବିଶ୍ୱାସ କରିବା ବଦଳରେ କେବଳ ସ୍ୱୀକାର କରନ୍ତୁ। &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; VPN ସକ୍ରିୟ ଥିବାବେଳେ ଏହା ଆପଣଙ୍କ ସ୍କ୍ରୀନ୍‍ର ଉପରେ ଦେଖାଯାଏ।"</string>
-    <!-- no translation found for warning (5188957997628124947) -->
-    <skip />
+    <string name="warning" product="tv" msgid="5188957997628124947">"<xliff:g id="APP">%s</xliff:g> ଏକ VPN ସଂଯୋଗ ସେଟ୍ ଅପ୍ କରିବାକୁ ଚାହେଁ, ଯାହା ଏହାକୁ ନେଟୱାର୍କ ଟ୍ରାଫିକ ମନିଟର୍ କରିବାକୁ ଅନୁମତି ଦେଇଥାଏ। ଯଦି ଆପଣ ସୋର୍ସରେ ବିଶ୍ୱାସ କରୁଛନ୍ତି, ତେବେ ହିଁ କେବଳ ସ୍ୱୀକାର କରନ୍ତୁ। &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; VPN ସକ୍ରିୟ ଥିବା ସମୟରେ ଆପଣଙ୍କ ସ୍କ୍ରିନ୍ ଉପରେ ଦେଖାଯାଏ।"</string>
     <string name="legacy_title" msgid="192936250066580964">"VPN ସଂଯୋଗ ହେଲା"</string>
     <string name="session" msgid="6470628549473641030">"ସେସନ୍‍:"</string>
     <string name="duration" msgid="3584782459928719435">"ଅବଧି:"</string>
