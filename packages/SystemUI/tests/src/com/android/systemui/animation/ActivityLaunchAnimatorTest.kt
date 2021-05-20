@@ -51,7 +51,11 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
         // We start in a new thread so that we can ensure that the callbacks are called in the main
         // thread.
         thread {
-            activityLaunchAnimator.startIntentWithAnimation(controller, animate, intentStarter)
+            activityLaunchAnimator.startIntentWithAnimation(
+                    controller = controller,
+                    animate = animate,
+                    intentStarter = intentStarter
+            )
         }.join()
     }
 

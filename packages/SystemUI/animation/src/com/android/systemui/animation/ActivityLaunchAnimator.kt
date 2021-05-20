@@ -4,12 +4,14 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.app.ActivityManager
+import android.app.ActivityTaskManager
 import android.app.PendingIntent
 import android.content.Context
 import android.graphics.Matrix
 import android.graphics.Rect
 import android.os.Looper
 import android.os.RemoteException
+import android.util.Log
 import android.util.MathUtils
 import android.view.IRemoteAnimationFinishedCallback
 import android.view.IRemoteAnimationRunner
@@ -30,6 +32,8 @@ import kotlin.math.roundToInt
  * nicely into the starting window.
  */
 class ActivityLaunchAnimator(context: Context) {
+    private val TAG = this::class.java.simpleName
+
     companion object {
         const val ANIMATION_DURATION = 500L
         const val ANIMATION_DURATION_FADE_OUT_CONTENT = 183L
@@ -78,29 +82,49 @@ class ActivityLaunchAnimator(context: Context) {
      * If [controller] is null or [animate] is false, then the intent will be started and no
      * animation will run.
      *
+     * If possible, you should pass the [packageName] of the intent that will be started so that
+     * trampoline activity launches will also be animated.
+     *
      * This method will throw any exception thrown by [intentStarter].
      */
     @JvmOverloads
-    inline fun startIntentWithAnimation(
+    fun startIntentWithAnimation(
         controller: Controller?,
         animate: Boolean = true,
+        packageName: String? = null,
         intentStarter: (RemoteAnimationAdapter?) -> Int
     ) {
         if (controller == null || !animate) {
+            Log.d(TAG, "Starting intent with no animation")
             intentStarter(null)
             controller?.callOnIntentStartedOnMainThread(willAnimate = false)
             return
         }
 
+        Log.d(TAG, "Starting intent with a launch animation")
         val runner = Runner(controller)
         val animationAdapter = RemoteAnimationAdapter(
             runner,
             ANIMATION_DURATION,
             ANIMATION_DURATION - 150 /* statusBarTransitionDelay */
         )
+
+        // Register the remote animation for the given package to also animate trampoline
+        // activity launches.
+        if (packageName != null) {
+            try {
+                ActivityTaskManager.getService().registerRemoteAnimationForNextActivityStart(
+                    packageName, animationAdapter)
+            } catch (e: RemoteException) {
+                Log.w(TAG, "Unable to register the remote animation", e)
+            }
+        }
+
         val launchResult = intentStarter(animationAdapter)
         val willAnimate = launchResult == ActivityManager.START_TASK_TO_FRONT ||
             launchResult == ActivityManager.START_SUCCESS
+
+        Log.d(TAG, "launchResult=$launchResult willAnimate=$willAnimate")
         controller.callOnIntentStartedOnMainThread(willAnimate)
 
         // If we expect an animation, post a timeout to cancel it in case the remote animation is
@@ -110,7 +134,6 @@ class ActivityLaunchAnimator(context: Context) {
         }
     }
 
-    @PublishedApi
     internal fun Controller.callOnIntentStartedOnMainThread(willAnimate: Boolean) {
         if (Looper.myLooper() != Looper.getMainLooper()) {
             this.launchContainer.context.mainExecutor.execute {
@@ -125,15 +148,21 @@ class ActivityLaunchAnimator(context: Context) {
      * Same as [startIntentWithAnimation] but allows [intentStarter] to throw a
      * [PendingIntent.CanceledException] which must then be handled by the caller. This is useful
      * for Java caller starting a [PendingIntent].
+     *
+     * If possible, you should pass the [packageName] of the intent that will be started so that
+     * trampoline activity launches will also be animated.
      */
     @Throws(PendingIntent.CanceledException::class)
     @JvmOverloads
     fun startPendingIntentWithAnimation(
         controller: Controller?,
         animate: Boolean = true,
+        packageName: String? = null,
         intentStarter: PendingIntentStarter
     ) {
-        startIntentWithAnimation(controller, animate) { intentStarter.startPendingIntent(it) }
+        startIntentWithAnimation(controller, animate, packageName) {
+            intentStarter.startPendingIntent(it)
+        }
     }
 
     /** Create a new animation [Runner] controlled by [controller]. */
@@ -278,7 +307,7 @@ class ActivityLaunchAnimator(context: Context) {
     @VisibleForTesting
     inner class Runner(private val controller: Controller) : IRemoteAnimationRunner.Stub() {
         private val launchContainer = controller.launchContainer
-        @PublishedApi internal val context = launchContainer.context
+        private val context = launchContainer.context
         private val transactionApplier = SyncRtSurfaceTransactionApplier(launchContainer)
         private var animator: ValueAnimator? = null
 
@@ -294,7 +323,6 @@ class ActivityLaunchAnimator(context: Context) {
         // posting it.
         private var onTimeout = Runnable { onAnimationTimedOut() }
 
-        @PublishedApi
         internal fun postTimeout() {
             launchContainer.postDelayed(onTimeout, LAUNCH_TIMEOUT)
         }
@@ -336,11 +364,13 @@ class ActivityLaunchAnimator(context: Context) {
             remoteAnimationNonAppTargets: Array<out RemoteAnimationTarget>,
             iCallback: IRemoteAnimationFinishedCallback
         ) {
+            Log.d(TAG, "Remote animation started")
             val window = remoteAnimationTargets.firstOrNull {
                 it.mode == RemoteAnimationTarget.MODE_OPENING
             }
 
             if (window == null) {
+                Log.d(TAG, "Aborting the animation as no window is opening")
                 removeTimeout()
                 invokeCallback(iCallback)
                 controller.onLaunchAnimationCancelled()
@@ -399,10 +429,12 @@ class ActivityLaunchAnimator(context: Context) {
 
             animator.addListener(object : AnimatorListenerAdapter() {
                 override fun onAnimationStart(animation: Animator?, isReverse: Boolean) {
+                    Log.d(TAG, "Animation started")
                     controller.onLaunchAnimationStart(isExpandingFullyAbove)
                 }
 
                 override fun onAnimationEnd(animation: Animator?) {
+                    Log.d(TAG, "Animation ended")
                     invokeCallback(iCallback)
                     controller.onLaunchAnimationEnd(isExpandingFullyAbove)
                 }
@@ -496,6 +528,7 @@ class ActivityLaunchAnimator(context: Context) {
                 return
             }
 
+            Log.d(TAG, "Remote animation timed out")
             timedOut = true
             controller.onLaunchAnimationCancelled()
         }
@@ -505,6 +538,7 @@ class ActivityLaunchAnimator(context: Context) {
                 return
             }
 
+            Log.d(TAG, "Remote animation was cancelled")
             cancelled = true
             removeTimeout()
             context.mainExecutor.execute {

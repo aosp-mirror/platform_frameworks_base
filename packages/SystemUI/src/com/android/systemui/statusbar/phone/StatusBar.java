@@ -2801,7 +2801,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             int[] result = new int[]{ActivityManager.START_CANCELED};
 
             mActivityLaunchAnimator.startIntentWithAnimation(animController,
-                    areLaunchAnimationsEnabled(), (adapter) -> {
+                    areLaunchAnimationsEnabled(), intent.getPackage(), (adapter) -> {
                         ActivityOptions options = new ActivityOptions(
                                 getActivityOptions(mDisplayId, adapter));
                         options.setDisallowEnterPictureInPictureWhileLaunching(
@@ -4563,7 +4563,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                                 animationController, this, intent.isActivity()) : null;
 
                 mActivityLaunchAnimator.startPendingIntentWithAnimation(
-                        controller, areLaunchAnimationsEnabled(),
+                        controller, areLaunchAnimationsEnabled(), intent.getCreatorPackage(),
                         (animationAdapter) -> intent.sendAndReturnResult(null, 0, null, null, null,
                                 null, getActivityOptions(mDisplayId, animationAdapter)));
             } catch (PendingIntent.CanceledException e) {
