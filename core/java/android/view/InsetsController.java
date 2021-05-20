@@ -1224,9 +1224,11 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     }
 
     void notifyControlRevoked(InsetsSourceConsumer consumer) {
+        final @InsetsType int types = toPublicType(consumer.getType());
         for (int i = mRunningAnimations.size() - 1; i >= 0; i--) {
             InsetsAnimationControlRunner control = mRunningAnimations.get(i).runner;
-            if ((control.getTypes() & toPublicType(consumer.getType())) != 0) {
+            control.notifyControlRevoked(types);
+            if (control.getControllingTypes() == 0) {
                 cancelAnimation(control, true /* invokeCallback */);
             }
         }

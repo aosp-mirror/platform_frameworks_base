@@ -141,6 +141,7 @@ package android {
     field public static final String REORDER_TASKS = "android.permission.REORDER_TASKS";
     field public static final String REQUEST_COMPANION_PROFILE_WATCH = "android.permission.REQUEST_COMPANION_PROFILE_WATCH";
     field public static final String REQUEST_COMPANION_RUN_IN_BACKGROUND = "android.permission.REQUEST_COMPANION_RUN_IN_BACKGROUND";
+    field public static final String REQUEST_COMPANION_START_FOREGROUND_SERVICES_FROM_BACKGROUND = "android.permission.REQUEST_COMPANION_START_FOREGROUND_SERVICES_FROM_BACKGROUND";
     field public static final String REQUEST_COMPANION_USE_DATA_IN_BACKGROUND = "android.permission.REQUEST_COMPANION_USE_DATA_IN_BACKGROUND";
     field public static final String REQUEST_DELETE_PACKAGES = "android.permission.REQUEST_DELETE_PACKAGES";
     field public static final String REQUEST_IGNORE_BATTERY_OPTIMIZATIONS = "android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS";
@@ -9039,7 +9040,7 @@ package android.bluetooth {
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public String getName();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public int getType();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public android.os.ParcelUuid[] getUuids();
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public boolean setAlias(@NonNull String);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public int setAlias(@Nullable String);
     method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public boolean setPairingConfirmation(boolean);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public boolean setPin(byte[]);
     method public void writeToParcel(android.os.Parcel, int);
@@ -9485,6 +9486,15 @@ package android.bluetooth {
     field public static final int TYPE_L2CAP = 3; // 0x3
     field public static final int TYPE_RFCOMM = 1; // 0x1
     field public static final int TYPE_SCO = 2; // 0x2
+  }
+
+  public final class BluetoothStatusCodes {
+    field public static final int ERROR_BLUETOOTH_NOT_ALLOWED = 2; // 0x2
+    field public static final int ERROR_BLUETOOTH_NOT_ENABLED = 1; // 0x1
+    field public static final int ERROR_DEVICE_NOT_BONDED = 3; // 0x3
+    field public static final int ERROR_MISSING_BLUETOOTH_CONNECT_PERMISSION = 6; // 0x6
+    field public static final int ERROR_UNKNOWN = 2147483647; // 0x7fffffff
+    field public static final int SUCCESS = 0; // 0x0
   }
 
 }
@@ -31980,6 +31990,7 @@ package android.os {
     field public static final String DISALLOW_AUTOFILL = "no_autofill";
     field public static final String DISALLOW_BLUETOOTH = "no_bluetooth";
     field public static final String DISALLOW_BLUETOOTH_SHARING = "no_bluetooth_sharing";
+    field public static final String DISALLOW_CAMERA_TOGGLE = "disallow_camera_toggle";
     field public static final String DISALLOW_CONFIG_BLUETOOTH = "no_config_bluetooth";
     field public static final String DISALLOW_CONFIG_BRIGHTNESS = "no_config_brightness";
     field public static final String DISALLOW_CONFIG_CELL_BROADCASTS = "no_config_cell_broadcasts";
@@ -32004,6 +32015,7 @@ package android.os {
     field public static final String DISALLOW_INSTALL_APPS = "no_install_apps";
     field public static final String DISALLOW_INSTALL_UNKNOWN_SOURCES = "no_install_unknown_sources";
     field public static final String DISALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY = "no_install_unknown_sources_globally";
+    field public static final String DISALLOW_MICROPHONE_TOGGLE = "disallow_microphone_toggle";
     field public static final String DISALLOW_MODIFY_ACCOUNTS = "no_modify_accounts";
     field public static final String DISALLOW_MOUNT_PHYSICAL_MEDIA = "no_physical_media";
     field public static final String DISALLOW_NETWORK_RESET = "no_network_reset";
@@ -39223,7 +39235,8 @@ package android.speech {
     method @MainThread public static android.speech.SpeechRecognizer createSpeechRecognizer(android.content.Context);
     method @MainThread public static android.speech.SpeechRecognizer createSpeechRecognizer(android.content.Context, android.content.ComponentName);
     method public void destroy();
-    method public static boolean isRecognitionAvailable(android.content.Context);
+    method public static boolean isOnDeviceRecognitionAvailable(@NonNull android.content.Context);
+    method public static boolean isRecognitionAvailable(@NonNull android.content.Context);
     method @MainThread public void setRecognitionListener(android.speech.RecognitionListener);
     method @MainThread public void startListening(android.content.Intent);
     method @MainThread public void stopListening();
@@ -52846,7 +52859,7 @@ package android.view.translation {
     method public int getTranslationFlags();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.view.translation.TranslationContext> CREATOR;
-    field public static final int FLAG_DICTIONARY_DESCRIPTION = 4; // 0x4
+    field public static final int FLAG_DEFINITIONS = 4; // 0x4
     field public static final int FLAG_LOW_LATENCY = 1; // 0x1
     field public static final int FLAG_TRANSLITERATION = 2; // 0x2
   }
@@ -52931,12 +52944,13 @@ package android.view.translation {
   public final class TranslationResponseValue implements android.os.Parcelable {
     method public int describeContents();
     method @NonNull public static android.view.translation.TranslationResponseValue forError();
-    method @Nullable public CharSequence getDictionaryDescription();
+    method @NonNull public android.os.Bundle getExtras();
     method public int getStatusCode();
     method @Nullable public CharSequence getText();
     method @Nullable public CharSequence getTransliteration();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.view.translation.TranslationResponseValue> CREATOR;
+    field public static final String EXTRA_DEFINITIONS = "android.view.translation.extra.DEFINITIONS";
     field public static final int STATUS_ERROR = 1; // 0x1
     field public static final int STATUS_SUCCESS = 0; // 0x0
   }
@@ -52944,7 +52958,7 @@ package android.view.translation {
   public static final class TranslationResponseValue.Builder {
     ctor public TranslationResponseValue.Builder(int);
     method @NonNull public android.view.translation.TranslationResponseValue build();
-    method @NonNull public android.view.translation.TranslationResponseValue.Builder setDictionaryDescription(@NonNull CharSequence);
+    method @NonNull public android.view.translation.TranslationResponseValue.Builder setExtras(@NonNull android.os.Bundle);
     method @NonNull public android.view.translation.TranslationResponseValue.Builder setText(@NonNull CharSequence);
     method @NonNull public android.view.translation.TranslationResponseValue.Builder setTransliteration(@NonNull CharSequence);
   }
@@ -52976,7 +52990,7 @@ package android.view.translation {
     method public void onFinished();
     method public void onPaused();
     method public default void onResumed(@NonNull android.icu.util.ULocale, @NonNull android.icu.util.ULocale);
-    method @Deprecated public void onStarted(@NonNull String, @NonNull String);
+    method @Deprecated public default void onStarted(@NonNull String, @NonNull String);
     method public default void onStarted(@NonNull android.icu.util.ULocale, @NonNull android.icu.util.ULocale);
   }
 

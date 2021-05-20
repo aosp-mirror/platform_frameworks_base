@@ -18,6 +18,8 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="prompt" msgid="3183836924226407828">"Bağlantı Sorğusu"</string>
     <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> VPN bağlantı yaratmaq istəyir ki, bu da şəbəkə trafikini izləyə bilər. Yalnız mənbəyə güvəndiyiniz halda qəbul edin. VPN aktiv olan zaman &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; ekranın yuxarısında görünür."</string>
+    <!-- no translation found for warning (5188957997628124947) -->
+    <skip />
     <string name="legacy_title" msgid="192936250066580964">"VPN qoşuludur"</string>
     <string name="session" msgid="6470628549473641030">"Sessiya:"</string>
     <string name="duration" msgid="3584782459928719435">"Müddət:"</string>

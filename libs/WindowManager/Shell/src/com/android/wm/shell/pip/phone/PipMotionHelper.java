@@ -21,7 +21,9 @@ import static androidx.dynamicanimation.animation.SpringForce.STIFFNESS_LOW;
 import static androidx.dynamicanimation.animation.SpringForce.STIFFNESS_MEDIUM;
 
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_EXPAND_OR_UNEXPAND;
+import static com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_LEFT;
 import static com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_NONE;
+import static com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_RIGHT;
 import static com.android.wm.shell.pip.phone.PipMenuView.ANIM_TYPE_DISMISS;
 import static com.android.wm.shell.pip.phone.PipMenuView.ANIM_TYPE_NONE;
 
@@ -496,6 +498,28 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         } else {
             resizeAndAnimatePipUnchecked(normalBounds, SHRINK_STACK_FROM_MENU_DURATION);
         }
+    }
+
+    /**
+     * Animates the PiP to the stashed state, choosing the closest edge.
+     */
+    void animateToStashedClosestEdge() {
+        Rect tmpBounds = new Rect();
+        final Rect insetBounds = mPipBoundsState.getDisplayLayout().stableInsets();
+        final int stashType =
+                mPipBoundsState.getBounds().left == mPipBoundsState.getMovementBounds().left
+                ? STASH_TYPE_LEFT : STASH_TYPE_RIGHT;
+        final float leftEdge = stashType == STASH_TYPE_LEFT
+                ? mPipBoundsState.getStashOffset()
+                - mPipBoundsState.getBounds().width() + insetBounds.left
+                : mPipBoundsState.getDisplayBounds().right
+                        - mPipBoundsState.getStashOffset() - insetBounds.right;
+        tmpBounds.set((int) leftEdge,
+                mPipBoundsState.getBounds().top,
+                (int) (leftEdge + mPipBoundsState.getBounds().width()),
+                mPipBoundsState.getBounds().bottom);
+        resizeAndAnimatePipUnchecked(tmpBounds, UNSTASH_DURATION);
+        mPipBoundsState.setStashed(stashType);
     }
 
     /**

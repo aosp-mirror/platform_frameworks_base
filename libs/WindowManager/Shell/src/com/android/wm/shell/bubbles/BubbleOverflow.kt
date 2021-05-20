@@ -82,7 +82,7 @@ class BubbleOverflow(
 
     fun updateResources() {
         bitmapSize = positioner.bubbleBitmapSize
-        iconBitmapSize = (bitmapSize * 0.46f).toInt()
+        iconBitmapSize = (bitmapSize * ICON_BITMAP_SIZE_PERCENT).toInt()
         val bubbleSize = positioner.bubbleSize
         overflowBtn?.layoutParams = FrameLayout.LayoutParams(bubbleSize, bubbleSize)
         expandedView?.updateDimensions()
