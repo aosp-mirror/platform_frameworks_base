@@ -4568,9 +4568,6 @@ public class AppOpsService extends IAppOpsService.Stub {
             // package is exempt from the restriction.
             ClientRestrictionState restrictionState = mOpUserRestrictions.valueAt(i);
             if (restrictionState.hasRestriction(code, packageName, attributionTag, userHandle)) {
-                if (restrictionState.rejectBypass(code, userHandle)) {
-                    return true;
-                }
                 RestrictionBypass opBypass = opAllowSystemBypassRestriction(code);
                 if (opBypass != null) {
                     // If we are the system, bypass user restrictions for certain codes
@@ -6152,8 +6149,6 @@ public class AppOpsService extends IAppOpsService.Stub {
                     for (int j = 0; j < restrictionCount; j++) {
                         int userId = restrictionState.perUserRestrictions.keyAt(j);
                         boolean[] restrictedOps = restrictionState.perUserRestrictions.valueAt(j);
-                        boolean[] rejectBypassOps =
-                                restrictionState.perUserRejectBypasses.valueAt(j);
                         if (restrictedOps == null) {
                             continue;
                         }
@@ -6178,9 +6173,6 @@ public class AppOpsService extends IAppOpsService.Stub {
                                     restrictedOpsValue.append(", ");
                                 }
                                 restrictedOpsValue.append(AppOpsManager.opToName(k));
-                                if (rejectBypassOps != null && rejectBypassOps[k]) {
-                                    restrictedOpsValue.append(" rejectBypass=true");
-                                }
                             }
                         }
                         restrictedOpsValue.append("]");
@@ -6261,14 +6253,14 @@ public class AppOpsService extends IAppOpsService.Stub {
             String restriction = AppOpsManager.opToRestriction(i);
             if (restriction != null) {
                 setUserRestrictionNoCheck(i, restrictions.getBoolean(restriction, false), token,
-                        userHandle, null, false);
+                        userHandle, null);
             }
         }
     }
 
     @Override
     public void setUserRestriction(int code, boolean restricted, IBinder token, int userHandle,
-            Map<String, String[]> excludedPackageTags, boolean rejectBypass) {
+            Map<String, String[]> excludedPackageTags) {
         if (Binder.getCallingPid() != Process.myPid()) {
             mContext.enforcePermission(Manifest.permission.MANAGE_APP_OPS_RESTRICTIONS,
                     Binder.getCallingPid(), Binder.getCallingUid(), null);
@@ -6284,12 +6276,11 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
         verifyIncomingOp(code);
         Objects.requireNonNull(token);
-        setUserRestrictionNoCheck(code, restricted, token, userHandle, excludedPackageTags,
-                rejectBypass);
+        setUserRestrictionNoCheck(code, restricted, token, userHandle, excludedPackageTags);
     }
 
     private void setUserRestrictionNoCheck(int code, boolean restricted, IBinder token,
-            int userHandle, Map<String, String[]> excludedPackageTags, boolean rejectBypass) {
+            int userHandle, Map<String, String[]> excludedPackageTags) {
         synchronized (AppOpsService.this) {
             ClientRestrictionState restrictionState = mOpUserRestrictions.get(token);
 
@@ -6303,7 +6294,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             }
 
             if (restrictionState.setRestriction(code, restricted, excludedPackageTags,
-                    userHandle, rejectBypass)) {
+                    userHandle)) {
                 mHandler.sendMessage(PooledLambda.obtainMessage(
                         AppOpsService::notifyWatchersOfChange, this, code, UID_ANY));
                 mHandler.sendMessage(PooledLambda.obtainMessage(
@@ -6834,9 +6825,7 @@ public class AppOpsService extends IAppOpsService.Stub {
     private final class ClientRestrictionState implements DeathRecipient {
         private final IBinder token;
         SparseArray<boolean[]> perUserRestrictions;
-        SparseArray<boolean[]> perUserRejectBypasses;
         SparseArray<Map<String, String[]>> perUserExcludedPackageTags;
-
 
         public ClientRestrictionState(IBinder token)
                 throws RemoteException {
@@ -6845,15 +6834,11 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
 
         public boolean setRestriction(int code, boolean restricted,
-                Map<String, String[]> excludedPackageTags, int userId, boolean rejectBypass) {
+                Map<String, String[]> excludedPackageTags, int userId) {
             boolean changed = false;
 
             if (perUserRestrictions == null && restricted) {
                 perUserRestrictions = new SparseArray<>();
-            }
-
-            if (perUserRejectBypasses == null && rejectBypass) {
-                perUserRejectBypasses = new SparseArray<>();
             }
 
             int[] users;
@@ -6915,20 +6900,6 @@ public class AppOpsService extends IAppOpsService.Stub {
                             }
                             changed = true;
                         }
-
-                        boolean[] userRejectBypasses = perUserRejectBypasses.get(thisUserId);
-                        if (userRejectBypasses == null && rejectBypass) {
-                            userRejectBypasses = new boolean[AppOpsManager._NUM_OP];
-                            perUserRejectBypasses.put(thisUserId, userRejectBypasses);
-                        }
-                        if (userRejectBypasses != null
-                                && userRejectBypasses[code] != rejectBypass) {
-                            userRejectBypasses[code] = rejectBypass;
-                            if (!rejectBypass && isDefault(userRejectBypasses)) {
-                                perUserRejectBypasses.remove(thisUserId);
-                            }
-                            changed = true;
-                        }
                     }
                 }
             }
@@ -6964,17 +6935,6 @@ public class AppOpsService extends IAppOpsService.Stub {
                 return false;
             }
             return !ArrayUtils.contains(excludedTags, attributionTag);
-        }
-
-        public boolean rejectBypass(int restriction, int userId) {
-            if (perUserRejectBypasses == null) {
-                return false;
-            }
-            boolean[] rejectBypasses = perUserRejectBypasses.get(userId);
-            if (rejectBypasses == null) {
-                return false;
-            }
-            return rejectBypasses[restriction];
         }
 
         public void removeUser(int userId) {

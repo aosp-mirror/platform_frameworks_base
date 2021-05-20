@@ -92,7 +92,7 @@ interface IAppOpsService {
     void setAudioRestriction(int code, int usage, int uid, int mode, in String[] exceptionPackages);
 
     void setUserRestrictions(in Bundle restrictions, IBinder token, int userHandle);
-    void setUserRestriction(int code, boolean restricted, IBinder token, int userHandle, in Map<String, String[]> excludedPackageTags, boolean rejectBypass);
+    void setUserRestriction(int code, boolean restricted, IBinder token, int userHandle, in Map<String, String[]> excludedPackageTags);
     void removeUser(int userHandle);
 
     void startWatchingActive(in int[] ops, IAppOpsActiveCallback callback);
