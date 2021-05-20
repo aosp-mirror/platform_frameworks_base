@@ -46,6 +46,7 @@ import android.graphics.drawable.ShapeDrawable;
 import android.os.RemoteException;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.SurfaceControl;
 import android.view.View;
@@ -250,26 +251,14 @@ public class BubbleExpandedView extends LinearLayout {
     protected void onFinishInflate() {
         super.onFinishInflate();
 
-        Resources res = getResources();
+        mSettingsIcon = findViewById(R.id.settings_button);
+        mSettingsIconHeight = getContext().getResources().getDimensionPixelSize(
+                R.dimen.bubble_manage_button_height);
         mPointerView = findViewById(R.id.pointer_view);
-        mPointerWidth = res.getDimensionPixelSize(R.dimen.bubble_pointer_width);
-        mPointerHeight = res.getDimensionPixelSize(R.dimen.bubble_pointer_height);
-
-        mTopPointer = new ShapeDrawable(TriangleShape.create(
-                mPointerWidth, mPointerHeight, true /* pointUp */));
-        mLeftPointer = new ShapeDrawable(TriangleShape.createHorizontal(
-                mPointerWidth, mPointerHeight, true /* pointLeft */));
-        mRightPointer = new ShapeDrawable(TriangleShape.createHorizontal(
-                mPointerWidth, mPointerHeight, false /* pointLeft */));
-
         mCurrentPointer = mTopPointer;
         mPointerView.setVisibility(INVISIBLE);
 
-        mSettingsIconHeight = getContext().getResources().getDimensionPixelSize(
-                R.dimen.bubble_manage_button_height);
-        mSettingsIcon = findViewById(R.id.settings_button);
-
-        // Set ActivityView's alpha value as zero, since there is no view content to be shown.
+        // Set TaskView's alpha value as zero, since there is no view content to be shown.
         setContentVisibility(false);
 
         mExpandedViewContainer.setOutlineProvider(new ViewOutlineProvider() {
@@ -293,7 +282,6 @@ public class BubbleExpandedView extends LinearLayout {
 
         applyThemeAttrs();
 
-        mExpandedViewPadding = res.getDimensionPixelSize(R.dimen.bubble_expanded_view_padding);
         setClipToPadding(false);
         setOnTouchListener((view, motionEvent) -> {
             if (mTaskView == null) {
@@ -354,7 +342,41 @@ public class BubbleExpandedView extends LinearLayout {
         Resources res = getResources();
         mMinHeight = res.getDimensionPixelSize(R.dimen.bubble_expanded_default_height);
         mOverflowHeight = res.getDimensionPixelSize(R.dimen.bubble_overflow_height);
+        mExpandedViewPadding = res.getDimensionPixelSize(R.dimen.bubble_expanded_view_padding);
+
         mPointerMargin = res.getDimensionPixelSize(R.dimen.bubble_pointer_margin);
+        mPointerWidth = res.getDimensionPixelSize(R.dimen.bubble_pointer_width);
+        mPointerHeight = res.getDimensionPixelSize(R.dimen.bubble_pointer_height);
+
+        mTopPointer = new ShapeDrawable(TriangleShape.create(
+                mPointerWidth, mPointerHeight, true /* pointUp */));
+        mLeftPointer = new ShapeDrawable(TriangleShape.createHorizontal(
+                mPointerWidth, mPointerHeight, true /* pointLeft */));
+        mRightPointer = new ShapeDrawable(TriangleShape.createHorizontal(
+                mPointerWidth, mPointerHeight, false /* pointLeft */));
+
+        final float fontSize = mContext.getResources()
+                .getDimensionPixelSize(com.android.internal.R.dimen.text_size_body_2_material);
+        if (mSettingsIcon != null) {
+            mSettingsIcon.setTextSize(TypedValue.COMPLEX_UNIT_PX, fontSize);
+        }
+        if (mOverflowView != null) {
+            mOverflowView.updateFontSize();
+        }
+        if (mPointerView != null) {
+            updatePointerView();
+        }
+    }
+
+    void updateFontSize() {
+        final float fontSize = mContext.getResources()
+                .getDimensionPixelSize(com.android.internal.R.dimen.text_size_body_2_material);
+        if (mSettingsIcon != null) {
+            mSettingsIcon.setTextSize(TypedValue.COMPLEX_UNIT_PX, fontSize);
+        }
+        if (mOverflowView != null) {
+            mOverflowView.updateFontSize();
+        }
     }
 
     void applyThemeAttrs() {
