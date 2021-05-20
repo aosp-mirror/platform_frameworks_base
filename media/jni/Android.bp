@@ -51,6 +51,7 @@ cc_library_shared {
     shared_libs: [
         "audioclient-types-aidl-cpp",
         "av-types-aidl-cpp",
+        "framework-permission-aidl-cpp",
         "libandroid_runtime",
         "libaudioclient",
         "libnativehelper",
@@ -85,7 +86,6 @@ cc_library_shared {
         "android.hardware.drm@1.4",
         "android.hidl.memory@1.0",
         "android.hidl.token@1.0-utils",
-        "media_permission-aidl-cpp",
     ],
 
     header_libs: [

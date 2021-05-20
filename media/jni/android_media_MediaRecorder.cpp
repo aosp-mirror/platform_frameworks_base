@@ -24,7 +24,6 @@
 
 //#define LOG_NDEBUG 0
 #define LOG_TAG "MediaRecorderJNI"
-#include "permission_utils.h"
 #include <utils/Log.h>
 
 #include <gui/Surface.h>
@@ -46,12 +45,12 @@
 
 #include <system/audio.h>
 #include <android_runtime/android_view_Surface.h>
+#include <android/content/AttributionSourceState.h>
+#include <android_os_Parcel.h>
 
 // ----------------------------------------------------------------------------
 
 using namespace android;
-
-using android::media::permission::convertIdentity;
 
 // ----------------------------------------------------------------------------
 
@@ -620,11 +619,14 @@ android_media_MediaRecorder_native_init(JNIEnv *env)
 
 static void
 android_media_MediaRecorder_native_setup(JNIEnv *env, jobject thiz, jobject weak_this,
-                                         jstring packageName, jobject jIdentity)
+                                         jstring packageName, jobject jAttributionSource)
 {
     ALOGV("setup");
 
-    sp<MediaRecorder> mr = new MediaRecorder(convertIdentity(env, jIdentity));
+    Parcel* parcel = parcelForJavaObject(env, jAttributionSource);
+    android::content::AttributionSourceState attributionSource;
+    attributionSource.readFromParcel(parcel);
+    sp<MediaRecorder> mr = new MediaRecorder(attributionSource);
 
     if (mr == NULL) {
         jniThrowException(env, "java/lang/RuntimeException", "Out of memory");
@@ -871,7 +873,7 @@ static const JNINativeMethod gMethods[] = {
     {"native_reset",         "()V",                             (void *)android_media_MediaRecorder_native_reset},
     {"release",              "()V",                             (void *)android_media_MediaRecorder_release},
     {"native_init",          "()V",                             (void *)android_media_MediaRecorder_native_init},
-    {"native_setup",         "(Ljava/lang/Object;Ljava/lang/String;Landroid/media/permission/Identity;)V",
+    {"native_setup",         "(Ljava/lang/Object;Ljava/lang/String;Landroid/os/Parcel;)V",
                                                                 (void *)android_media_MediaRecorder_native_setup},
     {"native_finalize",      "()V",                             (void *)android_media_MediaRecorder_native_finalize},
     {"native_setInputSurface", "(Landroid/view/Surface;)V", (void *)android_media_MediaRecorder_setInputSurface },
