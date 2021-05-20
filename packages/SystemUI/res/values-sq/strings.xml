@@ -136,8 +136,7 @@
     <string name="accessibility_camera_button" msgid="2938898391716647247">"Kamera"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"Telefoni"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Ndihma zanore"</string>
-    <!-- no translation found for accessibility_wallet_button (1458258783460555507) -->
-    <skip />
+    <string name="accessibility_wallet_button" msgid="1458258783460555507">"Wallet"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"Shkyç"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Pajisja është e kyçur"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="5209142744692162598">"Në pritje për gjurmën e gishtit"</string>
@@ -291,11 +290,7 @@
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"Qasja në zona publike interneti është e çaktivizuar."</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"Zona e qasjes publike për internet është e aktivizuar."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"Transmetimi i ekranit ndaloi."</string>
-    <!-- no translation found for accessibility_quick_settings_work_mode_off (9106217884005620744) -->
-    <skip />
-    <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"Modaliteti i punës është i aktivizuar."</string>
-    <!-- no translation found for accessibility_quick_settings_work_mode_changed_off (6422896967647049692) -->
-    <skip />
+    <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6422896967647049692">"Modaliteti i punës u vendos në pauzë."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"Modaliteti i punës është i aktivizuar."</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"Kursyesi i të dhënave është çaktivizuar."</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"Kursyesi i të dhënave është aktivizuar."</string>
@@ -413,8 +408,7 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="6798849610647988987">"Të përdorura: <xliff:g id="DATA_USED">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"Kufiri: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"Paralajmërim për kufirin prej <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
-    <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"Profili i punës"</string>
-    <!-- no translation found for quick_settings_work_mode_paused (4841109346916998613) -->
+    <!-- no translation found for quick_settings_work_mode_label (6440531507319809121) -->
     <skip />
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Drita e natës"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Në perëndim të diellit"</string>
@@ -674,12 +668,10 @@
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Shfaqi të gjitha"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Shkyçe për të paguar"</string>
-    <!-- no translation found for wallet_secondary_label_no_card (1282609666895946317) -->
-    <skip />
+    <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"Nuk është konfiguruar"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Shkyçe për ta përdorur"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Pati një problem me marrjen e kartave të tua. Provo përsëri më vonë"</string>
-    <!-- no translation found for wallet_lockscreen_settings_label (3539105300870383570) -->
-    <skip />
+    <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Cilësimet e ekranit të kyçjes"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Profili i punës"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Modaliteti i aeroplanit"</string>
     <string name="add_tile" msgid="6239678623873086686">"Shto një pllakëz"</string>
@@ -869,8 +861,7 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"Aktiv"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"Joaktiv"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"Nuk ofrohet"</string>
-    <!-- no translation found for tile_disabled (373212051546573069) -->
-    <skip />
+    <string name="tile_disabled" msgid="373212051546573069">"Joaktiv"</string>
     <string name="nav_bar" msgid="4642708685386136807">"Shiriti i navigimit"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"Struktura"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"Lloji i butonit shtesë majtas"</string>
@@ -1050,10 +1041,8 @@
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Zhvendose te skaji dhe fshihe"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Zhvendose jashtë skajit dhe shfaqe"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"aktivizo/çaktivizo"</string>
-    <string name="quick_controls_title" msgid="6839108006171302273">"Kontrollet e pajisjes"</string>
-    <string name="quick_controls_subtitle" msgid="1667408093326318053">"Shto kontrolle për pajisjet e tua të lidhura"</string>
-    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Konfiguro kontrollet e pajisjes"</string>
-    <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Mbaj shtypur butonin e energjisë për të pasur qasje te kontrollet e tua"</string>
+    <!-- no translation found for quick_controls_title (7095074621086860062) -->
+    <skip />
     <string name="controls_providers_title" msgid="6879775889857085056">"Zgjidh aplikacionin për të shtuar kontrollet"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="other">U shtuan <xliff:g id="NUMBER_1">%s</xliff:g> kontrolle.</item>
@@ -1067,7 +1056,8 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"ta heqësh nga të preferuarat"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Zhvendose te pozicioni <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Kontrollet"</string>
-    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Zgjidh kontrollet për të pasur qasje nga menyja e energjisë"</string>
+    <!-- no translation found for controls_favorite_subtitle (6481675111056961083) -->
+    <skip />
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Mbaje të shtypur dhe zvarrit për të risistemuar kontrollet"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Të gjitha kontrollet u hoqën"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Ndryshimet nuk u ruajtën"</string>
@@ -1106,7 +1096,8 @@
     <string name="controls_error_generic" msgid="352500456918362905">"Statusi nuk mund të ngarkohet"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Gabim, provo sërish"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"Në vazhdim"</string>
-    <string name="controls_added_tooltip" msgid="4842812921719153085">"Mbaj shtypur butonin e energjisë për të parë kontrollet e reja"</string>
+    <!-- no translation found for controls_added_tooltip (5866098408470111984) -->
+    <skip />
     <string name="controls_menu_add" msgid="4447246119229920050">"Shto kontrollet"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Modifiko kontrollet"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Shto daljet"</string>
@@ -1125,9 +1116,16 @@
     <string name="priority_conversations" msgid="3967482288896653039">"Bisedat me përparësi"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Bisedat e fundit"</string>
     <string name="okay" msgid="6490552955618608554">"Në rregull"</string>
-    <string name="timestamp" msgid="6577851592534538533">"<xliff:g id="DURATION">%1$s</xliff:g> më parë"</string>
-    <string name="less_than_timestamp" msgid="6598972791137724517">"Më pak se <xliff:g id="DURATION">%1$s</xliff:g> më parë"</string>
-    <string name="over_timestamp" msgid="4765793502859358634">"Mbi <xliff:g id="DURATION">%1$s</xliff:g> më parë"</string>
+    <!-- no translation found for days_timestamp (5821854736213214331) -->
+    <skip />
+    <!-- no translation found for one_week_timestamp (4925600765473875590) -->
+    <skip />
+    <!-- no translation found for two_weeks_timestamp (9111801081871962155) -->
+    <skip />
+    <!-- no translation found for over_one_week_timestamp (3770560704420807142) -->
+    <skip />
+    <!-- no translation found for over_two_weeks_timestamp (6300507859007874050) -->
+    <skip />
     <string name="birthday_status" msgid="2596961629465396761">"Ditëlindja"</string>
     <string name="birthday_status_content_description" msgid="682836371128282925">"<xliff:g id="NAME">%1$s</xliff:g> ka ditëlindjen"</string>
     <string name="upcoming_birthday_status" msgid="2005452239256870351">"Ditëlindje së shpejti"</string>
@@ -1158,8 +1156,6 @@
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"për ta vërtetuar"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"për të hyrë në pajisje"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Përdor gjurmën e gishtit për ta hapur"</string>
-    <!-- no translation found for accessibility_fingerprint_bouncer (7189102492498735519) -->
-    <skip />
-    <!-- no translation found for ongoing_phone_call_content_description (5332334388483099947) -->
-    <skip />
+    <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Kërkohet vërtetimi. Prek sensorin e gjurmës së gishtit për t\'u vërtetuar."</string>
+    <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Telefonatë në vazhdim"</string>
 </resources>
