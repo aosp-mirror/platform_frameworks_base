@@ -444,6 +444,7 @@ applications that come with the platform
         <permission name="android.permission.MANAGE_DEBUGGING" />
         <!-- Permissions required for CTS test - TimeManagerTest -->
         <permission name="android.permission.MANAGE_TIME_AND_ZONE_DETECTION" />
+        <permission name="android.permission.SUGGEST_EXTERNAL_TIME" />
         <!-- Permissions required for CTS test - CtsHdmiCecHostTestCases -->
         <permission name="android.permission.HDMI_CEC"/>
         <!-- Permission required for CTS test - MediaPlayerTest -->
