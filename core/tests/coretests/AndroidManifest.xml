@@ -156,6 +156,9 @@
     <!-- Allow use of PendingIntent.getIntent() -->
     <uses-permission android:name="android.permission.GET_INTENT_SENDER_INTENT" />
 
+    <!-- ChooserActivityTest permissions-->
+    <uses-permission android:name="android.permission.SET_CLIP_SOURCE" />
+
     <application android:theme="@style/Theme" android:supportsRtl="true">
         <uses-library android:name="android.test.runner" />
         <uses-library android:name="org.apache.http.legacy" android:required="false" />

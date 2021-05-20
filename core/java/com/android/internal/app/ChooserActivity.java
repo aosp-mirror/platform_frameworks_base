@@ -1093,6 +1093,7 @@ public class ChooserActivity extends ResolverActivity implements
                     "",
                     -1);
 
+            setResult(RESULT_OK);
             finish();
         }
     }
