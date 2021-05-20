@@ -14735,7 +14735,7 @@ package android.webkit {
     method public String getDataDirectorySuffix();
     method public String getErrorString(android.content.Context, int);
     method public int getPackageId(android.content.res.Resources, String);
-    method @NonNull public long[] getTimestamps();
+    method @NonNull public android.webkit.WebViewFactory.StartupTimestamps getStartupTimestamps();
     method @Deprecated public void invokeDrawGlFunctor(android.view.View, long, boolean);
     method public boolean isMultiProcessEnabled();
     method public boolean isTraceTagEnabled();
@@ -14751,12 +14751,6 @@ package android.webkit {
     method public static android.content.pm.PackageInfo getLoadedPackageInfo();
     method public static int loadWebViewNativeLibraryFromPackage(String, ClassLoader);
     method public static void prepareWebViewInZygote();
-    field public static final int ADD_ASSETS_END = 4; // 0x4
-    field public static final int ADD_ASSETS_START = 3; // 0x3
-    field public static final int CREATE_CONTEXT_END = 2; // 0x2
-    field public static final int CREATE_CONTEXT_START = 1; // 0x1
-    field public static final int GET_CLASS_LOADER_END = 6; // 0x6
-    field public static final int GET_CLASS_LOADER_START = 5; // 0x5
     field public static final int LIBLOAD_ADDRESS_SPACE_NOT_RESERVED = 2; // 0x2
     field public static final int LIBLOAD_FAILED_JNI_CALL = 7; // 0x7
     field public static final int LIBLOAD_FAILED_LISTING_WEBVIEW_PACKAGES = 4; // 0x4
@@ -14767,11 +14761,20 @@ package android.webkit {
     field public static final int LIBLOAD_FAILED_WAITING_FOR_WEBVIEW_REASON_UNKNOWN = 8; // 0x8
     field public static final int LIBLOAD_SUCCESS = 0; // 0x0
     field public static final int LIBLOAD_WRONG_PACKAGE_NAME = 1; // 0x1
-    field public static final int NATIVE_LOAD_END = 8; // 0x8
-    field public static final int NATIVE_LOAD_START = 7; // 0x7
-    field public static final int PROVIDER_CLASS_FOR_NAME_END = 10; // 0xa
-    field public static final int PROVIDER_CLASS_FOR_NAME_START = 9; // 0x9
-    field public static final int WEBVIEW_LOAD_START = 0; // 0x0
+  }
+
+  public static class WebViewFactory.StartupTimestamps {
+    method public long getAddAssetsEnd();
+    method public long getAddAssetsStart();
+    method public long getCreateContextEnd();
+    method public long getCreateContextStart();
+    method public long getGetClassLoaderEnd();
+    method public long getGetClassLoaderStart();
+    method public long getNativeLoadEnd();
+    method public long getNativeLoadStart();
+    method public long getProviderClassForNameEnd();
+    method public long getProviderClassForNameStart();
+    method public long getWebViewLoadStart();
   }
 
   public interface WebViewFactoryProvider {
