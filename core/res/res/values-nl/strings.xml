@@ -2095,7 +2095,8 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Uitzetten"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Meer informatie"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"In Android 12 hebben verbeterde meldingen aanpasbare Android-meldingen vervangen. Deze functie laat voorgestelde acties en antwoorden zien en ordent je meldingen.\n\nVerbeterde meldingen hebben toegang tot meldingscontent, waaronder persoonlijke informatie zoals contactnamen en berichten. Deze functie kan ook meldingen sluiten of erop reageren, zoals telefoongesprekken aannemen en Niet storen beheren."</string>
+    <!-- no translation found for nas_upgrade_notification_learn_more_content (3735480566983530650) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Informatiemelding voor routinemodus"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"De batterij raakt mogelijk leeg voordat deze normaal gesproken wordt opgeladen"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Batterijbesparing is geactiveerd om de batterijduur te verlengen"</string>
