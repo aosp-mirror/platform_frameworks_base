@@ -7725,6 +7725,7 @@ public class Notification implements Parcelable
         public RemoteViews makeBigContentView() {
             StandardTemplateParams p = mBuilder.mParams.reset()
                     .viewType(StandardTemplateParams.VIEW_TYPE_BIG)
+                    .allowTextWithProgress(true)
                     .textViewId(R.id.big_text)
                     .fillTextsFrom(mBuilder);
 
