@@ -603,7 +603,7 @@
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Osobni podaci mogu biti dostupni (na primjer kontakti i sadržaj e-pošte)."</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Prikvačena aplikacija može otvarati druge aplikacije."</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"Da biste otkvačili ovu aplikaciju, dodirnite gumbe Natrag i Pregled i zadržite pritisak"</string>
-    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Da biste otkvačili ovu aplikaciju, dodirnite gumb Natrag i gumb početnog zaslona i zadržite pritisak"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Da biste otkvačili ovu aplikaciju, dodirnite gumb Natrag i gumb Početna i zadržite pritisak"</string>
     <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Da biste otkvačili ovu aplikaciju, prijeđite prstom prema gore i zadržite pritisak"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"Shvaćam"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Ne, hvala"</string>
