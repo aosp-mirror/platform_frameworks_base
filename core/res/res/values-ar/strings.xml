@@ -350,7 +350,7 @@
     <string name="capability_title_canPerformGestures" msgid="9106545062106728987">"تنفيذ إيماءات"</string>
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"يمكن النقر والتمرير بسرعة والتصغير أو التكبير بإصبعين وتنفيذ إيماءات أخرى."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"إيماءات بصمات الإصبع"</string>
-    <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"يمكن أن تلتقط الإيماءات التي تم تنفيذها على جهاز استشعار بصمات الإصبع في الجهاز."</string>
+    <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"يمكن أن تلتقط الإيماءات التي تم تنفيذها على جهاز استشعار بصمة الإصبع في الجهاز."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"أخذ لقطة شاشة"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"يمكن أخذ لقطة شاشة."</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"إيقاف شريط الحالة أو تعديله"</string>
