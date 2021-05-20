@@ -64,6 +64,7 @@ import java.util.concurrent.Executor;
 import javax.inject.Inject;
 
 import dagger.Lazy;
+import kotlin.Unit;
 
 /**
  * A view controller used for Media Playback.
@@ -133,6 +134,13 @@ public class MediaControlPanel {
         mMediaOutputDialogFactory = mediaOutputDialogFactory;
         mMediaCarouselController = mediaCarouselController;
         loadDimens();
+
+        mSeekBarViewModel.setLogSmartspaceClick(() -> {
+            logSmartspaceCardReported(
+                    760, // SMARTSPACE_CARD_CLICK
+                    /* isRecommendationCard */ false);
+            return Unit.INSTANCE;
+        });
     }
 
     public void onDestroy() {
