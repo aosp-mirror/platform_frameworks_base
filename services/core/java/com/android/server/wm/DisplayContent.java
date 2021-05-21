@@ -724,6 +724,16 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             return false;
         }
 
+        // When switching the app task, we keep the IME window visibility for better
+        // transitioning experiences.
+        // However, in case IME created a child window without dismissing during the task
+        // switching to keep the window focus because IME window has higher window hierarchy,
+        // we don't give it focus if the next IME layering target doesn't request IME visible.
+        if (w.mIsImWindow && w.isChildWindow() && (mImeLayeringTarget == null
+                || !mImeLayeringTarget.getRequestedVisibility(ITYPE_IME))) {
+            return false;
+        }
+
         final ActivityRecord activity = w.mActivityRecord;
 
         if (focusedApp == null) {
@@ -4603,13 +4613,14 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             return super.forAllWindows(callback, traverseTopToBottom);
         }
 
-        private boolean skipImeWindowsDuringTraversal(DisplayContent dc) {
+        private static boolean skipImeWindowsDuringTraversal(DisplayContent dc) {
             // We skip IME windows so they're processed just above their target, except
             // in split-screen mode where we process the IME containers above the docked divider.
             // Note that this method check should align with {@link
             // WindowState#applyImeWindowsIfNeeded} in case of any state mismatch.
-            return dc.getImeTarget(IME_TARGET_LAYERING) != null
-                    && !dc.getDefaultTaskDisplayArea().isSplitScreenModeActivated();
+            return dc.mImeLayeringTarget != null
+                    && (!dc.getDefaultTaskDisplayArea().isSplitScreenModeActivated()
+                             || dc.mImeLayeringTarget.getTask() == null);
         }
 
         /** Like {@link #forAllWindows}, but ignores {@link #skipImeWindowsDuringTraversal} */

@@ -187,6 +187,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
     private final Executor mMainExecutor;
 
     private final Rect mPipExcludedBounds = new Rect();
+    private final Rect mNavBarOverlayExcludedBounds = new Rect();
     private final Region mExcludeRegion = new Region();
     private final Region mUnrestrictedExcludeRegion = new Region();
 
@@ -364,6 +365,10 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
         final float backGestureSlop = DeviceConfig.getFloat(DeviceConfig.NAMESPACE_SYSTEMUI,
                         SystemUiDeviceConfigFlags.BACK_GESTURE_SLOP_MULTIPLIER, 0.75f);
         mTouchSlop = mViewConfiguration.getScaledTouchSlop() * backGestureSlop;
+    }
+
+    public void updateNavigationBarOverlayExcludeRegion(Rect exclude) {
+        mNavBarOverlayExcludedBounds.set(exclude);
     }
 
     private void onNavigationSettingsChanged() {
@@ -629,8 +634,9 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
             return false;
         }
 
-        // If the point is inside the PiP excluded bounds, then drop it.
-        if (mPipExcludedBounds.contains(x, y)) {
+        // If the point is inside the PiP or Nav bar overlay excluded bounds, then ignore the back
+        // gesture
+        if (mPipExcludedBounds.contains(x, y) || mNavBarOverlayExcludedBounds.contains(x, y)) {
             return false;
         }
 
@@ -893,6 +899,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
         pw.println("  mExcludeRegion=" + mExcludeRegion);
         pw.println("  mUnrestrictedExcludeRegion=" + mUnrestrictedExcludeRegion);
         pw.println("  mPipExcludedBounds=" + mPipExcludedBounds);
+        pw.println("  mNavBarOverlayExcludedBounds=" + mNavBarOverlayExcludedBounds);
         pw.println("  mEdgeWidthLeft=" + mEdgeWidthLeft);
         pw.println("  mEdgeWidthRight=" + mEdgeWidthRight);
         pw.println("  mLeftInset=" + mLeftInset);

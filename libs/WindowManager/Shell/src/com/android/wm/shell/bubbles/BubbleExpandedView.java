@@ -111,6 +111,7 @@ public class BubbleExpandedView extends LinearLayout {
     private ShapeDrawable mRightPointer;
     private int mExpandedViewPadding;
     private float mCornerRadius = 0f;
+    private int mBackgroundColorFloating;
 
     @Nullable private Bubble mBubble;
     private PendingIntent mPendingIntent;
@@ -384,7 +385,11 @@ public class BubbleExpandedView extends LinearLayout {
                 android.R.attr.dialogCornerRadius,
                 android.R.attr.colorBackgroundFloating});
         mCornerRadius = ta.getDimensionPixelSize(0, 0);
-        mExpandedViewContainer.setBackgroundColor(ta.getColor(1, Color.WHITE));
+        final int mode =
+                getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        final boolean isNightMode = (mode == Configuration.UI_MODE_NIGHT_YES);
+        mBackgroundColorFloating = ta.getColor(1, isNightMode ? Color.BLACK : Color.WHITE);
+        mExpandedViewContainer.setBackgroundColor(mBackgroundColorFloating);
         ta.recycle();
 
         if (mTaskView != null && ScreenDecorationsUtils.supportsRoundedCornersOnWindows(
@@ -395,16 +400,6 @@ public class BubbleExpandedView extends LinearLayout {
     }
 
     private void updatePointerView() {
-        final int mode =
-                getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
-        switch (mode) {
-            case Configuration.UI_MODE_NIGHT_NO:
-                mCurrentPointer.setTint(getResources().getColor(R.color.bubbles_light));
-                break;
-            case Configuration.UI_MODE_NIGHT_YES:
-                mCurrentPointer.setTint(getResources().getColor(R.color.bubbles_dark));
-                break;
-        }
         LayoutParams lp = (LayoutParams) mPointerView.getLayoutParams();
         if (mCurrentPointer == mLeftPointer || mCurrentPointer == mRightPointer) {
             lp.width = mPointerHeight;
@@ -414,6 +409,7 @@ public class BubbleExpandedView extends LinearLayout {
             lp.height = mPointerHeight;
         }
         mPointerView.setLayoutParams(lp);
+        mCurrentPointer.setTint(mBackgroundColorFloating);
         mPointerView.setBackground(mCurrentPointer);
     }
 
