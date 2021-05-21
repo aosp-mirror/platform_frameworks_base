@@ -1123,6 +1123,14 @@ class ActivityStarter {
 
             aInfo = mSupervisor.resolveActivity(intent, rInfo, startFlags, null /*profilerInfo*/);
         }
+        // TODO (b/187680964) Correcting the caller/pid/uid when start activity from shortcut
+        // Pending intent launched from systemui also depends on caller app
+        if (callerApp == null && realCallingPid > 0) {
+            final WindowProcessController wpc = mService.mProcessMap.getProcess(realCallingPid);
+            if (wpc != null) {
+                callerApp = wpc;
+            }
+        }
         final ActivityRecord r = new ActivityRecord.Builder(mService)
                 .setCaller(callerApp)
                 .setLaunchedFromPid(callingPid)
@@ -1752,17 +1760,9 @@ class ActivityStarter {
         mRootWindowContainer.startPowerModeLaunchIfNeeded(
                 false /* forceSend */, mStartActivity);
 
-        final boolean startFromSamePackage;
-        if (sourceRecord != null && sourceRecord.mActivityComponent != null) {
-            startFromSamePackage = mStartActivity.mActivityComponent
-                    .getPackageName().equals(sourceRecord.mActivityComponent.getPackageName());
-        } else {
-            startFromSamePackage = false;
-        }
-
         mTargetRootTask.startActivityLocked(mStartActivity,
                 topRootTask != null ? topRootTask.getTopNonFinishingActivity() : null, newTask,
-                mKeepCurTransition, mOptions, startFromSamePackage);
+                mKeepCurTransition, mOptions, sourceRecord);
         if (mDoResume) {
             final ActivityRecord topTaskActivity =
                     mStartActivity.getTask().topRunningActivityLocked();
