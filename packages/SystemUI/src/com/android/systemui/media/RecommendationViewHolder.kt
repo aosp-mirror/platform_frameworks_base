@@ -40,13 +40,6 @@ class RecommendationViewHolder private constructor(itemView: View) {
         itemView.requireViewById(R.id.media_cover4),
         itemView.requireViewById(R.id.media_cover5),
         itemView.requireViewById(R.id.media_cover6))
-    val mediaLogoItems = listOf<ImageView>(
-        itemView.requireViewById(R.id.media_logo1),
-        itemView.requireViewById(R.id.media_logo2),
-        itemView.requireViewById(R.id.media_logo3),
-        itemView.requireViewById(R.id.media_logo4),
-        itemView.requireViewById(R.id.media_logo5),
-        itemView.requireViewById(R.id.media_logo6))
     val mediaCoverItemsResIds = listOf<@IntegerRes Int>(
         R.id.media_cover1,
         R.id.media_cover2,
@@ -54,13 +47,6 @@ class RecommendationViewHolder private constructor(itemView: View) {
         R.id.media_cover4,
         R.id.media_cover5,
         R.id.media_cover6)
-    val mediaLogoItemsResIds = listOf<@IntegerRes Int>(
-        R.id.media_logo1,
-        R.id.media_logo2,
-        R.id.media_logo3,
-        R.id.media_logo4,
-        R.id.media_logo5,
-        R.id.media_logo6)
 
     // Settings/Guts screen
     val cancel = itemView.requireViewById<View>(R.id.cancel)
@@ -71,7 +57,6 @@ class RecommendationViewHolder private constructor(itemView: View) {
     init {
         (recommendations.background as IlluminationDrawable).let { background ->
             mediaCoverItems.forEach { background.registerLightSource(it) }
-            mediaLogoItems.forEach { background.registerLightSource(it) }
             background.registerLightSource(cancel)
             background.registerLightSource(dismiss)
             background.registerLightSource(dismissLabel)
@@ -109,13 +94,7 @@ class RecommendationViewHolder private constructor(itemView: View) {
             R.id.media_cover3,
             R.id.media_cover4,
             R.id.media_cover5,
-            R.id.media_cover6,
-            R.id.media_logo1,
-            R.id.media_logo2,
-            R.id.media_logo3,
-            R.id.media_logo4,
-            R.id.media_logo5,
-            R.id.media_logo6
+            R.id.media_cover6
         )
 
         // Res Ids for the components on the guts panel.
