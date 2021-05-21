@@ -389,12 +389,24 @@ public final class AppSearchSchema {
         public @interface TokenizerType {}
 
         /**
-         * It is only valid for tokenizer_type to be 'NONE' if {@link #getIndexingType} is {@link
+         * This value indicates that no tokens should be extracted from this property.
+         *
+         * <p>It is only valid for tokenizer_type to be 'NONE' if {@link #getIndexingType} is {@link
          * #INDEXING_TYPE_NONE}.
          */
         public static final int TOKENIZER_TYPE_NONE = 0;
 
-        /** Tokenization for plain text. */
+        /**
+         * Tokenization for plain text. This value indicates that tokens should be extracted from
+         * this property based on word breaks. Segments of whitespace and punctuation are not
+         * considered tokens.
+         *
+         * <p>Ex. A property with "foo bar. baz." will produce tokens for "foo", "bar" and "baz".
+         * The segments " " and "." will not be considered tokens.
+         *
+         * <p>It is only valid for tokenizer_type to be 'PLAIN' if {@link #getIndexingType} is
+         * {@link #INDEXING_TYPE_EXACT_TERMS} or {@link #INDEXING_TYPE_PREFIXES}.
+         */
         public static final int TOKENIZER_TYPE_PLAIN = 1;
 
         StringPropertyConfig(@NonNull Bundle bundle) {
@@ -474,6 +486,17 @@ public final class AppSearchSchema {
             /** Constructs a new {@link StringPropertyConfig} from the contents of this builder. */
             @NonNull
             public StringPropertyConfig build() {
+                if (mTokenizerType == TOKENIZER_TYPE_NONE) {
+                    Preconditions.checkState(
+                            mIndexingType == INDEXING_TYPE_NONE,
+                            "Cannot set "
+                                    + "TOKENIZER_TYPE_NONE with an indexing type other than "
+                                    + "INDEXING_TYPE_NONE.");
+                } else {
+                    Preconditions.checkState(
+                            mIndexingType != INDEXING_TYPE_NONE,
+                            "Cannot set " + "TOKENIZER_TYPE_PLAIN  with INDEXING_TYPE_NONE.");
+                }
                 Bundle bundle = new Bundle();
                 bundle.putString(NAME_FIELD, mPropertyName);
                 bundle.putInt(DATA_TYPE_FIELD, DATA_TYPE_STRING);
