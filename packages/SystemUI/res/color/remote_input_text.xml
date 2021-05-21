@@ -16,6 +16,6 @@
   -->
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_enabled="true" android:color="?android:attr/textColorPrimary" />
-    <item android:color="?android:attr/textColorPrimary" android:alpha=".6" />
+    <item android:state_enabled="false" android:color="?android:attr/textColorPrimary" android:alpha=".6" />
+    <item android:color="?android:attr/textColorPrimary" />
 </selector>
