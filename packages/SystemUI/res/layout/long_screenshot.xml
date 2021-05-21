@@ -113,6 +113,7 @@
         style="@android:style/Widget.DeviceDefault.Button.Colored"
         android:backgroundTint="?androidprv:attr/colorAccentSecondary"
         android:src="@drawable/ic_screenshot_edit"
+        android:contentDescription="@string/screenshot_edit_label"
         android:tint="?androidprv:attr/textColorSecondary"
         android:padding="16dp"
         android:scaleType="fitCenter"
