@@ -19,7 +19,7 @@
 #include "AnimatedImageThread.h"
 #endif
 
-#include "utils/TraceUtils.h"
+#include <gui/TraceUtils.h>
 #include "pipeline/skia/SkiaUtils.h"
 
 #include <SkPicture.h>

@@ -24,6 +24,7 @@
 #include <Properties.h>
 #include <RootRenderNode.h>
 #include <dlfcn.h>
+#include <gui/TraceUtils.h>
 #include <inttypes.h>
 #include <media/NdkImage.h>
 #include <media/NdkImageReader.h>
@@ -39,7 +40,6 @@
 #include <utils/RefBase.h>
 #include <utils/StrongPointer.h>
 #include <utils/Timers.h>
-#include <utils/TraceUtils.h>
 
 #include <pthread.h>
 

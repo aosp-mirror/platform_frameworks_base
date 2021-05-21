@@ -21,9 +21,9 @@
 #include <SkAndroidFrameworkUtils.h>
 #include <SkImage.h>
 #include <SkM44.h>
+#include <gui/TraceUtils.h>
 #include <utils/Color.h>
 #include <utils/Trace.h>
-#include <utils/TraceUtils.h>
 #include <vk/GrVkTypes.h>
 #include <thread>
 #include "renderthread/RenderThread.h"

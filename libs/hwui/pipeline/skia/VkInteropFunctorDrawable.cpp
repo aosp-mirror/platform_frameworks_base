@@ -21,11 +21,11 @@
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 #include <GLES3/gl3.h>
+#include <gui/TraceUtils.h>
 #include <private/hwui/DrawGlInfo.h>
 #include <utils/Color.h>
 #include <utils/GLUtils.h>
 #include <utils/Trace.h>
-#include <utils/TraceUtils.h>
 
 #include <thread>
 

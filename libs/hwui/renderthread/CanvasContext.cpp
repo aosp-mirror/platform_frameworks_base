@@ -26,6 +26,7 @@
 #include <cstdlib>
 #include <functional>
 
+#include <gui/TraceUtils.h>
 #include "../Properties.h"
 #include "AnimationContext.h"
 #include "Frame.h"
@@ -39,7 +40,6 @@
 #include "thread/CommonPool.h"
 #include "utils/GLUtils.h"
 #include "utils/TimeUtils.h"
-#include "utils/TraceUtils.h"
 
 #define TRIM_MEMORY_COMPLETE 80
 #define TRIM_MEMORY_UI_HIDDEN 20
