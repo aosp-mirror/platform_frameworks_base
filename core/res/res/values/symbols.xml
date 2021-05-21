@@ -4268,6 +4268,9 @@
   <java-symbol type="attr" name="colorAccentPrimary" />
   <java-symbol type="attr" name="colorAccentSecondary" />
   <java-symbol type="attr" name="colorAccentTertiary" />
+  <java-symbol type="attr" name="colorAccentPrimaryVariant" />
+  <java-symbol type="attr" name="colorAccentSecondaryVariant" />
+  <java-symbol type="attr" name="colorAccentTertiaryVariant" />
   <java-symbol type="attr" name="colorSurface" format="color" />
   <java-symbol type="attr" name="colorSurfaceHighlight" format="color" />
   <java-symbol type="attr" name="colorSurfaceVariant" format="color" />
