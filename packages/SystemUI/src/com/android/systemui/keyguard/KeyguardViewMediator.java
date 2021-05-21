@@ -20,6 +20,7 @@ import static android.provider.Settings.System.SCREEN_OFF_TIMEOUT;
 import static android.view.WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG_WITH_WALLPAPER;
 
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.NAV_BAR_HANDLE_SHOW_OVER_LOCKSCREEN;
+import static com.android.internal.jank.InteractionJankMonitor.CUJ_LOCKSCREEN_UNLOCK_ANIMATION;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_USER_REQUEST;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT;
@@ -82,6 +83,8 @@ import android.view.WindowManagerPolicyConstants;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
+import com.android.internal.jank.InteractionJankMonitor;
+import com.android.internal.jank.InteractionJankMonitor.Configuration;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IKeyguardDrawnCallback;
 import com.android.internal.policy.IKeyguardExitCallback;
@@ -2154,6 +2157,9 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
                 playSounds(false);
             }
 
+            LatencyTracker.getInstance(mContext)
+                    .onActionEnd(LatencyTracker.ACTION_LOCKSCREEN_UNLOCK);
+
             IRemoteAnimationRunner runner = mKeyguardExitAnimationRunner;
             mKeyguardExitAnimationRunner = null;
 
@@ -2168,6 +2174,8 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
                                 onKeyguardExitFinished();
                                 mKeyguardViewControllerLazy.get().hide(0 /* startTime */,
                                         0 /* fadeoutDuration */);
+                                InteractionJankMonitor.getInstance()
+                                        .end(CUJ_LOCKSCREEN_UNLOCK_ANIMATION);
                             }
 
                             @Override
@@ -2176,6 +2184,8 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
                             }
                         };
                 try {
+                    InteractionJankMonitor.getInstance().begin(
+                            createInteractionJankMonitorConf("RunRemoteAnimation"));
                     runner.onAnimationStart(WindowManager.TRANSIT_KEYGUARD_GOING_AWAY, apps,
                             wallpapers, nonApps, callback);
                 } catch (RemoteException e) {
@@ -2190,10 +2200,16 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
                 mSurfaceBehindRemoteAnimationFinishedCallback = finishedCallback;
                 mSurfaceBehindRemoteAnimationRunning = true;
 
+                InteractionJankMonitor.getInstance().begin(
+                        createInteractionJankMonitorConf("DismissPanel"));
+
                 // Pass the surface and metadata to the unlock animation controller.
                 mKeyguardUnlockAnimationControllerLazy.get().notifyStartKeyguardExitAnimation(
                         apps[0], startTime, mSurfaceBehindRemoteAnimationRequested);
             } else {
+                InteractionJankMonitor.getInstance().begin(
+                        createInteractionJankMonitorConf("RemoteAnimationDisabled"));
+
                 mKeyguardViewControllerLazy.get().hide(startTime, fadeoutDuration);
 
                 // TODO(bc-animation): When remote animation is enabled for keyguard exit animation,
@@ -2201,6 +2217,7 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
                 // supported, so it's always null.
                 mContext.getMainExecutor().execute(() -> {
                     if (finishedCallback == null) {
+                        InteractionJankMonitor.getInstance().end(CUJ_LOCKSCREEN_UNLOCK_ANIMATION);
                         return;
                     }
 
@@ -2227,6 +2244,9 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
                                 finishedCallback.onAnimationFinished();
                             } catch (RemoteException e) {
                                 Slog.e(TAG, "RemoteException");
+                            } finally {
+                                InteractionJankMonitor.getInstance()
+                                        .end(CUJ_LOCKSCREEN_UNLOCK_ANIMATION);
                             }
                         }
 
@@ -2236,6 +2256,9 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
                                 finishedCallback.onAnimationFinished();
                             } catch (RemoteException e) {
                                 Slog.e(TAG, "RemoteException");
+                            } finally {
+                                InteractionJankMonitor.getInstance()
+                                        .cancel(CUJ_LOCKSCREEN_UNLOCK_ANIMATION);
                             }
                         }
                     });
@@ -2257,6 +2280,12 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
         mHideAnimationRun = false;
         adjustStatusBarLocked();
         sendUserPresentBroadcast();
+    }
+
+    private Configuration.Builder createInteractionJankMonitorConf(String tag) {
+        return new Configuration.Builder(CUJ_LOCKSCREEN_UNLOCK_ANIMATION)
+                .setView(mKeyguardViewControllerLazy.get().getViewRootImpl().getView())
+                .setTag(tag);
     }
 
     /**
@@ -2304,6 +2333,7 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
         finishSurfaceBehindRemoteAnimation();
         mSurfaceBehindRemoteAnimationRequested = false;
         mKeyguardUnlockAnimationControllerLazy.get().notifyFinishedKeyguardExitAnimation();
+        InteractionJankMonitor.getInstance().end(CUJ_LOCKSCREEN_UNLOCK_ANIMATION);
     }
 
     /**

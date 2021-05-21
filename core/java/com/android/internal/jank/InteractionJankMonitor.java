@@ -39,6 +39,7 @@ import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_IN
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_PIN_DISAPPEAR;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_TRANSITION_FROM_AOD;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_TRANSITION_TO_AOD;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_UNLOCK_ANIMATION;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__NOTIFICATION_SHADE_SWIPE;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SETTINGS_PAGE_SCROLL;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_APP_LAUNCH;
@@ -150,6 +151,7 @@ public class InteractionJankMonitor {
     public static final int CUJ_LAUNCHER_ALL_APPS_SCROLL = 26;
     public static final int CUJ_LAUNCHER_APP_LAUNCH_FROM_WIDGET = 27;
     public static final int CUJ_SETTINGS_PAGE_SCROLL = 28;
+    public static final int CUJ_LOCKSCREEN_UNLOCK_ANIMATION = 29;
 
     private static final int NO_STATSD_LOGGING = -1;
 
@@ -187,6 +189,7 @@ public class InteractionJankMonitor {
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_ALL_APPS_SCROLL,
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_APP_LAUNCH_FROM_WIDGET,
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SETTINGS_PAGE_SCROLL,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_UNLOCK_ANIMATION,
     };
 
     private static volatile InteractionJankMonitor sInstance;
@@ -235,6 +238,7 @@ public class InteractionJankMonitor {
             CUJ_LAUNCHER_ALL_APPS_SCROLL,
             CUJ_LAUNCHER_APP_LAUNCH_FROM_WIDGET,
             CUJ_SETTINGS_PAGE_SCROLL,
+            CUJ_LOCKSCREEN_UNLOCK_ANIMATION,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CujType {
@@ -548,29 +552,31 @@ public class InteractionJankMonitor {
             case CUJ_NOTIFICATION_APP_START:
                 return "NOTIFICATION_APP_START";
             case CUJ_LOCKSCREEN_PASSWORD_APPEAR:
-                return "CUJ_LOCKSCREEN_PASSWORD_APPEAR";
+                return "LOCKSCREEN_PASSWORD_APPEAR";
             case CUJ_LOCKSCREEN_PATTERN_APPEAR:
-                return "CUJ_LOCKSCREEN_PATTERN_APPEAR";
+                return "LOCKSCREEN_PATTERN_APPEAR";
             case CUJ_LOCKSCREEN_PIN_APPEAR:
-                return "CUJ_LOCKSCREEN_PIN_APPEAR";
+                return "LOCKSCREEN_PIN_APPEAR";
             case CUJ_LOCKSCREEN_PASSWORD_DISAPPEAR:
-                return "CUJ_LOCKSCREEN_PASSWORD_DISAPPEAR";
+                return "LOCKSCREEN_PASSWORD_DISAPPEAR";
             case CUJ_LOCKSCREEN_PATTERN_DISAPPEAR:
-                return "CUJ_LOCKSCREEN_PATTERN_DISAPPEAR";
+                return "LOCKSCREEN_PATTERN_DISAPPEAR";
             case CUJ_LOCKSCREEN_PIN_DISAPPEAR:
-                return "CUJ_LOCKSCREEN_PIN_DISAPPEAR";
+                return "LOCKSCREEN_PIN_DISAPPEAR";
             case CUJ_LOCKSCREEN_TRANSITION_FROM_AOD:
-                return "CUJ_LOCKSCREEN_TRANSITION_FROM_AOD";
+                return "LOCKSCREEN_TRANSITION_FROM_AOD";
             case CUJ_LOCKSCREEN_TRANSITION_TO_AOD:
-                return "CUJ_LOCKSCREEN_TRANSITION_TO_AOD";
+                return "LOCKSCREEN_TRANSITION_TO_AOD";
             case CUJ_LAUNCHER_OPEN_ALL_APPS :
-                return "CUJ_LAUNCHER_OPEN_ALL_APPS";
+                return "LAUNCHER_OPEN_ALL_APPS";
             case CUJ_LAUNCHER_ALL_APPS_SCROLL:
-                return "CUJ_LAUNCHER_ALL_APPS_SCROLL";
+                return "LAUNCHER_ALL_APPS_SCROLL";
             case CUJ_LAUNCHER_APP_LAUNCH_FROM_WIDGET:
                 return "LAUNCHER_APP_LAUNCH_FROM_WIDGET";
             case CUJ_SETTINGS_PAGE_SCROLL:
                 return "SETTINGS_PAGE_SCROLL";
+            case CUJ_LOCKSCREEN_UNLOCK_ANIMATION:
+                return "LOCKSCREEN_UNLOCK_ANIMATION";
         }
         return "UNKNOWN";
     }
