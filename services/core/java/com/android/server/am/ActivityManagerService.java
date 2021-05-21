@@ -3287,13 +3287,19 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         final int max = SystemProperties.getInt("tombstoned.max_anr_count", 64);
         final long now = System.currentTimeMillis();
-        Arrays.sort(files, Comparator.comparingLong(File::lastModified).reversed());
-        for (int i = 0; i < files.length; ++i) {
-            if (i > max || (now - files[i].lastModified()) > DAY_IN_MILLIS) {
-                if (!files[i].delete()) {
-                    Slog.w(TAG, "Unable to prune stale trace file: " + files[i]);
+        try {
+            Arrays.sort(files, Comparator.comparingLong(File::lastModified).reversed());
+            for (int i = 0; i < files.length; ++i) {
+                if (i > max || (now - files[i].lastModified()) > DAY_IN_MILLIS) {
+                    if (!files[i].delete()) {
+                        Slog.w(TAG, "Unable to prune stale trace file: " + files[i]);
+                    }
                 }
             }
+        } catch (IllegalArgumentException e) {
+            // The modification times changed while we were sorting. Bail...
+            // https://issuetracker.google.com/169836837
+            Slog.w(TAG, "tombstone modification times changed while sorting; not pruning", e);
         }
     }
 
