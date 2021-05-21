@@ -5407,17 +5407,17 @@ class Task extends WindowContainer<WindowContainer> {
                     : WINDOWING_MODE_FULLSCREEN;
         }
         if (currentMode == WINDOWING_MODE_PINNED) {
+            mRootWindowContainer.notifyActivityPipModeChanged(null);
+        }
+        if (likelyResolvedMode == WINDOWING_MODE_PINNED) {
             // In the case that we've disabled affecting the SysUI flags as a part of seamlessly
             // transferring the transform on the leash to the task, reset this state once we've
             // actually entered pip
             setCanAffectSystemUiFlags(true);
-            mRootWindowContainer.notifyActivityPipModeChanged(null);
-        }
-        if (likelyResolvedMode == WINDOWING_MODE_PINNED
-                && taskDisplayArea.getRootPinnedTask() != null) {
-
-            // Can only have 1 pip at a time, so replace an existing pip
-            taskDisplayArea.getRootPinnedTask().dismissPip();
+            if (taskDisplayArea.getRootPinnedTask() != null) {
+                // Can only have 1 pip at a time, so replace an existing pip
+                taskDisplayArea.getRootPinnedTask().dismissPip();
+            }
         }
         if (likelyResolvedMode != WINDOWING_MODE_FULLSCREEN
                 && topActivity != null && !topActivity.noDisplay
