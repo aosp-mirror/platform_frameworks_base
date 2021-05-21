@@ -1497,12 +1497,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 ConnectivitySettingsManager.WIFI_ALWAYS_REQUESTED, false /* defaultValue */);
         final boolean vehicleAlwaysRequested = mResources.get().getBoolean(
                 R.bool.config_vehicleInternalNetworkAlwaysRequested);
-        // TODO (b/183076074): remove legacy fallback after migrating overlays
-        final boolean legacyAlwaysRequested = mContext.getResources().getBoolean(
-                mContext.getResources().getIdentifier(
-                        "config_vehicleInternalNetworkAlwaysRequested", "bool", "android"));
-        handleAlwaysOnNetworkRequest(mDefaultVehicleRequest,
-                vehicleAlwaysRequested || legacyAlwaysRequested);
+        handleAlwaysOnNetworkRequest(mDefaultVehicleRequest, vehicleAlwaysRequested);
     }
 
     private void registerSettingsCallbacks() {
@@ -2218,7 +2213,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     @NonNull
     public List<NetworkStateSnapshot> getAllNetworkStateSnapshots() {
         // This contains IMSI details, so make sure the caller is privileged.
-        PermissionUtils.enforceNetworkStackPermission(mContext);
+        enforceNetworkStackOrSettingsPermission();
 
         final ArrayList<NetworkStateSnapshot> result = new ArrayList<>();
         for (Network network : getAllNetworks()) {
@@ -6822,14 +6817,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         int mark = mResources.get().getInteger(R.integer.config_networkWakeupPacketMark);
         int mask = mResources.get().getInteger(R.integer.config_networkWakeupPacketMask);
-
-        // TODO (b/183076074): remove legacy fallback after migrating overlays
-        final int legacyMark = mContext.getResources().getInteger(mContext.getResources()
-                .getIdentifier("config_networkWakeupPacketMark", "integer", "android"));
-        final int legacyMask = mContext.getResources().getInteger(mContext.getResources()
-                .getIdentifier("config_networkWakeupPacketMask", "integer", "android"));
-        mark = mark == 0 ? legacyMark : mark;
-        mask = mask == 0 ? legacyMask : mask;
 
         // Mask/mark of zero will not detect anything interesting.
         // Don't install rules unless both values are nonzero.

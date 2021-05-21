@@ -18,8 +18,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="prompt" msgid="3183836924226407828">"Միացման հայց"</string>
     <string name="warning" msgid="809658604548412033">"«<xliff:g id="APP">%s</xliff:g>» հավելվածը ցանկանում է VPN կապ հաստատել՝ ցանցային երթևեկը հսկելու համար: Թույլատրեք, միայն եթե վստահում եք աղբյուրին։ Երբ VPN-ն ակտիվ լինի, ձեր էկրանի վերին հատվածում կհայտնվի &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; պատկերը:"</string>
-    <!-- no translation found for warning (5188957997628124947) -->
-    <skip />
+    <string name="warning" product="tv" msgid="5188957997628124947">"<xliff:g id="APP">%s</xliff:g> հավելվածն ուզում է միանալ VPN-ի ցանցին՝ թրաֆիկին հետևելու համար։ Թույլատրեք, միայն եթե վստահում եք աղբյուրին։ &lt;br /&gt; &lt;br /&gt;Երբ VPN-ն ակտիվացված լինի, &lt;img src=vpn_icon /&gt; պատկերակը կհայտնվի ձեր էկրանին։"</string>
     <string name="legacy_title" msgid="192936250066580964">"VPN-ը կապակցված է"</string>
     <string name="session" msgid="6470628549473641030">"Աշխատաշրջան`"</string>
     <string name="duration" msgid="3584782459928719435">"Տևողությունը՝"</string>

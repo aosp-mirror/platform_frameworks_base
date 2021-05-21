@@ -2161,7 +2161,8 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"ОК"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Выключыць"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Даведацца больш"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"У версіі Android 12 Адаптыўныя апавяшчэнні Android заменены Палепшанымі апавяшчэннямі. Гэта функцыя ўпарадкоўвае вашы апавяшчэнні і паказвае прапановы дзеянняў і адказаў.\n\nПалепшаныя апавяшчэнні маюць доступ да змесціва ўсіх апавяшчэнняў, у тым ліку да асабістай інфармацыі – імён кантактаў і паведамленняў. Яшчэ гэта функцыя можа адхіляць апавяшчэнні ці адказваць на іх, напрыклад рэагаваць на тэлефонныя выклікі і кіраваць функцыяй \"Не турбаваць\"."</string>
+    <!-- no translation found for nas_upgrade_notification_learn_more_content (3735480566983530650) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Апавяшчэнне з інфармацыяй пра ўсталяваны рэжым"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Акумулятар можа разрадзіцца хутчэй, чым прыйдзе час звычайнай зарадкі"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Каб павялічыць тэрмін работы акумулятара, уключаны рэжым эканоміі зараду"</string>

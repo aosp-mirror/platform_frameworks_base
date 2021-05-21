@@ -27,7 +27,6 @@ import com.android.settingslib.Utils
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.commandline.Command
 import com.android.systemui.statusbar.commandline.CommandRegistry
-import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.phone.dagger.StatusBarComponent.StatusBarScope
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.ViewController
@@ -46,7 +45,6 @@ class AuthRippleController @Inject constructor(
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
     private val commandRegistry: CommandRegistry,
     private val notificationShadeWindowController: NotificationShadeWindowController,
-    private val bypassController: KeyguardBypassController,
     rippleView: AuthRippleView?
 ) : ViewController<AuthRippleView>(rippleView) {
     private var fingerprintSensorLocation: PointF? = null
@@ -71,20 +69,12 @@ class AuthRippleController @Inject constructor(
     }
 
     private fun showRipple(biometricSourceType: BiometricSourceType?) {
-        if (!keyguardUpdateMonitor.isKeyguardVisible ||
-            keyguardUpdateMonitor.userNeedsStrongAuth()) {
-            return
-        }
-
         if (biometricSourceType == BiometricSourceType.FINGERPRINT &&
             fingerprintSensorLocation != null) {
             mView.setSensorLocation(fingerprintSensorLocation!!)
             showRipple()
         } else if (biometricSourceType == BiometricSourceType.FACE &&
             faceSensorLocation != null) {
-            if (!bypassController.canBypass()) {
-                return
-            }
             mView.setSensorLocation(faceSensorLocation!!)
             showRipple()
         }

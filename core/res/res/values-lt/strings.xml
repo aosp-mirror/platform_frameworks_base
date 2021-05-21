@@ -2161,7 +2161,8 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"Gerai"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Išjungti"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Sužinokite daugiau"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"12 versijos „Android“ patobulinti pranešimai pakeitė „Android“ prisitaikančius pranešimus. Ši funkcija rodo siūlomus veiksmus bei atsakymus ir tvarko jūsų pranešimus.\n\nPatobulintų pranešimų funkcija gali pasiekti pranešimų turinį, įskaitant asmens informaciją (pvz., kontaktų vardus ir pranešimus). Ši funkcija taip pat gali atsisakyti pranešimų arba į juos atsakyti, pvz., atsakyti į telefono skambučius ir valdyti netrukdymo režimą."</string>
+    <!-- no translation found for nas_upgrade_notification_learn_more_content (3735480566983530650) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Veiksmų sekos režimo informacijos pranešimas"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Akumuliatoriaus energija gali išsekti prieš įprastą įkrovimą"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Akumuliatoriaus tausojimo priemonė suaktyvinta, kad akumuliatorius veiktų ilgiau"</string>

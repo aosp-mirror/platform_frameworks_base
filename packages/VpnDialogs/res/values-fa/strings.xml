@@ -18,8 +18,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="prompt" msgid="3183836924226407828">"درخواست اتصال"</string>
     <string name="warning" msgid="809658604548412033">"‏<xliff:g id="APP">%s</xliff:g> می‌خواهد یک اتصال VPN راه‌اندازی کند که به آن امکان نظارت بر ترافیک شبکه را می‌دهد. فقط در صورتی بپذیرید که به منبع آن اطمینان دارید. هنگامی که VPN فعال شد، &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; در بالای صفحه نمایش شما نشان داده می‌شود."</string>
-    <!-- no translation found for warning (5188957997628124947) -->
-    <skip />
+    <string name="warning" product="tv" msgid="5188957997628124947">"‏<xliff:g id="APP">%s</xliff:g> می‌خواهد یک اتصال VPN راه‌اندازی کند که به آن امکان نظارت بر ترافیک شبکه را می‌دهد. فقط درصورتی‌که به منبع اعتماد دارید قبول کنید. وقتی VPN فعال باشد، &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; در صفحه‌نمایش نشان داده می‌شود."</string>
     <string name="legacy_title" msgid="192936250066580964">"‏VPN متصل است"</string>
     <string name="session" msgid="6470628549473641030">"جلسه:"</string>
     <string name="duration" msgid="3584782459928719435">"مدت زمان:"</string>

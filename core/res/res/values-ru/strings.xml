@@ -2161,7 +2161,8 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"ОК"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Отключить"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Подробнее"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"В Android 12 адаптивные уведомления заменены улучшенными. Эта функция упорядочивает все ваши уведомления и подсказывает ответы и действия.\n\nЕй доступно содержимое всех уведомлений, в том числе личная информация, такая как имена контактов и сообщения. Также эта функция может закрывать уведомления и нажимать кнопки в них, например отвечать на звонки или управлять режимом \"Не беспокоить\"."</string>
+    <!-- no translation found for nas_upgrade_notification_learn_more_content (3735480566983530650) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Уведомление о батарее"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Батарея может разрядиться"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Чтобы увеличить время работы от батареи, был включен режим энергосбережения."</string>

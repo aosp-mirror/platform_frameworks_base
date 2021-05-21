@@ -560,8 +560,8 @@ public final class CameraManager {
      * @see android.app.admin.DevicePolicyManager#setCameraDisabled
      */
     private CameraDevice openCameraDeviceUserAsync(String cameraId,
-            CameraDevice.StateCallback callback, Executor executor, final int uid)
-            throws CameraAccessException {
+            CameraDevice.StateCallback callback, Executor executor, final int uid,
+            final int oomScoreOffset) throws CameraAccessException {
         CameraCharacteristics characteristics = getCameraCharacteristics(cameraId);
         CameraDevice device = null;
         Map<String, CameraCharacteristics> physicalIdsToChars =
@@ -589,7 +589,8 @@ public final class CameraManager {
                         "Camera service is currently unavailable");
                 }
                 cameraUser = cameraService.connectDevice(callbacks, cameraId,
-                    mContext.getOpPackageName(),  mContext.getAttributionTag(), uid);
+                    mContext.getOpPackageName(),  mContext.getAttributionTag(), uid,
+                    oomScoreOffset);
             } catch (ServiceSpecificException e) {
                 if (e.errorCode == ICameraService.ERROR_DEPRECATED_HAL) {
                     throw new AssertionError("Should've gone down the shim path");
@@ -760,6 +761,107 @@ public final class CameraManager {
     }
 
     /**
+     * Open a connection to a camera with the given ID. Also specify what oom score must be offset
+     * by cameraserver for this client. This api can be useful for system
+     * components which want to assume a lower priority (for camera arbitration) than other clients
+     * which it might contend for camera devices with. Increasing the oom score of a client reduces
+     * its priority when the camera framework manages camera arbitration.
+     * Considering typical use cases:
+     *
+     * 1) oom score(apps hosting activities visible to the user) - oom score(of a foreground app)
+     *    is approximately 100.
+     *
+     * 2) The oom score (process which hosts components which that are perceptible to the user /
+     *    native vendor camera clients) - oom (foreground app) is approximately 200.
+     *
+     * 3) The oom score (process which is cached hosting activities not visible) - oom (foreground
+     *    app) is approximately 999.
+     *
+     * <p>The behavior of this method matches that of
+     * {@link #openCamera(String, StateCallback, Handler)}, except that it uses
+     * {@link java.util.concurrent.Executor} as an argument instead of
+     * {@link android.os.Handler}.</p>
+     *
+     * @param cameraId
+     *             The unique identifier of the camera device to open
+     * @param executor
+     *             The executor which will be used when invoking the callback.
+     * @param callback
+     *             The callback which is invoked once the camera is opened
+     * @param oomScoreOffset
+     *             The value by which the oom score of this client must be offset by the camera
+     *             framework in order to assist it with camera arbitration. This value must be > 0.
+     *             A positive value lowers the priority of this camera client compared to what the
+     *             camera framework would have originally seen.
+     *
+     * @throws CameraAccessException if the camera is disabled by device policy,
+     * has been disconnected, or is being used by a higher-priority camera API client.
+     *
+     * @throws IllegalArgumentException if cameraId, the callback or the executor was null,
+     * or the cameraId does not match any currently or previously available
+     * camera device.
+     *
+     * @throws SecurityException if the application does not have permission to
+     * access the camera
+     *
+     * @see #getCameraIdList
+     * @see android.app.admin.DevicePolicyManager#setCameraDisabled
+     *
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.SYSTEM_CAMERA,
+            android.Manifest.permission.CAMERA,
+    })
+    public void openCamera(@NonNull String cameraId, int oomScoreOffset,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull final CameraDevice.StateCallback callback) throws CameraAccessException {
+        if (executor == null) {
+            throw new IllegalArgumentException("executor was null");
+        }
+        if (oomScoreOffset < 0) {
+            throw new IllegalArgumentException(
+                    "oomScoreOffset < 0, cannot increase priority of camera client");
+        }
+        openCameraForUid(cameraId, callback, executor, USE_CALLING_UID, oomScoreOffset);
+    }
+
+    /**
+     * Open a connection to a camera with the given ID, on behalf of another application
+     * specified by clientUid. Also specify the minimum oom score and process state the application
+     * should have, as seen by the cameraserver.
+     *
+     * <p>The behavior of this method matches that of {@link #openCamera}, except that it allows
+     * the caller to specify the UID to use for permission/etc verification. This can only be
+     * done by services trusted by the camera subsystem to act on behalf of applications and
+     * to forward the real UID.</p>
+     *
+     * @param clientUid
+     *             The UID of the application on whose behalf the camera is being opened.
+     *             Must be USE_CALLING_UID unless the caller is a trusted service.
+     * @param oomScoreOffset
+     *             The minimum oom score that cameraservice must see for this client.
+     * @hide
+     */
+    public void openCameraForUid(@NonNull String cameraId,
+            @NonNull final CameraDevice.StateCallback callback, @NonNull Executor executor,
+            int clientUid, int oomScoreOffset) throws CameraAccessException {
+
+        if (cameraId == null) {
+            throw new IllegalArgumentException("cameraId was null");
+        } else if (callback == null) {
+            throw new IllegalArgumentException("callback was null");
+        }
+        if (CameraManagerGlobal.sCameraServiceDisabled) {
+            throw new IllegalArgumentException("No cameras available on device");
+        }
+
+        openCameraDeviceUserAsync(cameraId, callback, executor, clientUid, oomScoreOffset);
+    }
+
+    /**
      * Open a connection to a camera with the given ID, on behalf of another application
      * specified by clientUid.
      *
@@ -776,19 +878,8 @@ public final class CameraManager {
      */
     public void openCameraForUid(@NonNull String cameraId,
             @NonNull final CameraDevice.StateCallback callback, @NonNull Executor executor,
-            int clientUid)
-            throws CameraAccessException {
-
-        if (cameraId == null) {
-            throw new IllegalArgumentException("cameraId was null");
-        } else if (callback == null) {
-            throw new IllegalArgumentException("callback was null");
-        }
-        if (CameraManagerGlobal.sCameraServiceDisabled) {
-            throw new IllegalArgumentException("No cameras available on device");
-        }
-
-        openCameraDeviceUserAsync(cameraId, callback, executor, clientUid);
+            int clientUid) throws CameraAccessException {
+            openCameraForUid(cameraId, callback, executor, clientUid, /*oomScoreOffset*/0);
     }
 
     /**

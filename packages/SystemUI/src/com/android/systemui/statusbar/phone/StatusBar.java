@@ -3669,9 +3669,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     public boolean onBackPressed() {
         boolean isScrimmedBouncer = mScrimController.getState() == ScrimState.BOUNCER_SCRIMMED;
         if (mStatusBarKeyguardViewManager.onBackPressed(isScrimmedBouncer /* hideImmediately */)) {
-            if (isScrimmedBouncer) {
-                mStatusBarStateController.setLeaveOpenOnKeyguardHide(false);
-            } else {
+            if (!isScrimmedBouncer) {
                 mNotificationPanelViewController.expandWithoutQs();
             }
             return true;
@@ -3706,13 +3704,9 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     private void showBouncerIfKeyguard() {
-        if (!mKeyguardViewMediator.isHiding()) {
-            if (mState == StatusBarState.KEYGUARD
-                    && !mStatusBarKeyguardViewManager.bouncerIsOrWillBeShowing()) {
-                mStatusBarKeyguardViewManager.showGenericBouncer(true /* scrimmed */);
-            } else if (mState == StatusBarState.SHADE_LOCKED) {
-                mStatusBarKeyguardViewManager.showBouncer(true /* scrimmed */);
-            }
+        if ((mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED)
+                && !mKeyguardViewMediator.isHiding()) {
+            mStatusBarKeyguardViewManager.showGenericBouncer(true /* scrimmed */);
         }
     }
 

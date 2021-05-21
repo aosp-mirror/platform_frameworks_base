@@ -97,6 +97,7 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
         when(mView.getContext()).thenReturn(mResourceContext);
         when(mResourceContext.getString(anyInt())).thenReturn("test string");
         when(mKeyguardViewMediator.isAnimatingScreenOff()).thenReturn(false);
+        when(mKeyguardUpdateMonitor.isKeyguardVisible()).thenReturn(true);
         mController = new UdfpsKeyguardViewController(
                 mView,
                 mStatusBarStateController,
@@ -180,6 +181,17 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
         sendStatusBarStateChanged(StatusBarState.KEYGUARD);
 
         assertFalse(mController.shouldPauseAuth());
+    }
+
+    @Test
+    public void testShouldPauseAuthKeyguardNotVisible() {
+        mController.onViewAttached();
+        captureKeyguardUpdateMonitorCallback();
+
+        // WHEN keyguard isn't visible
+        mKeyguardUpdateMonitorCallback.onKeyguardVisibilityChangedRaw(false);
+
+        assertTrue(mController.shouldPauseAuth());
     }
 
     @Test
