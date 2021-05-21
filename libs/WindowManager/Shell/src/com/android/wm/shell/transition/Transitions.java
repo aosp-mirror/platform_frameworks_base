@@ -382,7 +382,7 @@ public class Transitions implements RemoteCallable<Transitions> {
     }
 
     boolean startAnimation(@NonNull ActiveTransition active, TransitionHandler handler) {
-        return handler.startAnimation(active.mToken, active.mInfo, active.mStartT,
+        return handler.startAnimation(active.mToken, active.mInfo, active.mStartT, active.mFinishT,
                 (wct, cb) -> onFinish(active.mToken, wct, cb));
     }
 
@@ -566,12 +566,19 @@ public class Transitions implements RemoteCallable<Transitions> {
          * Starts a transition animation. This is always called if handleRequest returned non-null
          * for a particular transition. Otherwise, it is only called if no other handler before
          * it handled the transition.
-         *
+         * @param startTransaction the transaction given to the handler to be applied before the
+         *                         transition animation. Note the handler is expected to call on
+         *                         {@link SurfaceControl.Transaction#apply()} for startTransaction.
+         * @param finishTransaction the transaction given to the handler to be applied after the
+         *                       transition animation. Unlike startTransaction, the handler is NOT
+         *                       expected to apply this transaction. The Transition system will
+         *                       apply it when finishCallback is called.
          * @param finishCallback Call this when finished. This MUST be called on main thread.
          * @return true if transition was handled, false if not (falls-back to default).
          */
         boolean startAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
-                @NonNull SurfaceControl.Transaction t,
+                @NonNull SurfaceControl.Transaction startTransaction,
+                @NonNull SurfaceControl.Transaction finishTransaction,
                 @NonNull TransitionFinishCallback finishCallback);
 
         /**
