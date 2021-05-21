@@ -557,11 +557,14 @@ public class Vcn extends Handler {
 
         pw.println("mCurrentStatus: " + mCurrentStatus);
         pw.println("mIsMobileDataEnabled: " + mIsMobileDataEnabled);
+        pw.println();
 
         pw.println("mVcnGatewayConnections:");
+        pw.increaseIndent();
         for (VcnGatewayConnection gw : mVcnGatewayConnections.values()) {
             gw.dump(pw);
         }
+        pw.decreaseIndent();
         pw.println();
 
         pw.decreaseIndent();
