@@ -27,6 +27,7 @@ import android.content.pm.PackageManager;
 import android.media.audiofx.AudioEffect;
 import android.media.audiopolicy.AudioMix;
 import android.os.Build;
+import android.os.IBinder;
 import android.os.Vibrator;
 import android.telephony.TelephonyManager;
 import android.util.Log;
@@ -1655,6 +1656,8 @@ public class AudioSystem
     /** @hide */
     @UnsupportedAppUsage
     public static native int checkAudioFlinger();
+    /** @hide */
+    public static native void setAudioFlingerBinder(IBinder audioFlinger);
 
     /** @hide */
     public static native int listAudioPorts(ArrayList<AudioPort> ports, int[] generation);

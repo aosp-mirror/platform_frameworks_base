@@ -31,6 +31,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.hardware.soundtrigger.SoundTrigger;
 import android.media.AudioFormat;
+import android.media.AudioSystem;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
@@ -184,6 +185,11 @@ public abstract class HotwordDetectionService extends Service {
                 default:
                     Log.i(TAG, "Unsupported audio source " + audioSource);
             }
+        }
+
+        @Override
+        public void updateAudioFlinger(IBinder audioFlinger) {
+            AudioSystem.setAudioFlingerBinder(audioFlinger);
         }
 
         @Override
