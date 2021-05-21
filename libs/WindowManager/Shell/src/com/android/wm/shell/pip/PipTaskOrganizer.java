@@ -1159,8 +1159,11 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             preResizeBounds.offsetTo(0, 0);
             final Rect snapshotDest = new Rect(0, 0, destinationBounds.width(),
                     destinationBounds.height());
+            // Note: Put this at layer=MAX_VALUE-2 since the input consumer for PIP is placed at
+            //       MAX_VALUE-1
             final SurfaceControl snapshotSurface = ScreenshotUtils.takeScreenshot(
-                    mSurfaceControlTransactionFactory.getTransaction(), mLeash, preResizeBounds);
+                    mSurfaceControlTransactionFactory.getTransaction(), mLeash, preResizeBounds,
+                    Integer.MAX_VALUE - 2);
             if (snapshotSurface != null) {
                 mSyncTransactionQueue.queue(wct);
                 mSyncTransactionQueue.runInSync(t -> {
