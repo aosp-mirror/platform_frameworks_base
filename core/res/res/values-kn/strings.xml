@@ -2096,7 +2096,8 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"ಸರಿ"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"ಆಫ್ ಮಾಡಿ"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"ಇನ್ನಷ್ಟು ತಿಳಿಯಿರಿ"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"ವರ್ಧಿತ ಅಧಿಸೂಚನೆಗಳು Android 12 ರಲ್ಲಿ ಆಂಡ್ರಾಯ್ಡ್ ಅಡಾಪ್ಟಿವ್ ಅಧಿಸೂಚನೆಗಳನ್ನು ಬದಲಾಯಿಸಿವೆ. ಈ ವೈಶಿಷ್ಟ್ಯವು ಸೂಚಿಸಿದ ಕ್ರಿಯೆಗಳು ಮತ್ತು ಪ್ರತ್ಯುತ್ತರಗಳನ್ನು ತೋರಿಸುತ್ತದೆ ಮತ್ತು ನಿಮ್ಮ ಅಧಿಸೂಚನೆಗಳನ್ನು ಆಯೋಜಿಸುತ್ತದೆ.\n\nವರ್ಧಿತ ಅಧಿಸೂಚನೆಗಳು ಸಂಪರ್ಕ ಹೆಸರುಗಳು ಮತ್ತು ಸಂದೇಶಗಳಂತಹ ವೈಯಕ್ತಿಕ ಮಾಹಿತಿಯನ್ನು ಒಳಗೊಂಡಂತೆ ಎಲ್ಲಾ ಅಧಿಸೂಚನೆ ವಿಷಯವನ್ನು ಪ್ರವೇಶಿಸಬಹುದು. ಈ ವೈಶಿಷ್ಟ್ಯವು ಫೋನ್ ಕರೆಗಳಿಗೆ ಉತ್ತರಿಸುವುದು ಮತ್ತು \'ಅಡಚಣೆ ಮಾಡಬೇಡಿ\' ಅನ್ನು ನಿಯಂತ್ರಿಸುವಂತಹ ಅಧಿಸೂಚನೆಗಳನ್ನು ವಜಾಗೊಳಿಸಬಹುದು ಅಥವಾ ಪ್ರತಿಕ್ರಿಯಿಸಬಹುದು."</string>
+    <!-- no translation found for nas_upgrade_notification_learn_more_content (3735480566983530650) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ದೈನಂದಿನ ಸ್ಥಿತಿಯ ಮಾಹಿತಿಯ ಅಧಿಸೂಚನೆ"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"ಚಾರ್ಜ್‌ಗೆ ಮೊದಲೆ ಬ್ಯಾಟರಿ ಮುಗಿದು ಬಿಡಬಹುದು"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"ಬ್ಯಾಟರಿ ಅವಧಿ ಹೆಚ್ಚಿಸಲು ಬ್ಯಾಟರಿ ಸೇವರ್ ಸಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>
