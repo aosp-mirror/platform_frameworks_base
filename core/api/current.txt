@@ -12537,6 +12537,7 @@ package android.content.pm {
     method public abstract int getComponentEnabledSetting(@NonNull android.content.ComponentName);
     method @NonNull public abstract android.graphics.drawable.Drawable getDefaultActivityIcon();
     method @Nullable public abstract android.graphics.drawable.Drawable getDrawable(@NonNull String, @DrawableRes int, @Nullable android.content.pm.ApplicationInfo);
+    method public void getGroupOfPlatformPermission(@NonNull String, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.String>);
     method @NonNull public android.content.pm.InstallSourceInfo getInstallSourceInfo(@NonNull String) throws android.content.pm.PackageManager.NameNotFoundException;
     method @NonNull public abstract java.util.List<android.content.pm.ApplicationInfo> getInstalledApplications(int);
     method @NonNull public java.util.List<android.content.pm.ModuleInfo> getInstalledModules(int);
@@ -12561,6 +12562,7 @@ package android.content.pm {
     method @NonNull public abstract java.util.List<android.content.pm.PackageInfo> getPackagesHoldingPermissions(@NonNull String[], int);
     method @NonNull public abstract android.content.pm.PermissionGroupInfo getPermissionGroupInfo(@NonNull String, int) throws android.content.pm.PackageManager.NameNotFoundException;
     method public abstract android.content.pm.PermissionInfo getPermissionInfo(@NonNull String, int) throws android.content.pm.PackageManager.NameNotFoundException;
+    method public void getPlatformPermissionsForGroup(@NonNull String, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.util.List<java.lang.String>>);
     method @Deprecated public abstract int getPreferredActivities(@NonNull java.util.List<android.content.IntentFilter>, @NonNull java.util.List<android.content.ComponentName>, @Nullable String);
     method @Deprecated @NonNull public abstract java.util.List<android.content.pm.PackageInfo> getPreferredPackages(int);
     method @NonNull public android.content.pm.PackageManager.Property getProperty(@NonNull String, @NonNull String) throws android.content.pm.PackageManager.NameNotFoundException;
