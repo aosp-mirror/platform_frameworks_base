@@ -199,10 +199,13 @@ public class QSContainerImpl extends FrameLayout {
 
     void updateResources(QSPanelController qsPanelController,
             QuickStatusBarHeaderController quickStatusBarHeaderController) {
-        LayoutParams layoutParams = (LayoutParams) mQSPanelContainer.getLayoutParams();
-        layoutParams.topMargin = mContext.getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.quick_qs_offset_height);
-        mQSPanelContainer.setLayoutParams(layoutParams);
+        mQSPanelContainer.setPaddingRelative(
+                getPaddingStart(),
+                mContext.getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.quick_qs_offset_height),
+                getPaddingEnd(),
+                getPaddingBottom()
+        );
 
         int sideMargins = getResources().getDimensionPixelSize(R.dimen.notification_side_paddings);
         int padding = getResources().getDimensionPixelSize(
