@@ -672,7 +672,8 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     @Override
     public boolean startAnimation(@NonNull IBinder transition,
             @NonNull TransitionInfo info,
-            @NonNull SurfaceControl.Transaction t,
+            @NonNull SurfaceControl.Transaction startTransaction,
+            @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
         if (transition != mSplitTransitions.mPendingDismiss
                 && transition != mSplitTransitions.mPendingEnter) {
@@ -717,14 +718,14 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
         boolean shouldAnimate = true;
         if (mSplitTransitions.mPendingEnter == transition) {
-            shouldAnimate = startPendingEnterAnimation(transition, info, t);
+            shouldAnimate = startPendingEnterAnimation(transition, info, startTransaction);
         } else if (mSplitTransitions.mPendingDismiss == transition) {
-            shouldAnimate = startPendingDismissAnimation(transition, info, t);
+            shouldAnimate = startPendingDismissAnimation(transition, info, startTransaction);
         }
         if (!shouldAnimate) return false;
 
-        mSplitTransitions.playAnimation(transition, info, t, finishCallback,
-                mMainStage.mRootTaskInfo.token, mSideStage.mRootTaskInfo.token);
+        mSplitTransitions.playAnimation(transition, info, startTransaction, finishTransaction,
+                finishCallback, mMainStage.mRootTaskInfo.token, mSideStage.mRootTaskInfo.token);
         return true;
     }
 

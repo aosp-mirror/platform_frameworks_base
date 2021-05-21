@@ -35,6 +35,7 @@ import android.view.SurfaceControl;
 import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
 import android.window.WindowContainerTransaction;
+import android.window.WindowContainerTransactionCallback;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -68,7 +69,8 @@ public class PipTransition extends PipTransitionController {
     @Override
     public boolean startAnimation(@android.annotation.NonNull IBinder transition,
             @android.annotation.NonNull TransitionInfo info,
-            @android.annotation.NonNull SurfaceControl.Transaction t,
+            @android.annotation.NonNull SurfaceControl.Transaction startTransaction,
+            @android.annotation.NonNull SurfaceControl.Transaction finishTransaction,
             @android.annotation.NonNull Transitions.TransitionFinishCallback finishCallback) {
         for (int i = info.getChanges().size() - 1; i >= 0; --i) {
             final TransitionInfo.Change change = info.getChanges().get(i);
@@ -76,7 +78,8 @@ public class PipTransition extends PipTransitionController {
                     && change.getTaskInfo().configuration.windowConfiguration.getWindowingMode()
                     == WINDOWING_MODE_PINNED) {
                 mFinishCallback = finishCallback;
-                return startEnterAnimation(change.getTaskInfo(), change.getLeash(), t);
+                return startEnterAnimation(change.getTaskInfo(), change.getLeash(),
+                        startTransaction, finishTransaction);
             }
         }
         return false;
@@ -96,17 +99,25 @@ public class PipTransition extends PipTransitionController {
         WindowContainerTransaction wct = new WindowContainerTransaction();
         prepareFinishResizeTransaction(taskInfo, destinationBounds,
                 direction, tx, wct);
-        mFinishCallback.onTransitionFinished(wct, null);
+        mFinishCallback.onTransitionFinished(wct, new WindowContainerTransactionCallback() {
+            @Override
+            public void onTransactionReady(int id, @NonNull SurfaceControl.Transaction t) {
+                t.merge(tx);
+                t.apply();
+            }
+        });
         finishResizeForMenu(destinationBounds);
     }
 
     private boolean startEnterAnimation(final TaskInfo taskInfo, final SurfaceControl leash,
-            final SurfaceControl.Transaction t) {
+            final SurfaceControl.Transaction startTransaction,
+            final SurfaceControl.Transaction finishTransaction) {
         setBoundsStateForEntry(taskInfo.topActivity, taskInfo.pictureInPictureParams,
                 taskInfo.topActivityInfo);
         final Rect destinationBounds = mPipBoundsAlgorithm.getEntryDestinationBounds();
         final Rect currentBounds = taskInfo.configuration.windowConfiguration.getBounds();
         PipAnimationController.PipTransitionAnimator animator;
+        finishTransaction.setPosition(leash, destinationBounds.left, destinationBounds.top);
         if (mOneShotAnimationType == ANIM_TYPE_BOUNDS) {
             final Rect sourceHintRect =
                     PipBoundsAlgorithm.getValidSourceHintRect(
@@ -115,8 +126,8 @@ public class PipTransition extends PipTransitionController {
                     currentBounds, destinationBounds, sourceHintRect, TRANSITION_DIRECTION_TO_PIP,
                     0 /* startingAngle */, Surface.ROTATION_0);
         } else if (mOneShotAnimationType == ANIM_TYPE_ALPHA) {
-            t.setAlpha(leash, 0f);
-            t.apply();
+            startTransaction.setAlpha(leash, 0f);
+            startTransaction.apply();
             animator = mPipAnimationController.getAnimator(taskInfo, leash, destinationBounds,
                     0f, 1f);
             mOneShotAnimationType = ANIM_TYPE_BOUNDS;
@@ -158,6 +169,5 @@ public class PipTransition extends PipTransitionController {
         }
 
         wct.setBounds(taskInfo.token, taskBounds);
-        wct.setBoundsChangeTransaction(taskInfo.token, tx);
     }
 }
