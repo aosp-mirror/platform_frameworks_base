@@ -1457,6 +1457,7 @@ package android.app.search {
     method public long getTimestampMillis();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.search.Query> CREATOR;
+    field public static final String EXTRA_IME_HEIGHT = "android.app.search.extra.IME_HEIGHT";
   }
 
   public final class SearchAction implements android.os.Parcelable {
@@ -1525,7 +1526,7 @@ package android.app.search {
     method @Nullable public android.content.pm.ShortcutInfo getShortcutInfo();
     method @Nullable public android.net.Uri getSliceUri();
     method @NonNull public android.os.UserHandle getUserHandle();
-    method public boolean shouldHide();
+    method public boolean isHidden();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.search.SearchTarget> CREATOR;
     field public static final int RESULT_TYPE_APPLICATION = 1; // 0x1
@@ -1539,12 +1540,12 @@ package android.app.search {
     method @NonNull public android.app.search.SearchTarget build();
     method @NonNull public android.app.search.SearchTarget.Builder setAppWidgetProviderInfo(@NonNull android.appwidget.AppWidgetProviderInfo);
     method @NonNull public android.app.search.SearchTarget.Builder setExtras(@NonNull android.os.Bundle);
+    method @NonNull public android.app.search.SearchTarget.Builder setHidden(boolean);
     method @NonNull public android.app.search.SearchTarget.Builder setPackageName(@NonNull String);
     method @NonNull public android.app.search.SearchTarget.Builder setParentId(@NonNull String);
     method @NonNull public android.app.search.SearchTarget.Builder setScore(float);
     method @NonNull public android.app.search.SearchTarget.Builder setSearchAction(@Nullable android.app.search.SearchAction);
     method @NonNull public android.app.search.SearchTarget.Builder setShortcutInfo(@NonNull android.content.pm.ShortcutInfo);
-    method @NonNull public android.app.search.SearchTarget.Builder setShouldHide(boolean);
     method @NonNull public android.app.search.SearchTarget.Builder setSliceUri(@NonNull android.net.Uri);
     method @NonNull public android.app.search.SearchTarget.Builder setUserHandle(@NonNull android.os.UserHandle);
   }
