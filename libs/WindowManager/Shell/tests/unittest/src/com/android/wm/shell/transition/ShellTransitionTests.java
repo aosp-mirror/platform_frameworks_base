@@ -127,11 +127,13 @@ public class ShellTransitionTests {
         TestTransitionHandler testHandler = new TestTransitionHandler() {
             @Override
             public boolean startAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
-                    @NonNull SurfaceControl.Transaction t,
+                    @NonNull SurfaceControl.Transaction startTransaction,
+                    @NonNull SurfaceControl.Transaction finishTransaction,
                     @NonNull Transitions.TransitionFinishCallback finishCallback) {
                 for (TransitionInfo.Change chg : info.getChanges()) {
                     if (chg.getMode() == TRANSIT_CHANGE) {
-                        return super.startAnimation(transition, info, t, finishCallback);
+                        return super.startAnimation(transition, info, startTransaction,
+                                finishTransaction, finishCallback);
                     }
                 }
                 return false;
@@ -358,9 +360,11 @@ public class ShellTransitionTests {
         oneShot.setTransition(transitToken);
         IBinder anotherToken = new Binder();
         assertFalse(oneShot.startAnimation(anotherToken, new TransitionInfo(transitType, 0),
-                mock(SurfaceControl.Transaction.class), testFinish));
+                mock(SurfaceControl.Transaction.class), mock(SurfaceControl.Transaction.class),
+                testFinish));
         assertTrue(oneShot.startAnimation(transitToken, new TransitionInfo(transitType, 0),
-                mock(SurfaceControl.Transaction.class), testFinish));
+                mock(SurfaceControl.Transaction.class), mock(SurfaceControl.Transaction.class),
+                testFinish));
     }
 
     @Test
@@ -477,7 +481,8 @@ public class ShellTransitionTests {
 
         @Override
         public boolean startAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
-                @NonNull SurfaceControl.Transaction t,
+                @NonNull SurfaceControl.Transaction startTransaction,
+                @NonNull SurfaceControl.Transaction finishTransaction,
                 @NonNull Transitions.TransitionFinishCallback finishCallback) {
             mFinishes.add(finishCallback);
             return true;

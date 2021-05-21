@@ -84,7 +84,8 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
 
     @Override
     public boolean startAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
-            @NonNull SurfaceControl.Transaction t,
+            @NonNull SurfaceControl.Transaction startTransaction,
+            @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
                 "start default transition animation, info = %s", info);
@@ -104,12 +105,12 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             final TransitionInfo.Change change = info.getChanges().get(i);
             if (change.getMode() == TRANSIT_CHANGE) {
                 // No default animation for this, so just update bounds/position.
-                t.setPosition(change.getLeash(),
+                startTransaction.setPosition(change.getLeash(),
                         change.getEndAbsBounds().left - change.getEndRelOffset().x,
                         change.getEndAbsBounds().top - change.getEndRelOffset().y);
                 if (change.getTaskInfo() != null) {
                     // Skip non-tasks since those usually have null bounds.
-                    t.setWindowCrop(change.getLeash(),
+                    startTransaction.setWindowCrop(change.getLeash(),
                             change.getEndAbsBounds().width(), change.getEndAbsBounds().height());
                 }
             }
@@ -122,7 +123,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                 startAnimInternal(animations, a, change.getLeash(), onAnimFinish);
             }
         }
-        t.apply();
+        startTransaction.apply();
         // run finish now in-case there are no animations
         onAnimFinish.run();
         return true;

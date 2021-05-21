@@ -84,17 +84,19 @@ class SplitScreenTransitions {
     }
 
     void playAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
-            @NonNull SurfaceControl.Transaction t,
+            @NonNull SurfaceControl.Transaction startTransaction,
+            @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback,
             @NonNull WindowContainerToken mainRoot, @NonNull WindowContainerToken sideRoot) {
         mFinishCallback = finishCallback;
         mAnimatingTransition = transition;
         if (mRemoteHandler != null) {
-            mRemoteHandler.startAnimation(transition, info, t, mRemoteFinishCB);
+            mRemoteHandler.startAnimation(transition, info, startTransaction, finishTransaction,
+                    mRemoteFinishCB);
             mRemoteHandler = null;
             return;
         }
-        playInternalAnimation(transition, info, t, mainRoot, sideRoot);
+        playInternalAnimation(transition, info, startTransaction, mainRoot, sideRoot);
     }
 
     private void playInternalAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,

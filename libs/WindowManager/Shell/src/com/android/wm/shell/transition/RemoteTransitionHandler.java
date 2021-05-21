@@ -99,7 +99,8 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
 
     @Override
     public boolean startAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
-            @NonNull SurfaceControl.Transaction t,
+            @NonNull SurfaceControl.Transaction startTransaction,
+            @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
         IRemoteTransition pendingRemote = mRequestedRemotes.get(transition);
         if (pendingRemote == null) {
@@ -146,7 +147,7 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
             if (remote.asBinder() != null) {
                 remote.asBinder().linkToDeath(remoteDied, 0 /* flags */);
             }
-            remote.startAnimation(transition, info, t, cb);
+            remote.startAnimation(transition, info, startTransaction, cb);
         } catch (RemoteException e) {
             Log.e(Transitions.TAG, "Error running remote transition.", e);
             if (remote.asBinder() != null) {
