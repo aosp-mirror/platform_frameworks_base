@@ -700,6 +700,8 @@
         <item name="android:windowActivityTransitions">true</item>
     </style>
 
+    <style name="Screenshot" parent="@android:style/Theme.DeviceDefault.DayNight"/>
+
     <!-- Privacy dialog -->
     <style name="PrivacyDialog" parent="Theme.SystemUI.QuickSettings.Dialog">
         <item name="android:windowIsTranslucent">true</item>
