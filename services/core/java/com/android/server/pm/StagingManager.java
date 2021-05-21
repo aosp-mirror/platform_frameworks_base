@@ -48,12 +48,14 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.SystemProperties;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.IntArray;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.TimingsTraceLog;
 import android.util.apk.ApkSignatureVerifier;
 
 import com.android.internal.annotations.GuardedBy;
@@ -513,7 +515,11 @@ public class StagingManager {
         }
         // The APEX part of the session is activated, proceed with the installation of APKs.
         Slog.d(TAG, "Installing APK packages in session " + session.sessionId());
+        TimingsTraceLog t = new TimingsTraceLog(
+                "StagingManagerTiming", Trace.TRACE_TAG_PACKAGE_MANAGER);
+        t.traceBegin("installApksInSession");
         installApksInSession(session);
+        t.traceEnd();
 
         Slog.d(TAG, "Marking session " + session.sessionId() + " as applied");
         session.setSessionApplied();
@@ -839,6 +845,10 @@ public class StagingManager {
     }
 
     void restoreSessions(@NonNull List<StagedSession> sessions, boolean isDeviceUpgrading) {
+        TimingsTraceLog t = new TimingsTraceLog(
+                "StagingManagerTiming", Trace.TRACE_TAG_PACKAGE_MANAGER);
+        t.traceBegin("restoreSessions");
+
         // Do not resume sessions if boot completed already
         if (SystemProperties.getBoolean("sys.boot_completed", false)) {
             return;
@@ -971,6 +981,7 @@ public class StagingManager {
                         supportsCheckpoint, needsCheckpoint);
             }
         }
+        t.traceEnd();
     }
 
     private void logFailedApexSessionsIfNecessary() {
