@@ -39,4 +39,11 @@ public class TopIntroPreference extends Preference {
         setLayoutResource(R.layout.top_intro_preference);
         setSelectable(false);
     }
+
+    @Override
+    public void onBindViewHolder(PreferenceViewHolder holder) {
+        super.onBindViewHolder(holder);
+        holder.setDividerAllowedAbove(false);
+        holder.setDividerAllowedBelow(false);
+    }
 }
