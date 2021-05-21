@@ -6581,7 +6581,7 @@ class Task extends WindowContainer<WindowContainer> {
 
     void startActivityLocked(ActivityRecord r, @Nullable ActivityRecord focusedTopActivity,
             boolean newTask, boolean keepCurTransition, ActivityOptions options,
-            boolean samePackage) {
+            @Nullable ActivityRecord sourceRecord) {
         Task rTask = r.getTask();
         final boolean allowMoveToFront = options == null || !options.getAvoidMoveToFront();
         final boolean isOrhasTask = rTask == this || hasChild(rTask);
@@ -6725,7 +6725,7 @@ class Task extends WindowContainer<WindowContainer> {
                 }
 
                 r.showStartingWindow(prev, newTask, isTaskSwitch(r, focusedTopActivity),
-                        splashScreenThemeResId, samePackage);
+                        splashScreenThemeResId, sourceRecord);
             }
         } else {
             // If this is the first activity, don't do any fancy animations,
