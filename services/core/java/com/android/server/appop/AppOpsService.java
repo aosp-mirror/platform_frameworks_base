@@ -3303,6 +3303,9 @@ public class AppOpsService extends IAppOpsService.Stub {
         RestrictionBypass bypass;
         try {
             bypass = verifyAndGetBypass(uid, packageName, attributionTag, proxyPackageName);
+            if (bypass != null && bypass.getIsAttributionTagNotFound()) {
+                attributionTag = null;
+            }
         } catch (SecurityException e) {
             Slog.e(TAG, "noteOperation", e);
             return new SyncNotedAppOp(AppOpsManager.MODE_ERRORED, code, attributionTag,
@@ -3795,6 +3798,9 @@ public class AppOpsService extends IAppOpsService.Stub {
         RestrictionBypass bypass;
         try {
             bypass = verifyAndGetBypass(uid, packageName, attributionTag, proxyPackageName);
+            if (bypass != null && bypass.getIsAttributionTagNotFound()) {
+                attributionTag = null;
+            }
         } catch (SecurityException e) {
             Slog.e(TAG, "startOperation", e);
             return new SyncNotedAppOp(AppOpsManager.MODE_ERRORED, code, attributionTag,
@@ -3942,6 +3948,9 @@ public class AppOpsService extends IAppOpsService.Stub {
         RestrictionBypass bypass;
         try {
             bypass = verifyAndGetBypass(uid, packageName, attributionTag);
+            if (bypass != null && bypass.getIsAttributionTagNotFound()) {
+                attributionTag = null;
+            }
         } catch (SecurityException e) {
             Slog.e(TAG, "Cannot finishOperation", e);
             return;
@@ -4402,6 +4411,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 } else if (pkg != null) {
                     msg = "attributionTag " + attributionTag + " not declared in manifest of "
                             + packageName;
+                    bypass.setIsAttributionTagNotFound(true);
                 } else {
                     msg = "package " + packageName + " not found, can't check for "
                             + "attributionTag " + attributionTag;
@@ -4413,7 +4423,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                             userId) && mPlatformCompat.isChangeEnabledByUid(
                                     SECURITY_EXCEPTION_ON_INVALID_ATTRIBUTION_TAG_CHANGE,
                             callingUid) && !foundInProxy) {
-                        throw new SecurityException(msg);
+                        Slog.e(TAG, msg);
                     } else {
                         Slog.e(TAG, msg);
                     }
