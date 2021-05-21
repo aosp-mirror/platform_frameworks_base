@@ -16,6 +16,12 @@
 
 package android.window;
 
+import static android.app.ActivityOptions.ANIM_CLIP_REVEAL;
+import static android.app.ActivityOptions.ANIM_CUSTOM;
+import static android.app.ActivityOptions.ANIM_OPEN_CROSS_PROFILE_APPS;
+import static android.app.ActivityOptions.ANIM_SCALE_UP;
+import static android.app.ActivityOptions.ANIM_THUMBNAIL_SCALE_DOWN;
+import static android.app.ActivityOptions.ANIM_THUMBNAIL_SCALE_UP;
 import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
@@ -31,6 +37,7 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.hardware.HardwareBuffer;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.Surface;
@@ -102,6 +109,8 @@ public final class TransitionInfo implements Parcelable {
     private SurfaceControl mRootLeash;
     private final Point mRootOffset = new Point();
 
+    private AnimationOptions mOptions;
+
     /** @hide */
     public TransitionInfo(@WindowManager.TransitionOldType int type,
             @WindowManager.TransitionFlags int flags) {
@@ -116,6 +125,7 @@ public final class TransitionInfo implements Parcelable {
         mRootLeash = new SurfaceControl();
         mRootLeash.readFromParcel(in);
         mRootOffset.readFromParcel(in);
+        mOptions = in.readTypedObject(AnimationOptions.CREATOR);
     }
 
     @Override
@@ -126,6 +136,7 @@ public final class TransitionInfo implements Parcelable {
         dest.writeList(mChanges);
         mRootLeash.writeToParcel(dest, flags);
         mRootOffset.writeToParcel(dest, flags);
+        dest.writeTypedObject(mOptions, flags);
     }
 
     @NonNull
@@ -154,6 +165,10 @@ public final class TransitionInfo implements Parcelable {
         mRootOffset.set(offsetLeft, offsetTop);
     }
 
+    public void setAnimationOptions(AnimationOptions options) {
+        mOptions = options;
+    }
+
     public int getType() {
         return mType;
     }
@@ -180,6 +195,10 @@ public final class TransitionInfo implements Parcelable {
     @NonNull
     public Point getRootOffset() {
         return mRootOffset;
+    }
+
+    public AnimationOptions getAnimationOptions() {
+        return mOptions;
     }
 
     @NonNull
@@ -482,6 +501,148 @@ public final class TransitionInfo implements Parcelable {
                     + " m=" + modeToString(mMode) + " f=" + flagsToString(mFlags) + " sb="
                     + mStartAbsBounds + " eb=" + mEndAbsBounds + " eo=" + mEndRelOffset + " r="
                     + mStartRotation + "->" + mEndRotation + "}";
+        }
+    }
+
+    /** Represents animation options during a transition */
+    public static final class AnimationOptions implements Parcelable {
+
+        private int mType;
+        private int mEnterResId;
+        private int mExitResId;
+        private boolean mOverrideTaskTransition;
+        private String mPackageName;
+        private final Rect mTransitionBounds = new Rect();
+        private HardwareBuffer mThumbnail;
+
+        private AnimationOptions(int type) {
+            mType = type;
+        }
+
+        public AnimationOptions(Parcel in) {
+            mType = in.readInt();
+            mEnterResId = in.readInt();
+            mExitResId = in.readInt();
+            mOverrideTaskTransition = in.readBoolean();
+            mPackageName = in.readString();
+            mTransitionBounds.readFromParcel(in);
+            mThumbnail = in.readTypedObject(HardwareBuffer.CREATOR);
+        }
+
+        public static AnimationOptions makeCustomAnimOptions(String packageName, int enterResId,
+                int exitResId, boolean overrideTaskTransition) {
+            AnimationOptions options = new AnimationOptions(ANIM_CUSTOM);
+            options.mPackageName = packageName;
+            options.mEnterResId = enterResId;
+            options.mExitResId = exitResId;
+            options.mOverrideTaskTransition = overrideTaskTransition;
+            return options;
+        }
+
+        public static AnimationOptions makeClipRevealAnimOptions(int startX, int startY, int width,
+                int height) {
+            AnimationOptions options = new AnimationOptions(ANIM_CLIP_REVEAL);
+            options.mTransitionBounds.set(startX, startY, startX + width, startY + height);
+            return options;
+        }
+
+        public static AnimationOptions makeScaleUpAnimOptions(int startX, int startY, int width,
+                int height) {
+            AnimationOptions options = new AnimationOptions(ANIM_SCALE_UP);
+            options.mTransitionBounds.set(startX, startY, startX + width, startY + height);
+            return options;
+        }
+
+        public static AnimationOptions makeThumnbnailAnimOptions(HardwareBuffer srcThumb,
+                int startX, int startY, boolean scaleUp) {
+            AnimationOptions options = new AnimationOptions(
+                    scaleUp ? ANIM_THUMBNAIL_SCALE_UP : ANIM_THUMBNAIL_SCALE_DOWN);
+            options.mTransitionBounds.set(startX, startY, startX, startY);
+            options.mThumbnail = srcThumb;
+            return options;
+        }
+
+        public static AnimationOptions makeCrossProfileAnimOptions() {
+            AnimationOptions options = new AnimationOptions(ANIM_OPEN_CROSS_PROFILE_APPS);
+            return options;
+        }
+
+        public int getType() {
+            return mType;
+        }
+
+        public int getEnterResId() {
+            return mEnterResId;
+        }
+
+        public int getExitResId() {
+            return mExitResId;
+        }
+
+        public boolean getOverrideTaskTransition() {
+            return mOverrideTaskTransition;
+        }
+
+        public String getPackageName() {
+            return mPackageName;
+        }
+
+        public Rect getTransitionBounds() {
+            return mTransitionBounds;
+        }
+
+        public HardwareBuffer getThumbnail() {
+            return mThumbnail;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(mType);
+            dest.writeInt(mEnterResId);
+            dest.writeInt(mExitResId);
+            dest.writeBoolean(mOverrideTaskTransition);
+            dest.writeString(mPackageName);
+            mTransitionBounds.writeToParcel(dest, flags);
+            dest.writeTypedObject(mThumbnail, flags);
+        }
+
+        @NonNull
+        public static final Creator<AnimationOptions> CREATOR =
+                new Creator<AnimationOptions>() {
+                    @Override
+                    public AnimationOptions createFromParcel(Parcel in) {
+                        return new AnimationOptions(in);
+                    }
+
+                    @Override
+                    public AnimationOptions[] newArray(int size) {
+                        return new AnimationOptions[size];
+                    }
+                };
+
+        /** @hide */
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @NonNull
+        private static String typeToString(int mode) {
+            switch(mode) {
+                case ANIM_CUSTOM: return "ANIM_CUSTOM";
+                case ANIM_CLIP_REVEAL: return "ANIM_CLIP_REVEAL";
+                case ANIM_SCALE_UP: return "ANIM_SCALE_UP";
+                case ANIM_THUMBNAIL_SCALE_UP: return "ANIM_THUMBNAIL_SCALE_UP";
+                case ANIM_THUMBNAIL_SCALE_DOWN: return "ANIM_THUMBNAIL_SCALE_DOWN";
+                case ANIM_OPEN_CROSS_PROFILE_APPS: return "ANIM_OPEN_CROSS_PROFILE_APPS";
+                default: return "<unknown:" + mode + ">";
+            }
+        }
+
+        @Override
+        public String toString() {
+            return "{ AnimationOtions type= " + typeToString(mType) + " package=" + mPackageName
+                    + " override=" + mOverrideTaskTransition + " b=" + mTransitionBounds + "}";
         }
     }
 }

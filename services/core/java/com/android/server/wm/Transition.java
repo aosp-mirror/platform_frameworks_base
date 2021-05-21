@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-
 import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.TRANSIT_CHANGE;
@@ -124,6 +123,8 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
     /** The final animation targets derived from participants after promotion. */
     private ArraySet<WindowContainer> mTargets = null;
 
+    private TransitionInfo.AnimationOptions mOverrideOptions;
+
     private @TransitionState int mState = STATE_COLLECTING;
     private boolean mReadyCalled = false;
 
@@ -204,6 +205,15 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                 + " %s", mSyncId, wc);
         collect(wc);
         mChanges.get(wc).mExistenceChanged = true;
+    }
+
+    /**
+     * Set animation options for collecting transition by ActivityRecord.
+     * @param options AnimationOptions captured from ActivityOptions
+     */
+    void setOverrideAnimation(TransitionInfo.AnimationOptions options) {
+        if (mSyncId < 0) return;
+        mOverrideOptions = options;
     }
 
     /**
@@ -327,6 +337,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             mController.mAtm.mRootWindowContainer.getDisplayContent(displayId)
                     .getPendingTransaction().merge(transaction);
             mSyncId = -1;
+            mOverrideOptions = null;
             return;
         }
 
@@ -340,6 +351,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         // Resolve the animating targets from the participants
         mTargets = calculateTargets(mParticipants, mChanges);
         final TransitionInfo info = calculateTransitionInfo(mType, mFlags, mTargets, mChanges);
+        info.setAnimationOptions(mOverrideOptions);
 
         handleNonAppWindowsInTransition(displayId, mType, mFlags);
 
@@ -375,6 +387,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             cleanUpOnFailure();
         }
         mSyncId = -1;
+        mOverrideOptions = null;
     }
 
     /**
