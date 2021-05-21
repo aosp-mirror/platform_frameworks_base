@@ -851,7 +851,7 @@
     <string name="lockscreen_transport_stop_description" msgid="1449552232598355348">"बंद करें"</string>
     <string name="lockscreen_transport_rew_description" msgid="7680106856221622779">"रिवाइंड करें"</string>
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"फ़ास्ट फ़ॉरवर्ड"</string>
-    <string name="emergency_calls_only" msgid="3057351206678279851">"केवल आपातकालीन कॉल"</string>
+    <string name="emergency_calls_only" msgid="3057351206678279851">"सिर्फ़ आपातकालीन कॉल"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"नेटवर्क लॉक किया गया"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"सिम कार्ड PUK-लॉक किया हुआ है."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"कृपया उपयोग के लिए गाइड देखें या ग्राहक सहायता से संपर्क करें."</string>
