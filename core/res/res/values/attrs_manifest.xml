@@ -1535,6 +1535,9 @@
 
     <attr name="usesNonSdkApi" format="boolean" />
 
+    <!-- Whether attributions provided are meant to be user-visible. -->
+    <attr name="attributionsAreUserVisible" format="boolean" />
+
     <!-- Specify the type of foreground service. Multiple types can be specified by ORing the flags
          together. -->
     <attr name="foregroundServiceType">
@@ -1958,6 +1961,9 @@
         there's no way to be exempted (without using a privileged permission).
         -->
         <attr name="requestForegroundServiceExemption" format="boolean" />
+
+        <!-- Whether attributions provided are meant to be user-visible. -->
+        <attr name="attributionsAreUserVisible" format="boolean" />
     </declare-styleable>
 
     <!-- An attribution is a logical part of an app and is identified by a tag.

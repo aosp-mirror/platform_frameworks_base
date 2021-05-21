@@ -3100,6 +3100,7 @@
     <public name="effectColor" />
     <!-- @hide @TestApi -->
     <public name="requestForegroundServiceExemption" />
+    <public name="attributionsAreUserVisible" />
   </staging-public-group>
 
   <staging-public-group type="drawable" first-id="0x010800b5">
