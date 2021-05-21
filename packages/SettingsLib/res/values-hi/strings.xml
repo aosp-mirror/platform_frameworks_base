@@ -195,7 +195,7 @@
     <item msgid="581904787661470707">"सबसे तेज़"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"प्रोफ़ाइल चुनें"</string>
-    <string name="category_personal" msgid="6236798763159385225">"व्यक्तिगत"</string>
+    <string name="category_personal" msgid="6236798763159385225">"निजी"</string>
     <string name="category_work" msgid="4014193632325996115">"कार्यालय"</string>
     <string name="development_settings_title" msgid="140296922921597393">"डेवलपर के लिए सेटिंग और टूल"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"डेवलपर के लिए सेटिंग और टूल चालू करें"</string>

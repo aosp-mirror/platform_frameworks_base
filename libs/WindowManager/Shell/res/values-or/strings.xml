@@ -28,6 +28,10 @@
     <string name="pip_skip_to_next" msgid="8403429188794867653">"ପରବର୍ତ୍ତୀକୁ ଯାଆନ୍ତୁ"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"ପୂର୍ବବର୍ତ୍ତୀକୁ ଛାଡ଼ନ୍ତୁ"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"ରିସାଇଜ୍ କରନ୍ତୁ"</string>
+    <!-- no translation found for accessibility_action_pip_stash (4060775037619702641) -->
+    <skip />
+    <!-- no translation found for accessibility_action_pip_unstash (7467499339610437646) -->
+    <skip />
     <string name="dock_forced_resizable" msgid="1749750436092293116">"ସ୍ପ୍ଲିଟ୍-ସ୍କ୍ରିନରେ ଆପ୍ କାମ କରିନପାରେ।"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"ଆପ୍‍ ସ୍ପ୍ଲିଟ୍‍-ସ୍କ୍ରୀନକୁ ସପୋର୍ଟ କରେ ନାହିଁ।"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"ସେକେଣ୍ଡାରୀ ଡିସପ୍ଲେରେ ଆପ୍‍ କାମ ନକରିପାରେ।"</string>

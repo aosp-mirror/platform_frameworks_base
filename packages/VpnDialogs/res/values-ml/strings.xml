@@ -18,8 +18,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="prompt" msgid="3183836924226407828">"കണക്ഷൻ അഭ്യർത്ഥന"</string>
     <string name="warning" msgid="809658604548412033">"നെറ്റ്‌വർക്ക് ട്രാഫിക്ക് നിരീക്ഷിക്കാൻ അനുവദിക്കുന്ന ഒരു VPN കണക്ഷൻ <xliff:g id="APP">%s</xliff:g> സജ്ജീകരിക്കേണ്ടതുണ്ട്. ഉറവിടം പരിചിതമാണെങ്കിൽ മാത്രം അംഗീകരിക്കുക. VPN സജീവമാകുമ്പോൾ &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; നിങ്ങളുടെ സ്ക്രീനിന്റെ മുകളിൽ ദൃശ്യമാകുന്നു."</string>
-    <!-- no translation found for warning (5188957997628124947) -->
-    <skip />
+    <string name="warning" product="tv" msgid="5188957997628124947">"നെറ്റ്‌വർക്ക് ട്രാഫിക് നിരീക്ഷിക്കാൻ അനുവദിക്കുന്ന ഒരു VPN കണക്ഷൻ സജ്ജീകരിക്കാൻ <xliff:g id="APP">%s</xliff:g> താൽപ്പര്യപ്പെടുന്നു. നിങ്ങൾ ഉറവിടം വിശ്വസിക്കുന്നുണ്ടെങ്കിൽ മാത്രം അംഗീകരിക്കുക. VPN സജീവമാകുമ്പോൾ &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; നിങ്ങളുടെ സ്‌ക്രീനിൽ ദൃശ്യമാകും."</string>
     <string name="legacy_title" msgid="192936250066580964">"VPN കണക്‌റ്റുചെയ്‌തു"</string>
     <string name="session" msgid="6470628549473641030">"സെഷൻ:"</string>
     <string name="duration" msgid="3584782459928719435">"സമയദൈര്‍ഘ്യം:"</string>

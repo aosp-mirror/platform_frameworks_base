@@ -89,15 +89,16 @@ public class BubbleOverflowContainerView extends LinearLayout {
     }
 
     public BubbleOverflowContainerView(Context context) {
-        super(context);
+        this(context, null);
     }
 
     public BubbleOverflowContainerView(Context context, @Nullable AttributeSet attrs) {
-        super(context, attrs);
+        this(context, attrs, 0);
     }
 
-    public BubbleOverflowContainerView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
+    public BubbleOverflowContainerView(Context context, @Nullable AttributeSet attrs,
+            int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
     }
 
     public BubbleOverflowContainerView(Context context, AttributeSet attrs, int defStyleAttr,
@@ -170,14 +171,14 @@ public class BubbleOverflowContainerView extends LinearLayout {
                         ? res.getColor(R.color.bubbles_dark)
                         : res.getColor(R.color.bubbles_light));
 
-        final TypedArray typedArray = getContext().obtainStyledAttributes(
-                new int[]{android.R.attr.colorBackgroundFloating,
-                        android.R.attr.textColorSecondary});
+        final TypedArray typedArray = getContext().obtainStyledAttributes(new int[] {
+                android.R.attr.colorBackgroundFloating,
+                android.R.attr.textColorSecondary});
         int bgColor = typedArray.getColor(0, isNightMode ? Color.BLACK : Color.WHITE);
         int textColor = typedArray.getColor(1, isNightMode ? Color.WHITE : Color.BLACK);
         textColor = ContrastColorUtil.ensureTextContrast(textColor, bgColor, isNightMode);
         typedArray.recycle();
-
+        setBackgroundColor(bgColor);
         mEmptyStateTitle.setTextColor(textColor);
         mEmptyStateSubtitle.setTextColor(textColor);
     }

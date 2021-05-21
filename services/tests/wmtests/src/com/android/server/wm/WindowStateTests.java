@@ -20,6 +20,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
+import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.Surface.ROTATION_0;
@@ -50,6 +51,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.wm.DisplayContent.IME_TARGET_CONTROL;
+import static com.android.server.wm.DisplayContent.IME_TARGET_LAYERING;
 import static com.android.server.wm.WindowContainer.SYNC_STATE_WAITING_FOR_DRAW;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -58,6 +60,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -922,5 +925,35 @@ public class WindowStateTests extends WindowTestsBase {
 
         verify(app.getDisplayContent()).updateImeControlTarget();
         assertEquals(mAppWindow, mDisplayContent.getImeTarget(IME_TARGET_CONTROL).getWindow());
+    }
+
+    @UseTestDisplay(addWindows = { W_ACTIVITY, W_INPUT_METHOD, W_NOTIFICATION_SHADE })
+    @Test
+    public void testNotificationShadeHasImeInsetsWhenSplitscreenActivated() {
+        WindowState app = createWindow(null, TYPE_BASE_APPLICATION,
+                mAppWindow.mToken, "app");
+
+        // Simulate entering multi-window mode and verify if the split-screen is activated.
+        app.mActivityRecord.getRootTask().setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
+        assertEquals(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, app.getWindowingMode());
+        assertTrue(mDisplayContent.getDefaultTaskDisplayArea().isSplitScreenModeActivated());
+
+        // Simulate notificationShade is shown and being IME layering target.
+        mNotificationShadeWindow.setHasSurface(true);
+        mNotificationShadeWindow.mAttrs.flags &= ~FLAG_NOT_FOCUSABLE;
+        assertTrue(mNotificationShadeWindow.canBeImeTarget());
+        mDisplayContent.getInsetsStateController().getSourceProvider(ITYPE_IME).setWindow(
+                mImeWindow, null, null);
+
+        mDisplayContent.computeImeTarget(true);
+        assertEquals(mNotificationShadeWindow, mDisplayContent.getImeTarget(IME_TARGET_LAYERING));
+        mDisplayContent.getInsetsStateController().getRawInsetsState()
+                .setSourceVisible(ITYPE_IME, true);
+
+        // Verify notificationShade can still get IME insets even the split-screen is activated.
+        InsetsState state = mDisplayContent.getInsetsStateController().getInsetsForWindow(
+                mNotificationShadeWindow);
+        assertNotNull(state.peekSource(ITYPE_IME));
+        assertTrue(state.getSource(ITYPE_IME).isVisible());
     }
 }

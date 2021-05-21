@@ -1385,10 +1385,9 @@ public final class NotificationRecord {
 
     public boolean hasUndecoratedRemoteView() {
         Notification notification = getNotification();
-        Class<? extends Notification.Style> style = notification.getNotificationStyle();
-        boolean hasDecoratedStyle = style != null
-                && (Notification.DecoratedCustomViewStyle.class.equals(style)
-                || Notification.DecoratedMediaCustomViewStyle.class.equals(style));
+        boolean hasDecoratedStyle =
+                notification.isStyle(Notification.DecoratedCustomViewStyle.class)
+                || notification.isStyle(Notification.DecoratedMediaCustomViewStyle.class);
         boolean hasCustomRemoteView = notification.contentView != null
                 || notification.bigContentView != null
                 || notification.headsUpContentView != null;
@@ -1428,7 +1427,7 @@ public final class NotificationRecord {
         if (mIsNotConversationOverride) {
             return false;
         }
-        if (!Notification.MessagingStyle.class.equals(notification.getNotificationStyle())) {
+        if (!notification.isStyle(Notification.MessagingStyle.class)) {
             // some non-msgStyle notifs can temporarily appear in the conversation space if category
             // is right
             if (mPkgAllowedAsConvo && mTargetSdkVersion < Build.VERSION_CODES.R
@@ -1439,7 +1438,7 @@ public final class NotificationRecord {
         }
 
         if (mTargetSdkVersion >= Build.VERSION_CODES.R
-                && Notification.MessagingStyle.class.equals(notification.getNotificationStyle())
+                && notification.isStyle(Notification.MessagingStyle.class)
                 && (mShortcutInfo == null || isOnlyBots(mShortcutInfo.getPersons()))) {
             return false;
         }

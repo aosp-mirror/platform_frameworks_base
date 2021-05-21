@@ -27137,7 +27137,7 @@ package android.net.vcn {
   public final class VcnGatewayConnectionConfig {
     method @NonNull public int[] getExposedCapabilities();
     method @NonNull public String getGatewayConnectionName();
-    method @IntRange(from=android.net.vcn.VcnGatewayConnectionConfig.MIN_MTU_V6) public int getMaxMtu();
+    method @IntRange(from=0x500) public int getMaxMtu();
     method @NonNull public long[] getRetryIntervalsMillis();
   }
 
@@ -27146,7 +27146,7 @@ package android.net.vcn {
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder addExposedCapability(int);
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig build();
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder removeExposedCapability(int);
-    method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder setMaxMtu(@IntRange(from=android.net.vcn.VcnGatewayConnectionConfig.MIN_MTU_V6) int);
+    method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder setMaxMtu(@IntRange(from=0x500) int);
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder setRetryIntervalsMillis(@NonNull long[]);
   }
 
@@ -31958,6 +31958,7 @@ package android.os {
     method public long getUserCreationTime(android.os.UserHandle);
     method public android.os.UserHandle getUserForSerialNumber(long);
     method @NonNull @RequiresPermission(anyOf={"android.permission.MANAGE_USERS", android.Manifest.permission.GET_ACCOUNTS_PRIVILEGED, "android.permission.CREATE_USERS"}, conditional=true) public String getUserName();
+    method public int getUserPrivacySensitivity();
     method public java.util.List<android.os.UserHandle> getUserProfiles();
     method public android.os.Bundle getUserRestrictions();
     method @RequiresPermission(anyOf={"android.permission.MANAGE_USERS", "android.permission.INTERACT_ACROSS_USERS"}, conditional=true) public android.os.Bundle getUserRestrictions(android.os.UserHandle);
@@ -32038,6 +32039,8 @@ package android.os {
     field public static final String DISALLOW_USER_SWITCH = "no_user_switch";
     field public static final String ENSURE_VERIFY_APPS = "ensure_verify_apps";
     field public static final String KEY_RESTRICTIONS_PENDING = "restrictions_pending";
+    field public static final int PRIVACY_SENSITIVITY_DEFAULT = 0; // 0x0
+    field public static final int PRIVACY_SENSITIVITY_LOCATION = 1; // 0x1
     field public static final int QUIET_MODE_DISABLE_ONLY_IF_CREDENTIAL_NOT_REQUIRED = 1; // 0x1
     field public static final int USER_CREATION_FAILED_NOT_PERMITTED = 1; // 0x1
     field public static final int USER_CREATION_FAILED_NO_MORE_USERS = 2; // 0x2
@@ -51428,7 +51431,6 @@ package android.view.autofill {
 
   public final class AutofillManager {
     method public void cancel();
-    method public void clearAutofillRequestCallback();
     method public void commit();
     method public void disableAutofillServices();
     method @Nullable public android.content.ComponentName getAutofillServiceComponentName();
@@ -51454,7 +51456,6 @@ package android.view.autofill {
     method public void registerCallback(@Nullable android.view.autofill.AutofillManager.AutofillCallback);
     method public void requestAutofill(@NonNull android.view.View);
     method public void requestAutofill(@NonNull android.view.View, int, @NonNull android.graphics.Rect);
-    method public void setAutofillRequestCallback(@NonNull java.util.concurrent.Executor, @NonNull android.view.autofill.AutofillRequestCallback);
     method public void setUserData(@Nullable android.service.autofill.UserData);
     method public void unregisterCallback(@Nullable android.view.autofill.AutofillManager.AutofillCallback);
     field public static final String EXTRA_ASSIST_STRUCTURE = "android.view.autofill.extra.ASSIST_STRUCTURE";
@@ -51471,10 +51472,6 @@ package android.view.autofill {
     field public static final int EVENT_INPUT_HIDDEN = 2; // 0x2
     field public static final int EVENT_INPUT_SHOWN = 1; // 0x1
     field public static final int EVENT_INPUT_UNAVAILABLE = 3; // 0x3
-  }
-
-  public interface AutofillRequestCallback {
-    method public void onFillRequest(@Nullable android.view.inputmethod.InlineSuggestionsRequest, @NonNull android.os.CancellationSignal, @NonNull android.service.autofill.FillCallback);
   }
 
   public final class AutofillValue implements android.os.Parcelable {
@@ -51847,12 +51844,10 @@ package android.view.inputmethod {
     ctor public InlineSuggestionsRequest.Builder(@NonNull java.util.List<android.widget.inline.InlinePresentationSpec>);
     method @NonNull public android.view.inputmethod.InlineSuggestionsRequest.Builder addInlinePresentationSpecs(@NonNull android.widget.inline.InlinePresentationSpec);
     method @NonNull public android.view.inputmethod.InlineSuggestionsRequest build();
-    method @NonNull public android.view.inputmethod.InlineSuggestionsRequest.Builder setClientSupported(boolean);
     method @NonNull public android.view.inputmethod.InlineSuggestionsRequest.Builder setExtras(@NonNull android.os.Bundle);
     method @NonNull public android.view.inputmethod.InlineSuggestionsRequest.Builder setInlinePresentationSpecs(@NonNull java.util.List<android.widget.inline.InlinePresentationSpec>);
     method @NonNull public android.view.inputmethod.InlineSuggestionsRequest.Builder setInlineTooltipPresentationSpec(@NonNull android.widget.inline.InlinePresentationSpec);
     method @NonNull public android.view.inputmethod.InlineSuggestionsRequest.Builder setMaxSuggestionCount(int);
-    method @NonNull public android.view.inputmethod.InlineSuggestionsRequest.Builder setServiceSupported(boolean);
     method @NonNull public android.view.inputmethod.InlineSuggestionsRequest.Builder setSupportedLocales(@NonNull android.os.LocaleList);
   }
 
