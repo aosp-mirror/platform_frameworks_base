@@ -36,6 +36,7 @@ import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
+import android.hardware.fingerprint.ISidefpsController;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.Binder;
 import android.os.Handler;
@@ -90,6 +91,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
 
     @Nullable private IFingerprint mDaemon;
     @Nullable private IUdfpsOverlayController mUdfpsOverlayController;
+    @Nullable private ISidefpsController mSidefpsController;
 
     private final class BiometricTaskStackListener extends TaskStackListener {
         @Override
@@ -330,7 +332,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                     mSensors.get(sensorId).getLazySession(), token,
                     new ClientMonitorCallbackConverter(receiver), userId, hardwareAuthToken,
                     opPackageName, FingerprintUtils.getInstance(sensorId), sensorId,
-                    mUdfpsOverlayController, maxTemplatesPerUser, enrollReason);
+                    mUdfpsOverlayController, mSidefpsController, maxTemplatesPerUser, enrollReason);
             scheduleForSensor(sensorId, client, new BaseClientMonitor.Callback() {
 
                 @Override
@@ -528,6 +530,11 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
     @Override
     public void setUdfpsOverlayController(@NonNull IUdfpsOverlayController controller) {
         mUdfpsOverlayController = controller;
+    }
+
+    @Override
+    public void setSidefpsController(@NonNull ISidefpsController controller) {
+        mSidefpsController = controller;
     }
 
     @Override
