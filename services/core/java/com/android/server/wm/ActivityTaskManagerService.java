@@ -3721,6 +3721,20 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
+    @Override
+    public void detachNavigationBarFromApp(@NonNull IBinder transition) {
+        mAmInternal.enforceCallingPermission(CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS,
+                "detachNavigationBarFromApp");
+        final long token = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                getTransitionController().legacyDetachNavigationBarFromApp(transition);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
     void dumpLastANRLocked(PrintWriter pw) {
         pw.println("ACTIVITY MANAGER LAST ANR (dumpsys activity lastanr)");
         if (mLastANRState == null) {

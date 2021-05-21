@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.view.WindowManager.TRANSIT_CLOSE;
+import static android.view.WindowManager.TRANSIT_FLAG_IS_RECENTS;
 import static android.view.WindowManager.TRANSIT_OPEN;
 
 import android.annotation.NonNull;
@@ -33,6 +34,8 @@ import android.window.TransitionRequestInfo;
 
 import com.android.internal.protolog.ProtoLogGroup;
 import com.android.internal.protolog.common.ProtoLog;
+import com.android.server.LocalServices;
+import com.android.server.statusbar.StatusBarManagerInternal;
 
 import java.util.ArrayList;
 
@@ -63,8 +66,12 @@ class TransitionController {
     /** The transition currently being constructed (collecting participants). */
     private Transition mCollectingTransition = null;
 
+    // TODO(b/188595497): remove when not needed.
+    final StatusBarManagerInternal mStatusBar;
+
     TransitionController(ActivityTaskManagerService atm) {
         mAtm = atm;
+        mStatusBar = LocalServices.getService(StatusBarManagerInternal.class);
     }
 
     /** @see #createTransition(int, int) */
@@ -286,4 +293,22 @@ class TransitionController {
         mCollectingTransition = null;
     }
 
+    /**
+     * Explicitly mark the collectingTransition as being part of recents gesture. Used for legacy
+     * behaviors.
+     * TODO(b/188669821): Remove once legacy recents behavior is moved to shell.
+     */
+    void setIsLegacyRecents() {
+        if (mCollectingTransition == null) return;
+        mCollectingTransition.addFlag(TRANSIT_FLAG_IS_RECENTS);
+    }
+
+    void legacyDetachNavigationBarFromApp(@NonNull IBinder token) {
+        final Transition transition = Transition.fromBinder(token);
+        if (transition == null || !mPlayingTransitions.contains(transition)) {
+            Slog.e(TAG, "Transition isn't playing: " + token);
+            return;
+        }
+        transition.legacyRestoreNavigationBarFromApp();
+    }
 }

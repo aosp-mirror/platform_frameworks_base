@@ -25,6 +25,7 @@ import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
+import android.app.ActivityTaskManager;
 import android.graphics.Rect;
 import android.os.IBinder;
 import android.os.Parcelable;
@@ -135,7 +136,7 @@ public class RemoteTransitionCompat implements Parcelable {
                 }
                 t.apply();
                 mRecentsSession.setup(controller, info, finishedCallback, pausingTask,
-                        leashMap);
+                        leashMap, mToken);
                 recents.onAnimationStart(mRecentsSession, apps, wallpapers, new Rect(0, 0, 0, 0),
                         new Rect());
             }
@@ -178,10 +179,11 @@ public class RemoteTransitionCompat implements Parcelable {
         private TransitionInfo mInfo = null;
         private SurfaceControl mOpeningLeash = null;
         private ArrayMap<SurfaceControl, SurfaceControl> mLeashMap = null;
+        private IBinder mTransition = null;
 
         void setup(RecentsAnimationControllerCompat wrapped, TransitionInfo info,
                 IRemoteTransitionFinishedCallback finishCB, WindowContainerToken pausingTask,
-                ArrayMap<SurfaceControl, SurfaceControl> leashMap) {
+                ArrayMap<SurfaceControl, SurfaceControl> leashMap, IBinder transition) {
             if (mInfo != null) {
                 throw new IllegalStateException("Trying to run a new recents animation while"
                         + " recents is already active.");
@@ -191,6 +193,7 @@ public class RemoteTransitionCompat implements Parcelable {
             mFinishCB = finishCB;
             mPausingTask = pausingTask;
             mLeashMap = leashMap;
+            mTransition = transition;
         }
 
         @SuppressLint("NewApi")
@@ -298,6 +301,7 @@ public class RemoteTransitionCompat implements Parcelable {
             mInfo = null;
             mOpeningLeash = null;
             mLeashMap = null;
+            mTransition = null;
         }
 
         @Override public void setDeferCancelUntilNextTransition(boolean defer, boolean screenshot) {
@@ -317,6 +321,17 @@ public class RemoteTransitionCompat implements Parcelable {
          */
         @Override public boolean removeTask(int taskId) {
             return mWrapped != null ? mWrapped.removeTask(taskId) : false;
+        }
+
+        /**
+         * @see IRecentsAnimationController#detachNavigationBarFromApp
+         */
+        @Override public void detachNavigationBarFromApp(boolean moveHomeToTop) {
+            try {
+                ActivityTaskManager.getService().detachNavigationBarFromApp(mTransition);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to detach the navigation bar from app", e);
+            }
         }
     }
 
