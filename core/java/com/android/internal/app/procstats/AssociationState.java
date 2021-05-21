@@ -322,6 +322,15 @@ public final class AssociationState {
                 mActiveDuration = 0;
                 mActiveDurations = null;
             }
+            // We're actually resetting the common sources in process state already,
+            // resetting it here too in case they're out of sync.
+            if (mAssociationState != null) {
+                final SourceState commonSource = getCommonSourceState(false);
+                if (commonSource != null) {
+                    commonSource.resetSafely(now);
+                    mCommonSourceState = null;
+                }
+            }
         }
 
         void commitStateTime(long nowUptime) {
