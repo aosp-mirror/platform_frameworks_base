@@ -134,6 +134,8 @@ public class BinderCallsStatsService extends Binder {
         private static final String SETTINGS_COLLECT_LATENCY_DATA_KEY = "collect_Latency_data";
         private static final String SETTINGS_LATENCY_OBSERVER_SAMPLING_INTERVAL_KEY =
                 "latency_observer_sampling_interval";
+        private static final String SETTINGS_LATENCY_OBSERVER_PUSH_INTERVAL_MINUTES_KEY =
+                "latency_observer_push_interval_minutes";
         private static final String SETTINGS_LATENCY_HISTOGRAM_BUCKET_COUNT_KEY =
                 "latency_histogram_bucket_count";
         private static final String SETTINGS_LATENCY_HISTOGRAM_FIRST_BUCKET_SIZE_KEY =
@@ -211,7 +213,9 @@ public class BinderCallsStatsService extends Binder {
                     mParser.getFloat(
                         SETTINGS_LATENCY_HISTOGRAM_BUCKET_SCALE_FACTOR_KEY,
                         BinderLatencyObserver.BUCKET_SCALE_FACTOR_DEFAULT));
-
+            binderLatencyObserver.setPushInterval(mParser.getInt(
+                    SETTINGS_LATENCY_OBSERVER_PUSH_INTERVAL_MINUTES_KEY,
+                    BinderLatencyObserver.STATSD_PUSH_INTERVAL_MINUTES_DEFAULT));
 
             final boolean enabled =
                     mParser.getBoolean(SETTINGS_ENABLED_KEY, BinderCallsStats.ENABLED_DEFAULT);
