@@ -18,10 +18,16 @@ package com.android.server.connectivity;
 
 import static android.net.ConnectivityManager.NetworkCallback;
 import static android.net.ipsec.ike.SaProposal.DH_GROUP_2048_BIT_MODP;
+import static android.net.ipsec.ike.SaProposal.DH_GROUP_3072_BIT_MODP;
+import static android.net.ipsec.ike.SaProposal.DH_GROUP_4096_BIT_MODP;
+import static android.net.ipsec.ike.SaProposal.DH_GROUP_CURVE_25519;
 import static android.net.ipsec.ike.SaProposal.ENCRYPTION_ALGORITHM_AES_CBC;
+import static android.net.ipsec.ike.SaProposal.ENCRYPTION_ALGORITHM_AES_CTR;
 import static android.net.ipsec.ike.SaProposal.ENCRYPTION_ALGORITHM_AES_GCM_12;
 import static android.net.ipsec.ike.SaProposal.ENCRYPTION_ALGORITHM_AES_GCM_16;
 import static android.net.ipsec.ike.SaProposal.ENCRYPTION_ALGORITHM_AES_GCM_8;
+import static android.net.ipsec.ike.SaProposal.ENCRYPTION_ALGORITHM_CHACHA20_POLY1305;
+import static android.net.ipsec.ike.SaProposal.INTEGRITY_ALGORITHM_AES_CMAC_96;
 import static android.net.ipsec.ike.SaProposal.INTEGRITY_ALGORITHM_AES_XCBC_96;
 import static android.net.ipsec.ike.SaProposal.INTEGRITY_ALGORITHM_HMAC_SHA2_256_128;
 import static android.net.ipsec.ike.SaProposal.INTEGRITY_ALGORITHM_HMAC_SHA2_384_192;
@@ -29,8 +35,13 @@ import static android.net.ipsec.ike.SaProposal.INTEGRITY_ALGORITHM_HMAC_SHA2_512
 import static android.net.ipsec.ike.SaProposal.KEY_LEN_AES_128;
 import static android.net.ipsec.ike.SaProposal.KEY_LEN_AES_192;
 import static android.net.ipsec.ike.SaProposal.KEY_LEN_AES_256;
+import static android.net.ipsec.ike.SaProposal.KEY_LEN_UNUSED;
+import static android.net.ipsec.ike.SaProposal.PSEUDORANDOM_FUNCTION_AES128_CMAC;
 import static android.net.ipsec.ike.SaProposal.PSEUDORANDOM_FUNCTION_AES128_XCBC;
 import static android.net.ipsec.ike.SaProposal.PSEUDORANDOM_FUNCTION_HMAC_SHA1;
+import static android.net.ipsec.ike.SaProposal.PSEUDORANDOM_FUNCTION_SHA2_256;
+import static android.net.ipsec.ike.SaProposal.PSEUDORANDOM_FUNCTION_SHA2_384;
+import static android.net.ipsec.ike.SaProposal.PSEUDORANDOM_FUNCTION_SHA2_512;
 
 import android.annotation.NonNull;
 import android.content.Context;
@@ -83,12 +94,6 @@ import java.util.List;
  */
 public class VpnIkev2Utils {
     private static final String TAG = VpnIkev2Utils.class.getSimpleName();
-
-    // TODO: Use IKE library exposed constants when @SystemApi is updated.
-    /** IANA-defined 3072 group for use in IKEv2 */
-    private static final int DH_GROUP_3072_BIT_MODP = 15;
-    /** IANA-defined 4096 group for use in IKEv2 */
-    private static final int DH_GROUP_4096_BIT_MODP = 16;
 
     static IkeSessionParams buildIkeSessionParams(
             @NonNull Context context, @NonNull Ikev2VpnProfile profile, @NonNull Network network) {
@@ -154,12 +159,14 @@ public class VpnIkev2Utils {
         // TODO: Add ability to filter this when IKEv2 API is made Public API
         final List<IkeSaProposal> proposals = new ArrayList<>();
 
-        // Encryption Algorithms: Currently only AES_CBC is supported.
         final IkeSaProposal.Builder normalModeBuilder = new IkeSaProposal.Builder();
 
-        // Currently only AES_CBC is supported.
+        // Add normal mode encryption algorithms
+        normalModeBuilder.addEncryptionAlgorithm(ENCRYPTION_ALGORITHM_AES_CTR, KEY_LEN_AES_256);
         normalModeBuilder.addEncryptionAlgorithm(ENCRYPTION_ALGORITHM_AES_CBC, KEY_LEN_AES_256);
+        normalModeBuilder.addEncryptionAlgorithm(ENCRYPTION_ALGORITHM_AES_CTR, KEY_LEN_AES_192);
         normalModeBuilder.addEncryptionAlgorithm(ENCRYPTION_ALGORITHM_AES_CBC, KEY_LEN_AES_192);
+        normalModeBuilder.addEncryptionAlgorithm(ENCRYPTION_ALGORITHM_AES_CTR, KEY_LEN_AES_128);
         normalModeBuilder.addEncryptionAlgorithm(ENCRYPTION_ALGORITHM_AES_CBC, KEY_LEN_AES_128);
 
         // Authentication/Integrity Algorithms
@@ -167,9 +174,11 @@ public class VpnIkev2Utils {
         normalModeBuilder.addIntegrityAlgorithm(INTEGRITY_ALGORITHM_HMAC_SHA2_384_192);
         normalModeBuilder.addIntegrityAlgorithm(INTEGRITY_ALGORITHM_HMAC_SHA2_256_128);
         normalModeBuilder.addIntegrityAlgorithm(INTEGRITY_ALGORITHM_AES_XCBC_96);
+        normalModeBuilder.addIntegrityAlgorithm(INTEGRITY_ALGORITHM_AES_CMAC_96);
 
         // Add AEAD options
         final IkeSaProposal.Builder aeadBuilder = new IkeSaProposal.Builder();
+        aeadBuilder.addEncryptionAlgorithm(ENCRYPTION_ALGORITHM_CHACHA20_POLY1305, KEY_LEN_UNUSED);
         aeadBuilder.addEncryptionAlgorithm(ENCRYPTION_ALGORITHM_AES_GCM_16, KEY_LEN_AES_256);
         aeadBuilder.addEncryptionAlgorithm(ENCRYPTION_ALGORITHM_AES_GCM_12, KEY_LEN_AES_256);
         aeadBuilder.addEncryptionAlgorithm(ENCRYPTION_ALGORITHM_AES_GCM_8, KEY_LEN_AES_256);
@@ -183,9 +192,17 @@ public class VpnIkev2Utils {
         // Add dh, prf for both builders
         for (final IkeSaProposal.Builder builder : Arrays.asList(normalModeBuilder, aeadBuilder)) {
             builder.addDhGroup(DH_GROUP_4096_BIT_MODP);
+
+            // Curve25519 has the same security strength as MODP 3072 and cost less bytes
+            builder.addDhGroup(DH_GROUP_CURVE_25519);
+
             builder.addDhGroup(DH_GROUP_3072_BIT_MODP);
             builder.addDhGroup(DH_GROUP_2048_BIT_MODP);
+            builder.addPseudorandomFunction(PSEUDORANDOM_FUNCTION_SHA2_512);
+            builder.addPseudorandomFunction(PSEUDORANDOM_FUNCTION_SHA2_384);
+            builder.addPseudorandomFunction(PSEUDORANDOM_FUNCTION_SHA2_256);
             builder.addPseudorandomFunction(PSEUDORANDOM_FUNCTION_AES128_XCBC);
+            builder.addPseudorandomFunction(PSEUDORANDOM_FUNCTION_AES128_CMAC);
             builder.addPseudorandomFunction(PSEUDORANDOM_FUNCTION_HMAC_SHA1);
         }
 
@@ -196,6 +213,8 @@ public class VpnIkev2Utils {
 
     /** Builds a child SA proposal based on the allowed IPsec algorithms */
     private static List<ChildSaProposal> getChildSaProposals(List<String> allowedAlgorithms) {
+        // TODO: Add new IpSecAlgorithm in the followup commit
+
         final List<ChildSaProposal> proposals = new ArrayList<>();
 
         // Add non-AEAD options
