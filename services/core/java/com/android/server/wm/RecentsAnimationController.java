@@ -514,6 +514,7 @@ public class RecentsAnimationController implements DeathRecipient {
     void removeAnimation(TaskAnimationAdapter taskAdapter) {
         ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS,
                 "removeAnimation(%d)", taskAdapter.mTask.mTaskId);
+        taskAdapter.mTask.setCanAffectSystemUiFlags(true);
         taskAdapter.mCapturedFinishCallback.onAnimationFinished(taskAdapter.mLastAnimationType,
                 taskAdapter);
         mPendingAnimations.remove(taskAdapter);
