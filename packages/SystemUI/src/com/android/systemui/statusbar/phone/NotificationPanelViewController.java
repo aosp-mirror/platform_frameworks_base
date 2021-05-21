@@ -1085,8 +1085,7 @@ public class NotificationPanelViewController extends PanelViewController {
     }
 
     private void attachSplitShadeMediaPlayerContainer(FrameLayout container) {
-        mKeyguardMediaController.attachSplitShadeContainer(container,
-                () -> mShouldUseSplitNotificationShade);
+        mKeyguardMediaController.attachSplitShadeContainer(container);
     }
 
     private void initBottomArea() {
