@@ -357,6 +357,22 @@ public class DisplayContentTests extends WindowTestsBase {
         verify(imeContainer).assignRelativeLayer(any(), eq(imeSurfaceParent), anyInt(), eq(true));
     }
 
+    @Test
+    public void testComputeImeTargetReturnsNull_windowDidntRequestIme() {
+        final WindowState win1 = createWindow(null, TYPE_BASE_APPLICATION,
+                new ActivityBuilder(mAtm).setCreateTask(true).build(), "app");
+        final WindowState win2 = createWindow(null, TYPE_BASE_APPLICATION,
+                new ActivityBuilder(mAtm).setCreateTask(true).build(), "app2");
+
+        mDisplayContent.setImeInputTarget(win1);
+        mDisplayContent.setImeLayeringTarget(win2);
+
+        doReturn(true).when(mDisplayContent).shouldImeAttachedToApp();
+        // Compute IME parent returns nothing if current target and window receiving input
+        // are different i.e. if current window didn't request IME.
+        assertNull("computeImeParent() should be null", mDisplayContent.computeImeParent());
+    }
+
     /**
      * This tests root task movement between displays and proper root task's, task's and app token's
      * display container references updates.
