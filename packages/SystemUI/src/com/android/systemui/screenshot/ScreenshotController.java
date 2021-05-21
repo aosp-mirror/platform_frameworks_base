@@ -603,7 +603,7 @@ public class ScreenshotController {
                 // No connection means that the target window wasn't found
                 // or that it cannot support scroll capture.
                 Log.d(TAG, "ScrollCapture: " + mLastScrollCaptureResponse.getDescription() + " ["
-                 + mLastScrollCaptureResponse.getWindowTitle() + "]");
+                        + mLastScrollCaptureResponse.getWindowTitle() + "]");
                 return;
             }
             Log.d(TAG, "ScrollCapture: connected to window ["
@@ -611,6 +611,7 @@ public class ScreenshotController {
 
             final ScrollCaptureResponse response = mLastScrollCaptureResponse;
             mScreenshotView.showScrollChip(/* onClick */ () -> {
+                mScreenshotView.prepareScrollingTransition(response, mScreenBitmap);
                 // Clear the reference to prevent close() in dismissScreenshot
                 mLastScrollCaptureResponse = null;
                 final ListenableFuture<ScrollCaptureController.LongScreenshot> future =
@@ -628,9 +629,14 @@ public class ScreenshotController {
 
                     final Intent intent = new Intent(mContext, LongScreenshotActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    mContext.startActivity(intent);
 
-                    dismissScreenshot(false);
+                    Pair<ActivityOptions, ExitTransitionCoordinator> transition =
+                            ActivityOptions.startSharedElementAnimation(
+                                    mWindow, new ScreenshotExitTransitionCallbacks(), null,
+                                    Pair.create(mScreenshotView.getScrollablePreview(),
+                                            ChooserActivity.FIRST_IMAGE_PREVIEW_TRANSITION_NAME));
+                    transition.second.startExit();
+                    mContext.startActivity(intent, transition.first.toBundle());
                 }, mMainExecutor);
             });
         } catch (CancellationException e) {
@@ -654,7 +660,8 @@ public class ScreenshotController {
                         }
 
                         @Override
-                        public void onWindowDetached() { }
+                        public void onWindowDetached() {
+                        }
                     });
 
         }
@@ -852,24 +859,9 @@ public class ScreenshotController {
      */
     private Supplier<ActionTransition> getActionTransitionSupplier() {
         return () -> {
-            ExitTransitionCallbacks cb = new ExitTransitionCallbacks() {
-                @Override
-                public boolean isReturnTransitionAllowed() {
-                    return false;
-                }
-
-                @Override
-                public void hideSharedElements() {
-                    finishDismiss();
-                }
-
-                @Override
-                public void onFinish() {
-                }
-            };
-
             Pair<ActivityOptions, ExitTransitionCoordinator> transition =
-                    ActivityOptions.startSharedElementAnimation(mWindow, cb, null,
+                    ActivityOptions.startSharedElementAnimation(
+                            mWindow, new ScreenshotExitTransitionCallbacks(), null,
                             Pair.create(mScreenshotView.getScreenshotPreview(),
                                     ChooserActivity.FIRST_IMAGE_PREVIEW_TRANSITION_NAME));
             transition.second.startExit();
@@ -954,5 +946,21 @@ public class ScreenshotController {
                     + ", bounds: " + boundsAspect);
         }
         return matchWithinTolerance;
+    }
+
+    private class ScreenshotExitTransitionCallbacks implements ExitTransitionCallbacks {
+        @Override
+        public boolean isReturnTransitionAllowed() {
+            return false;
+        }
+
+        @Override
+        public void hideSharedElements() {
+            finishDismiss();
+        }
+
+        @Override
+        public void onFinish() {
+        }
     }
 }
