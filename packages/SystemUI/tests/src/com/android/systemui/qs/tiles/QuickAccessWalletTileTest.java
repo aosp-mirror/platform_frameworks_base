@@ -21,6 +21,7 @@ import static android.provider.Settings.Secure.NFC_PAYMENT_DEFAULT_COMPONENT;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static junit.framework.Assert.assertNotSame;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertNotNull;
@@ -155,12 +156,12 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
                 mStatusBarStateController,
                 mActivityStarter,
                 mQSLogger,
-                mQuickAccessWalletClient,
                 mKeyguardStateController,
                 mPackageManager,
                 mSecureSettings,
                 MoreExecutors.directExecutor(),
                 mFeatureFlags);
+        mTile.overrideQuickAccessWalletClientForTest(mQuickAccessWalletClient);
     }
 
     @Test
@@ -172,6 +173,15 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
     public void testIsAvailable_featureFlagIsOff() {
         when(mFeatureFlags.isQuickAccessWalletEnabled()).thenReturn(false);
         assertFalse(mTile.isAvailable());
+    }
+
+    @Test
+    public void testWalletServiceUnavailable_recreateWalletClient() {
+        when(mQuickAccessWalletClient.isWalletServiceAvailable()).thenReturn(false);
+
+        mTile.handleSetListening(true);
+
+        assertNotSame(mQuickAccessWalletClient, mTile.getQuickAccessWalletClient());
     }
 
     @Test
