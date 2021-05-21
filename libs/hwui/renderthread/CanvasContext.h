@@ -90,9 +90,17 @@ public:
      *         and false otherwise (e.g. cache limits have been exceeded).
      */
     bool pinImages(std::vector<SkImage*>& mutableImages) {
+        if (!Properties::isDrawingEnabled()) {
+            return true;
+        }
         return mRenderPipeline->pinImages(mutableImages);
     }
-    bool pinImages(LsaVector<sk_sp<Bitmap>>& images) { return mRenderPipeline->pinImages(images); }
+    bool pinImages(LsaVector<sk_sp<Bitmap>>& images) {
+        if (!Properties::isDrawingEnabled()) {
+            return true;
+        }
+        return mRenderPipeline->pinImages(images);
+    }
 
     /**
      * Unpin any image that had be previously pinned to the GPU cache
