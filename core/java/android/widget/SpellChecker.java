@@ -821,7 +821,7 @@ public class SpellChecker implements SpellCheckerSessionListener {
             // The offset should be rounded up to word boundary.
             int uncheckedLength = sentenceEnd - textChangeStart;
             if (uncheckedLength > MAX_SENTENCE_LENGTH) {
-                sentenceEnd = findSeparator(sequence, sentenceStart + MAX_SENTENCE_LENGTH,
+                sentenceEnd = findSeparator(sequence, textChangeStart + MAX_SENTENCE_LENGTH,
                         sentenceEnd);
                 sentenceStart = roundUpToWordStart(sequence, textChangeStart, sentenceStart);
             } else {
@@ -829,7 +829,7 @@ public class SpellChecker implements SpellCheckerSessionListener {
                         sentenceStart);
             }
         }
-        return new Range(sentenceStart, sentenceEnd);
+        return new Range<>(sentenceStart, Math.max(sentenceStart, sentenceEnd));
     }
 
     private int roundUpToWordStart(CharSequence sequence, int position, int frontBoundary) {
