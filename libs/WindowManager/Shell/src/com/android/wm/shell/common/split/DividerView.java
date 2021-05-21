@@ -36,13 +36,11 @@ import androidx.annotation.Nullable;
 import com.android.internal.policy.DividerSnapAlgorithm;
 import com.android.wm.shell.R;
 import com.android.wm.shell.animation.Interpolators;
-import com.android.wm.shell.common.DisplayImeController;
 
 /**
  * Divider for multi window splits.
  */
-public class DividerView extends FrameLayout implements View.OnTouchListener,
-        DisplayImeController.ImePositionProcessor {
+public class DividerView extends FrameLayout implements View.OnTouchListener {
     public static final long TOUCH_ANIMATION_DURATION = 150;
     public static final long TOUCH_RELEASE_ANIMATION_DURATION = 200;
 
@@ -99,12 +97,6 @@ public class DividerView extends FrameLayout implements View.OnTouchListener,
     }
 
     @Override
-    public void onImeVisibilityChanged(int displayId, boolean isShowing) {
-        if (displayId != getDisplay().getDisplayId()) return;
-        setInteractive(!isShowing);
-    }
-
-    @Override
     public boolean onTouch(View v, MotionEvent event) {
         if (mSplitLayout == null || !mInteractive) {
             return false;
@@ -139,11 +131,10 @@ public class DividerView extends FrameLayout implements View.OnTouchListener,
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
-                mVelocityTracker.addMovement(event);
                 releaseTouching();
-
                 if (!mMoving) break;
 
+                mVelocityTracker.addMovement(event);
                 mVelocityTracker.computeCurrentVelocity(1000 /* units */);
                 final float velocity = isLandscape
                         ? mVelocityTracker.getXVelocity()
@@ -217,7 +208,7 @@ public class DividerView extends FrameLayout implements View.OnTouchListener,
         mViewHost.relayout(lp);
     }
 
-    private void setInteractive(boolean interactive) {
+    void setInteractive(boolean interactive) {
         if (interactive == mInteractive) return;
         mInteractive = interactive;
         releaseTouching();

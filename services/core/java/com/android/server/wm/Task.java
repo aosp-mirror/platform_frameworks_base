@@ -2003,6 +2003,8 @@ class Task extends WindowContainer<WindowContainer> {
             return false;
         }
         if (tda == null) {
+            Slog.w(TAG_TASKS, "Can't find TaskDisplayArea to determine support for multi"
+                    + " window. Task id=" + mTaskId + " attached=" + isAttached());
             return false;
         }
 
@@ -3150,11 +3152,14 @@ class Task extends WindowContainer<WindowContainer> {
 
         // Figure-out min/max possible position depending on if child can show for current user.
         int minPosition = (canShowChild) ? computeMinUserPosition(0, size) : 0;
-        int maxPosition = (canShowChild) ? size : computeMaxUserPosition(size - 1);
+        int maxPosition = (canShowChild) ? size - 1 : computeMaxUserPosition(size - 1);
+        if (!hasChild(wc)) {
+            // Increase the maxPosition because children size will grow once wc is added.
+            ++maxPosition;
+        }
 
         // Factor in always-on-top children in max possible position.
         if (!wc.isAlwaysOnTop()) {
-
             // We want to place all non-always-on-top containers below always-on-top ones.
             while (maxPosition > minPosition) {
                 if (!mChildren.get(maxPosition - 1).isAlwaysOnTop()) break;
@@ -4046,10 +4051,17 @@ class Task extends WindowContainer<WindowContainer> {
         fillTaskInfo(info, true /* stripExtras */);
     }
 
+    void fillTaskInfo(TaskInfo info, boolean stripExtras) {
+        fillTaskInfo(info, stripExtras, getDisplayArea());
+    }
+
     /**
      * Fills in a {@link TaskInfo} with information from this task.
+     *
+     * @param tda consider whether this Task can be put in multi window as it will be attached to
+     *            the give {@link TaskDisplayArea}.
      */
-    void fillTaskInfo(TaskInfo info, boolean stripExtras) {
+    void fillTaskInfo(TaskInfo info, boolean stripExtras, @Nullable TaskDisplayArea tda) {
         getNumRunningActivities(mReuseActivitiesReport);
         info.userId = isLeafTask() ? mUserId : mCurrentUser;
         info.taskId = mTaskId;
@@ -4074,8 +4086,8 @@ class Task extends WindowContainer<WindowContainer> {
         info.numActivities = mReuseActivitiesReport.numActivities;
         info.lastActiveTime = lastActiveTime;
         info.taskDescription = new ActivityManager.TaskDescription(getTaskDescription());
-        info.supportsSplitScreenMultiWindow = supportsSplitScreenWindowingMode();
-        info.supportsMultiWindow = supportsMultiWindow();
+        info.supportsSplitScreenMultiWindow = supportsSplitScreenWindowingModeInDisplayArea(tda);
+        info.supportsMultiWindow = supportsMultiWindowInDisplayArea(tda);
         info.configuration.setTo(getConfiguration());
         // Update to the task's current activity type and windowing mode which may differ from the
         // window configuration
@@ -6066,6 +6078,7 @@ class Task extends WindowContainer<WindowContainer> {
      * @param prev The previously resumed activity, for when in the process
      * of pausing; can be null to call from elsewhere.
      * @param options Activity options.
+     * @param deferPause When {@code true}, this will not pause back tasks.
      *
      * @return Returns true if something is being resumed, or false if
      * nothing happened.
@@ -6076,7 +6089,8 @@ class Task extends WindowContainer<WindowContainer> {
      *       right activity for the current system state.
      */
     @GuardedBy("mService")
-    boolean resumeTopActivityUncheckedLocked(ActivityRecord prev, ActivityOptions options) {
+    boolean resumeTopActivityUncheckedLocked(ActivityRecord prev, ActivityOptions options,
+            boolean deferPause) {
         if (mInResumeTopActivity) {
             // Don't even start recursing.
             return false;
@@ -6089,7 +6103,7 @@ class Task extends WindowContainer<WindowContainer> {
 
             if (isLeafTask()) {
                 if (isFocusableAndVisible()) {
-                    someActivityResumed = resumeTopActivityInnerLocked(prev, options);
+                    someActivityResumed = resumeTopActivityInnerLocked(prev, options, deferPause);
                 }
             } else {
                 int idx = mChildren.size() - 1;
@@ -6102,7 +6116,8 @@ class Task extends WindowContainer<WindowContainer> {
                         break;
                     }
 
-                    someActivityResumed |= child.resumeTopActivityUncheckedLocked(prev, options);
+                    someActivityResumed |= child.resumeTopActivityUncheckedLocked(prev, options,
+                            deferPause);
                     // Doing so in order to prevent IndexOOB since hierarchy might changes while
                     // resuming activities, for example dismissing split-screen while starting
                     // non-resizeable activity.
@@ -6130,8 +6145,15 @@ class Task extends WindowContainer<WindowContainer> {
         return someActivityResumed;
     }
 
+    /** @see #resumeTopActivityUncheckedLocked(ActivityRecord, ActivityOptions, boolean) */
     @GuardedBy("mService")
-    private boolean resumeTopActivityInnerLocked(ActivityRecord prev, ActivityOptions options) {
+    boolean resumeTopActivityUncheckedLocked(ActivityRecord prev, ActivityOptions options) {
+        return resumeTopActivityUncheckedLocked(prev, options, false /* skipPause */);
+    }
+
+    @GuardedBy("mService")
+    private boolean resumeTopActivityInnerLocked(ActivityRecord prev, ActivityOptions options,
+            boolean deferPause) {
         if (!mAtmService.isBooting() && !mAtmService.isBooted()) {
             // Not ready yet!
             return false;
@@ -6227,7 +6249,7 @@ class Task extends WindowContainer<WindowContainer> {
             lastResumed = lastFocusedRootTask.getResumedActivity();
         }
 
-        boolean pausing = taskDisplayArea.pauseBackTasks(next);
+        boolean pausing = !deferPause && taskDisplayArea.pauseBackTasks(next);
         if (mResumedActivity != null) {
             ProtoLog.d(WM_DEBUG_STATES, "resumeTopActivityLocked: Pausing %s", mResumedActivity);
             pausing |= startPausingLocked(false /* uiSleeping */, next,

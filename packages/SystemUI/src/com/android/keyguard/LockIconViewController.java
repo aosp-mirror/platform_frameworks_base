@@ -45,6 +45,7 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.ViewController;
 
@@ -68,6 +69,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     @NonNull private final FalsingManager mFalsingManager;
     @NonNull private final AuthController mAuthController;
     @NonNull private final AccessibilityManager mAccessibilityManager;
+    @NonNull private final ConfigurationController mConfigurationController;
 
     private boolean mHasUdfpsOrFaceAuthFeatures;
     private boolean mUdfpsEnrolled;
@@ -103,7 +105,8 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
             @NonNull FalsingManager falsingManager,
             @NonNull AuthController authController,
             @NonNull DumpManager dumpManager,
-            @NonNull AccessibilityManager accessibilityManager
+            @NonNull AccessibilityManager accessibilityManager,
+            @NonNull ConfigurationController configurationController
     ) {
         super(view);
         mStatusBarStateController = statusBarStateController;
@@ -113,6 +116,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         mKeyguardStateController = keyguardStateController;
         mFalsingManager = falsingManager;
         mAccessibilityManager = accessibilityManager;
+        mConfigurationController = configurationController;
 
         final Context context = view.getContext();
         mButton = context.getResources().getDrawable(
@@ -145,7 +149,13 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         final boolean hasUdfps = mAuthController.getUdfpsSensorLocation() != null;
         mHasUdfpsOrFaceAuthFeatures = hasFaceAuth || hasUdfps;
         if (!mHasUdfpsOrFaceAuthFeatures) {
-            ((ViewGroup) mView.getParent()).removeView(mView);
+            // Posting since removing a view in the middle of onAttach can lead to a crash in the
+            // iteration loop when the view isn't last
+            mView.setVisibility(View.GONE);
+            mView.post(() -> {
+                mView.setVisibility(View.VISIBLE);
+                ((ViewGroup) mView.getParent()).removeView(mView);
+            });
             return;
         }
 
@@ -172,10 +182,8 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         mCanDismissLockScreen = mKeyguardStateController.canDismissLockScreen();
         mStatusBarState = mStatusBarStateController.getState();
 
-        mUnlockIcon.setTint(Utils.getColorAttrDefaultColor(mView.getContext(),
-                R.attr.wallpaperTextColorAccent));
-        mLockIcon.setTint(Utils.getColorAttrDefaultColor(mView.getContext(),
-                R.attr.wallpaperTextColorAccent));
+        updateColors();
+        mConfigurationController.addCallback(mConfigurationListener);
 
         mKeyguardUpdateMonitor.registerCallback(mKeyguardUpdateMonitorCallback);
         mStatusBarStateController.addCallback(mStatusBarStateListener);
@@ -188,6 +196,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
 
     @Override
     protected void onViewDetached() {
+        mConfigurationController.removeCallback(mConfigurationListener);
         mKeyguardUpdateMonitor.removeCallback(mKeyguardUpdateMonitorCallback);
         mStatusBarStateController.removeCallback(mStatusBarStateListener);
         mKeyguardStateController.removeCallback(mKeyguardStateCallback);
@@ -300,6 +309,13 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
                 && !mKeyguardStateController.isKeyguardGoingAway();
     }
 
+    private void updateColors() {
+        final int color = Utils.getColorAttrDefaultColor(mView.getContext(),
+                R.attr.wallpaperTextColorAccent);
+        mUnlockIcon.setTint(color);
+        mLockIcon.setTint(color);
+    }
+
     @Override
     public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("  mShowBouncerButton: " + mShowButton);
@@ -376,6 +392,24 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         public void onKeyguardFadingAwayChanged() {
             updateKeyguardShowing();
             updateVisibility();
+        }
+    };
+
+    private final ConfigurationController.ConfigurationListener mConfigurationListener =
+            new ConfigurationController.ConfigurationListener() {
+        @Override
+        public void onUiModeChanged() {
+            updateColors();
+        }
+
+        @Override
+        public void onThemeChanged() {
+            updateColors();
+        }
+
+        @Override
+        public void onOverlayChanged() {
+            updateColors();
         }
     };
 

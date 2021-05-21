@@ -104,6 +104,10 @@ public class DelegatedAdminReceiver extends BroadcastReceiver {
      * receiver's manifest in order to receive this callback. The default implementation
      * simply throws {@link UnsupportedOperationException}.
      *
+     * <p>
+     * This callback is triggered by a foreground broadcast and the app should ensure that any
+     * long-running work is not executed synchronously inside the callback.
+     *
      * @param context The running context as per {@link #onReceive}.
      * @param intent The received intent as per {@link #onReceive}.
      * @param batchToken The token representing the current batch of network logs.
@@ -129,6 +133,10 @@ public class DelegatedAdminReceiver extends BroadcastReceiver {
      * declare an intent filter for {@link DeviceAdminReceiver#ACTION_SECURITY_LOGS_AVAILABLE} in
      * the receiver's manifest in order to receive this callback. The default implementation
      * simply throws {@link UnsupportedOperationException}.
+     *
+     * <p>
+     * This callback is triggered by a foreground broadcast and the app should ensure that any
+     * long-running work is not executed synchronously inside the callback.
      *
      * @param context The running context as per {@link #onReceive}.
      * @param intent The received intent as per {@link #onReceive}.

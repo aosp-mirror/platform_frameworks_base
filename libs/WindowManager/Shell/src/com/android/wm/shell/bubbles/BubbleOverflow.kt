@@ -18,7 +18,6 @@ package com.android.wm.shell.bubbles
 
 import android.app.ActivityTaskManager.INVALID_TASK_ID
 import android.content.Context
-import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Matrix
 import android.graphics.Path
@@ -82,7 +81,7 @@ class BubbleOverflow(
 
     fun updateResources() {
         bitmapSize = positioner.bubbleBitmapSize
-        iconBitmapSize = (bitmapSize * 0.46f).toInt()
+        iconBitmapSize = (bitmapSize * ICON_BITMAP_SIZE_PERCENT).toInt()
         val bubbleSize = positioner.bubbleSize
         overflowBtn?.layoutParams = FrameLayout.LayoutParams(bubbleSize, bubbleSize)
         expandedView?.updateDimensions()
@@ -93,22 +92,21 @@ class BubbleOverflow(
 
         // Set overflow button accent color, dot color
         val typedValue = TypedValue()
-        context.theme.resolveAttribute(android.R.attr.colorAccent, typedValue, true)
+        context.theme.resolveAttribute(com.android.internal.R.attr.colorAccentPrimary,
+                typedValue, true)
         val colorAccent = res.getColor(typedValue.resourceId, null)
-        overflowBtn?.drawable?.setTint(colorAccent)
         dotColor = colorAccent
+
+        val shapeColor = res.getColor(android.R.color.system_accent1_1000)
+        overflowBtn?.drawable?.setTint(shapeColor)
 
         val iconFactory = BubbleIconFactory(context)
 
         // Update bitmap
-        val nightMode = (res.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-            == Configuration.UI_MODE_NIGHT_YES)
-        val bg = ColorDrawable(res.getColor(
-            if (nightMode) R.color.bubbles_dark else R.color.bubbles_light, null))
-
         val fg = InsetDrawable(overflowBtn?.drawable,
             bitmapSize - iconBitmapSize /* inset */)
-        bitmap = iconFactory.createBadgedIconBitmap(AdaptiveIconDrawable(bg, fg),
+        bitmap = iconFactory.createBadgedIconBitmap(AdaptiveIconDrawable(
+                ColorDrawable(colorAccent), fg),
             null /* user */, true /* shrinkNonAdaptiveIcons */).icon
 
         // Update dot path

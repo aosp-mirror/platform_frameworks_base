@@ -120,7 +120,7 @@ class ControlsUiControllerImpl @Inject constructor (
     private val onSeedingComplete = Consumer<Boolean> {
         accepted ->
             if (accepted) {
-                selectedStructure = controlsController.get().getFavorites().maxBy {
+                selectedStructure = controlsController.get().getFavorites().maxByOrNull {
                     it.controls.size
                 } ?: EMPTY_STRUCTURE
                 updatePreferences(selectedStructure)
@@ -217,22 +217,8 @@ class ControlsUiControllerImpl @Inject constructor (
     }
 
     private fun showInitialSetupView(items: List<SelectionItem>) {
-        val inflater = LayoutInflater.from(context)
-        inflater.inflate(R.layout.controls_no_favorites, parent, true)
-
-        val viewGroup = parent.requireViewById(R.id.controls_no_favorites_group) as ViewGroup
-        viewGroup.setOnClickListener { _: View -> startProviderSelectorActivity() }
-
-        val subtitle = parent.requireViewById<TextView>(R.id.controls_subtitle)
-        subtitle.setText(context.resources.getString(R.string.quick_controls_subtitle))
-
-        val iconRowGroup = parent.requireViewById(R.id.controls_icon_row) as ViewGroup
-        items.forEach {
-            val imageView = inflater.inflate(R.layout.controls_icon, viewGroup, false) as ImageView
-            imageView.setContentDescription(it.getTitle())
-            imageView.setImageDrawable(it.icon)
-            iconRowGroup.addView(imageView)
-        }
+        startProviderSelectorActivity()
+        onDismiss.run()
     }
 
     private fun startFavoritingActivity(si: StructureInfo) {
@@ -261,7 +247,9 @@ class ControlsUiControllerImpl @Inject constructor (
     }
 
     private fun startProviderSelectorActivity() {
-        startActivity(Intent(activityContext, ControlsProviderSelectorActivity::class.java))
+        val i = Intent(activityContext, ControlsProviderSelectorActivity::class.java)
+        i.putExtra(ControlsProviderSelectorActivity.BACK_SHOULD_EXIT, true)
+        startActivity(i)
     }
 
     private fun startActivity(intent: Intent) {

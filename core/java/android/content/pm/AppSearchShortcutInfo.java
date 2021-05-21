@@ -92,7 +92,7 @@ public class AppSearchShortcutInfo extends GenericDocument {
                     .setIndexingType(AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_PREFIXES)
                     .build()
 
-            ).addProperty(new AppSearchSchema.Int64PropertyConfig.Builder(KEY_SHORT_LABEL_RES_ID)
+            ).addProperty(new AppSearchSchema.LongPropertyConfig.Builder(KEY_SHORT_LABEL_RES_ID)
                     .setCardinality(AppSearchSchema.PropertyConfig.CARDINALITY_OPTIONAL)
                     .build()
 
@@ -108,7 +108,7 @@ public class AppSearchShortcutInfo extends GenericDocument {
                     .setIndexingType(AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_PREFIXES)
                     .build()
 
-            ).addProperty(new AppSearchSchema.Int64PropertyConfig.Builder(KEY_LONG_LABEL_RES_ID)
+            ).addProperty(new AppSearchSchema.LongPropertyConfig.Builder(KEY_LONG_LABEL_RES_ID)
                     .setCardinality(AppSearchSchema.PropertyConfig.CARDINALITY_OPTIONAL)
                     .build()
 
@@ -124,7 +124,7 @@ public class AppSearchShortcutInfo extends GenericDocument {
                     .setIndexingType(AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_NONE)
                     .build()
 
-            ).addProperty(new AppSearchSchema.Int64PropertyConfig.Builder(
+            ).addProperty(new AppSearchSchema.LongPropertyConfig.Builder(
                     KEY_DISABLED_MESSAGE_RES_ID)
                     .setCardinality(AppSearchSchema.PropertyConfig.CARDINALITY_OPTIONAL)
                     .build()
@@ -170,7 +170,7 @@ public class AppSearchShortcutInfo extends GenericDocument {
                     .setIndexingType(AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS)
                     .build()
 
-            ).addProperty(new AppSearchSchema.Int64PropertyConfig.Builder(KEY_IMPLICIT_RANK)
+            ).addProperty(new AppSearchSchema.LongPropertyConfig.Builder(KEY_IMPLICIT_RANK)
                     .setCardinality(AppSearchSchema.PropertyConfig.CARDINALITY_OPTIONAL)
                     .build()
 
@@ -184,7 +184,7 @@ public class AppSearchShortcutInfo extends GenericDocument {
                     .setIndexingType(AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS)
                     .build()
 
-            ).addProperty(new AppSearchSchema.Int64PropertyConfig.Builder(KEY_ICON_RES_ID)
+            ).addProperty(new AppSearchSchema.LongPropertyConfig.Builder(KEY_ICON_RES_ID)
                     .setCardinality(AppSearchSchema.PropertyConfig.CARDINALITY_OPTIONAL)
                     .build()
 

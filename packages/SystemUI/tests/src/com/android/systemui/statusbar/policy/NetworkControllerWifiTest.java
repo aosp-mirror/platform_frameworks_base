@@ -43,6 +43,7 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
     public void setUp() throws Exception {
         super.setUp();
         when(mWifiInfo.makeCopy(anyLong())).thenReturn(mWifiInfo);
+        when(mWifiInfo.isPrimary()).thenReturn(true);
     }
 
     @Test
@@ -275,6 +276,20 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
             setLevel(testStrength);
             verifyLastCallStrength(TelephonyIcons.MOBILE_CALL_STRENGTH_ICONS[testStrength]);
         }
+    }
+
+    @Test
+    public void testNonPrimaryWiFi() {
+        String testSsid = "Test SSID";
+        setWifiEnabled(true);
+        setWifiState(true, testSsid);
+        // Set the ImsType to be IMS_TYPE_WLAN
+        setImsType(2);
+        setWifiLevel(1);
+        verifyLastCallStrength(TelephonyIcons.WIFI_CALL_STRENGTH_ICONS[1]);
+        when(mWifiInfo.isPrimary()).thenReturn(false);
+        setWifiLevel(3);
+        verifyLastCallStrength(TelephonyIcons.WIFI_CALL_STRENGTH_ICONS[1]);
     }
 
     protected void setWifiActivity(int activity) {

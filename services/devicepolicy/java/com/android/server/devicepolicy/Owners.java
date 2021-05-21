@@ -62,6 +62,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -97,10 +98,13 @@ class Owners {
     // Holds "context" for device-owner, this must not be show up before device-owner.
     private static final String TAG_DEVICE_OWNER_CONTEXT = "device-owner-context";
     private static final String TAG_DEVICE_OWNER_TYPE = "device-owner-type";
+    private static final String TAG_DEVICE_OWNER_PROTECTED_PACKAGES =
+            "device-owner-protected-packages";
 
     private static final String ATTR_NAME = "name";
     private static final String ATTR_PACKAGE = "package";
     private static final String ATTR_COMPONENT_NAME = "component";
+    private static final String ATTR_SIZE = "size";
     private static final String ATTR_REMOTE_BUGREPORT_URI = "remoteBugreportUri";
     private static final String ATTR_REMOTE_BUGREPORT_HASH = "remoteBugreportHash";
     private static final String ATTR_USERID = "userId";
@@ -128,6 +132,8 @@ class Owners {
 
     // Device owner type for a managed device.
     private final ArrayMap<String, Integer> mDeviceOwnerTypes = new ArrayMap<>();
+
+    private final ArrayMap<String, List<String>> mDeviceOwnerProtectedPackages = new ArrayMap<>();
 
     private int mDeviceOwnerUserId = UserHandle.USER_NULL;
 
@@ -216,6 +222,12 @@ class Owners {
             pushToActivityTaskManagerLocked();
             pushToActivityManagerLocked();
             pushToAppOpsLocked();
+
+            for (ArrayMap.Entry<String, List<String>> entry :
+                    mDeviceOwnerProtectedPackages.entrySet()) {
+                mPackageManagerInternal.setDeviceOwnerProtectedPackages(
+                        entry.getKey(), entry.getValue());
+            }
         }
     }
 
@@ -343,6 +355,12 @@ class Owners {
     void clearDeviceOwner() {
         synchronized (mLock) {
             mDeviceOwnerTypes.remove(mDeviceOwner.packageName);
+            List<String> protectedPackages =
+                    mDeviceOwnerProtectedPackages.remove(mDeviceOwner.packageName);
+            if (protectedPackages != null) {
+                mPackageManagerInternal.setDeviceOwnerProtectedPackages(
+                        mDeviceOwner.packageName, new ArrayList<>());
+            }
             mDeviceOwner = null;
             mDeviceOwnerUserId = UserHandle.USER_NULL;
 
@@ -394,6 +412,12 @@ class Owners {
     void transferDeviceOwnership(ComponentName target) {
         synchronized (mLock) {
             Integer previousDeviceOwnerType = mDeviceOwnerTypes.remove(mDeviceOwner.packageName);
+            List<String> previousProtectedPackages =
+                    mDeviceOwnerProtectedPackages.remove(mDeviceOwner.packageName);
+            if (previousProtectedPackages != null) {
+                mPackageManagerInternal.setDeviceOwnerProtectedPackages(
+                        mDeviceOwner.packageName, new ArrayList<>());
+            }
             // We don't set a name because it's not used anyway.
             // See DevicePolicyManagerService#getDeviceOwnerName
             mDeviceOwner = new OwnerInfo(null, target,
@@ -402,6 +426,10 @@ class Owners {
                     mDeviceOwner.isOrganizationOwnedDevice);
             if (previousDeviceOwnerType != null) {
                 mDeviceOwnerTypes.put(mDeviceOwner.packageName, previousDeviceOwnerType);
+            }
+            if (previousProtectedPackages != null) {
+                mDeviceOwnerProtectedPackages.put(
+                        mDeviceOwner.packageName, previousProtectedPackages);
             }
             pushToPackageManagerLocked();
             pushToActivityTaskManagerLocked();
@@ -583,7 +611,7 @@ class Owners {
         }
     }
 
-    /** Sets the user restrictions migrated flag, and also writes to the file.  */
+    /** Sets the user restrictions migrated flag, and also writes to the file. */
     void setProfileOwnerUserRestrictionsMigrated(int userId) {
         synchronized (mLock) {
             OwnerInfo profileOwner = mProfileOwners.get(userId);
@@ -594,8 +622,10 @@ class Owners {
         }
     }
 
-    /** Sets the indicator that the profile owner manages an organization-owned device,
-     * then write to file. */
+    /**
+     * Sets the indicator that the profile owner manages an organization-owned device,
+     * then write to file.
+     */
     void markProfileOwnerOfOrganizationOwnedDevice(int userId) {
         synchronized (mLock) {
             OwnerInfo profileOwner = mProfileOwners.get(userId);
@@ -640,6 +670,33 @@ class Owners {
         }
     }
 
+    void setDeviceOwnerProtectedPackages(String packageName, List<String> protectedPackages) {
+        synchronized (mLock) {
+            if (!hasDeviceOwner()) {
+                Slog.e(TAG,
+                        "Attempting to set device owner protected packages when there is no "
+                                + "device owner");
+                return;
+            } else if (!mDeviceOwner.packageName.equals(packageName)) {
+                Slog.e(TAG, "Attempting to set device owner protected packages when the provided "
+                        + "package name " + packageName
+                        + " does not match the device owner package name");
+                return;
+            }
+
+            mDeviceOwnerProtectedPackages.put(packageName, protectedPackages);
+            mPackageManagerInternal.setDeviceOwnerProtectedPackages(packageName, protectedPackages);
+            writeDeviceOwner();
+        }
+    }
+
+    List<String> getDeviceOwnerProtectedPackages(String packageName) {
+        synchronized (mLock) {
+            return mDeviceOwnerProtectedPackages.containsKey(packageName)
+                    ? mDeviceOwnerProtectedPackages.get(packageName) : Collections.emptyList();
+        }
+    }
+
     private boolean readLegacyOwnerFileLocked(File file) {
         if (!file.exists()) {
             // Already migrated or the device has no owners.
@@ -649,8 +706,8 @@ class Owners {
             InputStream input = new AtomicFile(file).openRead();
             TypedXmlPullParser parser = Xml.resolvePullParser(input);
             int type;
-            while ((type=parser.next()) != TypedXmlPullParser.END_DOCUMENT) {
-                if (type!=TypedXmlPullParser.START_TAG) {
+            while ((type = parser.next()) != TypedXmlPullParser.END_DOCUMENT) {
+                if (type != TypedXmlPullParser.START_TAG) {
                     continue;
                 }
 
@@ -700,7 +757,7 @@ class Owners {
                 }
             }
             input.close();
-        } catch (XmlPullParserException|IOException e) {
+        } catch (XmlPullParserException | IOException e) {
             Slog.e(TAG, "Error parsing device-owner file", e);
         }
         return true;
@@ -936,6 +993,21 @@ class Owners {
                 }
             }
 
+            if (!mDeviceOwnerProtectedPackages.isEmpty()) {
+                for (ArrayMap.Entry<String, List<String>> entry :
+                        mDeviceOwnerProtectedPackages.entrySet()) {
+                    List<String> protectedPackages = entry.getValue();
+
+                    out.startTag(null, TAG_DEVICE_OWNER_PROTECTED_PACKAGES);
+                    out.attribute(null, ATTR_PACKAGE, entry.getKey());
+                    out.attributeInt(null, ATTR_SIZE, protectedPackages.size());
+                    for (int i = 0, size = protectedPackages.size(); i < size; i++) {
+                        out.attribute(null, ATTR_NAME + i, protectedPackages.get(i));
+                    }
+                    out.endTag(null, TAG_DEVICE_OWNER_PROTECTED_PACKAGES);
+                }
+            }
+
             if (mSystemUpdatePolicy != null) {
                 out.startTag(null, TAG_SYSTEM_UPDATE_POLICY);
                 mSystemUpdatePolicy.saveToXml(out);
@@ -1001,6 +1073,15 @@ class Owners {
                     int deviceOwnerType = parser.getAttributeInt(null, ATTR_DEVICE_OWNER_TYPE_VALUE,
                             DEVICE_OWNER_TYPE_DEFAULT);
                     mDeviceOwnerTypes.put(packageName, deviceOwnerType);
+                    break;
+                case TAG_DEVICE_OWNER_PROTECTED_PACKAGES:
+                    packageName = parser.getAttributeValue(null, ATTR_PACKAGE);
+                    int protectedPackagesSize = parser.getAttributeInt(null, ATTR_SIZE, 0);
+                    List<String> protectedPackages = new ArrayList<>();
+                    for (int i = 0; i < protectedPackagesSize; i++) {
+                        protectedPackages.add(parser.getAttributeValue(null, ATTR_NAME + i));
+                    }
+                    mDeviceOwnerProtectedPackages.put(packageName, protectedPackages);
                     break;
                 default:
                     Slog.e(TAG, "Unexpected tag: " + tag);

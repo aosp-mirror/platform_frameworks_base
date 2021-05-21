@@ -383,14 +383,17 @@ public class PipResizeGestureHandler {
             return;
         }
 
+        final Rect pipBounds = mPipBoundsState.getBounds();
         if (action == MotionEvent.ACTION_POINTER_DOWN) {
-            if (mFirstIndex == -1 && mSecondIndex == -1) {
+            if (mFirstIndex == -1 && mSecondIndex == -1
+                    && pipBounds.contains((int) ev.getRawX(0), (int) ev.getRawY(0))
+                    && pipBounds.contains((int) ev.getRawX(1), (int) ev.getRawY(1))) {
                 mAllowGesture = true;
                 mFirstIndex = 0;
                 mSecondIndex = 1;
                 mDownPoint.set(ev.getRawX(mFirstIndex), ev.getRawY(mFirstIndex));
                 mDownSecondPoint.set(ev.getRawX(mSecondIndex), ev.getRawY(mSecondIndex));
-                mDownBounds.set(mPipBoundsState.getBounds());
+                mDownBounds.set(pipBounds);
 
                 mLastPoint.set(mDownPoint);
                 mLastSecondPoint.set(mLastSecondPoint);
@@ -514,7 +517,18 @@ public class PipResizeGestureHandler {
                         || mLastResizeBounds.height() >= PINCH_RESIZE_AUTO_MAX_RATIO * mMaxSize.y) {
                     resizeRectAboutCenter(mLastResizeBounds, mMaxSize.x, mMaxSize.y);
                 }
-                final float snapFraction = mPipBoundsAlgorithm.getSnapFraction(mLastResizeBounds);
+                final int leftEdge = mLastResizeBounds.left;
+                final Rect movementBounds =
+                        mPipBoundsAlgorithm.getMovementBounds(mLastResizeBounds);
+                final int fromLeft = Math.abs(leftEdge - movementBounds.left);
+                final int fromRight = Math.abs(movementBounds.right - leftEdge);
+                // The PIP will be snapped to either the right or left edge, so calculate which one
+                // is closest to the current position.
+                final int newLeft = fromLeft < fromRight
+                        ? movementBounds.left : movementBounds.right;
+                mLastResizeBounds.offsetTo(newLeft, mLastResizeBounds.top);
+                final float snapFraction = mPipBoundsAlgorithm.getSnapFraction(
+                        mLastResizeBounds, movementBounds);
                 mPipBoundsAlgorithm.applySnapFraction(mLastResizeBounds, snapFraction);
                 mPipTaskOrganizer.scheduleAnimateResizePip(startBounds, mLastResizeBounds,
                         PINCH_RESIZE_SNAP_DURATION, mAngle, callback);

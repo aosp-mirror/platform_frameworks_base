@@ -942,7 +942,12 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      *
      * <p>This callback will be re-triggered if the logs are not retrieved.
      *
-     * <p>This callback is only applicable to device owners.
+     * <p>This callback is only applicable to device owners and profile owners of
+     * organization-owned managed profiles.
+     *
+     * <p>
+     * This callback is triggered by a foreground broadcast and the app should ensure that any
+     * long-running work is not executed synchronously inside the callback.
      *
      * @param context The running context as per {@link #onReceive}.
      * @param intent The received intent as per {@link #onReceive}.
@@ -961,7 +966,11 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * possible to retrieve the network logs batch with the most recent {@code batchToken} provided
      * by this callback. See {@link DevicePolicyManager#setAffiliationIds}.
      *
-     * <p>This callback is only applicable to device owners.
+     * <p>This callback is only applicable to device owners and profile owners.
+     *
+     * <p>
+     * This callback is triggered by a foreground broadcast and the app should ensure that any
+     * long-running work is not executed synchronously inside the callback.
      *
      * @param context The running context as per {@link #onReceive}.
      * @param intent The received intent as per {@link #onReceive}.

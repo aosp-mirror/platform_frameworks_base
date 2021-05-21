@@ -970,8 +970,7 @@ public class Activity extends ContextThemeWrapper
     private UiTranslationController mUiTranslationController;
 
     private SplashScreen mSplashScreen;
-    /** @hide */
-    SplashScreenView mSplashScreenView;
+    private SplashScreenView mSplashScreenView;
 
     private final WindowControllerCallback mWindowControllerCallback =
             new WindowControllerCallback() {
@@ -1631,16 +1630,14 @@ public class Activity extends ContextThemeWrapper
         }
     }
 
-    /**
-     * Clear the splash screen view if exist.
-     * @hide
-     */
-    public void detachSplashScreenView() {
-        synchronized (this) {
-            if (mSplashScreenView != null) {
-                mSplashScreenView = null;
-            }
-        }
+    /** @hide */
+    public void setSplashScreenView(SplashScreenView v) {
+        mSplashScreenView = v;
+    }
+
+    /** @hide */
+    SplashScreenView getSplashScreenView() {
+        return mSplashScreenView;
     }
 
     /**

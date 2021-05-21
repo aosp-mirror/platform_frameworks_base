@@ -18,8 +18,6 @@ package com.android.wm.shell.pip.phone;
 
 import static android.view.WindowManager.SHELL_ROOT_LAYER_PIP;
 
-import static com.android.wm.shell.pip.phone.PipMenuView.ANIM_TYPE_HIDE;
-
 import android.annotation.Nullable;
 import android.app.RemoteAction;
 import android.content.Context;
@@ -171,13 +169,6 @@ public class PhonePipMenuController implements PipMenuController {
     public void detach() {
         hideMenu();
         detachPipMenuView();
-    }
-
-
-    void onPinnedStackAnimationEnded() {
-        if (isMenuVisible()) {
-            mPipMenuView.onPipAnimationEnded();
-        }
     }
 
     private void attachPipMenuView() {
@@ -406,7 +397,10 @@ public class PhonePipMenuController implements PipMenuController {
      * Hides the menu view.
      */
     public void hideMenu() {
-        hideMenu(ANIM_TYPE_HIDE, true /* resize */);
+        final boolean isMenuVisible = isMenuVisible();
+        if (isMenuVisible) {
+            mPipMenuView.hideMenu();
+        }
     }
 
     /**

@@ -154,9 +154,6 @@ applications that come with the platform
         <permission name="android.permission.CHANGE_COMPONENT_ENABLED_STATE" />
         <permission name="android.permission.MODIFY_AUDIO_ROUTING" />
         <permission name="android.permission.GET_RUNTIME_PERMISSION_GROUP_MAPPING" />
-
-        <!-- For permission hub 2 debugging only -->
-        <permission name="android.permission.GET_ACCOUNTS_PRIVILEGED"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.phone">
@@ -269,36 +266,6 @@ applications that come with the platform
         <!-- Permissions required for reading and logging compat changes -->
         <permission name="android.permission.LOG_COMPAT_CHANGE" />
         <permission name="android.permission.READ_COMPAT_CHANGE_CONFIG" />
-    </privapp-permissions>
-
-    <privapp-permissions package="com.android.networkstack">
-        <permission name="android.permission.ACCESS_NETWORK_CONDITIONS"/>
-        <permission name="android.permission.CONNECTIVITY_INTERNAL"/>
-        <permission name="android.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS"/>
-        <permission name="android.permission.CONTROL_VPN"/>
-        <permission name="android.permission.INTERACT_ACROSS_USERS"/>
-        <permission name="android.permission.LOCAL_MAC_ADDRESS"/>
-        <permission name="android.permission.MANAGE_SUBSCRIPTION_PLANS"/>
-        <permission name="android.permission.MANAGE_USB"/>
-        <permission name="android.permission.NETWORK_BYPASS_PRIVATE_DNS"/>
-        <permission name="android.permission.PACKET_KEEPALIVE_OFFLOAD"/>
-        <permission name="android.permission.READ_NETWORK_USAGE_HISTORY"/>
-        <permission name="android.permission.READ_PRECISE_PHONE_STATE"/>
-        <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
-        <permission name="android.permission.READ_WIFI_CREDENTIAL"/>
-        <permission name="android.permission.RECEIVE_DATA_ACTIVITY_CHANGE"/>
-        <permission name="android.permission.TETHER_PRIVILEGED"/>
-        <permission name="android.permission.WRITE_SECURE_SETTINGS"/>
-    </privapp-permissions>
-
-    <privapp-permissions package="com.android.networkstack.tethering">
-        <permission name="android.permission.BLUETOOTH_PRIVILEGED" />
-        <permission name="android.permission.MANAGE_USB"/>
-        <permission name="android.permission.MODIFY_PHONE_STATE"/>
-        <permission name="android.permission.READ_NETWORK_USAGE_HISTORY"/>
-        <permission name="android.permission.TETHER_PRIVILEGED"/>
-        <permission name="android.permission.UPDATE_APP_OPS_STATS"/>
-        <permission name="android.permission.UPDATE_DEVICE_STATS"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.server.telecom">
@@ -472,6 +439,7 @@ applications that come with the platform
         <permission name="android.permission.MANAGE_DEBUGGING" />
         <!-- Permissions required for CTS test - TimeManagerTest -->
         <permission name="android.permission.MANAGE_TIME_AND_ZONE_DETECTION" />
+        <permission name="android.permission.SUGGEST_EXTERNAL_TIME" />
         <!-- Permissions required for CTS test - android.server.biometrics -->
         <permission name="android.permission.USE_BIOMETRIC" />
         <permission name="android.permission.TEST_BIOMETRIC" />

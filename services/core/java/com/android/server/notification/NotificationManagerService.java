@@ -6355,8 +6355,7 @@ public class NotificationManagerService extends SystemService {
         }
 
         // Ensure CallStyle has all the correct actions
-        if ("android.app.Notification$CallStyle".equals(
-                notification.extras.getString(Notification.EXTRA_TEMPLATE))) {
+        if (notification.isStyle(Notification.CallStyle.class)) {
             Notification.Builder builder =
                     Notification.Builder.recoverBuilder(getContext(), notification);
             Notification.CallStyle style = (Notification.CallStyle) builder.getStyle();
@@ -6598,8 +6597,7 @@ public class NotificationManagerService extends SystemService {
             }
         }
 
-        if ("android.app.Notification$CallStyle".equals(
-                n.extras.getString(Notification.EXTRA_TEMPLATE))) {
+        if (n.isStyle(Notification.CallStyle.class)) {
             boolean isForegroundService = (n.flags & FLAG_FOREGROUND_SERVICE) != 0;
             boolean hasFullScreenIntent = n.fullScreenIntent != null;
             if (!isForegroundService && !hasFullScreenIntent) {

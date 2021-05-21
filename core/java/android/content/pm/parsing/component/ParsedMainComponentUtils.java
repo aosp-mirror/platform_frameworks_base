@@ -48,7 +48,8 @@ class ParsedMainComponentUtils {
             TypedArray array, int flags, boolean useRoundIcon, ParseInput input,
             int bannerAttr, int descriptionAttr, @Nullable Integer directBootAwareAttr,
             @Nullable Integer enabledAttr, int iconAttr, int labelAttr, int logoAttr, int nameAttr,
-            @Nullable Integer processAttr, int roundIconAttr, @Nullable Integer splitNameAttr) {
+            @Nullable Integer processAttr, int roundIconAttr, @Nullable Integer splitNameAttr,
+            @Nullable Integer attributionTagsAttr) {
         ParseResult<Component> result = ParsedComponentUtils.parseComponent(component, tag, pkg,
                 array, useRoundIcon, input, bannerAttr, descriptionAttr, iconAttr, labelAttr,
                 logoAttr, nameAttr, roundIconAttr);
@@ -92,6 +93,13 @@ class ParsedMainComponentUtils {
 
         if (splitNameAttr != null) {
             component.splitName = array.getNonConfigurationString(splitNameAttr, 0);
+        }
+
+        if (attributionTagsAttr != null) {
+            final String attributionTags = array.getNonConfigurationString(attributionTagsAttr, 0);
+            if (attributionTags != null) {
+                component.attributionTags = attributionTags.split("\\|");
+            }
         }
 
         return input.success(component);

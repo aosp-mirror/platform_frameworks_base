@@ -881,7 +881,10 @@ public final class CachedAppOptimizer {
 
     @GuardedBy({"mAm", "mProcLock"})
     void freezeAppAsyncLSP(ProcessRecord app) {
-        mFreezeHandler.removeMessages(SET_FROZEN_PROCESS_MSG, app);
+        if (mFreezeHandler.hasMessages(SET_FROZEN_PROCESS_MSG, app)) {
+            // Skip redundant DO_FREEZE message
+            return;
+        }
 
         mFreezeHandler.sendMessageDelayed(
                 mFreezeHandler.obtainMessage(

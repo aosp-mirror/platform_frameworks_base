@@ -27,6 +27,8 @@
     <!-- Do not translate. Defines the slots for the right-hand side icons.  That is to say, the
          icons in the status bar that are not notifications. -->
     <string-array name="config_statusBarIcons">
+        <item><xliff:g id="id">@string/status_bar_no_calling</xliff:g></item>
+        <item><xliff:g id="id">@string/status_bar_call_strength</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_alarm_clock</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_rotate</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_headset</xliff:g></item>
@@ -58,8 +60,6 @@
         <item><xliff:g id="id">@string/status_bar_hotspot</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_mobile</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_airplane</xliff:g></item>
-        <item><xliff:g id="id">@string/status_bar_no_calling</xliff:g></item>
-        <item><xliff:g id="id">@string/status_bar_call_strength</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_battery</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_sensors_off</xliff:g></item>
     </string-array>
@@ -1653,29 +1653,38 @@
     <integer name="config_timeZoneRulesCheckRetryCount">5</integer>
 
     <!-- Whether the geolocation time zone detection feature is enabled. Setting this to false means
-         the feature cannot be used. Setting this to true means it may be used if other
-         configuration allows (see provider configuration below, also compile time overlays). -->
+         the feature cannot be used. Setting this to true means system server components can be
+         tested and location time zone detection may be used if other configuration allows (see
+         location time zone provider configuration settings below). -->
     <bool name="config_enableGeolocationTimeZoneDetection" translatable="false">true</bool>
 
-    <!-- Whether the primary LocationTimeZoneProvider is enabled.
-         Ignored if config_enableGeolocationTimeZoneDetection is false -->
+    <!-- Whether the primary location time zone provider is enabled.
+         This setting is ignored if config_enableGeolocationTimeZoneDetection is false.
+
+         AOSP does not configure a primary location time zone provider. -->
     <bool name="config_enablePrimaryLocationTimeZoneProvider" translatable="false">false</bool>
-    <!-- The package name providing the primary location time zone provider.
+
+    <!-- The package hosting the primary location time zone provider.
          Only used when config_enableGeolocationTimeZoneDetection and
-         enablePrimaryLocationTimeZoneProvider are true. -->
-    <string name="config_primaryLocationTimeZoneProviderPackageName" translatable="false">@null</string>
+         config_enablePrimaryLocationTimeZoneProvider are true.
 
-    <!-- Whether the secondary LocationTimeZoneProvider is enabled.
-         Ignored if config_enableGeolocationTimeZoneDetection is false -->
-    <bool name="config_enableSecondaryLocationTimeZoneProvider" translatable="false">true</bool>
-    <!-- Package name providing the secondary location time zone provider. Used only when
-         config_enableSecondaryLocationTimeZoneOverlay is false.
+         See android.service.timezone.TimeZoneProviderService for how to host location time zone
+         provider services. -->
+    <string name="config_primaryLocationTimeZoneProviderPackageName" translatable="false"></string>
 
-         By default, set to "android" to pick up the default LocationTimeZoneProvider configured in
-         the system server's AndroidManifest.xml. See the
-         com.android.location.timezone.service.v1.SecondaryLocationTimeZoneProvider intent-filter
-         definition there for more information. -->
-    <string name="config_secondaryLocationTimeZoneProviderPackageName" translatable="false">android</string>
+    <!-- Whether the secondary location time zone provider is enabled.
+         This setting is ignored if config_enableGeolocationTimeZoneDetection is false.
+
+         AOSP does not configure a secondary location time zone provider. -->
+    <bool name="config_enableSecondaryLocationTimeZoneProvider" translatable="false">false</bool>
+
+    <!-- The package hosting the secondary location time zone provider.
+         Only used when config_enableGeolocationTimeZoneDetection and
+         config_enableSecondaryLocationTimeZoneProvider are true.
+
+         See android.service.timezone.TimeZoneProviderService for how to host location time zone
+         provider services. -->
+    <string name="config_secondaryLocationTimeZoneProviderPackageName" translatable="false"></string>
 
     <!-- Whether to enable network location overlay which allows network location provider to be
          replaced by an app at run-time. When disabled, only the
@@ -3552,8 +3561,8 @@
     -->
     <integer name="config_largeScreenSmallestScreenWidthDp">600</integer>
 
-    <!-- True if the device is using leagacy split. -->
-    <bool name="config_useLegacySplit">true</bool>
+    <!-- True if the device is using legacy split. -->
+    <bool name="config_useLegacySplit">false</bool>
 
     <!-- True if the device supports running activities on secondary displays. -->
     <bool name="config_supportsMultiDisplay">true</bool>
@@ -3935,6 +3944,9 @@
 
     <!-- Handle volume keys directly in Window Manager without passing them to the foreground app -->
     <bool name="config_handleVolumeKeysInWindowManager">false</bool>
+
+    <!-- Rely or not on hardcoded aliased streams table within AudioService -->
+    <bool name="config_handleVolumeAliasesUsingVolumeGroups">false</bool>
 
     <!-- Volume level of in-call notification tone playback [0..1] -->
     <item name="config_inCallNotificationVolume" format="float" type="dimen">.10</item>

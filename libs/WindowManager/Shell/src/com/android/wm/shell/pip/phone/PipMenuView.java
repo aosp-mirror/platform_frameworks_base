@@ -40,7 +40,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Rect;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -131,6 +130,11 @@ public class PipMenuView extends FrameLayout {
     private ShellExecutor mMainExecutor;
     private Handler mMainHandler;
 
+    /**
+     * Whether the most recent showing of the menu caused a PIP resize, such as when PIP is too
+     * small and it is resized on menu show to fit the actions.
+     */
+    private boolean mDidLastShowMenuResize;
     private final Runnable mHideMenuRunnable = this::hideMenu;
 
     protected View mViewRoot;
@@ -246,6 +250,7 @@ public class PipMenuView extends FrameLayout {
     void showMenu(int menuState, Rect stackBounds, boolean allowMenuTimeout,
             boolean resizeMenuOnShow, boolean withDelay, boolean showResizeHandle) {
         mAllowMenuTimeout = allowMenuTimeout;
+        mDidLastShowMenuResize = resizeMenuOnShow;
         if (mMenuState != menuState) {
             // Disallow touches if the menu needs to resize while showing, and we are transitioning
             // to/from a full menu state.
@@ -279,10 +284,16 @@ public class PipMenuView extends FrameLayout {
             mMenuContainerAnimator.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
+                    mAllowTouches = true;
                     notifyMenuStateChangeFinish(menuState);
                     if (allowMenuTimeout) {
                         repostDelayedHide(INITIAL_DISMISS_DELAY);
                     }
+                }
+
+                @Override
+                public void onAnimationCancel(Animator animation) {
+                    mAllowTouches = true;
                 }
             });
             if (withDelay) {
@@ -326,10 +337,6 @@ public class PipMenuView extends FrameLayout {
         cancelDelayedHide();
     }
 
-    void onPipAnimationEnded() {
-        mAllowTouches = true;
-    }
-
     void updateMenuLayout(Rect bounds) {
         mPipMenuIconsAlgorithm.onBoundsChanged(bounds);
     }
@@ -339,7 +346,7 @@ public class PipMenuView extends FrameLayout {
     }
 
     void hideMenu(Runnable animationEndCallback) {
-        hideMenu(animationEndCallback, true /* notifyMenuVisibility */, true /* resize */,
+        hideMenu(animationEndCallback, true /* notifyMenuVisibility */, mDidLastShowMenuResize,
                 ANIM_TYPE_HIDE);
     }
 

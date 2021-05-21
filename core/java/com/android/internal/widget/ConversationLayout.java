@@ -137,9 +137,7 @@ public class ConversationLayout extends FrameLayout
     private int mContentMarginEnd;
     private Rect mMessagingClipRect;
     private ObservableTextView mAppName;
-    private ViewGroup mActions;
-    private int mConversationContentStart;
-    private int mInternalButtonPadding;
+    private NotificationActionListLayout mActions;
     private boolean mAppNameGone;
     private int mFacePileAvatarSize;
     private int mFacePileAvatarSizeExpandedGroup;
@@ -286,11 +284,6 @@ public class ConversationLayout extends FrameLayout
         mAppName.setOnVisibilityChangedListener((visibility) -> {
             onAppNameVisibilityChanged();
         });
-        mConversationContentStart = getResources().getDimensionPixelSize(
-                R.dimen.conversation_content_start);
-        mInternalButtonPadding
-                = getResources().getDimensionPixelSize(R.dimen.button_padding_horizontal_material)
-                + getResources().getDimensionPixelSize(R.dimen.button_inset_horizontal_material);
         mNotificationHeaderSeparatingMargin = getResources().getDimensionPixelSize(
                 R.dimen.notification_header_separating_margin);
     }
@@ -547,22 +540,8 @@ public class ConversationLayout extends FrameLayout
     }
 
     private void updateActionListPadding() {
-        if (mActions == null) {
-            return;
-        }
-        View firstAction = mActions.getChildAt(0);
-        if (firstAction != null) {
-            // Let's visually position the first action where the content starts
-            int paddingStart = mConversationContentStart;
-
-            MarginLayoutParams layoutParams = (MarginLayoutParams) firstAction.getLayoutParams();
-            paddingStart -= layoutParams.getMarginStart();
-            paddingStart -= mInternalButtonPadding;
-
-            mActions.setPaddingRelative(paddingStart,
-                    mActions.getPaddingTop(),
-                    mActions.getPaddingEnd(),
-                    mActions.getPaddingBottom());
+        if (mActions != null) {
+            mActions.setCollapsibleIndentDimen(R.dimen.call_notification_collapsible_indent);
         }
     }
 

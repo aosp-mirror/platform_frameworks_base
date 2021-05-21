@@ -61,6 +61,7 @@ import android.platform.test.annotations.Presubmit;
 import android.view.SurfaceControl;
 import android.view.View;
 import android.view.WindowManager;
+import android.window.DisplayAreaInfo;
 import android.window.IDisplayAreaOrganizer;
 
 import com.google.android.collect.Lists;
@@ -564,6 +565,31 @@ public class DisplayAreaTest extends WindowTestsBase {
         assertNull(displayArea.mOrganizer);
         verify(mWm.mAtmService.mWindowOrganizerController.mDisplayAreaOrganizerController)
                 .onDisplayAreaVanished(mockDisplayAreaOrganizer, displayArea);
+    }
+
+    @Test
+    public void testGetDisplayAreaInfo() {
+        final DisplayArea<WindowContainer> displayArea = new DisplayArea<>(
+                mWm, BELOW_TASKS, "NewArea", FEATURE_VENDOR_FIRST);
+        mDisplayContent.addChild(displayArea, 0);
+        final DisplayAreaInfo info = displayArea.getDisplayAreaInfo();
+
+        assertThat(info.token).isEqualTo(displayArea.mRemoteToken.toWindowContainerToken());
+        assertThat(info.configuration).isEqualTo(displayArea.getConfiguration());
+        assertThat(info.displayId).isEqualTo(mDisplayContent.getDisplayId());
+        assertThat(info.featureId).isEqualTo(displayArea.mFeatureId);
+        assertThat(info.rootDisplayAreaId).isEqualTo(mDisplayContent.mFeatureId);
+
+        final TaskDisplayArea tda = mDisplayContent.getDefaultTaskDisplayArea();
+        final int tdaIndex = tda.getParent().mChildren.indexOf(tda);
+        final RootDisplayArea root =
+                new DisplayAreaGroup(mWm, "TestRoot", FEATURE_VENDOR_FIRST + 1);
+        mDisplayContent.addChild(root, tdaIndex + 1);
+        displayArea.reparent(root, 0);
+
+        final DisplayAreaInfo info2 = displayArea.getDisplayAreaInfo();
+
+        assertThat(info2.rootDisplayAreaId).isEqualTo(root.mFeatureId);
     }
 
     private static class TestDisplayArea<T extends WindowContainer> extends DisplayArea<T> {

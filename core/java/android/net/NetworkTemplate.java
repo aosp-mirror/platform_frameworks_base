@@ -274,11 +274,14 @@ public class NetworkTemplate implements Parcelable {
     }
 
     /**
-     * Template to match all carrier networks with the given IMSI.
+     * Template to match all metered carrier networks with the given IMSI.
      */
-    public static NetworkTemplate buildTemplateCarrier(@NonNull String subscriberId) {
+    public static NetworkTemplate buildTemplateCarrierMetered(@NonNull String subscriberId) {
         Objects.requireNonNull(subscriberId);
-        return new NetworkTemplate(MATCH_CARRIER, subscriberId, null);
+        return new NetworkTemplate(MATCH_CARRIER, subscriberId,
+                new String[] { subscriberId }, null /* networkId */, METERED_YES, ROAMING_ALL,
+                DEFAULT_NETWORK_ALL, NETWORK_TYPE_ALL, OEM_MANAGED_ALL,
+                SUBSCRIBER_ID_MATCH_RULE_EXACT);
     }
 
     private final int mMatchRule;
@@ -424,7 +427,7 @@ public class NetworkTemplate implements Parcelable {
             builder.append(", subType=").append(mSubType);
         }
         if (mOemManaged != OEM_MANAGED_ALL) {
-            builder.append(", oemManaged=").append(mOemManaged);
+            builder.append(", oemManaged=").append(getOemManagedNames(mOemManaged));
         }
         builder.append(", subscriberIdMatchRule=")
                 .append(subscriberIdMatchRuleToString(mSubscriberIdMatchRule));
@@ -771,6 +774,19 @@ public class NetworkTemplate implements Parcelable {
                 return "CARRIER";
             default:
                 return "UNKNOWN(" + matchRule + ")";
+        }
+    }
+
+    private static String getOemManagedNames(int oemManaged) {
+        switch (oemManaged) {
+            case OEM_MANAGED_ALL:
+                return "OEM_MANAGED_ALL";
+            case OEM_MANAGED_NO:
+                return "OEM_MANAGED_NO";
+            case OEM_MANAGED_YES:
+                return "OEM_MANAGED_YES";
+            default:
+                return NetworkIdentity.getOemManagedNames(oemManaged);
         }
     }
 

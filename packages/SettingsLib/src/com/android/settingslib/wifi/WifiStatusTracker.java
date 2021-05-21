@@ -80,36 +80,41 @@ public class WifiStatusTracker {
         @Override
         public void onCapabilitiesChanged(
                 Network network, NetworkCapabilities networkCapabilities) {
-            if (!mNetworks.contains(network.getNetId())) {
-                // New network
-                boolean isVcnOverWifi =
-                        networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
-                                && (Utils.tryGetWifiInfoForVcn(networkCapabilities) != null);
-                boolean isWifi =
-                        networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI);
-                if (isVcnOverWifi || isWifi) {
-                    mNetworks.add(network.getNetId());
-                }
-            }
-
+            boolean isVcnOverWifi = false;
+            boolean isWifi = false;
             WifiInfo wifiInfo = null;
             if (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
                 wifiInfo = Utils.tryGetWifiInfoForVcn(networkCapabilities);
+                isVcnOverWifi = (wifiInfo != null);
             } else if (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
                 wifiInfo = (WifiInfo) networkCapabilities.getTransportInfo();
+                isWifi = true;
             }
-            String log = new StringBuilder()
-                    .append(SSDF.format(System.currentTimeMillis())).append(",")
-                    .append("onCapabilitiesChanged: ")
-                    .append("network=").append(network).append(",")
-                    .append("networkCapabilities=").append(networkCapabilities)
-                    .toString();
-            recordLastWifiNetwork(log);
-            if (wifiInfo != null) {
-                updateWifiInfo(wifiInfo);
-                updateStatusLabel();
-                mCallback.run();
+            // As long as it is a WiFi network, we will log it in the dumpsys for debugging.
+            if (isVcnOverWifi || isWifi) {
+                String log = new StringBuilder()
+                        .append(SSDF.format(System.currentTimeMillis())).append(",")
+                        .append("onCapabilitiesChanged: ")
+                        .append("network=").append(network).append(",")
+                        .append("networkCapabilities=").append(networkCapabilities)
+                        .toString();
+                recordLastWifiNetwork(log);
             }
+            // Ignore the WiFi network if it doesn't contain any valid WifiInfo, or it is not the
+            // primary WiFi.
+            if (wifiInfo == null || !wifiInfo.isPrimary()) {
+                // Remove the network from the tracking list once it becomes non-primary.
+                if (mNetworks.contains(network.getNetId())) {
+                    mNetworks.remove(network.getNetId());
+                }
+                return;
+            }
+            if (!mNetworks.contains(network.getNetId())) {
+                mNetworks.add(network.getNetId());
+            }
+            updateWifiInfo(wifiInfo);
+            updateStatusLabel();
+            mCallback.run();
         }
 
         @Override

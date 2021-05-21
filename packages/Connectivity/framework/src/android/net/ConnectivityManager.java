@@ -40,6 +40,8 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityAnnotations.MultipathPreference;
+import android.net.ConnectivityAnnotations.RestrictBackgroundStatus;
 import android.net.ConnectivityDiagnosticsManager.DataStallReport.DetectionMethod;
 import android.net.IpSecManager.UdpEncapsulationSocket;
 import android.net.SocketKeepalive.Callback;
@@ -1431,10 +1433,18 @@ public class ConnectivityManager {
      * Returns an array of all {@link Network} currently tracked by the
      * framework.
      *
+     * @deprecated This method does not provide any notification of network state changes, forcing
+     *             apps to call it repeatedly. This is inefficient and prone to race conditions.
+     *             Apps should use methods such as
+     *             {@link #registerNetworkCallback(NetworkRequest, NetworkCallback)} instead.
+     *             Apps that desire to obtain information about networks that do not apply to them
+     *             can use {@link NetworkRequest.Builder#setIncludeOtherUidNetworks}.
+     *
      * @return an array of {@link Network} objects.
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
     @NonNull
+    @Deprecated
     public Network[] getAllNetworks() {
         try {
             return mService.getAllNetworks();
@@ -4799,16 +4809,6 @@ public class ConnectivityManager {
             MULTIPATH_PREFERENCE_RELIABILITY |
             MULTIPATH_PREFERENCE_PERFORMANCE;
 
-    /** @hide */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag = true, value = {
-            MULTIPATH_PREFERENCE_HANDOVER,
-            MULTIPATH_PREFERENCE_RELIABILITY,
-            MULTIPATH_PREFERENCE_PERFORMANCE,
-    })
-    public @interface MultipathPreference {
-    }
-
     /**
      * Provides a hint to the calling application on whether it is desirable to use the
      * multinetwork APIs (e.g., {@link Network#openConnection}, {@link Network#bindSocket}, etc.)
@@ -5029,16 +5029,6 @@ public class ConnectivityManager {
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_RESTRICT_BACKGROUND_CHANGED =
             "android.net.conn.RESTRICT_BACKGROUND_CHANGED";
-
-    /** @hide */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag = false, value = {
-            RESTRICT_BACKGROUND_STATUS_DISABLED,
-            RESTRICT_BACKGROUND_STATUS_WHITELISTED,
-            RESTRICT_BACKGROUND_STATUS_ENABLED,
-    })
-    public @interface RestrictBackgroundStatus {
-    }
 
     /**
      * Determines if the calling application is subject to metered network restrictions while

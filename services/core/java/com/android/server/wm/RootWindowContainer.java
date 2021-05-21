@@ -2293,7 +2293,13 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
     boolean resumeFocusedTasksTopActivities(
             Task targetRootTask, ActivityRecord target, ActivityOptions targetOptions) {
+        return resumeFocusedTasksTopActivities(targetRootTask, target, targetOptions,
+                false /* deferPause */);
+    }
 
+    boolean resumeFocusedTasksTopActivities(
+            Task targetRootTask, ActivityRecord target, ActivityOptions targetOptions,
+            boolean deferPause) {
         if (!mTaskSupervisor.readyToResume()) {
             return false;
         }
@@ -2301,7 +2307,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         boolean result = false;
         if (targetRootTask != null && (targetRootTask.isTopRootTaskInDisplayArea()
                 || getTopDisplayFocusedRootTask() == targetRootTask)) {
-            result = targetRootTask.resumeTopActivityUncheckedLocked(target, targetOptions);
+            result = targetRootTask.resumeTopActivityUncheckedLocked(target, targetOptions,
+                    deferPause);
         }
 
         for (int displayNdx = getChildCount() - 1; displayNdx >= 0; --displayNdx) {

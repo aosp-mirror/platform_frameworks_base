@@ -124,16 +124,6 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     @Override
     public void onInit() {
         mKeyguardSliceViewController.init();
-    }
-
-    @Override
-    protected void onViewAttached() {
-        if (CUSTOM_CLOCKS_ENABLED) {
-            mClockManager.addOnClockChangedListener(mClockChangedListener);
-        }
-        mColorExtractor.addOnColorsChangedListener(mColorsListener);
-        mView.updateColors(getGradientColors());
-        updateAodIcons();
 
         mClockFrame = mView.findViewById(R.id.lockscreen_clock_view);
         mLargeClockFrame = mView.findViewById(R.id.lockscreen_clock_view_large);
@@ -157,6 +147,16 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
                         mKeyguardUpdateMonitor,
                         mBypassController);
         mLargeClockViewController.init();
+    }
+
+    @Override
+    protected void onViewAttached() {
+        if (CUSTOM_CLOCKS_ENABLED) {
+            mClockManager.addOnClockChangedListener(mClockChangedListener);
+        }
+        mColorExtractor.addOnColorsChangedListener(mColorsListener);
+        mView.updateColors(getGradientColors());
+        updateAodIcons();
 
         if (mSmartspaceController.isEnabled()) {
             mSmartspaceView = mSmartspaceController.buildAndConnectView(mView);
@@ -259,6 +259,9 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             mClockViewController.refreshTime();
             mLargeClockViewController.refreshTime();
         }
+        if (mSmartspaceController != null) {
+            mSmartspaceController.requestSmartspaceUpdate();
+        }
 
         mView.refresh();
     }
@@ -307,8 +310,6 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         NotificationIconContainer nic = (NotificationIconContainer)
                 mView.findViewById(
                         com.android.systemui.R.id.left_aligned_notification_icon_container);
-
-        // alt icon area is set in KeyguardClockSwitchController
         mNotificationIconAreaController.setupAodIcons(nic);
     }
 

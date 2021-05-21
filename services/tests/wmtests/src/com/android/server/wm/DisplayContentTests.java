@@ -31,6 +31,7 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.FLAG_PRIVATE;
 import static android.view.DisplayCutout.BOUNDS_POSITION_TOP;
 import static android.view.DisplayCutout.fromBoundingRect;
+import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.Surface.ROTATION_0;
@@ -349,7 +350,9 @@ public class DisplayContentTests extends WindowTestsBase {
         doReturn(imeSurfaceParent).when(mDisplayContent).computeImeParent();
         spyOn(imeContainer);
 
-        mDisplayContent.updateImeParent();
+        mDisplayContent.setImeInputTarget(startingWin);
+        mDisplayContent.onConfigurationChanged(new Configuration());
+        verify(mDisplayContent).updateImeParent();
 
         // Force reassign the relative layer when the IME surface parent is changed.
         verify(imeContainer).assignRelativeLayer(any(), eq(imeSurfaceParent), anyInt(), eq(true));
@@ -1275,6 +1278,7 @@ public class DisplayContentTests extends WindowTestsBase {
         // Assume that the display rotation is changed so it is frozen in preparation for animation.
         doReturn(true).when(rotationAnim).hasScreenshot();
         mWm.mDisplayFrozen = true;
+        displayContent.getDisplayRotation().setRotation((displayContent.getRotation() + 1) % 4);
         displayContent.setRotationAnimation(rotationAnim);
         // The fade rotation animation also starts to hide some non-app windows.
         assertNotNull(displayContent.getFadeRotationAnimationController());
@@ -2134,6 +2138,31 @@ public class DisplayContentTests extends WindowTestsBase {
     public void testRemoveRootTaskWithActivityTypes() {
         removeRootTaskTests(() -> mRootWindowContainer.removeRootTasksWithActivityTypes(
                 ACTIVITY_TYPE_STANDARD));
+    }
+
+    @UseTestDisplay(addWindows = W_INPUT_METHOD)
+    @Test
+    public void testImeChildWindowFocusWhenImeLayeringTargetChanges() {
+        final WindowState imeChildWindow =
+                createWindow(mImeWindow, TYPE_APPLICATION_ATTACHED_DIALOG, "imeChildWindow");
+        makeWindowVisibleAndDrawn(imeChildWindow, mImeWindow);
+        assertTrue(imeChildWindow.canReceiveKeys());
+        mDisplayContent.setInputMethodWindowLocked(mImeWindow);
+
+        // Verify imeChildWindow can be focused window if the next IME target requests IME visible.
+        final WindowState imeAppTarget =
+                createWindow(null, TYPE_BASE_APPLICATION, mDisplayContent, "imeAppTarget");
+        mDisplayContent.setImeLayeringTarget(imeAppTarget);
+        spyOn(imeAppTarget);
+        doReturn(true).when(imeAppTarget).getRequestedVisibility(ITYPE_IME);
+        assertEquals(imeChildWindow, mDisplayContent.findFocusedWindow());
+
+        // Verify imeChildWindow doesn't be focused window if the next IME target does not
+        // request IME visible.
+        final WindowState nextImeAppTarget =
+                createWindow(null, TYPE_BASE_APPLICATION, mDisplayContent, "nextImeAppTarget");
+        mDisplayContent.setImeLayeringTarget(nextImeAppTarget);
+        assertNotEquals(imeChildWindow, mDisplayContent.findFocusedWindow());
     }
 
     private void removeRootTaskTests(Runnable runnable) {

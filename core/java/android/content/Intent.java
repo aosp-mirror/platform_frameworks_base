@@ -31,6 +31,7 @@ import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.app.AppGlobals;
+import android.bluetooth.BluetoothDevice;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
@@ -11463,7 +11464,7 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * @hide
      */
-    public void prepareToEnterProcess(boolean fromProtectedComponent) {
+    public void prepareToEnterProcess(boolean fromProtectedComponent, AttributionSource source) {
         // We just entered destination process, so we should be able to read all
         // parcelables inside.
         setDefusable(true);
@@ -11471,10 +11472,10 @@ public class Intent implements Parcelable, Cloneable {
         if (mSelector != null) {
             // We can't recursively claim that this data is from a protected
             // component, since it may have been filled in by a malicious app
-            mSelector.prepareToEnterProcess(false);
+            mSelector.prepareToEnterProcess(false, source);
         }
         if (mClipData != null) {
-            mClipData.prepareToEnterProcess();
+            mClipData.prepareToEnterProcess(source);
         }
 
         if (mContentUserHint != UserHandle.USER_CURRENT) {
@@ -11486,6 +11487,16 @@ public class Intent implements Parcelable, Cloneable {
 
         if (fromProtectedComponent) {
             mLocalFlags |= LOCAL_FLAG_FROM_PROTECTED_COMPONENT;
+        }
+
+        // Special attribution fix-up logic for any BluetoothDevice extras
+        // passed via Bluetooth intents
+        if (mAction != null && mAction.startsWith("android.bluetooth.")
+                && hasExtra(BluetoothDevice.EXTRA_DEVICE)) {
+            final BluetoothDevice device = getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+            if (device != null) {
+                device.prepareToEnterProcess(source);
+            }
         }
     }
 

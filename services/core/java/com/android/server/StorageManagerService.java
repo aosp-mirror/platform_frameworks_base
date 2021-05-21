@@ -248,9 +248,18 @@ class StorageManagerService extends IStorageManager.Stub
 
         @Override
         public void onUserSwitching(@Nullable TargetUser from, @NonNull TargetUser to) {
-            mStorageManagerService.mCurrentUserId = to.getUserIdentifier();
-            // To reset public volume mounts
-            mStorageManagerService.onUserSwitching(mStorageManagerService.mCurrentUserId);
+            int currentUserId = to.getUserIdentifier();
+            mStorageManagerService.mCurrentUserId = currentUserId;
+
+            UserManagerInternal umInternal = LocalServices.getService(UserManagerInternal.class);
+            if (umInternal.isUserUnlocked(currentUserId)) {
+                Slog.d(TAG, "Attempt remount volumes for user: " + currentUserId);
+                mStorageManagerService.maybeRemountVolumes(currentUserId);
+                mStorageManagerService.mRemountCurrentUserVolumesOnUnlock = false;
+            } else {
+                Slog.d(TAG, "Attempt remount volumes for user: " + currentUserId + " on unlock");
+                mStorageManagerService.mRemountCurrentUserVolumesOnUnlock = true;
+            }
         }
 
         @Override
@@ -424,6 +433,8 @@ class StorageManagerService extends IStorageManager.Stub
     private volatile int mExternalStorageAuthorityAppId = -1;
 
     private volatile int mCurrentUserId = UserHandle.USER_SYSTEM;
+
+    private volatile boolean mRemountCurrentUserVolumesOnUnlock = false;
 
     private final Installer mInstaller;
 
@@ -1188,6 +1199,10 @@ class StorageManagerService extends IStorageManager.Stub
         }
 
         mHandler.obtainMessage(H_COMPLETE_UNLOCK_USER, userId).sendToTarget();
+        if (mRemountCurrentUserVolumesOnUnlock && userId == mCurrentUserId) {
+            maybeRemountVolumes(userId);
+            mRemountCurrentUserVolumesOnUnlock = false;
+        }
     }
 
     private void completeUnlockUser(int userId) {
@@ -1245,7 +1260,7 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
-    private void onUserSwitching(int userId) {
+    private void maybeRemountVolumes(int userId) {
         boolean reset = false;
         List<VolumeInfo> volumesToRemount = new ArrayList<>();
         synchronized (mLock) {
@@ -1262,6 +1277,7 @@ class StorageManagerService extends IStorageManager.Stub
         }
 
         for (VolumeInfo vol : volumesToRemount) {
+            Slog.i(TAG, "Remounting volume for user: " + userId + ". Volume: " + vol);
             mHandler.obtainMessage(H_VOLUME_UNMOUNT, vol).sendToTarget();
             mHandler.obtainMessage(H_VOLUME_MOUNT, vol).sendToTarget();
         }

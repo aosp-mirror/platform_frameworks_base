@@ -142,7 +142,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                 mNotificationSectionsManager,
                 mGroupMembershipManger,
                 mGroupExpansionManager,
-                mStatusBarStateController,
                 mAmbientState,
                 mFeatureFlags);
         mStackScrollerInternal.initView(getContext(), mKeyguardBypassEnabledProvider,

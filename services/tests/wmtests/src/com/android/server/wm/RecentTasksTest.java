@@ -1143,6 +1143,48 @@ public class RecentTasksTest extends WindowTestsBase {
         assertNull(lastSnapshotData.bufferSize);
     }
 
+    @Test
+    public void testCreateRecentTaskInfo_detachedTask() {
+        final Task task = createTaskBuilder(".Task").setCreateActivity(true).build();
+        final TaskDisplayArea tda = task.getDisplayArea();
+
+        assertTrue(task.isAttached());
+        assertTrue(task.supportsMultiWindow());
+
+        RecentTaskInfo info = mRecentTasks.createRecentTaskInfo(task, true);
+
+        assertTrue(info.supportsMultiWindow);
+        assertTrue(info.supportsSplitScreenMultiWindow);
+
+        // The task can be put in split screen even if it is not attached now.
+        task.removeImmediately();
+
+        info = mRecentTasks.createRecentTaskInfo(task, true);
+
+        assertTrue(info.supportsMultiWindow);
+        assertTrue(info.supportsSplitScreenMultiWindow);
+
+        // Test non-resizable.
+        // The non-resizable task cannot be put in split screen because of the config.
+        doReturn(false).when(tda).supportsNonResizableMultiWindow();
+        doReturn(false).when(task).isResizeable();
+
+        info = mRecentTasks.createRecentTaskInfo(task, true);
+
+        assertFalse(info.supportsMultiWindow);
+        assertFalse(info.supportsSplitScreenMultiWindow);
+
+        // Even if it is not attached, the non-resizable task can be put in split screen as long as
+        // the device supports it.
+        doReturn(true).when(tda).supportsNonResizableMultiWindow();
+
+        info = mRecentTasks.createRecentTaskInfo(task, true);
+
+        assertTrue(info.supportsMultiWindow);
+        assertTrue(info.supportsSplitScreenMultiWindow);
+
+    }
+
     private TaskSnapshot createSnapshot(Point taskSize, Point bufferSize) {
         HardwareBuffer buffer = null;
         if (bufferSize != null) {
