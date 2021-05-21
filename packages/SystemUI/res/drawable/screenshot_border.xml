@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright (C) 2019 The Android Open Source Project
+  ~ Copyright (C) 2021 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -14,14 +14,10 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<ripple
+<shape
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
-    android:color="@color/global_screenshot_button_ripple">
-    <item android:id="@android:id/background">
-        <shape android:shape="rectangle">
-            <solid android:color="?androidprv:attr/colorAccentSecondary"/>
-            <corners android:radius="@dimen/screenshot_button_corner_radius"/>
-        </shape>
-    </item>
-</ripple>
+    android:shape="rectangle">
+    <solid android:color="?androidprv:attr/colorSurface"/>
+    <corners android:radius="20dp"/>
+</shape>

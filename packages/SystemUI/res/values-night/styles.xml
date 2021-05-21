@@ -37,4 +37,8 @@
         <item name="android:navigationBarColor">?android:attr/colorBackgroundFloating</item>
     </style>
 
+    <style name="Screenshot" parent="@android:style/Theme.DeviceDefault.DayNight">
+        <item name="android:textColorPrimary">?android:attr/textColorPrimaryInverse</item>
+    </style>
+
 </resources>
