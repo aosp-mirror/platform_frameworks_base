@@ -265,7 +265,7 @@ public final class SensorPrivacyService extends SystemService {
                 sensor = CAMERA;
             }
 
-            long token = Binder.clearCallingIdentity();
+            final long token = Binder.clearCallingIdentity();
             try {
                 onSensorUseStarted(uid, packageName, sensor);
             } finally {
@@ -484,7 +484,7 @@ public final class SensorPrivacyService extends SystemService {
                 mIndividualEnabled.put(userId, userIndividualEnabled);
 
                 if (!enable) {
-                    long token = Binder.clearCallingIdentity();
+                    final long token = Binder.clearCallingIdentity();
                     try {
                         // Remove any notifications prompting the user to disable sensory privacy
                         NotificationManager notificationManager =

@@ -3459,7 +3459,7 @@ class StorageManagerService extends IStorageManager.Stub
         // We want to call the manageSpaceActivity as a SystemService and clear identity
         // of the calling App
         int originalUid = Binder.getCallingUidOrThrow();
-        long token = Binder.clearCallingIdentity();
+        final long token = Binder.clearCallingIdentity();
 
         try {
             ApplicationInfo appInfo = mIPackageManager.getApplicationInfo(packageName, 0,

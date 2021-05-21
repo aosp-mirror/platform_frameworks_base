@@ -331,7 +331,7 @@ public class GnssManagerService {
         @Override
         public void onCapabilitiesChanged(GnssCapabilities oldCapabilities,
                 GnssCapabilities newCapabilities) {
-            long ident = Binder.clearCallingIdentity();
+            final long ident = Binder.clearCallingIdentity();
             try {
                 Intent intent = new Intent(LocationManager.ACTION_GNSS_CAPABILITIES_CHANGED)
                         .putExtra(LocationManager.EXTRA_GNSS_CAPABILITIES, newCapabilities)

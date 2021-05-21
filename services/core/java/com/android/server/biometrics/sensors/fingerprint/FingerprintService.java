@@ -262,7 +262,7 @@ public class FingerprintService extends SystemService {
             final boolean isKeyguard = Utils.isKeyguard(getContext(), opPackageName);
 
             // Clear calling identity when checking LockPatternUtils for StrongAuth flags.
-            long identity = Binder.clearCallingIdentity();
+            final long identity1 = Binder.clearCallingIdentity();
             try {
                 if (isKeyguard && Utils.isUserEncryptedOrLockdown(mLockPatternUtils, userId)) {
                     // If this happens, something in KeyguardUpdateMonitor is wrong.
@@ -272,7 +272,7 @@ public class FingerprintService extends SystemService {
                     return;
                 }
             } finally {
-                Binder.restoreCallingIdentity(identity);
+                Binder.restoreCallingIdentity(identity1);
             }
 
             final boolean restricted = getContext().checkCallingPermission(MANAGE_FINGERPRINT)
@@ -296,11 +296,11 @@ public class FingerprintService extends SystemService {
                     provider.second.getSensorProperties(sensorId);
             if (!isKeyguard && !Utils.isSettings(getContext(), opPackageName)
                     && sensorProps != null && sensorProps.isAnyUdfpsType()) {
-                identity = Binder.clearCallingIdentity();
+                final long identity2 = Binder.clearCallingIdentity();
                 try {
                     authenticateWithPrompt(operationId, sensorProps, userId, receiver);
                 } finally {
-                    Binder.restoreCallingIdentity(identity);
+                    Binder.restoreCallingIdentity(identity2);
                 }
             } else {
                 provider.second.scheduleAuthenticate(provider.first, token, operationId, userId,

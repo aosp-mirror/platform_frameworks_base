@@ -2292,7 +2292,7 @@ public class HdmiControlService extends SystemService {
         @Override
         public List<String> getUserCecSettings() {
             initBinderCall();
-            long token = Binder.clearCallingIdentity();
+            final long token = Binder.clearCallingIdentity();
             try {
                 return HdmiControlService.this.getHdmiCecConfig().getUserSettings();
             } finally {
@@ -2303,7 +2303,7 @@ public class HdmiControlService extends SystemService {
         @Override
         public List<String> getAllowedCecSettingStringValues(String name) {
             initBinderCall();
-            long token = Binder.clearCallingIdentity();
+            final long token = Binder.clearCallingIdentity();
             try {
                 return HdmiControlService.this.getHdmiCecConfig().getAllowedStringValues(name);
             } finally {
@@ -2314,7 +2314,7 @@ public class HdmiControlService extends SystemService {
         @Override
         public int[] getAllowedCecSettingIntValues(String name) {
             initBinderCall();
-            long token = Binder.clearCallingIdentity();
+            final long token = Binder.clearCallingIdentity();
             try {
                 List<Integer> allowedValues =
                         HdmiControlService.this.getHdmiCecConfig().getAllowedIntValues(name);
@@ -2327,7 +2327,7 @@ public class HdmiControlService extends SystemService {
         @Override
         public String getCecSettingStringValue(String name) {
             initBinderCall();
-            long token = Binder.clearCallingIdentity();
+            final long token = Binder.clearCallingIdentity();
             try {
                 return HdmiControlService.this.getHdmiCecConfig().getStringValue(name);
             } finally {
@@ -2338,7 +2338,7 @@ public class HdmiControlService extends SystemService {
         @Override
         public void setCecSettingStringValue(String name, String value) {
             initBinderCall();
-            long token = Binder.clearCallingIdentity();
+            final long token = Binder.clearCallingIdentity();
             try {
                 HdmiControlService.this.getHdmiCecConfig().setStringValue(name, value);
             } finally {
@@ -2349,7 +2349,7 @@ public class HdmiControlService extends SystemService {
         @Override
         public int getCecSettingIntValue(String name) {
             initBinderCall();
-            long token = Binder.clearCallingIdentity();
+            final long token = Binder.clearCallingIdentity();
             try {
                 return HdmiControlService.this.getHdmiCecConfig().getIntValue(name);
             } finally {
@@ -2360,7 +2360,7 @@ public class HdmiControlService extends SystemService {
         @Override
         public void setCecSettingIntValue(String name, int value) {
             initBinderCall();
-            long token = Binder.clearCallingIdentity();
+            final long token = Binder.clearCallingIdentity();
             try {
                 HdmiControlService.this.getHdmiCecConfig().setIntValue(name, value);
             } finally {
