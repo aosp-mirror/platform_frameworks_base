@@ -136,8 +136,7 @@
     <string name="accessibility_camera_button" msgid="2938898391716647247">"கேமரா"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"ஃபோன்"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"குரல் உதவி"</string>
-    <!-- no translation found for accessibility_wallet_button (1458258783460555507) -->
-    <skip />
+    <string name="accessibility_wallet_button" msgid="1458258783460555507">"வாலட்"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"திற"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"சாதனம் பூட்டப்பட்டுள்ளது"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="5209142744692162598">"கைரேகைக்காகக் காத்திருக்கிறது"</string>
@@ -1152,8 +1151,6 @@
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"அங்கீகரி"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"சாதனத்தைத் திற"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"கைரேகையைப் பயன்படுத்தி திறந்திடுங்கள்"</string>
-    <!-- no translation found for accessibility_fingerprint_bouncer (7189102492498735519) -->
-    <skip />
-    <!-- no translation found for ongoing_phone_call_content_description (5332334388483099947) -->
-    <skip />
+    <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"அங்கீகாரம் தேவை. கைரேகை சென்சாரைத் தொட்டு அங்கீகரியுங்கள்."</string>
+    <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"செயலில் உள்ள மொபைல் அழைப்பு"</string>
 </resources>

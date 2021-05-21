@@ -460,7 +460,7 @@
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"‏برای استفاده از NFC، قفل را باز کنید"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"این دستگاه به سازمان شما تعلق دارد"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"این دستگاه به <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> تعلق دارد"</string>
-    <string name="do_financed_disclosure_with_name" msgid="6723004643314467864">"این دستگاه را <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> ارائه داده است"</string>
+    <string name="do_financed_disclosure_with_name" msgid="6723004643314467864">"این دستگاه را <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> تأمین کرده است"</string>
     <string name="phone_hint" msgid="6682125338461375925">"انگشتتان را از نماد تلفن تند بکشید"</string>
     <string name="voice_hint" msgid="7476017460191291417">"برای «دستیار صوتی»، تند بکشید"</string>
     <string name="camera_hint" msgid="4519495795000658637">"انگشتتان را از نماد دوربین تند بکشید"</string>
@@ -529,7 +529,7 @@
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"این دستگاه را ولی‌تان مدیریت می‌کند"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"مالک این دستگاه سازمان شما است و ممکن است ترافیک شبکه را پایش کند"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"مالک این دستگاه <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> است و ممکن است ترافیک شبکه را پایش کند"</string>
-    <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"این دستگاه ازسوی <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> تأمین شده است"</string>
+    <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"این دستگاه را <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> تأمین شده است"</string>
     <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"این دستگاه به سازمان شما تعلق دارد و به <xliff:g id="VPN_APP">%1$s</xliff:g> متصل است"</string>
     <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"این دستگاه به <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> تعلق دارد و به <xliff:g id="VPN_APP">%2$s</xliff:g> متصل است"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"این دستگاه به سازمان شما تعلق دارد"</string>
@@ -544,7 +544,7 @@
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"نمایه کاری به <xliff:g id="VPN_APP">%1$s</xliff:g> متصل است"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"نمایه شخصی شما به <xliff:g id="VPN_APP">%1$s</xliff:g> متصل است"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"این دستگاه به <xliff:g id="VPN_APP">%1$s</xliff:g> متصل است"</string>
-    <string name="monitoring_title_financed_device" msgid="3659962357973919387">"این دستگاه ازسوی <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> تأمین شده است"</string>
+    <string name="monitoring_title_financed_device" msgid="3659962357973919387">"این دستگاه را <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> تأمین کرده است"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"مدیریت دستگاه"</string>
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"کنترل نمایه"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"کنترل شبکه"</string>

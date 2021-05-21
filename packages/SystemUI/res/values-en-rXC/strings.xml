@@ -290,7 +290,8 @@
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‎‎‏‎‎‏‎‏‏‎‎‎‏‎‏‎‎‎‏‏‎‏‎‎‎‎‎‎‎‏‎‎‏‎‎‏‏‏‎‏‎‎‎‎‎‏‏‏‎‏‏‎‏‎‎‏‎‎‎‎Mobile hotspot turned off.‎‏‎‎‏‎"</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‎‏‏‏‏‎‎‎‎‏‎‏‏‏‏‏‎‎‎‏‎‏‎‏‎‏‎‎‎‏‏‎‏‏‏‎‎‏‎‎‎‎‏‎‏‏‎‎‎‏‏‏‎‎‎‏‎‎‎‎Mobile hotspot turned on.‎‏‎‎‏‎"</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‎‏‏‎‏‎‎‎‎‏‎‏‏‎‏‎‏‎‏‎‏‎‎‏‏‎‎‎‎‏‏‏‎‏‎‏‎‏‏‏‏‏‏‎‎‏‏‎‏‏‏‎‏‏‏‎‎‏‎‎Screen casting stopped.‎‏‎‎‏‎"</string>
-    <string name="accessibility_quick_settings_work_mode_off" msgid="9106217884005620744">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‏‏‎‎‏‎‏‏‏‏‏‏‏‎‎‏‎‎‎‏‏‏‎‏‎‏‏‎‎‏‎‏‏‏‏‎‏‏‏‎‏‏‎‏‏‎‏‏‏‎‎‎‎‎‎‏‎‎‎‎Work mode paused.‎‏‎‎‏‎"</string>
+    <!-- no translation found for accessibility_quick_settings_work_mode_off (9106217884005620744) -->
+    <skip />
     <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‏‎‏‎‎‏‎‎‎‏‏‏‏‎‎‏‎‎‎‏‎‎‏‎‏‏‎‎‎‎‏‏‎‎‎‎‏‎‏‎‎‏‏‏‏‎‎‏‎‏‎‏‏‎‎‏‏‎‎Work mode on.‎‏‎‎‏‎"</string>
     <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6422896967647049692">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‎‏‎‎‏‎‎‎‏‎‏‎‏‏‎‏‏‎‏‏‎‎‎‎‏‏‎‎‎‏‏‎‎‏‏‎‎‎‏‎‎‏‎‎‏‏‎‏‏‏‏‏‎‏‏‏‎‎‎Work mode paused.‎‏‎‎‏‎"</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‏‏‏‎‏‎‏‎‏‏‎‏‎‏‎‏‎‏‎‏‏‎‎‏‎‏‏‏‎‏‎‎‎‎‏‏‏‏‏‎‏‎‏‎‎‎‏‏‎‏‎‏‎‏‎‏‎‎‎‎Work mode turned on.‎‏‎‎‏‎"</string>
@@ -411,7 +412,8 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‎‎‎‏‏‎‏‏‏‎‎‎‏‎‎‏‎‏‏‎‏‎‏‏‎‏‏‏‏‎‎‏‎‏‏‎‎‏‎‏‎‎‏‎‏‏‎‏‏‎‎‏‏‏‎‏‏‎‎‎‎‏‎‎‏‏‎<xliff:g id="DATA_LIMIT">%s</xliff:g>‎‏‎‎‏‏‏‎ limit‎‏‎‎‏‎"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‏‏‎‎‏‏‎‏‏‎‏‏‏‎‏‏‎‎‎‎‎‏‎‏‏‏‎‎‏‏‎‏‎‎‏‎‏‎‏‏‎‎‏‎‎‏‏‏‏‏‏‏‏‏‏‎‏‏‏‎‎‏‎‎‏‏‎<xliff:g id="DATA_LIMIT">%s</xliff:g>‎‏‎‎‏‏‏‎ warning‎‏‎‎‏‎"</string>
     <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‏‎‎‎‏‏‏‎‎‎‏‏‏‎‏‏‎‏‎‏‏‏‏‏‎‎‎‎‏‏‎‎‎‏‏‏‎‎‏‏‎‏‎‏‎‎‏‏‏‏‎‏‎‎‏‏‎‏‎Work profile‎‏‎‎‏‎"</string>
-    <string name="quick_settings_work_mode_paused" msgid="4841109346916998613">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‎‏‏‎‎‏‎‏‏‏‏‎‎‎‏‎‎‏‏‎‏‎‎‏‏‎‏‎‎‏‏‏‏‎‏‏‏‎‎‏‏‏‏‏‎‎‏‏‏‎‏‏‏‎‏‎‏‎‏‎Paused‎‏‎‎‏‎"</string>
+    <!-- no translation found for quick_settings_work_mode_paused (4841109346916998613) -->
+    <skip />
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‎‏‏‎‎‎‎‏‎‏‎‏‎‎‏‏‏‎‏‎‎‎‏‎‏‏‎‏‏‏‏‎‎‏‏‏‏‏‎‎‏‏‎‎‏‏‏‎‏‏‎‎‎‎‎‏‎‎‎Night Light‎‏‎‎‏‎"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‏‏‎‏‎‎‏‏‏‎‎‏‎‎‎‎‏‎‏‏‎‎‏‏‎‎‎‎‏‏‏‏‏‏‏‎‏‎‏‏‏‎‎‏‏‏‎‏‎‏‏‏‎‎‎‎‎‏‎‎On at sunset‎‏‎‎‏‎"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‎‎‎‎‏‏‎‎‏‎‎‎‏‎‎‎‏‎‎‏‎‏‏‎‎‎‎‎‏‎‎‏‎‏‏‎‎‎‎‎‎‎‎‎‎‏‎‎‎‎‎‏‏‎‏‎‏‎‏‎Until sunrise‎‏‎‎‏‎"</string>

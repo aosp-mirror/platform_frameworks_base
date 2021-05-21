@@ -136,8 +136,7 @@
     <string name="accessibility_camera_button" msgid="2938898391716647247">"కెమెరా"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"ఫోన్"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"వాయిస్ అసిస్టెంట్"</string>
-    <!-- no translation found for accessibility_wallet_button (1458258783460555507) -->
-    <skip />
+    <string name="accessibility_wallet_button" msgid="1458258783460555507">"వాలెట్"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"అన్‌లాక్ చేయి"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"పరికరం లాక్ చేయబడింది"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="5209142744692162598">"వేలిముద్ర కోసం వేచి ఉంది"</string>
@@ -293,8 +292,7 @@
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"స్క్రీన్ ప్రసారం ఆపివేయబడింది."</string>
     <string name="accessibility_quick_settings_work_mode_off" msgid="9106217884005620744">"వర్క్ మోడ్ పాజ్‌లో ఉంది."</string>
     <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"పని మోడ్ ఆన్‌లో ఉంది."</string>
-    <!-- no translation found for accessibility_quick_settings_work_mode_changed_off (6422896967647049692) -->
-    <skip />
+    <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6422896967647049692">"వర్క్ మోడ్ పాజ్‌లో ఉంది."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"పని మోడ్ ఆన్ చేయబడింది."</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"డేటా సేవర్ ఆఫ్ చేయబడింది."</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"డేటా సేవర్ ఆన్ చేయబడింది."</string>
@@ -1153,8 +1151,6 @@
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"ప్రామాణీకరించండి"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"పరికరాన్ని ఎంటర్ చేయండి"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"తెరవడానికి వేలిముద్రను ఉపయోగించండి"</string>
-    <!-- no translation found for accessibility_fingerprint_bouncer (7189102492498735519) -->
-    <skip />
-    <!-- no translation found for ongoing_phone_call_content_description (5332334388483099947) -->
-    <skip />
+    <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"ప్రామాణీకరణ అవసరం. ప్రామాణీకరించడానికి వేలిముద్ర సెన్సార్‌ను తాకండి."</string>
+    <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"ఫోన్ కాల్ జరుగుతోంది"</string>
 </resources>

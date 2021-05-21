@@ -293,8 +293,7 @@
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"स्क्रिन कास्टिङ रोकियो।"</string>
     <string name="accessibility_quick_settings_work_mode_off" msgid="9106217884005620744">"कामसम्बन्धी मोड पज गरियो।"</string>
     <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"कार्य मोड अन।"</string>
-    <!-- no translation found for accessibility_quick_settings_work_mode_changed_off (6422896967647049692) -->
-    <skip />
+    <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6422896967647049692">"कामसम्बन्धी मोड पज गरियो।"</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"कार्य मोड सक्रिय भयो।"</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"डेटा सेभरलाई निष्क्रिय पारियो।"</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"डेटा सेभरलाई सक्रिय गरियो।"</string>
@@ -358,7 +357,7 @@
     <string name="quick_settings_camera_label" msgid="5612076679385269339">"क्यामेरा प्रयोग गर्ने अनुमति"</string>
     <string name="quick_settings_mic_label" msgid="8392773746295266375">"माइक प्रयोग गर्ने अनुमति"</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"उपलब्ध"</string>
-    <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"ब्लक गरिएको"</string>
+    <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"ब्लक गरिएको छ"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"मिडिया उपकरण"</string>
     <string name="quick_settings_rssi_label" msgid="3397615415140356701">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="7499207215265078598">"आपत्‌कालीन कल मात्र"</string>
