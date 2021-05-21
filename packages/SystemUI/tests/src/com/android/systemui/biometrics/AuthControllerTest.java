@@ -103,6 +103,8 @@ public class AuthControllerTest extends SysuiTestCase {
     private FaceManager mFaceManager;
     @Mock
     private UdfpsController mUdfpsController;
+    @Mock
+    private SidefpsController mSidefpsController;
     @Captor
     ArgumentCaptor<IFingerprintAuthenticatorsRegisteredCallback> mAuthenticatorsRegisteredCaptor;
 
@@ -149,7 +151,7 @@ public class AuthControllerTest extends SysuiTestCase {
 
         mAuthController = new TestableAuthController(context, mCommandQueue,
                 mStatusBarStateController, mActivityTaskManager, mFingerprintManager, mFaceManager,
-                () -> mUdfpsController);
+                () -> mUdfpsController, () -> mSidefpsController);
 
         mAuthController.start();
         verify(mFingerprintManager).addAuthenticatorsRegisteredCallback(
@@ -560,9 +562,11 @@ public class AuthControllerTest extends SysuiTestCase {
                 ActivityTaskManager activityTaskManager,
                 FingerprintManager fingerprintManager,
                 FaceManager faceManager,
-                Provider<UdfpsController> udfpsControllerFactory) {
+                Provider<UdfpsController> udfpsControllerFactory,
+                Provider<SidefpsController> sidefpsControllerFactory) {
             super(context, commandQueue, statusBarStateController, activityTaskManager,
-                    fingerprintManager, faceManager, udfpsControllerFactory);
+                    fingerprintManager, faceManager, udfpsControllerFactory,
+                    sidefpsControllerFactory);
         }
 
         @Override
