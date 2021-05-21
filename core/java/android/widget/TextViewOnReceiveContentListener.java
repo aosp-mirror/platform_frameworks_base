@@ -195,15 +195,9 @@ public final class TextViewOnReceiveContentListener implements OnReceiveContentL
      */
     private static boolean isUsageOfImeCommitContentEnabled(@NonNull View view) {
         if (view.getReceiveContentMimeTypes() != null) {
-            if (Log.isLoggable(LOG_TAG, Log.VERBOSE)) {
-                Log.v(LOG_TAG, "Fallback to commitContent disabled (custom callback is set)");
-            }
             return false;
         }
         if (Compatibility.isChangeEnabled(AUTOFILL_NON_TEXT_REQUIRES_ON_RECEIVE_CONTENT_LISTENER)) {
-            if (Log.isLoggable(LOG_TAG, Log.VERBOSE)) {
-                Log.v(LOG_TAG, "Fallback to commitContent disabled (target SDK is above S)");
-            }
             return false;
         }
         return true;
@@ -234,10 +228,6 @@ public final class TextViewOnReceiveContentListener implements OnReceiveContentL
      */
     void setInputConnectionInfo(@NonNull TextView view, @NonNull InputConnection ic,
             @NonNull EditorInfo editorInfo) {
-        if (Log.isLoggable(LOG_TAG, Log.VERBOSE)) {
-            Log.v(LOG_TAG, "setInputConnectionInfo: "
-                    + Arrays.toString(editorInfo.contentMimeTypes));
-        }
         if (!isUsageOfImeCommitContentEnabled(view)) {
             mInputConnectionInfo = null;
             return;
@@ -255,9 +245,6 @@ public final class TextViewOnReceiveContentListener implements OnReceiveContentL
      * callback instance.
      */
     void clearInputConnectionInfo() {
-        if (Log.isLoggable(LOG_TAG, Log.VERBOSE)) {
-            Log.v(LOG_TAG, "clearInputConnectionInfo: " + mInputConnectionInfo);
-        }
         mInputConnectionInfo = null;
     }
 
@@ -277,17 +264,9 @@ public final class TextViewOnReceiveContentListener implements OnReceiveContentL
         }
         final InputConnectionInfo icInfo = mInputConnectionInfo;
         if (icInfo == null) {
-            if (Log.isLoggable(LOG_TAG, Log.VERBOSE)) {
-                Log.v(LOG_TAG, "getEditorInfoMimeTypes: No usable EditorInfo");
-            }
             return null;
         }
-        final String[] editorInfoContentMimeTypes = icInfo.mEditorInfoContentMimeTypes;
-        if (Log.isLoggable(LOG_TAG, Log.VERBOSE)) {
-            Log.v(LOG_TAG, "getEditorInfoMimeTypes: "
-                    + Arrays.toString(editorInfoContentMimeTypes));
-        }
-        return editorInfoContentMimeTypes;
+        return icInfo.mEditorInfoContentMimeTypes;
     }
 
     /**
