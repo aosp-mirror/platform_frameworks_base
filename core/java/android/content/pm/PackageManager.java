@@ -17,6 +17,7 @@
 package android.content.pm;
 
 import android.Manifest;
+import android.annotation.CallbackExecutor;
 import android.annotation.CheckResult;
 import android.annotation.DrawableRes;
 import android.annotation.IntDef;
@@ -95,6 +96,8 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 /**
  * Class for retrieving various kinds of information related to the application
@@ -4694,6 +4697,32 @@ public abstract class PackageManager {
     @NonNull
     public abstract List<PermissionGroupInfo> getAllPermissionGroups(
             @PermissionGroupInfoFlags int flags);
+
+    /**
+     * Get the platform permissions which belong to a particular permission group.
+     *
+     * @param permissionGroupName The permission group whose permissions are desired
+     * @param executor Executor on which to invoke the callback
+     * @param callback A callback which will receive a list of the platform permissions in the
+     *                 group, or empty if the group is not a valid platform group, or there
+     *                 was an exception.
+     */
+    public void getPlatformPermissionsForGroup(@NonNull String permissionGroupName,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull Consumer<List<String>> callback) {}
+
+    /**
+     * Get the platform group of a particular permission, if the permission is a platform
+     * permission.
+     *
+     * @param permissionName The permission name whose group is desired
+     * @param executor Executor on which to invoke the callback
+     * @param callback A callback which will receive the name of the permission group this
+     *                 permission belongs to, or null if it has no group, is not a platform
+     *                 permission, or there was an exception.
+     */
+    public void getGroupOfPlatformPermission(@NonNull String permissionName,
+            @NonNull @CallbackExecutor Executor executor, @NonNull Consumer<String> callback) {}
 
     /**
      * Retrieve all of the information we know about a particular
