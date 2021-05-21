@@ -519,7 +519,7 @@ public class ScreenshotView extends FrameLayout implements
 
         ArrayList<ScreenshotActionChip> chips = new ArrayList<>();
 
-        mShareChip.setText(mContext.getString(com.android.internal.R.string.share));
+        mShareChip.setContentDescription(mContext.getString(com.android.internal.R.string.share));
         mShareChip.setIcon(Icon.createWithResource(mContext, R.drawable.ic_screenshot_share), true);
         mShareChip.setOnClickListener(v -> {
             mShareChip.setIsPending(true);
@@ -531,7 +531,7 @@ public class ScreenshotView extends FrameLayout implements
         });
         chips.add(mShareChip);
 
-        mEditChip.setText(mContext.getString(R.string.screenshot_edit_label));
+        mEditChip.setContentDescription(mContext.getString(R.string.screenshot_edit_label));
         mEditChip.setIcon(Icon.createWithResource(mContext, R.drawable.ic_screenshot_edit), true);
         mEditChip.setOnClickListener(v -> {
             mEditChip.setIsPending(true);

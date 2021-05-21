@@ -34,14 +34,11 @@
             android:id="@+id/screenshot_action_chip_icon"
             android:tint="?android:attr/textColorPrimary"
             android:layout_width="@dimen/screenshot_action_chip_icon_size"
-            android:layout_height="@dimen/screenshot_action_chip_icon_size"
-            android:layout_marginStart="@dimen/screenshot_action_chip_padding_start"
-            android:layout_marginEnd="@dimen/screenshot_action_chip_padding_middle"/>
+            android:layout_height="@dimen/screenshot_action_chip_icon_size"/>
         <TextView
             android:id="@+id/screenshot_action_chip_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/screenshot_action_chip_padding_end"
             android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
             android:textSize="@dimen/screenshot_action_chip_text_size"
             android:textColor="?android:attr/textColorPrimary"/>
