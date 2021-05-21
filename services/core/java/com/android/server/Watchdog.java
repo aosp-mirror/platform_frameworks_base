@@ -658,7 +658,7 @@ public class Watchdog {
                 // We've waited half the deadlock-detection interval.  Pull a stack
                 // trace and wait another half.
                 ActivityManagerService.dumpStackTraces(pids, null, null,
-                        getInterestingNativePids(), null);
+                        getInterestingNativePids(), null, subject);
                 continue;
             }
 
@@ -674,7 +674,7 @@ public class Watchdog {
             StringWriter tracesFileException = new StringWriter();
             final File stack = ActivityManagerService.dumpStackTraces(
                     pids, processCpuTracker, new SparseArray<>(), getInterestingNativePids(),
-                    tracesFileException);
+                    tracesFileException, subject);
 
             // Give some extra time to make sure the stack traces get written.
             // The system's been hanging for a minute, another second or two won't hurt much.
@@ -699,7 +699,8 @@ public class Watchdog {
                         if (mActivity != null) {
                             mActivity.addErrorToDropBox(
                                     "watchdog", null, "system_server", null, null, null,
-                                    localSubject, report.toString(), stack, null, null, null, null);
+                                    null, report.toString(), stack, null, null, null, null);
+
                         }
                         FrameworkStatsLog.write(FrameworkStatsLog.SYSTEM_SERVER_WATCHDOG_OCCURRED,
                                 localSubject);
