@@ -467,6 +467,13 @@ public interface WindowManager extends ViewManager {
     int TRANSIT_FLAG_KEYGUARD_LOCKED = 0x40;
 
     /**
+     * Transition flag: Indicates that this transition is for recents animation.
+     * TODO(b/188669821): Remove once special-case logic moves to shell.
+     * @hide
+     */
+    int TRANSIT_FLAG_IS_RECENTS = 0x80;
+
+    /**
      * @hide
      */
     @IntDef(flag = true, prefix = { "TRANSIT_FLAG_" }, value = {
@@ -476,7 +483,8 @@ public interface WindowManager extends ViewManager {
             TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION,
             TRANSIT_FLAG_APP_CRASHED,
             TRANSIT_FLAG_OPEN_BEHIND,
-            TRANSIT_FLAG_KEYGUARD_LOCKED
+            TRANSIT_FLAG_KEYGUARD_LOCKED,
+            TRANSIT_FLAG_IS_RECENTS
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface TransitionFlags {}

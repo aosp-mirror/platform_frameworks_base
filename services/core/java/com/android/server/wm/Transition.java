@@ -16,10 +16,13 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
+import static android.view.WindowManager.TRANSIT_FLAG_IS_RECENTS;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE;
@@ -128,6 +131,11 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
     private @TransitionState int mState = STATE_COLLECTING;
     private boolean mReadyCalled = false;
 
+    // TODO(b/188595497): remove when not needed.
+    /** @see RecentsAnimationController#mNavigationBarAttachedToApp */
+    private boolean mNavBarAttachedToApp = false;
+    private int mNavBarDisplayId = INVALID_DISPLAY;
+
     Transition(@WindowManager.TransitionType int type, @WindowManager.TransitionFlags int flags,
             TransitionController controller, BLASTSyncEngine syncEngine) {
         mType = type;
@@ -135,6 +143,10 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         mController = controller;
         mSyncEngine = syncEngine;
         mSyncId = mSyncEngine.startSyncSet(this);
+    }
+
+    void addFlag(int flag) {
+        mFlags |= flag;
     }
 
     @VisibleForTesting
@@ -299,6 +311,8 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                 wt.commitVisibility(false /* visible */);
             }
         }
+
+        legacyRestoreNavigationBarFromApp();
     }
 
     void abort() {
@@ -353,6 +367,9 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         final TransitionInfo info = calculateTransitionInfo(mType, mFlags, mTargets, mChanges);
         info.setAnimationOptions(mOverrideOptions);
 
+        // TODO(b/188669821): Move to animation impl in shell.
+        handleLegacyRecentsStartBehavior(displayId, info);
+
         handleNonAppWindowsInTransition(displayId, mType, mFlags);
 
         // Manually show any activities that are visibleRequested. This is needed to properly
@@ -405,6 +422,100 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             mFinishTransaction.apply();
         }
         finishTransition();
+    }
+
+    /** @see RecentsAnimationController#attachNavigationBarToApp */
+    private void handleLegacyRecentsStartBehavior(int displayId, TransitionInfo info) {
+        if ((mFlags & TRANSIT_FLAG_IS_RECENTS) == 0) {
+            return;
+        }
+        final DisplayContent dc =
+                mController.mAtm.mRootWindowContainer.getDisplayContent(displayId);
+        if (dc == null || !dc.getDisplayPolicy().shouldAttachNavBarToAppDuringTransition()
+                // Skip the case where the nav bar is controlled by fade rotation.
+                || dc.getFadeRotationAnimationController() != null) {
+            return;
+        }
+
+        WindowContainer topWC = null;
+        // Find the top-most non-home, closing app.
+        for (int i = 0; i < info.getChanges().size(); ++i) {
+            final TransitionInfo.Change c = info.getChanges().get(i);
+            if (c.getTaskInfo() == null || c.getTaskInfo().displayId != displayId
+                    || c.getTaskInfo().getActivityType() != ACTIVITY_TYPE_STANDARD
+                    || !(c.getMode() == TRANSIT_CLOSE || c.getMode() == TRANSIT_TO_BACK)) {
+                continue;
+            }
+            topWC = WindowContainer.fromBinder(c.getContainer().asBinder());
+            break;
+        }
+        if (topWC == null || topWC.inMultiWindowMode()) {
+            return;
+        }
+
+        final WindowState navWindow = dc.getDisplayPolicy().getNavigationBar();
+        if (navWindow == null || navWindow.mToken == null) {
+            return;
+        }
+        mNavBarAttachedToApp = true;
+        mNavBarDisplayId = displayId;
+        navWindow.mToken.cancelAnimation();
+        final SurfaceControl.Transaction t = navWindow.mToken.getPendingTransaction();
+        final SurfaceControl navSurfaceControl = navWindow.mToken.getSurfaceControl();
+        t.reparent(navSurfaceControl, topWC.getSurfaceControl());
+        t.show(navSurfaceControl);
+
+        final WindowContainer imeContainer = dc.getImeContainer();
+        if (imeContainer.isVisible()) {
+            t.setRelativeLayer(navSurfaceControl, imeContainer.getSurfaceControl(), 1);
+        } else {
+            // Place the nav bar on top of anything else in the top activity.
+            t.setLayer(navSurfaceControl, Integer.MAX_VALUE);
+        }
+        if (mController.mStatusBar != null) {
+            mController.mStatusBar.setNavigationBarLumaSamplingEnabled(displayId, false);
+        }
+    }
+
+    /** @see RecentsAnimationController#restoreNavigationBarFromApp */
+    void legacyRestoreNavigationBarFromApp() {
+        if (!mNavBarAttachedToApp) return;
+        mNavBarAttachedToApp = false;
+
+        if (mController.mStatusBar != null) {
+            mController.mStatusBar.setNavigationBarLumaSamplingEnabled(mNavBarDisplayId, true);
+        }
+
+        final DisplayContent dc =
+                mController.mAtm.mRootWindowContainer.getDisplayContent(mNavBarDisplayId);
+        final WindowState navWindow = dc.getDisplayPolicy().getNavigationBar();
+        if (navWindow == null) return;
+        navWindow.setSurfaceTranslationY(0);
+
+        final WindowToken navToken = navWindow.mToken;
+        if (navToken == null) return;
+        final SurfaceControl.Transaction t = dc.getPendingTransaction();
+        final WindowContainer parent = navToken.getParent();
+        t.setLayer(navToken.getSurfaceControl(), navToken.getLastLayer());
+
+        boolean animate = false;
+        // Search for the home task. If it is supposed to be visible, then the navbar is not at
+        // the bottom of the screen, so we need to animate it.
+        for (int i = 0; i < mTargets.size(); ++i) {
+            final Task task = mTargets.valueAt(i).asTask();
+            if (task == null || !task.isHomeOrRecentsRootTask()) continue;
+            animate = task.isVisibleRequested();
+            break;
+        }
+
+        if (animate) {
+            final NavBarFadeAnimationController controller =
+                    new NavBarFadeAnimationController(dc);
+            controller.fadeWindowToken(true);
+        } else {
+            // Reparent the SurfaceControl of nav bar token back.
+            t.reparent(navToken.getSurfaceControl(), parent.getSurfaceControl());
+        }
     }
 
     private void handleNonAppWindowsInTransition(int displayId,
