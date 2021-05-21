@@ -116,6 +116,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.PackageTagsList;
 import android.os.Process;
 import android.os.RemoteCallback;
 import android.os.RemoteCallbackList;
@@ -132,6 +133,7 @@ import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
+import android.util.IndentingPrintWriter;
 import android.util.KeyValueListParser;
 import android.util.LongSparseArray;
 import android.util.Pair;
@@ -6194,17 +6196,19 @@ public class AppOpsService extends IAppOpsService.Stub {
                 final int excludedPackageCount = restrictionState.perUserExcludedPackageTags != null
                         ? restrictionState.perUserExcludedPackageTags.size() : 0;
                 if (excludedPackageCount > 0 && dumpOp < 0) {
+                    IndentingPrintWriter ipw = new IndentingPrintWriter(pw);
+                    ipw.increaseIndent();
                     boolean printedPackagesHeader = false;
                     for (int j = 0; j < excludedPackageCount; j++) {
                         int userId = restrictionState.perUserExcludedPackageTags.keyAt(j);
-                        Map<String, String[]> packageNames =
+                        PackageTagsList packageNames =
                                 restrictionState.perUserExcludedPackageTags.valueAt(j);
                         if (packageNames == null) {
                             continue;
                         }
                         boolean hasPackage;
                         if (dumpPackage != null) {
-                            hasPackage = packageNames.containsKey(dumpPackage);
+                            hasPackage = packageNames.includes(dumpPackage);
                         } else {
                             hasPackage = true;
                         }
@@ -6212,32 +6216,29 @@ public class AppOpsService extends IAppOpsService.Stub {
                             continue;
                         }
                         if (!printedTokenHeader) {
-                            pw.println("  User restrictions for token " + token + ":");
+                            ipw.println("User restrictions for token " + token + ":");
                             printedTokenHeader = true;
                         }
+
+                        ipw.increaseIndent();
                         if (!printedPackagesHeader) {
-                            pw.println("      Excluded packages:");
+                            ipw.println("Excluded packages:");
                             printedPackagesHeader = true;
                         }
-                        pw.print("        ");
-                        pw.print("user: ");
-                        pw.print(userId);
-                        pw.println(" packages: ");
-                        for (Map.Entry<String, String[]> entry : packageNames.entrySet()) {
-                            if (entry.getValue() == null) {
-                                continue;
-                            }
-                            pw.print("          ");
-                            pw.print(entry.getKey());
-                            pw.print(": ");
-                            if (entry.getValue().length == 0) {
-                                pw.print("*");
-                            } else {
-                                pw.print(Arrays.toString(entry.getValue()));
-                            }
-                            pw.println();
-                        }
+
+                        ipw.increaseIndent();
+                        ipw.print("user: ");
+                        ipw.print(userId);
+                        ipw.println(" packages: ");
+
+                        ipw.increaseIndent();
+                        packageNames.dump(ipw);
+
+                        ipw.decreaseIndent();
+                        ipw.decreaseIndent();
+                        ipw.decreaseIndent();
                     }
+                    ipw.decreaseIndent();
                 }
             }
         }
@@ -6270,7 +6271,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     @Override
     public void setUserRestriction(int code, boolean restricted, IBinder token, int userHandle,
-            Map<String, String[]> excludedPackageTags) {
+            PackageTagsList excludedPackageTags) {
         if (Binder.getCallingPid() != Process.myPid()) {
             mContext.enforcePermission(Manifest.permission.MANAGE_APP_OPS_RESTRICTIONS,
                     Binder.getCallingPid(), Binder.getCallingUid(), null);
@@ -6290,7 +6291,7 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     private void setUserRestrictionNoCheck(int code, boolean restricted, IBinder token,
-            int userHandle, Map<String, String[]> excludedPackageTags) {
+            int userHandle, PackageTagsList excludedPackageTags) {
         synchronized (AppOpsService.this) {
             ClientRestrictionState restrictionState = mOpUserRestrictions.get(token);
 
@@ -6835,7 +6836,7 @@ public class AppOpsService extends IAppOpsService.Stub {
     private final class ClientRestrictionState implements DeathRecipient {
         private final IBinder token;
         SparseArray<boolean[]> perUserRestrictions;
-        SparseArray<Map<String, String[]>> perUserExcludedPackageTags;
+        SparseArray<PackageTagsList> perUserExcludedPackageTags;
 
         public ClientRestrictionState(IBinder token)
                 throws RemoteException {
@@ -6844,7 +6845,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
 
         public boolean setRestriction(int code, boolean restricted,
-                Map<String, String[]> excludedPackageTags, int userId) {
+                PackageTagsList excludedPackageTags, int userId) {
             boolean changed = false;
 
             if (perUserRestrictions == null && restricted) {
@@ -6886,7 +6887,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                     }
 
                     if (userRestrictions != null) {
-                        final boolean noExcludedPackages = ArrayUtils.isEmpty(excludedPackageTags);
+                        final boolean noExcludedPackages =
+                                excludedPackageTags == null || excludedPackageTags.isEmpty();
                         if (perUserExcludedPackageTags == null && !noExcludedPackages) {
                             perUserExcludedPackageTags = new SparseArray<>();
                         }
@@ -6897,16 +6899,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                                     perUserExcludedPackageTags = null;
                                 }
                             } else {
-                                Map<String, String[]> userExcludedPackageTags =
-                                        perUserExcludedPackageTags.get(thisUserId);
-                                if (userExcludedPackageTags == null) {
-                                    userExcludedPackageTags = new ArrayMap<>(
-                                            excludedPackageTags.size());
-                                    perUserExcludedPackageTags.put(thisUserId,
-                                            userExcludedPackageTags);
-                                }
-                                userExcludedPackageTags.clear();
-                                userExcludedPackageTags.putAll(excludedPackageTags);
+                                perUserExcludedPackageTags.put(thisUserId, excludedPackageTags);
                             }
                             changed = true;
                         }
@@ -6932,19 +6925,11 @@ public class AppOpsService extends IAppOpsService.Stub {
             if (perUserExcludedPackageTags == null) {
                 return true;
             }
-            Map<String, String[]> perUserExclusions = perUserExcludedPackageTags.get(userId);
+            PackageTagsList perUserExclusions = perUserExcludedPackageTags.get(userId);
             if (perUserExclusions == null) {
                 return true;
             }
-            String[] excludedTags = perUserExclusions.get(packageName);
-            if (excludedTags == null) {
-                return true;
-            }
-            if (excludedTags.length == 0) {
-                // all attribution tags within the package are excluded
-                return false;
-            }
-            return !ArrayUtils.contains(excludedTags, attributionTag);
+            return !perUserExclusions.contains(packageName, attributionTag);
         }
 
         public void removeUser(int userId) {

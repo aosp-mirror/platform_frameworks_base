@@ -49,6 +49,7 @@ import android.os.HandlerExecutor;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.PackageTagsList;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Process;
@@ -7407,7 +7408,7 @@ public class AppOpsManager {
 
     /** @hide */
     public void setUserRestriction(int code, boolean restricted, IBinder token) {
-        setUserRestriction(code, restricted, token, (Map<String, String[]>) null);
+        setUserRestriction(code, restricted, token, null);
     }
 
     /**
@@ -7415,7 +7416,7 @@ public class AppOpsManager {
      * @hide
      */
     public void setUserRestriction(int code, boolean restricted, IBinder token,
-            @Nullable Map<String, String[]> excludedPackageTags) {
+            @Nullable PackageTagsList excludedPackageTags) {
         setUserRestrictionForUser(code, restricted, token, excludedPackageTags,
                 mContext.getUserId());
     }
@@ -7425,7 +7426,7 @@ public class AppOpsManager {
      * @hide
      */
     public void setUserRestrictionForUser(int code, boolean restricted, IBinder token,
-            @Nullable Map<String, String[]> excludedPackageTags, int userId) {
+            @Nullable PackageTagsList excludedPackageTags, int userId) {
         try {
             mService.setUserRestriction(code, restricted, token, userId, excludedPackageTags);
         } catch (RemoteException e) {

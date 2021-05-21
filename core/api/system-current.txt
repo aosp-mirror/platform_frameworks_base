@@ -4930,6 +4930,10 @@ package android.location {
     field @Deprecated public static final String EXTRA_NO_GPS_LOCATION = "noGPSLocation";
   }
 
+  public final class LocationDeviceConfig {
+    field public static final String IGNORE_SETTINGS_ALLOWLIST = "ignore_settings_allowlist";
+  }
+
   public class LocationManager {
     method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void addProviderRequestChangedListener(@NonNull java.util.concurrent.Executor, @NonNull android.location.provider.ProviderRequest.ChangedListener);
     method @Deprecated @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void flushGnssBatch();
@@ -9088,6 +9092,7 @@ package android.provider {
     field public static final String NAMESPACE_GAME_DRIVER = "game_driver";
     field public static final String NAMESPACE_INPUT_NATIVE_BOOT = "input_native_boot";
     field public static final String NAMESPACE_INTELLIGENCE_ATTENTION = "intelligence_attention";
+    field public static final String NAMESPACE_LOCATION = "location";
     field public static final String NAMESPACE_MEDIA = "media";
     field public static final String NAMESPACE_MEDIA_NATIVE = "media_native";
     field public static final String NAMESPACE_NETD_NATIVE = "netd_native";
