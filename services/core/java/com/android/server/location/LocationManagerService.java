@@ -1420,9 +1420,9 @@ public class LocationManagerService extends ILocationManager.Stub implements
             }
             for (String packageName :
                     mInjector.getSettingsHelper().getIgnoreSettingsPackageWhitelist()) {
-                packages.computeIfAbsent(packageName, k -> new ArraySet<>());
+                packages.computeIfAbsent(packageName, k -> new ArraySet<>()).clear();
             }
-            packages.computeIfAbsent(mContext.getPackageName(), k -> new ArraySet<>());
+            packages.computeIfAbsent(mContext.getPackageName(), k -> new ArraySet<>()).clear();
 
             allowedPackages = new ArrayMap<>();
             for (Map.Entry<String, ArraySet<String>> entry : packages.entrySet()) {
