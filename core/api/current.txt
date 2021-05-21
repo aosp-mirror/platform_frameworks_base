@@ -15261,9 +15261,11 @@ package android.graphics {
     method public void clearContent();
     method @NonNull public android.graphics.HardwareRenderer.FrameRenderRequest createRenderRequest();
     method public void destroy();
+    method public static boolean isDrawingEnabled();
     method public boolean isOpaque();
     method public void notifyFramePending();
     method public void setContentRoot(@Nullable android.graphics.RenderNode);
+    method public static void setDrawingEnabled(boolean);
     method public void setLightSourceAlpha(@FloatRange(from=0.0f, to=1.0f) float, @FloatRange(from=0.0f, to=1.0f) float);
     method public void setLightSourceGeometry(float, float, float, float);
     method public void setName(@NonNull String);
