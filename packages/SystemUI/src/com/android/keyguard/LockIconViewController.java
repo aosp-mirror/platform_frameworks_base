@@ -40,6 +40,7 @@ import com.android.settingslib.Utils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.biometrics.AuthController;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -48,6 +49,7 @@ import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.ViewController;
+import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -70,6 +72,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     @NonNull private final AuthController mAuthController;
     @NonNull private final AccessibilityManager mAccessibilityManager;
     @NonNull private final ConfigurationController mConfigurationController;
+    @NonNull private final DelayableExecutor mExecutor;
 
     private boolean mHasUdfpsOrFaceAuthFeatures;
     private boolean mUdfpsEnrolled;
@@ -90,6 +93,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     private int mStatusBarState;
     private boolean mIsKeyguardShowing;
     private boolean mUserUnlockedWithBiometric;
+    private Runnable mCancelDelayedUpdateVisibilityRunnable;
 
     private boolean mShowButton;
     private boolean mShowUnlockIcon;
@@ -106,7 +110,8 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
             @NonNull AuthController authController,
             @NonNull DumpManager dumpManager,
             @NonNull AccessibilityManager accessibilityManager,
-            @NonNull ConfigurationController configurationController
+            @NonNull ConfigurationController configurationController,
+            @NonNull @Main DelayableExecutor executor
     ) {
         super(view);
         mStatusBarStateController = statusBarStateController;
@@ -117,6 +122,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         mFalsingManager = falsingManager;
         mAccessibilityManager = accessibilityManager;
         mConfigurationController = configurationController;
+        mExecutor = executor;
 
         final Context context = view.getContext();
         mButton = context.getResources().getDrawable(
@@ -202,6 +208,11 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         mKeyguardStateController.removeCallback(mKeyguardStateCallback);
         mAccessibilityManager.removeTouchExplorationStateChangeListener(
                 mTouchExplorationStateChangeListener);
+
+        if (mCancelDelayedUpdateVisibilityRunnable != null) {
+            mCancelDelayedUpdateVisibilityRunnable.run();
+            mCancelDelayedUpdateVisibilityRunnable = null;
+        }
     }
 
     public float getTop() {
@@ -213,8 +224,8 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
             return false;
         }
 
-        // pre-emptively set to false to hide view
-        mIsKeyguardShowing = false;
+        // pre-emptively set to true to hide view
+        mIsBouncerShowing = true;
         updateVisibility();
         mKeyguardViewController.showBouncer(/* scrim */ true);
         return true;
@@ -229,6 +240,11 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     }
 
     private void updateVisibility() {
+        if (mCancelDelayedUpdateVisibilityRunnable != null) {
+            mCancelDelayedUpdateVisibilityRunnable.run();
+            mCancelDelayedUpdateVisibilityRunnable = null;
+        }
+
         if (!mIsKeyguardShowing || (!mUdfpsEnrolled && !mFaceAuthEnrolled)) {
             mView.setVisibility(View.INVISIBLE);
             return;
@@ -318,13 +334,13 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
 
     @Override
     public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
-        pw.println("  mShowBouncerButton: " + mShowButton);
-        pw.println("  mShowUnlockIcon: " + mShowUnlockIcon);
-        pw.println("  mShowLockIcon: " + mShowLockIcon);
-        pw.println("    mHasUdfpsOrFaceAuthFeatures: " + mHasUdfpsOrFaceAuthFeatures);
-        pw.println("    mUdfpsEnrolled: " + mUdfpsEnrolled);
-        pw.println("    mFaceAuthEnrolled: " + mFaceAuthEnrolled);
-        pw.println("  mIsKeyguardShowing: " + mIsKeyguardShowing);
+        pw.println("mHasUdfpsOrFaceAuthFeatures: " + mHasUdfpsOrFaceAuthFeatures);
+        pw.println("mUdfpsEnrolled: " + mUdfpsEnrolled);
+        pw.println("mFaceAuthEnrolled: " + mFaceAuthEnrolled);
+        pw.println("mIsKeyguardShowing: " + mIsKeyguardShowing);
+        pw.println(" mShowBouncerButton: " + mShowButton);
+        pw.println(" mShowUnlockIcon: " + mShowUnlockIcon);
+        pw.println(" mShowLockIcon: " + mShowLockIcon);
         pw.println("  mIsDozing: " + mIsDozing);
         pw.println("  mIsBouncerShowing: " + mIsBouncerShowing);
         pw.println("  mUserUnlockedWithBiometric: " + mUserUnlockedWithBiometric);
@@ -352,6 +368,14 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     private final KeyguardUpdateMonitorCallback mKeyguardUpdateMonitorCallback =
             new KeyguardUpdateMonitorCallback() {
                 @Override
+                public void onKeyguardVisibilityChanged(boolean showing) {
+                    // reset mIsBouncerShowing state in case it was preemptively set
+                    // onAffordanceClick
+                    mIsBouncerShowing = mKeyguardViewController.isBouncerShowing();
+                    updateVisibility();
+                }
+
+                @Override
                 public void onKeyguardBouncerChanged(boolean bouncer) {
                     mIsBouncerShowing = bouncer;
                     updateVisibility();
@@ -366,7 +390,19 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
 
                     if (biometricSourceType == FINGERPRINT) {
                         mRunningFPS = running;
-                        updateVisibility();
+                        if (!mRunningFPS) {
+                            if (mCancelDelayedUpdateVisibilityRunnable != null) {
+                                mCancelDelayedUpdateVisibilityRunnable.run();
+                            }
+
+                            // For some devices, auth is cancelled immediately on screen off but
+                            // before dozing state is set. We want to avoid briefly showing the
+                            // button in this case, so we delay updating the visibility by 50ms.
+                            mCancelDelayedUpdateVisibilityRunnable =
+                                    mExecutor.executeDelayed(() -> updateVisibility(), 50);
+                        } else {
+                            updateVisibility();
+                        }
                     }
                 }
             };
