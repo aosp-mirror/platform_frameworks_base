@@ -97,7 +97,7 @@
     <!-- How much the bubble flyout text container is elevated. -->
     <dimen name="bubble_flyout_elevation">4dp</dimen>
     <!-- How much padding is around the left and right sides of the flyout text. -->
-    <dimen name="bubble_flyout_padding_x">12dp</dimen>
+    <dimen name="bubble_flyout_padding_x">14dp</dimen>
     <!-- How much padding is around the top and bottom of the flyout text. -->
     <dimen name="bubble_flyout_padding_y">10dp</dimen>
     <!-- Size of the triangle that points from the flyout to the bubble stack. -->
@@ -139,10 +139,15 @@
     <dimen name="bubble_empty_overflow_image_height">200dp</dimen>
     <!-- Padding of bubble overflow empty state subtitle -->
     <dimen name="bubble_empty_overflow_subtitle_padding">50dp</dimen>
-    <!-- Height of the triangle that points to the expanded bubble -->
-    <dimen name="bubble_pointer_height">8dp</dimen>
-    <!-- Width of the triangle that points to the expanded bubble -->
+    <!-- Height of the triangle that points to the expanded bubble. -->
+    <dimen name="bubble_pointer_height">10dp</dimen>
+    <!-- Width of the triangle that points to the expanded bubble. -->
     <dimen name="bubble_pointer_width">12dp</dimen>
+    <!-- Radius of the pointer -->
+    <dimen name="bubble_pointer_radius">2dp</dimen>
+    <!-- The amount the pointer overlaps with the expanded view to be flush on an edge with
+         a radius. -->
+    <dimen name="bubble_pointer_overlap">1dp</dimen>
     <!-- Extra padding around the dismiss target for bubbles -->
     <dimen name="bubble_dismiss_slop">16dp</dimen>
     <!-- Height of button allowing users to adjust settings for bubbles. -->

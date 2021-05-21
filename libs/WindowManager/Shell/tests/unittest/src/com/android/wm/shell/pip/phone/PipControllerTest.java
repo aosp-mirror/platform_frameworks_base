@@ -30,6 +30,7 @@ import static org.mockito.Mockito.when;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.RemoteException;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -40,12 +41,14 @@ import android.util.Size;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.onehanded.OneHandedController;
 import com.android.wm.shell.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.pip.PipBoundsState;
 import com.android.wm.shell.pip.PipMediaController;
+import com.android.wm.shell.pip.PipSnapAlgorithm;
 import com.android.wm.shell.pip.PipTaskOrganizer;
 import com.android.wm.shell.pip.PipTransitionController;
 
@@ -70,15 +73,20 @@ public class PipControllerTest extends ShellTestCase {
     @Mock private PhonePipMenuController mMockPhonePipMenuController;
     @Mock private PipAppOpsListener mMockPipAppOpsListener;
     @Mock private PipBoundsAlgorithm mMockPipBoundsAlgorithm;
+    @Mock private PipSnapAlgorithm mMockPipSnapAlgorithm;
     @Mock private PipMediaController mMockPipMediaController;
     @Mock private PipTaskOrganizer mMockPipTaskOrganizer;
     @Mock private PipTransitionController mMockPipTransitionController;
     @Mock private PipTouchHandler mMockPipTouchHandler;
+    @Mock private PipMotionHelper mMockPipMotionHelper;
     @Mock private WindowManagerShellWrapper mMockWindowManagerShellWrapper;
     @Mock private PipBoundsState mMockPipBoundsState;
     @Mock private TaskStackListenerImpl mMockTaskStackListener;
     @Mock private ShellExecutor mMockExecutor;
     @Mock private Optional<OneHandedController> mMockOneHandedController;
+
+    @Mock private DisplayLayout mMockDisplayLayout1;
+    @Mock private DisplayLayout mMockDisplayLayout2;
 
     @Before
     public void setUp() throws RemoteException {
@@ -92,6 +100,8 @@ public class PipControllerTest extends ShellTestCase {
                 mMockPipMediaController, mMockPhonePipMenuController, mMockPipTaskOrganizer,
                 mMockPipTouchHandler, mMockPipTransitionController, mMockWindowManagerShellWrapper,
                 mMockTaskStackListener, mMockOneHandedController, mMockExecutor);
+        when(mMockPipBoundsAlgorithm.getSnapAlgorithm()).thenReturn(mMockPipSnapAlgorithm);
+        when(mMockPipTouchHandler.getMotionHelper()).thenReturn(mMockPipMotionHelper);
     }
 
     @Test
@@ -166,5 +176,37 @@ public class PipControllerTest extends ShellTestCase {
         mPipController.saveReentryState(bounds);
 
         verify(mMockPipBoundsState).saveReentryState(new Size(30, 30), 1.0f);
+    }
+
+    @Test
+    public void onDisplayConfigurationChanged_inPip_movePip() {
+        final int displayId = 1;
+        final Rect bounds = new Rect(0, 0, 10, 10);
+        when(mMockPipBoundsAlgorithm.getDefaultBounds()).thenReturn(bounds);
+        when(mMockPipBoundsState.getDisplayId()).thenReturn(displayId);
+        when(mMockPipBoundsState.getDisplayLayout()).thenReturn(mMockDisplayLayout1);
+        when(mMockDisplayController.getDisplayLayout(displayId)).thenReturn(mMockDisplayLayout2);
+
+        when(mMockPipTaskOrganizer.isInPip()).thenReturn(true);
+        mPipController.mDisplaysChangedListener.onDisplayConfigurationChanged(
+                displayId, new Configuration());
+
+        verify(mMockPipMotionHelper).movePip(any(Rect.class));
+    }
+
+    @Test
+    public void onDisplayConfigurationChanged_notInPip_doesNotMovePip() {
+        final int displayId = 1;
+        final Rect bounds = new Rect(0, 0, 10, 10);
+        when(mMockPipBoundsAlgorithm.getDefaultBounds()).thenReturn(bounds);
+        when(mMockPipBoundsState.getDisplayId()).thenReturn(displayId);
+        when(mMockPipBoundsState.getDisplayLayout()).thenReturn(mMockDisplayLayout1);
+        when(mMockDisplayController.getDisplayLayout(displayId)).thenReturn(mMockDisplayLayout2);
+
+        when(mMockPipTaskOrganizer.isInPip()).thenReturn(false);
+        mPipController.mDisplaysChangedListener.onDisplayConfigurationChanged(
+                displayId, new Configuration());
+
+        verify(mMockPipMotionHelper, never()).movePip(any(Rect.class));
     }
 }

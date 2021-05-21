@@ -141,6 +141,7 @@ package android {
     field public static final String REORDER_TASKS = "android.permission.REORDER_TASKS";
     field public static final String REQUEST_COMPANION_PROFILE_WATCH = "android.permission.REQUEST_COMPANION_PROFILE_WATCH";
     field public static final String REQUEST_COMPANION_RUN_IN_BACKGROUND = "android.permission.REQUEST_COMPANION_RUN_IN_BACKGROUND";
+    field public static final String REQUEST_COMPANION_START_FOREGROUND_SERVICES_FROM_BACKGROUND = "android.permission.REQUEST_COMPANION_START_FOREGROUND_SERVICES_FROM_BACKGROUND";
     field public static final String REQUEST_COMPANION_USE_DATA_IN_BACKGROUND = "android.permission.REQUEST_COMPANION_USE_DATA_IN_BACKGROUND";
     field public static final String REQUEST_DELETE_PACKAGES = "android.permission.REQUEST_DELETE_PACKAGES";
     field public static final String REQUEST_IGNORE_BATTERY_OPTIMIZATIONS = "android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS";
@@ -9039,7 +9040,7 @@ package android.bluetooth {
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public String getName();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public int getType();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public android.os.ParcelUuid[] getUuids();
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public boolean setAlias(@NonNull String);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public int setAlias(@Nullable String);
     method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public boolean setPairingConfirmation(boolean);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public boolean setPin(byte[]);
     method public void writeToParcel(android.os.Parcel, int);
@@ -9485,6 +9486,15 @@ package android.bluetooth {
     field public static final int TYPE_L2CAP = 3; // 0x3
     field public static final int TYPE_RFCOMM = 1; // 0x1
     field public static final int TYPE_SCO = 2; // 0x2
+  }
+
+  public final class BluetoothStatusCodes {
+    field public static final int ERROR_BLUETOOTH_NOT_ALLOWED = 2; // 0x2
+    field public static final int ERROR_BLUETOOTH_NOT_ENABLED = 1; // 0x1
+    field public static final int ERROR_DEVICE_NOT_BONDED = 3; // 0x3
+    field public static final int ERROR_MISSING_BLUETOOTH_CONNECT_PERMISSION = 6; // 0x6
+    field public static final int ERROR_UNKNOWN = 2147483647; // 0x7fffffff
+    field public static final int SUCCESS = 0; // 0x0
   }
 
 }
@@ -27129,7 +27139,7 @@ package android.net.vcn {
   public final class VcnGatewayConnectionConfig {
     method @NonNull public int[] getExposedCapabilities();
     method @NonNull public String getGatewayConnectionName();
-    method @IntRange(from=android.net.vcn.VcnGatewayConnectionConfig.MIN_MTU_V6) public int getMaxMtu();
+    method @IntRange(from=0x500) public int getMaxMtu();
     method @NonNull public long[] getRetryIntervalsMillis();
   }
 
@@ -27138,7 +27148,7 @@ package android.net.vcn {
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder addExposedCapability(int);
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig build();
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder removeExposedCapability(int);
-    method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder setMaxMtu(@IntRange(from=android.net.vcn.VcnGatewayConnectionConfig.MIN_MTU_V6) int);
+    method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder setMaxMtu(@IntRange(from=0x500) int);
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder setRetryIntervalsMillis(@NonNull long[]);
   }
 
@@ -31950,6 +31960,7 @@ package android.os {
     method public long getUserCreationTime(android.os.UserHandle);
     method public android.os.UserHandle getUserForSerialNumber(long);
     method @NonNull @RequiresPermission(anyOf={"android.permission.MANAGE_USERS", android.Manifest.permission.GET_ACCOUNTS_PRIVILEGED, "android.permission.CREATE_USERS"}, conditional=true) public String getUserName();
+    method public int getUserPrivacySensitivity();
     method public java.util.List<android.os.UserHandle> getUserProfiles();
     method public android.os.Bundle getUserRestrictions();
     method @RequiresPermission(anyOf={"android.permission.MANAGE_USERS", "android.permission.INTERACT_ACROSS_USERS"}, conditional=true) public android.os.Bundle getUserRestrictions(android.os.UserHandle);
@@ -31982,6 +31993,7 @@ package android.os {
     field public static final String DISALLOW_AUTOFILL = "no_autofill";
     field public static final String DISALLOW_BLUETOOTH = "no_bluetooth";
     field public static final String DISALLOW_BLUETOOTH_SHARING = "no_bluetooth_sharing";
+    field public static final String DISALLOW_CAMERA_TOGGLE = "disallow_camera_toggle";
     field public static final String DISALLOW_CONFIG_BLUETOOTH = "no_config_bluetooth";
     field public static final String DISALLOW_CONFIG_BRIGHTNESS = "no_config_brightness";
     field public static final String DISALLOW_CONFIG_CELL_BROADCASTS = "no_config_cell_broadcasts";
@@ -32006,6 +32018,7 @@ package android.os {
     field public static final String DISALLOW_INSTALL_APPS = "no_install_apps";
     field public static final String DISALLOW_INSTALL_UNKNOWN_SOURCES = "no_install_unknown_sources";
     field public static final String DISALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY = "no_install_unknown_sources_globally";
+    field public static final String DISALLOW_MICROPHONE_TOGGLE = "disallow_microphone_toggle";
     field public static final String DISALLOW_MODIFY_ACCOUNTS = "no_modify_accounts";
     field public static final String DISALLOW_MOUNT_PHYSICAL_MEDIA = "no_physical_media";
     field public static final String DISALLOW_NETWORK_RESET = "no_network_reset";
@@ -32028,6 +32041,8 @@ package android.os {
     field public static final String DISALLOW_USER_SWITCH = "no_user_switch";
     field public static final String ENSURE_VERIFY_APPS = "ensure_verify_apps";
     field public static final String KEY_RESTRICTIONS_PENDING = "restrictions_pending";
+    field public static final int PRIVACY_SENSITIVITY_DEFAULT = 0; // 0x0
+    field public static final int PRIVACY_SENSITIVITY_LOCATION = 1; // 0x1
     field public static final int QUIET_MODE_DISABLE_ONLY_IF_CREDENTIAL_NOT_REQUIRED = 1; // 0x1
     field public static final int USER_CREATION_FAILED_NOT_PERMITTED = 1; // 0x1
     field public static final int USER_CREATION_FAILED_NO_MORE_USERS = 2; // 0x2

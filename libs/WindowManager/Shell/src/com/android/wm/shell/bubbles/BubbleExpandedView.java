@@ -39,13 +39,16 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.CornerPathEffect;
 import android.graphics.Outline;
+import android.graphics.Paint;
 import android.graphics.Picture;
 import android.graphics.Rect;
 import android.graphics.drawable.ShapeDrawable;
 import android.os.RemoteException;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.SurfaceControl;
 import android.view.View;
@@ -104,12 +107,16 @@ public class BubbleExpandedView extends LinearLayout {
     private int mSettingsIconHeight;
     private int mPointerWidth;
     private int mPointerHeight;
+    private float mPointerRadius;
+    private float mPointerOverlap;
+    private CornerPathEffect mPointerEffect;
     private ShapeDrawable mCurrentPointer;
     private ShapeDrawable mTopPointer;
     private ShapeDrawable mLeftPointer;
     private ShapeDrawable mRightPointer;
     private int mExpandedViewPadding;
     private float mCornerRadius = 0f;
+    private int mBackgroundColorFloating;
 
     @Nullable private Bubble mBubble;
     private PendingIntent mPendingIntent;
@@ -250,26 +257,14 @@ public class BubbleExpandedView extends LinearLayout {
     protected void onFinishInflate() {
         super.onFinishInflate();
 
-        Resources res = getResources();
+        mSettingsIcon = findViewById(R.id.settings_button);
+        mSettingsIconHeight = getContext().getResources().getDimensionPixelSize(
+                R.dimen.bubble_manage_button_height);
         mPointerView = findViewById(R.id.pointer_view);
-        mPointerWidth = res.getDimensionPixelSize(R.dimen.bubble_pointer_width);
-        mPointerHeight = res.getDimensionPixelSize(R.dimen.bubble_pointer_height);
-
-        mTopPointer = new ShapeDrawable(TriangleShape.create(
-                mPointerWidth, mPointerHeight, true /* pointUp */));
-        mLeftPointer = new ShapeDrawable(TriangleShape.createHorizontal(
-                mPointerWidth, mPointerHeight, true /* pointLeft */));
-        mRightPointer = new ShapeDrawable(TriangleShape.createHorizontal(
-                mPointerWidth, mPointerHeight, false /* pointLeft */));
-
         mCurrentPointer = mTopPointer;
         mPointerView.setVisibility(INVISIBLE);
 
-        mSettingsIconHeight = getContext().getResources().getDimensionPixelSize(
-                R.dimen.bubble_manage_button_height);
-        mSettingsIcon = findViewById(R.id.settings_button);
-
-        // Set ActivityView's alpha value as zero, since there is no view content to be shown.
+        // Set TaskView's alpha value as zero, since there is no view content to be shown.
         setContentVisibility(false);
 
         mExpandedViewContainer.setOutlineProvider(new ViewOutlineProvider() {
@@ -293,7 +288,6 @@ public class BubbleExpandedView extends LinearLayout {
 
         applyThemeAttrs();
 
-        mExpandedViewPadding = res.getDimensionPixelSize(R.dimen.bubble_expanded_view_padding);
         setClipToPadding(false);
         setOnTouchListener((view, motionEvent) -> {
             if (mTaskView == null) {
@@ -354,7 +348,43 @@ public class BubbleExpandedView extends LinearLayout {
         Resources res = getResources();
         mMinHeight = res.getDimensionPixelSize(R.dimen.bubble_expanded_default_height);
         mOverflowHeight = res.getDimensionPixelSize(R.dimen.bubble_overflow_height);
+        mExpandedViewPadding = res.getDimensionPixelSize(R.dimen.bubble_expanded_view_padding);
+
         mPointerMargin = res.getDimensionPixelSize(R.dimen.bubble_pointer_margin);
+        mPointerWidth = res.getDimensionPixelSize(R.dimen.bubble_pointer_width);
+        mPointerHeight = res.getDimensionPixelSize(R.dimen.bubble_pointer_height);
+        mPointerRadius = getResources().getDimensionPixelSize(R.dimen.bubble_pointer_radius);
+        mPointerEffect = new CornerPathEffect(mPointerRadius);
+        mPointerOverlap = getResources().getDimensionPixelSize(R.dimen.bubble_pointer_overlap);
+        mTopPointer = new ShapeDrawable(TriangleShape.create(
+                mPointerWidth, mPointerHeight, true /* pointUp */));
+        mLeftPointer = new ShapeDrawable(TriangleShape.createHorizontal(
+                mPointerWidth, mPointerHeight, true /* pointLeft */));
+        mRightPointer = new ShapeDrawable(TriangleShape.createHorizontal(
+                mPointerWidth, mPointerHeight, false /* pointLeft */));
+
+        final float fontSize = mContext.getResources()
+                .getDimensionPixelSize(com.android.internal.R.dimen.text_size_body_2_material);
+        if (mSettingsIcon != null) {
+            mSettingsIcon.setTextSize(TypedValue.COMPLEX_UNIT_PX, fontSize);
+        }
+        if (mOverflowView != null) {
+            mOverflowView.updateFontSize();
+        }
+        if (mPointerView != null) {
+            updatePointerView();
+        }
+    }
+
+    void updateFontSize() {
+        final float fontSize = mContext.getResources()
+                .getDimensionPixelSize(com.android.internal.R.dimen.text_size_body_2_material);
+        if (mSettingsIcon != null) {
+            mSettingsIcon.setTextSize(TypedValue.COMPLEX_UNIT_PX, fontSize);
+        }
+        if (mOverflowView != null) {
+            mOverflowView.updateFontSize();
+        }
     }
 
     void applyThemeAttrs() {
@@ -362,7 +392,11 @@ public class BubbleExpandedView extends LinearLayout {
                 android.R.attr.dialogCornerRadius,
                 android.R.attr.colorBackgroundFloating});
         mCornerRadius = ta.getDimensionPixelSize(0, 0);
-        mExpandedViewContainer.setBackgroundColor(ta.getColor(1, Color.WHITE));
+        final int mode =
+                getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        final boolean isNightMode = (mode == Configuration.UI_MODE_NIGHT_YES);
+        mBackgroundColorFloating = ta.getColor(1, isNightMode ? Color.BLACK : Color.WHITE);
+        mExpandedViewContainer.setBackgroundColor(mBackgroundColorFloating);
         ta.recycle();
 
         if (mTaskView != null && ScreenDecorationsUtils.supportsRoundedCornersOnWindows(
@@ -373,16 +407,6 @@ public class BubbleExpandedView extends LinearLayout {
     }
 
     private void updatePointerView() {
-        final int mode =
-                getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
-        switch (mode) {
-            case Configuration.UI_MODE_NIGHT_NO:
-                mCurrentPointer.setTint(getResources().getColor(R.color.bubbles_light));
-                break;
-            case Configuration.UI_MODE_NIGHT_YES:
-                mCurrentPointer.setTint(getResources().getColor(R.color.bubbles_dark));
-                break;
-        }
         LayoutParams lp = (LayoutParams) mPointerView.getLayoutParams();
         if (mCurrentPointer == mLeftPointer || mCurrentPointer == mRightPointer) {
             lp.width = mPointerHeight;
@@ -391,6 +415,11 @@ public class BubbleExpandedView extends LinearLayout {
             lp.width = mPointerWidth;
             lp.height = mPointerHeight;
         }
+        mCurrentPointer.setTint(mBackgroundColorFloating);
+
+        Paint arrowPaint = mCurrentPointer.getPaint();
+        arrowPaint.setColor(mBackgroundColorFloating);
+        arrowPaint.setPathEffect(mPointerEffect);
         mPointerView.setLayoutParams(lp);
         mPointerView.setBackground(mCurrentPointer);
     }
@@ -633,11 +662,12 @@ public class BubbleExpandedView extends LinearLayout {
                 // Remove top insets back here because availableRect.height would account for that
                 ? mExpandedViewContainerLocation[1] - mPositioner.getInsets().top
                 : 0;
+        int settingsHeight = mIsOverflow ? 0 : mSettingsIconHeight;
         return mPositioner.getAvailableRect().height()
                 - expandedContainerY
                 - getPaddingTop()
                 - getPaddingBottom()
-                - mSettingsIconHeight
+                - settingsHeight
                 - mPointerHeight
                 - mPointerMargin;
     }
@@ -682,10 +712,14 @@ public class BubbleExpandedView extends LinearLayout {
     public void setPointerPosition(float bubblePosition, boolean onLeft) {
         // Pointer gets drawn in the padding
         final boolean showVertically = mPositioner.showBubblesVertically();
-        final int paddingLeft = (showVertically && onLeft) ? mPointerHeight : 0;
-        final int paddingRight = (showVertically && !onLeft) ? mPointerHeight : 0;
-        final int paddingTop = showVertically ? 0 : mExpandedViewPadding;
-        setPadding(paddingLeft, paddingTop, paddingRight, 0);
+        final float paddingLeft = (showVertically && onLeft)
+                ? mPointerHeight - mPointerOverlap
+                : 0;
+        final float paddingRight = (showVertically && !onLeft)
+                ? mPointerHeight - mPointerOverlap : 0;
+        final int paddingTop = showVertically ? 0
+                : mExpandedViewPadding;
+        setPadding((int) paddingLeft, paddingTop, (int) paddingRight, 0);
 
         final float expandedViewY = mPositioner.getExpandedViewY();
         final float bubbleSize = mPositioner.getBubbleBitmapSize();
@@ -698,9 +732,11 @@ public class BubbleExpandedView extends LinearLayout {
             float pointerX;
             if (showVertically) {
                 pointerY = bubbleCenter - (mPointerWidth / 2f);
-                pointerX = onLeft ? -mPointerHeight : getWidth() - mPaddingRight;
+                pointerX = onLeft
+                        ? -mPointerHeight + mPointerOverlap
+                        : getWidth() - mPaddingRight - mPointerOverlap;
             } else {
-                pointerY = 0;
+                pointerY = mPointerOverlap;
                 pointerX = bubbleCenter - mPaddingLeft - (mPointerWidth / 2f);
             }
             mPointerView.setTranslationY(pointerY);

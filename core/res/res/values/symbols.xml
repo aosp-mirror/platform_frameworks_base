@@ -2963,7 +2963,6 @@
   <java-symbol type="string" name="importance_from_person" />
 
   <java-symbol type="layout" name="work_widget_mask_view" />
-  <java-symbol type="id" name="work_widget_mask_frame" />
   <java-symbol type="id" name="work_widget_app_icon" />
   <java-symbol type="id" name="work_widget_badge_icon" />
 
@@ -3165,6 +3164,7 @@
   <java-symbol type="bool" name="config_supportPreRebootSecurityLogs" />
 
   <java-symbol type="id" name="notification_action_list_margin_target" />
+  <java-symbol type="dimen" name="notification_actions_padding_start"/>
   <java-symbol type="dimen" name="notification_action_disabled_alpha" />
   <java-symbol type="id" name="tag_margin_end_when_icon_visible" />
   <java-symbol type="id" name="tag_margin_end_when_icon_gone" />

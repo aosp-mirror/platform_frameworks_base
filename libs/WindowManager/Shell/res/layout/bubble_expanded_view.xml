@@ -28,14 +28,18 @@
     />
 
     <com.android.wm.shell.common.AlphaOptimizedButton
-        style="@android:style/Widget.Material.Button.Borderless"
+        style="@android:style/Widget.DeviceDefault.Button.Borderless"
         android:id="@+id/settings_button"
         android:layout_gravity="start"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="40dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginLeft="8dp"
         android:focusable="true"
         android:text="@string/manage_bubbles_text"
-        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="@*android:dimen/text_size_body_2_material"
+        android:background="@drawable/bubble_manage_btn_bg"
+        android:textColor="@*android:color/system_neutral1_50"
     />
 
 </com.android.wm.shell.bubbles.BubbleExpandedView>

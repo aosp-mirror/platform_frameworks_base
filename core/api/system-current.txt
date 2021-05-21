@@ -1950,9 +1950,6 @@ package android.bluetooth {
     field public static final int ACTIVE_DEVICE_ALL = 2; // 0x2
     field public static final int ACTIVE_DEVICE_AUDIO = 0; // 0x0
     field public static final int ACTIVE_DEVICE_PHONE_CALL = 1; // 0x1
-    field public static final int OOB_ERROR_ADAPTER_DISABLED = 2; // 0x2
-    field public static final int OOB_ERROR_ANOTHER_ACTIVE_REQUEST = 1; // 0x1
-    field public static final int OOB_ERROR_UNKNOWN = 0; // 0x0
   }
 
   public static interface BluetoothAdapter.OnMetadataChangedListener {
@@ -2088,6 +2085,10 @@ package android.bluetooth {
     field public static final int PBAP_CLIENT = 17; // 0x11
     field @Deprecated public static final int PRIORITY_OFF = 0; // 0x0
     field @Deprecated public static final int PRIORITY_ON = 100; // 0x64
+  }
+
+  public final class BluetoothStatusCodes {
+    field public static final int ERROR_ANOTHER_ACTIVE_OOB_REQUEST = 1000; // 0x3e8
   }
 
   public final class BluetoothUuid {
@@ -2245,7 +2246,7 @@ package android.companion {
 
   public final class CompanionDeviceManager {
     method @RequiresPermission(android.Manifest.permission.ASSOCIATE_COMPANION_DEVICES) public void associate(@NonNull String, @NonNull android.net.MacAddress);
-    method @RequiresPermission("android.permission.MANAGE_COMPANION_DEVICES") public boolean canPairWithoutPrompt(@NonNull String, @NonNull String, int);
+    method @RequiresPermission("android.permission.MANAGE_COMPANION_DEVICES") public boolean canPairWithoutPrompt(@NonNull String, @NonNull String, @NonNull android.os.UserHandle);
     method @RequiresPermission("android.permission.MANAGE_COMPANION_DEVICES") public boolean isDeviceAssociatedForWifiConnection(@NonNull String, @NonNull android.net.MacAddress, @NonNull android.os.UserHandle);
   }
 
@@ -3141,6 +3142,10 @@ package android.hardware.camera2 {
     field public static final int SESSION_OPERATION_MODE_CONSTRAINED_HIGH_SPEED = 1; // 0x1
     field public static final int SESSION_OPERATION_MODE_NORMAL = 0; // 0x0
     field public static final int SESSION_OPERATION_MODE_VENDOR_START = 32768; // 0x8000
+  }
+
+  public final class CameraManager {
+    method @RequiresPermission(allOf={android.Manifest.permission.SYSTEM_CAMERA, android.Manifest.permission.CAMERA}) public void openCamera(@NonNull String, int, @NonNull java.util.concurrent.Executor, @NonNull android.hardware.camera2.CameraDevice.StateCallback) throws android.hardware.camera2.CameraAccessException;
   }
 
   public abstract static class CameraManager.AvailabilityCallback {
@@ -12063,10 +12068,10 @@ package android.telephony {
     field public static final int CALL_WAITING_STATUS_ENABLED = 1; // 0x1
     field public static final int CALL_WAITING_STATUS_NOT_SUPPORTED = 4; // 0x4
     field public static final int CALL_WAITING_STATUS_UNKNOWN_ERROR = 3; // 0x3
-    field public static final String CAPABILITY_ALLOWED_NETWORK_TYPES_USED = "CAPABILITY_ALLOWED_NETWORK_TYPES_USED";
     field public static final String CAPABILITY_NR_DUAL_CONNECTIVITY_CONFIGURATION_AVAILABLE = "CAPABILITY_NR_DUAL_CONNECTIVITY_CONFIGURATION_AVAILABLE";
     field public static final String CAPABILITY_SECONDARY_LINK_BANDWIDTH_VISIBLE = "CAPABILITY_SECONDARY_LINK_BANDWIDTH_VISIBLE";
     field public static final String CAPABILITY_THERMAL_MITIGATION_DATA_THROTTLING = "CAPABILITY_THERMAL_MITIGATION_DATA_THROTTLING";
+    field public static final String CAPABILITY_USES_ALLOWED_NETWORK_TYPES_BITMASK = "CAPABILITY_USES_ALLOWED_NETWORK_TYPES_BITMASK";
     field public static final int CARRIER_PRIVILEGE_STATUS_ERROR_LOADING_RULES = -2; // 0xfffffffe
     field public static final int CARRIER_PRIVILEGE_STATUS_HAS_ACCESS = 1; // 0x1
     field public static final int CARRIER_PRIVILEGE_STATUS_NO_ACCESS = 0; // 0x0
