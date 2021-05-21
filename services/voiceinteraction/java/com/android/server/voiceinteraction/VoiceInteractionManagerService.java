@@ -796,6 +796,10 @@ public class VoiceInteractionManagerService extends SystemService {
                     Settings.Secure.ASSISTANT, null, userHandle);
         }
 
+        void forceRestartHotwordDetector() {
+            mImpl.forceRestartHotwordDetector();
+        }
+
         @Override
         public void showSession(Bundle args, int flags) {
             synchronized (this) {

@@ -54,6 +54,8 @@ final class VoiceInteractionManagerServiceShellCommand extends ShellCommand {
                 return requestHide(pw);
             case "disable":
                 return requestDisable(pw);
+            case "restart-detection":
+                return requestRestartDetection(pw);
             default:
                 return handleDefaultCommands(cmd);
         }
@@ -73,6 +75,8 @@ final class VoiceInteractionManagerServiceShellCommand extends ShellCommand {
             pw.println("    Hides the current session");
             pw.println("  disable [true|false]");
             pw.println("    Temporarily disable (when true) service");
+            pw.println("  restart-detection");
+            pw.println("    Force a restart of a hotword detection service");
             pw.println("");
         }
     }
@@ -138,6 +142,16 @@ final class VoiceInteractionManagerServiceShellCommand extends ShellCommand {
             mService.setDisabled(disabled);
         } catch (Exception e) {
             return handleError(pw, "requestDisable()", e);
+        }
+        return 0;
+    }
+
+    private int requestRestartDetection(PrintWriter pw) {
+        Slog.i(TAG, "requestRestartDetection()");
+        try {
+            mService.forceRestartHotwordDetector();
+        } catch (Exception e) {
+            return handleError(pw, "requestRestartDetection()", e);
         }
         return 0;
     }
