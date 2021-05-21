@@ -27,6 +27,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import android.content.ComponentName;
 import android.graphics.Rect;
+import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.fingerprint.IUdfpsHbmListener;
@@ -423,13 +424,15 @@ public class CommandQueueTest extends SysuiTestCase {
         final int userId = 10;
         final String packageName = "test";
         final long operationId = 1;
+        final int multiSensorConfig = BiometricManager.BIOMETRIC_MULTI_SENSOR_DEFAULT;
 
         mCommandQueue.showAuthenticationDialog(promptInfo, receiver, sensorIds,
-                credentialAllowed, requireConfirmation , userId, packageName, operationId);
+                credentialAllowed, requireConfirmation , userId, packageName, operationId,
+                multiSensorConfig);
         waitForIdleSync();
         verify(mCallbacks).showAuthenticationDialog(eq(promptInfo), eq(receiver), eq(sensorIds),
                 eq(credentialAllowed), eq(requireConfirmation), eq(userId), eq(packageName),
-                eq(operationId));
+                eq(operationId), eq(multiSensorConfig));
     }
 
     @Test

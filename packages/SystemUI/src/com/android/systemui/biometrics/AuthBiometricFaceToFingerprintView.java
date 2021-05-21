@@ -26,9 +26,11 @@ import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
 
 /**
@@ -97,6 +99,11 @@ public class AuthBiometricFaceToFingerprintView extends AuthBiometricFaceView {
         super(context, attrs);
     }
 
+    @VisibleForTesting
+    AuthBiometricFaceToFingerprintView(Context context, AttributeSet attrs, Injector injector) {
+        super(context, attrs, injector);
+    }
+
     void setFingerprintSensorProps(@NonNull FingerprintSensorPropertiesInternal sensorProps) {
         if (!sensorProps.isAnyUdfpsType()) {
             return;
@@ -119,23 +126,44 @@ public class AuthBiometricFaceToFingerprintView extends AuthBiometricFaceView {
     }
 
     @Override
+    @BiometricState
+    protected int getStateForAfterError() {
+        if (mActiveSensorType == TYPE_FACE) {
+            mHandler.post(() -> mCallback.onAction(
+                    Callback.ACTION_START_DELAYED_FINGERPRINT_SENSOR));
+            return STATE_AUTHENTICATING;
+        }
+
+        return super.getStateForAfterError();
+    }
+
+    @Override
     @NonNull
     protected IconController getIconController() {
         if (mActiveSensorType == TYPE_FINGERPRINT) {
             if (!(mIconController instanceof UdfpsIconController)) {
-                mIconController = new UdfpsIconController(getContext(), mIconView, mIndicatorView);
+                mIconController = createUdfpsIconController();
             }
             return mIconController;
         }
         return super.getIconController();
     }
 
+    @NonNull
+    protected IconController createUdfpsIconController() {
+        return new UdfpsIconController(getContext(), mIconView, mIndicatorView);
+    }
+
     @Override
     public void updateState(int newState) {
         if (mState == STATE_HELP || mState == STATE_ERROR) {
             mActiveSensorType = TYPE_FINGERPRINT;
+
             setRequireConfirmation(false);
+            mConfirmButton.setEnabled(false);
+            mConfirmButton.setVisibility(View.GONE);
         }
+
         super.updateState(newState);
     }
 
