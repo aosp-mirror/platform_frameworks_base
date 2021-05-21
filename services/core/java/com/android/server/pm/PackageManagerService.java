@@ -6762,7 +6762,12 @@ public class PackageManagerService extends IPackageManager.Stub
                         mSettings.enableSystemPackageLPw(packageName);
 
                         try {
-                            scanPackageTracedLI(scanFile, reparseFlags, rescanFlags, 0, null);
+                            final AndroidPackage newPkg = scanPackageTracedLI(
+                                    scanFile, reparseFlags, rescanFlags, 0, null);
+                            // We rescanned a stub, add it to the list of stubbed system packages
+                            if (newPkg.isStub()) {
+                                stubSystemApps.add(packageName);
+                            }
                         } catch (PackageManagerException e) {
                             Slog.e(TAG, "Failed to parse original system package: "
                                     + e.getMessage());
