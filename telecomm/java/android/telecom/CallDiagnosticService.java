@@ -294,6 +294,10 @@ public abstract class CallDiagnosticService extends Service {
         CallDiagnostics callDiagnostics;
         synchronized (mLock) {
             callDiagnostics = mDiagnosticCallByTelecomCallId.get(telecomCallId);
+            if (callDiagnostics == null) {
+                // Possible to get a call update after a call is removed.
+                return;
+            }
             mCallByTelecomCallId.put(telecomCallId, newCallDetails);
         }
         getExecutor().execute(() -> callDiagnostics.handleCallUpdated(newCallDetails));
@@ -306,12 +310,12 @@ public abstract class CallDiagnosticService extends Service {
     private void handleCallRemoved(@NonNull String telecomCallId) {
         Log.i(this, "handleCallRemoved: callId=%s - removed", telecomCallId);
 
-        if (mCallByTelecomCallId.containsKey(telecomCallId)) {
-            mCallByTelecomCallId.remove(telecomCallId);
-        }
-
         CallDiagnostics callDiagnostics;
         synchronized (mLock) {
+            if (mCallByTelecomCallId.containsKey(telecomCallId)) {
+                mCallByTelecomCallId.remove(telecomCallId);
+            }
+
             if (mDiagnosticCallByTelecomCallId.containsKey(telecomCallId)) {
                 callDiagnostics = mDiagnosticCallByTelecomCallId.remove(telecomCallId);
             } else {
@@ -353,7 +357,10 @@ public abstract class CallDiagnosticService extends Service {
     private void handleCallDisconnected(@NonNull String callId,
             @NonNull DisconnectCause disconnectCause) {
         Log.i(this, "handleCallDisconnected: call=%s; cause=%s", callId, disconnectCause);
-        CallDiagnostics callDiagnostics = mDiagnosticCallByTelecomCallId.get(callId);
+        CallDiagnostics callDiagnostics;
+        synchronized (mLock) {
+            callDiagnostics = mDiagnosticCallByTelecomCallId.get(callId);
+        }
         CharSequence message;
         if (disconnectCause.getImsReasonInfo() != null) {
             message = callDiagnostics.onCallDisconnected(disconnectCause.getImsReasonInfo());
@@ -391,7 +398,9 @@ public abstract class CallDiagnosticService extends Service {
             @NonNull CallQuality callQuality) {
         Log.i(this, "handleCallQualityChanged; call=%s, cq=%s", callId, callQuality);
         CallDiagnostics callDiagnostics;
-        callDiagnostics = mDiagnosticCallByTelecomCallId.get(callId);
+        synchronized(mLock) {
+            callDiagnostics = mDiagnosticCallByTelecomCallId.get(callId);
+        }
         if (callDiagnostics != null) {
             callDiagnostics.onCallQualityReceived(callQuality);
         }
