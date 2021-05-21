@@ -76,8 +76,6 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Optional;
 
-import javax.inject.Provider;
-
 import dagger.Lazy;
 
 /**
@@ -460,11 +458,6 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
                             row);
                 };
 
-        final NotificationConversationInfo.OnSnoozeClickListener onSnoozeClickListener =
-                (View v, int hours) -> {
-                    mListContainer.getSwipeActionHelper().snooze(sbn, hours);
-                };
-
         final NotificationConversationInfo.OnConversationSettingsClickListener
                 onConversationSettingsListener =
                 () -> {
@@ -497,7 +490,6 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
                 entry,
                 entry.getBubbleMetadata(),
                 onSettingsClick,
-                onSnoozeClickListener,
                 iconFactoryLoader,
                 mContextTracker.getUserContext(),
                 mDeviceProvisionedController.isDeviceProvisioned(),

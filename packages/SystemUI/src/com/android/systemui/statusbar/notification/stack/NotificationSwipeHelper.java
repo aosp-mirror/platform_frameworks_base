@@ -300,11 +300,6 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
         mCallback.onSnooze(sbn, snoozeOption);
     }
 
-    @Override
-    public void snooze(StatusBarNotification sbn, int hours) {
-        mCallback.onSnooze(sbn, hours);
-    }
-
     @VisibleForTesting
     protected void handleMenuCoveredOrDismissed() {
         View exposedMenuView = getExposedMenuView();
@@ -469,8 +464,6 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
         void handleChildViewDismissed(View view);
 
         void onSnooze(StatusBarNotification sbn, SnoozeOption snoozeOption);
-
-        void onSnooze(StatusBarNotification sbn, int hours);
 
         void onDismiss();
     }
