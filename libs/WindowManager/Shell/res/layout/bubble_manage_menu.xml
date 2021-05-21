@@ -17,7 +17,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:background="@drawable/rounded_bg_full"
+    android:background="@drawable/bubble_manage_menu_bg"
     android:elevation="@dimen/bubble_manage_menu_elevation"
     android:orientation="vertical">
 

@@ -28,6 +28,10 @@
     <string name="pip_skip_to_next" msgid="8403429188794867653">"နောက်တစ်ခုသို့ ကျော်ရန်"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"ယခင်တစ်ခုသို့ ပြန်သွားရန်"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"အရွယ်အစားပြောင်းရန်"</string>
+    <!-- no translation found for accessibility_action_pip_stash (4060775037619702641) -->
+    <skip />
+    <!-- no translation found for accessibility_action_pip_unstash (7467499339610437646) -->
+    <skip />
     <string name="dock_forced_resizable" msgid="1749750436092293116">"မျက်နှာပြင် ခွဲ၍ပြသခြင်းဖြင့် အက်ပ်သည် အလုပ်မလုပ်ပါ။"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"အက်ပ်သည် မျက်နှာပြင်ခွဲပြရန် ပံ့ပိုးထားခြင်းမရှိပါ။"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"ဤအက်ပ်အနေဖြင့် ဒုတိယဖန်သားပြင်ပေါ်တွင် အလုပ်လုပ်မည် မဟုတ်ပါ။"</string>

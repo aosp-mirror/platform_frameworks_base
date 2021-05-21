@@ -13924,6 +13924,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             // TODO(b/176488462): apply the view's important for translation
             requestBuilder.setValue(ViewTranslationRequest.ID_TEXT,
                     TranslationRequestValue.forText(mText));
+            if (!TextUtils.isEmpty(getContentDescription())) {
+                requestBuilder.setValue(ViewTranslationRequest.ID_CONTENT_DESCRIPTION,
+                        TranslationRequestValue.forText(getContentDescription()));
+            }
         }
         requestsCollector.accept(requestBuilder.build());
     }

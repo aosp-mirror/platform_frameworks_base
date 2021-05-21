@@ -28,6 +28,10 @@
     <string name="pip_skip_to_next" msgid="8403429188794867653">"ਅਗਲੇ \'ਤੇ ਜਾਓ"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"ਪਿਛਲੇ \'ਤੇ ਜਾਓ"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"ਆਕਾਰ ਬਦਲੋ"</string>
+    <!-- no translation found for accessibility_action_pip_stash (4060775037619702641) -->
+    <skip />
+    <!-- no translation found for accessibility_action_pip_unstash (7467499339610437646) -->
+    <skip />
     <string name="dock_forced_resizable" msgid="1749750436092293116">"ਹੋ ਸਕਦਾ ਹੈ ਕਿ ਐਪ ਸਪਲਿਟ-ਸਕ੍ਰੀਨ ਨਾਲ ਕੰਮ ਨਾ ਕਰੇ।"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"ਐਪ ਸਪਲਿਟ-ਸਕ੍ਰੀਨ ਨੂੰ ਸਮਰਥਨ ਨਹੀਂ ਕਰਦੀ।"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"ਹੋ ਸਕਦਾ ਹੈ ਕਿ ਐਪ ਸੈਕੰਡਰੀ ਡਿਸਪਲੇ \'ਤੇ ਕੰਮ ਨਾ ਕਰੇ।"</string>

@@ -4213,6 +4213,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     void clearAllDrawn() {
         allDrawn = false;
+        mLastAllDrawn = false;
     }
 
     /**
@@ -8240,6 +8241,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     boolean isTaskOverlay() {
         return mTaskOverlay;
+    }
+
+    @Override
+    public boolean isAlwaysOnTop() {
+        return mTaskOverlay || super.isAlwaysOnTop();
     }
 
     @Override

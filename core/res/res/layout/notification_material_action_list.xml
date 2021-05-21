@@ -38,7 +38,6 @@
             android:layout_height="@dimen/notification_action_list_height"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:paddingStart="@dimen/notification_actions_padding_start"
             android:visibility="gone"
             >
             <!-- actions will be added here -->
