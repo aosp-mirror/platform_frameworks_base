@@ -340,6 +340,7 @@ package android {
     field public static final int appCategory = 16844101; // 0x1010545
     field public static final int appComponentFactory = 16844154; // 0x101057a
     field public static final int attributionTags;
+    field public static final int attributionsAreUserVisible;
     field public static final int author = 16843444; // 0x10102b4
     field public static final int authorities = 16842776; // 0x1010018
     field public static final int autoAdvanceViewId = 16843535; // 0x101030f
@@ -11933,6 +11934,7 @@ package android.content.pm {
   public class ApplicationInfo extends android.content.pm.PackageItemInfo implements android.os.Parcelable {
     ctor public ApplicationInfo();
     ctor public ApplicationInfo(android.content.pm.ApplicationInfo);
+    method public boolean areAttributionsUserVisible();
     method public int describeContents();
     method public void dump(android.util.Printer, String);
     method public static CharSequence getCategoryTitle(android.content.Context, int);
