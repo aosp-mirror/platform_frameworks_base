@@ -18,6 +18,8 @@ package com.android.systemui.theme;
 import static com.android.systemui.theme.ThemeOverlayApplier.COLOR_SOURCE_PRESET;
 import static com.android.systemui.theme.ThemeOverlayApplier.OVERLAY_CATEGORY_ACCENT_COLOR;
 import static com.android.systemui.theme.ThemeOverlayApplier.OVERLAY_CATEGORY_SYSTEM_PALETTE;
+import static com.android.systemui.theme.ThemeOverlayApplier.OVERLAY_COLOR_BOTH;
+import static com.android.systemui.theme.ThemeOverlayApplier.OVERLAY_COLOR_INDEX;
 import static com.android.systemui.theme.ThemeOverlayApplier.OVERLAY_COLOR_SOURCE;
 import static com.android.systemui.theme.ThemeOverlayApplier.TIMESTAMP_FIELD;
 
@@ -96,11 +98,11 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
     private SecureSettings mSecureSettings;
     private final Executor mMainExecutor;
     private final Handler mBgHandler;
-    private final WallpaperManager mWallpaperManager;
     private final boolean mIsMonetEnabled;
     private UserTracker mUserTracker;
     private DeviceProvisionedController mDeviceProvisionedController;
     private WallpaperColors mSystemColors;
+    private WallpaperManager mWallpaperManager;
     // If fabricated overlays were already created for the current theme.
     private boolean mNeedsOverlayCreation;
     // Dominant olor extracted from wallpaper, NOT the color used on the overlay
@@ -173,17 +175,24 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
         String overlayPackageJson = mSecureSettings.getStringForUser(
                 Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES,
                 currentUser);
+        boolean isDestinationBoth = mWallpaperManager.getWallpaperId(
+                WallpaperManager.FLAG_LOCK) < 0;
         if (!TextUtils.isEmpty(overlayPackageJson)) {
             try {
                 JSONObject jsonObject = new JSONObject(overlayPackageJson);
-                if ((jsonObject.has(OVERLAY_CATEGORY_ACCENT_COLOR)
-                        || jsonObject.has(OVERLAY_CATEGORY_SYSTEM_PALETTE))
-                        && !COLOR_SOURCE_PRESET.equals(
-                        jsonObject.optString(OVERLAY_COLOR_SOURCE))) {
+                if (!COLOR_SOURCE_PRESET.equals(jsonObject.optString(OVERLAY_COLOR_SOURCE))) {
                     mSkipSettingChange = true;
-                    jsonObject.remove(OVERLAY_CATEGORY_ACCENT_COLOR);
-                    jsonObject.remove(OVERLAY_CATEGORY_SYSTEM_PALETTE);
-                    jsonObject.remove(OVERLAY_COLOR_SOURCE);
+                    if (jsonObject.has(OVERLAY_CATEGORY_ACCENT_COLOR) || jsonObject.has(
+                            OVERLAY_CATEGORY_SYSTEM_PALETTE)) {
+                        jsonObject.remove(OVERLAY_CATEGORY_ACCENT_COLOR);
+                        jsonObject.remove(OVERLAY_CATEGORY_SYSTEM_PALETTE);
+                        jsonObject.remove(OVERLAY_COLOR_SOURCE);
+                        jsonObject.remove(OVERLAY_COLOR_INDEX);
+                    }
+                    // Keep color_both value because users can change either or both home and
+                    // lock screen wallpapers.
+                    jsonObject.put(OVERLAY_COLOR_BOTH, isDestinationBoth ? "1" : "0");
+
                     jsonObject.put(TIMESTAMP_FIELD, System.currentTimeMillis());
                     if (DEBUG) {
                         Log.d(TAG, "Updating theme setting from "
