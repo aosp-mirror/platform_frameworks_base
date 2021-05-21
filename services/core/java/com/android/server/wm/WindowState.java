@@ -4855,8 +4855,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // (i.e. Like {@link DisplayContent.ImeContainer#skipImeWindowsDuringTraversal}, the IME
         // window will be ignored to traverse when the IME target is still in split-screen mode).
         if (isImeLayeringTarget()
-                && !getDisplayContent().getDefaultTaskDisplayArea().isSplitScreenModeActivated()) {
-            if (getDisplayContent().forAllImeWindows(callback, traverseTopToBottom)) {
+                && (!mDisplayContent.getDefaultTaskDisplayArea().isSplitScreenModeActivated()
+                         || getTask() == null)) {
+            if (mDisplayContent.forAllImeWindows(callback, traverseTopToBottom)) {
                 return true;
             }
         }
