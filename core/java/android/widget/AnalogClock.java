@@ -567,12 +567,12 @@ public class AnalogClock extends View {
         }
     }
 
-    private void onVisible() {
-        if (!mVisible) {
-            mVisible = true;
-            IntentFilter filter = new IntentFilter();
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        IntentFilter filter = new IntentFilter();
 
-            filter.addAction(Intent.ACTION_TIME_TICK);
+        if (!mReceiverAttached) {
             filter.addAction(Intent.ACTION_TIME_CHANGED);
             filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
 
@@ -585,8 +585,7 @@ public class AnalogClock extends View {
             // user not the one the context is for.
             getContext().registerReceiverAsUser(mIntentReceiver,
                     android.os.Process.myUserHandle(), filter, null, getHandler());
-
-            mSecondsTick.run();
+            mReceiverAttached = true;
         }
 
         // NOTE: It's safe to do these after registering the receiver since the receiver always runs
@@ -599,9 +598,25 @@ public class AnalogClock extends View {
         onTimeChanged();
     }
 
+    @Override
+    protected void onDetachedFromWindow() {
+        if (mReceiverAttached) {
+            getContext().unregisterReceiver(mIntentReceiver);
+            mReceiverAttached = false;
+        }
+        super.onDetachedFromWindow();
+    }
+
+    private void onVisible() {
+        if (!mVisible) {
+            mVisible = true;
+            mSecondsTick.run();
+        }
+
+    }
+
     private void onInvisible() {
         if (mVisible) {
-            getContext().unregisterReceiver(mIntentReceiver);
             removeCallbacks(mSecondsTick);
             mVisible = false;
         }
@@ -751,6 +766,7 @@ public class AnalogClock extends View {
             invalidate();
         }
     };
+    private boolean mReceiverAttached;
 
     private final Runnable mSecondsTick = new Runnable() {
         @Override
