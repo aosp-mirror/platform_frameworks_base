@@ -52879,18 +52879,10 @@ package android.view.translation {
 
   public final class TranslationManager {
     method public void addOnDeviceTranslationCapabilityUpdateListener(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.view.translation.TranslationCapability>);
-    method @Deprecated public void addOnDeviceTranslationCapabilityUpdateListener(int, int, @NonNull android.app.PendingIntent);
-    method @Deprecated public void addTranslationCapabilityUpdateListener(int, int, @NonNull android.app.PendingIntent);
     method public void createOnDeviceTranslator(@NonNull android.view.translation.TranslationContext, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.view.translation.Translator>);
-    method @Deprecated @Nullable @WorkerThread public android.view.translation.Translator createOnDeviceTranslator(@NonNull android.view.translation.TranslationContext);
-    method @Deprecated @Nullable @WorkerThread public android.view.translation.Translator createTranslator(@NonNull android.view.translation.TranslationContext);
     method @NonNull @WorkerThread public java.util.Set<android.view.translation.TranslationCapability> getOnDeviceTranslationCapabilities(int, int);
     method @Nullable public android.app.PendingIntent getOnDeviceTranslationSettingsActivityIntent();
-    method @Deprecated @NonNull @WorkerThread public java.util.Set<android.view.translation.TranslationCapability> getTranslationCapabilities(int, int);
-    method @Deprecated @Nullable public android.app.PendingIntent getTranslationSettingsActivityIntent();
     method public void removeOnDeviceTranslationCapabilityUpdateListener(@NonNull java.util.function.Consumer<android.view.translation.TranslationCapability>);
-    method @Deprecated public void removeOnDeviceTranslationCapabilityUpdateListener(int, int, @NonNull android.app.PendingIntent);
-    method @Deprecated public void removeTranslationCapabilityUpdateListener(int, int, @NonNull android.app.PendingIntent);
   }
 
   public final class TranslationRequest implements android.os.Parcelable {
@@ -52971,11 +52963,9 @@ package android.view.translation {
   }
 
   public final class TranslationSpec implements android.os.Parcelable {
-    ctor @Deprecated public TranslationSpec(@NonNull String, int);
     ctor public TranslationSpec(@NonNull android.icu.util.ULocale, int);
     method public int describeContents();
     method public int getDataFormat();
-    method @Deprecated @NonNull public String getLanguage();
     method @NonNull public android.icu.util.ULocale getLocale();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.view.translation.TranslationSpec> CREATOR;
@@ -52997,7 +52987,6 @@ package android.view.translation {
     method public void onFinished();
     method public void onPaused();
     method public default void onResumed(@NonNull android.icu.util.ULocale, @NonNull android.icu.util.ULocale);
-    method @Deprecated public default void onStarted(@NonNull String, @NonNull String);
     method public default void onStarted(@NonNull android.icu.util.ULocale, @NonNull android.icu.util.ULocale);
   }
 

@@ -10419,20 +10419,13 @@ package android.service.translation {
     method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
     method public void onConnected();
     method public void onCreateTranslationSession(@NonNull android.view.translation.TranslationContext, int, @NonNull java.util.function.Consumer<java.lang.Boolean>);
-    method @Deprecated public void onCreateTranslationSession(@NonNull android.view.translation.TranslationContext, int);
     method public void onDisconnected();
     method public abstract void onFinishTranslationSession(int);
     method public abstract void onTranslationCapabilitiesRequest(int, int, @NonNull java.util.function.Consumer<java.util.Set<android.view.translation.TranslationCapability>>);
-    method @Deprecated public void onTranslationRequest(@NonNull android.view.translation.TranslationRequest, int, @Nullable android.os.CancellationSignal, @NonNull android.service.translation.TranslationService.OnTranslationResultCallback);
     method public void onTranslationRequest(@NonNull android.view.translation.TranslationRequest, int, @Nullable android.os.CancellationSignal, @NonNull java.util.function.Consumer<android.view.translation.TranslationResponse>);
     method public final void updateTranslationCapability(@NonNull android.view.translation.TranslationCapability);
     field public static final String SERVICE_INTERFACE = "android.service.translation.TranslationService";
     field public static final String SERVICE_META_DATA = "android.translation_service";
-  }
-
-  @Deprecated public static interface TranslationService.OnTranslationResultCallback {
-    method @Deprecated public void onError();
-    method @Deprecated public void onTranslationSuccess(@NonNull android.view.translation.TranslationResponse);
   }
 
 }
@@ -14538,7 +14531,6 @@ package android.view.translation {
     method @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION) public void finishTranslation(@NonNull android.app.assist.ActivityId);
     method @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION) public void pauseTranslation(@NonNull android.app.assist.ActivityId);
     method @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION) public void resumeTranslation(@NonNull android.app.assist.ActivityId);
-    method @Deprecated @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION) public void startTranslation(@NonNull android.view.translation.TranslationSpec, @NonNull android.view.translation.TranslationSpec, @NonNull java.util.List<android.view.autofill.AutofillId>, @NonNull android.app.assist.ActivityId);
     method @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION) public void startTranslation(@NonNull android.view.translation.TranslationSpec, @NonNull android.view.translation.TranslationSpec, @NonNull java.util.List<android.view.autofill.AutofillId>, @NonNull android.app.assist.ActivityId, @NonNull android.view.translation.UiTranslationSpec);
   }
 

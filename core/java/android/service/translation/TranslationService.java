@@ -125,7 +125,7 @@ public abstract class TranslationService extends Service {
 
     /**
      * Interface definition for a callback to be invoked when the translation is compleled.
-     * @deprecated use a {@link Consumer} instead.
+     * @removed use a {@link Consumer} instead.
      */
     @Deprecated
     public interface OnTranslationResultCallback {
@@ -149,7 +149,7 @@ public abstract class TranslationService extends Service {
 
         /**
          * TODO: implement javadoc
-         * @deprecated use {@link #onTranslationSuccess} with an error response instead.
+         * @removed use {@link #onTranslationSuccess} with an error response instead.
          */
         @Deprecated
         void onError();
@@ -240,7 +240,7 @@ public abstract class TranslationService extends Service {
     /**
      * TODO: fill in javadoc.
      *
-     * @deprecated use {@link #onCreateTranslationSession(TranslationContext, int, Consumer)}
+     * @removed use {@link #onCreateTranslationSession(TranslationContext, int, Consumer)}
      * instead.
      */
     @Deprecated
@@ -263,7 +263,7 @@ public abstract class TranslationService extends Service {
      * @param sessionId
      * @param callback
      * @param cancellationSignal
-     * @deprecated use
+     * @removed use
      * {@link #onTranslationRequest(TranslationRequest, int, CancellationSignal, Consumer)} instead.
      */
     @Deprecated
@@ -305,7 +305,6 @@ public abstract class TranslationService extends Service {
 
     /**
      * TODO: fill in javadoc
-     * TODO: make this abstract again once aiai is ready.
      *
      * <p>Must call {@code callback.accept} to pass back the set of translation capabilities.</p>
      *
