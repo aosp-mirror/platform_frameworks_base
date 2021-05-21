@@ -2095,8 +2095,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Унтраах"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Нэмэлт мэдээлэл авах"</string>
-    <!-- no translation found for nas_upgrade_notification_learn_more_content (3735480566983530650) -->
-    <skip />
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Сайжруулсан мэдэгдэл нь Android 12 дахь Android-н Орчинтой тохирсон мэдэгдлийг орлосон. Энэ онцлог нь санал болгосон үйлдлүүд болон хариунуудыг харуулж, таны мэдэгдлийг цэгцэлнэ.\n\nСайжруулсан мэдэгдэл нь харилцагчийн нэр, мессеж зэрэг хувийн мэдээллийг оруулаад мэдэгдлийн контентод хандах боломжтой. Энэ онцлог мөн утасны дуудлагад хариулах болон Бүү саад бол горимыг хянах зэргээр мэдэгдлийг хаах эсвэл түүнд хариулах боломжтой."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Хэвшлийн горимын мэдээллийн мэдэгдэл"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Батарей ихэвчлэн цэнэглэдэг хугацаанаас өмнө дуусаж болзошгүй"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Батарейн ажиллах хугацааг уртасгахын тулд Батарей хэмнэгчийг идэвхжүүллээ"</string>
