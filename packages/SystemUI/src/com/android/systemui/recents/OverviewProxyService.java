@@ -425,20 +425,32 @@ public class OverviewProxyService extends CurrentUserTracker implements
                 mPipOptional.ifPresent(
                         pip -> pip.setPinnedStackAnimationType(
                                 PipAnimationController.ANIM_TYPE_ALPHA));
-                mHandler.post(() -> notifySwipeToHomeFinishedInternal());
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
         }
 
         @Override
-        public void onQuickSwitchToNewTask(@Surface.Rotation int rotation) {
-            if (!verifyCaller("onQuickSwitchToNewTask")) {
+        public void notifySwipeUpGestureStarted() {
+            if (!verifyCaller("notifySwipeUpGestureStarted")) {
                 return;
             }
             final long token = Binder.clearCallingIdentity();
             try {
-                mHandler.post(() -> notifyQuickSwitchToNewTask(rotation));
+                mHandler.post(() -> notifySwipeUpGestureStartedInternal());
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public void notifyPrioritizedRotation(@Surface.Rotation int rotation) {
+            if (!verifyCaller("notifyPrioritizedRotation")) {
+                return;
+            }
+            final long token = Binder.clearCallingIdentity();
+            try {
+                mHandler.post(() -> notifyPrioritizedRotationInternal(rotation));
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -880,9 +892,9 @@ public class OverviewProxyService extends CurrentUserTracker implements
         }
     }
 
-    private void notifyQuickSwitchToNewTask(@Surface.Rotation int rotation) {
+    private void notifyPrioritizedRotationInternal(@Surface.Rotation int rotation) {
         for (int i = mConnectionCallbacks.size() - 1; i >= 0; --i) {
-            mConnectionCallbacks.get(i).onQuickSwitchToNewTask(rotation);
+            mConnectionCallbacks.get(i).onPrioritizedRotation(rotation);
         }
     }
 
@@ -910,9 +922,9 @@ public class OverviewProxyService extends CurrentUserTracker implements
         }
     }
 
-    public void notifySwipeToHomeFinishedInternal() {
+    private void notifySwipeUpGestureStartedInternal() {
         for (int i = mConnectionCallbacks.size() - 1; i >= 0; --i) {
-            mConnectionCallbacks.get(i).onSwipeToHomeFinished();
+            mConnectionCallbacks.get(i).onSwipeUpGestureStarted();
         }
     }
 
@@ -1007,8 +1019,8 @@ public class OverviewProxyService extends CurrentUserTracker implements
     public interface OverviewProxyListener {
         default void onConnectionChanged(boolean isConnected) {}
         default void onQuickStepStarted() {}
-        default void onSwipeToHomeFinished() {}
-        default void onQuickSwitchToNewTask(@Surface.Rotation int rotation) {}
+        default void onSwipeUpGestureStarted() {}
+        default void onPrioritizedRotation(@Surface.Rotation int rotation) {}
         default void onOverviewShown(boolean fromHome) {}
         default void onQuickScrubStarted() {}
         /** Notify the recents app (overview) is started by 3-button navigation. */
