@@ -5008,7 +5008,6 @@ package android.location {
   public final class SatellitePvt implements android.os.Parcelable {
     method public int describeContents();
     method @Nullable public android.location.SatellitePvt.ClockInfo getClockInfo();
-    method public int getFlags();
     method @FloatRange public double getIonoDelayMeters();
     method @Nullable public android.location.SatellitePvt.PositionEcef getPositionEcef();
     method @FloatRange public double getTropoDelayMeters();
@@ -5024,10 +5023,9 @@ package android.location {
     ctor public SatellitePvt.Builder();
     method @NonNull public android.location.SatellitePvt build();
     method @NonNull public android.location.SatellitePvt.Builder setClockInfo(@NonNull android.location.SatellitePvt.ClockInfo);
-    method @NonNull public android.location.SatellitePvt.Builder setFlags(int);
-    method @NonNull public android.location.SatellitePvt.Builder setIonoDelayMeters(@FloatRange double);
+    method @NonNull public android.location.SatellitePvt.Builder setIonoDelayMeters(@FloatRange(from=0.0f, to=100.0f) double);
     method @NonNull public android.location.SatellitePvt.Builder setPositionEcef(@NonNull android.location.SatellitePvt.PositionEcef);
-    method @NonNull public android.location.SatellitePvt.Builder setTropoDelayMeters(@FloatRange double);
+    method @NonNull public android.location.SatellitePvt.Builder setTropoDelayMeters(@FloatRange(from=0.0f, to=100.0f) double);
     method @NonNull public android.location.SatellitePvt.Builder setVelocityEcef(@NonNull android.location.SatellitePvt.VelocityEcef);
   }
 
