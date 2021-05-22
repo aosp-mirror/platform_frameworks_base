@@ -423,7 +423,8 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"Slökkt á NFC"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"Kveikt á NFC"</string>
-    <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Skjáupptaka"</string>
+    <!-- no translation found for quick_settings_screen_record_label (8650355346742003694) -->
+    <skip />
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Hefja"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Stöðva"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Opna fyrir hljóðnema tækisins?"</string>
@@ -1112,16 +1113,11 @@
     <string name="priority_conversations" msgid="3967482288896653039">"Forgangssamtöl"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Nýleg samtöl"</string>
     <string name="okay" msgid="6490552955618608554">"Í lagi"</string>
-    <!-- no translation found for days_timestamp (5821854736213214331) -->
-    <skip />
-    <!-- no translation found for one_week_timestamp (4925600765473875590) -->
-    <skip />
-    <!-- no translation found for two_weeks_timestamp (9111801081871962155) -->
-    <skip />
-    <!-- no translation found for over_one_week_timestamp (3770560704420807142) -->
-    <skip />
-    <!-- no translation found for over_two_weeks_timestamp (6300507859007874050) -->
-    <skip />
+    <string name="days_timestamp" msgid="5821854736213214331">"Fyrir <xliff:g id="DURATION">%1$s</xliff:g> dögum"</string>
+    <string name="one_week_timestamp" msgid="4925600765473875590">"Fyrir 1 viku"</string>
+    <string name="two_weeks_timestamp" msgid="9111801081871962155">"Fyrir 2 vikum"</string>
+    <string name="over_one_week_timestamp" msgid="3770560704420807142">"Fyrir meira en 1 viku"</string>
+    <string name="over_two_weeks_timestamp" msgid="6300507859007874050">"Fyrir meira en 2 vikum"</string>
     <string name="birthday_status" msgid="2596961629465396761">"Afmæli"</string>
     <string name="birthday_status_content_description" msgid="682836371128282925">"<xliff:g id="NAME">%1$s</xliff:g> á afmæli"</string>
     <string name="upcoming_birthday_status" msgid="2005452239256870351">"Afmæli á næstunni"</string>

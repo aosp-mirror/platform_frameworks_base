@@ -43,6 +43,8 @@ import android.view.ViewRootImpl;
 import android.view.WindowManagerGlobal;
 import android.view.autofill.AutofillId;
 import android.view.translation.UiTranslationManager.UiTranslationState;
+import android.widget.TextView;
+import android.widget.TextViewTranslationCallback;
 
 import com.android.internal.util.function.pooled.PooledLambda;
 
@@ -146,7 +148,13 @@ public class UiTranslationController {
                 break;
             case STATE_UI_TRANSLATION_FINISHED:
                 destroyTranslators();
-                runForEachView((view, callback) -> callback.onClearTranslation(view));
+                runForEachView((view, callback) -> {
+                    callback.onClearTranslation(view);
+                    if (view.hasTranslationTransientState()) {
+                        view.setHasTransientState(false);
+                        view.setHasTranslationTransientState(false);
+                    }
+                });
                 synchronized (mLock) {
                     mViews.clear();
                 }
@@ -381,17 +389,23 @@ public class UiTranslationController {
                     continue;
                 }
                 mActivity.runOnUiThread(() -> {
-                    final ViewTranslationCallback callback = view.getViewTranslationCallback();
+                    ViewTranslationCallback callback = view.getViewTranslationCallback();
                     if (callback == null) {
-                        if (DEBUG) {
-                            Log.d(TAG, view + " doesn't support showing translation because of "
-                                    + "null ViewTranslationCallback.");
+                        if (view instanceof TextView) {
+                            // developer doesn't provide their override, we set the default TextView
+                            // implememtation.
+                            callback = new TextViewTranslationCallback();
+                            view.setViewTranslationCallback(callback);
+                            if (mViewsToPadContent.contains(autofillId)) {
+                                callback.enableContentPadding();
+                            }
+                        } else {
+                            if (DEBUG) {
+                                Log.d(TAG, view + " doesn't support showing translation because of "
+                                        + "null ViewTranslationCallback.");
+                            }
+                            return;
                         }
-                        return;
-                    }
-
-                    if (mViewsToPadContent.contains(autofillId)) {
-                        callback.enableContentPadding();
                     }
                     view.onViewTranslationResponse(response);
                     callback.onShowTranslation(view);

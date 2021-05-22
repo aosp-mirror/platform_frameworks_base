@@ -651,6 +651,8 @@
         <item name="android:textColor">?android:attr/textColorPrimary</item>
         <item name="android:backgroundTint">@color/media_player_outline_button_bg</item>
         <item name="android:fontFamily">@*android:string/config_headlineFontFamilyMedium</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:singleLine">true</item>
     </style>
 
     <style name="MediaPlayer.SolidButton">
@@ -699,6 +701,8 @@
         <item name="android:navigationBarColor">?android:attr/colorBackgroundFloating</item>
         <item name="android:windowActivityTransitions">true</item>
     </style>
+
+    <style name="Screenshot" parent="@android:style/Theme.DeviceDefault.DayNight"/>
 
     <!-- Privacy dialog -->
     <style name="PrivacyDialog" parent="Theme.SystemUI.QuickSettings.Dialog">

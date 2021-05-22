@@ -208,7 +208,6 @@ public class ExpandedAnimationController
         Resources res = mLayout.getContext().getResources();
         mBubblePaddingTop = res.getDimensionPixelSize(R.dimen.bubble_padding_top);
         mStackOffsetPx = res.getDimensionPixelSize(R.dimen.bubble_stack_offset);
-        mBubblePaddingTop = res.getDimensionPixelSize(R.dimen.bubble_padding_top);
         mBubbleSizePx = mPositioner.getBubbleSize();
         mBubblesMaxRendered = res.getInteger(R.integer.bubbles_max_rendered);
         mBubblesMaxSpace = res.getDimensionPixelSize(R.dimen.bubble_max_spacing);
@@ -276,8 +275,8 @@ public class ExpandedAnimationController
                     boolean onLeft = mCollapsePoint != null
                             && mCollapsePoint.x < (availableRect.width() / 2f);
                     float translationX = onLeft
-                            ? availableRect.left + mExpandedViewPadding
-                            : availableRect.right - mBubbleSizePx - mExpandedViewPadding;
+                            ? availableRect.left
+                            : availableRect.right - mBubbleSizePx;
                     path.lineTo(translationX, getBubbleXOrYForOrientation(index));
                 } else {
                     path.lineTo(getBubbleXOrYForOrientation(index), expandedY);
@@ -290,7 +289,7 @@ public class ExpandedAnimationController
                 path.lineTo(stackedX, expandedY);
 
                 // Then, draw a line down to the stack position.
-                path.lineTo(stackedX, mCollapsePoint.y + index * mStackOffsetPx);
+                path.lineTo(stackedX, mCollapsePoint.y + Math.min(index, 1) * mStackOffsetPx);
             }
 
             // The lead bubble should be the bubble with the longest distance to travel when we're
@@ -509,7 +508,7 @@ public class ExpandedAnimationController
     }
 
     @Override
-    float getOffsetForChainedPropertyAnimation(DynamicAnimation.ViewProperty property) {
+    float getOffsetForChainedPropertyAnimation(DynamicAnimation.ViewProperty property, int index) {
         return 0;
     }
 
@@ -621,8 +620,8 @@ public class ExpandedAnimationController
                         && mCollapsePoint.x < (availableRect.width() / 2f);
                 animationForChild(bubble)
                         .translationX(onLeft
-                                ? availableRect.left + mExpandedViewPadding
-                                : availableRect.right - mBubbleSizePx - mExpandedViewPadding)
+                                ? availableRect.left
+                                : availableRect.right - mBubbleSizePx)
                         .translationY(getBubbleXOrYForOrientation(i))
                         .start();
             } else {

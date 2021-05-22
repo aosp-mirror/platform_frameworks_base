@@ -930,7 +930,12 @@ public class AppSearchManagerService extends SystemService {
                     for (int i = 0; i < ids.size(); i++) {
                         String id = ids.get(i);
                         try {
-                            impl.remove(packageName, databaseName, namespace, id);
+                            impl.remove(
+                                    packageName,
+                                    databaseName,
+                                    namespace,
+                                    id,
+                                    /*removeStatsBuilder=*/ null);
                             ++operationSuccessCount;
                             resultBuilder.setSuccess(id, /*result= */ null);
                         } catch (Throwable t) {
@@ -1007,7 +1012,8 @@ public class AppSearchManagerService extends SystemService {
                             packageName,
                             databaseName,
                             queryExpression,
-                            new SearchSpec(searchSpecBundle));
+                            new SearchSpec(searchSpecBundle),
+                            /*removeStatsBuilder=*/ null);
                     // Now that the batch has been written. Persist the newly written data.
                     impl.persistToDisk(PersistType.Code.LITE);
                     ++operationSuccessCount;

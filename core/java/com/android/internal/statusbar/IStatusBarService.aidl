@@ -110,7 +110,7 @@ interface IStatusBarService
     // Used to show the authentication dialog (Biometrics, Device Credential)
     void showAuthenticationDialog(in PromptInfo promptInfo, IBiometricSysuiReceiver sysuiReceiver,
             in int[] sensorIds, boolean credentialAllowed, boolean requireConfirmation,
-            int userId, String opPackageName,long operationId);
+            int userId, String opPackageName, long operationId, int multiSensorConfig);
 
     // Used to notify the authentication dialog that a biometric has been authenticated
     void onBiometricAuthenticated();
