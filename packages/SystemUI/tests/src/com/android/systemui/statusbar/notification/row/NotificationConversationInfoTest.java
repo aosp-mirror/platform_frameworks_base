@@ -36,7 +36,6 @@ import static junit.framework.Assert.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
@@ -74,7 +73,6 @@ import android.widget.TextView;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.settingslib.notification.ConversationIconFactory;
-import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.people.widget.PeopleSpaceWidgetManager;
@@ -89,7 +87,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -101,8 +98,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
-
-import javax.inject.Provider;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -252,7 +247,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mEntry,
                 mBubbleMetadata,
                 null,
-                null,
                 mIconFactory,
                 mContext,
                 true,
@@ -277,7 +271,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mNotificationChannel,
                 mEntry,
                 mBubbleMetadata,
-                null,
                 null,
                 mIconFactory,
                 mContext,
@@ -332,7 +325,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mEntry,
                 mBubbleMetadata,
                 null,
-                null,
                 mIconFactory,
                 mContext,
                 true,
@@ -359,7 +351,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mEntry,
                 mBubbleMetadata,
                 null,
-                null,
                 mIconFactory,
                 mContext,
                 true,
@@ -384,7 +375,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mNotificationChannel,
                 mEntry,
                 mBubbleMetadata,
-                null,
                 null,
                 mIconFactory,
                 mContext,
@@ -422,7 +412,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 entry,
                 mBubbleMetadata,
                 null,
-                null,
                 mIconFactory,
                 mContext,
                 true,
@@ -452,7 +441,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                     assertEquals(mConversationChannel, c);
                     latch.countDown();
                 },
-                null,
                 mIconFactory,
                 mContext,
                 true,
@@ -479,7 +467,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mNotificationChannel,
                 mEntry,
                 mBubbleMetadata,
-                null,
                 null,
                 mIconFactory,
                 mContext,
@@ -509,7 +496,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                     assertEquals(mNotificationChannel, c);
                     latch.countDown();
                 },
-                null,
                 mIconFactory,
                 mContext,
                 false,
@@ -535,7 +521,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mNotificationChannel,
                 mEntry,
                 mBubbleMetadata,
-                null,
                 null,
                 mIconFactory,
                 mContext,
@@ -565,7 +550,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mNotificationChannel,
                 mEntry,
                 mBubbleMetadata,
-                null,
                 null,
                 mIconFactory,
                 mContext,
@@ -598,7 +582,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mNotificationChannel,
                 mEntry,
                 mBubbleMetadata,
-                null,
                 null,
                 mIconFactory,
                 mContext,
@@ -638,7 +621,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mEntry,
                 null,
                 null,
-                null,
                 mIconFactory,
                 mContext,
                 true,
@@ -666,7 +648,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mEntry,
-                null,
                 null,
                 null,
                 mIconFactory,
@@ -705,7 +686,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mEntry,
                 mBubbleMetadata,
                 null,
-                null,
                 mIconFactory,
                 mContext,
                 true,
@@ -734,7 +714,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mNotificationChannel,
                 mEntry,
                 mBubbleMetadata,
-                null,
                 null,
                 mIconFactory,
                 mContext,
@@ -781,7 +760,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mEntry,
                 mBubbleMetadata,
                 null,
-                null,
                 mIconFactory,
                 mContext,
                 true,
@@ -825,7 +803,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mNotificationChannel,
                 mEntry,
                 mBubbleMetadata,
-                null,
                 null,
                 mIconFactory,
                 mContext,
@@ -872,7 +849,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mEntry,
                 mBubbleMetadata,
                 null,
-                null,
                 mIconFactory,
                 mContext,
                 true,
@@ -911,7 +887,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mEntry,
                 mBubbleMetadata,
                 null,
-                null,
                 mIconFactory,
                 mContext,
                 true,
@@ -948,7 +923,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mNotificationChannel,
                 mEntry,
                 mBubbleMetadata,
-                null,
                 null,
                 mIconFactory,
                 mContext,
@@ -991,7 +965,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mEntry,
                 mBubbleMetadata,
                 null,
-                null,
                 mIconFactory,
                 mContext,
                 true,
@@ -1023,7 +996,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mEntry,
                 mBubbleMetadata,
                 null,
-                null,
                 mIconFactory,
                 mContext,
                 true,
@@ -1053,7 +1025,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mNotificationChannel,
                 mEntry,
                 mBubbleMetadata,
-                null,
                 null,
                 mIconFactory,
                 mContext,
@@ -1092,7 +1063,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mEntry,
                 mBubbleMetadata,
                 null,
-                null,
                 mIconFactory,
                 mContext,
                 true,
@@ -1130,7 +1100,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mEntry,
                 mBubbleMetadata,
                 null,
-                null,
                 mIconFactory,
                 mContext,
                 true,
@@ -1167,7 +1136,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mEntry,
                 mBubbleMetadata,
                 null,
-                null,
                 mIconFactory,
                 mContext,
                 true,
@@ -1203,7 +1171,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mEntry,
                 mBubbleMetadata,
                 null,
-                null,
                 mIconFactory,
                 mContext,
                 true,
@@ -1229,7 +1196,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mNotificationChannel,
                 mEntry,
                 mBubbleMetadata,
-                null,
                 null,
                 mIconFactory,
                 mContext,
@@ -1257,7 +1223,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mNotificationChannel,
                 mEntry,
                 mBubbleMetadata,
-                null,
                 null,
                 mIconFactory,
                 mContext,
@@ -1289,7 +1254,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mNotificationChannel,
                 mEntry,
                 mBubbleMetadata,
-                null,
                 null,
                 mIconFactory,
                 mContext,
@@ -1325,7 +1289,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mNotificationChannel,
                 mEntry,
                 mBubbleMetadata,
-                null,
                 null,
                 mIconFactory,
                 mContext,

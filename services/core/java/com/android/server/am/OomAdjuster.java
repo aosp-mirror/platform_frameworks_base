@@ -3112,6 +3112,7 @@ public class OomAdjuster {
         // if an app is already frozen and shouldNotFreeze becomes true, immediately unfreeze
         if (opt.isFrozen() && opt.shouldNotFreeze()) {
             mCachedAppOptimizer.unfreezeAppLSP(app);
+            return;
         }
 
         final ProcessStateRecord state = app.mState;
@@ -3119,7 +3120,7 @@ public class OomAdjuster {
         if (state.getCurAdj() >= ProcessList.CACHED_APP_MIN_ADJ && !opt.isFrozen()
                 && !opt.shouldNotFreeze()) {
             mCachedAppOptimizer.freezeAppAsyncLSP(app);
-        } else if (state.getSetAdj() < ProcessList.CACHED_APP_MIN_ADJ && opt.isFrozen()) {
+        } else if (state.getSetAdj() < ProcessList.CACHED_APP_MIN_ADJ) {
             mCachedAppOptimizer.unfreezeAppLSP(app);
         }
     }

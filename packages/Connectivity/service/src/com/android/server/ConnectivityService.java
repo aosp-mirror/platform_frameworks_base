@@ -8655,28 +8655,32 @@ public class ConnectivityService extends IConnectivityManager.Stub
     public void factoryReset() {
         enforceSettingsPermission();
 
-        if (mUserManager.hasUserRestriction(UserManager.DISALLOW_NETWORK_RESET)) {
-            return;
-        }
-
+        final int uid = mDeps.getCallingUid();
         final long token = Binder.clearCallingIdentity();
         try {
+            if (mUserManager.hasUserRestrictionForUser(UserManager.DISALLOW_NETWORK_RESET,
+                    UserHandle.getUserHandleForUid(uid))) {
+                return;
+            }
+
             final IpMemoryStore ipMemoryStore = IpMemoryStore.getMemoryStore(mContext);
             ipMemoryStore.factoryReset();
+
+            // Turn airplane mode off
+            setAirplaneMode(false);
+
+            // restore private DNS settings to default mode (opportunistic)
+            if (!mUserManager.hasUserRestrictionForUser(UserManager.DISALLOW_CONFIG_PRIVATE_DNS,
+                    UserHandle.getUserHandleForUid(uid))) {
+                ConnectivitySettingsManager.setPrivateDnsMode(mContext,
+                        PRIVATE_DNS_MODE_OPPORTUNISTIC);
+            }
+
+            Settings.Global.putString(mContext.getContentResolver(),
+                    ConnectivitySettingsManager.NETWORK_AVOID_BAD_WIFI, null);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
-
-        // Turn airplane mode off
-        setAirplaneMode(false);
-
-        // restore private DNS settings to default mode (opportunistic)
-        if (!mUserManager.hasUserRestriction(UserManager.DISALLOW_CONFIG_PRIVATE_DNS)) {
-            ConnectivitySettingsManager.setPrivateDnsMode(mContext, PRIVATE_DNS_MODE_OPPORTUNISTIC);
-        }
-
-        Settings.Global.putString(mContext.getContentResolver(),
-                ConnectivitySettingsManager.NETWORK_AVOID_BAD_WIFI, null);
     }
 
     @Override
@@ -9158,6 +9162,34 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return results;
     }
 
+    private boolean hasLocationPermission(String packageName, int uid) {
+        // LocationPermissionChecker#checkLocationPermission can throw SecurityException if the uid
+        // and package name don't match. Throwing on the CS thread is not acceptable, so wrap the
+        // call in a try-catch.
+        try {
+            if (!mLocationPermissionChecker.checkLocationPermission(
+                        packageName, null /* featureId */, uid, null /* message */)) {
+                return false;
+            }
+        } catch (SecurityException e) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private boolean ownsVpnRunningOverNetwork(int uid, Network network) {
+        for (NetworkAgentInfo virtual : mNetworkAgentInfos) {
+            if (virtual.supportsUnderlyingNetworks()
+                    && virtual.networkCapabilities.getOwnerUid() == uid
+                    && CollectionUtils.contains(virtual.declaredUnderlyingNetworks, network)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     @VisibleForTesting
     boolean checkConnectivityDiagnosticsPermissions(
             int callbackPid, int callbackUid, NetworkAgentInfo nai, String callbackPackageName) {
@@ -9165,29 +9197,14 @@ public class ConnectivityService extends IConnectivityManager.Stub
             return true;
         }
 
-        // LocationPermissionChecker#checkLocationPermission can throw SecurityException if the uid
-        // and package name don't match. Throwing on the CS thread is not acceptable, so wrap the
-        // call in a try-catch.
-        try {
-            if (!mLocationPermissionChecker.checkLocationPermission(
-                    callbackPackageName, null /* featureId */, callbackUid, null /* message */)) {
-                return false;
-            }
-        } catch (SecurityException e) {
+        // Administrator UIDs also contains the Owner UID
+        final int[] administratorUids = nai.networkCapabilities.getAdministratorUids();
+        if (!CollectionUtils.contains(administratorUids, callbackUid)
+                && !ownsVpnRunningOverNetwork(callbackUid, nai.network)) {
             return false;
         }
 
-        for (NetworkAgentInfo virtual : mNetworkAgentInfos) {
-            if (virtual.supportsUnderlyingNetworks()
-                    && virtual.networkCapabilities.getOwnerUid() == callbackUid
-                    && CollectionUtils.contains(virtual.declaredUnderlyingNetworks, nai.network)) {
-                return true;
-            }
-        }
-
-        // Administrator UIDs also contains the Owner UID
-        final int[] administratorUids = nai.networkCapabilities.getAdministratorUids();
-        return CollectionUtils.contains(administratorUids, callbackUid);
+        return hasLocationPermission(callbackPackageName, callbackUid);
     }
 
     @Override

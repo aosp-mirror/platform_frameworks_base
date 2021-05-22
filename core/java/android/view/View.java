@@ -3514,6 +3514,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *                     11           PFLAG4_SCROLL_CAPTURE_HINT_MASK
      *                    1             PFLAG4_ALLOW_CLICK_WHEN_DISABLED
      *                   1              PFLAG4_DETACHED
+     *                  1               PFLAG4_HAS_TRANSLATION_TRANSIENT_STATE
      * |-------|-------|-------|-------|
      */
 
@@ -3579,6 +3580,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Indicates if the view is just detached.
      */
     private static final int PFLAG4_DETACHED = 0x000002000;
+
+    /**
+     * Indicates that the view has transient state because the system is translating it.
+     */
+    private static final int PFLAG4_HAS_TRANSLATION_TRANSIENT_STATE = 0x000004000;
 
     /* End of masks for mPrivateFlags4 */
 
@@ -9046,22 +9052,27 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * content into this view.
      *
      * <p>Depending on the type of view, this listener may be invoked for different scenarios. For
-     * example, for editable TextViews, this listener will be invoked for the following scenarios:
+     * example, for an editable {@link android.widget.TextView}, this listener will be invoked for
+     * the following scenarios:
      * <ol>
      *     <li>Paste from the clipboard (e.g. "Paste" or "Paste as plain text" action in the
      *     insertion/selection menu)
      *     <li>Content insertion from the keyboard (from {@link InputConnection#commitContent})
-     *     <li>Drag and drop (drop events from {@link #onDragEvent(DragEvent)})
+     *     <li>Drag and drop (drop events from {@link #onDragEvent})
      *     <li>Autofill
      *     <li>Selection replacement via {@link Intent#ACTION_PROCESS_TEXT}
      * </ol>
      *
-     * <p>When setting a listener, clients should also declare the MIME types accepted by it.
-     * When invoked with other types of content, the listener may reject the content (defer to
-     * the default platform behavior) or execute some other fallback logic. The MIME types
-     * declared here allow different features to optionally alter their behavior. For example,
-     * the soft keyboard may choose to hide its UI for inserting GIFs for a particular input
-     * field if the MIME types set here for that field don't include "image/gif" or "image/*".
+     * <p>When setting a listener, clients must also declare the accepted MIME types.
+     * The listener will still be invoked even if the MIME type of the content is not one of the
+     * declared MIME types (e.g. if the user pastes content whose type is not one of the declared
+     * MIME types).
+     * In that case, the listener may reject the content (defer to the default platform behavior)
+     * or execute some other fallback logic (e.g. show an appropriate message to the user).
+     * The declared MIME types serve as a hint to allow different features to optionally alter
+     * their behavior. For example, a soft keyboard may optionally choose to hide its UI for
+     * inserting GIFs for a particular input field if the MIME types set here for that field
+     * don't include "image/gif" or "image/*".
      *
      * <p>Note: MIME type matching in the Android framework is case-sensitive, unlike formal RFC
      * MIME types. As a result, you should always write your MIME types with lowercase letters,
@@ -12263,6 +12274,30 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 }
             }
         }
+    }
+
+    /**
+     * Set the view is tracking translation transient state. This flag is used to check if the view
+     * need to call setHasTransientState(false) to reset transient state that set when starting
+     * translation.
+     *
+     * @param hasTranslationTransientState true if this view has translation transient state
+     * @hide
+     */
+    public void setHasTranslationTransientState(boolean hasTranslationTransientState) {
+        if (hasTranslationTransientState) {
+            mPrivateFlags4 |= PFLAG4_HAS_TRANSLATION_TRANSIENT_STATE;
+        } else {
+            mPrivateFlags4 &= ~PFLAG4_HAS_TRANSLATION_TRANSIENT_STATE;
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public boolean hasTranslationTransientState() {
+        return (mPrivateFlags4 & PFLAG4_HAS_TRANSLATION_TRANSIENT_STATE)
+                == PFLAG4_HAS_TRANSLATION_TRANSIENT_STATE;
     }
 
     /**
@@ -30834,6 +30869,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Returns a {@link ViewTranslationCallback} that is used to display the translated information
+     * or {@code null} if this View doesn't support translation.
+     *
      * @hide
      */
     @Nullable
@@ -30920,7 +30958,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * view or calls {@link View#onVirtualViewTranslationResponses} for view contains virtual
      * children to build {@link ViewTranslationRequest} if the view should be translated.
      * The view is marked as having {@link #setHasTransientState(boolean) transient state} so that
-     * recycling of views doesn't prevent the system from attaching the response to it.</p>
+     * recycling of views doesn't prevent the system from attaching the response to it. Therefore,
+     * if overriding this method, you should set or reset the transient state. </p>
      *
      * @param viewIds a map for the view's {@link AutofillId} and its virtual child ids or
      * {@code null} if the view doesn't have virtual child that should be translated. The virtual
@@ -30970,10 +31009,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     Log.v(CONTENT_CAPTURE_LOG_TAG, "Calling setHasTransientState(true) for "
                             + getAutofillId());
                 }
-                // TODO: Add a default ViewTranslationCallback for View that resets this in
-                // onClearTranslation(). Also update the javadoc for this method to mention
-                // that.
                 setHasTransientState(true);
+                setHasTranslationTransientState(true);
             }
         }
     }
