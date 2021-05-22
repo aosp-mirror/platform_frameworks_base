@@ -290,8 +290,6 @@
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"نقطه اتصال دستگاه همراه خاموش شد."</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"نقطه اتصال دستگاه همراه روشن شد."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"فرستادن صفحه نمایش متوقف شد."</string>
-    <string name="accessibility_quick_settings_work_mode_off" msgid="9106217884005620744">"حالت کار موقتاً متوقف شده است."</string>
-    <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"حالت کار روشن."</string>
     <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6422896967647049692">"حالت کار موقتاً متوقف شده است."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"حالت کار روشن شد."</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"صرفه‌جویی داده خاموش شد."</string>
@@ -410,8 +408,7 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="6798849610647988987">"<xliff:g id="DATA_USED">%s</xliff:g> استفاده شده"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"<xliff:g id="DATA_LIMIT">%s</xliff:g> محدودیت"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"هشدار <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
-    <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"نمایه کاری"</string>
-    <string name="quick_settings_work_mode_paused" msgid="4841109346916998613">"موقتاً متوقف"</string>
+    <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"برنامه‌های کاری"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"نور شب"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"غروب روشن می‌شود"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"تا طلوع"</string>
@@ -460,7 +457,7 @@
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"‏برای استفاده از NFC، قفل را باز کنید"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"این دستگاه به سازمان شما تعلق دارد"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"این دستگاه به <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> تعلق دارد"</string>
-    <string name="do_financed_disclosure_with_name" msgid="6723004643314467864">"این دستگاه را <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> ارائه داده است"</string>
+    <string name="do_financed_disclosure_with_name" msgid="6723004643314467864">"این دستگاه را <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> تأمین کرده است"</string>
     <string name="phone_hint" msgid="6682125338461375925">"انگشتتان را از نماد تلفن تند بکشید"</string>
     <string name="voice_hint" msgid="7476017460191291417">"برای «دستیار صوتی»، تند بکشید"</string>
     <string name="camera_hint" msgid="4519495795000658637">"انگشتتان را از نماد دوربین تند بکشید"</string>
@@ -529,7 +526,7 @@
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"این دستگاه را ولی‌تان مدیریت می‌کند"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"مالک این دستگاه سازمان شما است و ممکن است ترافیک شبکه را پایش کند"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"مالک این دستگاه <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> است و ممکن است ترافیک شبکه را پایش کند"</string>
-    <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"این دستگاه ازسوی <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> تأمین شده است"</string>
+    <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"این دستگاه را <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> تأمین شده است"</string>
     <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"این دستگاه به سازمان شما تعلق دارد و به <xliff:g id="VPN_APP">%1$s</xliff:g> متصل است"</string>
     <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"این دستگاه به <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> تعلق دارد و به <xliff:g id="VPN_APP">%2$s</xliff:g> متصل است"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"این دستگاه به سازمان شما تعلق دارد"</string>
@@ -544,7 +541,7 @@
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"نمایه کاری به <xliff:g id="VPN_APP">%1$s</xliff:g> متصل است"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"نمایه شخصی شما به <xliff:g id="VPN_APP">%1$s</xliff:g> متصل است"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"این دستگاه به <xliff:g id="VPN_APP">%1$s</xliff:g> متصل است"</string>
-    <string name="monitoring_title_financed_device" msgid="3659962357973919387">"این دستگاه ازسوی <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> تأمین شده است"</string>
+    <string name="monitoring_title_financed_device" msgid="3659962357973919387">"این دستگاه را <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> تأمین کرده است"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"مدیریت دستگاه"</string>
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"کنترل نمایه"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"کنترل شبکه"</string>
@@ -1043,10 +1040,7 @@
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"انتقال به لبه و پنهان کردن"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"انتقال به خارج از لبه و نمایش"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"روشن/ خاموش کردن"</string>
-    <string name="quick_controls_title" msgid="6839108006171302273">"کنترل‌های دستگاه"</string>
-    <string name="quick_controls_subtitle" msgid="1667408093326318053">"افزودن کنترل‌ها برای دستگاه‌های متصل"</string>
-    <string name="quick_controls_setup_title" msgid="8901436655997849822">"تنظیم کنترل‌های دستگاه"</string>
-    <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"دکمه روشن/خاموش را نگه دارید تا به کنترل‌ها دسترسی پیدا کنید"</string>
+    <string name="quick_controls_title" msgid="7095074621086860062">"کنترل‌های لوازم خانگی"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"انتخاب برنامه برای افزودن کنترل‌ها"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g> کنترل اضافه شده است.</item>
@@ -1060,7 +1054,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"حذف کردن از موارد دلخواه"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"انتقال به موقعیت <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"کنترل‌ها"</string>
-    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"برای دسترسی از منوی روشن/خاموش، کنترل‌ها را انتخاب کنید"</string>
+    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"برای دسترس از «تنظیمات سریع»، کنترل‌ها را انتخاب کنید"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"برای تغییر دادن ترتیب کنترل‌ها، آن‌ها را نگه دارید و بکشید"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"همه کنترل‌ها برداشته شده‌اند"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"تغییرات ذخیره نشد"</string>
@@ -1099,7 +1093,7 @@
     <string name="controls_error_generic" msgid="352500456918362905">"وضعیت بار نشد"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"خطا، دوباره امتحان کنید"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"درحال انجام"</string>
-    <string name="controls_added_tooltip" msgid="4842812921719153085">"برای دیدن کنترل‌های جدید، دکمه روشن/خاموش را پایین نگه دارید"</string>
+    <string name="controls_added_tooltip" msgid="5866098408470111984">"برای دیدن کنترل‌های جدید، «تنظیمات فوری» را باز کنید"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"افزودن کنترل‌ها"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"ویرایش کنترل‌ها"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"افزودن خروجی"</string>
@@ -1118,9 +1112,16 @@
     <string name="priority_conversations" msgid="3967482288896653039">"مکالمه‌های اولویت‌دار"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"گفتگوهای اخیر"</string>
     <string name="okay" msgid="6490552955618608554">"تأیید"</string>
-    <string name="timestamp" msgid="6577851592534538533">"‫<xliff:g id="DURATION">%1$s</xliff:g> پیش"</string>
-    <string name="less_than_timestamp" msgid="6598972791137724517">"کمتر از <xliff:g id="DURATION">%1$s</xliff:g> قبل"</string>
-    <string name="over_timestamp" msgid="4765793502859358634">"بیش‌از <xliff:g id="DURATION">%1$s</xliff:g> قبل"</string>
+    <!-- no translation found for days_timestamp (5821854736213214331) -->
+    <skip />
+    <!-- no translation found for one_week_timestamp (4925600765473875590) -->
+    <skip />
+    <!-- no translation found for two_weeks_timestamp (9111801081871962155) -->
+    <skip />
+    <!-- no translation found for over_one_week_timestamp (3770560704420807142) -->
+    <skip />
+    <!-- no translation found for over_two_weeks_timestamp (6300507859007874050) -->
+    <skip />
     <string name="birthday_status" msgid="2596961629465396761">"تاریخ تولد"</string>
     <string name="birthday_status_content_description" msgid="682836371128282925">"امروز تولد <xliff:g id="NAME">%1$s</xliff:g> است"</string>
     <string name="upcoming_birthday_status" msgid="2005452239256870351">"تاریخ تولد نزدیک است"</string>

@@ -536,21 +536,22 @@
     <dimen name="pull_span_min">25dp</dimen>
 
     <dimen name="qs_corner_radius">28dp</dimen>
-    <dimen name="qs_tile_height">88dp</dimen>
+    <dimen name="qs_tile_height">84dp</dimen>
     <!--notification_side_paddings + notification_content_margin_start - (qs_quick_tile_size - qs_tile_background_size) / 2 -->
     <dimen name="qs_tile_layout_margin_side">18dp</dimen>
     <dimen name="qs_tile_margin_horizontal">8dp</dimen>
-    <dimen name="qs_tile_margin_horizontal_two_line">2dp</dimen>
     <dimen name="qs_tile_margin_vertical">@dimen/qs_tile_margin_horizontal</dimen>
     <dimen name="qs_tile_margin_top_bottom">4dp</dimen>
     <dimen name="qs_tile_margin_top_bottom_negative">-4dp</dimen>
+    <dimen name="qs_brightness_margin_top">8dp</dimen>
+    <dimen name="qs_brightness_margin_bottom">24dp</dimen>
+    <dimen name="qqs_layout_margin_top">16dp</dimen>
     <!-- The height of the qs customize header. Should be
-         (qs_panel_padding_top (48dp) +  brightness_mirror_height (48dp) + qs_tile_margin_top (18dp)) -
+         (qs_panel_padding_top (48dp) +  brightness_mirror_height (48dp) + qs_brightness_margin_top(8dp) + qs_brightness_margin_bottom (24dp)) -
          (Toolbar_minWidth (56dp) + qs_tile_margin_top_bottom (4dp))
     -->
-    <dimen name="qs_customize_header_min_height">54dp</dimen>
+    <dimen name="qs_customize_header_min_height">68dp</dimen>
     <dimen name="qs_customize_internal_side_paddings">8dp</dimen>
-    <dimen name="qs_tile_margin_top">18dp</dimen>
     <dimen name="qs_tile_icon_background_stroke_width">-1dp</dimen>
     <dimen name="qs_tile_background_size">56dp</dimen>
     <dimen name="qs_icon_size">20dp</dimen>
@@ -610,7 +611,6 @@
     <dimen name="qs_status_separator">32dp</dimen>
     <dimen name="qs_carrier_margin_width">4dp</dimen>
     <dimen name="qs_footer_icon_size">20dp</dimen>
-    <dimen name="qs_paged_tile_layout_padding_bottom">0dp</dimen>
     <dimen name="qs_header_top_padding">15dp</dimen>
     <dimen name="qs_header_bottom_padding">14dp</dimen>
 
@@ -1251,8 +1251,6 @@
     <!-- Size of the RAT type for CellularTile -->
     <dimen name="celltile_rat_type_size">10sp</dimen>
 
-    <dimen name="new_qs_vertical_margin">8dp</dimen>
-
     <!-- Size of media cards in the QSPanel carousel -->
     <dimen name="qs_media_padding">16dp</dimen>
     <dimen name="qs_media_album_size_small">72dp</dimen>
@@ -1277,10 +1275,9 @@
     <dimen name="qs_media_disabled_seekbar_vertical_padding">36dp</dimen>
 
     <!-- Size of Smartspace media recommendations cards in the QSPanel carousel -->
-    <dimen name="qs_aa_media_rec_header_icon_start_margin">10dp</dimen>
-    <dimen name="qs_aa_media_rec_header_icon_size">18dp</dimen>
-    <dimen name="qs_aa_media_rec_album_size">72dp</dimen>
-    <dimen name="qs_aa_media_rec_album_vertical_margin">8dp</dimen>
+    <dimen name="qs_aa_media_rec_album_size_collapsed">66dp</dimen>
+    <dimen name="qs_aa_media_rec_album_size_expanded">80dp</dimen>
+    <dimen name="qs_aa_media_rec_album_margin">8dp</dimen>
     <dimen name="qq_aa_media_rec_header_text_size">16sp</dimen>
 
     <!-- Window magnification -->
@@ -1333,6 +1330,7 @@
     <dimen name="controls_setup_title">22sp</dimen>
     <dimen name="controls_setup_subtitle">14sp</dimen>
     <dimen name="controls_setup_vertical_padding">52dp</dimen>
+    <dimen name="controls_detail_dialog_header_height">52dp</dimen>
 
     <!-- Home Controls activity view detail panel-->
     <dimen name="controls_activity_view_top_offset">100dp</dimen>

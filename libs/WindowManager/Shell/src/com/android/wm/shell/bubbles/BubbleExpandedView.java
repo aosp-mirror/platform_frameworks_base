@@ -39,7 +39,9 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.CornerPathEffect;
 import android.graphics.Outline;
+import android.graphics.Paint;
 import android.graphics.Picture;
 import android.graphics.Rect;
 import android.graphics.drawable.ShapeDrawable;
@@ -105,6 +107,9 @@ public class BubbleExpandedView extends LinearLayout {
     private int mSettingsIconHeight;
     private int mPointerWidth;
     private int mPointerHeight;
+    private float mPointerRadius;
+    private float mPointerOverlap;
+    private CornerPathEffect mPointerEffect;
     private ShapeDrawable mCurrentPointer;
     private ShapeDrawable mTopPointer;
     private ShapeDrawable mLeftPointer;
@@ -148,6 +153,9 @@ public class BubbleExpandedView extends LinearLayout {
             ActivityOptions options = ActivityOptions.makeCustomAnimation(getContext(),
                     0 /* enterResId */, 0 /* exitResId */);
 
+            Rect launchBounds = new Rect();
+            mTaskView.getBoundsOnScreen(launchBounds);
+
             // TODO: I notice inconsistencies in lifecycle
             // Post to keep the lifecycle normal
             post(() -> {
@@ -161,7 +169,7 @@ public class BubbleExpandedView extends LinearLayout {
                     if (!mIsOverflow && mBubble.hasMetadataShortcutId()) {
                         options.setApplyActivityFlagsForBubbles(true);
                         mTaskView.startShortcutActivity(mBubble.getShortcutInfo(),
-                                options, null /* sourceBounds */);
+                                options, launchBounds);
                     } else {
                         Intent fillInIntent = new Intent();
                         // Apply flags to make behaviour match documentLaunchMode=always.
@@ -170,7 +178,8 @@ public class BubbleExpandedView extends LinearLayout {
                         if (mBubble != null) {
                             mBubble.setIntentActive();
                         }
-                        mTaskView.startActivity(mPendingIntent, fillInIntent, options);
+                        mTaskView.startActivity(mPendingIntent, fillInIntent, options,
+                                launchBounds);
                     }
                 } catch (RuntimeException e) {
                     // If there's a runtime exception here then there's something
@@ -348,7 +357,9 @@ public class BubbleExpandedView extends LinearLayout {
         mPointerMargin = res.getDimensionPixelSize(R.dimen.bubble_pointer_margin);
         mPointerWidth = res.getDimensionPixelSize(R.dimen.bubble_pointer_width);
         mPointerHeight = res.getDimensionPixelSize(R.dimen.bubble_pointer_height);
-
+        mPointerRadius = getResources().getDimensionPixelSize(R.dimen.bubble_pointer_radius);
+        mPointerEffect = new CornerPathEffect(mPointerRadius);
+        mPointerOverlap = getResources().getDimensionPixelSize(R.dimen.bubble_pointer_overlap);
         mTopPointer = new ShapeDrawable(TriangleShape.create(
                 mPointerWidth, mPointerHeight, true /* pointUp */));
         mLeftPointer = new ShapeDrawable(TriangleShape.createHorizontal(
@@ -408,8 +419,12 @@ public class BubbleExpandedView extends LinearLayout {
             lp.width = mPointerWidth;
             lp.height = mPointerHeight;
         }
-        mPointerView.setLayoutParams(lp);
         mCurrentPointer.setTint(mBackgroundColorFloating);
+
+        Paint arrowPaint = mCurrentPointer.getPaint();
+        arrowPaint.setColor(mBackgroundColorFloating);
+        arrowPaint.setPathEffect(mPointerEffect);
+        mPointerView.setLayoutParams(lp);
         mPointerView.setBackground(mCurrentPointer);
     }
 
@@ -651,11 +666,12 @@ public class BubbleExpandedView extends LinearLayout {
                 // Remove top insets back here because availableRect.height would account for that
                 ? mExpandedViewContainerLocation[1] - mPositioner.getInsets().top
                 : 0;
+        int settingsHeight = mIsOverflow ? 0 : mSettingsIconHeight;
         return mPositioner.getAvailableRect().height()
                 - expandedContainerY
                 - getPaddingTop()
                 - getPaddingBottom()
-                - mSettingsIconHeight
+                - settingsHeight
                 - mPointerHeight
                 - mPointerMargin;
     }
@@ -700,10 +716,14 @@ public class BubbleExpandedView extends LinearLayout {
     public void setPointerPosition(float bubblePosition, boolean onLeft) {
         // Pointer gets drawn in the padding
         final boolean showVertically = mPositioner.showBubblesVertically();
-        final int paddingLeft = (showVertically && onLeft) ? mPointerHeight : 0;
-        final int paddingRight = (showVertically && !onLeft) ? mPointerHeight : 0;
-        final int paddingTop = showVertically ? 0 : mExpandedViewPadding;
-        setPadding(paddingLeft, paddingTop, paddingRight, 0);
+        final float paddingLeft = (showVertically && onLeft)
+                ? mPointerHeight - mPointerOverlap
+                : 0;
+        final float paddingRight = (showVertically && !onLeft)
+                ? mPointerHeight - mPointerOverlap : 0;
+        final int paddingTop = showVertically ? 0
+                : mExpandedViewPadding;
+        setPadding((int) paddingLeft, paddingTop, (int) paddingRight, 0);
 
         final float expandedViewY = mPositioner.getExpandedViewY();
         final float bubbleSize = mPositioner.getBubbleBitmapSize();
@@ -716,9 +736,11 @@ public class BubbleExpandedView extends LinearLayout {
             float pointerX;
             if (showVertically) {
                 pointerY = bubbleCenter - (mPointerWidth / 2f);
-                pointerX = onLeft ? -mPointerHeight : getWidth() - mPaddingRight;
+                pointerX = onLeft
+                        ? -mPointerHeight + mPointerOverlap
+                        : getWidth() - mPaddingRight - mPointerOverlap;
             } else {
-                pointerY = 0;
+                pointerY = mPointerOverlap;
                 pointerX = bubbleCenter - mPaddingLeft - (mPointerWidth / 2f);
             }
             mPointerView.setTranslationY(pointerY);

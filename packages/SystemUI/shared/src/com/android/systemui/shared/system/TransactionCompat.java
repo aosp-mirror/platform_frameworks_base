@@ -65,6 +65,11 @@ public class TransactionCompat {
         return this;
     }
 
+    public TransactionCompat setOpaque(SurfaceControlCompat surfaceControl, boolean opaque) {
+        mTransaction.setOpaque(surfaceControl.mSurfaceControl, opaque);
+        return this;
+    }
+
     public TransactionCompat setMatrix(SurfaceControlCompat surfaceControl, float dsdx, float dtdx,
             float dtdy, float dsdy) {
         mTransaction.setMatrix(surfaceControl.mSurfaceControl, dsdx, dtdx, dtdy, dsdy);

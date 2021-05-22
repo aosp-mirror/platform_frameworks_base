@@ -24,9 +24,11 @@ import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 import android.app.Notification;
 import android.app.PendingIntent;
+import android.app.Person;
 import android.content.Context;
 import android.content.Intent;
 import android.testing.AndroidTestingRunner;
@@ -114,6 +116,28 @@ public class HeadsUpManagerTest extends AlertingNotificationManagerTest {
 
         assertThat(ongoingCall.compareTo(activeRemoteInput)).isLessThan(0);
         assertThat(activeRemoteInput.compareTo(ongoingCall)).isGreaterThan(0);
+    }
+
+    @Test
+    public void testAlertEntryCompareTo_incomingCallLessThanActiveRemoteInput() {
+        HeadsUpManager.HeadsUpEntry incomingCall = mHeadsUpManager.new HeadsUpEntry();
+        Person person = new Person.Builder().setName("person").build();
+        PendingIntent intent = mock(PendingIntent.class);
+        incomingCall.setEntry(new NotificationEntryBuilder()
+                .setSbn(createNewSbn(0,
+                        new Notification.Builder(mContext, "")
+                                .setStyle(Notification.CallStyle
+                                        .forIncomingCall(person, intent, intent))))
+                .build());
+
+        HeadsUpManager.HeadsUpEntry activeRemoteInput = mHeadsUpManager.new HeadsUpEntry();
+        activeRemoteInput.setEntry(new NotificationEntryBuilder()
+                .setSbn(createNewNotification(1))
+                .build());
+        activeRemoteInput.remoteInputActive = true;
+
+        assertThat(incomingCall.compareTo(activeRemoteInput)).isLessThan(0);
+        assertThat(activeRemoteInput.compareTo(incomingCall)).isGreaterThan(0);
     }
 
     @Test

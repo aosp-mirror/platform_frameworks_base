@@ -183,6 +183,20 @@ package android.service.search {
 
 }
 
+package android.service.translation {
+
+  public abstract class TranslationService extends android.app.Service {
+    method @Deprecated public void onCreateTranslationSession(@NonNull android.view.translation.TranslationContext, int);
+    method @Deprecated public void onTranslationRequest(@NonNull android.view.translation.TranslationRequest, int, @Nullable android.os.CancellationSignal, @NonNull android.service.translation.TranslationService.OnTranslationResultCallback);
+  }
+
+  @Deprecated public static interface TranslationService.OnTranslationResultCallback {
+    method @Deprecated public void onError();
+    method public void onTranslationSuccess(@NonNull android.view.translation.TranslationResponse);
+  }
+
+}
+
 package android.telecom {
 
   public class TelecomManager {
@@ -205,6 +219,14 @@ package android.telephony.data {
 
   public final class DataCallResponse implements android.os.Parcelable {
     ctor public DataCallResponse(int, int, int, int, int, @Nullable String, @Nullable java.util.List<android.net.LinkAddress>, @Nullable java.util.List<java.net.InetAddress>, @Nullable java.util.List<java.net.InetAddress>, @Nullable java.util.List<java.net.InetAddress>, int);
+  }
+
+}
+
+package android.view.translation {
+
+  public final class UiTranslationManager {
+    method @Deprecated @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION) public void startTranslation(@NonNull android.view.translation.TranslationSpec, @NonNull android.view.translation.TranslationSpec, @NonNull java.util.List<android.view.autofill.AutofillId>, @NonNull android.app.assist.ActivityId);
   }
 
 }

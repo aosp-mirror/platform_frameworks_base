@@ -68,6 +68,7 @@ import android.service.voice.VoiceInteractionManagerInternal;
 import android.util.Slog;
 import android.view.RemoteAnimationDefinition;
 import android.window.SizeConfigurationBuckets;
+import android.window.TransitionInfo;
 
 import com.android.internal.app.AssistUtils;
 import com.android.internal.policy.IKeyguardDismissCallback;
@@ -1014,6 +1015,9 @@ class ActivityClientController extends IActivityClientController.Stub {
                 r.mDisplayContent.mAppTransition.overridePendingAppTransition(
                         packageName, enterAnim, exitAnim, null, null,
                         r.mOverrideTaskTransition);
+                mService.getTransitionController().setOverrideAnimation(
+                        TransitionInfo.AnimationOptions.makeCustomAnimOptions(packageName,
+                                enterAnim, exitAnim, r.mOverrideTaskTransition));
             }
         }
         Binder.restoreCallingIdentity(origId);
@@ -1170,7 +1174,7 @@ class ActivityClientController extends IActivityClientController.Stub {
                 final boolean activityIsBaseActivity = baseIntent != null
                         && r.mActivityComponent.equals(baseIntent.getComponent());
                 baseActivityIntent = activityIsBaseActivity ? r.intent : null;
-                launchedFromHome = r.launchedFromHomeProcess;
+                launchedFromHome = r.isLaunchSourceType(ActivityRecord.LAUNCH_SOURCE_TYPE_HOME);
             }
 
             // If the activity is one of the main entry points for the application, then we should

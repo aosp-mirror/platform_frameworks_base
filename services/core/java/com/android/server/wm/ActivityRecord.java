@@ -313,6 +313,7 @@ import android.window.IRemoteTransition;
 import android.window.SizeConfigurationBuckets;
 import android.window.SplashScreenView.SplashScreenViewParcelable;
 import android.window.TaskSnapshot;
+import android.window.TransitionInfo.AnimationOptions;
 import android.window.WindowContainerToken;
 
 import com.android.internal.R;
@@ -437,7 +438,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     final int launchedFromUid; // always the uid who started the activity.
     final String launchedFromPackage; // always the package who started the activity.
     final @Nullable String launchedFromFeatureId; // always the feature in launchedFromPackage
-    final boolean launchedFromHomeProcess; // as per original caller
+    private final int mLaunchSourceType; // original launch source type
     final Intent intent;    // the original intent that generated us
     final String shortComponentName; // the short component name of the intent
     final String resolvedType; // as per original caller;
@@ -540,6 +541,25 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     static final int STARTING_WINDOW_SHOWN = 1;
     static final int STARTING_WINDOW_REMOVED = 2;
     int mStartingWindowState = STARTING_WINDOW_NOT_SHOWN;
+
+    // Tracking splash screen status from previous activity
+    boolean mSplashScreenStyleEmpty = false;
+
+    static final int LAUNCH_SOURCE_TYPE_SYSTEM = 1;
+    static final int LAUNCH_SOURCE_TYPE_HOME = 2;
+    static final int LAUNCH_SOURCE_TYPE_SYSTEMUI = 3;
+    static final int LAUNCH_SOURCE_TYPE_APPLICATION = 4;
+    /**
+     * The type of launch source.
+     */
+    @IntDef(prefix = {"LAUNCH_SOURCE_TYPE_"}, value = {
+            LAUNCH_SOURCE_TYPE_SYSTEM,
+            LAUNCH_SOURCE_TYPE_HOME,
+            LAUNCH_SOURCE_TYPE_SYSTEMUI,
+            LAUNCH_SOURCE_TYPE_APPLICATION
+    })
+    @interface LaunchSourceType {}
+
     private boolean mTaskOverlay = false; // Task is always on-top of other activities in the task.
 
     // Marking the reason why this activity is being relaunched. Mainly used to track that this
@@ -1582,7 +1602,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         launchedFromUid = _launchedFromUid;
         launchedFromPackage = _launchedFromPackage;
         launchedFromFeatureId = _launchedFromFeature;
-        launchedFromHomeProcess = _caller != null && _caller.isHomeProcess();
+        mLaunchSourceType = determineLaunchSourceType(_launchedFromUid, _caller);
         shortComponentName = _intent.getComponent().flattenToShortString();
         resolvedType = _resolvedType;
         componentSpecified = _componentSpecified;
@@ -1774,12 +1794,34 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return selectedTheme;
     }
 
-    // Whether this activity launched from system or Home or SystemUI
+    /**
+     * @return Whether this {@link ActivityRecord} was launched from a system surface (e.g
+     * Launcher, Notification,...)
+     */
     private boolean launchedFromSystemSurface() {
-        return launchedFromUid == Process.SYSTEM_UID || launchedFromUid == Process.ROOT_UID
-                || launchedFromHomeProcess
-                || mAtmService.getSysUiServiceComponentLocked().getPackageName().equals(
-                        launchedFromPackage);
+        return mLaunchSourceType == LAUNCH_SOURCE_TYPE_SYSTEM
+                || mLaunchSourceType == LAUNCH_SOURCE_TYPE_HOME
+                || mLaunchSourceType == LAUNCH_SOURCE_TYPE_SYSTEMUI;
+    }
+
+    boolean isLaunchSourceType(@LaunchSourceType int type) {
+        return mLaunchSourceType == type;
+    }
+
+    private int determineLaunchSourceType(int launchFromUid, WindowProcessController caller) {
+        if (launchFromUid == Process.SYSTEM_UID || launchFromUid == Process.ROOT_UID) {
+            return LAUNCH_SOURCE_TYPE_SYSTEM;
+        }
+        if (caller != null) {
+            if (caller.isHomeProcess()) {
+                return LAUNCH_SOURCE_TYPE_HOME;
+            }
+            if (mAtmService.getSysUiServiceComponentLocked().getPackageName()
+                    .equals(caller.mInfo.packageName)) {
+                return LAUNCH_SOURCE_TYPE_SYSTEMUI;
+            }
+        }
+        return LAUNCH_SOURCE_TYPE_APPLICATION;
     }
 
     private boolean validateStartingWindowTheme(String pkg, int theme) {
@@ -1787,36 +1829,39 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // effect (a full-screen opaque starting window that fades away to the real contents
         // when it is ready) does not work for this.
         ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Checking theme of starting window: 0x%x", theme);
-        if (theme != 0) {
-            AttributeCache.Entry ent = AttributeCache.instance().get(pkg, theme,
-                    com.android.internal.R.styleable.Window,
-                    mWmService.mCurrentUserId);
-            if (ent == null) {
-                // Whoops!  App doesn't exist. Um. Okay. We'll just pretend like we didn't
-                // see that.
-                return false;
-            }
-            final boolean windowIsTranslucent = ent.array.getBoolean(
-                    com.android.internal.R.styleable.Window_windowIsTranslucent, false);
-            final boolean windowIsFloating = ent.array.getBoolean(
-                    com.android.internal.R.styleable.Window_windowIsFloating, false);
-            final boolean windowShowWallpaper = ent.array.getBoolean(
-                    com.android.internal.R.styleable.Window_windowShowWallpaper, false);
-            final boolean windowDisableStarting = ent.array.getBoolean(
-                    com.android.internal.R.styleable.Window_windowDisablePreview, false);
-            ProtoLog.v(WM_DEBUG_STARTING_WINDOW,
-                    "Translucent=%s Floating=%s ShowWallpaper=%s Disable=%s",
-                    windowIsTranslucent, windowIsFloating, windowShowWallpaper,
-                    windowDisableStarting);
-            // If this activity is launched from system surface, ignore windowDisableStarting
-            if (windowIsTranslucent || windowIsFloating
-                    || (windowDisableStarting && !launchedFromSystemSurface())) {
-                return false;
-            }
-            if (windowShowWallpaper
-                    && getDisplayContent().mWallpaperController.getWallpaperTarget() != null) {
-                return false;
-            }
+        if (theme == 0) {
+            return false;
+        }
+
+        final AttributeCache.Entry ent = AttributeCache.instance().get(pkg, theme,
+                com.android.internal.R.styleable.Window, mWmService.mCurrentUserId);
+        if (ent == null) {
+            // Whoops!  App doesn't exist. Um. Okay. We'll just pretend like we didn't
+            // see that.
+            return false;
+        }
+        final boolean windowIsTranslucent = ent.array.getBoolean(
+                com.android.internal.R.styleable.Window_windowIsTranslucent, false);
+        final boolean windowIsFloating = ent.array.getBoolean(
+                com.android.internal.R.styleable.Window_windowIsFloating, false);
+        final boolean windowShowWallpaper = ent.array.getBoolean(
+                com.android.internal.R.styleable.Window_windowShowWallpaper, false);
+        final boolean windowDisableStarting = ent.array.getBoolean(
+                com.android.internal.R.styleable.Window_windowDisablePreview, false);
+        ProtoLog.v(WM_DEBUG_STARTING_WINDOW,
+                "Translucent=%s Floating=%s ShowWallpaper=%s Disable=%s",
+                windowIsTranslucent, windowIsFloating, windowShowWallpaper,
+                windowDisableStarting);
+        // If this activity is launched from system surface, ignore windowDisableStarting
+        if (windowIsTranslucent || windowIsFloating) {
+            return false;
+        }
+        if (windowShowWallpaper
+                && getDisplayContent().mWallpaperController.getWallpaperTarget() != null) {
+            return false;
+        }
+        if (windowDisableStarting && !launchedFromSystemSurface()) {
+            return false;
         }
         return true;
     }
@@ -1846,7 +1891,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     boolean addStartingWindow(String pkg, int resolvedTheme, CompatibilityInfo compatInfo,
             CharSequence nonLocalizedLabel, int labelRes, int icon, int logo, int windowFlags,
             IBinder transferFrom, boolean newTask, boolean taskSwitch, boolean processRunning,
-            boolean allowTaskSnapshot, boolean activityCreated, boolean samePackage) {
+            boolean allowTaskSnapshot, boolean activityCreated, boolean useEmpty) {
         // If the display is frozen, we won't do anything until the actual window is
         // displayed so there is no reason to put in the starting window.
         if (!okToDisplay()) {
@@ -1868,7 +1913,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                         false /* restoreFromDisk */, false /* isLowResolution */);
         final int typeParameter = mWmService.mStartingSurfaceController
                 .makeStartingWindowTypeParameter(newTask, taskSwitch, processRunning,
-                        allowTaskSnapshot, activityCreated, samePackage);
+                        allowTaskSnapshot, activityCreated, useEmpty);
         final int type = getStartingWindowType(newTask, taskSwitch, processRunning,
                 allowTaskSnapshot, activityCreated, snapshot);
 
@@ -4122,6 +4167,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private void applyOptionsAnimation(ActivityOptions pendingOptions, Intent intent) {
         final int animationType = pendingOptions.getAnimationType();
         final DisplayContent displayContent = getDisplayContent();
+        AnimationOptions options = null;
         switch (animationType) {
             case ANIM_CUSTOM:
                 displayContent.mAppTransition.overridePendingAppTransition(
@@ -4131,9 +4177,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                         pendingOptions.getAnimationStartedListener(),
                         pendingOptions.getAnimationFinishedListener(),
                         pendingOptions.getOverrideTaskTransition());
+                options = AnimationOptions.makeCustomAnimOptions(pendingOptions.getPackageName(),
+                        pendingOptions.getCustomEnterResId(), pendingOptions.getCustomExitResId(),
+                        pendingOptions.getOverrideTaskTransition());
                 break;
             case ANIM_CLIP_REVEAL:
                 displayContent.mAppTransition.overridePendingAppTransitionClipReveal(
+                        pendingOptions.getStartX(), pendingOptions.getStartY(),
+                        pendingOptions.getWidth(), pendingOptions.getHeight());
+                options = AnimationOptions.makeClipRevealAnimOptions(
                         pendingOptions.getStartX(), pendingOptions.getStartY(),
                         pendingOptions.getWidth(), pendingOptions.getHeight());
                 if (intent.getSourceBounds() == null) {
@@ -4145,6 +4197,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 break;
             case ANIM_SCALE_UP:
                 displayContent.mAppTransition.overridePendingAppTransitionScaleUp(
+                        pendingOptions.getStartX(), pendingOptions.getStartY(),
+                        pendingOptions.getWidth(), pendingOptions.getHeight());
+                options = AnimationOptions.makeScaleUpAnimOptions(
                         pendingOptions.getStartX(), pendingOptions.getStartY(),
                         pendingOptions.getWidth(), pendingOptions.getHeight());
                 if (intent.getSourceBounds() == null) {
@@ -4162,6 +4217,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                         pendingOptions.getStartX(), pendingOptions.getStartY(),
                         pendingOptions.getAnimationStartedListener(),
                         scaleUp);
+                options = AnimationOptions.makeThumnbnailAnimOptions(buffer,
+                        pendingOptions.getStartX(), pendingOptions.getStartY(), scaleUp);
                 if (intent.getSourceBounds() == null && buffer != null) {
                     intent.setSourceBounds(new Rect(pendingOptions.getStartX(),
                             pendingOptions.getStartY(),
@@ -4201,6 +4258,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             case ANIM_OPEN_CROSS_PROFILE_APPS:
                 displayContent.mAppTransition
                         .overridePendingAppTransitionStartCrossProfileApps();
+                options = AnimationOptions.makeCrossProfileAnimOptions();
                 break;
             case ANIM_NONE:
             case ANIM_UNDEFINED:
@@ -4208,6 +4266,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             default:
                 Slog.e(TAG_WM, "applyOptionsLocked: Unknown animationType=" + animationType);
                 break;
+        }
+
+        if (options != null) {
+            mAtmService.getTransitionController().setOverrideAnimation(options);
         }
     }
 
@@ -5673,6 +5735,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     void onFirstWindowDrawn(WindowState win, WindowStateAnimator winAnimator) {
         firstWindowDrawn = true;
+        // stop tracking
+        mSplashScreenStyleEmpty = true;
 
         // We now have a good window to show, remove dead placeholders
         removeDeadWindows();
@@ -5691,6 +5755,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     void onStartingWindowDrawn() {
         if (task != null) {
+            mSplashScreenStyleEmpty = true;
             task.setHasBeenVisible(true);
         }
     }
@@ -6097,11 +6162,62 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     void showStartingWindow(boolean taskSwitch) {
         showStartingWindow(null /* prev */, false /* newTask */, taskSwitch,
-                0 /* splashScreenTheme */, true /* samePackage */);
+                0 /* splashScreenTheme */, null);
+    }
+
+    /**
+     * Search for the candidate launching activity from currently visible activities.
+     *
+     * This activity could be launched from service, so we need to check whether there is existing a
+     * foreground activity from the same process or same package.
+     *
+     */
+    private ActivityRecord searchCandidateLaunchingActivity() {
+        // Get previous activity below self
+        ActivityRecord below = task.getActivityBelow(this);
+        if (below == null) {
+            below = task.getParent().getActivityBelow(this);
+        }
+
+        if (below == null || below.isActivityTypeHome()) {
+            return null;
+        }
+        final WindowProcessController myProcess = app != null
+                ? app : mAtmService.mProcessNames.get(processName, info.applicationInfo.uid);
+        final WindowProcessController candidateProcess = below.app != null
+                        ? below.app
+                        : mAtmService.mProcessNames.get(below.processName,
+                                below.info.applicationInfo.uid);
+        // same process or same package
+        if (candidateProcess == myProcess
+                || mActivityComponent.getPackageName()
+                .equals(below.mActivityComponent.getPackageName())) {
+            return below;
+        }
+        return null;
+    }
+
+    private boolean shouldUseEmptySplashScreen(ActivityRecord sourceRecord) {
+        if (sourceRecord == null) {
+            sourceRecord = searchCandidateLaunchingActivity();
+        }
+
+        if (sourceRecord != null && !sourceRecord.isActivityTypeHome()) {
+            return sourceRecord.mSplashScreenStyleEmpty;
+        }
+
+        // If this activity was launched from a system surface, never use an empty splash screen
+        // Need to check sourceRecord before in case this activity is launched from service.
+        if (launchedFromSystemSurface()) {
+            return false;
+        }
+
+        // Otherwise use empty.
+        return true;
     }
 
     void showStartingWindow(ActivityRecord prev, boolean newTask, boolean taskSwitch,
-            int splashScreenTheme, boolean samePackage) {
+            int splashScreenTheme, ActivityRecord sourceRecord) {
         if (mTaskOverlay) {
             // We don't show starting window for overlay activities.
             return;
@@ -6115,14 +6231,17 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final CompatibilityInfo compatInfo =
                 mAtmService.compatibilityInfoForPackageLocked(info.applicationInfo);
 
+        mSplashScreenStyleEmpty = shouldUseEmptySplashScreen(sourceRecord);
+
         final int resolvedTheme = evaluateStartingWindowTheme(packageName, theme,
                 splashScreenTheme);
+
         final boolean shown = addStartingWindow(packageName, resolvedTheme,
                 compatInfo, nonLocalizedLabel, labelRes, icon, logo, windowFlags,
                 prev != null ? prev.appToken : null, newTask, taskSwitch, isProcessRunning(),
                 allowTaskSnapshot(),
                 mState.ordinal() >= STARTED.ordinal() && mState.ordinal() <= STOPPED.ordinal(),
-                samePackage);
+                mSplashScreenStyleEmpty);
         if (shown) {
             mStartingWindowState = STARTING_WINDOW_SHOWN;
         }
@@ -6496,8 +6615,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         final Configuration displayConfig = mDisplayContent.getConfiguration();
         return getDisplayContent().mAppTransition.createThumbnailAspectScaleAnimationLocked(
-                appRect, insets, thumbnailHeader, task, displayConfig.uiMode,
-                displayConfig.orientation);
+                appRect, insets, thumbnailHeader, task, displayConfig.orientation);
     }
 
     @Override

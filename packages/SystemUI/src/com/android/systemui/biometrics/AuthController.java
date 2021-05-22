@@ -83,6 +83,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
     @Nullable private final FingerprintManager mFingerprintManager;
     @Nullable private final FaceManager mFaceManager;
     private final Provider<UdfpsController> mUdfpsControllerFactory;
+    private final Provider<SidefpsController> mSidefpsControllerFactory;
     @Nullable private final PointF mFaceAuthSensorLocation;
 
     // TODO: These should just be saved from onSaveState
@@ -93,6 +94,8 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
     private WindowManager mWindowManager;
     @Nullable
     private UdfpsController mUdfpsController;
+    @Nullable
+    private SidefpsController mSidefpsController;
     @VisibleForTesting
     TaskStackListener mTaskStackListener;
     @VisibleForTesting
@@ -100,6 +103,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
     @Nullable private final List<FaceSensorPropertiesInternal> mFaceProps;
     @Nullable private List<FingerprintSensorPropertiesInternal> mFpProps;
     @Nullable private List<FingerprintSensorPropertiesInternal> mUdfpsProps;
+    @Nullable private List<FingerprintSensorPropertiesInternal> mSidefpsProps;
 
     private class BiometricTaskStackListener extends TaskStackListener {
         @Override
@@ -120,14 +124,22 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
                     }
                     mFpProps = sensors;
                     List<FingerprintSensorPropertiesInternal> udfpsProps = new ArrayList<>();
+                    List<FingerprintSensorPropertiesInternal> sidefpsProps = new ArrayList<>();
                     for (FingerprintSensorPropertiesInternal props : mFpProps) {
                         if (props.isAnyUdfpsType()) {
                             udfpsProps.add(props);
+                        }
+                        if (props.isAnySidefpsType()) {
+                            sidefpsProps.add(props);
                         }
                     }
                     mUdfpsProps = !udfpsProps.isEmpty() ? udfpsProps : null;
                     if (mUdfpsProps != null) {
                         mUdfpsController = mUdfpsControllerFactory.get();
+                    }
+                    mSidefpsProps = !sidefpsProps.isEmpty() ? sidefpsProps : null;
+                    if (mSidefpsProps != null) {
+                        mSidefpsController = mSidefpsControllerFactory.get();
                     }
                 }
             };
@@ -364,7 +376,8 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
             ActivityTaskManager activityTaskManager,
             @Nullable FingerprintManager fingerprintManager,
             @Nullable FaceManager faceManager,
-            Provider<UdfpsController> udfpsControllerFactory) {
+            Provider<UdfpsController> udfpsControllerFactory,
+            Provider<SidefpsController> sidefpsControllerFactory) {
         super(context);
         mCommandQueue = commandQueue;
         mStatusBarStateController = statusBarStateController;
@@ -372,6 +385,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         mFingerprintManager = fingerprintManager;
         mFaceManager = faceManager;
         mUdfpsControllerFactory = udfpsControllerFactory;
+        mSidefpsControllerFactory = sidefpsControllerFactory;
 
         mFaceProps = mFaceManager != null ? mFaceManager.getSensorPropertiesInternal() : null;
 
@@ -616,6 +630,10 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         // enrollment.
         if (mUdfpsController != null) {
             mUdfpsController.onConfigurationChanged();
+        }
+
+        if (mSidefpsController != null) {
+            mSidefpsController.onConfigurationChanged();
         }
 
         // Save the state of the current dialog (buttons showing, etc)

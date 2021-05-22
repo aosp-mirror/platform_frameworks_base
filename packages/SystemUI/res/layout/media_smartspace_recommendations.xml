@@ -46,116 +46,82 @@
 
     <com.android.internal.widget.CachingIconView
         android:id="@+id/recommendation_card_icon"
-        android:layout_width="@dimen/qs_aa_media_rec_header_icon_size"
-        android:layout_height="@dimen/qs_aa_media_rec_header_icon_size"
+        android:layout_width="@dimen/qs_media_icon_size"
+        android:layout_height="@dimen/qs_media_icon_size"
         android:src="@drawable/ic_headset"
-        android:tint="?android:attr/textColor" />
+        style="@style/MediaPlayer.AppIcon"/>
 
     <TextView
         android:id="@+id/recommendation_card_text"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:singleLine="true"
+        android:maxLines="2"
         android:text="@string/controls_media_smartspace_rec_title"
         android:fontFamily="google-sans-medium"
         android:textDirection="locale"
-        android:textSize="@dimen/qq_aa_media_rec_header_text_size" />
+        android:textSize="@dimen/qq_aa_media_rec_header_text_size"
+        android:breakStrategy="balanced"
+        android:hyphenationFrequency="none"/>
 
     <ImageView
         android:id="@+id/media_cover1"
-        android:layout_width="@dimen/qs_aa_media_rec_album_size"
-        android:layout_height="@dimen/qs_aa_media_rec_album_size"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/qs_aa_media_rec_album_size_collapsed"
         android:adjustViewBounds="true"
         android:background="@drawable/bg_smartspace_media_item"
         style="@style/MediaPlayer.Album"
         android:clipToOutline="true"
         android:scaleType="centerCrop"/>
-
-    <com.android.internal.widget.CachingIconView
-        android:id="@+id/media_logo1"
-        android:layout_width="@dimen/qs_media_icon_size"
-        android:layout_height="@dimen/qs_media_icon_size"
-        style="@style/MediaPlayer.AppIcon" />
 
     <ImageView
         android:id="@+id/media_cover2"
-        android:layout_width="@dimen/qs_aa_media_rec_album_size"
-        android:layout_height="@dimen/qs_aa_media_rec_album_size"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/qs_aa_media_rec_album_size_collapsed"
         android:adjustViewBounds="true"
         android:background="@drawable/bg_smartspace_media_item"
         style="@style/MediaPlayer.Album"
         android:clipToOutline="true"
         android:scaleType="centerCrop"/>
-
-    <com.android.internal.widget.CachingIconView
-        android:id="@+id/media_logo2"
-        android:layout_width="@dimen/qs_media_icon_size"
-        android:layout_height="@dimen/qs_media_icon_size"
-        style="@style/MediaPlayer.AppIcon" />
 
     <ImageView
         android:id="@+id/media_cover3"
-        android:layout_width="@dimen/qs_aa_media_rec_album_size"
-        android:layout_height="@dimen/qs_aa_media_rec_album_size"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/qs_aa_media_rec_album_size_collapsed"
         android:adjustViewBounds="true"
         android:background="@drawable/bg_smartspace_media_item"
         style="@style/MediaPlayer.Album"
         android:clipToOutline="true"
         android:scaleType="centerCrop"/>
-
-    <com.android.internal.widget.CachingIconView
-        android:id="@+id/media_logo3"
-        android:layout_width="@dimen/qs_media_icon_size"
-        android:layout_height="@dimen/qs_media_icon_size"
-        style="@style/MediaPlayer.AppIcon" />
 
     <ImageView
         android:id="@+id/media_cover4"
-        android:layout_width="@dimen/qs_aa_media_rec_album_size"
-        android:layout_height="@dimen/qs_aa_media_rec_album_size"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/qs_aa_media_rec_album_size_collapsed"
         android:adjustViewBounds="true"
         android:background="@drawable/bg_smartspace_media_item"
         style="@style/MediaPlayer.Album"
         android:clipToOutline="true"
         android:scaleType="centerCrop"/>
-
-    <com.android.internal.widget.CachingIconView
-        android:id="@+id/media_logo4"
-        android:layout_width="@dimen/qs_media_icon_size"
-        android:layout_height="@dimen/qs_media_icon_size"
-        style="@style/MediaPlayer.AppIcon" />
 
     <ImageView
         android:id="@+id/media_cover5"
-        android:layout_width="@dimen/qs_aa_media_rec_album_size"
-        android:layout_height="@dimen/qs_aa_media_rec_album_size"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/qs_aa_media_rec_album_size_collapsed"
         android:adjustViewBounds="true"
         android:background="@drawable/bg_smartspace_media_item"
         style="@style/MediaPlayer.Album"
         android:clipToOutline="true"
         android:scaleType="centerCrop"/>
-
-    <com.android.internal.widget.CachingIconView
-        android:id="@+id/media_logo5"
-        android:layout_width="@dimen/qs_media_icon_size"
-        android:layout_height="@dimen/qs_media_icon_size"
-        style="@style/MediaPlayer.AppIcon" />
 
     <ImageView
         android:id="@+id/media_cover6"
-        android:layout_width="@dimen/qs_aa_media_rec_album_size"
-        android:layout_height="@dimen/qs_aa_media_rec_album_size"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/qs_aa_media_rec_album_size_collapsed"
         android:adjustViewBounds="true"
         android:background="@drawable/bg_smartspace_media_item"
         style="@style/MediaPlayer.Album"
         android:clipToOutline="true"
         android:scaleType="centerCrop"/>
-
-    <com.android.internal.widget.CachingIconView
-        android:id="@+id/media_logo6"
-        android:layout_width="@dimen/qs_media_icon_size"
-        android:layout_height="@dimen/qs_media_icon_size"
-        style="@style/MediaPlayer.AppIcon" />
 
     <!-- Long press menu -->
     <TextView
