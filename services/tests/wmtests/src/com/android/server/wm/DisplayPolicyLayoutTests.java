@@ -65,6 +65,7 @@ import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.InsetsState;
+import android.view.PrivacyIndicatorBounds;
 import android.view.RoundedCorners;
 import android.view.WindowInsets.Side;
 import android.view.WindowInsets.Type;
@@ -176,7 +177,7 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
                 ? mDisplayContent.calculateRoundedCornersForRotation(mRotation)
                 : RoundedCorners.NO_ROUNDED_CORNERS;
         return new DisplayFrames(mDisplayContent.getDisplayId(),
-                insetsState, info.first, info.second, roundedCorners);
+                insetsState, info.first, info.second, roundedCorners, new PrivacyIndicatorBounds());
     }
 
     @Test
