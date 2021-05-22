@@ -567,11 +567,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"نماد اثر انگشت"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"مدیریت سخت‌افزار «بازگشایی با چهره»"</string>
+    <string name="permlab_manageFace" msgid="4569549381889283282">"مدیریت سخت‌افزار «قفل‌گشایی با چهره»"</string>
     <string name="permdesc_manageFace" msgid="6204569688492710471">"به برنامه امکان می‌دهد روش‌هایی را برای افزودن و حذف الگوهای چهره جهت استفاده فرابخواند."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"استفاده از سخت‌افزار «بازگشایی با چهره»"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"به برنامه امکان می‌دهد از سخت‌افزار «بازگشایی با چهره» برای اصالت‌سنجی استفاده کند"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"بازگشایی با چهره"</string>
+    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"استفاده از سخت‌افزار «قفل‌گشایی با چهره»"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"به برنامه امکان می‌دهد از سخت‌افزار «قفل‌گشایی با چهره» برای اصالت‌سنجی استفاده کند"</string>
+    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"قفل‌گشایی با چهره"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"ثبت مجدد چهره"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"برای بهبود تشخیص، لطفاً چهره‌تان را دوباره ثبت کنید"</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"داده‌های دقیق چهره ضبط نشد. دوباره امتحان کنید."</string>
@@ -597,15 +597,15 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"چهره تأیید نشد. سخت‌افزار در دسترس نیست."</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"«بازگشایی با چهره» را دوباره امتحان کنید."</string>
+    <string name="face_error_timeout" msgid="522924647742024699">"«قفل‌گشایی با چهره» را دوباره امتحان کنید."</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"داده‌ چهره جدید ذخیره نشد. اول داده‌ چهره قدیمی را حذف کنید."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"عملیات شناسایی چهره لغو شد."</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"کاربر «بازگشایی با چهره» را لغو کرد."</string>
+    <string name="face_error_user_canceled" msgid="8553045452825849843">"کاربر «قفل‌گشایی با چهره» را لغو کرد."</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"تعداد زیادی تلاش ناموفق. بعداً دوباره امتحان کنید."</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"تعداد تلاش‌ها بیش‌ازحد مجاز است. «بازگشایی با چهره» غیرفعال است."</string>
+    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"تعداد تلاش‌ها بیش‌ازحد مجاز است. «قفل‌گشایی با چهره» غیرفعال است."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"چهره تأیید نشد. دوباره امتحان کنید."</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"«بازگشایی با چهره» را راه‌اندازی نکرده‌اید."</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"«بازگشایی با چهره» در این دستگاه پشتیبانی نمی‌شود."</string>
+    <string name="face_error_not_enrolled" msgid="7369928733504691611">"«قفل‌گشایی با چهره» را راه‌اندازی نکرده‌اید."</string>
+    <string name="face_error_hw_not_present" msgid="1070600921591729944">"«قفل‌گشایی با چهره» در این دستگاه پشتیبانی نمی‌شود."</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"حسگر به‌طور موقت غیرفعال است."</string>
     <string name="face_name_template" msgid="3877037340223318119">"چهره <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
@@ -835,7 +835,7 @@
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"دوباره امتحان کنید"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"دوباره امتحان کنید"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"باز کردن قفل تمام قابلیت‌ها و داده‌ها"</string>
-    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"دفعات تلاش برای «بازگشایی با چهره» از حداکثر مجاز بیشتر شد"</string>
+    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"دفعات تلاش برای «قفل‌گشایی با چهره» از حداکثر مجاز بیشتر شد"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"سیم کارت موجود نیست"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"سیم کارت درون رایانهٔ لوحی نیست."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"‏هیچ سیم‌کارتی در دستگاه Android TV شما قرار داده نشده است."</string>
@@ -905,7 +905,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"گسترده کردن منطقه بازگشایی شده."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"باز کردن قفل با کشیدن انگشت روی صفحه."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"باز کردن قفل با الگو."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"بازگشایی با چهره."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"قفل‌گشایی با چهره."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"باز کردن قفل با پین."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"قفل پین سیم‌کارت باز شد."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"‏قفل Puk سیم‌کارت باز شد."</string>

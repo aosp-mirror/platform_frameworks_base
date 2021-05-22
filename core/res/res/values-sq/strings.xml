@@ -320,7 +320,7 @@
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Aktivizojë funksionin \"Eksploro me prekje\""</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"Artikujt e trokitur do të lexohen me zë të lartë dhe ekrani mund të eksplorohet duke përdorur gjestet."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"Vëzhgojë tekstin që shkruan"</string>
-    <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"Përfshi të dhënat personale si numrat e kartave të kreditit si dhe fjalëkalimet."</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"Përfshin të dhëna personale, si numrat e kartave të kreditit dhe fjalëkalimet."</string>
     <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"Kontrollo zmadhimin e ekranit"</string>
     <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"Kontrollo nivelin dhe pozicionimin e zmadhimit të ekranit."</string>
     <string name="capability_title_canPerformGestures" msgid="9106545062106728987">"Kryen gjeste"</string>
@@ -567,10 +567,10 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Ikona e gjurmës së gishtit"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"menaxho harduerin për shkyçjen me fytyrën"</string>
+    <string name="permlab_manageFace" msgid="4569549381889283282">"menaxho harduerin për shkyçjen me fytyrë"</string>
     <string name="permdesc_manageFace" msgid="6204569688492710471">"Lejon aplikacionin të aktivizojë mënyra për shtim e fshirje të shablloneve të përdorura."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"përdor harduerin e shkyçjes me fytyrën"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Lejon aplikacionin të përdorë harduerin e shkyçjes me fytyrën për procesin e vërtetimit"</string>
+    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"përdor harduerin e shkyçjes me fytyrë"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Lejon aplikacionin të përdorë harduerin e shkyçjes me fytyrë për procesin e vërtetimit"</string>
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Shkyçja me fytyrë"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Regjistro përsëri fytyrën tënde"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Për të përmirësuar njohjen, regjistro përsëri fytyrën tënde"</string>
@@ -597,7 +597,7 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Fytyra s\'mund të verifikohet. Hardueri nuk ofrohet."</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"Provo përsëri shkyçjen me fytyrën."</string>
+    <string name="face_error_timeout" msgid="522924647742024699">"Provo përsëri shkyçjen me fytyrë."</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"S\'mund të ruhen të dhëna të reja fytyre. Fshi një të vjetër në fillim."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Veprimi me fytyrën u anulua."</string>
     <string name="face_error_user_canceled" msgid="8553045452825849843">"Shkyçja me fytyrë u anulua nga përdoruesi."</string>
@@ -678,11 +678,11 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Monitoro numrin e fjalëkalimeve të shkruara gabim kur shkyç ekranin. Kyçe tabletin ose spastro të gjitha të dhënat e këtij përdoruesi nëse shkruhen shumë fjalëkalime të gabuara."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Monitoro numrin e fjalëkalimeve të shkruara gabim kur shkyç ekranin dhe kyçe pajisjen tënde Android TV ose spastro të gjitha të dhënat e këtij përdoruesi nëse shkruhen shumë fjalëkalime të gabuara."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Monitoro numrin e fjalëkalimeve të shkruara gabim kur shkyç ekranin. Kyçe telefonin ose spastro të gjitha të dhënat e këtij përdoruesi nëse shkruhen shumë fjalëkalime të gabuara."</string>
-    <string name="policylab_resetPassword" msgid="214556238645096520">"Ndryshimin e kyçjes"</string>
+    <string name="policylab_resetPassword" msgid="214556238645096520">"Ndryshimin e kyçjes së ekranit"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Ndryshon kyçjen e ekranit."</string>
     <string name="policylab_forceLock" msgid="7360335502968476434">"Kyçjen e ekranit"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"Kontrollon si dhe kur të kyçet ekrani."</string>
-    <string name="policylab_wipeData" msgid="1359485247727537311">"Fshirjen e të dhënave"</string>
+    <string name="policylab_wipeData" msgid="1359485247727537311">"Spastrimin e të gjitha të dhënave"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Fshi të dhënat e tabletit pa paralajmërim duke kryer një rivendosje të të dhënave në gjendje fabrike."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Spastro të dhënat e pajisjes Android TV pa paralajmërim duke kryer një rivendosje të të dhënave në gjendje fabrike."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Fshin të dhënat e telefonit pa paralajmërim, duke kryer rivendosje të të dhënave në gjendje fabrike."</string>
@@ -699,7 +699,7 @@
     <string name="policylab_disableCamera" msgid="5749486347810162018">"Çaktivizo kamerat"</string>
     <string name="policydesc_disableCamera" msgid="3204405908799676104">"Parandalo përdorimin e të gjitha kamerave të pajisjes."</string>
     <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"Çaktivizimin e disa veçorive të kyçjes së ekranit"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"Parandalo përdorimin e disa veçorive të kyçjes së ekranit."</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"Parandalon përdorimin e disa veçorive të kyçjes së ekranit."</string>
   <string-array name="phoneTypes">
     <item msgid="8996339953292723951">"Shtëpia"</item>
     <item msgid="7740243458912727194">"Celulari"</item>
@@ -835,7 +835,7 @@
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Provo sërish"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Provo sërish"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Shkyçe për të gjitha funksionet dhe të dhënat"</string>
-    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Tentativat maksimale të \"Shkyçjes me fytyrë\" u tejkaluan"</string>
+    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Përpjektet maksimale të \"Shkyçjes me fytyrë\" u tejkaluan"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"Nuk ka kartë SIM"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"Nuk ka kartë SIM në tablet."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Nuk ka kartë SIM në pajisjen tënde Android TV."</string>
@@ -905,7 +905,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"Zgjero zonën e shkyçjes."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"Rrëshqit shkyçjen."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"Shkyçje me motiv."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"Shkyçje me fytyrë."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"Shkyçja me fytyrë."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"Shkyçje me PIN."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"Shkyçja e kartës SIM me kodin PIN"</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"Shkyçja e kartës SIM me kodin PUK"</string>
