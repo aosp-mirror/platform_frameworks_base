@@ -18,6 +18,7 @@ package com.android.server.statusbar;
 
 import static android.app.StatusBarManager.DISABLE2_GLOBAL_ACTIONS;
 import static android.app.StatusBarManager.DISABLE2_NOTIFICATION_SHADE;
+import static android.hardware.biometrics.BiometricManager.BiometricMultiSensorMode;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import android.Manifest;
@@ -789,12 +790,13 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     @Override
     public void showAuthenticationDialog(PromptInfo promptInfo, IBiometricSysuiReceiver receiver,
             int[] sensorIds, boolean credentialAllowed, boolean requireConfirmation,
-            int userId, String opPackageName, long operationId) {
+            int userId, String opPackageName, long operationId,
+            @BiometricMultiSensorMode int multiSensorConfig) {
         enforceBiometricDialog();
         if (mBar != null) {
             try {
                 mBar.showAuthenticationDialog(promptInfo, receiver, sensorIds, credentialAllowed,
-                        requireConfirmation, userId, opPackageName, operationId);
+                        requireConfirmation, userId, opPackageName, operationId, multiSensorConfig);
             } catch (RemoteException ex) {
             }
         }

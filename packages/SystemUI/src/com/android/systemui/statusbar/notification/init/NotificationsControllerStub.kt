@@ -59,9 +59,6 @@ class NotificationsControllerStub @Inject constructor(
     override fun setNotificationSnoozed(sbn: StatusBarNotification, snoozeOption: SnoozeOption) {
     }
 
-    override fun setNotificationSnoozed(sbn: StatusBarNotification, hoursToSnooze: Int) {
-    }
-
     override fun getActiveNotificationsCount(): Int {
         return 0
     }

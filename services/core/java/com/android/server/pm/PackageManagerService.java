@@ -26547,11 +26547,17 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
 
+        // TODO(188814480) should be able to remove the NPE check when snapshot
+        // "recursion" is fixed.
         @Override
         public boolean isEnabledAndMatches(ParsedMainComponent component, int flags, int userId) {
             synchronized (mLock) {
                 AndroidPackage pkg = getPackage(component.getPackageName());
-                return mSettings.isEnabledAndMatchLPr(pkg, component, flags, userId);
+                if (pkg == null) {
+                    return false;
+                } else {
+                    return mSettings.isEnabledAndMatchLPr(pkg, component, flags, userId);
+                }
             }
         }
 

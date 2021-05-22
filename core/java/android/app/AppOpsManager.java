@@ -1588,14 +1588,14 @@ public class AppOpsManager {
      *
      * @hide
      */
-    @TestApi
+    @SystemApi
     public static final String OPSTR_PHONE_CALL_MICROPHONE = "android:phone_call_microphone";
     /**
      * Phone call is using camera
      *
      * @hide
      */
-    @TestApi
+    @SystemApi
     public static final String OPSTR_PHONE_CALL_CAMERA = "android:phone_call_camera";
 
     /**
@@ -3058,9 +3058,22 @@ public class AppOpsManager {
          */
         public boolean isRecordAudioRestrictionExcept;
 
+        /**
+         * Is attribution tag not null and not contained in the package attributions
+         */
+        public boolean isAttributionTagNotFound = false;
+
         public RestrictionBypass(boolean isPrivileged, boolean isRecordAudioRestrictionExcept) {
             this.isPrivileged = isPrivileged;
             this.isRecordAudioRestrictionExcept = isRecordAudioRestrictionExcept;
+        }
+
+        public void setIsAttributionTagNotFound(boolean isAttributionTagNotFound) {
+            this.isAttributionTagNotFound = isAttributionTagNotFound;
+        }
+
+        public boolean getIsAttributionTagNotFound() {
+            return this.isAttributionTagNotFound;
         }
 
         public static RestrictionBypass UNRESTRICTED = new RestrictionBypass(true, true);

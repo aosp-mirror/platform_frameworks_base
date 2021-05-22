@@ -186,7 +186,7 @@ public final class TranslationManager {
      *
      * <p><strong>NOTE: </strong>Call on a worker thread.
      *
-     * @deprecated use {@link #createOnDeviceTranslator(TranslationContext, Executor, Consumer)}
+     * @removed use {@link #createOnDeviceTranslator(TranslationContext, Executor, Consumer)}
      * instead.
      *
      * @param translationContext {@link TranslationContext} containing the specs for creating the
@@ -230,7 +230,7 @@ public final class TranslationManager {
         }
     }
 
-    /** @deprecated Use {@link #createOnDeviceTranslator(TranslationContext)} */
+    /** @removed Use {@link #createOnDeviceTranslator(TranslationContext)} */
     @Deprecated
     @Nullable
     @WorkerThread
@@ -245,8 +245,9 @@ public final class TranslationManager {
      * <p>These translation capabilities contains a source and target {@link TranslationSpec}
      * representing the data expected for both ends of translation process. The capabilities
      * provides the information and limitations for generating a {@link TranslationContext}.
-     * The context object can then be used by {@link #createTranslator(TranslationContext)} to
-     * obtain a {@link Translator} for translations.</p>
+     * The context object can then be used by
+     * {@link #createOnDeviceTranslator(TranslationContext, Executor, Consumer)} to obtain a
+     * {@link Translator} for translations.</p>
      *
      * <p><strong>NOTE: </strong>Call on a worker thread.
      *
@@ -284,7 +285,7 @@ public final class TranslationManager {
         }
     }
 
-    /** @deprecated Use {@link #getOnDeviceTranslationCapabilities(int, int)} */
+    /** @removed Use {@link #getOnDeviceTranslationCapabilities(int, int)} */
     @Deprecated
     @NonNull
     @WorkerThread
@@ -327,7 +328,7 @@ public final class TranslationManager {
 
 
     /**
-     * @deprecated Use {@link TranslationManager#addOnDeviceTranslationCapabilityUpdateListener(
+     * @removed Use {@link TranslationManager#addOnDeviceTranslationCapabilityUpdateListener(
      * java.util.concurrent.Executor, java.util.function.Consumer)}
      */
     @Deprecated
@@ -345,7 +346,7 @@ public final class TranslationManager {
     }
 
     /**
-     * @deprecated Use {@link TranslationManager#addOnDeviceTranslationCapabilityUpdateListener(
+     * @removed Use {@link TranslationManager#addOnDeviceTranslationCapabilityUpdateListener(
      * java.util.concurrent.Executor, java.util.function.Consumer)}
      */
     @Deprecated
@@ -384,7 +385,7 @@ public final class TranslationManager {
     }
 
     /**
-     * @deprecated Use {@link #removeOnDeviceTranslationCapabilityUpdateListener(
+     * @removed Use {@link #removeOnDeviceTranslationCapabilityUpdateListener(
      * java.util.function.Consumer)}.
      */
     @Deprecated
@@ -413,7 +414,7 @@ public final class TranslationManager {
     }
 
     /**
-     * @deprecated Use {@link #removeOnDeviceTranslationCapabilityUpdateListener(
+     * @removed Use {@link #removeOnDeviceTranslationCapabilityUpdateListener(
      * java.util.function.Consumer)}.
      */
     @Deprecated
@@ -451,7 +452,7 @@ public final class TranslationManager {
         }
     }
 
-    /** @deprecated Use {@link #getOnDeviceTranslationSettingsActivityIntent()} */
+    /** @removed Use {@link #getOnDeviceTranslationSettingsActivityIntent()} */
     @Deprecated
     @Nullable
     public PendingIntent getTranslationSettingsActivityIntent() {
