@@ -72,12 +72,13 @@ public class BubblePositioner {
     private int mBubbleBitmapSize;
     private int mExpandedViewLargeScreenWidth;
     private int mExpandedViewPadding;
-    private int mPointerHeight;
-    private int mBubblePaddingTop;
+    private int mPointerMargin;
+    private float mPointerWidth;
+    private float mPointerHeight;
 
     private PointF mPinLocation;
     private PointF mRestingStackPosition;
-    private int[] mLeftRightPadding = new int[2];
+    private int[] mPaddings = new int[4];
 
     private boolean mIsLargeScreen;
     private boolean mShowingInTaskbar;
@@ -154,8 +155,9 @@ public class BubblePositioner {
         mExpandedViewLargeScreenWidth = res.getDimensionPixelSize(
                 R.dimen.bubble_expanded_view_tablet_width);
         mExpandedViewPadding = res.getDimensionPixelSize(R.dimen.bubble_expanded_view_padding);
+        mPointerWidth = res.getDimensionPixelSize(R.dimen.bubble_pointer_width);
         mPointerHeight = res.getDimensionPixelSize(R.dimen.bubble_pointer_height);
-        mBubblePaddingTop = res.getDimensionPixelSize(R.dimen.bubble_padding_top);
+        mPointerMargin = res.getDimensionPixelSize(R.dimen.bubble_pointer_margin);
         if (mShowingInTaskbar) {
             adjustForTaskbar();
         }
@@ -251,30 +253,32 @@ public class BubblePositioner {
         final boolean isLargeOrOverflow = mIsLargeScreen || isOverflow;
         if (showBubblesVertically()) {
             if (!onLeft) {
-                rightPadding += mPointerHeight + mBubbleSize;
+                rightPadding += mBubbleSize - mPointerHeight;
                 leftPadding += isLargeOrOverflow
                         ? (mPositionRect.width() - rightPadding - mExpandedViewLargeScreenWidth)
                         : 0;
             } else {
-                //TODO: pointer height should be padding between pointer & bubbles here & above
-                leftPadding += mPointerHeight + mBubbleSize;
+                leftPadding += mBubbleSize - mPointerHeight;
                 rightPadding += isLargeOrOverflow
                         ? (mPositionRect.width() - leftPadding - mExpandedViewLargeScreenWidth)
                         : 0;
             }
         }
-        mLeftRightPadding[0] = leftPadding;
-        mLeftRightPadding[1] = rightPadding;
-        return mLeftRightPadding;
+        // [left, top, right, bottom]
+        mPaddings[0] = leftPadding;
+        mPaddings[1] = showBubblesVertically() ? 0 : mPointerMargin;
+        mPaddings[2] = rightPadding;
+        mPaddings[3] = 0;
+        return mPaddings;
     }
 
     /** Calculates the y position of the expanded view when it is expanded. */
     public float getExpandedViewY() {
         final int top = getAvailableRect().top;
         if (showBubblesVertically()) {
-            return top + mExpandedViewPadding;
+            return top - mPointerWidth;
         } else {
-            return top + mBubbleSize + mBubblePaddingTop;
+            return top + mBubbleSize + mPointerMargin;
         }
     }
 

@@ -49,10 +49,12 @@ class RecommendationViewHolder private constructor(itemView: View) {
         R.id.media_cover6)
 
     // Settings/Guts screen
+    val longPressText = itemView.requireViewById<TextView>(R.id.remove_text)
     val cancel = itemView.requireViewById<View>(R.id.cancel)
     val dismiss = itemView.requireViewById<ViewGroup>(R.id.dismiss)
     val dismissLabel = dismiss.getChildAt(0)
     val settings = itemView.requireViewById<View>(R.id.settings)
+    val settingsText = itemView.requireViewById<TextView>(R.id.settings_text)
 
     init {
         (recommendations.background as IlluminationDrawable).let { background ->
@@ -62,6 +64,10 @@ class RecommendationViewHolder private constructor(itemView: View) {
             background.registerLightSource(dismissLabel)
             background.registerLightSource(settings)
         }
+    }
+
+    fun marquee(start: Boolean, delay: Long) {
+        longPressText.getHandler().postDelayed({ longPressText.setSelected(start) }, delay)
     }
 
     companion object {

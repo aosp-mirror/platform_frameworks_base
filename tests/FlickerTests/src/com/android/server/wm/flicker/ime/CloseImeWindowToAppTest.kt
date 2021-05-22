@@ -25,6 +25,7 @@ import com.android.server.wm.flicker.FlickerBuilderProvider
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
+import com.android.server.wm.flicker.annotation.Group2
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.ImeAppHelper
 import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
@@ -51,6 +52,7 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @FlakyTest(bugId = 185400889)
+@Group2
 class CloseImeWindowToAppTest(private val testSpec: FlickerTestParameter) {
     private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
     private val testApp = ImeAppHelper(instrumentation)
