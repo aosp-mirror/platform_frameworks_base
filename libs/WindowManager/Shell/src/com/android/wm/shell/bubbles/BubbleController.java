@@ -613,6 +613,18 @@ public class BubbleController {
         }
     }
 
+    /** For the overflow to be focusable & receive key events the flags must be update. **/
+    void updateWindowFlagsForOverflow(boolean showingOverflow) {
+        if (mStackView != null && mAddedToWindowManager) {
+            mWmLayoutParams.flags = showingOverflow
+                    ? 0
+                    : WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                            | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
+            mWmLayoutParams.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
+            mWindowManager.updateViewLayout(mStackView, mWmLayoutParams);
+        }
+    }
+
     /** Removes the BubbleStackView from the WindowManager if it's there. */
     private void removeFromWindowManagerMaybe() {
         if (!mAddedToWindowManager) {
