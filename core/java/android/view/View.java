@@ -9046,22 +9046,27 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * content into this view.
      *
      * <p>Depending on the type of view, this listener may be invoked for different scenarios. For
-     * example, for editable TextViews, this listener will be invoked for the following scenarios:
+     * example, for an editable {@link android.widget.TextView}, this listener will be invoked for
+     * the following scenarios:
      * <ol>
      *     <li>Paste from the clipboard (e.g. "Paste" or "Paste as plain text" action in the
      *     insertion/selection menu)
      *     <li>Content insertion from the keyboard (from {@link InputConnection#commitContent})
-     *     <li>Drag and drop (drop events from {@link #onDragEvent(DragEvent)})
+     *     <li>Drag and drop (drop events from {@link #onDragEvent})
      *     <li>Autofill
      *     <li>Selection replacement via {@link Intent#ACTION_PROCESS_TEXT}
      * </ol>
      *
-     * <p>When setting a listener, clients should also declare the MIME types accepted by it.
-     * When invoked with other types of content, the listener may reject the content (defer to
-     * the default platform behavior) or execute some other fallback logic. The MIME types
-     * declared here allow different features to optionally alter their behavior. For example,
-     * the soft keyboard may choose to hide its UI for inserting GIFs for a particular input
-     * field if the MIME types set here for that field don't include "image/gif" or "image/*".
+     * <p>When setting a listener, clients must also declare the accepted MIME types.
+     * The listener will still be invoked even if the MIME type of the content is not one of the
+     * declared MIME types (e.g. if the user pastes content whose type is not one of the declared
+     * MIME types).
+     * In that case, the listener may reject the content (defer to the default platform behavior)
+     * or execute some other fallback logic (e.g. show an appropriate message to the user).
+     * The declared MIME types serve as a hint to allow different features to optionally alter
+     * their behavior. For example, a soft keyboard may optionally choose to hide its UI for
+     * inserting GIFs for a particular input field if the MIME types set here for that field
+     * don't include "image/gif" or "image/*".
      *
      * <p>Note: MIME type matching in the Android framework is case-sensitive, unlike formal RFC
      * MIME types. As a result, you should always write your MIME types with lowercase letters,
