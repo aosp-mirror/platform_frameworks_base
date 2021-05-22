@@ -330,4 +330,10 @@ interface IActivityTaskManager {
      * When the Picture-in-picture state has changed.
      */
     void onPictureInPictureStateChanged(in PictureInPictureUiState pipState);
+
+    /**
+     * Re-attach navbar to the display during a recents transition.
+     * TODO(188595497): Remove this once navbar attachment is in shell.
+     */
+    void detachNavigationBarFromApp(in IBinder transition);
 }

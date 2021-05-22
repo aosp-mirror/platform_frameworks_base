@@ -29,6 +29,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
 
 public class AuthBiometricFaceView extends AuthBiometricView {
@@ -146,6 +147,11 @@ public class AuthBiometricFaceView extends AuthBiometricView {
 
     public AuthBiometricFaceView(Context context, AttributeSet attrs) {
         super(context, attrs);
+    }
+
+    @VisibleForTesting
+    AuthBiometricFaceView(Context context, AttributeSet attrs, Injector injector) {
+        super(context, attrs, injector);
     }
 
     @Override

@@ -896,9 +896,6 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.GNSS_HAL_LOCATION_REQUEST_DURATION_MILLIS,
                 GlobalSettingsProto.Location.GNSS_HAL_LOCATION_REQUEST_DURATION_MILLIS);
-        dumpSetting(s, p,
-                Settings.Global.LOCATION_IGNORE_SETTINGS_PACKAGE_WHITELIST,
-                GlobalSettingsProto.Location.IGNORE_SETTINGS_PACKAGE_WHITELIST);
         p.end(locationToken);
 
         final long lpmToken = p.start(GlobalSettingsProto.LOW_POWER_MODE);

@@ -28,6 +28,7 @@ import static android.app.ActivityManager.START_RETURN_LOCK_TASK_MODE_VIOLATION;
 import static android.app.ActivityManager.START_SUCCESS;
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
@@ -1547,6 +1548,11 @@ class ActivityStarter {
             newTransition.setRemoteTransition(remoteTransition);
         }
         mService.getTransitionController().collect(r);
+        // TODO(b/188669821): Remove when navbar reparenting moves to shell
+        if (r.getActivityType() == ACTIVITY_TYPE_HOME && r.getOptions() != null
+                && r.getOptions().getTransientLaunch()) {
+            mService.getTransitionController().setIsLegacyRecents();
+        }
         try {
             mService.deferWindowLayout();
             Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "startActivityInner");
