@@ -1070,7 +1070,7 @@
     <string name="weeks" msgid="3516247214269821391">"апталар"</string>
     <string name="year" msgid="5182610307741238982">"жыл"</string>
     <string name="years" msgid="5797714729103773425">"жылдар"</string>
-    <string name="now_string_shortest" msgid="3684914126941650330">"азыр"</string>
+    <string name="now_string_shortest" msgid="3684914126941650330">"Учурда"</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="7519574894537185135">
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>мүн.</item>
       <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>мүн.</item>
@@ -2096,7 +2096,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"Макул"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Өчүрүү"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Кененирээк"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"Android 12 версиясында ыңгайлаштырылуучу билдирмелер жакшыртылган билдирмелерге алмаштырылды. Бул функция ыкчам аракеттерди жана жоопторду көрсөтүп, билдирмелериңизди иреттейт.\n\nЖакшыртылган билдирмелер бардык билдирмелердин мазмунун, ошондой эле байланыштардын аты-жөнү жана билдирүүлөрү сыяктуу жеке маалыматты көрө алат. Ошондой эле, бул функция билдирмелерди жаап, баскычтарын басып, телефон чалууларга жооп берип жана \"Тынчымды алба\" функциясын башкара алат."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12 версиясында ыңгайлаштырылуучу билдирмелер жакшыртылган билдирмелерге алмаштырылды. Бул функция ыкчам аракеттерди жана жоопторду көрсөтүп, билдирмелериңизди иреттейт.\n\nЖакшыртылган билдирмелер бардык билдирмелердин мазмунун, ошондой эле байланыштардын аты-жөнү жана билдирүүлөрү сыяктуу жеке маалыматты көрө алат. Ошондой эле, бул функция билдирмелерди жаап, баскычтарын басып, телефон чалууларга жооп берип жана \"Тынчымды алба\" функциясын башкара алат."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Режимдин адаттагы билдирмеси"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Батарея кубаттоого чейин отуруп калышы мүмкүн"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Батареянын отуруп калбашы үчүн Батареяны үнөмдөгүч режими иштетилди"</string>
