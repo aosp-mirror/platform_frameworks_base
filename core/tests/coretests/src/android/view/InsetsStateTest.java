@@ -315,6 +315,51 @@ public class InsetsStateTest {
     }
 
     @Test
+    public void testEquals_samePrivacyIndicator() {
+        Rect one = new Rect(0, 1, 2, 3);
+        Rect two = new Rect(4, 5, 6, 7);
+        Rect[] bounds = new Rect[] { one, two, one, two };
+        mState.setPrivacyIndicatorBounds(new PrivacyIndicatorBounds(bounds, 0));
+        mState2.setPrivacyIndicatorBounds(new PrivacyIndicatorBounds(bounds, 0));
+        assertEqualsAndHashCode();
+    }
+
+    @Test
+    public void testEquals_differentPrivacyIndicatorStaticBounds() {
+        Rect one = new Rect(0, 1, 2, 3);
+        Rect two = new Rect(4, 5, 6, 7);
+        Rect three = new Rect(8, 9, 10, 11);
+        Rect[] boundsOne = new Rect[] { one, two, one, two };
+        Rect[] boundsDifferent = new Rect[] { one, two, three, one };
+        Rect[] boundsDifferentOrder = new Rect[] { two, one, one, two };
+        Rect[] boundsDifferentLength = new Rect[] { one, two };
+        Rect[] boundsNull = new Rect[4];
+        mState.setPrivacyIndicatorBounds(new PrivacyIndicatorBounds(boundsOne, 0));
+
+        mState2.setPrivacyIndicatorBounds(new PrivacyIndicatorBounds(boundsDifferent, 0));
+        assertNotEqualsAndHashCode();
+
+        mState2.setPrivacyIndicatorBounds(new PrivacyIndicatorBounds(boundsDifferentOrder, 0));
+        assertNotEqualsAndHashCode();
+
+        mState2.setPrivacyIndicatorBounds(new PrivacyIndicatorBounds(boundsDifferentLength, 0));
+        assertNotEqualsAndHashCode();
+
+        mState2.setPrivacyIndicatorBounds(new PrivacyIndicatorBounds(boundsNull, 0));
+        assertNotEqualsAndHashCode();
+    }
+
+    @Test
+    public void testEquals_differentPrivacyIndicatorRotation() {
+        Rect one = new Rect(0, 1, 2, 3);
+        Rect two = new Rect(4, 5, 6, 7);
+        Rect[] arr = new Rect[] { one, two, one, two};
+        mState.setPrivacyIndicatorBounds(new PrivacyIndicatorBounds(arr, 0));
+        mState2.setPrivacyIndicatorBounds(new PrivacyIndicatorBounds(arr, 1));
+        assertNotEqualsAndHashCode();
+    }
+
+    @Test
     public void testEquals_excludeInvisibleIme() {
         mState.getSource(ITYPE_IME).setFrame(new Rect(0, 0, 100, 100));
         mState.getSource(ITYPE_IME).setVisible(false);
