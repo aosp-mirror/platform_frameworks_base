@@ -28,10 +28,8 @@
     <string name="pip_skip_to_next" msgid="8403429188794867653">"അടുത്തതിലേക്ക് പോകുക"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"മുമ്പത്തേതിലേക്ക് പോകുക"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"വലുപ്പം മാറ്റുക"</string>
-    <!-- no translation found for accessibility_action_pip_stash (4060775037619702641) -->
-    <skip />
-    <!-- no translation found for accessibility_action_pip_unstash (7467499339610437646) -->
-    <skip />
+    <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"സ്റ്റാഷ് ചെയ്യൽ"</string>
+    <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"അൺസ്റ്റാഷ് ചെയ്യൽ"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"സ്‌ക്രീൻ വിഭജന മോഡിൽ ആപ്പ് പ്രവർത്തിച്ചേക്കില്ല."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"സ്പ്ലിറ്റ്-സ്ക്രീനിനെ ആപ്പ് പിന്തുണയ്ക്കുന്നില്ല."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"രണ്ടാം ഡിസ്‌പ്ലേയിൽ ആപ്പ് പ്രവർത്തിച്ചേക്കില്ല."</string>
