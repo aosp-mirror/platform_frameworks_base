@@ -113,7 +113,6 @@ public class BubbleExpandedView extends LinearLayout {
     private ShapeDrawable mTopPointer;
     private ShapeDrawable mLeftPointer;
     private ShapeDrawable mRightPointer;
-    private int mExpandedViewPadding;
     private float mCornerRadius = 0f;
     private int mBackgroundColorFloating;
 
@@ -349,7 +348,6 @@ public class BubbleExpandedView extends LinearLayout {
         Resources res = getResources();
         mMinHeight = res.getDimensionPixelSize(R.dimen.bubble_expanded_default_height);
         mOverflowHeight = res.getDimensionPixelSize(R.dimen.bubble_overflow_height);
-        mExpandedViewPadding = res.getDimensionPixelSize(R.dimen.bubble_expanded_view_padding);
 
         updateFontSize();
 
@@ -667,13 +665,15 @@ public class BubbleExpandedView extends LinearLayout {
                 ? mExpandedViewContainerLocation[1] - mPositioner.getInsets().top
                 : 0;
         int settingsHeight = mIsOverflow ? 0 : mManageButtonHeight;
+        int pointerHeight = mPositioner.showBubblesVertically()
+                ? mPointerWidth
+                : (int) (mPointerHeight - mPointerOverlap + mPointerMargin);
         return mPositioner.getAvailableRect().height()
                 - expandedContainerY
                 - getPaddingTop()
                 - getPaddingBottom()
                 - settingsHeight
-                - mPointerHeight
-                - mPointerMargin;
+                - pointerHeight;
     }
 
     /**
@@ -721,15 +721,14 @@ public class BubbleExpandedView extends LinearLayout {
                 : 0;
         final float paddingRight = (showVertically && !onLeft)
                 ? mPointerHeight - mPointerOverlap : 0;
-        final int paddingTop = showVertically ? 0
-                : mExpandedViewPadding;
-        setPadding((int) paddingLeft, paddingTop, (int) paddingRight, 0);
+        final float paddingTop = showVertically ? 0
+                : mPointerHeight - mPointerOverlap;
+        setPadding((int) paddingLeft, (int) paddingTop, (int) paddingRight, 0);
 
         final float expandedViewY = mPositioner.getExpandedViewY();
-        final float bubbleSize = mPositioner.getBubbleBitmapSize();
         final float bubbleCenter = showVertically
-                ? bubblePosition + (bubbleSize / 2f) - expandedViewY
-                : bubblePosition + (bubbleSize / 2f);
+                ? bubblePosition + (mPositioner.getBubbleSize() / 2f) - expandedViewY
+                : bubblePosition + (mPositioner.getBubbleBitmapSize() / 2f) - mPointerWidth;
         // Post because we need the width of the view
         post(() -> {
             float pointerY;
@@ -741,7 +740,7 @@ public class BubbleExpandedView extends LinearLayout {
                         : getWidth() - mPaddingRight - mPointerOverlap;
             } else {
                 pointerY = mPointerOverlap;
-                pointerX = bubbleCenter - mPaddingLeft - (mPointerWidth / 2f);
+                pointerX = bubbleCenter - (mPointerWidth / 2f);
             }
             mPointerView.setTranslationY(pointerY);
             mPointerView.setTranslationX(pointerX);
