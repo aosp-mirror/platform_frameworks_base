@@ -255,7 +255,6 @@ public class NotificationShelf extends ActivatableNotificationView implements
         int backgroundTop = 0;
         int clipTopAmount = 0;
         float firstElementRoundness = 0.0f;
-        ActivatableNotificationView previousAnv = null;
 
         for (int i = 0; i < mHostLayoutController.getChildCount(); i++) {
             ExpandableView child = mHostLayoutController.getChildAt(i);
@@ -327,52 +326,10 @@ public class NotificationShelf extends ActivatableNotificationView implements
                 notGoneIndex++;
             }
 
-            final float viewEnd = viewStart + child.getActualHeight();
-            final float cornerAnimationDistance = mCornerAnimationDistance
-                    * mAmbientState.getExpansionFraction();
-            final float cornerAnimationTop = shelfStart - cornerAnimationDistance;
-
             if (child instanceof ActivatableNotificationView) {
                 ActivatableNotificationView anv =
                         (ActivatableNotificationView) child;
-
-                final boolean isUnlockedHeadsUp = !mAmbientState.isOnKeyguard()
-                        && !mAmbientState.isShadeExpanded()
-                        && child instanceof ExpandableView
-                        && ((ExpandableNotificationRow) child).isHeadsUp();
-                if (viewStart < shelfStart
-                        && !mHostLayoutController.isViewAffectedBySwipe(anv)
-                        && !isUnlockedHeadsUp
-                        && !mAmbientState.isPulsing()
-                        && !mAmbientState.isDozing()) {
-
-                    if (viewEnd >= cornerAnimationTop) {
-                        // Round bottom corners within animation bounds
-                        final float changeFraction = MathUtils.saturate(
-                                (viewEnd - cornerAnimationTop) / cornerAnimationDistance);
-                        final float roundness = anv.isLastInSection() ? 1f : changeFraction * 1f;
-                        anv.setBottomRoundness(roundness, false);
-
-                    } else if (viewEnd < cornerAnimationTop) {
-                        // Fast scroll skips frames and leaves corners with unfinished rounding.
-                        // Reset top and bottom corners outside of animation bounds.
-                        anv.setBottomRoundness(anv.isLastInSection() ? 1f : 0f, false);
-                    }
-
-                    if (viewStart >= cornerAnimationTop) {
-                        // Round top corners within animation bounds
-                        final float changeFraction = MathUtils.saturate(
-                                (viewStart - cornerAnimationTop) / cornerAnimationDistance);
-                        final float roundness = anv.isFirstInSection() ? 1f : changeFraction * 1f;
-                        anv.setTopRoundness(roundness, false);
-
-                    } else if (viewStart < cornerAnimationTop) {
-                        // Fast scroll skips frames and leaves corners with unfinished rounding.
-                        // Reset top and bottom corners outside of animation bounds.
-                        anv.setTopRoundness(anv.isFirstInSection() ? 1f : 0f, false);
-                    }
-                }
-                previousAnv = anv;
+                updateCornerRoundnessOnScroll(anv, viewStart, shelfStart);
             }
         }
 
@@ -405,6 +362,58 @@ public class NotificationShelf extends ActivatableNotificationView implements
         setHideBackground(hideBackground);
         if (mNotGoneIndex == -1) {
             mNotGoneIndex = notGoneIndex;
+        }
+    }
+
+    private void updateCornerRoundnessOnScroll(ActivatableNotificationView anv, float viewStart,
+            float shelfStart) {
+
+        final boolean isUnlockedHeadsUp = !mAmbientState.isOnKeyguard()
+                && !mAmbientState.isShadeExpanded()
+                && anv instanceof ExpandableNotificationRow
+                && ((ExpandableNotificationRow) anv).isHeadsUp();
+
+        final boolean shouldUpdateCornerRoundness = viewStart < shelfStart
+                && !mHostLayoutController.isViewAffectedBySwipe(anv)
+                && !isUnlockedHeadsUp
+                && !mAmbientState.isPulsing()
+                && !mAmbientState.isDozing();
+
+        if (!shouldUpdateCornerRoundness) {
+            return;
+        }
+
+        final float viewEnd = viewStart + anv.getActualHeight();
+        final float cornerAnimationDistance = mCornerAnimationDistance
+                * mAmbientState.getExpansionFraction();
+        final float cornerAnimationTop = shelfStart - cornerAnimationDistance;
+
+        if (viewEnd >= cornerAnimationTop) {
+            // Round bottom corners within animation bounds
+            final float changeFraction = MathUtils.saturate(
+                    (viewEnd - cornerAnimationTop) / cornerAnimationDistance);
+            anv.setBottomRoundness(anv.isLastInSection() ? 1f : changeFraction,
+                    false /* animate */);
+
+        } else if (viewEnd < cornerAnimationTop) {
+            // Fast scroll skips frames and leaves corners with unfinished rounding.
+            // Reset top and bottom corners outside of animation bounds.
+            anv.setBottomRoundness(anv.isLastInSection() ? 1f : 0f,
+                    false /* animate */);
+        }
+
+        if (viewStart >= cornerAnimationTop) {
+            // Round top corners within animation bounds
+            final float changeFraction = MathUtils.saturate(
+                    (viewStart - cornerAnimationTop) / cornerAnimationDistance);
+            anv.setTopRoundness(anv.isFirstInSection() ? 1f : changeFraction,
+                    false /* animate */);
+
+        } else if (viewStart < cornerAnimationTop) {
+            // Fast scroll skips frames and leaves corners with unfinished rounding.
+            // Reset top and bottom corners outside of animation bounds.
+            anv.setTopRoundness(anv.isFirstInSection() ? 1f : 0f,
+                    false /* animate */);
         }
     }
 
