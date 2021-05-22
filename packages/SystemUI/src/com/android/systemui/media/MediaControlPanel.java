@@ -23,6 +23,7 @@ import android.app.smartspace.SmartspaceAction;
 import android.app.smartspace.SmartspaceTarget;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.ColorMatrix;
@@ -511,10 +512,31 @@ public class MediaControlPanel {
             return;
         }
 
+        // Set up recommendation card's header.
+        ApplicationInfo applicationInfo = getApplicationInfo(target);
+        if (applicationInfo == null) {
+            Log.w(TAG, "No valid application info is found for media recommendations");
+            return;
+        }
+
+        PackageManager packageManager = mContext.getPackageManager();
+        // Set up media source app's logo.
+        Drawable icon = packageManager.getApplicationIcon(applicationInfo);
+        icon.setColorFilter(getGrayscaleFilter());
+        ImageView headerLogoImageView = mRecommendationViewHolder.getCardIcon();
+        headerLogoImageView.setImageDrawable(icon);
+        // Set up media source app's label text. Fallback to "Play" if the found label is empty.
+        CharSequence appLabel = packageManager.getApplicationLabel(applicationInfo);
+        if (appLabel.length() != 0) {
+            TextView headerTitleText = mRecommendationViewHolder.getCardText();
+            headerTitleText.setText(appLabel);
+        }
+        // Set up media card's tap action if applicable.
+        setSmartspaceRecItemOnClickListener(
+                mRecommendationViewHolder.getRecommendations(), target.getBaseAction());
+
         List<ImageView> mediaCoverItems = mRecommendationViewHolder.getMediaCoverItems();
-        List<ImageView> mediaLogoItems = mRecommendationViewHolder.getMediaLogoItems();
         List<Integer> mediaCoverItemsResIds = mRecommendationViewHolder.getMediaCoverItemsResIds();
-        List<Integer> mediaLogoItemsResIds = mRecommendationViewHolder.getMediaLogoItemsResIds();
         ConstraintSet expandedSet = mMediaViewController.getExpandedLayout();
         ConstraintSet collapsedSet = mMediaViewController.getCollapsedLayout();
         int mediaRecommendationNum = Math.min(mediaRecommendationList.size(),
@@ -528,50 +550,22 @@ public class MediaControlPanel {
                 continue;
             }
 
-            // Get media source app's logo.
-            Bundle extras = recommendation.getExtras();
-            Drawable icon = null;
-            if (extras != null && extras.getString(EXTRAS_MEDIA_SOURCE_PACKAGE_NAME) != null) {
-                // Get the logo from app's package name when applicable.
-                String packageName = extras.getString(EXTRAS_MEDIA_SOURCE_PACKAGE_NAME);
-                try {
-                    icon = mContext.getPackageManager().getApplicationIcon(
-                            packageName);
-                    icon.setColorFilter(getGrayscaleFilter());
-                } catch (PackageManager.NameNotFoundException e) {
-                    Log.w(TAG, "No media source icon can be fetched via package name", e);
-                }
-            } else {
-                Log.w(TAG, "No media source icon is provided. Skipping this item...");
-                continue;
-            }
-
-            // Set up media source app's logo.
-            ImageView mediaSourceLogoImageView = mediaLogoItems.get(uiComponentIndex);
-            mediaSourceLogoImageView.setImageDrawable(icon);
-
             // Set up media item cover.
             ImageView mediaCoverImageView = mediaCoverItems.get(uiComponentIndex);
             mediaCoverImageView.setImageIcon(recommendation.getIcon());
 
-            // Set up the click listener if applicable.
+            // Set up the media item's click listener if applicable.
             setSmartspaceRecItemOnClickListener(mediaCoverImageView, recommendation);
 
             if (uiComponentIndex < MEDIA_RECOMMENDATION_ITEMS_PER_ROW) {
                 setVisibleAndAlpha(collapsedSet,
                         mediaCoverItemsResIds.get(uiComponentIndex), true);
-                setVisibleAndAlpha(collapsedSet,
-                        mediaLogoItemsResIds.get(uiComponentIndex), true);
             } else {
                 setVisibleAndAlpha(collapsedSet,
                         mediaCoverItemsResIds.get(uiComponentIndex), false);
-                setVisibleAndAlpha(collapsedSet,
-                        mediaLogoItemsResIds.get(uiComponentIndex), false);
             }
             setVisibleAndAlpha(expandedSet,
                     mediaCoverItemsResIds.get(uiComponentIndex), true);
-            setVisibleAndAlpha(expandedSet,
-                    mediaLogoItemsResIds.get(uiComponentIndex), true);
 
             uiComponentIndex++;
         }
@@ -681,7 +675,8 @@ public class MediaControlPanel {
     private void setSmartspaceRecItemOnClickListener(
             @NonNull View view,
             @NonNull SmartspaceAction action) {
-        if (view == null || action == null || action.getIntent() == null) {
+        if (view == null || action == null || action.getIntent() == null
+                || action.getIntent().getExtras() == null) {
             Log.e(TAG, "No tap action can be set up");
             return;
         }
@@ -729,6 +724,38 @@ public class MediaControlPanel {
         }
 
         return false;
+    }
+
+    /**
+     * Returns the application info for the media recommendation's source app.
+     *
+     * @param target Smartspace target contains a list of media recommendations. Each item should
+     *               contain the same source app's info.
+     *
+     * @return The source app's application info. This value can be null if no valid application
+     * info can be obtained.
+     */
+    private ApplicationInfo getApplicationInfo(@NonNull SmartspaceTarget target) {
+        List<SmartspaceAction> mediaRecommendationList = target.getIconGrid();
+        if (mediaRecommendationList == null || mediaRecommendationList.isEmpty()) {
+            return null;
+        }
+
+        for (SmartspaceAction recommendation: mediaRecommendationList) {
+            Bundle extras = recommendation.getExtras();
+            if (extras != null && extras.getString(EXTRAS_MEDIA_SOURCE_PACKAGE_NAME) != null) {
+                // Get the logo from app's package name when applicable.
+                String packageName = extras.getString(EXTRAS_MEDIA_SOURCE_PACKAGE_NAME);
+                try {
+                    return mContext.getPackageManager()
+                            .getApplicationInfo(packageName, 0 /* flags */);
+                } catch (PackageManager.NameNotFoundException e) {
+                    Log.w(TAG, "Fail to get media recommendation's app info", e);
+                }
+            }
+        }
+
+        return null;
     }
 
     /**

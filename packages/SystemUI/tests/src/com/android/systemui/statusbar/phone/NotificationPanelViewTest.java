@@ -39,6 +39,7 @@ import android.content.res.Resources;
 import android.hardware.biometrics.BiometricSourceType;
 import android.os.PowerManager;
 import android.os.UserManager;
+import android.service.quickaccesswallet.QuickAccessWalletClient;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.DisplayMetrics;
@@ -244,6 +245,8 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     @Mock
     private LockIconViewController mLockIconViewController;
     @Mock
+    private QuickAccessWalletClient mQuickAccessWalletClient;
+    @Mock
     private KeyguardMediaController mKeyguardMediaController;
     @Mock
     private PrivacyDotViewController mPrivacyDotViewController;
@@ -358,6 +361,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mAmbientState,
                 mLockIconViewController,
                 mFeatureFlags,
+                mQuickAccessWalletClient,
                 mKeyguardMediaController,
                 mPrivacyDotViewController,
                 new FakeExecutor(new FakeSystemClock()),

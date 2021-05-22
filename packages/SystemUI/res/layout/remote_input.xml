@@ -28,18 +28,18 @@
         android:id="@+id/remote_input_content"
         android:orientation="vertical"
         android:clipToPadding="false"
-        android:layout_marginEnd="20dp"
-        android:layout_marginStart="20dp"
+        android:layout_marginEnd="0dp"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="5dp"
         android:layout_marginBottom="16dp"
         android:layout_weight="1">
         <FrameLayout
             android:id="@+id/remote_input_content_container"
-            android:layout_marginTop="-6dp"
-            android:layout_height="60dp"
-            android:layout_width="60dp"
+            android:layout_height="66dp"
+            android:layout_width="66dp"
+            android:layout_marginTop="0dp"
             android:layout_marginStart="4dp"
-            android:layout_marginBottom="12dp"
+            android:layout_marginBottom="0dp"
             android:visibility="gone"
             android:layout_gravity="center_vertical">
             <ImageView
@@ -52,18 +52,20 @@
                 android:scaleType="centerCrop" />
             <ImageView
                 android:id="@+id/remote_input_delete_bg"
-                android:paddingStart="24dp"
-                android:paddingBottom="24dp"
+                android:paddingTop="6dp"
+                android:paddingEnd="6dp"
+                android:paddingStart="18dp"
+                android:paddingBottom="18dp"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:layout_gravity="end|top"
                 android:src="@drawable/thumbnail_delete_btn_bg"/>
             <ImageView
                 android:id="@+id/remote_input_delete"
-                android:paddingTop="3dp"
-                android:paddingEnd="3dp"
-                android:paddingStart="27dp"
-                android:paddingBottom="27dp"
+                android:paddingTop="9dp"
+                android:paddingEnd="9dp"
+                android:paddingStart="21dp"
+                android:paddingBottom="21dp"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:layout_gravity="end|top"
@@ -76,9 +78,9 @@
                 android:layout_height="wrap_content"
                 android:layout_width="match_parent"
                 android:layout_weight="1"
-                android:paddingTop="2dp"
+                android:paddingTop="14dp"
                 android:paddingStart="4dp"
-                android:paddingBottom="4dp"
+                android:paddingBottom="16dp"
                 android:paddingEnd="12dp"
                 android:layout_gravity="start|center_vertical"
                 android:textAppearance="?android:attr/textAppearance"
@@ -93,7 +95,7 @@
     </LinearLayout>
 
     <FrameLayout
-            android:layout_width="wrap_content"
+            android:layout_width="56dp"
             android:layout_height="match_parent"
             android:layout_gravity="center_vertical">
 

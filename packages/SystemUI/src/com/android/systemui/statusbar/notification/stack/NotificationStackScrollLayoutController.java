@@ -377,11 +377,6 @@ public class NotificationStackScrollLayoutController {
                 }
 
                 @Override
-                public void onSnooze(StatusBarNotification sbn, int hours) {
-                    mStatusBar.setNotificationSnoozed(sbn, hours);
-                }
-
-                @Override
                 public boolean shouldDismissQuickly() {
                     return mView.isExpanded() && mView.isFullyAwake();
                 }

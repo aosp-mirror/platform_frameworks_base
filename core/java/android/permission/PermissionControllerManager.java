@@ -729,13 +729,12 @@ public final class PermissionControllerManager {
      * @param callback A callback which will receive a list of the platform permissions in the
      *                 group, or empty if the group is not a valid platform group, or there
      *                 was an exception.
+     *
+     * @hide
      */
-    @RequiresPermission(Manifest.permission.GET_RUNTIME_PERMISSION_GROUP_MAPPING)
     public void getPlatformPermissionsForGroup(@NonNull String permissionGroupName,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull Consumer<List<String>> callback) {
-        enforceSomePermissionsGrantedToSelf(
-                Manifest.permission.GET_RUNTIME_PERMISSION_GROUP_MAPPING);
         mRemoteService.postAsync(service -> {
             AndroidFuture<List<String>> future = new AndroidFuture<>();
             service.getPlatformPermissionsForGroup(permissionGroupName, future);
@@ -764,12 +763,11 @@ public final class PermissionControllerManager {
      * @param callback A callback which will receive the name of the permission group this
      *                 permission belongs to, or null if it has no group, is not a platform
      *                 permission, or there was an exception.
+     *
+     * @hide
      */
-    @RequiresPermission(Manifest.permission.GET_RUNTIME_PERMISSION_GROUP_MAPPING)
     public void getGroupOfPlatformPermission(@NonNull String permissionName,
             @NonNull @CallbackExecutor Executor executor, @NonNull Consumer<String> callback) {
-        enforceSomePermissionsGrantedToSelf(
-                Manifest.permission.GET_RUNTIME_PERMISSION_GROUP_MAPPING);
         mRemoteService.postAsync(service -> {
             AndroidFuture<String> future = new AndroidFuture<>();
             service.getGroupOfPlatformPermission(permissionName, future);
