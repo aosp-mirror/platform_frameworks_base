@@ -48,6 +48,7 @@ import com.android.wm.shell.pip.PipSurfaceTransactionHelper;
 import com.android.wm.shell.pip.PipTaskOrganizer;
 import com.android.wm.shell.pip.PipTransition;
 import com.android.wm.shell.pip.PipTransitionController;
+import com.android.wm.shell.pip.PipTransitionState;
 import com.android.wm.shell.pip.PipUiEventLogger;
 import com.android.wm.shell.pip.phone.PhonePipMenuController;
 import com.android.wm.shell.pip.phone.PipAppOpsListener;
@@ -184,8 +185,15 @@ public class WMShellModule {
 
     @WMSingleton
     @Provides
+    static PipTransitionState providePipTransitionState() {
+        return new PipTransitionState();
+    }
+
+    @WMSingleton
+    @Provides
     static PipTaskOrganizer providePipTaskOrganizer(Context context,
             SyncTransactionQueue syncTransactionQueue,
+            PipTransitionState pipTransitionState,
             PipBoundsState pipBoundsState,
             PipBoundsAlgorithm pipBoundsAlgorithm,
             PhonePipMenuController menuPhoneController,
@@ -197,7 +205,7 @@ public class WMShellModule {
             PipUiEventLogger pipUiEventLogger, ShellTaskOrganizer shellTaskOrganizer,
             @ShellMainThread ShellExecutor mainExecutor) {
         return new PipTaskOrganizer(context,
-                syncTransactionQueue, pipBoundsState, pipBoundsAlgorithm,
+                syncTransactionQueue, pipTransitionState, pipBoundsState, pipBoundsAlgorithm,
                 menuPhoneController, pipAnimationController, pipSurfaceTransactionHelper,
                 pipTransitionController, splitScreenOptional, displayController, pipUiEventLogger,
                 shellTaskOrganizer, mainExecutor);
@@ -215,8 +223,9 @@ public class WMShellModule {
     static PipTransitionController providePipTransitionController(Context context,
             Transitions transitions, ShellTaskOrganizer shellTaskOrganizer,
             PipAnimationController pipAnimationController, PipBoundsAlgorithm pipBoundsAlgorithm,
-            PipBoundsState pipBoundsState, PhonePipMenuController pipMenuController) {
-        return new PipTransition(context, pipBoundsState, pipMenuController,
+            PipBoundsState pipBoundsState, PipTransitionState pipTransitionState,
+            PhonePipMenuController pipMenuController) {
+        return new PipTransition(context, pipBoundsState, pipTransitionState, pipMenuController,
                 pipBoundsAlgorithm, pipAnimationController, transitions, shellTaskOrganizer);
     }
 

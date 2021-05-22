@@ -79,6 +79,7 @@ public class PipTaskOrganizerTest extends ShellTestCase {
     @Mock private ShellTaskOrganizer mMockShellTaskOrganizer;
     private TestShellExecutor mMainExecutor;
     private PipBoundsState mPipBoundsState;
+    private PipTransitionState mPipTransitionState;
     private PipBoundsAlgorithm mPipBoundsAlgorithm;
 
     private ComponentName mComponent1;
@@ -90,11 +91,12 @@ public class PipTaskOrganizerTest extends ShellTestCase {
         mComponent1 = new ComponentName(mContext, "component1");
         mComponent2 = new ComponentName(mContext, "component2");
         mPipBoundsState = new PipBoundsState(mContext);
+        mPipTransitionState = new PipTransitionState();
         mPipBoundsAlgorithm = new PipBoundsAlgorithm(mContext, mPipBoundsState,
                 new PipSnapAlgorithm());
         mMainExecutor = new TestShellExecutor();
         mSpiedPipTaskOrganizer = spy(new PipTaskOrganizer(mContext,
-                mMockSyncTransactionQueue, mPipBoundsState,
+                mMockSyncTransactionQueue, mPipTransitionState, mPipBoundsState,
                 mPipBoundsAlgorithm, mMockPhonePipMenuController,
                 mMockPipAnimationController, mMockPipSurfaceTransactionHelper,
                 mMockPipTransitionController, mMockOptionalSplitScreen, mMockDisplayController,

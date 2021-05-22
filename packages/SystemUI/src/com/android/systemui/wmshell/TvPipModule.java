@@ -38,6 +38,7 @@ import com.android.wm.shell.pip.PipSnapAlgorithm;
 import com.android.wm.shell.pip.PipSurfaceTransactionHelper;
 import com.android.wm.shell.pip.PipTaskOrganizer;
 import com.android.wm.shell.pip.PipTransitionController;
+import com.android.wm.shell.pip.PipTransitionState;
 import com.android.wm.shell.pip.PipUiEventLogger;
 import com.android.wm.shell.pip.tv.TvPipController;
 import com.android.wm.shell.pip.tv.TvPipMenuController;
@@ -144,10 +145,17 @@ public abstract class TvPipModule {
 
     @WMSingleton
     @Provides
+    static PipTransitionState providePipTransitionState() {
+        return new PipTransitionState();
+    }
+
+    @WMSingleton
+    @Provides
     static PipTaskOrganizer providePipTaskOrganizer(Context context,
             TvPipMenuController tvPipMenuController,
             SyncTransactionQueue syncTransactionQueue,
             PipBoundsState pipBoundsState,
+            PipTransitionState pipTransitionState,
             PipBoundsAlgorithm pipBoundsAlgorithm,
             PipAnimationController pipAnimationController,
             PipTransitionController pipTransitionController,
@@ -157,7 +165,7 @@ public abstract class TvPipModule {
             PipUiEventLogger pipUiEventLogger, ShellTaskOrganizer shellTaskOrganizer,
             @ShellMainThread ShellExecutor mainExecutor) {
         return new PipTaskOrganizer(context,
-                syncTransactionQueue, pipBoundsState, pipBoundsAlgorithm,
+                syncTransactionQueue, pipTransitionState, pipBoundsState, pipBoundsAlgorithm,
                 tvPipMenuController, pipAnimationController, pipSurfaceTransactionHelper,
                 pipTransitionController, splitScreenOptional, displayController, pipUiEventLogger,
                 shellTaskOrganizer, mainExecutor);

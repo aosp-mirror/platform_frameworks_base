@@ -52,19 +52,23 @@ import com.android.wm.shell.transition.Transitions;
  */
 public class PipTransition extends PipTransitionController {
 
+    private final PipTransitionState mPipTransitionState;
     private final int mEnterExitAnimationDuration;
     private @PipAnimationController.AnimationType int mOneShotAnimationType = ANIM_TYPE_BOUNDS;
     private Transitions.TransitionFinishCallback mFinishCallback;
     private Rect mExitDestinationBounds = new Rect();
 
     public PipTransition(Context context,
-            PipBoundsState pipBoundsState, PipMenuController pipMenuController,
+            PipBoundsState pipBoundsState,
+            PipTransitionState pipTransitionState,
+            PipMenuController pipMenuController,
             PipBoundsAlgorithm pipBoundsAlgorithm,
             PipAnimationController pipAnimationController,
             Transitions transitions,
             @NonNull ShellTaskOrganizer shellTaskOrganizer) {
         super(pipBoundsState, pipMenuController, pipBoundsAlgorithm,
                 pipAnimationController, transitions, shellTaskOrganizer);
+        mPipTransitionState = pipTransitionState;
         mEnterExitAnimationDuration = context.getResources()
                 .getInteger(R.integer.config_pipResizeAnimationDuration);
     }
@@ -85,6 +89,7 @@ public class PipTransition extends PipTransitionController {
         if (info.getType() == TRANSIT_EXIT_PIP && info.getChanges().size() == 1) {
             final TransitionInfo.Change change = info.getChanges().get(0);
             mFinishCallback = finishCallback;
+            startTransaction.apply();
             boolean success = startExpandAnimation(change.getTaskInfo(), change.getLeash(),
                     new Rect(mExitDestinationBounds));
             mExitDestinationBounds.setEmpty();
@@ -114,6 +119,7 @@ public class PipTransition extends PipTransitionController {
             startTransaction.setAlpha(wallpaper.getLeash(), 1.f);
         }
 
+        mPipTransitionState.setTransitionState(PipTransitionState.ENTERING_PIP);
         mFinishCallback = finishCallback;
         return startEnterAnimation(enterPip.getTaskInfo(), enterPip.getLeash(),
                 startTransaction, finishTransaction);
@@ -130,6 +136,9 @@ public class PipTransition extends PipTransitionController {
     public void onFinishResize(TaskInfo taskInfo, Rect destinationBounds,
             @PipAnimationController.TransitionDirection int direction,
             SurfaceControl.Transaction tx) {
+        if (isInPipDirection(direction)) {
+            mPipTransitionState.setTransitionState(PipTransitionState.ENTERED_PIP);
+        }
         WindowContainerTransaction wct = new WindowContainerTransaction();
         prepareFinishResizeTransaction(taskInfo, destinationBounds,
                 direction, tx, wct);
