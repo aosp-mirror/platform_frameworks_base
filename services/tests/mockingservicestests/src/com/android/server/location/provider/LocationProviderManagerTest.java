@@ -71,6 +71,7 @@ import android.location.util.identity.CallerIdentity;
 import android.os.Bundle;
 import android.os.ICancellationSignal;
 import android.os.IRemoteCallback;
+import android.os.PackageTagsList;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
@@ -923,8 +924,9 @@ public class LocationProviderManagerTest {
 
     @Test
     public void testProviderRequest_IgnoreLocationSettings() {
-        mInjector.getSettingsHelper().setIgnoreSettingsPackageWhitelist(
-                Collections.singleton(IDENTITY.getPackageName()));
+        mInjector.getSettingsHelper().setIgnoreSettingsAllowlist(
+                new PackageTagsList.Builder().add(
+                        IDENTITY.getPackageName()).build());
 
         ILocationListener listener1 = createMockLocationListener();
         LocationRequest request1 = new LocationRequest.Builder(5)
@@ -950,8 +952,9 @@ public class LocationProviderManagerTest {
 
     @Test
     public void testProviderRequest_IgnoreLocationSettings_ProviderDisabled() {
-        mInjector.getSettingsHelper().setIgnoreSettingsPackageWhitelist(
-                Collections.singleton(IDENTITY.getPackageName()));
+        mInjector.getSettingsHelper().setIgnoreSettingsAllowlist(
+                new PackageTagsList.Builder().add(
+                        IDENTITY.getPackageName()).build());
 
         ILocationListener listener1 = createMockLocationListener();
         LocationRequest request1 = new LocationRequest.Builder(1)
@@ -975,8 +978,9 @@ public class LocationProviderManagerTest {
 
     @Test
     public void testProviderRequest_IgnoreLocationSettings_NoAllowlist() {
-        mInjector.getSettingsHelper().setIgnoreSettingsPackageWhitelist(
-                Collections.singleton(IDENTITY.getPackageName()));
+        mInjector.getSettingsHelper().setIgnoreSettingsAllowlist(
+                new PackageTagsList.Builder().add(
+                        IDENTITY.getPackageName()).build());
 
         ILocationListener listener = createMockLocationListener();
         LocationRequest request = new LocationRequest.Builder(1)
@@ -985,7 +989,8 @@ public class LocationProviderManagerTest {
                 .build();
         mManager.registerLocationRequest(request, IDENTITY, PERMISSION_FINE, listener);
 
-        mInjector.getSettingsHelper().setIgnoreSettingsPackageWhitelist(Collections.emptySet());
+        mInjector.getSettingsHelper().setIgnoreSettingsAllowlist(
+                new PackageTagsList.Builder().build());
 
         assertThat(mProvider.getRequest().isActive()).isTrue();
         assertThat(mProvider.getRequest().getIntervalMillis()).isEqualTo(1);
@@ -994,8 +999,9 @@ public class LocationProviderManagerTest {
 
     @Test
     public void testProviderRequest_BackgroundThrottle_IgnoreLocationSettings() {
-        mInjector.getSettingsHelper().setIgnoreSettingsPackageWhitelist(
-                Collections.singleton(IDENTITY.getPackageName()));
+        mInjector.getSettingsHelper().setIgnoreSettingsAllowlist(
+                new PackageTagsList.Builder().add(
+                        IDENTITY.getPackageName()).build());
 
         ILocationListener listener1 = createMockLocationListener();
         LocationRequest request1 = new LocationRequest.Builder(5)

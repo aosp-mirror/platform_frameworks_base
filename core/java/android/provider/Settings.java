@@ -10988,10 +10988,12 @@ public final class Settings {
         /**
          * Packages that are whitelisted for ignoring location settings (may retrieve location even
          * when user location settings are off), for emergency purposes.
+         * @deprecated No longer used from Android 12+
          * @hide
          */
         @TestApi
         @Readable
+        @Deprecated
         public static final String LOCATION_IGNORE_SETTINGS_PACKAGE_WHITELIST =
                 "location_ignore_settings_package_whitelist";
 

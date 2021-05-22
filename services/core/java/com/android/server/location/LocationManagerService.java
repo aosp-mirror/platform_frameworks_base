@@ -76,6 +76,7 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.ICancellationSignal;
+import android.os.PackageTagsList;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
@@ -139,7 +140,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -271,7 +271,7 @@ public class LocationManagerService extends ILocationManager.Stub implements
 
         mInjector.getSettingsHelper().addOnLocationEnabledChangedListener(
                 this::onLocationModeChanged);
-        mInjector.getSettingsHelper().addOnIgnoreSettingsPackageWhitelistChangedListener(
+        mInjector.getSettingsHelper().addIgnoreSettingsAllowlistChangedListener(
                 () -> refreshAppOpsRestrictions(UserHandle.USER_ALL));
         mInjector.getUserInfoHelper().addListener((userId, change) -> {
             if (change == UserInfoHelper.UserListener.USER_STARTED) {
@@ -641,9 +641,8 @@ public class LocationManagerService extends ILocationManager.Stub implements
     }
 
     @Override
-    public String[] getIgnoreSettingsWhitelist() {
-        return mInjector.getSettingsHelper().getIgnoreSettingsPackageWhitelist().toArray(
-                new String[0]);
+    public PackageTagsList getIgnoreSettingsAllowlist() {
+        return mInjector.getSettingsHelper().getIgnoreSettingsAllowlist();
     }
 
     @Nullable
@@ -1408,26 +1407,17 @@ public class LocationManagerService extends ILocationManager.Stub implements
 
         boolean enabled = mInjector.getSettingsHelper().isLocationEnabled(userId);
 
-        ArrayMap<String, String[]> allowedPackages = null;
+        PackageTagsList allowedPackages = null;
         if (!enabled) {
-            ArrayMap<String, ArraySet<String>> packages = new ArrayMap<>();
+            PackageTagsList.Builder builder = new PackageTagsList.Builder();
             for (LocationProviderManager manager : mProviderManagers) {
                 CallerIdentity identity = manager.getIdentity();
                 if (identity != null) {
-                    packages.computeIfAbsent(identity.getPackageName(), k -> new ArraySet<>()).add(
-                            identity.getAttributionTag());
+                    builder.add(identity.getPackageName(), identity.getAttributionTag());
                 }
             }
-            for (String packageName :
-                    mInjector.getSettingsHelper().getIgnoreSettingsPackageWhitelist()) {
-                packages.computeIfAbsent(packageName, k -> new ArraySet<>()).clear();
-            }
-            packages.computeIfAbsent(mContext.getPackageName(), k -> new ArraySet<>()).clear();
-
-            allowedPackages = new ArrayMap<>();
-            for (Map.Entry<String, ArraySet<String>> entry : packages.entrySet()) {
-                allowedPackages.put(entry.getKey(), entry.getValue().toArray(new String[0]));
-            }
+            builder.add(mInjector.getSettingsHelper().getIgnoreSettingsAllowlist());
+            allowedPackages = builder.build();
         }
 
         AppOpsManager appOpsManager = Objects.requireNonNull(
