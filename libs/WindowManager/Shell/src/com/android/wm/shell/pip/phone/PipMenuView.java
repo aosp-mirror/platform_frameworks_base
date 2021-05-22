@@ -130,6 +130,11 @@ public class PipMenuView extends FrameLayout {
     private ShellExecutor mMainExecutor;
     private Handler mMainHandler;
 
+    /**
+     * Whether the most recent showing of the menu caused a PIP resize, such as when PIP is too
+     * small and it is resized on menu show to fit the actions.
+     */
+    private boolean mDidLastShowMenuResize;
     private final Runnable mHideMenuRunnable = this::hideMenu;
 
     protected View mViewRoot;
@@ -245,6 +250,7 @@ public class PipMenuView extends FrameLayout {
     void showMenu(int menuState, Rect stackBounds, boolean allowMenuTimeout,
             boolean resizeMenuOnShow, boolean withDelay, boolean showResizeHandle) {
         mAllowMenuTimeout = allowMenuTimeout;
+        mDidLastShowMenuResize = resizeMenuOnShow;
         if (mMenuState != menuState) {
             // Disallow touches if the menu needs to resize while showing, and we are transitioning
             // to/from a full menu state.
@@ -340,7 +346,7 @@ public class PipMenuView extends FrameLayout {
     }
 
     void hideMenu(Runnable animationEndCallback) {
-        hideMenu(animationEndCallback, true /* notifyMenuVisibility */, true /* resize */,
+        hideMenu(animationEndCallback, true /* notifyMenuVisibility */, mDidLastShowMenuResize,
                 ANIM_TYPE_HIDE);
     }
 

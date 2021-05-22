@@ -112,6 +112,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.PersistableBundle;
+import android.os.Process;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.util.MergedConfiguration;
@@ -2484,6 +2485,26 @@ public class ActivityRecordTests extends WindowTestsBase {
         doReturn(true).when(activity2).isAnimating();
         assertTrue(activity2.applyAnimation(null, TRANSIT_OLD_ACTIVITY_OPEN, true, false, sources));
     }
+    @Test
+    public void testTrackingStartingWindowThroughTrampoline() {
+        final ActivityRecord sourceRecord = new ActivityBuilder(mAtm)
+                .setCreateTask(true).setLaunchedFromUid(Process.SYSTEM_UID).build();
+        sourceRecord.showStartingWindow(null /* prev */, true /* newTask */, false,
+                0 /* splashScreenTheme */, null);
+
+        final ActivityRecord secondRecord = new ActivityBuilder(mAtm)
+                .setTask(sourceRecord.getTask()).build();
+        secondRecord.showStartingWindow(null /* prev */, true /* newTask */, false,
+                0 /* splashScreenTheme */, sourceRecord);
+        assertFalse(secondRecord.mSplashScreenStyleEmpty);
+        secondRecord.onStartingWindowDrawn();
+
+        final ActivityRecord finalRecord = new ActivityBuilder(mAtm)
+                .setTask(sourceRecord.getTask()).build();
+        finalRecord.showStartingWindow(null /* prev */, true /* newTask */, false,
+                0 /* splashScreenTheme */, secondRecord);
+        assertTrue(finalRecord.mSplashScreenStyleEmpty);
+    }
 
     @Test
     public void testTransferStartingWindowFromFinishingActivity() {
@@ -2494,13 +2515,13 @@ public class ActivityRecordTests extends WindowTestsBase {
                 "Test", 0 /* labelRes */, 0 /* icon */, 0 /* logo */, 0 /* windowFlags */,
                 null /* transferFrom */, true /* newTask */, true /* taskSwitch */,
                 false /* processRunning */, false /* allowTaskSnapshot */,
-                false /* activityCreate */, false /* samePackage */);
+                false /* activityCreate */, false /* suggestEmpty */);
         waitUntilHandlersIdle();
         assertHasStartingWindow(activity);
         activity.mStartingWindowState = ActivityRecord.STARTING_WINDOW_SHOWN;
 
         doCallRealMethod().when(task).startActivityLocked(
-                any(), any(), anyBoolean(), anyBoolean(), any(), anyBoolean());
+                any(), any(), anyBoolean(), anyBoolean(), any(), any());
         // In normal case, resumeFocusedTasksTopActivities() should be called after
         // startActivityLocked(). So skip resumeFocusedTasksTopActivities() in ActivityBuilder.
         doReturn(false).when(mRootWindowContainer).resumeFocusedTasksTopActivities();
@@ -2508,7 +2529,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         final ActivityRecord middle = new ActivityBuilder(mAtm).setTask(task).build();
         task.startActivityLocked(middle, null /* focusedTopActivity */,
                 false /* newTask */, false /* keepCurTransition */, null /* options */,
-                false /* samePackage */);
+                null /* sourceRecord */);
         middle.makeFinishingLocked();
 
         assertNull(activity.mStartingWindow);
@@ -2521,7 +2542,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         // The finishing middle should be able to transfer starting window to top.
         task.startActivityLocked(top, null /* focusedTopActivity */,
                 false /* newTask */, false /* keepCurTransition */, null /* options */,
-                false /* samePackage */);
+                null /* sourceRecord */);
 
         assertNull(middle.mStartingWindow);
         assertHasStartingWindow(top);

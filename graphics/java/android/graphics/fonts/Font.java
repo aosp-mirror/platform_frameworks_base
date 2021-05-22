@@ -801,6 +801,15 @@ public final class Font {
         return myBuffer.equals(otherBuffer);
     }
 
+    /** @hide */
+    public boolean paramEquals(@NonNull Font f) {
+        return f.getStyle().equals(getStyle())
+                && f.getTtcIndex() == getTtcIndex()
+                && Arrays.equals(f.getAxes(), getAxes())
+                && Objects.equals(f.getLocaleList(), getLocaleList())
+                && Objects.equals(getFile(), f.getFile());
+    }
+
     @Override
     public boolean equals(@Nullable Object o) {
         if (o == this) {
@@ -818,13 +827,7 @@ public final class Font {
             return true;
         }
 
-        boolean paramEqual = f.getStyle().equals(getStyle())
-                && f.getTtcIndex() == getTtcIndex()
-                && Arrays.equals(f.getAxes(), getAxes())
-                && Objects.equals(f.getLocaleList(), getLocaleList())
-                && Objects.equals(getFile(), f.getFile());
-
-        if (!paramEqual) {
+        if (!paramEquals(f)) {
             return false;
         }
 

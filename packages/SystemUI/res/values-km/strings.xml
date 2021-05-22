@@ -136,8 +136,7 @@
     <string name="accessibility_camera_button" msgid="2938898391716647247">"ម៉ាស៊ីន​ថត"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"ទូរសព្ទ"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"ជំនួយសំឡេង"</string>
-    <!-- no translation found for accessibility_wallet_button (1458258783460555507) -->
-    <skip />
+    <string name="accessibility_wallet_button" msgid="1458258783460555507">"កាបូប"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"ដោះ​​សោ"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"បានចាក់សោ​ឧបករណ៍"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="5209142744692162598">"កំពុង​រង់ចាំ​ស្នាមម្រាមដៃ"</string>
@@ -291,8 +290,6 @@
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"បាន​បិទ​ហតស្ប៉ត​ចល័ត។"</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"បាន​បើក​ហតស្ប៉ត​ចល័ត។"</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"បាន​បញ្ឈប់​ការ​ចាត់​ថ្នាក់​អេក្រង់។"</string>
-    <string name="accessibility_quick_settings_work_mode_off" msgid="9106217884005620744">"បានផ្អាកមុខងារការងារ។"</string>
-    <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"បើករបៀបការងារ"</string>
     <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6422896967647049692">"បានផ្អាកមុខងារការងារ។"</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"បានបើករបៀបការងារ"</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"បានបិទកម្មវិធីសន្សំសំចៃទិន្នន័យ"</string>
@@ -411,8 +408,7 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="6798849610647988987">"បាន​ប្រើ <xliff:g id="DATA_USED">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"ដែន​កំណត់ <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"<xliff:g id="DATA_LIMIT">%s</xliff:g> ការ​ព្រមាន"</string>
-    <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"កម្រងព័ត៌មានការងារ"</string>
-    <string name="quick_settings_work_mode_paused" msgid="4841109346916998613">"បានផ្អាក"</string>
+    <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"កម្មវិធីការងារ"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"ពន្លឺពេលយប់"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"បើក​នៅពេល​ថ្ងៃលិច"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"រហូត​ដល់​ពេល​ថ្ងៃរះ"</string>
@@ -1044,10 +1040,7 @@
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"ផ្លាស់ទីទៅផ្នែកខាងចុង រួចលាក់"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"ផ្លាស់ទីចេញពីផ្នែកខាងចុង រួចបង្ហាញ"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"បិទ/បើក"</string>
-    <string name="quick_controls_title" msgid="6839108006171302273">"ផ្ទាំងគ្រប់គ្រងឧបករណ៍"</string>
-    <string name="quick_controls_subtitle" msgid="1667408093326318053">"បញ្ចូល​ផ្ទាំងគ្រប់គ្រង​សម្រាប់​ឧបករណ៍​ដែលអ្នកបានភ្ជាប់"</string>
-    <string name="quick_controls_setup_title" msgid="8901436655997849822">"រៀបចំ​ផ្ទាំងគ្រប់គ្រងឧបករណ៍"</string>
-    <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"សង្កត់ប៊ូតុង​ថាមពលឱ្យជាប់ ដើម្បី​ចូលប្រើ​ការគ្រប់គ្រងរបស់អ្នក"</string>
+    <string name="quick_controls_title" msgid="7095074621086860062">"ការគ្រប់គ្រង​ផ្ទះ"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"ជ្រើសរើស​កម្មវិធីដែលត្រូវបញ្ចូល​ផ្ទាំងគ្រប់គ្រង"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="other">បានបញ្ចូល​ការគ្រប់គ្រង <xliff:g id="NUMBER_1">%s</xliff:g>។</item>
@@ -1061,7 +1054,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"ដកចេញ​ពី​សំណព្វ"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"ផ្លាស់ទី​ទៅតាំងទី <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"ការគ្រប់គ្រង"</string>
-    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"ជ្រើសរើស​ផ្ទាំងគ្រប់គ្រង​ដែលត្រូវចូលប្រើ​ពីម៉ឺនុយ​ថាមពល"</string>
+    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"ជ្រើសរើសការគ្រប់គ្រង ដើម្បីចូលប្រើពីការកំណត់រហ័ស"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"ចុច​ឱ្យ​ជាប់ រួចអូស​ដើម្បី​រៀបចំ​ផ្ទាំងគ្រប់គ្រង​ឡើងវិញ"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"បាន​ដកផ្ទាំងគ្រប់គ្រងទាំងអស់ហើយ"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"មិនបាន​រក្សាទុក​ការផ្លាស់ប្ដូរទេ"</string>
@@ -1100,7 +1093,7 @@
     <string name="controls_error_generic" msgid="352500456918362905">"មិនអាច​ផ្ទុក​ស្ថានភាព​បានទេ"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"មានបញ្ហា សូម​ព្យាយាម​ម្តងទៀត"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"កំពុងដំណើរការ"</string>
-    <string name="controls_added_tooltip" msgid="4842812921719153085">"សង្កត់​ប៊ូតុង​ថាមពល ដើម្បី​មើលឃើញ​ការគ្រប់គ្រង​ថ្មីៗ"</string>
+    <string name="controls_added_tooltip" msgid="5866098408470111984">"បើកការកំណត់រហ័ស ដើម្បីមើលការគ្រប់គ្រងថ្មី"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"បញ្ចូល​ផ្ទាំងគ្រប់គ្រង"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"កែ​ផ្ទាំងគ្រប់គ្រង"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"បញ្ចូល​ឧបករណ៍​មេឌៀ"</string>
@@ -1119,9 +1112,16 @@
     <string name="priority_conversations" msgid="3967482288896653039">"ការសន្ទនា​អាទិភាព"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"ការសន្ទនាថ្មីៗ"</string>
     <string name="okay" msgid="6490552955618608554">"យល់ព្រម"</string>
-    <string name="timestamp" msgid="6577851592534538533">"<xliff:g id="DURATION">%1$s</xliff:g> មុន"</string>
-    <string name="less_than_timestamp" msgid="6598972791137724517">"តិចជាង <xliff:g id="DURATION">%1$s</xliff:g> មុន"</string>
-    <string name="over_timestamp" msgid="4765793502859358634">"ជាង <xliff:g id="DURATION">%1$s</xliff:g> មុន"</string>
+    <!-- no translation found for days_timestamp (5821854736213214331) -->
+    <skip />
+    <!-- no translation found for one_week_timestamp (4925600765473875590) -->
+    <skip />
+    <!-- no translation found for two_weeks_timestamp (9111801081871962155) -->
+    <skip />
+    <!-- no translation found for over_one_week_timestamp (3770560704420807142) -->
+    <skip />
+    <!-- no translation found for over_two_weeks_timestamp (6300507859007874050) -->
+    <skip />
     <string name="birthday_status" msgid="2596961629465396761">"ថ្ងៃកំណើត"</string>
     <string name="birthday_status_content_description" msgid="682836371128282925">"នេះគឺជាថ្ងៃ​កំណើត​របស់ <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="upcoming_birthday_status" msgid="2005452239256870351">"ថ្ងៃកំណើតឆាប់ៗនេះ"</string>
@@ -1152,8 +1152,6 @@
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"ផ្ទៀងផ្ទាត់"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"បញ្ចូល​ឧបករណ៍"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"ប្រើស្នាមម្រាមដៃ ដើម្បីបើក"</string>
-    <!-- no translation found for accessibility_fingerprint_bouncer (7189102492498735519) -->
-    <skip />
-    <!-- no translation found for ongoing_phone_call_content_description (5332334388483099947) -->
-    <skip />
+    <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"តម្រូវឱ្យ​មាន​ការផ្ទៀងផ្ទាត់។ សូមចុច​ឧបករណ៍​ចាប់ស្នាមម្រាមដៃ ដើម្បី​ផ្ទៀងផ្ទាត់​។"</string>
+    <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"ការហៅទូរសព្ទ​ដែលកំពុង​ដំណើរការ"</string>
 </resources>

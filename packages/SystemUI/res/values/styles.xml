@@ -682,7 +682,8 @@
     </style>
 
     <!-- Screen recording -->
-    <style name="ScreenRecord" parent="Theme.SystemUI.Dialog.GlobalActions">
+    <style name="ScreenRecord" parent="@android:style/Theme.DeviceDefault.DayNight">
+        <item name="android:windowNoTitle">true</item>
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowIsFloating">true</item>
@@ -695,6 +696,7 @@
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowLightStatusBar">true</item>
         <item name="android:windowLightNavigationBar">true</item>
+        <item name="android:navigationBarColor">?android:attr/colorBackgroundFloating</item>
         <item name="android:windowActivityTransitions">true</item>
     </style>
 
