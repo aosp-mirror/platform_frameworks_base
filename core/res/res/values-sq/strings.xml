@@ -2096,7 +2096,8 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"Në rregull"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Çaktivizo"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Mëso më shumë"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"Njoftimet e përmirësuara kanë zëvendësuar \"Njoftimet me përshtatje të Android\" në Android 12. Kjo veçori shfaq veprimet dhe përgjigjet e sugjeruara dhe organizon njoftimet e tua.\n\nNjoftimet e përmirësuara mund të kenë qasje te përmbajtja e njoftimeve, duke përfshirë informacionet personale si emrat e kontakteve dhe mesazhet. Kjo veçori mund t\'i heqë ose të përgjigjet po ashtu për njoftimet, si p.sh. t\'u përgjigjet telefonatave ose të kontrollojë modalitetin \"Mos shqetëso\"."</string>
+    <!-- no translation found for nas_upgrade_notification_learn_more_content (3735480566983530650) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Njoftimi i informacionit të \"Modalitetit rutinë\""</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Bateria mund të mbarojë përpara ngarkimit të zakonshëm"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"\"Kursyesi i baterisë\" u aktivizua për të rritur kohëzgjatjen e baterisë"</string>

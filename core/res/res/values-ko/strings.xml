@@ -2096,7 +2096,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"확인"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"사용 중지"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"자세히 알아보기"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"Android 12에서는 Android 적응형 알림이 개선된 알림으로 대체됩니다. 이 기능은 추천 작업과 답장을 표시하고 알림을 정리해 줍니다.\n\n개선된 알림은 연락처 이름과 메시지 등 개인 정보가 포함된 알림 내용에 액세스할 수 있습니다. 이 기능은 전화 받기와 방해 금지 모드 제어와 같이 알림을 닫거나 알림을 처리할 수도 있습니다."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12에서는 Android 적응형 알림이 개선된 알림으로 대체됩니다. 이 기능은 추천 작업과 답장을 표시하고 알림을 정리해 줍니다.\n\n개선된 알림은 연락처 이름과 메시지 등 개인 정보가 포함된 알림 내용에 액세스할 수 있습니다. 또한 전화를 받고 방해 금지 모드를 제어하는 등 알림을 닫거나 처리하는 것도 가능합니다."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"루틴 모드 정보 알림"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"평소에 충전하는 시간 전에 배터리가 소진될 수 있습니다."</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"배터리 수명을 연장하기 위해 절전 모드가 활성화되었습니다."</string>

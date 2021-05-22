@@ -2101,7 +2101,8 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"ઓકે"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"બંધ કરો"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"વધુ જાણો"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"Android 12માં Android માટે અનુકૂળ નોટિફિકેશનને બદલે વધુ સારા નોટિફિકેશન છે. આ સુવિધા સૂચિત ક્રિયાઓ અને જવાબો બતાવે છે અને તમારા નોટિફિકેશનને વ્યવસ્થિત કરે છે.\n\nવધુ સારા નોટિફિકેશન સંપર્કનું નામ અને સંદેશા જેવી વ્યક્તિગત માહિતી સહિત નોટિફિકેશનનું બધું કન્ટેન્ટ ઍક્સેસ કરી શકે છે. આ સુવિધા ફોન કૉલના જવાબ આપવા કે \'ખલેલ પાડશો નહીં\'નું નિયંત્રણ કરવા જેવા નોટિફિકેશન છોડી શકે છે અથવા તેને જવાબ આપી શકે છે."</string>
+    <!-- no translation found for nas_upgrade_notification_learn_more_content (3735480566983530650) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"રૂટિન મોડની માહિતીનું નોટિફિકેશન"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"સામાન્ય રીતે ચાર્જ કરવાના સમય પહેલાં બૅટરી સમાપ્ત થઈ શકે છે"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"બૅટરી આવરદા વધારવા માટે બૅટરી સેવર ચાલુ કર્યું"</string>
