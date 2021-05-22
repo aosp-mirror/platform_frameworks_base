@@ -258,6 +258,14 @@ public final class DeviceConfig {
     public static final String NAMESPACE_JOB_SCHEDULER = "jobscheduler";
 
     /**
+     * Namespace for all location related features.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_LOCATION = "location";
+
+    /**
      * Namespace for all media related features.
      *
      * @hide
