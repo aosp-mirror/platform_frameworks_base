@@ -425,7 +425,8 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"Serviciul NFC este dezactivat"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"Serviciul NFC este activat"</string>
-    <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Înregistrarea ecranului"</string>
+    <!-- no translation found for quick_settings_screen_record_label (8650355346742003694) -->
+    <skip />
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Începeți"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Opriți"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Deblocați microfonul dispozitivului?"</string>
@@ -1118,16 +1119,11 @@
     <string name="priority_conversations" msgid="3967482288896653039">"Conversații cu prioritate"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Conversații recente"</string>
     <string name="okay" msgid="6490552955618608554">"OK"</string>
-    <!-- no translation found for days_timestamp (5821854736213214331) -->
-    <skip />
-    <!-- no translation found for one_week_timestamp (4925600765473875590) -->
-    <skip />
-    <!-- no translation found for two_weeks_timestamp (9111801081871962155) -->
-    <skip />
-    <!-- no translation found for over_one_week_timestamp (3770560704420807142) -->
-    <skip />
-    <!-- no translation found for over_two_weeks_timestamp (6300507859007874050) -->
-    <skip />
+    <string name="days_timestamp" msgid="5821854736213214331">"Acum <xliff:g id="DURATION">%1$s</xliff:g> zile"</string>
+    <string name="one_week_timestamp" msgid="4925600765473875590">"Acum o săptămână"</string>
+    <string name="two_weeks_timestamp" msgid="9111801081871962155">"Acum 2 săptămâni"</string>
+    <string name="over_one_week_timestamp" msgid="3770560704420807142">"Cu mai mult de o săptămână în urmă"</string>
+    <string name="over_two_weeks_timestamp" msgid="6300507859007874050">"Cu mai mult de 2 săptămâni în urmă"</string>
     <string name="birthday_status" msgid="2596961629465396761">"Ziua de naștere"</string>
     <string name="birthday_status_content_description" msgid="682836371128282925">"<xliff:g id="NAME">%1$s</xliff:g> își serbează astăzi ziua de naștere"</string>
     <string name="upcoming_birthday_status" msgid="2005452239256870351">"Zi de naștere în curând"</string>
