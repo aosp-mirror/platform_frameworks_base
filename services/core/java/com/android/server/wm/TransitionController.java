@@ -28,6 +28,7 @@ import android.util.Slog;
 import android.view.WindowManager;
 import android.window.IRemoteTransition;
 import android.window.ITransitionPlayer;
+import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
 
 import com.android.internal.protolog.ProtoLogGroup;
@@ -238,6 +239,12 @@ class TransitionController {
     void collectExistenceChange(@NonNull WindowContainer wc) {
         if (mCollectingTransition == null) return;
         mCollectingTransition.collectExistenceChange(wc);
+    }
+
+    /** @see Transition#setOverrideAnimation */
+    void setOverrideAnimation(TransitionInfo.AnimationOptions options) {
+        if (mCollectingTransition == null) return;
+        mCollectingTransition.setOverrideAnimation(options);
     }
 
     /** @see Transition#setReady */

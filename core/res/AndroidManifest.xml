@@ -4232,11 +4232,6 @@
     <permission android:name="android.permission.GET_RUNTIME_PERMISSIONS"
                 android:protectionLevel="signature" />
 
-    <!-- @SystemApi Allows the system to read the mapping between permission and permission group.
-        @hide -->
-    <permission android:name="android.permission.GET_RUNTIME_PERMISSION_GROUP_MAPPING"
-                android:protectionLevel="signature|privileged" />
-
     <!-- @SystemApi Allows the system to restore runtime permission state. This might grant
     permissions, hence this is a more scoped, less powerful variant of GRANT_RUNTIME_PERMISSIONS.
     Among other restrictions this cannot override user choices.

@@ -3669,7 +3669,9 @@ public class StatusBar extends SystemUI implements DemoMode,
     public boolean onBackPressed() {
         boolean isScrimmedBouncer = mScrimController.getState() == ScrimState.BOUNCER_SCRIMMED;
         if (mStatusBarKeyguardViewManager.onBackPressed(isScrimmedBouncer /* hideImmediately */)) {
-            if (!isScrimmedBouncer) {
+            if (isScrimmedBouncer) {
+                mStatusBarStateController.setLeaveOpenOnKeyguardHide(false);
+            } else {
                 mNotificationPanelViewController.expandWithoutQs();
             }
             return true;
@@ -3704,9 +3706,13 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     private void showBouncerIfKeyguard() {
-        if ((mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED)
-                && !mKeyguardViewMediator.isHiding()) {
-            mStatusBarKeyguardViewManager.showGenericBouncer(true /* scrimmed */);
+        if (!mKeyguardViewMediator.isHiding()) {
+            if (mState == StatusBarState.KEYGUARD
+                    && !mStatusBarKeyguardViewManager.bouncerIsOrWillBeShowing()) {
+                mStatusBarKeyguardViewManager.showGenericBouncer(true /* scrimmed */);
+            } else if (mState == StatusBarState.SHADE_LOCKED) {
+                mStatusBarKeyguardViewManager.showBouncer(true /* scrimmed */);
+            }
         }
     }
 
@@ -4423,10 +4429,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     public void setNotificationSnoozed(StatusBarNotification sbn, SnoozeOption snoozeOption) {
         mNotificationsController.setNotificationSnoozed(sbn, snoozeOption);
-    }
-
-    public void setNotificationSnoozed(StatusBarNotification sbn, int hoursToSnooze) {
-        mNotificationsController.setNotificationSnoozed(sbn, hoursToSnooze);
     }
 
     @Override

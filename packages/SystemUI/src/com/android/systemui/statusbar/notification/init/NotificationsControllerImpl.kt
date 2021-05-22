@@ -171,10 +171,4 @@ class NotificationsControllerImpl @Inject constructor(
     override fun getActiveNotificationsCount(): Int {
         return entryManager.activeNotificationsCount
     }
-
-    override fun setNotificationSnoozed(sbn: StatusBarNotification, hoursToSnooze: Int) {
-        notificationListener.snoozeNotification(
-                sbn.key,
-                hoursToSnooze * 60 * 60 * 1000.toLong())
-    }
 }

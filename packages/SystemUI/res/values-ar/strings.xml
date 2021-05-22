@@ -136,8 +136,7 @@
     <string name="accessibility_camera_button" msgid="2938898391716647247">"الكاميرا"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"الهاتف"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"المساعد الصوتي"</string>
-    <!-- no translation found for accessibility_wallet_button (1458258783460555507) -->
-    <skip />
+    <string name="accessibility_wallet_button" msgid="1458258783460555507">"المحفظة"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"فتح القفل"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"الجهاز مُقفل."</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="5209142744692162598">"في انتظار بصمة الإصبع"</string>
@@ -533,7 +532,7 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"الإشعارات"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"المحادثات"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"محو جميع الإشعارات الصامتة"</string>
-    <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"تم إيقاف الإشعارات مؤقتًا وفقًا لإعداد \"الرجاء عدم الإزعاج\""</string>
+    <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"تم إيقاف الإشعارات مؤقتًا وفقًا لإعداد \"عدم الإزعاج\""</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"البدء الآن"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"ليس هناك أي اشعارات"</string>
     <string name="profile_owned_footer" msgid="2756770645766113964">"ربما تتم مراقبة الملف الشخصي"</string>
@@ -1176,8 +1175,6 @@
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"المصادقة"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"الدخول إلى الجهاز"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"يمكنك استخدام بصمة الإصبع للفتح"</string>
-    <!-- no translation found for accessibility_fingerprint_bouncer (7189102492498735519) -->
-    <skip />
-    <!-- no translation found for ongoing_phone_call_content_description (5332334388483099947) -->
-    <skip />
+    <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"المصادقة مطلوبة. المس مستشعر بصمات الإصبع للمصادقة."</string>
+    <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"مكالمة هاتفية جارية"</string>
 </resources>

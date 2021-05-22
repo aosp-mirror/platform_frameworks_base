@@ -192,7 +192,7 @@ public final class SystemServerInitThreadPool implements Dumpable {
         final ArrayList<Integer> pids = new ArrayList<>();
         pids.add(Process.myPid());
         ActivityManagerService.dumpStackTraces(pids, null, null,
-                Watchdog.getInterestingNativePids(), null);
+                Watchdog.getInterestingNativePids(), null, null);
     }
 
     @Override

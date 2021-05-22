@@ -786,10 +786,18 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     public static final int PRIVATE_FLAG_EXT_REQUEST_FOREGROUND_SERVICE_EXEMPTION = 1 << 1;
 
+    /**
+     * Value for {@link #privateFlagsExt}: whether attributions provided by the application are
+     * meant to be user-visible.
+     * @hide
+     */
+    public static final int PRIVATE_FLAG_EXT_ATTRIBUTIONS_ARE_USER_VISIBLE = 1 << 2;
+
     /** @hide */
     @IntDef(flag = true, prefix = { "PRIVATE_FLAG_EXT_" }, value = {
             PRIVATE_FLAG_EXT_PROFILEABLE,
             PRIVATE_FLAG_EXT_REQUEST_FOREGROUND_SERVICE_EXEMPTION,
+            PRIVATE_FLAG_EXT_ATTRIBUTIONS_ARE_USER_VISIBLE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ApplicationInfoPrivateFlagsExt {}
@@ -2434,6 +2442,15 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     public boolean isProfileable() {
         return (privateFlagsExt & PRIVATE_FLAG_EXT_PROFILEABLE) != 0;
+    }
+
+    /**
+     * Returns whether attributions provided by the application are meant to be user-visible.
+     * Defaults to false if application info is retrieved without
+     * {@link PackageManager#GET_ATTRIBUTIONS}.
+     */
+    public boolean areAttributionsUserVisible() {
+        return (privateFlagsExt & PRIVATE_FLAG_EXT_ATTRIBUTIONS_ARE_USER_VISIBLE) != 0;
     }
 
     /**

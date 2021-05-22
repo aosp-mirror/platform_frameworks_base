@@ -24,6 +24,7 @@ import static android.content.pm.Checksum.TYPE_WHOLE_SHA1;
 import static android.content.pm.Checksum.TYPE_WHOLE_SHA256;
 import static android.content.pm.Checksum.TYPE_WHOLE_SHA512;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.DrawableRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -103,6 +104,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
+import android.permission.PermissionControllerManager;
 import android.permission.PermissionManager;
 import android.provider.Settings;
 import android.system.ErrnoException;
@@ -137,6 +139,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 /** @hide */
 public class ApplicationPackageManager extends PackageManager {
@@ -408,6 +412,25 @@ public class ApplicationPackageManager extends PackageManager {
             throw new NameNotFoundException(groupName);
         }
         return permissionInfos;
+    }
+
+    @Override
+    public void getPlatformPermissionsForGroup(@NonNull String permissionGroupName,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull Consumer<List<String>> callback) {
+        final PermissionControllerManager permissionControllerManager = mContext.getSystemService(
+                PermissionControllerManager.class);
+        permissionControllerManager.getPlatformPermissionsForGroup(permissionGroupName, executor,
+                callback);
+    }
+
+    @Override
+    public void getGroupOfPlatformPermission(@NonNull String permissionName,
+            @NonNull @CallbackExecutor Executor executor, @NonNull Consumer<String> callback) {
+        final PermissionControllerManager permissionControllerManager = mContext.getSystemService(
+                PermissionControllerManager.class);
+        permissionControllerManager.getGroupOfPlatformPermission(permissionName, executor,
+                callback);
     }
 
     @Override

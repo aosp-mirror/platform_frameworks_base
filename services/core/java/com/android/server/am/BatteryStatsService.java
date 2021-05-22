@@ -20,6 +20,7 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_SUSPENDED;
 import static android.os.BatteryStats.POWER_DATA_UNAVAILABLE;
 
 import android.annotation.NonNull;
+import android.app.StatsManager;
 import android.bluetooth.BluetoothActivityEnergyInfo;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -69,9 +70,11 @@ import android.telephony.ModemActivityInfo;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
 import android.util.Slog;
+import android.util.StatsEvent;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IBatteryStats;
+import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.BatteryStatsHelper;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.os.BatteryUsageStatsProvider;
@@ -380,6 +383,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
         final DataConnectionStats dataConnectionStats = new DataConnectionStats(mContext, mHandler);
         dataConnectionStats.startMonitoring();
+
+        registerStatsCallbacks();
     }
 
     private final class LocalService extends BatteryStatsInternal {
@@ -672,7 +677,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
      * and per-UID basis.
      */
     public List<BatteryUsageStats> getBatteryUsageStats(List<BatteryUsageStatsQuery> queries) {
-        mContext.enforceCallingPermission(
+        mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.BATTERY_STATS, null);
         awaitCompletion();
 
@@ -731,6 +736,48 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         } catch (IOException e) {
             Slog.w(TAG, "Unable to create shared memory", e);
             return null;
+        }
+    }
+
+    /** Register callbacks for statsd pulled atoms. */
+    private void registerStatsCallbacks() {
+        final StatsManager statsManager = mContext.getSystemService(StatsManager.class);
+        final StatsPullAtomCallbackImpl pullAtomCallback = new StatsPullAtomCallbackImpl();
+
+        statsManager.setPullAtomCallback(
+                FrameworkStatsLog.BATTERY_USAGE_STATS_SINCE_RESET,
+                null, // use default PullAtomMetadata values
+                BackgroundThread.getExecutor(), pullAtomCallback);
+        statsManager.setPullAtomCallback(
+                FrameworkStatsLog.BATTERY_USAGE_STATS_SINCE_RESET_USING_POWER_PROFILE_MODEL,
+                null, // use default PullAtomMetadata values
+                BackgroundThread.getExecutor(), pullAtomCallback);
+    }
+
+    /** StatsPullAtomCallback for pulling BatteryUsageStats data. */
+    private class StatsPullAtomCallbackImpl implements StatsManager.StatsPullAtomCallback {
+        @Override
+        public int onPullAtom(int atomTag, List<StatsEvent> data) {
+            final BatteryUsageStats bus;
+            switch (atomTag) {
+                case FrameworkStatsLog.BATTERY_USAGE_STATS_SINCE_RESET:
+                    bus = getBatteryUsageStats(List.of(BatteryUsageStatsQuery.DEFAULT)).get(0);
+                    break;
+                case FrameworkStatsLog.BATTERY_USAGE_STATS_SINCE_RESET_USING_POWER_PROFILE_MODEL:
+                    final BatteryUsageStatsQuery powerProfileQuery =
+                            new BatteryUsageStatsQuery.Builder().powerProfileModeledOnly().build();
+                    bus = getBatteryUsageStats(List.of(powerProfileQuery)).get(0);
+                    break;
+                default:
+                    throw new UnsupportedOperationException("Unknown tagId=" + atomTag);
+            }
+            // TODO(b/187223764): busTime won't be needed once end_session is a field in BUS.
+            final long busTime = System.currentTimeMillis();
+            final byte[] statsProto = bus.getStatsProto(busTime);
+
+            data.add(FrameworkStatsLog.buildStatsEvent(atomTag, statsProto));
+
+            return StatsManager.PULL_SUCCESS;
         }
     }
 

@@ -407,6 +407,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -3153,7 +3154,23 @@ public class ActivityManagerService extends IActivityManager.Stub
             ProcessCpuTracker processCpuTracker, SparseArray<Boolean> lastPids,
             ArrayList<Integer> nativePids, StringWriter logExceptionCreatingFile) {
         return dumpStackTraces(firstPids, processCpuTracker, lastPids, nativePids,
-                logExceptionCreatingFile, null);
+                logExceptionCreatingFile, null, null);
+    }
+
+    /**
+     * If a stack trace dump file is configured, dump process stack traces.
+     * @param firstPids of dalvik VM processes to dump stack traces for first
+     * @param lastPids of dalvik VM processes to dump stack traces for last
+     * @param nativePids optional list of native pids to dump stack crawls
+     * @param logExceptionCreatingFile optional writer to which we log errors creating the file
+     * @param subject optional line related to the error
+     */
+    public static File dumpStackTraces(ArrayList<Integer> firstPids,
+            ProcessCpuTracker processCpuTracker, SparseArray<Boolean> lastPids,
+            ArrayList<Integer> nativePids, StringWriter logExceptionCreatingFile,
+            String subject) {
+        return dumpStackTraces(firstPids, processCpuTracker, lastPids, nativePids,
+                logExceptionCreatingFile, null, subject);
     }
 
     /**
@@ -3163,7 +3180,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     /* package */ static File dumpStackTraces(ArrayList<Integer> firstPids,
             ProcessCpuTracker processCpuTracker, SparseArray<Boolean> lastPids,
             ArrayList<Integer> nativePids, StringWriter logExceptionCreatingFile,
-            long[] firstPidOffsets) {
+            long[] firstPidOffsets, String subject) {
         ArrayList<Integer> extraPids = null;
 
         Slog.i(TAG, "dumpStackTraces pids=" + lastPids + " nativepids=" + nativePids);
@@ -3215,6 +3232,15 @@ public class ActivityManagerService extends IActivityManager.Stub
             return null;
         }
 
+        if (subject != null) {
+            try (FileOutputStream fos = new FileOutputStream(tracesFile, true)) {
+                String header = "Subject: " + subject + "\n";
+                fos.write(header.getBytes(StandardCharsets.UTF_8));
+            } catch (IOException e) {
+                Slog.w(TAG, "Exception writing subject to ANR dump file:", e);
+            }
+        }
+
         Pair<Long, Long> offsets = dumpStackTraces(
                 tracesFile.getAbsolutePath(), firstPids, nativePids, extraPids);
         if (firstPidOffsets != null) {
@@ -3261,13 +3287,19 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         final int max = SystemProperties.getInt("tombstoned.max_anr_count", 64);
         final long now = System.currentTimeMillis();
-        Arrays.sort(files, Comparator.comparingLong(File::lastModified).reversed());
-        for (int i = 0; i < files.length; ++i) {
-            if (i > max || (now - files[i].lastModified()) > DAY_IN_MILLIS) {
-                if (!files[i].delete()) {
-                    Slog.w(TAG, "Unable to prune stale trace file: " + files[i]);
+        try {
+            Arrays.sort(files, Comparator.comparingLong(File::lastModified).reversed());
+            for (int i = 0; i < files.length; ++i) {
+                if (i > max || (now - files[i].lastModified()) > DAY_IN_MILLIS) {
+                    if (!files[i].delete()) {
+                        Slog.w(TAG, "Unable to prune stale trace file: " + files[i]);
+                    }
                 }
             }
+        } catch (IllegalArgumentException e) {
+            // The modification times changed while we were sorting. Bail...
+            // https://issuetracker.google.com/169836837
+            Slog.w(TAG, "tombstone modification times changed while sorting; not pruning", e);
         }
     }
 
