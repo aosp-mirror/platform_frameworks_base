@@ -17,13 +17,17 @@
 package com.android.settingslib.widget;
 
 import android.content.Context;
+import android.text.SpannableString;
 import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
+import android.text.style.UnderlineSpan;
 import android.util.AttributeSet;
+import android.view.View;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
+import androidx.annotation.VisibleForTesting;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
 
@@ -35,7 +39,10 @@ public class FooterPreference extends Preference {
 
     public static final String KEY_FOOTER = "footer_preference";
     static final int ORDER_FOOTER = Integer.MAX_VALUE - 1;
+    @VisibleForTesting
+    View.OnClickListener mLearnMoreListener;
     private CharSequence mContentDescription;
+    private CharSequence mLearnMoreContentDescription;
 
     public FooterPreference(Context context, AttributeSet attrs) {
         super(context, attrs, R.attr.footerPreferenceStyle);
@@ -53,7 +60,23 @@ public class FooterPreference extends Preference {
         title.setMovementMethod(new LinkMovementMethod());
         title.setClickable(false);
         title.setLongClickable(false);
-        title.setContentDescription(mContentDescription);
+        if (!TextUtils.isEmpty(mContentDescription)) {
+            title.setContentDescription(mContentDescription);
+        }
+
+        TextView learnMore = holder.itemView.findViewById(R.id.settingslib_learn_more);
+        if (learnMore != null && mLearnMoreListener != null) {
+            learnMore.setVisibility(View.VISIBLE);
+            learnMore.setOnClickListener(mLearnMoreListener);
+            SpannableString learnMoreText = new SpannableString(learnMore.getText());
+            learnMoreText.setSpan(new UnderlineSpan(), 0, learnMoreText.length(), 0);
+            learnMore.setText(learnMoreText);
+            if (!TextUtils.isEmpty(mLearnMoreContentDescription)) {
+                learnMore.setContentDescription(mLearnMoreContentDescription);
+            }
+        } else {
+            learnMore.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -87,8 +110,40 @@ public class FooterPreference extends Preference {
     /**
      * Return the content description of footer preference.
      */
-    public CharSequence getContentDescription() {
+    @VisibleForTesting
+    CharSequence getContentDescription() {
         return mContentDescription;
+    }
+
+    /**
+     * To set content description of the learn more text. This can use for talkback
+     * environment if developer wants to have a customization content.
+     *
+     * @param learnMoreContentDescription The resource id of the content description.
+     */
+    public void setLearnMoreContentDescription(CharSequence learnMoreContentDescription) {
+        if (!TextUtils.equals(mContentDescription, learnMoreContentDescription)) {
+            mLearnMoreContentDescription = learnMoreContentDescription;
+            notifyChanged();
+        }
+    }
+
+    /**
+     * Return the content description of learn more link.
+     */
+    @VisibleForTesting
+    CharSequence getLearnMoreContentDescription() {
+        return mLearnMoreContentDescription;
+    }
+
+    /**
+     * Assign an action for the learn more link.
+     */
+    public void setLearnMoreAction(View.OnClickListener listener) {
+        if (mLearnMoreListener != listener) {
+            mLearnMoreListener = listener;
+            notifyChanged();
+        }
     }
 
     private void init() {
@@ -110,6 +165,7 @@ public class FooterPreference extends Preference {
         private String mKey;
         private CharSequence mTitle;
         private CharSequence mContentDescription;
+        private CharSequence mLearnMoreContentDescription;
 
         public Builder(@NonNull Context context) {
             mContext = context;
@@ -168,6 +224,30 @@ public class FooterPreference extends Preference {
         }
 
         /**
+         * To set content description of the learn more text. This can use for talkback
+         * environment if developer wants to have a customization content.
+         *
+         * @param learnMoreContentDescription The resource id of the content description.
+         */
+        public Builder setLearnMoreContentDescription(CharSequence learnMoreContentDescription) {
+            mLearnMoreContentDescription = learnMoreContentDescription;
+            return this;
+        }
+
+        /**
+         * To set content description of the {@link FooterPreference}. This can use for talkback
+         * environment if developer wants to have a customization content.
+         *
+         * @param learnMoreContentDescriptionResId The resource id of the content description.
+         */
+        public Builder setLearnMoreContentDescription(
+                @StringRes int learnMoreContentDescriptionResId) {
+            mLearnMoreContentDescription = mContext.getText(learnMoreContentDescriptionResId);
+            return this;
+        }
+
+
+        /**
          * To generate the {@link FooterPreference}.
          */
         public FooterPreference build() {
@@ -183,6 +263,10 @@ public class FooterPreference extends Preference {
 
             if (!TextUtils.isEmpty(mContentDescription)) {
                 footerPreference.setContentDescription(mContentDescription);
+            }
+
+            if (!TextUtils.isEmpty(mLearnMoreContentDescription)) {
+                footerPreference.setLearnMoreContentDescription(mLearnMoreContentDescription);
             }
             return footerPreference;
         }
