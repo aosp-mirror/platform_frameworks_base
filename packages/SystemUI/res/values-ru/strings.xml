@@ -966,7 +966,7 @@
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"Приложение готово к работе, установка не требуется. Нажмите, чтобы узнать больше."</string>
     <string name="app_info" msgid="5153758994129963243">"О приложении"</string>
     <string name="go_to_web" msgid="636673528981366511">"Перейти в браузер"</string>
-    <string name="mobile_data" msgid="4564407557775397216">"Моб. Интернет"</string>
+    <string name="mobile_data" msgid="4564407557775397216">"Моб. интернет"</string>
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> – <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="5389597396308001471">"Модуль Wi-Fi отключен"</string>
