@@ -423,7 +423,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC non attiva"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC attiva"</string>
-    <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Registrazione schermo"</string>
+    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Registrazione dello schermo"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Inizia"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Interrompi"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Vuoi sbloccare il microfono del dispositivo?"</string>
@@ -1004,7 +1004,7 @@
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Le app stanno usando <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" e "</string>
-    <string name="ongoing_privacy_dialog_using_op" msgid="426635338010011796">"Attualmente usato da <xliff:g id="APPLICATION_NAME">%1$s</xliff:g>"</string>
+    <string name="ongoing_privacy_dialog_using_op" msgid="426635338010011796">"Attualmente in uso per <xliff:g id="APPLICATION_NAME">%1$s</xliff:g>"</string>
     <string name="ongoing_privacy_dialog_recent_op" msgid="2736290123662790026">"Usato di recente da <xliff:g id="APPLICATION_NAME">%1$s</xliff:g>"</string>
     <string name="ongoing_privacy_dialog_enterprise" msgid="3003314125311966061">"(lavoro)"</string>
     <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"Telefonata"</string>
@@ -1112,16 +1112,11 @@
     <string name="priority_conversations" msgid="3967482288896653039">"Conversazioni prioritarie"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Conversazioni recenti"</string>
     <string name="okay" msgid="6490552955618608554">"OK"</string>
-    <!-- no translation found for days_timestamp (5821854736213214331) -->
-    <skip />
-    <!-- no translation found for one_week_timestamp (4925600765473875590) -->
-    <skip />
-    <!-- no translation found for two_weeks_timestamp (9111801081871962155) -->
-    <skip />
-    <!-- no translation found for over_one_week_timestamp (3770560704420807142) -->
-    <skip />
-    <!-- no translation found for over_two_weeks_timestamp (6300507859007874050) -->
-    <skip />
+    <string name="days_timestamp" msgid="5821854736213214331">"<xliff:g id="DURATION">%1$s</xliff:g> giorni fa"</string>
+    <string name="one_week_timestamp" msgid="4925600765473875590">"1 settimana fa"</string>
+    <string name="two_weeks_timestamp" msgid="9111801081871962155">"2 settimane fa"</string>
+    <string name="over_one_week_timestamp" msgid="3770560704420807142">"Più di 1 settimana fa"</string>
+    <string name="over_two_weeks_timestamp" msgid="6300507859007874050">"Più di 2 settimane fa"</string>
     <string name="birthday_status" msgid="2596961629465396761">"Compleanno"</string>
     <string name="birthday_status_content_description" msgid="682836371128282925">"È il compleanno di <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="upcoming_birthday_status" msgid="2005452239256870351">"Compleanno imminente"</string>
