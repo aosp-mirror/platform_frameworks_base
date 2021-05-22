@@ -1356,9 +1356,14 @@ package android.location {
     method public void setType(int);
   }
 
+  public final class LocationDeviceConfig {
+    field public static final String IGNORE_SETTINGS_ALLOWLIST = "ignore_settings_allowlist";
+  }
+
   public class LocationManager {
     method @NonNull public String[] getBackgroundThrottlingWhitelist();
-    method @NonNull public String[] getIgnoreSettingsWhitelist();
+    method @NonNull public android.os.PackageTagsList getIgnoreSettingsAllowlist();
+    method @Deprecated @NonNull public String[] getIgnoreSettingsWhitelist();
     method @Deprecated @Nullable @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public java.util.List<java.lang.String> getProviderPackages(@NonNull String);
   }
 
@@ -1651,6 +1656,28 @@ package android.os {
   public final class MessageQueue {
     method public int postSyncBarrier();
     method public void removeSyncBarrier(int);
+  }
+
+  public final class PackageTagsList implements android.os.Parcelable {
+    method public boolean contains(@NonNull String, @Nullable String);
+    method public boolean contains(@NonNull android.os.PackageTagsList);
+    method public boolean containsAll(@NonNull String);
+    method public int describeContents();
+    method public boolean includes(@NonNull String);
+    method public boolean isEmpty();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.os.PackageTagsList> CREATOR;
+  }
+
+  public static final class PackageTagsList.Builder {
+    ctor public PackageTagsList.Builder();
+    ctor public PackageTagsList.Builder(int);
+    method @NonNull public android.os.PackageTagsList.Builder add(@NonNull String);
+    method @NonNull public android.os.PackageTagsList.Builder add(@NonNull String, @Nullable String);
+    method @NonNull public android.os.PackageTagsList.Builder add(@NonNull android.os.PackageTagsList);
+    method @NonNull public android.os.PackageTagsList.Builder add(@NonNull java.util.Map<java.lang.String,? extends java.util.Set<java.lang.String>>);
+    method @NonNull public android.os.PackageTagsList build();
+    method @NonNull public android.os.PackageTagsList.Builder clear();
   }
 
   public final class Parcel {
@@ -2087,7 +2114,7 @@ package android.provider {
     field public static final String HIDDEN_API_BLACKLIST_EXEMPTIONS = "hidden_api_blacklist_exemptions";
     field public static final String HIDDEN_API_POLICY = "hidden_api_policy";
     field public static final String HIDE_ERROR_DIALOGS = "hide_error_dialogs";
-    field public static final String LOCATION_IGNORE_SETTINGS_PACKAGE_WHITELIST = "location_ignore_settings_package_whitelist";
+    field @Deprecated public static final String LOCATION_IGNORE_SETTINGS_PACKAGE_WHITELIST = "location_ignore_settings_package_whitelist";
     field public static final String LOW_POWER_MODE = "low_power";
     field public static final String LOW_POWER_MODE_STICKY = "low_power_sticky";
     field @Deprecated public static final String NOTIFICATION_BUBBLES = "notification_bubbles";

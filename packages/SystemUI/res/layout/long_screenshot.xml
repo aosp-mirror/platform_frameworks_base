@@ -33,7 +33,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="4dp"
         android:backgroundTint="?androidprv:attr/colorAccentSecondary"
-        android:textColor="?androidprv:attr/textColorSecondary"
+        android:textColor="?android:textColorPrimary"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@id/preview" />
@@ -117,7 +117,7 @@
         android:backgroundTint="?androidprv:attr/colorAccentSecondary"
         android:src="@drawable/ic_screenshot_edit"
         android:contentDescription="@string/screenshot_edit_label"
-        android:tint="?androidprv:attr/textColorSecondary"
+        android:tint="?android:textColorPrimary"
         android:padding="16dp"
         android:scaleType="fitCenter"
         app:layout_constraintBottom_toBottomOf="parent"
