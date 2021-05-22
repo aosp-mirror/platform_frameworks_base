@@ -290,7 +290,7 @@ public class ExpandedAnimationController
                 path.lineTo(stackedX, expandedY);
 
                 // Then, draw a line down to the stack position.
-                path.lineTo(stackedX, mCollapsePoint.y + index * mStackOffsetPx);
+                path.lineTo(stackedX, mCollapsePoint.y + Math.min(index, 1) * mStackOffsetPx);
             }
 
             // The lead bubble should be the bubble with the longest distance to travel when we're
@@ -509,7 +509,7 @@ public class ExpandedAnimationController
     }
 
     @Override
-    float getOffsetForChainedPropertyAnimation(DynamicAnimation.ViewProperty property) {
+    float getOffsetForChainedPropertyAnimation(DynamicAnimation.ViewProperty property, int index) {
         return 0;
     }
 
