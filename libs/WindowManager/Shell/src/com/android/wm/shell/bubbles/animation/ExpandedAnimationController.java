@@ -208,7 +208,6 @@ public class ExpandedAnimationController
         Resources res = mLayout.getContext().getResources();
         mBubblePaddingTop = res.getDimensionPixelSize(R.dimen.bubble_padding_top);
         mStackOffsetPx = res.getDimensionPixelSize(R.dimen.bubble_stack_offset);
-        mBubblePaddingTop = res.getDimensionPixelSize(R.dimen.bubble_padding_top);
         mBubbleSizePx = mPositioner.getBubbleSize();
         mBubblesMaxRendered = res.getInteger(R.integer.bubbles_max_rendered);
         mBubblesMaxSpace = res.getDimensionPixelSize(R.dimen.bubble_max_spacing);
@@ -276,8 +275,8 @@ public class ExpandedAnimationController
                     boolean onLeft = mCollapsePoint != null
                             && mCollapsePoint.x < (availableRect.width() / 2f);
                     float translationX = onLeft
-                            ? availableRect.left + mExpandedViewPadding
-                            : availableRect.right - mBubbleSizePx - mExpandedViewPadding;
+                            ? availableRect.left
+                            : availableRect.right - mBubbleSizePx;
                     path.lineTo(translationX, getBubbleXOrYForOrientation(index));
                 } else {
                     path.lineTo(getBubbleXOrYForOrientation(index), expandedY);
@@ -621,8 +620,8 @@ public class ExpandedAnimationController
                         && mCollapsePoint.x < (availableRect.width() / 2f);
                 animationForChild(bubble)
                         .translationX(onLeft
-                                ? availableRect.left + mExpandedViewPadding
-                                : availableRect.right - mBubbleSizePx - mExpandedViewPadding)
+                                ? availableRect.left
+                                : availableRect.right - mBubbleSizePx)
                         .translationY(getBubbleXOrYForOrientation(i))
                         .start();
             } else {
