@@ -1969,6 +1969,9 @@ public class VcnGatewayConnection extends StateMachine {
             }
             builder.setAdministratorUids(adminUids);
 
+            builder.setLinkUpstreamBandwidthKbps(underlyingCaps.getLinkUpstreamBandwidthKbps());
+            builder.setLinkDownstreamBandwidthKbps(underlyingCaps.getLinkDownstreamBandwidthKbps());
+
             // Set TransportInfo for SysUI use (never parcelled out of SystemServer).
             if (underlyingCaps.hasTransport(TRANSPORT_WIFI)
                     && underlyingCaps.getTransportInfo() instanceof WifiInfo) {
@@ -1985,6 +1988,11 @@ public class VcnGatewayConnection extends StateMachine {
                         "Unknown transport type or missing TransportInfo/NetworkSpecifier for"
                                 + " non-null underlying network");
             }
+        } else {
+            Slog.wtf(
+                    TAG,
+                    "No underlying network while building network capabilities",
+                    new IllegalStateException());
         }
 
         return builder.build();
@@ -2012,7 +2020,18 @@ public class VcnGatewayConnection extends StateMachine {
         lp.addRoute(new RouteInfo(new IpPrefix(Inet6Address.ANY, 0), null /*gateway*/,
                 null /*iface*/, RouteInfo.RTN_UNICAST));
 
-        final int underlyingMtu = (underlying == null) ? 0 : underlying.linkProperties.getMtu();
+        int underlyingMtu = 0;
+        if (underlying != null) {
+            final LinkProperties underlyingLp = underlying.linkProperties;
+
+            lp.setTcpBufferSizes(underlyingLp.getTcpBufferSizes());
+            underlyingMtu = underlyingLp.getMtu();
+        } else {
+            Slog.wtf(
+                    TAG,
+                    "No underlying network while building link properties",
+                    new IllegalStateException());
+        }
         lp.setMtu(
                 MtuUtils.getMtu(
                         ikeTunnelParams.getTunnelModeChildSessionParams().getSaProposals(),
