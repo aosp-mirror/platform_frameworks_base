@@ -423,7 +423,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC is gedeaktiveer"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC is geaktiveer"</string>
-    <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Skermopname"</string>
+    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Skermopname"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Begin"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Stop"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Deblokkeer toestelmikrofoon?"</string>
@@ -1112,16 +1112,11 @@
     <string name="priority_conversations" msgid="3967482288896653039">"Prioriteitgesprekke"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Onlangse gesprekke"</string>
     <string name="okay" msgid="6490552955618608554">"OK"</string>
-    <!-- no translation found for days_timestamp (5821854736213214331) -->
-    <skip />
-    <!-- no translation found for one_week_timestamp (4925600765473875590) -->
-    <skip />
-    <!-- no translation found for two_weeks_timestamp (9111801081871962155) -->
-    <skip />
-    <!-- no translation found for over_one_week_timestamp (3770560704420807142) -->
-    <skip />
-    <!-- no translation found for over_two_weeks_timestamp (6300507859007874050) -->
-    <skip />
+    <string name="days_timestamp" msgid="5821854736213214331">"<xliff:g id="DURATION">%1$s</xliff:g> dae gelede"</string>
+    <string name="one_week_timestamp" msgid="4925600765473875590">"1 week gelede"</string>
+    <string name="two_weeks_timestamp" msgid="9111801081871962155">"2 weke gelede"</string>
+    <string name="over_one_week_timestamp" msgid="3770560704420807142">"Meer as 1 week gelede"</string>
+    <string name="over_two_weeks_timestamp" msgid="6300507859007874050">"Meer as 2 weke gelede"</string>
     <string name="birthday_status" msgid="2596961629465396761">"Verjaarsdag"</string>
     <string name="birthday_status_content_description" msgid="682836371128282925">"Dit is <xliff:g id="NAME">%1$s</xliff:g> se verjaarsdag"</string>
     <string name="upcoming_birthday_status" msgid="2005452239256870351">"Verjaar binnekort"</string>

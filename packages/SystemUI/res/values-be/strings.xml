@@ -412,8 +412,7 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="6798849610647988987">"Выкарыстана <xliff:g id="DATA_USED">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"Ліміт <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"Папярэджанне: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
-    <!-- no translation found for quick_settings_work_mode_label (6440531507319809121) -->
-    <skip />
+    <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"Працоўныя праграмы"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Начная падсветка"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Уключаць увечары"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Да ўсходу сонца"</string>
@@ -428,7 +427,8 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC адключаны"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC уключаны"</string>
-    <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Запіс экрана"</string>
+    <!-- no translation found for quick_settings_screen_record_label (8650355346742003694) -->
+    <skip />
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Пачаць"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Спыніць"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Разблакіраваць мікрафон прылады?"</string>
@@ -1051,8 +1051,7 @@
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Перамясціць на край і схаваць"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Перамясціць за край і паказаць"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"уключыць/выключыць"</string>
-    <!-- no translation found for quick_controls_title (7095074621086860062) -->
-    <skip />
+    <string name="quick_controls_title" msgid="7095074621086860062">"Элементы кіравання домам"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Выберыце праграму для дадавання элементаў кіравання"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="one">Дададзены <xliff:g id="NUMBER_1">%s</xliff:g> элемент кіравання.</item>
@@ -1068,8 +1067,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"выдаліць з абранага"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Перамясціць у пазіцыю <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Сродкі кіравання"</string>
-    <!-- no translation found for controls_favorite_subtitle (6481675111056961083) -->
-    <skip />
+    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Выберыце элементы кіравання, да якіх вы хочаце мець доступ з Хуткіх налад"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Каб змяніць парадак элементаў кіравання, утрымлівайце і перацягвайце іх"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Усе элементы кіравання выдалены"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Змяненні не захаваны"</string>
@@ -1108,8 +1106,7 @@
     <string name="controls_error_generic" msgid="352500456918362905">"Не ўдалося загрузіць стан"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Памылка, паўтарыце спробу"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"Выконваецца"</string>
-    <!-- no translation found for controls_added_tooltip (5866098408470111984) -->
-    <skip />
+    <string name="controls_added_tooltip" msgid="5866098408470111984">"Каб убачыць новыя элементы кіравання, адкрыйце \"Хуткія налады\""</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Дадаць элементы кіравання"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Змяніць элементы кіравання"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Дадайце прылады вываду"</string>
@@ -1128,16 +1125,11 @@
     <string name="priority_conversations" msgid="3967482288896653039">"Прыярытэтныя размовы"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Нядаўнія размовы"</string>
     <string name="okay" msgid="6490552955618608554">"OK"</string>
-    <!-- no translation found for days_timestamp (5821854736213214331) -->
-    <skip />
-    <!-- no translation found for one_week_timestamp (4925600765473875590) -->
-    <skip />
-    <!-- no translation found for two_weeks_timestamp (9111801081871962155) -->
-    <skip />
-    <!-- no translation found for over_one_week_timestamp (3770560704420807142) -->
-    <skip />
-    <!-- no translation found for over_two_weeks_timestamp (6300507859007874050) -->
-    <skip />
+    <string name="days_timestamp" msgid="5821854736213214331">"<xliff:g id="DURATION">%1$s</xliff:g> сут таму"</string>
+    <string name="one_week_timestamp" msgid="4925600765473875590">"1 тыдзень таму"</string>
+    <string name="two_weeks_timestamp" msgid="9111801081871962155">"2 тыдні таму"</string>
+    <string name="over_one_week_timestamp" msgid="3770560704420807142">"Больш за 1 тыдзень таму"</string>
+    <string name="over_two_weeks_timestamp" msgid="6300507859007874050">"Больш за 2 тыдні таму"</string>
     <string name="birthday_status" msgid="2596961629465396761">"Дзень нараджэння"</string>
     <string name="birthday_status_content_description" msgid="682836371128282925">"<xliff:g id="NAME">%1$s</xliff:g> святкуе дзень нараджэння"</string>
     <string name="upcoming_birthday_status" msgid="2005452239256870351">"Хутка свята"</string>
