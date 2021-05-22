@@ -480,7 +480,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 } else if (!task.mCreatedByOrganizer) {
                     throw new UnsupportedOperationException(
                             "Cannot set non-organized task as adjacent flag root: " + wc);
-                } else if (task.mAdjacentTask == null) {
+                } else if (task.getAdjacentTaskFragment() == null) {
                     throw new UnsupportedOperationException(
                             "Cannot set non-adjacent task as adjacent flag root: " + wc);
                 }
@@ -710,7 +710,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             throw new IllegalArgumentException("setAdjacentRootsHierarchyOp: Not created by"
                     + " organizer root1=" + root1 + " root2=" + root2);
         }
-        root1.setAdjacentTask(root2);
+        root1.setAdjacentTaskFragment(root2);
         return TRANSACT_EFFECTS_LIFECYCLE;
     }
 
