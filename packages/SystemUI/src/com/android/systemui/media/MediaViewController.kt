@@ -185,6 +185,11 @@ class MediaViewController @Inject constructor(
     var isGutsVisible = false
         private set
 
+    /**
+     * Whether the settings button in the guts should be visible
+     */
+    var shouldHideGutsSettings = false
+
     init {
         mediaHostStatesManager.addController(this)
         layoutController.sizeChangedListener = { width: Int, height: Int ->
@@ -276,6 +281,9 @@ class MediaViewController @Inject constructor(
                 viewState.widgetStates.get(id)?.alpha = if (isGutsVisible) 1f else 0f
                 viewState.widgetStates.get(id)?.gone = !isGutsVisible
             }
+        }
+        if (shouldHideGutsSettings) {
+            viewState.widgetStates.get(R.id.settings)?.gone = true
         }
     }
 

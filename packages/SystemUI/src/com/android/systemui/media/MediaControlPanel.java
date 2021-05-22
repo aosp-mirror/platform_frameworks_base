@@ -35,6 +35,7 @@ import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 import android.os.Bundle;
+import android.text.Layout;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
@@ -220,7 +221,7 @@ public class MediaControlPanel {
 
         mPlayerViewHolder.getPlayer().setOnLongClickListener(v -> {
             if (!mMediaViewController.isGutsVisible()) {
-                mMediaViewController.openGuts();
+                openGuts();
                 return true;
             } else {
                 closeGuts();
@@ -244,7 +245,7 @@ public class MediaControlPanel {
 
         mRecommendationViewHolder.getRecommendations().setOnLongClickListener(v -> {
             if (!mMediaViewController.isGutsVisible()) {
-                mMediaViewController.openGuts();
+                openGuts();
                 return true;
             } else {
                 return false;
@@ -433,7 +434,7 @@ public class MediaControlPanel {
 
         // Guts label
         boolean isDismissible = data.isClearable();
-        mPlayerViewHolder.getSettingsText().setText(isDismissible
+        mPlayerViewHolder.getLongPressText().setText(isDismissible
                 ? R.string.controls_media_close_session
                 : R.string.controls_media_active_session);
 
@@ -592,11 +593,42 @@ public class MediaControlPanel {
      * @param immediate {@code true} if it should be closed without animation
      */
     public void closeGuts(boolean immediate) {
+        if (mPlayerViewHolder != null) {
+            mPlayerViewHolder.marquee(false, mMediaViewController.GUTS_ANIMATION_DURATION);
+        } else if (mRecommendationViewHolder != null) {
+            mRecommendationViewHolder.marquee(false, mMediaViewController.GUTS_ANIMATION_DURATION);
+        }
         mMediaViewController.closeGuts(immediate);
     }
 
     private void closeGuts() {
         closeGuts(false);
+    }
+
+    private void openGuts() {
+        ConstraintSet expandedSet = mMediaViewController.getExpandedLayout();
+        ConstraintSet collapsedSet = mMediaViewController.getCollapsedLayout();
+
+        boolean wasTruncated = false;
+        Layout l = null;
+        if (mPlayerViewHolder != null) {
+            mPlayerViewHolder.marquee(true, mMediaViewController.GUTS_ANIMATION_DURATION);
+            l = mPlayerViewHolder.getSettingsText().getLayout();
+        } else if (mRecommendationViewHolder != null) {
+            mRecommendationViewHolder.marquee(true, mMediaViewController.GUTS_ANIMATION_DURATION);
+            l = mRecommendationViewHolder.getSettingsText().getLayout();
+        }
+        if (l != null) {
+            wasTruncated = l.getEllipsisCount(0) > 0;
+        }
+        mMediaViewController.setShouldHideGutsSettings(wasTruncated);
+        if (wasTruncated) {
+            // not enough room for the settings button to show fully, let's hide it
+            expandedSet.constrainMaxWidth(R.id.settings, 0);
+            collapsedSet.constrainMaxWidth(R.id.settings, 0);
+        }
+
+        mMediaViewController.openGuts();
     }
 
     @UiThread
