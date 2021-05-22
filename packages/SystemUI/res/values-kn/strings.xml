@@ -291,8 +291,6 @@
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"ಮೊಬೈಲ್ ಹಾಟ್‌ಸ್ಪಾಟ್ ಆಫ್ ಮಾಡಲಾಗಿದೆ."</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"ಮೊಬೈಲ್ ಹಾಟ್‌ಸ್ಪಾಟ್ ಆನ್ ಮಾಡಲಾಗಿದೆ."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"ಸ್ಕ್ರೀನ್ ಪ್ರಸಾರವನ್ನು ನಿಲ್ಲಿಸಲಾಗಿದೆ."</string>
-    <string name="accessibility_quick_settings_work_mode_off" msgid="9106217884005620744">"ಕೆಲಸದ ಮೋಡ್ ವಿರಾಮಗೊಳಿಸಲಾಗಿದೆ."</string>
-    <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"ಕೆಲಸದ ಮೋಡ್ ಆನ್ ಆಗಿದೆ."</string>
     <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6422896967647049692">"ಕೆಲಸದ ಮೋಡ್ ವಿರಾಮಗೊಳಿಸಲಾಗಿದೆ."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"ಕೆಲಸದ ಮೋಡ್ ಆನ್ ಮಾಡಲಾಗಿದೆ."</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"ಡೇಟಾ ಸೇವರ್ ಆಫ್ ಮಾಡಲಾಗಿದೆ."</string>
@@ -411,8 +409,8 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="6798849610647988987">"<xliff:g id="DATA_USED">%s</xliff:g> ಬಳಸಲಾಗಿದೆ"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"<xliff:g id="DATA_LIMIT">%s</xliff:g> ಮಿತಿ"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"<xliff:g id="DATA_LIMIT">%s</xliff:g> ಎಚ್ಚರಿಕೆ"</string>
-    <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"ಕೆಲಸದ ಪ್ರೊಫೈಲ್"</string>
-    <string name="quick_settings_work_mode_paused" msgid="4841109346916998613">"ವಿರಾಮಗೊಳಿಸಲಾಗಿದೆ"</string>
+    <!-- no translation found for quick_settings_work_mode_label (6440531507319809121) -->
+    <skip />
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"ನೈಟ್ ಲೈಟ್"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"ಸೂರ್ಯಾಸ್ತದಲ್ಲಿ"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"ಸೂರ್ಯೋದಯದವರೆಗೆ"</string>
@@ -1044,10 +1042,8 @@
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"ಅಂಚಿಗೆ ಸರಿಸಿ ಮತ್ತು ಮರೆಮಾಡಿ"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"ಅಂಚನ್ನು ಸರಿಸಿ ಮತ್ತು ತೋರಿಸಿ"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"ಟಾಗಲ್ ಮಾಡಿ"</string>
-    <string name="quick_controls_title" msgid="6839108006171302273">"ಸಾಧನ ನಿಯಂತ್ರಣಗಳು"</string>
-    <string name="quick_controls_subtitle" msgid="1667408093326318053">"ನಿಮ್ಮ ಕನೆಕ್ಟ್ ಆಗಿರುವ ಸಾಧನಗಳಿಗೆ ನಿಯಂತ್ರಣಗಳನ್ನು ಸೇರಿಸಿ"</string>
-    <string name="quick_controls_setup_title" msgid="8901436655997849822">"ಸಾಧನ ನಿಯಂತ್ರಣಗಳನ್ನು ಸೆಟಪ್ ಮಾಡಿ"</string>
-    <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"ನಿಮ್ಮ ನಿಯಂತ್ರಣಗಳನ್ನು ಪ್ರವೇಶಿಸಲು ಪವರ್ ಬಟನ್ ಅನ್ನು ಒತ್ತಿ ಹಿಡಿದುಕೊಳ್ಳಿ"</string>
+    <!-- no translation found for quick_controls_title (7095074621086860062) -->
+    <skip />
     <string name="controls_providers_title" msgid="6879775889857085056">"ನಿಯಂತ್ರಣಗಳನ್ನು ಸೇರಿಸಲು ಆ್ಯಪ್ ಅನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g> ನಿಯಂತ್ರಣಗಳನ್ನು ಸೇರಿಸಲಾಗಿದೆ.</item>
@@ -1061,7 +1057,8 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"ಮೆಚ್ಚಿನದಲ್ಲದ್ದು"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"ಸ್ಥಾನ <xliff:g id="NUMBER">%d</xliff:g> ಕ್ಕೆ ಸರಿಸಿ"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"ನಿಯಂತ್ರಣಗಳು"</string>
-    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"ಪವರ್ ಮೆನುವಿನಿಂದ ಪ್ರವೇಶಿಸಲು ನಿಯಂತ್ರಣಗಳನ್ನು ಆರಿಸಿ"</string>
+    <!-- no translation found for controls_favorite_subtitle (6481675111056961083) -->
+    <skip />
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"ನಿಯಂತ್ರಣಗಳನ್ನು ಮರುಹೊಂದಿಸಲು ಹೋಲ್ಡ್ ಮಾಡಿ ಮತ್ತು ಡ್ರ್ಯಾಗ್‌ ಮಾಡಿ"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"ಎಲ್ಲಾ ನಿಯಂತ್ರಣಗಳನ್ನು ತೆಗೆದುಹಾಕಲಾಗಿದೆ"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"ಬದಲಾವಣೆಗಳನ್ನು ಉಳಿಸಲಾಗಿಲ್ಲ"</string>
@@ -1100,7 +1097,8 @@
     <string name="controls_error_generic" msgid="352500456918362905">"ಸ್ಥಿತಿ ಲೋಡ್ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"ದೋಷ, ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"ಪ್ರಗತಿಯಲ್ಲಿದೆ"</string>
-    <string name="controls_added_tooltip" msgid="4842812921719153085">"ಹೊಸ ನಿಯಂತ್ರಣಗಳನ್ನು ನೋಡಲು ಪವರ್ ಬಟನ್ ಹಿಡಿದುಕೊಳ್ಳಿ"</string>
+    <!-- no translation found for controls_added_tooltip (5866098408470111984) -->
+    <skip />
     <string name="controls_menu_add" msgid="4447246119229920050">"ನಿಯಂತ್ರಣಗಳನ್ನು ಸೇರಿಸಿ"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"ನಿಯಂತ್ರಣಗಳನ್ನು ಎಡಿಟ್ ಮಾಡಿ"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"ಔಟ್‌ಪುಟ್‌ಗಳನ್ನು ಸೇರಿಸಿ"</string>
@@ -1119,9 +1117,16 @@
     <string name="priority_conversations" msgid="3967482288896653039">"ಆದ್ಯತೆಯ ಸಂಭಾಷಣೆಗಳು"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"ಇತ್ತೀಚಿನ ಸಂಭಾಷಣೆಗಳು"</string>
     <string name="okay" msgid="6490552955618608554">"ಸರಿ"</string>
-    <string name="timestamp" msgid="6577851592534538533">"<xliff:g id="DURATION">%1$s</xliff:g> ಸಮಯದ ಹಿಂದೆ"</string>
-    <string name="less_than_timestamp" msgid="6598972791137724517">"<xliff:g id="DURATION">%1$s</xliff:g> ಗಿಂತ ಕಡಿಮೆ ಅವಧಿಯ ಹಿಂದೆ"</string>
-    <string name="over_timestamp" msgid="4765793502859358634">"<xliff:g id="DURATION">%1$s</xliff:g> ಗಿಂತ ಹೆಚ್ಚಿನ ಅವಧಿಯ ಹಿಂದೆ"</string>
+    <!-- no translation found for days_timestamp (5821854736213214331) -->
+    <skip />
+    <!-- no translation found for one_week_timestamp (4925600765473875590) -->
+    <skip />
+    <!-- no translation found for two_weeks_timestamp (9111801081871962155) -->
+    <skip />
+    <!-- no translation found for over_one_week_timestamp (3770560704420807142) -->
+    <skip />
+    <!-- no translation found for over_two_weeks_timestamp (6300507859007874050) -->
+    <skip />
     <string name="birthday_status" msgid="2596961629465396761">"ಜನ್ಮದಿನ"</string>
     <string name="birthday_status_content_description" msgid="682836371128282925">"<xliff:g id="NAME">%1$s</xliff:g> ಅವರ ಜನ್ಮದಿನ"</string>
     <string name="upcoming_birthday_status" msgid="2005452239256870351">"ಶೀಘ್ರದಲ್ಲಿ ಜನ್ಮದಿನವಿದೆ"</string>

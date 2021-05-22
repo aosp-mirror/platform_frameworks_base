@@ -290,8 +290,6 @@
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"Zona móvil desactivada"</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"Zona móvil activada"</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"Transmisión de pantalla detenida"</string>
-    <string name="accessibility_quick_settings_work_mode_off" msgid="9106217884005620744">"Modo de trabajo pausado."</string>
-    <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"Modo de trabajo activado"</string>
     <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6422896967647049692">"Se pausó el modo de trabajo."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"Se activó el modo de trabajo."</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"Se desactivó el Ahorro de datos."</string>
@@ -410,8 +408,7 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="6798849610647988987">"Utilizados: <xliff:g id="DATA_USED">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"Límite de <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"Advertencia de <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
-    <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"Perfil de trabajo"</string>
-    <string name="quick_settings_work_mode_paused" msgid="4841109346916998613">"Pausado"</string>
+    <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"Apps de trabajo"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Luz nocturna"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Al atardecer"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Hasta el amanecer"</string>
@@ -481,9 +478,9 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Mostrar perfil"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Agregar usuario"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Usuario nuevo"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"¿Eliminar invitado?"</string>
+    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"¿Quitar invitado?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Se eliminarán las aplicaciones y los datos de esta sesión."</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Eliminar"</string>
+    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Quitar"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"¡Hola de nuevo, invitado!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"¿Quieres retomar la sesión?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Volver a empezar"</string>
@@ -1043,10 +1040,7 @@
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Mover fuera de borde y ocultar"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Mover fuera de borde y mostrar"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"activar o desactivar"</string>
-    <string name="quick_controls_title" msgid="6839108006171302273">"Controles de dispositivos"</string>
-    <string name="quick_controls_subtitle" msgid="1667408093326318053">"Agrega controles para los dispositivos conectados"</string>
-    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Configurar controles de dispositivos"</string>
-    <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Mantén presionado el botón de encendido para acceder a los controles"</string>
+    <string name="quick_controls_title" msgid="7095074621086860062">"Controles de la casa"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Elige la app para agregar los controles"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="other">Se agregaron <xliff:g id="NUMBER_1">%s</xliff:g> controles.</item>
@@ -1060,7 +1054,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"quitar de favoritos"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Mover a la posición <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Controles"</string>
-    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Elige los controles a los que quieres acceder desde el menú de encendido"</string>
+    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Elige a qué controles accederás desde la Configuración rápida"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Mantén presionado y arrastra un control para reubicarlo"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Se quitaron todos los controles"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"No se guardaron los cambios"</string>
@@ -1099,7 +1093,7 @@
     <string name="controls_error_generic" msgid="352500456918362905">"No se pudo cargar el estado"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Error. Vuelve a intentarlo."</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"En curso"</string>
-    <string name="controls_added_tooltip" msgid="4842812921719153085">"Mantén presionado el botón de encendido para ver los nuevos controles"</string>
+    <string name="controls_added_tooltip" msgid="5866098408470111984">"Abre la Configuración rápida para ver los controles nuevos"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Agregar controles"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Editar controles"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Agregar salidas"</string>
@@ -1118,9 +1112,16 @@
     <string name="priority_conversations" msgid="3967482288896653039">"Conversaciones prioritarias"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Conversaciones recientes"</string>
     <string name="okay" msgid="6490552955618608554">"Aceptar"</string>
-    <string name="timestamp" msgid="6577851592534538533">"Hace <xliff:g id="DURATION">%1$s</xliff:g>"</string>
-    <string name="less_than_timestamp" msgid="6598972791137724517">"Hace menos de <xliff:g id="DURATION">%1$s</xliff:g>"</string>
-    <string name="over_timestamp" msgid="4765793502859358634">"Hace más de <xliff:g id="DURATION">%1$s</xliff:g>"</string>
+    <!-- no translation found for days_timestamp (5821854736213214331) -->
+    <skip />
+    <!-- no translation found for one_week_timestamp (4925600765473875590) -->
+    <skip />
+    <!-- no translation found for two_weeks_timestamp (9111801081871962155) -->
+    <skip />
+    <!-- no translation found for over_one_week_timestamp (3770560704420807142) -->
+    <skip />
+    <!-- no translation found for over_two_weeks_timestamp (6300507859007874050) -->
+    <skip />
     <string name="birthday_status" msgid="2596961629465396761">"Cumpleaños"</string>
     <string name="birthday_status_content_description" msgid="682836371128282925">"Es el cumpleaños de <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="upcoming_birthday_status" msgid="2005452239256870351">"Cumpleaños pronto"</string>

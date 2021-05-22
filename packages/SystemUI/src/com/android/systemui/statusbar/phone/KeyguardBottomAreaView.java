@@ -194,7 +194,6 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private ActivityIntentHelper mActivityIntentHelper;
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private ContentObserver mWalletPreferenceObserver;
-    private ContentObserver mDefaultPaymentAppObserver;
     private SecureSettings mSecureSettings;
 
     public KeyguardBottomAreaView(Context context) {
@@ -335,9 +334,6 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
 
         if (mWalletPreferenceObserver != null) {
             mSecureSettings.unregisterContentObserver(mWalletPreferenceObserver);
-        }
-        if (mDefaultPaymentAppObserver != null) {
-            mSecureSettings.unregisterContentObserver(mDefaultPaymentAppObserver);
         }
     }
 
@@ -939,8 +935,9 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     /**
      * Initialize the wallet feature, only enabling if the feature is enabled within the platform.
      */
-    public void initWallet(Executor uiExecutor, SecureSettings secureSettings) {
-        mQuickAccessWalletClient = QuickAccessWalletClient.create(mContext);
+    public void initWallet(QuickAccessWalletClient client, Executor uiExecutor,
+            SecureSettings secureSettings) {
+        mQuickAccessWalletClient = client;
         mSecureSettings = secureSettings;
         setupWalletPreferenceObserver();
         updateWalletPreference();
@@ -956,9 +953,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
             mWalletPreferenceObserver = new ContentObserver(null /* handler */) {
                 @Override
                 public void onChange(boolean selfChange) {
-                    mUiExecutor.execute(() -> {
-                        updateWalletPreference();
-                    });
+                    mUiExecutor.execute(() -> updateWalletPreference());
                 }
             };
 
@@ -967,30 +962,10 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
                     false /* notifyForDescendants */,
                     mWalletPreferenceObserver);
         }
-
-        if (mDefaultPaymentAppObserver == null) {
-            mDefaultPaymentAppObserver = new ContentObserver(null /* handler */) {
-                @Override
-                public void onChange(boolean selfChange) {
-                    mUiExecutor.execute(() -> {
-                        mQuickAccessWalletClient = QuickAccessWalletClient.create(mContext);
-                        updateWalletPreference();
-                        queryWalletCards();
-                        updateWalletVisibility();
-                    });
-                }
-            };
-
-            mSecureSettings.registerContentObserver(
-                    Settings.Secure.getUriFor(Settings.Secure.NFC_PAYMENT_DEFAULT_COMPONENT),
-                    false /* notifyForDescendants */,
-                    mDefaultPaymentAppObserver);
-        }
     }
 
     private void updateWalletPreference() {
-        mWalletEnabled = mQuickAccessWalletClient.isWalletServiceAvailable()
-                && mQuickAccessWalletClient.isWalletFeatureAvailable()
+        mWalletEnabled = mQuickAccessWalletClient.isWalletFeatureAvailable()
                 && mQuickAccessWalletClient.isWalletFeatureAvailableWhenDeviceLocked();
     }
 

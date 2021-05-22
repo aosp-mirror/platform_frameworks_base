@@ -347,6 +347,15 @@ void RenderThread::setGrContext(sk_sp<GrDirectContext> context) {
     }
 }
 
+sk_sp<GrDirectContext> RenderThread::requireGrContext() {
+    if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaGL) {
+        requireGlContext();
+    } else {
+        requireVkContext();
+    }
+    return mGrContext;
+}
+
 int RenderThread::choreographerCallback(int fd, int events, void* data) {
     if (events & (Looper::EVENT_ERROR | Looper::EVENT_HANGUP)) {
         ALOGE("Display event receiver pipe was closed or an error occurred.  "

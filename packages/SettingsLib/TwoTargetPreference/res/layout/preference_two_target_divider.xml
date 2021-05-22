@@ -26,6 +26,6 @@
     android:paddingBottom="16dp">
     <View
         android:layout_width="1dp"
-        android:layout_height="match_parent"
+        android:layout_height="32dp"
         android:background="?android:attr/listDivider" />
 </LinearLayout>

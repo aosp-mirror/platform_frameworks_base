@@ -290,8 +290,6 @@
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"Hotspot mobile disattivato."</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"Hotspot mobile attivato."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"Trasmissione dello schermo interrotta."</string>
-    <string name="accessibility_quick_settings_work_mode_off" msgid="9106217884005620744">"Modalità Lavoro in pausa."</string>
-    <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"Modalità Lavoro attiva."</string>
     <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6422896967647049692">"Modalità Lavoro messa in pausa."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"Modalità Lavoro attivata."</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"Funzione Risparmio dati disattivata."</string>
@@ -410,8 +408,7 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="6798849610647988987">"<xliff:g id="DATA_USED">%s</xliff:g> utilizzati"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"Limite di <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"Avviso <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
-    <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"Profilo di lavoro"</string>
-    <string name="quick_settings_work_mode_paused" msgid="4841109346916998613">"In pausa"</string>
+    <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"App di lavoro"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Luminosità notturna"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Attivata al tramonto"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Fino all\'alba"</string>
@@ -1043,10 +1040,7 @@
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Sposta fino a bordo e nascondi"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Sposta fuori da bordo e mostra"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"attiva/disattiva"</string>
-    <string name="quick_controls_title" msgid="6839108006171302273">"Controllo dei dispositivi"</string>
-    <string name="quick_controls_subtitle" msgid="1667408093326318053">"Aggiungi controlli per i dispositivi connessi"</string>
-    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Configura il controllo dei dispositivi"</string>
-    <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Tieni premuto il tasto di accensione per accedere ai controlli"</string>
+    <string name="quick_controls_title" msgid="7095074621086860062">"Controlli della casa"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Scegli un\'app per aggiungere controlli"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> controlli aggiunti.</item>
@@ -1060,7 +1054,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"rimuovere l\'elemento dai preferiti"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Sposta nella posizione <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Controlli"</string>
-    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Seleziona i controlli a cui accedere dal menu del tasto di accensione"</string>
+    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Scegli i controlli a cui accedere dalle Impostazioni rapide"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Tieni premuto e trascina per riordinare i controlli"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Tutti i controlli sono stati rimossi"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Modifiche non salvate"</string>
@@ -1099,7 +1093,7 @@
     <string name="controls_error_generic" msgid="352500456918362905">"Impossibile caricare lo stato"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Errore, riprova"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"In corso"</string>
-    <string name="controls_added_tooltip" msgid="4842812921719153085">"Tieni premuto il tasto di accensione per visualizzare i nuovi controlli"</string>
+    <string name="controls_added_tooltip" msgid="5866098408470111984">"Apri le Impostazioni rapide per vedere nuovi controlli"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Aggiungi controlli"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Modifica controlli"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Aggiungi uscite"</string>
@@ -1118,9 +1112,16 @@
     <string name="priority_conversations" msgid="3967482288896653039">"Conversazioni prioritarie"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Conversazioni recenti"</string>
     <string name="okay" msgid="6490552955618608554">"OK"</string>
-    <string name="timestamp" msgid="6577851592534538533">"<xliff:g id="DURATION">%1$s</xliff:g> fa"</string>
-    <string name="less_than_timestamp" msgid="6598972791137724517">"Meno di <xliff:g id="DURATION">%1$s</xliff:g> fa"</string>
-    <string name="over_timestamp" msgid="4765793502859358634">"Più di <xliff:g id="DURATION">%1$s</xliff:g> fa"</string>
+    <!-- no translation found for days_timestamp (5821854736213214331) -->
+    <skip />
+    <!-- no translation found for one_week_timestamp (4925600765473875590) -->
+    <skip />
+    <!-- no translation found for two_weeks_timestamp (9111801081871962155) -->
+    <skip />
+    <!-- no translation found for over_one_week_timestamp (3770560704420807142) -->
+    <skip />
+    <!-- no translation found for over_two_weeks_timestamp (6300507859007874050) -->
+    <skip />
     <string name="birthday_status" msgid="2596961629465396761">"Compleanno"</string>
     <string name="birthday_status_content_description" msgid="682836371128282925">"È il compleanno di <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="upcoming_birthday_status" msgid="2005452239256870351">"Compleanno imminente"</string>

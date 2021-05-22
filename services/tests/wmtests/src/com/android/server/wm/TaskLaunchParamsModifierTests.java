@@ -20,6 +20,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
@@ -914,6 +915,25 @@ public class TaskLaunchParamsModifierTests extends WindowTestsBase {
 
         final ActivityOptions options = ActivityOptions.makeBasic();
         options.setLaunchWindowingMode(WINDOWING_MODE_PINNED);
+
+        final Rect expected = new Rect(0, 0, 100, 100);
+        options.setLaunchBounds(expected);
+
+        mCurrent.mPreferredTaskDisplayArea = freeformDisplay.getDefaultTaskDisplayArea();
+
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setOptions(options).calculate());
+
+        assertEquals(expected, mResult.mBounds);
+    }
+
+    @Test
+    public void testKeepsBoundsForMultiWindowModeInOptions() {
+        final TestDisplayContent freeformDisplay = createNewDisplayContent(
+                WINDOWING_MODE_FULLSCREEN);
+
+        final ActivityOptions options = ActivityOptions.makeBasic();
+        options.setLaunchWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
 
         final Rect expected = new Rect(0, 0, 100, 100);
         options.setLaunchBounds(expected);

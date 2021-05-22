@@ -136,8 +136,7 @@
     <string name="accessibility_camera_button" msgid="2938898391716647247">"Cameră foto"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"Telefon"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Asistent vocal"</string>
-    <!-- no translation found for accessibility_wallet_button (1458258783460555507) -->
-    <skip />
+    <string name="accessibility_wallet_button" msgid="1458258783460555507">"Wallet"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"Deblocați"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Dispozitiv blocat"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="5209142744692162598">"Se așteaptă amprenta"</string>
@@ -291,8 +290,6 @@
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"Hotspotul mobil este dezactivat."</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"Hotspotul mobil este activat."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"Transmiterea ecranului a fost oprită."</string>
-    <string name="accessibility_quick_settings_work_mode_off" msgid="9106217884005620744">"Modul de lucru s-a întrerupt."</string>
-    <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"Modul de lucru este activat."</string>
     <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6422896967647049692">"Modul de lucru a fost întrerupt."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"Modul de lucru a fost activat."</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"Economizorul de date a fost dezactivat."</string>
@@ -413,8 +410,7 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="6798849610647988987">"<xliff:g id="DATA_USED">%s</xliff:g> utilizați"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"Limită de <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"Avertizare: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
-    <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"Profil de serviciu"</string>
-    <string name="quick_settings_work_mode_paused" msgid="4841109346916998613">"Întrerupt"</string>
+    <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"Aplicații pentru lucru"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Lumină de noapte"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Activată la apus"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Până la răsărit"</string>
@@ -1049,10 +1045,7 @@
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Mutați în afară și ascundeți"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Mutați în afară și afișați"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"Activați / dezactivați"</string>
-    <string name="quick_controls_title" msgid="6839108006171302273">"Comenzile dispozitivelor"</string>
-    <string name="quick_controls_subtitle" msgid="1667408093326318053">"Adăugați comenzi pentru dispozitivele conectate"</string>
-    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Configurați comenzile dispozitivelor"</string>
-    <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Apăsați butonul de pornire pentru a accesa comenzile"</string>
+    <string name="quick_controls_title" msgid="7095074621086860062">"Controalele locuinței"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Alegeți aplicația pentru a adăuga comenzi"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="few">S-au adăugat <xliff:g id="NUMBER_1">%s</xliff:g> comenzi.</item>
@@ -1067,7 +1060,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"anulați marcarea ca preferată"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Mutați pe poziția <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Comenzi"</string>
-    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Alegeți comenzile de accesat din meniul de alimentare"</string>
+    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Alegeți comenzile de accesat din Setările rapide"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Țineți apăsat și trageți pentru a rearanja comenzile"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Au fost șterse toate comenzile"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Modificările nu au fost salvate"</string>
@@ -1106,7 +1099,7 @@
     <string name="controls_error_generic" msgid="352500456918362905">"Starea nu se poate încărca"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Eroare, încercați din nou"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"În curs"</string>
-    <string name="controls_added_tooltip" msgid="4842812921719153085">"Apăsați butonul de alimentare pentru a vedea noile comenzi"</string>
+    <string name="controls_added_tooltip" msgid="5866098408470111984">"Deschideți Setări rapide pentru a vedea comenzile noi"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Adăugați comenzi"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Editați comenzile"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Adăugați ieșiri"</string>
@@ -1125,9 +1118,16 @@
     <string name="priority_conversations" msgid="3967482288896653039">"Conversații cu prioritate"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Conversații recente"</string>
     <string name="okay" msgid="6490552955618608554">"OK"</string>
-    <string name="timestamp" msgid="6577851592534538533">"Acum <xliff:g id="DURATION">%1$s</xliff:g>"</string>
-    <string name="less_than_timestamp" msgid="6598972791137724517">"În urmă cu mai puțin de <xliff:g id="DURATION">%1$s</xliff:g>"</string>
-    <string name="over_timestamp" msgid="4765793502859358634">"În urmă cu peste <xliff:g id="DURATION">%1$s</xliff:g>"</string>
+    <!-- no translation found for days_timestamp (5821854736213214331) -->
+    <skip />
+    <!-- no translation found for one_week_timestamp (4925600765473875590) -->
+    <skip />
+    <!-- no translation found for two_weeks_timestamp (9111801081871962155) -->
+    <skip />
+    <!-- no translation found for over_one_week_timestamp (3770560704420807142) -->
+    <skip />
+    <!-- no translation found for over_two_weeks_timestamp (6300507859007874050) -->
+    <skip />
     <string name="birthday_status" msgid="2596961629465396761">"Ziua de naștere"</string>
     <string name="birthday_status_content_description" msgid="682836371128282925">"<xliff:g id="NAME">%1$s</xliff:g> își serbează astăzi ziua de naștere"</string>
     <string name="upcoming_birthday_status" msgid="2005452239256870351">"Zi de naștere în curând"</string>
@@ -1158,8 +1158,6 @@
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"Autentificați-vă"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"Accesați dispozitivul"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Folosiți amprenta ca să deschideți"</string>
-    <!-- no translation found for accessibility_fingerprint_bouncer (7189102492498735519) -->
-    <skip />
-    <!-- no translation found for ongoing_phone_call_content_description (5332334388483099947) -->
-    <skip />
+    <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Autentificare obligatorie. Atingeți senzorul de amprentă pentru a vă autentifica."</string>
+    <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Apel telefonic în desfășurare"</string>
 </resources>
