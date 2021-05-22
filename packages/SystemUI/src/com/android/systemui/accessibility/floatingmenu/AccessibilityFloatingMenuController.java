@@ -71,6 +71,19 @@ public class AccessibilityFloatingMenuController implements
                 handleFloatingMenuVisibility(mIsKeyguardVisible, mBtnMode, mBtnTargets);
             }
         }
+
+        @Override
+        public void onUserSwitching(int userId) {
+            destroyFloatingMenu();
+        }
+
+        @Override
+        public void onUserSwitchComplete(int userId) {
+            mBtnMode = mAccessibilityButtonModeObserver.getCurrentAccessibilityButtonMode();
+            mBtnTargets =
+                    mAccessibilityButtonTargetsObserver.getCurrentAccessibilityButtonTargets();
+            handleFloatingMenuVisibility(mIsKeyguardVisible, mBtnMode, mBtnTargets);
+        }
     };
 
     @Inject
