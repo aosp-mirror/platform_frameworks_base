@@ -29,8 +29,8 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.net.VpnProfile;
-import com.android.net.module.util.ProxyUtils;
 import com.android.internal.org.bouncycastle.x509.X509V1CertificateGenerator;
+import com.android.net.module.util.ProxyUtils;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -170,7 +170,10 @@ public class Ikev2VpnProfileTest {
         final Ikev2VpnProfile.Builder builder = getBuilderWithDefaultOptions();
         builder.setAuthPsk(PSK_BYTES);
 
-        List<String> allowedAlgorithms = Arrays.asList(IpSecAlgorithm.AUTH_CRYPT_AES_GCM);
+        List<String> allowedAlgorithms =
+                Arrays.asList(
+                        IpSecAlgorithm.AUTH_CRYPT_AES_GCM,
+                        IpSecAlgorithm.AUTH_CRYPT_CHACHA20_POLY1305);
         builder.setAllowedAlgorithms(allowedAlgorithms);
 
         final Ikev2VpnProfile profile = builder.build();
@@ -183,7 +186,12 @@ public class Ikev2VpnProfileTest {
         builder.setAuthPsk(PSK_BYTES);
 
         List<String> allowedAlgorithms =
-                Arrays.asList(IpSecAlgorithm.AUTH_HMAC_SHA512, IpSecAlgorithm.CRYPT_AES_CBC);
+                Arrays.asList(
+                        IpSecAlgorithm.AUTH_HMAC_SHA512,
+                        IpSecAlgorithm.AUTH_AES_XCBC,
+                        IpSecAlgorithm.AUTH_AES_CMAC,
+                        IpSecAlgorithm.CRYPT_AES_CBC,
+                        IpSecAlgorithm.CRYPT_AES_CTR);
         builder.setAllowedAlgorithms(allowedAlgorithms);
 
         final Ikev2VpnProfile profile = builder.build();

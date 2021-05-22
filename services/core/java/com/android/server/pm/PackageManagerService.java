@@ -16430,23 +16430,93 @@ public class PackageManagerService extends IPackageManager.Stub
     private void processInstallRequestsAsync(boolean success,
             List<InstallRequest> installRequests) {
         mHandler.post(() -> {
+            List<InstallRequest> apexInstallRequests = new ArrayList<>();
+            List<InstallRequest> apkInstallRequests = new ArrayList<>();
+            for (InstallRequest request : installRequests) {
+                if ((request.args.installFlags & PackageManager.INSTALL_APEX) != 0) {
+                    apexInstallRequests.add(request);
+                } else {
+                    apkInstallRequests.add(request);
+                }
+            }
+            // Note: supporting multi package install of both APEXes and APKs might requir some
+            // thinking to ensure atomicity of the install.
+            if (!apexInstallRequests.isEmpty() && !apkInstallRequests.isEmpty()) {
+                // This should've been caught at the validation step, but for some reason wasn't.
+                throw new IllegalStateException(
+                        "Attempted to do a multi package install of both APEXes and APKs");
+            }
+            if (!apexInstallRequests.isEmpty()) {
+                if (success) {
+                    // Since installApexPackages requires talking to external service (apexd), we
+                    // schedule to run it async. Once it finishes, it will resume the install.
+                    Thread t = new Thread(() -> installApexPackagesTraced(apexInstallRequests),
+                            "installApexPackages");
+                    t.start();
+                } else {
+                    // Non-staged APEX installation failed somewhere before
+                    // processInstallRequestAsync. In that case just notify the observer about the
+                    // failure.
+                    InstallRequest request = apexInstallRequests.get(0);
+                    notifyInstallObserver(request.installResult, request.args.observer);
+                }
+                return;
+            }
             if (success) {
-                for (InstallRequest request : installRequests) {
+                for (InstallRequest request : apkInstallRequests) {
                     request.args.doPreInstall(request.installResult.returnCode);
                 }
                 synchronized (mInstallLock) {
-                    installPackagesTracedLI(installRequests);
+                    installPackagesTracedLI(apkInstallRequests);
                 }
-                for (InstallRequest request : installRequests) {
+                for (InstallRequest request : apkInstallRequests) {
                     request.args.doPostInstall(
                             request.installResult.returnCode, request.installResult.uid);
                 }
             }
-            for (InstallRequest request : installRequests) {
+            for (InstallRequest request : apkInstallRequests) {
                 restoreAndPostInstall(request.args.user.getIdentifier(), request.installResult,
                         new PostInstallData(request.args, request.installResult, null));
             }
         });
+    }
+
+    private void installApexPackagesTraced(List<InstallRequest> requests) {
+        try {
+            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "installApexPackages");
+            installApexPackages(requests);
+        } finally {
+            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+        }
+    }
+
+    private void installApexPackages(List<InstallRequest> requests) {
+        if (requests.isEmpty()) {
+            return;
+        }
+        if (requests.size() != 1) {
+            throw new IllegalStateException(
+                "Only a non-staged install of a single APEX is supported");
+        }
+        InstallRequest request = requests.get(0);
+        try {
+            // Should directory scanning logic be moved to ApexManager for better test coverage?
+            final File dir = request.args.origin.resolvedFile;
+            final String[] apexes = dir.list();
+            if (apexes == null) {
+                throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
+                        dir.getAbsolutePath() + " is not a directory");
+            }
+            if (apexes.length != 1) {
+                throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
+                        "Expected exactly one .apex file under " + dir.getAbsolutePath()
+                                + " got: " + apexes.length);
+            }
+            mApexManager.installPackage(dir.getAbsolutePath() + "/" + apexes[0]);
+        } catch (PackageManagerException e) {
+            request.installResult.setError("APEX installation failed", e);
+        }
+        notifyInstallObserver(request.installResult, request.args.observer);
     }
 
     private PackageInstalledInfo createPackageInstalledInfo(
@@ -17060,6 +17130,10 @@ public class PackageManagerService extends IPackageManager.Stub
          * on the install location.
          */
         public void handleStartCopy() {
+            if ((installFlags & PackageManager.INSTALL_APEX) != 0) {
+                mRet = INSTALL_SUCCEEDED;
+                return;
+            }
             PackageInfoLite pkgLite = PackageManagerServiceUtils.getMinimalPackageInfo(mContext,
                     mPackageLite, origin.resolvedPath, installFlags, packageAbiOverride);
 
@@ -26563,11 +26637,17 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
 
+        // TODO(188814480) should be able to remove the NPE check when snapshot
+        // "recursion" is fixed.
         @Override
         public boolean isEnabledAndMatches(ParsedMainComponent component, int flags, int userId) {
             synchronized (mLock) {
                 AndroidPackage pkg = getPackage(component.getPackageName());
-                return mSettings.isEnabledAndMatchLPr(pkg, component, flags, userId);
+                if (pkg == null) {
+                    return false;
+                } else {
+                    return mSettings.isEnabledAndMatchLPr(pkg, component, flags, userId);
+                }
             }
         }
 

@@ -5945,6 +5945,20 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    @Override
+    public void updateStaticPrivacyIndicatorBounds(int displayId,
+            Rect[] staticBounds) {
+        synchronized (mGlobalLock) {
+            final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
+            if (displayContent != null) {
+                displayContent.updatePrivacyIndicatorBounds(staticBounds);
+            } else {
+                Slog.w(TAG, "updateStaticPrivacyIndicatorBounds with invalid displayId="
+                        + displayId);
+            }
+        }
+    }
+
     public void setNavBarVirtualKeyHapticFeedbackEnabled(boolean enabled) {
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.STATUS_BAR)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -7837,7 +7851,10 @@ public class WindowManagerService extends IWindowManager.Stub
         @Override
         public boolean isTouchOrFaketouchDevice() {
             synchronized (mGlobalLock) {
-                // All touchable devices are also faketouchable.
+                if (mIsTouchDevice && !mIsFakeTouchDevice) {
+                    throw new IllegalStateException(
+                            "touchscreen supported device must report faketouch.");
+                }
                 return mIsFakeTouchDevice;
             }
         }

@@ -54,6 +54,7 @@ import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.UserManager;
 import android.os.VibrationEffect;
+import android.service.quickaccesswallet.QuickAccessWalletClient;
 import android.util.Log;
 import android.util.MathUtils;
 import android.view.DisplayCutout;
@@ -572,6 +573,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private int mScreenCornerRadius;
     private int mNotificationScrimPadding;
 
+    private final QuickAccessWalletClient mQuickAccessWalletClient;
     private final Executor mUiExecutor;
     private final SecureSettings mSecureSettings;
 
@@ -647,6 +649,7 @@ public class NotificationPanelViewController extends PanelViewController {
             AmbientState ambientState,
             LockIconViewController lockIconViewController,
             FeatureFlags featureFlags,
+            QuickAccessWalletClient quickAccessWalletClient,
             KeyguardMediaController keyguardMediaController,
             PrivacyDotViewController privacyDotViewController,
             @Main Executor uiExecutor,
@@ -700,6 +703,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mScrimController.setClipsQsScrim(!mShouldUseSplitNotificationShade);
         mUserManager = userManager;
         mMediaDataManager = mediaDataManager;
+        mQuickAccessWalletClient = quickAccessWalletClient;
         mUiExecutor = uiExecutor;
         mSecureSettings = secureSettings;
         pulseExpansionHandler.setPulseExpandAbortListener(() -> {
@@ -1081,8 +1085,7 @@ public class NotificationPanelViewController extends PanelViewController {
     }
 
     private void attachSplitShadeMediaPlayerContainer(FrameLayout container) {
-        mKeyguardMediaController.attachSplitShadeContainer(container,
-                () -> mShouldUseSplitNotificationShade);
+        mKeyguardMediaController.attachSplitShadeContainer(container);
     }
 
     private void initBottomArea() {
@@ -1094,7 +1097,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mKeyguardBottomArea.setFalsingManager(mFalsingManager);
 
         if (mFeatureFlags.isQuickAccessWalletEnabled()) {
-            mKeyguardBottomArea.initWallet(mUiExecutor, mSecureSettings);
+            mKeyguardBottomArea.initWallet(mQuickAccessWalletClient, mUiExecutor, mSecureSettings);
         }
     }
 

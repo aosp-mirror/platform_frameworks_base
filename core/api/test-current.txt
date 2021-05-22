@@ -176,42 +176,6 @@ package android.app {
     field public static final int INVALID_STACK_ID = -1; // 0xffffffff
   }
 
-  public class ActivityView extends android.view.ViewGroup {
-    ctor public ActivityView(android.content.Context);
-    ctor public ActivityView(android.content.Context, android.util.AttributeSet);
-    ctor public ActivityView(@NonNull android.content.Context, @NonNull android.util.AttributeSet, int, boolean);
-    method public int getVirtualDisplayId();
-    method public void onLayout(boolean, int, int, int, int);
-    method public void onLocationChanged();
-    method public void performBackPress();
-    method public void release();
-    method public void setCallback(android.app.ActivityView.StateCallback);
-    method public void setForwardedInsets(android.graphics.Insets);
-    method public void startActivity(@NonNull android.content.Intent);
-    method public void startActivity(@NonNull android.content.Intent, android.os.UserHandle);
-    method public void startActivity(@NonNull android.app.PendingIntent);
-    method public void startActivity(@NonNull android.app.PendingIntent, @Nullable android.content.Intent, @NonNull android.app.ActivityOptions);
-  }
-
-  public static final class ActivityView.Builder {
-    ctor public ActivityView.Builder(@NonNull android.content.Context);
-    method @NonNull public android.app.ActivityView build();
-    method @NonNull public android.app.ActivityView.Builder setAttributeSet(@Nullable android.util.AttributeSet);
-    method @NonNull public android.app.ActivityView.Builder setDefaultStyle(int);
-    method @NonNull public android.app.ActivityView.Builder setDisableSurfaceViewBackgroundLayer(boolean);
-    method @NonNull public android.app.ActivityView.Builder setUsePublicVirtualDisplay(boolean);
-    method @NonNull public android.app.ActivityView.Builder setUseTrustedDisplay(boolean);
-  }
-
-  public abstract static class ActivityView.StateCallback {
-    ctor public ActivityView.StateCallback();
-    method public abstract void onActivityViewDestroyed(android.app.ActivityView);
-    method public abstract void onActivityViewReady(android.app.ActivityView);
-    method public void onTaskCreated(int, android.content.ComponentName);
-    method public void onTaskMovedToFront(int);
-    method public void onTaskRemovalStarted(int);
-  }
-
   public class AlarmManager {
     method public boolean hasScheduleExactAlarm(@NonNull String, int);
   }
@@ -249,8 +213,6 @@ package android.app {
     field public static final String OPSTR_ACTIVITY_RECOGNITION = "android:activity_recognition";
     field public static final String OPSTR_ACTIVITY_RECOGNITION_SOURCE = "android:activity_recognition_source";
     field public static final String OPSTR_MANAGE_ONGOING_CALLS = "android:manage_ongoing_calls";
-    field public static final String OPSTR_PHONE_CALL_CAMERA = "android:phone_call_camera";
-    field public static final String OPSTR_PHONE_CALL_MICROPHONE = "android:phone_call_microphone";
     field public static final String OPSTR_USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER = "android:use_icc_auth_with_device_identifier";
     field public static final int OP_COARSE_LOCATION = 0; // 0x0
     field public static final int OP_RECORD_AUDIO = 27; // 0x1b

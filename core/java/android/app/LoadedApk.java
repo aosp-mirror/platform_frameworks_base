@@ -930,7 +930,7 @@ public final class LoadedApk {
         if (DEBUG) Slog.v(ActivityThread.TAG, "Class path: " + zip +
                     ", JNI path: " + librarySearchPath);
 
-        boolean needToSetupJitProfiles = false;
+        boolean registerAppInfoToArt = false;
         if (mDefaultClassLoader == null) {
             // Temporarily disable logging of disk reads on the Looper thread
             // as this is early and necessary.
@@ -957,7 +957,7 @@ public final class LoadedApk {
 
             setThreadPolicy(oldPolicy);
             // Setup the class loader paths for profiling.
-            needToSetupJitProfiles = true;
+            registerAppInfoToArt = true;
         }
 
         if (!libPaths.isEmpty()) {
@@ -974,7 +974,7 @@ public final class LoadedApk {
             final String add = TextUtils.join(File.pathSeparator, addedPaths);
             ApplicationLoaders.getDefault().addPath(mDefaultClassLoader, add);
             // Setup the new code paths for profiling.
-            needToSetupJitProfiles = true;
+            registerAppInfoToArt = true;
         }
 
         // Setup jit profile support.
@@ -988,8 +988,8 @@ public final class LoadedApk {
         // loads code from) so we explicitly disallow it there.
         //
         // It is not ok to call this in a zygote context where mActivityThread is null.
-        if (needToSetupJitProfiles && !ActivityThread.isSystem() && mActivityThread != null) {
-            setupJitProfileSupport();
+        if (registerAppInfoToArt && !ActivityThread.isSystem() && mActivityThread != null) {
+            registerAppInfoToArt();
         }
 
         // Call AppComponentFactory to select/create the main class loader of this app.
@@ -1046,12 +1046,8 @@ public final class LoadedApk {
         }
     }
 
-    private void setupJitProfileSupport() {
-        if (!SystemProperties.getBoolean("dalvik.vm.usejitprofiles", false)) {
-            return;
-        }
-
-        // If we use profiles, setup the dex reporter to notify package manager
+    private void registerAppInfoToArt() {
+        // Setup the dex reporter to notify package manager
         // of any relevant dex loads. The idle maintenance job will use the information
         // reported to optimize the loaded dex files.
         // Note that we only need one global reporter per app.
@@ -1084,9 +1080,19 @@ public final class LoadedApk {
 
         for (int i = codePaths.size() - 1; i >= 0; i--) {
             String splitName = i == 0 ? null : mApplicationInfo.splitNames[i - 1];
-            String profileFile = ArtManager.getCurrentProfilePath(
+            String curProfileFile = ArtManager.getCurrentProfilePath(
                     mPackageName, UserHandle.myUserId(), splitName);
-            VMRuntime.registerAppInfo(profileFile, new String[] {codePaths.get(i)});
+            String refProfileFile = ArtManager.getReferenceProfilePath(
+                    mPackageName, UserHandle.myUserId(), splitName);
+            int codePathType = codePaths.get(i).equals(mApplicationInfo.sourceDir)
+                    ? VMRuntime.CODE_PATH_TYPE_PRIMARY_APK
+                    : VMRuntime.CODE_PATH_TYPE_SPLIT_APK;
+            VMRuntime.registerAppInfo(
+                    mPackageName,
+                    curProfileFile,
+                    refProfileFile,
+                    new String[] {codePaths.get(i)},
+                    codePathType);
         }
 
         // Register the app data directory with the reporter. It will

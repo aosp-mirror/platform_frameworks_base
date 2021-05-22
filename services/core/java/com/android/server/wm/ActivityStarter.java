@@ -28,6 +28,7 @@ import static android.app.ActivityManager.START_RETURN_LOCK_TASK_MODE_VIOLATION;
 import static android.app.ActivityManager.START_SUCCESS;
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
@@ -1123,6 +1124,14 @@ class ActivityStarter {
 
             aInfo = mSupervisor.resolveActivity(intent, rInfo, startFlags, null /*profilerInfo*/);
         }
+        // TODO (b/187680964) Correcting the caller/pid/uid when start activity from shortcut
+        // Pending intent launched from systemui also depends on caller app
+        if (callerApp == null && realCallingPid > 0) {
+            final WindowProcessController wpc = mService.mProcessMap.getProcess(realCallingPid);
+            if (wpc != null) {
+                callerApp = wpc;
+            }
+        }
         final ActivityRecord r = new ActivityRecord.Builder(mService)
                 .setCaller(callerApp)
                 .setLaunchedFromPid(callingPid)
@@ -1539,6 +1548,11 @@ class ActivityStarter {
             newTransition.setRemoteTransition(remoteTransition);
         }
         mService.getTransitionController().collect(r);
+        // TODO(b/188669821): Remove when navbar reparenting moves to shell
+        if (r.getActivityType() == ACTIVITY_TYPE_HOME && r.getOptions() != null
+                && r.getOptions().getTransientLaunch()) {
+            mService.getTransitionController().setIsLegacyRecents();
+        }
         try {
             mService.deferWindowLayout();
             Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "startActivityInner");
@@ -1752,17 +1766,9 @@ class ActivityStarter {
         mRootWindowContainer.startPowerModeLaunchIfNeeded(
                 false /* forceSend */, mStartActivity);
 
-        final boolean startFromSamePackage;
-        if (sourceRecord != null && sourceRecord.mActivityComponent != null) {
-            startFromSamePackage = mStartActivity.mActivityComponent
-                    .getPackageName().equals(sourceRecord.mActivityComponent.getPackageName());
-        } else {
-            startFromSamePackage = false;
-        }
-
         mTargetRootTask.startActivityLocked(mStartActivity,
                 topRootTask != null ? topRootTask.getTopNonFinishingActivity() : null, newTask,
-                mKeepCurTransition, mOptions, startFromSamePackage);
+                mKeepCurTransition, mOptions, sourceRecord);
         if (mDoResume) {
             final ActivityRecord topTaskActivity =
                     mStartActivity.getTask().topRunningActivityLocked();

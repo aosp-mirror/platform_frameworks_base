@@ -225,6 +225,12 @@ public class QuickStatusBarHeader extends FrameLayout {
             mBatteryRemainingIcon.updateColors(mTextColorPrimary, textColorSecondary,
                     mTextColorPrimary);
         }
+
+        MarginLayoutParams qqsLP = (MarginLayoutParams) mHeaderQsPanel.getLayoutParams();
+        qqsLP.topMargin = mContext.getResources()
+                .getDimensionPixelSize(R.dimen.qqs_layout_margin_top);
+        mHeaderQsPanel.setLayoutParams(qqsLP);
+
         updateHeadersPadding();
         updateAnimators();
     }

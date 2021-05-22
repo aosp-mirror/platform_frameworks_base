@@ -85,13 +85,6 @@
     <!-- The amount to inset the drop target regions from the edge of the display -->
     <dimen name="drop_layout_display_margin">16dp</dimen>
 
-    <!-- The menu grid size for bubble menu. -->
-    <dimen name="bubble_grid_item_icon_width">20dp</dimen>
-    <dimen name="bubble_grid_item_icon_height">20dp</dimen>
-    <dimen name="bubble_grid_item_icon_top_margin">12dp</dimen>
-    <dimen name="bubble_grid_item_icon_bottom_margin">4dp</dimen>
-    <dimen name="bubble_grid_item_icon_side_margin">22dp</dimen>
-
     <!-- How much each bubble is elevated. -->
     <dimen name="bubble_elevation">1dp</dimen>
     <!-- How much the bubble flyout text container is elevated. -->
@@ -109,7 +102,7 @@
     <!-- Padding between status bar and bubbles when displayed in expanded state -->
     <dimen name="bubble_padding_top">16dp</dimen>
     <!-- Max amount of space between bubbles when expanded. -->
-    <dimen name="bubble_max_spacing">16dp</dimen>
+    <dimen name="bubble_max_spacing">8dp</dimen>
     <!-- Size of individual bubbles. -->
     <dimen name="individual_bubble_size">60dp</dimen>
     <!-- Size of bubble bitmap. -->
@@ -119,7 +112,7 @@
     <!-- Size of the circle around the bubbles when they're in the dismiss target. -->
     <dimen name="bubble_dismiss_encircle_size">52dp</dimen>
     <!-- Padding around the view displayed when the bubble is expanded -->
-    <dimen name="bubble_expanded_view_padding">4dp</dimen>
+    <dimen name="bubble_expanded_view_padding">16dp</dimen>
     <!-- This should be at least the size of bubble_expanded_view_padding; it is used to include
          a slight touch slop around the expanded view. -->
     <dimen name="bubble_expanded_view_slop">8dp</dimen>
@@ -151,7 +144,7 @@
     <!-- Extra padding around the dismiss target for bubbles -->
     <dimen name="bubble_dismiss_slop">16dp</dimen>
     <!-- Height of button allowing users to adjust settings for bubbles. -->
-    <dimen name="bubble_manage_button_height">48dp</dimen>
+    <dimen name="bubble_manage_button_height">56dp</dimen>
     <!-- Height of an item in the bubble manage menu. -->
     <dimen name="bubble_menu_item_height">60dp</dimen>
     <!-- Max width of the message bubble-->
@@ -164,12 +157,13 @@
     <dimen name="bubble_stack_offset">10dp</dimen>
     <!-- Offset between stack y and animation y for bubble swap. -->
     <dimen name="bubble_swap_animation_offset">15dp</dimen>
-    <!-- How far offscreen the bubble stack rests. Cuts off padding and part of icon bitmap. -->
-    <dimen name="bubble_stack_offscreen">9dp</dimen>
+    <!-- How far offscreen the bubble stack rests. There's some padding around the bubble so
+         add 3dp to the desired overhang. -->
+    <dimen name="bubble_stack_offscreen">3dp</dimen>
     <!-- How far down the screen the stack starts. -->
     <dimen name="bubble_stack_starting_offset_y">120dp</dimen>
     <!-- Space between the pointer triangle and the bubble expanded view -->
-    <dimen name="bubble_pointer_margin">8dp</dimen>
+    <dimen name="bubble_pointer_margin">5dp</dimen>
     <!-- Padding applied to the bubble dismiss target. Touches in this padding cause the bubbles to
          snap to the dismiss target. -->
     <dimen name="bubble_dismiss_target_padding_x">40dp</dimen>
