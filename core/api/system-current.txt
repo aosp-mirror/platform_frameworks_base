@@ -10513,9 +10513,11 @@ package android.service.voice {
 
   public final class HotwordDetectedResult implements android.os.Parcelable {
     method public int describeContents();
-    method public int getByteOffset();
+    method public int getAudioChannel();
     method public int getConfidenceLevel();
     method @NonNull public android.os.PersistableBundle getExtras();
+    method public int getHotwordDurationMillis();
+    method public int getHotwordOffsetMillis();
     method public int getHotwordPhraseId();
     method public static int getMaxBundleSize();
     method public static int getMaxHotwordPhraseId();
@@ -10523,19 +10525,31 @@ package android.service.voice {
     method @Nullable public android.media.MediaSyncEvent getMediaSyncEvent();
     method public int getPersonalizedScore();
     method public int getScore();
+    method public boolean isPersonalizedHotwordDetection();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field public static final int BYTE_OFFSET_UNSET = -1; // 0xffffffff
+    field public static final int AUDIO_CHANNEL_UNSET = -1; // 0xffffffff
+    field public static final int CONFIDENCE_LEVEL_HIGH = 5; // 0x5
+    field public static final int CONFIDENCE_LEVEL_LOW = 1; // 0x1
+    field public static final int CONFIDENCE_LEVEL_LOW_MEDIUM = 2; // 0x2
+    field public static final int CONFIDENCE_LEVEL_MEDIUM = 3; // 0x3
+    field public static final int CONFIDENCE_LEVEL_MEDIUM_HIGH = 4; // 0x4
+    field public static final int CONFIDENCE_LEVEL_NONE = 0; // 0x0
+    field public static final int CONFIDENCE_LEVEL_VERY_HIGH = 6; // 0x6
     field @NonNull public static final android.os.Parcelable.Creator<android.service.voice.HotwordDetectedResult> CREATOR;
+    field public static final int HOTWORD_OFFSET_UNSET = -1; // 0xffffffff
   }
 
   public static final class HotwordDetectedResult.Builder {
     ctor public HotwordDetectedResult.Builder();
     method @NonNull public android.service.voice.HotwordDetectedResult build();
-    method @NonNull public android.service.voice.HotwordDetectedResult.Builder setByteOffset(int);
+    method @NonNull public android.service.voice.HotwordDetectedResult.Builder setAudioChannel(int);
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setConfidenceLevel(int);
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setExtras(@NonNull android.os.PersistableBundle);
+    method @NonNull public android.service.voice.HotwordDetectedResult.Builder setHotwordDurationMillis(int);
+    method @NonNull public android.service.voice.HotwordDetectedResult.Builder setHotwordOffsetMillis(int);
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setHotwordPhraseId(int);
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setMediaSyncEvent(@NonNull android.media.MediaSyncEvent);
+    method @NonNull public android.service.voice.HotwordDetectedResult.Builder setPersonalizedHotwordDetection(boolean);
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setPersonalizedScore(int);
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setScore(int);
   }
@@ -10565,10 +10579,6 @@ package android.service.voice {
     method public boolean startRecognition(@NonNull android.os.ParcelFileDescriptor, @NonNull android.media.AudioFormat, @Nullable android.os.PersistableBundle);
     method public boolean stopRecognition();
     method public void updateState(@Nullable android.os.PersistableBundle, @Nullable android.os.SharedMemory);
-    field public static final int CONFIDENCE_LEVEL_HIGH = 3; // 0x3
-    field public static final int CONFIDENCE_LEVEL_LOW = 1; // 0x1
-    field public static final int CONFIDENCE_LEVEL_MEDIUM = 2; // 0x2
-    field public static final int CONFIDENCE_LEVEL_NONE = 0; // 0x0
   }
 
   public static interface HotwordDetector.Callback {
@@ -10585,6 +10595,10 @@ package android.service.voice {
     method public int describeContents();
     method public int getConfidenceLevel();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final int CONFIDENCE_LEVEL_HIGH = 3; // 0x3
+    field public static final int CONFIDENCE_LEVEL_LOW = 1; // 0x1
+    field public static final int CONFIDENCE_LEVEL_MEDIUM = 2; // 0x2
+    field public static final int CONFIDENCE_LEVEL_NONE = 0; // 0x0
     field @NonNull public static final android.os.Parcelable.Creator<android.service.voice.HotwordRejectedResult> CREATOR;
   }
 
