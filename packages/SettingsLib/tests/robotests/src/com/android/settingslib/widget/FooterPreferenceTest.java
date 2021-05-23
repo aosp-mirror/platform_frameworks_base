@@ -69,4 +69,19 @@ public class FooterPreferenceTest {
 
         assertThat(mFooterPreference.getContentDescription()).isEqualTo("test");
     }
+
+    @Test
+    public void setLearnMoreContentDescription_contentSet_shouldGetSameContentDescription() {
+        mFooterPreference.setLearnMoreContentDescription("test");
+
+        assertThat(mFooterPreference.getLearnMoreContentDescription()).isEqualTo("test");
+    }
+
+    @Test
+    public void setLearnMoreAction_actionSet_shouldGetAction() {
+        mFooterPreference.setLearnMoreAction(v -> {
+        });
+
+        assertThat(mFooterPreference.mLearnMoreListener).isNotNull();
+    }
 }

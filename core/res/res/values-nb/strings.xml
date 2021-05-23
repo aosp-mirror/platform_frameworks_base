@@ -2096,7 +2096,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Slå av"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Finn ut mer"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"Forbedrede varsler erstatter tilpassede Android-varsler i Android 12. Denne funksjonen viser foreslåtte handlinger og svar og organiserer varslene dine.\n\nForbedrede varsler har tilgang til varselinnhold, inkludert personopplysninger som kontaktnavn og meldinger. Funksjonen kan også avvise og svare på varsler, for eksempel svare på anrop og kontrollere «Ikke forstyrr»."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Forbedrede varsler erstatter tilpassede Android-varsler i Android 12. Denne funksjonen viser foreslåtte handlinger og svar og organiserer varslene dine.\n\nForbedrede varsler har tilgang til varselinnhold, inkludert personopplysninger som kontaktnavn og meldinger. Funksjonen kan også avvise og svare på varsler, for eksempel svare på anrop og kontrollere «Ikke forstyrr»."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Varsel med informasjon om rutinemodus"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Batteriet kan gå tomt før den vanlige ladingen"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Batterisparing er aktivert for å forlenge batterilevetiden"</string>

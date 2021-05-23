@@ -2096,7 +2096,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"確定"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"關閉"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"瞭解詳情"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"在 Android 12 中，我們將 Android 自動調整通知取代成強化通知。此功能可顯示建議操作和回覆，以及整理通知。\n\n強化通知功能可讀取所有通知內容 (包括聯絡人姓名和訊息等個人資料)，以及關閉或回應通知，例如接聽來電和控制「請勿騷擾」功能。"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"在 Android 12 中，我們將 Android 自動調整通知取代成強化通知。此功能可顯示建議操作和回覆，以及整理通知。\n\n強化通知功能可讀取所有通知內容 (包括聯絡人姓名和訊息等個人資料)，以及關閉或回應通知，例如接聽來電和控制「請勿騷擾」功能。"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"「日常安排模式」資料通知"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"電量可能會在日常充電前耗盡"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"「省電模式」已啟用，以便延長電池壽命"</string>

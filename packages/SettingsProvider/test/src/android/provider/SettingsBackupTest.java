@@ -321,7 +321,6 @@ public class SettingsBackupTest {
                     Settings.Global.LOCATION_BACKGROUND_THROTTLE_PROXIMITY_ALERT_INTERVAL_MS,
                     Settings.Global.LOCATION_BACKGROUND_THROTTLE_PACKAGE_WHITELIST,
                     Settings.Global.LOCATION_ENABLE_STATIONARY_THROTTLE,
-                    Settings.Global.LOCATION_IGNORE_SETTINGS_PACKAGE_WHITELIST,
                     Settings.Global.LOCATION_SETTINGS_LINK_TO_PERMISSIONS_ENABLED,
                     Settings.Global.LOCK_SOUND,
                     Settings.Global.LOOPER_STATS,

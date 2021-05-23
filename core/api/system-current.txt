@@ -3118,7 +3118,7 @@ package android.hardware {
     method @RequiresPermission(android.Manifest.permission.OBSERVE_SENSOR_PRIVACY) public void addSensorPrivacyListener(int, @NonNull android.hardware.SensorPrivacyManager.OnSensorPrivacyChangedListener);
     method @RequiresPermission(android.Manifest.permission.OBSERVE_SENSOR_PRIVACY) public void addSensorPrivacyListener(int, @NonNull java.util.concurrent.Executor, @NonNull android.hardware.SensorPrivacyManager.OnSensorPrivacyChangedListener);
     method @RequiresPermission(android.Manifest.permission.OBSERVE_SENSOR_PRIVACY) public boolean isSensorPrivacyEnabled(int);
-    method @RequiresPermission(android.Manifest.permission.OBSERVE_SENSOR_PRIVACY) public void removeSensorPrivacyListener(@NonNull android.hardware.SensorPrivacyManager.OnSensorPrivacyChangedListener);
+    method @RequiresPermission(android.Manifest.permission.OBSERVE_SENSOR_PRIVACY) public void removeSensorPrivacyListener(int, @NonNull android.hardware.SensorPrivacyManager.OnSensorPrivacyChangedListener);
   }
 
   public static interface SensorPrivacyManager.OnSensorPrivacyChangedListener {
@@ -4930,6 +4930,10 @@ package android.location {
     field @Deprecated public static final String EXTRA_NO_GPS_LOCATION = "noGPSLocation";
   }
 
+  public final class LocationDeviceConfig {
+    field public static final String IGNORE_SETTINGS_ALLOWLIST = "ignore_settings_allowlist";
+  }
+
   public class LocationManager {
     method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void addProviderRequestChangedListener(@NonNull java.util.concurrent.Executor, @NonNull android.location.provider.ProviderRequest.ChangedListener);
     method @Deprecated @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void flushGnssBatch();
@@ -5004,7 +5008,6 @@ package android.location {
   public final class SatellitePvt implements android.os.Parcelable {
     method public int describeContents();
     method @Nullable public android.location.SatellitePvt.ClockInfo getClockInfo();
-    method public int getFlags();
     method @FloatRange public double getIonoDelayMeters();
     method @Nullable public android.location.SatellitePvt.PositionEcef getPositionEcef();
     method @FloatRange public double getTropoDelayMeters();
@@ -5020,10 +5023,9 @@ package android.location {
     ctor public SatellitePvt.Builder();
     method @NonNull public android.location.SatellitePvt build();
     method @NonNull public android.location.SatellitePvt.Builder setClockInfo(@NonNull android.location.SatellitePvt.ClockInfo);
-    method @NonNull public android.location.SatellitePvt.Builder setFlags(int);
-    method @NonNull public android.location.SatellitePvt.Builder setIonoDelayMeters(@FloatRange double);
+    method @NonNull public android.location.SatellitePvt.Builder setIonoDelayMeters(@FloatRange(from=0.0f, to=100.0f) double);
     method @NonNull public android.location.SatellitePvt.Builder setPositionEcef(@NonNull android.location.SatellitePvt.PositionEcef);
-    method @NonNull public android.location.SatellitePvt.Builder setTropoDelayMeters(@FloatRange double);
+    method @NonNull public android.location.SatellitePvt.Builder setTropoDelayMeters(@FloatRange(from=0.0f, to=100.0f) double);
     method @NonNull public android.location.SatellitePvt.Builder setVelocityEcef(@NonNull android.location.SatellitePvt.VelocityEcef);
   }
 
@@ -9086,6 +9088,7 @@ package android.provider {
     field public static final String NAMESPACE_GAME_DRIVER = "game_driver";
     field public static final String NAMESPACE_INPUT_NATIVE_BOOT = "input_native_boot";
     field public static final String NAMESPACE_INTELLIGENCE_ATTENTION = "intelligence_attention";
+    field public static final String NAMESPACE_LOCATION = "location";
     field public static final String NAMESPACE_MEDIA = "media";
     field public static final String NAMESPACE_MEDIA_NATIVE = "media_native";
     field public static final String NAMESPACE_NETD_NATIVE = "netd_native";

@@ -2162,7 +2162,8 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"אישור"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"השבתה"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"מידע נוסף"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"‏ההתראות המשופרות החליפו את ההתראות המותאמות ל-Android ב-Android 12. התכונה הזו מציגה הצעות לפעולות ולתשובות ומארגנת את ההתראות שלך.\n\nההתראות המשופרות יכולות לקבל גישה לתוכן של התראות, כולל מידע אישי כמו שמות אנשי קשר והודעות. התכונה הזו יכולה גם לסגור התראות או להשיב להן, למשל מענה לשיחות טלפון ושליטה בתכונה \'נא לא להפריע\'."</string>
+    <!-- no translation found for nas_upgrade_notification_learn_more_content (3735480566983530650) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"התראת מידע לגבי מצב שגרתי"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"הסוללה עלולה להתרוקן לפני המועד הרגיל של הטעינה"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"תכונת החיסכון בסוללה הופעלה כדי להאריך את חיי הסוללה"</string>
