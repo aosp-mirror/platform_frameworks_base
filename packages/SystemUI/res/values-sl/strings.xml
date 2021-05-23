@@ -412,8 +412,7 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="6798849610647988987">"Preneseno: <xliff:g id="DATA_USED">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"Omejitev: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"Opozorilo – <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
-    <!-- no translation found for quick_settings_work_mode_label (6440531507319809121) -->
-    <skip />
+    <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"Delovne aplikacije"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Nočna svetloba"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Ob sončnem zahodu"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Do sončnega vzhoda"</string>
@@ -428,7 +427,8 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"Tehnologija NFC je onemogočena"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"Tehnologija NFC je omogočena"</string>
-    <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Snemanje zaslona"</string>
+    <!-- no translation found for quick_settings_screen_record_label (8650355346742003694) -->
+    <skip />
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Začni"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Ustavi"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Želite odblokirati mikrofon v napravi?"</string>
@@ -1051,8 +1051,7 @@
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Premakni na rob in skrij"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Premakni z roba in pokaži"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"preklop"</string>
-    <!-- no translation found for quick_controls_title (7095074621086860062) -->
-    <skip />
+    <string name="quick_controls_title" msgid="7095074621086860062">"Kontrolniki za dom"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Izberite aplikacijo za dodajanje kontrolnikov"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g> kontrolnik dodan.</item>
@@ -1068,8 +1067,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"odstranitev iz priljubljenih"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Premakni na položaj <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Kontrolniki"</string>
-    <!-- no translation found for controls_favorite_subtitle (6481675111056961083) -->
-    <skip />
+    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Izbira kontrolnikov, dostopnih v hitrih nastavitvah"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Držite in povlecite, da prerazporedite kontrolnike."</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Vsi kontrolniki so bili odstranjeni."</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Spremembe niso shranjene"</string>
@@ -1108,8 +1106,7 @@
     <string name="controls_error_generic" msgid="352500456918362905">"Stanja ni mogoče naložiti"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Napaka, poskusite znova"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"V teku"</string>
-    <!-- no translation found for controls_added_tooltip (5866098408470111984) -->
-    <skip />
+    <string name="controls_added_tooltip" msgid="5866098408470111984">"Za ogled novih kontrolnikov odprite hitre nastavitve."</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Dodaj kontrolnike"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Uredi kontrolnike"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Dodajanje izhodov"</string>
@@ -1128,16 +1125,11 @@
     <string name="priority_conversations" msgid="3967482288896653039">"Prednostni pogovori"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Nedavni pogovori"</string>
     <string name="okay" msgid="6490552955618608554">"V redu"</string>
-    <!-- no translation found for days_timestamp (5821854736213214331) -->
-    <skip />
-    <!-- no translation found for one_week_timestamp (4925600765473875590) -->
-    <skip />
-    <!-- no translation found for two_weeks_timestamp (9111801081871962155) -->
-    <skip />
-    <!-- no translation found for over_one_week_timestamp (3770560704420807142) -->
-    <skip />
-    <!-- no translation found for over_two_weeks_timestamp (6300507859007874050) -->
-    <skip />
+    <string name="days_timestamp" msgid="5821854736213214331">"Pred več dnevi (<xliff:g id="DURATION">%1$s</xliff:g>)"</string>
+    <string name="one_week_timestamp" msgid="4925600765473875590">"Pred 1 tednom"</string>
+    <string name="two_weeks_timestamp" msgid="9111801081871962155">"Pred 2 tednoma"</string>
+    <string name="over_one_week_timestamp" msgid="3770560704420807142">"Pred več kot 1 tednom"</string>
+    <string name="over_two_weeks_timestamp" msgid="6300507859007874050">"Pred več kot 2 tednoma"</string>
     <string name="birthday_status" msgid="2596961629465396761">"Rojstni dan"</string>
     <string name="birthday_status_content_description" msgid="682836371128282925">"<xliff:g id="NAME">%1$s</xliff:g> ima rojstni dan."</string>
     <string name="upcoming_birthday_status" msgid="2005452239256870351">"Rojstni dan se bliža"</string>

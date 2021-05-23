@@ -431,7 +431,8 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"تم إيقاف الاتصال القريب المدى"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"تم تفعيل الاتصال القريب المدى"</string>
-    <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"تسجيل الشاشة"</string>
+    <!-- no translation found for quick_settings_screen_record_label (8650355346742003694) -->
+    <skip />
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"بدء"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"إيقاف"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"هل تريد إزالة حظر ميكروفون الجهاز؟"</string>
@@ -1136,16 +1137,11 @@
     <string name="priority_conversations" msgid="3967482288896653039">"المحادثات ذات الأولوية"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"المحادثات الحديثة"</string>
     <string name="okay" msgid="6490552955618608554">"حسنًا"</string>
-    <!-- no translation found for days_timestamp (5821854736213214331) -->
-    <skip />
-    <!-- no translation found for one_week_timestamp (4925600765473875590) -->
-    <skip />
-    <!-- no translation found for two_weeks_timestamp (9111801081871962155) -->
-    <skip />
-    <!-- no translation found for over_one_week_timestamp (3770560704420807142) -->
-    <skip />
-    <!-- no translation found for over_two_weeks_timestamp (6300507859007874050) -->
-    <skip />
+    <string name="days_timestamp" msgid="5821854736213214331">"قبل <xliff:g id="DURATION">%1$s</xliff:g> يوم"</string>
+    <string name="one_week_timestamp" msgid="4925600765473875590">"قبل أسبوع واحد"</string>
+    <string name="two_weeks_timestamp" msgid="9111801081871962155">"قبل أسبوعين"</string>
+    <string name="over_one_week_timestamp" msgid="3770560704420807142">"قبل أكثر من أسبوع واحد"</string>
+    <string name="over_two_weeks_timestamp" msgid="6300507859007874050">"قبل أكثر من أسبوعين"</string>
     <string name="birthday_status" msgid="2596961629465396761">"تاريخ الميلاد"</string>
     <string name="birthday_status_content_description" msgid="682836371128282925">"إنه يوم ميلاد <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="upcoming_birthday_status" msgid="2005452239256870351">"تاريخ ميلاد قريب"</string>

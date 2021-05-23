@@ -423,7 +423,8 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC ist deaktiviert"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC ist aktiviert"</string>
-    <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Bildschirmaufnahme"</string>
+    <!-- no translation found for quick_settings_screen_record_label (8650355346742003694) -->
+    <skip />
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Starten"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Beenden"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Blockierung des Gerätemikrofons aufheben?"</string>
@@ -1005,7 +1006,7 @@
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" und "</string>
     <string name="ongoing_privacy_dialog_using_op" msgid="426635338010011796">"Von <xliff:g id="APPLICATION_NAME">%1$s</xliff:g> verwendet"</string>
-    <string name="ongoing_privacy_dialog_recent_op" msgid="2736290123662790026">"Von <xliff:g id="APPLICATION_NAME">%1$s</xliff:g> zuletzt verwendet"</string>
+    <string name="ongoing_privacy_dialog_recent_op" msgid="2736290123662790026">"Zuletzt von <xliff:g id="APPLICATION_NAME">%1$s</xliff:g> verwendet"</string>
     <string name="ongoing_privacy_dialog_enterprise" msgid="3003314125311966061">"(geschäftlich)"</string>
     <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"Telefonanruf"</string>
     <string name="ongoing_privacy_dialog_attribution_text" msgid="4738795925380373994">"(über <xliff:g id="APPLICATION_NAME_S_">%s</xliff:g>)"</string>
