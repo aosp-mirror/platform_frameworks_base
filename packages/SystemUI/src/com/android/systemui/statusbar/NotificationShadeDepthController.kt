@@ -184,7 +184,7 @@ class NotificationShadeDepthController @Inject constructor(
             blur = 0
         }
 
-        blurUtils.applyBlur(blurRoot?.viewRootImpl ?: root.viewRootImpl, blur)
+        blurUtils.applyBlur(blurRoot?.viewRootImpl ?: root.viewRootImpl, blur, scrimsVisible)
         val zoomOut = blurUtils.ratioOfBlurRadius(blur)
         try {
             if (root.isAttachedToWindow && root.windowToken != null) {
