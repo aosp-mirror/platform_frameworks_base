@@ -34,8 +34,6 @@
 
             <ImageView
                 android:id="@+id/person_icon"
-                android:layout_marginStart="-2dp"
-                android:layout_marginTop="-2dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1" />
@@ -73,12 +71,12 @@
         <include layout="@layout/people_tile_emoji_background_large" />
 
         <TextView
-            android:layout_gravity="top"
             android:id="@+id/name"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingBottom="@dimen/below_name_text_padding"
-            android:gravity="start|top"
+            android:layout_gravity="start|center_vertical"
+            android:gravity="start|center_vertical"
             android:singleLine="true"
             android:ellipsize="end"
             android:text="@string/empty_user_name"
@@ -103,7 +101,7 @@
 
                 <ImageView
                     android:id="@+id/predefined_icon"
-                    android:tint="?android:attr/colorAccent"
+                    android:tint="?android:attr/textColorTertiary"
                     android:gravity="start|center_vertical"
                     android:layout_width="@dimen/regular_predefined_icon"
                     android:layout_height="@dimen/regular_predefined_icon" />

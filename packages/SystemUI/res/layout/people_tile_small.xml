@@ -39,7 +39,7 @@
 
         <ImageView
             android:id="@+id/predefined_icon"
-            android:tint="?android:attr/colorAccent"
+            android:tint="?android:attr/textColorTertiary"
             android:layout_gravity="center"
             android:layout_width="18dp"
             android:layout_height="22dp" />
