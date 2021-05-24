@@ -674,7 +674,6 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     // Compilation reasons.
-    public static final int REASON_UNKNOWN = -1;
     public static final int REASON_FIRST_BOOT = 0;
     public static final int REASON_BOOT_AFTER_OTA = 1;
     public static final int REASON_POST_BOOT = 2;
@@ -687,7 +686,8 @@ public class PackageManagerService extends IPackageManager.Stub
     public static final int REASON_BACKGROUND_DEXOPT = 9;
     public static final int REASON_AB_OTA = 10;
     public static final int REASON_INACTIVE_PACKAGE_DOWNGRADE = 11;
-    public static final int REASON_SHARED = 12;
+    public static final int REASON_CMDLINE = 12;
+    public static final int REASON_SHARED = 13;
 
     public static final int REASON_LAST = REASON_SHARED;
 
@@ -9969,7 +9969,7 @@ public class PackageManagerService extends IPackageManager.Stub
         int flags = (checkProfiles ? DexoptOptions.DEXOPT_CHECK_FOR_PROFILES_UPDATES : 0) |
                 (force ? DexoptOptions.DEXOPT_FORCE : 0) |
                 (bootComplete ? DexoptOptions.DEXOPT_BOOT_COMPLETE : 0);
-        return performDexOpt(new DexoptOptions(packageName, REASON_UNKNOWN,
+        return performDexOpt(new DexoptOptions(packageName, REASON_CMDLINE,
                 targetCompilerFilter, splitName, flags));
     }
 
