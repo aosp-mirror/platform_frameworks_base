@@ -27,9 +27,9 @@
 #include "DamageAccumulator.h"
 #include "pipeline/skia/SkiaDisplayList.h"
 #endif
+#include <gui/TraceUtils.h>
 #include "utils/MathUtils.h"
 #include "utils/StringUtils.h"
-#include "utils/TraceUtils.h"
 
 #include <SkPathOps.h>
 #include <algorithm>
