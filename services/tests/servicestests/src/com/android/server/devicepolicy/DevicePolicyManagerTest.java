@@ -4030,7 +4030,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
-    public void testUpdateNetworkPreferenceOnStartOnStopUser() throws Exception {
+    public void testUpdateNetworkPreferenceOnStartUser() throws Exception {
         final int managedProfileUserId = 15;
         final int managedProfileAdminUid = UserHandle.getUid(managedProfileUserId, 19436);
         addManagedProfile(admin1, managedProfileAdminUid, admin1);
@@ -4044,6 +4044,15 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 any(),
                 any()
         );
+    }
+
+    @Test
+    public void testUpdateNetworkPreferenceOnStopUser() throws Exception {
+        final int managedProfileUserId = 15;
+        final int managedProfileAdminUid = UserHandle.getUid(managedProfileUserId, 19436);
+        addManagedProfile(admin1, managedProfileAdminUid, admin1);
+        mContext.binder.callingUid = managedProfileAdminUid;
+        mServiceContext.permissions.add(permission.INTERACT_ACROSS_USERS_FULL);
 
         dpms.handleStopUser(managedProfileUserId);
         verify(getServices().connectivityManager, times(1)).setProfileNetworkPreference(
