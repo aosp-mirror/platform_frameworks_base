@@ -505,6 +505,13 @@ public class DevicePolicyManager {
             "android.app.extra.bugreport_notification_type";
 
     /**
+     * Default value for preferential network service enabling.
+     *
+     * @hide
+     */
+    public static final boolean PREFERENTIAL_NETWORK_SERVICE_ENABLED_DEFAULT = false;
+
+    /**
      * Notification type for a started remote bugreport flow.
      *
      * @hide
