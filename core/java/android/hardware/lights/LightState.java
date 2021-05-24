@@ -43,7 +43,7 @@ public final class LightState implements Parcelable {
      * of RBG color or monochrome color.
      *
      * @param color the desired color and intensity in ARGB format.
-     * @deprecated this has been replaced with {@link android.hardware.lights.LightState#forColor }
+     * @deprecated this has been replaced with {@link android.hardware.lights.LightState.Builder }
      * @hide
      */
     @Deprecated
@@ -54,8 +54,8 @@ public final class LightState implements Parcelable {
 
     /**
      * Creates a new LightState with the desired color and intensity, and the player Id.
-     * Player Id will only be applied on Light type
-     * {@link android.hardware.lights.Light#LIGHT_TYPE_INPUT_PLAYER_ID}
+     * Player Id will only be applied on Light with type
+     * {@link android.hardware.lights.Light#LIGHT_TYPE_PLAYER_ID}
      *
      * @param color the desired color and intensity in ARGB format.
      * @hide
@@ -94,8 +94,8 @@ public final class LightState implements Parcelable {
         }
 
         /**
-         * Set the desired player id of the LightState Builder, for a light of type
-         * {@link android.hardware.lights.Light#LIGHT_TYPE_INPUT_PLAYER_ID}.
+         * Set the desired player id of the LightState Builder, for a light with type
+         * {@link android.hardware.lights.Light#LIGHT_TYPE_PLAYER_ID}.
          *
          * @param playerId the desired player id.
          * @return The {@link LightState.Builder} object contains the player id.
@@ -134,15 +134,16 @@ public final class LightState implements Parcelable {
     /**
      * Returns the color and intensity associated with this LightState.
      * @return the color and intensity in ARGB format. The A channel is ignored. return 0 when
-     * calling LightsManager.getLightState with LIGHT_TYPE_INPUT_PLAYER_ID.
+     * calling LightsManager.getLightState with
+     * {@link android.hardware.lights.Light#LIGHT_TYPE_PLAYER_ID}.
      */
     public @ColorInt int getColor() {
         return mColor;
     }
 
     /**
-     * Returns the player ID associated with this LightState for Light type
-     * {@link android.hardware.lights.Light#LIGHT_TYPE_INPUT_PLAYER_ID},
+     * Returns the player ID associated with this LightState for Light with type
+     * {@link android.hardware.lights.Light#LIGHT_TYPE_PLAYER_ID},
      * or 0 for other types.
      * @return the player ID.
      */
