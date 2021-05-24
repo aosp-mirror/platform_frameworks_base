@@ -196,6 +196,9 @@
         android:name="android.bluetooth.hearingaid.profile.action.PLAYING_STATE_CHANGED" />
     <protected-broadcast
         android:name="android.bluetooth.hearingaid.profile.action.ACTIVE_DEVICE_CHANGED" />
+    <protected-broadcast android:name="android.bluetooth.action.CSIS_CONNECTION_STATE_CHANGED" />
+    <protected-broadcast android:name="android.bluetooth.action.CSIS_DEVICE_AVAILABLE" />
+    <protected-broadcast android:name="android.bluetooth.action.CSIS_SET_MEMBER_AVAILABLE" />
     <protected-broadcast
         android:name="android.bluetooth.volume-control.profile.action.CONNECTION_STATE_CHANGED" />
     <protected-broadcast
