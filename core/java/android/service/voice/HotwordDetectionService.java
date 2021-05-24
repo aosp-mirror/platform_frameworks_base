@@ -232,36 +232,6 @@ public abstract class HotwordDetectionService extends Service {
      * Called when the device hardware (such as a DSP) detected the hotword, to request second stage
      * validation before handing over the audio to the {@link AlwaysOnHotwordDetector}.
      * <p>
-     * After {@code callback} is invoked or {@code timeoutMillis} has passed, the system closes
-     * {@code audioStream} and invokes the appropriate {@link AlwaysOnHotwordDetector.Callback
-     * callback}.
-     *
-     * @param audioStream Stream containing audio bytes returned from DSP
-     * @param audioFormat Format of the supplied audio
-     * @param timeoutMillis Timeout in milliseconds for the operation to invoke the callback. If
-     *                      the application fails to abide by the timeout, system will close the
-     *                      microphone and cancel the operation.
-     * @param callback The callback to use for responding to the detection request.
-     * @deprecated Implement
-     * {@link #onDetect(AlwaysOnHotwordDetector.EventPayload, long, Callback)} instead.
-     *
-     * @hide
-     */
-    @Deprecated
-    @SystemApi
-    public void onDetect(
-            @NonNull ParcelFileDescriptor audioStream,
-            @NonNull AudioFormat audioFormat,
-            @DurationMillisLong long timeoutMillis,
-            @NonNull Callback callback) {
-        // TODO: Add a helpful error message.
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Called when the device hardware (such as a DSP) detected the hotword, to request second stage
-     * validation before handing over the audio to the {@link AlwaysOnHotwordDetector}.
-     * <p>
      * After {@code callback} is invoked or {@code timeoutMillis} has passed, and invokes the
      * appropriate {@link AlwaysOnHotwordDetector.Callback callback}.
      *
@@ -312,34 +282,6 @@ public abstract class HotwordDetectionService extends Service {
             @DurationMillisLong long callbackTimeoutMillis,
             @Nullable IntConsumer statusCallback) {
         // TODO: Handle the unimplemented case by throwing?
-    }
-
-    /**
-     * Called when the {@link VoiceInteractionService} requests that this service
-     * {@link HotwordDetector#startRecognition() start} hotword recognition on audio coming directly
-     * from the device microphone.
-     * <p>
-     * On such a request, the system streams mic audio to this service through {@code audioStream}.
-     * Audio is streamed until {@link HotwordDetector#stopRecognition()} is called, at which point
-     * the system closes {code audioStream}.
-     * <p>
-     * On successful detection of a hotword within {@code audioStream}, call
-     * {@link Callback#onDetected(HotwordDetectedResult)}. The system continues to stream audio
-     * through {@code audioStream}; {@code callback} is reusable.
-     *
-     * @param audioStream Stream containing audio bytes returned from a microphone
-     * @param audioFormat Format of the supplied audio
-     * @param callback The callback to use for responding to the detection request.
-     * {@link Callback#onRejected(HotwordRejectedResult) callback.onRejected} cannot be used here.
-     * @deprecated Implement {@link #onDetect(Callback)} instead.
-     */
-    @Deprecated
-    public void onDetect(
-            @NonNull ParcelFileDescriptor audioStream,
-            @NonNull AudioFormat audioFormat,
-            @NonNull Callback callback) {
-        // TODO: Add a helpful error message.
-        throw new UnsupportedOperationException();
     }
 
     /**
