@@ -73,6 +73,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.ColorUtils;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
@@ -156,7 +157,9 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         @UiEvent(doc = "User sent data through the notification remote input view")
         NOTIFICATION_REMOTE_INPUT_SEND(797),
         @UiEvent(doc = "Failed attempt to send data through the notification remote input view")
-        NOTIFICATION_REMOTE_INPUT_FAILURE(798);
+        NOTIFICATION_REMOTE_INPUT_FAILURE(798),
+        @UiEvent(doc = "User attached an image to the remote input view")
+        NOTIFICATION_REMOTE_INPUT_ATTACH_IMAGE(825);
 
         private final int mId;
         NotificationRemoteInputEvent(int id) {
@@ -290,7 +293,8 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         });
     }
 
-    private void setAttachment(ContentInfo item) {
+    @VisibleForTesting
+    protected void setAttachment(ContentInfo item) {
         if (mAttachment != null) {
             // We need to release permissions when sending the attachment to the target
             // app or if it is deleted by the user. When sending to the target app, we
@@ -312,6 +316,10 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
             attachment.setVisibility(GONE);
         } else {
             attachment.setVisibility(VISIBLE);
+            mUiEventLogger.logWithInstanceId(
+                    NotificationRemoteInputEvent.NOTIFICATION_REMOTE_INPUT_ATTACH_IMAGE,
+                    mEntry.getSbn().getUid(), mEntry.getSbn().getPackageName(),
+                    mEntry.getSbn().getInstanceId());
         }
         updateSendButton();
     }
