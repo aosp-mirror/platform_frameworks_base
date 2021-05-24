@@ -45,6 +45,7 @@
 
     <dimen name="volume_tool_tip_right_margin">136dp</dimen>
     <dimen name="volume_tool_tip_top_margin">12dp</dimen>
+    <dimen name="volume_row_slider_height">128dp</dimen>
 
     <dimen name="controls_activity_view_top_offset">25dp</dimen>
 

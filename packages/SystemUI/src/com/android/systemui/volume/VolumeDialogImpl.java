@@ -1752,7 +1752,21 @@ public class VolumeDialogImpl implements VolumeDialog,
         }
 
         final Rect bounds = mRingerAndRowsContainerBackground.copyBounds();
-        bounds.top = (int) (drawerClosedAmount * getRingerDrawerOpenExtraSize());
+
+        if (!isLandscape()) {
+            // In portrait, the background should fill the full width, but only go up to the ringer
+            // icon's top. We'll extend it all the way to the top of the container when the ringer
+            // drawer opens.
+            bounds.left = 0;
+            bounds.top = (int) (drawerClosedAmount * getRingerDrawerOpenExtraSize());
+        } else {
+            // In landscape, the background should be inset by the size of the open drawer, since it
+            // opens sideways. It should extend to the top of the container since we haven't left
+            // space for the drawer to open upward.
+            bounds.left = getRingerDrawerOpenExtraSize();
+            bounds.top = 0;
+        }
+
         mRingerAndRowsContainerBackground.setBounds(bounds);
     }
 

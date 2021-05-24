@@ -16,6 +16,7 @@
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:sysui="http://schemas.android.com/apk/res-auto"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:id="@+id/volume_dialog_container"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
@@ -24,64 +25,29 @@
     android:background="@android:color/transparent"
     android:theme="@style/volume_dialog_theme">
 
-    <FrameLayout
+    <!-- right-aligned to be physically near volume button -->
+    <LinearLayout
         android:id="@+id/volume_dialog"
-        android:minWidth="@dimen/volume_dialog_panel_width"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="right"
         android:layout_gravity="right"
-        android:background="@android:color/transparent"
-        android:paddingRight="@dimen/volume_dialog_stream_padding"
-        android:paddingLeft="@dimen/volume_dialog_panel_transparent_padding"
-        android:clipToPadding="false">
+        android:layout_marginRight="@dimen/volume_dialog_panel_transparent_padding_right"
+        android:orientation="vertical"
+        android:clipToPadding="false"
+        android:clipChildren="false">
 
-        <!--
-            Container for a) the ringer drawer and the caption button next to b) the volume rows.
-        -->
+
         <LinearLayout
+            android:id="@+id/volume_dialog_ringer_and_rows_container"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
+            android:orientation="vertical"
+            android:padding="7dp"
             android:clipChildren="false"
-            android:clipToPadding="false">
+            android:background="@drawable/volume_background">
 
-            <!-- The ringer drawer and the caption button. -->
-            <FrameLayout
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:paddingRight="@dimen/volume_dialog_stream_padding"
-                android:clipChildren="false"
-                android:clipToPadding="false"
-                android:orientation="vertical">
-
-                <include layout="@layout/volume_ringer_drawer"
-                    android:layout_gravity="top|right"/>
-
-                <FrameLayout
-                    android:id="@+id/odi_captions"
-                    android:layout_width="@dimen/volume_dialog_caption_size"
-                    android:layout_height="@dimen/volume_dialog_caption_size"
-                    android:gravity="center"
-                    android:layout_gravity="bottom|right"
-                    android:layout_marginBottom="@dimen/volume_dialog_tap_target_size"
-                    android:clipToPadding="false">
-
-                    <com.android.systemui.volume.CaptionsToggleImageButton
-                        android:id="@+id/odi_captions_icon"
-                        android:src="@drawable/ic_volume_odi_captions_disabled"
-                        style="@style/VolumeButtons"
-                        android:background="@drawable/rounded_ripple"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:tint="@color/caption_tint_color_selector"
-                        android:layout_gravity="center"
-                        android:soundEffectsEnabled="false"
-                        sysui:optedOut="false"/>
-
-                </FrameLayout>
-
-            </FrameLayout>
+            <include layout="@layout/volume_ringer_drawer" />
 
             <FrameLayout
                 android:visibility="gone"
@@ -102,34 +68,33 @@
                     android:layout_height="match_parent"
                     android:scaleType="fitCenter"
                     android:padding="@dimen/volume_dialog_ringer_icon_padding"
-                    android:tint="@color/accent_tint_color_selector"
+                    android:tint="?android:attr/textColorPrimary"
                     android:layout_gravity="center"
                     android:soundEffectsEnabled="false" />
 
                 <include layout="@layout/volume_dnd_icon"
-                         android:layout_width="match_parent"
-                         android:layout_height="wrap_content"
-                         android:layout_marginRight="@dimen/volume_dialog_stream_padding"
-                         android:layout_marginTop="6dp"/>
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="@dimen/volume_dialog_stream_padding"
+                    android:layout_marginTop="6dp"/>
             </FrameLayout>
 
             <LinearLayout
                 android:id="@+id/main"
                 android:layout_width="wrap_content"
-                android:minWidth="@dimen/volume_dialog_panel_width"
                 android:layout_height="wrap_content"
                 android:gravity="right"
                 android:layout_gravity="right"
                 android:orientation="vertical"
                 android:clipChildren="false"
-                android:clipToPadding="false">
+                android:clipToPadding="false" >
                 <LinearLayout
                     android:id="@+id/volume_dialog_rows"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:minWidth="@dimen/volume_dialog_panel_width"
                     android:gravity="center"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                    android:layout_marginTop="@dimen/volume_row_slider_padding_start">
                     <!-- volume rows added and removed here! :-) -->
                 </LinearLayout>
                 <FrameLayout
@@ -144,23 +109,41 @@
                         android:layout_gravity="center"
                         android:contentDescription="@string/accessibility_volume_settings"
                         android:background="@drawable/ripple_drawable_20dp"
-                        android:tint="?android:attr/colorBackgroundFloating"
+                        android:tint="?androidprv:attr/colorAccent"
                         android:soundEffectsEnabled="false" />
                 </FrameLayout>
             </LinearLayout>
 
         </LinearLayout>
 
-        <ViewStub
-            android:id="@+id/odi_captions_tooltip_stub"
-            android:inflatedId="@+id/odi_captions_tooltip_view"
-            android:layout="@layout/volume_tool_tip_view"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="@dimen/volume_tool_tip_right_margin"
-            android:layout_marginTop="@dimen/volume_tool_tip_top_margin"
-            android:layout_gravity="right"/>
+        <FrameLayout
+            android:id="@+id/odi_captions"
+            android:layout_width="@dimen/volume_dialog_caption_size"
+            android:layout_height="@dimen/volume_dialog_caption_size"
+            android:layout_marginTop="@dimen/volume_dialog_row_margin_bottom"
+            android:gravity="right"
+            android:layout_gravity="right"
+            android:clipToPadding="false"
+            android:background="@drawable/volume_background">
+            <com.android.systemui.volume.CaptionsToggleImageButton
+                android:id="@+id/odi_captions_icon"
+                android:src="@drawable/ic_volume_odi_captions_disabled"
+                style="@style/VolumeButtons"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:tint="?android:attr/colorAccent"
+                android:layout_gravity="center"
+                android:soundEffectsEnabled="false"
+                sysui:optedOut="false"/>
+        </FrameLayout>
+    </LinearLayout>
 
-    </FrameLayout>
+    <ViewStub
+        android:id="@+id/odi_captions_tooltip_stub"
+        android:inflatedId="@+id/odi_captions_tooltip_view"
+        android:layout="@layout/volume_tool_tip_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom | right"/>
 
 </FrameLayout>
