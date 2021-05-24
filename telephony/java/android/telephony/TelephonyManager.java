@@ -2932,7 +2932,12 @@ public class TelephonyManager {
      * currently in use on the device for data transmission.
      *
      * If this object has been created with {@link #createForSubscriptionId}, applies to the given
-     * subId. Otherwise, applies to {@link SubscriptionManager#getDefaultDataSubscriptionId()}
+     * subId. Otherwise, applies to {@link SubscriptionManager#getActiveDataSubscriptionId()}.
+     *
+     * Note: Before {@link SubscriptionManager#getActiveDataSubscriptionId()} was introduced in API
+     * level 30, it was applied to {@link SubscriptionManager#getDefaultDataSubscriptionId()} which
+     * may be different now from {@link SubscriptionManager#getActiveDataSubscriptionId()}, e.g.
+     * when opportunistic network is providing cellular internet connection to the user.
      *
      * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
