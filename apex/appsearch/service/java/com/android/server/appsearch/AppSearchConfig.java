@@ -44,6 +44,8 @@ import java.util.concurrent.Executor;
  * @hide
  */
 public final class AppSearchConfig implements AutoCloseable {
+    private static volatile AppSearchConfig sConfig;
+
     /**
      * It would be used as default min time interval between samples in millis if there is no value
      * set for {@link AppSearchConfig#KEY_MIN_TIME_INTERVAL_BETWEEN_SAMPLES_MILLIS} in DeviceConfig.
@@ -101,12 +103,16 @@ public final class AppSearchConfig implements AutoCloseable {
                 updateCachedValues(properties);
             };
 
+    private AppSearchConfig() {
+    }
+
     /**
      * Creates an instance of {@link AppSearchConfig}.
      *
      * @param executor used to fetch and cache the flag values from DeviceConfig during creation or
      *                 config change.
      */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
     @NonNull
     public static AppSearchConfig create(@NonNull Executor executor) {
         Objects.requireNonNull(executor);
@@ -115,7 +121,23 @@ public final class AppSearchConfig implements AutoCloseable {
         return configManager;
     }
 
-    private AppSearchConfig() {
+    /**
+     * Gets an instance of {@link AppSearchConfig} to be used.
+     *
+     * <p>If no instance has been initialized yet, a new one will be created. Otherwise, the
+     * existing instance will be returned.
+     */
+    @NonNull
+    public static AppSearchConfig getInstance(@NonNull Executor executor) {
+        Objects.requireNonNull(executor);
+        if (sConfig == null) {
+            synchronized (AppSearchConfig.class) {
+                if (sConfig == null) {
+                    sConfig = create(executor);
+                }
+            }
+        }
+        return sConfig;
     }
 
     /**

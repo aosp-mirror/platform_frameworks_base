@@ -224,7 +224,7 @@ public class AppSearchManagerService extends SystemService {
             if (ImplInstanceManager.getAppSearchDir(userHandle).exists()) {
                 // Only clear the package's data if AppSearch exists for this user.
                 PlatformLogger logger = mLoggerInstanceManager.getOrCreatePlatformLogger(mContext,
-                        userHandle);
+                        userHandle, AppSearchConfig.getInstance(EXECUTOR));
                 AppSearchImpl impl = mImplInstanceManager.getOrCreateAppSearchImpl(mContext,
                         userHandle, logger);
                 //TODO(b/145759910) clear visibility setting for package.
@@ -1147,7 +1147,8 @@ public class AppSearchManagerService extends SystemService {
                 try {
                     verifyUserUnlocked(callingUser);
                     logger = mLoggerInstanceManager.getOrCreatePlatformLogger(
-                            mContext, callingUser);
+                            mContext, callingUser,
+                            AppSearchConfig.getInstance(EXECUTOR));
                     mImplInstanceManager.getOrCreateAppSearchImpl(mContext, callingUser, logger);
                     ++operationSuccessCount;
                     invokeCallbackOnResult(callback, AppSearchResult.newSuccessfulResult(null));
@@ -1313,7 +1314,8 @@ public class AppSearchManagerService extends SystemService {
             try {
                 verifyUserUnlocked(userHandle);
                 PlatformLogger logger = mLoggerInstanceManager.getOrCreatePlatformLogger(
-                        mContext, userHandle);
+                        mContext, userHandle,
+                        AppSearchConfig.getInstance(EXECUTOR));
                 AppSearchImpl impl = mImplInstanceManager.getOrCreateAppSearchImpl(
                         mContext, userHandle, logger);
                 stats.dataSize += impl.getStorageInfoForPackage(packageName).getSizeBytes();
@@ -1341,7 +1343,8 @@ public class AppSearchManagerService extends SystemService {
                     return;
                 }
                 PlatformLogger logger = mLoggerInstanceManager.getOrCreatePlatformLogger(
-                        mContext, userHandle);
+                        mContext, userHandle,
+                        AppSearchConfig.getInstance(EXECUTOR));
                 AppSearchImpl impl = mImplInstanceManager.getOrCreateAppSearchImpl(
                         mContext, userHandle, logger);
                 for (int i = 0; i < packagesForUid.length; i++) {
@@ -1370,7 +1373,8 @@ public class AppSearchManagerService extends SystemService {
                     return;
                 }
                 PlatformLogger logger = mLoggerInstanceManager.getOrCreatePlatformLogger(
-                        mContext, userHandle);
+                        mContext, userHandle,
+                        AppSearchConfig.getInstance(EXECUTOR));
                 AppSearchImpl impl =
                         mImplInstanceManager.getOrCreateAppSearchImpl(mContext, userHandle, logger);
                 for (int i = 0; i < packagesForUser.size(); i++) {
