@@ -20,6 +20,7 @@ package com.android.server.companion;
 import static android.bluetooth.le.ScanSettings.CALLBACK_TYPE_ALL_MATCHES;
 import static android.bluetooth.le.ScanSettings.SCAN_MODE_BALANCED;
 import static android.content.Context.BIND_IMPORTANT;
+import static android.content.pm.PackageManager.CERT_INPUT_SHA256;
 import static android.content.pm.PackageManager.MATCH_ALL;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
@@ -665,7 +666,14 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         }
 
         @Override
-        public void createAssociation(String packageName, String macAddress, int userId) {
+        public void createAssociation(String packageName, String macAddress, int userId,
+                byte[] certificate) {
+            if (!getContext().getPackageManager().hasSigningCertificate(
+                    packageName, certificate, CERT_INPUT_SHA256)) {
+                Slog.e(LOG_TAG, "Given certificate doesn't match the package certificate.");
+                return;
+            }
+
             getContext().enforceCallingOrSelfPermission(
                     android.Manifest.permission.ASSOCIATE_COMPANION_DEVICES, "createAssociation");
 
