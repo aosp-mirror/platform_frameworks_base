@@ -29,7 +29,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.hardware.soundtrigger.KeyphraseEnrollmentInfo;
-import android.media.AudioFormat;
 import android.media.voice.KeyphraseModelManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -388,64 +387,6 @@ public class VoiceInteractionService extends Service {
                     supportHotwordDetectionService, options, sharedMemory);
         }
         return mHotwordDetector;
-    }
-
-    /**
-     * Creates a {@link HotwordDetector} and initializes the application's
-     * {@link HotwordDetectionService} using {@code options} and {code sharedMemory}.
-     *
-     * <p>To be able to call this, you need to set android:hotwordDetectionService in the
-     * android.voice_interaction metadata file to a valid hotword detection service, and set
-     * android:isolatedProcess="true" in the hotword detection service's declaration. Otherwise,
-     * this throws an {@link IllegalStateException}.
-     *
-     * <p>This instance must be retained and used by the client.
-     * Calling this a second time invalidates the previously created hotword detector
-     * which can no longer be used to manage recognition.
-     *
-     * <p>Using this has a noticeable impact on battery, since the microphone is kept open
-     * for the lifetime of the recognition {@link HotwordDetector#startRecognition() session}. On
-     * devices where hardware filtering is available (such as through a DSP), it's highly
-     * recommended to use {@link #createAlwaysOnHotwordDetector} instead.
-     *
-     * @param audioFormat Format of the audio to be passed to {@link HotwordDetectionService}.
-     * @param options Application configuration data to be provided to the
-     * {@link HotwordDetectionService}. PersistableBundle does not allow any remotable objects or
-     * other contents that can be used to communicate with other processes.
-     * @param sharedMemory The unrestricted data blob to be provided to the
-     * {@link HotwordDetectionService}. Use this to provide hotword models or other such data to the
-     * sandboxed process.
-     * @param callback The callback to notify of detection events.
-     * @return A hotword detector for the given audio format.
-     *
-     * @see #createAlwaysOnHotwordDetector(String, Locale, PersistableBundle, SharedMemory,
-     * AlwaysOnHotwordDetector.Callback)
-     * @deprecated Use
-     * {@link #createHotwordDetector(PersistableBundle, SharedMemory, HotwordDetector.Callback)}
-     * instead.
-     *
-     * @hide
-     */
-    @Deprecated
-    @SystemApi
-    @RequiresPermission(Manifest.permission.MANAGE_HOTWORD_DETECTION)
-    @NonNull
-    public final HotwordDetector createHotwordDetector(
-            @NonNull AudioFormat audioFormat,
-            @Nullable PersistableBundle options,
-            @Nullable SharedMemory sharedMemory,
-            @NonNull HotwordDetector.Callback callback) {
-        if (mSystemService == null) {
-            throw new IllegalStateException("Not available until onReady() is called");
-        }
-        synchronized (mLock) {
-            // Allow only one concurrent recognition via the APIs.
-            safelyShutdownHotwordDetector();
-            mSoftwareHotwordDetector =
-                    new SoftwareHotwordDetector(
-                            mSystemService, audioFormat, options, sharedMemory, callback);
-        }
-        return mSoftwareHotwordDetector;
     }
 
     /**
