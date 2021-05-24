@@ -16,6 +16,16 @@
 
 package android.net;
 
+import static android.net.IpSecAlgorithm.AUTH_AES_CMAC;
+import static android.net.IpSecAlgorithm.AUTH_AES_XCBC;
+import static android.net.IpSecAlgorithm.AUTH_CRYPT_AES_GCM;
+import static android.net.IpSecAlgorithm.AUTH_CRYPT_CHACHA20_POLY1305;
+import static android.net.IpSecAlgorithm.AUTH_HMAC_SHA256;
+import static android.net.IpSecAlgorithm.AUTH_HMAC_SHA384;
+import static android.net.IpSecAlgorithm.AUTH_HMAC_SHA512;
+import static android.net.IpSecAlgorithm.CRYPT_AES_CBC;
+import static android.net.IpSecAlgorithm.CRYPT_AES_CTR;
+
 import static com.android.internal.annotations.VisibleForTesting.Visibility;
 import static com.android.internal.util.Preconditions.checkStringNotEmpty;
 import static com.android.net.module.util.NetworkStackConstants.IPV6_MIN_MTU;
@@ -70,13 +80,28 @@ public final class Ikev2VpnProfile extends PlatformVpnProfile {
     private static final String EMPTY_CERT = "";
 
     /** @hide */
-    public static final List<String> DEFAULT_ALGORITHMS =
-            Collections.unmodifiableList(Arrays.asList(
-                    IpSecAlgorithm.CRYPT_AES_CBC,
-                    IpSecAlgorithm.AUTH_HMAC_SHA256,
-                    IpSecAlgorithm.AUTH_HMAC_SHA384,
-                    IpSecAlgorithm.AUTH_HMAC_SHA512,
-                    IpSecAlgorithm.AUTH_CRYPT_AES_GCM));
+    public static final List<String> DEFAULT_ALGORITHMS;
+
+    private static void addAlgorithmIfSupported(List<String> algorithms, String ipSecAlgoName) {
+        if (IpSecAlgorithm.getSupportedAlgorithms().contains(ipSecAlgoName)) {
+            algorithms.add(ipSecAlgoName);
+        }
+    }
+
+    static {
+        final List<String> algorithms = new ArrayList<>();
+        addAlgorithmIfSupported(algorithms, CRYPT_AES_CBC);
+        addAlgorithmIfSupported(algorithms, CRYPT_AES_CTR);
+        addAlgorithmIfSupported(algorithms, AUTH_HMAC_SHA256);
+        addAlgorithmIfSupported(algorithms, AUTH_HMAC_SHA384);
+        addAlgorithmIfSupported(algorithms, AUTH_HMAC_SHA512);
+        addAlgorithmIfSupported(algorithms, AUTH_AES_XCBC);
+        addAlgorithmIfSupported(algorithms, AUTH_AES_CMAC);
+        addAlgorithmIfSupported(algorithms, AUTH_CRYPT_AES_GCM);
+        addAlgorithmIfSupported(algorithms, AUTH_CRYPT_CHACHA20_POLY1305);
+
+        DEFAULT_ALGORITHMS = Collections.unmodifiableList(algorithms);
+    }
 
     @NonNull private final String mServerAddr;
     @NonNull private final String mUserIdentity;
@@ -195,8 +220,6 @@ public final class Ikev2VpnProfile extends PlatformVpnProfile {
      * @param allowedAlgorithms The list to be validated
      */
     private static void validateAllowedAlgorithms(@NonNull List<String> algorithmNames) {
-        VpnProfile.validateAllowedAlgorithms(algorithmNames);
-
         // First, make sure no insecure algorithms were proposed.
         if (algorithmNames.contains(IpSecAlgorithm.AUTH_HMAC_MD5)
                 || algorithmNames.contains(IpSecAlgorithm.AUTH_HMAC_SHA1)) {

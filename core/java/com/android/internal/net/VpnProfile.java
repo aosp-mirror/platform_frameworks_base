@@ -30,7 +30,10 @@ import android.text.TextUtils;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.net.module.util.ProxyUtils;
 
+import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -73,6 +76,9 @@ public final class VpnProfile implements Cloneable, Parcelable {
     public static final int PROXY_MANUAL = 1;
 
     private static final String ENCODED_NULL_PROXY_INFO = "\0\0\0\0";
+
+    /** Default URL encoding. */
+    private static final String DEFAULT_ENCODING = StandardCharsets.UTF_8.name();
 
     // Entity fields.
     @UnsupportedAppUsage
@@ -129,9 +135,6 @@ public final class VpnProfile implements Cloneable, Parcelable {
 
     /**
      * The list of allowable algorithms.
-     *
-     * <p>This list is validated in the setter to ensure that encoding characters (list, value
-     * delimiters) are not present in the algorithm names. See {@link #validateAllowedAlgorithms()}
      */
     private List<String> mAllowedAlgorithms = new ArrayList<>(); // 19
     public boolean isBypassable = false;                         // 20
@@ -196,11 +199,8 @@ public final class VpnProfile implements Cloneable, Parcelable {
      *
      * @param allowedAlgorithms the list of allowable algorithms, as listed in {@link
      *     IpSecAlgorithm}.
-     * @throws IllegalArgumentException if any delimiters are used in algorithm names. See {@link
-     *     #VALUE_DELIMITER} and {@link LIST_DELIMITER}.
      */
     public void setAllowedAlgorithms(List<String> allowedAlgorithms) {
-        validateAllowedAlgorithms(allowedAlgorithms);
         mAllowedAlgorithms = allowedAlgorithms;
     }
 
@@ -297,7 +297,11 @@ public final class VpnProfile implements Cloneable, Parcelable {
 
             // Either all must be present, or none must be.
             if (values.length >= 24) {
-                profile.mAllowedAlgorithms = Arrays.asList(values[19].split(LIST_DELIMITER));
+                profile.mAllowedAlgorithms = new ArrayList<>();
+                for (String algo : Arrays.asList(values[19].split(LIST_DELIMITER))) {
+                    profile.mAllowedAlgorithms.add(URLDecoder.decode(algo, DEFAULT_ENCODING));
+                }
+
                 profile.isBypassable = Boolean.parseBoolean(values[20]);
                 profile.isMetered = Boolean.parseBoolean(values[21]);
                 profile.maxMtu = Integer.parseInt(values[22]);
@@ -348,7 +352,19 @@ public final class VpnProfile implements Cloneable, Parcelable {
             builder.append(ENCODED_NULL_PROXY_INFO);
         }
 
-        builder.append(VALUE_DELIMITER).append(String.join(LIST_DELIMITER, mAllowedAlgorithms));
+        final List<String> encodedAlgoNames = new ArrayList<>();
+
+        try {
+            for (String algo : mAllowedAlgorithms) {
+                encodedAlgoNames.add(URLEncoder.encode(algo, DEFAULT_ENCODING));
+            }
+        } catch (UnsupportedEncodingException e) {
+            // Unexpected error
+            throw new IllegalStateException("Failed to encode algorithms.", e);
+        }
+
+        builder.append(VALUE_DELIMITER).append(String.join(LIST_DELIMITER, encodedAlgoNames));
+
         builder.append(VALUE_DELIMITER).append(isBypassable);
         builder.append(VALUE_DELIMITER).append(isMetered);
         builder.append(VALUE_DELIMITER).append(maxMtu);
@@ -423,20 +439,6 @@ public final class VpnProfile implements Cloneable, Parcelable {
             return false;
         }
         return true;
-    }
-
-    /**
-     * Validates that the provided list of algorithms does not contain illegal characters.
-     *
-     * @param allowedAlgorithms The list to be validated
-     */
-    public static void validateAllowedAlgorithms(List<String> allowedAlgorithms) {
-        for (final String alg : allowedAlgorithms) {
-            if (alg.contains(VALUE_DELIMITER) || alg.contains(LIST_DELIMITER)) {
-                throw new IllegalArgumentException(
-                        "Algorithm contained illegal ('\0' or ',') character");
-            }
-        }
     }
 
     /** Generates a hashcode over the VpnProfile. */

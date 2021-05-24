@@ -23,7 +23,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import android.net.IpSecAlgorithm;
 
@@ -97,6 +96,7 @@ public class VpnProfileTest {
         p.setAllowedAlgorithms(
                 Arrays.asList(
                         IpSecAlgorithm.AUTH_CRYPT_AES_GCM,
+                        IpSecAlgorithm.AUTH_CRYPT_CHACHA20_POLY1305,
                         IpSecAlgorithm.AUTH_HMAC_SHA512,
                         IpSecAlgorithm.CRYPT_AES_CBC));
         p.isBypassable = true;
@@ -123,30 +123,6 @@ public class VpnProfileTest {
     @Test
     public void testParcelUnparcel() {
         assertParcelSane(getSampleIkev2Profile(DUMMY_PROFILE_KEY), 23);
-    }
-
-    @Test
-    public void testSetInvalidAlgorithmValueDelimiter() {
-        final VpnProfile profile = getSampleIkev2Profile(DUMMY_PROFILE_KEY);
-
-        try {
-            profile.setAllowedAlgorithms(
-                    Arrays.asList("test" + VpnProfile.VALUE_DELIMITER + "test"));
-            fail("Expected failure due to value separator in algorithm name");
-        } catch (IllegalArgumentException expected) {
-        }
-    }
-
-    @Test
-    public void testSetInvalidAlgorithmListDelimiter() {
-        final VpnProfile profile = getSampleIkev2Profile(DUMMY_PROFILE_KEY);
-
-        try {
-            profile.setAllowedAlgorithms(
-                    Arrays.asList("test" + VpnProfile.LIST_DELIMITER + "test"));
-            fail("Expected failure due to value separator in algorithm name");
-        } catch (IllegalArgumentException expected) {
-        }
     }
 
     @Test
