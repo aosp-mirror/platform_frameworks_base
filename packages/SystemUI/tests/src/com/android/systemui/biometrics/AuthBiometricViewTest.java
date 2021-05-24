@@ -41,6 +41,7 @@ import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -194,6 +195,8 @@ public class AuthBiometricViewTest extends SysuiTestCase {
         assertEquals(AuthBiometricView.STATE_AUTHENTICATING, mBiometricView.mState);
     }
 
+    // TODO: b(/189031816)
+    @Ignore
     @Test
     public void testError_sendsActionError() {
         initDialog(mContext, false /* allowDeviceCredential */, mCallback, new MockInjector());
@@ -238,6 +241,8 @@ public class AuthBiometricViewTest extends SysuiTestCase {
         verify(mCallback, never()).onAction(eq(AuthBiometricView.Callback.ACTION_USER_CANCELED));
     }
 
+    // TODO: b(/189031816)
+    @Ignore
     @Test
     public void testRestoresState() {
         final boolean requireConfirmation = true; // set/init from AuthController
