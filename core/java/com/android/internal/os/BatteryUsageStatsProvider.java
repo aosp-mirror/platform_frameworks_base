@@ -180,29 +180,28 @@ public class BatteryUsageStatsProvider {
     }
 
     private long getProcessForegroundTimeMs(BatteryStats.Uid uid, long realtimeUs) {
-        final long topStateDurationMs = uid.getProcessStateTime(BatteryStats.Uid.PROCESS_STATE_TOP,
-                realtimeUs, BatteryStats.STATS_SINCE_CHARGED) / 1000;
-
-        long foregroundActivityDurationMs = 0;
+        final long topStateDurationUs = uid.getProcessStateTime(BatteryStats.Uid.PROCESS_STATE_TOP,
+                realtimeUs, BatteryStats.STATS_SINCE_CHARGED);
+        long foregroundActivityDurationUs = 0;
         final BatteryStats.Timer foregroundActivityTimer = uid.getForegroundActivityTimer();
         if (foregroundActivityTimer != null) {
-            foregroundActivityDurationMs = foregroundActivityTimer.getTotalTimeLocked(realtimeUs,
-                    BatteryStats.STATS_SINCE_CHARGED) / 1000;
+            foregroundActivityDurationUs = foregroundActivityTimer.getTotalTimeLocked(realtimeUs,
+                    BatteryStats.STATS_SINCE_CHARGED);
         }
 
         // Use the min value of STATE_TOP time and foreground activity time, since both of these
         // times are imprecise
-        final long foregroundDurationMs = Math.min(topStateDurationMs,
-                foregroundActivityDurationMs);
+        long totalForegroundDurationUs = Math.min(topStateDurationUs, foregroundActivityDurationUs);
 
-        long foregroundServiceDurationMs = 0;
-        final BatteryStats.Timer foregroundServiceTimer = uid.getForegroundServiceTimer();
-        if (foregroundServiceTimer != null) {
-            foregroundServiceDurationMs = foregroundServiceTimer.getTotalTimeLocked(realtimeUs,
-                    BatteryStats.STATS_SINCE_CHARGED) / 1000;
-        }
+        totalForegroundDurationUs += uid.getProcessStateTime(
+                BatteryStats.Uid.PROCESS_STATE_FOREGROUND, realtimeUs,
+                BatteryStats.STATS_SINCE_CHARGED);
 
-        return foregroundDurationMs + foregroundServiceDurationMs;
+        totalForegroundDurationUs += uid.getProcessStateTime(
+                BatteryStats.Uid.PROCESS_STATE_FOREGROUND_SERVICE, realtimeUs,
+                BatteryStats.STATS_SINCE_CHARGED);
+
+        return totalForegroundDurationUs / 1000;
     }
 
     private long getProcessBackgroundTimeMs(BatteryStats.Uid uid, long realtimeUs) {
