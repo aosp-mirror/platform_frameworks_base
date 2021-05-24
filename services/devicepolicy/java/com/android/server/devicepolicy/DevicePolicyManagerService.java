@@ -8572,6 +8572,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final DevicePolicyData policyData = getUserData(userId);
         policyData.mCurrentInputMethodSet = false;
         saveSettingsLocked(userId);
+        mPolicyCache.onUserRemoved(userId);
         final DevicePolicyData systemPolicyData = getUserData(UserHandle.USER_SYSTEM);
         systemPolicyData.mLastSecurityLogRetrievalTime = -1;
         systemPolicyData.mLastBugReportRequestTime = -1;
