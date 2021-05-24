@@ -30,8 +30,8 @@
 #include "renderthread/RenderThread.h"
 #endif
 
+#include <gui/TraceUtils.h>
 #include "utils/Macros.h"
-#include "utils/TraceUtils.h"
 #include "utils/VectorDrawableUtils.h"
 
 namespace android {
