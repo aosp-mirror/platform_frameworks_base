@@ -309,11 +309,16 @@ public class SpeechRecognizer {
      * {@link #setRecognitionListener(RecognitionListener)} should be called before dispatching any
      * command to the created {@code SpeechRecognizer}, otherwise no notifications will be
      * received.
-     *
      * Use this version of the method to specify a specific service to direct this
-     * {@link SpeechRecognizer} to. Normally you would not use this; use
-     * {@link #createSpeechRecognizer(Context)} instead to use the system default recognition
-     * service.
+     * {@link SpeechRecognizer} to.
+     *
+     * <p><strong>Important</strong>: before calling this method, please check via
+     * {@link android.content.pm.PackageManager#queryIntentServices(Intent, int)} that {@code
+     * serviceComponent} actually exists and provides
+     * {@link RecognitionService#SERVICE_INTERFACE}. Normally you would not use this; call
+     * {@link #createSpeechRecognizer(Context)} to use the system default recognition
+     * service instead or {@link #createOnDeviceSpeechRecognizer(Context)} to use on-device
+     * recognition.</p>
      *
      * <p>For apps targeting Android 11 (API level 30) interaction with a speech recognition
      * service requires <queries> element to be added to the manifest file:
