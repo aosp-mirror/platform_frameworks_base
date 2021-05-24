@@ -674,7 +674,6 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     // Compilation reasons.
-    public static final int REASON_UNKNOWN = -1;
     public static final int REASON_FIRST_BOOT = 0;
     public static final int REASON_BOOT_AFTER_OTA = 1;
     public static final int REASON_POST_BOOT = 2;
@@ -687,7 +686,8 @@ public class PackageManagerService extends IPackageManager.Stub
     public static final int REASON_BACKGROUND_DEXOPT = 9;
     public static final int REASON_AB_OTA = 10;
     public static final int REASON_INACTIVE_PACKAGE_DOWNGRADE = 11;
-    public static final int REASON_SHARED = 12;
+    public static final int REASON_CMDLINE = 12;
+    public static final int REASON_SHARED = 13;
 
     public static final int REASON_LAST = REASON_SHARED;
 
@@ -9903,10 +9903,10 @@ public class PackageManagerService extends IPackageManager.Stub
     @Override
     public void notifyDexLoad(String loadingPackageName, Map<String, String> classLoaderContextMap,
             String loaderIsa) {
-        if (PLATFORM_PACKAGE_NAME.equals(loadingPackageName)
-                && Binder.getCallingUid() != Process.SYSTEM_UID) {
+        int callingUid = Binder.getCallingUid();
+        if (PLATFORM_PACKAGE_NAME.equals(loadingPackageName) && callingUid != Process.SYSTEM_UID) {
             Slog.w(TAG, "Non System Server process reporting dex loads as system server. uid="
-                    + Binder.getCallingUid());
+                    + callingUid);
             // Do not record dex loads from processes pretending to be system server.
             // Only the system server should be assigned the package "android", so reject calls
             // that don't satisfy the constraint.
@@ -9917,6 +9917,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // in order to verify the expectations.
             return;
         }
+
         int userId = UserHandle.getCallingUserId();
         ApplicationInfo ai = getApplicationInfo(loadingPackageName, /*flags*/ 0, userId);
         if (ai == null) {
@@ -9924,7 +9925,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 + loadingPackageName + ", user=" + userId);
             return;
         }
-        mDexManager.notifyDexLoad(ai, classLoaderContextMap, loaderIsa, userId);
+        mDexManager.notifyDexLoad(ai, classLoaderContextMap, loaderIsa, userId,
+                Process.isIsolated(callingUid));
     }
 
     @Override
@@ -9967,7 +9969,7 @@ public class PackageManagerService extends IPackageManager.Stub
         int flags = (checkProfiles ? DexoptOptions.DEXOPT_CHECK_FOR_PROFILES_UPDATES : 0) |
                 (force ? DexoptOptions.DEXOPT_FORCE : 0) |
                 (bootComplete ? DexoptOptions.DEXOPT_BOOT_COMPLETE : 0);
-        return performDexOpt(new DexoptOptions(packageName, REASON_UNKNOWN,
+        return performDexOpt(new DexoptOptions(packageName, REASON_CMDLINE,
                 targetCompilerFilter, splitName, flags));
     }
 

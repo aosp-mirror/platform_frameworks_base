@@ -16,6 +16,8 @@
 
 package com.android.internal.os;
 
+import static com.android.internal.os.BinderLatencyProto.Dims.SYSTEM_SERVER;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
@@ -23,16 +25,21 @@ import static org.junit.Assert.assertEquals;
 import android.os.Binder;
 import android.platform.test.annotations.Presubmit;
 import android.util.ArrayMap;
+import android.util.proto.ProtoOutputStream;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.os.BinderInternal.CallSession;
 import com.android.internal.os.BinderLatencyObserver.LatencyDims;
+import com.android.internal.os.BinderLatencyProto.ApiStats;
+import com.android.internal.os.BinderLatencyProto.Dims;
+import com.android.internal.os.BinderLatencyProto.RepeatedApiStats;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -49,11 +56,17 @@ public class BinderLatencyObserverTest {
         CallSession callSession = new CallSession();
         callSession.binderClass = binder.getClass();
         callSession.transactionCode = 1;
+
+        blo.setElapsedTime(2);
         blo.callEnded(callSession);
+        blo.setElapsedTime(4);
         blo.callEnded(callSession);
+        blo.setElapsedTime(6);
         blo.callEnded(callSession);
         callSession.transactionCode = 2;
+        blo.setElapsedTime(8);
         blo.callEnded(callSession);
+        blo.setElapsedTime(10);
         blo.callEnded(callSession);
 
         ArrayMap<LatencyDims, int[]> latencyHistograms = blo.getLatencyHistograms();
@@ -74,8 +87,10 @@ public class BinderLatencyObserverTest {
         CallSession callSession = new CallSession();
         callSession.binderClass = binder.getClass();
         callSession.transactionCode = 1;
+        blo.setElapsedTime(2);
         blo.callEnded(callSession);
         callSession.transactionCode = 2;
+        blo.setElapsedTime(4);
         blo.callEnded(callSession);
 
         ArrayMap<LatencyDims, int[]> latencyHistograms = blo.getLatencyHistograms();
@@ -89,13 +104,13 @@ public class BinderLatencyObserverTest {
     @Test
     public void testTooCallLengthOverflow() {
         TestBinderLatencyObserver blo = new TestBinderLatencyObserver();
-        blo.setElapsedTime(2L + (long) Integer.MAX_VALUE);
         blo.setHistogramBucketsParams(5, 5, 1.125f);
 
         Binder binder = new Binder();
         CallSession callSession = new CallSession();
         callSession.binderClass = binder.getClass();
         callSession.transactionCode = 1;
+        blo.setElapsedTime(2L + (long) Integer.MAX_VALUE);
         blo.callEnded(callSession);
 
         // The long call should be capped to maxint (to not overflow) and placed in the last bucket.
@@ -114,6 +129,7 @@ public class BinderLatencyObserverTest {
         CallSession callSession = new CallSession();
         callSession.binderClass = binder.getClass();
         callSession.transactionCode = 1;
+        blo.setElapsedTime(2);
         blo.callEnded(callSession);
 
         LatencyDims dims = new LatencyDims(binder.getClass(), 1);
@@ -122,14 +138,111 @@ public class BinderLatencyObserverTest {
         assertThat(blo.getLatencyHistograms().get(dims))
             .asList().containsExactly(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE);
         // Try to add another sample.
+        blo.setElapsedTime(2);
         blo.callEnded(callSession);
         // Make sure the buckets don't overflow.
         assertThat(blo.getLatencyHistograms().get(dims))
             .asList().containsExactly(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE);
     }
 
+    @Test
+    public void testSingleAtomPush() {
+        TestBinderLatencyObserver blo = new TestBinderLatencyObserver();
+
+        Binder binder = new Binder();
+        CallSession callSession = new CallSession();
+        callSession.binderClass = binder.getClass();
+        callSession.transactionCode = 1;
+        blo.setElapsedTime(7);
+        blo.callEnded(callSession);
+        blo.callEnded(callSession);
+        blo.setElapsedTime(8);
+        blo.callEnded(callSession);
+
+        // Trigger the statsd push.
+        blo.getStatsdPushRunnable().run();
+
+        ProtoOutputStream expectedProto = new ProtoOutputStream();
+        long apiStatsToken = expectedProto.start(RepeatedApiStats.API_STATS);
+        long dimsToken = expectedProto.start(ApiStats.DIMS);
+        expectedProto.write(Dims.PROCESS_SOURCE, SYSTEM_SERVER);
+        expectedProto.write(Dims.SERVICE_CLASS_NAME, binder.getClass().getName());
+        expectedProto.write(Dims.SERVICE_METHOD_NAME, "1");
+        expectedProto.end(dimsToken);
+        expectedProto.write(ApiStats.FIRST_BUCKET_INDEX, 3);
+        expectedProto.write(ApiStats.BUCKETS, 2);
+        expectedProto.write(ApiStats.BUCKETS, 1);
+        expectedProto.end(apiStatsToken);
+
+        assertThat(blo.getWrittenAtoms())
+                .containsExactly(Arrays.toString(expectedProto.getBytes()));
+    }
+
+    @Test
+    public void testMultipleAtomPush() {
+        TestBinderLatencyObserver blo = new TestBinderLatencyObserver();
+
+        BinderTransactionNameResolver resolver = new BinderTransactionNameResolver();
+
+
+        Binder binder = new Binder();
+        CallSession callSession = new CallSession();
+        callSession.binderClass = binder.getClass();
+        callSession.transactionCode = 1;
+        blo.setElapsedTime(1);
+        blo.callEnded(callSession);
+        callSession.transactionCode = 2;
+        blo.setElapsedTime(5);
+        blo.callEnded(callSession);
+        callSession.transactionCode = 3;
+        blo.callEnded(callSession);
+
+        // Trigger the statsd push.
+        blo.getStatsdPushRunnable().run();
+
+        ProtoOutputStream expectedProto1 = new ProtoOutputStream();
+        long apiStatsToken = expectedProto1.start(RepeatedApiStats.API_STATS);
+        long dimsToken = expectedProto1.start(ApiStats.DIMS);
+        expectedProto1.write(Dims.PROCESS_SOURCE, SYSTEM_SERVER);
+        expectedProto1.write(Dims.SERVICE_CLASS_NAME, binder.getClass().getName());
+        expectedProto1.write(Dims.SERVICE_METHOD_NAME, "1");
+        expectedProto1.end(dimsToken);
+        expectedProto1.write(ApiStats.FIRST_BUCKET_INDEX, 0);
+        expectedProto1.write(ApiStats.BUCKETS, 1);
+        expectedProto1.end(apiStatsToken);
+
+        apiStatsToken = expectedProto1.start(RepeatedApiStats.API_STATS);
+        dimsToken = expectedProto1.start(ApiStats.DIMS);
+        expectedProto1.write(Dims.PROCESS_SOURCE, SYSTEM_SERVER);
+        expectedProto1.write(Dims.SERVICE_CLASS_NAME, binder.getClass().getName());
+        expectedProto1.write(Dims.SERVICE_METHOD_NAME, "2");
+        expectedProto1.end(dimsToken);
+        expectedProto1.write(ApiStats.FIRST_BUCKET_INDEX, 1);
+        expectedProto1.write(ApiStats.BUCKETS, 1);
+        expectedProto1.end(apiStatsToken);
+
+        ProtoOutputStream expectedProto2 = new ProtoOutputStream();
+        apiStatsToken = expectedProto2.start(RepeatedApiStats.API_STATS);
+        dimsToken = expectedProto2.start(ApiStats.DIMS);
+        expectedProto2.write(Dims.PROCESS_SOURCE, SYSTEM_SERVER);
+        expectedProto2.write(Dims.SERVICE_CLASS_NAME, binder.getClass().getName());
+        expectedProto2.write(Dims.SERVICE_METHOD_NAME, "3");
+        expectedProto2.end(dimsToken);
+        expectedProto2.write(ApiStats.FIRST_BUCKET_INDEX, 1);
+        expectedProto2.write(ApiStats.BUCKETS, 1);
+        expectedProto2.end(apiStatsToken);
+
+        // Each ApiStats is around ~60 bytes so only two should fit in an atom.
+        assertThat(blo.getWrittenAtoms())
+                .containsExactly(
+                        Arrays.toString(expectedProto1.getBytes()),
+                        Arrays.toString(expectedProto2.getBytes()))
+                .inOrder();
+    }
+
     public static class TestBinderLatencyObserver extends BinderLatencyObserver {
         private long mElapsedTime = 0;
+        private ArrayList<String> mWrittenAtoms;
 
         TestBinderLatencyObserver() {
             // Make random generator not random.
@@ -145,16 +258,30 @@ public class BinderLatencyObserverTest {
                 }
             });
             setSamplingInterval(1);
+            mWrittenAtoms = new ArrayList<>();
         }
 
         @Override
         protected long getElapsedRealtimeMicro() {
-            mElapsedTime += 2;
             return mElapsedTime;
+        }
+
+        @Override
+        protected int getMaxAtomSizeBytes() {
+            return 1100;
+        }
+
+        @Override
+        protected void writeAtomToStatsd(ProtoOutputStream atom) {
+            mWrittenAtoms.add(Arrays.toString(atom.getBytes()));
         }
 
         public void setElapsedTime(long time) {
             mElapsedTime = time;
+        }
+
+        public ArrayList<String> getWrittenAtoms() {
+            return mWrittenAtoms;
         }
     }
 }

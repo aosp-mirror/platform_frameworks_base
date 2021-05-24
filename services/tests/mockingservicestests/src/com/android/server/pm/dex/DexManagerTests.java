@@ -410,6 +410,17 @@ public class DexManagerTests {
     }
 
     @Test
+    public void testNotifyUsedByIsolatedProcess() {
+        // Bar loads its own apk but as isolatedProcess.
+        notifyDexLoad(mBarUser0, mBarUser0.getBaseAndSplitDexPaths(), mUser0,
+                /*isolatedProcess=*/ true);
+
+        // Bar is used by an isolated process and should be marked as usedByOtherApps
+        PackageUseInfo pui = getPackageUseInfo(mBarUser0);
+        assertIsUsedByOtherApps(mBarUser0, pui, true);
+    }
+
+    @Test
     public void testNotifyPackageUpdatedCodeLocations() {
         // Simulate a split update.
         String newSplit = mBarUser0.replaceLastSplit();
@@ -545,7 +556,7 @@ public class DexManagerTests {
         List<String> classLoaders =
                 Arrays.asList(PATH_CLASS_LOADER_NAME, UNSUPPORTED_CLASS_LOADER_NAME);
         List<String> classPaths = Arrays.asList(classPath, classPath);
-        notifyDexLoad(mBarUser0, classLoaders, classPaths, mUser0);
+        notifyDexLoad(mBarUser0, classLoaders, classPaths, mUser0, /*isolatedProcess=*/ false);
 
         assertNoUseInfo(mBarUser0);
 
@@ -664,7 +675,8 @@ public class DexManagerTests {
             expectedContexts[i] += contextSuffix;
         }
 
-        notifyDexLoad(mFooUser0, fooSecondaries, expectedContexts, mUser0);
+        notifyDexLoad(mFooUser0, fooSecondaries, expectedContexts, mUser0,
+                /*isolatedProcess=*/ false);
 
         PackageUseInfo pui = getPackageUseInfo(mFooUser0);
         assertIsUsedByOtherApps(mFooUser0, pui, false);
@@ -838,26 +850,32 @@ public class DexManagerTests {
             assertEquals(codePath, isUsedByOtherApps, pui.isUsedByOtherApps(codePath));
         }
     }
+
     private void notifyDexLoad(TestData testData, List<String> dexPaths, int loaderUserId) {
+        notifyDexLoad(testData, dexPaths, loaderUserId, /*isolatedProcess=*/ false);
+    }
+
+    private void notifyDexLoad(TestData testData, List<String> dexPaths, int loaderUserId,
+            boolean isolatedProcess) {
         // By default, assume a single class loader in the chain.
         // This makes writing tests much easier.
         List<String> classLoaders = Arrays.asList(testData.mClassLoader);
         List<String> classPaths = dexPaths != null
                 ? Arrays.<String>asList(String.join(File.pathSeparator, dexPaths)) : null;
-        notifyDexLoad(testData, classLoaders, classPaths, loaderUserId);
+        notifyDexLoad(testData, classLoaders, classPaths, loaderUserId, isolatedProcess);
     }
 
     private void notifyDexLoad(TestData testData, List<String> classLoaders,
-            List<String> classPaths, int loaderUserId) {
+            List<String> classPaths, int loaderUserId, boolean isolatedProcess) {
         String[] classLoaderContexts = computeClassLoaderContexts(classLoaders, classPaths);
         // We call the internal function so any exceptions thrown cause test failures.
         List<String> dexPaths = classPaths != null
                 ? Arrays.asList(classPaths.get(0).split(File.pathSeparator)) : Arrays.asList();
-        notifyDexLoad(testData, dexPaths, classLoaderContexts, loaderUserId);
+        notifyDexLoad(testData, dexPaths, classLoaderContexts, loaderUserId, isolatedProcess);
     }
 
     private void notifyDexLoad(TestData testData, List<String> dexPaths,
-            String[] classLoaderContexts, int loaderUserId) {
+            String[] classLoaderContexts, int loaderUserId, boolean isolatedProcess) {
         assertTrue(dexPaths.size() == classLoaderContexts.length);
         HashMap<String, String> dexPathMapping = new HashMap<>(dexPaths.size());
         for (int i = 0; i < dexPaths.size(); i++) {
@@ -865,7 +883,7 @@ public class DexManagerTests {
                     ? classLoaderContexts[i] : PackageDexUsage.UNSUPPORTED_CLASS_LOADER_CONTEXT);
         }
         mDexManager.notifyDexLoadInternal(testData.mPackageInfo.applicationInfo, dexPathMapping,
-                testData.mLoaderIsa, loaderUserId);
+                testData.mLoaderIsa, loaderUserId, isolatedProcess);
     }
 
     private String[] computeClassLoaderContexts(List<String> classLoaders,

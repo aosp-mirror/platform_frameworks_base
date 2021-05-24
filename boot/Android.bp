@@ -52,8 +52,44 @@ platform_bootclasspath {
             module: "art-bootclasspath-fragment",
         },
         {
+            apex: "com.android.conscrypt",
+            module: "com.android.conscrypt-bootclasspath-fragment",
+        },
+        {
             apex: "com.android.i18n",
             module: "i18n-bootclasspath-fragment",
+        },
+        {
+            apex: "com.android.ipsec",
+            module: "com.android.ipsec-bootclasspath-fragment",
+        },
+        {
+            apex: "com.android.media",
+            module: "com.android.media-bootclasspath-fragment",
+        },
+        {
+            apex: "com.android.mediaprovider",
+            module: "com.android.mediaprovider-bootclasspath-fragment",
+        },
+        {
+            apex: "com.android.os.statsd",
+            module: "com.android.os.statsd-bootclasspath-fragment",
+        },
+        {
+            apex: "com.android.permission",
+            module: "com.android.permission-bootclasspath-fragment",
+        },
+        {
+            apex: "com.android.sdkext",
+            module: "com.android.sdkext-bootclasspath-fragment",
+        },
+        {
+            apex: "com.android.tethering",
+            module: "com.android.tethering-bootclasspath-fragment",
+        },
+        {
+            apex: "com.android.wifi",
+            module: "com.android.wifi-bootclasspath-fragment",
         },
     ],
 

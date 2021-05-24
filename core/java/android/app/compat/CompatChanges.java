@@ -100,9 +100,10 @@ public final class CompatChanges {
     }
 
     /**
-     * Adds app compat overrides for a given package. This will check whether the caller is allowed
-     * to perform this operation on the given apk and build. Only the installer package is allowed
-     * to set overrides on a non-debuggable final build and a non-test apk.
+     * Associates app compat overrides with the given package and their respective change IDs.
+     * This will check whether the caller is allowed to perform this operation on the given apk and
+     * build. Only the installer package is allowed to set overrides on a non-debuggable final
+     * build and a non-test apk.
      *
      * <p>Note that calling this method doesn't remove previously added overrides for the given
      * package if their change ID isn't in the given map, only replaces those that have the same
@@ -112,7 +113,7 @@ public final class CompatChanges {
      * @param overrides A map from change ID to the override applied for this change ID.
      */
     @RequiresPermission(android.Manifest.permission.OVERRIDE_COMPAT_CHANGE_CONFIG_ON_RELEASE_BUILD)
-    public static void addPackageOverrides(@NonNull String packageName,
+    public static void putPackageOverrides(@NonNull String packageName,
             @NonNull Map<Long, PackageOverride> overrides) {
         IPlatformCompat platformCompat = IPlatformCompat.Stub.asInterface(
                 ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE));
@@ -125,7 +126,7 @@ public final class CompatChanges {
     }
 
     /**
-     * Removes app compat overrides for a given package. This will check whether the caller is
+     * Removes app compat overrides for the given package. This will check whether the caller is
      * allowed to perform this operation on the given apk and build. Only the installer package is
      * allowed to clear overrides on a non-debuggable final build and a non-test apk.
      *

@@ -86,6 +86,11 @@ public class DexManager {
     // However it can load verification data - thus we pick the "verify" compiler filter.
     private static final String SYSTEM_SERVER_COMPILER_FILTER = "verify";
 
+    // The suffix we add to the package name when the loading happens in an isolated process.
+    // Note that the double dot creates and "invalid" package name which makes it clear that this
+    // is an artificially constructed name.
+    private static final String ISOLATED_PROCESS_PACKAGE_SUFFIX = "..isolated";
+
     private final Context mContext;
 
     // Maps package name to code locations.
@@ -166,12 +171,14 @@ public class DexManager {
      *     the class loader context that was used to load them.
      * @param loaderIsa the ISA of the app loading the dex files
      * @param loaderUserId the user id which runs the code loading the dex files
+     * @param loaderIsIsolatedProcess whether or not the loading process is isolated.
      */
     public void notifyDexLoad(ApplicationInfo loadingAppInfo,
-            Map<String, String> classLoaderContextMap, String loaderIsa, int loaderUserId) {
+            Map<String, String> classLoaderContextMap, String loaderIsa, int loaderUserId,
+            boolean loaderIsIsolatedProcess) {
         try {
             notifyDexLoadInternal(loadingAppInfo, classLoaderContextMap, loaderIsa,
-                    loaderUserId);
+                    loaderUserId, loaderIsIsolatedProcess);
         } catch (Exception e) {
             Slog.w(TAG, "Exception while notifying dex load for package " +
                     loadingAppInfo.packageName, e);
@@ -181,7 +188,7 @@ public class DexManager {
     @VisibleForTesting
     /*package*/ void notifyDexLoadInternal(ApplicationInfo loadingAppInfo,
             Map<String, String> classLoaderContextMap, String loaderIsa,
-            int loaderUserId) {
+            int loaderUserId, boolean loaderIsIsolatedProcess) {
         if (classLoaderContextMap == null) {
             return;
         }
@@ -195,22 +202,36 @@ public class DexManager {
             return;
         }
 
+        // If this load is coming from an isolated process we need to be able to prevent profile
+        // based optimizations. This is because isolated processes are sandboxed and can only read
+        // world readable files, so they need world readable optimization files. An
+        // example of such a package is webview.
+        //
+        // In order to prevent profile optimization we pretend that the load is coming from a
+        // different package, and so we assign a artificial name to the loading package making it
+        // clear that it comes from an isolated process. This blends well with the entire
+        // usedByOthers logic without needing to special handle isolated process in all dexopt
+        // layers.
+        String loadingPackageAmendedName = loadingAppInfo.packageName;
+        if (loaderIsIsolatedProcess) {
+            loadingPackageAmendedName += ISOLATED_PROCESS_PACKAGE_SUFFIX;
+        }
         for (Map.Entry<String, String> mapping : classLoaderContextMap.entrySet()) {
             String dexPath = mapping.getKey();
             // Find the owning package name.
             DexSearchResult searchResult = getDexPackage(loadingAppInfo, dexPath, loaderUserId);
 
             if (DEBUG) {
-                Slog.i(TAG, loadingAppInfo.packageName
-                    + " loads from " + searchResult + " : " + loaderUserId + " : " + dexPath);
+                Slog.i(TAG, loadingPackageAmendedName
+                        + " loads from " + searchResult + " : " + loaderUserId + " : " + dexPath);
             }
 
             if (searchResult.mOutcome != DEX_SEARCH_NOT_FOUND) {
                 // TODO(calin): extend isUsedByOtherApps check to detect the cases where
                 // different apps share the same runtime. In that case we should not mark the dex
                 // file as isUsedByOtherApps. Currently this is a safe approximation.
-                boolean isUsedByOtherApps = !loadingAppInfo.packageName.equals(
-                        searchResult.mOwningPackageName);
+                boolean isUsedByOtherApps =
+                        !loadingPackageAmendedName.equals(searchResult.mOwningPackageName);
                 boolean primaryOrSplit = searchResult.mOutcome == DEX_SEARCH_FOUND_PRIMARY ||
                         searchResult.mOutcome == DEX_SEARCH_FOUND_SPLIT;
 
@@ -249,7 +270,7 @@ public class DexManager {
                     // async write to disk to make sure we don't loose the data in case of a reboot.
                     if (mPackageDexUsage.record(searchResult.mOwningPackageName,
                             dexPath, loaderUserId, loaderIsa, primaryOrSplit,
-                            loadingAppInfo.packageName, classLoaderContext, overwriteCLC)) {
+                            loadingPackageAmendedName, classLoaderContext, overwriteCLC)) {
                         mPackageDexUsage.maybeWriteAsync();
                     }
                 }
@@ -749,7 +770,7 @@ public class DexManager {
                     dexPath, userId, isa, /*primaryOrSplit*/ false,
                     loadingPackage,
                     PackageDexUsage.VARIABLE_CLASS_LOADER_CONTEXT,
-                    /*overwriteCLC*/ false);
+                    /*overwriteCLC=*/ false);
             update |= newUpdate;
         }
         if (update) {
