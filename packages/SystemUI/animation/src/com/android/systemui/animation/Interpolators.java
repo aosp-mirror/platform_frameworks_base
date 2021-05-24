@@ -96,13 +96,18 @@ public class Interpolators {
     /**
      * Interpolate alpha for notifications background scrim during shade expansion.
      * @param fraction Shade expansion fraction
+     * @param forNotification If we want the alpha of the notification shade or the scrim.
      */
-    public static float getNotificationScrimAlpha(float fraction) {
+    public static float getNotificationScrimAlpha(float fraction, boolean forNotification) {
+        if (!forNotification) {
+            fraction = MathUtils.saturate(1.7f * fraction);
+        }
         fraction = fraction * 1.2f - 0.2f;
         if (fraction <= 0) {
             return 0;
         } else {
-            return (float) (1f - 0.5f * (1f - Math.cos(3.14159f * Math.pow(1f - fraction, 2f))));
+            final float oneMinusFrac = 1f - fraction;
+            return (float) (1f - 0.5f * (1f - Math.cos(3.14159f * oneMinusFrac * oneMinusFrac)));
         }
     }
 }
