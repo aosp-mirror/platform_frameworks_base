@@ -52,6 +52,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.widget.MessagingMessage;
 import com.android.settingslib.utils.ThreadUtils;
 import com.android.systemui.R;
 import com.android.systemui.people.widget.PeopleSpaceWidgetManager;
@@ -265,10 +266,16 @@ public class PeopleSpaceUtils {
         boolean hasMessageText = message != null && !TextUtils.isEmpty(message.getText());
         CharSequence content = (isMissedCall && !hasMessageText)
                 ? context.getString(R.string.missed_call) : message.getText();
-        Uri dataUri = message != null ? message.getDataUri() : null;
+
+        // We only use the URI if it's an image, otherwise we fallback to text (for example, with an
+        // audio URI)
+        Uri imageUri = message != null && MessagingMessage.hasImage(message)
+                ? message.getDataUri() : null;
+
         if (DEBUG) {
             Log.d(TAG, "Tile key: " + key.toString() + ". Notification message has text: "
-                    + hasMessageText + " Has last interaction: " + sbn.getPostTime());
+                    + hasMessageText + ". Image URI: " + imageUri + ". Has last interaction: "
+                    + sbn.getPostTime());
         }
         CharSequence sender = getSenderIfGroupConversation(notification, message);
 
@@ -278,7 +285,7 @@ public class PeopleSpaceUtils {
                 .setNotificationCategory(notification.category)
                 .setNotificationContent(content)
                 .setNotificationSender(sender)
-                .setNotificationDataUri(dataUri)
+                .setNotificationDataUri(imageUri)
                 .setMessagesCount(messagesCount)
                 .build();
     }
