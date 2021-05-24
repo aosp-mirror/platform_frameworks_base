@@ -123,8 +123,13 @@ public class FadeRotationAnimationController extends FadeAnimationController {
     }
 
     /** Returns {@code true} if the window is handled by this controller. */
+    boolean isHandledToken(WindowToken token) {
+        return token == mNavBarToken || isTargetToken(token);
+    }
+
+    /** Returns {@code true} if the controller will run fade animations on the window. */
     boolean isTargetToken(WindowToken token) {
-        return token == mNavBarToken || mTargetWindowTokens.contains(token);
+        return mTargetWindowTokens.contains(token);
     }
 
     void setOnShowRunnable(Runnable onShowRunnable) {
