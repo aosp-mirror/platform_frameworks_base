@@ -21,38 +21,40 @@ import static android.Manifest.permission.REQUEST_COMPANION_START_FOREGROUND_SER
 import static android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND;
 import static android.Manifest.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND;
 import static android.app.ActivityManager.PROCESS_STATE_HEAVY_WEIGHT;
+import static android.app.ActivityManager.PROCESS_STATE_PERSISTENT_UI;
 import static android.app.ActivityManager.PROCESS_STATE_RECEIVER;
 import static android.app.ActivityManager.PROCESS_STATE_TOP;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MANIFEST;
+import static android.os.PowerExemptionManager.REASON_ACTIVITY_STARTER;
 import static android.os.PowerExemptionManager.REASON_ACTIVITY_VISIBILITY_GRACE_PERIOD;
+import static android.os.PowerExemptionManager.REASON_ALLOWLISTED_PACKAGE;
+import static android.os.PowerExemptionManager.REASON_BACKGROUND_ACTIVITY_PERMISSION;
+import static android.os.PowerExemptionManager.REASON_BACKGROUND_FGS_PERMISSION;
+import static android.os.PowerExemptionManager.REASON_COMPANION_DEVICE_MANAGER;
+import static android.os.PowerExemptionManager.REASON_DENIED;
+import static android.os.PowerExemptionManager.REASON_DEVICE_DEMO_MODE;
+import static android.os.PowerExemptionManager.REASON_DEVICE_OWNER;
+import static android.os.PowerExemptionManager.REASON_FGS_BINDING;
+import static android.os.PowerExemptionManager.REASON_INSTR_BACKGROUND_ACTIVITY_PERMISSION;
+import static android.os.PowerExemptionManager.REASON_INSTR_BACKGROUND_FGS_PERMISSION;
 import static android.os.PowerExemptionManager.REASON_OPT_OUT_REQUESTED;
 import static android.os.PowerExemptionManager.REASON_OP_ACTIVATE_PLATFORM_VPN;
 import static android.os.PowerExemptionManager.REASON_OP_ACTIVATE_VPN;
+import static android.os.PowerExemptionManager.REASON_PROC_STATE_PERSISTENT;
+import static android.os.PowerExemptionManager.REASON_PROC_STATE_PERSISTENT_UI;
+import static android.os.PowerExemptionManager.REASON_PROC_STATE_TOP;
+import static android.os.PowerExemptionManager.REASON_PROFILE_OWNER;
+import static android.os.PowerExemptionManager.REASON_SERVICE_LAUNCH;
+import static android.os.PowerExemptionManager.REASON_START_ACTIVITY_FLAG;
+import static android.os.PowerExemptionManager.REASON_SYSTEM_ALERT_WINDOW_PERMISSION;
+import static android.os.PowerExemptionManager.REASON_SYSTEM_ALLOW_LISTED;
+import static android.os.PowerExemptionManager.REASON_SYSTEM_UID;
 import static android.os.PowerExemptionManager.REASON_TEMP_ALLOWED_WHILE_IN_USE;
-import static android.os.PowerWhitelistManager.REASON_ACTIVITY_STARTER;
-import static android.os.PowerWhitelistManager.REASON_ALLOWLISTED_PACKAGE;
-import static android.os.PowerWhitelistManager.REASON_BACKGROUND_ACTIVITY_PERMISSION;
-import static android.os.PowerWhitelistManager.REASON_BACKGROUND_FGS_PERMISSION;
-import static android.os.PowerWhitelistManager.REASON_COMPANION_DEVICE_MANAGER;
-import static android.os.PowerWhitelistManager.REASON_DENIED;
-import static android.os.PowerWhitelistManager.REASON_DEVICE_DEMO_MODE;
-import static android.os.PowerWhitelistManager.REASON_DEVICE_OWNER;
-import static android.os.PowerWhitelistManager.REASON_FGS_BINDING;
-import static android.os.PowerWhitelistManager.REASON_INSTR_BACKGROUND_ACTIVITY_PERMISSION;
-import static android.os.PowerWhitelistManager.REASON_INSTR_BACKGROUND_FGS_PERMISSION;
-import static android.os.PowerWhitelistManager.REASON_PROC_STATE_PERSISTENT;
-import static android.os.PowerWhitelistManager.REASON_PROC_STATE_PERSISTENT_UI;
-import static android.os.PowerWhitelistManager.REASON_PROC_STATE_TOP;
-import static android.os.PowerWhitelistManager.REASON_PROFILE_OWNER;
-import static android.os.PowerWhitelistManager.REASON_START_ACTIVITY_FLAG;
-import static android.os.PowerWhitelistManager.REASON_SYSTEM_ALERT_WINDOW_PERMISSION;
-import static android.os.PowerWhitelistManager.REASON_SYSTEM_ALLOW_LISTED;
-import static android.os.PowerWhitelistManager.REASON_SYSTEM_UID;
-import static android.os.PowerWhitelistManager.REASON_UID_VISIBLE;
-import static android.os.PowerWhitelistManager.TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
-import static android.os.PowerWhitelistManager.getReasonCodeFromProcState;
-import static android.os.PowerWhitelistManager.reasonCodeToString;
+import static android.os.PowerExemptionManager.REASON_UID_VISIBLE;
+import static android.os.PowerExemptionManager.TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
+import static android.os.PowerExemptionManager.getReasonCodeFromProcState;
+import static android.os.PowerExemptionManager.reasonCodeToString;
 import static android.os.Process.INVALID_UID;
 import static android.os.Process.NFC_UID;
 import static android.os.Process.ROOT_UID;
@@ -118,8 +120,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
-import android.os.PowerWhitelistManager;
-import android.os.PowerWhitelistManager.ReasonCode;
+import android.os.PowerExemptionManager.ReasonCode;
 import android.os.Process;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
@@ -135,6 +136,7 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.EventLog;
+import android.util.Pair;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -3614,8 +3616,9 @@ public final class ActiveServices {
                         + " for fg-service launch");
             }
             mAm.tempAllowlistUidLocked(r.appInfo.uid,
-                    SERVICE_START_FOREGROUND_TIMEOUT, PowerWhitelistManager.REASON_SERVICE_LAUNCH,
-                    "fg-service-launch", TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
+                    SERVICE_START_FOREGROUND_TIMEOUT, REASON_SERVICE_LAUNCH,
+                    "fg-service-launch",
+                    TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
                     r.mRecentCallingUid);
         }
 
@@ -5740,6 +5743,66 @@ public final class ActiveServices {
         int ret = shouldAllowFgsStartForegroundLocked(allowWhileInUse, callingPid, callingUid,
                 callingPackage, r);
 
+        String bindFromPackage = null;
+        if (ret == REASON_DENIED) {
+            // If the callingUid is not allowed to start FGS, check if the callingUid has any
+            // service that is bound by a clientUid, the clientUid can propagate its BG-FGS-start
+            // capability down to the callingUid.
+            final ArraySet<Integer> checkedClientUids = new ArraySet<>();
+            final Pair<Integer, String> isAllowed = mAm.mProcessList.searchEachLruProcessesLOSP(
+                    false, pr -> {
+                if (pr.uid == callingUid) {
+                    final ProcessServiceRecord psr = pr.mServices;
+                    final int serviceCount = psr.mServices.size();
+                    for (int svc = 0; svc < serviceCount; svc++) {
+                        final ArrayMap<IBinder, ArrayList<ConnectionRecord>> conns =
+                                psr.mServices.valueAt(svc).getConnections();
+                        final int size = conns.size();
+                        for (int conni = 0; conni < size; conni++) {
+                            final ArrayList<ConnectionRecord> crs = conns.valueAt(conni);
+                            for (int con = 0; con < crs.size(); con++) {
+                                final ConnectionRecord cr = crs.get(con);
+                                final ProcessRecord clientPr = cr.binding.client;
+                                // Persistent process does not propagate BG-FGS-start capability
+                                // down to service over binding.
+                                if (clientPr.mState.getCurProcState()
+                                        <= PROCESS_STATE_PERSISTENT_UI) {
+                                    continue;
+                                }
+                                final int clientPid = clientPr.mPid;
+                                final int clientUid = clientPr.uid;
+                                // An UID can bind to itself, do not check on itself again.
+                                // Also skip already checked clientUid.
+                                if (clientUid == callingUid
+                                        || checkedClientUids.contains(clientUid)) {
+                                    continue;
+                                }
+                                final String clientPackageName = cr.clientPackageName;
+                                final @ReasonCode int allowWhileInUse2 =
+                                        shouldAllowFgsWhileInUsePermissionLocked(clientPackageName,
+                                                clientPid, clientUid, null /* serviceRecord */,
+                                                false /* allowBackgroundActivityStarts */);
+                                final @ReasonCode int allowStartFgs =
+                                        shouldAllowFgsStartForegroundLocked(allowWhileInUse2,
+                                                clientPid, clientUid, clientPackageName, null /* targetService */);
+                                if (allowStartFgs != REASON_DENIED) {
+                                    return new Pair<>(allowStartFgs, clientPackageName);
+                                } else {
+                                    checkedClientUids.add(clientUid);
+                                }
+
+                            }
+                        }
+                    }
+                }
+                return null;
+            });
+            if (isAllowed != null) {
+                ret = REASON_FGS_BINDING;
+                bindFromPackage = isAllowed.second;
+            }
+        }
+
         final int uidState = mAm.getUidStateLocked(callingUid);
         int callerTargetSdkVersion = INVALID_UID;
         try {
@@ -5765,6 +5828,7 @@ public final class ActiveServices {
                         + "; targetSdkVersion:" + r.appInfo.targetSdkVersion
                         + "; callerTargetSdkVersion:" + callerTargetSdkVersion
                         + "; startForegroundCount:" + r.mStartForegroundCount
+                        + "; bindFromPackage:" + bindFromPackage
                         + "]";
         if (!debugInfo.equals(r.mInfoAllowStartForeground)) {
             r.mLoggedInfoAllowStartForeground = false;
@@ -5790,9 +5854,7 @@ public final class ActiveServices {
             final Integer allowedType = mAm.mProcessList.searchEachLruProcessesLOSP(false, app -> {
                 if (app.uid == callingUid) {
                     final ProcessStateRecord state = app.mState;
-                    if (state.getAllowedStartFgs() != REASON_DENIED) {
-                        return state.getAllowedStartFgs();
-                    } else if (state.isAllowedStartFgsState()) {
+                    if (state.isAllowedStartFgsState()) {
                         return getReasonCodeFromProcState(state.getAllowStartFgsState());
                     } else if (state.areBackgroundFgsStartsAllowedByToken()) {
                         return REASON_FGS_BINDING;
@@ -5891,6 +5953,7 @@ public final class ActiveServices {
         }
         if (ret == REASON_DENIED) {
             if (mAm.mConstants.mFgsAllowOptOut
+                    && targetService != null
                     && targetService.appInfo.hasRequestForegroundServiceExemption()) {
                 ret = REASON_OPT_OUT_REQUESTED;
             }
