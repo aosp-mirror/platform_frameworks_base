@@ -150,7 +150,6 @@ class ActiveAdmin {
     private static final String ATTR_VALUE = "value";
     private static final String ATTR_LAST_NETWORK_LOGGING_NOTIFICATION = "last-notification";
     private static final String ATTR_NUM_NETWORK_LOGGING_NOTIFICATIONS = "num-notifications";
-    private static final boolean PREFERENTIAL_NETWORK_SERVICE_ENABLED_DEFAULT = true;
 
     DeviceAdminInfo info;
 
@@ -297,7 +296,7 @@ class ActiveAdmin {
     public String mEnrollmentSpecificId;
     public boolean mAdminCanGrantSensorsPermissions;
     public boolean mPreferentialNetworkServiceEnabled =
-            PREFERENTIAL_NETWORK_SERVICE_ENABLED_DEFAULT;
+            DevicePolicyManager.PREFERENTIAL_NETWORK_SERVICE_ENABLED_DEFAULT;
 
     private static final boolean USB_DATA_SIGNALING_ENABLED_DEFAULT = true;
     boolean mUsbDataSignalingEnabled = USB_DATA_SIGNALING_ENABLED_DEFAULT;
@@ -576,10 +575,8 @@ class ActiveAdmin {
         }
         writeAttributeValueToXml(out, TAG_ADMIN_CAN_GRANT_SENSORS_PERMISSIONS,
                 mAdminCanGrantSensorsPermissions);
-        if (mPreferentialNetworkServiceEnabled != PREFERENTIAL_NETWORK_SERVICE_ENABLED_DEFAULT) {
-            writeAttributeValueToXml(out, TAG_PREFERENTIAL_NETWORK_SERVICE_ENABLED,
-                    mPreferentialNetworkServiceEnabled);
-        }
+        writeAttributeValueToXml(out, TAG_PREFERENTIAL_NETWORK_SERVICE_ENABLED,
+                mPreferentialNetworkServiceEnabled);
         if (mUsbDataSignalingEnabled != USB_DATA_SIGNALING_ENABLED_DEFAULT) {
             writeAttributeValueToXml(out, TAG_USB_DATA_SIGNALING, mUsbDataSignalingEnabled);
         }
@@ -807,8 +804,8 @@ class ActiveAdmin {
             } else if (TAG_ALWAYS_ON_VPN_LOCKDOWN.equals(tag)) {
                 mAlwaysOnVpnLockdown = parser.getAttributeBoolean(null, ATTR_VALUE, false);
             } else if (TAG_PREFERENTIAL_NETWORK_SERVICE_ENABLED.equals(tag)) {
-                mPreferentialNetworkServiceEnabled = parser.getAttributeBoolean(
-                        null, ATTR_VALUE, PREFERENTIAL_NETWORK_SERVICE_ENABLED_DEFAULT);
+                mPreferentialNetworkServiceEnabled = parser.getAttributeBoolean(null, ATTR_VALUE,
+                        DevicePolicyManager.PREFERENTIAL_NETWORK_SERVICE_ENABLED_DEFAULT);
             } else if (TAG_COMMON_CRITERIA_MODE.equals(tag)) {
                 mCommonCriteriaMode = parser.getAttributeBoolean(null, ATTR_VALUE, false);
             } else if (TAG_PASSWORD_COMPLEXITY.equals(tag)) {
