@@ -1214,7 +1214,14 @@ public class NotificationPanelViewController extends PanelViewController {
             updateClockAppearance();
         }
         if (!onKeyguard) {
-            stackScrollerPadding = getUnlockedStackScrollerPadding();
+            if (mShouldUseSplitNotificationShade) {
+                // Quick settings are not on the top of the notifications
+                // when in split shade mode (they are on the left side),
+                // so we should not add a padding for them
+                stackScrollerPadding = 0;
+            } else {
+                stackScrollerPadding = getUnlockedStackScrollerPadding();
+            }
         } else {
             stackScrollerPadding = mClockPositionResult.stackScrollerPaddingExpanded;
         }
