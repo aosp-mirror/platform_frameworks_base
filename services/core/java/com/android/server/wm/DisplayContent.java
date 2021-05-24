@@ -1801,7 +1801,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             return false;
         }
         final FadeRotationAnimationController controller = mFadeRotationAnimationController;
-        return controller == null || !controller.isTargetToken(w.mToken);
+        return controller == null || !controller.isHandledToken(w.mToken);
     }
 
     void notifyInsetsChanged(Consumer<WindowState> dispatchInsetsChanged) {
