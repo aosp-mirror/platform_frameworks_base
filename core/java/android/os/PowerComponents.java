@@ -24,6 +24,7 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.os.PowerCalculator;
 
 import java.io.PrintWriter;
+import java.util.Arrays;
 
 /**
  * Contains details of battery attribution data broken down to individual power drain types
@@ -36,9 +37,12 @@ class PowerComponents {
             - BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID;
 
     private final double mConsumedPowerMah;
+    @NonNull
     private final double[] mPowerComponentsMah;
+    @NonNull
     private final long[] mUsageDurationsMs;
     private final int mCustomPowerComponentCount;
+    @Nullable
     private final byte[] mPowerModels;
     // Not written to Parcel and must be explicitly restored during the parent object's unparceling
     private String[] mCustomPowerComponentNames;
@@ -49,7 +53,7 @@ class PowerComponents {
         mPowerComponentsMah = builder.mPowerComponentsMah;
         mUsageDurationsMs = builder.mUsageDurationsMs;
         mConsumedPowerMah = builder.getTotalPower();
-        mPowerModels = builder.mPowerModels;
+        mPowerModels = builder.getPowerModels();
     }
 
     PowerComponents(@NonNull Parcel source) {
@@ -146,9 +150,13 @@ class PowerComponents {
         }
     }
 
+    public boolean hasPowerModels() {
+        return mPowerModels != null;
+    }
+
     @BatteryConsumer.PowerModel
     int getPowerModel(@BatteryConsumer.PowerComponent int component) {
-        if (mPowerModels == null) {
+        if (!hasPowerModels()) {
             throw new IllegalStateException(
                     "Power model IDs were not requested in the BatteryUsageStatsQuery");
         }
@@ -298,6 +306,8 @@ class PowerComponents {
      * Builder for PowerComponents.
      */
     static final class Builder {
+        private static final byte POWER_MODEL_UNINITIALIZED = -1;
+
         private final double[] mPowerComponentsMah;
         private final String[] mCustomPowerComponentNames;
         private final long[] mUsageDurationsMs;
@@ -311,6 +321,7 @@ class PowerComponents {
             mUsageDurationsMs = new long[powerComponentCount];
             if (includePowerModels) {
                 mPowerModels = new byte[BatteryConsumer.POWER_COMPONENT_COUNT];
+                Arrays.fill(mPowerModels, POWER_MODEL_UNINITIALIZED);
             } else {
                 mPowerModels = null;
             }
@@ -412,12 +423,39 @@ class PowerComponents {
             return this;
         }
 
-        public void addPowerAndDuration(Builder other) {
+        public void addPowerAndDuration(PowerComponents.Builder other) {
+            addPowerAndDuration(other.mPowerComponentsMah, other.mUsageDurationsMs,
+                    other.mPowerModels);
+        }
+
+        public void addPowerAndDuration(PowerComponents other) {
+            addPowerAndDuration(other.mPowerComponentsMah, other.mUsageDurationsMs,
+                    other.mPowerModels);
+        }
+
+        private void addPowerAndDuration(double[] powerComponentsMah,
+                long[] usageDurationsMs, byte[] powerModels) {
+            if (mPowerComponentsMah.length != powerComponentsMah.length) {
+                throw new IllegalArgumentException(
+                        "Number of power components does not match: " + powerComponentsMah.length
+                                + ", expected: " + mPowerComponentsMah.length);
+            }
+
             for (int i = mPowerComponentsMah.length - 1; i >= 0; i--) {
-                mPowerComponentsMah[i] += other.mPowerComponentsMah[i];
+                mPowerComponentsMah[i] += powerComponentsMah[i];
             }
             for (int i = mUsageDurationsMs.length - 1; i >= 0; i--) {
-                mUsageDurationsMs[i] += other.mUsageDurationsMs[i];
+                mUsageDurationsMs[i] += usageDurationsMs[i];
+            }
+            if (mPowerModels != null && powerModels != null) {
+                for (int i = mPowerModels.length - 1; i >= 0; i--) {
+                    if (mPowerModels[i] == POWER_MODEL_UNINITIALIZED) {
+                        mPowerModels[i] = powerModels[i];
+                    } else if (mPowerModels[i] != powerModels[i]
+                            && powerModels[i] != POWER_MODEL_UNINITIALIZED) {
+                        mPowerModels[i] = BatteryConsumer.POWER_MODEL_UNDEFINED;
+                    }
+                }
             }
         }
 
@@ -431,6 +469,19 @@ class PowerComponents {
                 totalPowerMah += mPowerComponentsMah[i];
             }
             return totalPowerMah;
+        }
+
+        private byte[] getPowerModels() {
+            if (mPowerModels == null) {
+                return null;
+            }
+
+            byte[] powerModels = new byte[mPowerModels.length];
+            for (int i = mPowerModels.length - 1; i >= 0; i--) {
+                powerModels[i] = mPowerModels[i] != POWER_MODEL_UNINITIALIZED ? mPowerModels[i]
+                        : BatteryConsumer.POWER_MODEL_UNDEFINED;
+            }
+            return powerModels;
         }
 
         /**
