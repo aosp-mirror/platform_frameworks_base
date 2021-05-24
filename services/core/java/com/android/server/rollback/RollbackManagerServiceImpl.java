@@ -554,10 +554,8 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                     PackageInstaller.SessionInfo session = mContext.getPackageManager()
                             .getPackageInstaller().getSessionInfo(rollback.getStagedSessionId());
                     if (session == null || session.isStagedSessionFailed()) {
-                        if (rollback.isEnabling()) {
-                            iter.remove();
-                            rollback.delete(mAppDataRollbackHelper);
-                        }
+                        iter.remove();
+                        rollback.delete(mAppDataRollbackHelper);
                         continue;
                     }
 
