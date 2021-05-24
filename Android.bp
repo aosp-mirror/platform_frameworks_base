@@ -473,10 +473,10 @@ stubs_defaults {
     aidl: {
         local_include_dirs: [
             "apex/media/aidl/stable",
-            // TODO: move to include-dirs for packages/modules/Connectivity when this moves out of
-            // frameworks/base
-            "packages/Connectivity/framework/aidl-export",
             "telephony/java",
+        ],
+        include_dirs: [
+            "packages/modules/Connectivity/framework/aidl-export",
         ],
     },
     // These are libs from framework-internal-utils that are required (i.e. being referenced)
