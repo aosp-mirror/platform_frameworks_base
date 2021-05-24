@@ -54,8 +54,8 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
     private boolean mIsDozing;
     private boolean mIsCharging;
     private float mDozeAmount;
+    boolean mKeyguardShowing;
     private Locale mLocale;
-    private boolean mAttached; // if keyguard isn't showing, mAttached = false
 
     private final NumberFormat mBurmeseNf = NumberFormat.getInstance(Locale.forLanguageTag("my"));
     private final String mBurmeseNumerals;
@@ -85,11 +85,15 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
                 R.dimen.keyguard_clock_line_spacing_scale);
     }
 
+    private void reset() {
+        mView.animateDoze(mIsDozing, false);
+    }
+
     private final BatteryController.BatteryStateChangeCallback mBatteryCallback =
             new BatteryController.BatteryStateChangeCallback() {
         @Override
         public void onBatteryLevelChanged(int level, boolean pluggedIn, boolean charging) {
-            if (!mIsCharging && charging) {
+            if (mKeyguardShowing && !mIsCharging && charging) {
                 mView.animateCharge(mIsDozing);
             }
             mIsCharging = charging;
@@ -103,21 +107,6 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
         }
     };
 
-    private final KeyguardUpdateMonitorCallback mKeyguardPersistentCallback =
-            new KeyguardUpdateMonitorCallback() {
-        @Override
-        public void onKeyguardVisibilityChanged(boolean showing) {
-            // call attached/detached methods on visibility changes. benefits include:
-            //  - no animations when keyguard/clock view aren't visible
-            //  - resets state when keyguard is visible again (ie: font weight)
-            if (showing) {
-                onViewAttached();
-            } else {
-                onViewDetached();
-            }
-        }
-    };
-
     private final KeyguardUpdateMonitorCallback mKeyguardUpdateMonitorCallback =
             new KeyguardUpdateMonitorCallback() {
         @Override
@@ -128,44 +117,41 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
                 mView.animateDisappear();
             }
         }
+
+        @Override
+        public void onKeyguardVisibilityChanged(boolean showing) {
+            mKeyguardShowing = showing;
+            if (!mKeyguardShowing) {
+                // reset state (ie: after animateDisappear)
+                reset();
+            }
+        }
     };
 
     @Override
     protected void onViewAttached() {
-        if (mAttached) {
-            return;
-        }
-        mAttached = true;
         updateLocale();
         mBroadcastDispatcher.registerReceiver(mLocaleBroadcastReceiver,
                 new IntentFilter(Intent.ACTION_LOCALE_CHANGED));
         mStatusBarStateController.addCallback(mStatusBarStateListener);
+
         mIsDozing = mStatusBarStateController.isDozing();
         mDozeAmount = mStatusBarStateController.getDozeAmount();
         mBatteryController.addCallback(mBatteryCallback);
         mKeyguardUpdateMonitor.registerCallback(mKeyguardUpdateMonitorCallback);
-
-        mKeyguardUpdateMonitor.removeCallback(mKeyguardPersistentCallback);
-        mKeyguardUpdateMonitor.registerCallback(mKeyguardPersistentCallback);
+        mKeyguardShowing = true;
 
         refreshTime();
         initColors();
+        mView.animateDoze(mIsDozing, false);
     }
 
     @Override
     protected void onViewDetached() {
-        if (!mAttached) {
-            return;
-        }
-
-        mAttached = false;
         mBroadcastDispatcher.unregisterReceiver(mLocaleBroadcastReceiver);
         mStatusBarStateController.removeCallback(mStatusBarStateListener);
         mKeyguardUpdateMonitor.removeCallback(mKeyguardUpdateMonitorCallback);
         mBatteryController.removeCallback(mBatteryCallback);
-        if (!mView.isAttachedToWindow()) {
-            mKeyguardUpdateMonitor.removeCallback(mKeyguardPersistentCallback);
-        }
     }
 
     /** Animate the clock appearance */
