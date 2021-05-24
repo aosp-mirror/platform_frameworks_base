@@ -133,11 +133,15 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
         };
         IRemoteTransitionFinishedCallback cb = new IRemoteTransitionFinishedCallback.Stub() {
             @Override
-            public void onTransitionFinished(WindowContainerTransaction wct) {
+            public void onTransitionFinished(WindowContainerTransaction wct,
+                    SurfaceControl.Transaction sct) {
                 if (remote.asBinder() != null) {
                     remote.asBinder().unlinkToDeath(remoteDied, 0 /* flags */);
                 }
                 mMainExecutor.execute(() -> {
+                    if (sct != null) {
+                        finishTransaction.merge(sct);
+                    }
                     mRequestedRemotes.remove(transition);
                     finishCallback.onTransitionFinished(wct, null /* wctCB */);
                 });
@@ -171,7 +175,8 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
 
         IRemoteTransitionFinishedCallback cb = new IRemoteTransitionFinishedCallback.Stub() {
             @Override
-            public void onTransitionFinished(WindowContainerTransaction wct) {
+            public void onTransitionFinished(WindowContainerTransaction wct,
+                    SurfaceControl.Transaction sct) {
                 mMainExecutor.execute(() -> {
                     if (!mRequestedRemotes.containsKey(mergeTarget)) {
                         Log.e(TAG, "Merged transition finished after it's mergeTarget (the "
