@@ -101,7 +101,7 @@ public final class WallpaperColors implements Parcelable {
     // We also check if the image has dark pixels in it,
     // to avoid bright images with some dark spots.
     private static final float DARK_PIXEL_CONTRAST = 5.5f;
-    private static final float MAX_DARK_AREA = 0.025f;
+    private static final float MAX_DARK_AREA = 0.05f;
 
     private final List<Color> mMainColors;
     private final Map<Integer, Integer> mAllColors;
