@@ -213,7 +213,7 @@ public class ShellTransitionTests {
                     SurfaceControl.Transaction t,
                     IRemoteTransitionFinishedCallback finishCallback) throws RemoteException {
                 remoteCalled[0] = true;
-                finishCallback.onTransitionFinished(remoteFinishWCT);
+                finishCallback.onTransitionFinished(remoteFinishWCT, null /* sct */);
             }
 
             @Override
@@ -287,7 +287,7 @@ public class ShellTransitionTests {
                     SurfaceControl.Transaction t,
                     IRemoteTransitionFinishedCallback finishCallback) throws RemoteException {
                 remoteCalled[0] = true;
-                finishCallback.onTransitionFinished(null /* wct */);
+                finishCallback.onTransitionFinished(null /* wct */, null /* sct */);
             }
 
             @Override
@@ -334,7 +334,7 @@ public class ShellTransitionTests {
                     SurfaceControl.Transaction t,
                     IRemoteTransitionFinishedCallback finishCallback) throws RemoteException {
                 remoteCalled[0] = true;
-                finishCallback.onTransitionFinished(remoteFinishWCT);
+                finishCallback.onTransitionFinished(remoteFinishWCT, null /* sct */);
             }
 
             @Override
