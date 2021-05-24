@@ -1207,16 +1207,16 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     List<OwnerDto> listAllOwners() {
         Preconditions.checkCallAuthorization(
                 hasCallingOrSelfPermission(permission.MANAGE_DEVICE_ADMINS));
-
-        List<OwnerDto> owners = mOwners.listAllOwners();
-        synchronized (getLockObject()) {
-            for (int i = 0; i < owners.size(); i++) {
-                OwnerDto owner = owners.get(i);
-                owner.isAffiliated = isUserAffiliatedWithDeviceLocked(owner.userId);
+        return mInjector.binderWithCleanCallingIdentity(() -> {
+            List<OwnerDto> owners = mOwners.listAllOwners();
+            synchronized (getLockObject()) {
+                for (int i = 0; i < owners.size(); i++) {
+                    OwnerDto owner = owners.get(i);
+                    owner.isAffiliated = isUserAffiliatedWithDeviceLocked(owner.userId);
+                }
             }
-        }
-
-        return owners;
+            return owners;
+        });
     }
 
     /**
@@ -8341,7 +8341,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     public boolean isProfileOwner(ComponentName who, int userId) {
-        final ComponentName profileOwner = getProfileOwnerAsUser(userId);
+        final ComponentName profileOwner = mInjector.binderWithCleanCallingIdentity(() ->
+                getProfileOwnerAsUser(userId));
         return who != null && who.equals(profileOwner);
     }
 
@@ -8358,7 +8359,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      */
     public boolean isProfileOwner(CallerIdentity caller) {
         synchronized (getLockObject()) {
-            final ComponentName profileOwner = getProfileOwnerAsUser(caller.getUserId());
+            final ComponentName profileOwner = mInjector.binderWithCleanCallingIdentity(() ->
+                    getProfileOwnerAsUser(caller.getUserId()));
             // No profile owner.
             if (profileOwner == null) {
                 return false;
@@ -8980,7 +8982,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Preconditions.checkArgumentNonnegative(userId, "Invalid userId");
 
         CallerIdentity caller = getCallerIdentity();
-        Preconditions.checkCallAuthorization(hasCrossUsersPermission(caller, userId));
+        Preconditions.checkCallAuthorization(hasCrossUsersPermission(caller, userId)
+                || hasFullCrossUsersPermission(caller, userId));
 
         synchronized (getLockObject()) {
             return mOwners.getProfileOwnerComponent(userId);
