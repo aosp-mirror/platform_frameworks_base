@@ -1638,15 +1638,20 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         mAmInternal.enforceCallingPermission(BIND_VOICE_INTERACTION, "startAssistantActivity()");
         userId = handleIncomingUser(callingPid, callingUid, userId, "startAssistantActivity");
 
-        return getActivityStartController().obtainStarter(intent, "startAssistantActivity")
-                .setCallingUid(callingUid)
-                .setCallingPackage(callingPackage)
-                .setCallingFeatureId(callingFeatureId)
-                .setResolvedType(resolvedType)
-                .setActivityOptions(bOptions)
-                .setUserId(userId)
-                .setAllowBackgroundActivityStart(true)
-                .execute();
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            return getActivityStartController().obtainStarter(intent, "startAssistantActivity")
+                    .setCallingUid(callingUid)
+                    .setCallingPackage(callingPackage)
+                    .setCallingFeatureId(callingFeatureId)
+                    .setResolvedType(resolvedType)
+                    .setActivityOptions(bOptions)
+                    .setUserId(userId)
+                    .setAllowBackgroundActivityStart(true)
+                    .execute();
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
     }
 
     /**
