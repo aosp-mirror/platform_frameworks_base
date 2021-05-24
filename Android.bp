@@ -284,10 +284,11 @@ java_defaults {
         generate_get_transaction_name: true,
         local_include_dirs: [
             "media/aidl",
-            // TODO: move to include_dirs when migrated to packages/modules
-            "packages/Connectivity/framework/aidl-export",
         ],
-        include_dirs: ["frameworks/av/aidl"],
+        include_dirs: [
+            "frameworks/av/aidl",
+            "packages/modules/Connectivity/framework/aidl-export",
+        ],
     },
     dxflags: [
         "--core-library",
@@ -524,12 +525,12 @@ stubs_defaults {
         local_include_dirs: [
             "apex/media/aidl/stable",
             "media/aidl",
-            // TODO: move to include-dirs for packages/modules/Connectivity when this moves out of
-            // frameworks/base
-            "packages/Connectivity/framework/aidl-export",
             "telephony/java",
         ],
-        include_dirs: ["frameworks/av/aidl"],
+        include_dirs: [
+            "frameworks/av/aidl",
+            "packages/modules/Connectivity/framework/aidl-export",
+        ],
     },
     // These are libs from framework-internal-utils that are required (i.e. being referenced)
     // from framework-non-updatable-sources. Add more here when there's a need.
