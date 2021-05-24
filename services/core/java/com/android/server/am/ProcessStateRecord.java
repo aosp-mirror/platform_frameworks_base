@@ -16,28 +16,9 @@
 
 package com.android.server.am;
 
-import static android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND;
-import static android.Manifest.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND;
-import static android.Manifest.permission.SYSTEM_ALERT_WINDOW;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_NONE;
 import static android.app.ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
-import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-import static android.os.PowerWhitelistManager.REASON_BACKGROUND_ACTIVITY_PERMISSION;
-import static android.os.PowerWhitelistManager.REASON_BACKGROUND_FGS_PERMISSION;
-import static android.os.PowerWhitelistManager.REASON_DENIED;
-import static android.os.PowerWhitelistManager.REASON_DEVICE_OWNER;
-import static android.os.PowerWhitelistManager.REASON_PROFILE_OWNER;
-import static android.os.PowerWhitelistManager.REASON_SYSTEM_ALERT_WINDOW_PERMISSION;
-import static android.os.PowerWhitelistManager.REASON_SYSTEM_ALLOW_LISTED;
-import static android.os.PowerWhitelistManager.REASON_SYSTEM_UID;
-import static android.os.PowerWhitelistManager.ReasonCode;
-import static android.os.PowerWhitelistManager.getReasonCodeFromProcState;
-import static android.os.PowerWhitelistManager.reasonCodeToString;
-import static android.os.Process.NFC_UID;
-import static android.os.Process.ROOT_UID;
-import static android.os.Process.SHELL_UID;
-import static android.os.Process.SYSTEM_UID;
 
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_OOM_ADJ;
 import static com.android.server.am.ProcessRecord.TAG;
@@ -47,7 +28,6 @@ import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.os.Binder;
 import android.os.SystemClock;
-import android.os.UserHandle;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.util.TimeUtils;
@@ -55,7 +35,6 @@ import android.util.TimeUtils;
 import com.android.internal.annotations.CompositeRWLock;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.FrameworkStatsLog;
-
 
 import java.io.PrintWriter;
 
@@ -327,20 +306,6 @@ final class ProcessStateRecord {
     private final ArraySet<Binder> mBackgroundFgsStartTokens = new ArraySet<>();
 
     /**
-     * Does the process has permission to start FGS from background.
-     */
-    @GuardedBy("mService")
-    private @ReasonCode int mAllowStartFgsByPermission = REASON_DENIED;
-
-    /**
-     * Can this process start FGS from background?
-     * If this process has the ability to start FGS from background, this ability can be passed to
-     * another process through service binding.
-     */
-    @GuardedBy("mService")
-    private @ReasonCode int mAllowStartFgs = REASON_DENIED;
-
-    /**
      * Whether or not this process has been in forced-app-standby state.
      */
     @GuardedBy("mService")
@@ -435,7 +400,6 @@ final class ProcessStateRecord {
         mApp = app;
         mService = app.mService;
         mProcLock = mService.mProcLock;
-        setAllowStartFgsByPermission();
     }
 
     void init(long now) {
@@ -1152,9 +1116,8 @@ final class ProcessStateRecord {
     }
 
     @GuardedBy("mService")
-    void resetAllowStartFgs() {
+    void resetAllowStartFgsState() {
         mAllowStartFgsState = PROCESS_STATE_NONEXISTENT;
-        mAllowStartFgs = mAllowStartFgsByPermission;
     }
 
     @GuardedBy("mService")
@@ -1165,11 +1128,6 @@ final class ProcessStateRecord {
     }
 
     @GuardedBy("mService")
-    void setAllowStartFgsState(int allowStartFgsState) {
-        mAllowStartFgsState = allowStartFgsState;
-    }
-
-    @GuardedBy("mService")
     int getAllowStartFgsState() {
         return mAllowStartFgsState;
     }
@@ -1177,98 +1135,6 @@ final class ProcessStateRecord {
     @GuardedBy("mService")
     boolean isAllowedStartFgsState() {
         return mAllowStartFgsState <= PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
-    }
-
-    @GuardedBy("mService")
-    void setAllowStartFgsByPermission() {
-        int ret = REASON_DENIED;
-        boolean isSystem = false;
-        final int uid = UserHandle.getAppId(mApp.info.uid);
-        switch (uid) {
-            case ROOT_UID:
-            case SYSTEM_UID:
-            case NFC_UID:
-            case SHELL_UID:
-                isSystem = true;
-                break;
-            default:
-                isSystem = false;
-                break;
-        }
-
-        if (isSystem) {
-            ret = REASON_SYSTEM_UID;
-        }
-
-        if (ret == REASON_DENIED) {
-            if (ActivityManager.checkComponentPermission(START_ACTIVITIES_FROM_BACKGROUND,
-                    mApp.info.uid, -1, true) == PERMISSION_GRANTED) {
-                ret = REASON_BACKGROUND_ACTIVITY_PERMISSION;
-            } else if (ActivityManager.checkComponentPermission(
-                    START_FOREGROUND_SERVICES_FROM_BACKGROUND,
-                    mApp.info.uid, -1, true) == PERMISSION_GRANTED) {
-                ret = REASON_BACKGROUND_FGS_PERMISSION;
-            } else if (ActivityManager.checkComponentPermission(SYSTEM_ALERT_WINDOW,
-                    mApp.info.uid, -1, true) == PERMISSION_GRANTED) {
-                ret = REASON_SYSTEM_ALERT_WINDOW_PERMISSION;
-            }
-        }
-        mAllowStartFgs = mAllowStartFgsByPermission = ret;
-    }
-
-    // TODO(b/188063200) Clean up this method. Why do we need to duplicate only some of the checks?
-    @GuardedBy("mService")
-    void setAllowStartFgs() {
-        if (mAllowStartFgs != REASON_DENIED) {
-            return;
-        }
-        if (mAllowStartFgs == REASON_DENIED) {
-            if (isAllowedStartFgsState()) {
-                mAllowStartFgs = getReasonCodeFromProcState(mAllowStartFgsState);
-            }
-        }
-
-        if (mAllowStartFgs == REASON_DENIED) {
-            // Is the calling UID a device owner app?
-            if (mService.mInternal != null) {
-                if (mService.mInternal.isDeviceOwner(mApp.info.uid)) {
-                    mAllowStartFgs = REASON_DEVICE_OWNER;
-                }
-            }
-        }
-
-        if (mAllowStartFgs == REASON_DENIED) {
-            // Is the calling UID a profile owner app?
-            if (mService.mInternal != null) {
-                if (mService.mInternal.isProfileOwner(mApp.info.uid)) {
-                    mAllowStartFgs = REASON_PROFILE_OWNER;
-                }
-            }
-        }
-
-        if (mAllowStartFgs == REASON_DENIED) {
-            // uid is on DeviceIdleController's user/system allowlist
-            // or AMS's FgsStartTempAllowList.
-            ActivityManagerService.FgsTempAllowListItem item =
-                    mService.isAllowlistedForFgsStartLOSP(mApp.info.uid);
-            if (item != null) {
-                if (item == ActivityManagerService.FAKE_TEMP_ALLOW_LIST_ITEM) {
-                    mAllowStartFgs = REASON_SYSTEM_ALLOW_LISTED;
-                } else {
-                    mAllowStartFgs = item.mReasonCode;
-                }
-            }
-        }
-    }
-
-    @GuardedBy("mService")
-    void setAllowStartFgs(@ReasonCode int allowStartFgs) {
-        mAllowStartFgs = allowStartFgs;
-    }
-
-    @GuardedBy("mService")
-    @ReasonCode int getAllowedStartFgs() {
-        return mAllowStartFgs;
     }
 
     @GuardedBy("mService")
@@ -1334,10 +1200,6 @@ final class ProcessStateRecord {
         pw.println();
         pw.print(prefix); pw.print("allowStartFgsState=");
         pw.println(mAllowStartFgsState);
-        if (mAllowStartFgs != REASON_DENIED) {
-            pw.print(prefix); pw.print("allowStartFgs=");
-            pw.println(reasonCodeToString(mAllowStartFgs));
-        }
         if (mHasShownUi || mApp.mProfile.hasPendingUiClean()) {
             pw.print(prefix); pw.print("hasShownUi="); pw.print(mHasShownUi);
             pw.print(" pendingUiClean="); pw.println(mApp.mProfile.hasPendingUiClean());
