@@ -442,13 +442,18 @@ public final class CompanionDeviceManager {
     /**
      * Associates given device with given app for the given user directly, without UI prompt.
      *
+     * @param packageName package name of the companion app
+     * @param macAddress mac address of the device to associate
+     * @param certificate The SHA256 digest of the companion app's signing certificate
+     *
      * @hide
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.ASSOCIATE_COMPANION_DEVICES)
     public void associate(
             @NonNull String packageName,
-            @NonNull MacAddress macAddress) {
+            @NonNull MacAddress macAddress,
+            @NonNull byte[] certificate) {
         if (!checkFeaturePresent()) {
             return;
         }
@@ -458,7 +463,7 @@ public final class CompanionDeviceManager {
         UserHandle user = android.os.Process.myUserHandle();
         try {
             mService.createAssociation(
-                    packageName, macAddress.toString(), user.getIdentifier());
+                    packageName, macAddress.toString(), user.getIdentifier(), certificate);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
