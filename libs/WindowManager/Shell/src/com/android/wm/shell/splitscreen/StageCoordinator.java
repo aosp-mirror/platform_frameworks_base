@@ -116,6 +116,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     private final DisplayImeController mDisplayImeController;
     private final SplitScreenTransitions mSplitTransitions;
     private boolean mExitSplitScreenOnHide = true;
+    private boolean mKeyguardOccluded;
 
     // TODO(b/187041611): remove this flag after totally deprecated legacy split
     /** Whether the device is supporting legacy split or not. */
@@ -275,6 +276,12 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mTaskOrganizer.applyTransaction(wct);
     }
 
+    void onKeyguardOccludedChanged(boolean occluded) {
+        // Do not exit split directly, because it needs to wait for task info update to determine
+        // which task should remain on top after split dismissed.
+        mKeyguardOccluded = occluded;
+    }
+
     void exitSplitScreen() {
         exitSplitScreen(null /* childrenToTop */);
     }
@@ -407,6 +414,13 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             // Exit split-screen if both stage are not visible.
             // TODO: This is only a temporary request from UX and is likely to be removed soon...
             exitSplitScreen();
+        } else if (mKeyguardOccluded) {
+            // At least one of the stages is visible while keyguard occluded. Dismiss split because
+            // there's show-when-locked activity showing on top of keyguard. Also make sure the
+            // task contains show-when-locked activity remains on top after split dismissed.
+            final StageTaskListener toTop =
+                    mainStageVisible ? mMainStage : (sideStageVisible ? mSideStage : null);
+            exitSplitScreen(toTop);
         }
 
         if (mainStageVisible) {
