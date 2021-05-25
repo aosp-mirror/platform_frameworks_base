@@ -243,7 +243,6 @@ public class BubbleStackView extends FrameLayout
 
     @Nullable private RelativeStackPosition mRelativeStackPositionBeforeRotation;
 
-    private int mMaxBubbles;
     private int mBubbleSize;
     private int mBubbleElevation;
     private int mBubbleTouchPadding;
@@ -764,7 +763,6 @@ public class BubbleStackView extends FrameLayout
         mBubbleData = data;
 
         Resources res = getResources();
-        mMaxBubbles = res.getInteger(R.integer.bubbles_max_rendered);
         mBubbleSize = res.getDimensionPixelSize(R.dimen.bubble_size);
         mBubbleElevation = res.getDimensionPixelSize(R.dimen.bubble_elevation);
         mBubbleTouchPadding = res.getDimensionPixelSize(R.dimen.bubble_touch_padding);
@@ -2725,7 +2723,7 @@ public class BubbleStackView extends FrameLayout
     private void updateBubbleShadows(boolean showForAllBubbles) {
         int bubbleCount = getBubbleCount();
         for (int i = 0; i < bubbleCount; i++) {
-            final float z = (mMaxBubbles * mBubbleElevation) - i;
+            final float z = (mPositioner.getMaxBubbles() * mBubbleElevation) - i;
             BadgedImageView bv = (BadgedImageView) mBubbleContainer.getChildAt(i);
             boolean isDraggedOut = mMagnetizedObject != null
                     && mMagnetizedObject.getUnderlyingObject().equals(bv);
@@ -2759,7 +2757,7 @@ public class BubbleStackView extends FrameLayout
         for (int i = 0; i < bubbleCount; i++) {
             BadgedImageView bv = (BadgedImageView) mBubbleContainer.getChildAt(i);
             bv.setZ(i < NUM_VISIBLE_WHEN_RESTING
-                    ? (mMaxBubbles * mBubbleElevation) - i
+                    ? (mPositioner.getMaxBubbles() * mBubbleElevation) - i
                     : 0f);
         }
     }

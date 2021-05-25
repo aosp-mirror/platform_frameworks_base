@@ -211,16 +211,8 @@ public class ExpandedAnimationController
         mBubblePaddingTop = res.getDimensionPixelSize(R.dimen.bubble_padding_top);
         mStackOffsetPx = res.getDimensionPixelSize(R.dimen.bubble_stack_offset);
         mBubbleSizePx = mPositioner.getBubbleSize();
-        mBubblesMaxRendered = res.getInteger(R.integer.bubbles_max_rendered);
-        mBubblesMaxSpace = res.getDimensionPixelSize(R.dimen.bubble_spacing);
-        final float availableSpace = mPositioner.isLandscape()
-                ? mPositioner.getAvailableRect().height()
-                : mPositioner.getAvailableRect().width();
-        final float spaceForMaxBubbles = (mExpandedViewPadding * 2)
-                + (mBubblesMaxRendered + 1) * mBubbleSizePx;
-        float spaceBetweenBubbles =
-                (availableSpace - spaceForMaxBubbles) / mBubblesMaxRendered;
-        mSpaceBetweenBubbles = Math.min(spaceBetweenBubbles, mBubblesMaxSpace);
+        mBubblesMaxRendered = mPositioner.getMaxBubbles();
+        mSpaceBetweenBubbles = res.getDimensionPixelSize(R.dimen.bubble_spacing);
     }
 
     /**

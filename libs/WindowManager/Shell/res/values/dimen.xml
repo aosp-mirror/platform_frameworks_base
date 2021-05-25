@@ -102,7 +102,7 @@
     <!-- Padding between status bar and bubbles when displayed in expanded state -->
     <dimen name="bubble_padding_top">16dp</dimen>
     <!-- Space between bubbles when expanded. -->
-    <dimen name="bubble_spacing">8dp</dimen>
+    <dimen name="bubble_spacing">3dp</dimen>
     <!-- Size of the bubble. -->
     <dimen name="bubble_size">60dp</dimen>
     <!-- Size of the badge shown on the bubble. -->

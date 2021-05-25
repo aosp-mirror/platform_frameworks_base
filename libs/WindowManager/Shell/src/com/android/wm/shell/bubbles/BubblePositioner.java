@@ -64,9 +64,12 @@ public class BubblePositioner {
     private Rect mPositionRect;
     private @Surface.Rotation int mRotation = Surface.ROTATION_0;
     private Insets mInsets;
+    private int mDefaultMaxBubbles;
+    private int mMaxBubbles;
 
     private int mBubbleSize;
     private int mBubbleBadgeSize;
+    private int mSpacingBetweenBubbles;
     private int mExpandedViewLargeScreenWidth;
     private int mExpandedViewPadding;
     private int mPointerMargin;
@@ -149,15 +152,43 @@ public class BubblePositioner {
         Resources res = mContext.getResources();
         mBubbleSize = res.getDimensionPixelSize(R.dimen.bubble_size);
         mBubbleBadgeSize = res.getDimensionPixelSize(R.dimen.bubble_badge_size);
+        mSpacingBetweenBubbles = res.getDimensionPixelSize(R.dimen.bubble_spacing);
+        mDefaultMaxBubbles = res.getInteger(R.integer.bubbles_max_rendered);
+
         mExpandedViewLargeScreenWidth = res.getDimensionPixelSize(
                 R.dimen.bubble_expanded_view_tablet_width);
         mExpandedViewPadding = res.getDimensionPixelSize(R.dimen.bubble_expanded_view_padding);
         mPointerWidth = res.getDimensionPixelSize(R.dimen.bubble_pointer_width);
         mPointerHeight = res.getDimensionPixelSize(R.dimen.bubble_pointer_height);
         mPointerMargin = res.getDimensionPixelSize(R.dimen.bubble_pointer_margin);
+
+        mMaxBubbles = calculateMaxBubbles();
+
         if (mShowingInTaskbar) {
             adjustForTaskbar();
         }
+    }
+
+    /**
+     * @return the maximum number of bubbles that can fit on the screen when expanded. If the
+     * screen size / screen density is too small to support the default maximum number, then
+     * the number will be adjust to something lower to ensure everything is presented nicely.
+     */
+    private int calculateMaxBubbles() {
+        // Use the shortest edge.
+        // In portrait the bubbles should align with the expanded view so subtract its padding.
+        // We always show the overflow so subtract one bubble size.
+        int padding = showBubblesVertically() ? 0 : (mExpandedViewPadding * 2);
+        int availableSpace = Math.min(mPositionRect.width(), mPositionRect.height())
+                - padding
+                - mBubbleSize;
+        // Each of the bubbles have spacing because the overflow is at the end.
+        int howManyFit = availableSpace / (mBubbleSize + mSpacingBetweenBubbles);
+        if (howManyFit < mDefaultMaxBubbles) {
+            // Not enough space for the default.
+            return howManyFit;
+        }
+        return mDefaultMaxBubbles;
     }
 
     /**
@@ -227,6 +258,11 @@ public class BubblePositioner {
         return (mShowingInTaskbar && mTaskbarIconSize > 0)
                 ? mTaskbarIconSize
                 : mBubbleSize;
+    }
+
+    /** The maximum number of bubbles that can be displayed comfortably on screen. */
+    public int getMaxBubbles() {
+        return mMaxBubbles;
     }
 
     /**
