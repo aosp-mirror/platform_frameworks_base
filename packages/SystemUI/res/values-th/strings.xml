@@ -423,8 +423,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC ถูกปิดใช้งาน"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"เปิดใช้งาน NFC แล้ว"</string>
-    <!-- no translation found for quick_settings_screen_record_label (8650355346742003694) -->
-    <skip />
+    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"บันทึกหน้าจอ"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"เริ่ม"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"หยุด"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"เลิกบล็อกไมโครโฟนของอุปกรณ์ใช่ไหม"</string>
@@ -860,7 +859,7 @@
     <string name="accessibility_data_saver_off" msgid="58339669022107171">"โปรแกรมประหยัดอินเทอร์เน็ตปิดอยู่"</string>
     <string name="switch_bar_on" msgid="1770868129120096114">"เปิด"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"ปิด"</string>
-    <string name="tile_unavailable" msgid="3095879009136616920">"ไม่มี"</string>
+    <string name="tile_unavailable" msgid="3095879009136616920">"ไม่พร้อมใช้งาน"</string>
     <string name="tile_disabled" msgid="373212051546573069">"ปิดใช้"</string>
     <string name="nav_bar" msgid="4642708685386136807">"แถบนำทาง"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"การจัดวาง"</string>
