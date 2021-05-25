@@ -25,6 +25,7 @@ import static com.android.internal.os.BinderCallsStats.SettingsObserver.SETTINGS
 import static com.android.internal.os.BinderCallsStats.SettingsObserver.SETTINGS_IGNORE_BATTERY_STATUS_KEY;
 import static com.android.internal.os.BinderCallsStats.SettingsObserver.SETTINGS_MAX_CALL_STATS_KEY;
 import static com.android.internal.os.BinderCallsStats.SettingsObserver.SETTINGS_SAMPLING_INTERVAL_KEY;
+import static com.android.internal.os.BinderCallsStats.SettingsObserver.SETTINGS_SHARDING_MODULO_KEY;
 import static com.android.internal.os.BinderCallsStats.SettingsObserver.SETTINGS_TRACK_DIRECT_CALLING_UID_KEY;
 import static com.android.internal.os.BinderCallsStats.SettingsObserver.SETTINGS_TRACK_SCREEN_INTERACTIVE_KEY;
 
@@ -188,6 +189,10 @@ public class BinderCallsStatsService extends Binder {
             mBinderCallsStats.setIgnoreBatteryStatus(
                     mParser.getBoolean(SETTINGS_IGNORE_BATTERY_STATUS_KEY,
                     BinderCallsStats.DEFAULT_IGNORE_BATTERY_STATUS));
+            mBinderCallsStats.setShardingModulo(mParser.getInt(
+                    SETTINGS_SHARDING_MODULO_KEY,
+                    BinderCallsStats.SHARDING_MODULO_DEFAULT));
+
             mBinderCallsStats.setCollectLatencyData(
                     mParser.getBoolean(SETTINGS_COLLECT_LATENCY_DATA_KEY,
                     BinderCallsStats.DEFAULT_COLLECT_LATENCY_DATA));
