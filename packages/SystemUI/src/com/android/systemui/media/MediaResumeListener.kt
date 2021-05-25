@@ -59,7 +59,6 @@ class MediaResumeListener @Inject constructor(
 
     private var useMediaResumption: Boolean = Utils.useMediaResumption(context)
     private val resumeComponents: ConcurrentLinkedQueue<ComponentName> = ConcurrentLinkedQueue()
-    private var blockedApps: MutableSet<String> = Utils.getBlockedMediaApps(context)
 
     private lateinit var mediaDataManager: MediaDataManager
 
@@ -124,14 +123,6 @@ class MediaResumeListener @Inject constructor(
                 mediaDataManager.setMediaResumptionEnabled(useMediaResumption)
             }
         }, Settings.Secure.MEDIA_CONTROLS_RESUME)
-
-        // Listen to changes in which apps are allowed to persist
-        tunerService.addTunable(object : TunerService.Tunable {
-            override fun onTuningChanged(key: String?, newValue: String?) {
-                blockedApps = Utils.getBlockedMediaApps(context)
-                mediaDataManager.appsBlockedFromResume = blockedApps
-            }
-        }, Settings.Secure.MEDIA_CONTROLS_RESUME_BLOCKED)
     }
 
     private fun loadSavedComponents() {
@@ -160,10 +151,8 @@ class MediaResumeListener @Inject constructor(
         }
 
         resumeComponents.forEach {
-            if (!blockedApps.contains(it.packageName)) {
-                val browser = mediaBrowserFactory.create(mediaBrowserCallback, it)
-                browser.findRecentMedia()
-            }
+            val browser = mediaBrowserFactory.create(mediaBrowserCallback, it)
+            browser.findRecentMedia()
         }
     }
 
@@ -172,8 +161,7 @@ class MediaResumeListener @Inject constructor(
             // If this had been started from a resume state, disconnect now that it's live
             mediaBrowser?.disconnect()
             // If we don't have a resume action, check if we haven't already
-            if (data.resumeAction == null && !data.hasCheckedForResume &&
-                    !blockedApps.contains(data.packageName) && data.isLocalSession) {
+            if (data.resumeAction == null && !data.hasCheckedForResume && data.isLocalSession) {
                 // TODO also check for a media button receiver intended for restarting (b/154127084)
                 Log.d(TAG, "Checking for service component for " + data.packageName)
                 val pm = context.packageManager
