@@ -192,6 +192,11 @@ public abstract class HotwordDetectionService extends Service {
             mContentCaptureManager = new ContentCaptureManager(
                     HotwordDetectionService.this, manager, options);
         }
+
+        @Override
+        public void stopDetection() {
+            HotwordDetectionService.this.onStopDetection();
+        }
     };
 
     @Override
@@ -346,6 +351,15 @@ public abstract class HotwordDetectionService extends Service {
                     };
         }
         onUpdateState(options, sharedMemory, UPDATE_TIMEOUT_MILLIS, intConsumer);
+    }
+
+    /**
+     * Called when the {@link VoiceInteractionService}
+     * {@link HotwordDetector#stopRecognition() requests} that hotword recognition be stopped.
+     * <p>
+     * Any open {@link android.media.AudioRecord} should be closed here.
+     */
+    public void onStopDetection() {
     }
 
     /**
