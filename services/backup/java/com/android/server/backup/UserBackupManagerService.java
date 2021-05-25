@@ -4369,7 +4369,7 @@ public class UserBackupManagerService {
             return OperationType.BACKUP;
         }
 
-        long oldCallingId = Binder.clearCallingIdentity();
+        final long oldCallingId = Binder.clearCallingIdentity();
         try {
             IBackupTransport transport = transportClient.connectOrThrow(
                     /* caller */ "BMS.getOperationTypeFromTransport");

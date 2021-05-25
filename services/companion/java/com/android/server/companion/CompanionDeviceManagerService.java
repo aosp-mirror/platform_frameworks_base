@@ -808,7 +808,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                         + " for " + association
                         + " - profile still present in " + otherAssociationWithDeviceProfile);
             } else {
-                long identity = Binder.clearCallingIdentity();
+                final long identity = Binder.clearCallingIdentity();
                 try {
                     mRoleManager.removeRoleHolderAsUser(
                             association.getDeviceProfile(),
@@ -1088,7 +1088,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
     }
 
     private List<UserInfo> getAllUsers() {
-        long identity = Binder.clearCallingIdentity();
+        final long identity = Binder.clearCallingIdentity();
         try {
             return mUserManager.getUsers();
         } finally {
@@ -1104,7 +1104,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
     }
 
     private Set<Association> getAllAssociations() {
-        long identity = Binder.clearCallingIdentity();
+        final long identity = Binder.clearCallingIdentity();
         try {
             ArraySet<Association> result = new ArraySet<>();
             for (UserInfo user : mUserManager.getAliveUsers()) {
