@@ -39,13 +39,12 @@
 
 
         <LinearLayout
-            android:id="@+id/volume_dialog_ringer_and_rows_container"
+            android:id="@+id/volume_dialog_top_container"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="7dp"
             android:clipChildren="false"
-            android:background="@drawable/volume_background">
+            android:gravity="right">
 
             <include layout="@layout/volume_ringer_drawer" />
 
@@ -80,7 +79,7 @@
             </FrameLayout>
 
             <LinearLayout
-                android:id="@+id/main"
+                android:id="@+id/volume_dialog_rows_container"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="right"
@@ -93,14 +92,17 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:orientation="horizontal"
-                    android:layout_marginTop="@dimen/volume_row_slider_padding_start">
+                    android:orientation="horizontal">
                     <!-- volume rows added and removed here! :-) -->
                 </LinearLayout>
                 <FrameLayout
                     android:id="@+id/settings_container"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/volume_background_bottom"
+                    android:paddingLeft="@dimen/volume_dialog_ringer_rows_padding"
+                    android:paddingBottom="@dimen/volume_dialog_ringer_rows_padding"
+                    android:paddingRight="@dimen/volume_dialog_ringer_rows_padding">
                     <com.android.keyguard.AlphaOptimizedImageButton
                         android:id="@+id/settings"
                         android:src="@drawable/horizontal_ellipsis"
@@ -124,7 +126,7 @@
             android:gravity="right"
             android:layout_gravity="right"
             android:clipToPadding="false"
-            android:background="@drawable/volume_background">
+            android:background="@drawable/volume_row_rounded_background">
             <com.android.systemui.volume.CaptionsToggleImageButton
                 android:id="@+id/odi_captions_icon"
                 android:src="@drawable/ic_volume_odi_captions_disabled"
