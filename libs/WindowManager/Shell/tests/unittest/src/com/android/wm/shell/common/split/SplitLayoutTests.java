@@ -61,7 +61,7 @@ public class SplitLayoutTests extends ShellTestCase {
         mSplitLayout = new SplitLayout(
                 "TestSplitLayout",
                 mContext,
-                getConfiguration(false),
+                getConfiguration(),
                 mSplitLayoutHandler,
                 b -> b.setParent(mRootLeash),
                 mDisplayImeController,
@@ -71,9 +71,23 @@ public class SplitLayoutTests extends ShellTestCase {
     @Test
     @UiThreadTest
     public void testUpdateConfiguration() {
+        final Configuration config = getConfiguration();
         mSplitLayout.init();
-        assertThat(mSplitLayout.updateConfiguration(getConfiguration(false))).isFalse();
-        assertThat(mSplitLayout.updateConfiguration(getConfiguration(true))).isTrue();
+
+        // Verify it returns true if new config won't affect split layout.
+        assertThat(mSplitLayout.updateConfiguration(config)).isFalse();
+
+        // Verify updateConfiguration returns true if the orientation changed.
+        config.orientation = ORIENTATION_LANDSCAPE;
+        assertThat(mSplitLayout.updateConfiguration(config)).isTrue();
+
+        // Verify updateConfiguration returns true if it rotated.
+        config.windowConfiguration.setRotation(1);
+        assertThat(mSplitLayout.updateConfiguration(config)).isTrue();
+
+        // Verify updateConfiguration returns true if the root bounds changed.
+        config.windowConfiguration.setBounds(new Rect(0, 0, 2160, 1080));
+        assertThat(mSplitLayout.updateConfiguration(config)).isTrue();
     }
 
     @Test
@@ -108,12 +122,13 @@ public class SplitLayoutTests extends ShellTestCase {
         verify(mSplitLayoutHandler).onSnappedToDismiss(eq(true));
     }
 
-    private static Configuration getConfiguration(boolean isLandscape) {
+    private static Configuration getConfiguration() {
         final Configuration configuration = new Configuration();
         configuration.unset();
-        configuration.orientation = isLandscape ? ORIENTATION_LANDSCAPE : ORIENTATION_PORTRAIT;
+        configuration.orientation = ORIENTATION_PORTRAIT;
+        configuration.windowConfiguration.setRotation(0);
         configuration.windowConfiguration.setBounds(
-                new Rect(0, 0, isLandscape ? 2160 : 1080, isLandscape ? 1080 : 2160));
+                new Rect(0, 0, 1080, 2160));
         return configuration;
     }
 
