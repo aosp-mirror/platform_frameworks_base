@@ -472,6 +472,8 @@
 
     <dimen name="volume_dialog_panel_transparent_padding">20dp</dimen>
 
+    <dimen name="volume_dialog_ringer_rows_padding">7dp</dimen>
+
     <dimen name="volume_dialog_stream_padding">12dp</dimen>
 
     <dimen name="volume_dialog_panel_width">56dp</dimen>
