@@ -53,37 +53,26 @@ import com.android.systemui.statusbar.phone.NotificationIconContainer;
 public class NotificationShelf extends ActivatableNotificationView implements
         View.OnLayoutChangeListener, StateListener {
 
-    private static final boolean ICON_ANMATIONS_WHILE_SCROLLING
-            = SystemProperties.getBoolean("debug.icon_scroll_animations", true);
     private static final int TAG_CONTINUOUS_CLIPPING = R.id.continuous_clipping_tag;
     private static final String TAG = "NotificationShelf";
 
     private NotificationIconContainer mShelfIcons;
     private int[] mTmp = new int[2];
     private boolean mHideBackground;
-    private int mIconAppearTopPadding;
-    private float mHiddenShelfIconSize;
     private int mStatusBarHeight;
     private AmbientState mAmbientState;
     private NotificationStackScrollLayoutController mHostLayoutController;
-    private int mMaxLayoutHeight;
     private int mPaddingBetweenElements;
     private int mNotGoneIndex;
     private boolean mHasItemsInStableShelf;
     private NotificationIconContainer mCollapsedIcons;
     private int mScrollFastThreshold;
-    private int mIconSize;
     private int mStatusBarState;
-    private int mRelativeOffset;
     private boolean mInteractive;
-    private float mOpenedAmount;
-    private boolean mNoAnimationsInThisFrame;
     private boolean mAnimationsEnabled = true;
     private boolean mShowNotificationShelf;
     private float mFirstElementRoundness;
     private Rect mClipRect = new Rect();
-    private int mCutoutHeight;
-    private int mGapHeight;
     private int mIndexOfFirstViewInShelf = -1;
     private float mCornerAnimationDistance;
     private NotificationShelfController mController;
@@ -121,7 +110,6 @@ public class NotificationShelf extends ActivatableNotificationView implements
 
     private void initDimens() {
         Resources res = getResources();
-        mIconAppearTopPadding = res.getDimensionPixelSize(R.dimen.notification_icon_appear_padding);
         mStatusBarHeight = res.getDimensionPixelOffset(R.dimen.status_bar_height);
         mPaddingBetweenElements = res.getDimensionPixelSize(R.dimen.notification_divider_height);
 
@@ -133,9 +121,6 @@ public class NotificationShelf extends ActivatableNotificationView implements
         mShelfIcons.setPadding(padding, 0, padding, 0);
         mScrollFastThreshold = res.getDimensionPixelOffset(R.dimen.scroll_fast_threshold);
         mShowNotificationShelf = res.getBoolean(R.bool.config_showNotificationShelf);
-        mIconSize = res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_icon_size);
-        mHiddenShelfIconSize = res.getDimensionPixelOffset(R.dimen.hidden_shelf_icon_size);
-        mGapHeight = res.getDimensionPixelSize(R.dimen.qs_notification_padding);
         mCornerAnimationDistance = res.getDimensionPixelSize(
                 R.dimen.notification_corner_animation_distance);
 
@@ -641,8 +626,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
             transitionAmount = mAmbientState.isFullyHidden() ? 1 : 0;
         } else {
             transitionAmount = iconTransitionAmount;
-            iconState.needsCannedAnimation = iconState.clampedAppearAmount != clampedAmount
-                    && !mNoAnimationsInThisFrame;
+            iconState.needsCannedAnimation = iconState.clampedAppearAmount != clampedAmount;
         }
         iconState.clampedAppearAmount = clampedAmount;
         setIconTransformationAmount(view, transitionAmount);
@@ -743,29 +727,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
 
     private void updateRelativeOffset() {
         mCollapsedIcons.getLocationOnScreen(mTmp);
-        mRelativeOffset = mTmp[0];
         getLocationOnScreen(mTmp);
-        mRelativeOffset -= mTmp[0];
-    }
-
-    @Override
-    public WindowInsets onApplyWindowInsets(WindowInsets insets) {
-        WindowInsets ret = super.onApplyWindowInsets(insets);
-
-        // NotificationShelf drag from the status bar and the status bar dock on the top
-        // of the display for current design so just focus on the top of ScreenDecorations.
-        // In landscape or multiple window split mode, the NotificationShelf still drag from
-        // the top and the physical notch/cutout goes to the right, left, or both side of the
-        // display so it doesn't matter for the NotificationSelf in landscape.
-        DisplayCutout displayCutout = insets.getDisplayCutout();
-        mCutoutHeight = displayCutout == null || displayCutout.getSafeInsetTop() < 0
-                ? 0 : displayCutout.getSafeInsetTop();
-
-        return ret;
-    }
-
-    public void setMaxLayoutHeight(int maxLayoutHeight) {
-        mMaxLayoutHeight = maxLayoutHeight;
     }
 
     /**
@@ -862,7 +824,6 @@ public class NotificationShelf extends ActivatableNotificationView implements
     private class ShelfState extends ExpandableViewState {
         private boolean hasItemsInStableShelf;
         private ExpandableView firstViewInShelf;
-        private ExpandableView firstViewInOverflowSection;
 
         @Override
         public void applyToView(View view) {
