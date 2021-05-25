@@ -253,17 +253,17 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     }
 
     void setSideStagePosition(@SplitPosition int sideStagePosition) {
-        setSideStagePosition(sideStagePosition, true /* updateVisibility */);
+        setSideStagePosition(sideStagePosition, true /* updateBounds */);
     }
 
     private void setSideStagePosition(@SplitPosition int sideStagePosition,
-            boolean updateVisibility) {
+            boolean updateBounds) {
         if (mSideStagePosition == sideStagePosition) return;
         mSideStagePosition = sideStagePosition;
         sendOnStagePositionChanged();
 
-        if (mSideStageListener.mVisible && updateVisibility) {
-            onStageVisibilityChanged(mSideStageListener);
+        if (mSideStageListener.mVisible && updateBounds) {
+            onBoundsChanged(mSplitLayout);
         }
     }
 
@@ -755,7 +755,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
             // Update local states (before animating).
             setDividerVisibility(true);
-            setSideStagePosition(SPLIT_POSITION_BOTTOM_OR_RIGHT, false /* updateVisibility */);
+            setSideStagePosition(SPLIT_POSITION_BOTTOM_OR_RIGHT, false /* updateBounds */);
             setSplitsVisible(true);
 
             addDividerBarToTransition(info, t, true /* show */);
