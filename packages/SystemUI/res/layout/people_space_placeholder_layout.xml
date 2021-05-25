@@ -34,7 +34,7 @@
         <LinearLayout
             android:orientation="vertical"
             android:paddingEnd="20dp"
-            android:gravity="bottom"
+            android:gravity="start|bottom"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
 
