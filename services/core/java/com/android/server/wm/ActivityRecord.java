@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
 import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
 import static android.app.ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
 import static android.app.ActivityOptions.ANIM_CLIP_REVEAL;
@@ -90,7 +89,6 @@ import static android.content.pm.ActivityInfo.SIZE_CHANGES_SUPPORTED_OVERRIDE;
 import static android.content.pm.ActivityInfo.SIZE_CHANGES_UNSUPPORTED_OVERRIDE;
 import static android.content.pm.ActivityInfo.isFixedOrientationLandscape;
 import static android.content.pm.ActivityInfo.isFixedOrientationPortrait;
-import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.content.res.Configuration.ASSETS_SEQ_UNDEFINED;
 import static android.content.res.Configuration.EMPTY;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
@@ -279,7 +277,6 @@ import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.storage.StorageManager;
-import android.permission.PermissionManager;
 import android.service.dreams.DreamActivity;
 import android.service.dreams.DreamManagerInternal;
 import android.service.voice.IVoiceInteractionSession;
@@ -7457,11 +7454,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     @Override
     public boolean providesMaxBounds() {
-        // System and SystemUI should always be able to access the physical display bounds,
-        // so do not provide it with the overridden maximum bounds.
-        // TODO(b/179179513) check WindowState#mOwnerCanAddInternalSystemWindow instead
-        if (getUid() == SYSTEM_UID || PermissionManager.checkPermission(INTERNAL_SYSTEM_WINDOW,
-                getPid(), info.applicationInfo.uid) == PERMISSION_GRANTED) {
+        // System should always be able to access the DisplayArea bounds, so do not provide it with
+        // compat max window bounds.
+        if (getUid() == SYSTEM_UID) {
             return false;
         }
         // Do not sandbox to activity window bounds if the feature is disabled.
