@@ -9,6 +9,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.graphics.Matrix
 import android.graphics.Rect
+import android.graphics.RectF
 import android.os.Looper
 import android.os.RemoteException
 import android.util.Log
@@ -311,7 +312,10 @@ class ActivityLaunchAnimator(context: Context) {
         private val transactionApplier = SyncRtSurfaceTransactionApplier(launchContainer)
         private var animator: ValueAnimator? = null
 
+        private val matrix = Matrix()
+        private val invertMatrix = Matrix()
         private var windowCrop = Rect()
+        private var windowCropF = RectF()
         private var timedOut = false
         private var cancelled = false
 
@@ -479,19 +483,52 @@ class ActivityLaunchAnimator(context: Context) {
         }
 
         private fun applyStateToWindow(window: RemoteAnimationTarget, state: State) {
-            val m = Matrix()
-            m.postTranslate(0f, (state.top - window.sourceContainerBounds.top).toFloat())
-            windowCrop.set(state.left, 0, state.right, state.height)
+            val screenBounds = window.screenSpaceBounds
+            val centerX = (screenBounds.left + screenBounds.right) / 2f
+            val centerY = (screenBounds.top + screenBounds.bottom) / 2f
+            val width = screenBounds.right - screenBounds.left
+            val height = screenBounds.bottom - screenBounds.top
 
-            val cornerRadius = minOf(state.topCornerRadius, state.bottomCornerRadius)
+            // Scale the window. We use the max of (widthRatio, heightRatio) so that there is no
+            // blank space on any side.
+            val widthRatio = state.width.toFloat() / width
+            val heightRatio = state.height.toFloat() / height
+            val scale = maxOf(widthRatio, heightRatio)
+            matrix.reset()
+            matrix.setScale(scale, scale, centerX, centerY)
+
+            // Align it to the top and center it in the x-axis.
+            val heightChange = height * scale - height
+            val translationX = state.centerX - centerX
+            val translationY = state.top - screenBounds.top + heightChange / 2f
+            matrix.postTranslate(translationX, translationY)
+
+            // Crop it. The matrix will also be applied to the crop, so we apply the inverse
+            // operation. Given that we only scale (by factor > 0) then translate, we can assume
+            // that the matrix is invertible.
+            val cropX = state.left.toFloat() - screenBounds.left
+            val cropY = state.top.toFloat() - screenBounds.top
+            windowCropF.set(cropX, cropY, cropX + state.width, cropY + state.height)
+            matrix.invert(invertMatrix)
+            invertMatrix.mapRect(windowCropF)
+            windowCrop.set(
+                windowCropF.left.roundToInt(),
+                windowCropF.top.roundToInt(),
+                windowCropF.right.roundToInt(),
+                windowCropF.bottom.roundToInt()
+            )
+
+            // The scale will also be applied to the corner radius, so we divide by the scale to
+            // keep the original radius.
+            val cornerRadius = minOf(state.topCornerRadius, state.bottomCornerRadius) / scale
             val params = SyncRtSurfaceTransactionApplier.SurfaceParams.Builder(window.leash)
-                    .withAlpha(1f)
-                    .withMatrix(m)
-                    .withWindowCrop(windowCrop)
-                    .withLayer(window.prefixOrderIndex)
-                    .withCornerRadius(cornerRadius)
-                    .withVisibility(true)
-                    .build()
+                .withAlpha(1f)
+                .withMatrix(matrix)
+                .withWindowCrop(windowCrop)
+                .withLayer(window.prefixOrderIndex)
+                .withCornerRadius(cornerRadius)
+                .withVisibility(true)
+                .build()
 
             transactionApplier.scheduleApply(params)
         }
@@ -506,12 +543,13 @@ class ActivityLaunchAnimator(context: Context) {
 
             val params = SyncRtSurfaceTransactionApplier.SurfaceParams.Builder(navigationBar.leash)
             if (fadeInProgress > 0) {
-                val m = Matrix()
-                m.postTranslate(0f, (state.top - navigationBar.sourceContainerBounds.top).toFloat())
+                matrix.reset()
+                matrix.setTranslate(
+                    0f, (state.top - navigationBar.sourceContainerBounds.top).toFloat())
                 windowCrop.set(state.left, 0, state.right, state.height)
                 params
                         .withAlpha(NAV_FADE_IN_INTERPOLATOR.getInterpolation(fadeInProgress))
-                        .withMatrix(m)
+                        .withMatrix(matrix)
                         .withWindowCrop(windowCrop)
                         .withVisibility(true)
             } else {
