@@ -309,7 +309,7 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"เข้าถึงกิจกรรมการเคลื่อนไหวร่างกายของคุณ"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"กล้องถ่ายรูป"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"ถ่ายภาพและบันทึกวิดีโอ"</string>
-    <string name="permgrouplab_calllog" msgid="7926834372073550288">"ประวัติการโทร"</string>
+    <string name="permgrouplab_calllog" msgid="7926834372073550288">"บันทึกการโทร"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"อ่านและเขียนบันทึกการโทรของโทรศัพท์"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"โทรศัพท์"</string>
     <string name="permgroupdesc_phone" msgid="270048070781478204">"โทรและจัดการการโทร"</string>
