@@ -22,7 +22,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="514691256816366517">"Teklatu-babeslea"</string>
     <string name="keyguard_password_enter_pin_code" msgid="8582296866585566671">"Idatzi PIN kodea"</string>
-    <string name="keyguard_password_enter_puk_code" msgid="3813154965969758868">"Idatzi SIM txartelaren PUK kodea eta PIN kode berria"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="3813154965969758868">"Idatzi SIM txartelaren PUKa eta PIN berria"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="3529260761374385243">"SIM txartelaren PUK kodea"</string>
     <string name="keyguard_password_enter_pin_prompt" msgid="2304037870481240781">"SIM txartelaren PIN berria"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="6180028658339706333"><font size="17">"Pasahitza idazteko, sakatu hau"</font></string>
@@ -31,7 +31,7 @@
     <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"Idatzi PIN kodea"</string>
     <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"Marraztu eredua"</string>
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"Idatzi pasahitza"</string>
-    <string name="keyguard_password_wrong_pin_code" msgid="3514267777289393046">"PIN kode hori ez da zuzena."</string>
+    <string name="keyguard_password_wrong_pin_code" msgid="3514267777289393046">"PINa ez da zuzena."</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Txartelak ez du balio."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"Kargatuta"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Hari gabe kargatzen"</string>
