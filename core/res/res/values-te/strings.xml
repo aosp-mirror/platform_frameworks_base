@@ -609,14 +609,12 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"వేలిముద్ర చిహ్నం"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"ఫేస్ అన్‌లాక్ చేయగల హార్డ్‌వేర్‌ను మేనేజ్‌ చేయడం"</string>
-    <string name="permdesc_manageFace" msgid="6204569688492710471">"వినియోగం కోసం ముఖ టెంప్లేట్‌లను జోడించే మరియు తొలగించే పద్ధతులను అమలు చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"ఫేస్ అన్‌లాక్ హార్డ్‌వేర్‌ను ఉపయోగించడం"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"ప్రామాణీకరణ కోసం ఫేస్‌తో అన్‌లాక్ చేయగల హార్డ్‌వేర్‌ ఉపయోగానికి యాప్‌ను అనుమతిస్తుంది"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"ఫేస్ అన్‌లాక్"</string>
+    <!-- no translation found for face_recalibrate_notification_name (7311163114750748686) -->
+    <skip />
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"మీ ముఖాన్ని తిరిగి నమోదు చేయండి"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"గుర్తింపును మెరుగుపరచడానికి, దయచేసి మీ ముఖంను తిరిగి నమోదు చేసుకోండి"</string>
-    <string name="face_setup_notification_title" msgid="550617822603450009">"ఫేస్ అన్‌లాక్‌ను సెటప్ చేయండి"</string>
+    <!-- no translation found for face_setup_notification_title (8843461561970741790) -->
+    <skip />
     <string name="face_setup_notification_content" msgid="5463999831057751676">"మీ ఫోన్‌ను చూడటం ద్వారా దాన్ని అన్‌లాక్ చేయండి"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"అన్‌లాక్ చేయడానికి మరిన్ని మార్గాలను సెటప్ చేయండి"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"వేలిముద్రను జోడించడానికి ట్యాప్ చేయండి"</string>
@@ -643,18 +641,26 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"ముఖం ధృవీకరించలేరు. హార్డ్‌వేర్ అందుబాటులో లేదు."</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"ఫేస్ అన్‌లాక్‌ను మళ్లీ ప్రయత్నించండి."</string>
+    <!-- no translation found for face_error_timeout (2598544068593889762) -->
+    <skip />
     <string name="face_error_no_space" msgid="5649264057026021723">"కొత్త ముఖం డేటాను నిల్వ చేయడం కాదు. మొదట పాతది తొలిగించండి."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"ముఖ కార్యకలాపం రద్దయింది."</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"ఫేస్ అన్‌లాక్‌ను యూజర్‌ రద్దు చేశారు."</string>
+    <!-- no translation found for face_error_user_canceled (5766472033202928373) -->
+    <skip />
     <string name="face_error_lockout" msgid="7864408714994529437">"చాలా ఎక్కువ ప్రయత్నాలు చేసారు. తర్వాత మళ్లీ ప్రయత్నించండి."</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"చాలా సార్లు ప్రయత్నించారు. ఫేస్ అన్‌లాక్ డిజేబుల్ చేయబడింది."</string>
+    <!-- no translation found for face_error_lockout_permanent (3277134834042995260) -->
+    <skip />
+    <!-- no translation found for face_error_lockout_screen_lock (5062609811636860928) -->
+    <skip />
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"ముఖం ధృవీకరించలేకపోయింది. మళ్లీ ప్రయత్నించండి."</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"మీరు ఫేస్ అన్‌లాక్‌ను సెటప్ చేయలేదు."</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"ఈ పరికరంలో ఫేస్ అన్‌లాక్‌ను ఉపయోగించడానికి సపోర్ట్ లేదు."</string>
+    <!-- no translation found for face_error_not_enrolled (1134739108536328412) -->
+    <skip />
+    <!-- no translation found for face_error_hw_not_present (7940978724978763011) -->
+    <skip />
     <string name="face_error_security_update_required" msgid="5076017208528750161">"సెన్సార్ తాత్కాలికంగా డిజేబుల్ చేయబడింది."</string>
     <string name="face_name_template" msgid="3877037340223318119">"ముఖ <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <string name="face_app_setting_name" msgid="8130135875458467243">"ఫేస్ అన్‌లాక్‌ను ఉపయోగించండి"</string>
+    <!-- no translation found for face_app_setting_name (5854024256907828015) -->
+    <skip />
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"ఫేస్ లేదా స్క్రీన్ లాక్‌ను ఉపయోగించండి"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"కొనసాగించడానికి మీ ముఖాన్ని ఉపయోగించండి"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"కొనసాగించడానికి మీ ముఖం లేదా స్క్రీన్ లాక్‌ను ఉపయోగించండి"</string>
@@ -957,7 +963,8 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"అన్‌లాక్ ప్రాంతాన్ని విస్తరింపజేయండి."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"స్లయిడ్ అన్‌లాక్."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"ఆకృతి అన్‌లాక్."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"ఫేస్ అన్‌లాక్."</string>
+    <!-- no translation found for keyguard_accessibility_face_unlock (4533832120787386728) -->
+    <skip />
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"పిన్ అన్‌లాక్."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"Sim పిన్ అన్‌లాక్."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"Sim Puk అన్‌లాక్."</string>

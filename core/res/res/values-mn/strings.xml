@@ -308,7 +308,7 @@
     <string name="permgrouplab_location" msgid="1858277002233964394">"Байршил"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"энэ төхөөрөмжийн байршилд хандалт хийх"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"Календарь"</string>
-    <string name="permgroupdesc_calendar" msgid="6762751063361489379">"Хуанли руу хандах"</string>
+    <string name="permgroupdesc_calendar" msgid="6762751063361489379">"Календарь руу хандах"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"Мессеж"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS мессежийг илгээх, харах"</string>
     <string name="permgrouplab_storage" msgid="1938416135375282333">"Файл болон мeдиа"</string>
@@ -427,14 +427,14 @@
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Апп нь таны утасны ирсэн гарсан дуудлага зэргийг агуулсан дуудлагын логыг өөрчлөх боломжтой. Хортой апп нь энийг ашиглан таны дуудлагын логыг өөрчлөх болон арилгах боломжтой."</string>
     <string name="permlab_bodySensors" msgid="3411035315357380862">"биеийн мэдрэгчид хандах (зүрхний хэмнэл шалгагч г.м)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"Апп-т таны зүрхний цохилт гэх мэт биеийн байдлыг хянадаг мэдрэгчдийн датанд хандалт хийх боломж олгоно."</string>
-    <string name="permlab_readCalendar" msgid="6408654259475396200">"Хуанлийн арга хэмжээ, дэлгэрэнгүйг унших"</string>
-    <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Энэ апп таны таблетад хадгалсан хуанлийн бүх арга хэмжээг унших, хуанлийн өгөгдлийг хуваалцах, хадгалах боломжтой."</string>
+    <string name="permlab_readCalendar" msgid="6408654259475396200">"Календарийн арга хэмжээ, дэлгэрэнгүйг унших"</string>
+    <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Энэ апп таны таблетад хадгалсан календарийн бүх арга хэмжээг унших, календарийн өгөгдлийг хуваалцах, хадгалах боломжтой."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Энэ апп таны Android TV төхөөрөмжид хадгалсан календарийн бүх арга хэмжээг унших болон таны календарийн өгөгдлийг хуваалцах эсвэл хадгалах боломжтой."</string>
-    <string name="permdesc_readCalendar" product="default" msgid="9118823807655829957">"Энэ апп таны утсанд хадгалсан хуанлийн бүх арга хэмжээг унших, хуанлийн өгөгдлийг хуваалцах, хадгалах боломжтой."</string>
+    <string name="permdesc_readCalendar" product="default" msgid="9118823807655829957">"Энэ апп таны утсанд хадгалсан календарийн бүх арга хэмжээг унших, календарийн өгөгдлийг хуваалцах, хадгалах боломжтой."</string>
     <string name="permlab_writeCalendar" msgid="6422137308329578076">"календарын хуваарийг нэмэх эсвэл өөрчлөх болон эзэмшигчид мэдэгдэлгүйгээр зочидруу имэйл илгээх"</string>
-    <string name="permdesc_writeCalendar" product="tablet" msgid="8722230940717092850">"Энэ апп таны таблет дээр хуанлийн арга хэмжээг нэмэх, устгах, эсвэл өөрчлөх боломжтой. Энэ апп нь хуанли эзэмшигчээс мессеж илгээсэн мэт харагдах, эсвэл эзэмшигчид мэдэгдэлгүйгээр арга хэмжээг өөрчлөх боломжтой."</string>
+    <string name="permdesc_writeCalendar" product="tablet" msgid="8722230940717092850">"Энэ апп таны таблет дээр календарийн арга хэмжээг нэмэх, устгах, эсвэл өөрчлөх боломжтой. Энэ апп нь календарь эзэмшигчээс мессеж илгээсэн мэт харагдах, эсвэл эзэмшигчид мэдэгдэлгүйгээр арга хэмжээг өөрчлөх боломжтой."</string>
     <string name="permdesc_writeCalendar" product="tv" msgid="951246749004952706">"Энэ апп таны Android TV төхөөрөмжид календарийн арга хэмжээ нэмэх, үүнийг устгах, эсвэл өөрчлөх боломжтой. Энэ апп календарийн өмчлөгчөөс ирсэн мэт харагдаж болох мессеж илгээх эсвэл арга хэмжээг өмчлөгчид нь мэдэгдэлгүйгээр өөрчлөх боломжтой."</string>
-    <string name="permdesc_writeCalendar" product="default" msgid="5416380074475634233">"Энэ апп таны утсанд хуанлийн арга хэмжээг нэмэх, устгах, эсвэл өөрчлөх боломжтой. Энэ апп нь хуанли эзэмшигчээс мессеж илгээсэн мэт харагдах, эсвэл эзэмшигчид мэдэгдэлгүйгээр арга хэмжээг өөрчлөх боломжтой."</string>
+    <string name="permdesc_writeCalendar" product="default" msgid="5416380074475634233">"Энэ апп таны утсанд календарийн арга хэмжээг нэмэх, устгах, эсвэл өөрчлөх боломжтой. Энэ апп нь календарь эзэмшигчээс мессеж илгээсэн мэт харагдах, эсвэл эзэмшигчид мэдэгдэлгүйгээр арга хэмжээг өөрчлөх боломжтой."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"байршил нийлүүлэгчийн нэмэлт тушаалд хандах"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Апп нь байршил нийлүүлэгчийн нэмэлт тушаалд хандах боломжтой. Энэ нь апп-д GPS эсвэл бусад байршлын үйлчилгээний ажиллагаанд нөлөөлөх боломжийг олгоно."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"нарийвчилсан байршилд зөвхөн нүүр хэсэгт хандах"</string>
@@ -609,14 +609,12 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Хурууны хээний дүрс"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"царайгаар түгжээ тайлах техник хангамжийг удирдах"</string>
-    <string name="permdesc_manageFace" msgid="6204569688492710471">"Аппад царайны загварыг ашиглахын тулд нэмэх эсвэл устгах аргыг идэвхжүүлэхийг зөвшөөрдөг."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"царайгаар түгжээ тайлах техник хангамж ашиглах"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Аппад царайгаар түгжээ тайлах техник хангамжийг баталгаажуулалтад ашиглахыг зөвшөөрдөг"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Царайгаар түгжээ тайлах"</string>
+    <!-- no translation found for face_recalibrate_notification_name (7311163114750748686) -->
+    <skip />
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Царайгаа дахин бүртгүүлнэ үү"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Танилтыг сайжруулахын тулд царайгаа дахин бүртгүүлнэ үү"</string>
-    <string name="face_setup_notification_title" msgid="550617822603450009">"Царайгаар түгжээ тайлах онцлогийг тохируулна уу"</string>
+    <!-- no translation found for face_setup_notification_title (8843461561970741790) -->
+    <skip />
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Утас руугаа харж түгжээг нь тайлна уу"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Түгжээ тайлах илүү олон арга тохируулна уу"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Хурууны хээ нэмэхийн тулд товшино уу"</string>
@@ -643,18 +641,26 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Царайг бататгаж чадсангүй. Техник хангамж боломжгүй байна."</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"Царайгаар түгжээ тайлахыг дахин оролдоно уу."</string>
+    <!-- no translation found for face_error_timeout (2598544068593889762) -->
+    <skip />
     <string name="face_error_no_space" msgid="5649264057026021723">"Царайн шинэ өгөгдлийг хадгалж чадсангүй. Эхлээд хуучин өгөгдлийг устгана уу."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Царайны үйл ажиллагааг цуцаллаа."</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"Хэрэглэгч царайгаар түгжээ тайлахыг цуцалсан."</string>
+    <!-- no translation found for face_error_user_canceled (5766472033202928373) -->
+    <skip />
     <string name="face_error_lockout" msgid="7864408714994529437">"Хэт олон удаа оролдлоо. Дараа дахин оролдоно уу."</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Хэтэрхий олон удаа оролдлоо. Царайгаар түгжээ тайлахыг идэвхгүй болголоо."</string>
+    <!-- no translation found for face_error_lockout_permanent (3277134834042995260) -->
+    <skip />
+    <!-- no translation found for face_error_lockout_screen_lock (5062609811636860928) -->
+    <skip />
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Царайг бататгаж чадсангүй. Дахин оролдоно уу."</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"Та царайгаар түгжээ тайлахыг тохируулаагүй байна."</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"Царайгаар түгжээ тайлахыг энэ төхөөрөмж дээр дэмждэггүй."</string>
+    <!-- no translation found for face_error_not_enrolled (1134739108536328412) -->
+    <skip />
+    <!-- no translation found for face_error_hw_not_present (7940978724978763011) -->
+    <skip />
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Мэдрэгчийг түр хугацаанд идэвхгүй болгосон."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Царай <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <string name="face_app_setting_name" msgid="8130135875458467243">"Царайгаар түгжээ тайлахыг ашиглах"</string>
+    <!-- no translation found for face_app_setting_name (5854024256907828015) -->
+    <skip />
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Царайгаар түгжээ тайлах эсвэл дэлгэцийн түгжээ ашиглах"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Үргэлжлүүлэхийн тулд царайгаа ашиглана уу"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Үргэлжлүүлэхийн тулд царай эсвэл дэлгэцийн түгжээгээ ашиглана уу"</string>
@@ -957,7 +963,8 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"Түгжээгүй хэсгийг өргөсгөх."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"Тайлах гулсуулалт."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"Тайлах хээ."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"Царайгаар түгжээ тайлах"</string>
+    <!-- no translation found for keyguard_accessibility_face_unlock (4533832120787386728) -->
+    <skip />
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"Тайлах пин."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"Sim-н пин кодыг тайлна уу."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"Sim-н Puk кодыг тайлна уу."</string>
