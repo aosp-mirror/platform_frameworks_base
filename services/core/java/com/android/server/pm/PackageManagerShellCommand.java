@@ -2689,6 +2689,7 @@ class PackageManagerShellCommand extends ShellCommand {
 
         String opt;
         boolean replaceExisting = true;
+        boolean forceNonStaged = false;
         while ((opt = getNextOption()) != null) {
             switch (opt) {
                 case "-r": // ignore
@@ -2783,6 +2784,9 @@ class PackageManagerShellCommand extends ShellCommand {
                     sessionParams.setInstallAsApex();
                     sessionParams.setStaged();
                     break;
+                case "--force-non-staged":
+                    forceNonStaged = true;
+                    break;
                 case "--multi-package":
                     sessionParams.setMultiPackage();
                     break;
@@ -2817,6 +2821,9 @@ class PackageManagerShellCommand extends ShellCommand {
         }
         if (replaceExisting) {
             sessionParams.installFlags |= PackageManager.INSTALL_REPLACE_EXISTING;
+        }
+        if (forceNonStaged) {
+            sessionParams.isStaged = false;
         }
         return params;
     }

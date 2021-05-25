@@ -10561,9 +10561,7 @@ package android.service.voice {
     ctor public HotwordDetectionService();
     method public static int getMaxCustomInitializationStatus();
     method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
-    method @Deprecated public void onDetect(@NonNull android.os.ParcelFileDescriptor, @NonNull android.media.AudioFormat, long, @NonNull android.service.voice.HotwordDetectionService.Callback);
     method public void onDetect(@NonNull android.service.voice.AlwaysOnHotwordDetector.EventPayload, long, @NonNull android.service.voice.HotwordDetectionService.Callback);
-    method @Deprecated public void onDetect(@NonNull android.os.ParcelFileDescriptor, @NonNull android.media.AudioFormat, @NonNull android.service.voice.HotwordDetectionService.Callback);
     method public void onDetect(@NonNull android.service.voice.HotwordDetectionService.Callback);
     method public void onDetect(@NonNull android.os.ParcelFileDescriptor, @NonNull android.media.AudioFormat, @Nullable android.os.PersistableBundle, @NonNull android.service.voice.HotwordDetectionService.Callback);
     method public void onUpdateState(@Nullable android.os.PersistableBundle, @Nullable android.os.SharedMemory, long, @Nullable java.util.function.IntConsumer);
@@ -10608,7 +10606,6 @@ package android.service.voice {
   public class VoiceInteractionService extends android.app.Service {
     method @NonNull public final android.service.voice.AlwaysOnHotwordDetector createAlwaysOnHotwordDetector(String, java.util.Locale, android.service.voice.AlwaysOnHotwordDetector.Callback);
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_HOTWORD_DETECTION) public final android.service.voice.AlwaysOnHotwordDetector createAlwaysOnHotwordDetector(String, java.util.Locale, @Nullable android.os.PersistableBundle, @Nullable android.os.SharedMemory, android.service.voice.AlwaysOnHotwordDetector.Callback);
-    method @Deprecated @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_HOTWORD_DETECTION) public final android.service.voice.HotwordDetector createHotwordDetector(@NonNull android.media.AudioFormat, @Nullable android.os.PersistableBundle, @Nullable android.os.SharedMemory, @NonNull android.service.voice.HotwordDetector.Callback);
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_HOTWORD_DETECTION) public final android.service.voice.HotwordDetector createHotwordDetector(@Nullable android.os.PersistableBundle, @Nullable android.os.SharedMemory, @NonNull android.service.voice.HotwordDetector.Callback);
     method @NonNull @RequiresPermission("android.permission.MANAGE_VOICE_KEYPHRASES") public final android.media.voice.KeyphraseModelManager createKeyphraseModelManager();
   }
