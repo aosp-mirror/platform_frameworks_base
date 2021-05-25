@@ -20,6 +20,8 @@ import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.telephony.TelephonyCallback.ActiveDataSubscriptionIdListener;
 
+import static com.android.server.VcnManagementService.LOCAL_LOG;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.net.ConnectivityManager;
@@ -433,7 +435,7 @@ public class UnderlyingNetworkTracker {
     private static boolean isOpportunistic(
             @NonNull TelephonySubscriptionSnapshot snapshot, Set<Integer> subIds) {
         if (snapshot == null) {
-            Slog.wtf(TAG, "Got null snapshot");
+            logWtf("Got null snapshot");
             return false;
         }
 
@@ -504,7 +506,7 @@ public class UnderlyingNetworkTracker {
             final UnderlyingNetworkRecord.Builder builder =
                     mUnderlyingNetworkRecordBuilders.get(network);
             if (builder == null) {
-                Slog.wtf(TAG, "Got capabilities change for unknown key: " + network);
+                logWtf("Got capabilities change for unknown key: " + network);
                 return;
             }
 
@@ -520,7 +522,7 @@ public class UnderlyingNetworkTracker {
             final UnderlyingNetworkRecord.Builder builder =
                     mUnderlyingNetworkRecordBuilders.get(network);
             if (builder == null) {
-                Slog.wtf(TAG, "Got link properties change for unknown key: " + network);
+                logWtf("Got link properties change for unknown key: " + network);
                 return;
             }
 
@@ -535,7 +537,7 @@ public class UnderlyingNetworkTracker {
             final UnderlyingNetworkRecord.Builder builder =
                     mUnderlyingNetworkRecordBuilders.get(network);
             if (builder == null) {
-                Slog.wtf(TAG, "Got blocked status change for unknown key: " + network);
+                logWtf("Got blocked status change for unknown key: " + network);
                 return;
             }
 
@@ -623,7 +625,7 @@ public class UnderlyingNetworkTracker {
             // mRouteSelectionNetworkRequest requires a network be both VALIDATED and NOT_SUSPENDED
 
             if (isBlocked) {
-                Slog.wtf(TAG, "Network blocked for System Server: " + network);
+                logWtf("Network blocked for System Server: " + network);
                 return PRIORITY_ANY;
             }
 
@@ -768,6 +770,16 @@ public class UnderlyingNetworkTracker {
                 return mCached;
             }
         }
+    }
+
+    private static void logWtf(String msg) {
+        Slog.wtf(TAG, msg);
+        LOCAL_LOG.log(TAG + " WTF: " + msg);
+    }
+
+    private static void logWtf(String msg, Throwable tr) {
+        Slog.wtf(TAG, msg, tr);
+        LOCAL_LOG.log(TAG + " WTF: " + msg + tr);
     }
 
     /** Dumps the state of this record for logging and debugging purposes. */
