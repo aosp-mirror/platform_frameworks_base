@@ -481,14 +481,24 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
      */
     @Override
     public void onBiometricAuthenticated() {
-        mCurrentDialog.onAuthenticationSucceeded();
+        if (DEBUG) Log.d(TAG, "onBiometricAuthenticated: ");
+
+        if (mCurrentDialog != null) {
+            mCurrentDialog.onAuthenticationSucceeded();
+        } else {
+            Log.w(TAG, "onBiometricAuthenticated callback but dialog gone");
+        }
     }
 
     @Override
     public void onBiometricHelp(String message) {
         if (DEBUG) Log.d(TAG, "onBiometricHelp: " + message);
 
-        mCurrentDialog.onHelp(message);
+        if (mCurrentDialog != null) {
+            mCurrentDialog.onHelp(message);
+        } else {
+            Log.w(TAG, "onBiometricHelp callback but dialog gone");
+        }
     }
 
     @Nullable
@@ -527,19 +537,23 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         final boolean isSoftError = (error == BiometricConstants.BIOMETRIC_PAUSED_REJECTED
                 || error == BiometricConstants.BIOMETRIC_ERROR_TIMEOUT);
 
-        if (mCurrentDialog.isAllowDeviceCredentials() && isLockout) {
-            if (DEBUG) Log.d(TAG, "onBiometricError, lockout");
-            mCurrentDialog.animateToCredentialUI();
-        } else if (isSoftError) {
-            final String errorMessage = (error == BiometricConstants.BIOMETRIC_PAUSED_REJECTED)
-                    ? mContext.getString(R.string.biometric_not_recognized)
-                    : getErrorString(modality, error, vendorCode);
-            if (DEBUG) Log.d(TAG, "onBiometricError, soft error: " + errorMessage);
-            mCurrentDialog.onAuthenticationFailed(errorMessage);
+        if (mCurrentDialog != null) {
+            if (mCurrentDialog.isAllowDeviceCredentials() && isLockout) {
+                if (DEBUG) Log.d(TAG, "onBiometricError, lockout");
+                mCurrentDialog.animateToCredentialUI();
+            } else if (isSoftError) {
+                final String errorMessage = (error == BiometricConstants.BIOMETRIC_PAUSED_REJECTED)
+                        ? mContext.getString(R.string.biometric_not_recognized)
+                        : getErrorString(modality, error, vendorCode);
+                if (DEBUG) Log.d(TAG, "onBiometricError, soft error: " + errorMessage);
+                mCurrentDialog.onAuthenticationFailed(errorMessage);
+            } else {
+                final String errorMessage = getErrorString(modality, error, vendorCode);
+                if (DEBUG) Log.d(TAG, "onBiometricError, hard error: " + errorMessage);
+                mCurrentDialog.onError(errorMessage);
+            }
         } else {
-            final String errorMessage = getErrorString(modality, error, vendorCode);
-            if (DEBUG) Log.d(TAG, "onBiometricError, hard error: " + errorMessage);
-            mCurrentDialog.onError(errorMessage);
+            Log.w(TAG, "onBiometricError callback but dialog is gone");
         }
 
         onCancelUdfps();
