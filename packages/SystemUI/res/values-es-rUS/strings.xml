@@ -535,7 +535,7 @@
     <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Este dispositivo pertenece a <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> y está conectado a VPN"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Tu organización puede controlar el tráfico de red en tu perfil de trabajo"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"Es posible que <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> controle el tráfico de red en tu perfil de trabajo"</string>
-    <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"El admin. de TI puede ver la actividad de red de tu perfil de trabajo"</string>
+    <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"El administrador de IT puede ver la actividad de red de tu perfil de trabajo"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Es posible que la red esté supervisada"</string>
     <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"Este dispositivo está conectado a VPN"</string>
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Tu perfil de trabajo está conectado a <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>

@@ -29,9 +29,9 @@
     <string name="battery_low_percent_format_hybrid" msgid="3985614339605686167">"Atlikušais laiks: <xliff:g id="PERCENTAGE">%1$s</xliff:g> — aptuveni <xliff:g id="TIME">%2$s</xliff:g> (ņemot vērā lietojumu)"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="5917433188456218857">"Atlikušais laiks: <xliff:g id="PERCENTAGE">%1$s</xliff:g> — aptuveni <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_low_percent_format_saver_started" msgid="4968468824040940688">"Atlikuši <xliff:g id="PERCENTAGE">%s</xliff:g>. Ir ieslēgts akumulatora enerģijas taupīšanas režīms."</string>
-    <string name="invalid_charger" msgid="4370074072117767416">"Nevar veikt uzlādi, izmantojot USB. Izmantojiet ierīces komplektācijā iekļauto uzlādes ierīci."</string>
+    <string name="invalid_charger" msgid="4370074072117767416">"Nevar veikt uzlādi, izmantojot USB. Izmantojiet ierīces komplektācijā iekļauto lādētāju."</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"Nevar veikt uzlādi, izmantojot USB"</string>
-    <string name="invalid_charger_text" msgid="2339310107232691577">"Izmantojiet ierīces komplektācijā iekļauto uzlādes ierīci"</string>
+    <string name="invalid_charger_text" msgid="2339310107232691577">"Izmantojiet ierīces komplektācijā iekļauto lādētāju"</string>
     <string name="battery_low_why" msgid="2056750982959359863">"Iestatījumi"</string>
     <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Vai ieslēgt akumulatora enerģijas taupīšanas režīmu?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"Par akumulatora enerģijas taupīšanas režīmu"</string>
@@ -425,8 +425,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC ir atspējoti"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC ir iespējoti"</string>
-    <!-- no translation found for quick_settings_screen_record_label (8650355346742003694) -->
-    <skip />
+    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Ekrāna ierakstīšana"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Sākt"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Apturēt"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Vai vēlaties atbloķēt ierīces mikrofonu?"</string>

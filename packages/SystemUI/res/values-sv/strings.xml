@@ -378,7 +378,7 @@
     <string name="quick_settings_cast_device_default_name" msgid="6988469571141331700">"Namnlös enhet"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2580520859212250265">"Redo att casta"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"Inga tillgängliga enheter"</string>
-    <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Inte ansluten till wifi"</string>
+    <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Ej ansluten till wifi"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Ljusstyrka"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="2325362583903258677">"AUTO"</string>
     <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Invertera färger"</string>
@@ -423,8 +423,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC är inaktiverat"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC är aktiverat"</string>
-    <!-- no translation found for quick_settings_screen_record_label (8650355346742003694) -->
-    <skip />
+    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Skärminspelning"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Starta"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Stoppa"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Vill du återaktivera enhetens mikrofon?"</string>
