@@ -883,7 +883,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     }
 
     private float getInterpolatedFraction() {
-        return Interpolators.getNotificationScrimAlpha(mPanelExpansion);
+        return Interpolators.getNotificationScrimAlpha(mPanelExpansion, false /* notification */);
     }
 
     private void setScrimAlpha(ScrimView scrim, float alpha) {
