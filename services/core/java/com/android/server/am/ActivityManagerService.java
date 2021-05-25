@@ -2588,6 +2588,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             addServiceToMap(mAppBindArgs, Context.POWER_SERVICE);
             addServiceToMap(mAppBindArgs, Context.USER_SERVICE);
             addServiceToMap(mAppBindArgs, "mount");
+            addServiceToMap(mAppBindArgs, Context.PLATFORM_COMPAT_SERVICE);
         }
         return mAppBindArgs;
     }
