@@ -13658,8 +13658,7 @@ package android.telephony.ims {
   }
 
   public interface SipDelegateConnection {
-    method public default void cleanupSession(@NonNull String);
-    method @Deprecated public default void closeDialog(@NonNull String);
+    method public void cleanupSession(@NonNull String);
     method public void notifyMessageReceiveError(@NonNull String, int);
     method public void notifyMessageReceived(@NonNull String);
     method public void sendMessage(@NonNull android.telephony.ims.SipMessage, long);
@@ -14111,8 +14110,7 @@ package android.telephony.ims.stub {
   }
 
   public interface SipDelegate {
-    method public default void cleanupSession(@NonNull String);
-    method @Deprecated public default void closeDialog(@NonNull String);
+    method public void cleanupSession(@NonNull String);
     method public void notifyMessageReceiveError(@NonNull String, int);
     method public void notifyMessageReceived(@NonNull String);
     method public void sendMessage(@NonNull android.telephony.ims.SipMessage, long);
