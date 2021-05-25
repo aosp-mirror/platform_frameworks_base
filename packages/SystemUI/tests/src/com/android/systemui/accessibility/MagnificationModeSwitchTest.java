@@ -22,6 +22,7 @@ import static android.view.MotionEvent.ACTION_CANCEL;
 import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_MOVE;
 import static android.view.MotionEvent.ACTION_UP;
+import static android.view.WindowInsets.Type.displayCutout;
 import static android.view.WindowInsets.Type.systemBars;
 import static android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction.ACTION_CLICK;
 
@@ -223,12 +224,25 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
     }
 
     @Test
-    public void onApplyWindowInsetsWithWindowInsetsChange_buttonIsShowing_draggableBoundsChanged() {
+    public void onSystemBarsInsetsChanged_buttonIsShowing_draggableBoundsChanged() {
         mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
         final Rect oldDraggableBounds = new Rect(mMagnificationModeSwitch.mDraggableWindowBounds);
 
         mWindowManager.setWindowInsets(new WindowInsets.Builder()
                 .setInsetsIgnoringVisibility(systemBars(), Insets.of(0, 20, 0, 20))
+                .build());
+        mSpyImageView.onApplyWindowInsets(WindowInsets.CONSUMED);
+
+        assertNotEquals(oldDraggableBounds, mMagnificationModeSwitch.mDraggableWindowBounds);
+    }
+
+    @Test
+    public void onDisplayCutoutInsetsChanged_buttonIsShowing_draggableBoundsChanged() {
+        mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
+        final Rect oldDraggableBounds = new Rect(mMagnificationModeSwitch.mDraggableWindowBounds);
+
+        mWindowManager.setWindowInsets(new WindowInsets.Builder()
+                .setInsetsIgnoringVisibility(displayCutout(), Insets.of(20, 30, 20, 30))
                 .build());
         mSpyImageView.onApplyWindowInsets(WindowInsets.CONSUMED);
 
