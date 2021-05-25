@@ -245,18 +245,24 @@ public class BinderLatencyObserverTest {
         private ArrayList<String> mWrittenAtoms;
 
         TestBinderLatencyObserver() {
-            // Make random generator not random.
-            super(new Injector() {
-                public Random getRandomGenerator() {
-                    return new Random() {
-                        int mCallCount = 0;
+            this(SYSTEM_SERVER);
+        }
 
-                        public int nextInt() {
-                            return mCallCount++;
+        TestBinderLatencyObserver(int processSource) {
+            // Make random generator not random.
+            super(
+                    new Injector() {
+                        public Random getRandomGenerator() {
+                            return new Random() {
+                                int mCallCount = 0;
+
+                                public int nextInt() {
+                                    return mCallCount++;
+                                }
+                            };
                         }
-                    };
-                }
-            });
+                    },
+                    processSource);
             setSamplingInterval(1);
             mWrittenAtoms = new ArrayList<>();
         }
