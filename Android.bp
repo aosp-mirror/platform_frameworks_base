@@ -254,9 +254,12 @@ java_library {
     installable: false,
 }
 
+// NOTE: This filegroup is exposed for vendor libraries to depend on and is referenced in
+// documentation. Do not remove without consulting the treble/hidl teams.
 filegroup {
     name: "framework-jarjar-rules",
     srcs: ["framework-jarjar-rules.txt"],
+    visibility: ["//visibility:public"],
 }
 
 java_library {
