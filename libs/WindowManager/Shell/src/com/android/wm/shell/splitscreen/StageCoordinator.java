@@ -44,6 +44,7 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.graphics.Rect;
+import android.hardware.devicestate.DeviceStateManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
@@ -158,6 +159,10 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 mSurfaceSession);
         mDisplayImeController = displayImeController;
         mRootTDAOrganizer.registerListener(displayId, this);
+        final DeviceStateManager deviceStateManager =
+                mContext.getSystemService(DeviceStateManager.class);
+        deviceStateManager.registerCallback(taskOrganizer.getExecutor(),
+                new DeviceStateManager.FoldStateListener(mContext, this::onFoldedStateChanged));
         mSplitTransitions = new SplitScreenTransitions(transactionPool, transitions,
                 mOnTransitionAnimationComplete);
         transitions.addHandler(this);
@@ -596,6 +601,12 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         if (mSplitLayout != null
                 && mSplitLayout.updateConfiguration(mDisplayAreaInfo.configuration)) {
             onBoundsChanged(mSplitLayout);
+        }
+    }
+
+    private void onFoldedStateChanged(boolean folded) {
+        if (folded && mMainStage.isActive()) {
+            exitSplitScreen();
         }
     }
 
