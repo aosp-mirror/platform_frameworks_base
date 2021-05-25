@@ -30,6 +30,7 @@ import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
@@ -94,11 +95,7 @@ public final class BatteryUsageStats implements Parcelable {
     private BatteryUsageStats(@NonNull Builder builder) {
         mStatsStartTimestampMs = builder.mStatsStartTimestampMs;
         mStatsEndTimestampMs = builder.mStatsEndTimestampMs;
-        if (builder.mStatsDurationMs != -1) {
-            mStatsDurationMs = builder.mStatsDurationMs;
-        } else {
-            mStatsDurationMs = mStatsEndTimestampMs - mStatsStartTimestampMs;
-        }
+        mStatsDurationMs = builder.getStatsDuration();
         mBatteryCapacityMah = builder.mBatteryCapacityMah;
         mDischargePercentage = builder.mDischargePercentage;
         mDischargedPowerLowerBound = builder.mDischargedPowerLowerBoundMah;
@@ -608,6 +605,14 @@ public final class BatteryUsageStats implements Parcelable {
             return this;
         }
 
+        private long getStatsDuration() {
+            if (mStatsDurationMs != -1) {
+                return mStatsDurationMs;
+            } else {
+                return mStatsEndTimestampMs - mStatsStartTimestampMs;
+            }
+        }
+
         /**
          * Sets the battery discharge amount since BatteryStats reset as percentage of the full
          * charge.
@@ -688,6 +693,22 @@ public final class BatteryUsageStats implements Parcelable {
         }
 
         /**
+         * Creates or returns a UidBatteryConsumer, which represents battery attribution
+         * data for an individual UID. This version of the method is not suitable for use
+         * with PowerCalculators.
+         */
+        @NonNull
+        public UidBatteryConsumer.Builder getOrCreateUidBatteryConsumerBuilder(int uid) {
+            UidBatteryConsumer.Builder builder = mUidBatteryConsumerBuilders.get(uid);
+            if (builder == null) {
+                builder = new UidBatteryConsumer.Builder(mCustomPowerComponentNames,
+                        mIncludePowerModels, uid);
+                mUidBatteryConsumerBuilders.put(uid, builder);
+            }
+            return builder;
+        }
+
+        /**
          * Creates or returns a UserBatteryConsumer, which represents battery attribution
          * data for an individual {@link UserHandle}.
          */
@@ -705,6 +726,60 @@ public final class BatteryUsageStats implements Parcelable {
         @NonNull
         public SparseArray<UidBatteryConsumer.Builder> getUidBatteryConsumerBuilders() {
             return mUidBatteryConsumerBuilders;
+        }
+
+        /**
+         * Adds battery usage stats from another snapshots. The two snapshots are assumed to be
+         * non-overlapping, meaning that the power consumption estimates and session durations
+         * can be simply summed across the two snapshots.  This remains true even if the timestamps
+         * seem to indicate that the sessions are in fact overlapping: timestamps may be off as a
+         * result of realtime clock adjustments by the user or the system.
+         */
+        @NonNull
+        public Builder add(BatteryUsageStats stats) {
+            if (!Arrays.equals(mCustomPowerComponentNames, stats.mCustomPowerComponentNames)) {
+                throw new IllegalArgumentException(
+                        "BatteryUsageStats have different custom power components");
+            }
+
+            if (mUserBatteryConsumerBuilders.size() != 0
+                    || !stats.getUserBatteryConsumers().isEmpty()) {
+                throw new UnsupportedOperationException(
+                        "Combining UserBatteryConsumers is not supported");
+            }
+
+            mDischargedPowerLowerBoundMah += stats.mDischargedPowerLowerBound;
+            mDischargedPowerUpperBoundMah += stats.mDischargedPowerUpperBound;
+            mDischargePercentage += stats.mDischargePercentage;
+
+            mStatsDurationMs = getStatsDuration() + stats.getStatsDuration();
+
+            if (mStatsStartTimestampMs == 0
+                    || stats.mStatsStartTimestampMs < mStatsStartTimestampMs) {
+                mStatsStartTimestampMs = stats.mStatsStartTimestampMs;
+            }
+
+            final boolean addingLaterSnapshot = stats.mStatsEndTimestampMs > mStatsEndTimestampMs;
+            if (addingLaterSnapshot) {
+                mStatsEndTimestampMs = stats.mStatsEndTimestampMs;
+            }
+
+            for (int scope = 0; scope < AGGREGATE_BATTERY_CONSUMER_SCOPE_COUNT; scope++) {
+                getAggregateBatteryConsumerBuilder(scope)
+                        .add(stats.mAggregateBatteryConsumers[scope]);
+            }
+
+            for (UidBatteryConsumer consumer : stats.getUidBatteryConsumers()) {
+                getOrCreateUidBatteryConsumerBuilder(consumer.getUid()).add(consumer);
+            }
+
+            if (addingLaterSnapshot) {
+                mBatteryCapacityMah = stats.mBatteryCapacityMah;
+                mBatteryTimeRemainingMs = stats.mBatteryTimeRemainingMs;
+                mChargeTimeRemainingMs = stats.mChargeTimeRemainingMs;
+            }
+
+            return this;
         }
     }
 }

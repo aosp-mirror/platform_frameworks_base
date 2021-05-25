@@ -76,13 +76,14 @@ open class BlurUtils @Inject constructor(
      * @param viewRootImpl The window root.
      * @param radius blur radius in pixels.
      */
-    fun applyBlur(viewRootImpl: ViewRootImpl?, radius: Int) {
+    fun applyBlur(viewRootImpl: ViewRootImpl?, radius: Int, opaqueBackground: Boolean) {
         if (viewRootImpl == null || !viewRootImpl.surfaceControl.isValid ||
                 !supportsBlursOnWindows()) {
             return
         }
         createTransaction().use {
             it.setBackgroundBlurRadius(viewRootImpl.surfaceControl, radius)
+            it.setOpaque(viewRootImpl.surfaceControl, opaqueBackground)
             it.apply()
         }
     }

@@ -19,6 +19,7 @@ package android.os;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.text.TextUtils;
 
 import com.android.internal.os.PowerCalculator;
 
@@ -147,9 +148,10 @@ public final class UidBatteryConsumer extends BatteryConsumer implements Parcela
      * Builder for UidBatteryConsumer.
      */
     public static final class Builder extends BaseBuilder<Builder> {
+        private static final String PACKAGE_NAME_UNINITIALIZED = "";
         private final BatteryStats.Uid mBatteryStatsUid;
         private final int mUid;
-        private String mPackageWithHighestDrain;
+        private String mPackageWithHighestDrain = PACKAGE_NAME_UNINITIALIZED;
         public long mTimeInForegroundMs;
         public long mTimeInBackgroundMs;
         private boolean mExcludeFromBatteryUsageStats;
@@ -161,8 +163,19 @@ public final class UidBatteryConsumer extends BatteryConsumer implements Parcela
             mUid = batteryStatsUid.getUid();
         }
 
+        public Builder(@NonNull String[] customPowerComponentNames, boolean includePowerModels,
+                int uid) {
+            super(customPowerComponentNames, includePowerModels);
+            mBatteryStatsUid = null;
+            mUid = uid;
+        }
+
         @NonNull
         public BatteryStats.Uid getBatteryStatsUid() {
+            if (mBatteryStatsUid == null) {
+                throw new IllegalStateException(
+                        "UidBatteryConsumer.Builder was initialized without a BatteryStats.Uid");
+            }
             return mBatteryStatsUid;
         }
 
@@ -176,7 +189,7 @@ public final class UidBatteryConsumer extends BatteryConsumer implements Parcela
          */
         @NonNull
         public Builder setPackageWithHighestDrain(@Nullable String packageName) {
-            mPackageWithHighestDrain = packageName;
+            mPackageWithHighestDrain = TextUtils.nullIfEmpty(packageName);
             return this;
         }
 
@@ -208,6 +221,30 @@ public final class UidBatteryConsumer extends BatteryConsumer implements Parcela
         }
 
         /**
+         * Adds power and usage duration from the supplied UidBatteryConsumer.
+         */
+        public Builder add(UidBatteryConsumer consumer) {
+            mPowerComponentsBuilder.addPowerAndDuration(consumer.mPowerComponents);
+            mTimeInBackgroundMs += consumer.mTimeInBackgroundMs;
+            mTimeInForegroundMs += consumer.mTimeInForegroundMs;
+
+            if (mPackageWithHighestDrain == PACKAGE_NAME_UNINITIALIZED) {
+                mPackageWithHighestDrain = consumer.mPackageWithHighestDrain;
+            } else if (!TextUtils.equals(mPackageWithHighestDrain,
+                    consumer.mPackageWithHighestDrain)) {
+                // Consider combining two UidBatteryConsumers with this distribution
+                // of power drain between packages:
+                // (package1=100, package2=10) and (package1=100, package2=101).
+                // Since we don't know the actual power distribution between packages at this
+                // point, we have no way to correctly declare package1 as the winner.
+                // The naive logic of picking the consumer with the higher total consumed
+                // power would produce an incorrect result.
+                mPackageWithHighestDrain = null;
+            }
+            return this;
+        }
+
+        /**
          * Returns true if this UidBatteryConsumer must be excluded from the
          * BatteryUsageStats.
          */
@@ -220,6 +257,9 @@ public final class UidBatteryConsumer extends BatteryConsumer implements Parcela
          */
         @NonNull
         public UidBatteryConsumer build() {
+            if (mPackageWithHighestDrain == PACKAGE_NAME_UNINITIALIZED) {
+                mPackageWithHighestDrain = null;
+            }
             return new UidBatteryConsumer(this);
         }
     }
