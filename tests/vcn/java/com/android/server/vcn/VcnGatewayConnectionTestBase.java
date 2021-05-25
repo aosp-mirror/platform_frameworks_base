@@ -99,6 +99,7 @@ public class VcnGatewayConnectionTestBase {
     protected static final long ELAPSED_REAL_TIME = 123456789L;
     protected static final String TEST_IPSEC_TUNNEL_IFACE = "IPSEC_IFACE";
 
+    protected static final String TEST_TCP_BUFFER_SIZES_1 = "1,2,3,4";
     protected static final UnderlyingNetworkRecord TEST_UNDERLYING_NETWORK_RECORD_1 =
             new UnderlyingNetworkRecord(
                     mock(Network.class, CALLS_REAL_METHODS),
@@ -108,8 +109,10 @@ public class VcnGatewayConnectionTestBase {
 
     static {
         TEST_UNDERLYING_NETWORK_RECORD_1.linkProperties.setMtu(1500);
+        TEST_UNDERLYING_NETWORK_RECORD_1.linkProperties.setTcpBufferSizes(TEST_TCP_BUFFER_SIZES_1);
     }
 
+    protected static final String TEST_TCP_BUFFER_SIZES_2 = "2,3,4,5";
     protected static final UnderlyingNetworkRecord TEST_UNDERLYING_NETWORK_RECORD_2 =
             new UnderlyingNetworkRecord(
                     mock(Network.class, CALLS_REAL_METHODS),
@@ -119,6 +122,7 @@ public class VcnGatewayConnectionTestBase {
 
     static {
         TEST_UNDERLYING_NETWORK_RECORD_2.linkProperties.setMtu(1460);
+        TEST_UNDERLYING_NETWORK_RECORD_2.linkProperties.setTcpBufferSizes(TEST_TCP_BUFFER_SIZES_2);
     }
 
     protected static final TelephonySubscriptionSnapshot TEST_SUBSCRIPTION_SNAPSHOT =
