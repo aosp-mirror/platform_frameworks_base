@@ -121,6 +121,7 @@ import java.io.PrintWriter;
 import java.net.URISyntaxException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
@@ -253,6 +254,8 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runSuspend(true);
                 case "unsuspend":
                     return runSuspend(false);
+                case "set-distracting-restriction":
+                    return runSetDistractingRestriction();
                 case "grant":
                     return runGrantRevokePermission(true);
                 case "revoke":
@@ -2207,6 +2210,57 @@ class PackageManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    private int runSetDistractingRestriction() {
+        final PrintWriter pw = getOutPrintWriter();
+        int userId = UserHandle.USER_SYSTEM;
+        String opt;
+        int flags = 0;
+        while ((opt = getNextOption()) != null) {
+            switch (opt) {
+                case "--user":
+                    userId = UserHandle.parseUserArg(getNextArgRequired());
+                    break;
+                case "--flag":
+                    final String flag = getNextArgRequired();
+                    switch (flag) {
+                        case "hide-notifications":
+                            flags |= PackageManager.RESTRICTION_HIDE_NOTIFICATIONS;
+                            break;
+                        case "hide-from-suggestions":
+                            flags |= PackageManager.RESTRICTION_HIDE_FROM_SUGGESTIONS;
+                            break;
+                        default:
+                            pw.println("Unrecognized flag: " + flag);
+                            return 1;
+                    }
+                    break;
+                default:
+                    pw.println("Error: Unknown option: " + opt);
+                    return 1;
+            }
+        }
+
+        final List<String> packageNames = getRemainingArgs();
+        if (packageNames.isEmpty()) {
+            pw.println("Error: package name not specified");
+            return 1;
+        }
+        try {
+            final int translatedUserId = translateUserId(userId, UserHandle.USER_NULL,
+                    "set-distracting");
+            final String[] errored = mInterface.setDistractingPackageRestrictionsAsUser(
+                    packageNames.toArray(new String[]{}), flags, translatedUserId);
+            if (errored.length > 0) {
+                pw.println("Could not set restriction for: " + Arrays.toString(errored));
+                return 1;
+            }
+            return 0;
+        } catch (RemoteException | IllegalArgumentException e) {
+            pw.println(e.toString());
+            return 1;
+        }
+    }
+
     private int runSuspend(boolean suspendedState) {
         final PrintWriter pw = getOutPrintWriter();
         int userId = UserHandle.USER_SYSTEM;
@@ -3687,6 +3741,16 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("");
         pw.println("  unsuspend [--user USER_ID] PACKAGE [PACKAGE...]");
         pw.println("    Unsuspends the specified package(s) (as user).");
+        pw.println("");
+        pw.println("  set-distracting-restriction [--user USER_ID] [--flag FLAG ...]");
+        pw.println("      PACKAGE [PACKAGE...]");
+        pw.println("    Sets the specified restriction flags to given package(s) (for user).");
+        pw.println("    Flags are:");
+        pw.println("      hide-notifications: Hides notifications from this package");
+        pw.println("      hide-from-suggestions: Hides this package from suggestions");
+        pw.println("        (by the launcher, etc.)");
+        pw.println("    Any existing flags are overwritten, which also means that if no flags are");
+        pw.println("    specified then all existing flags will be cleared.");
         pw.println("");
         pw.println("  grant [--user USER_ID] PACKAGE PERMISSION");
         pw.println("  revoke [--user USER_ID] PACKAGE PERMISSION");
