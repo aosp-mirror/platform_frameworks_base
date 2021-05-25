@@ -41,6 +41,7 @@ android_test {
         "frameworks-core-util-lib",
         "mockwebserver",
         "guava",
+        "androidx.core_core",
         "androidx.test.espresso.core",
         "androidx.test.ext.junit",
         "androidx.test.runner",
