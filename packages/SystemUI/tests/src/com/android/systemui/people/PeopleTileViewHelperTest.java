@@ -69,6 +69,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.time.Duration;
 import java.util.Arrays;
 
 @RunWith(AndroidTestingRunner.class)
@@ -182,6 +183,30 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
 
         // Not showing last interaction.
         assertEquals(View.GONE, largeResult.findViewById(R.id.last_interaction).getVisibility());
+    }
+
+    @Test
+    public void testLastInteractionTime() {
+        long now = System.currentTimeMillis();
+        long fiveDaysAgo = now - Duration.ofDays(5).toMillis();
+        String lastInteractionString = PeopleTileViewHelper.getLastInteractionString(mContext,
+                fiveDaysAgo);
+        assertThat(lastInteractionString).isEqualTo("5 days ago");
+
+        long lessThanOneDayAgo = now - Duration.ofHours(20).toMillis();
+        lastInteractionString = PeopleTileViewHelper.getLastInteractionString(mContext,
+                lessThanOneDayAgo);
+        assertThat(lastInteractionString).isNull();
+
+        long overOneWeekAgo = now - Duration.ofDays(8).toMillis();
+        lastInteractionString = PeopleTileViewHelper.getLastInteractionString(mContext,
+                overOneWeekAgo);
+        assertThat(lastInteractionString).isEqualTo("Over 1 week ago");
+
+        long overTwoWeeksAgo = now - Duration.ofDays(15).toMillis();
+        lastInteractionString = PeopleTileViewHelper.getLastInteractionString(mContext,
+                overTwoWeeksAgo);
+        assertThat(lastInteractionString).isEqualTo("Over 2 weeks ago");
     }
 
     @Test

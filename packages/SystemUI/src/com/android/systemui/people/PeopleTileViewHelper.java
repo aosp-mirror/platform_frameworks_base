@@ -45,9 +45,6 @@ import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
-import android.icu.text.MeasureFormat;
-import android.icu.util.Measure;
-import android.icu.util.MeasureUnit;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.UserHandle;
@@ -61,6 +58,9 @@ import android.view.View;
 import android.widget.RemoteViews;
 import android.widget.TextView;
 
+import androidx.core.graphics.drawable.RoundedBitmapDrawable;
+import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
+
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.launcher3.icons.FastBitmapDrawable;
 import com.android.systemui.R;
@@ -72,6 +72,7 @@ import java.text.NumberFormat;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -94,6 +95,8 @@ public class PeopleTileViewHelper {
     public static final int LAYOUT_LARGE = 2;
 
     private static final int MIN_CONTENT_MAX_LINES = 2;
+    private static final int NAME_MAX_LINES_WITHOUT_LAST_INTERACTION = 3;
+    private static final int NAME_MAX_LINES_WITH_LAST_INTERACTION = 1;
 
     private static final int FIXED_HEIGHT_DIMENS_FOR_LARGE_NOTIF_CONTENT = 16 + 22 + 8 + 16;
     private static final int FIXED_HEIGHT_DIMENS_FOR_LARGE_STATUS_CONTENT = 16 + 16 + 24 + 4 + 16;
@@ -225,7 +228,9 @@ public class PeopleTileViewHelper {
                 Log.d(TAG,
                         "Create status view for: " + statusesForEntireView.get(0).getActivity());
             }
-            return createStatusRemoteViews(statusesForEntireView.get(0));
+            ConversationStatus mostRecentlyStartedStatus = statusesForEntireView.stream().max(
+                    Comparator.comparing(s -> s.getStartTimeMillis())).get();
+            return createStatusRemoteViews(mostRecentlyStartedStatus);
         }
 
         return createLastInteractionRemoteViews();
@@ -579,9 +584,31 @@ public class PeopleTileViewHelper {
             setMaxLines(views, false);
         }
         setAvailabilityDotPadding(views, R.dimen.availability_dot_status_padding);
-        // TODO: Set status pre-defined icons
-        views.setImageViewResource(R.id.predefined_icon, R.drawable.ic_person);
+        views.setImageViewResource(R.id.predefined_icon, getDrawableForStatus(status));
         return views;
+    }
+
+    private int getDrawableForStatus(ConversationStatus status) {
+        switch (status.getActivity()) {
+            case ACTIVITY_NEW_STORY:
+                return R.drawable.ic_pages;
+            case ACTIVITY_ANNIVERSARY:
+                return R.drawable.ic_celebration;
+            case ACTIVITY_UPCOMING_BIRTHDAY:
+                return R.drawable.ic_gift;
+            case ACTIVITY_BIRTHDAY:
+                return R.drawable.ic_cake;
+            case ACTIVITY_LOCATION:
+                return R.drawable.ic_location;
+            case ACTIVITY_GAME:
+                return R.drawable.ic_play_games;
+            case ACTIVITY_VIDEO:
+                return R.drawable.ic_video;
+            case ACTIVITY_AUDIO:
+                return R.drawable.ic_music_note;
+            default:
+                return R.drawable.ic_person;
+        }
     }
 
     /**
@@ -658,7 +685,6 @@ public class PeopleTileViewHelper {
     }
 
     private RemoteViews decorateBackground(RemoteViews views, CharSequence content) {
-        int visibility = View.GONE;
         CharSequence emoji = getDoubleEmoji(content);
         if (!TextUtils.isEmpty(emoji)) {
             setEmojiBackground(views, emoji);
@@ -768,6 +794,7 @@ public class PeopleTileViewHelper {
     }
 
     private RemoteViews setViewForContentLayout(RemoteViews views) {
+        views = decorateBackground(views, "");
         if (mLayoutSize == LAYOUT_SMALL) {
             views.setViewVisibility(R.id.predefined_icon, View.VISIBLE);
             views.setViewVisibility(R.id.name, View.GONE);
@@ -819,6 +846,7 @@ public class PeopleTileViewHelper {
 
     private RemoteViews createLastInteractionRemoteViews() {
         RemoteViews views = new RemoteViews(mContext.getPackageName(), getEmptyLayout());
+        views.setInt(R.id.name, "setMaxLines", NAME_MAX_LINES_WITH_LAST_INTERACTION);
         if (mLayoutSize == LAYOUT_SMALL) {
             views.setViewVisibility(R.id.name, View.VISIBLE);
             views.setViewVisibility(R.id.predefined_icon, View.GONE);
@@ -836,6 +864,9 @@ public class PeopleTileViewHelper {
         } else {
             if (DEBUG) Log.d(TAG, "Hide last interaction");
             views.setViewVisibility(R.id.last_interaction, View.GONE);
+            if (mLayoutSize == LAYOUT_MEDIUM) {
+                views.setInt(R.id.name, "setMaxLines", NAME_MAX_LINES_WITHOUT_LAST_INTERACTION);
+            }
         }
         return views;
     }
@@ -891,8 +922,9 @@ public class PeopleTileViewHelper {
                 context.getPackageManager(),
                 IconDrawableFactory.newInstance(context, false),
                 maxAvatarSize);
-        Drawable drawable = icon.loadDrawable(context);
-        Drawable personDrawable = storyIcon.getPeopleTileDrawable(drawable,
+        RoundedBitmapDrawable roundedDrawable = RoundedBitmapDrawableFactory.create(
+                context.getResources(), icon.getBitmap());
+        Drawable personDrawable = storyIcon.getPeopleTileDrawable(roundedDrawable,
                 tile.getPackageName(), getUserId(tile), tile.isImportantConversation(),
                 hasNewStory);
         return convertDrawableToBitmap(personDrawable);
@@ -907,14 +939,11 @@ public class PeopleTileViewHelper {
         }
         long now = System.currentTimeMillis();
         Duration durationSinceLastInteraction = Duration.ofMillis(now - lastInteraction);
-        MeasureFormat formatter = MeasureFormat.getInstance(Locale.getDefault(),
-                MeasureFormat.FormatWidth.WIDE);
         if (durationSinceLastInteraction.toDays() <= ONE_DAY) {
             return null;
         } else if (durationSinceLastInteraction.toDays() < DAYS_IN_A_WEEK) {
-            return context.getString(R.string.days_timestamp, formatter.formatMeasures(
-                    new Measure(durationSinceLastInteraction.toDays(),
-                            MeasureUnit.DAY)));
+            return context.getString(R.string.days_timestamp,
+                    durationSinceLastInteraction.toDays());
         } else if (durationSinceLastInteraction.toDays() == DAYS_IN_A_WEEK) {
             return context.getString(R.string.one_week_timestamp);
         } else if (durationSinceLastInteraction.toDays() < DAYS_IN_A_WEEK * 2) {

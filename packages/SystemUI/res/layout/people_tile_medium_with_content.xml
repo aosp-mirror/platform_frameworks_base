@@ -47,8 +47,6 @@
                 <ImageView
                     android:gravity="start"
                     android:id="@+id/person_icon"
-                    android:layout_marginStart="-2dp"
-                    android:layout_marginTop="-2dp"
                     android:layout_width="52dp"
                     android:layout_height="52dp" />
 
@@ -112,7 +110,8 @@
                 android:clipToOutline="true">
                 <TextView
                     android:id="@+id/name"
-                    android:gravity="center_vertical"
+                    android:layout_gravity="start|center_vertical"
+                    android:gravity="start|center_vertical"
                     android:layout_weight="1"
                     android:text="@string/empty_user_name"
                     android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
@@ -140,7 +139,7 @@
                     />
                 <ImageView
                     android:id="@+id/predefined_icon"
-                    android:tint="?android:attr/colorAccent"
+                    android:tint="?android:attr/textColorTertiary"
                     android:gravity="end|center_vertical"
                     android:layout_width="@dimen/regular_predefined_icon"
                     android:layout_height="@dimen/regular_predefined_icon" />
