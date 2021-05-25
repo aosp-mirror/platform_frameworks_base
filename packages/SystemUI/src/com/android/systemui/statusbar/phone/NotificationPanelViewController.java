@@ -372,6 +372,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private float mDownX;
     private float mDownY;
     private int mDisplayCutoutTopInset = 0; // in pixels
+    private int mDisplayCutoutLeftInset = 0; // in pixels
     private int mSplitShadeNotificationsTopPadding;
 
     private final KeyguardClockPositionAlgorithm
@@ -2174,8 +2175,8 @@ public class NotificationPanelViewController extends PanelViewController {
                         : notificationTop);
             }
             bottom = getView().getBottom();
-            left = getView().getLeft();
-            right = getView().getRight();
+            left = getView().getLeft() - mDisplayCutoutLeftInset;
+            right = getView().getRight() - mDisplayCutoutLeftInset;
         } else if (qsPanelBottomY > 0) { // so bounds are empty on lockscreen
             top = Math.min(qsPanelBottomY, mSplitShadeNotificationsTopPadding);
             bottom = mNotificationStackScrollLayoutController.getHeight();
@@ -4414,6 +4415,7 @@ public class NotificationPanelViewController extends PanelViewController {
         public WindowInsets onApplyWindowInsets(View v, WindowInsets insets) {
             final DisplayCutout displayCutout = v.getRootWindowInsets().getDisplayCutout();
             mDisplayCutoutTopInset = displayCutout != null ? displayCutout.getSafeInsetTop() : 0;
+            mDisplayCutoutLeftInset = displayCutout != null ? displayCutout.getSafeInsetLeft() : 0;
 
             mNavigationBarBottomHeight = insets.getStableInsetBottom();
             updateMaxHeadsUpTranslation();

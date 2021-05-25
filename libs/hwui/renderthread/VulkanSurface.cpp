@@ -20,9 +20,9 @@
 #include <SkSurface.h>
 #include <algorithm>
 
+#include <gui/TraceUtils.h>
 #include "VulkanManager.h"
 #include "utils/Color.h"
-#include "utils/TraceUtils.h"
 
 namespace android {
 namespace uirenderer {

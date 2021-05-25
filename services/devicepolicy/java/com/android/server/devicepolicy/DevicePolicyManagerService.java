@@ -3176,11 +3176,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         updatePermissionPolicyCache(userId);
         updateAdminCanGrantSensorsPermissionCache(userId);
 
-        boolean preferentialNetworkServiceEnabled = true;
+        final boolean preferentialNetworkServiceEnabled;
         synchronized (getLockObject()) {
             ActiveAdmin owner = getDeviceOrProfileOwnerAdminLocked(userId);
             preferentialNetworkServiceEnabled = owner != null
-                    ? owner.mPreferentialNetworkServiceEnabled : true;
+                    ? owner.mPreferentialNetworkServiceEnabled
+                             : DevicePolicyManager.PREFERENTIAL_NETWORK_SERVICE_ENABLED_DEFAULT;
         }
         updateNetworkPreferenceForUser(userId, preferentialNetworkServiceEnabled);
 
@@ -4951,10 +4952,16 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final CallerIdentity caller = getCallerIdentity();
         final int userHandle = caller.getUserId();
 
-        // As of R, only privlleged caller holding RESET_PASSWORD can call resetPassword() to
+        // As of R, only privileged caller holding RESET_PASSWORD can call resetPassword() to
         // set password to an unsecured user.
         if (hasCallingPermission(permission.RESET_PASSWORD)) {
-            return setPasswordPrivileged(password, flags, caller);
+            final boolean result = setPasswordPrivileged(password, flags, caller);
+            if (result) {
+                DevicePolicyEventLogger
+                        .createEvent(DevicePolicyEnums.RESET_PASSWORD)
+                        .write();
+            }
+            return result;
         }
 
         // If caller has PO (or DO) throw or fail silently depending on its target SDK level.
@@ -15243,8 +15250,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             DevicePolicyData policy = getUserData(caller.getUserId());
             if (policy.mPasswordTokenHandle != 0) {
                 final String password = passwordOrNull != null ? passwordOrNull : "";
-                return resetPasswordInternal(password, policy.mPasswordTokenHandle, token,
-                        flags, caller);
+                final boolean result = resetPasswordInternal(password, policy.mPasswordTokenHandle,
+                        token, flags, caller);
+                if (result) {
+                    DevicePolicyEventLogger
+                            .createEvent(DevicePolicyEnums.RESET_PASSWORD_WITH_TOKEN)
+                            .setAdmin(caller.getComponentName())
+                            .write();
+                }
+                return result;
             } else {
                 Slogf.w(LOG_TAG, "No saved token handle");
             }

@@ -91,6 +91,14 @@ public final class AggregateBatteryConsumer extends BatteryConsumer implements P
         }
 
         /**
+         * Adds power and usage duration from the supplied AggregateBatteryConsumer.
+         */
+        public void add(AggregateBatteryConsumer aggregateBatteryConsumer) {
+            mConsumedPowerMah += aggregateBatteryConsumer.mConsumedPowerMah;
+            mPowerComponentsBuilder.addPowerAndDuration(aggregateBatteryConsumer.mPowerComponents);
+        }
+
+        /**
          * Creates a read-only object out of the Builder values.
          */
         @NonNull

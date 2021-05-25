@@ -241,6 +241,34 @@ public class BinderCallsStatsTest {
         assertEquals(10, callStats.maxCpuTimeMicros);
     }
 
+    @Test
+    public void testSharding() {
+        TestBinderCallsStats bcs = new TestBinderCallsStats();
+        bcs.setShardingModulo(2);
+
+        Binder binder = new Binder();
+        CallSession callSession = bcs.callStarted(binder, 1, WORKSOURCE_UID);
+        bcs.time += 10;
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE, WORKSOURCE_UID);
+
+        callSession = bcs.callStarted(binder, 2 /* another method */, WORKSOURCE_UID);
+        bcs.time += 10;
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE, WORKSOURCE_UID);
+
+
+        SparseArray<BinderCallsStats.UidEntry> uidEntries = bcs.getUidEntries();
+        assertEquals(1, uidEntries.size());
+        BinderCallsStats.UidEntry uidEntry = uidEntries.get(WORKSOURCE_UID);
+        assertEquals(2, uidEntry.callCount);
+        assertEquals(2, uidEntry.recordedCallCount);
+
+        List<BinderCallsStats.CallStat> callStatsList = new ArrayList(uidEntry.getCallStatsList());
+        assertEquals(2, callStatsList.size());
+
+        assertEquals(1, bcs.getExportedCallStats(true).size());
+        assertEquals(2, bcs.getExportedCallStats(false).size());
+    }
+
     private static class BinderWithGetTransactionName extends Binder {
         public static String getDefaultTransactionName(int code) {
             return "resolved";
@@ -669,7 +697,7 @@ public class BinderCallsStatsTest {
         bcs.setAddDebugEntries(true);
         bcs.setSamplingInterval(10);
         ArrayList<BinderCallsStats.ExportedCallStat> callStats = bcs.getExportedCallStats();
-        assertEquals(4, callStats.size());
+        assertEquals(5, callStats.size());
         BinderCallsStats.ExportedCallStat debugEntry1 = callStats.get(0);
         assertEquals("", debugEntry1.className);
         assertEquals("__DEBUG_start_time_millis", debugEntry1.methodName);
@@ -685,6 +713,9 @@ public class BinderCallsStatsTest {
         BinderCallsStats.ExportedCallStat debugEntry4 = callStats.get(3);
         assertEquals("__DEBUG_sampling_interval", debugEntry4.methodName);
         assertEquals(10, debugEntry4.latencyMicros);
+        BinderCallsStats.ExportedCallStat debugEntry5 = callStats.get(4);
+        assertEquals("__DEBUG_sharding_modulo", debugEntry5.methodName);
+        assertEquals(1, debugEntry5.latencyMicros);
     }
 
     @Test

@@ -607,6 +607,7 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
             TRON_COMPILATION_REASON_INSTALL_BULK_SECONDARY_DOWNGRADED_WITH_DM = 19;
     private static final int TRON_COMPILATION_REASON_BOOT_AFTER_OTA = 20;
     private static final int TRON_COMPILATION_REASON_POST_BOOT = 21;
+    private static final int TRON_COMPILATION_REASON_CMDLINE = 22;
 
     // The annotation to add as a suffix to the compilation reason when dexopt was
     // performed with dex metadata.
@@ -617,7 +618,7 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
      */
     private static int getCompilationReasonTronValue(String compilationReason) {
         switch (compilationReason) {
-            case "unknown" : return TRON_COMPILATION_REASON_UNKNOWN;
+            case "cmdline" : return TRON_COMPILATION_REASON_CMDLINE;
             case "error" : return TRON_COMPILATION_REASON_ERROR;
             case "first-boot" : return TRON_COMPILATION_REASON_FIRST_BOOT;
             case "boot-after-ota": return TRON_COMPILATION_REASON_BOOT_AFTER_OTA;
