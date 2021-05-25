@@ -26,6 +26,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.commandline.CommandRegistry
 import com.android.systemui.statusbar.phone.KeyguardBypassController
+import com.android.systemui.statusbar.phone.StatusBar
 import com.android.systemui.statusbar.policy.ConfigurationController
 import org.junit.Before
 import org.junit.Test
@@ -44,6 +45,7 @@ import org.mockito.MockitoAnnotations
 @RunWith(AndroidTestingRunner::class)
 class AuthRippleControllerTest : SysuiTestCase() {
     private lateinit var controller: AuthRippleController
+    @Mock private lateinit var statusBar: StatusBar
     @Mock private lateinit var rippleView: AuthRippleView
     @Mock private lateinit var commandRegistry: CommandRegistry
     @Mock private lateinit var configurationController: ConfigurationController
@@ -56,6 +58,7 @@ class AuthRippleControllerTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         controller = AuthRippleController(
+            statusBar,
             context,
             authController,
             configurationController,
@@ -72,7 +75,7 @@ class AuthRippleControllerTest : SysuiTestCase() {
     fun testFingerprintTrigger_Ripple() {
         // GIVEN fp exists, keyguard is visible, user doesn't need strong auth
         val fpsLocation = PointF(5f, 5f)
-        `when`(authController.udfpsSensorLocation).thenReturn(fpsLocation)
+        `when`(authController.fingerprintSensorLocation).thenReturn(fpsLocation)
         controller.onViewAttached()
         `when`(keyguardUpdateMonitor.isKeyguardVisible).thenReturn(true)
         `when`(keyguardUpdateMonitor.userNeedsStrongAuth()).thenReturn(false)
@@ -193,7 +196,7 @@ class AuthRippleControllerTest : SysuiTestCase() {
 
     @Test
     fun testNullFingerprintSensorLocationDoesNothing() {
-        `when`(authController.udfpsSensorLocation).thenReturn(null)
+        `when`(authController.fingerprintSensorLocation).thenReturn(null)
         controller.onViewAttached()
 
         val captor = ArgumentCaptor.forClass(KeyguardUpdateMonitorCallback::class.java)
