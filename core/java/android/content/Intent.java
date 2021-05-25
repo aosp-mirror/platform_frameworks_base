@@ -1983,7 +1983,7 @@ public class Intent implements Parcelable, Cloneable {
      * activities that are not properly protected.
      *
      * <p>
-     * Input: {@link android.Manifest.permission_group} specifies the permission group
+     * Input: {@link #EXTRA_PERMISSION_GROUP_NAME} specifies the permission group
      * for which the launched UI would be targeted.
      * </p>
      * <p>
