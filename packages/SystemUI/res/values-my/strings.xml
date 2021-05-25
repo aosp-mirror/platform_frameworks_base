@@ -725,7 +725,7 @@
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"ဤအကြောင်းကြားချက်အုပ်စုကို ဤနေရာတွင် စီစဉ်သတ်မှတ်၍ မရပါ"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"ပရောက်စီထည့်ထားသော အကြောင်းကြားချက်"</string>
     <string name="notification_channel_dialog_title" msgid="6856514143093200019">"<xliff:g id="APP_NAME">%1$s</xliff:g> အကြောင်းကြားချက်များ အားလုံး"</string>
-    <string name="see_more_title" msgid="7409317011708185729">"ပိုပြရန်"</string>
+    <string name="see_more_title" msgid="7409317011708185729">"ပိုကြည့်ရန်"</string>
     <string name="appops_camera" msgid="5215967620896725715">"ဤအက်ပ်က ကင်မရာကို အသုံးပြုနေသည်။"</string>
     <string name="appops_microphone" msgid="8805468338613070149">"ဤအက်ပ်က မိုက်ခရိုဖုန်းကို အသုံးပြုနေသည်။"</string>
     <string name="appops_overlay" msgid="4822261562576558490">"ဤအက်ပ်က ဖန်သားမျက်နှာပြင်ပေါ်ရှိ အခြားအက်ပ်များ အပေါ်မှ ထပ်ပြီး ပြသနေပါသည်။"</string>
@@ -1071,7 +1071,7 @@
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"နောက်ပင်နံပါတ်တစ်ခု စမ်းကြည့်ရန်"</string>
     <string name="controls_confirmation_confirming" msgid="2596071302617310665">"အတည်ပြုနေသည်…"</string>
     <string name="controls_confirmation_message" msgid="7744104992609594859">"<xliff:g id="DEVICE">%s</xliff:g> အတွက် အပြောင်းအလဲကို အတည်ပြုပါ"</string>
-    <string name="controls_structure_tooltip" msgid="4355922222944447867">"ပိုမိုကြည့်ရှုရန် ပွတ်ဆွဲပါ"</string>
+    <string name="controls_structure_tooltip" msgid="4355922222944447867">"ပိုကြည့်ရန် ပွတ်ဆွဲပါ"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"အကြံပြုချက်များ ဖွင့်နေသည်"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"မီဒီယာ"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"လက်ရှိ စက်ရှင်ကို ဖျောက်ထားမည်။"</string>

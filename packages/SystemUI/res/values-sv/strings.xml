@@ -385,7 +385,7 @@
     <string name="quick_settings_cast_device_default_name" msgid="6988469571141331700">"Namnlös enhet"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2580520859212250265">"Redo att casta"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"Inga tillgängliga enheter"</string>
-    <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Inte ansluten till wifi"</string>
+    <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Ej ansluten till wifi"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Ljusstyrka"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="2325362583903258677">"AUTO"</string>
     <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Invertera färger"</string>
