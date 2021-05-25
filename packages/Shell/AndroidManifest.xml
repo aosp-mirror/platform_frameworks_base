@@ -471,6 +471,10 @@
     <!-- Permission required for CTS test - GlobalSearchSessionPlatformCtsTests -->
     <uses-permission android:name="android.permission.READ_GLOBAL_APP_SEARCH_DATA" />
 
+    <!-- Permission required for hotword detection service CTS tests -->
+    <uses-permission android:name="android.permission.MANAGE_HOTWORD_DETECTION" />
+    <uses-permission android:name="android.permission.BIND_HOTWORD_DETECTION_SERVICE" />
+
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"
                 android:defaultToDeviceProtectedStorage="true"
