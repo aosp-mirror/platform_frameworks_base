@@ -38,6 +38,7 @@ import android.annotation.NonNull;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.ITrustManager;
 import android.content.Context;
+import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricManager.Authenticators;
 import android.hardware.biometrics.ComponentInfoInternal;
 import android.hardware.biometrics.IBiometricAuthenticator;
@@ -170,21 +171,42 @@ public class AuthSessionTest {
         session.onCookieReceived(cookie2);
         assertTrue(session.allCookiesReceived());
 
+
+        // for multi-sensor face then fingerprint is the default policy
         for (BiometricSensor sensor : session.mPreAuthInfo.eligibleSensors) {
-            verify(sensor.impl).startPreparedClient(eq(sensor.getCookie()));
-            assertEquals(BiometricSensor.STATE_AUTHENTICATING, sensor.getSensorState());
+            if (sensor.modality == TYPE_FACE) {
+                verify(sensor.impl).startPreparedClient(eq(sensor.getCookie()));
+                assertEquals(BiometricSensor.STATE_AUTHENTICATING, sensor.getSensorState());
+            } else if (sensor.modality == TYPE_FINGERPRINT) {
+                assertEquals(BiometricSensor.STATE_COOKIE_RETURNED, sensor.getSensorState());
+            }
         }
     }
 
     @Test
-    public void testUdfpsAuth_sensorStartsAfterDialogAnimationCompletes() throws RemoteException {
-        // For UDFPS-only setups, ensure that the sensor does not start auth until after the
-        // BiometricPrompt UI is finished animating. Otherwise, the UDFPS affordance will be
-        // shown before the BiometricPrompt is shown.
+    public void testMultiAuth_singleSensor_fingerprintSensorStartsAfterDialogAnimationCompletes()
+            throws Exception {
         setupFingerprint(0 /* id */, FingerprintSensorProperties.TYPE_UDFPS_OPTICAL);
+        testMultiAuth_fingerprintSensorStartsAfter(false /* fingerprintStartsAfterDelay */);
+    }
 
+    @Test
+    public void testMultiAuth_fingerprintSensorStartsAfterDialogAnimationCompletes()
+            throws Exception {
+        setupFingerprint(0 /* id */, FingerprintSensorProperties.TYPE_UDFPS_OPTICAL);
+        setupFace(1 /* id */, false, mock(IBiometricAuthenticator.class));
+        testMultiAuth_fingerprintSensorStartsAfter(true /* fingerprintStartsAfterDelay */);
+    }
+
+    public void testMultiAuth_fingerprintSensorStartsAfter(boolean fingerprintStartsAfterDelay)
+            throws Exception {
         final long operationId = 123;
         final int userId = 10;
+        final int fingerprintSensorId = mSensors.stream()
+                .filter(s -> s.modality == TYPE_FINGERPRINT)
+                .map(s -> s.id)
+                .findFirst()
+                .orElse(-1);
 
         final AuthSession session = createAuthSession(mSensors,
                 false /* checkDevicePolicyManager */,
@@ -200,27 +222,37 @@ public class AuthSessionTest {
 
         session.goToInitialState();
 
-        final int cookie1 = session.mPreAuthInfo.eligibleSensors.get(0).getCookie();
-        session.onCookieReceived(cookie1);
         for (BiometricSensor sensor : session.mPreAuthInfo.eligibleSensors) {
-            if (cookie1 == sensor.getCookie()) {
+            assertEquals(BiometricSensor.STATE_WAITING_FOR_COOKIE, sensor.getSensorState());
+            session.onCookieReceived(
+                    session.mPreAuthInfo.eligibleSensors.get(sensor.id).getCookie());
+            if (fingerprintSensorId == sensor.id) {
                 assertEquals(BiometricSensor.STATE_COOKIE_RETURNED, sensor.getSensorState());
             } else {
-                assertEquals(BiometricSensor.STATE_WAITING_FOR_COOKIE, sensor.getSensorState());
+                assertEquals(BiometricSensor.STATE_AUTHENTICATING, sensor.getSensorState());
             }
         }
         assertTrue(session.allCookiesReceived());
 
-        // UDFPS does not start even if all cookies are received
+        // fingerprint sensor does not start even if all cookies are received
         assertEquals(STATE_AUTH_STARTED, session.getState());
         verify(mStatusBarService).showAuthenticationDialog(any(), any(), any(),
-                anyBoolean(), anyBoolean(), anyInt(), any(), anyLong());
+                anyBoolean(), anyBoolean(), anyInt(), any(), anyLong(), anyInt());
 
-        // Notify AuthSession that the UI is shown. Then, UDFPS sensor should be started.
+        // Notify AuthSession that the UI is shown. Then, fingerprint sensor should be started.
         session.onDialogAnimatedIn();
+        if (fingerprintStartsAfterDelay) {
+            assertEquals(STATE_AUTH_STARTED_UI_SHOWING, session.getState());
+            assertEquals(BiometricSensor.STATE_COOKIE_RETURNED,
+                    session.mPreAuthInfo.eligibleSensors.get(fingerprintSensorId).getSensorState());
+            session.onErrorReceived(fingerprintSensorId,
+                    session.mPreAuthInfo.eligibleSensors.get(fingerprintSensorId).getCookie(),
+                    BiometricConstants.BIOMETRIC_ERROR_VENDOR, 0 /* vendorCode */);
+            session.onStartFingerprint();
+        }
         assertEquals(STATE_AUTH_STARTED_UI_SHOWING, session.getState());
         assertEquals(BiometricSensor.STATE_AUTHENTICATING,
-                session.mPreAuthInfo.eligibleSensors.get(0).getSensorState());
+                session.mPreAuthInfo.eligibleSensors.get(fingerprintSensorId).getSensorState());
     }
 
     @Test

@@ -23,6 +23,7 @@ import android.app.RuntimeAppOpAccessMessage;
 import android.content.AttributionSource;
 import android.content.pm.ParceledListSlice;
 import android.os.Bundle;
+import android.os.PackageTagsList;
 import android.os.RemoteCallback;
 import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsActiveCallback;
@@ -92,7 +93,7 @@ interface IAppOpsService {
     void setAudioRestriction(int code, int usage, int uid, int mode, in String[] exceptionPackages);
 
     void setUserRestrictions(in Bundle restrictions, IBinder token, int userHandle);
-    void setUserRestriction(int code, boolean restricted, IBinder token, int userHandle, in Map<String, String[]> excludedPackageTags);
+    void setUserRestriction(int code, boolean restricted, IBinder token, int userHandle, in PackageTagsList excludedPackageTags);
     void removeUser(int userHandle);
 
     void startWatchingActive(in int[] ops, IAppOpsActiveCallback callback);

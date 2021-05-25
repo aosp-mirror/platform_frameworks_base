@@ -32,7 +32,9 @@ import androidx.test.core.app.ApplicationProvider;
 import com.android.server.appsearch.external.localstorage.stats.CallStats;
 import com.android.server.appsearch.external.localstorage.stats.InitializeStats;
 import com.android.server.appsearch.external.localstorage.stats.PutDocumentStats;
+import com.android.server.appsearch.external.localstorage.stats.RemoveStats;
 import com.android.server.appsearch.external.localstorage.stats.SearchStats;
+import com.android.server.appsearch.proto.DeleteStatsProto;
 import com.android.server.appsearch.proto.InitializeStatsProto;
 import com.android.server.appsearch.proto.PutDocumentStatsProto;
 import com.android.server.appsearch.proto.QueryStatsProto;
@@ -73,6 +75,7 @@ public class AppSearchLoggerTest {
         @Nullable PutDocumentStats mPutDocumentStats;
         @Nullable InitializeStats mInitializeStats;
         @Nullable SearchStats mSearchStats;
+        @Nullable RemoveStats mRemoveStats;
 
         @Override
         public void logStats(@NonNull CallStats stats) {
@@ -92,6 +95,11 @@ public class AppSearchLoggerTest {
         @Override
         public void logStats(@NonNull SearchStats stats) {
             mSearchStats = stats;
+        }
+
+        @Override
+        public void logStats(@NonNull RemoveStats stats) {
+            mRemoveStats = stats;
         }
     }
 
@@ -252,6 +260,27 @@ public class AppSearchLoggerTest {
                 .isEqualTo(nativeDocumentRetrievingLatencyMillis);
     }
 
+    @Test
+    public void testAppSearchLoggerHelper_testCopyNativeStats_remove() {
+        final int nativeLatencyMillis = 1;
+        final int nativeDeleteType = 2;
+        final int nativeNumDocumentDeleted = 3;
+        DeleteStatsProto nativeDeleteStatsProto =
+                DeleteStatsProto.newBuilder()
+                        .setLatencyMs(nativeLatencyMillis)
+                        .setDeleteType(DeleteStatsProto.DeleteType.Code.forNumber(nativeDeleteType))
+                        .setNumDocumentsDeleted(nativeNumDocumentDeleted)
+                        .build();
+        RemoveStats.Builder rBuilder = new RemoveStats.Builder("packageName", "database");
+
+        AppSearchLoggerHelper.copyNativeStats(nativeDeleteStatsProto, rBuilder);
+
+        RemoveStats rStats = rBuilder.build();
+        assertThat(rStats.getNativeLatencyMillis()).isEqualTo(nativeLatencyMillis);
+        assertThat(rStats.getDeleteType()).isEqualTo(nativeDeleteType);
+        assertThat(rStats.getDeletedDocumentCount()).isEqualTo(nativeNumDocumentDeleted);
+    }
+
     //
     // Testing actual logging
     //
@@ -354,5 +383,75 @@ public class AppSearchLoggerTest {
         assertThat(sStats.getCurrentPageReturnedResultCount()).isEqualTo(1);
         assertThat(sStats.isFirstPage()).isTrue();
         assertThat(sStats.getScoredDocumentCount()).isEqualTo(1);
+    }
+
+    @Test
+    public void testLoggingStats_remove() throws Exception {
+        // Insert schema
+        final String testPackageName = "testPackage";
+        final String testDatabase = "testDatabase";
+        final String testNamespace = "testNameSpace";
+        final String testId = "id";
+        List<AppSearchSchema> schemas =
+                Collections.singletonList(new AppSearchSchema.Builder("type").build());
+        mAppSearchImpl.setSchema(
+                testPackageName,
+                testDatabase,
+                schemas,
+                /*schemasNotPlatformSurfaceable=*/ Collections.emptyList(),
+                /*schemasPackageAccessible=*/ Collections.emptyMap(),
+                /*forceOverride=*/ false,
+                /*version=*/ 0);
+        GenericDocument document =
+                new GenericDocument.Builder<>(testNamespace, testId, "type").build();
+        mAppSearchImpl.putDocument(testPackageName, testDatabase, document, /*logger=*/ null);
+
+        RemoveStats.Builder rStatsBuilder = new RemoveStats.Builder(testPackageName, testDatabase);
+        mAppSearchImpl.remove(testPackageName, testDatabase, testNamespace, testId, rStatsBuilder);
+        RemoveStats rStats = rStatsBuilder.build();
+
+        assertThat(rStats.getPackageName()).isEqualTo(testPackageName);
+        assertThat(rStats.getDatabase()).isEqualTo(testDatabase);
+        // delete by namespace + id
+        assertThat(rStats.getDeleteType()).isEqualTo(DeleteStatsProto.DeleteType.Code.SINGLE_VALUE);
+        assertThat(rStats.getDeletedDocumentCount()).isEqualTo(1);
+    }
+
+    @Test
+    public void testLoggingStats_removeByQuery() throws Exception {
+        // Insert schema
+        final String testPackageName = "testPackage";
+        final String testDatabase = "testDatabase";
+        final String testNamespace = "testNameSpace";
+        List<AppSearchSchema> schemas =
+                Collections.singletonList(new AppSearchSchema.Builder("type").build());
+        mAppSearchImpl.setSchema(
+                testPackageName,
+                testDatabase,
+                schemas,
+                /*schemasNotPlatformSurfaceable=*/ Collections.emptyList(),
+                /*schemasPackageAccessible=*/ Collections.emptyMap(),
+                /*forceOverride=*/ false,
+                /*version=*/ 0);
+        GenericDocument document1 =
+                new GenericDocument.Builder<>(testNamespace, "id1", "type").build();
+        GenericDocument document2 =
+                new GenericDocument.Builder<>(testNamespace, "id2", "type").build();
+        mAppSearchImpl.putDocument(testPackageName, testDatabase, document1, mLogger);
+        mAppSearchImpl.putDocument(testPackageName, testDatabase, document2, mLogger);
+        // No query filters specified. package2 should only get its own documents back.
+        SearchSpec searchSpec =
+                new SearchSpec.Builder().setTermMatch(TermMatchType.Code.PREFIX_VALUE).build();
+
+        RemoveStats.Builder rStatsBuilder = new RemoveStats.Builder(testPackageName, testDatabase);
+        mAppSearchImpl.removeByQuery(
+                testPackageName, testDatabase, /*queryExpression=*/ "", searchSpec, rStatsBuilder);
+        RemoveStats rStats = rStatsBuilder.build();
+
+        assertThat(rStats.getPackageName()).isEqualTo(testPackageName);
+        assertThat(rStats.getDatabase()).isEqualTo(testDatabase);
+        // delete by query
+        assertThat(rStats.getDeleteType()).isEqualTo(DeleteStatsProto.DeleteType.Code.QUERY_VALUE);
+        assertThat(rStats.getDeletedDocumentCount()).isEqualTo(2);
     }
 }

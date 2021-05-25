@@ -86,8 +86,7 @@ public class NotificationMessagingUtil {
     };
 
     private boolean hasMessagingStyle(StatusBarNotification sbn) {
-        Class<? extends Notification.Style> style = sbn.getNotification().getNotificationStyle();
-        return Notification.MessagingStyle.class.equals(style);
+        return sbn.getNotification().isStyle(Notification.MessagingStyle.class);
     }
 
     private boolean isCategoryMessage(StatusBarNotification sbn) {

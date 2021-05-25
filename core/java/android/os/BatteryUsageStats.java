@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.util.Range;
 import android.util.SparseArray;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.os.BatteryStatsHistory;
 import com.android.internal.os.BatteryStatsHistoryIterator;
@@ -184,7 +185,8 @@ public final class BatteryUsageStats implements Parcelable {
 
     /**
      * Portion of battery charge drained since BatteryStats reset (e.g. due to being fully
-     * charged), as percentage of the full charge in the range [0:100]
+     * charged), as percentage of the full charge in the range [0:100]. May exceed 100 if
+     * the device repeatedly charged and discharged prior to the reset.
      */
     public int getDischargePercentage() {
         return mDischargePercentage;
@@ -364,6 +366,70 @@ public final class BatteryUsageStats implements Parcelable {
             return new BatteryUsageStats[size];
         }
     };
+
+    /** Returns a proto (as used for atoms.proto) corresponding to this BatteryUsageStats. */
+    public byte[] getStatsProto(long sessionEndTimestampMs) {
+
+        final long sessionStartMillis = getStatsStartTimestamp();
+        // TODO(b/187223764): Use the getStatsEndTimestamp() instead, once that is added.
+        final long sessionEndMillis = sessionEndTimestampMs;
+        final long sessionDurationMillis = sessionEndTimestampMs - getStatsStartTimestamp();
+
+        final BatteryConsumer deviceBatteryConsumer = getAggregateBatteryConsumer(
+                AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE);
+
+        final int sessionDischargePercentage = getDischargePercentage();
+
+        final ProtoOutputStream proto = new ProtoOutputStream();
+        proto.write(BatteryUsageStatsAtomsProto.SESSION_START_MILLIS, sessionStartMillis);
+        proto.write(BatteryUsageStatsAtomsProto.SESSION_END_MILLIS, sessionEndMillis);
+        proto.write(BatteryUsageStatsAtomsProto.SESSION_DURATION_MILLIS, sessionDurationMillis);
+        deviceBatteryConsumer.writeStatsProto(proto,
+                BatteryUsageStatsAtomsProto.DEVICE_BATTERY_CONSUMER);
+        writeUidBatteryConsumersProto(proto);
+        proto.write(BatteryUsageStatsAtomsProto.SESSION_DISCHARGE_PERCENTAGE,
+                sessionDischargePercentage);
+        return proto.getBytes();
+    }
+
+    /**
+     * Writes the UidBatteryConsumers data, held by this BatteryUsageStats, to the proto (as used
+     * for atoms.proto).
+     */
+    private void writeUidBatteryConsumersProto(ProtoOutputStream proto) {
+        final List<UidBatteryConsumer> consumers = getUidBatteryConsumers();
+
+        // TODO: Sort the list by power consumption. If during the for, proto.getRawSize() > 45kb,
+        //       truncate the remainder of the list.
+        final int size = consumers.size();
+        for (int i = 0; i < size; i++) {
+            final UidBatteryConsumer consumer = consumers.get(i);
+
+            final long fgMs = consumer.getTimeInStateMs(UidBatteryConsumer.STATE_FOREGROUND);
+            final long bgMs = consumer.getTimeInStateMs(UidBatteryConsumer.STATE_BACKGROUND);
+            final boolean hasBaseData = consumer.hasStatsProtoData();
+
+            if (fgMs == 0 && bgMs == 0 && !hasBaseData) {
+                continue;
+            }
+
+            final long token = proto.start(BatteryUsageStatsAtomsProto.UID_BATTERY_CONSUMERS);
+            proto.write(
+                    BatteryUsageStatsAtomsProto.UidBatteryConsumer.UID,
+                    consumer.getUid());
+            if (hasBaseData) {
+                consumer.writeStatsProto(proto,
+                        BatteryUsageStatsAtomsProto.UidBatteryConsumer.BATTERY_CONSUMER_DATA);
+            }
+            proto.write(
+                    BatteryUsageStatsAtomsProto.UidBatteryConsumer.TIME_IN_FOREGROUND_MILLIS,
+                    fgMs);
+            proto.write(
+                    BatteryUsageStatsAtomsProto.UidBatteryConsumer.TIME_IN_BACKGROUND_MILLIS,
+                    bgMs);
+            proto.end(token);
+        }
+    }
 
     /**
      * Prints the stats in a human-readable format.

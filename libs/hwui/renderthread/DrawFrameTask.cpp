@@ -16,8 +16,8 @@
 
 #include "DrawFrameTask.h"
 
+#include <gui/TraceUtils.h>
 #include <utils/Log.h>
-#include <utils/TraceUtils.h>
 #include <algorithm>
 
 #include "../DeferredLayerUpdater.h"

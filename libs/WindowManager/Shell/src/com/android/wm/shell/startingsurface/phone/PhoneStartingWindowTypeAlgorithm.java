@@ -25,8 +25,8 @@ import static android.window.StartingWindowInfo.TYPE_PARAMETER_ACTIVITY_CREATED;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_ALLOW_TASK_SNAPSHOT;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_NEW_TASK;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_PROCESS_RUNNING;
-import static android.window.StartingWindowInfo.TYPE_PARAMETER_SAME_PACKAGE;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_TASK_SWITCH;
+import static android.window.StartingWindowInfo.TYPE_PARAMETER_USE_EMPTY_SPLASH_SCREEN;
 
 import static com.android.wm.shell.startingsurface.StartingWindowController.DEBUG_SPLASH_SCREEN;
 import static com.android.wm.shell.startingsurface.StartingWindowController.DEBUG_TASK_SNAPSHOT;
@@ -52,7 +52,8 @@ public class PhoneStartingWindowTypeAlgorithm implements StartingWindowTypeAlgor
         final boolean processRunning = (parameter & TYPE_PARAMETER_PROCESS_RUNNING) != 0;
         final boolean allowTaskSnapshot = (parameter & TYPE_PARAMETER_ALLOW_TASK_SNAPSHOT) != 0;
         final boolean activityCreated = (parameter & TYPE_PARAMETER_ACTIVITY_CREATED) != 0;
-        final boolean samePackage = (parameter & TYPE_PARAMETER_SAME_PACKAGE) != 0;
+        final boolean useEmptySplashScreen =
+                (parameter & TYPE_PARAMETER_USE_EMPTY_SPLASH_SCREEN) != 0;
         final boolean topIsHome = windowInfo.taskInfo.topActivityType == ACTIVITY_TYPE_HOME;
 
         if (DEBUG_SPLASH_SCREEN || DEBUG_TASK_SNAPSHOT) {
@@ -61,19 +62,19 @@ public class PhoneStartingWindowTypeAlgorithm implements StartingWindowTypeAlgor
                     + " processRunning " + processRunning
                     + " allowTaskSnapshot " + allowTaskSnapshot
                     + " activityCreated " + activityCreated
-                    + " samePackage " + samePackage
+                    + " useEmptySplashScreen " + useEmptySplashScreen
                     + " topIsHome " + topIsHome);
         }
         if (!topIsHome) {
             if (!processRunning) {
-                return STARTING_WINDOW_TYPE_SPLASH_SCREEN;
+                return useEmptySplashScreen
+                        ? STARTING_WINDOW_TYPE_EMPTY_SPLASH_SCREEN
+                        : STARTING_WINDOW_TYPE_SPLASH_SCREEN;
             }
             if (newTask) {
-                if (samePackage) {
-                    return STARTING_WINDOW_TYPE_EMPTY_SPLASH_SCREEN;
-                } else {
-                    return STARTING_WINDOW_TYPE_SPLASH_SCREEN;
-                }
+                return useEmptySplashScreen
+                        ? STARTING_WINDOW_TYPE_EMPTY_SPLASH_SCREEN
+                        : STARTING_WINDOW_TYPE_SPLASH_SCREEN;
             }
             if (taskSwitch && !activityCreated) {
                 return STARTING_WINDOW_TYPE_SPLASH_SCREEN;
@@ -84,7 +85,7 @@ public class PhoneStartingWindowTypeAlgorithm implements StartingWindowTypeAlgor
                 return STARTING_WINDOW_TYPE_SNAPSHOT;
             }
             if (!topIsHome) {
-                return STARTING_WINDOW_TYPE_SPLASH_SCREEN;
+                return STARTING_WINDOW_TYPE_EMPTY_SPLASH_SCREEN;
             }
         }
         return STARTING_WINDOW_TYPE_NONE;

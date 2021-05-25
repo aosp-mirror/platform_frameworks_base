@@ -780,7 +780,6 @@ public class PackageManagerService extends IPackageManager.Stub
     private static final String COMPANION_PACKAGE_NAME = "com.android.companiondevicemanager";
 
     // Compilation reasons.
-    public static final int REASON_UNKNOWN = -1;
     public static final int REASON_FIRST_BOOT = 0;
     public static final int REASON_BOOT_AFTER_OTA = 1;
     public static final int REASON_POST_BOOT = 2;
@@ -793,7 +792,8 @@ public class PackageManagerService extends IPackageManager.Stub
     public static final int REASON_BACKGROUND_DEXOPT = 9;
     public static final int REASON_AB_OTA = 10;
     public static final int REASON_INACTIVE_PACKAGE_DOWNGRADE = 11;
-    public static final int REASON_SHARED = 12;
+    public static final int REASON_CMDLINE = 12;
+    public static final int REASON_SHARED = 13;
 
     public static final int REASON_LAST = REASON_SHARED;
 
@@ -6762,7 +6762,12 @@ public class PackageManagerService extends IPackageManager.Stub
                         mSettings.enableSystemPackageLPw(packageName);
 
                         try {
-                            scanPackageTracedLI(scanFile, reparseFlags, rescanFlags, 0, null);
+                            final AndroidPackage newPkg = scanPackageTracedLI(
+                                    scanFile, reparseFlags, rescanFlags, 0, null);
+                            // We rescanned a stub, add it to the list of stubbed system packages
+                            if (newPkg.isStub()) {
+                                stubSystemApps.add(packageName);
+                            }
                         } catch (PackageManagerException e) {
                             Slog.e(TAG, "Failed to parse original system package: "
                                     + e.getMessage());
@@ -8467,7 +8472,7 @@ public class PackageManagerService extends IPackageManager.Stub
                             libInfo.getPackageName(), libInfo.getAllCodePaths(),
                             libInfo.getName(), libInfo.getLongVersion(),
                             libInfo.getType(), libInfo.getDeclaringPackage(),
-                            getPackagesUsingSharedLibraryLPr(libInfo, flags, userId),
+                            getPackagesUsingSharedLibraryLPr(libInfo, flags, callingUid, userId),
                             (libInfo.getDependencies() == null
                                     ? null
                                     : new ArrayList<>(libInfo.getDependencies())),
@@ -8539,9 +8544,11 @@ public class PackageManagerService extends IPackageManager.Stub
                             libraryInfo.getPath(), libraryInfo.getPackageName(),
                             libraryInfo.getAllCodePaths(), libraryInfo.getName(),
                             libraryInfo.getLongVersion(), libraryInfo.getType(),
-                            libraryInfo.getDeclaringPackage(), getPackagesUsingSharedLibraryLPr(
-                            libraryInfo, flags, userId), libraryInfo.getDependencies() == null
-                            ? null : new ArrayList<>(libraryInfo.getDependencies()),
+                            libraryInfo.getDeclaringPackage(),
+                            getPackagesUsingSharedLibraryLPr(
+                                    libraryInfo, flags, callingUid, userId),
+                            libraryInfo.getDependencies() == null
+                                    ? null : new ArrayList<>(libraryInfo.getDependencies()),
                             libraryInfo.isNative());
 
                     if (result == null) {
@@ -8557,7 +8564,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @GuardedBy("mLock")
     private List<VersionedPackage> getPackagesUsingSharedLibraryLPr(
-            SharedLibraryInfo libInfo, int flags, int userId) {
+            SharedLibraryInfo libInfo, int flags, int callingUid, int userId) {
         List<VersionedPackage> versionedPackages = null;
         final int packageCount = mSettings.getPackagesLocked().size();
         for (int i = 0; i < packageCount; i++) {
@@ -8580,6 +8587,9 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (ps.usesStaticLibrariesVersions[libIdx] != libInfo.getLongVersion()) {
                     continue;
                 }
+                if (shouldFilterApplicationLocked(ps, callingUid, userId)) {
+                    continue;
+                }
                 if (versionedPackages == null) {
                     versionedPackages = new ArrayList<>();
                 }
@@ -8592,6 +8602,9 @@ public class PackageManagerService extends IPackageManager.Stub
             } else if (ps.pkg != null) {
                 if (ArrayUtils.contains(ps.pkg.getUsesLibraries(), libName)
                         || ArrayUtils.contains(ps.pkg.getUsesOptionalLibraries(), libName)) {
+                    if (shouldFilterApplicationLocked(ps, callingUid, userId)) {
+                        continue;
+                    }
                     if (versionedPackages == null) {
                         versionedPackages = new ArrayList<>();
                     }
@@ -11871,10 +11884,10 @@ public class PackageManagerService extends IPackageManager.Stub
     @Override
     public void notifyDexLoad(String loadingPackageName, Map<String, String> classLoaderContextMap,
             String loaderIsa) {
-        if (PLATFORM_PACKAGE_NAME.equals(loadingPackageName)
-                && Binder.getCallingUid() != Process.SYSTEM_UID) {
+        int callingUid = Binder.getCallingUid();
+        if (PLATFORM_PACKAGE_NAME.equals(loadingPackageName) && callingUid != Process.SYSTEM_UID) {
             Slog.w(TAG, "Non System Server process reporting dex loads as system server. uid="
-                    + Binder.getCallingUid());
+                    + callingUid);
             // Do not record dex loads from processes pretending to be system server.
             // Only the system server should be assigned the package "android", so reject calls
             // that don't satisfy the constraint.
@@ -11885,6 +11898,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // in order to verify the expectations.
             return;
         }
+
         int userId = UserHandle.getCallingUserId();
         ApplicationInfo ai = getApplicationInfo(loadingPackageName, /*flags*/ 0, userId);
         if (ai == null) {
@@ -11892,7 +11906,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 + loadingPackageName + ", user=" + userId);
             return;
         }
-        mDexManager.notifyDexLoad(ai, classLoaderContextMap, loaderIsa, userId);
+        mDexManager.notifyDexLoad(ai, classLoaderContextMap, loaderIsa, userId,
+                Process.isIsolated(callingUid));
     }
 
     @Override
@@ -11935,7 +11950,7 @@ public class PackageManagerService extends IPackageManager.Stub
         int flags = (checkProfiles ? DexoptOptions.DEXOPT_CHECK_FOR_PROFILES_UPDATES : 0) |
                 (force ? DexoptOptions.DEXOPT_FORCE : 0) |
                 (bootComplete ? DexoptOptions.DEXOPT_BOOT_COMPLETE : 0);
-        return performDexOpt(new DexoptOptions(packageName, REASON_UNKNOWN,
+        return performDexOpt(new DexoptOptions(packageName, REASON_CMDLINE,
                 targetCompilerFilter, splitName, flags));
     }
 
@@ -14314,7 +14329,7 @@ public class PackageManagerService extends IPackageManager.Stub
         // Remove the shared library overlays from its dependent packages.
         for (int currentUserId : UserManagerService.getInstance().getUserIds()) {
             final List<VersionedPackage> dependents = getPackagesUsingSharedLibraryLPr(
-                    libraryInfo, 0, currentUserId);
+                    libraryInfo, 0, Process.SYSTEM_UID, currentUserId);
             if (dependents == null) {
                 continue;
             }
@@ -16426,23 +16441,93 @@ public class PackageManagerService extends IPackageManager.Stub
     private void processInstallRequestsAsync(boolean success,
             List<InstallRequest> installRequests) {
         mHandler.post(() -> {
+            List<InstallRequest> apexInstallRequests = new ArrayList<>();
+            List<InstallRequest> apkInstallRequests = new ArrayList<>();
+            for (InstallRequest request : installRequests) {
+                if ((request.args.installFlags & PackageManager.INSTALL_APEX) != 0) {
+                    apexInstallRequests.add(request);
+                } else {
+                    apkInstallRequests.add(request);
+                }
+            }
+            // Note: supporting multi package install of both APEXes and APKs might requir some
+            // thinking to ensure atomicity of the install.
+            if (!apexInstallRequests.isEmpty() && !apkInstallRequests.isEmpty()) {
+                // This should've been caught at the validation step, but for some reason wasn't.
+                throw new IllegalStateException(
+                        "Attempted to do a multi package install of both APEXes and APKs");
+            }
+            if (!apexInstallRequests.isEmpty()) {
+                if (success) {
+                    // Since installApexPackages requires talking to external service (apexd), we
+                    // schedule to run it async. Once it finishes, it will resume the install.
+                    Thread t = new Thread(() -> installApexPackagesTraced(apexInstallRequests),
+                            "installApexPackages");
+                    t.start();
+                } else {
+                    // Non-staged APEX installation failed somewhere before
+                    // processInstallRequestAsync. In that case just notify the observer about the
+                    // failure.
+                    InstallRequest request = apexInstallRequests.get(0);
+                    notifyInstallObserver(request.installResult, request.args.observer);
+                }
+                return;
+            }
             if (success) {
-                for (InstallRequest request : installRequests) {
+                for (InstallRequest request : apkInstallRequests) {
                     request.args.doPreInstall(request.installResult.returnCode);
                 }
                 synchronized (mInstallLock) {
-                    installPackagesTracedLI(installRequests);
+                    installPackagesTracedLI(apkInstallRequests);
                 }
-                for (InstallRequest request : installRequests) {
+                for (InstallRequest request : apkInstallRequests) {
                     request.args.doPostInstall(
                             request.installResult.returnCode, request.installResult.uid);
                 }
             }
-            for (InstallRequest request : installRequests) {
+            for (InstallRequest request : apkInstallRequests) {
                 restoreAndPostInstall(request.args.user.getIdentifier(), request.installResult,
                         new PostInstallData(request.args, request.installResult, null));
             }
         });
+    }
+
+    private void installApexPackagesTraced(List<InstallRequest> requests) {
+        try {
+            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "installApexPackages");
+            installApexPackages(requests);
+        } finally {
+            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+        }
+    }
+
+    private void installApexPackages(List<InstallRequest> requests) {
+        if (requests.isEmpty()) {
+            return;
+        }
+        if (requests.size() != 1) {
+            throw new IllegalStateException(
+                "Only a non-staged install of a single APEX is supported");
+        }
+        InstallRequest request = requests.get(0);
+        try {
+            // Should directory scanning logic be moved to ApexManager for better test coverage?
+            final File dir = request.args.origin.resolvedFile;
+            final String[] apexes = dir.list();
+            if (apexes == null) {
+                throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
+                        dir.getAbsolutePath() + " is not a directory");
+            }
+            if (apexes.length != 1) {
+                throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
+                        "Expected exactly one .apex file under " + dir.getAbsolutePath()
+                                + " got: " + apexes.length);
+            }
+            mApexManager.installPackage(dir.getAbsolutePath() + "/" + apexes[0]);
+        } catch (PackageManagerException e) {
+            request.installResult.setError("APEX installation failed", e);
+        }
+        notifyInstallObserver(request.installResult, request.args.observer);
     }
 
     private PackageInstalledInfo createPackageInstalledInfo(
@@ -17056,6 +17141,10 @@ public class PackageManagerService extends IPackageManager.Stub
          * on the install location.
          */
         public void handleStartCopy() {
+            if ((installFlags & PackageManager.INSTALL_APEX) != 0) {
+                mRet = INSTALL_SUCCEEDED;
+                return;
+            }
             PackageInfoLite pkgLite = PackageManagerServiceUtils.getMinimalPackageInfo(mContext,
                     mPackageLite, origin.resolvedPath, installFlags, packageAbiOverride);
 
@@ -20603,7 +20692,7 @@ public class PackageManagerService extends IPackageManager.Stub
                             continue;
                         }
                         List<VersionedPackage> libClientPackages = getPackagesUsingSharedLibraryLPr(
-                                libraryInfo, MATCH_KNOWN_PACKAGES, currUserId);
+                                libraryInfo, MATCH_KNOWN_PACKAGES, Process.SYSTEM_UID, currUserId);
                         if (!ArrayUtils.isEmpty(libClientPackages)) {
                             Slog.w(TAG, "Not removing package " + pkg.getManifestPackageName()
                                     + " hosting lib " + libraryInfo.getName() + " version "
@@ -26545,11 +26634,17 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
 
+        // TODO(188814480) should be able to remove the NPE check when snapshot
+        // "recursion" is fixed.
         @Override
         public boolean isEnabledAndMatches(ParsedMainComponent component, int flags, int userId) {
             synchronized (mLock) {
                 AndroidPackage pkg = getPackage(component.getPackageName());
-                return mSettings.isEnabledAndMatchLPr(pkg, component, flags, userId);
+                if (pkg == null) {
+                    return false;
+                } else {
+                    return mSettings.isEnabledAndMatchLPr(pkg, component, flags, userId);
+                }
             }
         }
 
@@ -26708,7 +26803,7 @@ public class PackageManagerService extends IPackageManager.Stub
                             continue;
                         }
                         final List<VersionedPackage> dependents = getPackagesUsingSharedLibraryLPr(
-                                info, 0, userId);
+                                info, 0, Process.SYSTEM_UID, userId);
                         if (dependents == null) {
                             continue;
                         }

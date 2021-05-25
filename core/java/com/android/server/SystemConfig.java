@@ -169,7 +169,7 @@ public class SystemConfig {
 
     // These are the packages that are white-listed to be able to retrieve location even when user
     // location settings are off, for emergency purposes, as read from the configuration files.
-    final ArraySet<String> mAllowIgnoreLocationSettings = new ArraySet<>();
+    final ArrayMap<String, ArraySet<String>> mAllowIgnoreLocationSettings = new ArrayMap<>();
 
     // These are the action strings of broadcasts which are whitelisted to
     // be delivered anonymously even to apps which target O+.
@@ -313,7 +313,7 @@ public class SystemConfig {
         return mAllowUnthrottledLocation;
     }
 
-    public ArraySet<String> getAllowIgnoreLocationSettings() {
+    public ArrayMap<String, ArraySet<String>> getAllowIgnoreLocationSettings() {
         return mAllowIgnoreLocationSettings;
     }
 
@@ -867,11 +867,25 @@ public class SystemConfig {
                     case "allow-ignore-location-settings": {
                         if (allowOverrideAppRestrictions) {
                             String pkgname = parser.getAttributeValue(null, "package");
+                            String attributionTag = parser.getAttributeValue(null,
+                                    "attributionTag");
                             if (pkgname == null) {
                                 Slog.w(TAG, "<" + name + "> without package in "
                                         + permFile + " at " + parser.getPositionDescription());
                             } else {
-                                mAllowIgnoreLocationSettings.add(pkgname);
+                                ArraySet<String> tags = mAllowIgnoreLocationSettings.get(pkgname);
+                                if (tags == null || !tags.isEmpty()) {
+                                    if (tags == null) {
+                                        tags = new ArraySet<>(1);
+                                        mAllowIgnoreLocationSettings.put(pkgname, tags);
+                                    }
+                                    if (!"*".equals(attributionTag)) {
+                                        if ("null".equals(attributionTag)) {
+                                            attributionTag = null;
+                                        }
+                                        tags.add(attributionTag);
+                                    }
+                                }
                             }
                         } else {
                             logNotAllowedInPartition(name, permFile, parser);

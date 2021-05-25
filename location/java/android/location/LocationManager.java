@@ -58,6 +58,7 @@ import android.os.HandlerExecutor;
 import android.os.ICancellationSignal;
 import android.os.IRemoteCallback;
 import android.os.Looper;
+import android.os.PackageTagsList;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -447,12 +448,23 @@ public class LocationManager {
     }
 
     /**
+     * @deprecated Do not use.
+     * @hide
+     */
+    @Deprecated
+    @TestApi
+    public @NonNull String[] getIgnoreSettingsWhitelist() {
+        return new String[0];
+    }
+
+    /**
+     * For testing purposes only.
      * @hide
      */
     @TestApi
-    public @NonNull String[] getIgnoreSettingsWhitelist() {
+    public @NonNull PackageTagsList getIgnoreSettingsAllowlist() {
         try {
-            return mService.getIgnoreSettingsWhitelist();
+            return mService.getIgnoreSettingsAllowlist();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

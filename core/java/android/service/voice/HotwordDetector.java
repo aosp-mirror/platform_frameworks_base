@@ -19,7 +19,6 @@ package android.service.voice;
 import static android.Manifest.permission.CAPTURE_AUDIO_HOTWORD;
 import static android.Manifest.permission.RECORD_AUDIO;
 
-import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -36,28 +35,6 @@ import android.os.SharedMemory;
  */
 @SystemApi
 public interface HotwordDetector {
-
-    /** No confidence in hotword detector result. */
-    int CONFIDENCE_LEVEL_NONE = 0;
-
-    /** Small confidence in hotword detector result. */
-    int CONFIDENCE_LEVEL_LOW = 1;
-
-    /** Medium confidence in hotword detector result. */
-    int CONFIDENCE_LEVEL_MEDIUM = 2;
-
-    /** High confidence in hotword detector result. */
-    int CONFIDENCE_LEVEL_HIGH = 3;
-
-    /** @hide */
-    @IntDef(prefix = {"CONFIDENCE_LEVEL_"}, value = {
-            CONFIDENCE_LEVEL_NONE,
-            CONFIDENCE_LEVEL_LOW,
-            CONFIDENCE_LEVEL_MEDIUM,
-            CONFIDENCE_LEVEL_HIGH
-    })
-    @interface HotwordConfidenceLevelValue {
-    }
 
     /**
      * Starts hotword recognition.

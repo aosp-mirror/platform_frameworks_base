@@ -19,6 +19,8 @@ package com.android.keyguard;
 import static android.telephony.SubscriptionManager.DATA_ROAMING_DISABLE;
 import static android.telephony.SubscriptionManager.NAME_SOURCE_CARRIER_ID;
 
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -477,7 +479,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     @Test
     public void testFingerprintDoesNotAuth_whenEncrypted() {
         testFingerprintWhenStrongAuth(
-                KeyguardUpdateMonitor.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT);
+                STRONG_AUTH_REQUIRED_AFTER_BOOT);
     }
 
     @Test
@@ -576,7 +578,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     @Test
     public void skipsAuthentication_whenEncryptedKeyguard() {
         when(mStrongAuthTracker.getStrongAuthForUser(anyInt())).thenReturn(
-                KeyguardUpdateMonitor.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT);
+                STRONG_AUTH_REQUIRED_AFTER_BOOT);
         mKeyguardUpdateMonitor.setKeyguardBypassController(mKeyguardBypassController);
 
         mKeyguardUpdateMonitor.dispatchStartedWakingUp();
@@ -588,7 +590,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     @Test
     public void requiresAuthentication_whenEncryptedKeyguard_andBypass() {
         testStrongAuthExceptOnBouncer(
-                KeyguardUpdateMonitor.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT);
+                STRONG_AUTH_REQUIRED_AFTER_BOOT);
     }
 
     @Test
@@ -893,7 +895,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mStatusBarStateListener.onStateChanged(StatusBarState.KEYGUARD);
 
         // WHEN user hasn't authenticated since last boot
-        when(mStrongAuthTracker.hasUserAuthenticatedSinceBoot()).thenReturn(false);
+        when(mStrongAuthTracker.getStrongAuthForUser(KeyguardUpdateMonitor.getCurrentUser()))
+                .thenReturn(STRONG_AUTH_REQUIRED_AFTER_BOOT);
 
         // THEN we shouldn't listen for udfps
         assertThat(mKeyguardUpdateMonitor.shouldListenForFingerprint(true)).isEqualTo(false);

@@ -367,8 +367,8 @@ public class RecordingService extends Service implements MediaRecorder.OnInfoLis
         if (thumbnailBitmap != null) {
             Notification.BigPictureStyle pictureStyle = new Notification.BigPictureStyle()
                     .bigPicture(thumbnailBitmap)
-                    .bigLargeIcon((Bitmap) null);
-            builder.setLargeIcon(thumbnailBitmap).setStyle(pictureStyle);
+                    .showBigPictureWhenCollapsed(true);
+            builder.setStyle(pictureStyle);
         }
         return builder.build();
     }

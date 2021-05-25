@@ -4,12 +4,15 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.app.ActivityManager
+import android.app.ActivityTaskManager
 import android.app.PendingIntent
 import android.content.Context
 import android.graphics.Matrix
 import android.graphics.Rect
+import android.graphics.RectF
 import android.os.Looper
 import android.os.RemoteException
+import android.util.Log
 import android.util.MathUtils
 import android.view.IRemoteAnimationFinishedCallback
 import android.view.IRemoteAnimationRunner
@@ -30,6 +33,8 @@ import kotlin.math.roundToInt
  * nicely into the starting window.
  */
 class ActivityLaunchAnimator(context: Context) {
+    private val TAG = this::class.java.simpleName
+
     companion object {
         const val ANIMATION_DURATION = 500L
         const val ANIMATION_DURATION_FADE_OUT_CONTENT = 183L
@@ -78,29 +83,49 @@ class ActivityLaunchAnimator(context: Context) {
      * If [controller] is null or [animate] is false, then the intent will be started and no
      * animation will run.
      *
+     * If possible, you should pass the [packageName] of the intent that will be started so that
+     * trampoline activity launches will also be animated.
+     *
      * This method will throw any exception thrown by [intentStarter].
      */
     @JvmOverloads
-    inline fun startIntentWithAnimation(
+    fun startIntentWithAnimation(
         controller: Controller?,
         animate: Boolean = true,
+        packageName: String? = null,
         intentStarter: (RemoteAnimationAdapter?) -> Int
     ) {
         if (controller == null || !animate) {
+            Log.d(TAG, "Starting intent with no animation")
             intentStarter(null)
             controller?.callOnIntentStartedOnMainThread(willAnimate = false)
             return
         }
 
+        Log.d(TAG, "Starting intent with a launch animation")
         val runner = Runner(controller)
         val animationAdapter = RemoteAnimationAdapter(
             runner,
             ANIMATION_DURATION,
             ANIMATION_DURATION - 150 /* statusBarTransitionDelay */
         )
+
+        // Register the remote animation for the given package to also animate trampoline
+        // activity launches.
+        if (packageName != null) {
+            try {
+                ActivityTaskManager.getService().registerRemoteAnimationForNextActivityStart(
+                    packageName, animationAdapter)
+            } catch (e: RemoteException) {
+                Log.w(TAG, "Unable to register the remote animation", e)
+            }
+        }
+
         val launchResult = intentStarter(animationAdapter)
         val willAnimate = launchResult == ActivityManager.START_TASK_TO_FRONT ||
             launchResult == ActivityManager.START_SUCCESS
+
+        Log.d(TAG, "launchResult=$launchResult willAnimate=$willAnimate")
         controller.callOnIntentStartedOnMainThread(willAnimate)
 
         // If we expect an animation, post a timeout to cancel it in case the remote animation is
@@ -110,7 +135,6 @@ class ActivityLaunchAnimator(context: Context) {
         }
     }
 
-    @PublishedApi
     internal fun Controller.callOnIntentStartedOnMainThread(willAnimate: Boolean) {
         if (Looper.myLooper() != Looper.getMainLooper()) {
             this.launchContainer.context.mainExecutor.execute {
@@ -125,15 +149,21 @@ class ActivityLaunchAnimator(context: Context) {
      * Same as [startIntentWithAnimation] but allows [intentStarter] to throw a
      * [PendingIntent.CanceledException] which must then be handled by the caller. This is useful
      * for Java caller starting a [PendingIntent].
+     *
+     * If possible, you should pass the [packageName] of the intent that will be started so that
+     * trampoline activity launches will also be animated.
      */
     @Throws(PendingIntent.CanceledException::class)
     @JvmOverloads
     fun startPendingIntentWithAnimation(
         controller: Controller?,
         animate: Boolean = true,
+        packageName: String? = null,
         intentStarter: PendingIntentStarter
     ) {
-        startIntentWithAnimation(controller, animate) { intentStarter.startPendingIntent(it) }
+        startIntentWithAnimation(controller, animate, packageName) {
+            intentStarter.startPendingIntent(it)
+        }
     }
 
     /** Create a new animation [Runner] controlled by [controller]. */
@@ -278,11 +308,14 @@ class ActivityLaunchAnimator(context: Context) {
     @VisibleForTesting
     inner class Runner(private val controller: Controller) : IRemoteAnimationRunner.Stub() {
         private val launchContainer = controller.launchContainer
-        @PublishedApi internal val context = launchContainer.context
+        private val context = launchContainer.context
         private val transactionApplier = SyncRtSurfaceTransactionApplier(launchContainer)
         private var animator: ValueAnimator? = null
 
+        private val matrix = Matrix()
+        private val invertMatrix = Matrix()
         private var windowCrop = Rect()
+        private var windowCropF = RectF()
         private var timedOut = false
         private var cancelled = false
 
@@ -294,7 +327,6 @@ class ActivityLaunchAnimator(context: Context) {
         // posting it.
         private var onTimeout = Runnable { onAnimationTimedOut() }
 
-        @PublishedApi
         internal fun postTimeout() {
             launchContainer.postDelayed(onTimeout, LAUNCH_TIMEOUT)
         }
@@ -336,11 +368,13 @@ class ActivityLaunchAnimator(context: Context) {
             remoteAnimationNonAppTargets: Array<out RemoteAnimationTarget>,
             iCallback: IRemoteAnimationFinishedCallback
         ) {
+            Log.d(TAG, "Remote animation started")
             val window = remoteAnimationTargets.firstOrNull {
                 it.mode == RemoteAnimationTarget.MODE_OPENING
             }
 
             if (window == null) {
+                Log.d(TAG, "Aborting the animation as no window is opening")
                 removeTimeout()
                 invokeCallback(iCallback)
                 controller.onLaunchAnimationCancelled()
@@ -399,10 +433,12 @@ class ActivityLaunchAnimator(context: Context) {
 
             animator.addListener(object : AnimatorListenerAdapter() {
                 override fun onAnimationStart(animation: Animator?, isReverse: Boolean) {
+                    Log.d(TAG, "Animation started")
                     controller.onLaunchAnimationStart(isExpandingFullyAbove)
                 }
 
                 override fun onAnimationEnd(animation: Animator?) {
+                    Log.d(TAG, "Animation ended")
                     invokeCallback(iCallback)
                     controller.onLaunchAnimationEnd(isExpandingFullyAbove)
                 }
@@ -447,19 +483,52 @@ class ActivityLaunchAnimator(context: Context) {
         }
 
         private fun applyStateToWindow(window: RemoteAnimationTarget, state: State) {
-            val m = Matrix()
-            m.postTranslate(0f, (state.top - window.sourceContainerBounds.top).toFloat())
-            windowCrop.set(state.left, 0, state.right, state.height)
+            val screenBounds = window.screenSpaceBounds
+            val centerX = (screenBounds.left + screenBounds.right) / 2f
+            val centerY = (screenBounds.top + screenBounds.bottom) / 2f
+            val width = screenBounds.right - screenBounds.left
+            val height = screenBounds.bottom - screenBounds.top
 
-            val cornerRadius = minOf(state.topCornerRadius, state.bottomCornerRadius)
+            // Scale the window. We use the max of (widthRatio, heightRatio) so that there is no
+            // blank space on any side.
+            val widthRatio = state.width.toFloat() / width
+            val heightRatio = state.height.toFloat() / height
+            val scale = maxOf(widthRatio, heightRatio)
+            matrix.reset()
+            matrix.setScale(scale, scale, centerX, centerY)
+
+            // Align it to the top and center it in the x-axis.
+            val heightChange = height * scale - height
+            val translationX = state.centerX - centerX
+            val translationY = state.top - screenBounds.top + heightChange / 2f
+            matrix.postTranslate(translationX, translationY)
+
+            // Crop it. The matrix will also be applied to the crop, so we apply the inverse
+            // operation. Given that we only scale (by factor > 0) then translate, we can assume
+            // that the matrix is invertible.
+            val cropX = state.left.toFloat() - screenBounds.left
+            val cropY = state.top.toFloat() - screenBounds.top
+            windowCropF.set(cropX, cropY, cropX + state.width, cropY + state.height)
+            matrix.invert(invertMatrix)
+            invertMatrix.mapRect(windowCropF)
+            windowCrop.set(
+                windowCropF.left.roundToInt(),
+                windowCropF.top.roundToInt(),
+                windowCropF.right.roundToInt(),
+                windowCropF.bottom.roundToInt()
+            )
+
+            // The scale will also be applied to the corner radius, so we divide by the scale to
+            // keep the original radius.
+            val cornerRadius = minOf(state.topCornerRadius, state.bottomCornerRadius) / scale
             val params = SyncRtSurfaceTransactionApplier.SurfaceParams.Builder(window.leash)
-                    .withAlpha(1f)
-                    .withMatrix(m)
-                    .withWindowCrop(windowCrop)
-                    .withLayer(window.prefixOrderIndex)
-                    .withCornerRadius(cornerRadius)
-                    .withVisibility(true)
-                    .build()
+                .withAlpha(1f)
+                .withMatrix(matrix)
+                .withWindowCrop(windowCrop)
+                .withLayer(window.prefixOrderIndex)
+                .withCornerRadius(cornerRadius)
+                .withVisibility(true)
+                .build()
 
             transactionApplier.scheduleApply(params)
         }
@@ -474,12 +543,13 @@ class ActivityLaunchAnimator(context: Context) {
 
             val params = SyncRtSurfaceTransactionApplier.SurfaceParams.Builder(navigationBar.leash)
             if (fadeInProgress > 0) {
-                val m = Matrix()
-                m.postTranslate(0f, (state.top - navigationBar.sourceContainerBounds.top).toFloat())
+                matrix.reset()
+                matrix.setTranslate(
+                    0f, (state.top - navigationBar.sourceContainerBounds.top).toFloat())
                 windowCrop.set(state.left, 0, state.right, state.height)
                 params
                         .withAlpha(NAV_FADE_IN_INTERPOLATOR.getInterpolation(fadeInProgress))
-                        .withMatrix(m)
+                        .withMatrix(matrix)
                         .withWindowCrop(windowCrop)
                         .withVisibility(true)
             } else {
@@ -496,6 +566,7 @@ class ActivityLaunchAnimator(context: Context) {
                 return
             }
 
+            Log.d(TAG, "Remote animation timed out")
             timedOut = true
             controller.onLaunchAnimationCancelled()
         }
@@ -505,6 +576,7 @@ class ActivityLaunchAnimator(context: Context) {
                 return
             }
 
+            Log.d(TAG, "Remote animation was cancelled")
             cancelled = true
             removeTimeout()
             context.mainExecutor.execute {

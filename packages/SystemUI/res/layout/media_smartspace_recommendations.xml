@@ -46,149 +46,122 @@
 
     <com.android.internal.widget.CachingIconView
         android:id="@+id/recommendation_card_icon"
-        android:layout_width="@dimen/qs_aa_media_rec_header_icon_size"
-        android:layout_height="@dimen/qs_aa_media_rec_header_icon_size"
+        android:layout_width="@dimen/qs_media_icon_size"
+        android:layout_height="@dimen/qs_media_icon_size"
         android:src="@drawable/ic_headset"
-        android:tint="?android:attr/textColor" />
+        style="@style/MediaPlayer.AppIcon"/>
 
     <TextView
         android:id="@+id/recommendation_card_text"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:singleLine="true"
+        android:maxLines="2"
         android:text="@string/controls_media_smartspace_rec_title"
         android:fontFamily="google-sans-medium"
         android:textDirection="locale"
-        android:textSize="@dimen/qq_aa_media_rec_header_text_size" />
+        android:textSize="@dimen/qq_aa_media_rec_header_text_size"
+        android:breakStrategy="balanced"
+        android:hyphenationFrequency="none"/>
 
     <ImageView
         android:id="@+id/media_cover1"
-        android:layout_width="@dimen/qs_aa_media_rec_album_size"
-        android:layout_height="@dimen/qs_aa_media_rec_album_size"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/qs_aa_media_rec_album_size_collapsed"
         android:adjustViewBounds="true"
         android:background="@drawable/bg_smartspace_media_item"
         style="@style/MediaPlayer.Album"
         android:clipToOutline="true"
         android:scaleType="centerCrop"/>
-
-    <com.android.internal.widget.CachingIconView
-        android:id="@+id/media_logo1"
-        android:layout_width="@dimen/qs_media_icon_size"
-        android:layout_height="@dimen/qs_media_icon_size"
-        style="@style/MediaPlayer.AppIcon" />
 
     <ImageView
         android:id="@+id/media_cover2"
-        android:layout_width="@dimen/qs_aa_media_rec_album_size"
-        android:layout_height="@dimen/qs_aa_media_rec_album_size"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/qs_aa_media_rec_album_size_collapsed"
         android:adjustViewBounds="true"
         android:background="@drawable/bg_smartspace_media_item"
         style="@style/MediaPlayer.Album"
         android:clipToOutline="true"
         android:scaleType="centerCrop"/>
-
-    <com.android.internal.widget.CachingIconView
-        android:id="@+id/media_logo2"
-        android:layout_width="@dimen/qs_media_icon_size"
-        android:layout_height="@dimen/qs_media_icon_size"
-        style="@style/MediaPlayer.AppIcon" />
 
     <ImageView
         android:id="@+id/media_cover3"
-        android:layout_width="@dimen/qs_aa_media_rec_album_size"
-        android:layout_height="@dimen/qs_aa_media_rec_album_size"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/qs_aa_media_rec_album_size_collapsed"
         android:adjustViewBounds="true"
         android:background="@drawable/bg_smartspace_media_item"
         style="@style/MediaPlayer.Album"
         android:clipToOutline="true"
         android:scaleType="centerCrop"/>
-
-    <com.android.internal.widget.CachingIconView
-        android:id="@+id/media_logo3"
-        android:layout_width="@dimen/qs_media_icon_size"
-        android:layout_height="@dimen/qs_media_icon_size"
-        style="@style/MediaPlayer.AppIcon" />
 
     <ImageView
         android:id="@+id/media_cover4"
-        android:layout_width="@dimen/qs_aa_media_rec_album_size"
-        android:layout_height="@dimen/qs_aa_media_rec_album_size"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/qs_aa_media_rec_album_size_collapsed"
         android:adjustViewBounds="true"
         android:background="@drawable/bg_smartspace_media_item"
         style="@style/MediaPlayer.Album"
         android:clipToOutline="true"
         android:scaleType="centerCrop"/>
-
-    <com.android.internal.widget.CachingIconView
-        android:id="@+id/media_logo4"
-        android:layout_width="@dimen/qs_media_icon_size"
-        android:layout_height="@dimen/qs_media_icon_size"
-        style="@style/MediaPlayer.AppIcon" />
 
     <ImageView
         android:id="@+id/media_cover5"
-        android:layout_width="@dimen/qs_aa_media_rec_album_size"
-        android:layout_height="@dimen/qs_aa_media_rec_album_size"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/qs_aa_media_rec_album_size_collapsed"
         android:adjustViewBounds="true"
         android:background="@drawable/bg_smartspace_media_item"
         style="@style/MediaPlayer.Album"
         android:clipToOutline="true"
         android:scaleType="centerCrop"/>
-
-    <com.android.internal.widget.CachingIconView
-        android:id="@+id/media_logo5"
-        android:layout_width="@dimen/qs_media_icon_size"
-        android:layout_height="@dimen/qs_media_icon_size"
-        style="@style/MediaPlayer.AppIcon" />
 
     <ImageView
         android:id="@+id/media_cover6"
-        android:layout_width="@dimen/qs_aa_media_rec_album_size"
-        android:layout_height="@dimen/qs_aa_media_rec_album_size"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/qs_aa_media_rec_album_size_collapsed"
         android:adjustViewBounds="true"
         android:background="@drawable/bg_smartspace_media_item"
         style="@style/MediaPlayer.Album"
         android:clipToOutline="true"
         android:scaleType="centerCrop"/>
 
-    <com.android.internal.widget.CachingIconView
-        android:id="@+id/media_logo6"
-        android:layout_width="@dimen/qs_media_icon_size"
-        android:layout_height="@dimen/qs_media_icon_size"
-        style="@style/MediaPlayer.AppIcon" />
-
     <!-- Long press menu -->
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/qs_media_padding"
+        android:layout_marginTop="20dp"
         android:layout_marginStart="@dimen/qs_media_padding"
         android:layout_marginEnd="@dimen/qs_media_padding"
         android:id="@+id/remove_text"
         android:fontFamily="@*android:string/config_headlineFontFamily"
         android:singleLine="true"
+        android:ellipsize="marquee"
+        android:marqueeRepeatLimit="marquee_forever"
         android:text="@string/controls_media_close_session"
         android:gravity="center_horizontal|top"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/settings"/>
+        app:layout_constraintBottom_toTopOf="@id/cancel"/>
 
     <FrameLayout
         android:id="@+id/settings"
         android:background="@drawable/qs_media_light_source"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/qs_media_padding"
-        android:paddingBottom="@dimen/qs_media_padding"
-        android:minWidth="48dp"
-        android:minHeight="48dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginEnd="@dimen/qs_media_info_spacing"
+        android:layout_marginBottom="@dimen/qs_media_padding"
+        android:layout_marginTop="6dp"
+        app:layout_constrainedWidth="true"
+        app:layout_constraintWidth_min="48dp"
+        app:layout_constraintHeight_min="48dp"
+        app:layout_constraintHorizontal_chainStyle="spread_inside"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/cancel"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/remove_text">
 
         <TextView
-            android:layout_gravity="bottom"
+            android:id="@+id/settings_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             style="@style/MediaPlayer.OutlineButton"
@@ -198,18 +171,21 @@
     <FrameLayout
         android:id="@+id/cancel"
         android:background="@drawable/qs_media_light_source"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:paddingBottom="@dimen/qs_media_padding"
-        android:minWidth="48dp"
-        android:minHeight="48dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginStart="@dimen/qs_media_info_spacing"
+        android:layout_marginEnd="@dimen/qs_media_info_spacing"
+        android:layout_marginBottom="@dimen/qs_media_padding"
+        android:layout_marginTop="6dp"
+        app:layout_constrainedWidth="true"
+        app:layout_constraintWidth_min="48dp"
+        app:layout_constraintHeight_min="48dp"
+        app:layout_constraintStart_toEndOf="@id/settings"
         app:layout_constraintEnd_toStartOf="@id/dismiss"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/remove_text">
 
         <TextView
-            android:layout_gravity="bottom"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             style="@style/MediaPlayer.OutlineButton"
@@ -219,23 +195,25 @@
     <FrameLayout
         android:id="@+id/dismiss"
         android:background="@drawable/qs_media_light_source"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/qs_media_info_spacing"
         android:layout_marginEnd="@dimen/qs_media_padding"
-        android:paddingBottom="@dimen/qs_media_padding"
-        android:minWidth="48dp"
-        android:minHeight="48dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginBottom="@dimen/qs_media_padding"
+        android:layout_marginTop="6dp"
+        app:layout_constrainedWidth="true"
+        app:layout_constraintWidth_min="48dp"
+        app:layout_constraintHeight_min="48dp"
+        app:layout_constraintStart_toEndOf="@id/cancel"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/remove_text">
 
         <TextView
-            android:layout_gravity="bottom"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             style="@style/MediaPlayer.OutlineButton"
             android:text="@string/controls_media_dismiss_button"
-            />
+        />
     </FrameLayout>
-
 </com.android.systemui.util.animation.TransitionLayout>

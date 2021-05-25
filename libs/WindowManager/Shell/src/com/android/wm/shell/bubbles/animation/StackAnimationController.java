@@ -709,14 +709,16 @@ public class StackAnimationController extends
 
 
     @Override
-    float getOffsetForChainedPropertyAnimation(DynamicAnimation.ViewProperty property) {
+    float getOffsetForChainedPropertyAnimation(DynamicAnimation.ViewProperty property, int index) {
         if (property.equals(DynamicAnimation.TRANSLATION_Y)) {
             // If we're in the dismiss target, have the bubbles pile on top of each other with no
             // offset.
             if (isStackStuckToTarget()) {
                 return 0f;
             } else {
-                return mStackOffset;
+                // We only show the first two bubbles in the stack & the rest hide behind them
+                // so they don't need an offset.
+                return index > 1 ? 0f : mStackOffset;
             }
         } else {
             return 0f;
@@ -825,7 +827,7 @@ public class StackAnimationController extends
     private void moveToFinalIndex(View view, int newIndex,
             Runnable finishReorder) {
         final ViewPropertyAnimator animator = view.animate()
-                .translationY(getStackPosition().y + newIndex * mStackOffset)
+                .translationY(getStackPosition().y + Math.min(newIndex, 1) * mStackOffset)
                 .setDuration(BUBBLE_SWAP_DURATION)
                 .withEndAction(() -> {
                     view.setTag(R.id.reorder_animator_tag, null);
@@ -912,8 +914,9 @@ public class StackAnimationController extends
         if (mLayout.getChildCount() > 0) {
             property.setValue(mLayout.getChildAt(0), value);
             if (mLayout.getChildCount() > 1) {
+                float newValue = value + getOffsetForChainedPropertyAnimation(property, 0);
                 animationForChildAtIndex(1)
-                        .property(property, value + getOffsetForChainedPropertyAnimation(property))
+                        .property(property, newValue)
                         .start();
             }
         }
@@ -935,12 +938,12 @@ public class StackAnimationController extends
 
             // Since we're not using the chained animations, apply the offsets manually.
             final float xOffset = getOffsetForChainedPropertyAnimation(
-                    DynamicAnimation.TRANSLATION_X);
+                    DynamicAnimation.TRANSLATION_X, 0);
             final float yOffset = getOffsetForChainedPropertyAnimation(
-                    DynamicAnimation.TRANSLATION_Y);
+                    DynamicAnimation.TRANSLATION_Y, 0);
             for (int i = 0; i < mLayout.getChildCount(); i++) {
-                mLayout.getChildAt(i).setTranslationX(pos.x + (i * xOffset));
-                mLayout.getChildAt(i).setTranslationY(pos.y + (i * yOffset));
+                mLayout.getChildAt(i).setTranslationX(pos.x + (Math.min(i, 1) * xOffset));
+                mLayout.getChildAt(i).setTranslationY(pos.y + (Math.min(i, 1) * yOffset));
             }
         }
     }
@@ -960,7 +963,7 @@ public class StackAnimationController extends
         }
 
         final float yOffset =
-                getOffsetForChainedPropertyAnimation(DynamicAnimation.TRANSLATION_Y);
+                getOffsetForChainedPropertyAnimation(DynamicAnimation.TRANSLATION_Y, 0);
         float endY = mStackPosition.y + yOffset * index;
         float endX = mStackPosition.x;
         if (mPositioner.showBubblesVertically()) {

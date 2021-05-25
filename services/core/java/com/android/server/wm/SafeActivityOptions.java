@@ -20,6 +20,9 @@ import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIO
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.Manifest.permission.STATUS_BAR_SERVICE;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.app.WindowConfiguration.activityTypeToString;
 import static android.content.pm.PackageManager.PERMISSION_DENIED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.view.Display.INVALID_DISPLAY;
@@ -29,12 +32,15 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLAS
 
 import android.annotation.Nullable;
 import android.app.ActivityOptions;
+import android.app.AppGlobals;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Process;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Slog;
 import android.view.RemoteAnimationAdapter;
@@ -281,17 +287,63 @@ public class SafeActivityOptions {
         }
 
         // If launched from bubble is specified, then ensure that the caller is system or sysui.
-        if (options.getLaunchedFromBubble() && callingUid != Process.SYSTEM_UID) {
-            final int statusBarPerm = ActivityTaskManagerService.checkPermission(
-                    STATUS_BAR_SERVICE, callingPid, callingUid);
-            if (statusBarPerm == PERMISSION_DENIED) {
+        if (options.getLaunchedFromBubble() && !isSystemOrSystemUI(callingPid, callingUid)) {
+            final String msg = "Permission Denial: starting " + getIntentString(intent)
+                    + " from " + callerApp + " (pid=" + callingPid
+                    + ", uid=" + callingUid + ") with launchedFromBubble=true";
+            Slog.w(TAG, msg);
+            throw new SecurityException(msg);
+        }
+
+        final int activityType = options.getLaunchActivityType();
+        if (activityType != ACTIVITY_TYPE_UNDEFINED
+                && !isSystemOrSystemUI(callingPid, callingUid)) {
+            // Granted if it is assistant type and the calling uid is assistant.
+            boolean activityTypeGranted = false;
+            if (activityType == ACTIVITY_TYPE_ASSISTANT
+                    && isAssistant(supervisor.mService, callingUid)) {
+                activityTypeGranted = true;
+            }
+
+            if (!activityTypeGranted) {
                 final String msg = "Permission Denial: starting " + getIntentString(intent)
                         + " from " + callerApp + " (pid=" + callingPid
-                        + ", uid=" + callingUid + ") with launchedFromBubble=true";
+                        + ", uid=" + callingUid + ") with launchActivityType="
+                        + activityTypeToString(options.getLaunchActivityType());
                 Slog.w(TAG, msg);
                 throw new SecurityException(msg);
             }
         }
+    }
+
+    private boolean isAssistant(ActivityTaskManagerService atmService, int callingUid) {
+        if (atmService.mActiveVoiceInteractionServiceComponent == null) {
+            return false;
+        }
+
+        final String assistantPackage =
+                atmService.mActiveVoiceInteractionServiceComponent.getPackageName();
+        try {
+            final int uid = AppGlobals.getPackageManager().getPackageUid(assistantPackage,
+                    PackageManager.MATCH_DIRECT_BOOT_AUTO,
+                    UserHandle.getUserId(callingUid));
+            if (uid == callingUid) {
+                return true;
+            }
+        } catch (RemoteException e) {
+            // Should not happen
+        }
+        return false;
+    }
+
+    private boolean isSystemOrSystemUI(int callingPid, int callingUid) {
+        if (callingUid == Process.SYSTEM_UID) {
+            return true;
+        }
+
+        final int statusBarPerm = ActivityTaskManagerService.checkPermission(
+                STATUS_BAR_SERVICE, callingPid, callingUid);
+        return statusBarPerm == PERMISSION_GRANTED;
     }
 
     private String getIntentString(Intent intent) {

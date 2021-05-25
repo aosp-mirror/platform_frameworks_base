@@ -220,8 +220,7 @@ private fun StatusBarNotification.isSystemNotification() =
         "android" == packageName || "com.android.systemui" == packageName
 
 private fun NotificationEntry.isImportantCall() =
-        sbn.notification.extras?.getString(Notification.EXTRA_TEMPLATE) ==
-                "android.app.Notification\$CallStyle" && importance > IMPORTANCE_MIN
+        sbn.notification.isStyle(Notification.CallStyle::class.java) && importance > IMPORTANCE_MIN
 
 private fun NotificationEntry.isColorizedForegroundService() = sbn.notification.run {
     isForegroundService && isColorized && importance > IMPORTANCE_MIN

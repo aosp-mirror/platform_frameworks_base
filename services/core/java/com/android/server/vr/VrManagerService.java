@@ -42,6 +42,7 @@ import android.os.IBinder;
 import android.os.IInterface;
 import android.os.Looper;
 import android.os.Message;
+import android.os.PackageTagsList;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -85,7 +86,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -856,14 +856,13 @@ public class VrManagerService extends SystemService
         // If user changed drop restrictions for the old user.
         if (oldUserId != newUserId) {
             appOpsManager.setUserRestrictionForUser(AppOpsManager.OP_SYSTEM_ALERT_WINDOW,
-                    false, mOverlayToken, (Map<String, String[]>) null, oldUserId);
+                    false, mOverlayToken, null, oldUserId);
         }
 
         // Apply the restrictions for the current user based on vr state
-        ArrayMap<String, String[]> exemptions = null;
+        PackageTagsList exemptions = null;
         if (exemptedPackage != null) {
-            exemptions = new ArrayMap<>(1);
-            exemptions.put(exemptedPackage, new String[0]);
+            exemptions = new PackageTagsList.Builder(1).add(exemptedPackage).build();
         }
 
         appOpsManager.setUserRestrictionForUser(AppOpsManager.OP_SYSTEM_ALERT_WINDOW,

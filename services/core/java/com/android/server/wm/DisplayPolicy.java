@@ -2420,6 +2420,15 @@ public class DisplayPolicy {
         } else {
             // Restore visibilities and positions of system bars.
             controlTarget.showInsets(Type.statusBars() | Type.navigationBars(), false);
+            // To further allow the pull-down-from-the-top gesture to pull down the notification
+            // shade as a consistent motion, we reroute the touch events here from the currently
+            // touched window to the status bar after making it visible.
+            if (swipeTarget == mStatusBar) {
+                final boolean transferred = mStatusBar.transferTouch();
+                if (!transferred) {
+                    Slog.i(TAG, "Could not transfer touch to the status bar");
+                }
+            }
         }
         mImmersiveModeConfirmation.confirmCurrentPrompt();
     }

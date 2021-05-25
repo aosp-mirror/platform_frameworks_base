@@ -24,8 +24,8 @@ import android.util.MathUtils;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.android.systemui.animation.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.animation.Interpolators;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.notification.dagger.SilentHeader;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
@@ -382,7 +382,7 @@ public class StackScrollAlgorithm {
 
         if (ambientState.isExpansionChanging() && !ambientState.isOnKeyguard()) {
             viewState.alpha = Interpolators.getNotificationScrimAlpha(
-                    ambientState.getExpansionFraction());
+                    ambientState.getExpansionFraction(), true /* notification */);
         } else {
             viewState.alpha = 1f - ambientState.getHideAmount();
         }

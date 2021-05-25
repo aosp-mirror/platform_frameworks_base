@@ -479,9 +479,13 @@ public class BootReceiver extends BroadcastReceiver {
         final String bootReason = SystemProperties.get("ro.boot.bootreason", null);
         HashMap<String, Long> timestamps = readTimestamps();
         try {
-            final String headers = getBootHeadersToLogAndUpdate();
-            addFileToDropBox(db, timestamps, headers, tombstone.getPath(), LOG_SIZE,
-                    proto ? TAG_TOMBSTONE_PROTO : TAG_TOMBSTONE);
+            if (proto) {
+                db.addFile(TAG_TOMBSTONE_PROTO, tombstone, 0);
+            } else {
+                final String headers = getBootHeadersToLogAndUpdate();
+                addFileToDropBox(db, timestamps, headers, tombstone.getPath(), LOG_SIZE,
+                        TAG_TOMBSTONE);
+            }
         } catch (IOException e) {
             Slog.e(TAG, "Can't log tombstone", e);
         }

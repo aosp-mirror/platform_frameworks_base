@@ -31,13 +31,13 @@
 
 #include <sstream>
 
+#include <gui/TraceUtils.h>
 #include "LightingInfo.h"
 #include "VectorDrawable.h"
 #include "thread/CommonPool.h"
 #include "tools/SkSharingProc.h"
 #include "utils/Color.h"
 #include "utils/String8.h"
-#include "utils/TraceUtils.h"
 
 using namespace android::uirenderer::renderthread;
 

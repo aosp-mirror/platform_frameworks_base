@@ -134,6 +134,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     private boolean mUpdateBackgroundOnUpdate;
     private boolean mNotificationTranslationFinished = false;
+    private ArrayList<MenuItem> mSnoozedMenuItems;
 
     /**
      * Listener for when {@link ExpandableNotificationRow} is laid out.
@@ -1102,7 +1103,13 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     /** The click listener for the snooze button. */
     public View.OnClickListener getSnoozeClickListener(MenuItem item) {
         return v -> {
+            // Dismiss a snoozed notification if one is still left behind
+            mNotificationGutsManager.closeAndSaveGuts(true /* removeLeavebehind */,
+                    false /* force */, false /* removeControls */, -1 /* x */, -1 /* y */,
+                    false /* resetMenu */);
             mNotificationGutsManager.openGuts(this, 0, 0, item);
+            mSnoozedMenuItems = mMenuRow.getMenuItems(mMenuRow.getMenuView().getContext());
+            mMenuRow.resetMenu();
         };
     }
 
@@ -1821,6 +1828,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     void onGutsClosed() {
         updateContentAccessibilityImportanceForGuts(true /* isEnabled */);
+        if (mSnoozedMenuItems != null && mSnoozedMenuItems.size() > 0) {
+            mMenuRow.setMenuItems(mSnoozedMenuItems);
+            mSnoozedMenuItems = null;
+        }
     }
 
     /**

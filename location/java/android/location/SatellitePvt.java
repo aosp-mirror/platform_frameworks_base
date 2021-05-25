@@ -399,13 +399,6 @@ public final class SatellitePvt implements Parcelable {
     }
 
     /**
-     * Gets a bitmask of fields present in this object
-     */
-    public int getFlags() {
-        return mFlags;
-    }
-
-    /**
      * Returns a {@link PositionEcef} object that contains estimates of the satellite
      * position fields in ECEF coordinate frame.
      */
@@ -536,18 +529,6 @@ public final class SatellitePvt implements Parcelable {
         private double mTropoDelayMeters;
 
         /**
-         * Sets a bitmask of fields present in this object
-         *
-         * @param flags int flags
-         * @return Builder builder object
-         */
-        @NonNull
-        public Builder setFlags(int flags) {
-            mFlags = flags;
-            return this;
-        }
-
-        /**
          * Set position ECEF.
          *
          * @param positionEcef position ECEF object
@@ -557,6 +538,7 @@ public final class SatellitePvt implements Parcelable {
         public Builder setPositionEcef(
                 @NonNull PositionEcef positionEcef) {
             mPositionEcef = positionEcef;
+            updateFlags();
             return this;
         }
 
@@ -570,6 +552,7 @@ public final class SatellitePvt implements Parcelable {
         public Builder setVelocityEcef(
                 @NonNull VelocityEcef velocityEcef) {
             mVelocityEcef = velocityEcef;
+            updateFlags();
             return this;
         }
 
@@ -583,7 +566,14 @@ public final class SatellitePvt implements Parcelable {
         public Builder setClockInfo(
                 @NonNull ClockInfo clockInfo) {
             mClockInfo = clockInfo;
+            updateFlags();
             return this;
+        }
+
+        private void updateFlags() {
+            if (mPositionEcef != null && mVelocityEcef != null && mClockInfo != null) {
+                mFlags = (byte) (mFlags | HAS_POSITION_VELOCITY_CLOCK_INFO);
+            }
         }
 
         /**
@@ -593,8 +583,10 @@ public final class SatellitePvt implements Parcelable {
          * @return Builder builder object
          */
         @NonNull
-        public Builder setIonoDelayMeters(@FloatRange() double ionoDelayMeters) {
+        public Builder setIonoDelayMeters(
+                @FloatRange(from = 0.0f, to = 100.0f) double ionoDelayMeters) {
             mIonoDelayMeters = ionoDelayMeters;
+            mFlags = (byte) (mFlags | HAS_IONO);
             return this;
         }
 
@@ -605,8 +597,10 @@ public final class SatellitePvt implements Parcelable {
          * @return Builder builder object
          */
         @NonNull
-        public Builder setTropoDelayMeters(@FloatRange() double tropoDelayMeters) {
+        public Builder setTropoDelayMeters(
+                @FloatRange(from = 0.0f, to = 100.0f) double tropoDelayMeters) {
             mTropoDelayMeters = tropoDelayMeters;
+            mFlags = (byte) (mFlags | HAS_TROPO);
             return this;
         }
 

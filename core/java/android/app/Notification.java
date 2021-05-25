@@ -2799,7 +2799,7 @@ public class Notification implements Parcelable
             }
         }
 
-        if (MessagingStyle.class.equals(getNotificationStyle()) && extras != null) {
+        if (isStyle(MessagingStyle.class) && extras != null) {
             final Parcelable[] messages = extras.getParcelableArray(EXTRA_MESSAGES);
             if (!ArrayUtils.isEmpty(messages)) {
                 for (MessagingStyle.Message message : MessagingStyle.Message
@@ -6907,6 +6907,15 @@ public class Notification implements Parcelable
     }
 
     /**
+     * @return whether the style of this notification is the one provided
+     * @hide
+     */
+    public boolean isStyle(@NonNull Class<? extends Style> styleClass) {
+        String templateClass = extras.getString(Notification.EXTRA_TEMPLATE);
+        return Objects.equals(templateClass, styleClass.getName());
+    }
+
+    /**
      * @return true if this notification is colorized *for the purposes of ranking*.  If the
      * {@link #color} is {@link #COLOR_DEFAULT} this will be true, even though the actual
      * appearance of the notification may not be "colorized".
@@ -6974,7 +6983,7 @@ public class Notification implements Parcelable
      * @return true if the notification has image
      */
     public boolean hasImage() {
-        if (MessagingStyle.class.equals(getNotificationStyle()) && extras != null) {
+        if (isStyle(MessagingStyle.class) && extras != null) {
             final Parcelable[] messages = extras.getParcelableArray(EXTRA_MESSAGES);
             if (!ArrayUtils.isEmpty(messages)) {
                 for (MessagingStyle.Message m : MessagingStyle.Message
@@ -7726,6 +7735,7 @@ public class Notification implements Parcelable
         public RemoteViews makeBigContentView() {
             StandardTemplateParams p = mBuilder.mParams.reset()
                     .viewType(StandardTemplateParams.VIEW_TYPE_BIG)
+                    .allowTextWithProgress(true)
                     .textViewId(R.id.big_text)
                     .fillTextsFrom(mBuilder);
 

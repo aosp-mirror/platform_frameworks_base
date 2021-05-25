@@ -212,6 +212,12 @@ interface PkgAppInfo {
      */
     int getRoundIconRes();
 
+    /**
+     * @see ApplicationInfo#areAttributionsUserVisible()
+     * @see R.styleable#AndroidManifestApplication_attributionsAreUserVisible
+     */
+    boolean areAttributionsUserVisible();
+
     /** @see ApplicationInfo#seInfo */
     @Nullable
     String getSeInfo();

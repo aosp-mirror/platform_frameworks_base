@@ -19,7 +19,6 @@ import java.util.ArrayList;
 public class TileLayout extends ViewGroup implements QSTileLayout {
 
     public static final int NO_MAX_COLUMNS = 100;
-    private static final float TILE_ASPECT = 1.2f;
 
     private static final String TAG = "TileLayout";
 
@@ -34,7 +33,6 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
     protected int mRows = 1;
 
     protected final ArrayList<TileRecord> mRecords = new ArrayList<>();
-    private int mCellMarginTop;
     protected boolean mListening;
     protected int mMaxAllowedRows = 3;
 
@@ -123,7 +121,6 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
         mCellMarginHorizontal = res.getDimensionPixelSize(R.dimen.qs_tile_margin_horizontal);
         mSidePadding = useSidePadding() ? mCellMarginHorizontal / 2 : 0;
         mCellMarginVertical= res.getDimensionPixelSize(R.dimen.qs_tile_margin_vertical);
-        mCellMarginTop = res.getDimensionPixelSize(R.dimen.qs_tile_margin_top);
         mMaxAllowedRows = Math.max(1, getResources().getInteger(R.integer.quick_settings_max_rows));
         if (mLessRows) mMaxAllowedRows = Math.max(mMinRows, mMaxAllowedRows - 1);
         if (updateColumns()) {
@@ -169,10 +166,7 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
             mCellHeight = record.tileView.getMeasuredHeight();
         }
 
-        // Only include the top margin in our measurement if we have more than 1 row to show.
-        // Otherwise, don't add the extra margin buffer at top.
-        int height = (mCellHeight + mCellMarginVertical) * mRows +
-                (mRows != 0 ? (mCellMarginTop - mCellMarginVertical) : 0);
+        int height = (mCellHeight + mCellMarginVertical) * mRows;
         if (height < 0) height = 0;
 
         setMeasuredDimension(width, height);
@@ -186,9 +180,8 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
      * @param tilesCount Upper limit on the number of tiles to show. to prevent empty rows.
      */
     public boolean updateMaxRows(int allowedHeight, int tilesCount) {
-        final int availableHeight =  allowedHeight - mCellMarginTop
-                // Add the cell margin in order to divide easily by the height + the margin below
-                + mCellMarginVertical;
+        // Add the cell margin in order to divide easily by the height + the margin below
+        final int availableHeight =  allowedHeight + mCellMarginVertical;
         final int previousRows = mRows;
         mRows = availableHeight / (getCellHeight() + mCellMarginVertical);
         if (mRows < mMinRows) {
@@ -243,7 +236,7 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
     }
 
     protected int getRowTop(int row) {
-        return row * (mCellHeight + mCellMarginVertical) + mCellMarginTop;
+        return row * (mCellHeight + mCellMarginVertical);
     }
 
     protected int getColumnStart(int column) {

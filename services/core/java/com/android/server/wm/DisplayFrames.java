@@ -27,6 +27,7 @@ import android.util.proto.ProtoOutputStream;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 import android.view.InsetsState;
+import android.view.PrivacyIndicatorBounds;
 import android.view.RoundedCorners;
 
 import com.android.server.wm.utils.WmDisplayCutout;
@@ -59,10 +60,11 @@ public class DisplayFrames {
     public int mRotation;
 
     public DisplayFrames(int displayId, InsetsState insetsState, DisplayInfo info,
-            WmDisplayCutout displayCutout, RoundedCorners roundedCorners) {
+            WmDisplayCutout displayCutout, RoundedCorners roundedCorners,
+            PrivacyIndicatorBounds indicatorBounds) {
         mDisplayId = displayId;
         mInsetsState = insetsState;
-        onDisplayInfoUpdated(info, displayCutout, roundedCorners);
+        onDisplayInfoUpdated(info, displayCutout, roundedCorners, indicatorBounds);
     }
 
     /**
@@ -74,15 +76,17 @@ public class DisplayFrames {
      * @return {@code true} if the insets state has been changed; {@code false} otherwise.
      */
     public boolean onDisplayInfoUpdated(DisplayInfo info, @NonNull WmDisplayCutout displayCutout,
-            @NonNull RoundedCorners roundedCorners) {
+            @NonNull RoundedCorners roundedCorners,
+            @NonNull PrivacyIndicatorBounds indicatorBounds) {
         mRotation = info.rotation;
 
         final InsetsState state = mInsetsState;
         final Rect safe = mDisplayCutoutSafe;
         final DisplayCutout cutout = displayCutout.getDisplayCutout();
         if (mDisplayWidth == info.logicalWidth && mDisplayHeight == info.logicalHeight
-                && state.getDisplayCutout().equals(cutout)
-                && state.getRoundedCorners().equals(roundedCorners)) {
+                 && state.getDisplayCutout().equals(cutout)
+                && state.getRoundedCorners().equals(roundedCorners)
+                && state.getPrivacyIndicatorBounds().equals(indicatorBounds)) {
             return false;
         }
         mDisplayWidth = info.logicalWidth;
@@ -93,6 +97,7 @@ public class DisplayFrames {
         state.setDisplayFrame(unrestricted);
         state.setDisplayCutout(cutout);
         state.setRoundedCorners(roundedCorners);
+        state.setPrivacyIndicatorBounds(indicatorBounds);
         if (!cutout.isEmpty()) {
             if (cutout.getSafeInsetLeft() > 0) {
                 safe.left = unrestricted.left + cutout.getSafeInsetLeft();

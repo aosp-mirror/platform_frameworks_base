@@ -16,6 +16,8 @@
 
 package com.android.server.app;
 
+import android.app.GameManager;
+import android.app.IGameManagerService;
 import android.compat.Compatibility;
 import android.content.Context;
 import android.os.ServiceManager;
@@ -55,7 +57,7 @@ public class GameManagerShellCommand extends ShellCommand {
         final PrintWriter pw = getOutPrintWriter();
         try {
             switch (cmd) {
-                case "downscale":
+                case "downscale": {
                     final String ratio = getNextArgRequired();
                     final String packageName = getNextArgRequired();
 
@@ -114,6 +116,71 @@ public class GameManagerShellCommand extends ShellCommand {
                     }
 
                     break;
+                }
+                case "mode": {
+                    /** The "mode" command allows setting a package's current game mode outside of
+                     * the game dashboard UI. This command requires that a mode already be supported
+                     * by the package. Devs can forcibly support game modes via the manifest
+                     * metadata flags: com.android.app.gamemode.performance.enabled,
+                     *                 com.android.app.gamemode.battery.enabled
+                     * OR by `adb shell device_config put game_overlay \
+                     *          <PACKAGE_NAME> <CONFIG_STRING>`
+                     * see: {@link GameManagerServiceTests#mockDeviceConfigAll()}
+                     */
+                    final String gameMode = getNextArgRequired();
+                    final String packageName = getNextArgRequired();
+                    final String userIdStr = getNextArgRequired();
+                    final IGameManagerService service = IGameManagerService.Stub.asInterface(
+                            ServiceManager.getServiceOrThrow(Context.GAME_SERVICE));
+                    boolean batteryModeSupported = false;
+                    boolean perfModeSupported = false;
+                    int[] modes = service.getAvailableGameModes(packageName);
+                    for (int mode : modes) {
+                        if (mode == GameManager.GAME_MODE_PERFORMANCE) {
+                            perfModeSupported = true;
+                        } else if (mode == GameManager.GAME_MODE_BATTERY) {
+                            batteryModeSupported = true;
+                        }
+                    }
+                    int userId = Integer.parseInt(userIdStr);
+                    switch (gameMode.toLowerCase()) {
+                        case "1":
+                        case "standard":
+                            // Standard should only be available if other game modes are.
+                            if (batteryModeSupported || perfModeSupported) {
+                                service.setGameMode(packageName, GameManager.GAME_MODE_STANDARD,
+                                        userId);
+                            } else {
+                                pw.println("Game mode: " + gameMode + " not supported by "
+                                        + packageName);
+                            }
+                            break;
+                        case "2":
+                        case "performance":
+                            if (perfModeSupported) {
+                                service.setGameMode(packageName, GameManager.GAME_MODE_PERFORMANCE,
+                                        userId);
+                            } else {
+                                pw.println("Game mode: " + gameMode + " not supported by "
+                                        + packageName);
+                            }
+                            break;
+                        case "3":
+                        case "battery":
+                            if (batteryModeSupported) {
+                                service.setGameMode(packageName, GameManager.GAME_MODE_BATTERY,
+                                        userId);
+                            } else {
+                                pw.println("Game mode: " + gameMode + " not supported by "
+                                        + packageName);
+                            }
+                            break;
+                        default:
+                            pw.println("Invalid game mode: " + gameMode);
+                            break;
+                    }
+                    break;
+                }
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -132,5 +199,7 @@ public class GameManagerShellCommand extends ShellCommand {
         pw.println("      Print this help text.");
         pw.println("  downscale [0.5|0.6|0.7|0.8|0.9|disable] <PACKAGE_NAME>");
         pw.println("      Force app to run at the specified scaling ratio.");
+        pw.println("  mode [1|2|3|standard|performance|battery] <PACKAGE_NAME> <USER_ID>");
+        pw.println("      Force app to run in the specified game mode, if supported.");
     }
 }

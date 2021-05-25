@@ -2095,8 +2095,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"Oke"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Nonaktifkan"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Pelajari lebih lanjut"</string>
-    <!-- no translation found for nas_upgrade_notification_learn_more_content (3735480566983530650) -->
-    <skip />
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Notifikasi yang ditingkatkan menggantikan Notifikasi Adaptif Android di Android 12. Fitur ini menunjukkan tindakan dan balasan yang disarankan, serta mengatur notifikasi.\n\nNotifikasi yang ditingkatkan dapat mengakses konten notifikasi, termasuk informasi pribadi seperti nama kontak dan pesan. Fitur ini juga dapat menutup atau merespons notifikasi, seperti menjawab panggilan telepon dan mengontrol fitur Jangan Ganggu."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notifikasi info Mode Rutinitas"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Baterai mungkin habis sebelum pengisian daya biasanya"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Penghemat Baterai diaktifkan untuk memperpanjang masa pakai baterai"</string>

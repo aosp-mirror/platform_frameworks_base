@@ -28,6 +28,7 @@ import android.graphics.Color;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -61,6 +62,15 @@ public class BubbleOverflowContainerView extends LinearLayout {
     private BubbleOverflowAdapter mAdapter;
     private RecyclerView mRecyclerView;
     private List<Bubble> mOverflowBubbles = new ArrayList<>();
+
+    private View.OnKeyListener mKeyListener = (view, i, keyEvent) -> {
+        if (keyEvent.getAction() == KeyEvent.ACTION_UP
+                && keyEvent.getKeyCode() == KeyEvent.KEYCODE_BACK) {
+            mController.collapseStack();
+            return true;
+        }
+        return false;
+    };
 
     private class OverflowGridLayoutManager extends GridLayoutManager {
         OverflowGridLayoutManager(Context context, int columns) {
@@ -104,6 +114,7 @@ public class BubbleOverflowContainerView extends LinearLayout {
     public BubbleOverflowContainerView(Context context, AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+        setFocusableInTouchMode(true);
     }
 
     public void setBubbleController(BubbleController controller) {
@@ -111,12 +122,8 @@ public class BubbleOverflowContainerView extends LinearLayout {
     }
 
     public void show() {
-        setVisibility(View.VISIBLE);
+        requestFocus();
         updateOverflow();
-    }
-
-    public void hide() {
-        setVisibility(View.INVISIBLE);
     }
 
     @Override
@@ -128,6 +135,25 @@ public class BubbleOverflowContainerView extends LinearLayout {
         mEmptyStateTitle = findViewById(R.id.bubble_overflow_empty_title);
         mEmptyStateSubtitle = findViewById(R.id.bubble_overflow_empty_subtitle);
         mEmptyStateImage = findViewById(R.id.bubble_overflow_empty_state_image);
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        if (mController != null) {
+            // For the overflow to get key events (e.g. back press) we need to adjust the flags
+            mController.updateWindowFlagsForOverflow(true);
+        }
+        setOnKeyListener(mKeyListener);
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        if (mController != null) {
+            mController.updateWindowFlagsForOverflow(false);
+        }
+        setOnKeyListener(null);
     }
 
     void updateOverflow() {

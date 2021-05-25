@@ -125,7 +125,7 @@ public abstract class TranslationService extends Service {
 
     /**
      * Interface definition for a callback to be invoked when the translation is compleled.
-     * @deprecated use a {@link Consumer} instead.
+     * @removed use a {@link Consumer} instead.
      */
     @Deprecated
     public interface OnTranslationResultCallback {
@@ -149,7 +149,7 @@ public abstract class TranslationService extends Service {
 
         /**
          * TODO: implement javadoc
-         * @deprecated use {@link #onTranslationSuccess} with an error response instead.
+         * @removed use {@link #onTranslationSuccess} with an error response instead.
          */
         @Deprecated
         void onError();
@@ -230,17 +230,13 @@ public abstract class TranslationService extends Service {
      */
     // TODO(b/176464808): the session id won't be unique cross client/server process. Need to find
     // solution to make it's safe.
-    // TODO: make abstract once aiai is implemented.
-    public void onCreateTranslationSession(@NonNull TranslationContext translationContext,
-            int sessionId, @NonNull Consumer<Boolean> callback) {
-        onCreateTranslationSession(translationContext, sessionId);
-        callback.accept(true);
-    }
+    public abstract void onCreateTranslationSession(@NonNull TranslationContext translationContext,
+            int sessionId, @NonNull Consumer<Boolean> callback);
 
     /**
      * TODO: fill in javadoc.
      *
-     * @deprecated use {@link #onCreateTranslationSession(TranslationContext, int, Consumer)}
+     * @removed use {@link #onCreateTranslationSession(TranslationContext, int, Consumer)}
      * instead.
      */
     @Deprecated
@@ -263,7 +259,7 @@ public abstract class TranslationService extends Service {
      * @param sessionId
      * @param callback
      * @param cancellationSignal
-     * @deprecated use
+     * @removed use
      * {@link #onTranslationRequest(TranslationRequest, int, CancellationSignal, Consumer)} instead.
      */
     @Deprecated
@@ -285,27 +281,12 @@ public abstract class TranslationService extends Service {
      * @param callback
      * @param cancellationSignal
      */
-    //TODO: make abstract once aiai transitions.
-    public void onTranslationRequest(@NonNull TranslationRequest request, int sessionId,
+    public abstract void onTranslationRequest(@NonNull TranslationRequest request, int sessionId,
             @Nullable CancellationSignal cancellationSignal,
-            @NonNull Consumer<TranslationResponse> callback) {
-        onTranslationRequest(request, sessionId, cancellationSignal,
-                new OnTranslationResultCallback() {
-                    @Override
-                    public void onTranslationSuccess(@NonNull TranslationResponse response) {
-                        callback.accept(response);
-                    }
-
-                    @Override
-                    public void onError() {
-                        // null-op
-                    }
-                });
-    }
+            @NonNull Consumer<TranslationResponse> callback);
 
     /**
      * TODO: fill in javadoc
-     * TODO: make this abstract again once aiai is ready.
      *
      * <p>Must call {@code callback.accept} to pass back the set of translation capabilities.</p>
      *

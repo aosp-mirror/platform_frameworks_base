@@ -157,16 +157,16 @@
     <integer name="config_screen_rotation_fade_out">116</integer>
 
     <!-- Fade in time for screen rotation -->
-    <integer name="config_screen_rotation_fade_in">233</integer>
+    <integer name="config_screen_rotation_fade_in">200</integer>
 
     <!-- Fade in delay time for screen rotation -->
-    <integer name="config_screen_rotation_fade_in_delay">100</integer>
+    <integer name="config_screen_rotation_fade_in_delay">83</integer>
 
     <!-- Total time for 90 degree screen rotation animations -->
-    <integer name="config_screen_rotation_total_90">333</integer>
+    <integer name="config_screen_rotation_total_90">283</integer>
 
     <!-- Total time for 180 degree screen rotation animation -->
-    <integer name="config_screen_rotation_total_180">433</integer>
+    <integer name="config_screen_rotation_total_180">383</integer>
 
     <!-- Total time for the rotation background color transition -->
     <integer name="config_screen_rotation_color_transition">200</integer>
@@ -3773,6 +3773,23 @@
          See android.companion.CompanionDeviceManager.
     -->
     <string name="config_companionDeviceManagerPackage" translatable="false"></string>
+
+    <!-- A list of packages managing companion device(s) by the same manufacturers as the main
+         device. It will fall back to showing a prompt if the association has been called multiple
+         times in a short period.
+         Note that config_companionDeviceManagerPackage and config_companionDeviceCerts are
+         parallel arrays.
+     -->
+    <string-array name="config_companionDevicePackages" translatable="false"></string-array>
+
+    <!-- A list of SHA256 Certificates managing companion device(s) by the same manufacturers as
+         the main device. It will fall back to showing a prompt if the association has been called
+         multiple times in a short period.
+         Note that config_companionDeviceCerts and config_companionDeviceManagerPackage are parallel
+         arrays.
+         Example: "1A:2B:3C:4D"
+     -->
+    <string-array name="config_companionDeviceCerts" translatable="false"></string-array>
 
     <!-- The package name for the default wellbeing app.
          This package must be trusted, as it has the permissions to control other applications

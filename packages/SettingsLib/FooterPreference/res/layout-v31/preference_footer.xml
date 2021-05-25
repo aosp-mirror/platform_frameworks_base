@@ -43,13 +43,27 @@
             android:layout_height="wrap_content"/>
     </LinearLayout>
 
-    <com.android.settingslib.widget.LinkTextView
-        android:id="@android:id/title"
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingBottom="16dp"
-        android:paddingTop="16dp"
-        android:textColor="?android:attr/textColorSecondary"
-        android:ellipsize="marquee" />
+        android:orientation="vertical">
+        <com.android.settingslib.widget.LinkTextView
+            android:id="@android:id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="16dp"
+            android:paddingBottom="8dp"
+            android:textColor="?android:attr/textColorSecondary"
+            android:ellipsize="marquee" />
+
+        <com.android.settingslib.widget.LinkTextView
+            android:id="@+id/settingslib_learn_more"
+            android:text="@string/settingslib_learn_more_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:visibility="gone"
+            style="@style/TextAppearance.Footer.Title.SettingsLib"/>
+    </LinearLayout>
 
 </LinearLayout>

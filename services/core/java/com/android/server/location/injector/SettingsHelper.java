@@ -16,6 +16,7 @@
 
 package com.android.server.location.injector;
 
+import android.os.PackageTagsList;
 import android.util.IndentingPrintWriter;
 
 import java.io.FileDescriptor;
@@ -146,21 +147,21 @@ public abstract class SettingsHelper {
             GlobalSettingChangedListener listener);
 
     /**
-     * Retrieve the ignore settings package whitelist.
+     * Retrieve the ignore location settings package+tags allowlist setting.
      */
-    public abstract Set<String> getIgnoreSettingsPackageWhitelist();
+    public abstract PackageTagsList getIgnoreSettingsAllowlist();
 
     /**
      * Add a listener for changes to the ignore settings package whitelist. Callbacks occur on an
      * unspecified thread.
      */
-    public abstract void addOnIgnoreSettingsPackageWhitelistChangedListener(
+    public abstract void addIgnoreSettingsAllowlistChangedListener(
             GlobalSettingChangedListener listener);
 
     /**
      * Remove a listener for changes to the ignore settings package whitelist.
      */
-    public abstract void removeOnIgnoreSettingsPackageWhitelistChangedListener(
+    public abstract void removeIgnoreSettingsAllowlistChangedListener(
             GlobalSettingChangedListener listener);
 
     /**

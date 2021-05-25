@@ -362,6 +362,8 @@ public interface ParsingPackage extends ParsingPackageRead {
 
     ParsingPackage setCompileSdkVersionCodename(String compileSdkVersionCodename);
 
+    ParsingPackage setAttributionsAreUserVisible(boolean attributionsAreUserVisible);
+
     // TODO(b/135203078): This class no longer has access to ParsedPackage, find a replacement
     //  for moving to the next step
     @CallSuper

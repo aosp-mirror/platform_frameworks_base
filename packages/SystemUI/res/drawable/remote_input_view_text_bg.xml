@@ -21,10 +21,10 @@
         android:width="@dimen/remote_input_view_text_stroke"
         android:color="?android:attr/colorAccent"/>
     <padding
-        android:bottom="12dp"
+        android:bottom="0dp"
         android:left="12dp"
         android:right="12dp"
-        android:top="12dp"/>
+        android:top="0dp"/>
 
     <corners android:radius="24dp" />
 

@@ -27,16 +27,6 @@
         android:layout_height="@dimen/bubble_pointer_height"
     />
 
-    <com.android.wm.shell.common.AlphaOptimizedButton
-        style="@android:style/Widget.Material.Button.Borderless"
-        android:id="@+id/settings_button"
-        android:layout_gravity="start"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:focusable="true"
-        android:text="@string/manage_bubbles_text"
-        android:textSize="@*android:dimen/text_size_body_2_material"
-        android:textColor="?android:attr/textColorPrimary"
-    />
+    <!-- Manage button added here. -->
 
 </com.android.wm.shell.bubbles.BubbleExpandedView>

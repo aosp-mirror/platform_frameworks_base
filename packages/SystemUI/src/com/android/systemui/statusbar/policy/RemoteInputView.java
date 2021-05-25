@@ -35,7 +35,6 @@ import android.graphics.BlendMode;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -187,6 +186,16 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         ta.recycle();
     }
 
+    private ColorStateList colorStateListWithDisabledAlpha(int color, int disabledAlpha) {
+        return new ColorStateList(new int[][]{
+                new int[]{-com.android.internal.R.attr.state_enabled}, // disabled
+                new int[]{},
+        }, new int[]{
+                ColorUtils.setAlphaComponent(color, disabledAlpha),
+                color
+        });
+    }
+
     /**
      * The remote view needs to adapt to colorized notifications when set
      * It overrides the background of itself as well as all of its childern
@@ -197,55 +206,50 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         mColorized = colorized;
         mTint = backgroundColor;
         final int editBgColor;
-        final int alternateBgColor;
-        final int alternateTextColor;
-        final int accentColor;
-        final int textColor;
-        final int hintTextColor;
-        final int stroke = mContext.getResources().getDimensionPixelSize(
-                R.dimen.remote_input_view_text_stroke);
+        final int deleteBgColor;
+        final int deleteFgColor;
+        final ColorStateList accentColor;
+        final ColorStateList textColor;
+        final int hintColor;
+        final int stroke = colorized ? mContext.getResources().getDimensionPixelSize(
+                R.dimen.remote_input_view_text_stroke) : 0;
         if (colorized) {
             final boolean dark = !ContrastColorUtil.isColorLight(backgroundColor);
             final int foregroundColor = dark ? Color.WHITE : Color.BLACK;
+            final int inverseColor = dark ? Color.BLACK : Color.WHITE;
             editBgColor = backgroundColor;
-            accentColor = foregroundColor;
-            alternateBgColor = foregroundColor;
-            alternateTextColor = backgroundColor;
-            textColor = foregroundColor;
-            hintTextColor = ColorUtils.setAlphaComponent(foregroundColor, 0x99);
+            deleteBgColor = foregroundColor;
+            deleteFgColor = inverseColor;
+            accentColor = colorStateListWithDisabledAlpha(foregroundColor, 0x4D); // 30%
+            textColor = colorStateListWithDisabledAlpha(foregroundColor, 0x99); // 60%
+            hintColor = ColorUtils.setAlphaComponent(foregroundColor, 0x99);
         } else {
-            textColor = mContext.getColor(R.color.remote_input_text);
-            hintTextColor = mContext.getColor(R.color.remote_input_hint);
+            accentColor = mContext.getColorStateList(R.color.remote_input_send);
+            textColor = mContext.getColorStateList(R.color.remote_input_text);
+            hintColor = mContext.getColor(R.color.remote_input_hint);
+            deleteFgColor = textColor.getDefaultColor();
             try (TypedArray ta = getContext().getTheme().obtainStyledAttributes(new int[]{
-                    com.android.internal.R.attr.colorAccent,
-                    com.android.internal.R.attr.colorSurface,
-                    com.android.internal.R.attr.colorSurfaceVariant,
-                    com.android.internal.R.attr.textColorPrimary
+                    com.android.internal.R.attr.colorSurfaceHighlight,
+                    com.android.internal.R.attr.colorSurfaceVariant
             })) {
-                accentColor = ta.getColor(0, textColor);
-                editBgColor = ta.getColor(1, backgroundColor);
-                alternateBgColor = ta.getColor(2, textColor);
-                alternateTextColor = ta.getColor(3, backgroundColor);
+                editBgColor = ta.getColor(0, backgroundColor);
+                deleteBgColor = ta.getColor(1, Color.GRAY);
             }
         }
-        mEditText.setAllColors(backgroundColor, editBgColor,
-                accentColor, textColor, hintTextColor);
-        final ColorStateList accentTint = new ColorStateList(new int[][]{
-                new int[]{com.android.internal.R.attr.state_enabled},
-                new int[]{},
-        }, new int[]{
-                accentColor,
-                accentColor & 0x4DFFFFFF // %30 opacity
-        });
+
+        mEditText.setTextColor(textColor);
+        mEditText.setHintTextColor(hintColor);
+        mEditText.getTextCursorDrawable().setColorFilter(
+                accentColor.getDefaultColor(), PorterDuff.Mode.SRC_IN);
         mContentBackground.setColor(editBgColor);
-        mContentBackground.setStroke(stroke, accentTint);
-        mDelete.setImageTintList(ColorStateList.valueOf(alternateTextColor));
-        mDeleteBg.setImageTintList(ColorStateList.valueOf(alternateBgColor));
-        mSendButton.setImageTintList(accentTint);
-        mProgressBar.setProgressTintList(accentTint);
-        mProgressBar.setIndeterminateTintList(accentTint);
-        mProgressBar.setSecondaryProgressTintList(accentTint);
-        setBackgroundColor(editBgColor);
+        mContentBackground.setStroke(stroke, accentColor);
+        mDelete.setImageTintList(ColorStateList.valueOf(deleteFgColor));
+        mDeleteBg.setImageTintList(ColorStateList.valueOf(deleteBgColor));
+        mSendButton.setImageTintList(accentColor);
+        mProgressBar.setProgressTintList(accentColor);
+        mProgressBar.setIndeterminateTintList(accentColor);
+        mProgressBar.setSecondaryProgressTintList(accentColor);
+        setBackgroundColor(backgroundColor);
     }
 
     @Override
@@ -311,6 +315,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         } else {
             attachment.setVisibility(VISIBLE);
         }
+        updateSendButton();
     }
 
     /**
@@ -332,6 +337,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
                 results);
 
         mEntry.remoteInputText = mEditText.getText();
+        // TODO(b/188646667): store attachment to entry
         mEntry.remoteInputUri = null;
         mEntry.remoteInputMimeType = null;
 
@@ -368,6 +374,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
                 : "\"" + attachmentLabel + "\" " + mEditText.getText();
 
         mEntry.remoteInputText = fullText;
+        // TODO(b/188646667): store attachment to entry
         mEntry.remoteInputMimeType = contentType;
         mEntry.remoteInputUri = data;
 
@@ -470,6 +477,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     private void onDefocus(boolean animate, boolean logClose) {
         mController.removeRemoteInput(mEntry, mToken);
         mEntry.remoteInputText = mEditText.getText();
+        // TODO(b/188646667): store attachment to entry
 
         // During removal, we get reattached and lose focus. Not hiding in that
         // case to prevent flicker.
@@ -557,6 +565,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         mEntry.editedSuggestionInfo = editedSuggestionInfo;
         if (editedSuggestionInfo != null) {
             mEntry.remoteInputText = editedSuggestionInfo.originalText;
+            // TODO(b/188646667): store attachment to entry
         }
     }
 
@@ -596,9 +605,10 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         mEditText.setInnerFocusable(true);
         mEditText.mShowImeOnInputConnection = true;
         mEditText.setText(mEntry.remoteInputText);
-        mEditText.setSelection(mEditText.getText().length());
+        mEditText.setSelection(mEditText.length());
         mEditText.requestFocus();
         mController.addRemoteInput(mEntry, mToken);
+        // TODO(b/188646667): restore attachment from entry
 
         mRemoteInputQuickSettingsDisabler.setRemoteInputActive(true);
 
@@ -621,6 +631,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     private void reset() {
         mResetting = true;
         mEntry.remoteInputTextWhenReset = SpannedString.valueOf(mEditText.getText());
+        // TODO(b/188646667): store attachment at time of reset to entry
 
         mEditText.getText().clear();
         mEditText.setEnabled(true);
@@ -629,6 +640,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         mController.removeSpinning(mEntry.getKey(), mToken);
         updateSendButton();
         onDefocus(false /* animate */, false /* logClose */);
+        // TODO(b/188646667): clear attachment
 
         mResetting = false;
     }
@@ -645,7 +657,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     }
 
     private void updateSendButton() {
-        mSendButton.setEnabled(mEditText.getText().length() != 0);
+        mSendButton.setEnabled(mEditText.length() != 0 || mAttachment != null);
     }
 
     public void close() {
@@ -875,7 +887,6 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         private final OnReceiveContentListener mOnReceiveContentListener = this::onReceiveContent;
 
         private RemoteInputView mRemoteInputView;
-        private ColorDrawable mBackground;
         boolean mShowImeOnInputConnection;
         private LightBarController mLightBarController;
         private InputMethodManager mInputMethodManager;
@@ -885,8 +896,6 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         public RemoteEditText(Context context, AttributeSet attrs) {
             super(context, attrs);
             mLightBarController = Dependency.get(LightBarController.class);
-
-            mBackground = new ColorDrawable();
         }
 
         void setSupportedMimeTypes(@Nullable Collection<String> mimeTypes) {
@@ -915,6 +924,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
                     // our focus, so we'll need to save our text here.
                     if (mRemoteInputView != null) {
                         mRemoteInputView.mEntry.remoteInputText = getText();
+                        // TODO(b/188646667): store attachment to entry
                     }
                 }
                 return;
@@ -1045,9 +1055,6 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
 
             if (focusable) {
                 requestFocus();
-                setBackground(mBackground);
-            } else {
-                setBackground(null);
             }
         }
 
@@ -1062,13 +1069,5 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
             return remainingItems;
         }
 
-        protected void setAllColors(int backgroundColor, int editBackgroundColor,
-                int accentColor, int textColor, int hintTextColor) {
-            setBackgroundColor(editBackgroundColor);
-            mBackground.setColor(editBackgroundColor);
-            setTextColor(textColor);
-            setHintTextColor(hintTextColor);
-            getTextCursorDrawable().setColorFilter(accentColor, PorterDuff.Mode.SRC_IN);
-        }
     }
 }

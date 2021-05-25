@@ -1837,12 +1837,16 @@ class Task extends WindowContainer<WindowContainer> {
         return autoRemoveRecents || (!hasChild() && !getHasBeenVisible());
     }
 
-    /** Completely remove all activities associated with an existing task. */
-    void performClearTask(String reason) {
+    private void clearPinnedTaskIfNeed() {
         // The original task is to be removed, try remove also the pinned task.
         if (mChildPipActivity != null && mChildPipActivity.getTask() != null) {
             mTaskSupervisor.removeRootTask(mChildPipActivity.getTask());
         }
+    }
+
+    /** Completely remove all activities associated with an existing task. */
+    void performClearTask(String reason) {
+        clearPinnedTaskIfNeed();
         // Broken down into to cases to avoid object create due to capturing mStack.
         if (getRootTask() == null) {
             forAllActivities((r) -> {
@@ -3067,6 +3071,11 @@ class Task extends WindowContainer<WindowContainer> {
             focusableTask = mRootWindowContainer.getNextFocusableRootTask(this, !allowFocusSelf);
         }
         if (focusableTask == null) {
+            final TaskDisplayArea taskDisplayArea = getDisplayArea();
+            if (taskDisplayArea != null) {
+                // Clear the recorded task since there is no next focusable task.
+                taskDisplayArea.clearPreferredTopFocusableRootTask();
+            }
             return null;
         }
 
@@ -3220,7 +3229,7 @@ class Task extends WindowContainer<WindowContainer> {
         mRemoving = true;
 
         EventLogTags.writeWmTaskRemoved(mTaskId, reason);
-
+        clearPinnedTaskIfNeed();
         // If applicable let the TaskOrganizer know the Task is vanishing.
         setTaskOrganizer(null);
 
@@ -5439,10 +5448,12 @@ class Task extends WindowContainer<WindowContainer> {
                     // force hidden flag.
                     if (!isForceHidden()) {
                         final Task lastParentBeforePip = topActivity.getLastParentBeforePip();
-                        topActivity.reparent(lastParentBeforePip,
-                                lastParentBeforePip.getChildCount() /* top */,
-                                "movePinnedActivityToOriginalTask");
-                        lastParentBeforePip.moveToFront("movePinnedActivityToOriginalTask");
+                        if (lastParentBeforePip.isAttached()) {
+                            topActivity.reparent(lastParentBeforePip,
+                                    lastParentBeforePip.getChildCount() /* top */,
+                                    "movePinnedActivityToOriginalTask");
+                            lastParentBeforePip.moveToFront("movePinnedActivityToOriginalTask");
+                        }
                     }
                 }
             }
@@ -6570,7 +6581,7 @@ class Task extends WindowContainer<WindowContainer> {
 
     void startActivityLocked(ActivityRecord r, @Nullable ActivityRecord focusedTopActivity,
             boolean newTask, boolean keepCurTransition, ActivityOptions options,
-            boolean samePackage) {
+            @Nullable ActivityRecord sourceRecord) {
         Task rTask = r.getTask();
         final boolean allowMoveToFront = options == null || !options.getAvoidMoveToFront();
         final boolean isOrhasTask = rTask == this || hasChild(rTask);
@@ -6714,7 +6725,7 @@ class Task extends WindowContainer<WindowContainer> {
                 }
 
                 r.showStartingWindow(prev, newTask, isTaskSwitch(r, focusedTopActivity),
-                        splashScreenThemeResId, samePackage);
+                        splashScreenThemeResId, sourceRecord);
             }
         } else {
             // If this is the first activity, don't do any fancy animations,

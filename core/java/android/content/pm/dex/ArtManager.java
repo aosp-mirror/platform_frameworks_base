@@ -201,6 +201,16 @@ public class ArtManager {
     }
 
     /**
+     * Return the path to the current profile corresponding to given package and split.
+     *
+     * @hide
+     */
+    public static String getReferenceProfilePath(String packageName, int userId, String splitName) {
+        File profileDir = Environment.getDataRefProfilesDePackageDirectory(packageName);
+        return new File(profileDir, getProfileName(splitName)).getAbsolutePath();
+    }
+
+    /**
      * Return the snapshot profile file for the given package and profile name.
      *
      * KEEP in sync with installd dexopt.cpp.

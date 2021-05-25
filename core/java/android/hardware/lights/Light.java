@@ -19,6 +19,7 @@ package android.hardware.lights;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -41,36 +42,52 @@ public final class Light implements Parcelable {
     /**
      * Type for lights that indicate a monochrome color LED light.
      */
-    public static final int LIGHT_TYPE_INPUT_SINGLE = 10001;
+    public static final int LIGHT_TYPE_INPUT = 10001;
 
     /**
-     * Type for lights that indicate a group of LED lights representing player ID.
-     * Player ID lights normally present on game controllers are lights that consist of a row of
+     * Type for lights that indicate a group of LED lights representing player id.
+     * Player id lights normally present on game controllers are lights that consist of a row of
      * LEDs.
-     * During multi-player game, the player ID for the current game controller is represented by
+     * During multi-player game, the player id for the current game controller is represented by
      * one of the LED that is lit according to its position in the row.
      */
-    public static final int LIGHT_TYPE_INPUT_PLAYER_ID = 10002;
+    public static final int LIGHT_TYPE_PLAYER_ID = 10002;
 
     /**
-     * Type for lights that indicate a color LED light.
+     * Capability for lights that could adjust its LED brightness. If the capability is not present
+     * the led can only be turned either on or off.
      */
-    public static final int LIGHT_TYPE_INPUT_RGB = 10003;
+    public static final int LIGHT_CAPABILITY_BRIGHTNESS = 1 << 0;
+
+    /**
+     * Capability for lights that has red, green and blue LEDs to control the light's color.
+     */
+    public static final int LIGHT_CAPABILITY_RGB = 0 << 1;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"LIGHT_TYPE_"},
         value = {
-            LIGHT_TYPE_INPUT_PLAYER_ID,
-            LIGHT_TYPE_INPUT_SINGLE,
-            LIGHT_TYPE_INPUT_RGB,
+            LIGHT_TYPE_MICROPHONE,
+            LIGHT_TYPE_INPUT,
+            LIGHT_TYPE_PLAYER_ID,
         })
     public @interface LightType {}
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = true, prefix = {"LIGHT_CAPABILITY_"},
+        value = {
+            LIGHT_CAPABILITY_BRIGHTNESS,
+            LIGHT_CAPABILITY_RGB,
+        })
+    public @interface LightCapability {}
+
     private final int mId;
+    private final String mName;
     private final int mOrdinal;
     private final int mType;
-    private final String mName;
+    private final int mCapabilities;
 
     /**
      * Creates a new light with the given data.
@@ -78,7 +95,7 @@ public final class Light implements Parcelable {
      * @hide
      */
     public Light(int id, int ordinal, int type) {
-        this(id, ordinal, type, "Light");
+        this(id, "Light", ordinal, type, 0);
     }
 
     /**
@@ -86,27 +103,30 @@ public final class Light implements Parcelable {
      *
      * @hide
      */
-    public Light(int id, int ordinal, int type, String name) {
+    public Light(int id, String name, int ordinal, int type, int capabilities) {
         mId = id;
+        mName = name;
         mOrdinal = ordinal;
         mType = type;
-        mName = name;
+        mCapabilities = capabilities;
     }
 
     private Light(@NonNull Parcel in) {
         mId = in.readInt();
+        mName = in.readString();
         mOrdinal = in.readInt();
         mType = in.readInt();
-        mName = in.readString();
+        mCapabilities = in.readInt();
     }
 
     /** Implement the Parcelable interface */
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeInt(mId);
+        dest.writeString(mName);
         dest.writeInt(mOrdinal);
         dest.writeInt(mType);
-        dest.writeString(mName);
+        dest.writeInt(mCapabilities);
     }
 
     /** Implement the Parcelable interface */
@@ -131,7 +151,8 @@ public final class Light implements Parcelable {
     public boolean equals(@Nullable Object obj) {
         if (obj instanceof Light) {
             Light light = (Light) obj;
-            return mId == light.mId && mOrdinal == light.mOrdinal && mType == light.mType;
+            return mId == light.mId && mOrdinal == light.mOrdinal && mType == light.mType
+                    && mCapabilities == light.mCapabilities;
         }
         return false;
     }
@@ -143,7 +164,8 @@ public final class Light implements Parcelable {
 
     @Override
     public String toString() {
-        return "[Name=" + mName + " Id=" + mId + " Type=" + mType + " Ordinal=" + mOrdinal + "]";
+        return "[Name=" + mName + " Id=" + mId + " Type=" + mType + " Capabilities="
+                + mCapabilities + " Ordinal=" + mOrdinal + "]";
     }
 
     /**
@@ -177,7 +199,35 @@ public final class Light implements Parcelable {
     /**
      * Returns the logical type of the light.
      */
-    public @LightsManager.LightType int getType() {
+    public @LightType int getType() {
         return mType;
     }
+
+    /**
+     * Returns the capabilities of the light.
+     * @hide
+     */
+    @TestApi
+    public @LightCapability int getCapabilities() {
+        return mCapabilities;
+    }
+
+    /**
+     * Check whether the light has led brightness control.
+     *
+     * @return True if the hardware can control the led brightness, otherwise false.
+     */
+    public boolean hasBrightnessControl() {
+        return (mCapabilities & LIGHT_CAPABILITY_BRIGHTNESS) == LIGHT_CAPABILITY_BRIGHTNESS;
+    }
+
+    /**
+     * Check whether the light has RGB led control.
+     *
+     * @return True if the hardware can control the RGB led, otherwise false.
+     */
+    public boolean hasRgbControl() {
+        return (mCapabilities & LIGHT_CAPABILITY_RGB) == LIGHT_CAPABILITY_RGB;
+    }
+
 }

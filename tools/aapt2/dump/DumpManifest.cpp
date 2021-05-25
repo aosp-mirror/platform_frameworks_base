@@ -1978,12 +1978,13 @@ bool ManifestExtractor::Dump(text::Printer* printer, IDiagnostics* diag) {
       filtered_uses_sdk_tags.emplace_back(uses_sdk);
     }
   }
-  filtered_uses_sdk_tags.pop_back();
-
-  root->Filter([&](const ManifestExtractor::Element* e) {
-    return std::find(filtered_uses_sdk_tags.begin(), filtered_uses_sdk_tags.end(), e) !=
-           filtered_uses_sdk_tags.end();
-  });
+  if (filtered_uses_sdk_tags.size() >= 2U) {
+    filtered_uses_sdk_tags.pop_back();
+    root->Filter([&](const ManifestExtractor::Element* e) {
+      return std::find(filtered_uses_sdk_tags.begin(), filtered_uses_sdk_tags.end(), e) !=
+             filtered_uses_sdk_tags.end();
+    });
+  }
 
   // Print the elements in order seen
   Print(root.get(), printer);

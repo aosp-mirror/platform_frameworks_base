@@ -17,6 +17,7 @@
 <com.android.systemui.screenshot.ScreenshotView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/global_screenshot_frame"
+    android:theme="@style/Screenshot"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
     <ImageView

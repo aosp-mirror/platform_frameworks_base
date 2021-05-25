@@ -22,13 +22,16 @@ import android.view.View.VISIBLE
 import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.statusbar.FeatureFlags
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.notification.stack.MediaHeaderView
 import com.android.systemui.statusbar.phone.KeyguardBypassController
+import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.animation.UniqueObjectHostView
 import com.google.common.truth.Truth.assertThat
+import junit.framework.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -48,11 +51,16 @@ class KeyguardMediaControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var statusBarStateController: SysuiStatusBarStateController
     @Mock
+    private lateinit var configurationController: ConfigurationController
+    @Mock
+    private lateinit var featureFlags: FeatureFlags
+    @Mock
     private lateinit var notificationLockscreenUserManager: NotificationLockscreenUserManager
     @JvmField @Rule
     val mockito = MockitoJUnit.rule()
 
     private val mediaHeaderView: MediaHeaderView = MediaHeaderView(context, null)
+    private val hostView = UniqueObjectHostView(context)
     private lateinit var keyguardMediaController: KeyguardMediaController
 
     @Before
@@ -62,10 +70,17 @@ class KeyguardMediaControllerTest : SysuiTestCase() {
         whenever(statusBarStateController.state).thenReturn(StatusBarState.KEYGUARD)
         whenever(notificationLockscreenUserManager.shouldShowLockscreenNotifications())
                 .thenReturn(true)
-        whenever(mediaHost.hostView).thenReturn(UniqueObjectHostView(context))
+        whenever(mediaHost.hostView).thenReturn(hostView)
 
-        keyguardMediaController = KeyguardMediaController(mediaHost, bypassController,
-                statusBarStateController, notificationLockscreenUserManager)
+        keyguardMediaController = KeyguardMediaController(
+            mediaHost,
+            bypassController,
+            statusBarStateController,
+            notificationLockscreenUserManager,
+            featureFlags,
+            context,
+            configurationController
+        )
         keyguardMediaController.attachSinglePaneContainer(mediaHeaderView)
     }
 
@@ -105,11 +120,8 @@ class KeyguardMediaControllerTest : SysuiTestCase() {
     @Test
     fun testActivatesSplitShadeContainerInSplitShadeMode() {
         val splitShadeContainer = FrameLayout(context)
-        keyguardMediaController.attachSplitShadeContainer(
-                splitShadeContainer,
-                useContainer = { true })
-
-        keyguardMediaController.refreshMediaPosition()
+        keyguardMediaController.attachSplitShadeContainer(splitShadeContainer)
+        keyguardMediaController.useSplitShade = true
 
         assertThat(splitShadeContainer.visibility).isEqualTo(VISIBLE)
     }
@@ -117,13 +129,28 @@ class KeyguardMediaControllerTest : SysuiTestCase() {
     @Test
     fun testActivatesSinglePaneContainerInSinglePaneMode() {
         val splitShadeContainer = FrameLayout(context)
-        keyguardMediaController.attachSplitShadeContainer(
-                splitShadeContainer,
-                useContainer = { false })
-
-        keyguardMediaController.refreshMediaPosition()
+        keyguardMediaController.attachSplitShadeContainer(splitShadeContainer)
 
         assertThat(splitShadeContainer.visibility).isEqualTo(GONE)
         assertThat(mediaHeaderView.visibility).isEqualTo(VISIBLE)
+    }
+
+    @Test
+    fun testAttachedToSplitShade() {
+        val splitShadeContainer = FrameLayout(context)
+        keyguardMediaController.attachSplitShadeContainer(splitShadeContainer)
+        keyguardMediaController.useSplitShade = true
+
+        assertTrue("HostView wasn't attached to the split pane container",
+            splitShadeContainer.childCount == 1)
+    }
+
+    @Test
+    fun testAttachedToSinglePane() {
+        val splitShadeContainer = FrameLayout(context)
+        keyguardMediaController.attachSplitShadeContainer(splitShadeContainer)
+
+        assertTrue("HostView wasn't attached to the single pane container",
+            mediaHeaderView.childCount == 1)
     }
 }

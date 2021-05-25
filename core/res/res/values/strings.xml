@@ -1656,23 +1656,14 @@
     <!-- Content description which should be used for the fingerprint icon. -->
     <string name="fingerprint_icon_content_description">Fingerprint icon</string>
 
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=70] -->
-    <string name="permlab_manageFace">manage face unlock hardware</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=90] -->
-    <string name="permdesc_manageFace">Allows the app to invoke methods to add and delete facial templates for use.</string>
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=70] -->
-    <string name="permlab_useFaceAuthentication">use face unlock hardware</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=90] -->
-    <string name="permdesc_useFaceAuthentication">Allows the app to use face unlock hardware for authentication</string>
-
     <!-- Notification name shown when the system requires the user to re-enroll their face. [CHAR LIMIT=NONE] -->
-    <string name="face_recalibrate_notification_name">Face unlock</string>
+    <string name="face_recalibrate_notification_name">Face Unlock</string>
     <!-- Notification title shown when the system requires the user to re-enroll their face. [CHAR LIMIT=NONE] -->
     <string name="face_recalibrate_notification_title">Re-enroll your face</string>
     <!-- Notification content shown when the system requires the user to re-enroll their face. [CHAR LIMIT=NONE] -->
     <string name="face_recalibrate_notification_content">To improve recognition, please re-enroll your face</string>
-    <!-- Title of a notification that directs the user to set up face unlock by enrolling their face. [CHAR LIMIT=NONE] -->
-    <string name="face_setup_notification_title">Set up face unlock</string>
+    <!-- Title of a notification that directs the user to set up Face Unlock by enrolling their face. [CHAR LIMIT=NONE] -->
+    <string name="face_setup_notification_title">Set up Face Unlock</string>
     <!-- Contents of a notification that directs the user to set up face unlock by enrolling their face. [CHAR LIMIT=NONE] -->
     <string name="face_setup_notification_content">Unlock your phone by looking at it</string>
     <!-- Title of a notification that directs the user to enroll a fingerprint. [CHAR LIMIT=NONE] -->
@@ -1727,23 +1718,25 @@
     <!-- Error message shown when the face hardware can't be accessed. [CHAR LIMIT=69] -->
     <string name="face_error_hw_not_available">Can\u2019t verify face. Hardware not available.</string>
     <!-- Error message shown when the face hardware timer has expired and the user needs to restart the operation. [CHAR LIMIT=50] -->
-    <string name="face_error_timeout">Try face unlock again.</string>
+    <string name="face_error_timeout">Try Face Unlock again</string>
     <!-- Error message shown when the face hardware has run out of room for storing faces. [CHAR LIMIT=69] -->
     <string name="face_error_no_space">Can\u2019t store new face data. Delete an old one first.</string>
     <!-- Generic error message shown when the face operation (e.g. enrollment or authentication) is canceled. Generally not shown to the user. [CHAR LIMIT=50] -->
     <string name="face_error_canceled">Face operation canceled.</string>
-    <!-- Generic error message shown when the face unlock operation is canceled due to user input. Generally not shown to the user [CHAR LIMIT=68] -->
-    <string name="face_error_user_canceled">Face unlock canceled by user.</string>
+    <!-- Generic error message shown when the Face Unlock operation is canceled due to user input. Generally not shown to the user [CHAR LIMIT=68] -->
+    <string name="face_error_user_canceled">Face Unlock canceled by user</string>
     <!-- Generic error message shown when the face operation fails because too many attempts have been made. [CHAR LIMIT=50] -->
     <string name="face_error_lockout">Too many attempts. Try again later.</string>
-    <!-- Generic error message shown when the face operation fails because strong authentication is required. [CHAR LIMIT=77] -->
-    <string name="face_error_lockout_permanent">Too many attempts. Face unlock disabled.</string>
+    <!-- Generic error message shown when the face operation fails because strong authentication is required. [CHAR LIMIT=90] -->
+    <string name="face_error_lockout_permanent">Too many attempts. Face Unlock disabled.</string>
+    <!-- Generic error message shown when the face operation fails because strong authentication is required. [CHAR LIMIT=90] -->
+    <string name="face_error_lockout_screen_lock">Too many attempts. Enter screen lock instead.</string>
     <!-- Generic error message shown when the face hardware can't recognize the face. [CHAR LIMIT=50] -->
     <string name="face_error_unable_to_process">Can\u2019t verify face. Try again.</string>
     <!-- Generic error message shown when the user has no enrolled face. [CHAR LIMIT=59] -->
-    <string name="face_error_not_enrolled">You haven\u2019t set up face unlock.</string>
-    <!-- Generic error message shown when the app requests face unlock on a device without a sensor. [CHAR LIMIT=61] -->
-    <string name="face_error_hw_not_present">Face unlock is not supported on this device.</string>
+    <string name="face_error_not_enrolled">You haven\u2019t set up Face Unlock</string>
+    <!-- Generic error message shown when the app requests Face Unlock on a device without a sensor. [CHAR LIMIT=61] -->
+    <string name="face_error_hw_not_present">Face Unlock isn\u2019t supported on this device</string>
     <!-- Generic error message shown when face unlock is not available due to a security vulnerability. [CHAR LIMIT=50] -->
     <string name="face_error_security_update_required">Sensor temporarily disabled.</string>
 
@@ -1751,7 +1744,7 @@
     <string name="face_name_template">Face <xliff:g id="faceId" example="1">%d</xliff:g></string>
 
     <!-- Name for an app setting that lets the user authenticate for that app with their face. [CHAR LIMIT=30] -->
-    <string name="face_app_setting_name">Use face unlock</string>
+    <string name="face_app_setting_name">Use Face Unlock</string>
     <!-- Name for an app setting that lets the user authenticate for that app with their face or screen lock credential (i.e. PIN, pattern, or password). [CHAR LIMIT=70] -->
     <string name="face_or_screen_lock_app_setting_name">Use face or screen lock</string>
     <!-- Subtitle shown on the system-provided biometric dialog, asking the user to authenticate with their face. [CHAR LIMIT=70] -->
@@ -2502,8 +2495,8 @@
     <string name="keyguard_accessibility_slide_unlock">Slide unlock.</string>
     <!-- Accessibility description of the pattern unlock. [CHAR_LIMIT=none] -->
     <string name="keyguard_accessibility_pattern_unlock">Pattern unlock.</string>
-    <!-- Accessibility description of the face unlock. [CHAR_LIMIT=none] -->
-    <string name="keyguard_accessibility_face_unlock">Face unlock.</string>
+    <!-- Accessibility description of the Face Unlock. [CHAR_LIMIT=none] -->
+    <string name="keyguard_accessibility_face_unlock">Face Unlock.</string>
     <!-- Accessibility description of the pin lock. [CHAR_LIMIT=none] -->
     <string name="keyguard_accessibility_pin_unlock">Pin unlock.</string>
     <!-- Accessibility description of the sim pin lock. [CHAR_LIMIT=none] -->

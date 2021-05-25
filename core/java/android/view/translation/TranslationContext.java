@@ -21,9 +21,12 @@ import android.os.Parcelable;
 
 import com.android.internal.util.DataClass;
 
+import java.util.concurrent.Executor;
+import java.util.function.Consumer;
+
 /**
  * Info class holding information for {@link Translator}s and used by
- * {@link TranslationManager#createTranslator(TranslationContext)}.
+ * {@link TranslationManager#createOnDeviceTranslator(TranslationContext, Executor, Consumer)}.
  */
 @DataClass(genHiddenConstDefs = true, genToString = true, genBuilder = true)
 public final class TranslationContext implements Parcelable {
@@ -295,7 +298,7 @@ public final class TranslationContext implements Parcelable {
     }
 
     @DataClass.Generated(
-            time = 1621034221152L,
+            time = 1621545292157L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/view/translation/TranslationContext.java",
             inputSignatures = "public static final @android.view.translation.TranslationContext.TranslationFlag int FLAG_LOW_LATENCY\npublic static final @android.view.translation.TranslationContext.TranslationFlag int FLAG_TRANSLITERATION\npublic static final @android.view.translation.TranslationContext.TranslationFlag int FLAG_DEFINITIONS\nprivate final @android.annotation.NonNull android.view.translation.TranslationSpec mSourceSpec\nprivate final @android.annotation.NonNull android.view.translation.TranslationSpec mTargetSpec\nprivate final @android.view.translation.TranslationContext.TranslationFlag int mTranslationFlags\nprivate static  int defaultTranslationFlags()\nclass TranslationContext extends java.lang.Object implements [android.os.Parcelable]\nclass BaseBuilder extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genHiddenConstDefs=true, genToString=true, genBuilder=true)\nclass BaseBuilder extends java.lang.Object implements []")

@@ -176,42 +176,6 @@ package android.app {
     field public static final int INVALID_STACK_ID = -1; // 0xffffffff
   }
 
-  public class ActivityView extends android.view.ViewGroup {
-    ctor public ActivityView(android.content.Context);
-    ctor public ActivityView(android.content.Context, android.util.AttributeSet);
-    ctor public ActivityView(@NonNull android.content.Context, @NonNull android.util.AttributeSet, int, boolean);
-    method public int getVirtualDisplayId();
-    method public void onLayout(boolean, int, int, int, int);
-    method public void onLocationChanged();
-    method public void performBackPress();
-    method public void release();
-    method public void setCallback(android.app.ActivityView.StateCallback);
-    method public void setForwardedInsets(android.graphics.Insets);
-    method public void startActivity(@NonNull android.content.Intent);
-    method public void startActivity(@NonNull android.content.Intent, android.os.UserHandle);
-    method public void startActivity(@NonNull android.app.PendingIntent);
-    method public void startActivity(@NonNull android.app.PendingIntent, @Nullable android.content.Intent, @NonNull android.app.ActivityOptions);
-  }
-
-  public static final class ActivityView.Builder {
-    ctor public ActivityView.Builder(@NonNull android.content.Context);
-    method @NonNull public android.app.ActivityView build();
-    method @NonNull public android.app.ActivityView.Builder setAttributeSet(@Nullable android.util.AttributeSet);
-    method @NonNull public android.app.ActivityView.Builder setDefaultStyle(int);
-    method @NonNull public android.app.ActivityView.Builder setDisableSurfaceViewBackgroundLayer(boolean);
-    method @NonNull public android.app.ActivityView.Builder setUsePublicVirtualDisplay(boolean);
-    method @NonNull public android.app.ActivityView.Builder setUseTrustedDisplay(boolean);
-  }
-
-  public abstract static class ActivityView.StateCallback {
-    ctor public ActivityView.StateCallback();
-    method public abstract void onActivityViewDestroyed(android.app.ActivityView);
-    method public abstract void onActivityViewReady(android.app.ActivityView);
-    method public void onTaskCreated(int, android.content.ComponentName);
-    method public void onTaskMovedToFront(int);
-    method public void onTaskRemovalStarted(int);
-  }
-
   public class AlarmManager {
     method public boolean hasScheduleExactAlarm(@NonNull String, int);
   }
@@ -249,8 +213,6 @@ package android.app {
     field public static final String OPSTR_ACTIVITY_RECOGNITION = "android:activity_recognition";
     field public static final String OPSTR_ACTIVITY_RECOGNITION_SOURCE = "android:activity_recognition_source";
     field public static final String OPSTR_MANAGE_ONGOING_CALLS = "android:manage_ongoing_calls";
-    field public static final String OPSTR_PHONE_CALL_CAMERA = "android:phone_call_camera";
-    field public static final String OPSTR_PHONE_CALL_MICROPHONE = "android:phone_call_microphone";
     field public static final String OPSTR_USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER = "android:use_icc_auth_with_device_identifier";
     field public static final int OP_COARSE_LOCATION = 0; // 0x0
     field public static final int OP_RECORD_AUDIO = 27; // 0x1b
@@ -1242,6 +1204,10 @@ package android.hardware.input {
 
 package android.hardware.lights {
 
+  public final class Light implements android.os.Parcelable {
+    method public int getCapabilities();
+  }
+
   public abstract class LightsManager {
     method @NonNull public abstract android.hardware.lights.LightsManager.LightsSession openSession(int);
   }
@@ -1394,9 +1360,14 @@ package android.location {
     method public void setType(int);
   }
 
+  public final class LocationDeviceConfig {
+    field public static final String IGNORE_SETTINGS_ALLOWLIST = "ignore_settings_allowlist";
+  }
+
   public class LocationManager {
     method @NonNull public String[] getBackgroundThrottlingWhitelist();
-    method @NonNull public String[] getIgnoreSettingsWhitelist();
+    method @NonNull public android.os.PackageTagsList getIgnoreSettingsAllowlist();
+    method @Deprecated @NonNull public String[] getIgnoreSettingsWhitelist();
     method @Deprecated @Nullable @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public java.util.List<java.lang.String> getProviderPackages(@NonNull String);
   }
 
@@ -1689,6 +1660,28 @@ package android.os {
   public final class MessageQueue {
     method public int postSyncBarrier();
     method public void removeSyncBarrier(int);
+  }
+
+  public final class PackageTagsList implements android.os.Parcelable {
+    method public boolean contains(@NonNull String, @Nullable String);
+    method public boolean contains(@NonNull android.os.PackageTagsList);
+    method public boolean containsAll(@NonNull String);
+    method public int describeContents();
+    method public boolean includes(@NonNull String);
+    method public boolean isEmpty();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.os.PackageTagsList> CREATOR;
+  }
+
+  public static final class PackageTagsList.Builder {
+    ctor public PackageTagsList.Builder();
+    ctor public PackageTagsList.Builder(int);
+    method @NonNull public android.os.PackageTagsList.Builder add(@NonNull String);
+    method @NonNull public android.os.PackageTagsList.Builder add(@NonNull String, @Nullable String);
+    method @NonNull public android.os.PackageTagsList.Builder add(@NonNull android.os.PackageTagsList);
+    method @NonNull public android.os.PackageTagsList.Builder add(@NonNull java.util.Map<java.lang.String,? extends java.util.Set<java.lang.String>>);
+    method @NonNull public android.os.PackageTagsList build();
+    method @NonNull public android.os.PackageTagsList.Builder clear();
   }
 
   public final class Parcel {
@@ -2125,7 +2118,7 @@ package android.provider {
     field public static final String HIDDEN_API_BLACKLIST_EXEMPTIONS = "hidden_api_blacklist_exemptions";
     field public static final String HIDDEN_API_POLICY = "hidden_api_policy";
     field public static final String HIDE_ERROR_DIALOGS = "hide_error_dialogs";
-    field public static final String LOCATION_IGNORE_SETTINGS_PACKAGE_WHITELIST = "location_ignore_settings_package_whitelist";
+    field @Deprecated public static final String LOCATION_IGNORE_SETTINGS_PACKAGE_WHITELIST = "location_ignore_settings_package_whitelist";
     field public static final String LOW_POWER_MODE = "low_power";
     field public static final String LOW_POWER_MODE_STICKY = "low_power_sticky";
     field @Deprecated public static final String NOTIFICATION_BUBBLES = "notification_bubbles";

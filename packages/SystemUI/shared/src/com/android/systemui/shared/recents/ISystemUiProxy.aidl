@@ -116,7 +116,7 @@ interface ISystemUiProxy {
      * Notifies that quickstep will switch to a new task
      * @param rotation indicates which Surface.Rotation the gesture was started in
      */
-    void onQuickSwitchToNewTask(int rotation) = 25;
+    void notifyPrioritizedRotation(int rotation) = 25;
 
     /**
      * Handle the provided image as if it was a screenshot.
@@ -137,5 +137,8 @@ interface ISystemUiProxy {
     /** Sets home rotation enabled. */
     void setHomeRotationEnabled(boolean enabled) = 45;
 
-    // Next id = 46
+    /** Notifies that a swipe-up gesture has started */
+    oneway void notifySwipeUpGestureStarted() = 46;
+
+    // Next id = 47
 }

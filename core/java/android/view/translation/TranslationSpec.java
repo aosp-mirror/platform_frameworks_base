@@ -47,7 +47,7 @@ public final class TranslationSpec implements Parcelable {
     public @interface DataFormat {}
 
     /**
-     * @deprecated use {@code mLocale} instead.
+     * @removed use {@code mLocale} instead.
      */
     @Deprecated
     private final @NonNull String mLanguage;
@@ -68,7 +68,7 @@ public final class TranslationSpec implements Parcelable {
     }
 
     /**
-     * @deprecated use {@link #TranslationSpec(ULocale, int)} instead.
+     * @removed use {@link #TranslationSpec(ULocale, int)} instead.
      */
     @Deprecated
     public TranslationSpec(@NonNull String language, @DataFormat int dataFormat) {
@@ -106,7 +106,7 @@ public final class TranslationSpec implements Parcelable {
 
 
     /**
-     * @deprecated use {@code mLocale} instead.
+     * @removed use {@code mLocale} instead.
      */
     @DataClass.Generated.Member
     public @Deprecated @NonNull String getLanguage() {
@@ -226,7 +226,7 @@ public final class TranslationSpec implements Parcelable {
     };
 
     @DataClass.Generated(
-            time = 1618968175733L,
+            time = 1620089623334L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/view/translation/TranslationSpec.java",
             inputSignatures = "public static final  int DATA_FORMAT_TEXT\nprivate final @java.lang.Deprecated @android.annotation.NonNull java.lang.String mLanguage\nprivate final @android.annotation.NonNull android.icu.util.ULocale mLocale\nprivate final @android.view.translation.TranslationSpec.DataFormat int mDataFormat\n  void parcelLocale(android.os.Parcel,int)\nstatic  android.icu.util.ULocale unparcelLocale(android.os.Parcel)\nclass TranslationSpec extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genEqualsHashCode=true, genHiddenConstDefs=true, genToString=true, genConstructor=false)")

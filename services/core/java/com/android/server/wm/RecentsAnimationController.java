@@ -152,6 +152,8 @@ public class RecentsAnimationController implements DeathRecipient {
     private boolean mCancelDeferredWithScreenshot;
 
     @VisibleForTesting
+    boolean mIsAddingTaskToTargets;
+    @VisibleForTesting
     boolean mShouldAttachNavBarToAppDuringTransition;
     private boolean mNavigationBarAttachedToApp;
 
@@ -375,7 +377,8 @@ public class RecentsAnimationController implements DeathRecipient {
             final long token = Binder.clearCallingIdentity();
             try {
                 synchronized (mService.getWindowManagerLock()) {
-                    restoreNavigationBarFromApp(moveHomeToTop);
+                    restoreNavigationBarFromApp(
+                            moveHomeToTop || mIsAddingTaskToTargets /* animate */);
                     mService.mWindowPlacerLocked.requestTraversal();
                 }
             } finally {
@@ -514,6 +517,7 @@ public class RecentsAnimationController implements DeathRecipient {
     void removeAnimation(TaskAnimationAdapter taskAdapter) {
         ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS,
                 "removeAnimation(%d)", taskAdapter.mTask.mTaskId);
+        taskAdapter.mTask.setCanAffectSystemUiFlags(true);
         taskAdapter.mCapturedFinishCallback.onAnimationFinished(taskAdapter.mLastAnimationType,
                 taskAdapter);
         mPendingAnimations.remove(taskAdapter);
@@ -684,6 +688,7 @@ public class RecentsAnimationController implements DeathRecipient {
 
     void addTaskToTargets(Task task, OnAnimationFinishedCallback finishedCallback) {
         if (mRunner != null) {
+            mIsAddingTaskToTargets = task != null;
             // No need to send task appeared when the task target already exists, or when the
             // task is being managed as a multi-window mode outside of recents (e.g. bubbles).
             if (isAnimatingTask(task) || skipAnimation(task)) {
@@ -900,7 +905,8 @@ public class RecentsAnimationController implements DeathRecipient {
             removeWallpaperAnimation(wallpaperAdapter);
         }
 
-        restoreNavigationBarFromApp(reorderMode == REORDER_MOVE_TO_TOP);
+        restoreNavigationBarFromApp(
+                reorderMode == REORDER_MOVE_TO_TOP || mIsAddingTaskToTargets /* animate */);
 
         // Clear any pending failsafe runnables
         mService.mH.removeCallbacks(mFailsafeRunnable);

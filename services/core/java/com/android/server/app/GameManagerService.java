@@ -387,12 +387,12 @@ public final class GameManagerService extends IGameManagerService.Stub {
          * Get an array of a package's available game modes.
          */
         public @GameMode int[] getAvailableGameModes() {
-
-            int modesBitfield = getAvailableGameModesBitfield();
-            int sigBits = Integer.bitCount(modesBitfield);
-            int[] modes = new int[sigBits];
+            final int modesBitfield = getAvailableGameModesBitfield();
+            int[] modes = new int[Integer.bitCount(modesBitfield)];
             int i = 0;
-            for (int mode = 0; mode < sigBits; ++mode) {
+            final int gameModeInHighestBit =
+                    Integer.numberOfTrailingZeros(Integer.highestOneBit(modesBitfield));
+            for (int mode = 0; mode <= gameModeInHighestBit; ++mode) {
                 if (((modesBitfield >> mode) & 1) != 0) {
                     modes[i++] = mode;
                 }

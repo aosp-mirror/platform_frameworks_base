@@ -196,13 +196,7 @@
     <color name="default_invocation_lights_color">#ffffffff</color>         <!-- white -->
 
     <!-- Global screenshot actions -->
-    <color name="global_screenshot_button_background">#F5F5F5</color>
-    <color name="global_screenshot_button_text">#000000</color>
-    <color name="global_screenshot_button_border">@color/GM2_grey_300</color>
     <color name="global_screenshot_button_ripple">#1f000000</color>
-    <color name="global_screenshot_button_icon">@color/GM2_blue_500</color>
-    <color name="global_screenshot_dismiss_background">#FFFFFF</color>
-    <color name="global_screenshot_dismiss_foreground">@color/GM2_grey_500</color>
     <color name="global_screenshot_background_protection_start">#40000000</color> <!-- 25% black -->
 
     <!-- Long screenshot UI -->

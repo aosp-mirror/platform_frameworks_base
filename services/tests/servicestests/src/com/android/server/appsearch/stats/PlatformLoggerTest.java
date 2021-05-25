@@ -75,7 +75,7 @@ public class PlatformLoggerTest {
     public void testCreateExtraStatsLocked_nullSamplingRatioMap_returnsDefaultSamplingRatio() {
         PlatformLogger logger = new PlatformLogger(
                 ApplicationProvider.getApplicationContext(),
-                UserHandle.USER_NULL,
+                UserHandle.of(UserHandle.USER_NULL),
                 new PlatformLogger.Config(
                         TEST_MIN_TIME_INTERVAL_BETWEEN_SAMPLES_MILLIS,
                         TEST_DEFAULT_SAMPLING_RATIO,
@@ -106,7 +106,7 @@ public class PlatformLoggerTest {
         samplingRatios.put(CallStats.CALL_TYPE_SEARCH, querySamplingRatio);
         PlatformLogger logger = new PlatformLogger(
                 ApplicationProvider.getApplicationContext(),
-                UserHandle.USER_NULL,
+                UserHandle.of(UserHandle.USER_NULL),
                 new PlatformLogger.Config(
                         TEST_MIN_TIME_INTERVAL_BETWEEN_SAMPLES_MILLIS,
                         TEST_DEFAULT_SAMPLING_RATIO,
@@ -207,7 +207,7 @@ public class PlatformLoggerTest {
         final String testPackageName = "packageName";
         PlatformLogger logger = new PlatformLogger(
                 ApplicationProvider.getApplicationContext(),
-                UserHandle.USER_NULL,
+                UserHandle.of(UserHandle.USER_NULL),
                 new PlatformLogger.Config(
                         TEST_MIN_TIME_INTERVAL_BETWEEN_SAMPLES_MILLIS,
                         samplingRatio,
@@ -225,7 +225,7 @@ public class PlatformLoggerTest {
         final String testPackageName = "packageName";
         PlatformLogger logger = new PlatformLogger(
                 ApplicationProvider.getApplicationContext(),
-                UserHandle.USER_NULL,
+                UserHandle.of(UserHandle.USER_NULL),
                 new PlatformLogger.Config(
                         TEST_MIN_TIME_INTERVAL_BETWEEN_SAMPLES_MILLIS,
                         samplingRatio,
@@ -247,7 +247,7 @@ public class PlatformLoggerTest {
         final String testPackageName = "packageName";
         PlatformLogger logger = new PlatformLogger(
                 ApplicationProvider.getApplicationContext(),
-                UserHandle.USER_NULL,
+                UserHandle.of(UserHandle.USER_NULL),
                 new PlatformLogger.Config(
                         minTimeIntervalBetweenSamplesMillis,
                         samplingRatio,
@@ -269,7 +269,7 @@ public class PlatformLoggerTest {
         final String testPackageName = "packageName";
         PlatformLogger logger = new PlatformLogger(
                 ApplicationProvider.getApplicationContext(),
-                UserHandle.USER_NULL,
+                UserHandle.of(UserHandle.USER_NULL),
                 new PlatformLogger.Config(
                         minTimeIntervalBetweenSamplesMillis,
                         samplingRatio,
@@ -289,7 +289,7 @@ public class PlatformLoggerTest {
         final int testUid = 1234;
         PlatformLogger logger = new PlatformLogger(
                 mContext,
-                mContext.getUserId(),
+                mContext.getUser(),
                 new PlatformLogger.Config(
                         TEST_MIN_TIME_INTERVAL_BETWEEN_SAMPLES_MILLIS,
                         TEST_DEFAULT_SAMPLING_RATIO,

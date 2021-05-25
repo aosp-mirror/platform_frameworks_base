@@ -23,17 +23,18 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Process;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.SparseIntArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.appsearch.external.localstorage.AppSearchLogger;
 import com.android.server.appsearch.external.localstorage.stats.CallStats;
 import com.android.server.appsearch.external.localstorage.stats.InitializeStats;
 import com.android.server.appsearch.external.localstorage.stats.PutDocumentStats;
+import com.android.server.appsearch.external.localstorage.stats.RemoveStats;
 import com.android.server.appsearch.external.localstorage.stats.SearchStats;
 
 import java.io.UnsupportedEncodingException;
@@ -56,8 +57,8 @@ public final class PlatformLogger implements AppSearchLogger {
     // Context of the system service.
     private final Context mContext;
 
-    // User ID of the caller who we're logging for.
-    private final int mUserId;
+    // User we're logging for.
+    private final UserHandle mUserHandle;
 
     // Configuration for the logger
     private final Config mConfig;
@@ -164,10 +165,11 @@ public final class PlatformLogger implements AppSearchLogger {
     /**
      * Westworld constructor
      */
-    public PlatformLogger(@NonNull Context context, int userId, @NonNull Config config) {
+    public PlatformLogger(
+            @NonNull Context context, @NonNull UserHandle userHandle, @NonNull Config config) {
         mContext = Objects.requireNonNull(context);
+        mUserHandle = Objects.requireNonNull(userHandle);
         mConfig = Objects.requireNonNull(config);
-        mUserId = userId;
     }
 
     /** Logs {@link CallStats}. */
@@ -212,6 +214,11 @@ public final class PlatformLogger implements AppSearchLogger {
         }
     }
 
+    @Override
+    public void logStats(@androidx.annotation.NonNull RemoveStats stats) throws AppSearchException {
+        // TODO(b/173532925): Log stats
+    }
+
     /**
      * Removes cached UID for package.
      *
@@ -235,7 +242,7 @@ public final class PlatformLogger implements AppSearchLogger {
         String database = stats.getGeneralStats().getDatabase();
         try {
             int hashCodeForDatabase = calculateHashCodeMd5(database);
-            FrameworkStatsLog.write(FrameworkStatsLog.APP_SEARCH_CALL_STATS_REPORTED,
+            AppSearchStatsLog.write(AppSearchStatsLog.APP_SEARCH_CALL_STATS_REPORTED,
                     extraStats.mSamplingRatio,
                     extraStats.mSkippedSampleCount,
                     extraStats.mPackageUid,
@@ -267,7 +274,7 @@ public final class PlatformLogger implements AppSearchLogger {
         String database = stats.getGeneralStats().getDatabase();
         try {
             int hashCodeForDatabase = calculateHashCodeMd5(database);
-            FrameworkStatsLog.write(FrameworkStatsLog.APP_SEARCH_PUT_DOCUMENT_STATS_REPORTED,
+            AppSearchStatsLog.write(AppSearchStatsLog.APP_SEARCH_PUT_DOCUMENT_STATS_REPORTED,
                     extraStats.mSamplingRatio,
                     extraStats.mSkippedSampleCount,
                     extraStats.mPackageUid,
@@ -304,7 +311,7 @@ public final class PlatformLogger implements AppSearchLogger {
         String database = stats.getDatabase();
         try {
             int hashCodeForDatabase = calculateHashCodeMd5(database);
-            FrameworkStatsLog.write(FrameworkStatsLog.APP_SEARCH_QUERY_STATS_REPORTED,
+            AppSearchStatsLog.write(AppSearchStatsLog.APP_SEARCH_QUERY_STATS_REPORTED,
                     extraStats.mSamplingRatio,
                     extraStats.mSkippedSampleCount,
                     extraStats.mPackageUid,
@@ -347,7 +354,7 @@ public final class PlatformLogger implements AppSearchLogger {
         mLastPushTimeMillisLocked = SystemClock.elapsedRealtime();
         ExtraStats extraStats = createExtraStatsLocked(/*packageName=*/ null,
                 CallStats.CALL_TYPE_INITIALIZE);
-        FrameworkStatsLog.write(FrameworkStatsLog.APP_SEARCH_INITIALIZE_STATS_REPORTED,
+        AppSearchStatsLog.write(AppSearchStatsLog.APP_SEARCH_INITIALIZE_STATS_REPORTED,
                 extraStats.mSamplingRatio,
                 extraStats.mSkippedSampleCount,
                 extraStats.mPackageUid,
@@ -493,7 +500,8 @@ public final class PlatformLogger implements AppSearchLogger {
         // TODO(b/173532925) since VisibilityStore has the same method, we can make this a
         //  utility function
         try {
-            packageUid = mContext.getPackageManager().getPackageUidAsUser(packageName, mUserId);
+            packageUid = mContext.getPackageManager().getPackageUidAsUser(
+                    packageName, mUserHandle.getIdentifier());
             mPackageUidCacheLocked.put(packageName, packageUid);
             return packageUid;
         } catch (PackageManager.NameNotFoundException e) {

@@ -249,7 +249,7 @@ public class PhysicsAnimationLayoutTest extends PhysicsAnimationLayoutTestCase {
         Mockito.verify(mTestableController, Mockito.never())
                 .getNextAnimationInChain(eq(DynamicAnimation.SCALE_X), anyInt());
         Mockito.verify(mTestableController, Mockito.never())
-                .getOffsetForChainedPropertyAnimation(eq(DynamicAnimation.SCALE_X));
+                .getOffsetForChainedPropertyAnimation(eq(DynamicAnimation.SCALE_X), anyInt());
 
         // Make sure we asked the new controller about its animated properties, and configuration
         // options.
@@ -258,7 +258,7 @@ public class PhysicsAnimationLayoutTest extends PhysicsAnimationLayoutTestCase {
         Mockito.verify(secondController, Mockito.atLeastOnce())
                 .getNextAnimationInChain(eq(DynamicAnimation.SCALE_X), anyInt());
         Mockito.verify(secondController, Mockito.atLeastOnce())
-                .getOffsetForChainedPropertyAnimation(eq(DynamicAnimation.SCALE_X));
+                .getOffsetForChainedPropertyAnimation(eq(DynamicAnimation.SCALE_X), anyInt());
 
         mLayout.setActiveController(mTestableController);
         mTestableController.animationForChildAtIndex(0)
@@ -271,7 +271,7 @@ public class PhysicsAnimationLayoutTest extends PhysicsAnimationLayoutTestCase {
         Mockito.verify(secondController, Mockito.never())
                 .getNextAnimationInChain(eq(DynamicAnimation.TRANSLATION_X), anyInt());
         Mockito.verify(secondController, Mockito.never())
-                .getOffsetForChainedPropertyAnimation(eq(DynamicAnimation.TRANSLATION_X));
+                .getOffsetForChainedPropertyAnimation(eq(DynamicAnimation.TRANSLATION_X), anyInt());
 
     }
 
@@ -479,7 +479,8 @@ public class PhysicsAnimationLayoutTest extends PhysicsAnimationLayoutTestCase {
         }
 
         @Override
-        float getOffsetForChainedPropertyAnimation(DynamicAnimation.ViewProperty property) {
+        float getOffsetForChainedPropertyAnimation(DynamicAnimation.ViewProperty property,
+                int index) {
             return mOffsetForProperty.getOrDefault(property, 0f);
         }
 

@@ -89,8 +89,6 @@ import android.content.pm.ServiceInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.ContentObserver;
-import android.graphics.Matrix;
-import android.hardware.display.DisplayManagerInternal;
 import android.hardware.input.InputManagerInternal;
 import android.inputmethodservice.InputMethodService;
 import android.media.AudioManagerInternal;
@@ -126,10 +124,8 @@ import android.util.Pair;
 import android.util.PrintWriterPrinter;
 import android.util.Printer;
 import android.util.Slog;
-import android.util.SparseArray;
 import android.util.imetracing.ImeTracing;
 import android.util.proto.ProtoOutputStream;
-import android.view.DisplayInfo;
 import android.view.IWindowManager;
 import android.view.InputChannel;
 import android.view.View;
@@ -313,7 +309,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     final WindowManagerInternal mWindowManagerInternal;
     final PackageManagerInternal mPackageManagerInternal;
     final InputManagerInternal mInputManagerInternal;
-    private final DisplayManagerInternal mDisplayManagerInternal;
     final HandlerCaller mCaller;
     final boolean mHasFeature;
     private final ArrayMap<String, List<InputMethodSubtype>> mAdditionalSubtypeMap =
@@ -453,32 +448,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     @GuardedBy("mMethodMap")
     final ArrayMap<IBinder, ClientState> mClients = new ArrayMap<>();
 
-    private static final class ActivityViewInfo {
-        /**
-         * {@link ClientState} where {@link android.app.ActivityView} is running.
-         */
-        private final ClientState mParentClient;
-        /**
-         * {@link Matrix} to convert screen coordinates in the embedded virtual display to
-         * screen coordinates where {@link #mParentClient} exists.
-         */
-        private final Matrix mMatrix;
-
-        ActivityViewInfo(ClientState parentClient, Matrix matrix) {
-            mParentClient = parentClient;
-            mMatrix = matrix;
-        }
-    }
-
-    /**
-     * A mapping table from virtual display IDs created for {@link android.app.ActivityView}
-     * to its parent IME client where {@link android.app.ActivityView} is running.
-     *
-     * <p>Note: this can be used only for virtual display IDs created by
-     * {@link android.app.ActivityView}.</p>
-     */
-    private SparseArray<ActivityViewInfo> mActivityViewDisplayIdToParentMap = new SparseArray<>();
-
     /**
      * Set once the system is ready to run third party code.
      */
@@ -562,16 +531,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      * The attributes last provided by the current client.
      */
     EditorInfo mCurAttribute;
-
-    /**
-     * A special {@link Matrix} to convert virtual screen coordinates to the IME target display
-     * coordinates.
-     *
-     * <p>Used only while the IME client is running in a virtual display inside
-     * {@link android.app.ActivityView}. {@code null} otherwise.</p>
-     */
-    @Nullable
-    private Matrix mCurActivityViewToScreenMatrix = null;
 
     /**
      * Id obtained with {@link InputMethodInfo#getId()} for the input method that we are currently
@@ -1648,7 +1607,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
         mInputManagerInternal = LocalServices.getService(InputManagerInternal.class);
-        mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
         mImeDisplayValidator = displayId -> mWindowManagerInternal.getDisplayImePolicy(displayId);
         mCaller = new HandlerCaller(context, null, new HandlerCaller.Callback() {
             @Override
@@ -2262,15 +2220,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             if (cs != null) {
                 client.asBinder().unlinkToDeath(cs.clientDeathRecipient, 0);
                 clearClientSessionLocked(cs);
-
-                final int numItems = mActivityViewDisplayIdToParentMap.size();
-                for (int i = numItems - 1; i >= 0; --i) {
-                    final ActivityViewInfo info = mActivityViewDisplayIdToParentMap.valueAt(i);
-                    if (info.mParentClient == cs) {
-                        mActivityViewDisplayIdToParentMap.removeAt(i);
-                    }
-                }
-
                 if (mCurClient == cs) {
                     hideCurrentInputLocked(
                             mCurFocusedWindow, 0, null, SoftInputShowHideReason.HIDE_REMOVE_CLIENT);
@@ -2282,7 +2231,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         }
                     }
                     mCurClient = null;
-                    mCurActivityViewToScreenMatrix = null;
                 }
                 if (mCurFocusedWindowClient == cs) {
                     mCurFocusedWindowClient = null;
@@ -2318,7 +2266,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     MSG_UNBIND_CLIENT, mCurSeq, unbindClientReason, mCurClient.client));
             mCurClient.sessionRequested = false;
             mCurClient = null;
-            mCurActivityViewToScreenMatrix = null;
 
             mMenuController.hideInputMethodMenuLocked();
         }
@@ -2386,31 +2333,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 curInputMethodInfo != null && curInputMethodInfo.suppressesSpellChecker();
         return new InputBindResult(InputBindResult.ResultCode.SUCCESS_WITH_IME_SESSION,
                 session.session, (session.channel != null ? session.channel.dup() : null),
-                mCurId, mCurSeq, mCurActivityViewToScreenMatrix, suppressesSpellChecker);
-    }
-
-    @Nullable
-    private Matrix getActivityViewToScreenMatrixLocked(int clientDisplayId, int imeDisplayId) {
-        if (clientDisplayId == imeDisplayId) {
-            return null;
-        }
-        int displayId = clientDisplayId;
-        Matrix matrix = null;
-        while (true) {
-            final ActivityViewInfo info = mActivityViewDisplayIdToParentMap.get(displayId);
-            if (info == null) {
-                return null;
-            }
-            if (matrix == null) {
-                matrix = new Matrix(info.mMatrix);
-            } else {
-                matrix.postConcat(info.mMatrix);
-            }
-            if (info.mParentClient.selfReportedDisplayId == imeDisplayId) {
-                return matrix;
-            }
-            displayId = info.mParentClient.selfReportedDisplayId;
-        }
+                mCurId, mCurSeq, suppressesSpellChecker);
     }
 
     @GuardedBy("mMethodMap")
@@ -2428,7 +2351,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             // party code.
             return new InputBindResult(
                     InputBindResult.ResultCode.ERROR_SYSTEM_NOT_READY,
-                    null, null, mCurMethodId, mCurSeq, null, false);
+                    null, null, mCurMethodId, mCurSeq, false);
         }
 
         if (!InputMethodUtils.checkIfPackageBelongsToUid(mAppOpsManager, cs.uid,
@@ -2474,10 +2397,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         if (mCurSeq <= 0) mCurSeq = 1;
         mCurClient = cs;
         mCurInputContext = inputContext;
-        mCurActivityViewToScreenMatrix =
-                getActivityViewToScreenMatrixLocked(cs.selfReportedDisplayId, displayIdToShowIme);
-        if (cs.selfReportedDisplayId != displayIdToShowIme
-                && mCurActivityViewToScreenMatrix == null) {
+        if (cs.selfReportedDisplayId != displayIdToShowIme) {
             // CursorAnchorInfo API does not work as-is for cross-display scenario.  Pretend that
             // InputConnection#requestCursorUpdates() is not implemented in the application so that
             // IMEs will always receive false from this API.
@@ -2504,7 +2424,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     requestClientSessionLocked(cs);
                     return new InputBindResult(
                             InputBindResult.ResultCode.SUCCESS_WAITING_IME_SESSION,
-                            null, null, mCurId, mCurSeq, null, false);
+                            null, null, mCurId, mCurSeq, false);
                 } else if (SystemClock.uptimeMillis()
                         < (mLastBindTime+TIME_TO_RECONNECT)) {
                     // In this case we have connected to the service, but
@@ -2516,7 +2436,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     // to see if we can get back in touch with the service.
                     return new InputBindResult(
                             InputBindResult.ResultCode.SUCCESS_WAITING_IME_BINDING,
-                            null, null, mCurId, mCurSeq, null, false);
+                            null, null, mCurId, mCurSeq, false);
                 } else {
                     EventLog.writeEvent(EventLogTags.IMF_FORCE_RECONNECT_IME,
                             mCurMethodId, SystemClock.uptimeMillis()-mLastBindTime, 0);
@@ -2556,7 +2476,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
             return new InputBindResult(
                     InputBindResult.ResultCode.SUCCESS_WAITING_IME_BINDING,
-                    null, null, mCurId, mCurSeq, null, false);
+                    null, null, mCurId, mCurSeq, false);
         }
         mCurIntent = null;
         Slog.w(TAG, "Failure connecting to input method service: " + mCurIntent);
@@ -3550,7 +3470,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
             return new InputBindResult(
                     InputBindResult.ResultCode.SUCCESS_REPORT_WINDOW_FOCUS_ONLY,
-                    null, null, null, -1, null, false);
+                    null, null, null, -1, false);
         }
 
         mCurFocusedWindow = windowToken;
@@ -4043,98 +3963,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             // TODO(yukawa): Should we verify the display ID?
             return mWindowManagerInternal.getInputMethodWindowVisibleHeight(mCurTokenDisplayId);
         });
-    }
-
-    @Override
-    public void reportActivityViewAsync(IInputMethodClient parentClient, int childDisplayId,
-            float[] matrixValues) {
-        try {
-            final DisplayInfo displayInfo = mDisplayManagerInternal.getDisplayInfo(childDisplayId);
-            if (displayInfo == null) {
-                throw new IllegalArgumentException(
-                        "Cannot find display for non-existent displayId: " + childDisplayId);
-            }
-            final int callingUid = Binder.getCallingUid();
-            if (callingUid != displayInfo.ownerUid) {
-                throw new SecurityException("The caller doesn't own the display.");
-            }
-
-            synchronized (mMethodMap) {
-                final ClientState cs = mClients.get(parentClient.asBinder());
-                if (cs == null) {
-                    return;
-                }
-
-                // null matrixValues means that the entry needs to be removed.
-                if (matrixValues == null) {
-                    final ActivityViewInfo info =
-                            mActivityViewDisplayIdToParentMap.get(childDisplayId);
-                    if (info == null) {
-                        return;
-                    }
-                    if (info.mParentClient != cs) {
-                        throw new SecurityException("Only the owner client can clear"
-                                + " ActivityViewGeometry for display #" + childDisplayId);
-                    }
-                    mActivityViewDisplayIdToParentMap.remove(childDisplayId);
-                    return;
-                }
-
-                ActivityViewInfo info = mActivityViewDisplayIdToParentMap.get(childDisplayId);
-                if (info != null && info.mParentClient != cs) {
-                    throw new InvalidParameterException("Display #" + childDisplayId
-                            + " is already registered by " + info.mParentClient);
-                }
-                if (info == null) {
-                    if (!mWindowManagerInternal.isUidAllowedOnDisplay(childDisplayId, cs.uid)) {
-                        throw new SecurityException(cs + " cannot access to display #"
-                                + childDisplayId);
-                    }
-                    info = new ActivityViewInfo(cs, new Matrix());
-                    mActivityViewDisplayIdToParentMap.put(childDisplayId, info);
-                }
-                info.mMatrix.setValues(matrixValues);
-
-                if (mCurClient == null || mCurClient.curSession == null) {
-                    return;
-                }
-
-                Matrix matrix = null;
-                int displayId = mCurClient.selfReportedDisplayId;
-                boolean needToNotify = false;
-                while (true) {
-                    needToNotify |= (displayId == childDisplayId);
-                    final ActivityViewInfo next = mActivityViewDisplayIdToParentMap.get(displayId);
-                    if (next == null) {
-                        break;
-                    }
-                    if (matrix == null) {
-                        matrix = new Matrix(next.mMatrix);
-                    } else {
-                        matrix.postConcat(next.mMatrix);
-                    }
-                    if (next.mParentClient.selfReportedDisplayId == mCurTokenDisplayId) {
-                        if (needToNotify) {
-                            final float[] values = new float[9];
-                            matrix.getValues(values);
-                            try {
-                                mCurClient.client.updateActivityViewToScreenMatrix(mCurSeq, values);
-                            } catch (RemoteException e) {
-                            }
-                        }
-                        break;
-                    }
-                    displayId = info.mParentClient.selfReportedDisplayId;
-                }
-            }
-        } catch (Throwable t) {
-            if (parentClient != null) {
-                try {
-                    parentClient.throwExceptionFromSystem(t.toString());
-                } catch (RemoteException e) {
-                }
-            }
-        }
     }
 
     @Override

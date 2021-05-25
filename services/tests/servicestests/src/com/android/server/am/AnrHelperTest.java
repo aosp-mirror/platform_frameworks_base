@@ -18,21 +18,28 @@ package com.android.server.am;
 
 import static android.testing.DexmakerShareClassLoaderRule.runWithDexmakerShareClassLoader;
 
+import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
+
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
+import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.os.Handler;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.server.appop.AppOpsService;
 import com.android.server.wm.WindowProcessController;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.concurrent.TimeUnit;
@@ -44,19 +51,35 @@ import java.util.concurrent.TimeUnit;
 @SmallTest
 @Presubmit
 public class AnrHelperTest {
-    private final AnrHelper mAnrHelper = new AnrHelper(mock(ActivityManagerService.class));
+    private AnrHelper mAnrHelper;
 
     private ProcessRecord mAnrApp;
 
+    @Rule
+    public ServiceThreadRule mServiceThreadRule = new ServiceThreadRule();
+
     @Before
     public void setUp() {
+        final Context context = getInstrumentation().getTargetContext();
         runWithDexmakerShareClassLoader(() -> {
             mAnrApp = mock(ProcessRecord.class);
-            final ActivityManagerService service = mock(ActivityManagerService.class);
             final ProcessErrorStateRecord errorState = mock(ProcessErrorStateRecord.class);
             setFieldValue(ProcessErrorStateRecord.class, errorState, "mProcLock",
                     new ActivityManagerProcLock());
             setFieldValue(ProcessRecord.class, mAnrApp, "mErrorState", errorState);
+            final ActivityManagerService service = new ActivityManagerService(
+                    new ActivityManagerService.Injector(context) {
+                    @Override
+                    public AppOpsService getAppOpsService(File file, Handler handler) {
+                        return null;
+                    }
+
+                    @Override
+                    public Handler getUiHandler(ActivityManagerService service) {
+                        return mServiceThreadRule.getThread().getThreadHandler();
+                    }
+                }, mServiceThreadRule.getThread());
+            mAnrHelper = new AnrHelper(service);
         });
     }
 

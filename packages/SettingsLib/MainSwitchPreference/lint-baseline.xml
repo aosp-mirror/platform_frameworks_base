@@ -45,4 +45,64 @@
             column="15"/>
     </issue>
 
+    <issue
+        id="NewApi"
+        severity="Error"
+        message="`@android:color/system_neutral2_300` requires API level 31 (current min is 21)"
+        errorLine1="    &lt;color name=&quot;settingslib_thumb_off_color&quot;>@android:color/system_neutral2_300&lt;/color>"
+        errorLine2="                                              ^">
+        <location
+            file="frameworks/base/packages/SettingsLib/MainSwitchPreference/res/values-night/colors.xml"
+            line="23"
+            column="47"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        severity="Error"
+        message="`@android:color/system_accent2_700` requires API level 31 (current min is 21)"
+        errorLine1="    &lt;color name=&quot;settingslib_track_on_color&quot;>@android:color/system_accent2_700&lt;/color>"
+        errorLine2="                                             ^">
+        <location
+            file="frameworks/base/packages/SettingsLib/MainSwitchPreference/res/values-night/colors.xml"
+            line="26"
+            column="46"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        severity="Error"
+        message="`@android:color/system_neutral1_700` requires API level 31 (current min is 21)"
+        errorLine1="    &lt;color name=&quot;settingslib_track_off_color&quot;>@android:color/system_neutral1_700&lt;/color>"
+        errorLine2="                                              ^">
+        <location
+            file="frameworks/base/packages/SettingsLib/MainSwitchPreference/res/values-night/colors.xml"
+            line="29"
+            column="47"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        severity="Error"
+        message="`@android:color/system_neutral2_100` requires API level 31 (current min is 21)"
+        errorLine1="    &lt;color name=&quot;settingslib_thumb_off_color&quot;>@android:color/system_neutral2_100&lt;/color>"
+        errorLine2="                                              ^">
+        <location
+            file="frameworks/base/packages/SettingsLib/MainSwitchPreference/res/values/colors.xml"
+            line="30"
+            column="47"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        severity="Error"
+        message="`@android:color/system_neutral2_600` requires API level 31 (current min is 21)"
+        errorLine1="    &lt;color name=&quot;settingslib_track_off_color&quot;>@android:color/system_neutral2_600&lt;/color>"
+        errorLine2="                                              ^">
+        <location
+            file="frameworks/base/packages/SettingsLib/MainSwitchPreference/res/values/colors.xml"
+            line="36"
+            column="47"/>
+    </issue>
+
 </issues>

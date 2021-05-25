@@ -92,21 +92,25 @@ public interface OnReceiveContentListener {
      * {@link android.content.ContentResolver#SCHEME_CONTENT content URIs} in the payload passed
      * to this listener. Permissions are transient and will be released automatically by the
      * platform.
-     * <ul>
-     *     <li>If the {@link ContentInfo#getSource() source} is the
-     *     {@link ContentInfo#SOURCE_CLIPBOARD clipboard}, permissions are released whenever the
-     *     next copy action is performed by the user.
-     *     <li>If the source is {@link ContentInfo#SOURCE_AUTOFILL autofill}, permissions are tied
-     *     to the target {@link android.app.Activity} lifecycle (released when the activity
-     *     finishes).
-     *     <li>For other sources, permissions are tied to the passed-in {@code payload} object
-     *     (released automatically when there are no more references to it). To ensure that
-     *     permissions are not released prematurely, implementations of this listener should pass
-     *     along the {@code payload} object if processing is done on a background thread.
-     * </ul>
+     * <p>Processing of content should normally be done in a service or activity.
+     * For long-running processing, using {@code androidx.work.WorkManager} is recommended.
+     * When implementing this, permissions should be extended to the target service or activity
+     * by passing the content using {@link android.content.Intent#setClipData Intent.setClipData}
+     * and {@link android.content.Intent#addFlags(int) setting} the flag
+     * {@link android.content.Intent#FLAG_GRANT_READ_URI_PERMISSION FLAG_GRANT_READ_URI_PERMISSION}.
+     * <p>Alternatively, if using a background thread within the current context to process the
+     * content, a reference to the {@code payload} object should be maintained to ensure that
+     * permissions are not revoked prematurely.
      *
      * @param view The view where the content insertion was requested.
-     * @param payload The content to insert and related metadata.
+     * @param payload The content to insert and related metadata. The payload may contain multiple
+     *                items and their MIME types may be different (e.g. an image item and a text
+     *                item). The payload may also contain items whose MIME type is not in the list
+     *                of MIME types specified when
+     *                {@link View#setOnReceiveContentListener setting} the listener. For
+     *                those items, the listener may reject the content (defer to the default
+     *                platform behavior) or execute some other fallback logic (e.g. show an
+     *                appropriate message to the user).
      *
      * @return The portion of the passed-in content whose processing should be delegated to
      * the platform. Return null if all content was handled in some way. Actual insertion of

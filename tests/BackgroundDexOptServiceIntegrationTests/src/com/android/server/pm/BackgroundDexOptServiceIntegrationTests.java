@@ -20,6 +20,7 @@ import android.app.AlarmManager;
 import android.content.Context;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
+import android.os.PowerManager;
 import android.os.SystemProperties;
 import android.os.storage.StorageManager;
 import android.util.Log;
@@ -201,11 +202,16 @@ public final class BackgroundDexOptServiceIntegrationTests {
         fillUpStorage((long) (getStorageLowBytes() * LOW_STORAGE_MULTIPLIER));
     }
 
-    // TODO(aeubanks): figure out how to get scheduled bg-dexopt to run
     private static void runBackgroundDexOpt() throws IOException {
+        runBackgroundDexOpt("Success");
+    }
+
+    // TODO(aeubanks): figure out how to get scheduled bg-dexopt to run
+    private static void runBackgroundDexOpt(String expectedStatus) throws IOException {
         String result = runShellCommand("cmd package bg-dexopt-job " + PACKAGE_NAME);
-        if (!result.trim().equals("Success")) {
-            throw new IllegalStateException("Expected command success, received >" + result + "<");
+        if (!result.trim().equals(expectedStatus)) {
+            throw new IllegalStateException("Expected status: " + expectedStatus
+                + "; Received: " + result.trim());
         }
     }
 
@@ -240,6 +246,16 @@ public final class BackgroundDexOptServiceIntegrationTests {
     // Compile the given package with the given compiler filter.
     private static void compilePackageWithFilter(String pkg, String filter) throws IOException {
         runShellCommand(String.format("cmd package compile -f -m %s %s", filter, pkg));
+    }
+
+    // Override the thermal status of the device
+    public static void overrideThermalStatus(int status) throws IOException {
+        runShellCommand("cmd thermalservice override-status " + status);
+    }
+
+    // Reset the thermal status of the device
+    public static void resetThermalStatus() throws IOException {
+        runShellCommand("cmd thermalservice reset");
     }
 
     // Test that background dexopt under normal conditions succeeds.
@@ -307,4 +323,17 @@ public final class BackgroundDexOptServiceIntegrationTests {
         }
     }
 
+    // Test that background dexopt job doesn't trigger if the device is under thermal throttling.
+    @Test
+    public void testBackgroundDexOptThermalThrottling() throws IOException {
+        try {
+            compilePackageWithFilter(PACKAGE_NAME, "verify");
+            overrideThermalStatus(PowerManager.THERMAL_STATUS_MODERATE);
+            // The bgdexopt task should fail when onStartJob is run
+            runBackgroundDexOpt("Failure");
+            Assert.assertEquals("verify", getCompilerFilter(PACKAGE_NAME));
+        } finally {
+            resetThermalStatus();
+        }
+    }
 }

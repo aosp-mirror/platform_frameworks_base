@@ -412,7 +412,7 @@ public class GameManagerServiceTests {
             reportedModes.add(mode);
         }
         assertEquals(requiredModes.length, reportedModes.size());
-        for (int requiredMode : reportedModes) {
+        for (int requiredMode : requiredModes) {
             assertTrue("Required game mode not supported: " + requiredMode,
                     reportedModes.contains(requiredMode));
         }

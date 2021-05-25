@@ -244,9 +244,7 @@ private fun isOngoingCallNotification(entry: NotificationEntry): Boolean {
 }
 
 private fun isCallNotification(entry: NotificationEntry): Boolean {
-    val extras = entry.sbn.notification.extras
-    val callStyleTemplateName = Notification.CallStyle::class.java.name
-    return extras.getString(Notification.EXTRA_TEMPLATE) == callStyleTemplateName
+    return entry.sbn.notification.isStyle(Notification.CallStyle::class.java)
 }
 
 private const val TAG = "OngoingCallController"

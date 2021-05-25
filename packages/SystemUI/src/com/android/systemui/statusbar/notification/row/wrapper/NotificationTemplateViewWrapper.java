@@ -185,7 +185,7 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
     @Nullable
     protected final Icon getRightIcon(Notification n) {
         if (n.extras.getBoolean(Notification.EXTRA_SHOW_BIG_PICTURE_WHEN_COLLAPSED)
-                && n.getNotificationStyle() == Notification.BigPictureStyle.class) {
+                && n.isStyle(Notification.BigPictureStyle.class)) {
             Icon pictureIcon = Notification.BigPictureStyle.getPictureIcon(n.extras);
             if (pictureIcon != null) {
                 return pictureIcon;

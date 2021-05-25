@@ -23,6 +23,7 @@ import android.graphics.drawable.RippleDrawable
 import android.media.MediaMetadata
 import android.media.session.MediaSession
 import android.media.session.PlaybackState
+import android.os.Handler
 import android.provider.Settings.ACTION_MEDIA_CONTROLS_SETTINGS
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
@@ -110,8 +111,10 @@ public class MediaControlPanelTest : SysuiTestCase() {
     private lateinit var action2: ImageButton
     private lateinit var action3: ImageButton
     private lateinit var action4: ImageButton
-    private lateinit var settingsText: TextView
+    @Mock private lateinit var longPressText: TextView
+    @Mock private lateinit var handler: Handler
     private lateinit var settings: View
+    private lateinit var settingsText: TextView
     private lateinit var cancel: View
     private lateinit var dismiss: FrameLayout
     private lateinit var dismissLabel: View
@@ -170,10 +173,12 @@ public class MediaControlPanelTest : SysuiTestCase() {
         whenever(holder.action3).thenReturn(action3)
         action4 = ImageButton(context)
         whenever(holder.action4).thenReturn(action4)
-        settingsText = TextView(context)
-        whenever(holder.settingsText).thenReturn(settingsText)
+        whenever(holder.longPressText).thenReturn(longPressText)
+        whenever(longPressText.handler).thenReturn(handler)
         settings = View(context)
         whenever(holder.settings).thenReturn(settings)
+        settingsText = TextView(context)
+        whenever(holder.settingsText).thenReturn(settingsText)
         cancel = View(context)
         whenever(holder.cancel).thenReturn(cancel)
         dismiss = FrameLayout(context)

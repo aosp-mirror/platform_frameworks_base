@@ -22,6 +22,7 @@ import android.app.appsearch.exceptions.AppSearchException;
 import com.android.server.appsearch.external.localstorage.stats.CallStats;
 import com.android.server.appsearch.external.localstorage.stats.InitializeStats;
 import com.android.server.appsearch.external.localstorage.stats.PutDocumentStats;
+import com.android.server.appsearch.external.localstorage.stats.RemoveStats;
 import com.android.server.appsearch.external.localstorage.stats.SearchStats;
 
 /**
@@ -46,6 +47,9 @@ public interface AppSearchLogger {
 
     /** Logs {@link SearchStats} */
     void logStats(@NonNull SearchStats stats) throws AppSearchException;
+
+    /** Logs {@link RemoveStats} */
+    void logStats(@NonNull RemoveStats stats) throws AppSearchException;
 
     // TODO(b/173532925) Add remaining logStats once we add all the stats.
 }

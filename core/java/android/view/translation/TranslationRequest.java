@@ -100,14 +100,14 @@ public final class TranslationRequest implements Parcelable {
 
     abstract static class BaseBuilder {
         /**
-         * @deprecated use {@link Builder#setTranslationRequestValues(List)}.
+         * @removed use {@link Builder#setTranslationRequestValues(List)}.
          */
         @Deprecated
         public abstract Builder addTranslationRequestValue(
                 @NonNull TranslationRequestValue value);
 
         /**
-         * @deprecated use {@link Builder#setViewTranslationRequests(List)}.
+         * @removed use {@link Builder#setViewTranslationRequests(List)}.
          */
         @Deprecated
         public abstract Builder addViewTranslationRequest(

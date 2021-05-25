@@ -2095,8 +2095,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"D\'acord"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Desactiva"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Més informació"</string>
-    <!-- no translation found for nas_upgrade_notification_learn_more_content (3735480566983530650) -->
-    <skip />
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Les notificacions millorades han substituït les notificacions adaptatives d\'Android a Android 12. Aquesta funció mostra les accions i respostes suggerides, i organitza les teves notificacions.\n\nLes notificacions millorades poden accedir al contingut de les notificacions, inclosa la informació personal com els noms dels contactes i els missatges. Aquesta funció també pot ignorar les notificacions o respondre-hi, com ara contestar a trucades, i controlar el mode No molestis."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notificació d\'informació del mode de rutina"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"És possible que la bateria s\'esgoti abans de la càrrega habitual"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"S\'ha activat l\'estalvi de bateria per prolongar-ne la durada"</string>

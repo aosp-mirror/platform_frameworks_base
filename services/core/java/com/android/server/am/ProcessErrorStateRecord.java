@@ -377,7 +377,7 @@ class ProcessErrorStateRecord {
         final long[] offsets = new long[2];
         File tracesFile = ActivityManagerService.dumpStackTraces(firstPids,
                 isSilentAnr ? null : processCpuTracker, isSilentAnr ? null : lastPids,
-                nativePids, tracesFileException, offsets);
+                nativePids, tracesFileException, offsets, annotation);
 
         if (isMonitorCpuUsage()) {
             mService.updateCpuStatsNow();
@@ -467,7 +467,7 @@ class ProcessErrorStateRecord {
         final ProcessRecord parentPr = parentProcess != null
                 ? (ProcessRecord) parentProcess.mOwner : null;
         mService.addErrorToDropBox("anr", mApp, mApp.processName, activityShortComponentName,
-                parentShortComponentName, parentPr, annotation, report.toString(), tracesFile,
+                parentShortComponentName, parentPr, null, report.toString(), tracesFile,
                 null, new Float(loadingProgress), incrementalMetrics, errorId);
 
         if (mApp.getWindowProcessController().appNotResponding(info.toString(),

@@ -1778,7 +1778,7 @@ public final class MultiClientInputMethodManagerService {
                         return new InputBindResult(
                                 InputBindResult.ResultCode.SUCCESS_WAITING_IME_SESSION,
                                 null, null, data.mCurrentInputMethodInfo.getId(),
-                                clientInfo.mBindingSequence, null, false);
+                                clientInfo.mBindingSequence, false);
                     case InputMethodClientState.READY_TO_SEND_FIRST_BIND_RESULT:
                     case InputMethodClientState.ALREADY_SENT_BIND_RESULT:
                         clientInfo.mBindingSequence++;
@@ -1800,7 +1800,7 @@ public final class MultiClientInputMethodManagerService {
                                 clientInfo.mInputMethodSession,
                                 clientInfo.mWriteChannel.dup(),
                                 data.mCurrentInputMethodInfo.getId(),
-                                clientInfo.mBindingSequence, null, false);
+                                clientInfo.mBindingSequence, false);
                     case InputMethodClientState.UNREGISTERED:
                         Slog.e(TAG, "The client is already unregistered.");
                         return InputBindResult.INVALID_CLIENT;
@@ -1860,13 +1860,6 @@ public final class MultiClientInputMethodManagerService {
         public void getInputMethodWindowVisibleHeight(IIntResultCallback resultCallback) {
             reportNotSupported();
             CallbackUtils.onResult(resultCallback, () -> 0);
-        }
-
-        @BinderThread
-        @Override
-        public void reportActivityViewAsync(IInputMethodClient parentClient, int childDisplayId,
-                float[] matrixValues) {
-            reportNotSupported();
         }
 
         @BinderThread

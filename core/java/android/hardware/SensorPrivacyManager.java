@@ -286,13 +286,15 @@ public final class SensorPrivacyManager {
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.OBSERVE_SENSOR_PRIVACY)
-    public void removeSensorPrivacyListener(@NonNull OnSensorPrivacyChangedListener listener) {
+    public void removeSensorPrivacyListener(@Sensors.Sensor int sensor,
+            @NonNull OnSensorPrivacyChangedListener listener) {
         synchronized (mListeners) {
             for (int i = 0; i < mIndividualListeners.size(); i++) {
                 Pair<OnSensorPrivacyChangedListener, Integer> pair = mIndividualListeners.keyAt(i);
-                if (pair.first.equals(listener)) {
+                if (pair.second == sensor && pair.first.equals(listener)) {
                     try {
-                        mService.removeSensorPrivacyListener(mIndividualListeners.valueAt(i));
+                        mService.removeIndividualSensorPrivacyListener(sensor,
+                                mIndividualListeners.valueAt(i));
                     } catch (RemoteException e) {
                         throw e.rethrowFromSystemServer();
                     }

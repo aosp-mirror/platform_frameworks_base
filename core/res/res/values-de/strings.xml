@@ -609,14 +609,14 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Fingerabdruck-Symbol"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"Hardware für Gesichtsentsperrung verwalten"</string>
+    <string name="permlab_manageFace" msgid="4569549381889283282">"Hardware für Entsperrung per Gesichtserkennung verwalten"</string>
     <string name="permdesc_manageFace" msgid="6204569688492710471">"Ermöglicht der App,  Gesichtsvorlagen hinzuzufügen oder zu entfernen."</string>
     <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"Hardware für Gesichtsentsperrung verwenden"</string>
     <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Ermöglicht der App, zur Authentifizierung Hardware für Gesichtsentsperrung zu verwenden"</string>
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Gesichtsentsperrung"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Gesicht neu scannen lassen"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Für bessere Erkennung Gesicht neu scannen lassen"</string>
-    <string name="face_setup_notification_title" msgid="550617822603450009">"Gesichtsentsperrung einrichten"</string>
+    <string name="face_setup_notification_title" msgid="550617822603450009">"Entsperrung per Gesichtserkennung einrichten"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Entsperre dein Smartphone, indem du es ansiehst"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Weitere Möglichkeiten zum Entsperren einrichten"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Tippe, um einen Fingerabdruck hinzuzufügen"</string>
@@ -646,16 +646,16 @@
     <string name="face_error_timeout" msgid="522924647742024699">"Gesichtsentsperrung noch einmal versuchen."</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Kein Speicherplatz frei. Bitte erst ein Gesicht löschen."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Gesichtserkennung abgebrochen."</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"Gesichtsentsperrung vom Nutzer abgebrochen."</string>
+    <string name="face_error_user_canceled" msgid="8553045452825849843">"Entsperrung per Gesichtserkennung vom Nutzer abgebrochen."</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Zu viele Versuche, bitte später noch einmal versuchen"</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Zu viele Versuche. Gesichtsentsperrung wurde deaktiviert."</string>
+    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Zu viele Versuche. Entsperrung per Gesichtserkennung wurde deaktiviert."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Gesichtsprüfung nicht möglich. Noch mal versuchen."</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"Gesichtsentsperrung ist nicht eingerichtet."</string>
+    <string name="face_error_not_enrolled" msgid="7369928733504691611">"Entsperrung per Gesichtserkennung ist nicht eingerichtet."</string>
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"Gesichtsentsperrung wird auf diesem Gerät nicht unterstützt."</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Der Sensor ist vorübergehend deaktiviert."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Gesicht <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <string name="face_app_setting_name" msgid="8130135875458467243">"Gesichtsentsperrung verwenden"</string>
-    <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Gesichtsentsperrung oder Displaysperre verwenden"</string>
+    <string name="face_app_setting_name" msgid="8130135875458467243">"Entsperrung per Gesichtserkenn."</string>
+    <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Entsperrung per Gesichtserkennung oder Displaysperre verwenden"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Gesichtserkennung verwenden, um fortzufahren"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Verwende die Gesichtserkennung oder deine Display-Entsperrmethode, um fortzufahren"</string>
   <string-array name="face_error_vendor">
@@ -887,7 +887,7 @@
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Erneut versuchen"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Erneut versuchen"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Entsperren, um alle Funktionen und Daten zu nutzen"</string>
-    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Die maximal zulässige Anzahl an Versuchen zur Gesichtsentsperrung wurde überschritten."</string>
+    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Die maximal zulässige Anzahl an Versuchen zur Entsperrung per Gesichtserkennung wurde überschritten."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"Keine SIM-Karte"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"Keine SIM-Karte im Tablet"</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Keine SIM-Karte in deinem Android TV-Gerät."</string>
@@ -957,7 +957,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"Entsperr-Bereich maximieren"</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"Entsperrung mit Fingerbewegung"</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"Entsperrung mit Muster"</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"Gesichtsentsperrung"</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"Entsperrung per Gesichtserkennung"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"Entsperrung mit PIN"</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"SIM durch PIN-Eingabe entsperren."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"SIM durch PUK-Eingabe entsperren."</string>

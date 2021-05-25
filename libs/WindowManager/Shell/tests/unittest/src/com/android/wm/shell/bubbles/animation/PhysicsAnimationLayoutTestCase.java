@@ -258,8 +258,9 @@ public class PhysicsAnimationLayoutTestCase extends ShellTestCase {
             }
 
             @Override
-            float getOffsetForChainedPropertyAnimation(DynamicAnimation.ViewProperty property) {
-                return mWrappedController.getOffsetForChainedPropertyAnimation(property);
+            float getOffsetForChainedPropertyAnimation(DynamicAnimation.ViewProperty property,
+                    int index) {
+                return mWrappedController.getOffsetForChainedPropertyAnimation(property, index);
             }
 
             @Override

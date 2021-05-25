@@ -16,6 +16,7 @@ android_library {
     static_libs: [
         "androidx.annotation_annotation",
         "androidx.preference_preference",
+        "SettingsLibSettingsTheme",
     ],
     sdk_version: "system_current",
     min_sdk_version: "21",

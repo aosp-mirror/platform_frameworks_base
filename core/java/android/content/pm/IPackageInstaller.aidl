@@ -61,4 +61,6 @@ interface IPackageInstaller {
     void setPermissionsResult(int sessionId, boolean accepted);
 
     void bypassNextStagedInstallerCheck(boolean value);
+
+    void setAllowUnlimitedSilentUpdates(String installerPackageName);
 }

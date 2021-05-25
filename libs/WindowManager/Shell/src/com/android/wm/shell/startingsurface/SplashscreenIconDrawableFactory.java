@@ -52,16 +52,23 @@ public class SplashscreenIconDrawableFactory {
             @NonNull Drawable foregroundDrawable, int srcIconSize, int iconSize,
             Handler splashscreenWorkerHandler) {
         if (foregroundDrawable instanceof Animatable) {
-            return new AnimatableIconDrawable(backgroundColor, foregroundDrawable);
+            return new AnimatableIconAnimateListener(backgroundColor, foregroundDrawable);
         } else if (foregroundDrawable instanceof AdaptiveIconDrawable) {
-            return new ImmobileIconDrawable((AdaptiveIconDrawable) foregroundDrawable,
+            return new ImmobileIconDrawable(foregroundDrawable,
                     srcIconSize, iconSize, splashscreenWorkerHandler);
         } else {
-            // TODO for legacy icon don't use adaptive icon drawable to wrapper it
+            // single layer icon
             return new ImmobileIconDrawable(new AdaptiveIconDrawable(
                     new ColorDrawable(backgroundColor), foregroundDrawable),
                     srcIconSize, iconSize, splashscreenWorkerHandler);
         }
+    }
+
+    static Drawable makeLegacyIconDrawable(@ColorInt int backgroundColor,
+            @NonNull Drawable foregroundDrawable, int srcIconSize, int iconSize,
+            Handler splashscreenWorkerHandler) {
+        return new ImmobileIconDrawable(new LegacyIconDrawable(backgroundColor,
+                foregroundDrawable), srcIconSize, iconSize, splashscreenWorkerHandler);
     }
 
     private static class ImmobileIconDrawable extends Drawable {
@@ -70,14 +77,14 @@ public class SplashscreenIconDrawableFactory {
         private final Matrix mMatrix = new Matrix();
         private Bitmap mIconBitmap;
 
-        ImmobileIconDrawable(AdaptiveIconDrawable drawable, int srcIconSize, int iconSize,
+        ImmobileIconDrawable(Drawable drawable, int srcIconSize, int iconSize,
                 Handler splashscreenWorkerHandler) {
             final float scale = (float) iconSize / srcIconSize;
             mMatrix.setScale(scale, scale);
             splashscreenWorkerHandler.post(() -> preDrawIcon(drawable, srcIconSize));
         }
 
-        private void preDrawIcon(AdaptiveIconDrawable drawable, int size) {
+        private void preDrawIcon(Drawable drawable, int size) {
             synchronized (mPaint) {
                 Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "preDrawIcon");
                 mIconBitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
@@ -115,49 +122,143 @@ public class SplashscreenIconDrawableFactory {
         }
     }
 
-    /**
-     * A lightweight AdaptiveIconDrawable which support foreground to be Animatable, and keep this
-     * drawable masked by config_icon_mask.
-     * @hide
-     */
-    private static class AnimatableIconDrawable extends SplashScreenView.SplashscreenIconDrawable {
+    // Base class the draw the circle background
+    private abstract static class MaskBackgroundDrawable extends Drawable {
         private static final float MASK_SIZE = AdaptiveIconDrawable.MASK_SIZE;
         private static final float EXTRA_INSET_PERCENTAGE = 1 / 4f;
-        private static final float DEFAULT_VIEW_PORT_SCALE = 1f / (1 + 2 * EXTRA_INSET_PERCENTAGE);
-        private final Rect mTmpOutRect = new Rect();
+        static final float DEFAULT_VIEW_PORT_SCALE = 1f / (1 + 2 * EXTRA_INSET_PERCENTAGE);
         /**
          * Clip path defined in R.string.config_icon_mask.
          */
         private static Path sMask;
-
-        /**
-         * Scaled mask based on the view bounds.
-         */
-        private final Path mMask;
         private final Path mMaskScaleOnly;
         private final Matrix mMaskMatrix;
-        private Paint mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private final Paint mPaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.DITHER_FLAG
+                | Paint.FILTER_BITMAP_FLAG);
+
+        MaskBackgroundDrawable(@ColorInt int backgroundColor) {
+            final Resources r = Resources.getSystem();
+            sMask = PathParser.createPathFromPathData(r.getString(R.string.config_icon_mask));
+            Path mask = new Path(sMask);
+            mMaskScaleOnly = new Path(mask);
+            mMaskMatrix = new Matrix();
+            mPaint.setColor(backgroundColor);
+            mPaint.setStyle(Paint.Style.FILL);
+        }
+
+        @Override
+        protected void onBoundsChange(Rect bounds) {
+            if (bounds.isEmpty()) {
+                return;
+            }
+            updateLayerBounds(bounds);
+        }
+
+        protected void updateLayerBounds(Rect bounds) {
+            // reset everything that depends on the view bounds
+            mMaskMatrix.setScale(bounds.width() / MASK_SIZE, bounds.height() / MASK_SIZE);
+            sMask.transform(mMaskMatrix, mMaskScaleOnly);
+        }
+
+        @Override
+        public void draw(Canvas canvas) {
+            if (mMaskScaleOnly != null) {
+                canvas.drawPath(mMaskScaleOnly, mPaint);
+            }
+        }
+
+        @Override
+        public void setAlpha(int alpha) {
+            mPaint.setAlpha(alpha);
+        }
+
+        @Override
+        public int getOpacity() {
+            return PixelFormat.RGBA_8888;
+        }
+    }
+
+    private static class LegacyIconDrawable extends MaskBackgroundDrawable {
+        // reference FixedScaleDrawable
+        // iconBounds = 0.7 * X * outerBounds, X is the scale of diagonal
+        private static final float LEGACY_ICON_SCALE = .7f * .8f;
+        private final Drawable mForegroundDrawable;
+        private float mScaleX, mScaleY, mTransX, mTransY;
+
+        LegacyIconDrawable(@ColorInt int backgroundColor, Drawable foregroundDrawable) {
+            super(backgroundColor);
+            mForegroundDrawable = foregroundDrawable;
+            mScaleX = LEGACY_ICON_SCALE;
+            mScaleY = LEGACY_ICON_SCALE;
+        }
+
+        @Override
+        protected void updateLayerBounds(Rect bounds) {
+            super.updateLayerBounds(bounds);
+
+            if (mForegroundDrawable == null) {
+                return;
+            }
+            float outerBoundsWidth = bounds.width();
+            float outerBoundsHeight = bounds.height();
+            float h = mForegroundDrawable.getIntrinsicHeight();
+            float w = mForegroundDrawable.getIntrinsicWidth();
+            mScaleX = LEGACY_ICON_SCALE;
+            mScaleY = LEGACY_ICON_SCALE;
+            if (h > w && w > 0) {
+                mScaleX *= w / h;
+            } else if (w > h && h > 0) {
+                mScaleY *= h / w;
+            }
+            int innerBoundsWidth = (int) (0.5 + outerBoundsWidth * mScaleX);
+            int innerBoundsHeight = (int) (0.5 + outerBoundsHeight * mScaleY);
+            final Rect rect = new Rect(0, 0, innerBoundsWidth, innerBoundsHeight);
+            mForegroundDrawable.setBounds(rect);
+            mTransX = (outerBoundsWidth - innerBoundsWidth) / 2;
+            mTransY = (outerBoundsHeight - innerBoundsHeight) / 2;
+            invalidateSelf();
+        }
+
+        @Override
+        public void draw(Canvas canvas) {
+            super.draw(canvas);
+            int saveCount = canvas.save();
+            canvas.translate(mTransX, mTransY);
+            if (mForegroundDrawable != null) {
+                mForegroundDrawable.draw(canvas);
+            }
+            canvas.restoreToCount(saveCount);
+        }
+
+        @Override
+        public void setColorFilter(ColorFilter colorFilter) {
+            if (mForegroundDrawable != null) {
+                mForegroundDrawable.setColorFilter(colorFilter);
+            }
+        }
+    }
+    /**
+     * A lightweight AdaptiveIconDrawable which support foreground to be Animatable, and keep this
+     * drawable masked by config_icon_mask.
+     */
+    private static class AnimatableIconAnimateListener extends MaskBackgroundDrawable
+            implements SplashScreenView.IconAnimateListener {
         private final Drawable mForegroundDrawable;
         private Animatable mAnimatableIcon;
         private Animator mIconAnimator;
         private boolean mAnimationTriggered;
+        private final Rect mTmpOutRect = new Rect();
 
-        AnimatableIconDrawable(@ColorInt int backgroundColor, Drawable foregroundDrawable) {
+        AnimatableIconAnimateListener(@ColorInt int backgroundColor, Drawable foregroundDrawable) {
+            super(backgroundColor);
             mForegroundDrawable = foregroundDrawable;
-            final Resources r = Resources.getSystem();
-            sMask = PathParser.createPathFromPathData(r.getString(R.string.config_icon_mask));
-            mMask = new Path(sMask);
-            mMaskScaleOnly = new Path(mMask);
-            mMaskMatrix = new Matrix();
-            mPaint.setColor(backgroundColor);
-            mPaint.setStyle(Paint.Style.FILL);
             if (mForegroundDrawable != null) {
                 mForegroundDrawable.setCallback(mCallback);
             }
         }
 
         @Override
-        protected boolean prepareAnimate(long duration, Runnable startListener) {
+        public boolean prepareAnimate(long duration, Runnable startListener) {
             mAnimatableIcon = (Animatable) mForegroundDrawable;
             mIconAnimator = ValueAnimator.ofInt(0, 1);
             mIconAnimator.setDuration(duration);
@@ -190,11 +291,19 @@ public class SplashscreenIconDrawableFactory {
         }
 
         @Override
-        protected void onBoundsChange(Rect bounds) {
-            if (bounds.isEmpty()) {
-                return;
+        protected void updateLayerBounds(Rect bounds) {
+            super.updateLayerBounds(bounds);
+            int cX = bounds.width() / 2;
+            int cY = bounds.height() / 2;
+
+            int insetWidth = (int) (bounds.width() / (DEFAULT_VIEW_PORT_SCALE * 2));
+            int insetHeight = (int) (bounds.height() / (DEFAULT_VIEW_PORT_SCALE * 2));
+            final Rect outRect = mTmpOutRect;
+            outRect.set(cX - insetWidth, cY - insetHeight, cX + insetWidth, cY + insetHeight);
+            if (mForegroundDrawable != null) {
+                mForegroundDrawable.setBounds(outRect);
             }
-            updateLayerBounds(bounds);
+            invalidateSelf();
         }
 
         private final Callback mCallback = new Callback() {
@@ -214,24 +323,6 @@ public class SplashscreenIconDrawableFactory {
             }
         };
 
-        private void updateLayerBounds(Rect bounds) {
-            int cX = bounds.width() / 2;
-            int cY = bounds.height() / 2;
-
-            int insetWidth = (int) (bounds.width() / (DEFAULT_VIEW_PORT_SCALE * 2));
-            int insetHeight = (int) (bounds.height() / (DEFAULT_VIEW_PORT_SCALE * 2));
-            final Rect outRect = mTmpOutRect;
-            outRect.set(cX - insetWidth, cY - insetHeight, cX + insetWidth, cY + insetHeight);
-
-            if (mForegroundDrawable != null) {
-                mForegroundDrawable.setBounds(outRect);
-            }
-            // reset everything that depends on the view bounds
-            mMaskMatrix.setScale(bounds.width() / MASK_SIZE, bounds.height() / MASK_SIZE);
-            sMask.transform(mMaskMatrix, mMaskScaleOnly);
-            invalidateSelf();
-        }
-
         private void ensureAnimationStarted() {
             if (mAnimationTriggered) {
                 return;
@@ -244,9 +335,7 @@ public class SplashscreenIconDrawableFactory {
 
         @Override
         public void draw(Canvas canvas) {
-            if (mMaskScaleOnly != null) {
-                canvas.drawPath(mMaskScaleOnly, mPaint);
-            }
+            super.draw(canvas);
             if (mForegroundDrawable != null) {
                 ensureAnimationStarted();
                 mForegroundDrawable.draw(canvas);
@@ -254,20 +343,10 @@ public class SplashscreenIconDrawableFactory {
         }
 
         @Override
-        public void setAlpha(int alpha) {
-            mPaint.setAlpha(alpha);
-        }
-
-        @Override
         public void setColorFilter(ColorFilter colorFilter) {
             if (mForegroundDrawable != null) {
                 mForegroundDrawable.setColorFilter(colorFilter);
             }
-        }
-
-        @Override
-        public int getOpacity() {
-            return PixelFormat.TRANSLUCENT;
         }
     }
 

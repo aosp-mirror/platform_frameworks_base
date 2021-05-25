@@ -20,7 +20,4 @@
     android:id="@+id/qs_pager"
     android:layout_width="match_parent"
     android:layout_height="0dp"
-    android:layout_weight="1"
-    android:clipChildren="false"
-    android:clipToPadding="false"
-    android:paddingBottom="@dimen/qs_paged_tile_layout_padding_bottom" />
+    android:layout_weight="1"/>

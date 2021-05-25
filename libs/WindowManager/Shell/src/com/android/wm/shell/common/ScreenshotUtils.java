@@ -32,11 +32,12 @@ public class ScreenshotUtils {
      * @param t the transaction used to set changes on the resulting screenshot.
      * @param sc the SurfaceControl to take a screenshot of
      * @param crop the crop to use when capturing the screenshot
+     * @param layer the layer to place the screenshot
      *
      * @return A SurfaceControl where the screenshot will be attached, or null if failed.
      */
     public static SurfaceControl takeScreenshot(SurfaceControl.Transaction t, SurfaceControl sc,
-            Rect crop) {
+            Rect crop, int layer) {
         final SurfaceControl.ScreenshotHardwareBuffer buffer = SurfaceControl.captureLayers(
                 new SurfaceControl.LayerCaptureArgs.Builder(sc)
                         .setSourceCrop(crop)
@@ -60,7 +61,7 @@ public class ScreenshotUtils {
         t.setBuffer(screenshot, graphicBuffer);
         t.setColorSpace(screenshot, buffer.getColorSpace());
         t.reparent(screenshot, sc);
-        t.setLayer(screenshot, Integer.MAX_VALUE);
+        t.setLayer(screenshot, layer);
         t.show(screenshot);
         t.apply();
         return screenshot;

@@ -810,7 +810,9 @@ public final class IpSecManager {
          *
          * @param underlyingNetwork the new {@link Network} that will carry traffic for this tunnel.
          *     This network MUST never be the network exposing this IpSecTunnelInterface, otherwise
-         *     this method will throw an {@link IllegalArgumentException}.
+         *     this method will throw an {@link IllegalArgumentException}. If the
+         *     IpSecTunnelInterface is later added to this network, all outbound traffic will be
+         *     blackholed.
          */
         // TODO: b/169171001 Update the documentation when transform migration is supported.
         // The purpose of making updating network and applying transforms separate is to leave open

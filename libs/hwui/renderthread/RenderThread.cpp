@@ -16,6 +16,7 @@
 
 #include "RenderThread.h"
 
+#include <gui/TraceUtils.h>
 #include "../HardwareBitmapUploader.h"
 #include "CanvasContext.h"
 #include "DeviceInfo.h"
@@ -29,7 +30,6 @@
 #include "pipeline/skia/SkiaVulkanPipeline.h"
 #include "renderstate/RenderState.h"
 #include "utils/TimeUtils.h"
-#include "utils/TraceUtils.h"
 
 #include <GrContextOptions.h>
 #include <gl/GrGLInterface.h>
@@ -345,6 +345,15 @@ void RenderThread::setGrContext(sk_sp<GrDirectContext> context) {
     if (mGrContext) {
         DeviceInfo::setMaxTextureSize(mGrContext->maxRenderTargetSize());
     }
+}
+
+sk_sp<GrDirectContext> RenderThread::requireGrContext() {
+    if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaGL) {
+        requireGlContext();
+    } else {
+        requireVkContext();
+    }
+    return mGrContext;
 }
 
 int RenderThread::choreographerCallback(int fd, int events, void* data) {

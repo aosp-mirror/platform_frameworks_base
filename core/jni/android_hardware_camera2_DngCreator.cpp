@@ -83,6 +83,22 @@ using android::base::GetProperty;
         return nullptr; \
     }
 
+#define BAIL_IF_EMPTY_RET_BOOL(entry, jnienv, tagId, writer)               \
+    if ((entry).count == 0) {                                              \
+        jniThrowExceptionFmt(jnienv, "java/lang/IllegalArgumentException", \
+                             "Missing metadata fields for tag %s (%x)",    \
+                             (writer)->getTagName(tagId), (tagId));        \
+        return false;                                                      \
+    }
+
+#define BAIL_IF_EMPTY_RET_STATUS(entry, jnienv, tagId, writer)             \
+    if ((entry).count == 0) {                                              \
+        jniThrowExceptionFmt(jnienv, "java/lang/IllegalArgumentException", \
+                             "Missing metadata fields for tag %s (%x)",    \
+                             (writer)->getTagName(tagId), (tagId));        \
+        return BAD_VALUE;                                                  \
+    }
+
 #define BAIL_IF_EXPR_RET_NULL_SP(expr, jnienv, tagId, writer) \
     if (expr) { \
         jniThrowExceptionFmt(jnienv, "java/lang/IllegalArgumentException", \
@@ -764,15 +780,76 @@ uint32_t DirectStripSource::getIfd() const {
 // End of DirectStripSource
 // ----------------------------------------------------------------------------
 
+// Get the appropriate tag corresponding to default / maximum resolution mode.
+static int32_t getAppropriateModeTag(int32_t tag, bool maximumResolution) {
+    if (!maximumResolution) {
+        return tag;
+    }
+    switch (tag) {
+        case ANDROID_SENSOR_INFO_PIXEL_ARRAY_SIZE:
+            return ANDROID_SENSOR_INFO_PIXEL_ARRAY_SIZE_MAXIMUM_RESOLUTION;
+        case ANDROID_SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE:
+            return ANDROID_SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE_MAXIMUM_RESOLUTION;
+        case ANDROID_SENSOR_INFO_ACTIVE_ARRAY_SIZE:
+            return ANDROID_SENSOR_INFO_ACTIVE_ARRAY_SIZE_MAXIMUM_RESOLUTION;
+        default:
+            ALOGE("%s: Tag %d doesn't have sensor info related maximum resolution counterpart",
+                  __FUNCTION__, tag);
+            return -1;
+    }
+}
+
+static bool isMaximumResolutionModeImage(const CameraMetadata& characteristics, uint32_t imageWidth,
+                                         uint32_t imageHeight, const sp<TiffWriter> writer,
+                                         JNIEnv* env) {
+    // If this isn't an ultra-high resolution sensor, return false;
+    camera_metadata_ro_entry capabilitiesEntry =
+            characteristics.find(ANDROID_REQUEST_AVAILABLE_CAPABILITIES);
+    size_t capsCount = capabilitiesEntry.count;
+    const uint8_t* caps = capabilitiesEntry.data.u8;
+    if (std::find(caps, caps + capsCount,
+                  ANDROID_REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR) ==
+        caps + capsCount) {
+        // not an ultra-high resolution sensor, cannot have a maximum resolution
+        // mode image.
+        return false;
+    }
+
+    // If the image width and height are either the maximum resolution
+    // pre-correction active array size or the maximum resolution pixel array
+    // size, this image is a maximum resolution RAW_SENSOR image.
+
+    // Check dimensions
+    camera_metadata_ro_entry entry = characteristics.find(
+            ANDROID_SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE_MAXIMUM_RESOLUTION);
+
+    BAIL_IF_EMPTY_RET_BOOL(entry, env, TAG_IMAGEWIDTH, writer);
+
+    uint32_t preWidth = static_cast<uint32_t>(entry.data.i32[2]);
+    uint32_t preHeight = static_cast<uint32_t>(entry.data.i32[3]);
+
+    camera_metadata_ro_entry pixelArrayEntry =
+            characteristics.find(ANDROID_SENSOR_INFO_PIXEL_ARRAY_SIZE_MAXIMUM_RESOLUTION);
+
+    BAIL_IF_EMPTY_RET_BOOL(pixelArrayEntry, env, TAG_IMAGEWIDTH, writer);
+
+    uint32_t pixWidth = static_cast<uint32_t>(pixelArrayEntry.data.i32[0]);
+    uint32_t pixHeight = static_cast<uint32_t>(pixelArrayEntry.data.i32[1]);
+
+    return (imageWidth == preWidth && imageHeight == preHeight) ||
+            (imageWidth == pixWidth && imageHeight == pixHeight);
+}
+
 /**
  * Calculate the default crop relative to the "active area" of the image sensor (this active area
  * will always be the pre-correction active area rectangle), and set this.
  */
 static status_t calculateAndSetCrop(JNIEnv* env, const CameraMetadata& characteristics,
-        sp<TiffWriter> writer) {
-
-    camera_metadata_ro_entry entry =
-            characteristics.find(ANDROID_SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE);
+                                    sp<TiffWriter> writer, bool maximumResolutionMode) {
+    camera_metadata_ro_entry entry = characteristics.find(
+            getAppropriateModeTag(ANDROID_SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE,
+                                  maximumResolutionMode));
+    BAIL_IF_EMPTY_RET_STATUS(entry, env, TAG_IMAGEWIDTH, writer);
     uint32_t width = static_cast<uint32_t>(entry.data.i32[2]);
     uint32_t height = static_cast<uint32_t>(entry.data.i32[3]);
 
@@ -811,11 +888,18 @@ static bool validateDngHeader(JNIEnv* env, sp<TiffWriter> writer,
                         "Image height %d is invalid", height);
         return false;
     }
+    bool isMaximumResolutionMode =
+            isMaximumResolutionModeImage(characteristics, static_cast<uint32_t>(width),
+                                         static_cast<uint32_t>(height), writer, env);
 
-    camera_metadata_ro_entry preCorrectionEntry =
-            characteristics.find(ANDROID_SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE);
-    camera_metadata_ro_entry pixelArrayEntry =
-            characteristics.find(ANDROID_SENSOR_INFO_PIXEL_ARRAY_SIZE);
+    camera_metadata_ro_entry preCorrectionEntry = characteristics.find(
+            getAppropriateModeTag(ANDROID_SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE,
+                                  isMaximumResolutionMode));
+    BAIL_IF_EMPTY_RET_BOOL(preCorrectionEntry, env, TAG_IMAGEWIDTH, writer);
+
+    camera_metadata_ro_entry pixelArrayEntry = characteristics.find(
+            getAppropriateModeTag(ANDROID_SENSOR_INFO_PIXEL_ARRAY_SIZE, isMaximumResolutionMode));
+    BAIL_IF_EMPTY_RET_BOOL(pixelArrayEntry, env, TAG_IMAGEWIDTH, writer);
 
     int pWidth = static_cast<int>(pixelArrayEntry.data.i32[0]);
     int pHeight = static_cast<int>(pixelArrayEntry.data.i32[1]);
@@ -1236,10 +1320,13 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
     uint32_t preHeight = 0;
     uint8_t colorFilter = 0;
     bool isBayer = true;
+    bool isMaximumResolutionMode =
+            isMaximumResolutionModeImage(characteristics, imageWidth, imageHeight, writer, env);
     {
         // Check dimensions
-        camera_metadata_entry entry =
-                characteristics.find(ANDROID_SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE);
+        camera_metadata_entry entry = characteristics.find(
+                getAppropriateModeTag(ANDROID_SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE,
+                                      isMaximumResolutionMode));
         BAIL_IF_EMPTY_RET_NULL_SP(entry, env, TAG_IMAGEWIDTH, writer);
         preXMin = static_cast<uint32_t>(entry.data.i32[0]);
         preYMin = static_cast<uint32_t>(entry.data.i32[1]);
@@ -1247,15 +1334,18 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
         preHeight = static_cast<uint32_t>(entry.data.i32[3]);
 
         camera_metadata_entry pixelArrayEntry =
-                characteristics.find(ANDROID_SENSOR_INFO_PIXEL_ARRAY_SIZE);
+                characteristics.find(getAppropriateModeTag(ANDROID_SENSOR_INFO_PIXEL_ARRAY_SIZE,
+                                                           isMaximumResolutionMode));
+
+        BAIL_IF_EMPTY_RET_NULL_SP(pixelArrayEntry, env, TAG_IMAGEWIDTH, writer);
         uint32_t pixWidth = static_cast<uint32_t>(pixelArrayEntry.data.i32[0]);
         uint32_t pixHeight = static_cast<uint32_t>(pixelArrayEntry.data.i32[1]);
 
         if (!((imageWidth == preWidth && imageHeight == preHeight) ||
                 (imageWidth == pixWidth && imageHeight == pixHeight))) {
             jniThrowException(env, "java/lang/AssertionError",
-                    "Height and width of image buffer did not match height and width of"
-                    "either the preCorrectionActiveArraySize or the pixelArraySize.");
+                              "Height and width of image buffer did not match height and width of"
+                              " either the preCorrectionActiveArraySize or the pixelArraySize.");
             return nullptr;
         }
 
@@ -1773,11 +1863,12 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
 
     {
         // Set dimensions
-        if (calculateAndSetCrop(env, characteristics, writer) != OK) {
+        if (calculateAndSetCrop(env, characteristics, writer, isMaximumResolutionMode) != OK) {
             return nullptr;
         }
-        camera_metadata_entry entry =
-                characteristics.find(ANDROID_SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE);
+        camera_metadata_entry entry = characteristics.find(
+                getAppropriateModeTag(ANDROID_SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE,
+                                      isMaximumResolutionMode));
         BAIL_IF_EMPTY_RET_NULL_SP(entry, env, TAG_ACTIVEAREA, writer);
         uint32_t xmin = static_cast<uint32_t>(entry.data.i32[0]);
         uint32_t ymin = static_cast<uint32_t>(entry.data.i32[1]);
@@ -1872,8 +1963,9 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
 
         camera_metadata_entry entry2 = results.find(ANDROID_STATISTICS_LENS_SHADING_MAP);
 
-        camera_metadata_entry entry =
-                characteristics.find(ANDROID_SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE);
+        camera_metadata_entry entry = characteristics.find(
+                getAppropriateModeTag(ANDROID_SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE,
+                                      isMaximumResolutionMode));
         BAIL_IF_EMPTY_RET_NULL_SP(entry, env, TAG_IMAGEWIDTH, writer);
         uint32_t xmin = static_cast<uint32_t>(entry.data.i32[0]);
         uint32_t ymin = static_cast<uint32_t>(entry.data.i32[1]);
@@ -1899,7 +1991,12 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
         // Hot pixel map is specific to bayer camera per DNG spec.
         if (isBayer) {
             // Set up bad pixel correction list
-            camera_metadata_entry entry3 = characteristics.find(ANDROID_STATISTICS_HOT_PIXEL_MAP);
+            // We first check the capture result. If the hot pixel map is not
+            // available, as a fallback, try the static characteristics.
+            camera_metadata_entry entry3 = results.find(ANDROID_STATISTICS_HOT_PIXEL_MAP);
+            if (entry3.count == 0) {
+                entry3 = characteristics.find(ANDROID_STATISTICS_HOT_PIXEL_MAP);
+            }
 
             if ((entry3.count % 2) != 0) {
                 ALOGE("%s: Hot pixel map contains odd number of values, cannot map to pairs!",
@@ -1908,7 +2005,8 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
                 return nullptr;
             }
 
-            // Adjust the bad pixel coordinates to be relative to the origin of the active area DNG tag
+            // Adjust the bad pixel coordinates to be relative to the origin of the active area
+            // DNG tag
             std::vector<uint32_t> v;
             for (size_t i = 0; i < entry3.count; i += 2) {
                 int32_t x = entry3.data.i32[i];
@@ -1962,6 +2060,8 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
         std::array<float, 6> distortion = {1.f, 0.f, 0.f, 0.f, 0.f, 0.f};
         bool gotDistortion = false;
 
+        // The capture result would have the correct intrinsic calibration
+        // regardless of the sensor pixel mode.
         camera_metadata_entry entry4 =
                 results.find(ANDROID_LENS_INTRINSIC_CALIBRATION);
 

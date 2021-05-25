@@ -22,6 +22,7 @@ import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
+import com.android.server.wm.flicker.annotation.Group2
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.launchSplitScreen
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
@@ -48,6 +49,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
+@Group2
 class EnterSplitScreenSupportNonResizable(
     testSpec: FlickerTestParameter
 ) : LegacySplitScreenTransition(testSpec) {

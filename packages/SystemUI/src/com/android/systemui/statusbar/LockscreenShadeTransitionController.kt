@@ -279,12 +279,14 @@ class LockscreenShadeTransitionController @Inject constructor(
                     nsslController.setTransitionToFullShadeAmount(field)
                     notificationPanelController.setTransitionToFullShadeAmount(field,
                             false /* animate */, 0 /* delay */)
-                    mediaHierarchyManager.setTransitionToFullShadeAmount(field)
                     val scrimProgress = MathUtils.saturate(field / scrimTransitionDistance)
                     scrimController.setTransitionToFullShadeProgress(scrimProgress)
                     // TODO: appear qs also in split shade
                     val qsAmount = if (useSplitShade) 0f else field
                     qS.setTransitionToFullShadeAmount(qsAmount, false /* animate */)
+                    // TODO: appear media also in split shade
+                    val mediaAmount = if (useSplitShade) 0f else field
+                    mediaHierarchyManager.setTransitionToFullShadeAmount(mediaAmount)
                 }
             }
         }

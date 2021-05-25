@@ -385,6 +385,13 @@ interface IWindowManager
     oneway void setRecentsVisibility(boolean visible);
 
     /**
+    * Called by System UI to indicate the maximum bounds of the system Privacy Indicator, for the
+    * current orientation, whether the indicator is showing or not. Should be an array of length
+    * 4, with the bounds for ROTATION_0, 90, 180, and 270, in that order.
+    */
+     oneway void updateStaticPrivacyIndicatorBounds(int displayId, in Rect[] staticBounds);
+
+    /**
      * Called by System UI to enable or disable haptic feedback on the navigation bar buttons.
      */
     @UnsupportedAppUsage

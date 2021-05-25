@@ -50,7 +50,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/quick_qs_status_icons"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="@dimen/qqs_layout_margin_top"
         android:accessibilityTraversalAfter="@id/quick_qs_status_icons"
         android:clipChildren="false"
         android:clipToPadding="false"

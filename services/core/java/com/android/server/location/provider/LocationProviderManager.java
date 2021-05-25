@@ -613,9 +613,9 @@ public class LocationProviderManager extends
             boolean locationSettingsIgnored = baseRequest.isLocationSettingsIgnored();
             if (locationSettingsIgnored) {
                 // if we are not currently allowed use location settings ignored, disable it
-                if (!mSettingsHelper.getIgnoreSettingsPackageWhitelist().contains(
-                        getIdentity().getPackageName()) && !mLocationManagerInternal.isProvider(
-                        null, getIdentity())) {
+                if (!mSettingsHelper.getIgnoreSettingsAllowlist().contains(
+                        getIdentity().getPackageName(), getIdentity().getAttributionTag())
+                        && !mLocationManagerInternal.isProvider(null, getIdentity())) {
                     builder.setLocationSettingsIgnored(false);
                     locationSettingsIgnored = false;
                 }
@@ -1820,7 +1820,7 @@ public class LocationProviderManager extends
                 mBackgroundThrottlePackageWhitelistChangedListener);
         mSettingsHelper.addOnLocationPackageBlacklistChangedListener(
                 mLocationPackageBlacklistChangedListener);
-        mSettingsHelper.addOnIgnoreSettingsPackageWhitelistChangedListener(
+        mSettingsHelper.addIgnoreSettingsAllowlistChangedListener(
                 mIgnoreSettingsPackageWhitelistChangedListener);
         mLocationPermissionsHelper.addListener(mLocationPermissionsListener);
         mAppForegroundHelper.addListener(mAppForegroundChangedListener);
@@ -1841,7 +1841,7 @@ public class LocationProviderManager extends
                 mBackgroundThrottlePackageWhitelistChangedListener);
         mSettingsHelper.removeOnLocationPackageBlacklistChangedListener(
                 mLocationPackageBlacklistChangedListener);
-        mSettingsHelper.removeOnIgnoreSettingsPackageWhitelistChangedListener(
+        mSettingsHelper.removeIgnoreSettingsAllowlistChangedListener(
                 mIgnoreSettingsPackageWhitelistChangedListener);
         mLocationPermissionsHelper.removeListener(mLocationPermissionsListener);
         mAppForegroundHelper.removeListener(mAppForegroundChangedListener);

@@ -88,9 +88,6 @@ interface IInputMethodManager {
     // TODO(Bug 113914148): Consider removing this.
     oneway void getInputMethodWindowVisibleHeight(IIntResultCallback resultCallback);
 
-    oneway void reportActivityViewAsync(in IInputMethodClient parentClient, int childDisplayId,
-            in float[] matrixValues);
-
     oneway void reportPerceptibleAsync(in IBinder windowToken, boolean perceptible);
     /** Remove the IME surface. Requires INTERNAL_SYSTEM_WINDOW permission. */
     oneway void removeImeSurface(in IVoidResultCallback resultCallback);

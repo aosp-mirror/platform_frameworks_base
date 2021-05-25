@@ -386,9 +386,17 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
         return false;
     }
 
-    private static boolean isOngoingCallNotif(NotificationEntry entry) {
-        return entry.getSbn().isOngoing() && Notification.CATEGORY_CALL.equals(
-                entry.getSbn().getNotification().category);
+    /**
+     * Determines if the notification is for a critical call that must display on top of an active
+     * input notification.
+     * The call isOngoing check is for a special case of incoming calls (see b/164291424).
+     */
+    private static boolean isCriticalCallNotif(NotificationEntry entry) {
+        Notification n = entry.getSbn().getNotification();
+        boolean isIncomingCall = n.isStyle(Notification.CallStyle.class) && n.extras.getInt(
+                Notification.EXTRA_CALL_TYPE) == Notification.CallStyle.CALL_TYPE_INCOMING;
+        return isIncomingCall || (entry.getSbn().isOngoing()
+                && Notification.CATEGORY_CALL.equals(n.category));
     }
 
     /**
@@ -423,8 +431,8 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
                 return 1;
             }
 
-            boolean selfCall = isOngoingCallNotif(mEntry);
-            boolean otherCall = isOngoingCallNotif(headsUpEntry.mEntry);
+            boolean selfCall = isCriticalCallNotif(mEntry);
+            boolean otherCall = isCriticalCallNotif(headsUpEntry.mEntry);
 
             if (selfCall && !otherCall) {
                 return -1;

@@ -18,12 +18,12 @@ package android.app.appsearch;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
-import android.annotation.UserIdInt;
 import android.app.appsearch.aidl.AppSearchResultParcel;
 import android.app.appsearch.aidl.IAppSearchManager;
 import android.app.appsearch.aidl.IAppSearchResultCallback;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.util.Log;
 
 import com.android.internal.util.Preconditions;
@@ -45,24 +45,23 @@ public class GlobalSearchSession implements Closeable {
     private static final String TAG = "AppSearchGlobalSearchSe";
 
     private final String mPackageName;
-    @UserIdInt
-    private final int mUserId;
+    private final UserHandle mUserHandle;
     private final IAppSearchManager mService;
 
     private boolean mIsMutated = false;
     private boolean mIsClosed = false;
 
     /**
-     * Creates a search session for the client, defined by the {@code userId} and
+     * Creates a search session for the client, defined by the {@code userHandle} and
      * {@code packageName}.
      */
     static void createGlobalSearchSession(
             @NonNull IAppSearchManager service,
-            @UserIdInt int userId,
+            @NonNull UserHandle userHandle,
             @NonNull String packageName,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull Consumer<AppSearchResult<GlobalSearchSession>> callback) {
-        GlobalSearchSession globalSearchSession = new GlobalSearchSession(service, userId,
+        GlobalSearchSession globalSearchSession = new GlobalSearchSession(service, userHandle,
                 packageName);
         globalSearchSession.initialize(executor, callback);
     }
@@ -73,7 +72,8 @@ public class GlobalSearchSession implements Closeable {
             @NonNull @CallbackExecutor Executor executor,
             @NonNull Consumer<AppSearchResult<GlobalSearchSession>> callback) {
         try {
-            mService.initialize(mUserId,
+            mService.initialize(
+                    mUserHandle,
                     /*binderCallStartTimeMillis=*/ SystemClock.elapsedRealtime(),
                     new IAppSearchResultCallback.Stub() {
                         @Override
@@ -95,10 +95,10 @@ public class GlobalSearchSession implements Closeable {
         }
     }
 
-    private GlobalSearchSession(@NonNull IAppSearchManager service, @UserIdInt int userId,
+    private GlobalSearchSession(@NonNull IAppSearchManager service, @NonNull UserHandle userHandle,
             @NonNull String packageName) {
         mService = service;
-        mUserId = userId;
+        mUserHandle = userHandle;
         mPackageName = packageName;
     }
 
@@ -127,7 +127,7 @@ public class GlobalSearchSession implements Closeable {
         Objects.requireNonNull(searchSpec);
         Preconditions.checkState(!mIsClosed, "GlobalSearchSession has already been closed");
         return new SearchResults(mService, mPackageName, /*databaseName=*/null, queryExpression,
-                searchSpec, mUserId);
+                searchSpec, mUserHandle);
     }
 
     /**
@@ -165,7 +165,7 @@ public class GlobalSearchSession implements Closeable {
                     request.getDocumentId(),
                     request.getUsageTimestampMillis(),
                     /*systemUsage=*/ true,
-                    mUserId,
+                    mUserHandle,
                     new IAppSearchResultCallback.Stub() {
                         @Override
                         public void onResult(AppSearchResultParcel resultParcel) {
@@ -186,8 +186,8 @@ public class GlobalSearchSession implements Closeable {
     public void close() {
         if (mIsMutated && !mIsClosed) {
             try {
-                mService.persistToDisk(mUserId,
-                        /*binderCallStartTimeMillis=*/ SystemClock.elapsedRealtime());
+                mService.persistToDisk(
+                        mUserHandle, /*binderCallStartTimeMillis=*/ SystemClock.elapsedRealtime());
                 mIsClosed = true;
             } catch (RemoteException e) {
                 Log.e(TAG, "Unable to close the GlobalSearchSession", e);

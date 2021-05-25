@@ -56,7 +56,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
     @NonNull private final KeyguardViewMediator mKeyguardViewMediator;
     @NonNull private final UdfpsController mUdfpsController;
 
-    @Nullable private Runnable mCancelRunnable;
+    @Nullable private Runnable mCancelDelayedHintRunnable;
     private boolean mShowingUdfpsBouncer;
     private boolean mUdfpsRequested;
     private boolean mQsExpanded;
@@ -64,7 +64,6 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
     private boolean mHintShown;
     private boolean mTransitioningFromHome;
     private int mStatusBarState;
-    private boolean mKeyguardIsVisible;
 
     /**
      * hidden amount of pin/pattern/password bouncer
@@ -111,7 +110,6 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         mUdfpsRequested = false;
         mStatusBarState = mStatusBarStateController.getState();
         mQsExpanded = mKeyguardViewManager.isQsExpanded();
-        mKeyguardIsVisible = mKeyguardUpdateMonitor.isKeyguardVisible();
         mInputBouncerHiddenAmount = KeyguardBouncer.EXPANSION_HIDDEN;
         updateAlpha();
         updatePauseAuth();
@@ -131,9 +129,9 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         mTransitioningFromHome = false;
         mKeyguardUpdateMonitor.requestFaceAuthOnOccludingApp(false);
 
-        if (mCancelRunnable != null) {
-            mCancelRunnable.run();
-            mCancelRunnable = null;
+        if (mCancelDelayedHintRunnable != null) {
+            mCancelDelayedHintRunnable.run();
+            mCancelDelayedHintRunnable = null;
         }
     }
 
@@ -145,7 +143,6 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         pw.println("mTransitioningFromHomeToKeyguard=" + mTransitioningFromHome);
         pw.println("mStatusBarState=" + StatusBarState.toShortString(mStatusBarState));
         pw.println("mQsExpanded=" + mQsExpanded);
-        pw.println("mKeyguardVisible=" + mKeyguardIsVisible);
         pw.println("mIsBouncerVisible=" + mIsBouncerVisible);
         pw.println("mInputBouncerHiddenAmount=" + mInputBouncerHiddenAmount);
         pw.println("mAlpha=" + mView.getAlpha());
@@ -205,11 +202,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
             return true;
         }
 
-        if (!mKeyguardIsVisible) {
-            return true;
-        }
-
-        if (mInputBouncerHiddenAmount < .4f) {
+        if (mInputBouncerHiddenAmount < .4f || mIsBouncerVisible) {
             return true;
         }
 
@@ -240,9 +233,9 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
     }
 
     private void cancelDelayedHint() {
-        if (mCancelRunnable != null) {
-            mCancelRunnable.run();
-            mCancelRunnable = null;
+        if (mCancelDelayedHintRunnable != null) {
+            mCancelDelayedHintRunnable.run();
+            mCancelDelayedHintRunnable = null;
         }
     }
 
@@ -252,9 +245,9 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         }
 
         // show udfps hint a few seconds after face auth started running
-        if (!mFaceDetectRunning && running && !mHintShown && mCancelRunnable == null) {
+        if (!mFaceDetectRunning && running && !mHintShown && mCancelDelayedHintRunnable == null) {
             // Face detect started running, show udfps hint after a delay
-            mCancelRunnable = mExecutor.executeDelayed(() -> showHint(false),
+            mCancelDelayedHintRunnable = mExecutor.executeDelayed(() -> showHint(false),
                     AFTER_FACE_AUTH_HINT_DELAY);
         }
 
@@ -328,11 +321,6 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
                         cancelDelayedHint();
                     }
                 }
-
-                public void onKeyguardVisibilityChangedRaw(boolean showing) {
-                    mKeyguardIsVisible = showing;
-                    updatePauseAuth();
-                }
             };
 
     private final StatusBarKeyguardViewManager.AlternateAuthInterceptor mAlternateAuthInterceptor =
@@ -385,6 +373,9 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
                 @Override
                 public void onBouncerVisibilityChanged() {
                     mIsBouncerVisible = mKeyguardViewManager.bouncerIsOrWillBeShowing();
+                    if (!mIsBouncerVisible) {
+                        mInputBouncerHiddenAmount = 1f;
+                    }
                     updatePauseAuth();
                 }
 

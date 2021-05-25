@@ -28,10 +28,8 @@
     <string name="pip_skip_to_next" msgid="8403429188794867653">"Passer au suivant"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"Revenir au précédent"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"Redimensionner"</string>
-    <!-- no translation found for accessibility_action_pip_stash (4060775037619702641) -->
-    <skip />
-    <!-- no translation found for accessibility_action_pip_unstash (7467499339610437646) -->
-    <skip />
+    <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"Ajouter à la réserve"</string>
+    <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Retirer de la réserve"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"Il est possible que l\'application ne fonctionne pas en mode Écran partagé."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"L\'application n\'est pas compatible avec l\'écran partagé."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Il est possible que l\'application ne fonctionne pas sur un écran secondaire."</string>

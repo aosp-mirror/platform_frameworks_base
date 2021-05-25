@@ -108,8 +108,6 @@ public final class BluetoothPan implements BluetoothProfile {
      * {@link #TETHERING_STATE_ON}
      */
     @RequiresLegacyBluetoothPermission
-    @RequiresBluetoothConnectPermission
-    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_TETHERING_STATE_CHANGED =
             "android.bluetooth.action.TETHERING_STATE_CHANGED";

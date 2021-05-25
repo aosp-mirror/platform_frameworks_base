@@ -46,7 +46,6 @@ import android.util.SparseArray;
 import android.util.SparseIntArray;
 
 import java.security.PublicKey;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -922,4 +921,10 @@ public interface ParsingPackageRead extends Parcelable {
      * same as toAppInfoWithoutState except without flag computation.
      */
     ApplicationInfo toAppInfoWithoutStateWithoutFlags();
+
+    /**
+     * Whether or not the app has said its attribution tags can be made user-visible.
+     * @see ApplicationInfo#areAttributionsUserVisible()
+     */
+    boolean areAttributionsUserVisible();
 }

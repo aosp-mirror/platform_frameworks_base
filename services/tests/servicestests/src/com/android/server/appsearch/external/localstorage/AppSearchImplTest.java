@@ -455,7 +455,8 @@ public class AppSearchImplTest {
         // delete 999 documents, we will reach the threshold to trigger optimize() in next
         // deletion.
         for (int i = 0; i < AppSearchImpl.OPTIMIZE_THRESHOLD_DOC_COUNT - 1; i++) {
-            mAppSearchImpl.remove("package", "database", "namespace", "id" + i);
+            mAppSearchImpl.remove(
+                    "package", "database", "namespace", "id" + i, /*removeStatsBuilder=*/ null);
         }
 
         // Updates the check for optimize counter, checkForOptimize() will be triggered since
@@ -475,7 +476,8 @@ public class AppSearchImplTest {
                         < AppSearchImpl.OPTIMIZE_THRESHOLD_DOC_COUNT
                                 + AppSearchImpl.CHECK_OPTIMIZE_INTERVAL;
                 i++) {
-            mAppSearchImpl.remove("package", "database", "namespace", "id" + i);
+            mAppSearchImpl.remove(
+                    "package", "database", "namespace", "id" + i, /*removeStatsBuilder=*/ null);
         }
         // updates the check for optimize counter, will reach both CHECK_OPTIMIZE_INTERVAL and
         // OPTIMIZE_THRESHOLD_DOC_COUNT this time and trigger a optimize().
@@ -885,17 +887,20 @@ public class AppSearchImplTest {
                         .addFilterSchemas("FakeType")
                         .setTermMatch(TermMatchType.Code.PREFIX_VALUE)
                         .build();
-        mAppSearchImpl.removeByQuery("package", "EmptyDatabase", "", searchSpec);
+        mAppSearchImpl.removeByQuery(
+                "package", "EmptyDatabase", "", searchSpec, /*statsBuilder=*/ null);
 
         searchSpec =
                 new SearchSpec.Builder()
                         .addFilterNamespaces("FakeNamespace")
                         .setTermMatch(TermMatchType.Code.PREFIX_VALUE)
                         .build();
-        mAppSearchImpl.removeByQuery("package", "EmptyDatabase", "", searchSpec);
+        mAppSearchImpl.removeByQuery(
+                "package", "EmptyDatabase", "", searchSpec, /*statsBuilder=*/ null);
 
         searchSpec = new SearchSpec.Builder().setTermMatch(TermMatchType.Code.PREFIX_VALUE).build();
-        mAppSearchImpl.removeByQuery("package", "EmptyDatabase", "", searchSpec);
+        mAppSearchImpl.removeByQuery(
+                "package", "EmptyDatabase", "", searchSpec, /*statsBuilder=*/ null);
     }
 
     @Test
@@ -1661,8 +1666,7 @@ public class AppSearchImplTest {
                         context,
                         VisibilityStore.NO_OP_USER_ID,
                         /*globalQuerierPackage=*/ "",
-                        /*logger
-                        =*/ null);
+                        /*logger=*/ null);
 
         // Initial check that we could do something at first.
         List<AppSearchSchema> schemas =
@@ -1768,7 +1772,8 @@ public class AppSearchImplTest {
         expectThrows(
                 IllegalStateException.class,
                 () -> {
-                    appSearchImpl.remove("package", "database", "namespace", "id");
+                    appSearchImpl.remove(
+                            "package", "database", "namespace", "id", /*statsBuilder=*/ null);
                 });
 
         expectThrows(
@@ -1780,7 +1785,8 @@ public class AppSearchImplTest {
                             "query",
                             new SearchSpec.Builder()
                                     .setTermMatch(TermMatchType.Code.PREFIX_VALUE)
-                                    .build());
+                                    .build(),
+                            /*statsBuilder=*/ null);
                 });
 
         expectThrows(
@@ -1894,7 +1900,7 @@ public class AppSearchImplTest {
         assertThat(getResult).isEqualTo(document2);
 
         // Delete the first document
-        appSearchImpl.remove("package", "database", "namespace1", "id1");
+        appSearchImpl.remove("package", "database", "namespace1", "id1", /*statsBuilder=*/ null);
         appSearchImpl.persistToDisk(PersistType.Code.LITE);
         expectThrows(
                 AppSearchException.class,
@@ -1983,7 +1989,8 @@ public class AppSearchImplTest {
                 new SearchSpec.Builder()
                         .addFilterNamespaces("namespace1")
                         .setTermMatch(SearchSpec.TERM_MATCH_EXACT_ONLY)
-                        .build());
+                        .build(),
+                /*statsBuilder=*/ null);
         appSearchImpl.persistToDisk(PersistType.Code.LITE);
         expectThrows(
                 AppSearchException.class,

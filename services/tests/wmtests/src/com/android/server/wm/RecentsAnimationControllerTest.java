@@ -553,6 +553,31 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
     }
 
     @Test
+    public void testAddTaskToTargets_expectAnimation() {
+        setupForShouldAttachNavBarDuringTransition();
+        final ActivityRecord activity = createActivityRecord(mDefaultDisplay);
+        final ActivityRecord homeActivity = createHomeActivity();
+        initializeRecentsAnimationController(mController, homeActivity);
+
+        final WindowToken navToken = mDefaultDisplay.getDisplayPolicy().getNavigationBar().mToken;
+        final SurfaceControl.Transaction transaction = navToken.getPendingTransaction();
+
+        verify(mController.mStatusBar).setNavigationBarLumaSamplingEnabled(
+                eq(mDefaultDisplay.mDisplayId), eq(false));
+        verify(transaction).reparent(navToken.getSurfaceControl(), activity.getSurfaceControl());
+        verify(transaction).setLayer(navToken.getSurfaceControl(), Integer.MAX_VALUE);
+
+        final WindowContainer parent = navToken.getParent();
+
+        mController.addTaskToTargets(createTask(mDefaultDisplay), (type, anim) -> {});
+        mController.cleanupAnimation(REORDER_MOVE_TO_ORIGINAL_POSITION);
+        verify(mController).restoreNavigationBarFromApp(eq(true));
+        verify(mController.mStatusBar).setNavigationBarLumaSamplingEnabled(
+                eq(mDefaultDisplay.mDisplayId), eq(true));
+        verify(transaction).setLayer(navToken.getSurfaceControl(), 0);
+    }
+
+    @Test
     public void testNotAttachNavigationBar_controlledByFadeRotationAnimation() {
         setupForShouldAttachNavBarDuringTransition();
         FadeRotationAnimationController mockController =

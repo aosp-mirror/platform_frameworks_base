@@ -246,7 +246,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
      * gesture to indicate to them that they can continue in that orientation without having to
      * rotate the phone
      * The secondary handle will show when we get
-     * {@link OverviewProxyListener#onQuickSwitchToNewTask(int)} callback with the
+     * {@link OverviewProxyListener#notifyPrioritizedRotation(int)} callback with the
      * original handle hidden and we'll flip the visibilities once the
      * {@link #mTasksFrozenListener} fires
      */
@@ -319,7 +319,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         }
 
         @Override
-        public void onQuickSwitchToNewTask(@Surface.Rotation int rotation) {
+        public void onPrioritizedRotation(@Surface.Rotation int rotation) {
             mStartingQuickSwitchRotation = rotation;
             if (rotation == -1) {
                 mShowOrientedHandleForImmersiveMode = false;

@@ -145,6 +145,7 @@ public:
 
     GrDirectContext* getGrContext() const { return mGrContext.get(); }
     void setGrContext(sk_sp<GrDirectContext> cxt);
+    sk_sp<GrDirectContext> requireGrContext();
 
     CacheManager& cacheManager() { return *mCacheManager; }
     VulkanManager& vulkanManager();

@@ -16,16 +16,22 @@
 
 package com.android.systemui.media
 
+import android.content.Context
+import android.content.res.Configuration
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.VisibleForTesting
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.media.dagger.MediaModule.KEYGUARD
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.statusbar.FeatureFlags
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.notification.stack.MediaHeaderView
 import com.android.systemui.statusbar.phone.KeyguardBypassController
+import com.android.systemui.statusbar.policy.ConfigurationController
+import com.android.systemui.util.Utils
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -38,7 +44,10 @@ class KeyguardMediaController @Inject constructor(
     @param:Named(KEYGUARD) private val mediaHost: MediaHost,
     private val bypassController: KeyguardBypassController,
     private val statusBarStateController: SysuiStatusBarStateController,
-    private val notifLockscreenUserManager: NotificationLockscreenUserManager
+    private val notifLockscreenUserManager: NotificationLockscreenUserManager,
+    private val featureFlags: FeatureFlags,
+    private val context: Context,
+    configurationController: ConfigurationController
 ) {
 
     init {
@@ -46,12 +55,10 @@ class KeyguardMediaController @Inject constructor(
             override fun onStateChanged(newState: Int) {
                 refreshMediaPosition()
             }
-
-            override fun onDozingChanged(isDozing: Boolean) {
-                if (!isDozing) {
-                    mediaHost.visible = true
-                    refreshMediaPosition()
-                }
+        })
+        configurationController.addCallback(object : ConfigurationController.ConfigurationListener {
+            override fun onConfigChanged(newConfig: Configuration?) {
+                updateResources()
             }
         })
 
@@ -62,7 +69,23 @@ class KeyguardMediaController @Inject constructor(
 
         // Let's now initialize this view, which also creates the host view for us.
         mediaHost.init(MediaHierarchyManager.LOCATION_LOCKSCREEN)
+        updateResources()
     }
+
+    private fun updateResources() {
+        useSplitShade = Utils.shouldUseSplitNotificationShade(featureFlags, context.resources)
+    }
+
+    @VisibleForTesting
+    var useSplitShade = false
+        set(value) {
+            if (field == value) {
+                return
+            }
+            field = value
+            reattachHostView()
+            refreshMediaPosition()
+        }
 
     /**
      * Is the media player visible?
@@ -78,34 +101,63 @@ class KeyguardMediaController @Inject constructor(
     var singlePaneContainer: MediaHeaderView? = null
         private set
     private var splitShadeContainer: ViewGroup? = null
-    private var useSplitShadeContainer: () -> Boolean = { false }
 
     /**
      * Attaches media container in single pane mode, situated at the top of the notifications list
      */
     fun attachSinglePaneContainer(mediaView: MediaHeaderView?) {
+        val needsListener = singlePaneContainer == null
         singlePaneContainer = mediaView
+        if (needsListener) {
+            // On reinflation we don't want to add another listener
+            mediaHost.addVisibilityChangeListener(this::onMediaHostVisibilityChanged)
+        }
+        reattachHostView()
+        onMediaHostVisibilityChanged(mediaHost.visible)
+    }
 
-        // Required to show it for the first time, afterwards visibility is managed automatically
-        mediaHost.visible = true
-        mediaHost.addVisibilityChangeListener { visible ->
-            refreshMediaPosition()
-            if (visible) {
-                mediaHost.hostView.layoutParams.apply {
-                    height = ViewGroup.LayoutParams.WRAP_CONTENT
-                    width = ViewGroup.LayoutParams.MATCH_PARENT
-                }
+    /**
+     * Called whenever the media hosts visibility changes
+     */
+    private fun onMediaHostVisibilityChanged(visible: Boolean) {
+        refreshMediaPosition()
+        if (visible) {
+            mediaHost.hostView.layoutParams.apply {
+                height = ViewGroup.LayoutParams.WRAP_CONTENT
+                width = ViewGroup.LayoutParams.MATCH_PARENT
             }
         }
-        refreshMediaPosition()
     }
 
     /**
      * Attaches media container in split shade mode, situated to the left of notifications
      */
-    fun attachSplitShadeContainer(container: ViewGroup, useContainer: () -> Boolean) {
+    fun attachSplitShadeContainer(container: ViewGroup) {
         splitShadeContainer = container
-        useSplitShadeContainer = useContainer
+        reattachHostView()
+        refreshMediaPosition()
+    }
+
+    private fun reattachHostView() {
+        val inactiveContainer: ViewGroup?
+        val activeContainer: ViewGroup?
+        if (useSplitShade) {
+            activeContainer = splitShadeContainer
+            inactiveContainer = singlePaneContainer
+        } else {
+            inactiveContainer = splitShadeContainer
+            activeContainer = singlePaneContainer
+        }
+        if (inactiveContainer?.childCount == 1) {
+            inactiveContainer.removeAllViews()
+        }
+        if (activeContainer?.childCount == 0) {
+            // Detach the hostView from its parent view if exists
+            mediaHost.hostView.parent?.let {
+                (it as? ViewGroup)?.removeView(mediaHost.hostView)
+            }
+            activeContainer.addView(mediaHost.hostView)
+        }
     }
 
     fun refreshMediaPosition() {
@@ -124,35 +176,17 @@ class KeyguardMediaController @Inject constructor(
     }
 
     private fun showMediaPlayer() {
-        if (useSplitShadeContainer()) {
-            showMediaPlayer(
-                    activeContainer = splitShadeContainer,
-                    inactiveContainer = singlePaneContainer)
+        if (useSplitShade) {
+            setVisibility(splitShadeContainer, View.VISIBLE)
+            setVisibility(singlePaneContainer, View.GONE)
         } else {
-            showMediaPlayer(
-                    activeContainer = singlePaneContainer,
-                    inactiveContainer = splitShadeContainer)
+            setVisibility(singlePaneContainer, View.VISIBLE)
+            setVisibility(splitShadeContainer, View.GONE)
         }
-    }
-
-    private fun showMediaPlayer(activeContainer: ViewGroup?, inactiveContainer: ViewGroup?) {
-        if (inactiveContainer?.childCount == 1) {
-            inactiveContainer.removeAllViews()
-        }
-        // might be called a few times for the same view, no need to add hostView again
-        if (activeContainer?.childCount == 0) {
-            // Detach the hostView from its parent view if exists
-            mediaHost.hostView.parent ?.let {
-                (it as? ViewGroup)?.removeView(mediaHost.hostView)
-            }
-            activeContainer.addView(mediaHost.hostView)
-        }
-        setVisibility(activeContainer, View.VISIBLE)
-        setVisibility(inactiveContainer, View.GONE)
     }
 
     private fun hideMediaPlayer() {
-        if (useSplitShadeContainer()) {
+        if (useSplitShade) {
             setVisibility(splitShadeContainer, View.GONE)
         } else {
             setVisibility(singlePaneContainer, View.GONE)

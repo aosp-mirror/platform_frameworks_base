@@ -332,9 +332,6 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
 
     @Override
     public boolean updateResources() {
-        setPadding(0, 0, 0,
-                getContext().getResources().getDimensionPixelSize(
-                        R.dimen.qs_paged_tile_layout_padding_bottom));
         boolean changed = false;
         for (int i = 0; i < mPages.size(); i++) {
             changed |= mPages.get(i).updateResources();

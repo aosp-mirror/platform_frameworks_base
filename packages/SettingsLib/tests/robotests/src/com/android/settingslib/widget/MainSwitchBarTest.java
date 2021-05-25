@@ -59,6 +59,16 @@ public class MainSwitchBarTest {
     }
 
     @Test
+    public void setTitle_switchShouldHasContentDescription() {
+        final String title = "title";
+
+        mBar.setTitle(title);
+
+        final Switch switchObj = mBar.getSwitch();
+        assertThat(switchObj.getContentDescription()).isEqualTo(title);
+    }
+
+    @Test
     public void getSwitch_shouldNotNull() {
         final Switch switchObj = mBar.getSwitch();
 

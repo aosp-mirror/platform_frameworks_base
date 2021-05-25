@@ -103,7 +103,7 @@ public final class StartingWindowInfo implements Parcelable {
             TYPE_PARAMETER_PROCESS_RUNNING,
             TYPE_PARAMETER_ALLOW_TASK_SNAPSHOT,
             TYPE_PARAMETER_ACTIVITY_CREATED,
-            TYPE_PARAMETER_SAME_PACKAGE
+            TYPE_PARAMETER_USE_EMPTY_SPLASH_SCREEN
     })
     public @interface StartingTypeParams {}
 
@@ -121,7 +121,7 @@ public final class StartingWindowInfo implements Parcelable {
     /** @hide */
     public static final int TYPE_PARAMETER_ACTIVITY_CREATED = 0x00000010;
     /** @hide */
-    public static final int TYPE_PARAMETER_SAME_PACKAGE = 0x00000020;
+    public static final int TYPE_PARAMETER_USE_EMPTY_SPLASH_SCREEN = 0x00000020;
 
     /**
      * The parameters which effect the starting window type.

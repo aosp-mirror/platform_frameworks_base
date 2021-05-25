@@ -983,7 +983,7 @@
     <string name="quick_settings_nfc_on">NFC is enabled</string>
 
     <!-- QuickSettings: Screen record tile [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_screen_record_label">Screen Record</string>
+    <string name="quick_settings_screen_record_label">Screen record</string>
     <!-- QuickSettings: Text to prompt the user to begin a new recording [CHAR LIMIT=20] -->
     <string name="quick_settings_screen_record_start">Start</string>
     <!-- QuickSettings: Text to prompt the user to stop an ongoing recording [CHAR LIMIT=20] -->

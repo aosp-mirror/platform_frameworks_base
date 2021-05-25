@@ -49,6 +49,7 @@ import android.platform.test.annotations.Presubmit;
 import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.InsetsState;
+import android.view.PrivacyIndicatorBounds;
 import android.view.RoundedCorners;
 import android.view.Surface;
 import android.view.SurfaceControl;
@@ -152,7 +153,7 @@ public class WallpaperControllerTests extends WindowTestsBase {
         final DisplayInfo info = dc.computeScreenConfiguration(config, Surface.ROTATION_0);
         final WmDisplayCutout cutout = dc.calculateDisplayCutoutForRotation(Surface.ROTATION_0);
         final DisplayFrames displayFrames = new DisplayFrames(dc.getDisplayId(), new InsetsState(),
-                info, cutout, RoundedCorners.NO_ROUNDED_CORNERS);
+                info, cutout, RoundedCorners.NO_ROUNDED_CORNERS, new PrivacyIndicatorBounds());
         wallpaperWindowToken.applyFixedRotationTransform(info, displayFrames, config);
 
         // Check that the wallpaper has the same frame in landscape than in portrait

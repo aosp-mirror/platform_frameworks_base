@@ -19,13 +19,13 @@ package android.app.appsearch;
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UserIdInt;
 import android.app.appsearch.aidl.AppSearchResultParcel;
 import android.app.appsearch.aidl.IAppSearchManager;
 import android.app.appsearch.aidl.IAppSearchResultCallback;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.util.Log;
 
 import com.android.internal.util.Preconditions;
@@ -66,8 +66,7 @@ public class SearchResults implements Closeable {
 
     private final SearchSpec mSearchSpec;
 
-    @UserIdInt
-    private final int mUserId;
+    private final UserHandle mUserHandle;
 
     private long mNextPageToken;
 
@@ -81,13 +80,13 @@ public class SearchResults implements Closeable {
             @Nullable String databaseName,
             @NonNull String queryExpression,
             @NonNull SearchSpec searchSpec,
-            @UserIdInt int userId) {
+            @NonNull UserHandle userHandle) {
         mService = Objects.requireNonNull(service);
         mPackageName = packageName;
         mDatabaseName = databaseName;
         mQueryExpression = Objects.requireNonNull(queryExpression);
         mSearchSpec = Objects.requireNonNull(searchSpec);
-        mUserId = userId;
+        mUserHandle = Objects.requireNonNull(userHandle);
     }
 
     /**
@@ -114,18 +113,18 @@ public class SearchResults implements Closeable {
                 if (mDatabaseName == null) {
                     // Global query, there's no one package-database combination to check.
                     mService.globalQuery(mPackageName, mQueryExpression,
-                            mSearchSpec.getBundle(), mUserId,
+                            mSearchSpec.getBundle(), mUserHandle,
                             binderCallStartTimeMillis,
                             wrapCallback(executor, callback));
                 } else {
                     // Normal local query, pass in specified database.
                     mService.query(mPackageName, mDatabaseName, mQueryExpression,
-                            mSearchSpec.getBundle(), mUserId,
+                            mSearchSpec.getBundle(), mUserHandle,
                             binderCallStartTimeMillis,
                             wrapCallback(executor, callback));
                 }
             } else {
-                mService.getNextPage(mNextPageToken, mUserId, wrapCallback(executor, callback));
+                mService.getNextPage(mNextPageToken, mUserHandle, wrapCallback(executor, callback));
             }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -136,7 +135,7 @@ public class SearchResults implements Closeable {
     public void close() {
         if (!mIsClosed) {
             try {
-                mService.invalidateNextPageToken(mNextPageToken, mUserId);
+                mService.invalidateNextPageToken(mNextPageToken, mUserHandle);
                 mIsClosed = true;
             } catch (RemoteException e) {
                 Log.e(TAG, "Unable to close the SearchResults", e);

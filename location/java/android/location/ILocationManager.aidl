@@ -41,6 +41,7 @@ import android.location.provider.IProviderRequestListener;
 import android.location.provider.ProviderProperties;
 import android.os.Bundle;
 import android.os.ICancellationSignal;
+import android.os.PackageTagsList;
 
 /**
  * System private API for talking with the location service.
@@ -133,5 +134,5 @@ interface ILocationManager
 
     // used by gts tests to verify whitelists
     String[] getBackgroundThrottlingWhitelist();
-    String[] getIgnoreSettingsWhitelist();
+    PackageTagsList getIgnoreSettingsAllowlist();
 }

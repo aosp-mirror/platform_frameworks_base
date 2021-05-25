@@ -26,12 +26,15 @@ import com.android.internal.util.DataClass;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
+import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 /**
  * Capability class holding information for a pair of {@link TranslationSpec}s.
  *
  * <p>Holds information and limitations on how to create a {@link TranslationContext} which can
- * be used by {@link TranslationManager#createTranslator(TranslationContext)}.
+ * be used by
+ * {@link TranslationManager#createOnDeviceTranslator(TranslationContext, Executor, Consumer)}.
  */
 @DataClass(genHiddenConstDefs = true, genToString = true, genConstructor = false)
 public final class TranslationCapability implements Parcelable {
@@ -290,7 +293,7 @@ public final class TranslationCapability implements Parcelable {
     };
 
     @DataClass.Generated(
-            time = 1619119609557L,
+            time = 1621545303074L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/view/translation/TranslationCapability.java",
             inputSignatures = "public static final @android.view.translation.TranslationCapability.ModelState int STATE_AVAILABLE_TO_DOWNLOAD\npublic static final @android.view.translation.TranslationCapability.ModelState int STATE_DOWNLOADING\npublic static final @android.view.translation.TranslationCapability.ModelState int STATE_ON_DEVICE\npublic static final @android.view.translation.TranslationCapability.ModelState int STATE_NOT_AVAILABLE\nprivate final @android.view.translation.TranslationCapability.ModelState int mState\nprivate final @android.annotation.NonNull android.view.translation.TranslationSpec mSourceSpec\nprivate final @android.annotation.NonNull android.view.translation.TranslationSpec mTargetSpec\nprivate final  boolean mUiTranslationEnabled\nprivate final @android.view.translation.TranslationContext.TranslationFlag int mSupportedTranslationFlags\nclass TranslationCapability extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genHiddenConstDefs=true, genToString=true, genConstructor=false)")

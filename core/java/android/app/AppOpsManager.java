@@ -49,6 +49,7 @@ import android.os.HandlerExecutor;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.PackageTagsList;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Process;
@@ -1588,14 +1589,14 @@ public class AppOpsManager {
      *
      * @hide
      */
-    @TestApi
+    @SystemApi
     public static final String OPSTR_PHONE_CALL_MICROPHONE = "android:phone_call_microphone";
     /**
      * Phone call is using camera
      *
      * @hide
      */
-    @TestApi
+    @SystemApi
     public static final String OPSTR_PHONE_CALL_CAMERA = "android:phone_call_camera";
 
     /**
@@ -3058,9 +3059,22 @@ public class AppOpsManager {
          */
         public boolean isRecordAudioRestrictionExcept;
 
+        /**
+         * Is attribution tag not null and not contained in the package attributions
+         */
+        public boolean isAttributionTagNotFound = false;
+
         public RestrictionBypass(boolean isPrivileged, boolean isRecordAudioRestrictionExcept) {
             this.isPrivileged = isPrivileged;
             this.isRecordAudioRestrictionExcept = isRecordAudioRestrictionExcept;
+        }
+
+        public void setIsAttributionTagNotFound(boolean isAttributionTagNotFound) {
+            this.isAttributionTagNotFound = isAttributionTagNotFound;
+        }
+
+        public boolean getIsAttributionTagNotFound() {
+            return this.isAttributionTagNotFound;
         }
 
         public static RestrictionBypass UNRESTRICTED = new RestrictionBypass(true, true);
@@ -7394,7 +7408,7 @@ public class AppOpsManager {
 
     /** @hide */
     public void setUserRestriction(int code, boolean restricted, IBinder token) {
-        setUserRestriction(code, restricted, token, (Map<String, String[]>) null);
+        setUserRestriction(code, restricted, token, null);
     }
 
     /**
@@ -7402,7 +7416,7 @@ public class AppOpsManager {
      * @hide
      */
     public void setUserRestriction(int code, boolean restricted, IBinder token,
-            @Nullable Map<String, String[]> excludedPackageTags) {
+            @Nullable PackageTagsList excludedPackageTags) {
         setUserRestrictionForUser(code, restricted, token, excludedPackageTags,
                 mContext.getUserId());
     }
@@ -7412,7 +7426,7 @@ public class AppOpsManager {
      * @hide
      */
     public void setUserRestrictionForUser(int code, boolean restricted, IBinder token,
-            @Nullable Map<String, String[]> excludedPackageTags, int userId) {
+            @Nullable PackageTagsList excludedPackageTags, int userId) {
         try {
             mService.setUserRestriction(code, restricted, token, userId, excludedPackageTags);
         } catch (RemoteException e) {

@@ -110,8 +110,7 @@ public:
     }
 
     bool requiresLayer() const {
-        return !(isEmpty() ||
-                 Properties::getStretchEffectBehavior() == StretchEffectBehavior::UniformScale);
+        return !isEmpty();
     }
 
 private:

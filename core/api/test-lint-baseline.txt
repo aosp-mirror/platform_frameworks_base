@@ -413,8 +413,6 @@ ForbiddenSuperClass: android.app.AppDetailsActivity:
     
 
 
-GenericException: android.app.ActivityView#finalize():
-    
 GenericException: android.app.prediction.AppPredictor#finalize():
     
 GenericException: android.service.autofill.CharSequenceTransformation#apply(android.service.autofill.ValueFinder, android.widget.RemoteViews, int):
@@ -601,20 +599,6 @@ MinMaxConstant: android.view.autofill.AutofillManager#MAX_TEMP_AUGMENTED_SERVICE
     
 
 
-MissingGetterMatchingBuilder: android.app.ActivityView.Builder#setAttributeSet(android.util.AttributeSet):
-    
-MissingGetterMatchingBuilder: android.app.ActivityView.Builder#setDefaultStyle(int):
-    
-MissingGetterMatchingBuilder: android.app.ActivityView.Builder#setDisableSurfaceViewBackgroundLayer(boolean):
-    
-MissingGetterMatchingBuilder: android.app.ActivityView.Builder#setSingleInstance(boolean):
-    
-MissingGetterMatchingBuilder: android.app.ActivityView.Builder#setUsePublicVirtualDisplay(boolean):
-    
-MissingGetterMatchingBuilder: android.app.ActivityView.Builder#setUseTrustedDisplay(boolean):
-    
-MissingGetterMatchingBuilder: android.app.AppOpsManager.HistoricalOpsRequest.Builder#setAttributionTag(String):
-    
 MissingGetterMatchingBuilder: android.app.AppOpsManager.HistoricalOpsRequest.Builder#setFlags(int):
     
 MissingGetterMatchingBuilder: android.app.AppOpsManager.HistoricalOpsRequest.Builder#setOpNames(java.util.List<java.lang.String>):
@@ -790,36 +774,6 @@ MissingNullability: android.app.ActivityTaskManager#setTaskWindowingModeSplitScr
 MissingNullability: android.app.ActivityTaskManager#supportsMultiWindow(android.content.Context) parameter #0:
     
 MissingNullability: android.app.ActivityTaskManager#supportsSplitScreenMultiWindow(android.content.Context) parameter #0:
-    
-MissingNullability: android.app.ActivityView#ActivityView(android.content.Context) parameter #0:
-    
-MissingNullability: android.app.ActivityView#ActivityView(android.content.Context, android.util.AttributeSet) parameter #0:
-    
-MissingNullability: android.app.ActivityView#ActivityView(android.content.Context, android.util.AttributeSet) parameter #1:
-    
-MissingNullability: android.app.ActivityView#ActivityView(android.content.Context, android.util.AttributeSet, int) parameter #0:
-    
-MissingNullability: android.app.ActivityView#ActivityView(android.content.Context, android.util.AttributeSet, int) parameter #1:
-    
-MissingNullability: android.app.ActivityView#ActivityView(android.content.Context, android.util.AttributeSet, int, boolean) parameter #0:
-    
-MissingNullability: android.app.ActivityView#ActivityView(android.content.Context, android.util.AttributeSet, int, boolean) parameter #1:
-    
-MissingNullability: android.app.ActivityView#gatherTransparentRegion(android.graphics.Region) parameter #0:
-    
-MissingNullability: android.app.ActivityView#onVisibilityChanged(android.view.View, int) parameter #0:
-    
-MissingNullability: android.app.ActivityView#setCallback(android.app.ActivityView.StateCallback) parameter #0:
-    
-MissingNullability: android.app.ActivityView#setForwardedInsets(android.graphics.Insets) parameter #0:
-    
-MissingNullability: android.app.ActivityView#startActivity(android.content.Intent, android.os.UserHandle) parameter #1:
-    
-MissingNullability: android.app.ActivityView.StateCallback#onActivityViewDestroyed(android.app.ActivityView) parameter #0:
-    
-MissingNullability: android.app.ActivityView.StateCallback#onActivityViewReady(android.app.ActivityView) parameter #0:
-    
-MissingNullability: android.app.ActivityView.StateCallback#onTaskCreated(int, android.content.ComponentName) parameter #1:
     
 MissingNullability: android.app.AppDetailsActivity#onCreate(android.os.Bundle) parameter #0:
     
@@ -2641,8 +2595,6 @@ NoSettingsProvider: android.provider.Settings.Secure#VOICE_INTERACTION_SERVICE:
     
 
 
-NotCloseable: android.app.ActivityView:
-    
 NotCloseable: android.app.prediction.AppPredictor:
     
 NotCloseable: android.net.EthernetManager.TetheredInterfaceRequest:
@@ -2773,8 +2725,6 @@ ParcelNotFinal: android.service.autofill.InternalValidator:
     
 
 
-ProtectedMember: android.app.ActivityView#onVisibilityChanged(android.view.View, int):
-    
 ProtectedMember: android.app.AppDetailsActivity#onCreate(android.os.Bundle):
     
 ProtectedMember: android.os.VibrationEffect#scale(int, float, int):
@@ -3025,8 +2975,6 @@ UserHandle: android.telecom.TelecomManager#getDefaultDialerPackage(android.os.Us
     
 
 
-UserHandleName: android.app.ActivityView#startActivity(android.content.Intent, android.os.UserHandle):
-    
 UserHandleName: android.content.AutofillOptions:
     
 UserHandleName: android.content.ContentCaptureOptions:

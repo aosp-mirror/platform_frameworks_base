@@ -2329,10 +2329,14 @@ public final class PowerManagerService extends SystemService
             final int numWakeLocks = mWakeLocks.size();
             for (int i = 0; i < numWakeLocks; i++) {
                 final WakeLock wakeLock = mWakeLocks.get(i);
+                final Integer groupId = wakeLock.getDisplayGroupId();
+                if (groupId == null) {
+                    continue;
+                }
+
                 final int wakeLockFlags = getWakeLockSummaryFlags(wakeLock);
                 mWakeLockSummary |= wakeLockFlags;
 
-                final int groupId = wakeLock.getDisplayGroupId();
                 if (groupId != Display.INVALID_DISPLAY_GROUP) {
                     int wakeLockSummary = mDisplayGroupPowerStateMapper.getWakeLockSummaryLocked(
                             groupId);
@@ -4876,13 +4880,19 @@ public final class PowerManagerService extends SystemService
             mWorkSource = copyWorkSource(workSource);
         }
 
-        public int getDisplayGroupId() {
+        /** Returns the DisplayGroup Id of this wakeLock or {@code null} if no longer valid. */
+        public Integer getDisplayGroupId() {
             if (!mSystemReady || mDisplayId == Display.INVALID_DISPLAY) {
                 return Display.INVALID_DISPLAY_GROUP;
             }
 
+            final int[] ids = mDisplayGroupPowerStateMapper.getDisplayGroupIdsLocked();
             final DisplayInfo displayInfo = mDisplayManagerInternal.getDisplayInfo(mDisplayId);
-            return displayInfo == null ? Display.INVALID_DISPLAY_GROUP : displayInfo.displayGroupId;
+            if (displayInfo != null && ArrayUtils.contains(ids, displayInfo.displayGroupId)) {
+                return displayInfo.displayGroupId;
+            }
+
+            return null;
         }
 
         @Override

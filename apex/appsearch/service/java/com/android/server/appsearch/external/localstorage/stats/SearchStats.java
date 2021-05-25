@@ -52,6 +52,9 @@ public final class SearchStats {
     // Searches the global documents. Including platform surfaceable and 3p-access.
     public static final int VISIBILITY_SCOPE_GLOBAL = 2;
 
+    // TODO(b/173532925): Add a field searchType to indicate where the search is used(normal
+    //  query vs in removeByQuery vs during migration)
+
     @NonNull private final String mPackageName;
     @Nullable private final String mDatabase;
     /**

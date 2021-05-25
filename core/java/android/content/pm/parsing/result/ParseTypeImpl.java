@@ -119,6 +119,8 @@ public class ParseTypeImpl implements ParseInput, ParseResult<Object> {
             // how many APKs they're going through.
             mDeferredErrors.erase();
         }
+        mPackageName = null;
+        mTargetSdkVersion = null;
         return this;
     }
 

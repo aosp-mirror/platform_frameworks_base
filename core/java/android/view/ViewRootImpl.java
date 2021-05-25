@@ -3372,9 +3372,9 @@ public final class ViewRootImpl implements ViewParent,
         }
         // TODO (b/131181940): Make sure this doesn't leak Activity with mActivityConfigCallback
         // config changes.
-        final View focusedView = mView != null ? mView.findFocus() : null;
         if (hasWindowFocus) {
-            mInsetsController.onWindowFocusGained(focusedView != null /* hasViewFocused */);
+            mInsetsController.onWindowFocusGained(
+                    getFocusedViewOrNull() != null /* hasViewFocused */);
         } else {
             mInsetsController.onWindowFocusLost();
         }
@@ -3423,7 +3423,8 @@ public final class ViewRootImpl implements ViewParent,
 
             // Note: must be done after the focus change callbacks,
             // so all of the view state is set up correctly.
-            mImeFocusController.onPostWindowFocus(focusedView, hasWindowFocus, mWindowAttributes);
+            mImeFocusController.onPostWindowFocus(
+                    getFocusedViewOrNull(), hasWindowFocus, mWindowAttributes);
 
             if (hasWindowFocus) {
                 // Clear the forward bit.  We can just do this directly, since
@@ -6390,6 +6391,11 @@ public final class ViewRootImpl implements ViewParent,
             return;
         }
         mView.dispatchTooltipHoverEvent(event);
+    }
+
+    @Nullable
+    private View getFocusedViewOrNull() {
+        return mView != null ? mView.findFocus() : null;
     }
 
     /**

@@ -315,9 +315,23 @@ public class VolumeDialogImpl implements VolumeDialog,
             final View view = mDialogView.getChildAt(i);
             final int[] locInWindow = new int[2];
             view.getLocationInWindow(locInWindow);
+
+            float x = locInWindow[0];
+            float y = locInWindow[1];
+
+            // The ringer and rows container has extra height at the top to fit the expanded ringer
+            // drawer. This area should not be touchable unless the ringer drawer is open.
+            if (view == mRingerAndRowsContainer && !mIsRingerDrawerOpen) {
+                if (!isLandscape()) {
+                    y += getRingerDrawerOpenExtraSize();
+                } else {
+                    x += getRingerDrawerOpenExtraSize();
+                }
+            }
+
             mTouchableRegion.op(
-                    locInWindow[0],
-                    locInWindow[1],
+                    (int) x,
+                    (int) y,
                     locInWindow[0] + view.getWidth(),
                     locInWindow[1] + view.getHeight(),
                     Region.Op.UNION);
@@ -697,10 +711,10 @@ public class VolumeDialogImpl implements VolumeDialog,
                     mDialogView.getPaddingLeft(),
                     mDialogView.getPaddingTop(),
                     mDialogView.getPaddingRight(),
-                    mDialogView.getPaddingBottom() + getRingerDrawerOpenExtraHeight());
+                    mDialogView.getPaddingBottom() + getRingerDrawerOpenExtraSize());
         } else {
             mDialogView.setPadding(
-                    mDialogView.getPaddingLeft() + getRingerDrawerOpenExtraHeight(),
+                    mDialogView.getPaddingLeft() + getRingerDrawerOpenExtraSize(),
                     mDialogView.getPaddingTop(),
                     mDialogView.getPaddingRight(),
                     mDialogView.getPaddingBottom());
@@ -1720,10 +1734,11 @@ public class VolumeDialogImpl implements VolumeDialog,
     }
 
     /**
-     * Return the height of the 1-2 extra ringer options that are made visible when the ringer
-     * drawer is opened.
+     * Return the size of the 1-2 extra ringer options that are made visible when the ringer drawer
+     * is opened. The drawer options are square so this can be used for height calculations (when in
+     * portrait, and the drawer opens upward) or for width (when opening sideways in landscape).
      */
-    private int getRingerDrawerOpenExtraHeight() {
+    private int getRingerDrawerOpenExtraSize() {
         return (mRingerCount - 1) * mRingerDrawerItemSize;
     }
 
@@ -1737,7 +1752,7 @@ public class VolumeDialogImpl implements VolumeDialog,
         }
 
         final Rect bounds = mRingerAndRowsContainerBackground.copyBounds();
-        bounds.top = (int) (drawerClosedAmount * getRingerDrawerOpenExtraHeight());
+        bounds.top = (int) (drawerClosedAmount * getRingerDrawerOpenExtraSize());
         mRingerAndRowsContainerBackground.setBounds(bounds);
     }
 

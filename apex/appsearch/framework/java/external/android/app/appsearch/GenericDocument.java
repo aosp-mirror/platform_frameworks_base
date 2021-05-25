@@ -27,8 +27,6 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.Log;
 
-import com.android.internal.util.Preconditions;
-
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1018,16 +1016,13 @@ public class GenericDocument {
     // GenericDocument.
     @SuppressLint("StaticFinalBuilder")
     public static class Builder<BuilderType extends Builder> {
-
-        private final Bundle mBundle;
-        private final Bundle mProperties;
+        private Bundle mBundle;
+        private Bundle mProperties;
         private final BuilderType mBuilderTypeInstance;
         private boolean mBuilt = false;
 
         /**
          * Creates a new {@link GenericDocument.Builder}.
-         *
-         * <p>Once {@link #build} is called, the instance can no longer be used.
          *
          * <p>Document IDs are unique within a namespace.
          *
@@ -1053,9 +1048,6 @@ public class GenericDocument {
             mBundle.putString(GenericDocument.NAMESPACE_FIELD, namespace);
             mBundle.putString(GenericDocument.ID_FIELD, id);
             mBundle.putString(GenericDocument.SCHEMA_TYPE_FIELD, schemaType);
-            // Set current timestamp for creation timestamp by default.
-            mBundle.putLong(
-                    GenericDocument.CREATION_TIMESTAMP_MILLIS_FIELD, System.currentTimeMillis());
             mBundle.putLong(GenericDocument.TTL_MILLIS_FIELD, DEFAULT_TTL_MILLIS);
             mBundle.putInt(GenericDocument.SCORE_FIELD, DEFAULT_SCORE);
 
@@ -1063,7 +1055,11 @@ public class GenericDocument {
             mBundle.putBundle(PROPERTIES_FIELD, mProperties);
         }
 
-        /** Creates a new {@link GenericDocument.Builder} from the given Bundle. */
+        /**
+         * Creates a new {@link GenericDocument.Builder} from the given Bundle.
+         *
+         * <p>The bundle is NOT copied.
+         */
         @SuppressWarnings("unchecked")
         Builder(@NonNull Bundle bundle) {
             mBundle = Objects.requireNonNull(bundle);
@@ -1079,13 +1075,12 @@ public class GenericDocument {
          *
          * <p>The number of namespaces per app should be kept small for efficiency reasons.
          *
-         * @throws IllegalStateException if the builder has already been used.
          * @hide
          */
         @NonNull
         public BuilderType setNamespace(@NonNull String namespace) {
-            Preconditions.checkState(!mBuilt, "Builder has already been used");
             Objects.requireNonNull(namespace);
+            resetIfBuilt();
             mBundle.putString(GenericDocument.NAMESPACE_FIELD, namespace);
             return mBuilderTypeInstance;
         }
@@ -1096,13 +1091,12 @@ public class GenericDocument {
          *
          * <p>Document IDs are unique within a namespace.
          *
-         * @throws IllegalStateException if the builder has already been used.
          * @hide
          */
         @NonNull
         public BuilderType setId(@NonNull String id) {
-            Preconditions.checkState(!mBuilt, "Builder has already been used");
             Objects.requireNonNull(id);
+            resetIfBuilt();
             mBundle.putString(GenericDocument.ID_FIELD, id);
             return mBuilderTypeInstance;
         }
@@ -1113,13 +1107,12 @@ public class GenericDocument {
          * <p>To successfully index a document, the schema type must match the name of an {@link
          * AppSearchSchema} object previously provided to {@link AppSearchSession#setSchema}.
          *
-         * @throws IllegalStateException if the builder has already been used.
          * @hide
          */
         @NonNull
         public BuilderType setSchemaType(@NonNull String schemaType) {
-            Preconditions.checkState(!mBuilt, "Builder has already been used");
             Objects.requireNonNull(schemaType);
+            resetIfBuilt();
             mBundle.putString(GenericDocument.SCHEMA_TYPE_FIELD, schemaType);
             return mBuilderTypeInstance;
         }
@@ -1136,14 +1129,13 @@ public class GenericDocument {
          * <p>Any non-negative integer can be used a score. By default, scores are set to 0.
          *
          * @param score any non-negative {@code int} representing the document's score.
-         * @throws IllegalStateException if the builder has already been used.
          */
         @NonNull
         public BuilderType setScore(@IntRange(from = 0, to = Integer.MAX_VALUE) int score) {
-            Preconditions.checkState(!mBuilt, "Builder has already been used");
             if (score < 0) {
                 throw new IllegalArgumentException("Document score cannot be negative.");
             }
+            resetIfBuilt();
             mBundle.putInt(GenericDocument.SCORE_FIELD, score);
             return mBuilderTypeInstance;
         }
@@ -1154,13 +1146,14 @@ public class GenericDocument {
          * <p>This should be set using a value obtained from the {@link System#currentTimeMillis}
          * time base.
          *
+         * <p>If this method is not called, this will be set to the time the object is built.
+         *
          * @param creationTimestampMillis a creation timestamp in milliseconds.
-         * @throws IllegalStateException if the builder has already been used.
          */
         @NonNull
         public BuilderType setCreationTimestampMillis(
                 @CurrentTimeMillisLong long creationTimestampMillis) {
-            Preconditions.checkState(!mBuilt, "Builder has already been used");
+            resetIfBuilt();
             mBundle.putLong(
                     GenericDocument.CREATION_TIMESTAMP_MILLIS_FIELD, creationTimestampMillis);
             return mBuilderTypeInstance;
@@ -1177,14 +1170,13 @@ public class GenericDocument {
          * auto-deleted until the app is uninstalled or {@link AppSearchSession#remove} is called.
          *
          * @param ttlMillis a non-negative duration in milliseconds.
-         * @throws IllegalStateException if the builder has already been used.
          */
         @NonNull
         public BuilderType setTtlMillis(long ttlMillis) {
-            Preconditions.checkState(!mBuilt, "Builder has already been used");
             if (ttlMillis < 0) {
                 throw new IllegalArgumentException("Document ttlMillis cannot be negative.");
             }
+            resetIfBuilt();
             mBundle.putLong(GenericDocument.TTL_MILLIS_FIELD, ttlMillis);
             return mBuilderTypeInstance;
         }
@@ -1197,13 +1189,12 @@ public class GenericDocument {
          * @param values the {@code String} values of the property.
          * @throws IllegalArgumentException if no values are provided, if provided values exceed
          *     maximum repeated property length, or if a passed in {@code String} is {@code null}.
-         * @throws IllegalStateException if the builder has already been used.
          */
         @NonNull
         public BuilderType setPropertyString(@NonNull String name, @NonNull String... values) {
-            Preconditions.checkState(!mBuilt, "Builder has already been used");
             Objects.requireNonNull(name);
             Objects.requireNonNull(values);
+            resetIfBuilt();
             putInPropertyBundle(name, values);
             return mBuilderTypeInstance;
         }
@@ -1216,13 +1207,12 @@ public class GenericDocument {
          *     property as given in {@link AppSearchSchema.PropertyConfig#getName}.
          * @param values the {@code boolean} values of the property.
          * @throws IllegalArgumentException if values exceed maximum repeated property length.
-         * @throws IllegalStateException if the builder has already been used.
          */
         @NonNull
         public BuilderType setPropertyBoolean(@NonNull String name, @NonNull boolean... values) {
-            Preconditions.checkState(!mBuilt, "Builder has already been used");
             Objects.requireNonNull(name);
             Objects.requireNonNull(values);
+            resetIfBuilt();
             putInPropertyBundle(name, values);
             return mBuilderTypeInstance;
         }
@@ -1234,13 +1224,12 @@ public class GenericDocument {
          *     property as given in {@link AppSearchSchema.PropertyConfig#getName}.
          * @param values the {@code long} values of the property.
          * @throws IllegalArgumentException if values exceed maximum repeated property length.
-         * @throws IllegalStateException if the builder has already been used.
          */
         @NonNull
         public BuilderType setPropertyLong(@NonNull String name, @NonNull long... values) {
-            Preconditions.checkState(!mBuilt, "Builder has already been used");
             Objects.requireNonNull(name);
             Objects.requireNonNull(values);
+            resetIfBuilt();
             putInPropertyBundle(name, values);
             return mBuilderTypeInstance;
         }
@@ -1252,13 +1241,12 @@ public class GenericDocument {
          *     property as given in {@link AppSearchSchema.PropertyConfig#getName}.
          * @param values the {@code double} values of the property.
          * @throws IllegalArgumentException if values exceed maximum repeated property length.
-         * @throws IllegalStateException if the builder has already been used.
          */
         @NonNull
         public BuilderType setPropertyDouble(@NonNull String name, @NonNull double... values) {
-            Preconditions.checkState(!mBuilt, "Builder has already been used");
             Objects.requireNonNull(name);
             Objects.requireNonNull(values);
+            resetIfBuilt();
             putInPropertyBundle(name, values);
             return mBuilderTypeInstance;
         }
@@ -1271,13 +1259,12 @@ public class GenericDocument {
          * @param values the {@code byte[]} of the property.
          * @throws IllegalArgumentException if no values are provided, if provided values exceed
          *     maximum repeated property length, or if a passed in {@code byte[]} is {@code null}.
-         * @throws IllegalStateException if the builder has already been used.
          */
         @NonNull
         public BuilderType setPropertyBytes(@NonNull String name, @NonNull byte[]... values) {
-            Preconditions.checkState(!mBuilt, "Builder has already been used");
             Objects.requireNonNull(name);
             Objects.requireNonNull(values);
+            resetIfBuilt();
             putInPropertyBundle(name, values);
             return mBuilderTypeInstance;
         }
@@ -1292,14 +1279,13 @@ public class GenericDocument {
          * @throws IllegalArgumentException if no values are provided, if provided values exceed if
          *     provided values exceed maximum repeated property length, or if a passed in {@link
          *     GenericDocument} is {@code null}.
-         * @throws IllegalStateException if the builder has already been used.
          */
         @NonNull
         public BuilderType setPropertyDocument(
                 @NonNull String name, @NonNull GenericDocument... values) {
-            Preconditions.checkState(!mBuilt, "Builder has already been used");
             Objects.requireNonNull(name);
             Objects.requireNonNull(values);
+            resetIfBuilt();
             putInPropertyBundle(name, values);
             return mBuilderTypeInstance;
         }
@@ -1314,8 +1300,8 @@ public class GenericDocument {
          */
         @NonNull
         public BuilderType clearProperty(@NonNull String name) {
-            Preconditions.checkState(!mBuilt, "Builder has already been used");
             Objects.requireNonNull(name);
+            resetIfBuilt();
             mProperties.remove(name);
             return mBuilderTypeInstance;
         }
@@ -1399,16 +1385,25 @@ public class GenericDocument {
             }
         }
 
-        /**
-         * Builds the {@link GenericDocument} object.
-         *
-         * @throws IllegalStateException if the builder has already been used.
-         */
+        /** Builds the {@link GenericDocument} object. */
         @NonNull
         public GenericDocument build() {
-            Preconditions.checkState(!mBuilt, "Builder has already been used");
             mBuilt = true;
+            // Set current timestamp for creation timestamp by default.
+            if (mBundle.getLong(GenericDocument.CREATION_TIMESTAMP_MILLIS_FIELD, -1) == -1) {
+                mBundle.putLong(
+                        GenericDocument.CREATION_TIMESTAMP_MILLIS_FIELD,
+                        System.currentTimeMillis());
+            }
             return new GenericDocument(mBundle);
+        }
+
+        private void resetIfBuilt() {
+            if (mBuilt) {
+                mBundle = BundleUtil.deepCopy(mBundle);
+                mProperties = mBundle.getBundle(PROPERTIES_FIELD);
+                mBuilt = false;
+            }
         }
     }
 }

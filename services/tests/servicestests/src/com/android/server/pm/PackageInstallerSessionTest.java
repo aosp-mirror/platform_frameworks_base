@@ -29,8 +29,6 @@ import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import androidx.test.runner.AndroidJUnit4;
@@ -165,6 +163,7 @@ public class PackageInstallerSessionTest {
                 /* context */null,
                 /* pm */ mMockPackageManagerInternal,
                 /* sessionProvider */ null,
+                /* silentUpdatePolicy */ null,
                 /* looper */ BackgroundThread.getHandler().getLooper(),
                 /* stagingManager */ null,
                 /* sessionId */ sessionId,
@@ -239,7 +238,7 @@ public class PackageInstallerSessionTest {
                             session = PackageInstallerSession.readFromXml(in, null,
                                     null, mMockPackageManagerInternal,
                                     BackgroundThread.getHandler().getLooper(), null,
-                                    mTmpDir, null);
+                                    mTmpDir, null, null);
                             ret.add(session);
                         } catch (Exception e) {
                             Slog.e("PackageInstallerSessionTest", "Exception ", e);

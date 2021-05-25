@@ -549,8 +549,28 @@ package android.view {
 
 package android.view.translation {
 
+  public final class TranslationManager {
+    method @Deprecated public void addOnDeviceTranslationCapabilityUpdateListener(int, int, @NonNull android.app.PendingIntent);
+    method @Deprecated public void addTranslationCapabilityUpdateListener(int, int, @NonNull android.app.PendingIntent);
+    method @Deprecated @Nullable @WorkerThread public android.view.translation.Translator createOnDeviceTranslator(@NonNull android.view.translation.TranslationContext);
+    method @Deprecated @Nullable @WorkerThread public android.view.translation.Translator createTranslator(@NonNull android.view.translation.TranslationContext);
+    method @Deprecated @NonNull @WorkerThread public java.util.Set<android.view.translation.TranslationCapability> getTranslationCapabilities(int, int);
+    method @Deprecated @Nullable public android.app.PendingIntent getTranslationSettingsActivityIntent();
+    method @Deprecated public void removeOnDeviceTranslationCapabilityUpdateListener(int, int, @NonNull android.app.PendingIntent);
+    method @Deprecated public void removeTranslationCapabilityUpdateListener(int, int, @NonNull android.app.PendingIntent);
+  }
+
+  public final class TranslationSpec implements android.os.Parcelable {
+    ctor @Deprecated public TranslationSpec(@NonNull String, int);
+    method @Deprecated @NonNull public String getLanguage();
+  }
+
   public class Translator {
     method @Deprecated @Nullable public void translate(@NonNull android.view.translation.TranslationRequest, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.view.translation.TranslationResponse>);
+  }
+
+  public interface UiTranslationStateCallback {
+    method @Deprecated public default void onStarted(@NonNull String, @NonNull String);
   }
 
 }

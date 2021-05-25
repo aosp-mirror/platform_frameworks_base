@@ -78,7 +78,7 @@ public final class TranslationResponse implements Parcelable {
     abstract static class BaseBuilder {
 
         /**
-         * @deprecated Use {@link Builder#Builder(int)}.
+         * @removed Use {@link Builder#Builder(int)}.
          * @hide
          */
         @Deprecated
@@ -447,7 +447,7 @@ public final class TranslationResponse implements Parcelable {
     }
 
     @DataClass.Generated(
-            time = 1617218030666L,
+            time = 1620089618357L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/view/translation/TranslationResponse.java",
             inputSignatures = "public static final  int TRANSLATION_STATUS_SUCCESS\npublic static final  int TRANSLATION_STATUS_UNKNOWN_ERROR\npublic static final  int TRANSLATION_STATUS_CONTEXT_UNSUPPORTED\nprivate final @android.view.translation.TranslationResponse.TranslationStatus int mTranslationStatus\nprivate final @android.annotation.NonNull android.util.SparseArray<android.view.translation.TranslationResponseValue> mTranslationResponseValues\nprivate final @android.annotation.NonNull android.util.SparseArray<android.view.translation.ViewTranslationResponse> mViewTranslationResponses\nprivate final  boolean mFinalResponse\nprivate static  android.util.SparseArray<android.view.translation.TranslationResponseValue> defaultTranslationResponseValues()\nprivate static  android.util.SparseArray<android.view.translation.ViewTranslationResponse> defaultViewTranslationResponses()\nprivate static  boolean defaultFinalResponse()\nclass TranslationResponse extends java.lang.Object implements [android.os.Parcelable]\npublic abstract @java.lang.Deprecated android.view.translation.TranslationResponse.Builder setTranslationStatus(int)\npublic @android.annotation.NonNull @java.lang.SuppressWarnings android.view.translation.TranslationResponse.Builder setTranslationResponseValue(int,android.view.translation.TranslationResponseValue)\npublic @android.annotation.NonNull @java.lang.SuppressWarnings android.view.translation.TranslationResponse.Builder setViewTranslationResponse(int,android.view.translation.ViewTranslationResponse)\nclass BaseBuilder extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genBuilder=true, genToString=true, genHiddenConstDefs=true)\npublic abstract @java.lang.Deprecated android.view.translation.TranslationResponse.Builder setTranslationStatus(int)\npublic @android.annotation.NonNull @java.lang.SuppressWarnings android.view.translation.TranslationResponse.Builder setTranslationResponseValue(int,android.view.translation.TranslationResponseValue)\npublic @android.annotation.NonNull @java.lang.SuppressWarnings android.view.translation.TranslationResponse.Builder setViewTranslationResponse(int,android.view.translation.ViewTranslationResponse)\nclass BaseBuilder extends java.lang.Object implements []")

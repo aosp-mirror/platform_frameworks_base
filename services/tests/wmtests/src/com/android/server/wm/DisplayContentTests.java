@@ -31,6 +31,7 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.FLAG_PRIVATE;
 import static android.view.DisplayCutout.BOUNDS_POSITION_TOP;
 import static android.view.DisplayCutout.fromBoundingRect;
+import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.Surface.ROTATION_0;
@@ -2137,6 +2138,31 @@ public class DisplayContentTests extends WindowTestsBase {
     public void testRemoveRootTaskWithActivityTypes() {
         removeRootTaskTests(() -> mRootWindowContainer.removeRootTasksWithActivityTypes(
                 ACTIVITY_TYPE_STANDARD));
+    }
+
+    @UseTestDisplay(addWindows = W_INPUT_METHOD)
+    @Test
+    public void testImeChildWindowFocusWhenImeLayeringTargetChanges() {
+        final WindowState imeChildWindow =
+                createWindow(mImeWindow, TYPE_APPLICATION_ATTACHED_DIALOG, "imeChildWindow");
+        makeWindowVisibleAndDrawn(imeChildWindow, mImeWindow);
+        assertTrue(imeChildWindow.canReceiveKeys());
+        mDisplayContent.setInputMethodWindowLocked(mImeWindow);
+
+        // Verify imeChildWindow can be focused window if the next IME target requests IME visible.
+        final WindowState imeAppTarget =
+                createWindow(null, TYPE_BASE_APPLICATION, mDisplayContent, "imeAppTarget");
+        mDisplayContent.setImeLayeringTarget(imeAppTarget);
+        spyOn(imeAppTarget);
+        doReturn(true).when(imeAppTarget).getRequestedVisibility(ITYPE_IME);
+        assertEquals(imeChildWindow, mDisplayContent.findFocusedWindow());
+
+        // Verify imeChildWindow doesn't be focused window if the next IME target does not
+        // request IME visible.
+        final WindowState nextImeAppTarget =
+                createWindow(null, TYPE_BASE_APPLICATION, mDisplayContent, "nextImeAppTarget");
+        mDisplayContent.setImeLayeringTarget(nextImeAppTarget);
+        assertNotEquals(imeChildWindow, mDisplayContent.findFocusedWindow());
     }
 
     private void removeRootTaskTests(Runnable runnable) {

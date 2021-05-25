@@ -16,6 +16,20 @@
 
 package com.android.server.pm;
 
+import static com.google.common.truth.Truth.assertThat;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertThrows;
+
 import android.apex.ApexSessionInfo;
 import android.content.Context;
 import android.content.IntentSender;
@@ -31,8 +45,6 @@ import com.android.dx.mockito.inline.extended.ExtendedMockito;
 import com.android.internal.content.PackageHelper;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.Preconditions;
-
-import static com.google.common.truth.Truth.assertThat;
 
 import org.junit.After;
 import org.junit.Before;
@@ -51,18 +63,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertThrows;
 
 @Presubmit
 @RunWith(JUnit4.class)
@@ -472,6 +472,7 @@ public class StagingManagerTest {
                 /* context */ null,
                 /* pm */ null,
                 /* sessionProvider */ null,
+                /* silentUpdatePolicy */ null,
                 /* looper */ BackgroundThread.getHandler().getLooper(),
                 /* stagingManager */ null,
                 /* sessionId */ sessionId,

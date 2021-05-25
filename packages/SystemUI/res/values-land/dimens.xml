@@ -22,13 +22,15 @@
     <dimen name="docked_divider_handle_width">2dp</dimen>
     <dimen name="docked_divider_handle_height">16dp</dimen>
 
-    <dimen name="qs_tile_margin_top">8dp</dimen>
-
+    <dimen name="qs_tile_height">84dp</dimen>
+    <dimen name="qs_brightness_margin_top">0dp</dimen>
+    <dimen name="qs_brightness_margin_bottom">12dp</dimen>
+    <dimen name="qqs_layout_margin_top">8dp</dimen>
     <!-- The height of the qs customize header. Should be
-    (qs_panel_padding_top (48dp) +  brightness_mirror_height (48dp) + qs_tile_margin_top (8dp)) -
+    (qs_panel_padding_top (48dp) +  brightness_mirror_height (48dp) + qs_brightness_margin_top (0dp) + qs_brightness_margin_bottom (12dp)) -
     (Toolbar_minWidth (56dp) + qs_tile_margin_top_bottom (4dp))
     -->
-    <dimen name="qs_customize_header_min_height">44dp</dimen>
+    <dimen name="qs_customize_header_min_height">48dp</dimen>
 
     <dimen name="qs_security_footer_single_line_height">@*android:dimen/quick_qs_offset_height</dimen>
     <dimen name="qs_footer_padding">14dp</dimen>

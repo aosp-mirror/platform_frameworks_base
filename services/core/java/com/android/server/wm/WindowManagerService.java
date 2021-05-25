@@ -5945,6 +5945,20 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    @Override
+    public void updateStaticPrivacyIndicatorBounds(int displayId,
+            Rect[] staticBounds) {
+        synchronized (mGlobalLock) {
+            final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
+            if (displayContent != null) {
+                displayContent.updatePrivacyIndicatorBounds(staticBounds);
+            } else {
+                Slog.w(TAG, "updateStaticPrivacyIndicatorBounds with invalid displayId="
+                        + displayId);
+            }
+        }
+    }
+
     public void setNavBarVirtualKeyHapticFeedbackEnabled(boolean enabled) {
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.STATUS_BAR)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -8091,11 +8105,10 @@ public class WindowManagerService extends IWindowManager.Stub
             // This could prevent if there is no container animation, we still have to apply the
             // pending transaction and exit waiting.
             mAnimator.mNotifyWhenNoAnimation = true;
-            WindowContainer animatingContainer = null;
-            while (mAnimator.isAnimationScheduled() || timeoutRemaining > 0) {
-                animatingContainer = mRoot.getAnimatingContainer(TRANSITION | CHILDREN,
-                        ANIMATION_TYPE_ALL);
-                if (animatingContainer == null) {
+            while (timeoutRemaining > 0) {
+                boolean isAnimating = mAnimator.isAnimationScheduled()
+                        || mRoot.isAnimating(TRANSITION | CHILDREN, ANIMATION_TYPE_ALL);
+                if (!isAnimating) {
                     break;
                 }
                 long startTime = System.currentTimeMillis();
@@ -8107,6 +8120,9 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             mAnimator.mNotifyWhenNoAnimation = false;
 
+            WindowContainer animatingContainer;
+            animatingContainer = mRoot.getAnimatingContainer(TRANSITION | CHILDREN,
+                    ANIMATION_TYPE_ALL);
             if (mAnimator.isAnimationScheduled() || animatingContainer != null) {
                 Slog.w(TAG, "Timed out waiting for animations to complete,"
                         + " animatingContainer=" + animatingContainer

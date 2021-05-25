@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.view.Display.INVALID_DISPLAY;
@@ -368,6 +369,29 @@ public class LaunchParamsControllerTests extends WindowTestsBase {
 
         // Task will make adjustments to requested bounds. We only need to guarantee that the
         // reuqested bounds are expected.
+        assertEquals(expected, task.getRequestedOverrideBounds());
+    }
+
+    /**
+     * Ensures that {@link LaunchParamsModifier} requests specifying bounds during
+     * layout are honored if window is in multiwindow mode.
+     */
+    @Test
+    public void testLayoutTaskBoundsChangeMultiWindow() {
+        final Rect expected = new Rect(10, 20, 30, 40);
+
+        final LaunchParams params = new LaunchParams();
+        params.mWindowingMode = WINDOWING_MODE_MULTI_WINDOW;
+        params.mBounds.set(expected);
+        final InstrumentedPositioner positioner = new InstrumentedPositioner(RESULT_DONE, params);
+        final Task task = new TaskBuilder(mAtm.mTaskSupervisor).build();
+
+        mController.registerModifier(positioner);
+
+        assertNotEquals(expected, task.getBounds());
+
+        mController.layoutTask(task, null /* windowLayout */);
+
         assertEquals(expected, task.getRequestedOverrideBounds());
     }
 

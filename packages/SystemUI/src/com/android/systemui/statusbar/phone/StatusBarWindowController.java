@@ -20,12 +20,20 @@ import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_M
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR;
 
+import static com.android.systemui.util.leak.RotationUtils.ROTATION_LANDSCAPE;
+import static com.android.systemui.util.leak.RotationUtils.ROTATION_NONE;
+import static com.android.systemui.util.leak.RotationUtils.ROTATION_SEASCAPE;
+import static com.android.systemui.util.leak.RotationUtils.ROTATION_UPSIDE_DOWN;
+
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.os.Binder;
+import android.os.RemoteException;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.IWindowManager;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 
@@ -46,7 +54,9 @@ public class StatusBarWindowController {
 
     private final Context mContext;
     private final WindowManager mWindowManager;
+    private final IWindowManager mIWindowManager;
     private final SuperStatusBarViewFactory mSuperStatusBarViewFactory;
+    private final StatusBarContentInsetsProvider mContentInsetsProvider;
     private final Resources mResources;
     private int mBarHeight = -1;
     private final State mCurrentState = new State();
@@ -57,11 +67,17 @@ public class StatusBarWindowController {
     private final WindowManager.LayoutParams mLpChanged;
 
     @Inject
-    public StatusBarWindowController(Context context, WindowManager windowManager,
+    public StatusBarWindowController(
+            Context context,
+            WindowManager windowManager,
+            IWindowManager iWindowManager,
             SuperStatusBarViewFactory superStatusBarViewFactory,
+            StatusBarContentInsetsProvider contentInsetsProvider,
             @Main Resources resources) {
         mContext = context;
         mWindowManager = windowManager;
+        mIWindowManager = iWindowManager;
+        mContentInsetsProvider = contentInsetsProvider;
         mSuperStatusBarViewFactory = superStatusBarViewFactory;
         mStatusBarView = mSuperStatusBarViewFactory.getStatusBarWindowView();
         mLaunchAnimationContainer = mStatusBarView.findViewById(
@@ -120,6 +136,27 @@ public class StatusBarWindowController {
 
         mWindowManager.addView(mStatusBarView, mLp);
         mLpChanged.copyFrom(mLp);
+
+        mContentInsetsProvider.addCallback(this::calculateStatusBarLocationsForAllRotations);
+        calculateStatusBarLocationsForAllRotations();
+    }
+
+    private void calculateStatusBarLocationsForAllRotations() {
+        Rect[] bounds = new Rect[4];
+        bounds[0] = mContentInsetsProvider
+                .getBoundingRectForPrivacyChipForRotation(ROTATION_NONE);
+        bounds[1] = mContentInsetsProvider
+                .getBoundingRectForPrivacyChipForRotation(ROTATION_LANDSCAPE);
+        bounds[2] = mContentInsetsProvider
+                .getBoundingRectForPrivacyChipForRotation(ROTATION_UPSIDE_DOWN);
+        bounds[3] = mContentInsetsProvider
+                .getBoundingRectForPrivacyChipForRotation(ROTATION_SEASCAPE);
+
+        try {
+            mIWindowManager.updateStaticPrivacyIndicatorBounds(mContext.getDisplayId(), bounds);
+        } catch (RemoteException e) {
+             //Swallow
+        }
     }
 
     /** Set force status bar visible. */

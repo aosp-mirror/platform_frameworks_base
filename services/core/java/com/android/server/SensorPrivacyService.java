@@ -966,6 +966,19 @@ public final class SensorPrivacyService extends SystemService {
             mHandler.removeListener(listener);
         }
 
+        /**
+         * Unregisters a listener from sensor privacy state change notifications.
+         */
+        @Override
+        public void removeIndividualSensorPrivacyListener(int sensor,
+                ISensorPrivacyListener listener) {
+            enforceObserveSensorPrivacyPermission();
+            if (listener == null) {
+                throw new NullPointerException("listener cannot be null");
+            }
+            mHandler.removeListener(sensor, listener);
+        }
+
         @Override
         public void suppressIndividualSensorPrivacyReminders(int userId, String packageName,
                 IBinder token, boolean suppress) {
@@ -1300,10 +1313,21 @@ public final class SensorPrivacyService extends SystemService {
                     deathRecipient.destroy();
                 }
                 mListeners.unregister(listener);
+            }
+        }
+
+        public void removeListener(int sensor, ISensorPrivacyListener listener) {
+            synchronized (mListenerLock) {
+                DeathRecipient deathRecipient = mDeathRecipients.remove(listener);
+                if (deathRecipient != null) {
+                    deathRecipient.destroy();
+                }
+
                 for (int i = 0, numUsers = mIndividualSensorListeners.size(); i < numUsers; i++) {
-                    for (int j = 0, numListeners = mIndividualSensorListeners.valueAt(i).size();
-                            j < numListeners; j++) {
-                        mIndividualSensorListeners.valueAt(i).valueAt(j).unregister(listener);
+                    RemoteCallbackList callbacks =
+                            mIndividualSensorListeners.valueAt(i).get(sensor);
+                    if (callbacks != null) {
+                        callbacks.unregister(listener);
                     }
                 }
             }

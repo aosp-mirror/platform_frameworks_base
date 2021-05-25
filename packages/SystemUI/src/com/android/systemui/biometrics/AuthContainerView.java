@@ -16,6 +16,8 @@
 
 package com.android.systemui.biometrics;
 
+import static android.hardware.biometrics.BiometricManager.BiometricMultiSensorMode;
+
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -121,6 +123,7 @@ public class AuthContainerView extends LinearLayout
         boolean mCredentialAllowed;
         boolean mSkipIntro;
         long mOperationId;
+        @BiometricMultiSensorMode int mMultiSensorConfig;
     }
 
     public static class Builder {
@@ -163,6 +166,12 @@ public class AuthContainerView extends LinearLayout
 
         public Builder setOperationId(long operationId) {
             mConfig.mOperationId = operationId;
+            return this;
+        }
+
+        /** The multi-sensor mode. */
+        public Builder setMultiSensorConfig(@BiometricMultiSensorMode int multiSensorConfig) {
+            mConfig.mMultiSensorConfig = multiSensorConfig;
             return this;
         }
 
@@ -236,6 +245,9 @@ public class AuthContainerView extends LinearLayout
                     mHandler.postDelayed(() -> {
                         addCredentialView(false /* animatePanel */, true /* animateContents */);
                     }, mInjector.getAnimateCredentialStartDelayMs());
+                    break;
+                case AuthBiometricView.Callback.ACTION_START_DELAYED_FINGERPRINT_SENSOR:
+                    mConfig.mCallback.onStartFingerprintNow();
                     break;
                 default:
                     Log.e(TAG, "Unhandled action: " + action);
@@ -316,21 +328,9 @@ public class AuthContainerView extends LinearLayout
                     return;
                 }
             } else if (sensorCount == 2) {
-                int fingerprintSensorId = -1;
-                int faceSensorId = -1;
-                for (final int sensorId : config.mSensorIds) {
-                    if (Utils.containsSensorId(mFpProps, sensorId)) {
-                        fingerprintSensorId = sensorId;
-                        continue;
-                    } else if (Utils.containsSensorId(mFaceProps, sensorId)) {
-                        faceSensorId = sensorId;
-                        continue;
-                    }
-
-                    if (fingerprintSensorId != -1 && faceSensorId != -1) {
-                        break;
-                    }
-                }
+                final int[] allSensors = findFaceAndFingerprintSensors();
+                final int faceSensorId = allSensors[0];
+                final int fingerprintSensorId = allSensors[1];
 
                 if (fingerprintSensorId == -1 || faceSensorId == -1) {
                     Log.e(TAG, "Missing fingerprint or face for dual-sensor config");
@@ -746,5 +746,30 @@ public class AuthContainerView extends LinearLayout
         lp.setTitle("BiometricPrompt");
         lp.token = windowToken;
         return lp;
+    }
+
+    private boolean hasFaceAndFingerprintSensors() {
+        final int[] ids = findFaceAndFingerprintSensors();
+        return ids[0] >= 0 && ids[1] >= 0;
+    }
+
+    // returns [face, fingerprint] sensor ids (id is -1 if not present)
+    private int[] findFaceAndFingerprintSensors() {
+        int faceSensorId = -1;
+        int fingerprintSensorId = -1;
+
+        for (final int sensorId : mConfig.mSensorIds) {
+            if (Utils.containsSensorId(mFpProps, sensorId)) {
+                fingerprintSensorId = sensorId;
+            } else if (Utils.containsSensorId(mFaceProps, sensorId)) {
+                faceSensorId = sensorId;
+            }
+
+            if (fingerprintSensorId != -1 && faceSensorId != -1) {
+                break;
+            }
+        }
+
+        return new int[] {faceSensorId, fingerprintSensorId};
     }
 }

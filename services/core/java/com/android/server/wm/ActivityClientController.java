@@ -1170,7 +1170,7 @@ class ActivityClientController extends IActivityClientController.Stub {
                 final boolean activityIsBaseActivity = baseIntent != null
                         && r.mActivityComponent.equals(baseIntent.getComponent());
                 baseActivityIntent = activityIsBaseActivity ? r.intent : null;
-                launchedFromHome = r.launchedFromHomeProcess;
+                launchedFromHome = r.isLaunchSourceType(ActivityRecord.LAUNCH_SOURCE_TYPE_HOME);
             }
 
             // If the activity is one of the main entry points for the application, then we should

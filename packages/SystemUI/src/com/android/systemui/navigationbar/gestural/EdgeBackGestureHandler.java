@@ -128,7 +128,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
     private OverviewProxyService.OverviewProxyListener mQuickSwitchListener =
             new OverviewProxyService.OverviewProxyListener() {
                 @Override
-                public void onQuickSwitchToNewTask(@Surface.Rotation int rotation) {
+                public void onPrioritizedRotation(@Surface.Rotation int rotation) {
                     mStartingQuickstepRotation = rotation;
                     updateDisabledForQuickstep(mContext.getResources().getConfiguration());
                 }

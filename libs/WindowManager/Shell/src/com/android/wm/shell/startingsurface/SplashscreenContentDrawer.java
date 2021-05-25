@@ -280,7 +280,7 @@ public class SplashscreenContentDrawer {
                 // replaced icon, don't process
                 iconDrawable = mTmpAttrs.mReplaceIcon;
                 animationDuration = mTmpAttrs.mAnimationDuration;
-                createIconDrawable(iconDrawable);
+                createIconDrawable(iconDrawable, false);
             } else {
                 final float iconScale = (float) mIconSize / (float) mDefaultIconSize;
                 final int densityDpi = mContext.getResources().getDisplayMetrics().densityDpi;
@@ -295,7 +295,7 @@ public class SplashscreenContentDrawer {
                         Slog.d(TAG, "The icon is not an AdaptiveIconDrawable");
                     }
                     // TODO process legacy icon(bitmap)
-                    createIconDrawable(iconDrawable);
+                    createIconDrawable(iconDrawable, true);
                 }
                 animationDuration = 0;
             }
@@ -305,11 +305,18 @@ public class SplashscreenContentDrawer {
             return mCachedResult;
         }
 
-        private void createIconDrawable(Drawable iconDrawable) {
-            mFinalIconDrawable = SplashscreenIconDrawableFactory.makeIconDrawable(
-                    mTmpAttrs.mIconBgColor != Color.TRANSPARENT
-                            ? mTmpAttrs.mIconBgColor : mThemeColor,
-                    iconDrawable, mDefaultIconSize, mFinalIconSize, mSplashscreenWorkerHandler);
+        private void createIconDrawable(Drawable iconDrawable, boolean legacy) {
+            if (legacy) {
+                mFinalIconDrawable = SplashscreenIconDrawableFactory.makeLegacyIconDrawable(
+                        mTmpAttrs.mIconBgColor != Color.TRANSPARENT
+                                ? mTmpAttrs.mIconBgColor : Color.WHITE,
+                        iconDrawable, mDefaultIconSize, mFinalIconSize, mSplashscreenWorkerHandler);
+            } else {
+                mFinalIconDrawable = SplashscreenIconDrawableFactory.makeIconDrawable(
+                        mTmpAttrs.mIconBgColor != Color.TRANSPARENT
+                                ? mTmpAttrs.mIconBgColor : mThemeColor,
+                        iconDrawable, mDefaultIconSize, mFinalIconSize, mSplashscreenWorkerHandler);
+            }
         }
 
         private boolean processAdaptiveIcon(Drawable iconDrawable) {
@@ -365,12 +372,12 @@ public class SplashscreenContentDrawer {
                 // Using AdaptiveIconDrawable here can help keep the shape consistent with the
                 // current settings.
                 mFinalIconSize = (int) (0.5f + mIconSize * noBgScale);
-                createIconDrawable(iconForeground);
+                createIconDrawable(iconForeground, false);
             } else {
                 if (DEBUG) {
                     Slog.d(TAG, "makeSplashScreenContentView: draw whole icon");
                 }
-                createIconDrawable(iconDrawable);
+                createIconDrawable(iconDrawable, false);
             }
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
             return true;

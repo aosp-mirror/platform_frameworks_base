@@ -247,7 +247,6 @@ public class BubbleStackView extends FrameLayout
     private int mBubbleElevation;
     private int mBubbleTouchPadding;
     private int mExpandedViewPadding;
-    private int mPointerHeight;
     private int mCornerRadius;
     private int mImeOffset;
     @Nullable private BubbleViewProvider mExpandedBubble;
@@ -767,7 +766,6 @@ public class BubbleStackView extends FrameLayout
         mBubbleSize = res.getDimensionPixelSize(R.dimen.individual_bubble_size);
         mBubbleElevation = res.getDimensionPixelSize(R.dimen.bubble_elevation);
         mBubbleTouchPadding = res.getDimensionPixelSize(R.dimen.bubble_touch_padding);
-        mPointerHeight = res.getDimensionPixelSize(R.dimen.bubble_pointer_height);
         mImeOffset = res.getDimensionPixelSize(R.dimen.pip_ime_offset);
 
         mExpandedViewPadding = res.getDimensionPixelSize(R.dimen.bubble_expanded_view_padding);
@@ -2169,13 +2167,6 @@ public class BubbleStackView extends FrameLayout
         }
     }
 
-    /**
-     */
-    @Override
-    public boolean onInterceptTouchEvent(MotionEvent ev) {
-        return super.onInterceptTouchEvent(ev);
-    }
-
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
         if (ev.getAction() != MotionEvent.ACTION_DOWN && ev.getActionIndex() != mPointerIndexDown) {
@@ -2700,7 +2691,7 @@ public class BubbleStackView extends FrameLayout
                 && BubbleOverflow.KEY.equals(mExpandedBubble.getKey());
         int[] paddings = mPositioner.getExpandedViewPadding(
                 mStackAnimationController.isStackOnLeftSide(), isOverflowExpanded);
-        mExpandedViewContainer.setPadding(paddings[0], 0, paddings[1], 0);
+        mExpandedViewContainer.setPadding(paddings[0], paddings[1], paddings[2], paddings[3]);
         if (mIsExpansionAnimating) {
             mExpandedViewContainer.setVisibility(mIsExpanded ? VISIBLE : GONE);
         }

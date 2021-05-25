@@ -671,6 +671,7 @@ cc_test {
         "tests/unit/SkiaPipelineTests.cpp",
         "tests/unit/SkiaRenderPropertiesTests.cpp",
         "tests/unit/SkiaCanvasTests.cpp",
+        "tests/unit/StretchEffectTests.cpp",
         "tests/unit/StringUtilsTests.cpp",
         "tests/unit/TestUtilsTests.cpp",
         "tests/unit/ThreadBaseTests.cpp",

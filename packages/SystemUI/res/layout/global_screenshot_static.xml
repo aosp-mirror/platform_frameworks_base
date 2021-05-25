@@ -37,7 +37,7 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/screenshot_action_container_margin_horizontal"
         android:layout_marginBottom="@dimen/screenshot_action_container_offset_y"
-        android:paddingHorizontal="@dimen/screenshot_action_container_padding_right"
+        android:paddingEnd="@dimen/screenshot_action_container_padding_right"
         android:paddingVertical="@dimen/screenshot_action_container_padding_vertical"
         android:elevation="1dp"
         android:scrollbars="none"
@@ -45,7 +45,7 @@
         app:layout_constraintWidth_percent="1.0"
         app:layout_constraintWidth_max="wrap"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/global_screenshot_preview"
+        app:layout_constraintStart_toEndOf="@+id/global_screenshot_preview_border"
         app:layout_constraintEnd_toEndOf="parent">
         <LinearLayout
             android:id="@+id/global_screenshot_actions"
@@ -60,7 +60,49 @@
                      android:visibility="gone" />
         </LinearLayout>
     </HorizontalScrollView>
-    <include layout="@layout/global_screenshot_preview"/>
+    <View
+        android:id="@+id/global_screenshot_preview_border"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="@dimen/screenshot_offset_x"
+        android:layout_marginBottom="@dimen/screenshot_offset_y"
+        android:elevation="@dimen/screenshot_preview_elevation"
+        android:alpha="0"
+        android:background="@drawable/screenshot_border"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/screenshot_preview_end"
+        app:layout_constraintTop_toTopOf="@+id/screenshot_preview_top"/>
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/screenshot_preview_end"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierMargin="4dp"
+        app:barrierDirection="end"
+        app:constraint_referenced_ids="global_screenshot_preview"/>
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/screenshot_preview_top"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="top"
+        app:barrierMargin="-4dp"
+        app:constraint_referenced_ids="global_screenshot_preview"/>
+    <ImageView
+        android:id="@+id/global_screenshot_preview"
+        android:visibility="invisible"
+        android:layout_width="@dimen/global_screenshot_x_scale"
+        android:layout_marginStart="4dp"
+        android:layout_marginBottom="4dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:elevation="@dimen/screenshot_preview_elevation"
+        android:contentDescription="@string/screenshot_edit_label"
+        android:scaleType="fitEnd"
+        android:background="@drawable/screenshot_preview_background"
+        android:adjustViewBounds="true"
+        app:layout_constraintBottom_toBottomOf="@+id/global_screenshot_preview_border"
+        app:layout_constraintStart_toStartOf="@+id/global_screenshot_preview_border">
+    </ImageView>
     <FrameLayout
         android:id="@+id/global_screenshot_dismiss_button"
         android:layout_width="@dimen/screenshot_dismiss_button_tappable_size"

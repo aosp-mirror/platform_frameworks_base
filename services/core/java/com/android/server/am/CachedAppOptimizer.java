@@ -881,7 +881,8 @@ public final class CachedAppOptimizer {
 
     @GuardedBy({"mAm", "mProcLock"})
     void freezeAppAsyncLSP(ProcessRecord app) {
-        if (mFreezeHandler.hasMessages(SET_FROZEN_PROCESS_MSG, app)) {
+        final ProcessCachedOptimizerRecord opt = app.mOptRecord;
+        if (opt.isPendingFreeze()) {
             // Skip redundant DO_FREEZE message
             return;
         }
@@ -890,21 +891,27 @@ public final class CachedAppOptimizer {
                 mFreezeHandler.obtainMessage(
                     SET_FROZEN_PROCESS_MSG, DO_FREEZE, 0, app),
                 mFreezerDebounceTimeout);
+        opt.setPendingFreeze(true);
+        if (DEBUG_FREEZER) {
+            Slog.d(TAG_AM, "Async freezing " + app.getPid() + " " + app.processName);
+        }
     }
 
     @GuardedBy({"mAm", "mProcLock"})
     void unfreezeAppLSP(ProcessRecord app) {
-        mFreezeHandler.removeMessages(SET_FROZEN_PROCESS_MSG, app);
-
         final int pid = app.getPid();
         final ProcessCachedOptimizerRecord opt = app.mOptRecord;
+        if (opt.isPendingFreeze()) {
+            // Remove pending DO_FREEZE message
+            mFreezeHandler.removeMessages(SET_FROZEN_PROCESS_MSG, app);
+            opt.setPendingFreeze(false);
+            if (DEBUG_FREEZER) {
+                Slog.d(TAG_AM, "Cancel freezing " + pid + " " + app.processName);
+            }
+        }
+
         opt.setFreezerOverride(false);
         if (!opt.isFrozen()) {
-            if (DEBUG_FREEZER) {
-                Slog.d(TAG_AM,
-                        "Skipping unfreeze for process " + pid + " "
-                        + app.processName + " (not frozen)");
-            }
             return;
         }
 
@@ -983,7 +990,12 @@ public final class CachedAppOptimizer {
     @GuardedBy({"mAm", "mProcLock"})
     void unscheduleFreezeAppLSP(ProcessRecord app) {
         if (mUseFreezer) {
-            mFreezeHandler.removeMessages(SET_FROZEN_PROCESS_MSG, app);
+            final ProcessCachedOptimizerRecord opt = app.mOptRecord;
+            if (opt.isPendingFreeze()) {
+                // Remove pending DO_FREEZE message
+                mFreezeHandler.removeMessages(SET_FROZEN_PROCESS_MSG, app);
+                opt.setPendingFreeze(false);
+            }
         }
     }
 
@@ -1278,6 +1290,8 @@ public final class CachedAppOptimizer {
             final boolean frozen;
             final ProcessCachedOptimizerRecord opt = proc.mOptRecord;
 
+            opt.setPendingFreeze(false);
+
             try {
                 // pre-check for locks to avoid unnecessary freeze/unfreeze operations
                 if (Process.hasFileLocks(pid)) {
@@ -1351,7 +1365,6 @@ public final class CachedAppOptimizer {
             if (!frozen) {
                 return;
             }
-
 
             if (DEBUG_FREEZER) {
                 Slog.d(TAG_AM, "froze " + pid + " " + name);

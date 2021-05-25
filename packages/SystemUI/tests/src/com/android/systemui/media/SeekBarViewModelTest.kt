@@ -75,6 +75,7 @@ public class SeekBarViewModelTest : SysuiTestCase() {
     fun setUp() {
         fakeExecutor = FakeExecutor(FakeSystemClock())
         viewModel = SeekBarViewModel(FakeRepeatableExecutor(fakeExecutor))
+        viewModel.logSmartspaceClick = { }
         mockController = mock(MediaController::class.java)
         whenever(mockController.sessionToken).thenReturn(token1)
         mockTransport = mock(MediaController.TransportControls::class.java)
