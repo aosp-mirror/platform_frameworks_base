@@ -48,9 +48,8 @@ public class BatteryUsageStatsPulledTest {
 
     @Test
     public void testGetStatsProto() {
-        final long sessionEndTimestampMs = 1050;
         final BatteryUsageStats bus = buildBatteryUsageStats();
-        final byte[] bytes = bus.getStatsProto(sessionEndTimestampMs);
+        final byte[] bytes = bus.getStatsProto();
         BatteryUsageStatsAtomsProto proto;
         try {
             proto = BatteryUsageStatsAtomsProto.parseFrom(bytes);
@@ -60,9 +59,9 @@ public class BatteryUsageStatsPulledTest {
         }
 
         assertEquals(bus.getStatsStartTimestamp(), proto.sessionStartMillis);
-        assertEquals(sessionEndTimestampMs, proto.sessionEndMillis);
+        assertEquals(bus.getStatsEndTimestamp(), proto.sessionEndMillis);
         assertEquals(
-                sessionEndTimestampMs - bus.getStatsStartTimestamp(),
+                bus.getStatsEndTimestamp() - bus.getStatsStartTimestamp(),
                 proto.sessionDurationMillis);
         assertEquals(bus.getDischargePercentage(), proto.sessionDischargePercentage);
 

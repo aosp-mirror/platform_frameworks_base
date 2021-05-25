@@ -368,27 +368,19 @@ public final class BatteryUsageStats implements Parcelable {
     };
 
     /** Returns a proto (as used for atoms.proto) corresponding to this BatteryUsageStats. */
-    public byte[] getStatsProto(long sessionEndTimestampMs) {
-
-        final long sessionStartMillis = getStatsStartTimestamp();
-        // TODO(b/187223764): Use the getStatsEndTimestamp() instead, once that is added.
-        final long sessionEndMillis = sessionEndTimestampMs;
-        final long sessionDurationMillis = sessionEndTimestampMs - getStatsStartTimestamp();
-
+    public byte[] getStatsProto() {
         final BatteryConsumer deviceBatteryConsumer = getAggregateBatteryConsumer(
                 AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE);
 
-        final int sessionDischargePercentage = getDischargePercentage();
-
         final ProtoOutputStream proto = new ProtoOutputStream();
-        proto.write(BatteryUsageStatsAtomsProto.SESSION_START_MILLIS, sessionStartMillis);
-        proto.write(BatteryUsageStatsAtomsProto.SESSION_END_MILLIS, sessionEndMillis);
-        proto.write(BatteryUsageStatsAtomsProto.SESSION_DURATION_MILLIS, sessionDurationMillis);
+        proto.write(BatteryUsageStatsAtomsProto.SESSION_START_MILLIS, getStatsStartTimestamp());
+        proto.write(BatteryUsageStatsAtomsProto.SESSION_END_MILLIS, getStatsEndTimestamp());
+        proto.write(BatteryUsageStatsAtomsProto.SESSION_DURATION_MILLIS, getStatsDuration());
         deviceBatteryConsumer.writeStatsProto(proto,
                 BatteryUsageStatsAtomsProto.DEVICE_BATTERY_CONSUMER);
         writeUidBatteryConsumersProto(proto);
         proto.write(BatteryUsageStatsAtomsProto.SESSION_DISCHARGE_PERCENTAGE,
-                sessionDischargePercentage);
+                getDischargePercentage());
         return proto.getBytes();
     }
 
@@ -399,8 +391,8 @@ public final class BatteryUsageStats implements Parcelable {
     private void writeUidBatteryConsumersProto(ProtoOutputStream proto) {
         final List<UidBatteryConsumer> consumers = getUidBatteryConsumers();
 
-        // TODO: Sort the list by power consumption. If during the for, proto.getRawSize() > 45kb,
-        //       truncate the remainder of the list.
+        // TODO(b/189225426): Sort the list by power consumption. If during the for,
+        //                    proto.getRawSize() > 45kb, truncate the remainder of the list.
         final int size = consumers.size();
         for (int i = 0; i < size; i++) {
             final UidBatteryConsumer consumer = consumers.get(i);
