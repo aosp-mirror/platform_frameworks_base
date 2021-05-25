@@ -15,19 +15,19 @@
  */
 
 #define ATRACE_TAG ATRACE_TAG_VIEW
-#include "FontUtils.h"
-#include "GraphicsJNI.h"
-#include "fonts/Font.h"
-#include <nativehelper/ScopedPrimitiveArray.h>
-#include <nativehelper/ScopedUtfChars.h>
-#include "SkData.h"
-#include "SkTypeface.h"
+#include <gui/TraceUtils.h>
 #include <hwui/Typeface.h>
 #include <minikin/FontCollection.h>
 #include <minikin/FontFamily.h>
 #include <minikin/FontFileParser.h>
 #include <minikin/SystemFonts.h>
-#include <utils/TraceUtils.h>
+#include <nativehelper/ScopedPrimitiveArray.h>
+#include <nativehelper/ScopedUtfChars.h>
+#include "FontUtils.h"
+#include "GraphicsJNI.h"
+#include "SkData.h"
+#include "SkTypeface.h"
+#include "fonts/Font.h"
 
 #include <mutex>
 #include <unordered_map>
@@ -37,7 +37,6 @@
 #endif
 
 using namespace android;
-using android::uirenderer::TraceUtils;
 
 static inline Typeface* toTypeface(jlong ptr) {
     return reinterpret_cast<Typeface*>(ptr);
