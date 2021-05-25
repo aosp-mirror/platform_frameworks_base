@@ -16,11 +16,13 @@
 
 package com.android.server.compat;
 
+import android.annotation.Nullable;
 import android.app.compat.ChangeIdStateCache;
 import android.app.compat.PackageOverride;
 import android.compat.Compatibility.ChangeConfig;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.os.Environment;
 import android.text.TextUtils;
 import android.util.LongArray;
@@ -51,7 +53,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -249,6 +250,7 @@ final class CompatConfig {
         OverrideAllowedState allowedState =
                 mOverrideValidator.getOverrideAllowedState(changeId, packageName);
         allowedState.enforce(changeId, packageName);
+        Long versionCode = getVersionCodeOrNull(packageName);
         synchronized (mChanges) {
             CompatChange c = mChanges.get(changeId);
             if (c == null) {
@@ -256,7 +258,7 @@ final class CompatConfig {
                 c = new CompatChange(changeId);
                 addChange(c);
             }
-            c.addPackageOverride(packageName, overrides, allowedState, mContext);
+            c.addPackageOverride(packageName, overrides, allowedState, versionCode);
             invalidateCache();
         }
         return alreadyKnown;
@@ -336,6 +338,7 @@ final class CompatConfig {
      * It does not invalidate the cache nor save the overrides.
      */
     private boolean removeOverrideUnsafe(long changeId, String packageName) {
+        Long versionCode = getVersionCodeOrNull(packageName);
         synchronized (mChanges) {
             CompatChange c = mChanges.get(changeId);
             if (c != null) {
@@ -343,7 +346,7 @@ final class CompatConfig {
                         mOverrideValidator.getOverrideAllowedState(changeId, packageName);
                 if (c.hasPackageOverride(packageName)) {
                     allowedState.enforce(changeId, packageName);
-                    c.removePackageOverride(packageName, allowedState, mContext);
+                    c.removePackageOverride(packageName, allowedState, versionCode);
                     invalidateCache();
                     return true;
                 }
@@ -653,26 +656,33 @@ final class CompatConfig {
      * Rechecks all the existing overrides for a package.
      */
     void recheckOverrides(String packageName) {
-        // Local cache of compat changes. Holding a lock on mChanges for the whole duration of the
-        // method will cause a deadlock.
-        List<CompatChange> changes;
+        Long versionCode = getVersionCodeOrNull(packageName);
         synchronized (mChanges) {
-            changes = new ArrayList<>(mChanges.size());
+            boolean shouldInvalidateCache = false;
             for (int idx = 0; idx < mChanges.size(); ++idx) {
-                changes.add(mChanges.valueAt(idx));
+                CompatChange c = mChanges.valueAt(idx);
+                if (!c.hasPackageOverride(packageName)) {
+                    continue;
+                }
+                OverrideAllowedState allowedState =
+                        mOverrideValidator.getOverrideAllowedStateForRecheck(c.getId(),
+                                packageName);
+                shouldInvalidateCache |= c.recheckOverride(packageName, allowedState, versionCode);
+            }
+            if (shouldInvalidateCache) {
+                invalidateCache();
             }
         }
-        boolean shouldInvalidateCache = false;
-        for (CompatChange c: changes) {
-            if (!c.hasPackageOverride(packageName)) {
-                continue;
-            }
-            OverrideAllowedState allowedState =
-                    mOverrideValidator.getOverrideAllowedStateForRecheck(c.getId(), packageName);
-            shouldInvalidateCache |= c.recheckOverride(packageName, allowedState, mContext);
-        }
-        if (shouldInvalidateCache) {
-            invalidateCache();
+    }
+
+    @Nullable
+    private Long getVersionCodeOrNull(String packageName) {
+        try {
+            ApplicationInfo applicationInfo = mContext.getPackageManager().getApplicationInfo(
+                    packageName, 0);
+            return applicationInfo.longVersionCode;
+        } catch (PackageManager.NameNotFoundException e) {
+            return null;
         }
     }
 
