@@ -92,12 +92,16 @@ public final class SplitLayout {
     private DividerSnapAlgorithm mDividerSnapAlgorithm;
     private int mDividePosition;
     private boolean mInitialized = false;
+    private int mOrientation;
+    private int mRotation;
 
     public SplitLayout(String windowName, Context context, Configuration configuration,
             SplitLayoutHandler splitLayoutHandler,
             SplitWindowManager.ParentContainerCallbacks parentContainerCallbacks,
             DisplayImeController displayImeController, ShellTaskOrganizer taskOrganizer) {
         mContext = context.createConfigurationContext(configuration);
+        mOrientation = configuration.orientation;
+        mRotation = configuration.windowConfiguration.getRotation();
         mSplitLayoutHandler = splitLayoutHandler;
         mDisplayImeController = displayImeController;
         mSplitWindowManager = new SplitWindowManager(
@@ -144,25 +148,37 @@ public final class SplitLayout {
 
     /** Applies new configuration, returns {@code false} if there's no effect to the layout. */
     public boolean updateConfiguration(Configuration configuration) {
+        boolean affectsLayout = false;
+
+        // Make sure to render the divider bar with proper resources that matching the screen
+        // orientation.
+        final int orientation = configuration.orientation;
+        if (orientation != mOrientation) {
+            mOrientation = orientation;
+            mContext = mContext.createConfigurationContext(configuration);
+            mSplitWindowManager.setConfiguration(configuration);
+            affectsLayout = true;
+        }
+
+        // Update the split bounds when necessary. Besides root bounds changed, split bounds need to
+        // be updated when the rotation changed to cover the case that users rotated the screen 180
+        // degrees.
+        final int rotation = configuration.windowConfiguration.getRotation();
         final Rect rootBounds = configuration.windowConfiguration.getBounds();
-        if (mRootBounds.equals(rootBounds)) {
-            return false;
+        if (rotation != mRotation || !mRootBounds.equals(rootBounds)) {
+            mRootBounds.set(rootBounds);
+            mDividerSnapAlgorithm = getSnapAlgorithm(mContext, mRootBounds);
+            resetDividerPosition();
+            affectsLayout = true;
         }
 
-        mContext = mContext.createConfigurationContext(configuration);
-        mSplitWindowManager.setConfiguration(configuration);
-        mRootBounds.set(rootBounds);
-        mDividerSnapAlgorithm = getSnapAlgorithm(mContext, mRootBounds);
-        resetDividerPosition();
-
-        // Don't inflate divider bar if it is not initialized.
-        if (!mInitialized) {
-            return false;
+        if (mInitialized && affectsLayout) {
+            release();
+            init();
+            return true;
         }
 
-        release();
-        init();
-        return true;
+        return false;
     }
 
     /** Updates recording bounds of divider window and both of the splits. */
