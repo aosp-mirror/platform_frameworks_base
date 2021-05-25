@@ -10604,6 +10604,12 @@ package android.service.voice {
     field @NonNull public static final android.os.Parcelable.Creator<android.service.voice.HotwordRejectedResult> CREATOR;
   }
 
+  public static final class HotwordRejectedResult.Builder {
+    ctor public HotwordRejectedResult.Builder();
+    method @NonNull public android.service.voice.HotwordRejectedResult build();
+    method @NonNull public android.service.voice.HotwordRejectedResult.Builder setConfidenceLevel(int);
+  }
+
   public class VoiceInteractionService extends android.app.Service {
     method @NonNull public final android.service.voice.AlwaysOnHotwordDetector createAlwaysOnHotwordDetector(String, java.util.Locale, android.service.voice.AlwaysOnHotwordDetector.Callback);
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_HOTWORD_DETECTION) public final android.service.voice.AlwaysOnHotwordDetector createAlwaysOnHotwordDetector(String, java.util.Locale, @Nullable android.os.PersistableBundle, @Nullable android.os.SharedMemory, android.service.voice.AlwaysOnHotwordDetector.Callback);
