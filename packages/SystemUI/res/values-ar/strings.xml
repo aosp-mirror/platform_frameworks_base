@@ -179,7 +179,7 @@
     <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"لقد استنفدت عدد المحاولات غير الصحيحة وسيتم حذف هذا المستخدم."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"لقد استنفدت عدد المحاولات غير الصحيحة وسيتم حذف الملف الشخصي للعمل وبياناته."</string>
     <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"إغلاق"</string>
-    <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"المس زر استشعار بصمة الإصبع"</string>
+    <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"المس مستشعر بصمة الإصبع"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"رمز بصمة الإصبع"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"يتعذّر التعرّف على الوجه. استخدِم بصمة الإصبع بدلاً من ذلك."</string>
     <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"عليك استخدام بصمة الإصبع للمتابعة."</string>
@@ -290,8 +290,6 @@
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"تم إيقاف نقطة اتصال الجوّال."</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"تم تفعيل نقطة اتصال الجوّال."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"توقف إرسال الشاشة."</string>
-    <string name="accessibility_quick_settings_work_mode_off" msgid="9106217884005620744">"تم إيقاف وضع العمل مؤقتًا."</string>
-    <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"وضع العمل قيد التشغيل."</string>
     <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6422896967647049692">"تم إيقاف وضع العمل مؤقتًا."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"تم تفعيل وضع العمل."</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"تم إيقاف توفير البيانات."</string>
@@ -418,8 +416,7 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="6798849610647988987">"<xliff:g id="DATA_USED">%s</xliff:g> مستخدَمة"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"قيد <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"تحذير <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
-    <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"الملف الشخصي للعمل"</string>
-    <string name="quick_settings_work_mode_paused" msgid="4841109346916998613">"متوقف مؤقتًا"</string>
+    <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"تطبيقات العمل"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"الإضاءة الليلية"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"تفعيل عند غروب الشمس"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"حتى شروق الشمس"</string>
@@ -434,7 +431,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"تم إيقاف الاتصال القريب المدى"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"تم تفعيل الاتصال القريب المدى"</string>
-    <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"تسجيل الشاشة"</string>
+    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"تسجيل الشاشة"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"بدء"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"إيقاف"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"هل تريد إزالة حظر ميكروفون الجهاز؟"</string>
@@ -1063,10 +1060,7 @@
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"نقله إلى الحافة وإخفاؤه"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"نقله إلى خارج الحافة وإظهاره"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"إيقاف/تفعيل"</string>
-    <string name="quick_controls_title" msgid="6839108006171302273">"أدوات التحكم بالأجهزة"</string>
-    <string name="quick_controls_subtitle" msgid="1667408093326318053">"إضافة عناصر تحكّم لأجهزتك المتصلة"</string>
-    <string name="quick_controls_setup_title" msgid="8901436655997849822">"إعداد أدوات التحكم بالجهاز"</string>
-    <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"اضغط مع الاستمرار على زر التشغيل للوصول إلى عناصر التحكّم"</string>
+    <string name="quick_controls_title" msgid="7095074621086860062">"إدارة آلية للمنزل"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"اختيار تطبيق لإضافة عناصر التحكّم"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="zero">تمت إضافة <xliff:g id="NUMBER_1">%s</xliff:g> عنصر تحكّم.</item>
@@ -1084,7 +1078,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"إزالة من المفضّلة"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"نقل إلى الموضع <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"عناصر التحكّم"</string>
-    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"اختيار عناصر التحكّم التي تريد الوصول إليها من قائمة التشغيل"</string>
+    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"اختيار عناصر التحكّم التي يتم الوصول إليها من \"الإعدادات السريعة\"."</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"اضغط مع الاستمرار واسحب لإعادة ترتيب عناصر التحكّم."</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"تمت إزالة كل عناصر التحكّم."</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"لم يتم حفظ التغييرات."</string>
@@ -1123,7 +1117,7 @@
     <string name="controls_error_generic" msgid="352500456918362905">"يتعذّر تحميل الحالة."</string>
     <string name="controls_error_failed" msgid="960228639198558525">"حدث خطأ، يُرجى إعادة المحاولة."</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"قيد التقدم"</string>
-    <string name="controls_added_tooltip" msgid="4842812921719153085">"اضغط مع الاستمرار على زر التشغيل لعرض عناصر التحكّم الجديدة."</string>
+    <string name="controls_added_tooltip" msgid="5866098408470111984">"افتح \"الإعدادات السريعة\" للاطّلاع على عناصر التحكّم الجديدة."</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"إضافة عناصر تحكّم"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"تعديل عناصر التحكّم"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"إضافة مخرجات"</string>
@@ -1142,9 +1136,11 @@
     <string name="priority_conversations" msgid="3967482288896653039">"المحادثات ذات الأولوية"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"المحادثات الحديثة"</string>
     <string name="okay" msgid="6490552955618608554">"حسنًا"</string>
-    <string name="timestamp" msgid="6577851592534538533">"قبل <xliff:g id="DURATION">%1$s</xliff:g>"</string>
-    <string name="less_than_timestamp" msgid="6598972791137724517">"قبل أقل من <xliff:g id="DURATION">%1$s</xliff:g>"</string>
-    <string name="over_timestamp" msgid="4765793502859358634">"قبل أكثر من <xliff:g id="DURATION">%1$s</xliff:g>"</string>
+    <string name="days_timestamp" msgid="5821854736213214331">"قبل <xliff:g id="DURATION">%1$s</xliff:g> يوم"</string>
+    <string name="one_week_timestamp" msgid="4925600765473875590">"قبل أسبوع واحد"</string>
+    <string name="two_weeks_timestamp" msgid="9111801081871962155">"قبل أسبوعين"</string>
+    <string name="over_one_week_timestamp" msgid="3770560704420807142">"قبل أكثر من أسبوع واحد"</string>
+    <string name="over_two_weeks_timestamp" msgid="6300507859007874050">"قبل أكثر من أسبوعين"</string>
     <string name="birthday_status" msgid="2596961629465396761">"تاريخ الميلاد"</string>
     <string name="birthday_status_content_description" msgid="682836371128282925">"إنه يوم ميلاد <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="upcoming_birthday_status" msgid="2005452239256870351">"تاريخ ميلاد قريب"</string>
