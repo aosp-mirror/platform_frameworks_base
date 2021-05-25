@@ -515,7 +515,7 @@
     <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"يمكنك السماح لهذا التطبيق بضبط المنبّهات وجدولة الإجراءات الأخرى. قد يتم استخدام هذا التطبيق عند عدم استخدامك للجهاز، مما قد يستهلك المزيد من شحن البطارية. إذا كان هذا الإذن غير مفعّل، قد لا يعمل هذا التطبيق بشكل طبيعي ولن تعمل المنبّهات فيه كما هو مقرر."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"جدول زمني، جدولة، منبّه، تذكير، ساعة"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"تفعيل"</string>
-    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"تفعيل وضع \"الرجاء عدم الإزعاج\""</string>
+    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"تفعيل ميزة \"عدم الإزعاج\""</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"مطلقًا"</string>
     <string name="zen_interruption_level_priority" msgid="5392140786447823299">"الأولوية فقط"</string>
     <string name="zen_mode_and_condition" msgid="8877086090066332516">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
