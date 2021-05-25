@@ -76,29 +76,41 @@ class ToastDefaultAnimation {
             }
             val linearInterp = LinearInterpolator()
             val scaleInterp = PathInterpolator(0.3f, 0f, 1f, 1f)
-            val sX = ObjectAnimator.ofFloat(view, "scaleX", 1f, 0.9f).apply {
+            val viewScaleX = ObjectAnimator.ofFloat(view, "scaleX", 1f, 0.9f).apply {
                 interpolator = scaleInterp
                 duration = 250
             }
-            val sY = ObjectAnimator.ofFloat(view, "scaleY", 1f, 0.9f).apply {
+            val viewScaleY = ObjectAnimator.ofFloat(view, "scaleY", 1f, 0.9f).apply {
                 interpolator = scaleInterp
                 duration = 250
             }
-            val vA = ObjectAnimator.ofFloat(view, "alpha", 1f, 0f).apply {
+            val viewElevation = ObjectAnimator.ofFloat(view, "elevation",
+                view.elevation, 0f).apply {
+                interpolator = linearInterp
+                duration = 40
+                startDelay = 150
+            }
+            val viewAlpha = ObjectAnimator.ofFloat(view, "alpha", 1f, 0f).apply {
                 interpolator = linearInterp
                 duration = 100
                 startDelay = 150
             }
-            val tA = ObjectAnimator.ofFloat(text, "alpha", 1f, 0f).apply {
+            val textAlpha = ObjectAnimator.ofFloat(text, "alpha", 1f, 0f).apply {
                 interpolator = linearInterp
                 duration = 166
             }
-            val iA = ObjectAnimator.ofFloat(icon, "alpha", 1f, 0f).apply {
+            val iconAlpha = ObjectAnimator.ofFloat(icon, "alpha", 1f, 0f).apply {
                 interpolator = linearInterp
                 duration = 166
             }
             return AnimatorSet().apply {
-                playTogether(sX, sY, vA, tA, iA)
+                playTogether(
+                    viewScaleX,
+                    viewScaleY,
+                    viewElevation,
+                    viewAlpha,
+                    textAlpha,
+                    iconAlpha)
             }
         }
     }
