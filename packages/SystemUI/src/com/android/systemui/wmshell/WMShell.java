@@ -61,6 +61,7 @@ import com.android.wm.shell.onehanded.OneHandedTransitionCallback;
 import com.android.wm.shell.onehanded.OneHandedUiEventLogger;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.protolog.ShellProtoLogImpl;
+import com.android.wm.shell.splitscreen.SplitScreen;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -101,7 +102,8 @@ public final class WMShell extends SystemUI
 
     // Shell interfaces
     private final Optional<Pip> mPipOptional;
-    private final Optional<LegacySplitScreen> mSplitScreenOptional;
+    private final Optional<LegacySplitScreen> mLegacySplitScreenOptional;
+    private final Optional<SplitScreen> mSplitScreenOptional;
     private final Optional<OneHanded> mOneHandedOptional;
     private final Optional<HideDisplayCutout> mHideDisplayCutoutOptional;
     private final Optional<ShellCommandHandler> mShellCommandHandler;
@@ -116,6 +118,7 @@ public final class WMShell extends SystemUI
     private final Executor mSysUiMainExecutor;
 
     private boolean mIsSysUiStateValid;
+    private KeyguardUpdateMonitorCallback mLegacySplitScreenKeyguardCallback;
     private KeyguardUpdateMonitorCallback mSplitScreenKeyguardCallback;
     private KeyguardUpdateMonitorCallback mPipKeyguardCallback;
     private KeyguardUpdateMonitorCallback mOneHandedKeyguardCallback;
@@ -123,7 +126,8 @@ public final class WMShell extends SystemUI
     @Inject
     public WMShell(Context context,
             Optional<Pip> pipOptional,
-            Optional<LegacySplitScreen> splitScreenOptional,
+            Optional<LegacySplitScreen> legacySplitScreenOptional,
+            Optional<SplitScreen> splitScreenOptional,
             Optional<OneHanded> oneHandedOptional,
             Optional<HideDisplayCutout> hideDisplayCutoutOptional,
             Optional<ShellCommandHandler> shellCommandHandler,
@@ -143,6 +147,7 @@ public final class WMShell extends SystemUI
         mScreenLifecycle = screenLifecycle;
         mSysUiState = sysUiState;
         mPipOptional = pipOptional;
+        mLegacySplitScreenOptional = legacySplitScreenOptional;
         mSplitScreenOptional = splitScreenOptional;
         mOneHandedOptional = oneHandedOptional;
         mHideDisplayCutoutOptional = hideDisplayCutoutOptional;
@@ -158,6 +163,7 @@ public final class WMShell extends SystemUI
         mProtoTracer.add(this);
         mCommandQueue.addCallback(this);
         mPipOptional.ifPresent(this::initPip);
+        mLegacySplitScreenOptional.ifPresent(this::initLegacySplitScreen);
         mSplitScreenOptional.ifPresent(this::initSplitScreen);
         mOneHandedOptional.ifPresent(this::initOneHanded);
         mHideDisplayCutoutOptional.ifPresent(this::initHideDisplayCutout);
@@ -211,8 +217,8 @@ public final class WMShell extends SystemUI
     }
 
     @VisibleForTesting
-    void initSplitScreen(LegacySplitScreen legacySplitScreen) {
-        mSplitScreenKeyguardCallback = new KeyguardUpdateMonitorCallback() {
+    void initLegacySplitScreen(LegacySplitScreen legacySplitScreen) {
+        mLegacySplitScreenKeyguardCallback = new KeyguardUpdateMonitorCallback() {
             @Override
             public void onKeyguardVisibilityChanged(boolean showing) {
                 // Hide the divider when keyguard is showing. Even though keyguard/statusbar is
@@ -220,6 +226,17 @@ public final class WMShell extends SystemUI
                 // we still need to hide any surfaces that are below it.
                 // TODO(b/148906453): Figure out keyguard dismiss animation for divider view.
                 legacySplitScreen.onKeyguardVisibilityChanged(showing);
+            }
+        };
+        mKeyguardUpdateMonitor.registerCallback(mLegacySplitScreenKeyguardCallback);
+    }
+
+    @VisibleForTesting
+    void initSplitScreen(SplitScreen splitScreen) {
+        mSplitScreenKeyguardCallback = new KeyguardUpdateMonitorCallback() {
+            @Override
+            public void onKeyguardOccludedChanged(boolean occluded) {
+                splitScreen.onKeyguardOccludedChanged(occluded);
             }
         };
         mKeyguardUpdateMonitor.registerCallback(mSplitScreenKeyguardCallback);

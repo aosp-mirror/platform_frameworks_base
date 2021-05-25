@@ -2738,6 +2738,20 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         updateBiometricListeningState();
     }
 
+    /** Notifies that the occluded state changed. */
+    public void onKeyguardOccludedChanged(boolean occluded) {
+        Assert.isMainThread();
+        if (DEBUG) {
+            Log.d(TAG, "onKeyguardOccludedChanged(" + occluded + ")");
+        }
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+            if (cb != null) {
+                cb.onKeyguardOccludedChanged(occluded);
+            }
+        }
+    }
+
     /**
      * Handle {@link #MSG_KEYGUARD_RESET}
      */
@@ -2920,6 +2934,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         callback.onPhoneStateChanged(mPhoneState);
         callback.onRefreshCarrierInfo();
         callback.onClockVisibilityChanged();
+        callback.onKeyguardOccludedChanged(mKeyguardOccluded);
         callback.onKeyguardVisibilityChangedRaw(mKeyguardIsVisible);
         callback.onTelephonyCapable(mTelephonyCapable);
         callback.onLockScreenModeChanged(mLockScreenMode);
