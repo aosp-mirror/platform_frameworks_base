@@ -3,4 +3,4 @@ per-file Android.bp = file:platform/build/soong:/OWNERS
 # art-team@ manages the system server profile
 per-file art-profile* = calin@google.com, mathieuc@google.com, ngeoffray@google.com
 
-per-file java/com/android/server/* = toddke@google.com
+per-file java/com/android/server/* = toddke@google.com,patb@google.com

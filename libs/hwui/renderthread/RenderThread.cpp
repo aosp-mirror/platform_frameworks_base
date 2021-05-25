@@ -16,6 +16,7 @@
 
 #include "RenderThread.h"
 
+#include <gui/TraceUtils.h>
 #include "../HardwareBitmapUploader.h"
 #include "CanvasContext.h"
 #include "DeviceInfo.h"
@@ -29,7 +30,6 @@
 #include "pipeline/skia/SkiaVulkanPipeline.h"
 #include "renderstate/RenderState.h"
 #include "utils/TimeUtils.h"
-#include "utils/TraceUtils.h"
 
 #include <GrContextOptions.h>
 #include <gl/GrGLInterface.h>

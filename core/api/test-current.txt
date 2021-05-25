@@ -1204,6 +1204,10 @@ package android.hardware.input {
 
 package android.hardware.lights {
 
+  public final class Light implements android.os.Parcelable {
+    method public int getCapabilities();
+  }
+
   public abstract class LightsManager {
     method @NonNull public abstract android.hardware.lights.LightsManager.LightsSession openSession(int);
   }
