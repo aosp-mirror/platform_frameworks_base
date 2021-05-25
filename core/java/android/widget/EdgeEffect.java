@@ -342,6 +342,9 @@ public class EdgeEffect {
 
         mGlowAlphaFinish = mGlowAlpha;
         mGlowScaleYFinish = mGlowScaleY;
+        if (mEdgeEffectType == TYPE_STRETCH && mDistance == 0) {
+            mState = STATE_IDLE;
+        }
     }
 
     /**
@@ -739,8 +742,12 @@ public class EdgeEffect {
     private boolean isAtEquilibrium() {
         double displacement = mDistance * mHeight; // in pixels
         double velocity = mVelocity;
-        return Math.abs(velocity) < VELOCITY_THRESHOLD
-                && Math.abs(displacement) < VALUE_THRESHOLD;
+
+        // Don't allow displacement to drop below 0. We don't want it stretching the opposite
+        // direction if it is flung that way. We also want to stop the animation as soon as
+        // it gets very close to its destination.
+        return displacement < 0 || (Math.abs(velocity) < VELOCITY_THRESHOLD
+                && displacement < VALUE_THRESHOLD);
     }
 
     private float dampStretchVector(float normalizedVec) {
