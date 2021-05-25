@@ -19,11 +19,9 @@ package com.android.settingslib.enterprise;
 import static java.util.Objects.requireNonNull;
 
 import android.annotation.UserIdInt;
-import android.app.Activity;
 import android.content.Context;
 
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog.Builder;
 
 import com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
 
@@ -41,21 +39,22 @@ public class FinancedDeviceActionDisabledByAdminController
     FinancedDeviceActionDisabledByAdminController(
             ActionDisabledLearnMoreButtonLauncher helper,
             DeviceAdminStringProvider deviceAdminStringProvider) {
-        mHelper = requireNonNull(helper);
-        mDeviceAdminStringProvider = requireNonNull(deviceAdminStringProvider);
+        mHelper = requireNonNull(helper, "helper cannot be null");
+        mDeviceAdminStringProvider = requireNonNull(deviceAdminStringProvider,
+                "deviceAdminStringProvider cannot be null");
     }
 
     @Override
     public void updateEnforcedAdmin(EnforcedAdmin admin, int adminUserId) {
         mEnforcementAdminUserId = adminUserId;
-        mEnforcedAdmin = requireNonNull(admin);
+        mEnforcedAdmin = requireNonNull(admin, "admin cannot be null");
     }
 
     @Override
-    public void setupLearnMoreButton(Activity activity, Builder builder) {
+    public void setupLearnMoreButton(Context context, Object alertDialogBuilder) {
         mHelper.setupLearnMoreButtonToShowAdminPolicies(
-                activity,
-                builder,
+                context,
+                alertDialogBuilder,
                 mEnforcementAdminUserId,
                 mEnforcedAdmin);
     }

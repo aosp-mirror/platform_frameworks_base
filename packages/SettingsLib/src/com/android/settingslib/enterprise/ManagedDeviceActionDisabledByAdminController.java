@@ -19,13 +19,10 @@ package com.android.settingslib.enterprise;
 import static java.util.Objects.requireNonNull;
 
 import android.annotation.UserIdInt;
-import android.app.Activity;
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.os.UserManager;
 import android.text.TextUtils;
-
-import androidx.appcompat.app.AlertDialog.Builder;
 
 import com.android.settingslib.RestrictedLockUtils;
 
@@ -49,20 +46,20 @@ class ManagedDeviceActionDisabledByAdminController implements
     @Override
     public void updateEnforcedAdmin(RestrictedLockUtils.EnforcedAdmin admin, int adminUserId) {
         mEnforcementAdminUserId = adminUserId;
-        mEnforcedAdmin = requireNonNull(admin);
+        mEnforcedAdmin = requireNonNull(admin, "admin cannot be null");
     }
 
     @Override
-    public void setupLearnMoreButton(Activity activity, Builder builder) {
+    public void setupLearnMoreButton(Context context, Object alertDialogBuilder) {
         String url = mStringProvider.getLearnMoreHelpPageUrl();
         if (TextUtils.isEmpty(url)) {
             mHelper.setupLearnMoreButtonToShowAdminPolicies(
-                    activity,
-                    builder,
+                    context,
+                    alertDialogBuilder,
                     mEnforcementAdminUserId,
                     mEnforcedAdmin);
         } else {
-            mHelper.setupLearnMoreButtonToLaunchHelpPage(activity, builder, url);
+            mHelper.setupLearnMoreButtonToLaunchHelpPage(context, alertDialogBuilder, url);
         }
     }
 
