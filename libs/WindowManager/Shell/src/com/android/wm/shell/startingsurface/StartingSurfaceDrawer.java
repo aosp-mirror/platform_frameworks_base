@@ -277,8 +277,9 @@ public class StartingSurfaceDrawer {
             // waiting for setContentView before relayoutWindow
             SplashScreenView contentView = viewSupplier.get();
             final StartingWindowRecord record = mStartingWindowRecords.get(taskId);
-            // if record == null, either the starting window added fail or removed already.
-            if (record != null) {
+            // If record == null, either the starting window added fail or removed already.
+            // Do not add this view if the token is mismatch.
+            if (record != null && appToken == record.mAppToken) {
                 // if view == null then creation of content view was failed.
                 if (contentView != null) {
                     try {
@@ -297,15 +298,16 @@ public class StartingSurfaceDrawer {
 
         try {
             final WindowManager wm = context.getSystemService(WindowManager.class);
-            postAddWindow(taskId, appToken, rootLayout, wm, params);
-
-            // We use the splash screen worker thread to create SplashScreenView while adding the
-            // window, as otherwise Choreographer#doFrame might be delayed on this thread.
-            // And since Choreographer#doFrame won't happen immediately after adding the window, if
-            // the view is not added to the PhoneWindow on the first #doFrame, the view will not be
-            // rendered on the first frame. So here we need to synchronize the view on the window
-            // before first round relayoutWindow, which will happen after insets animation.
-            mChoreographer.postCallback(CALLBACK_INSETS_ANIMATION, setViewSynchronized, null);
+            if (postAddWindow(taskId, appToken, rootLayout, wm, params)) {
+                // We use the splash screen worker thread to create SplashScreenView while adding
+                // the window, as otherwise Choreographer#doFrame might be delayed on this thread.
+                // And since Choreographer#doFrame won't happen immediately after adding the window,
+                // if the view is not added to the PhoneWindow on the first #doFrame, the view will
+                // not be rendered on the first frame. So here we need to synchronize the view on
+                // the window before first round relayoutWindow, which will happen after insets
+                // animation.
+                mChoreographer.postCallback(CALLBACK_INSETS_ANIMATION, setViewSynchronized, null);
+            }
         } catch (RuntimeException e) {
             // don't crash if something else bad happens, for example a
             // failure loading resources because we are loading from an app
@@ -347,7 +349,8 @@ public class StartingSurfaceDrawer {
         final int taskId = startingWindowInfo.taskInfo.taskId;
         final TaskSnapshotWindow surface = TaskSnapshotWindow.create(startingWindowInfo, appToken,
                 snapshot, mSplashScreenExecutor, () -> removeWindowNoAnimate(taskId));
-        final StartingWindowRecord tView = new StartingWindowRecord(null/* decorView */, surface);
+        final StartingWindowRecord tView = new StartingWindowRecord(appToken,
+                null/* decorView */, surface);
         mStartingWindowRecords.put(taskId, tView);
     }
 
@@ -382,7 +385,7 @@ public class StartingSurfaceDrawer {
         ActivityTaskManager.getInstance().onSplashScreenViewCopyFinished(taskId, parcelable);
     }
 
-    protected void postAddWindow(int taskId, IBinder appToken, View view, WindowManager wm,
+    protected boolean postAddWindow(int taskId, IBinder appToken, View view, WindowManager wm,
             WindowManager.LayoutParams params) {
         boolean shouldSaveView = true;
         try {
@@ -401,12 +404,13 @@ public class StartingSurfaceDrawer {
         }
         if (shouldSaveView) {
             removeWindowNoAnimate(taskId);
-            saveSplashScreenRecord(taskId, view);
+            saveSplashScreenRecord(appToken, taskId, view);
         }
+        return shouldSaveView;
     }
 
-    private void saveSplashScreenRecord(int taskId, View view) {
-        final StartingWindowRecord tView = new StartingWindowRecord(view,
+    private void saveSplashScreenRecord(IBinder appToken, int taskId, View view) {
+        final StartingWindowRecord tView = new StartingWindowRecord(appToken, view,
                 null/* TaskSnapshotWindow */);
         mStartingWindowRecords.put(taskId, tView);
     }
@@ -468,12 +472,15 @@ public class StartingSurfaceDrawer {
      * Record the view or surface for a starting window.
      */
     private static class StartingWindowRecord {
+        private final IBinder mAppToken;
         private final View mDecorView;
         private final TaskSnapshotWindow mTaskSnapshotWindow;
         private SplashScreenView mContentView;
         private boolean mSetSplashScreen;
 
-        StartingWindowRecord(View decorView, TaskSnapshotWindow taskSnapshotWindow) {
+        StartingWindowRecord(IBinder appToken, View decorView,
+                TaskSnapshotWindow taskSnapshotWindow) {
+            mAppToken = appToken;
             mDecorView = decorView;
             mTaskSnapshotWindow = taskSnapshotWindow;
         }
