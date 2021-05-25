@@ -4136,6 +4136,7 @@ class Task extends WindowContainer<WindowContainer> {
                 : INVALID_TASK_ID;
         info.isFocused = isFocused();
         info.isVisible = hasVisibleChildren();
+        info.isSleeping = shouldSleepActivities();
         ActivityRecord topRecord = getTopNonFinishingActivity();
         info.mTopActivityLocusId = topRecord != null ? topRecord.getLocusId() : null;
     }
