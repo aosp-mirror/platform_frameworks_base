@@ -19,6 +19,7 @@ package com.android.settingslib.enterprise;
 import static com.google.common.truth.Truth.assertThat;
 
 import android.app.Activity;
+import android.content.Context;
 
 import androidx.appcompat.app.AlertDialog;
 
@@ -37,15 +38,15 @@ class ActionDisabledByAdminControllerTestUtils {
     ActionDisabledLearnMoreButtonLauncher createLearnMoreButtonLauncher() {
         return new ActionDisabledLearnMoreButtonLauncher() {
             @Override
-            public void setupLearnMoreButtonToShowAdminPolicies(Activity activity,
-                    AlertDialog.Builder builder, int enforcementAdminUserId,
+            public void setupLearnMoreButtonToShowAdminPolicies(Context context,
+                    Object alertDialogBuilder, int enforcementAdminUserId,
                     RestrictedLockUtils.EnforcedAdmin enforcedAdmin) {
                 mLearnMoreButtonAction = LEARN_MORE_ACTION_SHOW_ADMIN_POLICIES;
             }
 
             @Override
-            public void setupLearnMoreButtonToLaunchHelpPage(Activity activity,
-                    AlertDialog.Builder builder, String url) {
+            public void setupLearnMoreButtonToLaunchHelpPage(Context context,
+                    Object alertDialogBuilder, String url) {
                 mLearnMoreButtonAction = LEARN_MORE_ACTION_LAUNCH_HELP_PAGE;
             }
         };
