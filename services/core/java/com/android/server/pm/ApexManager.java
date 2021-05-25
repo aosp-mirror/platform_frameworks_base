@@ -390,6 +390,11 @@ public abstract class ApexManager {
             throws RemoteException;
 
     /**
+     * Performs a non-staged install of an APEX package with given {@code packagePath}.
+     */
+    abstract void installPackage(String packagePath) throws PackageManagerException;
+
+    /**
      * Dumps various state information to the provided {@link PrintWriter} object.
      *
      * @param pw the {@link PrintWriter} object to send information to.
@@ -974,6 +979,22 @@ public abstract class ApexManager {
             waitForApexService().reserveSpaceForCompressedApex(infoList);
         }
 
+        @Override
+        void installPackage(String packagePath) throws PackageManagerException {
+            try {
+                // TODO(b/187864524): do pre-install verification.
+                waitForApexService().installAndActivatePackage(packagePath);
+                // TODO(b/187864524): update mAllPackagesCache.
+            } catch (RemoteException e) {
+                throw new PackageManagerException(PackageManager.INSTALL_FAILED_INTERNAL_ERROR,
+                        "apexservice not available");
+            } catch (Exception e) {
+                // TODO(b/187864524): is INSTALL_FAILED_INTERNAL_ERROR is the right error code here?
+                throw new PackageManagerException(PackageManager.INSTALL_FAILED_INTERNAL_ERROR,
+                        e.getMessage());
+            }
+        }
+
         /**
          * Dump information about the packages contained in a particular cache
          * @param packagesCache the cache to print information about.
@@ -1238,6 +1259,11 @@ public abstract class ApexManager {
         @Override
         public void reserveSpaceForCompressedApex(CompressedApexInfoList infoList) {
             throw new UnsupportedOperationException();
+        }
+
+        @Override
+        void installPackage(String packagePath) {
+            throw new UnsupportedOperationException("APEX updates are not supported");
         }
 
         @Override

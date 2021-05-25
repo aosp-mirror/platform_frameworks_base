@@ -42,7 +42,6 @@ import static android.app.ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE;
-import static android.os.PowerWhitelistManager.REASON_DENIED;
 import static android.os.Process.SCHED_OTHER;
 import static android.os.Process.THREAD_GROUP_BACKGROUND;
 import static android.os.Process.THREAD_GROUP_DEFAULT;
@@ -1574,8 +1573,7 @@ public class OomAdjuster {
         state.setAdjTarget(null);
         state.setEmpty(false);
         state.setCached(false);
-        state.setAllowStartFgsState(PROCESS_STATE_NONEXISTENT);
-        state.resetAllowStartFgs();
+        state.resetAllowStartFgsState();
         app.mOptRecord.setShouldNotFreeze(false);
 
         final int appUid = app.info.uid;
@@ -1630,7 +1628,6 @@ public class OomAdjuster {
             state.setCurAdj(state.getMaxAdj());
             state.setCompletedAdjSeq(state.getAdjSeq());
             state.bumpAllowStartFgsState(state.getCurProcState());
-            state.setAllowStartFgs();
             // if curAdj is less than prevAppAdj, then this process was promoted
             return state.getCurAdj() < prevAppAdj || state.getCurProcState() < prevProcState;
         }
@@ -2027,12 +2024,6 @@ public class OomAdjuster {
                     int clientProcState = cstate.getCurRawProcState();
 
                     final boolean clientIsSystem = clientProcState < PROCESS_STATE_TOP;
-
-                    // pass client's mAllowStartFgs to the app if client is not persistent process.
-                    if (cstate.getAllowedStartFgs() != REASON_DENIED
-                            && cstate.getMaxAdj() >= ProcessList.FOREGROUND_APP_ADJ) {
-                        state.setAllowStartFgs(cstate.getAllowedStartFgs());
-                    }
 
                     if ((cr.flags & Context.BIND_WAIVE_PRIORITY) == 0) {
                         if (shouldSkipDueToCycle(state, cstate, procState, adj, cycleReEval)) {
@@ -2524,7 +2515,6 @@ public class OomAdjuster {
         state.updateLastInvisibleTime(hasVisibleActivities);
         state.setHasForegroundActivities(foregroundActivities);
         state.setCompletedAdjSeq(mAdjSeq);
-        state.setAllowStartFgs();
 
         // if curAdj or curProcState improved, then this process was promoted
         return state.getCurAdj() < prevAppAdj || state.getCurProcState() < prevProcState
