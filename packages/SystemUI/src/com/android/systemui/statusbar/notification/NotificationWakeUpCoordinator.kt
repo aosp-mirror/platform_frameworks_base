@@ -393,6 +393,11 @@ class NotificationWakeUpCoordinator @Inject constructor(
     override fun onDozingChanged(isDozing: Boolean) {
         if (isDozing) {
             setNotificationsVisible(visible = false, animate = false, increaseSpeed = false)
+        } else {
+            // We only unset the flag once we fully went asleep. If the user interrupts the
+            // animation in the middle, we have to abort the animation as well to make sure
+            // the notifications are visible again.
+            animatingScreenOff = false
         }
     }
 
