@@ -28,6 +28,7 @@ import static android.media.AudioManager.STREAM_VOICE_CALL;
 import static android.view.View.ACCESSIBILITY_LIVE_REGION_POLITE;
 import static android.view.View.GONE;
 import static android.view.View.INVISIBLE;
+import static android.view.View.LAYOUT_DIRECTION_RTL;
 import static android.view.View.VISIBLE;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
@@ -52,6 +53,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Color;
+import android.graphics.Outline;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -74,11 +76,13 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
 import android.view.ContextThemeWrapper;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.AccessibilityDelegate;
 import android.view.View.OnAttachStateChangeListener;
 import android.view.ViewGroup;
+import android.view.ViewOutlineProvider;
 import android.view.ViewPropertyAnimator;
 import android.view.ViewStub;
 import android.view.ViewTreeObserver;
@@ -147,7 +151,10 @@ public class VolumeDialogImpl implements VolumeDialog,
 
     private final int mDialogShowAnimationDurationMs;
     private final int mDialogHideAnimationDurationMs;
+    private final int mDialogWidth;
+    private final int mDialogCornerRadius;
     private final int mRingerDrawerItemSize;
+    private final int mRingerRowsPadding;
     private final boolean mShowVibrate;
     private final int mRingerCount;
     private final boolean mShowLowMediaVolumeIcon;
@@ -162,11 +169,25 @@ public class VolumeDialogImpl implements VolumeDialog,
     private Window mWindow;
     private CustomDialog mDialog;
     private ViewGroup mDialogView;
+    private ViewGroup mDialogRowsViewContainer;
     private ViewGroup mDialogRowsView;
     private ViewGroup mRinger;
 
-    @Nullable private View mRingerAndRowsContainer;
-    @Nullable private Drawable mRingerAndRowsContainerBackground;
+    /**
+     * Container for the top part of the dialog, which contains the ringer, the ringer drawer, the
+     * volume rows, and the ellipsis button. This does not include the live caption button.
+     */
+    @Nullable private View mTopContainer;
+
+    /** Container for the ringer icon, and for the (initially hidden) ringer drawer view. */
+    @Nullable private View mRingerAndDrawerContainer;
+
+    /**
+     * Background drawable for the ringer and drawer container. The background's top bound is
+     * initially inset by the height of the (hidden) ringer drawer. When the drawer is animated in,
+     * this top bound is animated to accommodate it.
+     */
+    @Nullable private Drawable mRingerAndDrawerContainerBackground;
 
     private ViewGroup mSelectedRingerContainer;
     private ImageView mSelectedRingerIcon;
@@ -196,6 +217,7 @@ public class VolumeDialogImpl implements VolumeDialog,
     private final ValueAnimator mAnimateUpBackgroundToMatchDrawer = ValueAnimator.ofFloat(1f, 0f);
 
     private boolean mIsRingerDrawerOpen = false;
+    private float mRingerDrawerClosedAmount = 1f;
 
     private ImageButton mRingerIcon;
     private ViewGroup mODICaptionsView;
@@ -266,8 +288,14 @@ public class VolumeDialogImpl implements VolumeDialog,
                 mDialogRowsView.invalidate();
             };
         }
+        mDialogWidth = mContext.getResources().getDimensionPixelSize(
+                R.dimen.volume_dialog_panel_width);
+        mDialogCornerRadius = mContext.getResources().getDimensionPixelSize(
+                R.dimen.volume_dialog_panel_width_half);
         mRingerDrawerItemSize = mContext.getResources().getDimensionPixelSize(
                 R.dimen.volume_ringer_drawer_item_size);
+        mRingerRowsPadding = mContext.getResources().getDimensionPixelSize(
+                R.dimen.volume_dialog_ringer_rows_padding);
         mShowVibrate = mController.hasVibrator();
 
         // Normal, mute, and possibly vibrate.
@@ -321,7 +349,7 @@ public class VolumeDialogImpl implements VolumeDialog,
 
             // The ringer and rows container has extra height at the top to fit the expanded ringer
             // drawer. This area should not be touchable unless the ringer drawer is open.
-            if (view == mRingerAndRowsContainer && !mIsRingerDrawerOpen) {
+            if (view == mTopContainer && !mIsRingerDrawerOpen) {
                 if (!isLandscape()) {
                     y += getRingerDrawerOpenExtraSize();
                 } else {
@@ -431,6 +459,46 @@ public class VolumeDialogImpl implements VolumeDialog,
             });
         }
 
+        mDialogRowsViewContainer = mDialogView.findViewById(R.id.volume_dialog_rows_container);
+        mTopContainer = mDialogView.findViewById(R.id.volume_dialog_top_container);
+        mRingerAndDrawerContainer = mDialogView.findViewById(
+                R.id.volume_ringer_and_drawer_container);
+
+        if (mRingerAndDrawerContainer != null) {
+            if (isLandscape()) {
+                // In landscape, we need to add padding to the bottom of the ringer drawer so that
+                // when it expands to the left, it doesn't overlap any additional volume rows.
+                mRingerAndDrawerContainer.setPadding(
+                        mRingerAndDrawerContainer.getPaddingLeft(),
+                        mRingerAndDrawerContainer.getPaddingTop(),
+                        mRingerAndDrawerContainer.getPaddingRight(),
+                        mRingerRowsPadding);
+
+                // Since the ringer drawer is expanding to the left, outside of the background of
+                // the dialog, it needs its own rounded background drawable. We also need that
+                // background to be rounded on all sides. We'll use a background rounded on all four
+                // corners, and then extend the container's background later to fill in the bottom
+                // corners when the drawer is closed.
+                mRingerAndDrawerContainer.setBackgroundDrawable(
+                        mContext.getDrawable(R.drawable.volume_background_top_rounded));
+            }
+
+            // Post to wait for layout so that the background bounds are set.
+            mRingerAndDrawerContainer.post(() -> {
+                final LayerDrawable ringerAndDrawerBg =
+                        (LayerDrawable) mRingerAndDrawerContainer.getBackground();
+
+                // Retrieve the ShapeDrawable from within the background - this is what we will
+                // animate up and down when the drawer is opened/closed.
+                if (ringerAndDrawerBg != null && ringerAndDrawerBg.getNumberOfLayers() > 0) {
+                    mRingerAndDrawerContainerBackground = ringerAndDrawerBg.getDrawable(0);
+
+                    updateBackgroundForDrawerClosedAmount();
+                    setTopContainerBackgroundDrawable();
+                }
+            });
+        }
+
         mRinger = mDialog.findViewById(R.id.ringer);
         if (mRinger != null) {
             mRingerIcon = mRinger.findViewById(R.id.ringer_icon);
@@ -508,6 +576,11 @@ public class VolumeDialogImpl implements VolumeDialog,
     private boolean isLandscape() {
         return mContext.getResources().getConfiguration().orientation ==
                 Configuration.ORIENTATION_LANDSCAPE;
+    }
+
+    private boolean isRtl() {
+        return mContext.getResources().getConfiguration().getLayoutDirection()
+                == LAYOUT_DIRECTION_RTL;
     }
 
     public void setStreamImportant(int stream, boolean important) {
@@ -611,23 +684,6 @@ public class VolumeDialogImpl implements VolumeDialog,
         row.number = row.view.findViewById(R.id.volume_number);
 
         row.anim = null;
-
-        mRingerAndRowsContainer = mDialogView.findViewById(
-                R.id.volume_dialog_ringer_and_rows_container);
-
-        if (mRingerAndRowsContainer != null) {
-            // Wait for layout so the background bounds are set, then set the background top to the
-            // ringer drawer closed position.
-            mRingerAndRowsContainer.post(() -> {
-                final LayerDrawable bgWrapper =
-                        ((LayerDrawable) mRingerAndRowsContainer.getBackground());
-
-                if (bgWrapper != null) {
-                    mRingerAndRowsContainerBackground = bgWrapper.getDrawable(0);
-                    setRingerAndRowsBackgroundTop(1f /* closedAmount */);
-                }
-            });
-        }
 
         final LayerDrawable seekbarDrawable =
                 (LayerDrawable) mContext.getDrawable(R.drawable.volume_row_seekbar);
@@ -764,8 +820,10 @@ public class VolumeDialogImpl implements VolumeDialog,
         });
         mRingerDrawerIconColorAnimator.setDuration(DRAWER_ANIMATION_DURATION_SHORT);
 
-        mAnimateUpBackgroundToMatchDrawer.addUpdateListener(valueAnimator ->
-                setRingerAndRowsBackgroundTop((float) valueAnimator.getAnimatedValue()));
+        mAnimateUpBackgroundToMatchDrawer.addUpdateListener(valueAnimator -> {
+            mRingerDrawerClosedAmount = (float) valueAnimator.getAnimatedValue();
+            updateBackgroundForDrawerClosedAmount();
+        });
     }
 
     private ImageView getDrawerIconViewForMode(int mode) {
@@ -792,6 +850,10 @@ public class VolumeDialogImpl implements VolumeDialog,
 
     /** Animates in the ringer drawer. */
     private void showRingerDrawer() {
+        if (mIsRingerDrawerOpen) {
+            return;
+        }
+
         // Show all ringer icons except the currently selected one, since we're going to animate the
         // ringer button to that position.
         mRingerDrawerVibrateIcon.setVisibility(
@@ -871,6 +933,10 @@ public class VolumeDialogImpl implements VolumeDialog,
 
         // If the ringer drawer isn't present, don't try to hide it.
         if (mRingerDrawerContainer == null) {
+            return;
+        }
+
+        if (!mIsRingerDrawerOpen) {
             return;
         }
 
@@ -1143,6 +1209,7 @@ public class VolumeDialogImpl implements VolumeDialog,
         mController.notifyVisible(true);
         mController.getCaptionsComponentState(false);
         checkODICaptionsTooltip(false);
+        updateBackgroundForDrawerClosedAmount();
     }
 
     protected void rescheduleTimeoutH() {
@@ -1258,15 +1325,65 @@ public class VolumeDialogImpl implements VolumeDialog,
         if (!mShowing) {
             trimObsoleteH();
         }
+
+        // Index of the last row that is actually visible.
+        int rightmostVisibleRowIndex = !isRtl() ? -1 : Short.MAX_VALUE;
+
         // apply changes to all rows
         for (final VolumeRow row : mRows) {
             final boolean isActive = row == activeRow;
             final boolean shouldBeVisible = shouldBeVisibleH(row, activeRow);
             Util.setVisOrGone(row.view, shouldBeVisible);
+
+            if (shouldBeVisible && mRingerAndDrawerContainerBackground != null) {
+                // For RTL, the rightmost row has the lowest index since child views are laid out
+                // from right to left.
+                rightmostVisibleRowIndex =
+                        !isRtl()
+                                ? Math.max(rightmostVisibleRowIndex,
+                                mDialogRowsView.indexOfChild(row.view))
+                                : Math.min(rightmostVisibleRowIndex,
+                                        mDialogRowsView.indexOfChild(row.view));
+
+                // Add spacing between each of the visible rows - we'll remove the spacing from the
+                // last row after the loop.
+                final ViewGroup.LayoutParams layoutParams = row.view.getLayoutParams();
+                if (layoutParams instanceof LinearLayout.LayoutParams) {
+                    final LinearLayout.LayoutParams linearLayoutParams =
+                            ((LinearLayout.LayoutParams) layoutParams);
+                    if (!isRtl()) {
+                        linearLayoutParams.setMarginEnd(mRingerRowsPadding);
+                    } else {
+                        linearLayoutParams.setMarginStart(mRingerRowsPadding);
+                    }
+                }
+
+                // Set the background on each of the rows. We'll remove this from the last row after
+                // the loop, since the last row's background is drawn by the main volume container.
+                row.view.setBackgroundDrawable(
+                        mContext.getDrawable(R.drawable.volume_row_rounded_background));
+            }
+
             if (row.view.isShown()) {
                 updateVolumeRowTintH(row, isActive);
             }
         }
+
+        if (rightmostVisibleRowIndex > -1 && rightmostVisibleRowIndex < Short.MAX_VALUE) {
+            final View lastVisibleChild = mDialogRowsView.getChildAt(rightmostVisibleRowIndex);
+            final ViewGroup.LayoutParams layoutParams = lastVisibleChild.getLayoutParams();
+            // Remove the spacing on the last row, and remove its background since the container is
+            // drawing a background for this row.
+            if (layoutParams instanceof LinearLayout.LayoutParams) {
+                final LinearLayout.LayoutParams linearLayoutParams =
+                        ((LinearLayout.LayoutParams) layoutParams);
+                linearLayoutParams.setMarginStart(0);
+                linearLayoutParams.setMarginEnd(0);
+                lastVisibleChild.setBackgroundColor(Color.TRANSPARENT);
+            }
+        }
+
+        updateBackgroundForDrawerClosedAmount();
     }
 
     protected void updateRingerH() {
@@ -1742,32 +1859,74 @@ public class VolumeDialogImpl implements VolumeDialog,
         return (mRingerCount - 1) * mRingerDrawerItemSize;
     }
 
-    /**
-     * Sets the top of the background drawable behind the container view for the ringer icon and the
-     * volume rows, depending on whether the ringer drawer is open or closed.
-     */
-    private void setRingerAndRowsBackgroundTop(float drawerClosedAmount) {
-        if (mRingerAndRowsContainerBackground == null) {
+    private void updateBackgroundForDrawerClosedAmount() {
+        if (mRingerAndDrawerContainerBackground == null) {
             return;
         }
 
-        final Rect bounds = mRingerAndRowsContainerBackground.copyBounds();
-
+        final Rect bounds = mRingerAndDrawerContainerBackground.copyBounds();
         if (!isLandscape()) {
-            // In portrait, the background should fill the full width, but only go up to the ringer
-            // icon's top. We'll extend it all the way to the top of the container when the ringer
-            // drawer opens.
-            bounds.left = 0;
-            bounds.top = (int) (drawerClosedAmount * getRingerDrawerOpenExtraSize());
+            bounds.top = (int) (mRingerDrawerClosedAmount * getRingerDrawerOpenExtraSize());
         } else {
-            // In landscape, the background should be inset by the size of the open drawer, since it
-            // opens sideways. It should extend to the top of the container since we haven't left
-            // space for the drawer to open upward.
-            bounds.left = getRingerDrawerOpenExtraSize();
-            bounds.top = 0;
+            bounds.left = (int) (mRingerDrawerClosedAmount * getRingerDrawerOpenExtraSize());
+        }
+        mRingerAndDrawerContainerBackground.setBounds(bounds);
+    }
+
+    /*
+     * The top container is responsible for drawing the solid color background behind the rightmost
+     * (primary) volume row. This is because the volume drawer animates in from below, initially
+     * overlapping the primary row. We need the drawer to draw below the row's SeekBar, since it
+     * looks strange to overlap it, but above the row's background color, since otherwise it will be
+     * clipped.
+     *
+     * Since we can't be both above and below the volume row view, we'll be below it, and render the
+     * background color in the container since they're both above that.
+     */
+    private void setTopContainerBackgroundDrawable() {
+        if (mTopContainer == null) {
+            return;
         }
 
-        mRingerAndRowsContainerBackground.setBounds(bounds);
+        final ColorDrawable solidDrawable = new ColorDrawable(
+                Utils.getColorAttrDefaultColor(mContext, com.android.internal.R.attr.colorSurface));
+
+        final LayerDrawable background = new LayerDrawable(new Drawable[] { solidDrawable });
+
+        // Size the solid color to match the primary volume row. In landscape, extend it upwards
+        // slightly so that it fills in the bottom corners of the ringer icon, whose background is
+        // rounded on all sides so that it can expand to the left, outside the dialog's background.
+        background.setLayerSize(0, mDialogWidth,
+                !isLandscape()
+                        ? mDialogRowsView.getHeight()
+                        : mDialogRowsView.getHeight() + mDialogCornerRadius);
+        // Inset the top so that the color only renders below the ringer drawer, which has its own
+        // background. In landscape, reduce the inset slightly since we are using the background to
+        // fill in the corners of the closed ringer drawer.
+        background.setLayerInsetTop(0,
+                !isLandscape()
+                        ? mDialogRowsViewContainer.getTop()
+                        : mDialogRowsViewContainer.getTop() - mDialogCornerRadius);
+
+        // Set gravity to top-right, since additional rows will be added on the left.
+        background.setLayerGravity(0, Gravity.TOP | Gravity.RIGHT);
+
+        // In landscape, the ringer drawer animates out to the left (instead of down). Since the
+        // drawer comes from the right (beyond the bounds of the dialog), we should clip it so it
+        // doesn't draw outside the dialog background. This isn't an issue in portrait, since the
+        // drawer animates downward, below the volume row.
+        if (isLandscape()) {
+            mRingerAndDrawerContainer.setOutlineProvider(new ViewOutlineProvider() {
+                @Override
+                public void getOutline(View view, Outline outline) {
+                    outline.setRoundRect(
+                            0, 0, view.getWidth(), view.getHeight(), mDialogCornerRadius);
+                }
+            });
+            mRingerAndDrawerContainer.setClipToOutline(true);
+        }
+
+        mTopContainer.setBackground(background);
     }
 
     private final VolumeDialogController.Callbacks mControllerCallbackH
