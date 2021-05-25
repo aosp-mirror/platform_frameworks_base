@@ -609,14 +609,12 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Icona dell\'impronta"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"gestione dell\'hardware per lo sblocco con il volto"</string>
-    <string name="permdesc_manageFace" msgid="6204569688492710471">"Consente all\'app di richiamare i metodi per aggiungere e rimuovere i modelli di volti."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"utilizzo dell\'hardware per lo sblocco con il volto"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Consente all\'app di usare hardware per l\'autenticazione mediante lo sblocco con il volto"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Sblocco con il volto"</string>
+    <!-- no translation found for face_recalibrate_notification_name (7311163114750748686) -->
+    <skip />
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Registra di nuovo il volto"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Per migliorare il riconoscimento, registra di nuovo il tuo volto"</string>
-    <string name="face_setup_notification_title" msgid="550617822603450009">"Configura lo sblocco con il volto"</string>
+    <!-- no translation found for face_setup_notification_title (8843461561970741790) -->
+    <skip />
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Sblocca il telefono guardandolo"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Configura altri modi per sbloccare"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Tocca per aggiungere un\'impronta"</string>
@@ -643,18 +641,26 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Imposs. verificare volto. Hardware non disponibile."</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"Riprova lo sblocco con il volto."</string>
+    <!-- no translation found for face_error_timeout (2598544068593889762) -->
+    <skip />
     <string name="face_error_no_space" msgid="5649264057026021723">"Imposs. salvare dati nuovi volti. Elimina un volto vecchio."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Operazione associata al volto annullata."</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"Sblocco con il volto annullato dall\'utente."</string>
+    <!-- no translation found for face_error_user_canceled (5766472033202928373) -->
+    <skip />
     <string name="face_error_lockout" msgid="7864408714994529437">"Troppi tentativi. Riprova più tardi."</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Troppi tentativi. Lo sblocco con il volto è disattivato."</string>
+    <!-- no translation found for face_error_lockout_permanent (3277134834042995260) -->
+    <skip />
+    <!-- no translation found for face_error_lockout_screen_lock (5062609811636860928) -->
+    <skip />
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Impossibile verificare il volto. Riprova."</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"Non hai configurato lo sblocco con il volto."</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"Sblocco con il volto non supportato su questo dispositivo."</string>
+    <!-- no translation found for face_error_not_enrolled (1134739108536328412) -->
+    <skip />
+    <!-- no translation found for face_error_hw_not_present (7940978724978763011) -->
+    <skip />
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Sensore temporaneamente disattivato."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Volto <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <string name="face_app_setting_name" msgid="8130135875458467243">"Usa lo sblocco con il volto"</string>
+    <!-- no translation found for face_app_setting_name (5854024256907828015) -->
+    <skip />
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Usa lo sblocco con il volto o il blocco schermo"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Usa il tuo volto per continuare"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Per continuare devi usare il tuo volto o il tuo blocco schermo"</string>
@@ -957,7 +963,8 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"Espandi area di sblocco."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"Sblocco con scorrimento."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"Sblocco con sequenza."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"Sblocco con il volto."</string>
+    <!-- no translation found for keyguard_accessibility_face_unlock (4533832120787386728) -->
+    <skip />
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"Sblocco con PIN."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"Sblocco tramite PIN della SIM."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"Sblocco tramite PUK della SIM."</string>

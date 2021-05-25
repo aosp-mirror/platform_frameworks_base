@@ -609,14 +609,12 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Icono de huella digital"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"gestionar el hardware de Desbloqueo facial"</string>
-    <string name="permdesc_manageFace" msgid="6204569688492710471">"Permite que la app use métodos para añadir y suprimir plantillas de caras para su uso."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"utilizar hardware de Desbloqueo facial"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Permite que la aplicación utilice el hardware de Desbloqueo facial para autenticarte"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Desbloqueo facial"</string>
+    <!-- no translation found for face_recalibrate_notification_name (7311163114750748686) -->
+    <skip />
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Volver a registrar la cara"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Para mejorar el reconocimiento, vuelve a registrar tu cara"</string>
-    <string name="face_setup_notification_title" msgid="550617822603450009">"Configura Desbloqueo facial"</string>
+    <!-- no translation found for face_setup_notification_title (8843461561970741790) -->
+    <skip />
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Desbloquea el teléfono con solo mirarlo"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Configura más formas de desbloqueo"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Toca para añadir una huella digital"</string>
@@ -643,18 +641,26 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"No se puede verificar. Hardware no disponible."</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"Vuelve a probar Desbloqueo facial."</string>
+    <!-- no translation found for face_error_timeout (2598544068593889762) -->
+    <skip />
     <string name="face_error_no_space" msgid="5649264057026021723">"Para guardar nuevos datos faciales, borra otros antiguos."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Se ha cancelado el reconocimiento facial."</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"El usuario ha cancelado Desbloqueo facial."</string>
+    <!-- no translation found for face_error_user_canceled (5766472033202928373) -->
+    <skip />
     <string name="face_error_lockout" msgid="7864408714994529437">"Demasiados intentos. Inténtalo de nuevo más tarde."</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Muchos intentos. Se ha inhabilitado Desbloqueo facial."</string>
+    <!-- no translation found for face_error_lockout_permanent (3277134834042995260) -->
+    <skip />
+    <!-- no translation found for face_error_lockout_screen_lock (5062609811636860928) -->
+    <skip />
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"No se ha verificado tu cara. Vuelve a intentarlo."</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"No has configurado Desbloqueo facial."</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"Desbloqueo facial no está disponible en este dispositivo."</string>
+    <!-- no translation found for face_error_not_enrolled (1134739108536328412) -->
+    <skip />
+    <!-- no translation found for face_error_hw_not_present (7940978724978763011) -->
+    <skip />
     <string name="face_error_security_update_required" msgid="5076017208528750161">"El sensor está inhabilitado en estos momentos."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Cara <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <string name="face_app_setting_name" msgid="8130135875458467243">"Usar Desbloqueo facial"</string>
+    <!-- no translation found for face_app_setting_name (5854024256907828015) -->
+    <skip />
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Usar Desbloqueo facial o Bloqueo de pantalla"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Usa tu cara para continuar"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Usa tu cara o tu bloqueo de pantalla para continuar"</string>
@@ -731,13 +737,13 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Comprueba cuántas veces se han introducido contraseñas incorrectas para desbloquear la pantalla y, si te parece que han sido demasiadas, bloquea tu dispositivo Android TV o borra todos los datos de este usuario."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Controla el número de contraseñas incorrectas introducidas para desbloquear la pantalla y bloquea el teléfono o borra todos los datos del usuario si se introducen demasiadas contraseñas incorrectas."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Cambiar el bloqueo de pantalla"</string>
-    <string name="policydesc_resetPassword" msgid="4626419138439341851">"Cambiar el bloqueo de pantalla"</string>
+    <string name="policydesc_resetPassword" msgid="4626419138439341851">"Cambia el bloqueo de pantalla"</string>
     <string name="policylab_forceLock" msgid="7360335502968476434">"Bloquear la pantalla"</string>
-    <string name="policydesc_forceLock" msgid="1008844760853899693">"Controlar cómo y cuándo se bloquea la pantalla"</string>
+    <string name="policydesc_forceLock" msgid="1008844760853899693">"Controla cómo y cuándo se bloquea la pantalla"</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"Borrar todos los datos"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Borrar los datos del tablet sin avisar restableciendo el estado de fábrica"</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Restablece los datos de fábrica de tu dispositivo Android TV, eliminando sin previo aviso los datos que tuviera."</string>
-    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Borrar los datos del teléfono sin avisar restableciendo el estado de fábrica"</string>
+    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Borra los datos del teléfono sin avisar restableciendo el estado de fábrica"</string>
     <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Borrar datos del usuario"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Borra los datos del usuario en este tablet sin avisar."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Eliminar los datos de este usuario del dispositivo Android TV sin previo aviso."</string>
@@ -751,7 +757,7 @@
     <string name="policylab_disableCamera" msgid="5749486347810162018">"Inhabilitar cámaras"</string>
     <string name="policydesc_disableCamera" msgid="3204405908799676104">"Evita el uso de las cámaras del dispositivo"</string>
     <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"Desactivar algunas funciones del bloqueo de pantalla"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"Evitar el uso de algunas funciones del bloqueo de pantalla"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"Evita el uso de algunas funciones del bloqueo de pantalla"</string>
   <string-array name="phoneTypes">
     <item msgid="8996339953292723951">"Casa"</item>
     <item msgid="7740243458912727194">"Móvil"</item>
@@ -957,7 +963,8 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"Ampliar área de desbloqueo"</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"Desbloqueo deslizando el dedo"</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"Desbloqueo por patrón"</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"Desbloqueo facial"</string>
+    <!-- no translation found for keyguard_accessibility_face_unlock (4533832120787386728) -->
+    <skip />
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"Desbloqueo por PIN"</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"Desbloqueo con PIN de la SIM."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"Desbloqueo con PUK de la SIM."</string>
