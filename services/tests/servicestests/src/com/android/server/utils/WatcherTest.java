@@ -22,6 +22,7 @@ import static org.junit.Assert.fail;
 
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -34,9 +35,12 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Random;
 
 /**
- * Test class for {@link Watcher}, {@link Watchable}, {@link WatchableImpl},
+ * Test class for various utility classes that support the Watchable or Snappable
+ * features.  This covers {@link Watcher}, {@link Watchable}, {@link WatchableImpl},
  * {@link WatchedArrayMap}, {@link WatchedSparseArray}, and
  * {@link WatchedSparseBooleanArray}.
  *
@@ -856,6 +860,93 @@ public class WatcherTest {
                 assertTrue(msg, array.get(i) == copy.get(i));
             }
         }
+    }
+
+    private static class IndexGenerator {
+        private final int mSeed;
+        private final Random mRandom;
+        public IndexGenerator(int seed) {
+            mSeed = seed;
+            mRandom = new Random(mSeed);
+        }
+        public int index() {
+            return mRandom.nextInt(50000);
+        }
+        public void reset() {
+            mRandom.setSeed(mSeed);
+        }
+    }
+
+    // Return a value based on the row and column.  The algorithm tries to avoid simple
+    // patterns like checkerboard.
+    private final boolean cellValue(int row, int col) {
+        return (((row * 4 + col) % 3)& 1) == 1;
+    }
+
+    // This is an inefficient way to know if a value appears in an array.
+    private final boolean contains(int[] s, int length, int k) {
+        for (int i = 0; i < length; i++) {
+            if (s[i] == k) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void matrixTest(WatchedSparseBooleanMatrix matrix, int size, IndexGenerator indexer) {
+        indexer.reset();
+        int[] indexes = new int[size];
+        for (int i = 0; i < size; i++) {
+            int key = indexer.index();
+            // Ensure the list of indices are unique.
+            while (contains(indexes, i, key)) {
+                key = indexer.index();
+            }
+            indexes[i] = key;
+        }
+        // Set values in the matrix.
+        for (int i = 0; i < size; i++) {
+            int row = indexes[i];
+            for (int j = 0; j < size; j++) {
+                int col = indexes[j];
+                boolean want = cellValue(i, j);
+                matrix.put(row, col, want);
+            }
+        }
+
+        assertEquals(matrix.size(), size);
+
+        // Read back and verify
+        for (int i = 0; i < matrix.size(); i++) {
+            int row = indexes[i];
+            for (int j = 0; j < matrix.size(); j++) {
+                int col = indexes[j];
+                boolean want = cellValue(i, j);
+                boolean actual = matrix.get(row, col);
+                String msg = String.format("matrix(%d:%d, %d:%d) == %s, expected %s",
+                                           i, row, j, col, actual, want);
+                assertEquals(msg, actual, want);
+            }
+        }
+
+        // Test the keyAt/indexOfKey methods
+        for (int i = 0; i < matrix.size(); i++) {
+            int key = indexes[i];
+            assertEquals(matrix.keyAt(matrix.indexOfKey(key)), key);
+        }
+    }
+
+    @Test
+    public void testWatchedSparseBooleanMatrix() {
+        final String name = "WatchedSparseBooleanMatrix";
+
+        // The first part of this method tests the core matrix functionality.  The second
+        // part tests the watchable behavior.  The third part tests the snappable
+        // behavior.
+        IndexGenerator indexer = new IndexGenerator(3);
+        matrixTest(new WatchedSparseBooleanMatrix(), 10, indexer);
+        matrixTest(new WatchedSparseBooleanMatrix(1000), 500, indexer);
+        matrixTest(new WatchedSparseBooleanMatrix(1000), 2000, indexer);
     }
 
     @Test
