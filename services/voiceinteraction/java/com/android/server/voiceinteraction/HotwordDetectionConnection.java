@@ -287,6 +287,8 @@ final class HotwordDetectionConnection {
             Slog.d(TAG, "stopListening");
         }
 
+        mRemoteHotwordDetectionService.run(service -> service.stopDetection());
+
         synchronized (mLock) {
             if (mCurrentAudioSink != null) {
                 Slog.i(TAG, "Closing audio stream to hotword detector: stopping requested");

@@ -10565,6 +10565,7 @@ package android.service.voice {
     method public void onDetect(@NonNull android.service.voice.AlwaysOnHotwordDetector.EventPayload, long, @NonNull android.service.voice.HotwordDetectionService.Callback);
     method public void onDetect(@NonNull android.service.voice.HotwordDetectionService.Callback);
     method public void onDetect(@NonNull android.os.ParcelFileDescriptor, @NonNull android.media.AudioFormat, @Nullable android.os.PersistableBundle, @NonNull android.service.voice.HotwordDetectionService.Callback);
+    method public void onStopDetection();
     method public void onUpdateState(@Nullable android.os.PersistableBundle, @Nullable android.os.SharedMemory, long, @Nullable java.util.function.IntConsumer);
     field public static final int INITIALIZATION_STATUS_SUCCESS = 0; // 0x0
     field public static final int INITIALIZATION_STATUS_UNKNOWN = 100; // 0x64
