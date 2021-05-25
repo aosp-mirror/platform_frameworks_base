@@ -93,7 +93,7 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
     private final WorkSource mWorkSource = new WorkSource();
     private final PowerManager.WakeLock mWakeLock;
     private final IBatteryStats mBatteryStatsService;
-    private final VibrationEffectModifier<VibratorInfo> mDeviceEffectAdapter =
+    private final DeviceVibrationEffectAdapter mDeviceEffectAdapter =
             new DeviceVibrationEffectAdapter();
     private final Vibration mVibration;
     private final VibrationCallbacks mCallbacks;
