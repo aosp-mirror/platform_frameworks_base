@@ -1594,7 +1594,7 @@
     <!-- Message shown during fingerprint acquisision when the fingerprint sensor needs cleaning -->
     <string name="fingerprint_acquired_imager_dirty">Clean the sensor</string>
     <!-- Message shown during fingerprint acquisision when the user removes their finger from the sensor too quickly -->
-    <string name="fingerprint_acquired_too_fast">Finger moved too fast</string>
+    <string name="fingerprint_acquired_too_fast">Hold a little longer</string>
     <!-- Message shown during fingerprint acquisision when the user moves their finger too slowly -->
     <string name="fingerprint_acquired_too_slow">Finger moved too slow. Please try again.</string>
     <!-- Message shown during fingerprint acquisition when the fingerprint was already enrolled.[CHAR LIMIT=50] -->
