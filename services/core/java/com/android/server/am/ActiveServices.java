@@ -2569,10 +2569,6 @@ public final class ActiveServices {
                 s.setAllowedBgActivityStartsByBinding(true);
             }
 
-            if ((flags & Context.BIND_ALLOW_FOREGROUND_SERVICE_STARTS_FROM_BACKGROUND) != 0) {
-                s.setAllowedBgFgsStartsByBinding(true);
-            }
-
             if ((flags & Context.BIND_NOT_APP_COMPONENT_USAGE) != 0) {
                 s.isNotAppComponentUsage = true;
             }
@@ -4128,9 +4124,6 @@ public final class ActiveServices {
             // And do the same for bg activity starts ability.
             if ((c.flags & Context.BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS) != 0) {
                 s.updateIsAllowedBgActivityStartsByBinding();
-            }
-            if ((c.flags & Context.BIND_ALLOW_FOREGROUND_SERVICE_STARTS_FROM_BACKGROUND) != 0) {
-                s.updateIsAllowedBgFgsStartsByBinding();
             }
             if (s.app != null) {
                 updateServiceClientActivitiesLocked(s.app.mServices, c, true);
@@ -5856,8 +5849,6 @@ public final class ActiveServices {
                     final ProcessStateRecord state = app.mState;
                     if (state.isAllowedStartFgsState()) {
                         return getReasonCodeFromProcState(state.getAllowStartFgsState());
-                    } else if (state.areBackgroundFgsStartsAllowedByToken()) {
-                        return REASON_FGS_BINDING;
                     } else {
                         final ActiveInstrumentation instr = app.getActiveInstrumentation();
                         if (instr != null
