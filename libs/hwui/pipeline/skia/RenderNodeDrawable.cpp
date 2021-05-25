@@ -16,11 +16,11 @@
 
 #include "RenderNodeDrawable.h"
 #include <SkPaintFilterCanvas.h>
-#include "StretchMask.h"
+#include <gui/TraceUtils.h>
 #include "RenderNode.h"
 #include "SkiaDisplayList.h"
+#include "StretchMask.h"
 #include "TransformCanvas.h"
-#include "utils/TraceUtils.h"
 
 #include <include/effects/SkImageFilters.h>
 

@@ -285,6 +285,73 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
     }
 
     @Test
+    public void testAugmentTileFromNotificationGroupWithImageUri() {
+        Notification notification = new Notification.Builder(mContext, "test")
+                .setContentTitle("TEST_TITLE")
+                .setContentText("TEST_TEXT")
+                .setShortcutId(SHORTCUT_ID_1)
+                .setStyle(new Notification.MessagingStyle(PERSON)
+                        .addMessage(new Notification.MessagingStyle.Message(
+                                NOTIFICATION_TEXT_1, 0, PERSON)
+                                .setData("image/jpeg", URI))
+                )
+                .build();
+        NotificationEntry notificationEntry = new NotificationEntryBuilder()
+                .setNotification(notification)
+                .setShortcutInfo(new ShortcutInfo.Builder(mContext, SHORTCUT_ID_1).build())
+                .setUser(UserHandle.of(0))
+                .setPkg(PACKAGE_NAME)
+                .build();
+        PeopleSpaceTile tile =
+                new PeopleSpaceTile
+                        .Builder(SHORTCUT_ID_1, "userName", ICON, new Intent())
+                        .setPackageName(PACKAGE_NAME)
+                        .setUserHandle(new UserHandle(0))
+                        .build();
+        PeopleTileKey key = new PeopleTileKey(tile);
+        PeopleSpaceTile actual = PeopleSpaceUtils
+                .augmentTileFromNotification(mContext, tile, key, notificationEntry, 0,
+                        Optional.empty());
+
+        assertThat(actual.getNotificationContent().toString()).isEqualTo(NOTIFICATION_TEXT_1);
+        assertThat(actual.getNotificationDataUri()).isEqualTo(URI);
+    }
+
+    @Test
+    public void testAugmentTileFromNotificationGroupWithAudioUri() {
+        Notification notification = new Notification.Builder(mContext, "test")
+                .setContentTitle("TEST_TITLE")
+                .setContentText("TEST_TEXT")
+                .setShortcutId(SHORTCUT_ID_1)
+                .setStyle(new Notification.MessagingStyle(PERSON)
+                        .addMessage(new Notification.MessagingStyle.Message(
+                                NOTIFICATION_TEXT_1, 0, PERSON)
+                                .setData("audio/ogg", URI))
+                )
+                .build();
+        NotificationEntry notificationEntry = new NotificationEntryBuilder()
+                .setNotification(notification)
+                .setShortcutInfo(new ShortcutInfo.Builder(mContext, SHORTCUT_ID_1).build())
+                .setUser(UserHandle.of(0))
+                .setPkg(PACKAGE_NAME)
+                .build();
+        PeopleSpaceTile tile =
+                new PeopleSpaceTile
+                        .Builder(SHORTCUT_ID_1, "userName", ICON, new Intent())
+                        .setPackageName(PACKAGE_NAME)
+                        .setUserHandle(new UserHandle(0))
+                        .build();
+        PeopleTileKey key = new PeopleTileKey(tile);
+        PeopleSpaceTile actual = PeopleSpaceUtils
+                .augmentTileFromNotification(mContext, tile, key, notificationEntry, 0,
+                        Optional.empty());
+
+        assertThat(actual.getNotificationContent().toString()).isEqualTo(NOTIFICATION_TEXT_1);
+        assertThat(actual.getNotificationDataUri()).isNull();
+    }
+
+
+    @Test
     public void testAugmentTileFromNotificationNoContent() {
         PeopleSpaceTile tile =
                 new PeopleSpaceTile

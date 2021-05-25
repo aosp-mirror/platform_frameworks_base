@@ -16,6 +16,7 @@
 
 #include "SkiaOpenGLPipeline.h"
 
+#include <gui/TraceUtils.h>
 #include "DeferredLayerUpdater.h"
 #include "LayerDrawable.h"
 #include "LightingInfo.h"
@@ -27,7 +28,6 @@
 #include "renderthread/EglManager.h"
 #include "renderthread/Frame.h"
 #include "utils/GLUtils.h"
-#include "utils/TraceUtils.h"
 
 #include <GLES3/gl3.h>
 

@@ -43,7 +43,6 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Environment;
 import android.os.FileUtils;
-import android.os.Process;
 import android.provider.DeviceConfig;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
@@ -229,7 +228,7 @@ final class DiscreteRegistry {
     void recordDiscreteAccess(int uid, String packageName, int op, @Nullable String attributionTag,
             @AppOpsManager.OpFlags int flags, @AppOpsManager.UidState int uidState, long accessTime,
             long accessDuration) {
-        if (!isDiscreteOp(op, uid, flags)) {
+        if (!isDiscreteOp(op, flags)) {
             return;
         }
         synchronized (mInMemoryLock) {
@@ -1046,21 +1045,11 @@ final class DiscreteRegistry {
         return result;
     }
 
-    private static boolean isDiscreteOp(int op, int uid, @AppOpsManager.OpFlags int flags) {
+    private static boolean isDiscreteOp(int op, @AppOpsManager.OpFlags int flags) {
         if (!ArrayUtils.contains(sDiscreteOps, op)) {
             return false;
         }
-        if (!isDiscreteUid(uid)) {
-            return false;
-        }
         if ((flags & (sDiscreteFlags)) == 0) {
-            return false;
-        }
-        return true;
-    }
-
-    private static boolean isDiscreteUid(int uid) {
-        if (uid < Process.FIRST_APPLICATION_UID) {
             return false;
         }
         return true;

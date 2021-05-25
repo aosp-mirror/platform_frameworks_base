@@ -19,6 +19,7 @@
 #include <sync/sync.h>
 #include <system/window.h>
 
+#include <gui/TraceUtils.h>
 #include "DeferredLayerUpdater.h"
 #include "Properties.h"
 #include "hwui/Bitmap.h"
@@ -28,7 +29,6 @@
 #include "utils/Color.h"
 #include "utils/MathUtils.h"
 #include "utils/NdkUtils.h"
-#include "utils/TraceUtils.h"
 
 using namespace android::uirenderer::renderthread;
 

@@ -1,2 +1,0 @@
-rule com.android.net.module.util.** android.net.connectivity.framework.util.@1
-rule android.net.NetworkFactory* android.net.connectivity.framework.NetworkFactory@1
