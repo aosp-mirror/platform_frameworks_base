@@ -199,6 +199,17 @@ public final class WidgetFlags {
      */
     public static final float MAGNIFIER_ASPECT_RATIO_DEFAULT = 5.5f;
 
+    /** The flag of the fps of the analog clock seconds hand. */
+    public static final String ANALOG_CLOCK_SECONDS_HAND_FPS =
+            "AnalogClockFeature__analog_clock_seconds_hand_fps";
+
+    /** The key name used in app core settings for {@link #ANALOG_CLOCK_SECONDS_HAND_FPS}. */
+    public static final String KEY_ANALOG_CLOCK_SECONDS_HAND_FPS =
+            "widget__analog_clock_seconds_hand_fps";
+
+    /** Default value for the flag {@link #ANALOG_CLOCK_SECONDS_HAND_FPS}. */
+    public static final int ANALOG_CLOCK_SECONDS_HAND_FPS_DEFAULT = 1;
+
     private WidgetFlags() {
     }
 }
