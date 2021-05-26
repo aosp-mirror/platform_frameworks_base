@@ -3074,7 +3074,7 @@ public final class ProcessList {
                                 UidRecord.CHANGE_GONE);
                         EventLogTags.writeAmUidStopped(uid);
                         mActiveUids.remove(uid);
-                        mService.mFgsStartTempAllowList.remove(record.info.uid);
+                        mService.mFgsStartTempAllowList.removeUid(record.info.uid);
                         mService.noteUidProcessState(uid, ActivityManager.PROCESS_STATE_NONEXISTENT,
                                 ActivityManager.PROCESS_CAPABILITY_NONE);
                     }
