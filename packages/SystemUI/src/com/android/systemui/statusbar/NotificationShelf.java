@@ -358,9 +358,13 @@ public class NotificationShelf extends ActivatableNotificationView implements
                 && anv instanceof ExpandableNotificationRow
                 && ((ExpandableNotificationRow) anv).isHeadsUp();
 
+        final boolean isHunGoingToShade = mAmbientState.isShadeExpanded()
+                && anv == mAmbientState.getTrackedHeadsUpRow();
+
         final boolean shouldUpdateCornerRoundness = viewStart < shelfStart
                 && !mHostLayoutController.isViewAffectedBySwipe(anv)
                 && !isUnlockedHeadsUp
+                && !isHunGoingToShade
                 && !mAmbientState.isPulsing()
                 && !mAmbientState.isDozing();
 
