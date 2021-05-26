@@ -22,7 +22,6 @@ import static android.graphics.drawable.Icon.TYPE_URI_ADAPTIVE_BITMAP;
 
 import static java.util.Objects.requireNonNull;
 
-import android.annotation.AttrRes;
 import android.annotation.ColorInt;
 import android.annotation.ColorRes;
 import android.annotation.DimenRes;
@@ -36,6 +35,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.StringRes;
+import android.annotation.StyleableRes;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
@@ -3750,19 +3750,11 @@ public class Notification implements Parcelable
         private boolean mIsLegacyInitialized;
 
         /**
-         * Caches a contrast-enhanced version of {@link #mCachedContrastColorIsFor}.
-         */
-        private int mCachedContrastColor = COLOR_INVALID;
-        private int mCachedContrastColorIsFor = COLOR_INVALID;
-
-        /**
          * Caches an instance of StandardTemplateParams. Note that this may have been used before,
          * so make sure to call {@link StandardTemplateParams#reset()} before using it.
          */
         StandardTemplateParams mParams = new StandardTemplateParams();
-        private int mTextColorsAreForBackground = COLOR_INVALID;
-        private int mPrimaryTextColor = COLOR_INVALID;
-        private int mSecondaryTextColor = COLOR_INVALID;
+        Colors mColors = new Colors();
 
         private boolean mTintActionButtons;
         private boolean mInNightMode;
@@ -5019,7 +5011,7 @@ public class Notification implements Parcelable
             contentView.setDrawableTint(
                     R.id.phishing_alert,
                     false /* targetBackground */,
-                    getErrorColor(p),
+                    getColors(p).getErrorColor(),
                     PorterDuff.Mode.SRC_ATOP);
         }
 
@@ -5066,8 +5058,8 @@ public class Notification implements Parcelable
             contentView.setDrawableTint(
                     R.id.alerted_icon,
                     false /* targetBackground */,
-                    getHeaderIconColor(p),
-                    PorterDuff.Mode.SRC_ATOP);
+                    getColors(p).getSecondaryTextColor(),
+                    PorterDuff.Mode.SRC_IN);
         }
 
         /**
@@ -5195,8 +5187,7 @@ public class Notification implements Parcelable
          */
         @VisibleForTesting
         public @ColorInt int getPrimaryTextColor(StandardTemplateParams p) {
-            ensureColors(p);
-            return mPrimaryTextColor;
+            return getColors(p).getPrimaryTextColor();
         }
 
         /**
@@ -5206,8 +5197,7 @@ public class Notification implements Parcelable
          */
         @VisibleForTesting
         public @ColorInt int getSecondaryTextColor(StandardTemplateParams p) {
-            ensureColors(p);
-            return mSecondaryTextColor;
+            return getColors(p).getSecondaryTextColor();
         }
 
         private void setTextViewColorSecondary(RemoteViews contentView, @IdRes int id,
@@ -5215,29 +5205,9 @@ public class Notification implements Parcelable
             contentView.setTextColor(id, getSecondaryTextColor(p));
         }
 
-        private void ensureColors(StandardTemplateParams p) {
-            int backgroundColor = getUnresolvedBackgroundColor(p);
-            if (mPrimaryTextColor == COLOR_INVALID
-                    || mSecondaryTextColor == COLOR_INVALID
-                    || mTextColorsAreForBackground != backgroundColor) {
-                mTextColorsAreForBackground = backgroundColor;
-                int defaultPrimaryTextColor = ContrastColorUtil.resolvePrimaryColor(mContext,
-                        backgroundColor, mInNightMode);
-                int defaultSecondaryTextColor = ContrastColorUtil.resolveSecondaryColor(mContext,
-                        backgroundColor, mInNightMode);
-                boolean colorized = backgroundColor != COLOR_DEFAULT;
-                if (colorized) {
-                    mPrimaryTextColor = ContrastColorUtil.findAlphaToMeetContrast(
-                            defaultPrimaryTextColor, backgroundColor, 4.5);
-                    mSecondaryTextColor = ContrastColorUtil.findAlphaToMeetContrast(
-                            defaultSecondaryTextColor, backgroundColor, 4.5);
-                } else {
-                    mPrimaryTextColor = obtainThemeColor(R.attr.textColorPrimary,
-                            defaultPrimaryTextColor);
-                    mSecondaryTextColor = obtainThemeColor(R.attr.textColorSecondary,
-                            defaultSecondaryTextColor);
-                }
-            }
+        private Colors getColors(StandardTemplateParams p) {
+            mColors.resolvePalette(mContext, mN.color, isBackgroundColorized(p), mInNightMode);
+            return mColors;
         }
 
         private void updateBackgroundColor(RemoteViews contentView,
@@ -5262,7 +5232,7 @@ public class Notification implements Parcelable
                 contentView.setProgressBar(R.id.progress, max, progress, ind);
                 contentView.setProgressBackgroundTintList(R.id.progress,
                         mContext.getColorStateList(R.color.notification_progress_background_color));
-                ColorStateList progressTint = ColorStateList.valueOf(getAccentColor(p));
+                ColorStateList progressTint = ColorStateList.valueOf(getPrimaryAccentColor(p));
                 contentView.setProgressTintList(R.id.progress, progressTint);
                 contentView.setProgressIndeterminateTintList(R.id.progress, progressTint);
                 return true;
@@ -5396,13 +5366,13 @@ public class Notification implements Parcelable
         private void bindExpandButton(RemoteViews contentView, StandardTemplateParams p) {
             // set default colors
             int textColor = getPrimaryTextColor(p);
-            int pillColor = getProtectionColor(p);
+            int pillColor = getColors(p).getProtectionColor();
             contentView.setInt(R.id.expand_button, "setDefaultTextColor", textColor);
             contentView.setInt(R.id.expand_button, "setDefaultPillColor", pillColor);
             // Use different highlighted colors for conversations' unread count
             if (p.mHighlightExpander) {
                 textColor = getBackgroundColor(p);
-                pillColor = getAccentColor(p);
+                pillColor = getPrimaryAccentColor(p);
             }
             contentView.setInt(R.id.expand_button, "setHighlightTextColor", textColor);
             contentView.setInt(R.id.expand_button, "setHighlightPillColor", pillColor);
@@ -5715,7 +5685,7 @@ public class Notification implements Parcelable
                         showSpinner ? View.VISIBLE : View.GONE);
                 big.setProgressIndeterminateTintList(
                         R.id.notification_material_reply_progress,
-                        ColorStateList.valueOf(getAccentColor(p)));
+                        ColorStateList.valueOf(getPrimaryAccentColor(p)));
 
                 if (replyText.length > 1 && !TextUtils.isEmpty(replyText[1].getText())
                         && p.maxRemoteInputHistory > 1) {
@@ -6110,7 +6080,7 @@ public class Notification implements Parcelable
                 // change the background bgColor
                 CharSequence title = action.title;
                 ColorStateList[] outResultColor = new ColorStateList[1];
-                int background = getSecondaryAccentColor(p);
+                int background = getColors(p).getSecondaryAccentColor();
                 if (isLegacy()) {
                     title = ContrastColorUtil.clearColorSpans(title);
                 } else {
@@ -6270,7 +6240,7 @@ public class Notification implements Parcelable
             if (largeIcon != null && isLegacy()
                     && getColorUtil().isGrayscaleIcon(mContext, largeIcon)) {
                 // resolve color will fall back to the default when legacy
-                int color = getContrastColor(p);
+                int color = getSmallIconColor(p);
                 contentView.setInt(R.id.icon, "setOriginalIconColor", color);
             }
         }
@@ -6286,14 +6256,7 @@ public class Notification implements Parcelable
          */
         private @ColorInt int getStandardActionColor(Notification.StandardTemplateParams p) {
             return mTintActionButtons || isBackgroundColorized(p)
-                    ? getAccentColor(p) : getNeutralColor(p);
-        }
-
-        /**
-         * Gets a neutral color that can be used for icons or similar that should not stand out.
-         */
-        private @ColorInt int getHeaderIconColor(StandardTemplateParams p) {
-            return isBackgroundColorized(p) ? getSecondaryTextColor(p) : getNeutralColor(p);
+                    ? getPrimaryAccentColor(p) : getSecondaryTextColor(p);
         }
 
         /**
@@ -6301,134 +6264,12 @@ public class Notification implements Parcelable
          * is the primary text color, otherwise it's the contrast-adjusted app-provided color.
          */
         private @ColorInt int getSmallIconColor(StandardTemplateParams p) {
-            return getContrastColor(p);
+            return getColors(p).getContrastColor();
         }
 
-        /**
-         * Gets the accent color for colored UI elements.  If we're tinting with the theme
-         * accent, this is the theme accent color, otherwise this would be identical to
-         * {@link #getSmallIconColor(StandardTemplateParams)}.
-         */
-        private @ColorInt int getAccentColor(StandardTemplateParams p) {
-            if (isBackgroundColorized(p)) {
-                return getPrimaryTextColor(p);
-            }
-            int color = obtainThemeColor(R.attr.colorAccent, COLOR_INVALID);
-            if (color != COLOR_INVALID) {
-                return color;
-            }
-            return getContrastColor(p);
-        }
-
-        /**
-         * Gets the secondary accent color for colored UI elements.  If we're tinting with the theme
-         * accent, this is the theme accent color, otherwise this would be identical to
-         * {@link #getSmallIconColor(StandardTemplateParams)}.
-         */
-        private @ColorInt int getSecondaryAccentColor(StandardTemplateParams p) {
-            if (isBackgroundColorized(p)) {
-                return getSecondaryTextColor(p);
-            }
-            int color = obtainThemeColor(R.attr.colorAccentSecondary, COLOR_INVALID);
-            if (color != COLOR_INVALID) {
-                return color;
-            }
-            return getContrastColor(p);
-        }
-
-        /**
-         * Gets the "surface protection" color from the theme, or a variant of the normal background
-         * color when colorized, or when not using theme color tints.
-         */
-        private @ColorInt int getProtectionColor(StandardTemplateParams p) {
-            if (!isBackgroundColorized(p)) {
-                int color = obtainThemeColor(R.attr.colorBackgroundFloating, COLOR_INVALID);
-                if (color != COLOR_INVALID) {
-                    return color;
-                }
-            }
-            // TODO(b/181048615): What color should we use for the expander pill when colorized
-            return ColorUtils.blendARGB(getPrimaryTextColor(p), getBackgroundColor(p), 0.8f);
-        }
-
-        /**
-         * Gets the theme's error color, or the primary text color for colorized notifications.
-         */
-        private @ColorInt int getErrorColor(StandardTemplateParams p) {
-            if (!isBackgroundColorized(p)) {
-                int color = obtainThemeColor(R.attr.colorError, COLOR_INVALID);
-                if (color != COLOR_INVALID) {
-                    return color;
-                }
-            }
-            return getPrimaryTextColor(p);
-        }
-
-        /**
-         * Gets the theme's background color
-         */
-        private @ColorInt int getDefaultBackgroundColor() {
-            return obtainThemeColor(R.attr.colorSurface,
-                    mInNightMode ? Color.BLACK : Color.WHITE);
-        }
-
-        /**
-         * Gets the contrast-adjusted version of the color provided by the app.
-         */
-        private @ColorInt int getContrastColor(StandardTemplateParams p) {
-            if (isBackgroundColorized(p)) {
-                return getPrimaryTextColor(p);
-            }
-            int rawColor = getRawColor(p);
-            if (mCachedContrastColorIsFor == rawColor && mCachedContrastColor != COLOR_INVALID) {
-                return mCachedContrastColor;
-            }
-
-            int color;
-            // TODO: Maybe use getBackgroundColor(p) instead -- but doing so could break the cache
-            int background = getDefaultBackgroundColor();
-            if (rawColor == COLOR_DEFAULT) {
-                ensureColors(p);
-                color = obtainThemeColor(R.attr.colorAccent, COLOR_INVALID);
-                if (color == COLOR_INVALID) {
-                    color = ContrastColorUtil.resolveDefaultColor(mContext, background,
-                            mInNightMode);
-                }
-            } else {
-                color = ContrastColorUtil.resolveContrastColor(mContext, rawColor,
-                        background, mInNightMode);
-            }
-            if (Color.alpha(color) < 255) {
-                // alpha doesn't go well for color filters, so let's blend it manually
-                color = ContrastColorUtil.compositeColors(color, background);
-            }
-            mCachedContrastColorIsFor = rawColor;
-            return mCachedContrastColor = color;
-        }
-
-        /**
-         * Return the raw color of this Notification, which doesn't necessarily satisfy contrast.
-         *
-         * @see #getContrastColor(StandardTemplateParams) for the contrasted color
-         * @param p the template params to inflate this with
-         */
-        private @ColorInt int getRawColor(StandardTemplateParams p) {
-            return mN.color;
-        }
-
-        /**
-         * Gets a neutral palette color; this is a contrast-satisfied version of the default color.
-         * @param p the template params to inflate this with
-         */
-        private @ColorInt int getNeutralColor(StandardTemplateParams p) {
-            int background = getBackgroundColor(p);
-            int neutralColor = ContrastColorUtil.resolveDefaultColor(mContext, background,
-                    mInNightMode);
-            if (Color.alpha(neutralColor) < 255) {
-                // alpha doesn't go well for color filters, so let's blend it manually
-                neutralColor = ContrastColorUtil.compositeColors(neutralColor, background);
-            }
-            return neutralColor;
+        /** @return the theme's accent color for colored UI elements. */
+        private @ColorInt int getPrimaryAccentColor(StandardTemplateParams p) {
+            return getColors(p).getPrimaryAccentColor();
         }
 
         /**
@@ -6574,23 +6415,6 @@ public class Notification implements Parcelable
         }
 
         /**
-         * Returns the color for the given Theme.DeviceDefault.DayNight attribute, or
-         * defValue if that could not be completed
-         */
-        private @ColorInt int obtainThemeColor(@AttrRes int attrRes, @ColorInt int defaultColor) {
-            Resources.Theme theme = mContext.getTheme();
-            if (theme == null) {
-                // Running unit tests with mocked context
-                return defaultColor;
-            }
-            theme = new ContextThemeWrapper(mContext, R.style.Theme_DeviceDefault_DayNight)
-                    .getTheme();
-            try (TypedArray ta = theme.obtainStyledAttributes(new int[]{attrRes})) {
-                return ta == null ? defaultColor : ta.getColor(0, defaultColor);
-            }
-        }
-
-        /**
          * Apply this Builder to an existing {@link Notification} object.
          *
          * @hide
@@ -6700,24 +6524,8 @@ public class Notification implements Parcelable
             return R.layout.notification_material_action_tombstone;
         }
 
-        /**
-         * Gets the background color, with {@link #COLOR_DEFAULT} being a valid return value,
-         * which must be resolved by the caller before being used.
-         */
-        private @ColorInt int getUnresolvedBackgroundColor(StandardTemplateParams p) {
-            return isBackgroundColorized(p) ? getRawColor(p) : COLOR_DEFAULT;
-        }
-
-        /**
-         * Same as {@link #getUnresolvedBackgroundColor(StandardTemplateParams)} except that it
-         * also resolves the default color to the background.
-         */
         private @ColorInt int getBackgroundColor(StandardTemplateParams p) {
-            int backgroundColor = getUnresolvedBackgroundColor(p);
-            if (backgroundColor == COLOR_DEFAULT) {
-                backgroundColor = getDefaultBackgroundColor();
-            }
-            return backgroundColor;
+            return getColors(p).getBackgroundColor();
         }
 
         private boolean textColorsNeedInversion() {
@@ -9099,8 +8907,7 @@ public class Notification implements Parcelable
             container.setDrawableTint(buttonId, false, tintColor,
                     PorterDuff.Mode.SRC_ATOP);
 
-            int rippleAlpha = Color.alpha(mBuilder.obtainThemeColor(
-                    android.R.attr.colorControlHighlight, COLOR_DEFAULT));
+            int rippleAlpha = mBuilder.getColors(p).getRippleAlpha();
             int rippleColor = Color.argb(rippleAlpha, Color.red(tintColor), Color.green(tintColor),
                     Color.blue(tintColor));
             container.setRippleDrawableColor(buttonId, ColorStateList.valueOf(rippleColor));
@@ -12429,6 +12236,221 @@ public class Notification implements Parcelable
             hideProgress(hideOtherFields);
             hideActions(hideOtherFields);
             return this;
+        }
+    }
+
+    /**
+     * A utility which stores and calculates the palette of colors used to color notifications.
+     * @hide
+     */
+    @VisibleForTesting
+    public static class Colors {
+        private int mPaletteIsForRawColor = COLOR_INVALID;
+        private boolean mPaletteIsForColorized = false;
+        private boolean mPaletteIsForNightMode = false;
+        // The following colors are the palette
+        private int mBackgroundColor = COLOR_INVALID;
+        private int mProtectionColor = COLOR_INVALID;
+        private int mPrimaryTextColor = COLOR_INVALID;
+        private int mSecondaryTextColor = COLOR_INVALID;
+        private int mPrimaryAccentColor = COLOR_INVALID;
+        private int mSecondaryAccentColor = COLOR_INVALID;
+        private int mErrorColor = COLOR_INVALID;
+        private int mContrastColor = COLOR_INVALID;
+        private int mRippleAlpha = 0x33;
+
+        /**
+         * A utility for obtaining a TypedArray of the given DayNight-styled attributes, which
+         * returns null when the context is a mock with no theme.
+         *
+         * NOTE: Calling this method is expensive, as creating a new ContextThemeWrapper
+         * instances can allocate as much as 5MB of memory, so its important to call this method
+         * only when necessary, getting as many attributes as possible from each call.
+         *
+         * @see Resources.Theme#obtainStyledAttributes(int[])
+         */
+        @Nullable
+        private static TypedArray obtainDayNightAttributes(@NonNull Context ctx,
+                @NonNull @StyleableRes int[] attrs) {
+            // when testing, the mock context may have no theme
+            if (ctx.getTheme() == null) {
+                return null;
+            }
+            Resources.Theme theme = new ContextThemeWrapper(ctx,
+                    R.style.Theme_DeviceDefault_DayNight).getTheme();
+            return theme.obtainStyledAttributes(attrs);
+        }
+
+        /** A null-safe wrapper of TypedArray.getColor because mocks return null */
+        private static @ColorInt int getColor(@Nullable TypedArray ta, int index,
+                @ColorInt int defValue) {
+            return ta == null ? defValue : ta.getColor(index, defValue);
+        }
+
+        /**
+         * Resolve the palette.  If the inputs have not changed, this will be a no-op.
+         * This does not handle invalidating the resolved colors when the context itself changes,
+         * because that case does not happen in the current notification inflation pipeline; we will
+         * recreate a new builder (and thus a new palette) when reinflating notifications for a new
+         * theme (admittedly, we do the same for night mode, but that's easy to check).
+         *
+         * @param ctx the builder context.
+         * @param rawColor the notification's color; may be COLOR_DEFAULT, but may never have alpha.
+         * @param isColorized whether the notification is colorized.
+         * @param nightMode whether the UI is in night mode.
+         */
+        public void resolvePalette(Context ctx, int rawColor,
+                boolean isColorized, boolean nightMode) {
+            if (mPaletteIsForRawColor == rawColor
+                    && mPaletteIsForColorized == isColorized
+                    && mPaletteIsForNightMode == nightMode) {
+                return;
+            }
+            mPaletteIsForRawColor = rawColor;
+            mPaletteIsForColorized = isColorized;
+            mPaletteIsForNightMode = nightMode;
+
+            if (isColorized) {
+                if (rawColor == COLOR_DEFAULT) {
+                    int[] attrs = {R.attr.colorAccentTertiary};
+                    try (TypedArray ta = obtainDayNightAttributes(ctx, attrs)) {
+                        mBackgroundColor = getColor(ta, 0, Color.WHITE);
+                    }
+                } else {
+                    mBackgroundColor = rawColor;
+                }
+                mProtectionColor = COLOR_INVALID;  // filled in at the end
+                mPrimaryTextColor = ContrastColorUtil.findAlphaToMeetContrast(
+                        ContrastColorUtil.resolvePrimaryColor(ctx, mBackgroundColor, nightMode),
+                        mBackgroundColor, 4.5);
+                mSecondaryTextColor = ContrastColorUtil.findAlphaToMeetContrast(
+                        ContrastColorUtil.resolveSecondaryColor(ctx, mBackgroundColor, nightMode),
+                        mBackgroundColor, 4.5);
+                mContrastColor = mPrimaryTextColor;
+                mPrimaryAccentColor = mPrimaryTextColor;
+                mSecondaryAccentColor = mSecondaryTextColor;
+                mErrorColor = mPrimaryTextColor;
+                mRippleAlpha = 0x33;
+            } else {
+                int[] attrs = {
+                        R.attr.colorBackground,
+                        R.attr.colorBackgroundFloating,
+                        R.attr.textColorPrimary,
+                        R.attr.textColorSecondary,
+                        R.attr.colorAccent,
+                        R.attr.colorAccentSecondary,
+                        R.attr.colorError,
+                        R.attr.colorControlHighlight
+                };
+                try (TypedArray ta = obtainDayNightAttributes(ctx, attrs)) {
+                    mBackgroundColor = getColor(ta, 0, nightMode ? Color.BLACK : Color.WHITE);
+                    mProtectionColor = getColor(ta, 1, COLOR_INVALID);
+                    mPrimaryTextColor = getColor(ta, 2, COLOR_INVALID);
+                    mSecondaryTextColor = getColor(ta, 3, COLOR_INVALID);
+                    mPrimaryAccentColor = getColor(ta, 4, COLOR_INVALID);
+                    mSecondaryAccentColor = getColor(ta, 5, COLOR_INVALID);
+                    mErrorColor = getColor(ta, 6, COLOR_INVALID);
+                    mRippleAlpha = Color.alpha(getColor(ta, 7, 0x33ffffff));
+                }
+                mContrastColor = calculateContrastColor(ctx, rawColor, mPrimaryAccentColor,
+                        mBackgroundColor, nightMode);
+
+                // make sure every color has a valid value
+                if (mPrimaryTextColor == COLOR_INVALID) {
+                    mPrimaryTextColor = ContrastColorUtil.resolvePrimaryColor(
+                            ctx, mBackgroundColor, nightMode);
+                }
+                if (mSecondaryTextColor == COLOR_INVALID) {
+                    mSecondaryTextColor = ContrastColorUtil.resolveSecondaryColor(
+                            ctx, mBackgroundColor, nightMode);
+                }
+                if (mPrimaryAccentColor == COLOR_INVALID) {
+                    mPrimaryAccentColor = mContrastColor;
+                }
+                if (mSecondaryAccentColor == COLOR_INVALID) {
+                    mSecondaryAccentColor = mContrastColor;
+                }
+                if (mErrorColor == COLOR_INVALID) {
+                    mErrorColor = mPrimaryTextColor;
+                }
+            }
+            // make sure every color has a valid value
+            if (mProtectionColor == COLOR_INVALID) {
+                mProtectionColor = ColorUtils.blendARGB(mPrimaryTextColor, mBackgroundColor, 0.8f);
+            }
+        }
+
+        /** calculates the contrast color for the non-colorized notifications */
+        private static @ColorInt int calculateContrastColor(Context ctx, @ColorInt int rawColor,
+                @ColorInt int accentColor, @ColorInt int backgroundColor, boolean nightMode) {
+            int color;
+            if (rawColor == COLOR_DEFAULT) {
+                color = accentColor;
+                if (color == COLOR_INVALID) {
+                    color = ContrastColorUtil.resolveDefaultColor(ctx, backgroundColor, nightMode);
+                }
+            } else {
+                color = ContrastColorUtil.resolveContrastColor(ctx, rawColor, backgroundColor,
+                        nightMode);
+            }
+            return flattenAlpha(color, backgroundColor);
+        }
+
+        /** remove any alpha by manually blending it with the given background. */
+        private static @ColorInt int flattenAlpha(@ColorInt int color, @ColorInt int background) {
+            return Color.alpha(color) == 0xff ? color
+                    : ContrastColorUtil.compositeColors(color, background);
+        }
+
+        /** @return the notification's background color */
+        public @ColorInt int getBackgroundColor() {
+            return mBackgroundColor;
+        }
+
+        /**
+         * @return the "surface protection" color from the theme,
+         * or a variant of the normal background color when colorized.
+         */
+        public @ColorInt int getProtectionColor() {
+            return mProtectionColor;
+        }
+
+        /** @return the color for the most prominent text */
+        public @ColorInt int getPrimaryTextColor() {
+            return mPrimaryTextColor;
+        }
+
+        /** @return the color for less prominent text */
+        public @ColorInt int getSecondaryTextColor() {
+            return mSecondaryTextColor;
+        }
+
+        /** @return the theme's accent color for colored UI elements. */
+        public @ColorInt int getPrimaryAccentColor() {
+            return mPrimaryAccentColor;
+        }
+
+        /** @return the theme's secondary accent color for colored UI elements. */
+        public @ColorInt int getSecondaryAccentColor() {
+            return mSecondaryAccentColor;
+        }
+
+        /**
+         * @return the contrast-adjusted version of the color provided by the app, or the
+         * primary text color when colorized.
+         */
+        public @ColorInt int getContrastColor() {
+            return mContrastColor;
+        }
+
+        /** @return the theme's error color, or the primary text color when colorized. */
+        public @ColorInt int getErrorColor() {
+            return mErrorColor;
+        }
+
+        /** @return the alpha component of the current theme's control highlight color. */
+        public int getRippleAlpha() {
+            return mRippleAlpha;
         }
     }
 }
