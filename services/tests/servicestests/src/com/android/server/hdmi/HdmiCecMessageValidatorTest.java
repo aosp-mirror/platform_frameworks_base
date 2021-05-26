@@ -37,6 +37,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import java.util.Collections;
+
 /** Tests for {@link com.android.server.hdmi.HdmiCecMessageValidator} class. */
 @SmallTest
 @Presubmit
@@ -49,7 +51,7 @@ public class HdmiCecMessageValidatorTest {
     @Before
     public void setUp() throws Exception {
         HdmiControlService mHdmiControlService = new HdmiControlService(
-                InstrumentationRegistry.getTargetContext());
+                InstrumentationRegistry.getTargetContext(), Collections.emptyList());
 
         mHdmiControlService.setIoLooper(mTestLooper.getLooper());
         mHdmiCecMessageValidator = new HdmiCecMessageValidator(mHdmiControlService);

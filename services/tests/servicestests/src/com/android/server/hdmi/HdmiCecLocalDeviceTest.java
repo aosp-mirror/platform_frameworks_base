@@ -129,7 +129,7 @@ public class HdmiCecLocalDeviceTest {
         Context context = InstrumentationRegistry.getTargetContext();
 
         mHdmiControlService =
-                new HdmiControlService(context) {
+                new HdmiControlService(context, Collections.emptyList()) {
                     @Override
                     boolean isControlEnabled() {
                         return isControlEnabled;
