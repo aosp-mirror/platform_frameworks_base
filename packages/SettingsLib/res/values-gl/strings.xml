@@ -155,8 +155,8 @@
     <string name="running_process_item_user_label" msgid="3988506293099805796">"Usuario: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"Definíronse algúns valores predeterminados"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"Non se definiu ningún valor predeterminado"</string>
-    <string name="tts_settings" msgid="8130616705989351312">"Configuración da síntese de voz"</string>
-    <string name="tts_settings_title" msgid="7602210956640483039">"Saída da síntese de voz"</string>
+    <string name="tts_settings" msgid="8130616705989351312">"Configuración da conversión de texto a voz"</string>
+    <string name="tts_settings_title" msgid="7602210956640483039">"Saída da conversión de texto a voz"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"Velocidade da fala"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"Velocidade á que se di o texto"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"Ton"</string>
@@ -170,7 +170,7 @@
     <string name="tts_install_data_title" msgid="1829942496472751703">"Instalar datos de voz"</string>
     <string name="tts_install_data_summary" msgid="3608874324992243851">"Instala os datos de voz necesarios para a síntese de voz"</string>
     <string name="tts_engine_security_warning" msgid="3372432853837988146">"É posible que este motor de síntese de voz poida recompilar todo o texto falado, incluídos datos persoais como contrasinais e números de tarxetas de crédito. Provén do motor <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g>. Queres activar o uso deste motor de síntese de voz?"</string>
-    <string name="tts_engine_network_required" msgid="8722087649733906851">"Este idioma precisa dispoñer dunha conexión de rede que funcione para a saída da síntese de voz."</string>
+    <string name="tts_engine_network_required" msgid="8722087649733906851">"Este idioma precisa dispoñer dunha conexión de rede que funcione para a saída da conversión de texto a voz."</string>
     <string name="tts_default_sample_string" msgid="6388016028292967973">"Este é un exemplo da síntese de voz"</string>
     <string name="tts_status_title" msgid="8190784181389278640">"Estado do idioma predeterminado"</string>
     <string name="tts_status_ok" msgid="8583076006537547379">"<xliff:g id="LOCALE">%1$s</xliff:g> é completamente compatible"</string>
