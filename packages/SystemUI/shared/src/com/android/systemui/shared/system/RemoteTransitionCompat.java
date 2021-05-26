@@ -74,7 +74,7 @@ public class RemoteTransitionCompat implements Parcelable {
                     IRemoteTransitionFinishedCallback finishedCallback) {
                 final Runnable finishAdapter = () ->  {
                     try {
-                        finishedCallback.onTransitionFinished(null /* wct */);
+                        finishedCallback.onTransitionFinished(null /* wct */, null /* sct */);
                     } catch (RemoteException e) {
                         Log.e(TAG, "Failed to call transition finished callback", e);
                     }
@@ -88,7 +88,7 @@ public class RemoteTransitionCompat implements Parcelable {
                     IRemoteTransitionFinishedCallback finishedCallback) {
                 final Runnable finishAdapter = () ->  {
                     try {
-                        finishedCallback.onTransitionFinished(null /* wct */);
+                        finishedCallback.onTransitionFinished(null /* wct */, null /* sct */);
                     } catch (RemoteException e) {
                         Log.e(TAG, "Failed to call transition finished callback", e);
                     }
@@ -120,6 +120,7 @@ public class RemoteTransitionCompat implements Parcelable {
                 // This transition is for opening recents, so recents is on-top. We want to draw
                 // the current going-away task on top of recents, though, so move it to front
                 WindowContainerToken pausingTask = null;
+                SurfaceControl pausingLeash = null;
                 for (int i = info.getChanges().size() - 1; i >= 0; --i) {
                     final TransitionInfo.Change change = info.getChanges().get(i);
                     if (change.getMode() == TRANSIT_CLOSE || change.getMode() == TRANSIT_TO_BACK) {
@@ -148,7 +149,7 @@ public class RemoteTransitionCompat implements Parcelable {
                 if (!mergeTarget.equals(mToken)) return;
                 if (!mRecentsSession.merge(info, t, recents)) return;
                 try {
-                    finishedCallback.onTransitionFinished(null /* wct */);
+                    finishedCallback.onTransitionFinished(null /* wct */, null /* sct */);
                 } catch (RemoteException e) {
                     Log.e(TAG, "Error merging transition.", e);
                 }
@@ -266,10 +267,13 @@ public class RemoteTransitionCompat implements Parcelable {
             try {
                 if (!toHome && mPausingTask != null && mOpeningLeash == null) {
                     // The gesture went back to opening the app rather than continuing with
-                    // recents, so end the transition by moving the app back to the top.
+                    // recents, so end the transition by moving the app back to the top (and also
+                    // re-showing it's task).
                     final WindowContainerTransaction wct = new WindowContainerTransaction();
                     wct.reorder(mPausingTask, true /* onTop */);
-                    mFinishCB.onTransitionFinished(wct);
+                    final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+                    t.show(mInfo.getChange(mPausingTask).getLeash());
+                    mFinishCB.onTransitionFinished(wct, t);
                 } else {
                     if (mOpeningLeash != null) {
                         // TODO: the launcher animation should handle this
@@ -278,7 +282,7 @@ public class RemoteTransitionCompat implements Parcelable {
                         t.setAlpha(mOpeningLeash, 1.f);
                         t.apply();
                     }
-                    mFinishCB.onTransitionFinished(null /* wct */);
+                    mFinishCB.onTransitionFinished(null /* wct */, null /* sct */);
                 }
             } catch (RemoteException e) {
                 Log.e("RemoteTransitionCompat", "Failed to call animation finish callback", e);

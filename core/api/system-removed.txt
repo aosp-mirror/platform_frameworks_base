@@ -58,6 +58,14 @@ package android.app.search {
     method @Deprecated public void destroy();
   }
 
+  public final class SearchTarget implements android.os.Parcelable {
+    method @Deprecated public boolean shouldHide();
+  }
+
+  public static final class SearchTarget.Builder {
+    method @Deprecated @NonNull public android.app.search.SearchTarget.Builder setShouldHide(boolean);
+  }
+
 }
 
 package android.bluetooth {

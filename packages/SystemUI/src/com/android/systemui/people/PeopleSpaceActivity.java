@@ -184,10 +184,4 @@ public class PeopleSpaceActivity extends Activity {
         // Refresh tile views to sync new conversations.
         buildActivity();
     }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        finish();
-    }
 }

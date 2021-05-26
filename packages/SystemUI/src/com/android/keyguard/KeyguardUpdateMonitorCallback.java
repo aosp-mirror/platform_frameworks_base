@@ -88,6 +88,12 @@ public class KeyguardUpdateMonitorCallback {
      */
     public void onKeyguardVisibilityChanged(boolean showing) { }
 
+    /**
+     * Called when the keyguard occluded state changes.
+     * @param occluded Indicates if the keyguard is now occluded.
+     */
+    public void onKeyguardOccludedChanged(boolean occluded) { }
+
     public void onKeyguardVisibilityChangedRaw(boolean showing) {
         final long now = SystemClock.elapsedRealtime();
         if (showing == mShowing

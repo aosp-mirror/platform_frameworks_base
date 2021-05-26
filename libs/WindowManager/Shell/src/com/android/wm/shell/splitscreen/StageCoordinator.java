@@ -44,6 +44,7 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.graphics.Rect;
+import android.hardware.devicestate.DeviceStateManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
@@ -115,7 +116,8 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     private final List<SplitScreen.SplitScreenListener> mListeners = new ArrayList<>();
     private final DisplayImeController mDisplayImeController;
     private final SplitScreenTransitions mSplitTransitions;
-    private boolean mExitSplitScreenOnHide = true;
+    private boolean mExitSplitScreenOnHide;
+    private boolean mKeyguardOccluded;
 
     // TODO(b/187041611): remove this flag after totally deprecated legacy split
     /** Whether the device is supporting legacy split or not. */
@@ -157,6 +159,10 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 mSurfaceSession);
         mDisplayImeController = displayImeController;
         mRootTDAOrganizer.registerListener(displayId, this);
+        final DeviceStateManager deviceStateManager =
+                mContext.getSystemService(DeviceStateManager.class);
+        deviceStateManager.registerCallback(taskOrganizer.getExecutor(),
+                new DeviceStateManager.FoldStateListener(mContext, this::onFoldedStateChanged));
         mSplitTransitions = new SplitScreenTransitions(transactionPool, transitions,
                 mOnTransitionAnimationComplete);
         transitions.addHandler(this);
@@ -253,17 +259,17 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     }
 
     void setSideStagePosition(@SplitPosition int sideStagePosition) {
-        setSideStagePosition(sideStagePosition, true /* updateVisibility */);
+        setSideStagePosition(sideStagePosition, true /* updateBounds */);
     }
 
     private void setSideStagePosition(@SplitPosition int sideStagePosition,
-            boolean updateVisibility) {
+            boolean updateBounds) {
         if (mSideStagePosition == sideStagePosition) return;
         mSideStagePosition = sideStagePosition;
         sendOnStagePositionChanged();
 
-        if (mSideStageListener.mVisible && updateVisibility) {
-            onStageVisibilityChanged(mSideStageListener);
+        if (mSideStageListener.mVisible && updateBounds) {
+            onBoundsChanged(mSplitLayout);
         }
     }
 
@@ -273,6 +279,12 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         mSideStage.setVisibility(visible, wct);
         mTaskOrganizer.applyTransaction(wct);
+    }
+
+    void onKeyguardOccludedChanged(boolean occluded) {
+        // Do not exit split directly, because it needs to wait for task info update to determine
+        // which task should remain on top after split dismissed.
+        mKeyguardOccluded = occluded;
     }
 
     void exitSplitScreen() {
@@ -403,10 +415,20 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         // Divider is only visible if both the main stage and side stages are visible
         setDividerVisibility(isSplitScreenVisible());
 
-        if (mExitSplitScreenOnHide && !mainStageVisible && !sideStageVisible) {
-            // Exit split-screen if both stage are not visible.
-            // TODO: This is only a temporary request from UX and is likely to be removed soon...
-            exitSplitScreen();
+        if (!mainStageVisible && !sideStageVisible) {
+            if (mExitSplitScreenOnHide
+            // Don't dismiss staged split when both stages are not visible due to sleeping display,
+            // like the cases keyguard showing or screen off.
+            || (!mMainStage.mRootTaskInfo.isSleeping && !mSideStage.mRootTaskInfo.isSleeping)) {
+                exitSplitScreen();
+            }
+        } else if (mKeyguardOccluded) {
+            // At least one of the stages is visible while keyguard occluded. Dismiss split because
+            // there's show-when-locked activity showing on top of keyguard. Also make sure the
+            // task contains show-when-locked activity remains on top after split dismissed.
+            final StageTaskListener toTop =
+                    mainStageVisible ? mMainStage : (sideStageVisible ? mSideStage : null);
+            exitSplitScreen(toTop);
         }
 
         if (mainStageVisible) {
@@ -585,6 +607,12 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         }
     }
 
+    private void onFoldedStateChanged(boolean folded) {
+        if (folded && mMainStage.isActive()) {
+            exitSplitScreen();
+        }
+    }
+
     private Rect getSideStageBounds() {
         return mSideStagePosition == SPLIT_POSITION_TOP_OR_LEFT
                 ? mSplitLayout.getBounds1() : mSplitLayout.getBounds2();
@@ -755,7 +783,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
             // Update local states (before animating).
             setDividerVisibility(true);
-            setSideStagePosition(SPLIT_POSITION_BOTTOM_OR_RIGHT, false /* updateVisibility */);
+            setSideStagePosition(SPLIT_POSITION_BOTTOM_OR_RIGHT, false /* updateBounds */);
             setSplitsVisible(true);
 
             addDividerBarToTransition(info, t, true /* show */);

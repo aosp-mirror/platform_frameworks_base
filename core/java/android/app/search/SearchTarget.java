@@ -50,7 +50,7 @@ import java.util.Objects;
  * can recommend which layout this target should be rendered in.
  *
  * The service can also use fields such as {@link #getScore()} to indicate
- * how confidence the search result is and {@link #shouldHide()} to indicate
+ * how confidence the search result is and {@link #isHidden()} to indicate
  * whether it is recommended to be shown by default.
  *
  * Finally, {@link #getId()} is the unique identifier of this search target and a single
@@ -125,7 +125,7 @@ public final class SearchTarget implements Parcelable {
 
     private final float mScore;
 
-    private final boolean mShouldHide;
+    private final boolean mHidden;
 
     @NonNull
     private final String mPackageName;
@@ -149,7 +149,7 @@ public final class SearchTarget implements Parcelable {
         mId = parcel.readString();
         mParentId = parcel.readString();
         mScore = parcel.readFloat();
-        mShouldHide = parcel.readBoolean();
+        mHidden = parcel.readBoolean();
 
         mPackageName = parcel.readString();
         mUserHandle = UserHandle.of(parcel.readInt());
@@ -165,7 +165,7 @@ public final class SearchTarget implements Parcelable {
             @NonNull String layoutType,
             @NonNull String id,
             @Nullable String parentId,
-            float score, boolean shouldHide,
+            float score, boolean hidden,
             @NonNull String packageName,
             @NonNull UserHandle userHandle,
             @Nullable SearchAction action,
@@ -178,7 +178,7 @@ public final class SearchTarget implements Parcelable {
         mId = Objects.requireNonNull(id);
         mParentId = parentId;
         mScore = score;
-        mShouldHide = shouldHide;
+        mHidden = hidden;
         mPackageName = Objects.requireNonNull(packageName);
         mUserHandle = Objects.requireNonNull(userHandle);
         mSearchAction = action;
@@ -238,9 +238,20 @@ public final class SearchTarget implements Parcelable {
 
     /**
      * Indicates whether this object should be hidden and shown only on demand.
+     *
+     * @deprecated will be removed once SDK drops
+     * @removed
      */
+    @Deprecated
     public boolean shouldHide() {
-        return mShouldHide;
+        return mHidden;
+    }
+
+    /**
+     * Indicates whether this object should be hidden and shown only on demand.
+     */
+    public boolean isHidden() {
+        return mHidden;
     }
 
     /**
@@ -311,7 +322,7 @@ public final class SearchTarget implements Parcelable {
         parcel.writeString(mId);
         parcel.writeString(mParentId);
         parcel.writeFloat(mScore);
-        parcel.writeBoolean(mShouldHide);
+        parcel.writeBoolean(mHidden);
         parcel.writeString(mPackageName);
         parcel.writeInt(mUserHandle.getIdentifier());
         parcel.writeTypedObject(mSearchAction, flags);
@@ -351,7 +362,7 @@ public final class SearchTarget implements Parcelable {
         @Nullable
         private String mParentId;
         private float mScore;
-        private boolean mShouldHide;
+        private boolean mHidden;
         @NonNull
         private String mPackageName;
         @NonNull
@@ -374,7 +385,7 @@ public final class SearchTarget implements Parcelable {
             mLayoutType = Objects.requireNonNull(layoutType);
             mResultType = resultType;
             mScore = 1f;
-            mShouldHide = false;
+            mHidden = false;
         }
 
         /**
@@ -473,8 +484,20 @@ public final class SearchTarget implements Parcelable {
          * Sets whether the result should be hidden (e.g. not visible) by default inside client.
          */
         @NonNull
+        public Builder setHidden(boolean hidden) {
+            mHidden = hidden;
+            return this;
+        }
+
+        /**
+         * Sets whether the result should be hidden by default inside client.
+         * @deprecated will be removed once SDK drops
+         * @removed
+         */
+        @NonNull
+        @Deprecated
         public Builder setShouldHide(boolean shouldHide) {
-            mShouldHide = shouldHide;
+            mHidden = shouldHide;
             return this;
         }
 
@@ -485,7 +508,7 @@ public final class SearchTarget implements Parcelable {
          */
         @NonNull
         public SearchTarget build() {
-            return new SearchTarget(mResultType, mLayoutType, mId, mParentId, mScore, mShouldHide,
+            return new SearchTarget(mResultType, mLayoutType, mId, mParentId, mScore, mHidden,
                     mPackageName, mUserHandle,
                     mSearchAction, mShortcutInfo, mSliceUri, mAppWidgetProviderInfo,
                     mExtras);

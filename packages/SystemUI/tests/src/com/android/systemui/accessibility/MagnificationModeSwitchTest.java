@@ -100,8 +100,6 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
     private AccessibilityManager mAccessibilityManager;
     @Mock
     private SfVsyncFrameCallbackProvider mSfVsyncFrameProvider;
-    @Mock
-    private Handler mHandler;
     private TestableWindowManager mWindowManager;
     private ViewPropertyAnimator mViewPropertyAnimator;
     private MagnificationModeSwitch mMagnificationModeSwitch;
@@ -152,12 +150,12 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
     }
 
     @Test
-    public void showWindowModeButton_fullscreenMode_addViewAndSetImageResource() {
-        mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+    public void showFullscreenModeButton_addViewAndSetImageResource() {
+        mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
 
         verify(mSpyImageView).setImageResource(
-                getIconResId(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW));
-        verify(mWindowManager).addView(eq(mSpyImageView), any(WindowManager.LayoutParams.class));
+                getIconResId(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN));
+        assertEquals(mSpyImageView, mWindowManager.getAttachedView());
         assertShowFadingAnimation(FADE_IN_ALPHA);
         assertShowFadingAnimation(FADE_OUT_ALPHA);
     }

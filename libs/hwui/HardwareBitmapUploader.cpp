@@ -24,10 +24,10 @@
 #include <GrDirectContext.h>
 #include <SkCanvas.h>
 #include <SkImage.h>
+#include <gui/TraceUtils.h>
 #include <utils/GLUtils.h>
 #include <utils/NdkUtils.h>
 #include <utils/Trace.h>
-#include <utils/TraceUtils.h>
 
 #include <thread>
 
