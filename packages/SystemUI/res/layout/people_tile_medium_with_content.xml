@@ -16,6 +16,7 @@
  -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:theme="@android:style/Theme.DeviceDefault.DayNight"
     android:id="@+id/item"
     android:background="@drawable/people_space_tile_view_card"
@@ -128,7 +129,7 @@
                     android:paddingStart="8dp"
                     android:paddingEnd="8dp"
                     android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
-                    android:textColor="?android:attr/textColorPrimary"
+                    android:textColor="?androidprv:attr/textColorOnAccent"
                     android:background="@drawable/people_space_messages_count_background"
                     android:textSize="14sp"
                     android:maxLines="1"
