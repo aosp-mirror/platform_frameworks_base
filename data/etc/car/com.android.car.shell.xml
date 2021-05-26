@@ -33,5 +33,8 @@
         <permission name="android.car.permission.CONTROL_CAR_EVS_ACTIVITY" />
         <permission name="android.car.permission.USE_CAR_EVS_CAMERA" />
         <permission name="android.car.permission.MONITOR_CAR_EVS_STATUS" />
+        <permission name="android.car.permission.USE_CAR_WATCHDOG" />
+        <permission name="android.car.permission.COLLECT_CAR_WATCHDOG_METRICS" />
+        <permission name="android.car.permission.CONTROL_CAR_WATCHDOG_CONFIG" />
     </privapp-permissions>
 </permissions>
