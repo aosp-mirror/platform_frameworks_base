@@ -24,6 +24,8 @@ import static com.android.systemui.tuner.LockscreenFragment.LOCKSCREEN_LEFT_BUTT
 import static com.android.systemui.tuner.LockscreenFragment.LOCKSCREEN_LEFT_UNLOCK;
 import static com.android.systemui.tuner.LockscreenFragment.LOCKSCREEN_RIGHT_BUTTON;
 import static com.android.systemui.tuner.LockscreenFragment.LOCKSCREEN_RIGHT_UNLOCK;
+import static com.android.systemui.wallet.controller.QuickAccessWalletController.WalletChangeEvent.DEFAULT_PAYMENT_APP_CHANGE;
+import static com.android.systemui.wallet.controller.QuickAccessWalletController.WalletChangeEvent.WALLET_PREFERENCE_CHANGE;
 
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
@@ -39,7 +41,6 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
-import android.database.ContentObserver;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -49,13 +50,10 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.MediaStore;
-import android.provider.Settings;
 import android.service.media.CameraPrewarmService;
 import android.service.quickaccesswallet.GetWalletCardsError;
-import android.service.quickaccesswallet.GetWalletCardsRequest;
 import android.service.quickaccesswallet.GetWalletCardsResponse;
 import android.service.quickaccesswallet.QuickAccessWalletClient;
-import android.service.quickaccesswallet.QuickAccessWalletClientImpl;
 import android.telecom.TelecomManager;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -71,7 +69,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.LockPatternUtils;
@@ -97,10 +94,8 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.PreviewInflater;
 import com.android.systemui.tuner.LockscreenFragment.LockButtonFactory;
 import com.android.systemui.tuner.TunerService;
-import com.android.systemui.util.settings.SecureSettings;
+import com.android.systemui.wallet.controller.QuickAccessWalletController;
 import com.android.systemui.wallet.ui.WalletActivity;
-
-import java.util.concurrent.Executor;
 
 /**
  * Implementation for the bottom area of the Keyguard, including camera/phone affordance and status
@@ -137,10 +132,9 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private KeyguardAffordanceView mLeftAffordanceView;
 
     private ImageView mWalletButton;
-    private boolean mWalletEnabled = false;
     private boolean mHasCard = false;
     private WalletCardRetriever mCardRetriever = new WalletCardRetriever();
-    private QuickAccessWalletClient mQuickAccessWalletClient;
+    private QuickAccessWalletController mQuickAccessWalletController;
 
     private ViewGroup mIndicationArea;
     private TextView mIndicationText;
@@ -159,7 +153,6 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private StatusBar mStatusBar;
     private KeyguardAffordanceHelper mAffordanceHelper;
     private FalsingManager mFalsingManager;
-    @Nullable private Executor mUiExecutor;
     private boolean mUserSetupComplete;
     private boolean mPrewarmBound;
     private Messenger mPrewarmMessenger;
@@ -193,8 +186,6 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private int mBurnInYOffset;
     private ActivityIntentHelper mActivityIntentHelper;
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
-    private ContentObserver mWalletPreferenceObserver;
-    private SecureSettings mSecureSettings;
 
     public KeyguardBottomAreaView(Context context) {
         this(context, null);
@@ -332,8 +323,9 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         getContext().unregisterReceiver(mDevicePolicyReceiver);
         mKeyguardUpdateMonitor.removeCallback(mUpdateMonitorCallback);
 
-        if (mWalletPreferenceObserver != null) {
-            mSecureSettings.unregisterContentObserver(mWalletPreferenceObserver);
+        if (mQuickAccessWalletController != null) {
+            mQuickAccessWalletController.unregisterWalletChangeObservers(
+                    WALLET_PREFERENCE_CHANGE, DEFAULT_PAYMENT_APP_CHANGE);
         }
     }
 
@@ -456,7 +448,10 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     }
 
     private void updateWalletVisibility() {
-        if (mDozing || !mWalletEnabled || !mHasCard) {
+        if (mDozing
+                || mQuickAccessWalletController == null
+                || !mQuickAccessWalletController.isWalletEnabled()
+                || !mHasCard) {
             mWalletButton.setVisibility(GONE);
             mIndicationArea.setPadding(0, 0, 0, 0);
         } else {
@@ -690,7 +685,9 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     @Override
     public void onKeyguardShowingChanged() {
         if (mKeyguardStateController.isShowing()) {
-            queryWalletCards();
+            if (mQuickAccessWalletController != null) {
+                mQuickAccessWalletController.queryWalletCards(mCardRetriever);
+            }
         }
     }
 
@@ -935,48 +932,15 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     /**
      * Initialize the wallet feature, only enabling if the feature is enabled within the platform.
      */
-    public void initWallet(QuickAccessWalletClient client, Executor uiExecutor,
-            SecureSettings secureSettings) {
-        mQuickAccessWalletClient = client;
-        mSecureSettings = secureSettings;
-        setupWalletPreferenceObserver();
-        updateWalletPreference();
-
-        mUiExecutor = uiExecutor;
-        queryWalletCards();
+    public void initWallet(
+            QuickAccessWalletController controller) {
+        mQuickAccessWalletController = controller;
+        mQuickAccessWalletController.setupWalletChangeObservers(
+                mCardRetriever, WALLET_PREFERENCE_CHANGE, DEFAULT_PAYMENT_APP_CHANGE);
+        mQuickAccessWalletController.updateWalletPreference();
+        mQuickAccessWalletController.queryWalletCards(mCardRetriever);
 
         updateWalletVisibility();
-    }
-
-    private void setupWalletPreferenceObserver() {
-        if (mWalletPreferenceObserver == null) {
-            mWalletPreferenceObserver = new ContentObserver(null /* handler */) {
-                @Override
-                public void onChange(boolean selfChange) {
-                    mUiExecutor.execute(() -> updateWalletPreference());
-                }
-            };
-
-            mSecureSettings.registerContentObserver(
-                    Settings.Secure.getUriFor(QuickAccessWalletClientImpl.SETTING_KEY),
-                    false /* notifyForDescendants */,
-                    mWalletPreferenceObserver);
-        }
-    }
-
-    private void updateWalletPreference() {
-        mWalletEnabled = mQuickAccessWalletClient.isWalletFeatureAvailable()
-                && mQuickAccessWalletClient.isWalletFeatureAvailableWhenDeviceLocked();
-    }
-
-    private void queryWalletCards() {
-        if (!mWalletEnabled || mUiExecutor == null) {
-            return;
-        }
-        GetWalletCardsRequest request =
-                new GetWalletCardsRequest(1 /* cardWidth */, 1 /* cardHeight */,
-                        1 /* iconSizePx */, 1 /* maxCards */);
-        mQuickAccessWalletClient.getWalletCards(mUiExecutor, request, mCardRetriever);
     }
 
     private void onWalletClick(View v) {
@@ -991,12 +955,13 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
                     .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             mContext.startActivity(intent);
         } else {
-            if (mQuickAccessWalletClient.createWalletIntent() == null) {
+            if (mQuickAccessWalletController.getWalletClient().createWalletIntent() == null) {
                 Log.w(TAG, "Could not get intent of the wallet app.");
                 return;
             }
             mActivityStarter.postStartActivityDismissingKeyguard(
-                    mQuickAccessWalletClient.createWalletIntent(), /* delay= */ 0);
+                    mQuickAccessWalletController.getWalletClient().createWalletIntent(),
+                    /* delay= */ 0);
         }
     }
 
