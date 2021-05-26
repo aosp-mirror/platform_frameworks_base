@@ -771,9 +771,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 default:
                     throw new UnsupportedOperationException("Unknown tagId=" + atomTag);
             }
-            // TODO(b/187223764): busTime won't be needed once end_session is a field in BUS.
-            final long busTime = System.currentTimeMillis();
-            final byte[] statsProto = bus.getStatsProto(busTime);
+            final byte[] statsProto = bus.getStatsProto();
 
             data.add(FrameworkStatsLog.buildStatsEvent(atomTag, statsProto));
 
