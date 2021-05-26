@@ -29,6 +29,7 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 import android.view.InsetsController.AnimationType;
+import android.view.InsetsController.LayoutInsetsDuringAnimation;
 import android.view.SyncRtSurfaceTransactionApplier.SurfaceParams;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsAnimation.Bounds;
@@ -103,14 +104,15 @@ public class InsetsAnimationThreadControlRunner implements InsetsAnimationContro
     @UiThread
     public InsetsAnimationThreadControlRunner(SparseArray<InsetsSourceControl> controls,
             @Nullable Rect frame, InsetsState state, WindowInsetsAnimationControlListener listener,
-            @InsetsType int types,
-            InsetsAnimationControlCallbacks controller, long durationMs, Interpolator interpolator,
-            @AnimationType int animationType, CompatibilityInfo.Translator translator,
-            Handler mainThreadHandler) {
+            @InsetsType int types, InsetsAnimationControlCallbacks controller, long durationMs,
+            Interpolator interpolator, @AnimationType int animationType,
+            @LayoutInsetsDuringAnimation int layoutInsetsDuringAnimation,
+            CompatibilityInfo.Translator translator, Handler mainThreadHandler) {
         mMainThreadHandler = mainThreadHandler;
         mOuterCallbacks = controller;
-        mControl = new InsetsAnimationControlImpl(controls, frame, state, listener,
-                types, mCallbacks, durationMs, interpolator, animationType, translator);
+        mControl = new InsetsAnimationControlImpl(controls, frame, state, listener, types,
+                mCallbacks, durationMs, interpolator, animationType, layoutInsetsDuringAnimation,
+                translator);
         InsetsAnimationThread.getHandler().post(() -> {
             if (mControl.isCancelled()) {
                 return;

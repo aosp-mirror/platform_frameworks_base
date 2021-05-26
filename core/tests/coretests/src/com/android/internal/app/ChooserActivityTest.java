@@ -16,6 +16,8 @@
 
 package com.android.internal.app;
 
+import static android.app.Activity.RESULT_OK;
+
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.action.ViewActions.swipeUp;
@@ -558,6 +560,8 @@ public class ChooserActivityTest {
 
         ClipDescription clipDescription = clipData.getDescription();
         assertThat("text/plain", is(clipDescription.getMimeType(0)));
+
+        assertEquals(mActivityRule.getActivityResult().getResultCode(), RESULT_OK);
     }
 
     @Test

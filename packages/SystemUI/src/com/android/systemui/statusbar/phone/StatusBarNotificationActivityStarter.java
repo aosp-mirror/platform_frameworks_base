@@ -437,7 +437,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
 
             mActivityLaunchAnimator.startPendingIntentWithAnimation(animationController,
                     !wasOccluded && mStatusBar.areLaunchAnimationsEnabled(),
-                    (adapter) -> {
+                    intent.getCreatorPackage(), (adapter) -> {
                         long eventTime = row.getAndResetLastActionUpTime();
                         Bundle options = eventTime > 0
                                 ? getActivityOptions(
@@ -469,6 +469,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
 
                 mActivityLaunchAnimator.startIntentWithAnimation(
                         animationController, mStatusBar.areLaunchAnimationsEnabled(),
+                        intent.getPackage(),
                         (adapter) -> TaskStackBuilder.create(mContext)
                                 .addNextIntentWithParentStack(intent)
                                 .startActivities(getActivityOptions(
@@ -499,7 +500,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                                 true /* isActivityIntent */);
 
                 mActivityLaunchAnimator.startIntentWithAnimation(animationController,
-                        mStatusBar.areLaunchAnimationsEnabled(),
+                        mStatusBar.areLaunchAnimationsEnabled(), intent.getPackage(),
                         (adapter) -> tsb.startActivities(
                                 getActivityOptions(mStatusBar.getDisplayId(), adapter),
                                 UserHandle.CURRENT));

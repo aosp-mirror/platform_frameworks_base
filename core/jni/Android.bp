@@ -128,6 +128,7 @@ cc_library_shared {
                 "android_graphics_BLASTBufferQueue.cpp",
                 "android_view_SurfaceSession.cpp",
                 "android_view_TextureView.cpp",
+                "android_view_TunnelModeEnabledListener.cpp",
                 "android_view_VelocityTracker.cpp",
                 "android_view_VerifiedKeyEvent.cpp",
                 "android_view_VerifiedMotionEvent.cpp",

@@ -255,7 +255,7 @@ modules_public_stubs = [
 
 modules_system_stubs = [
     "android.net.ipsec.ike.stubs.system",
-    "art.module.public.api.stubs", // Only has public stubs
+    "art.module.public.api.stubs.system",
     "conscrypt.module.public.api.stubs", // Only has public stubs
     "framework-appsearch.stubs.system",
     "framework-connectivity.stubs.system",

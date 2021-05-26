@@ -159,6 +159,10 @@ final class CoreSettingsObserver extends ContentObserver {
                 DeviceConfig.NAMESPACE_WIDGET, WidgetFlags.MAGNIFIER_ASPECT_RATIO,
                 WidgetFlags.KEY_MAGNIFIER_ASPECT_RATIO, float.class,
                 WidgetFlags.MAGNIFIER_ASPECT_RATIO_DEFAULT));
+        sDeviceConfigEntries.add(new DeviceConfigEntry<>(
+                DeviceConfig.NAMESPACE_WIDGET, WidgetFlags.ANALOG_CLOCK_SECONDS_HAND_FPS,
+                WidgetFlags.KEY_ANALOG_CLOCK_SECONDS_HAND_FPS, int.class,
+                WidgetFlags.ANALOG_CLOCK_SECONDS_HAND_FPS_DEFAULT));
         // add other device configs here...
     }
 
