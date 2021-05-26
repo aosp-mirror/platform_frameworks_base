@@ -143,7 +143,7 @@
     <string name="data_usage_uninstalled_apps" msgid="1933665711856171491">"Eemaldatud rakendused"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="5533981546921913295">"Eemaldatud rakendused ja kasutajad"</string>
     <string name="data_usage_ota" msgid="7984667793701597001">"Süsteemivärskendused"</string>
-    <string name="tether_settings_title_usb" msgid="3728686573430917722">"USB jagamine"</string>
+    <string name="tether_settings_title_usb" msgid="3728686573430917722">"Jagamine USB-ga"</string>
     <string name="tether_settings_title_wifi" msgid="4803402057533895526">"Mobiilne kuumkoht"</string>
     <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"Jagamine Bluetoothiga"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"Jagamine"</string>
