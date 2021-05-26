@@ -228,9 +228,7 @@ public class KeyguardStatusView extends GridLayout {
         }
         mDarkAmount = darkAmount;
         mClockView.setDarkAmount(darkAmount);
-        if (mMediaHostContainer.getVisibility() != View.GONE) {
-            CrossFadeHelper.fadeOut(mMediaHostContainer, darkAmount);
-        }
+        CrossFadeHelper.fadeOut(mMediaHostContainer, darkAmount);
         updateDark();
     }
 

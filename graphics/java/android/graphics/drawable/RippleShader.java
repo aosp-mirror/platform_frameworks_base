@@ -58,7 +58,7 @@ final class RippleShader extends RuntimeShader {
             + "  float s = 0.0;\n"
             + "  for (float i = 0; i < 4; i += 1) {\n"
             + "    float l = i * 0.1;\n"
-            + "    float h = l + 0.025;\n"
+            + "    float h = l + 0.05;\n"
             + "    float o = sin(PI * (t + 0.35 * i));\n"
             + "    s += threshold(n + o, l, h);\n"
             + "  }\n"
@@ -70,7 +70,7 @@ final class RippleShader extends RuntimeShader {
             + "  return 1. - smoothstep(1. - blurHalf, 1. + blurHalf, d / radius);\n"
             + "}\n"
             + "float softRing(vec2 uv, vec2 xy, float radius, float progress, float blur) {\n"
-            + "  float thickness = 0.3 * radius;\n"
+            + "  float thickness = 0.05 * radius;\n"
             + "  float currentRadius = radius * progress;\n"
             + "  float circle_outer = softCircle(uv, xy, currentRadius + thickness, blur);\n"
             + "  float circle_inner = softCircle(uv, xy, max(currentRadius - thickness, 0.), "
@@ -93,7 +93,7 @@ final class RippleShader extends RuntimeShader {
             + "  return softCircle(coord, vec2(normal_radius), radius, radius * 50.0);\n"
             + "}\n"
             + "float turbulence(vec2 uv, float t) {\n"
-            + "  const vec2 scale = vec2(1.5);\n"
+            + "  const vec2 scale = vec2(0.8);\n"
             + "  uv = uv * scale;\n"
             + "  float g1 = circle_grid(scale, uv, t, in_tCircle1, in_tRotation1, 0.17);\n"
             + "  float g2 = circle_grid(scale, uv, t, in_tCircle2, in_tRotation2, 0.2);\n"
@@ -102,12 +102,12 @@ final class RippleShader extends RuntimeShader {
             + "  return saturate(0.45 + 0.8 * v);\n"
             + "}\n";
     private static final String SHADER_MAIN = "vec4 main(vec2 p) {\n"
-            + "    float fadeIn = subProgress(0., 0.1, in_progress);\n"
-            + "    float scaleIn = subProgress(0., 0.45, in_progress);\n"
-            + "    float fadeOutNoise = subProgress(0.5, 0.95, in_progress);\n"
-            + "    float fadeOutRipple = subProgress(0.5, 1., in_progress);\n"
-            + "    vec2 center = mix(in_touch, in_origin, scaleIn);\n"
-            + "    float ring = softRing(p, center, in_maxRadius, scaleIn, 0.45);\n"
+            + "    float fadeIn = subProgress(0., 0.13, in_progress);\n"
+            + "    float scaleIn = subProgress(0., 1.0, in_progress);\n"
+            + "    float fadeOutNoise = subProgress(0.4, 0.5, in_progress);\n"
+            + "    float fadeOutRipple = subProgress(0.4, 1., in_progress);\n"
+            + "    vec2 center = mix(in_touch, in_origin, saturate(in_progress * 2.0));\n"
+            + "    float ring = softRing(p, center, in_maxRadius, scaleIn, 1.);\n"
             + "    float alpha = min(fadeIn, 1. - fadeOutNoise);\n"
             + "    vec2 uv = p * in_resolutionScale;\n"
             + "    vec2 densityUv = uv - mod(uv, in_noiseScale);\n"
@@ -115,7 +115,7 @@ final class RippleShader extends RuntimeShader {
             + "    float sparkleAlpha = sparkles(densityUv, in_noisePhase) * ring * alpha "
             + "* turbulence;\n"
             + "    float fade = min(fadeIn, 1. - fadeOutRipple);\n"
-            + "    float waveAlpha = softCircle(p, center, in_maxRadius * scaleIn, 0.2) * fade "
+            + "    float waveAlpha = softCircle(p, center, in_maxRadius * scaleIn, 1.) * fade "
             + "* in_color.a;\n"
             + "    vec4 waveColor = vec4(in_color.rgb * waveAlpha, waveAlpha);\n"
             + "    vec4 sparkleColor = vec4(in_sparkleColor.rgb * in_sparkleColor.a, "
@@ -139,7 +139,7 @@ final class RippleShader extends RuntimeShader {
     }
 
     public void setRadius(float radius) {
-        setUniform("in_maxRadius", radius);
+        setUniform("in_maxRadius", radius * 2.3f);
     }
 
     public void setOrigin(float x, float y) {
@@ -205,7 +205,7 @@ final class RippleShader extends RuntimeShader {
     }
 
     public void setResolution(float w, float h, int density) {
-        final float densityScale = density * DisplayMetrics.DENSITY_DEFAULT_SCALE;
+        final float densityScale = density * DisplayMetrics.DENSITY_DEFAULT_SCALE * 0.8f;
         setUniform("in_resolutionScale", new float[] {1f / w, 1f / h});
         setUniform("in_noiseScale", new float[] {densityScale / w, densityScale / h});
     }
