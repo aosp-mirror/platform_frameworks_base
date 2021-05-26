@@ -1823,6 +1823,7 @@ public class LocationManager {
      * @deprecated Use {@link #isProviderPackage(String, String, String)} instead.
      *
      * @hide
+     * @removed
      */
     @Deprecated
     @SystemApi
