@@ -194,7 +194,13 @@ class IdmapDaemon {
     }
 
     private static void stopIdmapService() {
-        SystemService.stop(IDMAP_DAEMON);
+        try {
+            SystemService.stop(IDMAP_DAEMON);
+        } catch (RuntimeException e) {
+            // If the idmap daemon cannot be disabled for some reason, it is okay
+            // since we already finished invoking idmap.
+            Slog.w(TAG, "Failed to disable idmap2 daemon", e);
+        }
     }
 
     private Connection connect() throws TimeoutException, RemoteException {
