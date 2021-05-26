@@ -151,6 +151,7 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
         mRightIcon = mView.findViewById(com.android.internal.R.id.right_icon);
         if (mRightIcon != null) {
             mRightIcon.setTag(ImageTransformState.ICON_TAG, getRightIcon(sbn.getNotification()));
+            mRightIcon.setTag(TransformState.ALIGN_END_TAG, true);
         }
         mLeftIcon = mView.findViewById(com.android.internal.R.id.left_icon);
         if (mLeftIcon != null) {
