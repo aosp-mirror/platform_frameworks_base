@@ -33,6 +33,7 @@ import android.os.Message;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.provider.Settings.Global;
 import android.providers.settings.SettingsOperationProto;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -47,6 +48,7 @@ import android.util.Xml;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FrameworkStatsLog;
 
 import libcore.io.IoUtils;
@@ -806,7 +808,14 @@ final class SettingsState {
 
                 final int settingCount = settings.size();
                 for (int i = 0; i < settingCount; i++) {
+
                     Setting setting = settings.valueAt(i);
+                    if (setting.isTransient()) {
+                        if (DEBUG_PERSISTENCE) {
+                            Slog.i(LOG_TAG, "[SKIPPED PERSISTING]" + setting.getName());
+                        }
+                        continue;
+                    }
 
                     if (writeSingleSetting(mVersion, serializer, setting.getId(), setting.getName(),
                             setting.getValue(), setting.getDefaultValue(), setting.getPackageName(),
@@ -1300,6 +1309,14 @@ final class SettingsState {
             // modification.
             return update(this.defaultValue, false, packageName, null, true, true,
                     /* resetToDefault */ true);
+        }
+
+        public boolean isTransient() {
+            switch (getTypeFromKey(getKey())) {
+                case SETTINGS_TYPE_GLOBAL:
+                    return ArrayUtils.contains(Global.TRANSIENT_SETTINGS, getName());
+            }
+            return false;
         }
 
         public boolean update(String value, boolean setDefault, String packageName, String tag,
