@@ -154,7 +154,7 @@
     <string name="unknown" msgid="3544487229740637809">"Naməlum"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"İstifadəçi: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"Bəzi susmaya görələr təyin edilib"</string>
-    <string name="launch_defaults_none" msgid="8049374306261262709">"Susmaya görələr təyin edilməyib."</string>
+    <string name="launch_defaults_none" msgid="8049374306261262709">"Defolt ayarlanmayıb"</string>
     <string name="tts_settings" msgid="8130616705989351312">"Mətndən-danışığa parametrləri"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"Mətndən-nitqə daxiletmə"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"Nitq diapazonu"</string>
@@ -506,9 +506,9 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Siqnallar və xatırladıcılar"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Siqnallar və xatırlatmaları ayarlamağa icazə verin"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Siqnallar və xatırlatmalar"</string>
-    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"Bu tətbiqə siqnallar ayarlamağa və digər əməliyyatları planlaşdırmağa icazə verin. Bu tətbiq telefonunuzu istifadə etmədiyiniz zaman istifadə edilə bilər və daha çox enerji istifadə edə bilər. Bu icazə deaktivdirsə, bu tətbiq normal işləməyə bilər və onun siqnalları planlaşdırıldığı kimi işləməyəcəkdir."</string>
-    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"Bu tətbiqə siqnallar ayarlamağa və digər əməliyyatları planlaşdırmağa icazə verin. Bu tətbiq planşetinizi istifadə etmədiyiniz zaman istifadə edilə bilər və daha çox enerji istifadə edə bilər. Bu icazə deaktivdirsə, bu tətbiq normal işləməyə bilər və onun siqnalları planlaşdırıldığı kimi işləməyəcəkdir."</string>
-    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"Bu tətbiqə siqnallar ayarlamağa və digər əməliyyatları planlaşdırmağa icazə verin. Bu tətbiq cihazınızı istifadə etmədiyiniz zaman istifadə edilə bilər və daha çox enerji istifadə edə bilər. Bu icazə deaktivdirsə, bu tətbiq normal işləməyə bilər və onun siqnalları planlaşdırıldığı kimi işləməyəcəkdir."</string>
+    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"Bu tətbiqə zəngli saat və bildiriş hazırlamaq icazəsi verdiyiniz halda tətbiq cihaz istifadə edilmədiyi zaman da işləyəcək, enerji daha tez qurtaracaq. Bu ayar deaktiv ediləndən sonra tətbiqin işində kəsintilər ola, zəngli saatlar vaxtında işləməyə bilər."</string>
+    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"Bu tətbiqə zəngli saat və bildiriş hazırlamaq icazəsi verdiyiniz halda tətbiq cihaz istifadə edilmədiyi zaman da işləyəcək, enerji daha tez qurtaracaq. Bu ayar deaktiv ediləndən sonra tətbiqin işində kəsintilər ola, zəngli saatlar vaxtında işləməyə bilər."</string>
+    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"Bu tətbiqə zəngli saat və bildiriş hazırlamaq icazəsi verdiyiniz halda tətbiq cihaz istifadə edilmədiyi zaman da işləyəcək, enerji daha tez qurtaracaq. Bu ayar deaktiv ediləndən sonra tətbiqin işində kəsintilər ola, zəngli saatlar vaxtında işləməyə bilər."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"cədvəl, siqnal, xatırlatma, saat"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Aktiv edin"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"\"Narahat Etməyin\" rejimini aktiv edin"</string>
