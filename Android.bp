@@ -254,6 +254,11 @@ java_library {
     installable: false,
 }
 
+filegroup {
+    name: "framework-jarjar-rules",
+    srcs: ["framework-jarjar-rules.txt"],
+}
+
 java_library {
     name: "framework-minus-apex",
     defaults: ["framework-aidl-export-defaults"],
@@ -270,7 +275,7 @@ java_library {
         "--multi-dex",
     ],
     installable: true,
-    jarjar_rules: "framework-jarjar-rules.txt",
+    jarjar_rules: ":framework-jarjar-rules",
     javac_shard_size: 150,
     plugins: [
         "view-inspector-annotation-processor",
