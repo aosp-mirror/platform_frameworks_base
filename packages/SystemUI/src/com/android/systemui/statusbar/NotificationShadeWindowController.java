@@ -36,6 +36,12 @@ public interface NotificationShadeWindowController extends RemoteInputController
      */
     default void registerCallback(StatusBarWindowCallback callback) {}
 
+    /**
+     * Unregisters a {@link StatusBarWindowCallback previous registered with
+     * {@link #registerCallback(StatusBarWindowCallback)}}
+     */
+    default void unregisterCallback(StatusBarWindowCallback callback) {}
+
     /** Notifies the registered {@link StatusBarWindowCallback} instances. */
     default void notifyStateChangedCallbacks() {}
 
