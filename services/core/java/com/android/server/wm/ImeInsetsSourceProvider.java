@@ -29,6 +29,7 @@ import static com.android.server.wm.ImeInsetsSourceProviderProto.IS_IME_LAYOUT_D
 import static com.android.server.wm.WindowManagerService.H.UPDATE_MULTI_WINDOW_STACKS;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.Trace;
 import android.util.proto.ProtoOutputStream;
 import android.view.InsetsSource;
@@ -88,6 +89,16 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
     protected void updateVisibility() {
         super.updateVisibility();
         onSourceChanged();
+    }
+
+    @Override
+    void updateControlForTarget(@Nullable InsetsControlTarget target, boolean force) {
+        if (target != null && target.getWindow() != null) {
+            // ime control target could be a different window.
+            // Refer WindowState#getImeControlTarget().
+            target = target.getWindow().getImeControlTarget();
+        }
+        super.updateControlForTarget(target, force);
     }
 
     private void onSourceChanged() {
