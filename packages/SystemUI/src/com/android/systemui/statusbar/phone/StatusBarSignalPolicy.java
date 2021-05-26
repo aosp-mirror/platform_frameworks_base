@@ -175,7 +175,7 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
                 && !mIsAirplaneMode) {
             newState.visible = true;
             newState.resId = R.drawable.ic_qs_no_internet_unavailable;
-        } else if (mWifiIconState.noValidatedNetwork && !mWifiIconState.noNetworksAvailable
+        } else if (mWifiIconState.noDefaultNetwork && !mWifiIconState.noNetworksAvailable
                 && (!mIsAirplaneMode || (mIsAirplaneMode && mIsWifiEnabled))) {
             newState.visible = true;
             newState.resId = R.drawable.ic_qs_no_internet_available;
@@ -380,7 +380,7 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
         if (noDefaultNetwork && noNetworksAvailable && !mIsAirplaneMode) {
             newState.visible = true;
             newState.resId = R.drawable.ic_qs_no_internet_unavailable;
-        } else if (noValidatedNetwork && !noNetworksAvailable
+        } else if (noDefaultNetwork && !noNetworksAvailable
                 && (!mIsAirplaneMode || (mIsAirplaneMode && mIsWifiEnabled))) {
             newState.visible = true;
             newState.resId = R.drawable.ic_qs_no_internet_available;
