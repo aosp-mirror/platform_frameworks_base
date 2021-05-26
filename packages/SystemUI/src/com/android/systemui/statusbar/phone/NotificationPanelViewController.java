@@ -582,6 +582,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private int mScrimCornerRadius;
     private int mScreenCornerRadius;
     private int mNotificationScrimPadding;
+    private boolean mQSAnimatingHiddenFromCollapsed;
 
     private final QuickAccessWalletClient mQuickAccessWalletClient;
     private final Executor mUiExecutor;
@@ -1443,7 +1444,7 @@ public class NotificationPanelViewController extends PanelViewController {
         }
         mStatusBar.getGutsManager().closeAndSaveGuts(true /* leavebehind */, true /* force */,
                 true /* controls */, -1 /* x */, -1 /* y */, true /* resetMenu */);
-        if (animate) {
+        if (animate && !isFullyCollapsed()) {
             animateCloseQs(true /* animateAway */);
         } else {
             closeQs();
@@ -1727,6 +1728,11 @@ public class NotificationPanelViewController extends PanelViewController {
     }
 
     private float computeQsExpansionFraction() {
+        if (mQSAnimatingHiddenFromCollapsed) {
+            // When hiding QS from collapsed state, the expansion can sometimes temporarily
+            // be larger than 0 because of the timing, leading to flickers.
+            return 0.0f;
+        }
         return Math.min(
                 1f, (mQsExpansionHeight - mQsMinExpansionHeight) / (mQsMaxExpansionHeight
                         - mQsMinExpansionHeight));
@@ -2527,6 +2533,7 @@ public class NotificationPanelViewController extends PanelViewController {
 
             @Override
             public void onAnimationEnd(Animator animation) {
+                mQSAnimatingHiddenFromCollapsed = false;
                 mAnimatingQS = false;
                 notifyExpandingFinished();
                 mNotificationStackScrollLayoutController.resetCheckSnoozeLeavebehind();
@@ -2543,6 +2550,7 @@ public class NotificationPanelViewController extends PanelViewController {
         animator.start();
         mQsExpansionAnimator = animator;
         mQsAnimatorExpand = expanding;
+        mQSAnimatingHiddenFromCollapsed = computeQsExpansionFraction() == 0.0f && target == 0;
     }
 
     /**
