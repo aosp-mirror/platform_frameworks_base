@@ -83,6 +83,7 @@ class WiredChargingRippleController @Inject constructor(
     var rippleView: ChargingRippleView = ChargingRippleView(context, attrs = null)
 
     init {
+        pluggedIn = batteryController.isPluggedIn
         val batteryStateChangeCallback = object : BatteryController.BatteryStateChangeCallback {
             override fun onBatteryLevelChanged(
                 level: Int,
