@@ -1163,9 +1163,6 @@ public class RecentsAnimationController implements DeathRecipient {
                 // Apply the task's pending transaction in case it is detached and its transaction
                 // is not reachable.
                 mTask.getPendingTransaction().apply();
-
-                // Reset whether this task can affect the sysui flags
-                mTask.setCanAffectSystemUiFlags(true);
             }
         }
 
