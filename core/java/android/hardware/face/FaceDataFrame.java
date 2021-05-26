@@ -17,6 +17,7 @@
 package android.hardware.face;
 
 import android.annotation.NonNull;
+import android.hardware.biometrics.BiometricFaceConstants;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -26,7 +27,7 @@ import android.os.Parcelable;
  * @hide
  */
 public final class FaceDataFrame implements Parcelable {
-    private final int mAcquiredInfo;
+    @BiometricFaceConstants.FaceAcquired private final int mAcquiredInfo;
     private final int mVendorCode;
     private final float mPan;
     private final float mTilt;
@@ -48,7 +49,7 @@ public final class FaceDataFrame implements Parcelable {
      * @param isCancellable Whether the ongoing face operation should be canceled.
      */
     public FaceDataFrame(
-            int acquiredInfo,
+            @BiometricFaceConstants.FaceAcquired int acquiredInfo,
             int vendorCode,
             float pan,
             float tilt,
@@ -69,7 +70,7 @@ public final class FaceDataFrame implements Parcelable {
      * @param vendorCode An integer representing a custom vendor-specific message. Ignored unless
      *  {@code acquiredInfo} is {@code FACE_ACQUIRED_VENDOR}.
      */
-    public FaceDataFrame(int acquiredInfo, int vendorCode) {
+    public FaceDataFrame(@BiometricFaceConstants.FaceAcquired int acquiredInfo, int vendorCode) {
         mAcquiredInfo = acquiredInfo;
         mVendorCode = vendorCode;
         mPan = 0f;
@@ -83,6 +84,7 @@ public final class FaceDataFrame implements Parcelable {
      *
      * @see android.hardware.biometrics.BiometricFaceConstants
      */
+    @BiometricFaceConstants.FaceAcquired
     public int getAcquiredInfo() {
         return mAcquiredInfo;
     }
