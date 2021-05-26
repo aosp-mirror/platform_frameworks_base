@@ -10529,7 +10529,7 @@ package android.service.voice {
     method @Nullable public android.media.MediaSyncEvent getMediaSyncEvent();
     method public int getPersonalizedScore();
     method public int getScore();
-    method public boolean isPersonalizedHotwordDetection();
+    method public boolean isHotwordDetectionPersonalized();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field public static final int AUDIO_CHANNEL_UNSET = -1; // 0xffffffff
     field public static final int CONFIDENCE_LEVEL_HIGH = 5; // 0x5
@@ -10549,11 +10549,11 @@ package android.service.voice {
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setAudioChannel(int);
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setConfidenceLevel(int);
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setExtras(@NonNull android.os.PersistableBundle);
+    method @NonNull public android.service.voice.HotwordDetectedResult.Builder setHotwordDetectionPersonalized(boolean);
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setHotwordDurationMillis(int);
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setHotwordOffsetMillis(int);
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setHotwordPhraseId(int);
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setMediaSyncEvent(@NonNull android.media.MediaSyncEvent);
-    method @NonNull public android.service.voice.HotwordDetectedResult.Builder setPersonalizedHotwordDetection(boolean);
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setPersonalizedScore(int);
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setScore(int);
   }
