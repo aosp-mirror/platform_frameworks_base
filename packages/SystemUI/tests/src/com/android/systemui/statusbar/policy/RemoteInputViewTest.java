@@ -14,6 +14,8 @@
 
 package com.android.systemui.statusbar.policy;
 
+import static android.view.ContentInfo.SOURCE_CLIPBOARD;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 
@@ -25,15 +27,19 @@ import static org.mockito.Mockito.spy;
 import android.app.ActivityManager;
 import android.app.PendingIntent;
 import android.app.RemoteInput;
+import android.content.ClipData;
+import android.content.ClipDescription;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ShortcutManager;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Process;
 import android.os.UserHandle;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.view.ContentInfo;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
@@ -236,6 +242,41 @@ public class RemoteInputViewTest extends SysuiTestCase {
                 mUiEventLoggerFake.eventId(0));
         assertEquals(
                 RemoteInputView.NotificationRemoteInputEvent.NOTIFICATION_REMOTE_INPUT_SEND.getId(),
+                mUiEventLoggerFake.eventId(1));
+    }
+
+    @Test
+    public void testUiEventLogging_openAndAttach() throws Exception {
+        NotificationTestHelper helper = new NotificationTestHelper(
+                mContext,
+                mDependency,
+                TestableLooper.get(this));
+        ExpandableNotificationRow row = helper.createRow();
+        RemoteInputView view = RemoteInputView.inflate(mContext, null, row.getEntry(), mController);
+
+        setTestPendingIntent(view);
+
+        // Open view, attach an image
+        view.focus();
+        EditText editText = view.findViewById(R.id.remote_input_text);
+        editText.setText(TEST_REPLY);
+        ClipDescription description = new ClipDescription("", new String[] {"image/png"});
+        // We need to use an (arbitrary) real resource here so that an actual image gets attached.
+        ClipData clip = new ClipData(description, new ClipData.Item(
+                Uri.parse("android.resource://com.android.systemui/"
+                        + R.drawable.default_thumbnail)));
+        ContentInfo payload =
+                new ContentInfo.Builder(clip, SOURCE_CLIPBOARD).build();
+        view.setAttachment(payload);
+        mReceiver.waitForIntent();
+
+        assertEquals(2, mUiEventLoggerFake.numLogs());
+        assertEquals(
+                RemoteInputView.NotificationRemoteInputEvent.NOTIFICATION_REMOTE_INPUT_OPEN.getId(),
+                mUiEventLoggerFake.eventId(0));
+        assertEquals(
+                RemoteInputView.NotificationRemoteInputEvent
+                        .NOTIFICATION_REMOTE_INPUT_ATTACH_IMAGE.getId(),
                 mUiEventLoggerFake.eventId(1));
     }
 }
