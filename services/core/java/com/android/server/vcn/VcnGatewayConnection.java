@@ -30,6 +30,7 @@ import static android.net.vcn.VcnManager.VCN_ERROR_CODE_CONFIG_ERROR;
 import static android.net.vcn.VcnManager.VCN_ERROR_CODE_INTERNAL_ERROR;
 import static android.net.vcn.VcnManager.VCN_ERROR_CODE_NETWORK_ERROR;
 
+import static com.android.server.VcnManagementService.LOCAL_LOG;
 import static com.android.server.VcnManagementService.VDBG;
 
 import android.annotation.NonNull;
@@ -1644,7 +1645,7 @@ public class VcnGatewayConnection extends StateMachine {
                 @NonNull IpSecTransform transform,
                 int direction) {
             if (direction != IpSecManager.DIRECTION_IN && direction != IpSecManager.DIRECTION_OUT) {
-                Slog.wtf(TAG, "Applying transform for unexpected direction: " + direction);
+                logWtf("Applying transform for unexpected direction: " + direction);
             }
 
             try {
@@ -2133,37 +2134,44 @@ public class VcnGatewayConnection extends StateMachine {
                 + LogUtils.getHashedSubscriptionGroup(mSubscriptionGroup)
                 + "-"
                 + mConnectionConfig.getGatewayConnectionName()
-                + "]: ";
+                + "] ";
     }
 
     private void logVdbg(String msg) {
         if (VDBG) {
             Slog.v(TAG, getLogPrefix() + msg);
+            LOCAL_LOG.log(getLogPrefix() + "VDBG: " + msg);
         }
     }
 
     private void logDbg(String msg) {
         Slog.d(TAG, getLogPrefix() + msg);
+        LOCAL_LOG.log(getLogPrefix() + "DBG: " + msg);
     }
 
     private void logDbg(String msg, Throwable tr) {
         Slog.d(TAG, getLogPrefix() + msg, tr);
+        LOCAL_LOG.log(getLogPrefix() + "DBG: " + msg + tr);
     }
 
     private void logErr(String msg) {
         Slog.e(TAG, getLogPrefix() + msg);
+        LOCAL_LOG.log(getLogPrefix() + "ERR: " + msg);
     }
 
     private void logErr(String msg, Throwable tr) {
         Slog.e(TAG, getLogPrefix() + msg, tr);
+        LOCAL_LOG.log(getLogPrefix() + "ERR: " + msg + tr);
     }
 
     private void logWtf(String msg) {
         Slog.wtf(TAG, getLogPrefix() + msg);
+        LOCAL_LOG.log(getLogPrefix() + "WTF: " + msg);
     }
 
     private void logWtf(String msg, Throwable tr) {
         Slog.wtf(TAG, getLogPrefix() + msg, tr);
+        LOCAL_LOG.log(getLogPrefix() + "WTF: " + msg + tr);
     }
 
     /**
