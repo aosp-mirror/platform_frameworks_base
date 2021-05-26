@@ -1229,7 +1229,11 @@ public class JobInfo implements Parcelable {
          * </ul>
          * Note that the system may choose to delay jobs with large network
          * usage estimates when the device has a poor network connection, in
-         * order to save battery.
+         * order to save battery and possible network costs.
+         * Starting from Android version {@link Build.VERSION_CODES#S}, JobScheduler may attempt
+         * to run large jobs when the device is charging and on an unmetered network, even if the
+         * network is slow. This gives large jobs an opportunity to make forward progress, even if
+         * they risk timing out.
          * <p>
          * The values provided here only reflect the traffic that will be
          * performed by the base job; if you're using {@link JobWorkItem} then
