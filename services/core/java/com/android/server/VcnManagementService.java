@@ -148,6 +148,7 @@ import java.util.concurrent.TimeUnit;
 // TODO(b/180451994): ensure all incoming + outgoing calls have a cleared calling identity
 public class VcnManagementService extends IVcnManagementService.Stub {
     @NonNull private static final String TAG = VcnManagementService.class.getSimpleName();
+    private static final long DUMP_TIMEOUT_MILLIS = TimeUnit.SECONDS.toMillis(5);
 
     public static final boolean VDBG = false; // STOPSHIP: if true
 
@@ -1001,46 +1002,50 @@ public class VcnManagementService extends IVcnManagementService.Stub {
 
         final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
 
-        pw.println("VcnManagementService dump:");
-        pw.increaseIndent();
-
-        pw.println("mNetworkProvider:");
-        pw.increaseIndent();
-        mNetworkProvider.dump(pw);
-        pw.decreaseIndent();
-        pw.println();
-
-        pw.println("mTrackingNetworkCallback:");
-        pw.increaseIndent();
-        mTrackingNetworkCallback.dump(pw);
-        pw.decreaseIndent();
-        pw.println();
-
-        synchronized (mLock) {
-            pw.println("mLastSnapshot:");
+        // Post to handler thread to prevent ConcurrentModificationExceptions, and avoid lock-hell.
+        mHandler.runWithScissors(() -> {
+            pw.println("VcnManagementService dump:");
             pw.increaseIndent();
-            mLastSnapshot.dump(pw);
+
+            pw.println("mNetworkProvider:");
+            pw.increaseIndent();
+            mNetworkProvider.dump(pw);
             pw.decreaseIndent();
             pw.println();
 
-            pw.println("mConfigs:");
+            pw.println("mTrackingNetworkCallback:");
             pw.increaseIndent();
-            for (Entry<ParcelUuid, VcnConfig> entry : mConfigs.entrySet()) {
-                pw.println(entry.getKey() + ": " + entry.getValue().getProvisioningPackageName());
+            mTrackingNetworkCallback.dump(pw);
+            pw.decreaseIndent();
+            pw.println();
+
+            synchronized (mLock) {
+                pw.println("mLastSnapshot:");
+                pw.increaseIndent();
+                mLastSnapshot.dump(pw);
+                pw.decreaseIndent();
+                pw.println();
+
+                pw.println("mConfigs:");
+                pw.increaseIndent();
+                for (Entry<ParcelUuid, VcnConfig> entry : mConfigs.entrySet()) {
+                    pw.println(entry.getKey() + ": "
+                            + entry.getValue().getProvisioningPackageName());
+                }
+                pw.decreaseIndent();
+                pw.println();
+
+                pw.println("mVcns:");
+                pw.increaseIndent();
+                for (Vcn vcn : mVcns.values()) {
+                    vcn.dump(pw);
+                }
+                pw.decreaseIndent();
+                pw.println();
             }
-            pw.decreaseIndent();
-            pw.println();
 
-            pw.println("mVcns:");
-            pw.increaseIndent();
-            for (Vcn vcn : mVcns.values()) {
-                vcn.dump(pw);
-            }
             pw.decreaseIndent();
-            pw.println();
-        }
-
-        pw.decreaseIndent();
+        }, DUMP_TIMEOUT_MILLIS);
     }
 
     // TODO(b/180452282): Make name more generic and implement directly with VcnManagementService
