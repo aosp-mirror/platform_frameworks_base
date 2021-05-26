@@ -29,6 +29,9 @@ import android.util.Pair;
 
 import org.junit.Test;
 
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
+
 /**
  * Build/Install/Run:
  *  atest FrameworksServicesTests:TempAllowListTest
@@ -41,7 +44,7 @@ public class FgsTempAllowListTest {
      */
     @Test
     public void testIsAllowed() {
-        FgsTempAllowList<Integer, String> allowList = new FgsTempAllowList();
+        FgsTempAllowList<String> allowList = new FgsTempAllowList();
         allowList.add(10001, 2000, "description1");
         allowList.add(10002, 2000, "description2");
 
@@ -55,7 +58,7 @@ public class FgsTempAllowListTest {
         assertNotNull(entry2);
         assertEquals(entry2.second, "description2");
 
-        allowList.remove(10001);
+        allowList.removeUid(10001);
         assertFalse(allowList.isAllowed(10001));
         assertNull(allowList.get(10001));
     }
@@ -65,7 +68,7 @@ public class FgsTempAllowListTest {
      */
     @Test
     public void testExpired() {
-        FgsTempAllowList<Integer, String> allowList = new FgsTempAllowList();
+        FgsTempAllowList<String> allowList = new FgsTempAllowList();
         // temp allow for 2000ms.
         allowList.add(10001, 2000, "uid1-2000ms");
         // sleep for 3000ms.
@@ -73,5 +76,52 @@ public class FgsTempAllowListTest {
         // entry expired.
         assertFalse(allowList.isAllowed(10001));
         assertNull(allowList.get(10001));
+    }
+
+    @Test
+    public void testRemoveAppId() {
+        FgsTempAllowList<String> allowList = new FgsTempAllowList();
+        allowList.add(10001, 2000, "description1");
+        allowList.add(10002, 2000, "description2");
+        allowList.add(10_10001, 2000, "description3");
+
+        assertTrue(allowList.isAllowed(10001));
+        assertTrue(allowList.isAllowed(10002));
+        assertTrue(allowList.isAllowed(10_10001));
+
+        allowList.removeAppId(10001);
+
+        assertFalse(allowList.isAllowed(10001));
+        assertTrue(allowList.isAllowed(10002));
+        assertFalse(allowList.isAllowed(10_10001));
+    }
+
+    @Test
+    public void testForEach() {
+        final FgsTempAllowList<String> allowList = new FgsTempAllowList();
+
+
+        // Call forEach(), return the sum of all the UIDs, and make sure the item is
+        // "uid" + uid.
+        final Supplier<Integer> callForEach = () -> {
+            final AtomicInteger sum = new AtomicInteger();
+            sum.set(0);
+            allowList.forEach((uid, entry) -> {
+                sum.set(sum.get() + uid);
+                assertEquals(entry.second, "uid" + uid);
+            });
+            return sum.get();
+        };
+
+        // Call on th empty list.
+        assertEquals(0, (int) callForEach.get());
+
+        // Add one item.
+        allowList.add(1, 2000, "uid1");
+        assertEquals(1, (int) callForEach.get());
+
+        // Add one more item.
+        allowList.add(10, 2000, "uid10");
+        assertEquals(11, (int) callForEach.get());
     }
 }

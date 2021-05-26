@@ -547,7 +547,7 @@ public class DeviceIdleController extends SystemService
     private int[] mPowerSaveWhitelistUserAppIdArray = new int[0];
 
     /**
-     * List of end times for UIDs that are temporarily marked as being allowed to access
+     * List of end times for app-IDs that are temporarily marked as being allowed to access
      * the network and acquire wakelocks. Times are in milliseconds.
      */
     private final SparseArray<Pair<MutableLong, String>> mTempWhitelistAppIdEndTimes
