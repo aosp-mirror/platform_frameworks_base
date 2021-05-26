@@ -478,7 +478,7 @@
     <string name="retail_demo_reset_next" msgid="3688129033843885362">"आगे बढ़ें"</string>
     <string name="retail_demo_reset_title" msgid="1866911701095959800">"पासवर्ड आवश्यक"</string>
     <string name="active_input_method_subtypes" msgid="4232680535471633046">"टाइप करने की सक्रीय पद्धतियां"</string>
-    <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"सिस्टम की भाषाओं का उपयोग करें"</string>
+    <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"सिस्टम की भाषाओं का इस्तेमाल करें"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"<xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> के लिए सेटिंग खोलने में विफल रहा"</string>
     <string name="ime_security_warning" msgid="6547562217880551450">"इनपुट का यह तरीका, आपके पासवर्ड और क्रेडिट कार्ड नंबर जैसे निजी डेटा के साथ-साथ उस सभी डेटा को इकट्ठा कर सकता है जिसे आप लिखते हैं. यह <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> ऐप्लिकेशन से आता है. इनपुट के इस तरीके का इस्तेमाल करें?"</string>
     <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"नोट: पुनः बूट करने के बाद, यह ऐप्लिकेशन तब तक शुरू नहीं हो सकता है जब तक कि आप अपना फ़ोन अनलॉक ना कर लें"</string>
