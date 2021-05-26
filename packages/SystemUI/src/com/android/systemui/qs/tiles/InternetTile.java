@@ -416,10 +416,10 @@ public class InternetTile extends QSTileImpl<SignalState> {
         if (cb.mAirplaneModeEnabled) {
             if (!state.value) {
                 state.state = Tile.STATE_INACTIVE;
-                state.icon = ResourceIcon.get(R.drawable.ic_qs_no_internet_airplane);
+                state.icon = ResourceIcon.get(R.drawable.ic_qs_no_internet_unavailable);
                 state.secondaryLabel = r.getString(R.string.status_bar_airplane);
             } else if (!wifiConnected) {
-                state.icon = ResourceIcon.get(R.drawable.ic_qs_no_internet_airplane);
+                state.icon = ResourceIcon.get(R.drawable.ic_qs_no_internet_unavailable);
                 if (cb.mNoNetworksAvailable) {
                     state.secondaryLabel =
                             r.getString(R.string.quick_settings_networks_unavailable);
@@ -486,7 +486,7 @@ public class InternetTile extends QSTileImpl<SignalState> {
 
         if (cb.mAirplaneModeEnabled && cb.mQsTypeIcon != TelephonyIcons.ICON_CWF) {
             state.state = Tile.STATE_INACTIVE;
-            state.icon = ResourceIcon.get(R.drawable.ic_qs_no_internet_airplane);
+            state.icon = ResourceIcon.get(R.drawable.ic_qs_no_internet_unavailable);
             state.secondaryLabel = r.getString(R.string.status_bar_airplane);
         } else if (cb.mNoDefaultNetwork && cb.mNoNetworksAvailable) {
             state.icon = ResourceIcon.get(R.drawable.ic_qs_no_internet_unavailable);
