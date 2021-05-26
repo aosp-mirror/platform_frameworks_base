@@ -8471,7 +8471,9 @@ public class NotificationManagerService extends SystemService {
             for (int i = 0; i < newUris.size(); i++) {
                 final Uri uri = newUris.valueAt(i);
                 if (oldUris == null || !oldUris.contains(uri)) {
-                    Slog.d(TAG, key + ": granting " + uri);
+                    if (DBG) {
+                        Slog.d(TAG, key + ": granting " + uri);
+                    }
                     grantUriPermission(permissionOwner, uri, newRecord.getUid(), targetPkg,
                             targetUserId);
                 }
