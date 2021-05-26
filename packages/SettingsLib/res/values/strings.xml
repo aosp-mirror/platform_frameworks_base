@@ -653,8 +653,8 @@
     <string name="wifi_verbose_logging">Enable Wi\u2011Fi Verbose Logging</string>
     <!-- Setting Checkbox title whether to disable WiFi Scan Throttling. [CHAR LIMIT=40] -->
     <string name="wifi_scan_throttling">Wi\u2011Fi scan throttling</string>
-    <!-- Setting Checkbox title whether to enable WiFi enhanced mac randomization. [CHAR LIMIT=40] -->
-    <string name="wifi_enhanced_mac_randomization">Wi\u2011Fi\u2011enhanced MAC randomization</string>
+    <!-- Setting Checkbox title whether to enable WiFi non-persistent mac randomization. [CHAR LIMIT=80] -->
+    <string name="wifi_enhanced_mac_randomization">Wi\u2011Fi non\u2011persistent MAC randomization</string>
     <!-- Setting Checkbox title whether to always keep mobile data active. [CHAR LIMIT=80] -->
     <string name="mobile_data_always_on">Mobile data always active</string>
     <!-- Setting Checkbox title whether to enable hardware acceleration for tethering. [CHAR LIMIT=80] -->
