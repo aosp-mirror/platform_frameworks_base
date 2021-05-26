@@ -380,11 +380,15 @@ public class StackScrollAlgorithm {
         ExpandableViewState viewState = view.getViewState();
         viewState.location = ExpandableViewState.LOCATION_UNKNOWN;
 
-        if (ambientState.isExpansionChanging() && !ambientState.isOnKeyguard()) {
-            viewState.alpha = Interpolators.getNotificationScrimAlpha(
-                    ambientState.getExpansionFraction(), true /* notification */);
-        } else {
-            viewState.alpha = 1f - ambientState.getHideAmount();
+        final boolean isHunGoingToShade = ambientState.isShadeExpanded()
+                && view == ambientState.getTrackedHeadsUpRow();
+        if (!isHunGoingToShade) {
+            if (ambientState.isExpansionChanging() && !ambientState.isOnKeyguard()) {
+                viewState.alpha = Interpolators.getNotificationScrimAlpha(
+                        ambientState.getExpansionFraction(), true /* notification */);
+            } else {
+                viewState.alpha = 1f - ambientState.getHideAmount();
+            }
         }
 
         if (view.mustStayOnScreen() && viewState.yTranslation >= 0) {
