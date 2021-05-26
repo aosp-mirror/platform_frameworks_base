@@ -20,25 +20,17 @@ import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
-import android.app.job.JobInfo;
-import android.app.job.JobParameters;
-import android.app.job.JobScheduler;
-import android.app.job.JobService;
 import android.app.people.ConversationStatus;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.CancellationSignal;
-import android.os.SystemClock;
 
 import com.android.server.LocalServices;
-import com.android.server.notification.NotificationRecord;
 import com.android.server.people.PeopleServiceInternal;
-
-import java.util.concurrent.TimeUnit;
 
 /**
  * If a {@link ConversationStatus} is added to the system with an expiration time, remove that
@@ -53,18 +45,22 @@ public class ConversationStatusExpirationBroadcastReceiver extends BroadcastRece
 
     void scheduleExpiration(Context context, @UserIdInt int userId, String pkg,
             String conversationId, ConversationStatus status) {
-
-        final PendingIntent pi = PendingIntent.getBroadcast(context,
-                REQUEST_CODE,
-                new Intent(ACTION)
-                        .setData(new Uri.Builder().scheme(SCHEME)
-                                .appendPath(getKey(userId, pkg, conversationId, status))
-                                .build())
-                        .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
-                        .putExtra(EXTRA_USER_ID, userId),
-                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-        context.getSystemService(AlarmManager.class).setExactAndAllowWhileIdle(
-                AlarmManager.RTC_WAKEUP, status.getEndTimeMillis(), pi);
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            final PendingIntent pi = PendingIntent.getBroadcast(context,
+                    REQUEST_CODE,
+                    new Intent(ACTION)
+                            .setData(new Uri.Builder().scheme(SCHEME)
+                                    .appendPath(getKey(userId, pkg, conversationId, status))
+                                    .build())
+                            .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
+                            .putExtra(EXTRA_USER_ID, userId),
+                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+            context.getSystemService(AlarmManager.class).setExactAndAllowWhileIdle(
+                    AlarmManager.RTC_WAKEUP, status.getEndTimeMillis(), pi);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 
     private static String getKey(@UserIdInt int userId, String pkg,

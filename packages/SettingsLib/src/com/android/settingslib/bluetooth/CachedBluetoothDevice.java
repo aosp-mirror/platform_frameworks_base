@@ -1222,19 +1222,22 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
      */
     public Pair<Drawable, String> getDrawableWithDescription() {
         Uri uri = BluetoothUtils.getUriMetaData(mDevice, BluetoothDevice.METADATA_MAIN_ICON);
+        Pair<Drawable, String> pair = BluetoothUtils.getBtClassDrawableWithDescription(
+                mContext, this);
+
         if (BluetoothUtils.isAdvancedDetailsHeader(mDevice) && uri != null) {
             BitmapDrawable drawable = mDrawableCache.get(uri.toString());
             if (drawable != null) {
                 Resources resources = mContext.getResources();
                 return new Pair<>(new AdaptiveOutlineDrawable(
-                        resources, drawable.getBitmap()),
-                        BluetoothUtils.getBtClassDrawableWithDescription(mContext, this).second);
+                        resources, drawable.getBitmap()), pair.second);
             }
 
             refresh();
         }
 
-        return BluetoothUtils.getBtRainbowDrawableWithDescription(mContext, this);
+        return new Pair<>(BluetoothUtils.buildBtRainbowDrawable(
+                        mContext, pair.first, getAddress().hashCode()), pair.second);
     }
 
     void releaseLruCache() {
