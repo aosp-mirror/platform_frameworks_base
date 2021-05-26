@@ -64,14 +64,15 @@ public class InternalResourceService extends SystemService {
     private final BatteryManagerInternal mBatteryManagerInternal;
     private final PackageManager mPackageManager;
 
-    @GuardedBy("mLock")
     private final CopyOnWriteArraySet<BalanceChangeListener> mBalanceChangeListeners =
             new CopyOnWriteArraySet<>();
 
     @NonNull
+    @GuardedBy("mLock")
     private List<PackageInfo> mPkgCache = new ArrayList<>();
 
     /** Cached mapping of UIDs (for all users) to a list of packages in the UID. */
+    @GuardedBy("mLock")
     private final SparseSetArray<String> mUidToPackageCache = new SparseSetArray<>();
 
     @GuardedBy("mLock")
@@ -185,7 +186,7 @@ public class InternalResourceService extends SystemService {
     ArraySet<String> getPackagesForUidLocked(final int uid) {
         ArraySet<String> packages = mUidToPackageCache.get(uid);
         if (packages == null) {
-            String[] pkgs = mPackageManager.getPackagesForUid(uid);
+            final String[] pkgs = mPackageManager.getPackagesForUid(uid);
             if (pkgs != null) {
                 for (String pkg : pkgs) {
                     mUidToPackageCache.add(uid, pkg);
@@ -194,9 +195,6 @@ public class InternalResourceService extends SystemService {
             }
         }
         return packages;
-    }
-
-    void onAppStateChanged(final int userId, @NonNull final ArraySet<String> pkgNames) {
     }
 
     void onBatteryLevelChanged() {
@@ -243,6 +241,9 @@ public class InternalResourceService extends SystemService {
                 }
             }
         }
+    }
+
+    void onUidStateChanged(final int uid) {
     }
 
     void onUserAdded(final int userId) {
