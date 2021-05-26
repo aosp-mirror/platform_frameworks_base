@@ -90,7 +90,7 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:gravity="center_vertical|end"
-        android:minWidth="64dp"
+        android:minWidth="@dimen/two_target_min_width"
         android:orientation="vertical"/>
 
 </LinearLayout>
