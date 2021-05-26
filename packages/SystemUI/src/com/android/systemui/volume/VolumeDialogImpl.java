@@ -337,35 +337,42 @@ public class VolumeDialogImpl implements VolumeDialog,
 
         mTouchableRegion.setEmpty();
 
-        // Set the touchable region to the union of all child view bounds. We don't use touches on
-        // the volume dialog container itself, so this is fine.
+        // Set the touchable region to the union of all child view bounds and the live caption
+        // tooltip. We don't use touches on the volume dialog container itself, so this is fine.
         for (int i = 0; i < mDialogView.getChildCount(); i++) {
-            final View view = mDialogView.getChildAt(i);
-            final int[] locInWindow = new int[2];
-            view.getLocationInWindow(locInWindow);
+            unionViewBoundstoTouchableRegion(mDialogView.getChildAt(i));
+        }
 
-            float x = locInWindow[0];
-            float y = locInWindow[1];
-
-            // The ringer and rows container has extra height at the top to fit the expanded ringer
-            // drawer. This area should not be touchable unless the ringer drawer is open.
-            if (view == mTopContainer && !mIsRingerDrawerOpen) {
-                if (!isLandscape()) {
-                    y += getRingerDrawerOpenExtraSize();
-                } else {
-                    x += getRingerDrawerOpenExtraSize();
-                }
-            }
-
-            mTouchableRegion.op(
-                    (int) x,
-                    (int) y,
-                    locInWindow[0] + view.getWidth(),
-                    locInWindow[1] + view.getHeight(),
-                    Region.Op.UNION);
+        if (mODICaptionsTooltipView != null && mODICaptionsTooltipView.getVisibility() == VISIBLE) {
+            unionViewBoundstoTouchableRegion(mODICaptionsTooltipView);
         }
 
         internalInsetsInfo.touchableRegion.set(mTouchableRegion);
+    }
+
+    private void unionViewBoundstoTouchableRegion(final View view) {
+        final int[] locInWindow = new int[2];
+        view.getLocationInWindow(locInWindow);
+
+        float x = locInWindow[0];
+        float y = locInWindow[1];
+
+        // The ringer and rows container has extra height at the top to fit the expanded ringer
+        // drawer. This area should not be touchable unless the ringer drawer is open.
+        if (view == mTopContainer && !mIsRingerDrawerOpen) {
+            if (!isLandscape()) {
+                y += getRingerDrawerOpenExtraSize();
+            } else {
+                x += getRingerDrawerOpenExtraSize();
+            }
+        }
+
+        mTouchableRegion.op(
+                (int) x,
+                (int) y,
+                locInWindow[0] + view.getWidth(),
+                locInWindow[1] + view.getHeight(),
+                Region.Op.UNION);
     }
 
     private void initDialog() {
@@ -1058,21 +1065,38 @@ public class VolumeDialogImpl implements VolumeDialog,
         }
 
         if (mODICaptionsTooltipView != null) {
-            mODICaptionsTooltipView.setAlpha(0.f);
-            mODICaptionsTooltipView.animate()
-                .alpha(1.f)
-                .setStartDelay(mDialogShowAnimationDurationMs)
-                .withEndAction(() -> {
-                    if (D.BUG) Log.d(TAG, "tool:checkODICaptionsTooltip() putBoolean true");
-                    Prefs.putBoolean(mContext,
-                            Prefs.Key.HAS_SEEN_ODI_CAPTIONS_TOOLTIP, true);
-                    mHasSeenODICaptionsTooltip = true;
-                    if (mODICaptionsIcon != null) {
-                        mODICaptionsIcon
-                                .postOnAnimation(getSinglePressFor(mODICaptionsIcon));
-                    }
-                })
-                .start();
+            mODICaptionsTooltipView.setAlpha(0.0f);
+
+            // We need to wait for layout and then center the caption view. Since the height of the
+            // dialog is now dynamic (with the variable ringer drawer height changing the height of
+            // the dialog), we need to do this here in code vs. in XML.
+            mHandler.post(() -> {
+                final int[] odiTooltipLocation = mODICaptionsTooltipView.getLocationOnScreen();
+                final int[] odiButtonLocation = mODICaptionsIcon.getLocationOnScreen();
+
+                final float heightDiffForCentering =
+                        (mODICaptionsTooltipView.getHeight() - mODICaptionsIcon.getHeight()) / 2f;
+
+                mODICaptionsTooltipView.setTranslationY(
+                        odiButtonLocation[1] - odiTooltipLocation[1] - heightDiffForCentering);
+
+                mODICaptionsTooltipView.animate()
+                        .alpha(1.0f)
+                        .setStartDelay(mDialogShowAnimationDurationMs)
+                        .withEndAction(() -> {
+                            if (D.BUG) {
+                                Log.d(TAG, "tool:checkODICaptionsTooltip() putBoolean true");
+                            }
+                            Prefs.putBoolean(mContext,
+                                    Prefs.Key.HAS_SEEN_ODI_CAPTIONS_TOOLTIP, true);
+                            mHasSeenODICaptionsTooltip = true;
+                            if (mODICaptionsIcon != null) {
+                                mODICaptionsIcon
+                                        .postOnAnimation(getSinglePressFor(mODICaptionsIcon));
+                            }
+                        })
+                        .start();
+            });
         }
     }
 

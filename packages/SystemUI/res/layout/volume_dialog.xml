@@ -147,7 +147,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom | right"
-        android:layout_marginRight="@dimen/volume_tool_tip_right_margin"
-        android:layout_marginBottom="@dimen/volume_tool_tip_bottom_margin"/>
+        android:layout_marginRight="@dimen/volume_tool_tip_right_margin"/>
 
 </FrameLayout>
