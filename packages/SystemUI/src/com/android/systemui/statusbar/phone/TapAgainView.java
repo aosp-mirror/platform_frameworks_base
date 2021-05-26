@@ -23,7 +23,6 @@ import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
-import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -35,24 +34,24 @@ import com.android.wm.shell.animation.Interpolators;
 /**
  * View to show a toast-like popup on the notification shade and quick settings.
  */
-public class TapAgainView extends FrameLayout {
+public class TapAgainView extends TextView {
+    private TextView mTextView;
+
     public TapAgainView(
             @NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
-        updateBgColor();
     }
 
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-
-        TextView text = new TextView(mContext);
-        text.setText(R.string.notification_tap_again);
-        addView(text);
+        updateColor();
     }
 
-    void updateBgColor() {
-        setBackgroundResource(R.drawable.rounded_bg_full);
+    void updateColor() {
+        int textColor = getResources().getColor(R.color.notif_pill_text, mContext.getTheme());
+        setTextColor(textColor);
+        setBackground(getResources().getDrawable(R.drawable.rounded_bg_full, mContext.getTheme()));
     }
 
     /** Make the view visible. */
