@@ -54,7 +54,6 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.Mock
-import org.mockito.Mockito.anyBoolean
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
@@ -324,11 +323,6 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
         assertThat(dismiss.isEnabled).isEqualTo(true)
         dismiss.callOnClick()
-        val captor = ArgumentCaptor.forClass(ActivityStarter.OnDismissAction::class.java)
-        verify(keyguardDismissUtil).executeWhenUnlocked(captor.capture(), anyBoolean(),
-            eq(false))
-
-        captor.value.onDismiss()
         verify(mediaDataManager).dismissMediaData(eq(mediaKey), anyLong())
     }
 
