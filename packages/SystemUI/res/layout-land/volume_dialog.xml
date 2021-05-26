@@ -126,6 +126,7 @@
             android:gravity="right"
             android:layout_gravity="right"
             android:clipToPadding="false"
+            android:clipToOutline="true"
             android:background="@drawable/volume_row_rounded_background">
             <com.android.systemui.volume.CaptionsToggleImageButton
                 android:id="@+id/odi_captions_icon"
@@ -146,6 +147,7 @@
         android:layout="@layout/volume_tool_tip_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom | right"/>
+        android:layout_gravity="bottom | right"
+        android:layout_marginRight="@dimen/volume_tool_tip_right_margin"/>
 
 </FrameLayout>
