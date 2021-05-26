@@ -14,6 +14,7 @@
 ~ limitations under the License.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_gravity="center"
@@ -52,7 +53,7 @@
             android:paddingStart="8dp"
             android:paddingEnd="8dp"
             android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
-            android:textColor="?android:attr/textColorPrimary"
+            android:textColor="?androidprv:attr/textColorOnAccent"
             android:background="@drawable/people_space_messages_count_background"
             android:textSize="14sp"
             android:maxLines="1"
