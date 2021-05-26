@@ -474,7 +474,7 @@
     <item msgid="7529124349186240216">"100%"</item>
   </string-array>
     <string name="charge_length_format" msgid="6941645744588690932">"<xliff:g id="ID_1">%1$s</xliff:g>前"</string>
-    <string name="remaining_length_format" msgid="4310625772926171089">"还需 <xliff:g id="ID_1">%1$s</xliff:g>"</string>
+    <string name="remaining_length_format" msgid="4310625772926171089">"还可以使用 <xliff:g id="ID_1">%1$s</xliff:g>"</string>
     <string name="screen_zoom_summary_small" msgid="6050633151263074260">"小"</string>
     <string name="screen_zoom_summary_default" msgid="1888865694033865408">"默认"</string>
     <string name="screen_zoom_summary_large" msgid="4706951482598978984">"大"</string>

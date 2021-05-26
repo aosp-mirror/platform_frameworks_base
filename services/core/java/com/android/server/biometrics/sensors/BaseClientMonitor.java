@@ -82,7 +82,20 @@ public abstract class BaseClientMonitor extends LoggableMonitor
     private final int mCookie;
     boolean mAlreadyDone;
 
-    @NonNull protected Callback mCallback;
+    // Use an empty callback by default since delayed operations can receive events
+    // before they are started and cause NPE in subclasses that access this field directly.
+    @NonNull protected Callback mCallback = new Callback() {
+        @Override
+        public void onClientStarted(@NonNull BaseClientMonitor clientMonitor) {
+            Slog.e(TAG, "mCallback onClientStarted: called before set (should not happen)");
+        }
+
+        @Override
+        public void onClientFinished(@NonNull BaseClientMonitor clientMonitor,
+                boolean success) {
+            Slog.e(TAG, "mCallback onClientFinished: called before set (should not happen)");
+        }
+    };
 
     /**
      * @return A ClientMonitorEnum constant defined in biometrics.proto

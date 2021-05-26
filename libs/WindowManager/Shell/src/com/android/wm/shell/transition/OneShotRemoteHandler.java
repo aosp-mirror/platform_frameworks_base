@@ -71,12 +71,17 @@ public class OneShotRemoteHandler implements Transitions.TransitionHandler {
         };
         IRemoteTransitionFinishedCallback cb = new IRemoteTransitionFinishedCallback.Stub() {
             @Override
-            public void onTransitionFinished(WindowContainerTransaction wct) {
+            public void onTransitionFinished(WindowContainerTransaction wct,
+                    SurfaceControl.Transaction sct) {
                 if (mRemote.asBinder() != null) {
                     mRemote.asBinder().unlinkToDeath(remoteDied, 0 /* flags */);
                 }
-                mMainExecutor.execute(
-                        () -> finishCallback.onTransitionFinished(wct, null /* wctCB */));
+                mMainExecutor.execute(() -> {
+                    if (sct != null) {
+                        finishTransaction.merge(sct);
+                    }
+                    finishCallback.onTransitionFinished(wct, null /* wctCB */);
+                });
             }
         };
         try {
@@ -103,7 +108,8 @@ public class OneShotRemoteHandler implements Transitions.TransitionHandler {
 
         IRemoteTransitionFinishedCallback cb = new IRemoteTransitionFinishedCallback.Stub() {
             @Override
-            public void onTransitionFinished(WindowContainerTransaction wct) {
+            public void onTransitionFinished(WindowContainerTransaction wct,
+                    SurfaceControl.Transaction sct) {
                 mMainExecutor.execute(
                         () -> finishCallback.onTransitionFinished(wct, null /* wctCB */));
             }

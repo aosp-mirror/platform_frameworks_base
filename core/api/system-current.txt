@@ -1458,6 +1458,7 @@ package android.app.search {
     method public long getTimestampMillis();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.search.Query> CREATOR;
+    field public static final String EXTRA_IME_HEIGHT = "android.app.search.extra.IME_HEIGHT";
   }
 
   public final class SearchAction implements android.os.Parcelable {
@@ -1526,7 +1527,7 @@ package android.app.search {
     method @Nullable public android.content.pm.ShortcutInfo getShortcutInfo();
     method @Nullable public android.net.Uri getSliceUri();
     method @NonNull public android.os.UserHandle getUserHandle();
-    method public boolean shouldHide();
+    method public boolean isHidden();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.search.SearchTarget> CREATOR;
     field public static final String LAYOUT_TYPE_ICON = "icon";
@@ -1543,12 +1544,12 @@ package android.app.search {
     method @NonNull public android.app.search.SearchTarget build();
     method @NonNull public android.app.search.SearchTarget.Builder setAppWidgetProviderInfo(@NonNull android.appwidget.AppWidgetProviderInfo);
     method @NonNull public android.app.search.SearchTarget.Builder setExtras(@NonNull android.os.Bundle);
+    method @NonNull public android.app.search.SearchTarget.Builder setHidden(boolean);
     method @NonNull public android.app.search.SearchTarget.Builder setPackageName(@NonNull String);
     method @NonNull public android.app.search.SearchTarget.Builder setParentId(@NonNull String);
     method @NonNull public android.app.search.SearchTarget.Builder setScore(@FloatRange(from=0.0f, to=1.0f) float);
     method @NonNull public android.app.search.SearchTarget.Builder setSearchAction(@Nullable android.app.search.SearchAction);
     method @NonNull public android.app.search.SearchTarget.Builder setShortcutInfo(@NonNull android.content.pm.ShortcutInfo);
-    method @NonNull public android.app.search.SearchTarget.Builder setShouldHide(boolean);
     method @NonNull public android.app.search.SearchTarget.Builder setSliceUri(@NonNull android.net.Uri);
     method @NonNull public android.app.search.SearchTarget.Builder setUserHandle(@NonNull android.os.UserHandle);
   }
@@ -2246,7 +2247,7 @@ package android.bluetooth.le {
 package android.companion {
 
   public final class CompanionDeviceManager {
-    method @RequiresPermission(android.Manifest.permission.ASSOCIATE_COMPANION_DEVICES) public void associate(@NonNull String, @NonNull android.net.MacAddress);
+    method @RequiresPermission(android.Manifest.permission.ASSOCIATE_COMPANION_DEVICES) public void associate(@NonNull String, @NonNull android.net.MacAddress, @NonNull byte[]);
     method @RequiresPermission("android.permission.MANAGE_COMPANION_DEVICES") public boolean canPairWithoutPrompt(@NonNull String, @NonNull String, @NonNull android.os.UserHandle);
     method @RequiresPermission("android.permission.MANAGE_COMPANION_DEVICES") public boolean isDeviceAssociatedForWifiConnection(@NonNull String, @NonNull android.net.MacAddress, @NonNull android.os.UserHandle);
   }
@@ -10416,11 +10417,11 @@ package android.service.translation {
     ctor public TranslationService();
     method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
     method public void onConnected();
-    method public void onCreateTranslationSession(@NonNull android.view.translation.TranslationContext, int, @NonNull java.util.function.Consumer<java.lang.Boolean>);
+    method public abstract void onCreateTranslationSession(@NonNull android.view.translation.TranslationContext, int, @NonNull java.util.function.Consumer<java.lang.Boolean>);
     method public void onDisconnected();
     method public abstract void onFinishTranslationSession(int);
     method public abstract void onTranslationCapabilitiesRequest(int, int, @NonNull java.util.function.Consumer<java.util.Set<android.view.translation.TranslationCapability>>);
-    method public void onTranslationRequest(@NonNull android.view.translation.TranslationRequest, int, @Nullable android.os.CancellationSignal, @NonNull java.util.function.Consumer<android.view.translation.TranslationResponse>);
+    method public abstract void onTranslationRequest(@NonNull android.view.translation.TranslationRequest, int, @Nullable android.os.CancellationSignal, @NonNull java.util.function.Consumer<android.view.translation.TranslationResponse>);
     method public final void updateTranslationCapability(@NonNull android.view.translation.TranslationCapability);
     field public static final String SERVICE_INTERFACE = "android.service.translation.TranslationService";
     field public static final String SERVICE_META_DATA = "android.translation_service";
@@ -10528,7 +10529,7 @@ package android.service.voice {
     method @Nullable public android.media.MediaSyncEvent getMediaSyncEvent();
     method public int getPersonalizedScore();
     method public int getScore();
-    method public boolean isPersonalizedHotwordDetection();
+    method public boolean isHotwordDetectionPersonalized();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field public static final int AUDIO_CHANNEL_UNSET = -1; // 0xffffffff
     field public static final int CONFIDENCE_LEVEL_HIGH = 5; // 0x5
@@ -10548,11 +10549,11 @@ package android.service.voice {
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setAudioChannel(int);
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setConfidenceLevel(int);
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setExtras(@NonNull android.os.PersistableBundle);
+    method @NonNull public android.service.voice.HotwordDetectedResult.Builder setHotwordDetectionPersonalized(boolean);
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setHotwordDurationMillis(int);
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setHotwordOffsetMillis(int);
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setHotwordPhraseId(int);
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setMediaSyncEvent(@NonNull android.media.MediaSyncEvent);
-    method @NonNull public android.service.voice.HotwordDetectedResult.Builder setPersonalizedHotwordDetection(boolean);
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setPersonalizedScore(int);
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setScore(int);
   }

@@ -26,6 +26,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import android.content.Context;
+import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.biometrics.PromptInfo;
 import android.os.Bundle;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -202,7 +203,7 @@ public class AuthBiometricViewTest extends SysuiTestCase {
         waitForIdleSync();
 
         verify(mCallback).onAction(AuthBiometricView.Callback.ACTION_ERROR);
-        assertEquals(AuthBiometricView.STATE_ERROR, mBiometricView.mState);
+        assertEquals(AuthBiometricView.STATE_IDLE, mBiometricView.mState);
     }
 
     @Test
@@ -252,6 +253,12 @@ public class AuthBiometricViewTest extends SysuiTestCase {
             @Override
             public TextView getIndicatorView() {
                 return indicatorView;
+            }
+
+            @Override
+            public int getDelayAfterError() {
+                // keep a real delay to test saving in the error state
+                return BiometricPrompt.HIDE_DIALOG_DELAY;
             }
         });
 
