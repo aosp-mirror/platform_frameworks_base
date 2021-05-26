@@ -4672,27 +4672,27 @@ public abstract class PackageManager {
             @PermissionGroupInfoFlags int flags);
 
     /**
-     * Get the platform permissions which belong to a particular permission group.
+     * Get the platform-defined permissions which belong to a particular permission group.
      *
-     * @param permissionGroupName The permission group whose permissions are desired
-     * @param executor Executor on which to invoke the callback
-     * @param callback A callback which will receive a list of the platform permissions in the
-     *                 group, or empty if the group is not a valid platform group, or there
-     *                 was an exception.
+     * @param permissionGroupName the permission group whose permissions are desired
+     * @param executor the {@link Executor} on which to invoke the callback
+     * @param callback the callback which will receive a list of the platform-defined permissions in
+     *                 the group, or empty if the group is not a valid platform-defined permission
+     *                 group, or there was an exception
      */
     public void getPlatformPermissionsForGroup(@NonNull String permissionGroupName,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull Consumer<List<String>> callback) {}
 
     /**
-     * Get the platform group of a particular permission, if the permission is a platform
-     * permission.
+     * Get the platform-defined permission group of a particular permission, if the permission is a
+     * platform-defined permission.
      *
-     * @param permissionName The permission name whose group is desired
-     * @param executor Executor on which to invoke the callback
-     * @param callback A callback which will receive the name of the permission group this
-     *                 permission belongs to, or null if it has no group, is not a platform
-     *                 permission, or there was an exception.
+     * @param permissionName the permission whose group is desired
+     * @param executor the {@link Executor} on which to invoke the callback
+     * @param callback the callback which will receive the name of the permission group this
+     *                 permission belongs to, or {@code null} if it has no group, is not a
+     *                 platform-defined permission, or there was an exception
      */
     public void getGroupOfPlatformPermission(@NonNull String permissionName,
             @NonNull @CallbackExecutor Executor executor, @NonNull Consumer<String> callback) {}
