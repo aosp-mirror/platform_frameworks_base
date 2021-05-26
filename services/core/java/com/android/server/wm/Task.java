@@ -41,7 +41,6 @@ import static android.content.Intent.FLAG_ACTIVITY_RETAIN_IN_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_TASK_ON_HOME;
 import static android.content.pm.ActivityInfo.CONFIG_SCREEN_LAYOUT;
 import static android.content.pm.ActivityInfo.FLAG_RELINQUISH_TASK_IDENTITY;
-import static android.content.pm.ActivityInfo.FLAG_RESUME_WHILE_PAUSING;
 import static android.content.pm.ActivityInfo.FLAG_SHOW_FOR_ALL_USERS;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_LANDSCAPE_ONLY;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_PORTRAIT_ONLY;
@@ -63,7 +62,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_APP_CRASHED;
-import static android.view.WindowManager.TRANSIT_FLAG_OPEN_BEHIND;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_OLD_ACTIVITY_OPEN;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE;
@@ -83,19 +81,11 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_TASKS;
 import static com.android.server.wm.ActivityRecord.STARTING_WINDOW_SHOWN;
 import static com.android.server.wm.ActivityRecord.TRANSFER_SPLASH_SCREEN_COPYING;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RECENTS;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RESULTS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_TRANSITION;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_USER_LEAVING;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_ADD_REMOVE;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_APP;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_CLEANUP;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_LOCKTASK;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_PAUSE;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_RECENTS;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_RESULTS;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_ROOT_TASK;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_STATES;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_SWITCH;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_TASKS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_TRANSITION;
@@ -123,7 +113,6 @@ import static com.android.server.wm.Task.ActivityState.PAUSED;
 import static com.android.server.wm.Task.ActivityState.PAUSING;
 import static com.android.server.wm.Task.ActivityState.RESUMED;
 import static com.android.server.wm.Task.ActivityState.STARTED;
-import static com.android.server.wm.Task.ActivityState.STOPPING;
 import static com.android.server.wm.TaskProto.ACTIVITY_TYPE;
 import static com.android.server.wm.TaskProto.AFFINITY;
 import static com.android.server.wm.TaskProto.BOUNDS;
@@ -166,14 +155,8 @@ import android.app.AppGlobals;
 import android.app.IActivityController;
 import android.app.PictureInPictureParams;
 import android.app.RemoteAction;
-import android.app.ResultInfo;
 import android.app.TaskInfo;
 import android.app.WindowConfiguration;
-import android.app.servertransaction.ActivityResultItem;
-import android.app.servertransaction.ClientTransaction;
-import android.app.servertransaction.NewIntentItem;
-import android.app.servertransaction.PauseActivityItem;
-import android.app.servertransaction.ResumeActivityItem;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -255,16 +238,9 @@ import java.util.function.Predicate;
  */
 class Task extends TaskFragment {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "Task" : TAG_ATM;
-    static final String TAG_ADD_REMOVE = TAG + POSTFIX_ADD_REMOVE;
     private static final String TAG_RECENTS = TAG + POSTFIX_RECENTS;
-    private static final String TAG_LOCKTASK = TAG + POSTFIX_LOCKTASK;
     static final String TAG_TASKS = TAG + POSTFIX_TASKS;
-    private static final String TAG_APP = TAG + POSTFIX_APP;
     static final String TAG_CLEANUP = TAG + POSTFIX_CLEANUP;
-    private static final String TAG_PAUSE = TAG + POSTFIX_PAUSE;
-    private static final String TAG_RESULTS = TAG + POSTFIX_RESULTS;
-    private static final String TAG_ROOT_TASK = TAG + POSTFIX_ROOT_TASK;
-    private static final String TAG_STATES = TAG + POSTFIX_STATES;
     private static final String TAG_SWITCH = TAG + POSTFIX_SWITCH;
     private static final String TAG_TRANSITION = TAG + POSTFIX_TRANSITION;
     private static final String TAG_USER_LEAVING = TAG + POSTFIX_USER_LEAVING;
@@ -306,10 +282,6 @@ class Task extends TaskFragment {
     private static final String ATTR_LAST_SNAPSHOT_TASK_SIZE = "last_snapshot_task_size";
     private static final String ATTR_LAST_SNAPSHOT_CONTENT_INSETS = "last_snapshot_content_insets";
     private static final String ATTR_LAST_SNAPSHOT_BUFFER_SIZE = "last_snapshot_buffer_size";
-
-    // Set to false to disable the preview that is shown while a new activity
-    // is being started.
-    private static final boolean SHOW_APP_STARTING_PREVIEW = true;
 
     // How long to wait for all background Activities to redraw following a call to
     // convertToTranslucent().
@@ -553,29 +525,6 @@ class Task extends TaskFragment {
 
     /** ActivityRecords that are exiting, but still on screen for animations. */
     final ArrayList<ActivityRecord> mExitingActivities = new ArrayList<>();
-
-    /**
-     * When we are in the process of pausing an activity, before starting the
-     * next one, this variable holds the activity that is currently being paused.
-     *
-     * Only set at leaf tasks.
-     */
-    @Nullable
-    private ActivityRecord mPausingActivity = null;
-
-    /**
-     * This is the last activity that we put into the paused state.  This is
-     * used to determine if we need to do an activity transition while sleeping,
-     * when we normally hold the top activity paused.
-     */
-    ActivityRecord mLastPausedActivity = null;
-
-    /**
-     * Current activity that is resumed, or null if there is none.
-     * Only set at leaf tasks.
-     */
-    @Nullable
-    private ActivityRecord mResumedActivity = null;
 
     private boolean mForceShowForAllUsers;
 
@@ -1453,64 +1402,54 @@ class Task extends TaskFragment {
         }
     }
 
-    void cleanUpActivityReferences(ActivityRecord r) {
-        // mPausingActivity is set at leaf task
-        if (mPausingActivity != null && mPausingActivity == r) {
-            mPausingActivity = null;
-        }
-
-        if (mResumedActivity != null && mResumedActivity == r) {
-            setResumedActivity(null, "cleanUpActivityReferences");
-        }
-
-        final WindowContainer parent = getParent();
-        if (parent != null && parent.asTask() != null) {
-            parent.asTask().cleanUpActivityReferences(r);
-            return;
-        }
-        r.removeTimeouts();
-        mExitingActivities.remove(r);
-    }
-
-    /** @return the currently resumed activity. */
-    ActivityRecord getResumedActivity() {
+    /** Returns the currently topmost resumed activity. */
+    @Nullable
+    ActivityRecord getTopResumedActivity() {
         if (isLeafTask()) {
-            return mResumedActivity;
+            final ActivityRecord[] resumedActivity = new ActivityRecord[1];
+            forAllLeafTaskFragments(fragment -> {
+                if (fragment.getResumedActivity() != null) {
+                    resumedActivity[0] = fragment.getResumedActivity();
+                    return true;
+                }
+                return false;
+            });
+            return resumedActivity[0];
         }
 
-        final Task task = getTask(t -> t.mResumedActivity != null, true /* traverseTopToBottom */);
-        return task != null ? task.mResumedActivity : null;
-    }
-
-    @VisibleForTesting
-    void setPausingActivity(ActivityRecord pausing) {
-        mPausingActivity = pausing;
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            ActivityRecord resumedActivity = mChildren.get(i).asTask().getTopResumedActivity();
+            if (resumedActivity != null) {
+                return resumedActivity;
+            }
+        }
+        return null;
     }
 
     /**
-     * @return the currently pausing activity of this task or the topmost pausing activity of the
-     * child tasks
+     * Returns the currently topmost pausing activity.
      */
-    ActivityRecord getPausingActivity() {
+    @Nullable
+    ActivityRecord getTopPausingActivity() {
         if (isLeafTask()) {
-            return mPausingActivity;
+            final ActivityRecord[] pausingActivity = new ActivityRecord[1];
+            forAllLeafTaskFragments(fragment -> {
+                if (fragment.getPausingActivity() != null) {
+                    pausingActivity[0] = fragment.getPausingActivity();
+                    return true;
+                }
+                return false;
+            });
+            return pausingActivity[0];
         }
 
-        final Task task = getTask(t -> t.mPausingActivity != null, true /* traverseTopToBottom */);
-        return task != null ? task.mPausingActivity : null;
-    }
-
-    void setResumedActivity(ActivityRecord r, String reason) {
-        warnForNonLeafTask("setResumedActivity");
-        if (mResumedActivity == r) {
-            return;
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            ActivityRecord pausingActivity = mChildren.get(i).asTask().getTopPausingActivity();
+            if (pausingActivity != null) {
+                return pausingActivity;
+            }
         }
-
-        if (ActivityTaskManagerDebugConfig.DEBUG_ROOT_TASK) Slog.d(TAG_ROOT_TASK,
-                "setResumedActivity task:" + this + " + from: "
-                + mResumedActivity + " to:" + r + " reason:" + reason);
-        mResumedActivity = r;
-        mTaskSupervisor.updateTopResumedActivityIfNeeded();
+        return null;
     }
 
     void updateTaskMovement(boolean toTop, int position) {
@@ -2187,32 +2126,6 @@ class Task extends TaskFragment {
             mLastNonFullscreenBounds = new Rect(bounds);
         } else {
             mLastNonFullscreenBounds.set(bounds);
-        }
-    }
-
-    /**
-     * This should be called when an child activity changes state. This should only
-     * be called from
-     * {@link ActivityRecord#setState(ActivityState, String)} .
-     * @param record The {@link ActivityRecord} whose state has changed.
-     * @param state The new state.
-     * @param reason The reason for the change.
-     */
-    void onActivityStateChanged(ActivityRecord record, ActivityState state, String reason) {
-        warnForNonLeafTask("onActivityStateChanged");
-        if (record == mResumedActivity && state != RESUMED) {
-            setResumedActivity(null, reason + " - onActivityStateChanged");
-        }
-
-        if (state == RESUMED) {
-            if (ActivityTaskManagerDebugConfig.DEBUG_ROOT_TASK) {
-                Slog.v(TAG_ROOT_TASK, "set resumed activity to:" + record + " reason:" + reason);
-            }
-            setResumedActivity(record, reason + " - onActivityStateChanged");
-            if (record == mRootWindowContainer.getTopResumedActivity()) {
-                mAtmService.setResumedActivityUncheckLocked(record, reason);
-            }
-            mTaskSupervisor.mRecentTasks.add(record.getTask());
         }
     }
 
@@ -3080,12 +2993,12 @@ class Task extends TaskFragment {
         // and focused application if needed.
         focusableTask.moveToFront(myReason);
         // Top display focused root task is changed, update top resumed activity if needed.
-        if (rootTask.getResumedActivity() != null) {
+        if (rootTask.getTopResumedActivity() != null) {
             mTaskSupervisor.updateTopResumedActivityIfNeeded();
             // Set focused app directly because if the next focused activity is already resumed
             // (e.g. the next top activity is on a different display), there won't have activity
             // state change to update it.
-            mAtmService.setResumedActivityUncheckLocked(rootTask.getResumedActivity(), reason);
+            mAtmService.setResumedActivityUncheckLocked(rootTask.getTopResumedActivity(), reason);
         }
         return rootTask;
     }
@@ -4117,15 +4030,6 @@ class Task extends TaskFragment {
     Task asTask() {
         // I'm a task!
         return this;
-    }
-
-    /**
-     * Returns true if the task should be visible.
-     *
-     * @param starting The currently starting activity or null if there is none.
-     */
-    boolean shouldBeVisible(ActivityRecord starting) {
-        return getVisibility(starting) != TASK_FRAGMENT_VISIBILITY_INVISIBLE;
     }
 
     ActivityRecord isInTask(ActivityRecord r) {
@@ -5352,19 +5256,6 @@ class Task extends TaskFragment {
         r.completeResumeLocked();
     }
 
-    void awakeFromSleepingLocked() {
-        if (!isLeafTask()) {
-            forAllLeafTasks((task) -> task.awakeFromSleepingLocked(),
-                    true /* traverseTopToBottom */);
-            return;
-        }
-
-        if (mPausingActivity != null) {
-            Slog.d(TAG, "awakeFromSleepingLocked: previously pausing activity didn't pause");
-            mPausingActivity.activityPaused(true);
-        }
-    }
-
     void checkReadyForSleep() {
         if (shouldSleepActivities() && goToSleepIfPossible(false /* shuttingDown */)) {
             mTaskSupervisor.checkReadyForSleepLocked(true /* allowDelay */);
@@ -5383,302 +5274,13 @@ class Task extends TaskFragment {
      * the process of going to sleep (checkReadyForSleep will be called when that process finishes).
      */
     boolean goToSleepIfPossible(boolean shuttingDown) {
-        if (!isLeafTask()) {
-            final int[] sleepInProgress = {0};
-            forAllLeafTasks((t) -> {
-                if (!t.goToSleepIfPossible(shuttingDown)) {
-                    sleepInProgress[0]++;
-                }
-            }, true);
-            return sleepInProgress[0] == 0;
-        }
-
-        boolean shouldSleep = true;
-        if (mResumedActivity != null) {
-            // Still have something resumed; can't sleep until it is paused.
-            ProtoLog.v(WM_DEBUG_STATES, "Sleep needs to pause %s", mResumedActivity);
-            if (DEBUG_USER_LEAVING) Slog.v(TAG_USER_LEAVING,
-                    "Sleep => pause with userLeaving=false");
-
-            startPausingLocked(false /* userLeaving */, true /* uiSleeping */, null /* resuming */,
-                    "sleep");
-            shouldSleep = false ;
-        } else if (mPausingActivity != null) {
-            // Still waiting for something to pause; can't sleep yet.
-            ProtoLog.v(WM_DEBUG_STATES, "Sleep still waiting to pause %s", mPausingActivity);
-            shouldSleep = false;
-        }
-
-        if (!shuttingDown) {
-            if (containsActivityFromRootTask(mTaskSupervisor.mStoppingActivities)) {
-                // Still need to tell some activities to stop; can't sleep yet.
-                ProtoLog.v(WM_DEBUG_STATES, "Sleep still need to stop %d activities",
-                        mTaskSupervisor.mStoppingActivities.size());
-
-                mTaskSupervisor.scheduleIdle();
-                shouldSleep = false;
+        final int[] sleepInProgress = {0};
+        forAllLeafTaskFragments((f) -> {
+            if (!f.sleepIfPossible(shuttingDown)) {
+                sleepInProgress[0]++;
             }
-        }
-
-        if (shouldSleep) {
-            ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
-                    !PRESERVE_WINDOWS);
-        }
-
-        return shouldSleep;
-    }
-
-    private boolean containsActivityFromRootTask(List<ActivityRecord> rs) {
-        for (ActivityRecord r : rs) {
-            if (r.getRootTask() == this) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    final boolean startPausingLocked(boolean uiSleeping, ActivityRecord resuming, String reason) {
-        return startPausingLocked(mTaskSupervisor.mUserLeaving, uiSleeping, resuming, reason);
-    }
-
-    /**
-     * Start pausing the currently resumed activity.  It is an error to call this if there
-     * is already an activity being paused or there is no resumed activity.
-     *
-     * @param userLeaving True if this should result in an onUserLeaving to the current activity.
-     * @param uiSleeping True if this is happening with the user interface going to sleep (the
-     * screen turning off).
-     * @param resuming The activity we are currently trying to resume or null if this is not being
-     *                 called as part of resuming the top activity, so we shouldn't try to instigate
-     *                 a resume here if not null.
-     * @param reason The reason of pausing the activity.
-     * @return Returns true if an activity now is in the PAUSING state, and we are waiting for
-     * it to tell us when it is done.
-     */
-    final boolean startPausingLocked(boolean userLeaving, boolean uiSleeping,
-            ActivityRecord resuming, String reason) {
-        if (!isLeafTask()) {
-            final int[] pausing = {0};
-            forAllLeafTasks((t) -> {
-                if (t.startPausingLocked(userLeaving, uiSleeping, resuming, reason)) {
-                    pausing[0]++;
-                }
-            }, true /* traverseTopToBottom */);
-            return pausing[0] > 0;
-        }
-
-        if (mPausingActivity != null) {
-            Slog.wtf(TAG, "Going to pause when pause is already pending for " + mPausingActivity
-                    + " state=" + mPausingActivity.getState());
-            if (!shouldSleepActivities()) {
-                // Avoid recursion among check for sleep and complete pause during sleeping.
-                // Because activity will be paused immediately after resume, just let pause
-                // be completed by the order of activity paused from clients.
-                completePauseLocked(false, resuming);
-            }
-        }
-        ActivityRecord prev = mResumedActivity;
-
-        if (prev == null) {
-            if (resuming == null) {
-                Slog.wtf(TAG, "Trying to pause when nothing is resumed");
-                mRootWindowContainer.resumeFocusedTasksTopActivities();
-            }
-            return false;
-        }
-
-        if (prev == resuming) {
-            Slog.wtf(TAG, "Trying to pause activity that is in process of being resumed");
-            return false;
-        }
-
-        ProtoLog.v(WM_DEBUG_STATES, "Moving to PAUSING: %s", prev);
-        mPausingActivity = prev;
-        mLastPausedActivity = prev;
-        if (prev.isNoHistory() && !mTaskSupervisor.mNoHistoryActivities.contains(prev)) {
-            mTaskSupervisor.mNoHistoryActivities.add(prev);
-        }
-        prev.setState(PAUSING, "startPausingLocked");
-        prev.getTask().touchActiveTime();
-
-        mAtmService.updateCpuStats();
-
-        boolean pauseImmediately = false;
-        boolean shouldAutoPip = false;
-        if (resuming != null && (resuming.info.flags & FLAG_RESUME_WHILE_PAUSING) != 0) {
-            // If the flag RESUME_WHILE_PAUSING is set, then continue to schedule the previous
-            // activity to be paused, while at the same time resuming the new resume activity
-            // only if the previous activity can't go into Pip since we want to give Pip
-            // activities a chance to enter Pip before resuming the next activity.
-            final boolean lastResumedCanPip = prev != null && prev.checkEnterPictureInPictureState(
-                    "shouldResumeWhilePausing", userLeaving);
-            if (lastResumedCanPip && prev.pictureInPictureArgs.isAutoEnterEnabled()) {
-                shouldAutoPip = true;
-            } else if (!lastResumedCanPip) {
-                pauseImmediately = true;
-            } else {
-                // The previous activity may still enter PIP even though it did not allow auto-PIP.
-            }
-        }
-
-        boolean didAutoPip = false;
-        if (prev.attachedToProcess()) {
-            if (shouldAutoPip) {
-                ProtoLog.d(WM_DEBUG_STATES, "Auto-PIP allowed, entering PIP mode "
-                        + "directly: %s", prev);
-
-                didAutoPip = mAtmService.enterPictureInPictureMode(prev, prev.pictureInPictureArgs);
-                mPausingActivity = null;
-            } else {
-                ProtoLog.v(WM_DEBUG_STATES, "Enqueueing pending pause: %s", prev);
-                try {
-                    EventLogTags.writeWmPauseActivity(prev.mUserId, System.identityHashCode(prev),
-                            prev.shortComponentName, "userLeaving=" + userLeaving, reason);
-
-                    mAtmService.getLifecycleManager().scheduleTransaction(prev.app.getThread(),
-                            prev.appToken, PauseActivityItem.obtain(prev.finishing, userLeaving,
-                                    prev.configChangeFlags, pauseImmediately));
-                } catch (Exception e) {
-                    // Ignore exception, if process died other code will cleanup.
-                    Slog.w(TAG, "Exception thrown during pause", e);
-                    mPausingActivity = null;
-                    mLastPausedActivity = null;
-                    mTaskSupervisor.mNoHistoryActivities.remove(prev);
-                }
-            }
-        } else {
-            mPausingActivity = null;
-            mLastPausedActivity = null;
-            mTaskSupervisor.mNoHistoryActivities.remove(prev);
-        }
-
-        // If we are not going to sleep, we want to ensure the device is
-        // awake until the next activity is started.
-        if (!uiSleeping && !mAtmService.isSleepingOrShuttingDownLocked()) {
-            mTaskSupervisor.acquireLaunchWakelock();
-        }
-
-        // If already entered PIP mode, no need to keep pausing.
-        if (mPausingActivity != null && !didAutoPip) {
-            // Have the window manager pause its key dispatching until the new
-            // activity has started.  If we're pausing the activity just because
-            // the screen is being turned off and the UI is sleeping, don't interrupt
-            // key dispatch; the same activity will pick it up again on wakeup.
-            if (!uiSleeping) {
-                prev.pauseKeyDispatchingLocked();
-            } else {
-                ProtoLog.v(WM_DEBUG_STATES, "Key dispatch not paused for screen off");
-            }
-
-            if (pauseImmediately) {
-                // If the caller said they don't want to wait for the pause, then complete
-                // the pause now.
-                completePauseLocked(false, resuming);
-                return false;
-
-            } else {
-                prev.schedulePauseTimeout();
-                return true;
-            }
-
-        } else {
-            // This activity either failed to schedule the pause or it entered PIP mode,
-            // so just treat it as being paused now.
-            ProtoLog.v(WM_DEBUG_STATES, "Activity not running or entered PiP, resuming next.");
-            if (resuming == null) {
-                mRootWindowContainer.resumeFocusedTasksTopActivities();
-            }
-            return false;
-        }
-    }
-
-    @VisibleForTesting
-    void completePauseLocked(boolean resumeNext, ActivityRecord resuming) {
-        // Complete the pausing process of a pausing activity, so it doesn't make sense to
-        // operate on non-leaf tasks.
-        warnForNonLeafTask("completePauseLocked");
-
-        ActivityRecord prev = mPausingActivity;
-        ProtoLog.v(WM_DEBUG_STATES, "Complete pause: %s", prev);
-
-        if (prev != null) {
-            prev.setWillCloseOrEnterPip(false);
-            final boolean wasStopping = prev.isState(STOPPING);
-            prev.setState(PAUSED, "completePausedLocked");
-            if (prev.finishing) {
-                // We will update the activity visibility later, no need to do in
-                // completeFinishing(). Updating visibility here might also making the next
-                // activities to be resumed, and could result in wrong app transition due to
-                // lack of previous activity information.
-                ProtoLog.v(WM_DEBUG_STATES, "Executing finish of activity: %s", prev);
-                prev = prev.completeFinishing(false /* updateVisibility */,
-                        "completePausedLocked");
-            } else if (prev.hasProcess()) {
-                ProtoLog.v(WM_DEBUG_STATES, "Enqueue pending stop if needed: %s "
-                        + "wasStopping=%b visibleRequested=%b",  prev,  wasStopping,
-                        prev.mVisibleRequested);
-                if (prev.deferRelaunchUntilPaused) {
-                    // Complete the deferred relaunch that was waiting for pause to complete.
-                    ProtoLog.v(WM_DEBUG_STATES, "Re-launching after pause: %s", prev);
-                    prev.relaunchActivityLocked(prev.preserveWindowOnDeferredRelaunch);
-                } else if (wasStopping) {
-                    // We are also stopping, the stop request must have gone soon after the pause.
-                    // We can't clobber it, because the stop confirmation will not be handled.
-                    // We don't need to schedule another stop, we only need to let it happen.
-                    prev.setState(STOPPING, "completePausedLocked");
-                } else if (!prev.mVisibleRequested || shouldSleepOrShutDownActivities()) {
-                    // Clear out any deferred client hide we might currently have.
-                    prev.setDeferHidingClient(false);
-                    // If we were visible then resumeTopActivities will release resources before
-                    // stopping.
-                    prev.addToStopping(true /* scheduleIdle */, false /* idleDelayed */,
-                            "completePauseLocked");
-                }
-            } else {
-                ProtoLog.v(WM_DEBUG_STATES, "App died during pause, not stopping: %s", prev);
-                prev = null;
-            }
-            // It is possible the activity was freezing the screen before it was paused.
-            // In that case go ahead and remove the freeze this activity has on the screen
-            // since it is no longer visible.
-            if (prev != null) {
-                prev.stopFreezingScreenLocked(true /*force*/);
-            }
-            mPausingActivity = null;
-        }
-
-        if (resumeNext) {
-            final Task topRootTask = mRootWindowContainer.getTopDisplayFocusedRootTask();
-            if (topRootTask != null && !topRootTask.shouldSleepOrShutDownActivities()) {
-                mRootWindowContainer.resumeFocusedTasksTopActivities(topRootTask, prev, null);
-            } else {
-                checkReadyForSleep();
-                final ActivityRecord top =
-                        topRootTask != null ? topRootTask.topRunningActivity() : null;
-                if (top == null || (prev != null && top != prev)) {
-                    // If there are no more activities available to run, do resume anyway to start
-                    // something. Also if the top activity on the root task is not the just paused
-                    // activity, we need to go ahead and resume it to ensure we complete an
-                    // in-flight app switch.
-                    mRootWindowContainer.resumeFocusedTasksTopActivities();
-                }
-            }
-        }
-
-        if (prev != null) {
-            prev.resumeKeyDispatchingLocked();
-        }
-
-        mRootWindowContainer.ensureActivitiesVisible(resuming, 0, !PRESERVE_WINDOWS);
-
-        // Notify when the task stack has changed, but only if visibilities changed (not just
-        // focus). Also if there is an active root pinned task - we always want to notify it about
-        // task stack changes, because its positioning may depend on it.
-        if (mTaskSupervisor.mAppVisibilitiesChangedSinceLastPause
-                || (getDisplayArea() != null && getDisplayArea().hasPinnedTask())) {
-            mAtmService.getTaskChangeNotificationController().notifyTaskStackChanged();
-            mTaskSupervisor.mAppVisibilitiesChangedSinceLastPause = false;
-        }
+        }, true);
+        return sleepInProgress[0] == 0;
     }
 
     boolean isTopRootTaskInDisplayArea() {
@@ -5732,12 +5334,8 @@ class Task extends TaskFragment {
             boolean preserveWindows, boolean notifyClients) {
         mTaskSupervisor.beginActivityVisibilityUpdate();
         try {
-            forAllTaskFragments(fragment -> {
-                if (!fragment.hasDirectChildActivities()) {
-                    return;
-                }
-
-                fragment.ensureFragmentActivitiesVisible(starting, configChanges, preserveWindows,
+            forAllLeafTaskFragments(fragment -> {
+                fragment.updateActivityVisibilities(starting, configChanges, preserveWindows,
                         notifyClients);
             }, true /* traverseTopToBottom */);
 
@@ -5921,383 +5519,18 @@ class Task extends TaskFragment {
             return false;
         }
 
-        // Find the next top-most activity to resume in this root task that is not finishing and is
-        // focusable. If it is not focusable, we will fall into the case below to resume the
-        // top activity in the next focusable task.
-        ActivityRecord next = topRunningActivity(true /* focusableOnly */);
-
-        final boolean hasRunningActivity = next != null;
-
-        // TODO: Maybe this entire condition can get removed?
-        if (hasRunningActivity && !isAttached()) {
-            return false;
-        }
-
         mRootWindowContainer.cancelInitializingActivities();
 
-        if (!hasRunningActivity) {
-            // There are no activities left in the root task, let's look somewhere else.
+        if (topRunningActivity(true /* focusableOnly */) == null) {
+            // There are no activities left in this task, let's look somewhere else.
             return resumeNextFocusableActivityWhenRootTaskIsEmpty(prev, options);
         }
 
-        next.delayedResume = false;
-        final TaskDisplayArea taskDisplayArea = getDisplayArea();
-
-        // If the top activity is the resumed one, nothing to do.
-        if (mResumedActivity == next && next.isState(RESUMED)
-                && taskDisplayArea.allResumedActivitiesComplete()) {
-            // Make sure we have executed any pending transitions, since there
-            // should be nothing left to do at this point.
-            executeAppTransition(options);
-            // For devices that are not in fullscreen mode (e.g. freeform windows), it's possible
-            // we still want to check if the visibility of other windows have changed (e.g. bringing
-            // a fullscreen window forward to cover another freeform activity.)
-            if (taskDisplayArea.inMultiWindowMode()) {
-                taskDisplayArea.ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
-                        false /* preserveWindows */, true /* notifyClients */);
-            }
-            ProtoLog.d(WM_DEBUG_STATES, "resumeTopActivityLocked: Top activity "
-                    + "resumed %s", next);
-            return false;
-        }
-
-        if (!next.canResumeByCompat()) {
-            return false;
-        }
-
-        // If we are currently pausing an activity, then don't do anything until that is done.
-        final boolean allPausedComplete = mRootWindowContainer.allPausedActivitiesComplete();
-        if (!allPausedComplete) {
-            ProtoLog.v(WM_DEBUG_STATES,
-                    "resumeTopActivityLocked: Skip resume: some activity pausing.");
-
-            return false;
-        }
-
-        // If we are sleeping, and there is no resumed activity, and the top activity is paused,
-        // well that is the state we want.
-        if (mLastPausedActivity == next && shouldSleepOrShutDownActivities()) {
-            // Make sure we have executed any pending transitions, since there
-            // should be nothing left to do at this point.
-            executeAppTransition(options);
-            ProtoLog.d(WM_DEBUG_STATES, "resumeTopActivityLocked: Going to sleep and"
-                    + " all paused");
-            return false;
-        }
-
-        // Make sure that the user who owns this activity is started.  If not,
-        // we will just leave it as is because someone should be bringing
-        // another user's activities to the top of the stack.
-        if (!mAtmService.mAmInternal.hasStartedUserState(next.mUserId)) {
-            Slog.w(TAG, "Skipping resume of top activity " + next
-                    + ": user " + next.mUserId + " is stopped");
-            return false;
-        }
-
-        // The activity may be waiting for stop, but that is no longer
-        // appropriate for it.
-        mTaskSupervisor.mStoppingActivities.remove(next);
-
-        if (DEBUG_SWITCH) Slog.v(TAG_SWITCH, "Resuming " + next);
-
-        mTaskSupervisor.setLaunchSource(next.info.applicationInfo.uid);
-
-        ActivityRecord lastResumed = null;
-        final Task lastFocusedRootTask = taskDisplayArea.getLastFocusedRootTask();
-        if (lastFocusedRootTask != null && lastFocusedRootTask != getRootTask()) {
-            // So, why aren't we using prev here??? See the param comment on the method. prev
-            // doesn't represent the last resumed activity. However, the last focus stack does if
-            // it isn't null.
-            lastResumed = lastFocusedRootTask.getResumedActivity();
-        }
-
-        boolean pausing = !deferPause && taskDisplayArea.pauseBackTasks(next);
-        if (mResumedActivity != null) {
-            ProtoLog.d(WM_DEBUG_STATES, "resumeTopActivityLocked: Pausing %s", mResumedActivity);
-            pausing |= startPausingLocked(false /* uiSleeping */, next,
-                    "resumeTopActivityInnerLocked");
-        }
-        if (pausing) {
-            ProtoLog.v(WM_DEBUG_STATES, "resumeTopActivityLocked: Skip resume: need to"
-                    + " start pausing");
-            // At this point we want to put the upcoming activity's process
-            // at the top of the LRU list, since we know we will be needing it
-            // very soon and it would be a waste to let it get killed if it
-            // happens to be sitting towards the end.
-            if (next.attachedToProcess()) {
-                next.app.updateProcessInfo(false /* updateServiceConnectionActivities */,
-                        true /* activityChange */, false /* updateOomAdj */,
-                        false /* addPendingTopUid */);
-            } else if (!next.isProcessRunning()) {
-                // Since the start-process is asynchronous, if we already know the process of next
-                // activity isn't running, we can start the process earlier to save the time to wait
-                // for the current activity to be paused.
-                final boolean isTop = this == taskDisplayArea.getFocusedRootTask();
-                mAtmService.startProcessAsync(next, false /* knownToBeDead */, isTop,
-                        isTop ? "pre-top-activity" : "pre-activity");
-            }
-            if (lastResumed != null) {
-                lastResumed.setWillCloseOrEnterPip(true);
-            }
-            return true;
-        } else if (mResumedActivity == next && next.isState(RESUMED)
-                && taskDisplayArea.allResumedActivitiesComplete()) {
-            // It is possible for the activity to be resumed when we paused back stacks above if the
-            // next activity doesn't have to wait for pause to complete.
-            // So, nothing else to-do except:
-            // Make sure we have executed any pending transitions, since there
-            // should be nothing left to do at this point.
-            executeAppTransition(options);
-            ProtoLog.d(WM_DEBUG_STATES, "resumeTopActivityLocked: Top activity resumed "
-                    + "(dontWaitForPause) %s", next);
-            return true;
-        }
-
-        // If the most recent activity was noHistory but was only stopped rather
-        // than stopped+finished because the device went to sleep, we need to make
-        // sure to finish it as we're making a new activity topmost.
-        if (shouldSleepActivities()) {
-            mTaskSupervisor.finishNoHistoryActivitiesIfNeeded(next);
-        }
-
-        if (prev != null && prev != next && next.nowVisible) {
-
-            // The next activity is already visible, so hide the previous
-            // activity's windows right now so we can show the new one ASAP.
-            // We only do this if the previous is finishing, which should mean
-            // it is on top of the one being resumed so hiding it quickly
-            // is good.  Otherwise, we want to do the normal route of allowing
-            // the resumed activity to be shown so we can decide if the
-            // previous should actually be hidden depending on whether the
-            // new one is found to be full-screen or not.
-            if (prev.finishing) {
-                prev.setVisibility(false);
-                if (DEBUG_SWITCH) Slog.v(TAG_SWITCH,
-                        "Not waiting for visible to hide: " + prev
-                                + ", nowVisible=" + next.nowVisible);
-            } else {
-                if (DEBUG_SWITCH) Slog.v(TAG_SWITCH,
-                        "Previous already visible but still waiting to hide: " + prev
-                                + ", nowVisible=" + next.nowVisible);
-            }
-
-        }
-
-        // Launching this app's activity, make sure the app is no longer
-        // considered stopped.
-        try {
-            mTaskSupervisor.getActivityMetricsLogger()
-                    .notifyBeforePackageUnstopped(next.packageName);
-            mAtmService.getPackageManager().setPackageStoppedState(
-                    next.packageName, false, next.mUserId); /* TODO: Verify if correct userid */
-        } catch (RemoteException e1) {
-        } catch (IllegalArgumentException e) {
-            Slog.w(TAG, "Failed trying to unstop package "
-                    + next.packageName + ": " + e);
-        }
-
-        // We are starting up the next activity, so tell the window manager
-        // that the previous one will be hidden soon.  This way it can know
-        // to ignore it when computing the desired screen orientation.
-        boolean anim = true;
-        final DisplayContent dc = taskDisplayArea.mDisplayContent;
-        if (prev != null) {
-            if (prev.finishing) {
-                if (DEBUG_TRANSITION) Slog.v(TAG_TRANSITION,
-                        "Prepare close transition: prev=" + prev);
-                if (mTaskSupervisor.mNoAnimActivities.contains(prev)) {
-                    anim = false;
-                    dc.prepareAppTransition(TRANSIT_NONE);
-                } else {
-                    dc.prepareAppTransition(TRANSIT_CLOSE);
-                }
-                prev.setVisibility(false);
-            } else {
-                if (DEBUG_TRANSITION) Slog.v(TAG_TRANSITION,
-                        "Prepare open transition: prev=" + prev);
-                if (mTaskSupervisor.mNoAnimActivities.contains(next)) {
-                    anim = false;
-                    dc.prepareAppTransition(TRANSIT_NONE);
-                } else {
-                    dc.prepareAppTransition(TRANSIT_OPEN,
-                            next.mLaunchTaskBehind ? TRANSIT_FLAG_OPEN_BEHIND : 0);
-                }
-            }
-        } else {
-            if (DEBUG_TRANSITION) Slog.v(TAG_TRANSITION, "Prepare open transition: no previous");
-            if (mTaskSupervisor.mNoAnimActivities.contains(next)) {
-                anim = false;
-                dc.prepareAppTransition(TRANSIT_NONE);
-            } else {
-                dc.prepareAppTransition(TRANSIT_OPEN);
-            }
-        }
-
-        if (anim) {
-            next.applyOptionsAnimation();
-        } else {
-            next.abortAndClearOptionsAnimation();
-        }
-
-        mTaskSupervisor.mNoAnimActivities.clear();
-
-        if (next.attachedToProcess()) {
-            if (DEBUG_SWITCH) Slog.v(TAG_SWITCH, "Resume running: " + next
-                    + " stopped=" + next.stopped
-                    + " visibleRequested=" + next.mVisibleRequested);
-
-            // If the previous activity is translucent, force a visibility update of
-            // the next activity, so that it's added to WM's opening app list, and
-            // transition animation can be set up properly.
-            // For example, pressing Home button with a translucent activity in focus.
-            // Launcher is already visible in this case. If we don't add it to opening
-            // apps, maybeUpdateTransitToWallpaper() will fail to identify this as a
-            // TRANSIT_WALLPAPER_OPEN animation, and run some funny animation.
-            final boolean lastActivityTranslucent = lastFocusedRootTask != null
-                    && (lastFocusedRootTask.inMultiWindowMode()
-                    || (lastFocusedRootTask.mLastPausedActivity != null
-                    && !lastFocusedRootTask.mLastPausedActivity.occludesParent()));
-
-            // This activity is now becoming visible.
-            if (!next.mVisibleRequested || next.stopped || lastActivityTranslucent) {
-                next.setVisibility(true);
-            }
-
-            // schedule launch ticks to collect information about slow apps.
-            next.startLaunchTickingLocked();
-
-            ActivityRecord lastResumedActivity =
-                    lastFocusedRootTask == null ? null : lastFocusedRootTask.getResumedActivity();
-            final ActivityState lastState = next.getState();
-
-            mAtmService.updateCpuStats();
-
-            ProtoLog.v(WM_DEBUG_STATES, "Moving to RESUMED: %s (in existing)", next);
-
-            next.setState(RESUMED, "resumeTopActivityInnerLocked");
-
-            // Have the window manager re-evaluate the orientation of
-            // the screen based on the new activity order.
-            boolean notUpdated = true;
-
-            // Activity should also be visible if set mLaunchTaskBehind to true (see
-            // ActivityRecord#shouldBeVisibleIgnoringKeyguard()).
-            if (shouldBeVisible(next)) {
-                // We have special rotation behavior when here is some active activity that
-                // requests specific orientation or Keyguard is locked. Make sure all activity
-                // visibilities are set correctly as well as the transition is updated if needed
-                // to get the correct rotation behavior. Otherwise the following call to update
-                // the orientation may cause incorrect configurations delivered to client as a
-                // result of invisible window resize.
-                // TODO: Remove this once visibilities are set correctly immediately when
-                // starting an activity.
-                notUpdated = !mRootWindowContainer.ensureVisibilityAndConfig(next, getDisplayId(),
-                        true /* markFrozenIfConfigChanged */, false /* deferResume */);
-            }
-
-            if (notUpdated) {
-                // The configuration update wasn't able to keep the existing
-                // instance of the activity, and instead started a new one.
-                // We should be all done, but let's just make sure our activity
-                // is still at the top and schedule another run if something
-                // weird happened.
-                ActivityRecord nextNext = topRunningActivity();
-                ProtoLog.i(WM_DEBUG_STATES, "Activity config changed during resume: "
-                        + "%s, new next: %s", next, nextNext);
-                if (nextNext != next) {
-                    // Do over!
-                    mTaskSupervisor.scheduleResumeTopActivities();
-                }
-                if (!next.mVisibleRequested || next.stopped) {
-                    next.setVisibility(true);
-                }
-                next.completeResumeLocked();
-                return true;
-            }
-
-            try {
-                final ClientTransaction transaction =
-                        ClientTransaction.obtain(next.app.getThread(), next.appToken);
-                // Deliver all pending results.
-                ArrayList<ResultInfo> a = next.results;
-                if (a != null) {
-                    final int N = a.size();
-                    if (!next.finishing && N > 0) {
-                        if (DEBUG_RESULTS) Slog.v(TAG_RESULTS,
-                                "Delivering results to " + next + ": " + a);
-                        transaction.addCallback(ActivityResultItem.obtain(a));
-                    }
-                }
-
-                if (next.newIntents != null) {
-                    transaction.addCallback(
-                            NewIntentItem.obtain(next.newIntents, true /* resume */));
-                }
-
-                // Well the app will no longer be stopped.
-                // Clear app token stopped state in window manager if needed.
-                next.notifyAppResumed(next.stopped);
-
-                EventLogTags.writeWmResumeActivity(next.mUserId, System.identityHashCode(next),
-                        next.getTask().mTaskId, next.shortComponentName);
-
-                mAtmService.getAppWarningsLocked().onResumeActivity(next);
-                next.app.setPendingUiCleanAndForceProcessStateUpTo(mAtmService.mTopProcessState);
-                next.abortAndClearOptionsAnimation();
-                transaction.setLifecycleStateRequest(
-                        ResumeActivityItem.obtain(next.app.getReportedProcState(),
-                                dc.isNextTransitionForward()));
-                mAtmService.getLifecycleManager().scheduleTransaction(transaction);
-
-                ProtoLog.d(WM_DEBUG_STATES, "resumeTopActivityLocked: Resumed %s", next);
-            } catch (Exception e) {
-                // Whoops, need to restart this activity!
-                ProtoLog.v(WM_DEBUG_STATES, "Resume failed; resetting state to %s: "
-                        + "%s", lastState, next);
-                next.setState(lastState, "resumeTopActivityInnerLocked");
-
-                // lastResumedActivity being non-null implies there is a lastStack present.
-                if (lastResumedActivity != null) {
-                    lastResumedActivity.setState(RESUMED, "resumeTopActivityInnerLocked");
-                }
-
-                Slog.i(TAG, "Restarting because process died: " + next);
-                if (!next.hasBeenLaunched) {
-                    next.hasBeenLaunched = true;
-                } else if (SHOW_APP_STARTING_PREVIEW && lastFocusedRootTask != null
-                        && lastFocusedRootTask.isTopRootTaskInDisplayArea()) {
-                    next.showStartingWindow(false /* taskSwitch */);
-                }
-                mTaskSupervisor.startSpecificActivity(next, true, false);
-                return true;
-            }
-
-            // From this point on, if something goes wrong there is no way
-            // to recover the activity.
-            try {
-                next.completeResumeLocked();
-            } catch (Exception e) {
-                // If any exception gets thrown, toss away this
-                // activity and try the next one.
-                Slog.w(TAG, "Exception thrown during resume of " + next, e);
-                next.finishIfPossible("resume-exception", true /* oomAdj */);
-                return true;
-            }
-        } else {
-            // Whoops, need to restart this activity!
-            if (!next.hasBeenLaunched) {
-                next.hasBeenLaunched = true;
-            } else {
-                if (SHOW_APP_STARTING_PREVIEW) {
-                    next.showStartingWindow(false /* taskSwich */);
-                }
-                if (DEBUG_SWITCH) Slog.v(TAG_SWITCH, "Restarting: " + next);
-            }
-            ProtoLog.d(WM_DEBUG_STATES, "resumeTopActivityLocked: Restarting %s", next);
-            mTaskSupervisor.startSpecificActivity(next, true, true);
-        }
-
-        return true;
+        final boolean[] resumed = new boolean[1];
+        forAllLeafTaskFragments(f -> {
+            resumed[0] |= f.resumeTopActivity(prev, options, deferPause);
+        }, true);
+        return resumed[0];
     }
 
     /**
@@ -7036,29 +6269,6 @@ class Task extends TaskFragment {
         }
     }
 
-    /**
-     * Reset local parameters because an app's activity died.
-     * @param app The app of the activity that died.
-     * @return {@code true} if the process of the pausing activity is died.
-     */
-    boolean handleAppDied(WindowProcessController app) {
-        warnForNonLeafTask("handleAppDied");
-        boolean isPausingDied = false;
-        if (mPausingActivity != null && mPausingActivity.app == app) {
-            ProtoLog.v(WM_DEBUG_STATES, "App died while pausing: %s",
-                    mPausingActivity);
-            mPausingActivity = null;
-            isPausingDied = true;
-        }
-        if (mLastPausedActivity != null && mLastPausedActivity.app == app) {
-            if (mLastPausedActivity.isNoHistory()) {
-                mTaskSupervisor.mNoHistoryActivities.remove(mLastPausedActivity);
-            }
-            mLastPausedActivity = null;
-        }
-        return isPausingDied;
-    }
-
     boolean dump(FileDescriptor fd, PrintWriter pw, boolean dumpAll, boolean dumpClient,
             String dumpPackage, final boolean needSep) {
         Runnable headerPrinter = () -> {
@@ -7083,9 +6293,9 @@ class Task extends TaskFragment {
             printed = true;
         }
 
-        printed |= printThisActivity(pw, getPausingActivity(), dumpPackage, false,
+        printed |= printThisActivity(pw, getTopPausingActivity(), dumpPackage, false,
                 "    mPausingActivity: ", null);
-        printed |= printThisActivity(pw, getResumedActivity(), dumpPackage, false,
+        printed |= printThisActivity(pw, getTopResumedActivity(), dumpPackage, false,
                 "    mResumedActivity: ", null);
         if (dumpAll) {
             printed |= printThisActivity(pw, mLastPausedActivity, dumpPackage, false,
@@ -7537,6 +6747,7 @@ class Task extends TaskFragment {
         return mAnimatingActivityRegistry;
     }
 
+    @Override
     void executeAppTransition(ActivityOptions options) {
         mDisplayContent.executeAppTransition();
         ActivityOptions.abort(options);
@@ -7557,10 +6768,6 @@ class Task extends TaskFragment {
         }
 
         return display != null ? display.isSleeping() : mAtmService.isSleepingLocked();
-    }
-
-    boolean shouldSleepOrShutDownActivities() {
-        return shouldSleepActivities() || mAtmService.mShuttingDown;
     }
 
     private Rect getRawBounds() {
@@ -7587,8 +6794,8 @@ class Task extends TaskFragment {
         proto.write(DISPLAY_ID, getDisplayId());
         proto.write(ROOT_TASK_ID, getRootTaskId());
 
-        if (mResumedActivity != null) {
-            mResumedActivity.writeIdentifierToProto(proto, RESUMED_ACTIVITY);
+        if (getTopResumedActivity() != null) {
+            getTopResumedActivity().writeIdentifierToProto(proto, RESUMED_ACTIVITY);
         }
         if (realActivity != null) {
             proto.write(REAL_ACTIVITY, realActivity.flattenToShortString());
