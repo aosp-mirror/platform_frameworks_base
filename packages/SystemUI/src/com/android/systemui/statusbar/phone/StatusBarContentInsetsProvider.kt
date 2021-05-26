@@ -23,6 +23,8 @@ import android.util.Pair
 import android.view.DisplayCutout
 import android.view.View.LAYOUT_DIRECTION_RTL
 import android.view.WindowManager
+import android.view.WindowMetrics
+import androidx.annotation.VisibleForTesting
 import com.android.systemui.Dumpable
 import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
@@ -118,17 +120,8 @@ class StatusBarContentInsetsProvider @Inject constructor(
         val chipWidth = rotatedResources.getDimensionPixelSize(
                 R.dimen.ongoing_appops_chip_max_width)
 
-        return if (context.resources.configuration.layoutDirection == LAYOUT_DIRECTION_RTL) {
-            Rect(insets.left - dotWidth,
-                    insets.top,
-                    insets.left + chipWidth,
-                    insets.bottom)
-        } else {
-            Rect(insets.right - chipWidth,
-                    insets.top,
-                    insets.right + dotWidth,
-                    insets.bottom)
-        }
+        val isRtl = context.resources.configuration.layoutDirection == LAYOUT_DIRECTION_RTL
+        return getPrivacyChipBoundingRectForInsets(insets, dotWidth, chipWidth, isRtl)
     }
 
     /**
@@ -139,8 +132,7 @@ class StatusBarContentInsetsProvider @Inject constructor(
         var insets = insetsByCorner[rotation]
         if (insets == null) {
             val rotatedResources = RotationUtils.getResourcesForRotation(rotation, context)
-            insets = getCalculatedInsetsForRotation(rotation, rotatedResources)
-            insetsByCorner[rotation] = insets
+            insets = getAndSetInsetsForRotation(rotation, rotatedResources)
         }
 
         return insets
@@ -157,13 +149,19 @@ class StatusBarContentInsetsProvider @Inject constructor(
     }
 
     private fun getCalculatedInsetsForRotation(
-        @Rotation rotation: Int,
+        @Rotation targetRotation: Int,
         rotatedResources: Resources
     ): Rect {
         val dc = context.display.cutout
+        val currentRotation = RotationUtils.getExactRotation(context)
 
         return calculateInsetsForRotationWithRotatedResources(
-                rotation, rotatedResources, dc, windowManager, context)
+                currentRotation,
+                targetRotation,
+                dc,
+                windowManager.maximumWindowMetrics,
+                rotatedResources.getDimensionPixelSize(R.dimen.status_bar_height),
+                rotatedResources.getDimensionPixelSize(R.dimen.rounded_corner_content_padding))
     }
 
     override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
@@ -179,8 +177,8 @@ interface StatusBarContentInsetsChangedListener {
 
 private const val TAG = "StatusBarInsetsProvider"
 
-private fun getRotationZeroDisplayBounds(wm: WindowManager, @Rotation exactRotation: Int): Rect {
-    val bounds = wm.maximumWindowMetrics.bounds
+private fun getRotationZeroDisplayBounds(wm: WindowMetrics, @Rotation exactRotation: Int): Rect {
+    val bounds = wm.bounds
 
     if (exactRotation == ROTATION_NONE || exactRotation == ROTATION_UPSIDE_DOWN) {
         return bounds
@@ -190,9 +188,24 @@ private fun getRotationZeroDisplayBounds(wm: WindowManager, @Rotation exactRotat
     return Rect(0, 0, bounds.bottom, bounds.right)
 }
 
-private fun getCurrentDisplayBounds(wm: WindowManager): Rect {
-    val bounds = wm.maximumWindowMetrics.bounds
-    return bounds
+@VisibleForTesting
+fun getPrivacyChipBoundingRectForInsets(
+    contentRect: Rect,
+    dotWidth: Int,
+    chipWidth: Int,
+    isRtl: Boolean
+): Rect {
+    return if (isRtl) {
+        Rect(contentRect.left - dotWidth,
+                contentRect.top,
+                contentRect.left + chipWidth,
+                contentRect.bottom)
+    } else {
+        Rect(contentRect.right - chipWidth,
+                contentRect.top,
+                contentRect.right + dotWidth,
+                contentRect.bottom)
+    }
 }
 
 /**
@@ -206,41 +219,32 @@ private fun getCurrentDisplayBounds(wm: WindowManager): Rect {
  * @see [RotationUtils#getResourcesForRotation]
  */
 fun calculateInsetsForRotationWithRotatedResources(
+    @Rotation currentRotation: Int,
     @Rotation targetRotation: Int,
-    rotatedResources: Resources,
     displayCutout: DisplayCutout?,
-    windowmanager: WindowManager,
-    context: Context
+    windowMetrics: WindowMetrics,
+    statusBarHeight: Int,
+    roundedCornerPadding: Int
 ): Rect {
-    val rtl = rotatedResources.configuration.layoutDirection == LAYOUT_DIRECTION_RTL
-
-    val exactRotation = RotationUtils.getExactRotation(context)
-    val height = rotatedResources.getDimensionPixelSize(R.dimen.status_bar_height)
-
     /*
     TODO: Check if this is ever used for devices with no rounded corners
-    val paddingStart = rotatedResources.getDimensionPixelSize(R.dimen.status_bar_padding_start)
-    val paddingEnd = rotatedResources.getDimensionPixelSize(R.dimen.status_bar_padding_end)
-    val left = if (rtl) paddingEnd else paddingStart
-    val right = if(rtl) paddingStart else paddingEnd
+    val left = if (isRtl) paddingEnd else paddingStart
+    val right = if (isRtl) paddingStart else paddingEnd
      */
 
-    val roundedCornerPadding = rotatedResources.getDimensionPixelSize(
-            R.dimen.rounded_corner_content_padding)
-
-    val rotZeroBounds = getRotationZeroDisplayBounds(windowmanager, exactRotation)
-    val currentBounds = getCurrentDisplayBounds(windowmanager)
+    val rotZeroBounds = getRotationZeroDisplayBounds(windowMetrics, currentRotation)
+    val currentBounds = windowMetrics.bounds
 
     val sbLeftRight = getStatusBarLeftRight(
             displayCutout,
-            height,
+            statusBarHeight,
             rotZeroBounds.right,
             rotZeroBounds.bottom,
             currentBounds.width(),
             currentBounds.height(),
             roundedCornerPadding,
             targetRotation,
-            exactRotation)
+            currentRotation)
 
     return sbLeftRight
 }

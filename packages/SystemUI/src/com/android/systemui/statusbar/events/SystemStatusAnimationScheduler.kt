@@ -26,14 +26,18 @@ import android.os.Process
 import android.provider.DeviceConfig
 import android.util.Log
 import android.view.View
+import com.android.systemui.Dumpable
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.statusbar.phone.StatusBarWindowController
 import com.android.systemui.statusbar.policy.CallbackController
 import com.android.systemui.util.Assert
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.time.SystemClock
+import java.io.FileDescriptor
+import java.io.PrintWriter
 
 import javax.inject.Inject
 
@@ -59,9 +63,10 @@ class SystemStatusAnimationScheduler @Inject constructor(
     private val coordinator: SystemEventCoordinator,
     private val chipAnimationController: SystemEventChipAnimationController,
     private val statusBarWindowController: StatusBarWindowController,
+    private val dumpManager: DumpManager,
     private val systemClock: SystemClock,
     @Main private val executor: DelayableExecutor
-) : CallbackController<SystemStatusAnimationCallback> {
+) : CallbackController<SystemStatusAnimationCallback>, Dumpable {
 
     companion object {
         private const val PROPERTY_ENABLE_IMMERSIVE_INDICATOR = "enable_immersive_indicator"
@@ -70,10 +75,6 @@ class SystemStatusAnimationScheduler @Inject constructor(
         return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_PRIVACY,
                 PROPERTY_ENABLE_IMMERSIVE_INDICATOR, true)
     }
-
-    /** True from the time a scheduled event starts until it's animation finishes */
-    var isActive = false
-        private set
 
     @SystemAnimationState var animationState: Int = IDLE
         private set
@@ -88,6 +89,7 @@ class SystemStatusAnimationScheduler @Inject constructor(
 
     init {
         coordinator.attachScheduler(this)
+        dumpManager.registerDumpable(TAG, this)
     }
 
     fun onStatusEvent(event: StatusEvent) {
@@ -291,6 +293,20 @@ class SystemStatusAnimationScheduler @Inject constructor(
 
     private val chipUpdateListener = ValueAnimator.AnimatorUpdateListener {
         anim -> chipAnimationController.onChipAnimationUpdate(anim, animationState)
+    }
+
+    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
+        pw.println("Scheduled event: $scheduledEvent")
+        pw.println("Has persistent privacy dot: $hasPersistentDot")
+        pw.println("Animation state: $animationState")
+        pw.println("Listeners:")
+        if (listeners.isEmpty()) {
+            pw.println("(none)")
+        } else {
+            listeners.forEach {
+                pw.println("  $it")
+            }
+        }
     }
 
     inner class ChipAnimatorAdapter(
