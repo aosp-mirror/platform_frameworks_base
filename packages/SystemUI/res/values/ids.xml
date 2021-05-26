@@ -100,6 +100,7 @@
     <!-- For notification icons for which targetSdk < L, this caches whether the icon is grayscale -->
     <item type="id" name="icon_is_grayscale" />
     <item type="id" name="image_icon_tag" />
+    <item type="id" name="align_transform_end_tag" />
     <item type="id" name="contains_transformed_view" />
     <item type="id" name="is_clicked_heads_up_tag" />
 
