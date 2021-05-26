@@ -18,6 +18,7 @@ package com.android.keyguard;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.RippleDrawable;
 import android.os.PowerManager;
 import android.os.SystemClock;
@@ -29,6 +30,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.TextView;
+
+import androidx.annotation.Nullable;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.settingslib.Utils;
@@ -47,6 +50,7 @@ public class NumPadKey extends ViewGroup {
     private int mTextViewResId;
     private PasswordTextView mTextView;
 
+    @Nullable
     private NumPadAnimator mAnimator;
 
     private View.OnClickListener mListener = new View.OnClickListener() {
@@ -126,8 +130,13 @@ public class NumPadKey extends ViewGroup {
 
         setContentDescription(mDigitText.getText().toString());
 
-        mAnimator = new NumPadAnimator(context, (RippleDrawable) getBackground(),
-                R.style.NumPadKey);
+        Drawable background = getBackground();
+        if (background instanceof RippleDrawable) {
+            mAnimator = new NumPadAnimator(context, (RippleDrawable) background,
+                    R.style.NumPadKey);
+        } else {
+            mAnimator = null;
+        }
     }
 
     /**
@@ -141,14 +150,14 @@ public class NumPadKey extends ViewGroup {
         mDigitText.setTextColor(textColor);
         mKlondikeText.setTextColor(klondikeColor);
 
-        mAnimator.reloadColors(getContext());
+        if (mAnimator != null) mAnimator.reloadColors(getContext());
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
             doHapticKeyClick();
-            mAnimator.start();
+            if (mAnimator != null) mAnimator.start();
         }
 
         return super.onTouchEvent(event);
@@ -162,7 +171,7 @@ public class NumPadKey extends ViewGroup {
         // Set width/height to the same value to ensure a smooth circle for the bg, but shrink
         // the height to match the old pin bouncer
         int width = getMeasuredWidth();
-        int height = width;
+        int height = mAnimator == null ? (int) (width * .75f) : width;
 
         setMeasuredDimension(getMeasuredWidth(), height);
     }
@@ -183,7 +192,7 @@ public class NumPadKey extends ViewGroup {
         left = centerX - mKlondikeText.getMeasuredWidth() / 2;
         mKlondikeText.layout(left, top, left + mKlondikeText.getMeasuredWidth(), bottom);
 
-        mAnimator.onLayout(b - t);
+        if (mAnimator != null) mAnimator.onLayout(b - t);
     }
 
     @Override
