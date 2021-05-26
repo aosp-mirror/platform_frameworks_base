@@ -30,9 +30,9 @@ import java.nio.ByteBuffer;
 /**
  * Track our app name.  We don't (currently) handle any inbound packets.
  */
-public class DdmHandleAppName extends ChunkHandler {
+public class DdmHandleAppName extends DdmHandle {
 
-    public static final int CHUNK_APNM = type("APNM");
+    public static final int CHUNK_APNM = ChunkHandler.type("APNM");
 
     private static volatile Names sNames = new Names("", "");
 
@@ -51,13 +51,13 @@ public class DdmHandleAppName extends ChunkHandler {
      * Called when the DDM server connects.  The handler is allowed to
      * send messages to the server.
      */
-    public void connected() {}
+    public void onConnected() {}
 
     /**
      * Called when the DDM server disconnects.  Can be used to disable
      * periodic transmissions or clean up saved state.
      */
-    public void disconnected() {}
+    public void onDisconnected() {}
 
     /**
      * Handle a chunk of data.
