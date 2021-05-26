@@ -73,9 +73,9 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.PointF;
-import android.graphics.RectF;
 import android.media.AudioAttributes;
 import android.metrics.LogMaker;
 import android.net.Uri;
@@ -150,6 +150,7 @@ import com.android.systemui.accessibility.floatingmenu.AccessibilityFloatingMenu
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.DelegateLaunchAnimatorController;
 import com.android.systemui.assist.AssistManager;
+import com.android.systemui.biometrics.AuthRippleController;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.camera.CameraIntents;
 import com.android.systemui.charging.WirelessChargingAnimation;
@@ -326,9 +327,15 @@ public class StatusBar extends SystemUI implements DemoMode,
     public static final int FADE_KEYGUARD_DURATION = 300;
     public static final int FADE_KEYGUARD_DURATION_PULSING = 96;
 
+    public static final long[] CAMERA_LAUNCH_GESTURE_VIBRATION_TIMINGS =
+            new long[]{20, 20, 20, 20, 100, 20};
+    public static final int[] CAMERA_LAUNCH_GESTURE_VIBRATION_AMPLITUDES =
+            new int[]{39, 82, 139, 213, 0, 127};
 
-    /** If true, the system is in the half-boot-to-decryption-screen state.
-     * Prudently disable QS and notifications.  */
+    /**
+     * If true, the system is in the half-boot-to-decryption-screen state.
+     * Prudently disable QS and notifications.
+     */
     public static final boolean ONLY_CORE_APPS;
 
     /** If true, the lockscreen will show a distinct wallpaper */
@@ -380,6 +387,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected NotificationShadeWindowView mNotificationShadeWindowView;
     protected StatusBarWindowView mPhoneStatusBarWindow;
     protected PhoneStatusBarView mStatusBarView;
+    private AuthRippleController mAuthRippleController;
     private int mStatusBarWindowState = WINDOW_STATE_SHOWING;
     protected NotificationShadeWindowController mNotificationShadeWindowController;
     protected StatusBarWindowController mStatusBarWindowController;
@@ -600,7 +608,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private int mLastCameraLaunchSource;
     protected PowerManager.WakeLock mGestureWakeLock;
     private Vibrator mVibrator;
-    private long[] mCameraLaunchGestureVibePattern;
+    private VibrationEffect mCameraLaunchGestureVibrationEffect;
 
     private final int[] mTmpInt2 = new int[2];
 
@@ -1311,12 +1319,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         mGestureWakeLock = mPowerManager.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK,
                 "GestureWakeLock");
         mVibrator = mContext.getSystemService(Vibrator.class);
-        int[] pattern = mContext.getResources().getIntArray(
-                R.array.config_cameraLaunchGestureVibePattern);
-        mCameraLaunchGestureVibePattern = new long[pattern.length];
-        for (int i = 0; i < pattern.length; i++) {
-            mCameraLaunchGestureVibePattern[i] = pattern[i];
-        }
+        mCameraLaunchGestureVibrationEffect = getCameraGestureVibrationEffect(
+                mVibrator, context.getResources());
 
         // receive broadcasts
         registerBroadcastReceiver();
@@ -1556,7 +1560,9 @@ public class StatusBar extends SystemUI implements DemoMode,
         mPhoneStatusBarWindow = mSuperStatusBarViewFactory.getStatusBarWindowView();
         mNotificationPanelViewController = statusBarComponent.getNotificationPanelViewController();
         statusBarComponent.getLockIconViewController().init();
-        statusBarComponent.getAuthRippleController().init();
+
+        mAuthRippleController = statusBarComponent.getAuthRippleController();
+        mAuthRippleController.init();
     }
 
     protected void startKeyguard() {
@@ -2801,7 +2807,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             int[] result = new int[]{ActivityManager.START_CANCELED};
 
             mActivityLaunchAnimator.startIntentWithAnimation(animController,
-                    areLaunchAnimationsEnabled(), (adapter) -> {
+                    areLaunchAnimationsEnabled(), intent.getPackage(), (adapter) -> {
                         ActivityOptions options = new ActivityOptions(
                                 getActivityOptions(mDisplayId, adapter));
                         options.setDisallowEnterPictureInPictureWhileLaunching(
@@ -3609,10 +3615,16 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         boolean visibleNotOccluded = mStatusBarKeyguardViewManager.isShowing()
                 && !mStatusBarKeyguardViewManager.isOccluded();
+        // If we're dozing and we'll be animating the screen off, the keyguard isn't currently
+        // visible but will be shortly for the animation, so we should proceed as if it's visible.
+        boolean visibleNotOccludedOrWillBe =
+                visibleNotOccluded || (mDozing && mDozeParameters.shouldControlUnlockedScreenOff());
+
         boolean wakeAndUnlock = mBiometricUnlockController.getMode()
                 == BiometricUnlockController.MODE_WAKE_AND_UNLOCK;
         boolean animate = (!mDozing && mDozeServiceHost.shouldAnimateWakeup() && !wakeAndUnlock)
-                || (mDozing && mDozeServiceHost.shouldAnimateScreenOff() && visibleNotOccluded);
+                || (mDozing && mDozeServiceHost.shouldAnimateScreenOff()
+                && visibleNotOccludedOrWillBe);
 
         mNotificationPanelViewController.setDozing(mDozing, animate, mWakeUpTouchLocation);
         updateQsExpansionEnabled();
@@ -3791,7 +3803,8 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     @Override
     public void onDozeAmountChanged(float linear, float eased) {
-        if (mFeatureFlags.useNewLockscreenAnimations()) {
+        if (mFeatureFlags.useNewLockscreenAnimations()
+                && !mCircleRevealAnimator.isRunning()) {
             mLightRevealScrim.setRevealAmount(1f - linear);
         }
     }
@@ -3828,6 +3841,23 @@ public class StatusBar extends SystemUI implements DemoMode,
         Trace.endSection();
     }
 
+    /**
+     * Update the parameters for the dozing circle reveal that animates when the user authenticates
+     * from AOD using the fingerprint sensor.
+     */
+    public void updateCircleReveal() {
+        final PointF fpLocation = mAuthRippleController.getFingerprintSensorLocation();
+        if (fpLocation != null) {
+            mCircleReveal =
+                    new CircleReveal(
+                            fpLocation.x,
+                            fpLocation.y,
+                            0,
+                            Math.max(Math.max(fpLocation.x, getDisplayWidth() - fpLocation.x),
+                                    Math.max(fpLocation.y, getDisplayHeight() - fpLocation.y)));
+        }
+    }
+
     private void startCircleReveal() {
         mLightRevealScrim.setRevealEffect(mCircleReveal);
         mCircleRevealAnimator.cancel();
@@ -3840,7 +3870,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     private boolean shouldShowCircleReveal() {
         return mCircleReveal != null && !mCircleRevealAnimator.isRunning()
-                && mKeyguardUpdateMonitor.isUdfpsEnrolled()
                 && mBiometricUnlockController.getBiometricType() == FINGERPRINT;
     }
 
@@ -4062,12 +4091,37 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     private void vibrateForCameraGesture() {
         // Make sure to pass -1 for repeat so VibratorService doesn't stop us when going to sleep.
-        mVibrator.vibrate(mCameraLaunchGestureVibePattern, -1 /* repeat */);
+        mVibrator.vibrate(mCameraLaunchGestureVibrationEffect);
+    }
+
+    private static VibrationEffect getCameraGestureVibrationEffect(Vibrator vibrator,
+            Resources resources) {
+        if (vibrator.areAllPrimitivesSupported(
+                VibrationEffect.Composition.PRIMITIVE_QUICK_RISE,
+                VibrationEffect.Composition.PRIMITIVE_CLICK)) {
+            return VibrationEffect.startComposition()
+                    .addPrimitive(VibrationEffect.Composition.PRIMITIVE_QUICK_RISE)
+                    .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 1, 50)
+                    .compose();
+        }
+        if (vibrator.hasAmplitudeControl()) {
+            return VibrationEffect.createWaveform(
+                    CAMERA_LAUNCH_GESTURE_VIBRATION_TIMINGS,
+                    CAMERA_LAUNCH_GESTURE_VIBRATION_AMPLITUDES,
+                    /* repeat= */ -1);
+        }
+
+        int[] pattern = resources.getIntArray(R.array.config_cameraLaunchGestureVibePattern);
+        long[] timings = new long[pattern.length];
+        for (int i = 0; i < pattern.length; i++) {
+            timings[i] = pattern[i];
+        }
+        return VibrationEffect.createWaveform(timings, /* repeat= */ -1);
     }
 
     /**
      * @return true if the screen is currently fully off, i.e. has finished turning off and has
-     *         since not started turning on.
+     * since not started turning on.
      */
     public boolean isScreenFullyOff() {
         return mScreenLifecycle.getScreenState() == ScreenLifecycle.SCREEN_OFF;
@@ -4276,15 +4330,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     public void notifyBiometricAuthModeChanged() {
         mDozeServiceHost.updateDozing();
         updateScrimController();
-    }
-
-    /**
-     * Set the location of the sensor on UDFPS if existent.
-     */
-    public void setSensorRect(RectF rect) {
-        final float startRadius = (rect.right - rect.left) / 2f;
-        mCircleReveal = new CircleReveal(rect.centerX(), rect.centerY(),
-                startRadius, rect.centerY() - startRadius);
     }
 
     @VisibleForTesting
@@ -4565,7 +4610,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                                 animationController, this, intent.isActivity()) : null;
 
                 mActivityLaunchAnimator.startPendingIntentWithAnimation(
-                        controller, areLaunchAnimationsEnabled(),
+                        controller, areLaunchAnimationsEnabled(), intent.getCreatorPackage(),
                         (animationAdapter) -> intent.sendAndReturnResult(null, 0, null, null, null,
                                 null, getActivityOptions(mDisplayId, animationAdapter)));
             } catch (PendingIntent.CanceledException e) {

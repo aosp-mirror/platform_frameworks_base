@@ -26,6 +26,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import android.content.Context;
+import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.biometrics.PromptInfo;
 import android.os.Bundle;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -41,7 +42,6 @@ import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -195,8 +195,6 @@ public class AuthBiometricViewTest extends SysuiTestCase {
         assertEquals(AuthBiometricView.STATE_AUTHENTICATING, mBiometricView.mState);
     }
 
-    // TODO: b(/189031816)
-    @Ignore
     @Test
     public void testError_sendsActionError() {
         initDialog(mContext, false /* allowDeviceCredential */, mCallback, new MockInjector());
@@ -205,7 +203,7 @@ public class AuthBiometricViewTest extends SysuiTestCase {
         waitForIdleSync();
 
         verify(mCallback).onAction(AuthBiometricView.Callback.ACTION_ERROR);
-        assertEquals(AuthBiometricView.STATE_ERROR, mBiometricView.mState);
+        assertEquals(AuthBiometricView.STATE_IDLE, mBiometricView.mState);
     }
 
     @Test
@@ -241,8 +239,6 @@ public class AuthBiometricViewTest extends SysuiTestCase {
         verify(mCallback, never()).onAction(eq(AuthBiometricView.Callback.ACTION_USER_CANCELED));
     }
 
-    // TODO: b(/189031816)
-    @Ignore
     @Test
     public void testRestoresState() {
         final boolean requireConfirmation = true; // set/init from AuthController
@@ -257,6 +253,12 @@ public class AuthBiometricViewTest extends SysuiTestCase {
             @Override
             public TextView getIndicatorView() {
                 return indicatorView;
+            }
+
+            @Override
+            public int getDelayAfterError() {
+                // keep a real delay to test saving in the error state
+                return BiometricPrompt.HIDE_DIALOG_DELAY;
             }
         });
 

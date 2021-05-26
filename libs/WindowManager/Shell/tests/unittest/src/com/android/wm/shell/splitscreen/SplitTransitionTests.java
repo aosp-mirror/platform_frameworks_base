@@ -346,7 +346,7 @@ public class SplitTransitionTests extends ShellTestCase {
                 IRemoteTransitionFinishedCallback finishCallback)
                 throws RemoteException {
             mCalled = true;
-            finishCallback.onTransitionFinished(mRemoteFinishWCT);
+            finishCallback.onTransitionFinished(mRemoteFinishWCT, null /* sct */);
         }
 
         @Override

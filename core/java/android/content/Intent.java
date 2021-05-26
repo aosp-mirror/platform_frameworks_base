@@ -1983,7 +1983,7 @@ public class Intent implements Parcelable, Cloneable {
      * activities that are not properly protected.
      *
      * <p>
-     * Input: {@link android.Manifest.permission_group} specifies the permission group
+     * Input: {@link #EXTRA_PERMISSION_GROUP_NAME} specifies the permission group
      * for which the launched UI would be targeted.
      * </p>
      * <p>
@@ -2013,12 +2013,12 @@ public class Intent implements Parcelable, Cloneable {
      * Input: {@link #EXTRA_ATTRIBUTION_TAGS} specifies the attribution tags for the usage entry.
      * </p>
      * <p>
-     * Input: {@link #EXTRA_START_TIME} specifies the start time of the period. Both start time and
-     * end time are needed and start time must be <= end time.
+     * Input: {@link #EXTRA_START_TIME} specifies the start time of the period (epoch time in
+     * millis). Both start time and end time are needed and start time must be <= end time.
      * </p>
      * <p>
-     * Input: {@link #EXTRA_END_TIME} specifies the end time of the period. Both start time and end
-     * time are needed and start time must be <= end time.
+     * Input: {@link #EXTRA_END_TIME} specifies the end time of the period (epoch time in
+     * millis). Both start time and end time are needed and start time must be <= end time.
      * </p>
      * <p>
      * Output: Nothing.

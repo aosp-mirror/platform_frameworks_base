@@ -16,6 +16,7 @@
 
 #include "RenderProxy.h"
 
+#include <gui/TraceUtils.h>
 #include "DeferredLayerUpdater.h"
 #include "DisplayList.h"
 #include "Properties.h"
@@ -27,7 +28,6 @@
 #include "renderthread/RenderThread.h"
 #include "utils/Macros.h"
 #include "utils/TimeUtils.h"
-#include "utils/TraceUtils.h"
 
 namespace android {
 namespace uirenderer {

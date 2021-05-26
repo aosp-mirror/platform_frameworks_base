@@ -888,6 +888,9 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             mStatusBar.setBouncerShowing(bouncerShowing);
         }
 
+        if (occluded != mLastOccluded || mFirstUpdate) {
+            mKeyguardUpdateManager.onKeyguardOccludedChanged(occluded);
+        }
         if ((showing && !occluded) != (mLastShowing && !mLastOccluded) || mFirstUpdate) {
             mKeyguardUpdateManager.onKeyguardVisibilityChanged(showing && !occluded);
         }

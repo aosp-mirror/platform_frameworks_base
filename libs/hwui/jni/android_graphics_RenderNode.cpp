@@ -26,8 +26,8 @@
 #endif
 #include <TreeInfo.h>
 #include <effects/StretchEffect.h>
+#include <gui/TraceUtils.h>
 #include <hwui/Paint.h>
-#include <utils/TraceUtils.h>
 
 namespace android {
 

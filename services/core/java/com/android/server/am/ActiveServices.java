@@ -1706,14 +1706,6 @@ public final class ActiveServices {
                         +  String.format("0x%08X", manifestType)
                         + " in service element of manifest file");
                 }
-                // If the foreground service is not started from TOP process, do not allow it to
-                // have while-in-use location/camera/microphone access.
-                if (!r.mAllowWhileInUsePermissionInFgs) {
-                    Slog.w(TAG,
-                            "Foreground service started from background can not have "
-                                    + "location/camera/microphone access: service "
-                                    + r.shortInstanceName);
-                }
             }
 
             boolean alreadyStartedOp = false;
@@ -1801,6 +1793,14 @@ public final class ActiveServices {
                             setFgsRestrictionLocked(r.serviceInfo.packageName, r.app.getPid(),
                                     r.appInfo.uid, r.intent.getIntent(), r, r.userId,false);
                         }
+                    }
+                    // If the foreground service is not started from TOP process, do not allow it to
+                    // have while-in-use location/camera/microphone access.
+                    if (!r.mAllowWhileInUsePermissionInFgs) {
+                        Slog.w(TAG,
+                                "Foreground service started from background can not have "
+                                        + "location/camera/microphone access: service "
+                                        + r.shortInstanceName);
                     }
                     logFgsBackgroundStart(r);
                     if (r.mAllowStartForeground == REASON_DENIED && isBgFgsRestrictionEnabled(r)) {

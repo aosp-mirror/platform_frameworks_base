@@ -3236,6 +3236,8 @@
     <public name="config_systemCompanionDeviceProvider"/>
     <!-- @hide @SystemApi -->
     <public name="config_systemUi" />
+    <!-- @hide For use by platform and tools only. Developers should not specify this value. -->
+    <public name="config_defaultRingtoneVibrationSound"/>
   </staging-public-group>
 
   <staging-public-group type="id" first-id="0x01020055">
