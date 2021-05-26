@@ -16,6 +16,7 @@
 
 package com.android.settingslib.transition;
 
+import androidx.annotation.IntDef;
 import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
@@ -29,10 +30,30 @@ import com.google.android.material.transition.platform.FadeThroughProvider;
 import com.google.android.material.transition.platform.MaterialSharedAxis;
 import com.google.android.material.transition.platform.SlideDistanceProvider;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 /**
  * A helper class to apply Settings Transition
  */
 public class SettingsTransitionHelper {
+
+    /**
+     * Flags indicating the type of the transition.
+     */
+    @IntDef({
+            TransitionType.TRANSITION_NONE,
+            TransitionType.TRANSITION_SHARED_AXIS,
+            TransitionType.TRANSITION_SLIDE,
+            TransitionType.TRANSITION_FADE
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface TransitionType {
+        int TRANSITION_NONE = -1;
+        int TRANSITION_SHARED_AXIS = 0;
+        int TRANSITION_SLIDE = 1;
+        int TRANSITION_FADE = 2;
+    }
 
     private static final String TAG = "SettingsTransitionHelper";
     private static final long DURATION = 450L;
