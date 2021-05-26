@@ -1360,10 +1360,6 @@ package android.location {
     method public void setType(int);
   }
 
-  public final class LocationDeviceConfig {
-    field public static final String IGNORE_SETTINGS_ALLOWLIST = "ignore_settings_allowlist";
-  }
-
   public class LocationManager {
     method @NonNull public String[] getBackgroundThrottlingWhitelist();
     method @NonNull public android.os.PackageTagsList getIgnoreSettingsAllowlist();
