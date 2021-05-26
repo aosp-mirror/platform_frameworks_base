@@ -1000,30 +1000,18 @@ public class VcnManagementService extends IVcnManagementService.Stub {
     protected void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
         mContext.enforceCallingOrSelfPermission(DUMP, TAG);
 
-        final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
+        final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "| ");
 
         // Post to handler thread to prevent ConcurrentModificationExceptions, and avoid lock-hell.
         mHandler.runWithScissors(() -> {
-            pw.println("VcnManagementService dump:");
-            pw.increaseIndent();
-
-            pw.println("mNetworkProvider:");
-            pw.increaseIndent();
             mNetworkProvider.dump(pw);
-            pw.decreaseIndent();
             pw.println();
 
-            pw.println("mTrackingNetworkCallback:");
-            pw.increaseIndent();
             mTrackingNetworkCallback.dump(pw);
-            pw.decreaseIndent();
             pw.println();
 
             synchronized (mLock) {
-                pw.println("mLastSnapshot:");
-                pw.increaseIndent();
                 mLastSnapshot.dump(pw);
-                pw.decreaseIndent();
                 pw.println();
 
                 pw.println("mConfigs:");
@@ -1043,8 +1031,6 @@ public class VcnManagementService extends IVcnManagementService.Stub {
                 pw.decreaseIndent();
                 pw.println();
             }
-
-            pw.decreaseIndent();
         }, DUMP_TIMEOUT_MILLIS);
     }
 

@@ -40,6 +40,7 @@ import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyManager;
 import android.util.ArrayMap;
 import android.util.Slog;
+import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.annotations.VisibleForTesting.Visibility;
@@ -105,6 +106,17 @@ public class UnderlyingNetworkTracker {
     /** Priority for any other networks (including unvalidated, etc) */
     @VisibleForTesting(visibility = Visibility.PRIVATE)
     static final int PRIORITY_ANY = Integer.MAX_VALUE;
+
+    private static final SparseArray<String> PRIORITY_TO_STRING_MAP = new SparseArray<>();
+
+    static {
+        PRIORITY_TO_STRING_MAP.put(
+                PRIORITY_OPPORTUNISTIC_CELLULAR, "PRIORITY_OPPORTUNISTIC_CELLULAR");
+        PRIORITY_TO_STRING_MAP.put(PRIORITY_WIFI_IN_USE, "PRIORITY_WIFI_IN_USE");
+        PRIORITY_TO_STRING_MAP.put(PRIORITY_WIFI_PROSPECTIVE, "PRIORITY_WIFI_PROSPECTIVE");
+        PRIORITY_TO_STRING_MAP.put(PRIORITY_MACRO_CELLULAR, "PRIORITY_MACRO_CELLULAR");
+        PRIORITY_TO_STRING_MAP.put(PRIORITY_ANY, "PRIORITY_ANY");
+    }
 
     @NonNull private final VcnContext mVcnContext;
     @NonNull private final ParcelUuid mSubscriptionGroup;
@@ -395,12 +407,12 @@ public class UnderlyingNetworkTracker {
     }
 
     private void reevaluateNetworks() {
-        TreeSet<UnderlyingNetworkRecord> sorted =
-                new TreeSet<>(
-                        UnderlyingNetworkRecord.getComparator(
-                                mSubscriptionGroup, mLastSnapshot, mCurrentRecord, mCarrierConfig));
-        sorted.addAll(mRouteSelectionCallback.getUnderlyingNetworks());
+        if (mRouteSelectionCallback == null) {
+            return; // UnderlyingNetworkTracker has quit.
+        }
 
+        TreeSet<UnderlyingNetworkRecord> sorted =
+                mRouteSelectionCallback.getSortedUnderlyingNetworks();
         UnderlyingNetworkRecord candidate = sorted.isEmpty() ? null : sorted.first();
         if (Objects.equals(mCurrentRecord, candidate)) {
             return;
@@ -446,17 +458,23 @@ public class UnderlyingNetworkTracker {
         private final Map<Network, UnderlyingNetworkRecord.Builder>
                 mUnderlyingNetworkRecordBuilders = new ArrayMap<>();
 
-        private List<UnderlyingNetworkRecord> getUnderlyingNetworks() {
-            final List<UnderlyingNetworkRecord> records = new ArrayList<>();
+        private TreeSet<UnderlyingNetworkRecord> getSortedUnderlyingNetworks() {
+            TreeSet<UnderlyingNetworkRecord> sorted =
+                    new TreeSet<>(
+                            UnderlyingNetworkRecord.getComparator(
+                                    mSubscriptionGroup,
+                                    mLastSnapshot,
+                                    mCurrentRecord,
+                                    mCarrierConfig));
 
             for (UnderlyingNetworkRecord.Builder builder :
                     mUnderlyingNetworkRecordBuilders.values()) {
                 if (builder.isValid()) {
-                    records.add(builder.build());
+                    sorted.add(builder.build());
                 }
             }
 
-            return records;
+            return sorted;
         }
 
         @Override
@@ -660,10 +678,21 @@ public class UnderlyingNetworkTracker {
         }
 
         /** Dumps the state of this record for logging and debugging purposes. */
-        public void dump(IndentingPrintWriter pw) {
+        private void dump(
+                IndentingPrintWriter pw,
+                ParcelUuid subscriptionGroup,
+                TelephonySubscriptionSnapshot snapshot,
+                UnderlyingNetworkRecord currentlySelected,
+                PersistableBundle carrierConfig) {
             pw.println("UnderlyingNetworkRecord:");
             pw.increaseIndent();
 
+            final int priorityClass =
+                    calculatePriorityClass(
+                            subscriptionGroup, snapshot, currentlySelected, carrierConfig);
+            pw.println(
+                    "Priority class: " + PRIORITY_TO_STRING_MAP.get(priorityClass) + " ("
+                            + priorityClass + ")");
             pw.println("mNetwork: " + network);
             pw.println("mNetworkCapabilities: " + networkCapabilities);
             pw.println("mLinkProperties: " + linkProperties);
@@ -731,6 +760,30 @@ public class UnderlyingNetworkTracker {
                 return mCached;
             }
         }
+    }
+
+    /** Dumps the state of this record for logging and debugging purposes. */
+    public void dump(IndentingPrintWriter pw) {
+        pw.println("UnderlyingNetworkTracker:");
+        pw.increaseIndent();
+
+        pw.println("Carrier WiFi Entry Threshold: " + getWifiEntryRssiThreshold(mCarrierConfig));
+        pw.println("Carrier WiFi Exit Threshold: " + getWifiExitRssiThreshold(mCarrierConfig));
+        pw.println(
+                "Currently selected: " + (mCurrentRecord == null ? null : mCurrentRecord.network));
+
+        pw.println("Underlying networks:");
+        pw.increaseIndent();
+        if (mRouteSelectionCallback != null) {
+            for (UnderlyingNetworkRecord record :
+                    mRouteSelectionCallback.getSortedUnderlyingNetworks()) {
+                record.dump(pw, mSubscriptionGroup, mLastSnapshot, mCurrentRecord, mCarrierConfig);
+            }
+        }
+        pw.decreaseIndent();
+        pw.println();
+
+        pw.decreaseIndent();
     }
 
     private class VcnActiveDataSubscriptionIdListener extends TelephonyCallback
