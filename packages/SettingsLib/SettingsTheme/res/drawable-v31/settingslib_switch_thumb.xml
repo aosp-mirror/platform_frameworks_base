@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Copyright (C) 2020 The Android Open Source Project
+  Copyright (C) 2021 The Android Open Source Project
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -15,8 +15,15 @@
   limitations under the License.
   -->
 
-<resources xmlns:androidprv="http://schemas.android.com/apk/prv/res/android">
-    <color name="settingslib_switchbar_background_color">@*android:color/material_grey_600</color>
-    <color name="settingslib_switchbar_switch_track_tint">#BFFFFFFF</color>
-    <color name="settingslib_switchbar_switch_thumb_tint">@android:color/white</color>
-</resources>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:top="4dp"
+        android:left="4dp"
+        android:right="4dp"
+        android:bottom="4dp">
+        <shape android:shape="oval" >
+            <size android:height="20dp" android:width="20dp" />
+            <solid android:color="@color/settingslib_switch_thumb_color" />
+        </shape>
+    </item>
+</layer-list>
