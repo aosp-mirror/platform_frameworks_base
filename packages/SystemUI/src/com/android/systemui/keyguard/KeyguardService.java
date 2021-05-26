@@ -232,10 +232,11 @@ public class KeyguardService extends Service {
         }
 
         @Override // Binder interface
-        public void onStartedWakingUp(@PowerManager.WakeReason int pmWakeReason) {
+        public void onStartedWakingUp(
+                @PowerManager.WakeReason int pmWakeReason, boolean cameraGestureTriggered) {
             Trace.beginSection("KeyguardService.mBinder#onStartedWakingUp");
             checkPermission();
-            mKeyguardViewMediator.onStartedWakingUp();
+            mKeyguardViewMediator.onStartedWakingUp(cameraGestureTriggered);
             mKeyguardLifecyclesDispatcher.dispatch(
                     KeyguardLifecyclesDispatcher.STARTED_WAKING_UP, pmWakeReason);
             Trace.endSection();

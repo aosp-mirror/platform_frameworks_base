@@ -335,6 +335,8 @@ public class NotificationPanelViewController extends PanelViewController {
     private NotificationsQuickSettingsContainer mNotificationContainerParent;
     private boolean mAnimateNextPositionUpdate;
     private float mQuickQsOffsetHeight;
+    private UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
+
     private int mTrackingPointer;
     private VelocityTracker mQsVelocityTracker;
     private boolean mQsTracking;
@@ -671,7 +673,8 @@ public class NotificationPanelViewController extends PanelViewController {
             FragmentService fragmentService,
             QuickAccessWalletController quickAccessWalletController,
             @Main Executor uiExecutor,
-            SecureSettings secureSettings) {
+            SecureSettings secureSettings,
+            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController) {
         super(view, falsingManager, dozeLog, keyguardStateController,
                 (SysuiStatusBarStateController) statusBarStateController, vibratorHelper,
                 statusBarKeyguardViewManager, latencyTracker, flingAnimationUtilsBuilder.get(),
@@ -766,6 +769,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mConversationNotificationManager = conversationNotificationManager;
         mAuthController = authController;
         mLockIconViewController = lockIconViewController;
+        mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
 
         mView.setBackgroundColor(Color.TRANSPARENT);
         OnAttachStateChangeListener onAttachStateChangeListener = new OnAttachStateChangeListener();
@@ -1241,10 +1245,11 @@ public class NotificationPanelViewController extends PanelViewController {
         int userIconHeight = mKeyguardQsUserSwitchController != null
                 ? mKeyguardQsUserSwitchController.getUserIconHeight() : 0;
         float expandedFraction =
-                mKeyguardStatusViewController.isAnimatingScreenOffFromUnlocked() ? 1.0f
-                        : getExpandedFraction();
-        float darkamount = mKeyguardStatusViewController.isAnimatingScreenOffFromUnlocked() ? 1.0f
-                : mInterpolatedDarkAmount;
+                mUnlockedScreenOffAnimationController.isScreenOffAnimationPlaying()
+                        ? 1.0f : getExpandedFraction();
+        float darkamount =
+                mUnlockedScreenOffAnimationController.isScreenOffAnimationPlaying()
+                        ? 1.0f : mInterpolatedDarkAmount;
         mClockPositionAlgorithm.setup(mStatusBarHeaderHeightKeyguard,
                 totalHeight - bottomPadding,
                 mNotificationStackScrollLayoutController.getIntrinsicContentHeight(),
@@ -4210,7 +4215,9 @@ public class NotificationPanelViewController extends PanelViewController {
             int oldState = mBarState;
             boolean keyguardShowing = statusBarState == KEYGUARD;
 
-            if (mDozeParameters.shouldControlUnlockedScreenOff() && isDozing() && keyguardShowing) {
+            if (mUnlockedScreenOffAnimationController.shouldPlayScreenOffAnimation()
+                    && oldState == StatusBarState.SHADE
+                    && statusBarState == KEYGUARD) {
                 // This means we're doing the screen off animation - position the keyguard status
                 // view where it'll be on AOD, so we can animate it in.
                 mKeyguardStatusViewController.updatePosition(
@@ -4278,6 +4285,18 @@ public class NotificationPanelViewController extends PanelViewController {
             mKeyguardBottomArea.setDarkAmount(mInterpolatedDarkAmount);
             positionClockAndNotifications();
         }
+    }
+
+    /**
+     * Reconfigures the shade to show the AOD UI (clock, smartspace, etc). This is called by the
+     * screen off animation controller in order to animate in AOD without "actually" fully switching
+     * to the KEYGUARD state.
+     */
+    public void showAodUi() {
+        setDozing(true /* dozing */, false /* animate */, null);
+        mStatusBarStateListener.onStateChanged(KEYGUARD);
+        mStatusBarStateListener.onDozeAmountChanged(1f, 1f);
+        setExpandedFraction(1f);
     }
 
     /**
