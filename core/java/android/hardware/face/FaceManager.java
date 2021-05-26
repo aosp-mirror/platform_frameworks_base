@@ -1449,6 +1449,8 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
             case FACE_ACQUIRED_ROLL_TOO_EXTREME:
                 return context.getString(R.string.face_acquired_roll_too_extreme);
             case FACE_ACQUIRED_FACE_OBSCURED:
+            case FACE_ACQUIRED_DARK_GLASSES_DETECTED:
+            case FACE_ACQUIRED_MOUTH_COVERING_DETECTED:
                 return context.getString(R.string.face_acquired_obscured);
             case FACE_ACQUIRED_SENSOR_DIRTY:
                 return context.getString(R.string.face_acquired_sensor_dirty);
