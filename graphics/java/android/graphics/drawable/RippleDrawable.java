@@ -975,7 +975,7 @@ public class RippleDrawable extends LayerDrawable {
         shader.setColor(color, effectColor);
         shader.setOrigin(cx, cy);
         shader.setTouch(x, y);
-        shader.setResolution(w, h, mState.mDensity);
+        shader.setResolution(w, h);
         shader.setNoisePhase(noisePhase);
         shader.setRadius(radius);
         shader.setProgress(.0f);
