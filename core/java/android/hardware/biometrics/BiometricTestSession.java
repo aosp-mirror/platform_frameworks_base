@@ -23,7 +23,6 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.TestApi;
 import android.content.Context;
-import android.hardware.fingerprint.FingerprintManager;
 import android.os.RemoteException;
 import android.util.ArraySet;
 import android.util.Log;
@@ -246,6 +245,12 @@ public class BiometricTestSession implements AutoCloseable {
             } catch (InterruptedException e) {
                 Log.e(getTag(), "Latch interrupted", e);
             }
+        }
+
+        if (!mUsersCleaningUp.isEmpty()) {
+            // TODO(b/186600837): this seems common on multi sensor devices
+            Log.e(getTag(), "Cleanup not finished before shutdown - pending: "
+                    + mUsersCleaningUp.size());
         }
 
         // Disable the test HAL after the sensor becomes idle.

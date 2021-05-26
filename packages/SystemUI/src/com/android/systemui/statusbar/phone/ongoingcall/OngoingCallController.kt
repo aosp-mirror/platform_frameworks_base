@@ -150,9 +150,11 @@ class OngoingCallController @Inject constructor(
 
         val currentChipView = chipView
         val timeView =
-                currentChipView?.findViewById<Chronometer>(R.id.ongoing_call_chip_time)
+            currentChipView?.findViewById<Chronometer>(R.id.ongoing_call_chip_time)
+        val backgroundView =
+            currentChipView?.findViewById<View>(R.id.ongoing_call_chip_background)
 
-        if (currentChipView != null && timeView != null) {
+        if (currentChipView != null && timeView != null && backgroundView != null) {
             timeView.base = currentOngoingCallInfo.callStartTime -
                     System.currentTimeMillis() +
                     systemClock.elapsedRealtime()
@@ -162,7 +164,7 @@ class OngoingCallController @Inject constructor(
                 logger.logChipClicked()
                 activityStarter.postStartActivityDismissingKeyguard(
                         currentOngoingCallInfo.intent, 0,
-                        ActivityLaunchAnimator.Controller.fromView(it))
+                        ActivityLaunchAnimator.Controller.fromView(backgroundView))
             }
 
             setUpUidObserver(currentOngoingCallInfo)

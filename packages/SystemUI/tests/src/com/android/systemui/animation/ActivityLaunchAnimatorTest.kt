@@ -51,7 +51,11 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
         // We start in a new thread so that we can ensure that the callbacks are called in the main
         // thread.
         thread {
-            activityLaunchAnimator.startIntentWithAnimation(controller, animate, intentStarter)
+            activityLaunchAnimator.startIntentWithAnimation(
+                    controller = controller,
+                    animate = animate,
+                    intentStarter = intentStarter
+            )
         }.join()
     }
 
@@ -135,11 +139,14 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
         verify(controller).onLaunchAnimationStart(anyBoolean())
     }
 
-    private fun fakeWindow() = RemoteAnimationTarget(
-            0, RemoteAnimationTarget.MODE_OPENING, SurfaceControl(), false, Rect(), Rect(), 0,
-            Point(), Rect(), Rect(), WindowConfiguration(), false, SurfaceControl(), Rect(),
-            ActivityManager.RunningTaskInfo()
-    )
+    private fun fakeWindow(): RemoteAnimationTarget {
+        val bounds = Rect(10 /* left */, 20 /* top */, 30 /* right */, 40 /* bottom */)
+        return RemoteAnimationTarget(
+                0, RemoteAnimationTarget.MODE_OPENING, SurfaceControl(), false, Rect(), Rect(), 0,
+                Point(), Rect(), bounds, WindowConfiguration(), false, SurfaceControl(), Rect(),
+                ActivityManager.RunningTaskInfo()
+        )
+    }
 }
 
 /**

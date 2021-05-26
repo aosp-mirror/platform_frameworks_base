@@ -17,7 +17,13 @@
 package android.os;
 
 import android.annotation.NonNull;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.IOException;
 import java.io.PrintWriter;
 
 /**
@@ -70,6 +76,43 @@ public final class AggregateBatteryConsumer extends BatteryConsumer implements P
     @Override
     public double getConsumedPower() {
         return mConsumedPowerMah;
+    }
+
+    /** Serializes this object to XML */
+    void writeToXml(TypedXmlSerializer serializer,
+            @BatteryUsageStats.AggregateBatteryConsumerScope int scope) throws IOException {
+        serializer.startTag(null, BatteryUsageStats.XML_TAG_AGGREGATE);
+        serializer.attributeInt(null, BatteryUsageStats.XML_ATTR_SCOPE, scope);
+        serializer.attributeDouble(null, BatteryUsageStats.XML_ATTR_POWER, mConsumedPowerMah);
+        mPowerComponents.writeToXml(serializer);
+        serializer.endTag(null, BatteryUsageStats.XML_TAG_AGGREGATE);
+    }
+
+    /** Parses an XML representation and populates the BatteryUsageStats builder */
+    static void parseXml(TypedXmlPullParser parser, BatteryUsageStats.Builder builder)
+            throws XmlPullParserException, IOException {
+        final int scope = parser.getAttributeInt(null, BatteryUsageStats.XML_ATTR_SCOPE);
+        final Builder consumerBuilder = builder.getAggregateBatteryConsumerBuilder(scope);
+
+        int eventType = parser.getEventType();
+        if (eventType != XmlPullParser.START_TAG || !parser.getName().equals(
+                BatteryUsageStats.XML_TAG_AGGREGATE)) {
+            throw new XmlPullParserException("Invalid XML parser state");
+        }
+
+        consumerBuilder.setConsumedPower(
+                parser.getAttributeDouble(null, BatteryUsageStats.XML_ATTR_POWER));
+
+        while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals(
+                BatteryUsageStats.XML_TAG_AGGREGATE))
+                && eventType != XmlPullParser.END_DOCUMENT) {
+            if (eventType == XmlPullParser.START_TAG) {
+                if (parser.getName().equals(BatteryUsageStats.XML_TAG_POWER_COMPONENTS)) {
+                    PowerComponents.parseXml(parser, consumerBuilder.mPowerComponentsBuilder);
+                }
+            }
+            eventType = parser.next();
+        }
     }
 
     /**

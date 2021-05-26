@@ -667,12 +667,16 @@ public class PeopleSpaceWidgetManager {
         if (icon != null) {
             updatedTile.setUserIcon(icon);
         }
+        if (DEBUG) Log.d(TAG, "Statuses: " + conversation.getStatuses().toString());
+        NotificationChannel channel = conversation.getParentNotificationChannel();
+        if (channel != null) {
+            if (DEBUG) Log.d(TAG, "Important:" + channel.isImportantConversation());
+            updatedTile.setIsImportantConversation(channel.isImportantConversation());
+        }
         updatedTile
                 .setContactUri(uri)
                 .setStatuses(conversation.getStatuses())
-                .setLastInteractionTimestamp(conversation.getLastEventTimestamp())
-                .setIsImportantConversation(conversation.getParentNotificationChannel() != null
-                        && conversation.getParentNotificationChannel().isImportantConversation());
+                .setLastInteractionTimestamp(conversation.getLastEventTimestamp());
         updateAppWidgetOptionsAndView(appWidgetId, updatedTile.build());
     }
 

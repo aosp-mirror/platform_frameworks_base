@@ -260,7 +260,7 @@ public class RemoteAnimationAdapterCompat {
                                 t.remove(leashMap.valueAt(i));
                             }
                             t.apply();
-                            finishCallback.onTransitionFinished(null /* wct */);
+                            finishCallback.onTransitionFinished(null /* wct */, null /* sct */);
                         } catch (RemoteException e) {
                             Log.e("ActivityOptionsCompat", "Failed to call app controlled animation"
                                     + " finished callback", e);

@@ -16,9 +16,7 @@
 
 package com.android.settingslib.enterprise;
 
-import android.app.Activity;
-
-import androidx.appcompat.app.AlertDialog;
+import android.content.Context;
 
 import com.android.settingslib.RestrictedLockUtils;
 
@@ -31,8 +29,8 @@ public interface ActionDisabledLearnMoreButtonLauncher {
      * Sets up a "learn more" button which shows a screen with device policy settings
      */
     void setupLearnMoreButtonToShowAdminPolicies(
-            Activity activity,
-            AlertDialog.Builder builder,
+            Context context,
+            Object alertDialogBuilder,
             int enforcementAdminUserId,
             RestrictedLockUtils.EnforcedAdmin enforcedAdmin);
 
@@ -40,7 +38,7 @@ public interface ActionDisabledLearnMoreButtonLauncher {
      * Sets up a "learn more" button which launches a help page
      */
     void setupLearnMoreButtonToLaunchHelpPage(
-            Activity activity,
-            AlertDialog.Builder builder,
+            Context context,
+            Object alertDialogBuilder,
             String url);
 }

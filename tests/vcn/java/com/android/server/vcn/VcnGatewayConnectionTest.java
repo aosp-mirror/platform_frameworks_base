@@ -74,6 +74,9 @@ public class VcnGatewayConnectionTest extends VcnGatewayConnectionTestBase {
     private static final SubscriptionInfo TEST_SUBINFO_2 = mock(SubscriptionInfo.class);
     private static final Map<Integer, ParcelUuid> TEST_SUBID_TO_GROUP_MAP;
 
+    private static final int TEST_UPSTREAM_BANDWIDTH = 1234;
+    private static final int TEST_DOWNSTREAM_BANDWIDTH = 2345;
+
     static {
         final Map<Integer, ParcelUuid> subIdToGroupMap = new HashMap<>();
         subIdToGroupMap.put(TEST_SUBSCRIPTION_ID_1, TEST_PARCEL_UUID);
@@ -106,6 +109,8 @@ public class VcnGatewayConnectionTest extends VcnGatewayConnectionTestBase {
             capBuilder.setNetworkSpecifier(
                     new TelephonyNetworkSpecifier(TEST_SUBSCRIPTION_ID_1));
         }
+        capBuilder.setLinkUpstreamBandwidthKbps(TEST_UPSTREAM_BANDWIDTH);
+        capBuilder.setLinkDownstreamBandwidthKbps(TEST_DOWNSTREAM_BANDWIDTH);
         capBuilder.setAdministratorUids(new int[] {TEST_UID});
         UnderlyingNetworkRecord record = new UnderlyingNetworkRecord(
                 mock(Network.class, CALLS_REAL_METHODS),
@@ -130,6 +135,8 @@ public class VcnGatewayConnectionTest extends VcnGatewayConnectionTestBase {
 
         assertArrayEquals(new int[] {TEST_UID}, vcnCaps.getAdministratorUids());
         assertTrue(vcnCaps.getTransportInfo() instanceof VcnTransportInfo);
+        assertEquals(TEST_UPSTREAM_BANDWIDTH, vcnCaps.getLinkUpstreamBandwidthKbps());
+        assertEquals(TEST_DOWNSTREAM_BANDWIDTH, vcnCaps.getLinkDownstreamBandwidthKbps());
 
         final VcnTransportInfo info = (VcnTransportInfo) vcnCaps.getTransportInfo();
         if (transportType == TRANSPORT_WIFI) {

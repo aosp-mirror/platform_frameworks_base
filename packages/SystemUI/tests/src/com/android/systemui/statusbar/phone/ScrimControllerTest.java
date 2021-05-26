@@ -1118,7 +1118,7 @@ public class ScrimControllerTest extends SysuiTestCase {
     public void testNotificationTransparency_inKeyguardState() {
         mScrimController.transitionTo(ScrimState.KEYGUARD);
 
-        assertAlphaAfterExpansion(mNotificationsScrim, /* alpha */ 0.2f, /* expansion */ 0.8f);
+        assertAlphaAfterExpansion(mNotificationsScrim, /* alpha */ 0.2f, /* expansion */ 0.4f);
         assertAlphaAfterExpansion(mNotificationsScrim, /* alpha */ 0.8f, /* expansion */ 0.2f);
     }
 

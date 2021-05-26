@@ -1053,10 +1053,11 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         final InsetsAnimationControlRunner runner = useInsetsAnimationThread
                 ? new InsetsAnimationThreadControlRunner(controls,
                         frame, mState, listener, typesReady, this, durationMs, interpolator,
-                        animationType, mHost.getTranslator(), mHost.getHandler())
+                        animationType, layoutInsetsDuringAnimation, mHost.getTranslator(),
+                        mHost.getHandler())
                 : new InsetsAnimationControlImpl(controls,
                         frame, mState, listener, typesReady, this, durationMs, interpolator,
-                        animationType, mHost.getTranslator());
+                        animationType, layoutInsetsDuringAnimation, mHost.getTranslator());
         if ((typesReady & WindowInsets.Type.ime()) != 0) {
             ImeTracing.getInstance().triggerClientDump("InsetsAnimationControlImpl",
                     mHost.getInputMethodManager(), null /* icProto */);

@@ -5958,7 +5958,6 @@ package android.app {
     method @NonNull public android.app.Notification.Builder setRemoteInputHistory(CharSequence[]);
     method @NonNull public android.app.Notification.Builder setSettingsText(CharSequence);
     method @NonNull public android.app.Notification.Builder setShortcutId(String);
-    method @Deprecated @NonNull public android.app.Notification.Builder setShowForegroundImmediately(boolean);
     method @NonNull public android.app.Notification.Builder setShowWhen(boolean);
     method @NonNull public android.app.Notification.Builder setSmallIcon(@DrawableRes int);
     method @NonNull public android.app.Notification.Builder setSmallIcon(@DrawableRes int, int);

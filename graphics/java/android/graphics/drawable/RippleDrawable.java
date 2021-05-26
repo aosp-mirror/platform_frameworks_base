@@ -50,6 +50,7 @@ import android.graphics.Rect;
 import android.graphics.Shader;
 import android.os.Build;
 import android.util.AttributeSet;
+import android.view.animation.AnimationUtils;
 import android.view.animation.LinearInterpolator;
 
 import com.android.internal.R;
@@ -151,7 +152,7 @@ public class RippleDrawable extends LayerDrawable {
     /** The maximum number of ripples supported. */
     private static final int MAX_RIPPLES = 10;
     private static final LinearInterpolator LINEAR_INTERPOLATOR = new LinearInterpolator();
-    private static final int DEFAULT_EFFECT_COLOR = 0x80ffffff;
+    private static final int DEFAULT_EFFECT_COLOR = 0x8dffffff;
     /** Temporary flag for teamfood. **/
     private static final boolean FORCE_PATTERNED_STYLE = true;
 
@@ -970,15 +971,16 @@ public class RippleDrawable extends LayerDrawable {
                 ? mState.mColor.getColorForState(getState(), Color.BLACK)
                 : mMaskColorFilter.getColor());
         final int effectColor = mState.mEffectColor.getColorForState(getState(), Color.MAGENTA);
+        final float noisePhase = AnimationUtils.currentAnimationTimeMillis();
         shader.setColor(color, effectColor);
         shader.setOrigin(cx, cy);
         shader.setTouch(x, y);
         shader.setResolution(w, h, mState.mDensity);
-        shader.setNoisePhase(0);
+        shader.setNoisePhase(noisePhase);
         shader.setRadius(radius);
         shader.setProgress(.0f);
         properties = new RippleAnimationSession.AnimationProperties<>(
-                cx, cy, radius, 0f, p, 0f, color, shader);
+                cx, cy, radius, noisePhase, p, 0f, color, shader);
         if (mMaskShader == null) {
             shader.setShader(null);
         } else {
