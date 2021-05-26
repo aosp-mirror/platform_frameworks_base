@@ -20,7 +20,6 @@ import android.annotation.ColorInt;
 import android.graphics.Color;
 import android.graphics.RuntimeShader;
 import android.graphics.Shader;
-import android.util.DisplayMetrics;
 
 final class RippleShader extends RuntimeShader {
     private static final String SHADER_UNIFORMS =  "uniform vec2 in_origin;\n"
@@ -204,8 +203,8 @@ final class RippleShader extends RuntimeShader {
                 sparkleColor.green(), sparkleColor.blue(), sparkleColor.alpha()});
     }
 
-    public void setResolution(float w, float h, int density) {
-        final float densityScale = density * DisplayMetrics.DENSITY_DEFAULT_SCALE * 0.8f;
+    public void setResolution(float w, float h) {
+        final float densityScale = 2.1f;
         setUniform("in_resolutionScale", new float[] {1f / w, 1f / h});
         setUniform("in_noiseScale", new float[] {densityScale / w, densityScale / h});
     }
