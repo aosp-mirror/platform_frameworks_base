@@ -40,6 +40,7 @@ public class FalsingManagerFake implements FalsingManager {
     private boolean mIsFalseRobustTap;
 
     private final List<FalsingBeliefListener> mFalsingBeliefListeners = new ArrayList<>();
+    private final List<FalsingTapListener> mTapListeners = new ArrayList<>();
 
     @Override
     public void onSuccessfulUnlock() {
@@ -148,11 +149,15 @@ public class FalsingManagerFake implements FalsingManager {
 
     @Override
     public void addTapListener(FalsingTapListener falsingTapListener) {
-
+        mTapListeners.add(falsingTapListener);
     }
 
     @Override
     public void removeTapListener(FalsingTapListener falsingTapListener) {
+        mTapListeners.remove(falsingTapListener);
+    }
 
+    public List<FalsingTapListener> getTapListeners() {
+        return mTapListeners;
     }
 }
