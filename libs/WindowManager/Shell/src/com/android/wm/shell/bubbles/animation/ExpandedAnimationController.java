@@ -16,6 +16,8 @@
 
 package com.android.wm.shell.bubbles.animation;
 
+import static com.android.wm.shell.bubbles.BubblePositioner.NUM_VISIBLE_WHEN_RESTING;
+
 import android.content.res.Resources;
 import android.graphics.Path;
 import android.graphics.PointF;
@@ -289,7 +291,8 @@ public class ExpandedAnimationController
                 path.lineTo(stackedX, expandedY);
 
                 // Then, draw a line down to the stack position.
-                path.lineTo(stackedX, mCollapsePoint.y + Math.min(index, 1) * mStackOffsetPx);
+                path.lineTo(stackedX, mCollapsePoint.y
+                        + Math.min(index, NUM_VISIBLE_WHEN_RESTING - 1) * mStackOffsetPx);
             }
 
             // The lead bubble should be the bubble with the longest distance to travel when we're

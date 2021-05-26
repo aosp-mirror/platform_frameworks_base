@@ -23,15 +23,19 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.PaintFlagsDrawFilter;
 import android.graphics.Path;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.PathParser;
+import android.view.View;
+import android.view.ViewOutlineProvider;
 import android.widget.ImageView;
 
 import com.android.launcher3.icons.DotRenderer;
+import com.android.launcher3.icons.IconNormalizer;
 import com.android.wm.shell.animation.Interpolators;
 
 import java.util.EnumSet;
@@ -104,6 +108,19 @@ public class BadgedImageView extends ImageView {
 
         setFocusable(true);
         setClickable(true);
+        setOutlineProvider(new ViewOutlineProvider() {
+            @Override
+            public void getOutline(View view, Outline outline) {
+                BadgedImageView.this.getOutline(outline);
+            }
+        });
+    }
+
+    private void getOutline(Outline outline) {
+        final int bubbleSize = mPositioner.getBubbleSize();
+        final int normalizedSize = IconNormalizer.getNormalizedCircleSize(bubbleSize);
+        final int inset = (bubbleSize - normalizedSize) / 2;
+        outline.setOval(inset, inset, inset + normalizedSize, inset + normalizedSize);
     }
 
     public void initialize(BubblePositioner positioner) {

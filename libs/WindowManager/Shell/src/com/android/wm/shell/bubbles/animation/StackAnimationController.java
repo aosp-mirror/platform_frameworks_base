@@ -16,6 +16,8 @@
 
 package com.android.wm.shell.bubbles.animation;
 
+import static com.android.wm.shell.bubbles.BubblePositioner.NUM_VISIBLE_WHEN_RESTING;
+
 import android.content.ContentResolver;
 import android.content.res.Resources;
 import android.graphics.PointF;
@@ -255,14 +257,21 @@ public class StackAnimationController extends
      */
     private Runnable mOnBubbleAnimatedOutAction;
 
+    /**
+     * Callback to run whenever the stack is finished being flung somewhere.
+     */
+    private Runnable mOnStackAnimationFinished;
+
     public StackAnimationController(
             FloatingContentCoordinator floatingContentCoordinator,
             IntSupplier bubbleCountSupplier,
             Runnable onBubbleAnimatedOutAction,
+            Runnable onStackAnimationFinished,
             BubblePositioner positioner) {
         mFloatingContentCoordinator = floatingContentCoordinator;
         mBubbleCountSupplier = bubbleCountSupplier;
         mOnBubbleAnimatedOutAction = onBubbleAnimatedOutAction;
+        mOnStackAnimationFinished = onStackAnimationFinished;
         mPositioner = positioner;
     }
 
@@ -672,6 +681,10 @@ public class StackAnimationController extends
                                 mPositioner.setRestingPosition(mStackPosition);
                             }
 
+                            if (mOnStackAnimationFinished != null) {
+                                mOnStackAnimationFinished.run();
+                            }
+
                             if (after != null) {
                                 for (Runnable callback : after) {
                                     callback.run();
@@ -716,7 +729,7 @@ public class StackAnimationController extends
             } else {
                 // We only show the first two bubbles in the stack & the rest hide behind them
                 // so they don't need an offset.
-                return index > 1 ? 0f : mStackOffset;
+                return index > (NUM_VISIBLE_WHEN_RESTING - 1) ? 0f : mStackOffset;
             }
         } else {
             return 0f;
@@ -825,7 +838,8 @@ public class StackAnimationController extends
     private void moveToFinalIndex(View view, int newIndex,
             Runnable finishReorder) {
         final ViewPropertyAnimator animator = view.animate()
-                .translationY(getStackPosition().y + Math.min(newIndex, 1) * mStackOffset)
+                .translationY(getStackPosition().y
+                        + Math.min(newIndex, NUM_VISIBLE_WHEN_RESTING - 1) * mStackOffset)
                 .setDuration(BUBBLE_SWAP_DURATION)
                 .withEndAction(() -> {
                     view.setTag(R.id.reorder_animator_tag, null);
@@ -834,8 +848,9 @@ public class StackAnimationController extends
         view.setTag(R.id.reorder_animator_tag, animator);
     }
 
+    // TODO: do we need this & BubbleStackView#updateBadgesAndZOrder?
     private void updateBadgesAndZOrder(View v, int index) {
-        v.setZ((mMaxBubbles * mElevation) - index);
+        v.setZ(index < NUM_VISIBLE_WHEN_RESTING ? (mMaxBubbles * mElevation) - index : 0f);
         BadgedImageView bv = (BadgedImageView) v;
         if (index == 0) {
             bv.showDotAndBadge(!isStackOnLeftSide());
@@ -939,8 +954,9 @@ public class StackAnimationController extends
             final float yOffset = getOffsetForChainedPropertyAnimation(
                     DynamicAnimation.TRANSLATION_Y, 0);
             for (int i = 0; i < mLayout.getChildCount(); i++) {
-                mLayout.getChildAt(i).setTranslationX(pos.x + (Math.min(i, 1) * xOffset));
-                mLayout.getChildAt(i).setTranslationY(pos.y + (Math.min(i, 1) * yOffset));
+                float index = Math.min(i, NUM_VISIBLE_WHEN_RESTING - 1);
+                mLayout.getChildAt(i).setTranslationX(pos.x + (index * xOffset));
+                mLayout.getChildAt(i).setTranslationY(pos.y + (index * yOffset));
             }
         }
     }

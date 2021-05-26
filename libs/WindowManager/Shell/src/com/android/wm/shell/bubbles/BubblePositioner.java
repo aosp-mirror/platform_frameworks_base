@@ -56,11 +56,8 @@ public class BubblePositioner {
     public static final int TASKBAR_POSITION_LEFT = 1;
     public static final int TASKBAR_POSITION_BOTTOM = 2;
 
-    /**
-     * The bitmap in the bubble is slightly smaller than the overall size of the bubble.
-     * This is the percentage to scale the image down based on the overall bubble size.
-     */
-    private static final float BUBBLE_BITMAP_SIZE_PERCENT = 0.86f;
+    /** When the bubbles are collapsed in a stack only some of them are shown, this is how many. **/
+    public static final int NUM_VISIBLE_WHEN_RESTING = 2;
 
     private Context mContext;
     private WindowManager mWindowManager;
