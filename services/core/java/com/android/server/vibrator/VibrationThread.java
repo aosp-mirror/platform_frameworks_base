@@ -95,8 +95,7 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
     private final WorkSource mWorkSource = new WorkSource();
     private final PowerManager.WakeLock mWakeLock;
     private final IBatteryStats mBatteryStatsService;
-    private final DeviceVibrationEffectAdapter mDeviceEffectAdapter =
-            new DeviceVibrationEffectAdapter();
+    private final DeviceVibrationEffectAdapter mDeviceEffectAdapter;
     private final Vibration mVibration;
     private final VibrationCallbacks mCallbacks;
     private final SparseArray<VibratorController> mVibrators = new SparseArray<>();
@@ -104,10 +103,11 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
 
     private volatile boolean mForceStop;
 
-    VibrationThread(Vibration vib, SparseArray<VibratorController> availableVibrators,
-            PowerManager.WakeLock wakeLock, IBatteryStats batteryStatsService,
-            VibrationCallbacks callbacks) {
+    VibrationThread(Vibration vib, DeviceVibrationEffectAdapter effectAdapter,
+            SparseArray<VibratorController> availableVibrators, PowerManager.WakeLock wakeLock,
+            IBatteryStats batteryStatsService, VibrationCallbacks callbacks) {
         mVibration = vib;
+        mDeviceEffectAdapter = effectAdapter;
         mCallbacks = callbacks;
         mWakeLock = wakeLock;
         mWorkSource.set(vib.uid);
