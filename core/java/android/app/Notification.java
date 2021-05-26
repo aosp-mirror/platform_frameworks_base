@@ -4595,22 +4595,6 @@ public class Notification implements Parcelable
         }
 
         /**
-         * Set to {@code true} to require that the Notification associated with a
-         * foreground service is shown as soon as the service's {@code startForeground()}
-         * method is called, even if the system's UI policy might otherwise defer
-         * its visibility to a later time.
-         * @deprecated Use setForegroundServiceBehavior(int) instead
-         */
-        @Deprecated
-        @NonNull
-        public Builder setShowForegroundImmediately(boolean showImmediately) {
-            setForegroundServiceBehavior(showImmediately
-                    ? FOREGROUND_SERVICE_IMMEDIATE
-                    : FOREGROUND_SERVICE_DEFAULT);
-            return this;
-        }
-
-        /**
          * Specify a desired visibility policy for a Notification associated with a
          * foreground service.  By default, the system can choose to defer
          * visibility of the notification for a short time after the service is
