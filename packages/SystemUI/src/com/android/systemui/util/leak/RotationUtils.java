@@ -116,7 +116,7 @@ public class RotationUtils {
             default:
                 throw new IllegalArgumentException("Unknown rotation: " + rot);
         }
-        Configuration c = context.getResources().getConfiguration();
+        Configuration c = new Configuration(context.getResources().getConfiguration());
         c.orientation = orientation;
         Context rotated = context.createConfigurationContext(c);
         return rotated.getResources();
