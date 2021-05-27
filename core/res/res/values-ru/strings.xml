@@ -586,7 +586,8 @@
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Отсканирована только часть отпечатка."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Не удалось распознать отпечаток. Повторите попытку."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"Очистите сканер."</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"Вы убрали палец слишком быстро."</string>
+    <!-- no translation found for fingerprint_acquired_too_fast (6038375140739678098) -->
+    <skip />
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Вы перемещали палец слишком медленно. Повторите попытку."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Попробуйте сохранить отпечаток другого пальца."</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Слишком светло."</string>
@@ -742,8 +743,8 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Отслеживать неверно введенные пароли при разблокировке экрана и блокировать планшет или удалять с него все данные, если сделано слишком много неудачных попыток."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Блокировать устройство Android TV или удалять с него все данные этого пользователя при слишком большом количестве неудачных попыток ввести пароль для разблокировки экрана."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Отслеживать неверно введенные пароли при разблокировке экрана и блокировать телефон или удалять с него все данные, если сделано слишком много неудачных попыток."</string>
-    <string name="policylab_resetPassword" msgid="214556238645096520">"Изменение блокировки экрана"</string>
-    <string name="policydesc_resetPassword" msgid="4626419138439341851">"Изменять блокировку экрана."</string>
+    <string name="policylab_resetPassword" msgid="214556238645096520">"Изменение способа блокировки экрана"</string>
+    <string name="policydesc_resetPassword" msgid="4626419138439341851">"Изменять способ блокировки экрана."</string>
     <string name="policylab_forceLock" msgid="7360335502968476434">"Блокировка экрана"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"Управлять способом и временем блокировки экрана."</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"Удаление всех данных"</string>
@@ -763,7 +764,7 @@
     <string name="policylab_disableCamera" msgid="5749486347810162018">"Отключение камер"</string>
     <string name="policydesc_disableCamera" msgid="3204405908799676104">"Запретить использование камер на устройстве."</string>
     <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"Отключение функций блокировки"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"Запретить использовать некоторые функции блокировки экрана."</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"Запрещать использование некоторых функций блокировки экрана."</string>
   <string-array name="phoneTypes">
     <item msgid="8996339953292723951">"Домашний"</item>
     <item msgid="7740243458912727194">"Мобильный"</item>
@@ -1752,7 +1753,7 @@
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Просмотр и контроль экрана"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Сервис может просматривать весь контент на экране и отображать контент поверх других приложений"</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Просмотр и выполнение действий"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Сервис может отслеживать ваше взаимодействие с приложениями и датчиками устройства и давать приложениям команды от вашего имени"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Сервис может отслеживать ваше взаимодействие с приложениями и датчиками устройства и давать приложениям команды от вашего имени."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Разрешить"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Отклонить"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Выберите, какую функцию использовать:"</string>
@@ -2367,7 +2368,7 @@
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Значок приложения"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Образ бренда приложения"</string>
     <string name="view_and_control_notification_title" msgid="4300765399209912240">"Проверьте настройки доступа"</string>
-    <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> просматривать и контролировать то, что отображается на вашем экране. Нажмите здесь, чтобы узнать больше."</string>
+    <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> может просматривать и контролировать то, что отображается на вашем экране. Нажмите здесь, чтобы узнать больше."</string>
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"Сообщение \"<xliff:g id="MESSAGE">%1$s</xliff:g>\" переведено."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Сообщение переведено на <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>. Язык оригинала: <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g>."</string>
 </resources>

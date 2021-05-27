@@ -580,7 +580,7 @@
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Partial fingerprint detected"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Couldn\'t process fingerprint. Please try again."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"Clean the sensor"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"Finger moved too fast"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="6038375140739678098">"Hold a little longer"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Finger moved too slow. Please try again."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Try another fingerprint"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Too bright"</string>
