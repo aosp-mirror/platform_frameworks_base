@@ -426,12 +426,12 @@
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Rekodi ya skrini"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Anza kurekodi"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Acha kurekodi"</string>
-    <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Ungependa kuondoa kizuizi kwenye maikrofoni ya kifaa?"</string>
-    <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Ungependa kuondoa kizuizi kwenye kamera ya kifaa?"</string>
-    <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Ungependa kuondoa kizuizi kwenye kamera na maikrofoni ya kifaa?"</string>
-    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Hatua hii huondoa kizuizi cha kufikia kwa programu na huduma zote zinazoruhusiwa kutumia maikrofoni yako."</string>
-    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Hatua hii huondoa kizuizi cha kufikia kwa programu na huduma zote zinazoruhusiwa kutumia kamera yako."</string>
-    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Hatua hii huondoa kizuizi cha kufikia kwa programu na huduma zote zinazoruhusiwa kutumia kamera au maikrofoni yako."</string>
+    <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Ungependa kuwacha kuzuia maikrofoni ya kifaa?"</string>
+    <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Ungependa kuwacha kuzuia kamera ya kifaa?"</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Ungependa kuwacha kuzuia kamera na maikrofoni ya kifaa?"</string>
+    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Hatua hii huruhusu programu na huduma zote zenye idhini zitumie maikrofoni yako."</string>
+    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Hatua hii huruhusu programu na huduma zote zenye idhini zitumie kamera yako."</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Hatua hii huruhusu programu na huduma zote zenye idhini zitumie kamera au maikrofoni yako."</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"Kifaa"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Telezesha kidole juu ili ubadilishe programu"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Buruta kulia ili ubadilishe programu haraka"</string>

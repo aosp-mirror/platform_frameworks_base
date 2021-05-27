@@ -349,7 +349,7 @@
     <string name="quick_settings_rotation_locked_portrait_label" msgid="1194988975270484482">"Portret"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="2000295772687238645">"Peyzaj"</string>
     <string name="quick_settings_ime_label" msgid="3351174938144332051">"Daxiletmə metodu"</string>
-    <string name="quick_settings_location_label" msgid="2621868789013389163">"Yer"</string>
+    <string name="quick_settings_location_label" msgid="2621868789013389163">"Məkan"</string>
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"Yer Deaktiv"</string>
     <string name="quick_settings_camera_label" msgid="5612076679385269339">"Kameraya giriş"</string>
     <string name="quick_settings_mic_label" msgid="8392773746295266375">"Mikrofona giriş"</string>
