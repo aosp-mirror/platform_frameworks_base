@@ -550,7 +550,9 @@ public final class AssetManager implements AutoCloseable {
                     outValue.changingConfigurations);
 
             if (outValue.type == TypedValue.TYPE_STRING) {
-                outValue.string = getPooledStringForCookie(cookie, outValue.data);
+                if ((outValue.string = getPooledStringForCookie(cookie, outValue.data)) == null) {
+                    return false;
+                }
             }
             return true;
         }
@@ -731,7 +733,9 @@ public final class AssetManager implements AutoCloseable {
                     outValue.changingConfigurations);
 
             if (outValue.type == TypedValue.TYPE_STRING) {
-                outValue.string = getPooledStringForCookie(cookie, outValue.data);
+                if ((outValue.string = getPooledStringForCookie(cookie, outValue.data)) == null) {
+                    return false;
+                }
             }
             return true;
         }
@@ -833,6 +837,7 @@ public final class AssetManager implements AutoCloseable {
         }
     }
 
+    @Nullable
     CharSequence getPooledStringForCookie(int cookie, int id) {
         // Cookies map to ApkAssets starting at 1.
         return getApkAssets()[cookie - 1].getStringFromPool(id);
