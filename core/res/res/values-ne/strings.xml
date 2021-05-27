@@ -259,7 +259,7 @@
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"आवाज बन्द छ"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"ध्वनि खुल्ला छ"</string>
     <string name="global_actions_toggle_airplane_mode" msgid="6911684460146916206">"हवाइजहाज मोड"</string>
-    <string name="global_actions_airplane_mode_on_status" msgid="5508025516695361936">"हवाइजहाज मोड खुला छ"</string>
+    <string name="global_actions_airplane_mode_on_status" msgid="5508025516695361936">"हवाइजहाज मोड अन छ"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="8522219771500505475">"हवाइजहाज मोड बन्द छ"</string>
     <string name="global_action_settings" msgid="4671878836947494217">"सेटिङहरू"</string>
     <string name="global_action_assist" msgid="2517047220311505805">"सहायता दिनुहोस्"</string>
@@ -1561,7 +1561,7 @@
     <string name="bluetooth_a2dp_audio_route_name" msgid="4214648773120426288">"ब्लुटुथ अडियो"</string>
     <string name="wireless_display_route_description" msgid="8297563323032966831">"ताररहित प्रदर्शन"</string>
     <string name="media_route_button_content_description" msgid="2299223698196869956">"कास्ट"</string>
-    <string name="media_route_chooser_title" msgid="6646594924991269208">"उपकरणमा जडान गर्नुहोस्"</string>
+    <string name="media_route_chooser_title" msgid="6646594924991269208">"उपकरणमा कनेक्ट गर्नुहोस्"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"स्क्रिन डिभाइसमा कास्ट गर्नुहोस्"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"उपकरणको खोजी गरिँदै..."</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"सेटिंङहरू"</string>
