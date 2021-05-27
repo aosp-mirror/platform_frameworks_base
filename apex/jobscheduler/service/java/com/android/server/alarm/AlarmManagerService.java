@@ -121,7 +121,6 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsService;
-import com.android.internal.os.BinderDeathDispatcher;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.LocalLog;
@@ -184,8 +183,7 @@ public class AlarmManagerService extends SystemService {
     static final boolean DEBUG_BG_LIMIT = localLOGV || false;
     static final boolean DEBUG_STANDBY = localLOGV || false;
     static final boolean RECORD_ALARMS_IN_HISTORY = true;
-    // TODO(b/178484639) : Turn off once alarms and reminders work is complete.
-    static final boolean RECORD_DEVICE_IDLE_ALARMS = true;
+    static final boolean RECORD_DEVICE_IDLE_ALARMS = false;
     static final String TIMEZONE_PROPERTY = "persist.sys.timezone";
 
     static final int TICK_HISTORY_DEPTH = 10;
@@ -206,8 +204,6 @@ public class AlarmManagerService extends SystemService {
                     .addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING
                             | Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
 
-    private static final BinderDeathDispatcher<IAlarmListener> sListenerDeathDispatcher =
-            new BinderDeathDispatcher<>();
     final LocalLog mLog = new LocalLog(TAG);
 
     AppOpsManager mAppOps;
@@ -1837,8 +1833,9 @@ public class AlarmManagerService extends SystemService {
         }
 
         if (directReceiver != null) {
-            if (sListenerDeathDispatcher.linkToDeath(directReceiver, mListenerDeathRecipient)
-                    <= 0) {
+            try {
+                directReceiver.asBinder().linkToDeath(mListenerDeathRecipient, 0);
+            } catch (RemoteException e) {
                 Slog.w(TAG, "Dropping unreachable alarm listener " + listenerTag);
                 return;
             }
@@ -2851,12 +2848,6 @@ public class AlarmManagerService extends SystemService {
                 pw.println();
             }
 
-            pw.println("Listener death dispatcher state:");
-            pw.increaseIndent();
-            sListenerDeathDispatcher.dump(pw);
-            pw.println();
-            pw.decreaseIndent();
-
             if (mLog.dump(pw, "Recent problems:")) {
                 pw.println();
             }
@@ -3448,6 +3439,9 @@ public class AlarmManagerService extends SystemService {
 
         for (final Alarm removed : removedAlarms) {
             decrementAlarmCount(removed.uid, 1);
+            if (removed.listener != null) {
+                removed.listener.asBinder().unlinkToDeath(mListenerDeathRecipient, 0);
+            }
             if (!RemovedAlarm.isLoggable(reason)) {
                 continue;
             }
@@ -4700,6 +4694,8 @@ public class AlarmManagerService extends SystemService {
                 } else {
                     // Direct listener callback alarm
                     mListenerCount++;
+
+                    alarm.listener.asBinder().unlinkToDeath(mListenerDeathRecipient, 0);
 
                     if (RECORD_ALARMS_IN_HISTORY) {
                         if (alarm.listener == mTimeTickTrigger) {

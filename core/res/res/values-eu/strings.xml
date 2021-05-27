@@ -609,14 +609,12 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Hatz-markaren ikonoa"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"kudeatu aurpegiaren bidez desblokeatzeko hardwarea"</string>
-    <string name="permdesc_manageFace" msgid="6204569688492710471">"Aurpegi-txantiloiak gehitu eta ezabatzeko metodoei dei egitea baimentzen dio aplikazioari."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"erabili aurpegiaren bidez desblokeatzeko hardwarea"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Autentifikaziorako aurpegiaren bidez desblokeatzeko hardwarea erabiltzeko baimena ematen die aplikazioei"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Aurpegiaren bidez desblokeatzeko eginbidea"</string>
+    <!-- no translation found for face_recalibrate_notification_name (7311163114750748686) -->
+    <skip />
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Erregistratu aurpegia berriro"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Ezagutzea hobetzeko, erregistratu aurpegia berriro"</string>
-    <string name="face_setup_notification_title" msgid="550617822603450009">"Konfiguratu aurpegiaren bidez desblokeatzeko eginbidea"</string>
+    <!-- no translation found for face_setup_notification_title (8843461561970741790) -->
+    <skip />
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Telefonoa desblokeatzeko, begira iezaiozu"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Konfiguratu telefonoa desblokeatzeko modu gehiago"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Sakatu hau hatz-marka bat gehitzeko"</string>
@@ -643,18 +641,26 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Ezin da egiaztatu aurpegia. Hardwarea ez dago erabilgarri."</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"Saiatu berriro aurpegiaren bidez desblokeatzen."</string>
+    <!-- no translation found for face_error_timeout (2598544068593889762) -->
+    <skip />
     <string name="face_error_no_space" msgid="5649264057026021723">"Ezin dira gorde aurpegiaren datu berriak. Ezabatu zaharrak."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Utzi da aurpegiaren bidezko eragiketa."</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"Erabiltzaileak aurpegiaren bidez desblokeatzeko aukera utzi du"</string>
+    <!-- no translation found for face_error_user_canceled (5766472033202928373) -->
+    <skip />
     <string name="face_error_lockout" msgid="7864408714994529437">"Saiakera gehiegi egin dituzu. Saiatu berriro geroago."</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Saiakera gehiegi egin dira. Aurpegiaren bidez desblokeatzeko eginbidea desgaitu egin da."</string>
+    <!-- no translation found for face_error_lockout_permanent (3277134834042995260) -->
+    <skip />
+    <!-- no translation found for face_error_lockout_screen_lock (5062609811636860928) -->
+    <skip />
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Ezin da egiaztatu aurpegia. Saiatu berriro."</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"Ez duzu konfiguratu aurpegiaren bidez desblokeatzeko eginbidea."</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"Gailu honek ez du onartzen aurpegiaren bidez desblokeatzea."</string>
+    <!-- no translation found for face_error_not_enrolled (1134739108536328412) -->
+    <skip />
+    <!-- no translation found for face_error_hw_not_present (7940978724978763011) -->
+    <skip />
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Sentsorea aldi baterako desgaitu da."</string>
     <string name="face_name_template" msgid="3877037340223318119">"<xliff:g id="FACEID">%d</xliff:g> aurpegia"</string>
-    <string name="face_app_setting_name" msgid="8130135875458467243">"Erabili aurpegiaren bidez desblokeatzeko eginbidea"</string>
+    <!-- no translation found for face_app_setting_name (5854024256907828015) -->
+    <skip />
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Erabili aurpegia edo pantailaren blokeoa"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Aurrera egiteko, erabili aurpegia"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Aurrera egiteko, erabili aurpegia edo pantailaren blokeoa"</string>
@@ -867,9 +873,9 @@
     <string name="sipAddressTypeOther" msgid="6317012577345187275">"Beste bat"</string>
     <string name="quick_contacts_not_available" msgid="1262709196045052223">"Ez da kontaktua ikusteko aplikaziorik aurkitu."</string>
     <string name="keyguard_password_enter_pin_code" msgid="6401406801060956153">"Idatzi PIN kodea"</string>
-    <string name="keyguard_password_enter_puk_code" msgid="3112256684547584093">"Idatzi PUK kodea eta PIN kode berria"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="3112256684547584093">"Idatzi PUKa eta PIN berria"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="2825313071899938305">"PUK kodea"</string>
-    <string name="keyguard_password_enter_pin_prompt" msgid="5505434724229581207">"PIN kode berria"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="5505434724229581207">"PIN berria"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="4032288032993261520"><font size="17">"Sakatu pasahitza idazteko"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="2751130557661643482">"Idatzi desblokeatzeko pasahitza"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7792964196473964340">"Idatzi desblokeatzeko PIN kodea"</string>
@@ -957,7 +963,8 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"Zabaldu desblokeatzeko eremua."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"Hatza lerratuta desblokeatzea."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"Ereduaren bidez desblokeatzea."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"Aurpegiaren bidez desblokeatzeko eginbidea."</string>
+    <!-- no translation found for keyguard_accessibility_face_unlock (4533832120787386728) -->
+    <skip />
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"PIN kodearen bidez desblokeatzea."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"SIM txartela desblokeatzeko PIN kodea."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"SIM txartela desblokeatzeko PUK kodea."</string>
@@ -1656,7 +1663,7 @@
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"Idatzi erabili nahi duzun PIN kodea"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"Berretsi erabili nahi duzun PIN kodea"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"SIM txartela desblokeatzen…"</string>
-    <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"PIN kode okerra."</string>
+    <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"PIN okerra."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"Idatzi 4 eta 8 zenbaki arteko PINa."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"PUK kodeak 8 zenbaki izan behar ditu."</string>
     <string name="kg_invalid_puk" msgid="4809502818518963344">"Idatzi berriro PUK kode zuzena. Hainbat saiakera oker eginez gero, betiko desgaituko da SIMa."</string>

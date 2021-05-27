@@ -472,6 +472,8 @@
 
     <dimen name="volume_dialog_panel_transparent_padding">20dp</dimen>
 
+    <dimen name="volume_dialog_ringer_rows_padding">7dp</dimen>
+
     <dimen name="volume_dialog_stream_padding">12dp</dimen>
 
     <dimen name="volume_dialog_panel_width">56dp</dimen>
@@ -1416,10 +1418,6 @@
     <dimen name="media_output_dialog_icon_corner_radius">16dp</dimen>
     <dimen name="media_output_dialog_title_anim_y_delta">12.5dp</dimen>
 
-    <!-- Delay after which the media will start transitioning to the full shade on
-         the lockscreen -->
-    <dimen name="lockscreen_shade_media_transition_start_delay">40dp</dimen>
-
     <!-- Distance that the full shade transition takes in order for qs to fully transition to the
          shade -->
     <dimen name="lockscreen_shade_qs_transition_distance">200dp</dimen>
@@ -1428,13 +1426,16 @@
          the shade (in alpha) -->
     <dimen name="lockscreen_shade_scrim_transition_distance">80dp</dimen>
 
-    <!-- Extra inset for the notifications when accounting for media during the lockscreen to
-         shade transition to compensate for the disappearing media -->
-    <dimen name="lockscreen_shade_transition_extra_media_inset">-48dp</dimen>
+    <!-- Distance that the full shade transition takes in order for media to fully transition to
+         the shade -->
+    <dimen name="lockscreen_shade_media_transition_distance">140dp</dimen>
 
     <!-- Maximum overshoot for the topPadding of notifications when transitioning to the full
          shade -->
-    <dimen name="lockscreen_shade_max_top_overshoot">32dp</dimen>
+    <dimen name="lockscreen_shade_notification_movement">24dp</dimen>
+
+    <!-- Maximum overshoot for the pulse expansion -->
+    <dimen name="pulse_expansion_max_top_overshoot">16dp</dimen>
 
     <dimen name="people_space_widget_radius">28dp</dimen>
     <dimen name="people_space_image_radius">20dp</dimen>

@@ -14876,6 +14876,17 @@ public final class Settings {
                 "clockwork_sysui_main_activity_name";
 
         /**
+         * Setting to determine if the Clockwork Home application is ready.
+         *
+         * <p>
+         * Set to 1 when the Clockwork Home application has finished starting up.
+         * </p>
+         *
+         * @hide
+         */
+        public static final String CLOCKWORK_HOME_READY = "clockwork_home_ready";
+
+        /**
          * Indicates whether aware is available in the current location.
          * @hide
          */
@@ -14932,6 +14943,15 @@ public final class Settings {
          * @hide
          */
         public static final String ONE_HANDED_KEYGUARD_SIDE = "one_handed_keyguard_side";
+
+        /**
+         * Global settings that shouldn't be persisted.
+         *
+         * @hide
+         */
+        public static final String[] TRANSIENT_SETTINGS = {
+                CLOCKWORK_HOME_READY,
+        };
 
         /**
          * Keys we no longer back up under the current schema, but want to continue to

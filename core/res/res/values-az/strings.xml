@@ -609,14 +609,12 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Barmaq izi ikonası"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"Üz ilə kiliddən açma avadanlığını idarə edin"</string>
-    <string name="permdesc_manageFace" msgid="6204569688492710471">"Proqramdan istifadə üçün barmaq izi şablonlarını əlavə etmək və silmək məqsədilə üsullara müraciət etməyə imkan verir."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"üz ilə kiliddən açma işlədin"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"İdentifikasiya üçün tətbiqin Üz ilə Kiliddən Açmasına icazə verir"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Üz ilə Kiliddən Açma"</string>
+    <!-- no translation found for face_recalibrate_notification_name (7311163114750748686) -->
+    <skip />
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Üzünüzü yenidən qeydiyyatdan keçirin"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Tanınmanı təkmilləşdirmək üçün üzünüzü yenidən qeydiyyatdan keçirin"</string>
-    <string name="face_setup_notification_title" msgid="550617822603450009">"Üz ilə kiliddən çıxarmanı ayarlayın"</string>
+    <!-- no translation found for face_setup_notification_title (8843461561970741790) -->
+    <skip />
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Telefona baxaraq onu kiliddən çıxarın"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Kiliddən çıxarmağın daha çox yolunu ayarlayın"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Barmaq izi əlavə etmək üçün toxunun"</string>
@@ -643,18 +641,26 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Üz doğrulanmadı. Avadanlıq əlçatan deyil."</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"Üz ilə Kiliddən Açmanı yenidən sınayın."</string>
+    <!-- no translation found for face_error_timeout (2598544068593889762) -->
+    <skip />
     <string name="face_error_no_space" msgid="5649264057026021723">"Yeni üz datası saxlanmadı. Əvvəlcə köhnə olanı silin."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Üz əməliyyatı ləğv edildi."</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"İstifadəçi Üz ilə Kiliddən Açmanı ləğv edib."</string>
+    <!-- no translation found for face_error_user_canceled (5766472033202928373) -->
+    <skip />
     <string name="face_error_lockout" msgid="7864408714994529437">"Həddindən çox cəhd. Sonraya saxlayın."</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Həddindən çox cəhd. Üz ilə Kiliddən Açma deaktiv edildi."</string>
+    <!-- no translation found for face_error_lockout_permanent (3277134834042995260) -->
+    <skip />
+    <!-- no translation found for face_error_lockout_screen_lock (5062609811636860928) -->
+    <skip />
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Üz doğrulanmadı. Yenidən cəhd edin."</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"Üz ilə Kiliddən Açmanı quraşdırmamısınız."</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"Üz ilə Kiliddən Açma bu cihazda dəstəklənmir."</string>
+    <!-- no translation found for face_error_not_enrolled (1134739108536328412) -->
+    <skip />
+    <!-- no translation found for face_error_hw_not_present (7940978724978763011) -->
+    <skip />
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Sensor müvəqqəti deaktivdir."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Üz <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <string name="face_app_setting_name" msgid="8130135875458467243">"Üz ilə kiliddən çıxarmadan istifadə edin"</string>
+    <!-- no translation found for face_app_setting_name (5854024256907828015) -->
+    <skip />
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Üz və ya ekran kilidindən istifadə edin"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Davam etmək üçün üzünüzdən istifadə edin"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Davam etmək üçün üz və ya ekran kilidinizdən istifadə edin"</string>
@@ -957,7 +963,8 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"Kilidi açma sahəsini genişləndir."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"Sürüşdürmə kilidi."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"Kild açma modeli."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"Üz ilə Kiliddən Açma"</string>
+    <!-- no translation found for keyguard_accessibility_face_unlock (4533832120787386728) -->
+    <skip />
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"Pin kilid açması."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"Sim Pin kilidini açın."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"Sim Puk kilidini açın."</string>

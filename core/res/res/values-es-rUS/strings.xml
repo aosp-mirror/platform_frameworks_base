@@ -609,14 +609,12 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Ícono de huella dactilar"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"administrar el hardware de desbloqueo facial"</string>
-    <string name="permdesc_manageFace" msgid="6204569688492710471">"Permite que la app emplee métodos para agregar y borrar plantillas de rostros para su uso."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"usar el hardware de desbloqueo facial"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Permite que la app use el hardware de desbloqueo facial con fines de autenticación"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Desbloqueo facial"</string>
+    <!-- no translation found for face_recalibrate_notification_name (7311163114750748686) -->
+    <skip />
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Vuelve a registrar tu rostro"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Para mejorar el reconocimiento, vuelve a registrar tu rostro"</string>
-    <string name="face_setup_notification_title" msgid="550617822603450009">"Configura Desbloqueo facial"</string>
+    <!-- no translation found for face_setup_notification_title (8843461561970741790) -->
+    <skip />
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Desbloquea el teléfono con solo mirarlo"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Configura más formas de desbloquear el dispositivo"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Presiona para agregar una huella dactilar"</string>
@@ -643,18 +641,26 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"No se verificó el rostro. Hardware no disponible."</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"Vuelve a probar el desbloqueo facial."</string>
+    <!-- no translation found for face_error_timeout (2598544068593889762) -->
+    <skip />
     <string name="face_error_no_space" msgid="5649264057026021723">"No hay espacio para datos faciales nuevos. Borra uno viejo."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Se canceló el reconocimiento facial."</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"El usuario canceló el desbloqueo facial."</string>
+    <!-- no translation found for face_error_user_canceled (5766472033202928373) -->
+    <skip />
     <string name="face_error_lockout" msgid="7864408714994529437">"Demasiados intentos. Inténtalo de nuevo más tarde."</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Demasiados intentos. Se inhabilitó el desbloqueo facial."</string>
+    <!-- no translation found for face_error_lockout_permanent (3277134834042995260) -->
+    <skip />
+    <!-- no translation found for face_error_lockout_screen_lock (5062609811636860928) -->
+    <skip />
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"No se pudo verificar el rostro. Vuelve a intentarlo."</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"No configuraste el desbloqueo facial."</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"No se admite el desbloqueo facial en este dispositivo."</string>
+    <!-- no translation found for face_error_not_enrolled (1134739108536328412) -->
+    <skip />
+    <!-- no translation found for face_error_hw_not_present (7940978724978763011) -->
+    <skip />
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Se inhabilitó temporalmente el sensor."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Rostro <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <string name="face_app_setting_name" msgid="8130135875458467243">"Usar desbloqueo facial"</string>
+    <!-- no translation found for face_app_setting_name (5854024256907828015) -->
+    <skip />
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Usar desbloqueo facial o de pantalla"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Usa el rostro para continuar"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Usa tu rostro o bloqueo de pantalla para continuar"</string>
@@ -957,7 +963,8 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"Expandir el área desbloqueada"</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"Desbloqueo por deslizamiento"</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"Desbloqueo por patrón"</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"Desbloqueo facial"</string>
+    <!-- no translation found for keyguard_accessibility_face_unlock (4533832120787386728) -->
+    <skip />
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"Desbloqueo por PIN"</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"PIN de desbloqueo de SIM"</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"PUK de desbloqueo de SIM"</string>

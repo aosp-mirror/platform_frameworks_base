@@ -291,9 +291,6 @@
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"મોબાઇલ હૉટસ્પૉટ બંધ કર્યું."</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"મોબાઇલ હૉટસ્પૉટ ચાલુ કર્યું."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"સ્ક્રીન કાસ્ટિંગ બંધ કર્યું."</string>
-    <!-- no translation found for accessibility_quick_settings_work_mode_off (9106217884005620744) -->
-    <skip />
-    <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"કાર્ય મોડ ચાલુ."</string>
     <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6422896967647049692">"કાર્ય મોડ થોભાવ્યો."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"કાર્ય મોડ ચાલુ કર્યો."</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"ડેટા સેવર બંધ કર્યું."</string>
@@ -412,9 +409,7 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="6798849610647988987">"<xliff:g id="DATA_USED">%s</xliff:g> વાપર્યો"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"<xliff:g id="DATA_LIMIT">%s</xliff:g> મર્યાદા"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"<xliff:g id="DATA_LIMIT">%s</xliff:g> ચેતવણી"</string>
-    <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"ઑફિસની પ્રોફાઇલ"</string>
-    <!-- no translation found for quick_settings_work_mode_paused (4841109346916998613) -->
-    <skip />
+    <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"ઑફિસ માટેની ઍપ"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"રાત્રિ પ્રકાશ"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"સૂર્યાસ્ત વખતે"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"સૂર્યોદય સુધી"</string>
@@ -429,7 +424,8 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC અક્ષમ કરેલ છે"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC સક્ષમ કરેલ છે"</string>
-    <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"સ્ક્રીન રેકૉર્ડ કરો"</string>
+    <!-- no translation found for quick_settings_screen_record_label (8650355346742003694) -->
+    <skip />
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"શરૂ કરો"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"રોકો"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"ડિવાઇસના માઇક્રોફોનને કરીએ?"</string>
@@ -673,12 +669,10 @@
     <string name="wallet_title" msgid="5369767670735827105">"વૉલેટ"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"બધું બતાવો"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"ચુકવણી કરવા માટે અનલૉક કરો"</string>
-    <!-- no translation found for wallet_secondary_label_no_card (1282609666895946317) -->
-    <skip />
+    <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"કોઈ સેટઅપ કર્યું નથી"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"ઉપયોગ કરવા માટે અનલૉક કરો"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"તમારા કાર્ડની માહિતી મેળવવામાં સમસ્યા આવી હતી, કૃપા કરીને થોડા સમય પછી ફરી પ્રયાસ કરો"</string>
-    <!-- no translation found for wallet_lockscreen_settings_label (3539105300870383570) -->
-    <skip />
+    <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"લૉક સ્ક્રીનના સેટિંગ"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"ઑફિસની પ્રોફાઇલ"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"એરપ્લેન મોડ"</string>
     <string name="add_tile" msgid="6239678623873086686">"ટાઇલ ઉમેરો"</string>
@@ -868,8 +862,7 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"ચાલુ"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"બંધ"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"ઉપલબ્ધ નથી"</string>
-    <!-- no translation found for tile_disabled (373212051546573069) -->
-    <skip />
+    <string name="tile_disabled" msgid="373212051546573069">"બંધ છે"</string>
     <string name="nav_bar" msgid="4642708685386136807">"નેવિગેશન બાર"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"લેઆઉટ"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"અતિરિક્ત ડાબો બટન પ્રકાર"</string>
@@ -1049,10 +1042,7 @@
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"કિનારી પર ખસેડો અને છુપાવો"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"કિનારીથી ખસેડો અને બતાવો"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"ટૉગલ કરો"</string>
-    <string name="quick_controls_title" msgid="6839108006171302273">"ડિવાઇસનાં નિયંત્રણો"</string>
-    <string name="quick_controls_subtitle" msgid="1667408093326318053">"તમારા કનેક્ટ કરેલા ડિવાઇસ માટે નિયંત્રણો ઉમેરો"</string>
-    <string name="quick_controls_setup_title" msgid="8901436655997849822">"ડિવાઇસનાં નિયંત્રણો સેટઅપ કરો"</string>
-    <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"તમારા નિયંત્રણોને ઍક્સેસ કરવા માટે પાવર બટન દબાવી રાખો"</string>
+    <string name="quick_controls_title" msgid="7095074621086860062">"ઘરેલું સાધનોનાં નિયંત્રણો"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"નિયંત્રણો ઉમેરવા માટે ઍપ પસંદ કરો"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g> નિયંત્રણ ઉમેર્યું.</item>
@@ -1066,7 +1056,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"મનપસંદમાંથી કાઢી નાખો"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"સ્થાન <xliff:g id="NUMBER">%d</xliff:g> પર ખસેડો"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"નિયંત્રણો"</string>
-    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"પાવર મેનૂમાંથી ઍક્સેસ કરવા માટેના નિયંત્રણોને પસંદ કરો"</string>
+    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"ઝડપી સેટિંગમાંથી ઍક્સેસ કરવાના નિયંત્રણો પસંદ કરો"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"નિયંત્રણોને ફરીથી ગોઠવવા માટે તેમને હોલ્ડ કરીને ખેંચો"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"બધા નિયંત્રણો કાઢી નાખ્યા"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"ફેરફારો સાચવ્યા નથી"</string>
@@ -1105,7 +1095,7 @@
     <string name="controls_error_generic" msgid="352500456918362905">"સ્ટેટસ લોડ કરી શકાતું નથી"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"ભૂલ, ફરીથી પ્રયાસ કરો"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"પ્રક્રિયા ચાલુ છે"</string>
-    <string name="controls_added_tooltip" msgid="4842812921719153085">"નવા નિયંત્રણ જોવા માટે પાવર બટનને દબાવી રાખો"</string>
+    <string name="controls_added_tooltip" msgid="5866098408470111984">"નવા નિયંત્રણો જોવા માટે ઝડપી સેટિંગ ખોલો"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"નિયંત્રણો ઉમેરો"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"નિયંત્રણોમાં ફેરફાર કરો"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"આઉટપુટ ઉમેરો"</string>
@@ -1124,9 +1114,11 @@
     <string name="priority_conversations" msgid="3967482288896653039">"પ્રાધાન્યતા ધરાવતી વાતચીતો"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"તાજેતરની વાતચીતો"</string>
     <string name="okay" msgid="6490552955618608554">"ઓકે"</string>
-    <string name="timestamp" msgid="6577851592534538533">"<xliff:g id="DURATION">%1$s</xliff:g> પહેલાં"</string>
-    <string name="less_than_timestamp" msgid="6598972791137724517">"<xliff:g id="DURATION">%1$s</xliff:g>થી ઓછા સમય પહેલાં"</string>
-    <string name="over_timestamp" msgid="4765793502859358634">"<xliff:g id="DURATION">%1$s</xliff:g> કરતાં વધુ સમય પહેલાં"</string>
+    <string name="days_timestamp" msgid="5821854736213214331">"<xliff:g id="DURATION">%1$s</xliff:g> દિવસ પહેલાં"</string>
+    <string name="one_week_timestamp" msgid="4925600765473875590">"1 અઠવાડિયા પહેલાં"</string>
+    <string name="two_weeks_timestamp" msgid="9111801081871962155">"2 અઠવાડિયા પહેલાં"</string>
+    <string name="over_one_week_timestamp" msgid="3770560704420807142">"1 અઠવાડિયા કરતાં પહેલાંથી"</string>
+    <string name="over_two_weeks_timestamp" msgid="6300507859007874050">"2 અઠવાડિયા કરતાં પહેલાંથી"</string>
     <string name="birthday_status" msgid="2596961629465396761">"જન્મદિવસ"</string>
     <string name="birthday_status_content_description" msgid="682836371128282925">"આ તો <xliff:g id="NAME">%1$s</xliff:g>નો જન્મદિવસ છે"</string>
     <string name="upcoming_birthday_status" msgid="2005452239256870351">"જલ્દી જ જન્મદિવસ છે"</string>

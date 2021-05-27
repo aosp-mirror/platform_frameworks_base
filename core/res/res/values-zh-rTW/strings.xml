@@ -609,14 +609,12 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"指紋圖示"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"管理人臉解鎖硬體"</string>
-    <string name="permdesc_manageFace" msgid="6204569688492710471">"允許應用程式呼叫方法來新增及移除可用的臉孔範本。"</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"使用人臉解鎖硬體"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"允許應用程式使用人臉解鎖硬體進行驗證"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"人臉解鎖"</string>
+    <!-- no translation found for face_recalibrate_notification_name (7311163114750748686) -->
+    <skip />
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"請重新註冊你的臉孔"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"為提升辨識精準度，請重新註冊你的臉孔"</string>
-    <string name="face_setup_notification_title" msgid="550617822603450009">"設定人臉解鎖功能"</string>
+    <!-- no translation found for face_setup_notification_title (8843461561970741790) -->
+    <skip />
     <string name="face_setup_notification_content" msgid="5463999831057751676">"看著手機就能解鎖"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"設定更多解鎖方式"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"輕觸即可新增指紋"</string>
@@ -643,18 +641,26 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"相關硬體無法使用，因此無法驗證臉孔。"</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"請重新進行人臉解鎖。"</string>
+    <!-- no translation found for face_error_timeout (2598544068593889762) -->
+    <skip />
     <string name="face_error_no_space" msgid="5649264057026021723">"無法儲存新的臉孔資料，請先刪除舊的資料。"</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"臉孔處理作業已取消。"</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"使用者已取消人臉解鎖作業。"</string>
+    <!-- no translation found for face_error_user_canceled (5766472033202928373) -->
+    <skip />
     <string name="face_error_lockout" msgid="7864408714994529437">"嘗試次數過多，請稍後再試。"</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"嘗試次數過多，因此系統已停用人臉解鎖功能。"</string>
+    <!-- no translation found for face_error_lockout_permanent (3277134834042995260) -->
+    <skip />
+    <!-- no translation found for face_error_lockout_screen_lock (5062609811636860928) -->
+    <skip />
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"無法驗證臉孔，請再試一次。"</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"你尚未設定人臉解鎖功能。"</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"這個裝置不支援人臉解鎖功能。"</string>
+    <!-- no translation found for face_error_not_enrolled (1134739108536328412) -->
+    <skip />
+    <!-- no translation found for face_error_hw_not_present (7940978724978763011) -->
+    <skip />
     <string name="face_error_security_update_required" msgid="5076017208528750161">"感應器已暫時停用。"</string>
     <string name="face_name_template" msgid="3877037340223318119">"臉孔 <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <string name="face_app_setting_name" msgid="8130135875458467243">"使用人臉解鎖功能"</string>
+    <!-- no translation found for face_app_setting_name (5854024256907828015) -->
+    <skip />
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"使用人臉解鎖或螢幕鎖定功能"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"如要繼續操作，請透過你的臉孔驗證身分"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"請使用人臉解鎖或螢幕鎖定功能驗證身分，才能繼續操作"</string>
@@ -957,7 +963,8 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"展開解鎖區域。"</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"滑動解鎖。"</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"圖案解鎖。"</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"人臉解鎖。"</string>
+    <!-- no translation found for keyguard_accessibility_face_unlock (4533832120787386728) -->
+    <skip />
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"PIN 解鎖。"</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"SIM 卡 PIN 碼解鎖。"</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"SIM 卡 PUK 解鎖。"</string>

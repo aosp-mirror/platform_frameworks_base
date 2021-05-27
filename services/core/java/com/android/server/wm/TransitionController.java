@@ -18,6 +18,11 @@ package com.android.server.wm;
 
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_IS_RECENTS;
+import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION;
+import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION;
+import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE;
+import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER;
+import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_OPEN;
 
 import android.annotation.NonNull;
@@ -25,6 +30,7 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.util.Slog;
 import android.view.WindowManager;
 import android.window.IRemoteTransition;
@@ -47,6 +53,9 @@ class TransitionController {
 
     private ITransitionPlayer mTransitionPlayer;
     final ActivityTaskManagerService mAtm;
+
+    private final ArrayList<WindowManagerInternal.AppTransitionListener> mLegacyListeners =
+            new ArrayList<>();
 
     /**
      * Currently playing transitions (in the order they were started). When finished, records are
@@ -95,6 +104,7 @@ class TransitionController {
         mCollectingTransition = new Transition(type, flags, this, mAtm.mWindowManager.mSyncEngine);
         ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Creating Transition: %s",
                 mCollectingTransition);
+        dispatchLegacyAppTransitionPending();
         return mCollectingTransition;
     }
 
@@ -310,5 +320,41 @@ class TransitionController {
             return;
         }
         transition.legacyRestoreNavigationBarFromApp();
+    }
+
+    void registerLegacyListener(WindowManagerInternal.AppTransitionListener listener) {
+        mLegacyListeners.add(listener);
+    }
+
+    void dispatchLegacyAppTransitionPending() {
+        for (int i = 0; i < mLegacyListeners.size(); ++i) {
+            mLegacyListeners.get(i).onAppTransitionPendingLocked();
+        }
+    }
+
+    void dispatchLegacyAppTransitionStarting(TransitionInfo info) {
+        final boolean keyguardGoingAway = info.getType() == TRANSIT_KEYGUARD_GOING_AWAY
+                || (info.getFlags() & (TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE
+                        | TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION
+                        | TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER
+                        | TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION)) != 0;
+        for (int i = 0; i < mLegacyListeners.size(); ++i) {
+            mLegacyListeners.get(i).onAppTransitionStartingLocked(keyguardGoingAway,
+                    0 /* durationHint */, SystemClock.uptimeMillis(),
+                    AnimationAdapter.STATUS_BAR_TRANSITION_DURATION);
+        }
+    }
+
+    void dispatchLegacyAppTransitionFinished(ActivityRecord ar) {
+        for (int i = 0; i < mLegacyListeners.size(); ++i) {
+            mLegacyListeners.get(i).onAppTransitionFinishedLocked(ar.token);
+        }
+    }
+
+    void dispatchLegacyAppTransitionCancelled() {
+        for (int i = 0; i < mLegacyListeners.size(); ++i) {
+            mLegacyListeners.get(i).onAppTransitionCancelledLocked(
+                    false /* keyguardGoingAway */);
+        }
     }
 }

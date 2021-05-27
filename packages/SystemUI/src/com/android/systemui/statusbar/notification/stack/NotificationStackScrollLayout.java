@@ -963,7 +963,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     @ShadeViewRefactor(RefactorComponent.LAYOUT_ALGORITHM)
     private void setMaxLayoutHeight(int maxLayoutHeight) {
         mMaxLayoutHeight = maxLayoutHeight;
-        mShelf.setMaxLayoutHeight(maxLayoutHeight);
         updateAlgorithmHeightAndPadding();
     }
 
@@ -1009,9 +1008,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     private void updateClippingToTopRoundedCorner() {
-        Float clipStart = (float) mTopPadding
-                + mStackTranslation
-                + mAmbientState.getExpandAnimationTopChange();
+        Float clipStart = mAmbientState.getNotificationScrimTop();
         Float clipEnd = clipStart + mCornerRadius;
         boolean first = true;
         for (int i = 0; i < getChildCount(); i++) {
@@ -1024,7 +1021,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             boolean clip = clipStart > start && clipStart < end
                     || clipEnd >= start && clipEnd <= end;
             clip &= !(first && mScrollAdapter.isScrolledToTop());
-            child.setDistanceToTopRoundness(ExpandableView.NO_ROUNDNESS);
+            child.setDistanceToTopRoundness(clip ? Math.max(start - clipStart, 0)
+                    : ExpandableView.NO_ROUNDNESS);
             first = false;
         }
     }
@@ -5147,8 +5145,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     /**
-     * Sets the extra top inset for the full shade transition. This is needed to compensate for
-     * media transitioning to quick settings
+     * Sets the extra top inset for the full shade transition. This moves notifications down
+     * during the drag down.
      */
     public void setExtraTopInsetForFullShadeTransition(float inset) {
         mExtraTopInsetForFullShadeTransition = inset;

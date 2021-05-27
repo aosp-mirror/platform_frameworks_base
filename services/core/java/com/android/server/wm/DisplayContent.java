@@ -1008,6 +1008,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
         mAppTransition = new AppTransition(mWmService.mContext, mWmService, this);
         mAppTransition.registerListenerLocked(mWmService.mActivityManagerAppTransitionNotifier);
+        mAtmService.getTransitionController().registerLegacyListener(
+                mWmService.mActivityManagerAppTransitionNotifier);
         mAppTransition.registerListenerLocked(mFixedRotationTransitionListener);
         mAppTransitionController = new AppTransitionController(mWmService, this);
         mUnknownAppVisibilityController = new UnknownAppVisibilityController(mWmService, this);
@@ -4033,6 +4035,22 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     boolean isLayoutNeeded() {
         return mLayoutNeeded;
+    }
+
+    /** Returns {@code true} if all opening apps may be ready to execute transition. */
+    boolean areOpeningAppsReady() {
+        final int size = mOpeningApps.size();
+        for (int i = size - 1; i >= 0; i--) {
+            final ActivityRecord r = mOpeningApps.valueAt(i);
+            if (!r.hasVisible) {
+                return false;
+            }
+            final WindowState w = r.findMainWindow();
+            if (w != null && !w.isDrawn()) {
+                return false;
+            }
+        }
+        return size > 0;
     }
 
     void dumpTokens(PrintWriter pw, boolean dumpAll) {
