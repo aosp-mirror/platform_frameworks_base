@@ -188,6 +188,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
     private final UiEventLogger mUiEventLogger;
     private final NotificationShadeDepthController mDepthController;
     private final SysUiState mSysUiState;
+    private final GlobalActionsInfoProvider mInfoProvider;
 
     // Used for RingerModeTracker
     private final LifecycleRegistry mLifecycle = new LifecycleRegistry(this);
@@ -320,6 +321,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             IWindowManager iWindowManager,
             @Background Executor backgroundExecutor,
             UiEventLogger uiEventLogger,
+            GlobalActionsInfoProvider infoProvider,
             RingerModeTracker ringerModeTracker, SysUiState sysUiState, @Main Handler handler) {
         mContext = context;
         mWindowManagerFuncs = windowManagerFuncs;
@@ -339,6 +341,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         mTelecomManager = telecomManager;
         mMetricsLogger = metricsLogger;
         mUiEventLogger = uiEventLogger;
+        mInfoProvider = infoProvider;
         mDepthController = depthController;
         mSysuiColorExtractor = colorExtractor;
         mStatusBarService = statusBarService;
@@ -621,7 +624,8 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
                 mAdapter, mOverflowAdapter,
                 mDepthController, mSysuiColorExtractor,
                 mStatusBarService, mNotificationShadeWindowController,
-                mSysUiState, this::onRotate, mKeyguardShowing, mPowerAdapter, mUiEventLogger);
+                mSysUiState, this::onRotate, mKeyguardShowing, mPowerAdapter, mUiEventLogger,
+                mInfoProvider);
 
         dialog.setOnDismissListener(this);
         dialog.setOnShowListener(this);
@@ -2095,6 +2099,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         private Dialog mPowerOptionsDialog;
         protected final Runnable mOnRotateCallback;
         private UiEventLogger mUiEventLogger;
+        private GlobalActionsInfoProvider mInfoProvider;
 
         protected ViewGroup mContainer;
 
@@ -2104,7 +2109,8 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
                 SysuiColorExtractor sysuiColorExtractor, IStatusBarService statusBarService,
                 NotificationShadeWindowController notificationShadeWindowController,
                 SysUiState sysuiState, Runnable onRotateCallback, boolean keyguardShowing,
-                MyPowerOptionsAdapter powerAdapter, UiEventLogger uiEventLogger) {
+                MyPowerOptionsAdapter powerAdapter, UiEventLogger uiEventLogger,
+                @Nullable GlobalActionsInfoProvider infoProvider) {
             super(context, themeRes);
             mContext = context;
             mAdapter = adapter;
@@ -2118,6 +2124,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             mOnRotateCallback = onRotateCallback;
             mKeyguardShowing = keyguardShowing;
             mUiEventLogger = uiEventLogger;
+            mInfoProvider = infoProvider;
 
             // Window initialization
             Window window = getWindow();
@@ -2214,6 +2221,10 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             if (mBackgroundDrawable == null) {
                 mBackgroundDrawable = new ScrimDrawable();
                 mScrimAlpha = 1.0f;
+            }
+
+            if (mInfoProvider != null && mInfoProvider.shouldShowMessage()) {
+                mInfoProvider.addPanel(mContext, mContainer, mAdapter.getCount(), () -> dismiss());
             }
         }
 

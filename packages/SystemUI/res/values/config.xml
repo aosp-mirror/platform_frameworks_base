@@ -603,6 +603,8 @@
 
     <!-- Whether wallet view is shown in landscape / seascape orientations -->
     <bool name="global_actions_show_landscape_wallet_view">false</bool>
+    <!-- Whether global actions should show an informational message about changes in S -->
+    <bool name="global_actions_show_change_info">false</bool>
 
     <!-- Package name of the preferred system app to perform eSOS action -->
     <string name="config_preferredEmergencySosPackage" translatable="false"></string>
