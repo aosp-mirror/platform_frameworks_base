@@ -38,11 +38,9 @@ import com.android.internal.annotations.GuardedBy;
 import libcore.io.IoUtils;
 
 import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
@@ -375,10 +373,15 @@ public class PersistentDataBlockService extends SystemService {
 
         try {
             FileChannel channel = getBlockOutputChannel();
-            ByteBuffer buf = ByteBuffer.allocate(DIGEST_SIZE_BYTES + HEADER_SIZE);
+            int header_size = DIGEST_SIZE_BYTES + HEADER_SIZE;
+            ByteBuffer buf = ByteBuffer.allocate(header_size);
             buf.put(new byte[DIGEST_SIZE_BYTES]);
             buf.putInt(PARTITION_TYPE_MARKER);
             buf.putInt(0);
+            channel.write(buf);
+            // corrupt the payload explicitly
+            int payload_size = (int) getBlockDeviceSize() - header_size;
+            buf = ByteBuffer.allocate(payload_size);
             channel.write(buf);
             channel.force(true);
         } catch (IOException e) {

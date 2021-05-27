@@ -105,6 +105,10 @@ public class VcnNetworkProvider extends NetworkProvider {
 
     @Override
     public void onNetworkRequestWithdrawn(@NonNull NetworkRequest request) {
+        if (VDBG) {
+            Slog.v(TAG, "Network request withdrawn: Request = " + request);
+        }
+
         mRequests.remove(request);
     }
 
