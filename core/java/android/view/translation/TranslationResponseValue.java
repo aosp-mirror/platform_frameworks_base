@@ -116,6 +116,11 @@ public final class TranslationResponseValue implements Parcelable {
         return Bundle.EMPTY;
     }
 
+    private boolean extrasEquals(Bundle other) {
+        // TODO: Also compare the contents.
+        return Objects.equals(mExtras, other) || (mExtras.isEmpty() && other.isEmpty());
+    }
+
     private static CharSequence defaultTransliteration() {
         return null;
     }
@@ -254,7 +259,7 @@ public final class TranslationResponseValue implements Parcelable {
         return true
                 && mStatusCode == that.mStatusCode
                 && Objects.equals(mText, that.mText)
-                && Objects.equals(mExtras, that.mExtras)
+                && extrasEquals(that.mExtras)
                 && Objects.equals(mTransliteration, that.mTransliteration);
     }
 
@@ -443,10 +448,10 @@ public final class TranslationResponseValue implements Parcelable {
     }
 
     @DataClass.Generated(
-            time = 1621623218037L,
+            time = 1622133051937L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/view/translation/TranslationResponseValue.java",
-            inputSignatures = "public static final  int STATUS_SUCCESS\npublic static final  int STATUS_ERROR\npublic static final  java.lang.String EXTRA_DEFINITIONS\nprivate final @android.view.translation.TranslationResponseValue.Status int mStatusCode\nprivate final @android.annotation.Nullable java.lang.CharSequence mText\nprivate final @android.annotation.NonNull android.os.Bundle mExtras\nprivate final @android.annotation.Nullable java.lang.CharSequence mTransliteration\npublic static @android.annotation.NonNull android.view.translation.TranslationResponseValue forError()\nprivate static  java.lang.CharSequence defaultText()\nprivate static  android.os.Bundle defaultExtras()\nprivate static  java.lang.CharSequence defaultTransliteration()\nclass TranslationResponseValue extends java.lang.Object implements [android.os.Parcelable]\nclass BaseBuilder extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genBuilder=true, genToString=true, genEqualsHashCode=true, genHiddenConstDefs=true)\nclass BaseBuilder extends java.lang.Object implements []")
+            inputSignatures = "public static final  int STATUS_SUCCESS\npublic static final  int STATUS_ERROR\npublic static final  java.lang.String EXTRA_DEFINITIONS\nprivate final @android.view.translation.TranslationResponseValue.Status int mStatusCode\nprivate final @android.annotation.Nullable java.lang.CharSequence mText\nprivate final @android.annotation.NonNull android.os.Bundle mExtras\nprivate final @android.annotation.Nullable java.lang.CharSequence mTransliteration\npublic static @android.annotation.NonNull android.view.translation.TranslationResponseValue forError()\nprivate static  java.lang.CharSequence defaultText()\nprivate static  android.os.Bundle defaultExtras()\nprivate  boolean extrasEquals(android.os.Bundle)\nprivate static  java.lang.CharSequence defaultTransliteration()\nclass TranslationResponseValue extends java.lang.Object implements [android.os.Parcelable]\nclass BaseBuilder extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genBuilder=true, genToString=true, genEqualsHashCode=true, genHiddenConstDefs=true)\nclass BaseBuilder extends java.lang.Object implements []")
     @Deprecated
     private void __metadata() {}
 
