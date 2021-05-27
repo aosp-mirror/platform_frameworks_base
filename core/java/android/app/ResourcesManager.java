@@ -39,6 +39,7 @@ import android.os.IBinder;
 import android.os.Process;
 import android.os.Trace;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Pair;
@@ -260,6 +261,12 @@ public class ResourcesManager {
      */
     private final UpdateHandler mUpdateCallbacks = new UpdateHandler();
 
+    /**
+     * The set of APK paths belonging to this process. This is used to disable incremental
+     * installation crash protections on these APKs so the app either behaves as expects or crashes.
+     */
+    private final ArraySet<String> mApplicationOwnedApks = new ArraySet<>();
+
     @UnsupportedAppUsage
     public ResourcesManager() {
     }
@@ -424,6 +431,32 @@ public class ResourcesManager {
         }
     }
 
+    /**
+     * Initializes the set of APKs owned by the application running in this process.
+     */
+    public void initializeApplicationPaths(@NonNull String sourceDir,
+            @Nullable String[] splitDirs) {
+        synchronized (mLock) {
+            if (mApplicationOwnedApks.isEmpty()) {
+                addApplicationPathsLocked(sourceDir, splitDirs);
+            }
+        }
+    }
+
+    /**
+     * Updates the set of APKs owned by the application running in this process.
+     *
+     * This method only appends to the set of APKs owned by this process because the previous APKs
+     * paths still belong to the application running in this process.
+     */
+    private void addApplicationPathsLocked(@NonNull String sourceDir,
+            @Nullable String[] splitDirs) {
+        mApplicationOwnedApks.add(sourceDir);
+        if (splitDirs != null) {
+            mApplicationOwnedApks.addAll(Arrays.asList(splitDirs));
+        }
+    }
+
     private static String overlayPathToIdmapPath(String path) {
         return "/data/resource-cache/" + path.substring(1).replace('/', '@') + "@idmap";
     }
@@ -445,13 +478,17 @@ public class ResourcesManager {
             }
         }
 
-        // We must load this from disk.
+        int flags = 0;
+        if (key.sharedLib) {
+            flags |= ApkAssets.PROPERTY_DYNAMIC;
+        }
+        if (mApplicationOwnedApks.contains(key.path)) {
+            flags |= ApkAssets.PROPERTY_DISABLE_INCREMENTAL_HARDENING;
+        }
         if (key.overlay) {
-            apkAssets = ApkAssets.loadOverlayFromPath(overlayPathToIdmapPath(key.path),
-                    0 /*flags*/);
+            apkAssets = ApkAssets.loadOverlayFromPath(overlayPathToIdmapPath(key.path), flags);
         } else {
-            apkAssets = ApkAssets.loadFromPath(key.path,
-                    key.sharedLib ? ApkAssets.PROPERTY_DYNAMIC : 0);
+            apkAssets = ApkAssets.loadFromPath(key.path, flags);
         }
 
         synchronized (mLock) {
@@ -1436,6 +1473,10 @@ public class ResourcesManager {
                 String[] copiedSplitDirs = ArrayUtils.cloneOrNull(newSplitDirs);
                 String[] copiedResourceDirs = combinedOverlayPaths(appInfo.resourceDirs,
                         appInfo.overlayPaths);
+
+                if (appInfo.uid == myUid) {
+                    addApplicationPathsLocked(baseCodePath, copiedSplitDirs);
+                }
 
                 final ArrayMap<ResourcesImpl, ResourcesKey> updatedResourceKeys = new ArrayMap<>();
                 final int implCount = mResourceImpls.size();

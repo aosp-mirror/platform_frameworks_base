@@ -26,7 +26,7 @@
 namespace android::idmap2 {
 
 Result<XmlParser> CreateTestParser(const std::string& test_file) {
-  auto zip = ZipAssetsProvider::Create(GetTestDataPath() + "/target/target.apk");
+  auto zip = ZipAssetsProvider::Create(GetTestDataPath() + "/target/target.apk", 0 /* flags */);
   if (zip == nullptr) {
     return Error("Failed to open zip file");
   }
