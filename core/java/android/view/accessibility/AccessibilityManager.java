@@ -111,7 +111,13 @@ public final class AccessibilityManager {
     public static final int STATE_FLAG_REQUEST_MULTI_FINGER_GESTURES = 0x00000010;
 
     /** @hide */
-    public static final int STATE_FLAG_ACCESSIBILITY_TRACING_ENABLED = 0x00000020;
+    public static final int STATE_FLAG_TRACE_A11Y_INTERACTION_CONNECTION_ENABLED = 0x00000100;
+    /** @hide */
+    public static final int STATE_FLAG_TRACE_A11Y_INTERACTION_CONNECTION_CB_ENABLED = 0x00000200;
+    /** @hide */
+    public static final int STATE_FLAG_TRACE_A11Y_INTERACTION_CLIENT_ENABLED = 0x00000400;
+    /** @hide */
+    public static final int STATE_FLAG_TRACE_A11Y_SERVICE_ENABLED = 0x00000800;
 
     /** @hide */
     public static final int DALTONIZER_DISABLED = -1;
@@ -235,8 +241,8 @@ public final class AccessibilityManager {
     @UnsupportedAppUsage(trackingBug = 123768939L)
     boolean mIsHighTextContrastEnabled;
 
-    // Whether accessibility tracing is enabled or not
-    boolean mIsAccessibilityTracingEnabled = false;
+    // accessibility tracing state
+    int mAccessibilityTracingState = 0;
 
     AccessibilityPolicy mAccessibilityPolicy;
 
@@ -1010,13 +1016,50 @@ public final class AccessibilityManager {
     }
 
     /**
-     * Gets accessibility tracing enabled state.
+     * Gets accessibility interaction connection tracing enabled state.
      *
      * @hide
      */
-    public boolean isAccessibilityTracingEnabled() {
+    public boolean isA11yInteractionConnectionTraceEnabled() {
         synchronized (mLock) {
-            return mIsAccessibilityTracingEnabled;
+            return ((mAccessibilityTracingState
+                    & STATE_FLAG_TRACE_A11Y_INTERACTION_CONNECTION_ENABLED) != 0);
+        }
+    }
+
+    /**
+     * Gets accessibility interaction connection callback tracing enabled state.
+     *
+     * @hide
+     */
+    public boolean isA11yInteractionConnectionCBTraceEnabled() {
+        synchronized (mLock) {
+            return ((mAccessibilityTracingState
+                    & STATE_FLAG_TRACE_A11Y_INTERACTION_CONNECTION_CB_ENABLED) != 0);
+        }
+    }
+
+    /**
+     * Gets accessibility interaction client tracing enabled state.
+     *
+     * @hide
+     */
+    public boolean isA11yInteractionClientTraceEnabled() {
+        synchronized (mLock) {
+            return ((mAccessibilityTracingState
+                    & STATE_FLAG_TRACE_A11Y_INTERACTION_CLIENT_ENABLED) != 0);
+        }
+    }
+
+    /**
+     * Gets accessibility service tracing enabled state.
+     *
+     * @hide
+     */
+    public boolean isA11yServiceTraceEnabled() {
+        synchronized (mLock) {
+            return ((mAccessibilityTracingState
+                    & STATE_FLAG_TRACE_A11Y_SERVICE_ENABLED) != 0);
         }
     }
 
@@ -1214,8 +1257,6 @@ public final class AccessibilityManager {
                 (stateFlags & STATE_FLAG_TOUCH_EXPLORATION_ENABLED) != 0;
         final boolean highTextContrastEnabled =
                 (stateFlags & STATE_FLAG_HIGH_TEXT_CONTRAST_ENABLED) != 0;
-        final boolean accessibilityTracingEnabled =
-                (stateFlags & STATE_FLAG_ACCESSIBILITY_TRACING_ENABLED) != 0;
 
         final boolean wasEnabled = isEnabled();
         final boolean wasTouchExplorationEnabled = mIsTouchExplorationEnabled;
@@ -1238,7 +1279,7 @@ public final class AccessibilityManager {
             notifyHighTextContrastStateChanged();
         }
 
-        updateAccessibilityTracingState(accessibilityTracingEnabled);
+        updateAccessibilityTracingState(stateFlags);
     }
 
     /**
@@ -1696,11 +1737,11 @@ public final class AccessibilityManager {
     }
 
     /**
-     * Update mIsAccessibilityTracingEnabled.
+     * Update mAccessibilityTracingState.
      */
-    private void updateAccessibilityTracingState(boolean enabled) {
+    private void updateAccessibilityTracingState(int stateFlag) {
         synchronized (mLock) {
-            mIsAccessibilityTracingEnabled = enabled;
+            mAccessibilityTracingState = stateFlag;
         }
     }
 

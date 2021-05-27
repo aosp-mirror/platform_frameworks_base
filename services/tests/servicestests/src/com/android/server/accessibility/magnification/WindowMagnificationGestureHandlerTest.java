@@ -35,6 +35,7 @@ import android.view.ViewConfiguration;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.server.accessibility.AccessibilityTraceManager;
 import com.android.server.accessibility.EventStreamTransformation;
 import com.android.server.accessibility.utils.TouchEventGenerator;
 
@@ -74,16 +75,18 @@ public class WindowMagnificationGestureHandlerTest {
     private WindowMagnificationGestureHandler mWindowMagnificationGestureHandler;
     @Mock
     MagnificationGestureHandler.Callback mMockCallback;
+    @Mock
+    AccessibilityTraceManager mMockTrace;
 
     @Before
     public void setUp() throws RemoteException {
         MockitoAnnotations.initMocks(this);
         mContext = InstrumentationRegistry.getInstrumentation().getContext();
         mWindowMagnificationManager = new WindowMagnificationManager(mContext, 0,
-                mock(WindowMagnificationManager.Callback.class));
+                mock(WindowMagnificationManager.Callback.class), mMockTrace);
         mMockConnection = new MockWindowMagnificationConnection();
         mWindowMagnificationGestureHandler = new WindowMagnificationGestureHandler(
-                mContext, mWindowMagnificationManager, mMockCallback,
+                mContext, mWindowMagnificationManager, mMockTrace, mMockCallback,
                 /** detectTripleTap= */true,   /** detectShortcutTrigger= */true, DISPLAY_0);
         mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
         mWindowMagnificationGestureHandler.setNext(strictMock(EventStreamTransformation.class));

@@ -56,11 +56,13 @@ public class KeyboardInterceptorTest {
     private MessageCapturingHandler mHandler = new MessageCapturingHandler(
             msg -> mInterceptor.handleMessage(msg));
     @Mock AccessibilityManagerService mMockAms;
+    @Mock AccessibilityTraceManager mMockTraceManager;
     @Mock WindowManagerPolicy mMockPolicy;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        when(mMockAms.getTraceManager()).thenReturn(mMockTraceManager);
         mInterceptor = new KeyboardInterceptor(mMockAms, mMockPolicy, mHandler);
     }
 

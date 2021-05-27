@@ -40,6 +40,7 @@ import com.android.server.input.InputManagerService;
 import com.android.server.policy.WindowManagerPolicy;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Window manager local system service interface.
@@ -54,17 +55,18 @@ public abstract class WindowManagerInternal {
      */
     public interface AccessibilityControllerInternal {
         /**
-         * Enable the accessibility trace logging.
+         * Start tracing for the given logging types.
+         * @param loggingTypeFlags flags of the logging types enabled.
          */
-        void startTrace();
+        void startTrace(long loggingTypeFlags);
 
         /**
-         * Disable the accessibility trace logging.
+         * Disable accessibility tracing for all logging types.
          */
         void stopTrace();
 
         /**
-         * Is trace enabled or not.
+         * Is tracing enabled for any logging type.
          */
         boolean isAccessibilityTracingEnabled();
 
@@ -73,20 +75,23 @@ public abstract class WindowManagerInternal {
          *
          * @param where A string to identify this log entry, which can be used to filter/search
          *        through the tracing file.
+         * @param loggingTypeFlags The flags for the logging types this log entry belongs to.
          * @param callingParams The parameters for the method to be logged.
          * @param a11yDump The proto byte array for a11y state when the entry is generated.
          * @param callingUid The calling uid.
          * @param stackTrace The stack trace, null if not needed.
+         * @param ignoreStackEntries The stack entries can be removed
          */
         void logTrace(
-                String where, String callingParams, byte[] a11yDump, int callingUid,
-                StackTraceElement[] stackTrace);
+                String where, long loggingTypeFlags, String callingParams, byte[] a11yDump,
+                int callingUid, StackTraceElement[] stackTrace, Set<String> ignoreStackEntries);
 
         /**
          * Add an accessibility trace entry.
          *
          * @param where A string to identify this log entry, which can be used to filter/search
          *        through the tracing file.
+         * @param loggingTypeFlags The flags for the logging types this log entry belongs to.
          * @param callingParams The parameters for the method to be logged.
          * @param a11yDump The proto byte array for a11y state when the entry is generated.
          * @param callingUid The calling uid.
@@ -94,9 +99,11 @@ public abstract class WindowManagerInternal {
          * @param timeStamp The time when the method to be logged is called.
          * @param processId The calling process Id.
          * @param threadId The calling thread Id.
+         * @param ignoreStackEntries The stack entries can be removed
          */
-        void logTrace(String where, String callingParams, byte[] a11yDump, int callingUid,
-                StackTraceElement[] callStack, long timeStamp, int processId, long threadId);
+        void logTrace(String where, long loggingTypeFlags, String callingParams,
+                byte[] a11yDump, int callingUid, StackTraceElement[] callStack, long timeStamp,
+                int processId, long threadId, Set<String> ignoreStackEntries);
     }
 
     /**
