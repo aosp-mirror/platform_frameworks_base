@@ -305,7 +305,7 @@
     <string name="managed_profile_label" msgid="7316778766973512382">"Byt till jobbprofilen"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Kontakter"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"få tillgång till dina kontakter"</string>
-    <string name="permgrouplab_location" msgid="1858277002233964394">"plats"</string>
+    <string name="permgrouplab_location" msgid="1858277002233964394">"Plats"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"komma åt enhetens platsuppgifter"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"Kalender"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"få tillgång till din kalender"</string>
@@ -580,7 +580,8 @@
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Ofullständigt fingeravtryck upptäcktes"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Det gick inte att bearbeta fingeravtrycket. Försök igen."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"Rengör sensorn"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"Fingret flyttades för snabbt"</string>
+    <!-- no translation found for fingerprint_acquired_too_fast (6038375140739678098) -->
+    <skip />
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Du rörde fingret för långsamt. Försök igen."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Testa ett annat fingeravtryck"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Det är för ljust"</string>
@@ -1971,7 +1972,7 @@
     <string name="user_creation_adding" msgid="7305185499667958364">"Tillåter du att <xliff:g id="APP">%1$s</xliff:g> skapar en ny användare för <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Lägg till ett språk"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"Regionsinställningar"</string>
-    <string name="search_language_hint" msgid="7004225294308793583">"Ange språket"</string>
+    <string name="search_language_hint" msgid="7004225294308793583">"Ange språk"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Förslag"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Alla språk"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"Alla regioner"</string>
