@@ -254,6 +254,14 @@ java_library {
     installable: false,
 }
 
+// NOTE: This filegroup is exposed for vendor libraries to depend on and is referenced in
+// documentation. Do not remove without consulting the treble/hidl teams.
+filegroup {
+    name: "framework-jarjar-rules",
+    srcs: ["framework-jarjar-rules.txt"],
+    visibility: ["//visibility:public"],
+}
+
 java_library {
     name: "framework-minus-apex",
     defaults: ["framework-aidl-export-defaults"],
@@ -270,7 +278,7 @@ java_library {
         "--multi-dex",
     ],
     installable: true,
-    jarjar_rules: "framework-jarjar-rules.txt",
+    jarjar_rules: ":framework-jarjar-rules",
     javac_shard_size: 150,
     plugins: [
         "view-inspector-annotation-processor",
@@ -473,10 +481,10 @@ stubs_defaults {
     aidl: {
         local_include_dirs: [
             "apex/media/aidl/stable",
-            // TODO: move to include-dirs for packages/modules/Connectivity when this moves out of
-            // frameworks/base
-            "packages/Connectivity/framework/aidl-export",
             "telephony/java",
+        ],
+        include_dirs: [
+            "packages/modules/Connectivity/framework/aidl-export",
         ],
     },
     // These are libs from framework-internal-utils that are required (i.e. being referenced)

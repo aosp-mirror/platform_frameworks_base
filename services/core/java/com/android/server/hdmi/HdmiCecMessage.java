@@ -117,6 +117,10 @@ public final class HdmiCecMessage {
         if (mParams.length > 0) {
             if (filterMessageParameters(mOpcode)) {
                 s.append(String.format(" <Redacted len=%d>", mParams.length));
+            } else if (isUserControlPressedMessage(mOpcode)) {
+                s.append(
+                        String.format(
+                                " <Keycode type = %s>", HdmiCecKeycode.getKeycodeType(mParams[0])));
             } else {
                 for (byte data : mParams) {
                     s.append(String.format(":%02X", data));
@@ -277,7 +281,6 @@ public final class HdmiCecMessage {
 
     private static boolean filterMessageParameters(int opcode) {
         switch (opcode) {
-            case Constants.MESSAGE_USER_CONTROL_PRESSED:
             case Constants.MESSAGE_USER_CONTROL_RELEASED:
             case Constants.MESSAGE_SET_OSD_NAME:
             case Constants.MESSAGE_SET_OSD_STRING:
@@ -289,6 +292,10 @@ public final class HdmiCecMessage {
             default:
                 return false;
         }
+    }
+
+    private static boolean isUserControlPressedMessage(int opcode) {
+        return Constants.MESSAGE_USER_CONTROL_PRESSED == opcode;
     }
 }
 

@@ -23,6 +23,7 @@ import android.content.Context;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.Debug;
+import android.os.Looper;
 import android.util.Log;
 import android.view.Choreographer;
 
@@ -94,8 +95,18 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
 
     private ThreadLocal<AnimationHandler> mSfAnimationHandlerThreadLocal =
             ThreadLocal.withInitial(() -> {
-                FrameCallbackScheduler scheduler = runnable ->
+                final Looper initialLooper = Looper.myLooper();
+                final FrameCallbackScheduler scheduler = new FrameCallbackScheduler() {
+                    @Override
+                    public void postFrameCallback(@androidx.annotation.NonNull Runnable runnable) {
                         Choreographer.getSfInstance().postFrameCallback(t -> runnable.run());
+                    }
+
+                    @Override
+                    public boolean isCurrentThread() {
+                        return Looper.myLooper() == initialLooper;
+                    }
+                };
                 AnimationHandler handler = new AnimationHandler(scheduler);
                 return handler;
             });
