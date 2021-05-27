@@ -987,9 +987,9 @@
     <string name="searchview_description_clear" msgid="1989371719192982900">"Limpar consulta"</string>
     <string name="searchview_description_submit" msgid="6771060386117334686">"Enviar consulta"</string>
     <string name="searchview_description_voice" msgid="42360159504884679">"Pesquisa por voz"</string>
-    <string name="enable_explore_by_touch_warning_title" msgid="5095399706284943314">"Ativar exploração pelo toque?"</string>
-    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="1037295476738940824">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> quer ativar a exploração pelo toque. Com ela, você pode ouvir ou ver descrições do que está sob seu dedo e interagir com o tablet através de gestos."</string>
-    <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> quer ativar a exploração pelo toque. Com ela, você pode ouvir ou ver descrições do que está sob seu dedo e interagir com o telefone através de gestos."</string>
+    <string name="enable_explore_by_touch_warning_title" msgid="5095399706284943314">"Ativar o Explorar por toque?"</string>
+    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="1037295476738940824">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> quer ativar o Explorar por toque. Com ele, você pode ouvir ou ver descrições do que está sob seu dedo e interagir com o tablet por gestos."</string>
+    <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> quer ativar o Explorar por toque. Com ele, você pode ouvir ou ver descrições do que está sob seu dedo e interagir com o telefone por gestos."</string>
     <string name="oneMonthDurationPast" msgid="4538030857114635777">"1 mês atrás"</string>
     <string name="beforeOneMonthDurationPast" msgid="8315149541372065392">"Antes de 1 mês atrás"</string>
     <plurals name="last_num_days" formatted="false" msgid="687443109145393632">
@@ -1156,8 +1156,8 @@
     <string name="noApplications" msgid="1186909265235544019">"Nenhum app pode realizar esta ação."</string>
     <string name="aerr_application" msgid="4090916809370389109">"<xliff:g id="APPLICATION">%1$s</xliff:g> parou"</string>
     <string name="aerr_process" msgid="4268018696970966407">"<xliff:g id="PROCESS">%1$s</xliff:g> parou"</string>
-    <string name="aerr_application_repeated" msgid="7804378743218496566">"<xliff:g id="APPLICATION">%1$s</xliff:g> apresenta falhas continuamente"</string>
-    <string name="aerr_process_repeated" msgid="1153152413537954974">"<xliff:g id="PROCESS">%1$s</xliff:g> apresenta falhas continuamente"</string>
+    <string name="aerr_application_repeated" msgid="7804378743218496566">"o app <xliff:g id="APPLICATION">%1$s</xliff:g> apresenta falhas contínuas"</string>
+    <string name="aerr_process_repeated" msgid="1153152413537954974">"<xliff:g id="PROCESS">%1$s</xliff:g> apresenta falhas contínuas"</string>
     <string name="aerr_restart" msgid="2789618625210505419">"Abrir app novamente"</string>
     <string name="aerr_report" msgid="3095644466849299308">"Enviar feedback"</string>
     <string name="aerr_close" msgid="3398336821267021852">"Fechar"</string>

@@ -567,10 +567,10 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Icône d\'empreinte digitale"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"gérer le matériel de déverrouillage par authentification faciale"</string>
+    <string name="permlab_manageFace" msgid="4569549381889283282">"gérer le matériel de déverrouillage par reconnaissance faciale"</string>
     <string name="permdesc_manageFace" msgid="6204569688492710471">"Autorise l\'appli à invoquer des méthodes pour ajouter et supprimer des modèles de visages."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"utiliser le matériel de déverrouillage par authentification faciale"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Autorise l\'appli à utiliser le matériel de déverrouillage par authentification faciale"</string>
+    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"utiliser le matériel de déverrouillage par reconnaissance faciale"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Autorise l\'appli à utiliser le matériel de déverrouillage par reconnaissance faciale"</string>
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Déverrouillage par reconnaissance faciale"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Enregistrer à nouveau votre visage"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Pour améliorer la reconnaissance, veuillez enregistrer à nouveau votre visage"</string>
@@ -600,12 +600,12 @@
     <string name="face_error_timeout" msgid="522924647742024699">"Réessayez d\'activer le déverrouillage."</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Impossible stocker nouv. visages. Veuillez en supprimer un."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Opération de reconnaissance faciale annulée."</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"Déverrouillage par authentification faciale annulé par l\'utilisateur"</string>
+    <string name="face_error_user_canceled" msgid="8553045452825849843">"Déverrouillage par reconnaissance faciale annulé par l\'utilisateur"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Trop de tentatives. Réessayez plus tard."</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Trop de tentatives. Déverrouillage par authentification faciale désactivé."</string>
+    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Trop de tentatives. Déverrouillage par reconnaissance faciale désactivé."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Impossible de valider votre visage. Réessayez."</string>
     <string name="face_error_not_enrolled" msgid="7369928733504691611">"Déverrouillage par reconnaissance faciale non configuré"</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"Déverrouillage par authentification faciale non compatible"</string>
+    <string name="face_error_hw_not_present" msgid="1070600921591729944">"Déverrouillage par reconnaissance faciale non compatible"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Capteur temporairement désactivé."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Visage <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
@@ -905,7 +905,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"Développer la zone de déverrouillage"</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"Déverrouillage en faisant glisser votre doigt sur l\'écran"</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"Déverrouillage par schéma"</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"Déverrouillage par authentification faciale"</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"Déverrouillage par reconnaissance faciale"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"Déverrouillage par code PIN"</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"Déverrouillage de la carte SIM à l\'aide d\'un code."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"Déverrouillage de la carte SIM à l\'aide d\'une clé PUK."</string>
@@ -1785,9 +1785,9 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"<xliff:g id="LABEL">%1$s</xliff:g> (pro)"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"2e <xliff:g id="LABEL">%1$s</xliff:g> professionnelle"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3e <xliff:g id="LABEL">%1$s</xliff:g> professionnelle"</string>
-    <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Demander le code avant d\'annuler l\'épinglage"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Demander le schéma de déverrouillage avant d\'annuler l\'épinglage"</string>
-    <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Demander le mot de passe avant d\'annuler l\'épinglage"</string>
+    <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Demander le code avant de retirer l\'épingle"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Demander le schéma de déverrouillage avant de retirer l\'épingle"</string>
+    <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Demander le mot de passe avant de retirer l\'épingle"</string>
     <string name="package_installed_device_owner" msgid="7035926868974878525">"Installé par votre administrateur"</string>
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Mis à jour par votre administrateur"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Supprimé par votre administrateur"</string>

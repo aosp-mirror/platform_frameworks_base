@@ -259,7 +259,7 @@
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"បិទ​សំឡេង"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"បើក​សំឡេង"</string>
     <string name="global_actions_toggle_airplane_mode" msgid="6911684460146916206">"ពេល​ជិះ​យន្តហោះ"</string>
-    <string name="global_actions_airplane_mode_on_status" msgid="5508025516695361936">"បាន​បើក​របៀប​ពេល​ជិះ​យន្ត​ហោះ"</string>
+    <string name="global_actions_airplane_mode_on_status" msgid="5508025516695361936">"បានបើកមុខងារ​ពេល​ជិះ​យន្តហោះ"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="8522219771500505475">"បាន​បិទ​របៀបពេលជិះ​យន្តហោះ​"</string>
     <string name="global_action_settings" msgid="4671878836947494217">"ការ​កំណត់"</string>
     <string name="global_action_assist" msgid="2517047220311505805">"ជំនួយ"</string>
