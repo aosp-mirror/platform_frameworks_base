@@ -130,7 +130,7 @@ final class LetterboxUiController {
         }
         final boolean surfaceReady = w.isDrawn()  // Regular case
                 || w.isDragResizeChanged();  // Waiting for relayoutWindow to call preserveSurface.
-        final boolean needsLetterbox = surfaceReady && isLetterboxed(w);
+        final boolean needsLetterbox = surfaceReady && shouldShowLetterboxUi(w);
         updateRoundedCorners(w);
         updateWallpaperForLetterbox(w);
         if (needsLetterbox) {
@@ -166,8 +166,8 @@ final class LetterboxUiController {
      * and doesn't show a wallpaper.
      */
     @VisibleForTesting
-    boolean isLetterboxed(WindowState mainWindow) {
-        return mainWindow.isLetterboxedAppWindow() && mActivityRecord.fillsParent()
+    boolean shouldShowLetterboxUi(WindowState mainWindow) {
+        return mainWindow.areAppWindowBoundsLetterboxed() && mActivityRecord.fillsParent()
                 // Check for FLAG_SHOW_WALLPAPER explicitly instead of using
                 // WindowContainer#showWallpaper because the later will return true when this
                 // activity is using blurred wallpaper for letterbox backgroud.
@@ -217,7 +217,7 @@ final class LetterboxUiController {
     private void updateRoundedCorners(WindowState mainWindow) {
         int cornersRadius =
                 // Don't round corners if letterboxed only for display cutout.
-                isLetterboxed(mainWindow)
+                shouldShowLetterboxUi(mainWindow)
                                 && !mainWindow.isLetterboxedForDisplayCutout()
                         ? Math.max(0, mLetterboxConfiguration.getLetterboxActivityCornersRadius())
                         : 0;
@@ -237,7 +237,7 @@ final class LetterboxUiController {
                 mLetterboxConfiguration.getLetterboxBackgroundType();
         boolean wallpaperShouldBeShown =
                 letterboxBackgroundType == LETTERBOX_BACKGROUND_WALLPAPER
-                        && isLetterboxed(mainWindow)
+                        && shouldShowLetterboxUi(mainWindow)
                         // Don't use wallpaper as a background if letterboxed for display cutout.
                         && !mainWindow.isLetterboxedForDisplayCutout()
                         // Check that dark scrim alpha or blur radius are provided
@@ -274,7 +274,7 @@ final class LetterboxUiController {
             return;
         }
 
-        boolean areBoundsLetterboxed = mainWin.isLetterboxedAppWindow();
+        boolean areBoundsLetterboxed = mainWin.areAppWindowBoundsLetterboxed();
         pw.println(prefix + "areBoundsLetterboxed=" + areBoundsLetterboxed);
         if (!areBoundsLetterboxed) {
             return;
@@ -284,10 +284,10 @@ final class LetterboxUiController {
         pw.println(prefix + "  letterboxAspectRatio="
                 + mActivityRecord.computeAspectRatio(mActivityRecord.getBounds()));
 
-        boolean isLetterboxUiShown = isLetterboxed(mainWin);
-        pw.println(prefix + "isLetterboxUiShown=" + isLetterboxUiShown);
+        boolean shouldShowLetterboxUi = shouldShowLetterboxUi(mainWin);
+        pw.println(prefix + "shouldShowLetterboxUi=" + shouldShowLetterboxUi);
 
-        if (!isLetterboxUiShown) {
+        if (!shouldShowLetterboxUi) {
             return;
         }
         pw.println(prefix + "  letterboxBackgroundColor=" + Integer.toHexString(
