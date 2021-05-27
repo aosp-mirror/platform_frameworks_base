@@ -464,6 +464,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected final NotificationInterruptStateProvider mNotificationInterruptStateProvider;
     private final BrightnessSlider.Factory mBrightnessSliderFactory;
     private final FeatureFlags mFeatureFlags;
+    private final KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
 
     private final List<ExpansionChangedListener> mExpansionChangedListeners;
 
@@ -885,6 +886,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         mAnimationScheduler = animationScheduler;
         mStatusBarLocationPublisher = locationPublisher;
         mFeatureFlags = featureFlags;
+        mKeyguardUnlockAnimationController = keyguardUnlockAnimationController;
+
         mLockscreenShadeTransitionController = lockscreenShadeTransitionController;
         lockscreenShadeTransitionController.setStatusbar(this);
 
@@ -1369,7 +1372,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         // are already animating the keyguard dismiss (since we will need to either finish or cancel
         // the animation).
         if (trackingTouch
-                || mKeyguardViewMediator.isAnimatingBetweenKeyguardAndSurfaceBehindOrWillBe()) {
+                || mKeyguardViewMediator.isAnimatingBetweenKeyguardAndSurfaceBehindOrWillBe()
+                || mKeyguardUnlockAnimationController.isUnlockingWithSmartSpaceTransition()) {
             mKeyguardStateController.notifyKeyguardDismissAmountChanged(
                     1f - expansion, trackingTouch);
         }
