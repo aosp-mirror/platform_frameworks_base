@@ -2120,9 +2120,9 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"سيتم كتم صوت الهاتف عند تلقي المكالمات والإشعارات"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"تغييرات النظام"</string>
     <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"عدم الإزعاج"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"جديد: يؤدي تفعيل وضع \"الرجاء عدم الإزعاج\" إلى إخفاء الإشعارات."</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"جديد: يؤدي تفعيل ميزة \"عدم الإزعاج\" إلى إخفاء الإشعارات."</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"انقر لمعرفة مزيد من المعلومات وإجراء التغيير."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"تم تغيير وضع \"الرجاء عدم الإزعاج\"."</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"تم تغيير ميزة \"عدم الإزعاج\""</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"انقر للاطّلاع على ما تم حظره."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"النظام"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"الإعدادات"</string>

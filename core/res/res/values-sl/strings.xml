@@ -685,7 +685,7 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Nadzira število vnesenih nepravilnih gesel pri odklepanju zaslona in zaklene napravo Android TV ali izbriše vse podatke tega uporabnika, če je vnesenih preveč nepravilnih gesel."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Nadzira število vnesenih nepravilnih gesel pri odklepanju zaslona in zaklene telefon ali izbriše vse podatke lastnika, če je vnesenih preveč nepravilnih gesel."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Spreminjanje zaklepanja zaslona"</string>
-    <string name="policydesc_resetPassword" msgid="4626419138439341851">"Spreminjanje zaklepanja zaslona."</string>
+    <string name="policydesc_resetPassword" msgid="4626419138439341851">"Spremeni zaklepanje zaslona."</string>
     <string name="policylab_forceLock" msgid="7360335502968476434">"Zaklepanje zaslona"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"Nadzor nad tem, kako in kdaj se zaklene zaslon."</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"Brisanje vseh podatkov"</string>

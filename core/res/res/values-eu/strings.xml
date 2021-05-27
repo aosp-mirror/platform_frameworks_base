@@ -815,9 +815,9 @@
     <string name="sipAddressTypeOther" msgid="6317012577345187275">"Beste bat"</string>
     <string name="quick_contacts_not_available" msgid="1262709196045052223">"Ez da kontaktua ikusteko aplikaziorik aurkitu."</string>
     <string name="keyguard_password_enter_pin_code" msgid="6401406801060956153">"Idatzi PIN kodea"</string>
-    <string name="keyguard_password_enter_puk_code" msgid="3112256684547584093">"Idatzi PUK kodea eta PIN kode berria"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="3112256684547584093">"Idatzi PUKa eta PIN berria"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="2825313071899938305">"PUK kodea"</string>
-    <string name="keyguard_password_enter_pin_prompt" msgid="5505434724229581207">"PIN kode berria"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="5505434724229581207">"PIN berria"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="4032288032993261520"><font size="17">"Sakatu pasahitza idazteko"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="2751130557661643482">"Idatzi desblokeatzeko pasahitza"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7792964196473964340">"Idatzi desblokeatzeko PIN kodea"</string>
@@ -1592,7 +1592,7 @@
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"Idatzi erabili nahi duzun PIN kodea"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"Berretsi erabili nahi duzun PIN kodea"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"SIM txartela desblokeatzen…"</string>
-    <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"PIN kode okerra."</string>
+    <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"PIN okerra."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"Idatzi 4 eta 8 zenbaki arteko PINa."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"PUK kodeak 8 zenbaki izan behar ditu."</string>
     <string name="kg_invalid_puk" msgid="4809502818518963344">"Idatzi berriro PUK kode zuzena. Hainbat saiakera oker eginez gero, betiko desgaituko da SIMa."</string>

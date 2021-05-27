@@ -679,13 +679,13 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Comprueba cuántas veces se han introducido contraseñas incorrectas para desbloquear la pantalla y, si te parece que han sido demasiadas, bloquea tu dispositivo Android TV o borra todos los datos de este usuario."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Controla el número de contraseñas incorrectas introducidas para desbloquear la pantalla y bloquea el teléfono o borra todos los datos del usuario si se introducen demasiadas contraseñas incorrectas."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Cambiar el bloqueo de pantalla"</string>
-    <string name="policydesc_resetPassword" msgid="4626419138439341851">"Cambiar el bloqueo de pantalla"</string>
+    <string name="policydesc_resetPassword" msgid="4626419138439341851">"Cambia el bloqueo de pantalla"</string>
     <string name="policylab_forceLock" msgid="7360335502968476434">"Bloquear la pantalla"</string>
-    <string name="policydesc_forceLock" msgid="1008844760853899693">"Controlar cómo y cuándo se bloquea la pantalla"</string>
+    <string name="policydesc_forceLock" msgid="1008844760853899693">"Controla cómo y cuándo se bloquea la pantalla"</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"Borrar todos los datos"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Borrar los datos del tablet sin avisar restableciendo el estado de fábrica"</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Restablece los datos de fábrica de tu dispositivo Android TV, eliminando sin previo aviso los datos que tuviera."</string>
-    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Borrar los datos del teléfono sin avisar restableciendo el estado de fábrica"</string>
+    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Borra los datos del teléfono sin avisar restableciendo el estado de fábrica"</string>
     <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Borrar datos del usuario"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Borra los datos del usuario en este tablet sin avisar."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Eliminar los datos de este usuario del dispositivo Android TV sin previo aviso."</string>
@@ -699,7 +699,7 @@
     <string name="policylab_disableCamera" msgid="5749486347810162018">"Inhabilitar cámaras"</string>
     <string name="policydesc_disableCamera" msgid="3204405908799676104">"Evita el uso de las cámaras del dispositivo"</string>
     <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"Desactivar algunas funciones del bloqueo de pantalla"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"Evitar el uso de algunas funciones del bloqueo de pantalla"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"Evita el uso de algunas funciones del bloqueo de pantalla"</string>
   <string-array name="phoneTypes">
     <item msgid="8996339953292723951">"Casa"</item>
     <item msgid="7740243458912727194">"Móvil"</item>
