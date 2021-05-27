@@ -580,7 +580,8 @@
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"ตรวจพบลายนิ้วมือบางส่วน"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"ประมวลผลลายนิ้วมือไม่ได้ โปรดลองอีกครั้ง"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"ทำความสะอาดเซ็นเซอร์"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"ขยับนิ้วเร็วเกินไป"</string>
+    <!-- no translation found for fingerprint_acquired_too_fast (6038375140739678098) -->
+    <skip />
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"นิ้วเคลื่อนที่ช้าเกินไป โปรดลองอีกครั้ง"</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"ลองลายนิ้วมืออื่น"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"สว่างเกินไป"</string>
@@ -1869,9 +1870,9 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"<xliff:g id="LABEL">%1$s</xliff:g>ที่ทำงาน"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"<xliff:g id="LABEL">%1$s</xliff:g> งานที่ 2"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"<xliff:g id="LABEL">%1$s</xliff:g> งานที่ 3"</string>
-    <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"ขอ PIN ก่อนเลิกตรึง"</string>
+    <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"ขอ PIN ก่อนเลิกปักหมุด"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"ขอรูปแบบการปลดล็อกก่อนเลิกปักหมุด"</string>
-    <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"ขอรหัสผ่านก่อนเลิกตรึง"</string>
+    <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"ขอรหัสผ่านก่อนเลิกปักหมุด"</string>
     <string name="package_installed_device_owner" msgid="7035926868974878525">"ติดตั้งโดยผู้ดูแลระบบ"</string>
     <string name="package_updated_device_owner" msgid="7560272363805506941">"อัปเดตโดยผู้ดูแลระบบ"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"ลบโดยผู้ดูแลระบบ"</string>
