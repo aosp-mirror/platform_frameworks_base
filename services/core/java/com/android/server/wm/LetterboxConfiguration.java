@@ -21,6 +21,7 @@ import android.content.Context;
 import android.graphics.Color;
 
 import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -104,17 +105,9 @@ final class LetterboxConfiguration {
      * com.android.internal.R.dimen.config_fixedOrientationLetterboxAspectRatio} will be ignored and
      * the framework implementation will be used to determine the aspect ratio.
      */
+    @VisibleForTesting
     void setFixedOrientationLetterboxAspectRatio(float aspectRatio) {
         mFixedOrientationLetterboxAspectRatio = aspectRatio;
-    }
-
-    /**
-     * Resets the aspect ratio of letterbox for fixed orientation to {@link
-     * com.android.internal.R.dimen.config_fixedOrientationLetterboxAspectRatio}.
-     */
-    void resetFixedOrientationLetterboxAspectRatio() {
-        mFixedOrientationLetterboxAspectRatio = mContext.getResources().getFloat(
-                com.android.internal.R.dimen.config_fixedOrientationLetterboxAspectRatio);
     }
 
     /**
@@ -122,25 +115,6 @@ final class LetterboxConfiguration {
      */
     float getFixedOrientationLetterboxAspectRatio() {
         return mFixedOrientationLetterboxAspectRatio;
-    }
-
-    /**
-     * Overrides corners raidus for activities presented in the letterbox mode. If given value < 0,
-     * both it and a value of {@link
-     * com.android.internal.R.integer.config_letterboxActivityCornersRadius} will be ignored and
-     * and corners of the activity won't be rounded.
-     */
-    void setLetterboxActivityCornersRadius(int cornersRadius) {
-        mLetterboxActivityCornersRadius = cornersRadius;
-    }
-
-    /**
-     * Resets corners raidus for activities presented in the letterbox mode to {@link
-     * com.android.internal.R.integer.config_letterboxActivityCornersRadius}.
-     */
-    void resetLetterboxActivityCornersRadius() {
-        mLetterboxActivityCornersRadius = mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_letterboxActivityCornersRadius);
     }
 
     /**
@@ -166,25 +140,6 @@ final class LetterboxConfiguration {
         return mLetterboxBackgroundColor;
     }
 
-
-    /**
-     * Sets color of letterbox background which is used when {@link
-     * #getLetterboxBackgroundType()} is {@link #LETTERBOX_BACKGROUND_SOLID_COLOR} or as
-     * fallback for other backfround types.
-     */
-    void setLetterboxBackgroundColor(Color color) {
-        mLetterboxBackgroundColor = color;
-    }
-
-    /**
-     * Resets color of letterbox background to {@link
-     * com.android.internal.R.color.config_letterboxBackgroundColor}.
-     */
-    void resetLetterboxBackgroundColor() {
-        mLetterboxBackgroundColor = Color.valueOf(mContext.getResources().getColor(
-                com.android.internal.R.color.config_letterboxBackgroundColor));
-    }
-
     /**
      * Gets {@link LetterboxBackgroundType} specified in {@link
      * com.android.internal.R.integer.config_letterboxBackgroundType} or over via ADB command.
@@ -192,19 +147,6 @@ final class LetterboxConfiguration {
     @LetterboxBackgroundType
     int getLetterboxBackgroundType() {
         return mLetterboxBackgroundType;
-    }
-
-    /** Sets letterbox background type. */
-    void setLetterboxBackgroundType(@LetterboxBackgroundType int backgroundType) {
-        mLetterboxBackgroundType = backgroundType;
-    }
-
-    /**
-     * Resets cletterbox background type to {@link
-     * com.android.internal.R.integer.config_letterboxBackgroundType}.
-     */
-    void resetLetterboxBackgroundType() {
-        mLetterboxBackgroundType = readLetterboxBackgroundTypeFromConfig(mContext);
     }
 
     /** Returns a string representing the given {@link LetterboxBackgroundType}. */
@@ -236,53 +178,10 @@ final class LetterboxConfiguration {
     }
 
     /**
-     * Overrides alpha of a black scrim shown over wallpaper for {@link
-     * #LETTERBOX_BACKGROUND_WALLPAPER} option in {@link mLetterboxBackgroundType}.
-     *
-     * <p>If given value is < 0 or >= 1, both it and a value of {@link
-     * com.android.internal.R.dimen.config_letterboxBackgroundWallaperDarkScrimAlpha} are ignored
-     * and 0.0 (transparent) is instead.
-     */
-    void setLetterboxBackgroundWallpaperDarkScrimAlpha(float alpha) {
-        mLetterboxBackgroundWallpaperDarkScrimAlpha = alpha;
-    }
-
-    /**
-     * Resets alpha of a black scrim shown over wallpaper letterbox background to {@link
-     * com.android.internal.R.dimen.config_letterboxBackgroundWallaperDarkScrimAlpha}.
-     */
-    void resetLetterboxBackgroundWallpaperDarkScrimAlpha() {
-        mLetterboxBackgroundWallpaperDarkScrimAlpha = mContext.getResources().getFloat(
-                com.android.internal.R.dimen.config_letterboxBackgroundWallaperDarkScrimAlpha);
-    }
-
-    /**
      * Gets alpha of a black scrim shown over wallpaper letterbox background.
      */
     float getLetterboxBackgroundWallpaperDarkScrimAlpha() {
         return mLetterboxBackgroundWallpaperDarkScrimAlpha;
-    }
-
-    /**
-     * Overrides blur radius for {@link #LETTERBOX_BACKGROUND_WALLPAPER} option in
-     * {@link mLetterboxBackgroundType}.
-     *
-     * <p> If given value <= 0, both it and a value of {@link
-     * com.android.internal.R.dimen.config_letterboxBackgroundWallpaperBlurRadius} are ignored
-     * and 0 is used instead.
-     */
-    void setLetterboxBackgroundWallpaperBlurRadius(int radius) {
-        mLetterboxBackgroundWallpaperBlurRadius = radius;
-    }
-
-    /**
-     * Resets blur raidus for {@link #LETTERBOX_BACKGROUND_WALLPAPER} option in {@link
-     * mLetterboxBackgroundType} to {@link
-     * com.android.internal.R.dimen.config_letterboxBackgroundWallpaperBlurRadius}.
-     */
-    void resetLetterboxBackgroundWallpaperBlurRadius() {
-        mLetterboxBackgroundWallpaperBlurRadius = mContext.getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.config_letterboxBackgroundWallpaperBlurRadius);
     }
 
     /**
@@ -312,17 +211,9 @@ final class LetterboxConfiguration {
      * com.android.internal.R.dimen.config_letterboxHorizontalPositionMultiplier} are ignored and
      * central position (0.5) is used.
      */
+    @VisibleForTesting
     void setLetterboxHorizontalPositionMultiplier(float multiplier) {
         mLetterboxHorizontalPositionMultiplier = multiplier;
-    }
-
-    /**
-     * Resets horizontal position of a center of the letterboxed app window to {@link
-     * com.android.internal.R.dimen.config_letterboxHorizontalPositionMultiplier}.
-     */
-    void resetLetterboxHorizontalPositionMultiplier() {
-        mLetterboxHorizontalPositionMultiplier = mContext.getResources().getFloat(
-                com.android.internal.R.dimen.config_letterboxHorizontalPositionMultiplier);
     }
 
 }
