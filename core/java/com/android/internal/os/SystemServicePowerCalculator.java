@@ -40,8 +40,10 @@ public class SystemServicePowerCalculator extends PowerCalculator {
     // to this layout:
     // {cluster1-speed1, cluster1-speed2, ..., cluster2-speed1, cluster2-speed2, ...}
     private final UsageBasedPowerEstimator[] mPowerEstimators;
+    private final CpuPowerCalculator mCpuPowerCalculator;
 
     public SystemServicePowerCalculator(PowerProfile powerProfile) {
+        mCpuPowerCalculator = new CpuPowerCalculator(powerProfile);
         int numFreqs = 0;
         final int numCpuClusters = powerProfile.getNumCpuClusters();
         for (int cluster = 0; cluster < numCpuClusters; cluster++) {
@@ -62,7 +64,22 @@ public class SystemServicePowerCalculator extends PowerCalculator {
     @Override
     public void calculate(BatteryUsageStats.Builder builder, BatteryStats batteryStats,
             long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query) {
-        double systemServicePowerMah = calculateSystemServicePower(batteryStats);
+        final BatteryStats.Uid systemUid = batteryStats.getUidStats().get(Process.SYSTEM_UID);
+        if (systemUid == null) {
+            return;
+        }
+
+        final long consumptionUC = systemUid.getCpuMeasuredBatteryConsumptionUC();
+        final int powerModel = getPowerModel(consumptionUC, query);
+
+        double systemServicePowerMah;
+        if (powerModel == BatteryConsumer.POWER_MODEL_MEASURED_ENERGY) {
+            systemServicePowerMah = calculatePowerUsingMeasuredConsumption(batteryStats,
+                    systemUid, consumptionUC);
+        } else {
+            systemServicePowerMah = calculatePowerUsingPowerProfile(batteryStats);
+        }
+
         final SparseArray<UidBatteryConsumer.Builder> uidBatteryConsumerBuilders =
                 builder.getUidBatteryConsumerBuilders();
         final UidBatteryConsumer.Builder systemServerConsumer = uidBatteryConsumerBuilders.get(
@@ -76,7 +93,7 @@ public class SystemServicePowerCalculator extends PowerCalculator {
             // distributed to applications
             systemServerConsumer.setConsumedPower(
                     BatteryConsumer.POWER_COMPONENT_REATTRIBUTED_TO_OTHER_CONSUMERS,
-                    -systemServicePowerMah);
+                    -systemServicePowerMah, powerModel);
         }
 
         for (int i = uidBatteryConsumerBuilders.size() - 1; i >= 0; i--) {
@@ -84,7 +101,8 @@ public class SystemServicePowerCalculator extends PowerCalculator {
             if (app != systemServerConsumer) {
                 final BatteryStats.Uid uid = app.getBatteryStatsUid();
                 app.setConsumedPower(BatteryConsumer.POWER_COMPONENT_SYSTEM_SERVICES,
-                        systemServicePowerMah * uid.getProportionalSystemServiceUsage());
+                        systemServicePowerMah * uid.getProportionalSystemServiceUsage(),
+                        powerModel);
             }
         }
 
@@ -102,7 +120,20 @@ public class SystemServicePowerCalculator extends PowerCalculator {
     public void calculate(List<BatterySipper> sippers, BatteryStats batteryStats,
             long rawRealtimeUs, long rawUptimeUs, int statsType,
             SparseArray<UserHandle> asUsers) {
-        double systemServicePowerMah = calculateSystemServicePower(batteryStats);
+        final BatteryStats.Uid systemUid = batteryStats.getUidStats().get(Process.SYSTEM_UID);
+        if (systemUid == null) {
+            return;
+        }
+
+        final long consumptionUC = systemUid.getCpuMeasuredBatteryConsumptionUC();
+        double systemServicePowerMah;
+        if (getPowerModel(consumptionUC) == BatteryConsumer.POWER_MODEL_MEASURED_ENERGY) {
+            systemServicePowerMah = calculatePowerUsingMeasuredConsumption(batteryStats,
+                    systemUid, consumptionUC);
+        } else {
+            systemServicePowerMah = calculatePowerUsingPowerProfile(batteryStats);
+        }
+
         BatterySipper systemServerSipper = null;
         for (int i = sippers.size() - 1; i >= 0; i--) {
             final BatterySipper app = sippers.get(i);
@@ -134,7 +165,21 @@ public class SystemServicePowerCalculator extends PowerCalculator {
         }
     }
 
-    private double calculateSystemServicePower(BatteryStats batteryStats) {
+    private double calculatePowerUsingMeasuredConsumption(BatteryStats batteryStats,
+            BatteryStats.Uid systemUid, long consumptionUC) {
+        // Use the PowerProfile based model to estimate the ratio between the power consumed
+        // while handling incoming binder calls and the entire System UID power consumption.
+        // Apply that ratio to the _measured_ system UID power consumption to get a more
+        // accurate estimate of the power consumed by incoming binder calls.
+        final double systemServiceModeledPowerMah = calculatePowerUsingPowerProfile(batteryStats);
+        final double systemUidModeledPowerMah = mCpuPowerCalculator.calculateUidModeledPowerMah(
+                systemUid, BatteryStats.STATS_SINCE_CHARGED);
+
+        return uCtoMah(consumptionUC) * systemServiceModeledPowerMah
+                / systemUidModeledPowerMah;
+    }
+
+    private double calculatePowerUsingPowerProfile(BatteryStats batteryStats) {
         final long[] systemServiceTimeAtCpuSpeeds = batteryStats.getSystemServiceTimeAtCpuSpeeds();
         if (systemServiceTimeAtCpuSpeeds == null) {
             return 0;
@@ -145,13 +190,12 @@ public class SystemServicePowerCalculator extends PowerCalculator {
         double powerMah = 0;
         final int size = Math.min(mPowerEstimators.length, systemServiceTimeAtCpuSpeeds.length);
         for (int i = 0; i < size; i++) {
-            powerMah += mPowerEstimators[i].calculatePower(systemServiceTimeAtCpuSpeeds[i]);
+            powerMah += mPowerEstimators[i].calculatePower(systemServiceTimeAtCpuSpeeds[i] / 1000);
         }
 
         if (DEBUG) {
             Log.d(TAG, "System service power:" + powerMah);
         }
-
         return powerMah;
     }
 }

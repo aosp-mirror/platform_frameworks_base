@@ -152,6 +152,16 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         mCallbacks.add(new WeakReference<StatusBarWindowCallback>(callback));
     }
 
+    @Override
+    public void unregisterCallback(StatusBarWindowCallback callback) {
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            if (mCallbacks.get(i).get() == callback) {
+                mCallbacks.remove(i);
+                return;
+            }
+        }
+    }
+
     /**
      * Register a listener to monitor scrims visibility
      * @param listener A listener to monitor scrims visibility

@@ -400,10 +400,7 @@ public abstract class Context {
     public static final int BIND_BYPASS_POWER_NETWORK_RESTRICTIONS = 0x00020000;
 
     /**
-     * Flag for {@link #bindService}: allow background foreground service starts from the bound
-     * service's process.
-     * This flag is only respected if the caller is holding
-     * {@link android.Manifest.permission#START_FOREGROUND_SERVICES_FROM_BACKGROUND}.
+     * Do not use. This flag is no longer needed nor used.
      * @hide
      */
     @SystemApi

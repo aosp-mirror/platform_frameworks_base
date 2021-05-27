@@ -26,7 +26,6 @@ import static com.android.server.am.ProcessRecord.TAG;
 import android.annotation.ElapsedRealtimeLong;
 import android.app.ActivityManager;
 import android.content.ComponentName;
-import android.os.Binder;
 import android.os.SystemClock;
 import android.util.ArraySet;
 import android.util.Slog;
@@ -301,9 +300,6 @@ final class ProcessStateRecord {
      */
     @GuardedBy("mService")
     private int mAllowStartFgsState = PROCESS_STATE_NONEXISTENT;
-
-    @GuardedBy("mService")
-    private final ArraySet<Binder> mBackgroundFgsStartTokens = new ArraySet<>();
 
     /**
      * Whether or not this process has been in forced-app-standby state.
@@ -1098,21 +1094,6 @@ final class ProcessStateRecord {
         mCurSchedGroup = mSetSchedGroup = ProcessList.SCHED_GROUP_BACKGROUND;
         mCurProcState = mRepProcState = mCurRawProcState = mSetProcState = mAllowStartFgsState =
                 PROCESS_STATE_NONEXISTENT;
-    }
-
-    @GuardedBy("mService")
-    void addAllowBackgroundFgsStartsToken(Binder entity) {
-        mBackgroundFgsStartTokens.add(entity);
-    }
-
-    @GuardedBy("mService")
-    void removeAllowBackgroundFgsStartsToken(Binder entity) {
-        mBackgroundFgsStartTokens.remove(entity);
-    }
-
-    @GuardedBy("mService")
-    boolean areBackgroundFgsStartsAllowedByToken() {
-        return !mBackgroundFgsStartTokens.isEmpty();
     }
 
     @GuardedBy("mService")

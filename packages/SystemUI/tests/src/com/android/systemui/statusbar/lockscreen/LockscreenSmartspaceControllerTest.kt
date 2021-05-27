@@ -511,6 +511,9 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
 
         override fun setNextAlarm(image: Drawable?, description: String?) {
         }
+
+        override fun setMediaTarget(target: SmartspaceTarget?) {
+        }
     })
 }
 
