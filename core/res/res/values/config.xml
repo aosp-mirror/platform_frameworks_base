@@ -1968,6 +1968,9 @@
     <string name="config_systemActivityRecognizer" translatable="false"></string>
     <!-- The name of the package that will hold the system ui role -->
     <string name="config_systemUi" translatable="false">com.android.systemui</string>
+    <!-- The name of the package that will hold the television remote service role.
+        TODO(b/189347385) make this a @SystemAPI -->
+    <string name="config_systemTelevisionRemoteService" translatable="false">@string/config_tvRemoteServicePackage</string>
 
     <!-- The name of the package that will be allowed to change its components' label/icon. -->
     <string name="config_overrideComponentUiPackage" translatable="false">com.android.stk</string>
