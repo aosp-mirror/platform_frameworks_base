@@ -136,8 +136,7 @@
     <string name="accessibility_camera_button" msgid="2938898391716647247">"કૅમેરો"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"ફોન"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"વૉઇસ સહાય"</string>
-    <!-- no translation found for accessibility_wallet_button (1458258783460555507) -->
-    <skip />
+    <string name="accessibility_wallet_button" msgid="1458258783460555507">"વૉલેટ"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"અનલૉક કરો"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"ડિવાઇસ લૉક કરેલું છે"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="5209142744692162598">"ફિંગરપ્રિન્ટની રાહ જોઈ રહ્યાં છીએ"</string>
@@ -424,8 +423,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC અક્ષમ કરેલ છે"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC સક્ષમ કરેલ છે"</string>
-    <!-- no translation found for quick_settings_screen_record_label (8650355346742003694) -->
-    <skip />
+    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"સ્ક્રીન રેકૉર્ડ"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"શરૂ કરો"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"રોકો"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"ડિવાઇસના માઇક્રોફોનને કરીએ?"</string>
@@ -1149,8 +1147,6 @@
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"ખાતરી કરો"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"ડિવાઇસ અનલૉક કરો"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"ખોલવા માટે ફિંગરપ્રિન્ટનો ઉપયોગ કરો"</string>
-    <!-- no translation found for accessibility_fingerprint_bouncer (7189102492498735519) -->
-    <skip />
-    <!-- no translation found for ongoing_phone_call_content_description (5332334388483099947) -->
-    <skip />
+    <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"પ્રમાણીકરણ આવશ્યક છે. પ્રમાણિત કરવા માટે ફિંગરપ્રિન્ટ સેન્સરને ટચ કરો."</string>
+    <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"ફોન કૉલ ચાલુ છે"</string>
 </resources>
