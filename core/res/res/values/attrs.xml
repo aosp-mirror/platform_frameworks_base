@@ -1137,6 +1137,9 @@
         <!-- Darker accent color used on Material NEXT buttons. @hide -->
         <attr name="colorAccentPrimaryVariant" format="color" />
 
+        <!-- Text color used on top of Material NEXT accent colors. @hide -->
+        <attr name="textColorOnAccent" format="color" />
+
         <!-- Secondary darker accent color used on Material NEXT buttons. @hide -->
         <attr name="colorAccentSecondaryVariant" format="color" />
 

@@ -290,8 +290,6 @@
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"ম’বাইল হটস্পট  অফ কৰা হ’ল।"</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"ম’বাইল হটস্পট  অন কৰা হ’ল।"</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"স্ক্ৰীণ কাষ্টিং বন্ধ কৰা হ’ল।"</string>
-    <string name="accessibility_quick_settings_work_mode_off" msgid="9106217884005620744">"কৰ্মস্থান ম’ড পজ হৈ আছে।"</string>
-    <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"কৰ্মস্থান ম\'ড অন হৈ আছে।"</string>
     <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6422896967647049692">"কৰ্মস্থান ম’ড পজ হৈ আছে।"</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"কৰ্মস্থান ম\'ড অন কৰা হ’ল।"</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"ডেটা সঞ্চয়কাৰী সুবিধা অফ কৰা হ’ল।"</string>
@@ -410,8 +408,7 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="6798849610647988987">"<xliff:g id="DATA_USED">%s</xliff:g> ব্যৱহৃত"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"<xliff:g id="DATA_LIMIT">%s</xliff:g> সীমা"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"<xliff:g id="DATA_LIMIT">%s</xliff:g> সকীয়নি"</string>
-    <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"কৰ্মস্থানৰ প্ৰ\'ফাইল"</string>
-    <string name="quick_settings_work_mode_paused" msgid="4841109346916998613">"পজ হৈ আছে"</string>
+    <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"কৰ্মস্থানৰ এপ্‌"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"ৰাতিৰ পোহৰ"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"সূৰ্যাস্তত অন কৰক"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"সূৰ্যোদয়ৰ লৈকে"</string>
@@ -426,7 +423,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC নিষ্ক্ৰিয় হৈ আছে"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC সক্ষম হৈ আছে"</string>
-    <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"স্ক্ৰীন ৰেকর্ড"</string>
+    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"স্ক্ৰীন ৰেকৰ্ড কৰা"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"আৰম্ভ কৰক"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"বন্ধ কৰক"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"ডিভাইচৰ মাইক্ৰ\'ফ\'ন অৱৰোধৰ পৰা আঁতৰাবনে?"</string>
@@ -1043,10 +1040,7 @@
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"কাষলৈ নিয়ক আৰু লুকুৱাওক"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"কাষৰ বাহিৰলৈ নিয়ক আৰু দেখুৱাওক"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"ট’গল কৰক"</string>
-    <string name="quick_controls_title" msgid="6839108006171302273">"ডিভাইচৰ নিয়ন্ত্ৰণসমূহ"</string>
-    <string name="quick_controls_subtitle" msgid="1667408093326318053">"আপোনাৰ সংযোজিত ডিভাইচৰ বাবে নিয়ন্ত্ৰণ যোগ কৰক"</string>
-    <string name="quick_controls_setup_title" msgid="8901436655997849822">"ডিভাইচৰ নিয়ন্ত্ৰণসমূহ ছেট আপ কৰক"</string>
-    <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"আপোনাৰ নিয়ন্ত্ৰণসমূহ এক্সেছ কৰিবলৈ পাৱাৰ বুটামটো হেঁচি ধৰি ৰাখক"</string>
+    <string name="quick_controls_title" msgid="7095074621086860062">"গৃহ নিয়ন্ত্ৰণ"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"নিয়ন্ত্ৰণসমূহ যোগ কৰিবলৈ এপ্‌ বাছনি কৰক"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g> টা নিয়ন্ত্ৰণ যোগ কৰা হ’ল।</item>
@@ -1060,7 +1054,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"অপ্ৰিয়"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"<xliff:g id="NUMBER">%d</xliff:g> নম্বৰ অৱস্থানলৈ স্থানান্তৰিত কৰক"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"নিয়ন্ত্ৰণসমূহ"</string>
-    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"পাৱাৰ মেনুখনৰ পৰা এক্সেছ পাবলৈ নিয়ন্ত্ৰণসমূহ বাছনি কৰক"</string>
+    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"ক্ষিপ্ৰ ছেটিঙৰ পৰা এক্সেছ কৰিবলৈ নিয়ন্ত্ৰণসমূহ বাছনি কৰক"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"নিয়ন্ত্ৰণসমূহ পুনৰ সজাবলৈ ধৰি ৰাখক আৰু টানি আনি এৰক"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"সকলো নিয়ন্ত্ৰণ আঁতৰোৱা হৈছে"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"সালসলনিসমূহ ছেভ নহ’ল"</string>
@@ -1099,7 +1093,7 @@
     <string name="controls_error_generic" msgid="352500456918362905">"স্থিতি ল’ড কৰিব নোৱাৰি"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"আসোঁৱাহ হৈছে, আকৌ চেষ্টা কৰক"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"চলি আছে"</string>
-    <string name="controls_added_tooltip" msgid="4842812921719153085">"নতুন নিয়ন্ত্ৰণসমূহ চাবলৈ পাৱাৰৰ বুটামটো ধৰি ৰাখক"</string>
+    <string name="controls_added_tooltip" msgid="5866098408470111984">"নতুন নিয়ন্ত্ৰণসমূহ চাবলৈ ক্ষিপ্ৰ ছেটিং খোলক"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"নিয়ন্ত্ৰণসমূহ যোগ দিয়ক"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"নিয়ন্ত্ৰণসমূহ সম্পাদনা কৰক"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"আউটপুটসমূহ যোগ দিয়ক"</string>
@@ -1118,9 +1112,11 @@
     <string name="priority_conversations" msgid="3967482288896653039">"অগ্ৰাধিকাৰপ্ৰাপ্ত বাৰ্তালাপ"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"শেহতীয়া বাৰ্তালাপ"</string>
     <string name="okay" msgid="6490552955618608554">"ঠিক আছে"</string>
-    <string name="timestamp" msgid="6577851592534538533">"<xliff:g id="DURATION">%1$s</xliff:g> পূৰ্বে"</string>
-    <string name="less_than_timestamp" msgid="6598972791137724517">"<xliff:g id="DURATION">%1$s</xliff:g>তকৈ কম সময়ৰ পূৰ্বে"</string>
-    <string name="over_timestamp" msgid="4765793502859358634">"<xliff:g id="DURATION">%1$s</xliff:g>তকৈ বেছি সময়ৰ পূৰ্বে"</string>
+    <string name="days_timestamp" msgid="5821854736213214331">"<xliff:g id="DURATION">%1$s</xliff:g> দিন আগতে"</string>
+    <string name="one_week_timestamp" msgid="4925600765473875590">"১ সপ্তাহ আগতে"</string>
+    <string name="two_weeks_timestamp" msgid="9111801081871962155">"২ সপ্তাহ পূৰ্বে"</string>
+    <string name="over_one_week_timestamp" msgid="3770560704420807142">"১ সপ্তাহতকৈ বেছি আগতে"</string>
+    <string name="over_two_weeks_timestamp" msgid="6300507859007874050">"২ সপ্তাহতকৈ বেছি আগতে"</string>
     <string name="birthday_status" msgid="2596961629465396761">"জন্মদিন"</string>
     <string name="birthday_status_content_description" msgid="682836371128282925">"এয়া <xliff:g id="NAME">%1$s</xliff:g>ৰ জন্মদিন"</string>
     <string name="upcoming_birthday_status" msgid="2005452239256870351">"জন্মদিন সোনকালে আহি আছে"</string>

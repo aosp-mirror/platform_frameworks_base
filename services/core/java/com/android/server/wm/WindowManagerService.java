@@ -7582,6 +7582,7 @@ public class WindowManagerService extends IWindowManager.Stub
         public void registerAppTransitionListener(AppTransitionListener listener) {
             synchronized (mGlobalLock) {
                 getDefaultDisplayContentLocked().mAppTransition.registerListenerLocked(listener);
+                mAtmService.getTransitionController().registerLegacyListener(listener);
             }
         }
 

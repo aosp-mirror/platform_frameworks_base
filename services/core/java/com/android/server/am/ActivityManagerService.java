@@ -1236,7 +1236,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      * The temp-allowlist that is allowed to start FGS from background.
      */
     @CompositeRWLock({"this", "mProcLock"})
-    final FgsTempAllowList<Integer, FgsTempAllowListItem> mFgsStartTempAllowList =
+    final FgsTempAllowList<FgsTempAllowListItem> mFgsStartTempAllowList =
             new FgsTempAllowList();
 
     static final FgsTempAllowListItem FAKE_TEMP_ALLOW_LIST_ITEM = new FgsTempAllowListItem(
@@ -1246,7 +1246,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      * List of uids that are allowed to have while-in-use permission when FGS is started from
      * background.
      */
-    private final FgsTempAllowList<Integer, String> mFgsWhileInUseTempAllowList =
+    private final FgsTempAllowList<String> mFgsWhileInUseTempAllowList =
             new FgsTempAllowList();
 
     /**
@@ -4331,8 +4331,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (pid > 0 && pid != MY_PID) {
                 killProcessQuiet(pid);
                 //TODO: killProcessGroup(app.info.uid, pid);
-                mProcessList.noteAppKill(app, ApplicationExitInfo.REASON_INITIALIZATION_FAILURE,
-                        ApplicationExitInfo.SUBREASON_UNKNOWN, "attach failed");
+                // We can't log the app kill info for this process since we don't
+                // know who it is, so just skip the logging.
             } else {
                 try {
                     thread.scheduleExit();
@@ -9380,22 +9380,17 @@ public class ActivityManagerService extends IActivityManager.Stub
             pw.println("  mFgsStartTempAllowList:");
             final long currentTimeNow = System.currentTimeMillis();
             final long elapsedRealtimeNow = SystemClock.elapsedRealtime();
-            final Set<Integer> uids = new ArraySet<>(mFgsStartTempAllowList.keySet());
-            for (Integer uid : uids) {
-                final Pair<Long, FgsTempAllowListItem> entry = mFgsStartTempAllowList.get(uid);
-                if (entry == null) {
-                    continue;
-                }
+            mFgsStartTempAllowList.forEach((uid, entry) -> {
                 pw.print("    " + UserHandle.formatUid(uid) + ": ");
-                entry.second.dump(pw); pw.println();
-                pw.print("ms expiration=");
+                entry.second.dump(pw);
+                pw.print(" expiration=");
                 // Convert entry.mExpirationTime, which is an elapsed time since boot,
                 // to a time since epoch (i.e. System.currentTimeMillis()-based time.)
                 final long expirationInCurrentTime =
                         currentTimeNow - elapsedRealtimeNow + entry.first;
                 TimeUtils.dumpTimeWithDelta(pw, expirationInCurrentTime, currentTimeNow);
                 pw.println();
-            }
+            });
         }
         if (mDebugApp != null || mOrigDebugApp != null || mDebugTransient
                 || mOrigWaitForDebugger) {
@@ -15353,10 +15348,19 @@ public class ActivityManagerService extends IActivityManager.Stub
                     mDeviceIdleTempAllowlist = appids;
                     if (adding) {
                         if (type == TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED) {
+                            // Note, the device idle temp-allowlist are by app-ids, but here
+                            // mFgsStartTempAllowList contains UIDs.
                             mFgsStartTempAllowList.add(changingUid, durationMs,
                                     new FgsTempAllowListItem(durationMs, reasonCode, reason,
                                     callingUid));
                         }
+                    } else {
+                        // Note in the removing case, we need to remove all the UIDs matching
+                        // the appId, because DeviceIdle's temp-allowlist are based on AppIds,
+                        // not UIDs.
+                        // For eacmple, "cmd deviceidle tempallowlist -r PACKAGE" will
+                        // not only remove this app for user 0, but for all users.
+                        mFgsStartTempAllowList.removeAppId(UserHandle.getAppId(changingUid));
                     }
                     setAppIdTempAllowlistStateLSP(changingUid, adding);
                 }

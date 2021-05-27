@@ -975,7 +975,7 @@ public class RippleDrawable extends LayerDrawable {
         shader.setColor(color, effectColor);
         shader.setOrigin(cx, cy);
         shader.setTouch(x, y);
-        shader.setResolution(w, h, mState.mDensity);
+        shader.setResolution(w, h);
         shader.setNoisePhase(noisePhase);
         shader.setRadius(radius);
         shader.setProgress(.0f);
@@ -1193,6 +1193,9 @@ public class RippleDrawable extends LayerDrawable {
             mRipplePaint = new Paint();
             mRipplePaint.setAntiAlias(true);
             mRipplePaint.setStyle(Paint.Style.FILL);
+            if (mState.mRippleStyle == STYLE_PATTERNED) {
+                mRipplePaint.setDither(true);
+            }
         }
 
         final float x = mHotspotBounds.exactCenterX();

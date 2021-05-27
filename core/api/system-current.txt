@@ -4931,10 +4931,6 @@ package android.location {
     field @Deprecated public static final String EXTRA_NO_GPS_LOCATION = "noGPSLocation";
   }
 
-  public final class LocationDeviceConfig {
-    field public static final String IGNORE_SETTINGS_ALLOWLIST = "ignore_settings_allowlist";
-  }
-
   public class LocationManager {
     method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void addProviderRequestChangedListener(@NonNull java.util.concurrent.Executor, @NonNull android.location.provider.ProviderRequest.ChangedListener);
     method @Deprecated @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void flushGnssBatch();
@@ -4947,7 +4943,6 @@ package android.location {
     method public boolean isLocationEnabledForUser(@NonNull android.os.UserHandle);
     method public boolean isProviderEnabledForUser(@NonNull String, @NonNull android.os.UserHandle);
     method @Deprecated @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public boolean isProviderPackage(@NonNull String);
-    method @Deprecated @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public boolean isProviderPackage(@Nullable String, @NonNull String);
     method @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public boolean isProviderPackage(@Nullable String, @NonNull String, @Nullable String);
     method @Deprecated @RequiresPermission(allOf={android.Manifest.permission.LOCATION_HARDWARE, android.Manifest.permission.UPDATE_APP_OPS_STATS}) public boolean registerGnssBatchedLocationCallback(long, boolean, @NonNull android.location.BatchedLocationCallback, @Nullable android.os.Handler);
     method @Deprecated @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public boolean registerGnssMeasurementsCallback(@NonNull android.location.GnssRequest, @NonNull java.util.concurrent.Executor, @NonNull android.location.GnssMeasurementsEvent.Callback);
@@ -10567,6 +10562,7 @@ package android.service.voice {
     method public void onDetect(@NonNull android.service.voice.AlwaysOnHotwordDetector.EventPayload, long, @NonNull android.service.voice.HotwordDetectionService.Callback);
     method public void onDetect(@NonNull android.service.voice.HotwordDetectionService.Callback);
     method public void onDetect(@NonNull android.os.ParcelFileDescriptor, @NonNull android.media.AudioFormat, @Nullable android.os.PersistableBundle, @NonNull android.service.voice.HotwordDetectionService.Callback);
+    method public void onStopDetection();
     method public void onUpdateState(@Nullable android.os.PersistableBundle, @Nullable android.os.SharedMemory, long, @Nullable java.util.function.IntConsumer);
     field public static final int INITIALIZATION_STATUS_SUCCESS = 0; // 0x0
     field public static final int INITIALIZATION_STATUS_UNKNOWN = 100; // 0x64
@@ -10604,6 +10600,12 @@ package android.service.voice {
     field public static final int CONFIDENCE_LEVEL_MEDIUM = 2; // 0x2
     field public static final int CONFIDENCE_LEVEL_NONE = 0; // 0x0
     field @NonNull public static final android.os.Parcelable.Creator<android.service.voice.HotwordRejectedResult> CREATOR;
+  }
+
+  public static final class HotwordRejectedResult.Builder {
+    ctor public HotwordRejectedResult.Builder();
+    method @NonNull public android.service.voice.HotwordRejectedResult build();
+    method @NonNull public android.service.voice.HotwordRejectedResult.Builder setConfidenceLevel(int);
   }
 
   public class VoiceInteractionService extends android.app.Service {
@@ -12838,7 +12840,6 @@ package android.telephony.ims {
     method public void onCreated(@NonNull android.telephony.ims.stub.SipDelegate, @Nullable java.util.Set<android.telephony.ims.FeatureTagState>);
     method public void onDestroyed(int);
     method public void onFeatureTagRegistrationChanged(@NonNull android.telephony.ims.DelegateRegistrationState);
-    method @Deprecated public void onImsConfigurationChanged(@NonNull android.telephony.ims.SipDelegateImsConfiguration);
   }
 
   public final class FeatureTagState implements android.os.Parcelable {
@@ -13653,72 +13654,10 @@ package android.telephony.ims {
   }
 
   public interface SipDelegateConnection {
-    method public default void cleanupSession(@NonNull String);
-    method @Deprecated public default void closeDialog(@NonNull String);
+    method public void cleanupSession(@NonNull String);
     method public void notifyMessageReceiveError(@NonNull String, int);
     method public void notifyMessageReceived(@NonNull String);
     method public void sendMessage(@NonNull android.telephony.ims.SipMessage, long);
-  }
-
-  @Deprecated public final class SipDelegateImsConfiguration implements android.os.Parcelable {
-    method @Deprecated public boolean containsKey(@NonNull String);
-    method @Deprecated @NonNull public android.os.PersistableBundle copyBundle();
-    method @Deprecated public int describeContents();
-    method @Deprecated public boolean getBoolean(@NonNull String, boolean);
-    method @Deprecated public int getInt(@NonNull String, int);
-    method @Deprecated @Nullable public String getString(@NonNull String);
-    method @Deprecated public long getVersion();
-    method @Deprecated public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @Deprecated @NonNull public static final android.os.Parcelable.Creator<android.telephony.ims.SipDelegateImsConfiguration> CREATOR;
-    field @Deprecated public static final String IPTYPE_IPV4 = "IPV4";
-    field @Deprecated public static final String IPTYPE_IPV6 = "IPV6";
-    field @Deprecated public static final String KEY_SIP_CONFIG_AUTHENTICATION_HEADER_STRING = "sip_config_auhentication_header_string";
-    field @Deprecated public static final String KEY_SIP_CONFIG_AUTHENTICATION_NONCE_STRING = "sip_config_authentication_nonce_string";
-    field @Deprecated public static final String KEY_SIP_CONFIG_CELLULAR_NETWORK_INFO_HEADER_STRING = "sip_config_cellular_network_info_header_string";
-    field @Deprecated public static final String KEY_SIP_CONFIG_HOME_DOMAIN_STRING = "sip_config_home_domain_string";
-    field @Deprecated public static final String KEY_SIP_CONFIG_IMEI_STRING = "sip_config_imei_string";
-    field @Deprecated public static final String KEY_SIP_CONFIG_IPTYPE_STRING = "sip_config_iptype_string";
-    field @Deprecated public static final String KEY_SIP_CONFIG_IS_COMPACT_FORM_ENABLED_BOOL = "sip_config_is_compact_form_enabled_bool";
-    field @Deprecated public static final String KEY_SIP_CONFIG_IS_GRUU_ENABLED_BOOL = "sip_config_is_gruu_enabled_bool";
-    field @Deprecated public static final String KEY_SIP_CONFIG_IS_IPSEC_ENABLED_BOOL = "sip_config_is_ipsec_enabled_bool";
-    field @Deprecated public static final String KEY_SIP_CONFIG_IS_KEEPALIVE_ENABLED_BOOL = "sip_config_is_keepalive_enabled_bool";
-    field @Deprecated public static final String KEY_SIP_CONFIG_IS_NAT_ENABLED_BOOL = "sip_config_is_nat_enabled_bool";
-    field @Deprecated public static final String KEY_SIP_CONFIG_MAX_PAYLOAD_SIZE_ON_UDP_INT = "sip_config_udp_max_payload_size_int";
-    field @Deprecated public static final String KEY_SIP_CONFIG_PATH_HEADER_STRING = "sip_config_path_header_string";
-    field @Deprecated public static final String KEY_SIP_CONFIG_P_ACCESS_NETWORK_INFO_HEADER_STRING = "sip_config_p_access_network_info_header_string";
-    field @Deprecated public static final String KEY_SIP_CONFIG_P_ASSOCIATED_URI_HEADER_STRING = "sip_config_p_associated_uri_header_string";
-    field @Deprecated public static final String KEY_SIP_CONFIG_P_LAST_ACCESS_NETWORK_INFO_HEADER_STRING = "sip_config_p_last_access_network_info_header_string";
-    field @Deprecated public static final String KEY_SIP_CONFIG_SECURITY_VERIFY_HEADER_STRING = "sip_config_security_verify_header_string";
-    field @Deprecated public static final String KEY_SIP_CONFIG_SERVER_DEFAULT_IPADDRESS_STRING = "sip_config_server_default_ipaddress_string";
-    field @Deprecated public static final String KEY_SIP_CONFIG_SERVER_DEFAULT_PORT_INT = "sip_config_server_default_port_int";
-    field @Deprecated public static final String KEY_SIP_CONFIG_SERVER_IPSEC_CLIENT_PORT_INT = "sip_config_server_ipsec_client_port_int";
-    field @Deprecated public static final String KEY_SIP_CONFIG_SERVER_IPSEC_OLD_CLIENT_PORT_INT = "sip_config_server_ipsec_old_client_port_int";
-    field @Deprecated public static final String KEY_SIP_CONFIG_SERVER_IPSEC_SERVER_PORT_INT = "sip_config_server_ipsec_server_port_int";
-    field @Deprecated public static final String KEY_SIP_CONFIG_SERVICE_ROUTE_HEADER_STRING = "sip_config_service_route_header_string";
-    field @Deprecated public static final String KEY_SIP_CONFIG_TRANSPORT_TYPE_STRING = "sip_config_protocol_type_string";
-    field @Deprecated public static final String KEY_SIP_CONFIG_UE_DEFAULT_IPADDRESS_STRING = "sip_config_ue_default_ipaddress_string";
-    field @Deprecated public static final String KEY_SIP_CONFIG_UE_DEFAULT_PORT_INT = "sip_config_ue_default_port_int";
-    field @Deprecated public static final String KEY_SIP_CONFIG_UE_IPSEC_CLIENT_PORT_INT = "sip_config_ue_ipsec_client_port_int";
-    field @Deprecated public static final String KEY_SIP_CONFIG_UE_IPSEC_OLD_CLIENT_PORT_INT = "sip_config_ue_ipsec_old_client_port_int";
-    field @Deprecated public static final String KEY_SIP_CONFIG_UE_IPSEC_SERVER_PORT_INT = "sip_config_ue_ipsec_server_port_int";
-    field @Deprecated public static final String KEY_SIP_CONFIG_UE_PRIVATE_USER_ID_STRING = "sip_config_ue_private_user_id_string";
-    field @Deprecated public static final String KEY_SIP_CONFIG_UE_PUBLIC_GRUU_STRING = "sip_config_ue_public_gruu_string";
-    field @Deprecated public static final String KEY_SIP_CONFIG_UE_PUBLIC_IPADDRESS_WITH_NAT_STRING = "sip_config_ue_public_ipaddress_with_nat_string";
-    field @Deprecated public static final String KEY_SIP_CONFIG_UE_PUBLIC_PORT_WITH_NAT_INT = "sip_config_ue_public_port_with_nat_int";
-    field @Deprecated public static final String KEY_SIP_CONFIG_UE_PUBLIC_USER_ID_STRING = "sip_config_ue_public_user_id_string";
-    field @Deprecated public static final String KEY_SIP_CONFIG_URI_USER_PART_STRING = "sip_config_uri_user_part_string";
-    field @Deprecated public static final String KEY_SIP_CONFIG_USER_AGENT_HEADER_STRING = "sip_config_sip_user_agent_header_string";
-    field @Deprecated public static final String SIP_TRANSPORT_TCP = "TCP";
-    field @Deprecated public static final String SIP_TRANSPORT_UDP = "UDP";
-  }
-
-  @Deprecated public static final class SipDelegateImsConfiguration.Builder {
-    ctor @Deprecated public SipDelegateImsConfiguration.Builder(int);
-    ctor @Deprecated public SipDelegateImsConfiguration.Builder(@NonNull android.telephony.ims.SipDelegateImsConfiguration);
-    method @Deprecated @NonNull public android.telephony.ims.SipDelegateImsConfiguration.Builder addBoolean(@NonNull String, boolean);
-    method @Deprecated @NonNull public android.telephony.ims.SipDelegateImsConfiguration.Builder addInt(@NonNull String, int);
-    method @Deprecated @NonNull public android.telephony.ims.SipDelegateImsConfiguration.Builder addString(@NonNull String, @NonNull String);
-    method @Deprecated @NonNull public android.telephony.ims.SipDelegateImsConfiguration build();
   }
 
   public class SipDelegateManager {
@@ -13888,11 +13827,10 @@ package android.telephony.ims.stub {
   }
 
   public interface DelegateConnectionStateCallback {
-    method public default void onConfigurationChanged(@NonNull android.telephony.ims.SipDelegateConfiguration);
+    method public void onConfigurationChanged(@NonNull android.telephony.ims.SipDelegateConfiguration);
     method public void onCreated(@NonNull android.telephony.ims.SipDelegateConnection);
     method public void onDestroyed(int);
     method public void onFeatureTagStatusChanged(@NonNull android.telephony.ims.DelegateRegistrationState, @NonNull java.util.Set<android.telephony.ims.FeatureTagState>);
-    method @Deprecated public default void onImsConfigurationChanged(@NonNull android.telephony.ims.SipDelegateImsConfiguration);
   }
 
   public class ImsCallSessionImplBase implements java.lang.AutoCloseable {
@@ -14106,8 +14044,7 @@ package android.telephony.ims.stub {
   }
 
   public interface SipDelegate {
-    method public default void cleanupSession(@NonNull String);
-    method @Deprecated public default void closeDialog(@NonNull String);
+    method public void cleanupSession(@NonNull String);
     method public void notifyMessageReceiveError(@NonNull String, int);
     method public void notifyMessageReceived(@NonNull String);
     method public void sendMessage(@NonNull android.telephony.ims.SipMessage, long);

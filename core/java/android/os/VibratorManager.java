@@ -94,6 +94,8 @@ public abstract class VibratorManager {
      * VibrationEffect VibrationEffects} to be played on one or more vibrators.
      * </p>
      *
+     * <p>The app should be in foreground for the vibration to happen.</p>
+     *
      * @param effect a combination of effects to be performed by one or more vibrators.
      */
     @RequiresPermission(android.Manifest.permission.VIBRATE)
@@ -108,6 +110,9 @@ public abstract class VibratorManager {
      * Pass in a {@link CombinedVibration} representing a combination of {@link
      * VibrationEffect} to be played on one or more vibrators.
      * </p>
+     *
+     * <p>The app should be in foreground for the vibration to happen. Background apps should
+     * specify a ringtone, notification or alarm usage in order to vibrate.</p>
      *
      * @param effect a combination of effects to be performed by one or more vibrators.
      * @param attributes {@link VibrationAttributes} corresponding to the vibration. For example,

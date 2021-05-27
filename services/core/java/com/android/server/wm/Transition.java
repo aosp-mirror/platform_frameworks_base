@@ -304,6 +304,9 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                         "  Commit activity becoming invisible: %s", ar);
                 ar.commitVisibility(false /* visible */, false /* performLayout */);
             }
+            if (ar != null) {
+                mController.dispatchLegacyAppTransitionFinished(ar);
+            }
             final WallpaperWindowToken wt = mParticipants.valueAt(i).asWallpaperToken();
             if (wt != null && !wt.isVisibleRequested()) {
                 ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
@@ -321,6 +324,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         if (mState != STATE_COLLECTING) {
             throw new IllegalStateException("Too late to abort.");
         }
+        mController.dispatchLegacyAppTransitionCancelled();
         mState = STATE_ABORT;
         // Syncengine abort will call through to onTransactionReady()
         mSyncEngine.abort(mSyncId);
@@ -389,6 +393,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         mFinishTransaction = mController.mAtm.mWindowManager.mTransactionFactory.get();
         buildFinishTransaction(mFinishTransaction, info.getRootLeash());
         if (mController.getTransitionPlayer() != null) {
+            mController.dispatchLegacyAppTransitionStarting(info);
             try {
                 ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                         "Calling onTransitionReady: %s", info);

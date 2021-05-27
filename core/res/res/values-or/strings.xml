@@ -609,14 +609,12 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"ଟିପଚିହ୍ନ ଆଇକନ୍"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"ଫେସ୍ ଅନଲକ୍ ହାର୍ଡୱେର୍ ପରିଚାଳନା କରନ୍ତୁ"</string>
-    <string name="permdesc_manageFace" msgid="6204569688492710471">"ବ୍ୟବହାର ପାଇଁ ଆପ୍‍କୁ ଫେସିଆଲ୍‍ ଟେମ୍ପଲେଟ୍‍ ଯୋଡିବା ଓ ଡିଲିଟ୍‍ ର ପଦ୍ଧତି ପାଇଁ ଅନୁମତି ଦିଅନ୍ତୁ।"</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"ଫେସ୍ ଅନଲକ୍ ହାର୍ଡୱେର୍ ବ୍ୟବହାର କରନ୍ତୁ"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"ପ୍ରମାଣୀକରଣ ପାଇଁ ଫେସ୍ ଅନଲକ୍ ହାର୍ଡୱେର୍‌ର ବ୍ୟବହାର କରିବା ପାଇଁ ଆପ୍‍କୁ ଅନୁମତି ଦିଅନ୍ତୁ"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"ଫେସ୍ ଅନଲକ୍"</string>
+    <!-- no translation found for face_recalibrate_notification_name (7311163114750748686) -->
+    <skip />
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"ଆପଣଙ୍କର ମୁହଁ ପୁଣି-ଏନ୍‍ରୋଲ୍ କରନ୍ତୁ"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"ଚିହ୍ନଟକରଣକୁ ଉନ୍ନତ କରିବା ପାଇଁ, ଦୟାକରି ଆପଣଙ୍କର ମୁହଁ ପୁଣି-ଏନ୍‍ରୋଲ୍ କରନ୍ତୁ।"</string>
-    <string name="face_setup_notification_title" msgid="550617822603450009">"ଫେସ୍ ଅନଲକ୍ ସେଟ୍ ଅପ୍ କରନ୍ତୁ"</string>
+    <!-- no translation found for face_setup_notification_title (8843461561970741790) -->
+    <skip />
     <string name="face_setup_notification_content" msgid="5463999831057751676">"ଫୋନକୁ ଦେଖି ଏହାକୁ ଅନଲକ୍ କରନ୍ତୁ"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"ଅନଲକ୍ କରିବା ପାଇଁ ଆହୁରି ଅଧିକ ଉପାୟ ସେଟ୍ ଅପ୍ କରନ୍ତୁ"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"ଏକ ଟିପଚିହ୍ନ ଯୋଗ କରିବାକୁ ଟାପ୍ କରନ୍ତୁ"</string>
@@ -643,18 +641,26 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"ମୁହଁ ଚିହ୍ନଟ କରିପାରିଲା ନାହିଁ। ହାର୍ଡୱେୟାର୍ ଉପଲବ୍ଧ ନାହିଁ।"</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"ଫେସ୍ ଅନଲକ୍ ପୁଣି ବ୍ୟବହାର କରି ଦେଖନ୍ତୁ।"</string>
+    <!-- no translation found for face_error_timeout (2598544068593889762) -->
+    <skip />
     <string name="face_error_no_space" msgid="5649264057026021723">"ନୂଆ ମୁହଁ ଡାଟା ଷ୍ଟୋର୍ ହେବ ନାହିଁ। ପ୍ରଥମେ ପୁରୁଣାକୁ ଡିଲିଟ୍ କରନ୍ତୁ।"</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"ଫେସ୍‍ର ଅପରେଶନ୍‍ କ୍ୟାନ୍ସଲ୍‍ ହୋ‍ଇଗଲା"</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"ଉପଯୋଗକର୍ତ୍ତାଙ୍କ ଦ୍ୱାରା ଫେସ୍ ଅନଲକ୍ ବାତିଲ୍ କରାଯାଇଛି।"</string>
+    <!-- no translation found for face_error_user_canceled (5766472033202928373) -->
+    <skip />
     <string name="face_error_lockout" msgid="7864408714994529437">"ବାରମ୍ବାର ଚେଷ୍ଟା। ପରେ ପୁଣିଥରେ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"ଅତ୍ୟଧିକ ପ୍ରଚେଷ୍ଟା। ଫେସ୍ ଅନଲକ୍ ଅକ୍ଷମ ହୋଇଛି।"</string>
+    <!-- no translation found for face_error_lockout_permanent (3277134834042995260) -->
+    <skip />
+    <!-- no translation found for face_error_lockout_screen_lock (5062609811636860928) -->
+    <skip />
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"ମୁହଁ ଚିହ୍ନଟ କରିପାରିଲା ନାହିଁ। ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"ଆପଣ ଫେସ୍ ଅନଲକ୍ ସେଟ୍ ଅପ୍ କରିନାହାଁନ୍ତି।"</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"ଏହି ଡିଭାଇସରେ ଫେସ୍ ଅନଲକ୍ ସମର୍ଥିତ ନୁହେଁ।"</string>
+    <!-- no translation found for face_error_not_enrolled (1134739108536328412) -->
+    <skip />
+    <!-- no translation found for face_error_hw_not_present (7940978724978763011) -->
+    <skip />
     <string name="face_error_security_update_required" msgid="5076017208528750161">"ସେନ୍ସରକୁ ଅସ୍ଥାୟୀ ଭାବେ ଅକ୍ଷମ କରାଯାଇଛି।"</string>
     <string name="face_name_template" msgid="3877037340223318119">"<xliff:g id="FACEID">%d</xliff:g>ଙ୍କ ଫେସ୍‍"</string>
-    <string name="face_app_setting_name" msgid="8130135875458467243">"ଫେସ୍ ଅନଲକ୍ ବ୍ୟବହାର କରନ୍ତୁ"</string>
+    <!-- no translation found for face_app_setting_name (5854024256907828015) -->
+    <skip />
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"ଫେସ୍ ବା ସ୍କ୍ରିନ୍ ଲକ୍ ବ୍ୟବହାର କରନ୍ତୁ"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"ଜାରି ରଖିବାକୁ ଆପଣଙ୍କ ଚେହେରା ବ୍ୟବହାର କରନ୍ତୁ"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"ଜାରି ରଖିବାକୁ ଆପଣଙ୍କ ଚେହେରା କିମ୍ବା ସ୍କ୍ରିନ୍ ଲକ୍ ବ୍ୟବହାର କରନ୍ତୁ"</string>
@@ -957,7 +963,8 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"ଅନଲକ୍‍ କ୍ଷେତ୍ରକୁ ବଢ଼ାନ୍ତୁ।"</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"ସ୍ଲାଇଡ୍‍ ଅନଲକ୍‍।"</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"ପାଟର୍ନ ଅନଲକ୍‍।"</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"ଫେସ୍‍ ଅନଲକ୍‍।"</string>
+    <!-- no translation found for keyguard_accessibility_face_unlock (4533832120787386728) -->
+    <skip />
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"PIN ଅନଲକ୍‍।"</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"PIN ଦ୍ଵାରା SIMକୁ ଅନଲକ୍ କରନ୍ତୁ।"</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"PUK ଦ୍ଵାରା SIMକୁ ଅନଲକ୍ କରନ୍ତୁ।"</string>
@@ -2096,8 +2103,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"ଠିକ୍ ଅଛି"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"ବନ୍ଦ କରନ୍ତୁ"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"ଅଧିକ ଜାଣନ୍ତୁ"</string>
-    <!-- no translation found for nas_upgrade_notification_learn_more_content (3735480566983530650) -->
-    <skip />
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12ରେ Android ଆଡେପ୍ଟିଭ୍ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକୁ ଉନ୍ନତ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକରେ ପରିବର୍ତ୍ତନ କରାଯାଇଛି। ଏହି ଫିଚର୍ ପ୍ରସ୍ତାବିତ କାର୍ଯ୍ୟ ଏବଂ ପ୍ରତ୍ୟୁତ୍ତରଗୁଡ଼ିକୁ ଦେଖାଏ ଏବଂ ଆପଣଙ୍କ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକୁ ବ୍ୟବସ୍ଥିତ କରେ।\n\nଉନ୍ନତ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକ ଯୋଗାଯୋଗ ନାମ ଏବଂ ମେସେଜଗୁଡ଼ିକ ପରି ବ୍ୟକ୍ତିଗତ ସୂଚନା ସମେତ ବିଜ୍ଞପ୍ତିର ବିଷୟବସ୍ତୁକୁ ଆକ୍ସେସ୍ କରିପାରିବ। ଏହି ଫିଚର୍ ଫୋନ୍ କଲଗୁଡ଼ିକର ଉତ୍ତର ଦେବା ଏବଂ \'ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ\'କୁ ନିୟନ୍ତ୍ରଣ କରିବା ପରି, ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକୁ ମଧ୍ୟ ଖାରଜ କରିପାରିବ କିମ୍ବା ସେଗୁଡ଼ିକର ଉତ୍ତର ଦେଇପାରିବ।"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ନିୟମିତ ମୋଡ୍‍ ସୂଚନା ବିଜ୍ଞପ୍ତି"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"ସାଧାରଣ ଭାବରେ ଚାର୍ଜ୍ କରିବା ପୂର୍ବରୁ ବ୍ୟାଟେରୀ ସରିଯାଇପାରେ"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"ବ୍ୟାଟେରୀର ସମୟକୁ ବଢ଼ାଇବା ପାଇଁ ବ୍ୟଟେରୀ ସେଭର୍‍କୁ କାର୍ଯ୍ୟକାରୀ କରାଯାଇଛି"</string>

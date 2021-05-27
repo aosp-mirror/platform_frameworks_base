@@ -609,14 +609,12 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"फिंगरप्रिन्ट आइकन"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"फेस अनलकको हार्डवेयर व्यवस्थित गर्नुहोस्"</string>
-    <string name="permdesc_manageFace" msgid="6204569688492710471">"एपलाई प्रयोगका लागि अनुहार टेम्प्लेट थप्न र मेटाउने तरिका आह्वान गर्न अनुमति दिन्छ।"</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"फेस अनलकको हार्डवेयर प्रयोग गर्नुहोस्"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"एपलाई प्रमाणीकरणका लागि फेस अनलकको हार्डवेयर प्रयोग गर्न अनुमति दिन्छ"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"फेस अनलक"</string>
+    <!-- no translation found for face_recalibrate_notification_name (7311163114750748686) -->
+    <skip />
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"आफ्नो अनुहार पुनः दर्ता गर्नुहोस्"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"अनुहार पहिचानको गुणस्तर सुधार गर्न कृपया आफ्नो अनुहार पुनः दर्ता गर्नुहोस्"</string>
-    <string name="face_setup_notification_title" msgid="550617822603450009">"फेस अनलक सेटअप गर्नुहोस्"</string>
+    <!-- no translation found for face_setup_notification_title (8843461561970741790) -->
+    <skip />
     <string name="face_setup_notification_content" msgid="5463999831057751676">"फोनमा हेरेकै भरमा फोन अनलक गर्नुहोस्"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"अनलक गर्ने अन्य तरिकाहरू सेटअप गर्नुहोस्"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"फिंगरप्रिन्ट हाल्न ट्याप गर्नुहोस्"</string>
@@ -643,18 +641,26 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"अनुहार पुष्टि गर्न सकिएन। हार्डवेयर उपलब्ध छैन।"</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"फेरि फेस अनलक प्रयोग गरी हेर्नुहोस्।"</string>
+    <!-- no translation found for face_error_timeout (2598544068593889762) -->
+    <skip />
     <string name="face_error_no_space" msgid="5649264057026021723">"अनुहारसम्बन्धी नयाँ डेटा भण्डारण गर्न सकिएन। पहिले कुनै पुरानो डेटा मेटाउनुहोस्।"</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"अनुहार पहिचान रद्द गरियो।"</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"प्रयोगकर्ताले फेस अनलक रद्द गर्नुभयो।"</string>
+    <!-- no translation found for face_error_user_canceled (5766472033202928373) -->
+    <skip />
     <string name="face_error_lockout" msgid="7864408714994529437">"धेरैपटक प्रयासहरू भए। पछि फेरि प्रयास गर्नुहोस्‌।"</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"अत्यधिक प्रयासहरू भए। फेस अनलक असक्षम पारियो।"</string>
+    <!-- no translation found for face_error_lockout_permanent (3277134834042995260) -->
+    <skip />
+    <!-- no translation found for face_error_lockout_screen_lock (5062609811636860928) -->
+    <skip />
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"अनुहार पुष्टि गर्न सकिएन। फेरि प्रयास गर्नुहोस्।"</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"तपाईंले फेस अनलक सुविधा सेट अप गर्नुभएको छैन।"</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"यस डिभाइसमा फेस अनलक सुविधा प्रयोग गर्न मिल्दैन।"</string>
+    <!-- no translation found for face_error_not_enrolled (1134739108536328412) -->
+    <skip />
+    <!-- no translation found for face_error_hw_not_present (7940978724978763011) -->
+    <skip />
     <string name="face_error_security_update_required" msgid="5076017208528750161">"केही समयका लागि सेन्सर असक्षम पारियो।"</string>
     <string name="face_name_template" msgid="3877037340223318119">"अनुहार <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <string name="face_app_setting_name" msgid="8130135875458467243">"फेस अनलक प्रयोग गर्नुहोस्"</string>
+    <!-- no translation found for face_app_setting_name (5854024256907828015) -->
+    <skip />
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"फेस अनलक वा स्क्रिन लक प्रयोग गर्नुहोस्"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"जारी राख्न आफ्नो अनुहारको सहायताले पुष्टि गर्नुहोस्"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"जारी राख्न आफ्नो फेस वा स्क्रिन लक प्रयोग गरी पुष्टि गर्नुहोस्"</string>
@@ -733,7 +739,7 @@
     <string name="policylab_resetPassword" msgid="214556238645096520">"स्क्रिन लक परिवर्तन गर्ने"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"स्क्रिन लक परिवर्तन गर्नुहोस्।"</string>
     <string name="policylab_forceLock" msgid="7360335502968476434">"स्क्रिन लक गर्ने"</string>
-    <string name="policydesc_forceLock" msgid="1008844760853899693">"कसरी र कहिले स्क्रिन लक गर्ने नियन्त्रण गर्नुहोस्।"</string>
+    <string name="policydesc_forceLock" msgid="1008844760853899693">"कसरी र कहिले स्क्रिन लक गर्ने भन्ने कुरा सेट गर्न"</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"सबै डेटा मेट्ने"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"एउटा फ्याक्ट्रि डेटा रिसेट गरेर चेतावनी नआउँदै ट्याबल्टको डेटा मेट्नुहोस्।"</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"फ्याक्ट्री डेटा रिसेट गरेर चेतावनी नदिइकन आफ्नो Android टिभी डिभाइसको डेटा मेटाउनुहोस्।"</string>
@@ -751,7 +757,7 @@
     <string name="policylab_disableCamera" msgid="5749486347810162018">"क्यामेरालाई असक्षम गराउनुहोस्"</string>
     <string name="policydesc_disableCamera" msgid="3204405908799676104">"सबै उपकरण क्यामराहरूको प्रयोग रोक्नुहोस्"</string>
     <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"स्क्रिन लकका केही सुविधा असक्षम पार्ने"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"केही स्क्रिन लक  सुविधाहरूको प्रयोगमा रोक लगाउनुहोस्।"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"स्क्रिन लकका केही सुविधाहरूको प्रयोगमा रोक लगाउन।"</string>
   <string-array name="phoneTypes">
     <item msgid="8996339953292723951">"गृह"</item>
     <item msgid="7740243458912727194">"मोबाइल"</item>
@@ -957,7 +963,8 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"अनलक क्षेत्र बढाउनुहोस्।"</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"स्लाइड अनलक।"</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"ढाँचा अनलक।"</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"फेस अनलक"</string>
+    <!-- no translation found for keyguard_accessibility_face_unlock (4533832120787386728) -->
+    <skip />
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"Pin अनलक"</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"Sim को Pin मार्फत अनलक गर्ने प्रक्रिया।"</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"Sim को Puk मार्फत अनलक गर्ने प्रक्रिया।"</string>
@@ -1863,7 +1870,7 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"कार्य <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"कार्यालयको दोस्रो <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"कार्यालयको तेस्रो <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"पिन निकाल्नुअघि PIN सोध्नुहोस्"</string>
+    <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"अनपिन गर्नुअघि PIN मागियोस्"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"अनपिन गर्नअघि अनलक प्याटर्न माग्नुहोस्"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"पिन निकाल्नुअघि पासवर्ड सोध्नुहोस्"</string>
     <string name="package_installed_device_owner" msgid="7035926868974878525">"तपाईंका प्रशासकले स्थापना गर्नुभएको"</string>
@@ -2096,8 +2103,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"ठिक छ"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"अफ गर्नुहोस्"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"थप जान्नुहोस्"</string>
-    <!-- no translation found for nas_upgrade_notification_learn_more_content (3735480566983530650) -->
-    <skip />
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android १२ मा Android को अनुकूल पार्न मिल्ने सूचनाहरू नामक सुविधालाई परिष्कृत सूचनाहरू नामक सुविधाले प्रतिस्थापन गरेको छ। यो सुविधाले कारबाही तथा जवाफसम्बन्धी सुझाव देखाउँछ र तपाईंका सूचनाहरू व्यवस्थित गर्छ।\n\nपरिष्कृत सूचनाहरू नामक सुविधाले सूचनामा उल्लिखित सम्पर्क व्यक्तिको नाम र म्यासेज जस्ता व्यक्तिगत जानकारीलगायतका सामग्री हेर्न तथा प्रयोग गर्न सक्छ। यो सुविधाले फोन उठाउने तथा \'बाधा नपुऱ्याउनुहोस्\' मोड नियन्त्रण गर्ने कार्यसहित सूचनाहरू हटाउने वा सूचनाहरूको जवाफ दिने कार्य पनि गर्न सक्छ।"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"दिनचर्या मोडको जानकारीमूलक सूचना"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"प्रायः चार्ज गर्ने समय हुनुभन्दा पहिले नै ब्याट्री सकिन सक्छ"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"ब्याट्रीको आयु बढाउन ब्याट्री सेभर सक्रिय गरियो"</string>

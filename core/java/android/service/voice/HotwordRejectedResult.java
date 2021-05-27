@@ -29,7 +29,7 @@ import com.android.internal.util.DataClass;
  */
 @DataClass(
         genConstructor = false,
-        genHiddenBuilder = true,
+        genBuilder = true,
         genEqualsHashCode = true,
         genHiddenConstDefs = true,
         genParcelable = true,
@@ -210,7 +210,6 @@ public final class HotwordRejectedResult implements Parcelable {
 
     /**
      * A builder for {@link HotwordRejectedResult}
-     * @hide
      */
     @SuppressWarnings("WeakerAccess")
     @DataClass.Generated.Member
@@ -256,10 +255,10 @@ public final class HotwordRejectedResult implements Parcelable {
     }
 
     @DataClass.Generated(
-            time = 1621551683210L,
+            time = 1621961370106L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/service/voice/HotwordRejectedResult.java",
-            inputSignatures = "public static final  int CONFIDENCE_LEVEL_NONE\npublic static final  int CONFIDENCE_LEVEL_LOW\npublic static final  int CONFIDENCE_LEVEL_MEDIUM\npublic static final  int CONFIDENCE_LEVEL_HIGH\nprivate final @android.service.voice.HotwordRejectedResult.HotwordConfidenceLevelValue int mConfidenceLevel\nprivate static  int defaultConfidenceLevel()\nclass HotwordRejectedResult extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genConstructor=false, genHiddenBuilder=true, genEqualsHashCode=true, genHiddenConstDefs=true, genParcelable=true, genToString=true)")
+            inputSignatures = "public static final  int CONFIDENCE_LEVEL_NONE\npublic static final  int CONFIDENCE_LEVEL_LOW\npublic static final  int CONFIDENCE_LEVEL_MEDIUM\npublic static final  int CONFIDENCE_LEVEL_HIGH\nprivate final @android.service.voice.HotwordRejectedResult.HotwordConfidenceLevelValue int mConfidenceLevel\nprivate static  int defaultConfidenceLevel()\nclass HotwordRejectedResult extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genConstructor=false, genBuilder=true, genEqualsHashCode=true, genHiddenConstDefs=true, genParcelable=true, genToString=true)")
     @Deprecated
     private void __metadata() {}
 

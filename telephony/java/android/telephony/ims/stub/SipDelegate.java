@@ -64,25 +64,6 @@ public interface SipDelegate {
     void sendMessage(@NonNull SipMessage message, long configVersion);
 
     /**
-     * The framework is requesting that routing resources associated with the SIP dialog using the
-     * provided Call-ID to be cleaned up.
-     * <p>
-     * Typically, a SIP Dialog close event will be signalled by that dialog receiving a BYE or
-     * 200 OK message, however, the IMS application will still call
-     * {@link SipDelegateConnection#closeDialog(String)} to signal to the framework that resources
-     * can be released. In some cases, the framework will request that the ImsService close the
-     * dialog due to the open dialog holding up an event such as applying a provisioning change or
-     * handing over to another transport type. See {@link DelegateRegistrationState}.
-     *
-     * @param callId The call-ID header value associated with the ongoing SIP Dialog that the
-     *         framework is requesting be closed.
-     * @deprecated This method does not take into account INVITE forking. Use
-     * {@link #cleanupSession(String)} instead.
-     */
-    @Deprecated
-    default void closeDialog(@NonNull String callId) { }
-
-    /**
      * The remote IMS application has closed a SIP session and the routing resources associated
      * with the SIP session using the provided Call-ID may now be cleaned up.
      * <p>
@@ -97,9 +78,7 @@ public interface SipDelegate {
      * @param callId The call-ID header value associated with the ongoing SIP Session that the
      *         framework is requesting be cleaned up.
      */
-    default void cleanupSession(@NonNull String callId) {
-        closeDialog(callId);
-    }
+    void cleanupSession(@NonNull String callId);
 
     /**
      * The remote application has received the SIP message and is processing it.

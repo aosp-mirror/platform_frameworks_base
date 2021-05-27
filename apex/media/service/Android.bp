@@ -23,10 +23,10 @@ package {
 filegroup {
     name: "service-media-s-sources",
     srcs: [
-      "java/**/*.java",
+        "java/**/*.java",
     ],
     path: "java",
-    visibility: ["//frameworks/base/services"], // TODO(b/177640454): Should be private.
+    visibility: ["//visibility:private"],
 }
 
 java_sdk_library {

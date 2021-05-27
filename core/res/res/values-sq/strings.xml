@@ -609,14 +609,12 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Ikona e gjurmës së gishtit"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"menaxho harduerin për shkyçjen me fytyrë"</string>
-    <string name="permdesc_manageFace" msgid="6204569688492710471">"Lejon aplikacionin të aktivizojë mënyra për shtim e fshirje të shablloneve të përdorura."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"përdor harduerin e shkyçjes me fytyrë"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Lejon aplikacionin të përdorë harduerin e shkyçjes me fytyrë për procesin e vërtetimit"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Shkyçja me fytyrë"</string>
+    <!-- no translation found for face_recalibrate_notification_name (7311163114750748686) -->
+    <skip />
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Regjistro përsëri fytyrën tënde"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Për të përmirësuar njohjen, regjistro përsëri fytyrën tënde"</string>
-    <string name="face_setup_notification_title" msgid="550617822603450009">"Konfiguro shkyçjen me fytyrë"</string>
+    <!-- no translation found for face_setup_notification_title (8843461561970741790) -->
+    <skip />
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Shkyçe telefonin duke parë tek ai"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Konfiguri më shumë mënyra për të shkyçur"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Trokit për të shtuar një gjurmë gishti"</string>
@@ -643,18 +641,26 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Fytyra s\'mund të verifikohet. Hardueri nuk ofrohet."</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"Provo përsëri shkyçjen me fytyrë."</string>
+    <!-- no translation found for face_error_timeout (2598544068593889762) -->
+    <skip />
     <string name="face_error_no_space" msgid="5649264057026021723">"S\'mund të ruhen të dhëna të reja fytyre. Fshi një të vjetër në fillim."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Veprimi me fytyrën u anulua."</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"Shkyçja me fytyrë u anulua nga përdoruesi."</string>
+    <!-- no translation found for face_error_user_canceled (5766472033202928373) -->
+    <skip />
     <string name="face_error_lockout" msgid="7864408714994529437">"Shumë përpjekje. Provo sërish më vonë."</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Shumë përpjekje. Shkyçja me fytyrë u çaktivizua."</string>
+    <!-- no translation found for face_error_lockout_permanent (3277134834042995260) -->
+    <skip />
+    <!-- no translation found for face_error_lockout_screen_lock (5062609811636860928) -->
+    <skip />
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Fytyra nuk mund të verifikohet. Provo përsëri."</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"Nuk e ke konfiguruar shkyçjen me fytyrë."</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"Shkyçja me fytyrë nuk mbështetet në këtë pajisje"</string>
+    <!-- no translation found for face_error_not_enrolled (1134739108536328412) -->
+    <skip />
+    <!-- no translation found for face_error_hw_not_present (7940978724978763011) -->
+    <skip />
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Sensori është çaktivizuar përkohësisht."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Fytyra <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <string name="face_app_setting_name" msgid="8130135875458467243">"Përdor shkyçjen me fytyrë"</string>
+    <!-- no translation found for face_app_setting_name (5854024256907828015) -->
+    <skip />
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Përdor kyçjen me fytyrë ose kyçjen e ekranit"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Përdor fytyrën tënde për të vazhduar"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Përdor fytyrën tënde ose kyçjen e ekranit për të vazhduar"</string>
@@ -957,7 +963,8 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"Zgjero zonën e shkyçjes."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"Rrëshqit shkyçjen."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"Shkyçje me motiv."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"Shkyçja me fytyrë."</string>
+    <!-- no translation found for keyguard_accessibility_face_unlock (4533832120787386728) -->
+    <skip />
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"Shkyçje me PIN."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"Shkyçja e kartës SIM me kodin PIN"</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"Shkyçja e kartës SIM me kodin PUK"</string>
@@ -2096,8 +2103,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"Në rregull"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Çaktivizo"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Mëso më shumë"</string>
-    <!-- no translation found for nas_upgrade_notification_learn_more_content (3735480566983530650) -->
-    <skip />
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Njoftimet e përmirësuara kanë zëvendësuar \"Njoftimet me përshtatje të Android\" në Android 12. Kjo veçori shfaq veprimet dhe përgjigjet e sugjeruara dhe organizon njoftimet e tua.\n\nNjoftimet e përmirësuara mund të kenë qasje te përmbajtja e njoftimeve, duke përfshirë informacionet personale si emrat e kontakteve dhe mesazhet. Kjo veçori mund t\'i heqë ose të përgjigjet po ashtu për njoftimet, si p.sh. t\'u përgjigjet telefonatave, dhe të kontrollojë modalitetin \"Mos shqetëso\"."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Njoftimi i informacionit të \"Modalitetit rutinë\""</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Bateria mund të mbarojë përpara ngarkimit të zakonshëm"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"\"Kursyesi i baterisë\" u aktivizua për të rritur kohëzgjatjen e baterisë"</string>

@@ -16,16 +16,11 @@
 
 package android.location;
 
-import android.annotation.SystemApi;
-import android.annotation.TestApi;
-
 /**
  * DeviceConfig keys within the location namespace.
  *
  * @hide
  */
-@SystemApi
-@TestApi
 public final class LocationDeviceConfig {
 
     /**

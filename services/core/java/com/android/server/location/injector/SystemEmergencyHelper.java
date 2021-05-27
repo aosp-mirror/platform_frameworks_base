@@ -72,8 +72,11 @@ public class SystemEmergencyHelper extends EmergencyHelper {
 
     @Override
     public boolean isInEmergency(long extensionTimeMs) {
+        boolean isInExtensionTime = mEmergencyCallEndRealtimeMs != Long.MIN_VALUE
+                && (SystemClock.elapsedRealtime() - mEmergencyCallEndRealtimeMs) < extensionTimeMs;
+
         return mIsInEmergencyCall
-                || ((SystemClock.elapsedRealtime() - mEmergencyCallEndRealtimeMs) < extensionTimeMs)
+                || isInExtensionTime
                 || mTelephonyManager.getEmergencyCallbackMode()
                 || mTelephonyManager.isInEmergencySmsMode();
     }
