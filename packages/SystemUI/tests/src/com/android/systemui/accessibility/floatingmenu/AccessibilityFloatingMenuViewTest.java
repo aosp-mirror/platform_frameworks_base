@@ -111,7 +111,7 @@ public class AccessibilityFloatingMenuViewTest extends SysuiTestCase {
         final int margin =
                 res.getDimensionPixelSize(R.dimen.accessibility_floating_menu_margin);
         final int padding =
-                res.getDimensionPixelSize(R.dimen.accessibility_floating_menu_padding);
+                res.getDimensionPixelSize(R.dimen.accessibility_floating_menu_small_padding);
         final int iconWidthHeight =
                 res.getDimensionPixelSize(R.dimen.accessibility_floating_menu_small_width_height);
         final int menuWidth = padding * 2 + iconWidthHeight;

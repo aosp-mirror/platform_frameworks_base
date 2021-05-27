@@ -409,11 +409,13 @@ public class AccessibilityFloatingMenuView extends FrameLayout
 
         mSizeType = newSizeType;
 
-        updateIconSizeWith(newSizeType);
+        updateItemViewWith(newSizeType);
         updateRadiusWith(newSizeType, mRadiusType, mTargets.size());
 
         // When the icon sized changed, the menu size and location will be impacted.
         updateLocationWith(mAlignment, mPercentageY);
+        updateScrollModeWith(hasExceededMaxLayoutHeight());
+        updateOffsetWith(mShapeType, mAlignment);
         setSystemGestureExclusion();
 
         fadeOut();
@@ -601,24 +603,35 @@ public class AccessibilityFloatingMenuView extends FrameLayout
         mScreenHeight = dm.heightPixels;
         mMargin =
                 res.getDimensionPixelSize(R.dimen.accessibility_floating_menu_margin);
-        mPadding =
-                res.getDimensionPixelSize(R.dimen.accessibility_floating_menu_padding);
         mInset =
                 res.getDimensionPixelSize(R.dimen.accessibility_floating_menu_stroke_inset);
 
         mSquareScaledTouchSlop =
                 sq(ViewConfiguration.get(getContext()).getScaledTouchSlop());
+
+        updateItemViewDimensionsWith(mSizeType);
     }
 
-    private void updateIconSizeWith(@SizeType int sizeType) {
+    private void updateItemViewDimensionsWith(@SizeType int sizeType) {
         final Resources res = getResources();
+        final int paddingResId =
+                sizeType == SizeType.SMALL
+                        ? R.dimen.accessibility_floating_menu_small_padding
+                        : R.dimen.accessibility_floating_menu_large_padding;
+        mPadding = res.getDimensionPixelSize(paddingResId);
+
         final int iconResId =
                 sizeType == SizeType.SMALL
                         ? R.dimen.accessibility_floating_menu_small_width_height
                         : R.dimen.accessibility_floating_menu_large_width_height;
         mIconWidth = res.getDimensionPixelSize(iconResId);
         mIconHeight = mIconWidth;
+    }
 
+    private void updateItemViewWith(@SizeType int sizeType) {
+        updateItemViewDimensionsWith(sizeType);
+
+        mAdapter.setItemPadding(mPadding);
         mAdapter.setIconWidthHeight(mIconWidth);
         mAdapter.notifyDataSetChanged();
     }
@@ -630,7 +643,6 @@ public class AccessibilityFloatingMenuView extends FrameLayout
         final LayoutParams layoutParams =
                 new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
                         ViewGroup.LayoutParams.WRAP_CONTENT);
-        layoutParams.setMargins(mMargin, mMargin, mMargin, mMargin);
         mListView.setLayoutParams(layoutParams);
         final InstantInsetLayerDrawable layerDrawable =
                 new InstantInsetLayerDrawable(new Drawable[]{background});
@@ -645,6 +657,10 @@ public class AccessibilityFloatingMenuView extends FrameLayout
     }
 
     private void updateListView() {
+        final LayoutParams layoutParams = (FrameLayout.LayoutParams) mListView.getLayoutParams();
+        layoutParams.setMargins(mMargin, mMargin, mMargin, mMargin);
+        mListView.setLayoutParams(layoutParams);
+
         final int elevation =
                 getResources().getDimensionPixelSize(R.dimen.accessibility_floating_menu_elevation);
         mListView.setElevation(elevation);
@@ -676,11 +692,13 @@ public class AccessibilityFloatingMenuView extends FrameLayout
 
         updateDimensions();
         updateListView();
-        updateIconSizeWith(mSizeType);
+        updateItemViewWith(mSizeType);
         updateColor();
         updateStrokeWith(newConfig.uiMode, mAlignment);
         updateLocationWith(mAlignment, mPercentageY);
+        updateRadiusWith(mSizeType, mRadiusType, mTargets.size());
         updateScrollModeWith(hasExceededMaxLayoutHeight());
+        setSystemGestureExclusion();
 
         mLastConfiguration.setTo(newConfig);
     }
