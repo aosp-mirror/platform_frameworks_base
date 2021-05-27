@@ -1,12 +1,4 @@
 // Signature format: 2.0
-package android {
-
-  public static final class R.dimen {
-    field public static final int __removed_system_app_widget_internal_padding;
-  }
-
-}
-
 package android.app {
 
   public class Notification implements android.os.Parcelable {
