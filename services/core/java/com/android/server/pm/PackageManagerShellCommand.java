@@ -3772,9 +3772,6 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("  get-oem-permissions TARGET-PACKAGE");
         pw.println("    Prints all OEM permissions for a package.");
         pw.println("");
-        pw.println("  set-app-link [--user USER_ID] PACKAGE {always|ask|never|undefined}");
-        pw.println("  get-app-link [--user USER_ID] PACKAGE");
-        pw.println("");
         pw.println("  trim-caches DESIRED_FREE_SPACE [internal|UUID]");
         pw.println("    Trim cache files to reach the given free space.");
         pw.println("");
