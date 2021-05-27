@@ -319,7 +319,7 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"शारीरिक अ‍ॅक्टिव्हिटी अ‍ॅक्सेस करा"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"कॅमेरा"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"चित्रे काढण्याची आणि व्हिडिओ रेकॉर्ड करण्याची"</string>
-    <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"जवळपासची डीव्‍हाइस"</string>
+    <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"जवळपासची डिव्‍हाइस"</string>
     <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"जवळपास असलेली डिव्हाइस शोध आणि त्यांच्याशी कनेक्ट करा"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"कॉल लॉग"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"फोन कॉल लॉग वाचा आणि लिहा"</string>
@@ -580,7 +580,8 @@
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"आंशिक फिंगरप्रिंट डिटेक्ट केली"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"फिंगरप्रिंटवर प्रक्रिया करणे शक्य झाले नाही. कृपया पुन्हा प्रयत्न करा."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"सेन्सर साफ करा"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"बोट खूप वेगाने हलवले गेले"</string>
+    <!-- no translation found for fingerprint_acquired_too_fast (6038375140739678098) -->
+    <skip />
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"बोट खूप सावकाश हलविले. कृपया पुन्हा प्रयत्न करा."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"दुसरी फिंगरप्रिंट वापरून पाहा"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"खूप प्रखर"</string>
@@ -2103,8 +2104,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"ओके"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"बंद करा"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"अधिक जाणून घ्या"</string>
-    <!-- no translation found for nas_upgrade_notification_learn_more_content (3735480566983530650) -->
-    <skip />
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12 मधील Android ॲडॅप्टिव्ह सूचना हे वैशिष्ट्य बदलून आता वर्धित सूचना झाले आहे. हे वैशिष्ट्य सुचवलेल्या कृती आणि उत्तरे दाखवते व तुमच्या सूचना व्यवस्थापित करते. \n\nवर्धित सूचना हे वैशिष्ट्य संपर्कांची नावे आणि मेसेज यांसारख्या वैयक्तिक माहितीसह सर्व सूचनांचा आशय ॲक्सेस करू शकते. हे वैशिष्ट्य फोन कॉलना उत्तर देणे आणि व्यत्यय आणू नका नियंत्रित करणे यांसारख्या कृती करून सूचना डिसमिस करू शकते किंवा त्यांना प्रतिसाद देऊ शकते."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"दिनक्रम मोडची माहिती सूचना"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"चार्जिंगची सामान्य पातळी गाठेपर्यंत कदाचित बॅटरी संपू शकते"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"बॅटरी लाइफ वाढवण्यासाठी बॅटरी सेव्हर सुरू केला आहे"</string>

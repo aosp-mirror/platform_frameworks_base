@@ -580,7 +580,8 @@
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"పాక్షిక వేలిముద్ర గుర్తించబడింది"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"వేలిముద్రను ప్రాసెస్ చేయడం సాధ్యపడలేదు. దయచేసి మళ్లీ ప్రయత్నించండి."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"సెన్సార్‌ను శుభ్రం చేయండి"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"వేలు చాలా వేగంగా తరలించబడింది"</string>
+    <!-- no translation found for fingerprint_acquired_too_fast (6038375140739678098) -->
+    <skip />
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"వేలిని చాలా నెమ్మదిగా కదిలించారు. దయచేసి మళ్లీ ప్రయత్నించండి."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"మరొక వేలిముద్రను ట్రై చేయండి"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"వెలుతురు అధికంగా ఉంది"</string>

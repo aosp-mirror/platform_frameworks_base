@@ -580,7 +580,8 @@
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Barmoq izi qismi aniqlandi"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Barmoq izi aniqlanmadi. Qaytadan urining."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"Sensorni tozalang"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"Barmoq juda tez olindi"</string>
+    <!-- no translation found for fingerprint_acquired_too_fast (6038375140739678098) -->
+    <skip />
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Barmoq juda sekin harakatlandi. Qayta urinib ko‘ring."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Boshqa barmoq izi bilan urining"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Juda yorqin"</string>
@@ -609,12 +610,10 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Barmoq izi belgisi"</string>
-    <!-- no translation found for face_recalibrate_notification_name (7311163114750748686) -->
-    <skip />
+    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Yuz bilan ochish"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Yuzingizni yana qayd qiling"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Yuzingiz yanada yaxshiroq aniqlanishi uchun uni yana bir marta qayd qiling"</string>
-    <!-- no translation found for face_setup_notification_title (8843461561970741790) -->
-    <skip />
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"Yuz bilan ochishni sozlash"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Telefoningizni yuz tekshiruvi yordamida qulfdan chiqaring"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Qulfdan chiqarishning boshqa usullarini sozlang"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Barmoq izi kiritish uchun bosing"</string>
@@ -641,26 +640,19 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Yuzingiz tasdiqlanmadi. Qurilma ishlamayapti."</string>
-    <!-- no translation found for face_error_timeout (2598544068593889762) -->
-    <skip />
+    <string name="face_error_timeout" msgid="2598544068593889762">"Yana yuz bilan ochishga urining"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Yuzga oid axborot saqlanmadi. Avval eskilari tozalansin."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Yuzni aniqlash bekor qilindi."</string>
-    <!-- no translation found for face_error_user_canceled (5766472033202928373) -->
-    <skip />
+    <string name="face_error_user_canceled" msgid="5766472033202928373">"Yuz bilan ochishni foydalanuvchi bekor qildi"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Juda ko‘p urinildi. Keyinroq qaytadan urining."</string>
-    <!-- no translation found for face_error_lockout_permanent (3277134834042995260) -->
-    <skip />
-    <!-- no translation found for face_error_lockout_screen_lock (5062609811636860928) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Juda koʻp urinildi. Yuz bilan ochish faolsizlantirildi."</string>
+    <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Juda koʻp urinildi. Ekran qulfi bilan oching."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Yuzingiz tasdiqlanmadi. Qaytadan urining."</string>
-    <!-- no translation found for face_error_not_enrolled (1134739108536328412) -->
-    <skip />
-    <!-- no translation found for face_error_hw_not_present (7940978724978763011) -->
-    <skip />
+    <string name="face_error_not_enrolled" msgid="1134739108536328412">"Hali yuz bilan ochishni sozlamagansiz"</string>
+    <string name="face_error_hw_not_present" msgid="7940978724978763011">"Bu qurilmada yuz bilan ochish funksiyasi ishlamaydi"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Sensor vaqtincha faol emas."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Yuz <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <!-- no translation found for face_app_setting_name (5854024256907828015) -->
-    <skip />
+    <string name="face_app_setting_name" msgid="5854024256907828015">"Yuz bilan ochish"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Yuz bilan ochish yoki ekran qulfi"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Yuz tekshiruvi bilan davom eting"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Davom etish uchun yuz tekshiruvi yoki ekran qulfidan foydalaning"</string>
@@ -963,8 +955,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"Qulfni ochish maydonini kengaytirish."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"Qulfni silab ochish"</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"Grafik kalit bilan ochish."</string>
-    <!-- no translation found for keyguard_accessibility_face_unlock (4533832120787386728) -->
-    <skip />
+    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"Yuz bilan ochish."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"Pin qulfini ochish."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"SIM kartani PIN kod bilan ochish."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"SIM kartani PUK kod bilan ochish."</string>

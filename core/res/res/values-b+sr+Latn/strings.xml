@@ -583,7 +583,8 @@
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Otkriven je delimičan otisak prsta"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Nije uspela obrada otiska prsta. Probajte ponovo."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"Obrišite senzor"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"Prst je pomeren prebrzo"</string>
+    <!-- no translation found for fingerprint_acquired_too_fast (6038375140739678098) -->
+    <skip />
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Previše sporo ste pomerili prst. Probajte ponovo."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Probajte sa drugim otiskom prsta"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Previše je svetlo"</string>
@@ -1418,7 +1419,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"DELI"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"ODBIJ"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Izbor metoda unosa"</string>
-    <string name="show_ime" msgid="6406112007347443383">"Zadrži je na ekranu dok je fizička tastatura aktivna"</string>
+    <string name="show_ime" msgid="6406112007347443383">"Zadržava se na ekranu dok je fizička tastatura aktivna"</string>
     <string name="hardware" msgid="1800597768237606953">"Prikaži virtuelnu tastaturu"</string>
     <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"Konfigurišite fizičku tastaturu"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Dodirnite da biste izabrali jezik i raspored"</string>
