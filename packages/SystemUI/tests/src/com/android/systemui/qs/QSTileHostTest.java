@@ -78,7 +78,7 @@ import javax.inject.Provider;
 
 @RunWith(AndroidTestingRunner.class)
 @SmallTest
-@RunWithLooper
+@RunWithLooper(setAsMainLooper = true)
 public class QSTileHostTest extends SysuiTestCase {
 
     private static String MOCK_STATE_STRING = "MockState";
