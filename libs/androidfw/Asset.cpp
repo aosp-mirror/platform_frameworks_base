@@ -594,7 +594,12 @@ void _FileAsset::close(void)
  */
 const void* _FileAsset::getBuffer(bool aligned)
 {
-    return getIncFsBuffer(aligned).unsafe_ptr();
+    auto buffer = getIncFsBuffer(aligned);
+    if (mBuf != NULL)
+        return mBuf;
+    if (!buffer.convert<uint8_t>().verify(mLength))
+        return NULL;
+    return buffer.unsafe_ptr();
 }
 
 incfs::map_ptr<void> _FileAsset::getIncFsBuffer(bool aligned)
