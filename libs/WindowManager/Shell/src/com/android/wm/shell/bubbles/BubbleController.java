@@ -722,6 +722,7 @@ public class BubbleController {
                     || !newConfig.windowConfiguration.getBounds().equals(mScreenBounds)) {
                 mDensityDpi = newConfig.densityDpi;
                 mScreenBounds.set(newConfig.windowConfiguration.getBounds());
+                mBubbleData.onMaxBubblesChanged();
                 mBubbleIconFactory = new BubbleIconFactory(mContext);
                 mStackView.onDisplaySizeChanged();
             }

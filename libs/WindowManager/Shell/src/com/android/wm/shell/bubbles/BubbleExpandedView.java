@@ -60,6 +60,7 @@ import android.widget.LinearLayout;
 import androidx.annotation.Nullable;
 
 import com.android.internal.policy.ScreenDecorationsUtils;
+import com.android.launcher3.icons.IconNormalizer;
 import com.android.wm.shell.R;
 import com.android.wm.shell.TaskView;
 import com.android.wm.shell.common.AlphaOptimizedButton;
@@ -726,9 +727,13 @@ public class BubbleExpandedView extends LinearLayout {
         setPadding((int) paddingLeft, (int) paddingTop, (int) paddingRight, 0);
 
         final float expandedViewY = mPositioner.getExpandedViewY();
+        // TODO: I don't understand why it works but it does - why normalized in portrait
+        //  & not in landscape? Am I missing ~2dp in the portrait expandedViewY calculation?
+        final float normalizedSize = IconNormalizer.getNormalizedCircleSize(
+                mPositioner.getBubbleSize());
         final float bubbleCenter = showVertically
                 ? bubblePosition + (mPositioner.getBubbleSize() / 2f) - expandedViewY
-                : bubblePosition + (mPositioner.getBubbleBitmapSize() / 2f) - mPointerWidth;
+                : bubblePosition + (normalizedSize / 2f) - mPointerWidth;
         // Post because we need the width of the view
         post(() -> {
             float pointerY;
