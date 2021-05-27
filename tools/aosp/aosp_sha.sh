@@ -4,6 +4,9 @@ LOCAL_DIR="$( dirname "${BASH_SOURCE}" )"
 if git branch -vv | grep -q -P "^\*[^\[]+\[aosp/"; then
     # Change appears to be in AOSP
     exit 0
+elif git log -n 1 --format='%B' $1 | grep -q -E "^Ignore-AOSP-First: .+" ; then
+    # Change is explicitly marked as ok to skip AOSP
+    exit 0
 else
     # Change appears to be non-AOSP; search for files
     count=0

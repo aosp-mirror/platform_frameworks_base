@@ -258,6 +258,7 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
                 eq(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES), anyInt()))
                 .thenReturn(jsonString);
         when(mWallpaperManager.getWallpaperId(WallpaperManager.FLAG_LOCK)).thenReturn(20);
+        when(mWallpaperManager.getWallpaperId(WallpaperManager.FLAG_SYSTEM)).thenReturn(21);
 
         mColorsListener.getValue().onColorsChanged(mainColors, WallpaperManager.FLAG_SYSTEM);
 
@@ -298,6 +299,63 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
                 "android.theme.customization.color_both\":\"1")).isTrue();
 
         verify(mThemeOverlayApplier)
+                .applyCurrentUserOverlays(any(), any(), anyInt(), any());
+    }
+
+    @Test
+    public void onWallpaperColorsChanged_ResetThemeWhenFromLatestWallpaper() {
+        // Should ask for a new theme when the colors of the last applied wallpaper change
+        WallpaperColors mainColors = new WallpaperColors(Color.valueOf(Color.RED),
+                Color.valueOf(Color.BLUE), null);
+
+        String jsonString =
+                "{\"android.theme.customization.system_palette\":\"override.package.name\","
+                        + "\"android.theme.customization.color_source\":\"home_wallpaper\","
+                        + "\"android.theme.customization.color_index\":\"2\"}";
+
+        when(mSecureSettings.getStringForUser(
+                eq(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES), anyInt()))
+                .thenReturn(jsonString);
+        when(mWallpaperManager.getWallpaperId(WallpaperManager.FLAG_LOCK)).thenReturn(1);
+        // SYSTEM wallpaper is the last applied one
+        when(mWallpaperManager.getWallpaperId(WallpaperManager.FLAG_SYSTEM)).thenReturn(2);
+
+        mColorsListener.getValue().onColorsChanged(mainColors, WallpaperManager.FLAG_SYSTEM);
+
+        ArgumentCaptor<String> updatedSetting = ArgumentCaptor.forClass(String.class);
+        verify(mSecureSettings).putString(
+                eq(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES), updatedSetting.capture());
+
+        verify(mThemeOverlayApplier)
+                .applyCurrentUserOverlays(any(), any(), anyInt(), any());
+    }
+
+    @Test
+    public void onWallpaperColorsChanged_keepThemeIfNotLatestWallpaper() {
+        // Shouldn't ask for a new theme when the colors of the wallpaper that is not the last
+        // applied one change
+        WallpaperColors mainColors = new WallpaperColors(Color.valueOf(Color.RED),
+                Color.valueOf(Color.BLUE), null);
+
+        String jsonString =
+                "{\"android.theme.customization.system_palette\":\"override.package.name\","
+                        + "\"android.theme.customization.color_source\":\"home_wallpaper\","
+                        + "\"android.theme.customization.color_index\":\"2\"}";
+
+        when(mSecureSettings.getStringForUser(
+                eq(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES), anyInt()))
+                .thenReturn(jsonString);
+        when(mWallpaperManager.getWallpaperId(WallpaperManager.FLAG_LOCK)).thenReturn(1);
+        // SYSTEM wallpaper is the last applied one
+        when(mWallpaperManager.getWallpaperId(WallpaperManager.FLAG_SYSTEM)).thenReturn(2);
+
+        mColorsListener.getValue().onColorsChanged(mainColors, WallpaperManager.FLAG_LOCK);
+
+        verify(mSecureSettings, never()).putString(
+                eq(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES), any());
+
+
+        verify(mThemeOverlayApplier, never())
                 .applyCurrentUserOverlays(any(), any(), anyInt(), any());
     }
 

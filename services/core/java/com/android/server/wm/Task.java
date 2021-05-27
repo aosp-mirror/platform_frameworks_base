@@ -106,6 +106,7 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_VISIB
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.ActivityTaskManagerService.H.FIRST_ACTIVITY_TASK_MSG;
+import static com.android.server.wm.ActivityTaskManagerService.SKIP_LAYOUT_REASON_EXPECT_NEXT_RELAYOUT;
 import static com.android.server.wm.ActivityTaskSupervisor.DEFER_RESUME;
 import static com.android.server.wm.ActivityTaskSupervisor.ON_TOP;
 import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
@@ -5408,17 +5409,17 @@ class Task extends WindowContainer<WindowContainer> {
                     : WINDOWING_MODE_FULLSCREEN;
         }
         if (currentMode == WINDOWING_MODE_PINNED) {
+            mRootWindowContainer.notifyActivityPipModeChanged(null);
+        }
+        if (likelyResolvedMode == WINDOWING_MODE_PINNED) {
             // In the case that we've disabled affecting the SysUI flags as a part of seamlessly
             // transferring the transform on the leash to the task, reset this state once we've
             // actually entered pip
             setCanAffectSystemUiFlags(true);
-            mRootWindowContainer.notifyActivityPipModeChanged(null);
-        }
-        if (likelyResolvedMode == WINDOWING_MODE_PINNED
-                && taskDisplayArea.getRootPinnedTask() != null) {
-
-            // Can only have 1 pip at a time, so replace an existing pip
-            taskDisplayArea.getRootPinnedTask().dismissPip();
+            if (taskDisplayArea.getRootPinnedTask() != null) {
+                // Can only have 1 pip at a time, so replace an existing pip
+                taskDisplayArea.getRootPinnedTask().dismissPip();
+            }
         }
         if (likelyResolvedMode != WINDOWING_MODE_FULLSCREEN
                 && topActivity != null && !topActivity.noDisplay
@@ -6289,6 +6290,8 @@ class Task extends WindowContainer<WindowContainer> {
             if (lastResumed != null) {
                 lastResumed.setWillCloseOrEnterPip(true);
             }
+            // There may be a relayout from resuming next activity after the previous is paused.
+            mAtmService.addWindowLayoutReasons(SKIP_LAYOUT_REASON_EXPECT_NEXT_RELAYOUT);
             return true;
         } else if (mResumedActivity == next && next.isState(RESUMED)
                 && taskDisplayArea.allResumedActivitiesComplete()) {
@@ -6498,6 +6501,7 @@ class Task extends WindowContainer<WindowContainer> {
                         ResumeActivityItem.obtain(next.app.getReportedProcState(),
                                 dc.isNextTransitionForward()));
                 mAtmService.getLifecycleManager().scheduleTransaction(transaction);
+                mAtmService.addWindowLayoutReasons(SKIP_LAYOUT_REASON_EXPECT_NEXT_RELAYOUT);
 
                 ProtoLog.d(WM_DEBUG_STATES, "resumeTopActivityLocked: Resumed %s", next);
             } catch (Exception e) {

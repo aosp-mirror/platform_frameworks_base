@@ -2589,6 +2589,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             addServiceToMap(mAppBindArgs, Context.POWER_SERVICE);
             addServiceToMap(mAppBindArgs, Context.USER_SERVICE);
             addServiceToMap(mAppBindArgs, "mount");
+            addServiceToMap(mAppBindArgs, Context.PLATFORM_COMPAT_SERVICE);
         }
         return mAppBindArgs;
     }
@@ -4324,8 +4325,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (pid > 0 && pid != MY_PID) {
                 killProcessQuiet(pid);
                 //TODO: killProcessGroup(app.info.uid, pid);
-                mProcessList.noteAppKill(app, ApplicationExitInfo.REASON_INITIALIZATION_FAILURE,
-                        ApplicationExitInfo.SUBREASON_UNKNOWN, "attach failed");
+                // We can't log the app kill info for this process since we don't
+                // know who it is, so just skip the logging.
             } else {
                 try {
                     thread.scheduleExit();

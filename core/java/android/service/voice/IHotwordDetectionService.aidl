@@ -53,4 +53,6 @@ oneway interface IHotwordDetectionService {
     void updateContentCaptureManager(
         in IContentCaptureManager contentCaptureManager,
         in ContentCaptureOptions options);
+
+    void stopDetection();
 }

@@ -560,6 +560,15 @@ package android.view.translation {
     method @Deprecated public void removeTranslationCapabilityUpdateListener(int, int, @NonNull android.app.PendingIntent);
   }
 
+  public static final class TranslationRequest.Builder {
+    method @Deprecated @NonNull public android.view.translation.TranslationRequest.Builder addTranslationRequestValue(@NonNull android.view.translation.TranslationRequestValue);
+    method @Deprecated @NonNull public android.view.translation.TranslationRequest.Builder addViewTranslationRequest(@NonNull android.view.translation.ViewTranslationRequest);
+  }
+
+  public static final class TranslationResponse.Builder {
+    method @Deprecated @NonNull public android.view.translation.TranslationResponse.Builder setTranslationStatus(int);
+  }
+
   public final class TranslationSpec implements android.os.Parcelable {
     ctor @Deprecated public TranslationSpec(@NonNull String, int);
     method @Deprecated @NonNull public String getLanguage();

@@ -22,6 +22,7 @@
         <item name="android:listPreferredItemPaddingStart">24dp</item>
         <item name="android:listPreferredItemPaddingEnd">16dp</item>
         <item name="preferenceTheme">@style/PreferenceTheme.SettingsLib</item>
+        <item name="android:switchStyle">@style/Switch.SettingsLib</item>
     </style>
 
     <!-- Using in SubSettings page including injected settings page -->

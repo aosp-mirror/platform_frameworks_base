@@ -20,12 +20,8 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
-import android.os.Looper;
 import android.os.PowerManager;
-import android.os.test.TestLooper;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.io.PrintWriter;
@@ -37,17 +33,6 @@ import java.util.TimeZone;
  * Tests for {@link WakeLockLog}.
  */
 public class WakeLockLogTest {
-
-    private TestLooper mTestLooper;
-
-    @Before
-    public void setUp() throws Exception {
-        mTestLooper = new TestLooper();
-    }
-
-    @After
-    public void tearDown() throws Exception {
-    }
 
     @Test
     public void testAddTwoItems() {
@@ -70,7 +55,7 @@ public class WakeLockLogTest {
                 + "  -\n"
                 + "  Events: 2, Time-Resets: 0\n"
                 + "  Buffer, Bytes used: 6\n",
-                dispatchAndDump(log, false));
+                dumpLog(log, false));
     }
 
     @Test
@@ -92,7 +77,7 @@ public class WakeLockLogTest {
                 + "  -\n"
                 + "  Events: 2, Time-Resets: 1\n"
                 + "  Buffer, Bytes used: 15\n",
-                dispatchAndDump(log, false));
+                dumpLog(log, false));
     }
 
     @Test
@@ -114,7 +99,7 @@ public class WakeLockLogTest {
                 + "  -\n"
                 + "  Events: 2, Time-Resets: 0\n"
                 + "  Buffer, Bytes used: 6\n",
-                dispatchAndDump(log, false));
+                dumpLog(log, false));
     }
 
     @Test
@@ -142,7 +127,7 @@ public class WakeLockLogTest {
                 + "  -\n"
                 + "  Events: 3, Time-Resets: 0\n"
                 + "  Buffer, Bytes used: 9\n",
-                dispatchAndDump(log, false));
+                dumpLog(log, false));
     }
 
     @Test
@@ -160,7 +145,7 @@ public class WakeLockLogTest {
                 + "  -\n"
                 + "  Events: 0, Time-Resets: 0\n"
                 + "  Buffer, Bytes used: 0\n",
-                dispatchAndDump(log, false));
+                dumpLog(log, false));
     }
 
     @Test
@@ -179,7 +164,7 @@ public class WakeLockLogTest {
                 + "  -\n"
                 + "  Events: 1, Time-Resets: 0\n"
                 + "  Buffer, Bytes used: 3\n",
-                dispatchAndDump(log, false));
+                dumpLog(log, false));
     }
 
     @Test
@@ -201,7 +186,7 @@ public class WakeLockLogTest {
                 + "  Events: 2, Time-Resets: 0\n"
                 + "  Buffer, Bytes used: 5\n"
                 + "  Tag Database: size(5), entries: 1, Bytes used: 80\n",
-                dispatchAndDump(log, true));
+                dumpLog(log, true));
     }
 
     @Test
@@ -223,11 +208,10 @@ public class WakeLockLogTest {
                 + "  -\n"
                 + "  Events: 1, Time-Resets: 0\n"
                 + "  Buffer, Bytes used: 3\n",
-                dispatchAndDump(log, false));
+                dumpLog(log, false));
     }
 
-    private String dispatchAndDump(WakeLockLog log, boolean includeTagDb) {
-        mTestLooper.dispatchAll();
+    private String dumpLog(WakeLockLog log, boolean includeTagDb) {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
         log.dump(pw, includeTagDb);
@@ -241,11 +225,6 @@ public class WakeLockLogTest {
         public TestInjector(int tagDatabaseSize, int logSize) {
             mTagDatabaseSize = tagDatabaseSize;
             mLogSize = logSize;
-        }
-
-        @Override
-        public Looper getLooper() {
-            return mTestLooper.getLooper();
         }
 
         @Override
