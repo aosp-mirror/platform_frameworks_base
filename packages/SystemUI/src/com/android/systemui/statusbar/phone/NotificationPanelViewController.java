@@ -54,7 +54,6 @@ import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.UserManager;
 import android.os.VibrationEffect;
-import android.service.quickaccesswallet.QuickAccessWalletClient;
 import android.util.Log;
 import android.util.MathUtils;
 import android.view.DisplayCutout;
@@ -97,8 +96,8 @@ import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.DozeLog;
-import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.fragments.FragmentHostManager.FragmentListener;
+import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.media.KeyguardMediaController;
 import com.android.systemui.media.MediaDataManager;
 import com.android.systemui.media.MediaHierarchyManager;
@@ -153,6 +152,7 @@ import com.android.systemui.statusbar.policy.KeyguardUserSwitcherView;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.util.Utils;
 import com.android.systemui.util.settings.SecureSettings;
+import com.android.systemui.wallet.controller.QuickAccessWalletController;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 
 import java.io.FileDescriptor;
@@ -306,14 +306,17 @@ public class NotificationPanelViewController extends PanelViewController {
     private final KeyguardUserSwitcherComponent.Factory mKeyguardUserSwitcherComponentFactory;
     private final KeyguardStatusBarViewComponent.Factory mKeyguardStatusBarViewComponentFactory;
     private final QSDetailDisplayer mQSDetailDisplayer;
+    private final FragmentService mFragmentService;
     private final FeatureFlags mFeatureFlags;
     private final ScrimController mScrimController;
     private final PrivacyDotViewController mPrivacyDotViewController;
+    private final QuickAccessWalletController mQuickAccessWalletController;
 
     // Maximum # notifications to show on Keyguard; extras will be collapsed in an overflow card.
     // If there are exactly 1 + mMaxKeyguardNotifications, then still shows all notifications
     private final int mMaxKeyguardNotifications;
     private final LockscreenShadeTransitionController mLockscreenShadeTransitionController;
+    private final TapAgainViewController mTapAgainViewController;
     private boolean mShouldUseSplitNotificationShade;
     // Current max allowed keyguard notifications determined by measuring the panel
     private int mMaxAllowedKeyguardNotifications;
@@ -574,7 +577,6 @@ public class NotificationPanelViewController extends PanelViewController {
     private int mScreenCornerRadius;
     private int mNotificationScrimPadding;
 
-    private final QuickAccessWalletClient mQuickAccessWalletClient;
     private final Executor mUiExecutor;
     private final SecureSettings mSecureSettings;
 
@@ -604,7 +606,12 @@ public class NotificationPanelViewController extends PanelViewController {
     private final FalsingTapListener mFalsingTapListener = new FalsingTapListener() {
         @Override
         public void onDoubleTapRequired() {
-            showTransientIndication(R.string.notification_tap_again);
+            if (mStatusBarStateController.getState() == StatusBarState.SHADE_LOCKED) {
+                mTapAgainViewController.show();
+            } else {
+                mKeyguardIndicationController.showTransientIndication(
+                        R.string.notification_tap_again);
+            }
             mVibratorHelper.vibrate(VibrationEffect.EFFECT_STRENGTH_MEDIUM);
         }
     };
@@ -650,9 +657,11 @@ public class NotificationPanelViewController extends PanelViewController {
             AmbientState ambientState,
             LockIconViewController lockIconViewController,
             FeatureFlags featureFlags,
-            QuickAccessWalletClient quickAccessWalletClient,
             KeyguardMediaController keyguardMediaController,
             PrivacyDotViewController privacyDotViewController,
+            TapAgainViewController tapAgainViewController,
+            FragmentService fragmentService,
+            QuickAccessWalletController quickAccessWalletController,
             @Main Executor uiExecutor,
             SecureSettings secureSettings) {
         super(view, falsingManager, dozeLog, keyguardStateController,
@@ -663,6 +672,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mVibratorHelper = vibratorHelper;
         mKeyguardMediaController = keyguardMediaController;
         mPrivacyDotViewController = privacyDotViewController;
+        mQuickAccessWalletController = quickAccessWalletController;
         mMetricsLogger = metricsLogger;
         mActivityManager = activityManager;
         mConfigurationController = configurationController;
@@ -679,6 +689,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mKeyguardQsUserSwitchComponentFactory = keyguardQsUserSwitchComponentFactory;
         mKeyguardUserSwitcherComponentFactory = keyguardUserSwitcherComponentFactory;
         mQSDetailDisplayer = qsDetailDisplayer;
+        mFragmentService = fragmentService;
         mKeyguardUserSwitcherEnabled = mResources.getBoolean(
                 com.android.internal.R.bool.config_keyguardUserSwitcher);
         mKeyguardQsUserSwitchEnabled =
@@ -704,7 +715,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mScrimController.setClipsQsScrim(!mShouldUseSplitNotificationShade);
         mUserManager = userManager;
         mMediaDataManager = mediaDataManager;
-        mQuickAccessWalletClient = quickAccessWalletClient;
+        mTapAgainViewController = tapAgainViewController;
         mUiExecutor = uiExecutor;
         mSecureSettings = secureSettings;
         pulseExpansionHandler.setPulseExpandAbortListener(() -> {
@@ -843,6 +854,8 @@ public class NotificationPanelViewController extends PanelViewController {
         if (mShouldUseSplitNotificationShade) {
             updateResources();
         }
+
+        mTapAgainViewController.init();
     }
 
     @Override
@@ -1098,7 +1111,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mKeyguardBottomArea.setFalsingManager(mFalsingManager);
 
         if (mFeatureFlags.isQuickAccessWalletEnabled()) {
-            mKeyguardBottomArea.initWallet(mQuickAccessWalletClient, mUiExecutor, mSecureSettings);
+            mKeyguardBottomArea.initWallet(mQuickAccessWalletController);
         }
     }
 
@@ -3671,10 +3684,6 @@ public class NotificationPanelViewController extends PanelViewController {
         updateMaxDisplayedNotifications(true);
     }
 
-    public void showTransientIndication(int id) {
-        mKeyguardIndicationController.showTransientIndication(id);
-    }
-
     public void setAlpha(float alpha) {
         mView.setAlpha(alpha);
     }
@@ -4260,7 +4269,8 @@ public class NotificationPanelViewController extends PanelViewController {
     private class OnAttachStateChangeListener implements View.OnAttachStateChangeListener {
         @Override
         public void onViewAttachedToWindow(View v) {
-            FragmentHostManager.get(mView).addTagListener(QS.TAG, mFragmentListener);
+            mFragmentService.getFragmentHostManager(mView)
+                            .addTagListener(QS.TAG, mFragmentListener);
             mStatusBarStateController.addCallback(mStatusBarStateListener);
             mConfigurationController.addCallback(mConfigurationListener);
             mUpdateMonitor.registerCallback(mKeyguardUpdateCallback);
@@ -4274,7 +4284,8 @@ public class NotificationPanelViewController extends PanelViewController {
 
         @Override
         public void onViewDetachedFromWindow(View v) {
-            FragmentHostManager.get(mView).removeTagListener(QS.TAG, mFragmentListener);
+            mFragmentService.getFragmentHostManager(mView)
+                            .removeTagListener(QS.TAG, mFragmentListener);
             mStatusBarStateController.removeCallback(mStatusBarStateListener);
             mConfigurationController.removeCallback(mConfigurationListener);
             mUpdateMonitor.removeCallback(mKeyguardUpdateCallback);
