@@ -617,8 +617,10 @@ class ActivityStarter {
             final LaunchingState launchingState;
             synchronized (mService.mGlobalLock) {
                 final ActivityRecord caller = ActivityRecord.forTokenLocked(mRequest.resultTo);
+                final int callingUid = mRequest.realCallingUid == Request.DEFAULT_REAL_CALLING_UID
+                        ?  Binder.getCallingUid() : mRequest.realCallingUid;
                 launchingState = mSupervisor.getActivityMetricsLogger().notifyActivityLaunching(
-                        mRequest.intent, caller);
+                        mRequest.intent, caller, callingUid);
             }
 
             // If the caller hasn't already resolved the activity, we're willing

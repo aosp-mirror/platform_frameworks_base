@@ -80,7 +80,6 @@ import android.content.pm.IncrementalStatesInfo;
 import android.content.pm.dex.ArtManagerInternal;
 import android.content.pm.dex.PackageOptimizationInfo;
 import android.metrics.LogMaker;
-import android.os.Binder;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
@@ -508,21 +507,12 @@ class ActivityMetricsLogger {
     }
 
     /**
-     * If the caller is found in an active transition, it will be considered as consecutive launch
-     * and coalesced into the active transition.
-     *
-     * @see #notifyActivityLaunching(Intent, ActivityRecord, int)
-     */
-    LaunchingState notifyActivityLaunching(Intent intent, @Nullable ActivityRecord caller) {
-        return notifyActivityLaunching(intent, caller, Binder.getCallingUid());
-    }
-
-    /**
      * Notifies the tracker at the earliest possible point when we are starting to launch an
      * activity. The caller must ensure that {@link #notifyActivityLaunched} will be called later
-     * with the returned {@link LaunchingState}.
+     * with the returned {@link LaunchingState}. If the caller is found in an active transition,
+     * it will be considered as consecutive launch and coalesced into the active transition.
      */
-    private LaunchingState notifyActivityLaunching(Intent intent, @Nullable ActivityRecord caller,
+    LaunchingState notifyActivityLaunching(Intent intent, @Nullable ActivityRecord caller,
             int callingUid) {
         final long transitionStartTimeNs = SystemClock.elapsedRealtimeNanos();
         TransitionInfo existingInfo = null;
