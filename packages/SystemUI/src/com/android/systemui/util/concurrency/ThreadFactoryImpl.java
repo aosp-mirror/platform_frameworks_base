@@ -29,10 +29,15 @@ class ThreadFactoryImpl implements ThreadFactory {
     ThreadFactoryImpl() {}
 
     @Override
-    public Handler builderHandlerOnNewThread(String threadName) {
+    public Looper buildLooperOnNewThread(String threadName) {
         HandlerThread handlerThread = new HandlerThread(threadName);
         handlerThread.start();
-        return new Handler(handlerThread.getLooper());
+        return handlerThread.getLooper();
+    }
+
+    @Override
+    public Handler buildHandlerOnNewThread(String threadName) {
+        return new Handler(buildLooperOnNewThread(threadName));
     }
 
     @Override

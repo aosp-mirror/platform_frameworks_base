@@ -423,8 +423,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"Slökkt á NFC"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"Kveikt á NFC"</string>
-    <!-- no translation found for quick_settings_screen_record_label (8650355346742003694) -->
-    <skip />
+    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Skjáupptaka"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Hefja"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Stöðva"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Opna fyrir hljóðnema tækisins?"</string>

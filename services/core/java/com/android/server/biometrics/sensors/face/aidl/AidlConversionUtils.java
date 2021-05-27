@@ -120,10 +120,13 @@ final class AidlConversionUtils {
                 return BiometricFaceConstants.FACE_ACQUIRED_SENSOR_DIRTY;
             case AcquiredInfo.VENDOR:
                 return BiometricFaceConstants.FACE_ACQUIRED_VENDOR;
-            case AcquiredInfo.UNKNOWN:
             case AcquiredInfo.FIRST_FRAME_RECEIVED:
+                return BiometricFaceConstants.FACE_ACQUIRED_FIRST_FRAME_RECEIVED;
             case AcquiredInfo.DARK_GLASSES_DETECTED:
+                return BiometricFaceConstants.FACE_ACQUIRED_DARK_GLASSES_DETECTED;
             case AcquiredInfo.MOUTH_COVERING_DETECTED:
+                return BiometricFaceConstants.FACE_ACQUIRED_MOUTH_COVERING_DETECTED;
+            case AcquiredInfo.UNKNOWN:
             default:
                 return BiometricFaceConstants.FACE_ACQUIRED_UNKNOWN;
         }

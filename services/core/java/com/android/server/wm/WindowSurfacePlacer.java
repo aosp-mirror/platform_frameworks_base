@@ -101,6 +101,16 @@ class WindowSurfacePlacer {
         }
     }
 
+    /**
+     * Resumes layout passes but skip to perform layout even if there was a request. This can only
+     * be called when there will be another layout request from client side, e.g. an activity is
+     * starting or resuming. And there should be no other significant changes need to apply.
+     */
+    void endDeferAndSkipLayout() {
+        mDeferDepth--;
+        mDeferredRequests = 0;
+    }
+
     boolean isLayoutDeferred() {
         return mDeferDepth > 0;
     }

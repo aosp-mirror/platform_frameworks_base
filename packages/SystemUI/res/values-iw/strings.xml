@@ -427,8 +427,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"‏NFC מושבת"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"‏NFC מופעל"</string>
-    <!-- no translation found for quick_settings_screen_record_label (8650355346742003694) -->
-    <skip />
+    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"הקלטת המסך"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"התחלה"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"עצירה"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"לבטל את חסימת המיקרופון של המכשיר?"</string>
@@ -1051,7 +1050,7 @@
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"העברה לשוליים והסתרה"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"העברה מהשוליים והצגה"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"החלפת מצב"</string>
-    <string name="quick_controls_title" msgid="7095074621086860062">"בית חכם"</string>
+    <string name="quick_controls_title" msgid="7095074621086860062">"פקדי הבית החכם"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"יש לבחור אפליקציה כדי להוסיף פקדים"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="two">נוספו <xliff:g id="NUMBER_1">%s</xliff:g> פקדים.</item>
@@ -1125,16 +1124,11 @@
     <string name="priority_conversations" msgid="3967482288896653039">"שיחות בעדיפות גבוהה"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"שיחות אחרונות"</string>
     <string name="okay" msgid="6490552955618608554">"בסדר"</string>
-    <!-- no translation found for days_timestamp (5821854736213214331) -->
-    <skip />
-    <!-- no translation found for one_week_timestamp (4925600765473875590) -->
-    <skip />
-    <!-- no translation found for two_weeks_timestamp (9111801081871962155) -->
-    <skip />
-    <!-- no translation found for over_one_week_timestamp (3770560704420807142) -->
-    <skip />
-    <!-- no translation found for over_two_weeks_timestamp (6300507859007874050) -->
-    <skip />
+    <string name="days_timestamp" msgid="5821854736213214331">"לפני <xliff:g id="DURATION">%1$s</xliff:g> ימים"</string>
+    <string name="one_week_timestamp" msgid="4925600765473875590">"לפני שבוע"</string>
+    <string name="two_weeks_timestamp" msgid="9111801081871962155">"לפני שבועיים"</string>
+    <string name="over_one_week_timestamp" msgid="3770560704420807142">"לפני יותר משבוע"</string>
+    <string name="over_two_weeks_timestamp" msgid="6300507859007874050">"לפני יותר משבועיים"</string>
     <string name="birthday_status" msgid="2596961629465396761">"יום הולדת"</string>
     <string name="birthday_status_content_description" msgid="682836371128282925">"זהו יום ההולדת של <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="upcoming_birthday_status" msgid="2005452239256870351">"יום הולדת יחול בקרוב"</string>

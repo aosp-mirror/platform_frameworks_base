@@ -412,8 +412,7 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="6798849610647988987">"Wykorzyst.: <xliff:g id="DATA_USED">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"Limit <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"Ostrzeżenie: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
-    <!-- no translation found for quick_settings_work_mode_label (6440531507319809121) -->
-    <skip />
+    <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"Aplikacje służbowe"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Podświetlenie nocne"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Włącz o zachodzie"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Do wschodu słońca"</string>
@@ -428,8 +427,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"Komunikacja NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"Komunikacja NFC jest wyłączona"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"Komunikacja NFC jest włączona"</string>
-    <!-- no translation found for quick_settings_screen_record_label (8650355346742003694) -->
-    <skip />
+    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Nagrywanie ekranu"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Rozpocznij"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Zatrzymaj"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Odblokować mikrofon urządzenia?"</string>
@@ -543,7 +541,7 @@
     <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"To urządzenie należy do organizacji <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> i jest połączone z sieciami VPN"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Twoja organizacja może monitorować ruch w sieci w Twoim profilu służbowym"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"Organizacja <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> może monitorować ruch w sieci w Twoim profilu służbowym"</string>
-    <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"Aktywność w sieci w profilu służbowym widoczna dla administratora IT"</string>
+    <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"Aktywność w sieci w profilu służbowym jest widoczna dla administratora IT"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Sieć może być monitorowana"</string>
     <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"To urządzenie jest połączone z sieciami VPN"</string>
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Twój profil służbowy jest połączony z siecią <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
@@ -1052,8 +1050,7 @@
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Przenieś do krawędzi i ukryj"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Przenieś poza krawędź i pokaż"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"przełącz"</string>
-    <!-- no translation found for quick_controls_title (7095074621086860062) -->
-    <skip />
+    <string name="quick_controls_title" msgid="7095074621086860062">"Sterowanie domem"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Wybierz aplikację, do której chcesz dodać elementy sterujące"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="few">Dodano <xliff:g id="NUMBER_1">%s</xliff:g> elementy sterujące</item>
@@ -1069,8 +1066,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"usunąć z ulubionych"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Przenieś w położenie <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Elementy sterujące"</string>
-    <!-- no translation found for controls_favorite_subtitle (6481675111056961083) -->
-    <skip />
+    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Wybierz elementy sterujące dostępne w Szybkich ustawieniach"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Przytrzymaj i przeciągnij, aby przestawić elementy sterujące"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Usunięto wszystkie elementy sterujące"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Zmiany nie zostały zapisane"</string>
@@ -1109,8 +1105,7 @@
     <string name="controls_error_generic" msgid="352500456918362905">"Nie udało się wczytać stanu"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Błąd, spróbuj ponownie"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"W toku"</string>
-    <!-- no translation found for controls_added_tooltip (5866098408470111984) -->
-    <skip />
+    <string name="controls_added_tooltip" msgid="5866098408470111984">"Otwórz Szybkie ustawienia, by zobaczyć nowe elementy sterujące"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Dodaj elementy sterujące"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Edytuj elementy sterujące"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Dodaj urządzenia wyjściowe"</string>

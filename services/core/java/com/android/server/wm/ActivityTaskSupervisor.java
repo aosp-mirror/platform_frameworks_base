@@ -938,6 +938,9 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         if (r.app != null) {
             r.app.updateServiceConnectionActivities();
         }
+        // Expect a window of the starting activity will perform relayout.
+        mService.addWindowLayoutReasons(
+                ActivityTaskManagerService.SKIP_LAYOUT_REASON_EXPECT_NEXT_RELAYOUT);
 
         return true;
     }
