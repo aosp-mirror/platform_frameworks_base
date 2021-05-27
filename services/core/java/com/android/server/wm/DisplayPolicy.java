@@ -613,6 +613,8 @@ public class DisplayPolicy {
             }
         };
         displayContent.mAppTransition.registerListenerLocked(mAppTransitionListener);
+        mService.mAtmService.getTransitionController().registerLegacyListener(
+                mAppTransitionListener);
         mImmersiveModeConfirmation = new ImmersiveModeConfirmation(mContext, looper,
                 mService.mVrModeEnabled);
 

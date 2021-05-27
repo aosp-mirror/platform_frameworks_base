@@ -14,6 +14,7 @@
   ~ limitations under the License.
   -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:theme="@android:style/Theme.DeviceDefault.DayNight"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -50,7 +51,7 @@
             android:gravity="center"
             android:paddingHorizontal="8dp"
             android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
-            android:textColor="?android:attr/textColorPrimary"
+            android:textColor="?androidprv:attr/textColorOnAccent"
             android:background="@drawable/people_space_messages_count_background"
             android:textSize="@dimen/name_text_size_for_small"
             android:maxLines="1"

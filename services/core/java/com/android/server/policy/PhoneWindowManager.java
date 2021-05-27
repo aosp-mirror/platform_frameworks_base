@@ -192,6 +192,7 @@ import android.view.autofill.AutofillManagerInternal;
 
 import com.android.internal.R;
 import com.android.internal.accessibility.AccessibilityShortcutController;
+import com.android.internal.app.AssistUtils;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
@@ -650,7 +651,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 case MSG_LAUNCH_ASSIST:
                     final int deviceId = msg.arg1;
                     final Long eventTime = (Long) msg.obj;
-                    launchAssistAction(null /* hint */, deviceId, eventTime);
+                    launchAssistAction(null /* hint */, deviceId, eventTime,
+                            AssistUtils.INVOCATION_TYPE_UNKNOWN);
                     break;
                 case MSG_LAUNCH_VOICE_ASSIST_WITH_WAKE_LOCK:
                     launchVoiceAssistWithWakeLock();
@@ -1108,7 +1110,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 performHapticFeedback(HapticFeedbackConstants.ASSISTANT_BUTTON, false,
                         "Power - Long Press - Go To Assistant");
                 final int powerKeyDeviceId = Integer.MIN_VALUE;
-                launchAssistAction(null, powerKeyDeviceId, eventTime);
+                launchAssistAction(null, powerKeyDeviceId, eventTime,
+                        AssistUtils.INVOCATION_TYPE_POWER_BUTTON_LONG_PRESS);
                 break;
         }
     }
@@ -1541,7 +1544,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     launchAllAppsAction();
                     break;
                 case LONG_PRESS_HOME_ASSIST:
-                    launchAssistAction(null, deviceId, eventTime);
+                    launchAssistAction(null, deviceId, eventTime,
+                            AssistUtils.INVOCATION_TYPE_HOME_BUTTON_LONG_PRESS);
                     break;
                 case LONG_PRESS_HOME_NOTIFICATION_PANEL:
                     toggleNotificationPanel();
@@ -2772,7 +2776,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     } else if (mPendingMetaAction) {
                         launchAssistAction(Intent.EXTRA_ASSIST_INPUT_HINT_KEYBOARD,
                                 event.getDeviceId(),
-                                event.getEventTime());
+                                event.getEventTime(), AssistUtils.INVOCATION_TYPE_UNKNOWN);
                         mPendingMetaAction = false;
                     }
                 }
@@ -3036,7 +3040,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // various parts of the UI.
 
     /** Asks the status bar to startAssist(), usually a full "assistant" interface */
-    private void launchAssistAction(String hint, int deviceId, long eventTime) {
+    private void launchAssistAction(String hint, int deviceId, long eventTime,
+            int invocationType) {
         sendCloseSystemWindows(SYSTEM_DIALOG_REASON_ASSIST);
         if (!isUserSetupComplete()) {
             // Disable opening assist window during setup
@@ -3053,6 +3058,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             args.putBoolean(hint, true);
         }
         args.putLong(Intent.EXTRA_TIME, eventTime);
+        args.putInt(AssistUtils.INVOCATION_TYPE_KEY, invocationType);
 
         ((SearchManager) mContext.createContextAsUser(UserHandle.of(mCurrentUserId), 0)
                 .getSystemService(Context.SEARCH_SERVICE)).launchAssist(args);

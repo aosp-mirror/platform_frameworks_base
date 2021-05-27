@@ -40,7 +40,8 @@ android_library {
     name: "SystemUISharedLib",
     srcs: [
         "src/**/*.java",
-        "src/**/I*.aidl",
+        "src/**/*.kt",
+        "src/**/*.aidl",
         ":wm_shell-aidls",
     ],
 

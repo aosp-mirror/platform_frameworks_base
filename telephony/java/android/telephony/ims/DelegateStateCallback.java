@@ -79,7 +79,7 @@ public interface DelegateStateCallback {
      * messages routing should be delayed until the {@link SipDelegate} sends the IMS configuration
      * change event to reduce conditions where the remote application is using a stale IMS
      * configuration.
-     * @deprecated This is being removed from API surface, Use
+     * @removed This is being removed from API surface, Use
      * {@link #onConfigurationChanged(SipDelegateConfiguration)} instead.
      */
     @Deprecated
