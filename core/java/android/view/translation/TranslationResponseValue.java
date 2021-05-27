@@ -49,7 +49,24 @@ public final class TranslationResponseValue implements Parcelable {
      * <p>The dictionary definitions consists of groups of terms keyed by their corresponding parts
      * of speech. This map-like structure is stored in a {@link Bundle}. The individual parts of
      * speech can be traversed by {@link Bundle#keySet()} and used to get the corresponding list
-     * of terms as {@link CharSequence}s.</p>
+     * of terms as {@link CharSequence}s.
+     *
+     * <ul>
+     *     <li>"noun" -> ["def1", "def2", ...]</li>
+     *     <li>"verb" -> ["def3", "def4", ...]</li>
+     *     <li>...</li>
+     * </ul>
+     *
+     * The set of parts of speech can then be used by
+     * {@link Bundle#getCharSequenceArrayList(String)} to get the list of terms.
+     *
+     * <b>Example</b>:
+     *
+     * {@code for (String partOfSpeech : extras.getBundle(EXTRA_DEFINITIONS).keySet()) {
+     *    ArrayList<CharSequence> terms =
+     *            extras.getBundle(EXTRA_DEFINITIONS).getCharSequenceArrayList(partOfSpeech);
+     *    ...
+     * }}</p>
      */
     public static final String EXTRA_DEFINITIONS = "android.view.translation.extra.DEFINITIONS";
 
@@ -70,7 +87,8 @@ public final class TranslationResponseValue implements Parcelable {
     /**
      * Extra results associated with the translated text.
      *
-     * <p>The bundle includes {@link #EXTRA_DEFINITIONS}, obtained by {@link Bundle#getBundle}.</p>
+     * <p>The bundle includes {@link #EXTRA_DEFINITIONS}, obtained by {@link Bundle#getBundle}.
+     * </p>
      */
     @NonNull
     private final Bundle mExtras;
@@ -190,7 +208,8 @@ public final class TranslationResponseValue implements Parcelable {
     /**
      * Extra results associated with the translated text.
      *
-     * <p>The bundle includes {@link #EXTRA_DEFINITIONS}, obtained by {@link Bundle#getBundle}.</p>
+     * <p>The bundle includes {@link #EXTRA_DEFINITIONS}, obtained by {@link Bundle#getBundle}.
+     * </p>
      */
     @DataClass.Generated.Member
     public @NonNull Bundle getExtras() {
@@ -370,7 +389,8 @@ public final class TranslationResponseValue implements Parcelable {
         /**
          * Extra results associated with the translated text.
          *
-         * <p>The bundle includes {@link #EXTRA_DEFINITIONS}, obtained by {@link Bundle#getBundle}.</p>
+         * <p>The bundle includes {@link #EXTRA_DEFINITIONS}, obtained by {@link Bundle#getBundle}.
+         * </p>
          */
         @DataClass.Generated.Member
         public @NonNull Builder setExtras(@NonNull Bundle value) {
@@ -423,7 +443,7 @@ public final class TranslationResponseValue implements Parcelable {
     }
 
     @DataClass.Generated(
-            time = 1621034223313L,
+            time = 1621623218037L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/view/translation/TranslationResponseValue.java",
             inputSignatures = "public static final  int STATUS_SUCCESS\npublic static final  int STATUS_ERROR\npublic static final  java.lang.String EXTRA_DEFINITIONS\nprivate final @android.view.translation.TranslationResponseValue.Status int mStatusCode\nprivate final @android.annotation.Nullable java.lang.CharSequence mText\nprivate final @android.annotation.NonNull android.os.Bundle mExtras\nprivate final @android.annotation.Nullable java.lang.CharSequence mTransliteration\npublic static @android.annotation.NonNull android.view.translation.TranslationResponseValue forError()\nprivate static  java.lang.CharSequence defaultText()\nprivate static  android.os.Bundle defaultExtras()\nprivate static  java.lang.CharSequence defaultTransliteration()\nclass TranslationResponseValue extends java.lang.Object implements [android.os.Parcelable]\nclass BaseBuilder extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genBuilder=true, genToString=true, genEqualsHashCode=true, genHiddenConstDefs=true)\nclass BaseBuilder extends java.lang.Object implements []")

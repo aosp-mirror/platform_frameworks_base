@@ -12,15 +12,11 @@
   ~ distributed under the License is distributed on an "AS IS" BASIS,
   ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   ~ See the License for the specific language governing permissions and
-  ~ limitations under the License
+  ~ limitations under the License.
   -->
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android">
-    <item>
-        <shape>
-            <size android:width="@dimen/volume_dialog_panel_width" />
-            <solid android:color="?androidprv:attr/colorSurface" />
-            <corners android:radius="@dimen/volume_dialog_panel_width_half"/>
-        </shape>
-    </item>
-</layer-list>
+<!-- Please see primary_text_material_light.xml -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_enabled="false"
+          android:color="@color/system_neutral1_400"/>
+    <item android:color="@color/system_neutral1_900"/>
+</selector>

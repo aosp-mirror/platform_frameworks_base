@@ -137,12 +137,11 @@
             systemui:layout_constraintRight_toRightOf="parent"
             systemui:layout_constraintBottom_toBottomOf="parent"
             android:layout_marginBottom="20dp"
-            android:paddingHorizontal="16dp"
-            android:minHeight="44dp"
-            android:elevation="4dp"
-            android:background="@drawable/rounded_bg_full"
-            android:gravity="center"
-            android:text="@string/tap_again"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:elevation="10dp"
             android:visibility="gone"
         />
     </com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer>

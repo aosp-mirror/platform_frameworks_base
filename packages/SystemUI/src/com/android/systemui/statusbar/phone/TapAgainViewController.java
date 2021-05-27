@@ -44,17 +44,17 @@ public class TapAgainViewController extends ViewController<TapAgainView> {
     final ConfigurationListener mConfigurationListener = new ConfigurationListener() {
         @Override
         public void onOverlayChanged() {
-            mView.updateColor();
+            mView.updateBgColor();
         }
 
         @Override
         public void onUiModeChanged() {
-            mView.updateColor();
+            mView.updateBgColor();
         }
 
         @Override
         public void onThemeChanged() {
-            mView.updateColor();
+            mView.updateBgColor();
         }
     };
 

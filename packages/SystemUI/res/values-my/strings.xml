@@ -423,8 +423,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC ကို ပိတ်ထားသည်"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC ကို ဖွင့်ထားသည်"</string>
-    <!-- no translation found for quick_settings_screen_record_label (8650355346742003694) -->
-    <skip />
+    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"ဖန်သားပြင် ရိုက်ကူးရန်"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"စတင်ရန်"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"ရပ်ရန်"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"စက်၏မိုက်ခရိုဖုန်းကို ပြန်ဖွင့်မလား။"</string>
@@ -751,7 +750,7 @@
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"ဤအကြောင်းကြားချက်အုပ်စုကို ဤနေရာတွင် စီစဉ်သတ်မှတ်၍ မရပါ"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"ပရောက်စီထည့်ထားသော အကြောင်းကြားချက်"</string>
     <string name="notification_channel_dialog_title" msgid="6856514143093200019">"<xliff:g id="APP_NAME">%1$s</xliff:g> အကြောင်းကြားချက်များ အားလုံး"</string>
-    <string name="see_more_title" msgid="7409317011708185729">"ပိုပြရန်"</string>
+    <string name="see_more_title" msgid="7409317011708185729">"ပိုကြည့်ရန်"</string>
     <string name="appops_camera" msgid="5215967620896725715">"ဤအက်ပ်က ကင်မရာကို အသုံးပြုနေသည်။"</string>
     <string name="appops_microphone" msgid="8805468338613070149">"ဤအက်ပ်က မိုက်ခရိုဖုန်းကို အသုံးပြုနေသည်။"</string>
     <string name="appops_overlay" msgid="4822261562576558490">"ဤအက်ပ်က ဖန်သားမျက်နှာပြင်ပေါ်ရှိ အခြားအက်ပ်များ အပေါ်မှ ထပ်ပြီး ပြသနေပါသည်။"</string>
@@ -1040,7 +1039,7 @@
     <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"ညာဘက်အောက်ခြေသို့ ရွှေ့ရန်"</string>
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"အစွန်းသို့ရွှေ့ပြီး ဝှက်ရန်"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"အစွန်းမှရွှေ့ပြီး ပြရန်"</string>
-    <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"ခလုတ်"</string>
+    <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"ပြောင်းရန်"</string>
     <string name="quick_controls_title" msgid="7095074621086860062">"ပင်မ ထိန်းချုပ်မှုများ"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"ထိန်းချုပ်မှုများထည့်ရန် အက်ပ်ရွေးခြင်း"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
@@ -1076,7 +1075,7 @@
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"နောက်ပင်နံပါတ်တစ်ခု စမ်းကြည့်ရန်"</string>
     <string name="controls_confirmation_confirming" msgid="2596071302617310665">"အတည်ပြုနေသည်…"</string>
     <string name="controls_confirmation_message" msgid="7744104992609594859">"<xliff:g id="DEVICE">%s</xliff:g> အတွက် အပြောင်းအလဲကို အတည်ပြုပါ"</string>
-    <string name="controls_structure_tooltip" msgid="4355922222944447867">"ပိုမိုကြည့်ရှုရန် ပွတ်ဆွဲပါ"</string>
+    <string name="controls_structure_tooltip" msgid="4355922222944447867">"ပိုကြည့်ရန် ပွတ်ဆွဲပါ"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"အကြံပြုချက်များ ဖွင့်နေသည်"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"မီဒီယာ"</string>
     <string name="controls_media_close_session" msgid="1193000643003066508">"ဤမီဒီယာစက်ရှင်ကို ဝှက်မလား။"</string>

@@ -547,7 +547,7 @@
     <string name="monitoring_title" msgid="4063890083735924568">"Supervisión de red"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
     <string name="monitoring_subtitle_network_logging" msgid="2444199331891219596">"Registro de red"</string>
-    <string name="monitoring_subtitle_ca_certificate" msgid="8588092029755175800">"Certificados de CA"</string>
+    <string name="monitoring_subtitle_ca_certificate" msgid="8588092029755175800">"Certificados AC"</string>
     <string name="disable_vpn" msgid="482685974985502922">"Inhabilitar VPN"</string>
     <string name="disconnect_vpn" msgid="26286850045344557">"Desconectar VPN"</string>
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Ver políticas"</string>

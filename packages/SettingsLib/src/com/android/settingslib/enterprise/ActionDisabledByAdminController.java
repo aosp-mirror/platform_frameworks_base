@@ -16,11 +16,9 @@
 
 package com.android.settingslib.enterprise;
 
-import android.app.Activity;
 import android.content.Context;
 
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog.Builder;
 
 import com.android.settingslib.RestrictedLockUtils;
 
@@ -33,7 +31,7 @@ public interface ActionDisabledByAdminController {
      * Handles the adding and setting up of the learn more button. If button is not needed, then
      * this method can be left empty.
      */
-    void setupLearnMoreButton(Activity activity, Builder builder);
+    void setupLearnMoreButton(Context context, Object alertDialogBuilder);
 
     /**
      * Returns the admin support dialog's title resource id.

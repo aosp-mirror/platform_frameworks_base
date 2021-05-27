@@ -10565,6 +10565,7 @@ package android.service.voice {
     method public void onDetect(@NonNull android.service.voice.AlwaysOnHotwordDetector.EventPayload, long, @NonNull android.service.voice.HotwordDetectionService.Callback);
     method public void onDetect(@NonNull android.service.voice.HotwordDetectionService.Callback);
     method public void onDetect(@NonNull android.os.ParcelFileDescriptor, @NonNull android.media.AudioFormat, @Nullable android.os.PersistableBundle, @NonNull android.service.voice.HotwordDetectionService.Callback);
+    method public void onStopDetection();
     method public void onUpdateState(@Nullable android.os.PersistableBundle, @Nullable android.os.SharedMemory, long, @Nullable java.util.function.IntConsumer);
     field public static final int INITIALIZATION_STATUS_SUCCESS = 0; // 0x0
     field public static final int INITIALIZATION_STATUS_UNKNOWN = 100; // 0x64
@@ -10602,6 +10603,12 @@ package android.service.voice {
     field public static final int CONFIDENCE_LEVEL_MEDIUM = 2; // 0x2
     field public static final int CONFIDENCE_LEVEL_NONE = 0; // 0x0
     field @NonNull public static final android.os.Parcelable.Creator<android.service.voice.HotwordRejectedResult> CREATOR;
+  }
+
+  public static final class HotwordRejectedResult.Builder {
+    ctor public HotwordRejectedResult.Builder();
+    method @NonNull public android.service.voice.HotwordRejectedResult build();
+    method @NonNull public android.service.voice.HotwordRejectedResult.Builder setConfidenceLevel(int);
   }
 
   public class VoiceInteractionService extends android.app.Service {
@@ -13651,8 +13658,7 @@ package android.telephony.ims {
   }
 
   public interface SipDelegateConnection {
-    method public default void cleanupSession(@NonNull String);
-    method @Deprecated public default void closeDialog(@NonNull String);
+    method public void cleanupSession(@NonNull String);
     method public void notifyMessageReceiveError(@NonNull String, int);
     method public void notifyMessageReceived(@NonNull String);
     method public void sendMessage(@NonNull android.telephony.ims.SipMessage, long);
@@ -14104,8 +14110,7 @@ package android.telephony.ims.stub {
   }
 
   public interface SipDelegate {
-    method public default void cleanupSession(@NonNull String);
-    method @Deprecated public default void closeDialog(@NonNull String);
+    method public void cleanupSession(@NonNull String);
     method public void notifyMessageReceiveError(@NonNull String, int);
     method public void notifyMessageReceived(@NonNull String);
     method public void sendMessage(@NonNull android.telephony.ims.SipMessage, long);

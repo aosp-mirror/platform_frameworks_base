@@ -42,6 +42,7 @@ import android.content.res.Resources;
 import android.hardware.biometrics.BiometricSourceType;
 import android.os.PowerManager;
 import android.os.UserManager;
+import android.service.quickaccesswallet.QuickAccessWalletClient;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.DisplayMetrics;
@@ -111,7 +112,6 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.util.time.FakeSystemClock;
-import com.android.systemui.wallet.controller.QuickAccessWalletController;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 
 import org.junit.Before;
@@ -252,6 +252,8 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     @Mock
     private LockIconViewController mLockIconViewController;
     @Mock
+    private QuickAccessWalletClient mQuickAccessWalletClient;
+    @Mock
     private KeyguardMediaController mKeyguardMediaController;
     @Mock
     private PrivacyDotViewController mPrivacyDotViewController;
@@ -265,8 +267,6 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     private FragmentService mFragmentService;
     @Mock
     private FragmentHostManager mFragmentHostManager;
-    @Mock
-    private QuickAccessWalletController mQuickAccessWalletController;
 
     private SysuiStatusBarStateController mStatusBarStateController;
     private NotificationPanelViewController mNotificationPanelViewController;
@@ -380,11 +380,11 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mAmbientState,
                 mLockIconViewController,
                 mFeatureFlags,
+                mQuickAccessWalletClient,
                 mKeyguardMediaController,
                 mPrivacyDotViewController,
                 mTapAgainViewController,
                 mFragmentService,
-                mQuickAccessWalletController,
                 new FakeExecutor(new FakeSystemClock()),
                 mSecureSettings);
         mNotificationPanelViewController.initDependencies(

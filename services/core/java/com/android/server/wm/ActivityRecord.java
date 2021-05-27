@@ -181,6 +181,7 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLAS
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_FREE_RESIZE;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_WINDOWING_MODE_RESIZE;
+import static com.android.server.wm.ActivityTaskManagerService.SKIP_LAYOUT_REASON_ALLOWED;
 import static com.android.server.wm.ActivityTaskManagerService.getInputDispatchingTimeoutMillisLocked;
 import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.IdentifierProto.HASH_CODE;
@@ -5376,6 +5377,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 mAtmService.deferWindowLayout();
                 try {
                     task.completePauseLocked(true /* resumeNext */, null /* resumingActivity */);
+                    // If there is no possible transition to execute, then allow to skip layout
+                    // because it may be done by next resumed activity.
+                    if (!pausingActivity.mDisplayContent.areOpeningAppsReady()) {
+                        mAtmService.addWindowLayoutReasons(SKIP_LAYOUT_REASON_ALLOWED);
+                    }
                 } finally {
                     mAtmService.continueWindowLayout();
                 }
