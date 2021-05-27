@@ -55,6 +55,8 @@ public class SettingsTransitionHelper {
         int TRANSITION_FADE = 2;
     }
 
+    public static final String EXTRA_PAGE_TRANSITION_TYPE = "page_transition_type";
+
     private static final String TAG = "SettingsTransitionHelper";
     private static final long DURATION = 450L;
     private static final float FADE_THROUGH_THRESHOLD = 0.22F;
