@@ -226,7 +226,7 @@
     <string name="data_connection_roaming" msgid="375650836665414797">"Rändlus"</string>
     <string name="data_connection_edge" msgid="6316755666481405762">"EDGE"</string>
     <string name="accessibility_data_connection_wifi" msgid="4422160347472742434">"WiFi"</string>
-    <string name="accessibility_no_sim" msgid="1140839832913084973">"SIM-kaarti pole."</string>
+    <string name="accessibility_no_sim" msgid="1140839832913084973">"SIM-i pole."</string>
     <string name="accessibility_cell_data" msgid="172950885786007392">"Mobiilne andmeside"</string>
     <string name="accessibility_cell_data_on" msgid="691666434519443162">"Mobiilne andmeside on sees"</string>
     <string name="cell_data_off_content_description" msgid="9165555931499878044">"Mobiilne andmeside on väljas"</string>

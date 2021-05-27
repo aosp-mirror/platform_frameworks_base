@@ -765,7 +765,7 @@
       <item quantity="other">%d perc</item>
       <item quantity="one">%d perc</item>
     </plurals>
-    <string name="battery_panel_title" msgid="5931157246673665963">"Akkumulátorhasználat"</string>
+    <string name="battery_panel_title" msgid="5931157246673665963">"Akkuhasználat"</string>
     <string name="battery_detail_charging_summary" msgid="8821202155297559706">"Az Akkumulátorkímélő módot töltés közben nem lehet használni"</string>
     <string name="battery_detail_switch_title" msgid="6940976502957380405">"Akkumulátorkímélő mód"</string>
     <string name="battery_detail_switch_summary" msgid="3668748557848025990">"Csökkenti a teljesítményt és a háttéradatok használatát"</string>
