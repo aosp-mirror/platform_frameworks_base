@@ -9850,12 +9850,10 @@ public final class Settings {
         public static final String MEDIA_CONTROLS_RESUME = "qs_media_resumption";
 
         /**
-         * Controls which packages are blocked from persisting in media controls when resumption is
-         * enabled. The list of packages is set by the user in the Settings app.
-         * @see Settings.Secure#MEDIA_CONTROLS_RESUME
+         * Controls whether contextual suggestions can be shown in the media controls.
          * @hide
          */
-        public static final String MEDIA_CONTROLS_RESUME_BLOCKED = "qs_media_resumption_blocked";
+        public static final String MEDIA_CONTROLS_RECOMMENDATION = "qs_media_recommend";
 
         /**
          * Controls magnification mode when magnification is enabled via a system-wide triple tap
