@@ -63,7 +63,7 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Дозволи"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"Отклањање грешака на USB-у није дозвољено"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"Корисник који је тренутно пријављен на овај уређај не може да укључи отклањање грешака на USB-у. Да бисте користили ову функцију, пребаците на примарног корисника."</string>
-    <string name="wifi_debugging_title" msgid="7300007687492186076">"Желите да омогућите бежично отклањање грешака на овој мрежи?"</string>
+    <string name="wifi_debugging_title" msgid="7300007687492186076">"Желите да дозволите бежично отклањање грешака на овој мрежи?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"Назив мреже (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nWi‑Fi адреса (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"Увек дозволи на овој мрежи"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"Дозволи"</string>
