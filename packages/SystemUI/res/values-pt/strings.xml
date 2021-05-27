@@ -429,9 +429,9 @@
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Desbloquear o microfone do dispositivo?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Desbloquear a câmera do dispositivo?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Desbloquear a câmera e o microfone do dispositivo?"</string>
-    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Essa ação desbloqueia o acesso de todos os apps e serviços com autorização para usar seu microfone."</string>
-    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Essa ação desbloqueia o acesso de todos os apps e serviços com autorização para usar sua câmera."</string>
-    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Essa ação desbloqueia o acesso de todos os apps e serviços com autorização para usar sua câmera ou seu microfone."</string>
+    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Essa ação desbloqueia o acesso para todos os apps e serviços com autorização para usar seu microfone."</string>
+    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Essa ação desbloqueia o acesso para todos os apps e serviços com autorização para usar sua câmera."</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Essa ação desbloqueia o acesso para todos os apps e serviços com autorização para usar sua câmera ou seu microfone."</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"Dispositivo"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Deslize para cima para mudar de app"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Arraste para a direita para mudar rapidamente de app"</string>
