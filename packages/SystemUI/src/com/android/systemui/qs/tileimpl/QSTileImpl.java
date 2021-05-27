@@ -55,7 +55,6 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.settingslib.RestrictedLockUtils;
 import com.android.settingslib.RestrictedLockUtilsInternal;
 import com.android.settingslib.Utils;
-import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.Prefs;
 import com.android.systemui.plugins.ActivityStarter;
@@ -93,12 +92,12 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
     protected final QSHost mHost;
     protected final Context mContext;
     // @NonFinalForTesting
-    protected H mHandler = new H(Dependency.get(Dependency.BG_LOOPER));
-    protected final Handler mUiHandler = new Handler(Looper.getMainLooper());
+    protected final H mHandler;
+    protected final Handler mUiHandler;
     private final ArraySet<Object> mListeners = new ArraySet<>();
-    private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
-    private final StatusBarStateController
-            mStatusBarStateController = Dependency.get(StatusBarStateController.class);
+    private final MetricsLogger mMetricsLogger;
+    private final StatusBarStateController mStatusBarStateController;
+    protected final ActivityStarter mActivityStarter;
     private final UiEventLogger mUiEventLogger;
     private final QSLogger mQSLogger;
 
@@ -151,14 +150,29 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
      */
     abstract public int getMetricsCategory();
 
-    protected QSTileImpl(QSHost host) {
+    protected QSTileImpl(
+            QSHost host,
+            Looper backgroundLooper,
+            Handler mainHandler,
+            MetricsLogger metricsLogger,
+            StatusBarStateController statusBarStateController,
+            ActivityStarter activityStarter,
+            QSLogger qsLogger
+    ) {
         mHost = host;
         mContext = host.getContext();
         mInstanceId = host.getNewInstanceId();
+        mUiEventLogger = host.getUiEventLogger();
+
+        mUiHandler = mainHandler;
+        mHandler = new H(backgroundLooper);
+        mQSLogger = qsLogger;
+        mMetricsLogger = metricsLogger;
+        mStatusBarStateController = statusBarStateController;
+        mActivityStarter = activityStarter;
+
         mState = newTileState();
         mTmpState = newTileState();
-        mQSLogger = host.getQSLogger();
-        mUiEventLogger = host.getUiEventLogger();
     }
 
     protected final void resetStates() {
@@ -358,8 +372,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
      * {@link QSTileImpl#getLongClickIntent}
      */
     protected void handleLongClick() {
-        Dependency.get(ActivityStarter.class).postStartActivityDismissingKeyguard(
-                getLongClickIntent(), 0);
+        mActivityStarter.postStartActivityDismissingKeyguard(getLongClickIntent(), 0);
     }
 
     /**
@@ -533,7 +546,8 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
         private static final int REMOVE_CALLBACKS = 11;
         private static final int REMOVE_CALLBACK = 12;
         private static final int SET_LISTENING = 13;
-        private static final int STALE = 14;
+        @VisibleForTesting
+        protected static final int STALE = 14;
 
         @VisibleForTesting
         protected H(Looper looper) {
@@ -558,8 +572,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
                     if (mState.disabledByPolicy) {
                         Intent intent = RestrictedLockUtils.getShowAdminSupportDetailsIntent(
                                 mContext, mEnforcedAdmin);
-                        Dependency.get(ActivityStarter.class).postStartActivityDismissingKeyguard(
-                                intent, 0);
+                        mActivityStarter.postStartActivityDismissingKeyguard(intent, 0);
                     } else {
                         handleClick();
                     }

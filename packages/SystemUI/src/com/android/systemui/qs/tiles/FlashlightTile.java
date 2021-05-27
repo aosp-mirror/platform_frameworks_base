@@ -18,14 +18,22 @@ package com.android.systemui.qs.tiles;
 
 import android.app.ActivityManager;
 import android.content.Intent;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.MediaStore;
 import android.service.quicksettings.Tile;
 import android.widget.Switch;
 
+import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
+import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.FlashlightController;
 
@@ -39,8 +47,18 @@ public class FlashlightTile extends QSTileImpl<BooleanState> implements
     private final FlashlightController mFlashlightController;
 
     @Inject
-    public FlashlightTile(QSHost host, FlashlightController flashlightController) {
-        super(host);
+    public FlashlightTile(
+            QSHost host,
+            @Background Looper backgroundLooper,
+            @Main Handler mainHandler,
+            MetricsLogger metricsLogger,
+            StatusBarStateController statusBarStateController,
+            ActivityStarter activityStarter,
+            QSLogger qsLogger,
+            FlashlightController flashlightController
+    ) {
+        super(host, backgroundLooper, mainHandler, metricsLogger, statusBarStateController,
+                activityStarter, qsLogger);
         mFlashlightController = flashlightController;
         mFlashlightController.observe(getLifecycle(), this);
     }

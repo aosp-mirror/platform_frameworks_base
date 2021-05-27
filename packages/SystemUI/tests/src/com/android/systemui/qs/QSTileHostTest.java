@@ -41,14 +41,17 @@ import android.testing.TestableLooper.RunWithLooper;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.util.CollectionUtils;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QSFactory;
 import com.android.systemui.plugins.qs.QSTile;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
@@ -331,7 +334,15 @@ public class QSTileHostTest extends SysuiTestCase {
     private class TestTile extends QSTileImpl<QSTile.State> {
 
         protected TestTile(QSHost host) {
-            super(host);
+            super(
+                    host,
+                    mLooper.getLooper(),
+                    new Handler(mLooper.getLooper()),
+                    mock(MetricsLogger.class),
+                    mock(StatusBarStateController.class),
+                    mock(ActivityStarter.class),
+                    mQSLogger
+            );
         }
 
         @Override

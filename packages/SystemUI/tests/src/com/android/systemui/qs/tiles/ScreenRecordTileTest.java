@@ -23,16 +23,20 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.os.Handler;
 import android.service.quicksettings.Tile;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.Dependency;
+import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSTileHost;
+import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.screenrecord.RecordingController;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
 
@@ -43,7 +47,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 @RunWith(AndroidTestingRunner.class)
-@TestableLooper.RunWithLooper(setAsMainLooper = true)
+@TestableLooper.RunWithLooper()
 @SmallTest
 public class ScreenRecordTileTest extends SysuiTestCase {
 
@@ -53,6 +57,14 @@ public class ScreenRecordTileTest extends SysuiTestCase {
     private QSTileHost mHost;
     @Mock
     private KeyguardDismissUtil mKeyguardDismissUtil;
+    @Mock
+    private MetricsLogger mMetricsLogger;
+    @Mock
+    private StatusBarStateController mStatusBarStateController;
+    @Mock
+    private ActivityStarter mActivityStarter;
+    @Mock
+    private QSLogger mQSLogger;
 
     private TestableLooper mTestableLooper;
     private ScreenRecordTile mTile;
@@ -62,12 +74,20 @@ public class ScreenRecordTileTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
 
         mTestableLooper = TestableLooper.get(this);
-        mDependency.injectTestDependency(Dependency.BG_LOOPER, mTestableLooper.getLooper());
-        mController = mDependency.injectMockDependency(RecordingController.class);
 
         when(mHost.getContext()).thenReturn(mContext);
 
-        mTile = new ScreenRecordTile(mHost, mController, mKeyguardDismissUtil);
+        mTile = new ScreenRecordTile(
+                mHost,
+                mTestableLooper.getLooper(),
+                new Handler(mTestableLooper.getLooper()),
+                mMetricsLogger,
+                mStatusBarStateController,
+                mActivityStarter,
+                mQSLogger,
+                mController,
+                mKeyguardDismissUtil
+        );
     }
 
     // Test that the tile is inactive and labeled correctly when the controller is neither starting
