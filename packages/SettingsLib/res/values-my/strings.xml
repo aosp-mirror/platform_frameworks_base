@@ -87,7 +87,7 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"ဖိုင်လွဲပြောင်းခြင်း"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"ထည့်သွင်းသော စက်"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"အင်တာနက်ချိတ်ဆက်ခြင်း"</string>
-    <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"အဆက်အသွယ်ကို မျှဝေရန်"</string>
+    <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"အဆက်အသွယ်ကို မျှဝေခြင်း"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"အဆက်အသွယ်ကို မျှဝေရန် အတွက် သုံးရန်"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"အင်တာနက်ဆက်သွယ်မှု မျှဝေခြင်း"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"မိုဘိုင်းမက်ဆေ့ဂျ်များ"</string>
@@ -118,7 +118,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"မလုပ်တော့"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"ချိတ်တွဲမှုက ချိတ်ဆက်ထားလျှင် သင်၏ အဆက်အသွယ်များ နှင့် ခေါ်ဆိုမှု မှတ်တမ်းကို ရယူခွင့် ပြုသည်။"</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> နှင့် တွဲချိတ်မရပါ"</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"ပင်နံပါတ် သို့မဟုတ် ဖြတ်သန်းခွင့်ကီး မမှန်ကန်သောကြောင့် <xliff:g id="DEVICE_NAME">%1$s</xliff:g> နှင့် တွဲချိတ်မရပါ။"</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"ပင်နံပါတ် (သို့) ဖြတ်သန်းခွင့်ကီး မမှန်ကန်သောကြောင့် <xliff:g id="DEVICE_NAME">%1$s</xliff:g> နှင့် တွဲချိတ်၍မရပါ။"</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>နှင့်ဆက်သွယ်မရပါ"</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>နှင့်တွဲချိတ်ရန် ပယ်ချခံရသည်"</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"ကွန်ပျူတာ"</string>
