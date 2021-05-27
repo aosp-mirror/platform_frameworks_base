@@ -416,10 +416,10 @@ public class InternetTile extends QSTileImpl<SignalState> {
         if (cb.mAirplaneModeEnabled) {
             if (!state.value) {
                 state.state = Tile.STATE_INACTIVE;
-                state.icon = ResourceIcon.get(R.drawable.ic_qs_no_internet_airplane);
+                state.icon = ResourceIcon.get(R.drawable.ic_qs_no_internet_unavailable);
                 state.secondaryLabel = r.getString(R.string.status_bar_airplane);
             } else if (!wifiConnected) {
-                state.icon = ResourceIcon.get(R.drawable.ic_qs_no_internet_airplane);
+                state.icon = ResourceIcon.get(R.drawable.ic_qs_no_internet_unavailable);
                 if (cb.mNoNetworksAvailable) {
                     state.secondaryLabel =
                             r.getString(R.string.quick_settings_networks_unavailable);
@@ -430,12 +430,14 @@ public class InternetTile extends QSTileImpl<SignalState> {
             } else {
                 state.icon = ResourceIcon.get(cb.mWifiSignalIconId);
             }
-        } else if (cb.mNoDefaultNetwork && cb.mNoNetworksAvailable) {
-            state.icon = ResourceIcon.get(R.drawable.ic_qs_no_internet_unavailable);
-            state.secondaryLabel = r.getString(R.string.quick_settings_networks_unavailable);
-        } else if (cb.mNoValidatedNetwork && !cb.mNoNetworksAvailable) {
-            state.icon = ResourceIcon.get(R.drawable.ic_qs_no_internet_available);
-            state.secondaryLabel = r.getString(R.string.quick_settings_networks_available);
+        } else if (cb.mNoDefaultNetwork) {
+            if (cb.mNoNetworksAvailable) {
+                state.icon = ResourceIcon.get(R.drawable.ic_qs_no_internet_unavailable);
+                state.secondaryLabel = r.getString(R.string.quick_settings_networks_unavailable);
+            } else {
+                state.icon = ResourceIcon.get(R.drawable.ic_qs_no_internet_available);
+                state.secondaryLabel = r.getString(R.string.quick_settings_networks_available);
+            }
         } else if (cb.mIsTransient) {
             state.icon = ResourceIcon.get(
                 com.android.internal.R.drawable.ic_signal_wifi_transient_animation);
@@ -486,14 +488,16 @@ public class InternetTile extends QSTileImpl<SignalState> {
 
         if (cb.mAirplaneModeEnabled && cb.mQsTypeIcon != TelephonyIcons.ICON_CWF) {
             state.state = Tile.STATE_INACTIVE;
-            state.icon = ResourceIcon.get(R.drawable.ic_qs_no_internet_airplane);
-            state.secondaryLabel = r.getString(R.string.status_bar_airplane);
-        } else if (cb.mNoDefaultNetwork && cb.mNoNetworksAvailable) {
             state.icon = ResourceIcon.get(R.drawable.ic_qs_no_internet_unavailable);
-            state.secondaryLabel = r.getString(R.string.quick_settings_networks_unavailable);
-        } else if (cb.mNoValidatedNetwork && !cb.mNoNetworksAvailable) {
-            state.icon = ResourceIcon.get(R.drawable.ic_qs_no_internet_available);
-            state.secondaryLabel = r.getString(R.string.quick_settings_networks_available);
+            state.secondaryLabel = r.getString(R.string.status_bar_airplane);
+        } else if (cb.mNoDefaultNetwork) {
+            if (cb.mNoNetworksAvailable) {
+                state.icon = ResourceIcon.get(R.drawable.ic_qs_no_internet_unavailable);
+                state.secondaryLabel = r.getString(R.string.quick_settings_networks_unavailable);
+            } else {
+                state.icon = ResourceIcon.get(R.drawable.ic_qs_no_internet_available);
+                state.secondaryLabel = r.getString(R.string.quick_settings_networks_available);
+            }
         } else {
             state.icon = new SignalIcon(cb.mMobileSignalIconId);
             state.secondaryLabel = appendMobileDataType(cb.mDataSubscriptionName,

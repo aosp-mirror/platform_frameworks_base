@@ -618,7 +618,7 @@ public abstract class ActivityTaskManagerInternal {
         /**
          * Commit changes.
          */
-        void commit() throws RemoteException;
+        void commit();
     }
 
     /**

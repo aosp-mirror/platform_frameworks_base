@@ -425,8 +425,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"Serviciul NFC este dezactivat"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"Serviciul NFC este activat"</string>
-    <!-- no translation found for quick_settings_screen_record_label (8650355346742003694) -->
-    <skip />
+    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Înregistrarea ecranului"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Începeți"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Opriți"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Deblocați microfonul dispozitivului?"</string>
@@ -1046,7 +1045,7 @@
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Mutați în afară și ascundeți"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Mutați în afară și afișați"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"Activați / dezactivați"</string>
-    <string name="quick_controls_title" msgid="7095074621086860062">"Controalele locuinței"</string>
+    <string name="quick_controls_title" msgid="7095074621086860062">"Comenzi pentru locuință"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Alegeți aplicația pentru a adăuga comenzi"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="few">S-au adăugat <xliff:g id="NUMBER_1">%s</xliff:g> comenzi.</item>
