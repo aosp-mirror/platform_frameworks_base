@@ -17,6 +17,7 @@
 package com.android.systemui.accessibility;
 
 import static android.view.Choreographer.FrameCallback;
+import static android.view.WindowInsets.Type.systemGestures;
 import static android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_MAGNIFICATION_OVERLAP;
@@ -45,6 +46,8 @@ import android.app.Instrumentation;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Resources;
+import android.graphics.Insets;
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.SystemClock;
@@ -55,6 +58,7 @@ import android.view.Display;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.View;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 
@@ -239,11 +243,13 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
         mInstrumentation.runOnMainSync(() -> {
             mWindowMagnificationController.onConfigurationChanged(ActivityInfo.CONFIG_DENSITY);
             mWindowMagnificationController.onConfigurationChanged(ActivityInfo.CONFIG_ORIENTATION);
+            mWindowMagnificationController.onConfigurationChanged(ActivityInfo.CONFIG_LOCALE);
+            mWindowMagnificationController.onConfigurationChanged(ActivityInfo.CONFIG_SCREEN_SIZE);
         });
     }
 
     @Test
-    public void onOrientationChanged_enabled_updateDisplayRotationAndLayout() {
+    public void onOrientationChanged_enabled_updateDisplayRotationAndCenterStayAtSamePosition() {
         final Display display = Mockito.spy(mContext.getDisplay());
         when(display.getRotation()).thenReturn(Surface.ROTATION_90);
         when(mContext.getDisplay()).thenReturn(display);
@@ -251,13 +257,22 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
             mWindowMagnificationController.enableWindowMagnification(Float.NaN, Float.NaN,
                     Float.NaN);
         });
+        final PointF expectedCenter = new PointF(mWindowMagnificationController.getCenterY(),
+                mWindowMagnificationController.getCenterX());
+        final Rect windowBounds = new Rect(mWindowManager.getCurrentWindowMetrics().getBounds());
+        // Rotate the window 90 degrees.
+        windowBounds.set(windowBounds.top, windowBounds.left, windowBounds.bottom,
+                windowBounds.right);
+        mWindowManager.setWindowBounds(windowBounds);
 
         mInstrumentation.runOnMainSync(() -> {
             mWindowMagnificationController.onConfigurationChanged(ActivityInfo.CONFIG_ORIENTATION);
         });
 
         assertEquals(Surface.ROTATION_90, mWindowMagnificationController.mRotation);
-        // The first invocation is called when the surface is created.
+        final PointF actualCenter = new PointF(mWindowMagnificationController.getCenterX(),
+                mWindowMagnificationController.getCenterY());
+        assertEquals(expectedCenter, actualCenter);
         verify(mWindowManager, times(2)).updateViewLayout(any(), any());
     }
 
@@ -272,6 +287,33 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
         });
 
         assertEquals(Surface.ROTATION_90, mWindowMagnificationController.mRotation);
+    }
+
+    @Test
+    public void onScreenSizeChanged_enabledAtTheCenterOfScreen_keepSameWindowSizeRatio() {
+        // The default position is at the center of the screen.
+        final float expectedRatio = 0.5f;
+        final Rect testWindowBounds = new Rect(
+                mWindowManager.getCurrentWindowMetrics().getBounds());
+        testWindowBounds.set(testWindowBounds.left, testWindowBounds.top,
+                testWindowBounds.right + 100, testWindowBounds.bottom + 100);
+        mInstrumentation.runOnMainSync(() -> {
+            mWindowMagnificationController.enableWindowMagnification(Float.NaN, Float.NaN,
+                    Float.NaN);
+        });
+        mWindowManager.setWindowBounds(testWindowBounds);
+
+        mInstrumentation.runOnMainSync(() -> {
+            mWindowMagnificationController.onConfigurationChanged(ActivityInfo.CONFIG_SCREEN_SIZE);
+        });
+
+        // The ratio of center to window size should be the same.
+        assertEquals(expectedRatio,
+                mWindowMagnificationController.getCenterX() / testWindowBounds.width(),
+                0);
+        assertEquals(expectedRatio,
+                mWindowMagnificationController.getCenterY() / testWindowBounds.height(),
+                0);
     }
 
     @Test
@@ -419,9 +461,12 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void moveWindowMagnificationToTheBottom_enabled_overlapFlagIsTrue() {
-        final WindowManager wm = mContext.getSystemService(WindowManager.class);
-        final Rect bounds = wm.getCurrentWindowMetrics().getBounds();
+    public void moveWindowMagnificationToTheBottom_enabledWithGestureInset_overlapFlagIsTrue() {
+        final Rect bounds = mWindowManager.getCurrentWindowMetrics().getBounds();
+        final WindowInsets testInsets = new WindowInsets.Builder()
+                .setInsets(systemGestures(), Insets.of(0, 0, 0, 10))
+                .build();
+        mWindowManager.setWindowInsets(testInsets);
         mInstrumentation.runOnMainSync(() -> {
             mWindowMagnificationController.enableWindowMagnification(Float.NaN, Float.NaN,
                     Float.NaN);
