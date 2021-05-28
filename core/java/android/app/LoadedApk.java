@@ -2060,13 +2060,14 @@ public final class LoadedApk {
             }
             if (dead) {
                 mConnection.onBindingDied(name);
-            }
-            // If there is a new viable service, it is now connected.
-            if (service != null) {
-                mConnection.onServiceConnected(name, service);
             } else {
-                // The binding machinery worked, but the remote returned null from onBind().
-                mConnection.onNullBinding(name);
+                // If there is a new viable service, it is now connected.
+                if (service != null) {
+                    mConnection.onServiceConnected(name, service);
+                } else {
+                    // The binding machinery worked, but the remote returned null from onBind().
+                    mConnection.onNullBinding(name);
+                }
             }
         }
 
