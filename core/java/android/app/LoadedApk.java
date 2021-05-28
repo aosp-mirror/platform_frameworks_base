@@ -1289,6 +1289,10 @@ public final class LoadedApk {
                 throw new AssertionError("null split not found");
             }
 
+            if (Process.myUid() == mApplicationInfo.uid) {
+                ResourcesManager.getInstance().initializeApplicationPaths(mResDir, splitPaths);
+            }
+
             mResources = ResourcesManager.getInstance().getResources(null, mResDir,
                     splitPaths, mLegacyOverlayDirs, mOverlayPaths,
                     mApplicationInfo.sharedLibraryFiles, null, null, getCompatibilityInfo(),
