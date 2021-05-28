@@ -18,6 +18,7 @@ package android.app.appsearch;
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.SystemService;
+import android.annotation.UserHandleAware;
 import android.app.appsearch.aidl.IAppSearchManager;
 import android.content.Context;
 
@@ -195,6 +196,7 @@ public class AppSearchManager {
      *     this operation. Or a {@link AppSearchResult} with failure reason code and error
      *     information.
      */
+    @UserHandleAware
     public void createSearchSession(
             @NonNull SearchContext searchContext,
             @NonNull @CallbackExecutor Executor executor,
@@ -222,6 +224,7 @@ public class AppSearchManager {
      *     this operation. Or a {@link AppSearchResult} with failure reason code and error
      *     information.
      */
+    @UserHandleAware
     public void createGlobalSearchSession(
             @NonNull @CallbackExecutor Executor executor,
             @NonNull Consumer<AppSearchResult<GlobalSearchSession>> callback) {
