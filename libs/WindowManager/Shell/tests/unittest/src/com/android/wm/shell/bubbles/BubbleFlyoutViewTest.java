@@ -57,7 +57,6 @@ public class BubbleFlyoutViewTest extends ShellTestCase {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        when(mPositioner.getBubbleBitmapSize()).thenReturn(40);
         when(mPositioner.getBubbleSize()).thenReturn(60);
 
         mFlyoutMessage = new Bubble.FlyoutMessage();
