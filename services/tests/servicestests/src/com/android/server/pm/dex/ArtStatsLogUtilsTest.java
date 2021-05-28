@@ -28,8 +28,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.mockito.Mock;
 import org.mockito.InOrder;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.io.IOException;
@@ -277,7 +277,7 @@ public final class ArtStatsLogUtilsTest {
                 UID,
                 COMPILATION_REASON,
                 COMPILER_FILTER,
-                ArtStatsLog.ART_DATUM_REPORTED__KIND__ART_DATUM_DEX2OAT_DEX_CODE_BYTES,
+                ArtStatsLog.ART_DATUM_REPORTED__KIND__ART_DATUM_DEX2OAT_DEX_CODE_COUNTER_BYTES,
                 DEX_CONTENT.length,
                 dexMetadataType,
                 ArtStatsLog.ART_DATUM_REPORTED__APK_TYPE__ART_APK_TYPE_BASE,
@@ -287,7 +287,7 @@ public final class ArtStatsLogUtilsTest {
                 UID,
                 COMPILATION_REASON,
                 COMPILER_FILTER,
-                ArtStatsLog.ART_DATUM_REPORTED__KIND__ART_DATUM_DEX2OAT_TOTAL_TIME,
+                ArtStatsLog.ART_DATUM_REPORTED__KIND__ART_DATUM_DEX2OAT_TOTAL_TIME_COUNTER_MILLIS,
                 COMPILE_TIME,
                 dexMetadataType,
                 ArtStatsLog.ART_DATUM_REPORTED__APK_TYPE__ART_APK_TYPE_BASE,
