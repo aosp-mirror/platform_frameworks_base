@@ -3994,24 +3994,15 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return mActivityRecord == null || (mActivityRecord.matchParentBounds() && !inMultiWindowMode());
     }
 
-    /** @return true when the window should be letterboxed. */
-    boolean isLetterboxedAppWindow() {
-        // Fullscreen mode but doesn't fill display area.
-        if (!inMultiWindowMode() && !matchesDisplayAreaBounds()) {
-            return true;
-        }
-        if (mActivityRecord != null) {
-            // Activity in size compat.
-            if (mActivityRecord.inSizeCompatMode()) {
-                return true;
-            }
-            // Letterbox for fixed orientation.
-            if (mActivityRecord.isLetterboxedForFixedOrientationAndAspectRatio()) {
-                return true;
-            }
-        }
-        // Letterboxed for display cutout.
-        return isLetterboxedForDisplayCutout();
+    /**
+     * @return true if activity bounds are letterboxed or letterboxed for diplay cutout.
+     *
+     * <p>Note that letterbox UI may not be shown even when this returns {@code true}. See {@link
+     * LetterboxUiController#shouldShowLetterboxUi} for more context.
+     */
+    boolean areAppWindowBoundsLetterboxed() {
+        return mActivityRecord != null
+                && (mActivityRecord.areBoundsLetterboxed() || isLetterboxedForDisplayCutout());
     }
 
     /** Returns {@code true} if the window is letterboxed for the display cutout. */
@@ -5824,7 +5815,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // the status bar). In that case we need to use the final frame.
         if (inFreeformWindowingMode()) {
             outFrame.set(getFrame());
-        } else if (isLetterboxedAppWindow() || mToken.isFixedRotationTransforming()) {
+        } else if (areAppWindowBoundsLetterboxed() || mToken.isFixedRotationTransforming()) {
             // 1. The letterbox surfaces should be animated with the owner activity, so use task
             //    bounds to include them.
             // 2. If the activity has fixed rotation transform, its windows are rotated in activity

@@ -995,7 +995,7 @@ final class AccessibilityController {
                     }
 
                     // Count letterbox into nonMagnifiedBounds
-                    if (windowState.isLetterboxedAppWindow()) {
+                    if (windowState.areAppWindowBoundsLetterboxed()) {
                         Region letterboxBounds = getLetterboxBounds(windowState);
                         nonMagnifiedBounds.op(letterboxBounds, Region.Op.UNION);
                         availableBounds.op(letterboxBounds, Region.Op.DIFFERENCE);
@@ -1775,7 +1775,7 @@ final class AccessibilityController {
                 }
 
                 // Account for the space of letterbox.
-                if (windowState.isLetterboxedAppWindow()) {
+                if (windowState.areAppWindowBoundsLetterboxed()) {
                     unaccountedSpace.op(getLetterboxBounds(windowState), unaccountedSpace,
                             Region.Op.REVERSE_DIFFERENCE);
                 }
