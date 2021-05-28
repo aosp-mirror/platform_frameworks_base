@@ -698,14 +698,9 @@ public class Environment {
      *
      * @see #getExternalStorageState()
      * @see #isExternalStorageRemovable()
-     * @deprecated To improve user privacy, direct access to shared/external
-     *             storage devices is deprecated. When an app targets
-     *             {@link android.os.Build.VERSION_CODES#Q}, the path returned
-     *             from this method is no longer directly accessible to apps.
-     *             Apps can continue to access content stored on shared/external
-     *             storage by migrating to alternatives such as
-     *             {@link Context#getExternalFilesDir(String)},
-     *             {@link MediaStore}, or {@link Intent#ACTION_OPEN_DOCUMENT}.
+     * @deprecated Alternatives such as {@link Context#getExternalFilesDir(String)},
+     *             {@link MediaStore}, or {@link Intent#ACTION_OPEN_DOCUMENT} offer better
+     *             performance.
      */
     @Deprecated
     public static File getExternalStorageDirectory() {
@@ -1014,14 +1009,9 @@ public class Environment {
      * @return Returns the File path for the directory. Note that this directory
      *         may not yet exist, so you must make sure it exists before using
      *         it such as with {@link File#mkdirs File.mkdirs()}.
-     * @deprecated To improve user privacy, direct access to shared/external
-     *             storage devices is deprecated. When an app targets
-     *             {@link android.os.Build.VERSION_CODES#Q}, the path returned
-     *             from this method is no longer directly accessible to apps.
-     *             Apps can continue to access content stored on shared/external
-     *             storage by migrating to alternatives such as
-     *             {@link Context#getExternalFilesDir(String)},
-     *             {@link MediaStore}, or {@link Intent#ACTION_OPEN_DOCUMENT}.
+     * @deprecated Alternatives such as {@link Context#getExternalFilesDir(String)},
+     *             {@link MediaStore}, or {@link Intent#ACTION_OPEN_DOCUMENT} offer better
+     *             performance.
      */
     @Deprecated
     public static File getExternalStoragePublicDirectory(String type) {
