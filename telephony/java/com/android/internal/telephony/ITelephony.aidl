@@ -2440,6 +2440,12 @@ interface ITelephony {
     boolean removeUceRequestDisallowedStatus(int subId);
 
     /**
+     * Set the timeout for contact capabilities request.
+     * Note: This is designed for a SHELL command only.
+     */
+    boolean setCapabilitiesRequestTimeout(int subId, long timeoutAfterMs);
+
+    /**
      * Set a SignalStrengthUpdateRequest to receive notification when Signal Strength breach the
      * specified thresholds.
      */
