@@ -92,6 +92,10 @@ enum : package_property_t {
 
   // The package is a RRO.
   PROPERTY_OVERLAY = 1U << 3U,
+
+  // The apk assets is owned by the application running in this process and incremental crash
+  // protections for this APK must be disabled.
+  PROPERTY_DISABLE_INCREMENTAL_HARDENING = 1U << 4U,
 };
 
 struct OverlayableInfo {
