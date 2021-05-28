@@ -49,6 +49,8 @@ public:
 
     void newBufferContent(GrDirectContext* context);
 
+    void releaseQueueOwnership(GrDirectContext* context);
+
 private:
     // The only way to invoke dtor is with unref, when mUsageCount is 0.
     ~AutoBackendTextureRelease() {}
