@@ -580,7 +580,8 @@
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Sebagian sidik jari terdeteksi"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Tidak dapat memproses sidik jari. Coba lagi."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"Bersihkan sensor"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"Jari bergerak terlalu cepat"</string>
+    <!-- no translation found for fingerprint_acquired_too_fast (6038375140739678098) -->
+    <skip />
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Jari digerakkan terlalu lambat. Coba lagi."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Coba sidik jari lain"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Terlalu terang"</string>
@@ -2291,10 +2292,10 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Sekarang Anda dapat memperbesar sebagian layar"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Aktifkan di Setelan"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Tutup"</string>
-    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Batalkan pemblokiran mikrofon perangkat"</string>
-    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Batalkan pemblokiran kamera perangkat"</string>
+    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Berhenti memblokir mikrofon perangkat"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Berhenti memblokir kamera perangkat"</string>
     <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"Untuk &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; serta semua aplikasi dan layanan"</string>
-    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Batalkan pemblokiran"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Berhenti memblokir"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Privasi Sensor"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Ikon aplikasi"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Brand image aplikasi"</string>

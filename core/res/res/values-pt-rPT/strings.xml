@@ -580,7 +580,8 @@
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Impressão digital parcial detetada"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Não foi possível processar a impressão digital. Tente novamente."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"Limpe o sensor"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"O dedo moveu-se demasiado rápido"</string>
+    <!-- no translation found for fingerprint_acquired_too_fast (6038375140739678098) -->
+    <skip />
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Moveu o dedo demasiado lentamente. Tente novamente."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Experimente outra impressão digital"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Está demasiado claro"</string>
@@ -756,7 +757,7 @@
     <string name="policydesc_encryptedStorage" msgid="1102516950740375617">"Solicitar encriptação dos dados da app armazenados."</string>
     <string name="policylab_disableCamera" msgid="5749486347810162018">"Desativar câmaras"</string>
     <string name="policydesc_disableCamera" msgid="3204405908799676104">"Evitar a utilização de todas as câmaras do dispositivo."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"Desat. funcionalid. bloq. ecrã"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"Desativar funcionalidades do bloqueio de ecrã"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"Impede a utilização de algumas funcionalidades de bloqueio de ecrã."</string>
   <string-array name="phoneTypes">
     <item msgid="8996339953292723951">"Casa"</item>

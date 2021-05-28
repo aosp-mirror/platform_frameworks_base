@@ -2377,7 +2377,6 @@ public final class ProcessList {
             }
 
             final Process.ProcessStartResult startResult;
-            boolean regularZygote = false;
             if (hostingRecord.usesWebviewZygote()) {
                 startResult = startWebView(entryPoint,
                         app.processName, uid, uid, gids, runtimeFlags, mountExternal,
@@ -2397,8 +2396,12 @@ public final class ProcessList {
                         app.getDisabledCompatChanges(), pkgDataInfoMap, allowlistedAppDataInfoMap,
                         false, false,
                         new String[]{PROC_START_SEQ_IDENT + app.getStartSeq()});
+
+                if (Process.createProcessGroup(uid, startResult.pid) < 0) {
+                    Slog.e(ActivityManagerService.TAG, "Unable to create process group for "
+                            + app.processName + " (" + startResult.pid + ")");
+                }
             } else {
-                regularZygote = true;
                 startResult = Process.start(entryPoint,
                         app.processName, uid, uid, gids, runtimeFlags, mountExternal,
                         app.info.targetSdkVersion, seInfo, requiredAbi, instructionSet,
@@ -2407,15 +2410,6 @@ public final class ProcessList {
                         allowlistedAppDataInfoMap, bindMountAppsData, bindMountAppStorageDirs,
                         new String[]{PROC_START_SEQ_IDENT + app.getStartSeq()});
             }
-
-            if (!regularZygote) {
-                // webview and app zygote don't have the permission to create the nodes
-                if (Process.createProcessGroup(uid, startResult.pid) < 0) {
-                    Slog.e(ActivityManagerService.TAG, "Unable to create process group for "
-                            + app.processName + " (" + startResult.pid + ")");
-                }
-            }
-
             // This runs after Process.start() as this method may block app process starting time
             // if dir is not cached. Running this method after Process.start() can make it
             // cache the dir asynchronously, so zygote can use it without waiting for it.

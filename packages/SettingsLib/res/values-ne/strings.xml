@@ -218,7 +218,7 @@
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"छ अङ्कको कोड प्रयोग गरी नयाँ डिभाइसहरू कनेक्ट गरियोस्"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"कनेक्ट गरिएका डिभाइस"</string>
     <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"हाल जोडिएको छ"</string>
-    <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"यन्त्रसम्बन्धी विवरणहरू"</string>
+    <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"डिभाइसको विवरण"</string>
     <string name="adb_device_forget" msgid="193072400783068417">"बिर्सनुहोस्"</string>
     <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"डिभाइसको फिंगरप्रिन्ट: <xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
     <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"वायरलेसमा जोड्न सकिएन"</string>
@@ -227,7 +227,7 @@
     <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Wi‑Fi मा कनेक्ट गर्ने कोड"</string>
     <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"जोडा बनाउने प्रक्रिया सफल भएन"</string>
     <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"यन्त्र उही नेटवर्कमा जोडिएको कुरा सुनिश्चित गर्नुहोस्।"</string>
-    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"QR कोड स्क्यान गरेर Wi‑Fi प्रयोग गरी डिभाइसको जोडा बनाउनुहोस्"</string>
+    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"QR कोड स्क्यान गरेर Wi‑Fi प्रयोग गरी डिभाइस कनेक्ट गर्नुहोस्"</string>
     <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"डिभाइस कनेक्ट गर्दै…"</string>
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"यन्त्रसँग जोडा बनाउन सकिएन। कि त QR कोड गलत छ कि यन्त्र उही नेटवर्कमा जोडिएको छैन।"</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP एड्रेस र पोर्ट"</string>

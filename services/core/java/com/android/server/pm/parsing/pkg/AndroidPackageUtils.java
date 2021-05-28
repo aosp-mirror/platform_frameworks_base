@@ -196,6 +196,12 @@ public class AndroidPackageUtils {
             }
         }
 
+        if (pkg.getBackupAgentName() != null) {
+            if (Objects.equals(className, pkg.getBackupAgentName())) {
+                return true;
+            }
+        }
+
         return false;
     }
 

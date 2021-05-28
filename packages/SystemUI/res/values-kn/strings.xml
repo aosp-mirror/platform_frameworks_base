@@ -351,8 +351,8 @@
     <string name="quick_settings_ime_label" msgid="3351174938144332051">"ಇನ್‌ಪುಟ್ ವಿಧಾನ"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"ಸ್ಥಳ"</string>
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"ಸ್ಥಳ ಆಫ್ ಆಗಿದೆ"</string>
-    <string name="quick_settings_camera_label" msgid="5612076679385269339">"ಕ್ಯಾಮರಾ ಪ್ರವೇಶದ ಅನುಮತಿ"</string>
-    <string name="quick_settings_mic_label" msgid="8392773746295266375">"ಮೈಕ್ ಪ್ರವೇಶದ ಅನುಮತಿ"</string>
+    <string name="quick_settings_camera_label" msgid="5612076679385269339">"ಕ್ಯಾಮರಾ ಆ್ಯಕ್ಸೆಸ್"</string>
+    <string name="quick_settings_mic_label" msgid="8392773746295266375">"ಮೈಕ್ ಆ್ಯಕ್ಸೆಸ್"</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"ಲಭ್ಯವಿದೆ"</string>
     <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"ಮಾಧ್ಯಮ ಸಾಧನ"</string>
