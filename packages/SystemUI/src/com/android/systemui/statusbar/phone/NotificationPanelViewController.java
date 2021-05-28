@@ -27,7 +27,6 @@ import static com.android.systemui.classifier.Classifier.QS_COLLAPSE;
 import static com.android.systemui.classifier.Classifier.QUICK_SETTINGS;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_ALL;
-import static com.android.systemui.util.Utils.shouldUseSplitNotificationShade;
 
 import static java.lang.Float.isNaN;
 
@@ -54,7 +53,6 @@ import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.UserManager;
 import android.os.VibrationEffect;
-import android.service.quickaccesswallet.QuickAccessWalletClient;
 import android.util.Log;
 import android.util.MathUtils;
 import android.view.DisplayCutout;
@@ -153,6 +151,7 @@ import com.android.systemui.statusbar.policy.KeyguardUserSwitcherView;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.util.Utils;
 import com.android.systemui.util.settings.SecureSettings;
+import com.android.systemui.wallet.controller.QuickAccessWalletController;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 
 import java.io.FileDescriptor;
@@ -310,6 +309,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private final FeatureFlags mFeatureFlags;
     private final ScrimController mScrimController;
     private final PrivacyDotViewController mPrivacyDotViewController;
+    private final QuickAccessWalletController mQuickAccessWalletController;
 
     // Maximum # notifications to show on Keyguard; extras will be collapsed in an overflow card.
     // If there are exactly 1 + mMaxKeyguardNotifications, then still shows all notifications
@@ -582,8 +582,8 @@ public class NotificationPanelViewController extends PanelViewController {
     private int mScrimCornerRadius;
     private int mScreenCornerRadius;
     private int mNotificationScrimPadding;
+    private boolean mQSAnimatingHiddenFromCollapsed;
 
-    private final QuickAccessWalletClient mQuickAccessWalletClient;
     private final Executor mUiExecutor;
     private final SecureSettings mSecureSettings;
 
@@ -664,11 +664,11 @@ public class NotificationPanelViewController extends PanelViewController {
             AmbientState ambientState,
             LockIconViewController lockIconViewController,
             FeatureFlags featureFlags,
-            QuickAccessWalletClient quickAccessWalletClient,
             KeyguardMediaController keyguardMediaController,
             PrivacyDotViewController privacyDotViewController,
             TapAgainViewController tapAgainViewController,
             FragmentService fragmentService,
+            QuickAccessWalletController quickAccessWalletController,
             @Main Executor uiExecutor,
             SecureSettings secureSettings) {
         super(view, falsingManager, dozeLog, keyguardStateController,
@@ -679,6 +679,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mVibratorHelper = vibratorHelper;
         mKeyguardMediaController = keyguardMediaController;
         mPrivacyDotViewController = privacyDotViewController;
+        mQuickAccessWalletController = quickAccessWalletController;
         mMetricsLogger = metricsLogger;
         mActivityManager = activityManager;
         mConfigurationController = configurationController;
@@ -721,7 +722,6 @@ public class NotificationPanelViewController extends PanelViewController {
         mScrimController.setClipsQsScrim(!mShouldUseSplitNotificationShade);
         mUserManager = userManager;
         mMediaDataManager = mediaDataManager;
-        mQuickAccessWalletClient = quickAccessWalletClient;
         mTapAgainViewController = tapAgainViewController;
         mUiExecutor = uiExecutor;
         mSecureSettings = secureSettings;
@@ -1122,7 +1122,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mKeyguardBottomArea.setFalsingManager(mFalsingManager);
 
         if (mFeatureFlags.isQuickAccessWalletEnabled()) {
-            mKeyguardBottomArea.initWallet(mQuickAccessWalletClient, mUiExecutor, mSecureSettings);
+            mKeyguardBottomArea.initWallet(mQuickAccessWalletController);
         }
     }
 
@@ -1259,7 +1259,7 @@ public class NotificationPanelViewController extends PanelViewController {
                 bypassEnabled, getUnlockedStackScrollerPadding(),
                 computeQsExpansionFraction(),
                 mDisplayCutoutTopInset,
-                shouldUseSplitNotificationShade(mFeatureFlags, mResources));
+                mShouldUseSplitNotificationShade);
         mClockPositionAlgorithm.run(mClockPositionResult);
         boolean animate = mNotificationStackScrollLayoutController.isAddOrRemoveAnimationPending();
         boolean animateClock = animate || mAnimateNextPositionUpdate;
@@ -1443,7 +1443,7 @@ public class NotificationPanelViewController extends PanelViewController {
         }
         mStatusBar.getGutsManager().closeAndSaveGuts(true /* leavebehind */, true /* force */,
                 true /* controls */, -1 /* x */, -1 /* y */, true /* resetMenu */);
-        if (animate) {
+        if (animate && !isFullyCollapsed()) {
             animateCloseQs(true /* animateAway */);
         } else {
             closeQs();
@@ -1727,6 +1727,11 @@ public class NotificationPanelViewController extends PanelViewController {
     }
 
     private float computeQsExpansionFraction() {
+        if (mQSAnimatingHiddenFromCollapsed) {
+            // When hiding QS from collapsed state, the expansion can sometimes temporarily
+            // be larger than 0 because of the timing, leading to flickers.
+            return 0.0f;
+        }
         return Math.min(
                 1f, (mQsExpansionHeight - mQsMinExpansionHeight) / (mQsMaxExpansionHeight
                         - mQsMinExpansionHeight));
@@ -2260,19 +2265,24 @@ public class NotificationPanelViewController extends PanelViewController {
             boolean visible) {
         // Fancy clipping for quick settings
         int radius = mScrimCornerRadius;
+        int statusBarClipTop = 0;
+        boolean clipStatusView = false;
         if (!mShouldUseSplitNotificationShade) {
             // The padding on this area is large enough that we can use a cheaper clipping strategy
             mKeyguardStatusAreaClipBounds.set(left, top, right, bottom);
-            mKeyguardStatusViewController.setClipBounds(visible
-                    ? mKeyguardStatusAreaClipBounds : null);
+            clipStatusView = visible;
             radius = (int) MathUtils.lerp(mScreenCornerRadius, mScrimCornerRadius,
                     Math.min(top / (float) mScrimCornerRadius, 1f));
+            statusBarClipTop = top - mKeyguardStatusBar.getTop();
         }
         if (mQs != null) {
             mQs.setFancyClipping(top, bottom, radius, visible);
         }
+        mKeyguardStatusViewController.setClipBounds(
+                clipStatusView ? mKeyguardStatusAreaClipBounds : null);
         mScrimController.setNotificationsBounds(left, top, right, bottom);
         mScrimController.setScrimCornerRadius(radius);
+        mKeyguardStatusBar.setTopClipping(statusBarClipTop);
     }
 
     private float getQSEdgePosition() {
@@ -2527,6 +2537,7 @@ public class NotificationPanelViewController extends PanelViewController {
 
             @Override
             public void onAnimationEnd(Animator animation) {
+                mQSAnimatingHiddenFromCollapsed = false;
                 mAnimatingQS = false;
                 notifyExpandingFinished();
                 mNotificationStackScrollLayoutController.resetCheckSnoozeLeavebehind();
@@ -2543,6 +2554,7 @@ public class NotificationPanelViewController extends PanelViewController {
         animator.start();
         mQsExpansionAnimator = animator;
         mQsAnimatorExpand = expanding;
+        mQSAnimatingHiddenFromCollapsed = computeQsExpansionFraction() == 0.0f && target == 0;
     }
 
     /**

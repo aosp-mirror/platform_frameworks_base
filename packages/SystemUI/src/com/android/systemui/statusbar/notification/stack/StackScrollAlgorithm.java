@@ -380,11 +380,15 @@ public class StackScrollAlgorithm {
         ExpandableViewState viewState = view.getViewState();
         viewState.location = ExpandableViewState.LOCATION_UNKNOWN;
 
-        if (ambientState.isExpansionChanging() && !ambientState.isOnKeyguard()) {
-            viewState.alpha = Interpolators.getNotificationScrimAlpha(
-                    ambientState.getExpansionFraction(), true /* notification */);
-        } else {
-            viewState.alpha = 1f - ambientState.getHideAmount();
+        final boolean isHunGoingToShade = ambientState.isShadeExpanded()
+                && view == ambientState.getTrackedHeadsUpRow();
+        if (!isHunGoingToShade) {
+            if (ambientState.isExpansionChanging() && !ambientState.isOnKeyguard()) {
+                viewState.alpha = Interpolators.getNotificationScrimAlpha(
+                        ambientState.getExpansionFraction(), true /* notification */);
+            } else {
+                viewState.alpha = 1f - ambientState.getHideAmount();
+            }
         }
 
         if (view.mustStayOnScreen() && viewState.yTranslation >= 0) {
@@ -414,13 +418,15 @@ public class StackScrollAlgorithm {
         }
 
         if (view instanceof FooterView) {
+            final boolean shadeClosed = !ambientState.isShadeExpanded();
             final boolean isShelfShowing = algorithmState.firstViewInShelf != null;
 
             final float footerEnd = algorithmState.mCurrentExpandedYPosition
                     + view.getIntrinsicHeight();
             final boolean noSpaceForFooter = footerEnd > ambientState.getStackEndHeight();
 
-            viewState.hidden = isShelfShowing || noSpaceForFooter;
+            viewState.hidden = shadeClosed || isShelfShowing || noSpaceForFooter;
+
         } else if (view != ambientState.getTrackedHeadsUpRow()) {
             if (ambientState.isExpansionChanging()) {
                 // Show all views. Views below the shelf will later be clipped (essentially hidden)

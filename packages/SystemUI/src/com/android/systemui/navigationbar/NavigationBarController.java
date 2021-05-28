@@ -123,8 +123,7 @@ public class NavigationBarController implements Callbacks,
 
     // Tracks config changes that will actually recreate the nav bar
     private final InterestingConfigChanges mConfigChanges = new InterestingConfigChanges(
-            ActivityInfo.CONFIG_FONT_SCALE | ActivityInfo.CONFIG_LOCALE
-                    | ActivityInfo.CONFIG_SCREEN_LAYOUT
+            ActivityInfo.CONFIG_FONT_SCALE | ActivityInfo.CONFIG_SCREEN_LAYOUT
                     | ActivityInfo.CONFIG_UI_MODE);
 
     @Inject
@@ -225,10 +224,7 @@ public class NavigationBarController implements Callbacks,
                 if (navBar == null) {
                     continue;
                 }
-                NavigationBarView view = (NavigationBarView) navBar.getView();
-                if (view != null) {
-                    view.updateStates();
-                }
+                navBar.getView().updateStates();
             }
         });
     }
@@ -366,13 +362,12 @@ public class NavigationBarController implements Callbacks,
                 mHandler,
                 mNavBarOverlayController,
                 mUiEventLogger);
+        mNavigationBars.put(displayId, navBar);
 
         View navigationBarView = navBar.createView(savedState);
         navigationBarView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
             @Override
             public void onViewAttachedToWindow(View v) {
-                mNavigationBars.put(displayId, navBar);
-
                 if (result != null) {
                     navBar.setImeWindowStatus(display.getDisplayId(), result.mImeToken,
                             result.mImeWindowVis, result.mImeBackDisposition,
@@ -448,7 +443,7 @@ public class NavigationBarController implements Callbacks,
      */
     public @Nullable NavigationBarView getNavigationBarView(int displayId) {
         NavigationBar navBar = mNavigationBars.get(displayId);
-        return (navBar == null) ? null : (NavigationBarView) navBar.getView();
+        return (navBar == null) ? null : navBar.getView();
     }
 
     /** @return {@link NavigationBar} on the default display. */

@@ -8,6 +8,7 @@ import android.media.MediaDescription
 import android.media.MediaMetadata
 import android.media.session.MediaController
 import android.media.session.MediaSession
+import android.provider.Settings
 import android.service.notification.StatusBarNotification
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
@@ -83,11 +84,16 @@ class MediaDataManagerTest : SysuiTestCase() {
     @Captor lateinit var mediaDataCaptor: ArgumentCaptor<MediaData>
     private val clock = FakeSystemClock()
 
+    private val originalSmartspaceSetting = Settings.Secure.getInt(context.contentResolver,
+            Settings.Secure.MEDIA_CONTROLS_RECOMMENDATION, 1)
+
     @Before
     fun setup() {
         foregroundExecutor = FakeExecutor(clock)
         backgroundExecutor = FakeExecutor(clock)
         smartspaceMediaDataProvider = SmartspaceMediaDataProvider()
+        Settings.Secure.putInt(context.contentResolver,
+                Settings.Secure.MEDIA_CONTROLS_RECOMMENDATION, 1)
         mediaDataManager = MediaDataManager(
             context = context,
             backgroundExecutor = backgroundExecutor,
@@ -139,6 +145,8 @@ class MediaDataManagerTest : SysuiTestCase() {
     fun tearDown() {
         session.release()
         mediaDataManager.destroy()
+        Settings.Secure.putInt(context.contentResolver,
+                Settings.Secure.MEDIA_CONTROLS_RECOMMENDATION, originalSmartspaceSetting)
     }
 
     @Test
@@ -257,55 +265,6 @@ class MediaDataManagerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testAppBlockedFromResumption() {
-        // GIVEN that the manager has a notification with a resume action
-        whenever(controller.metadata).thenReturn(metadataBuilder.build())
-        mediaDataManager.onNotificationAdded(KEY, mediaNotification)
-        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
-        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
-        verify(listener).onMediaDataLoaded(eq(KEY), eq(null), capture(mediaDataCaptor))
-        val data = mediaDataCaptor.value
-        assertThat(data.resumption).isFalse()
-        mediaDataManager.onMediaDataLoaded(KEY, null, data.copy(resumeAction = Runnable {}))
-
-        // and the manager should block the package from creating resume controls
-        val blocked = mutableSetOf(PACKAGE_NAME, "com.example.app")
-        mediaDataManager.appsBlockedFromResume = blocked
-
-        // WHEN the notification is removed
-        mediaDataManager.onNotificationRemoved(KEY)
-
-        // THEN the media data is removed
-        verify(listener).onMediaDataRemoved(eq(KEY))
-    }
-
-    @Test
-    fun testAppUnblockedFromResumption() {
-        // GIVEN that an app was blocked from resuming
-        val blocked = mutableSetOf(PACKAGE_NAME, "com.example.app")
-        mediaDataManager.appsBlockedFromResume = blocked
-
-        // and GIVEN that the manager has a notification from that app with a resume action
-        whenever(controller.metadata).thenReturn(metadataBuilder.build())
-        mediaDataManager.onNotificationAdded(KEY, mediaNotification)
-        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
-        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
-        verify(listener).onMediaDataLoaded(eq(KEY), eq(null), capture(mediaDataCaptor))
-        val data = mediaDataCaptor.value
-        assertThat(data.resumption).isFalse()
-        mediaDataManager.onMediaDataLoaded(KEY, null, data.copy(resumeAction = Runnable {}))
-
-        // WHEN the app is unblocked
-        mediaDataManager.appsBlockedFromResume = mutableSetOf("com.example.app")
-
-        // and the notification is removed
-        mediaDataManager.onNotificationRemoved(KEY)
-
-        // THEN the entry will stay as a resume control
-        verify(listener).onMediaDataLoaded(eq(PACKAGE_NAME), eq(KEY), capture(mediaDataCaptor))
-    }
-
-    @Test
     fun testAddResumptionControls() {
         // WHEN resumption controls are added
         val desc = MediaDescription.Builder().run {
@@ -379,6 +338,18 @@ class MediaDataManagerTest : SysuiTestCase() {
         smartspaceMediaDataProvider.onTargetsAvailable(listOf(mediaSmartspaceTarget))
         smartspaceMediaDataProvider.onTargetsAvailable(listOf())
         verify(listener).onSmartspaceMediaDataRemoved(KEY_MEDIA_SMARTSPACE)
+    }
+
+    @Test
+    fun testOnSmartspaceMediaDataLoaded_settingDisabled_doesNothing() {
+        // WHEN media recommendation setting is off
+        Settings.Secure.putInt(context.contentResolver,
+                Settings.Secure.MEDIA_CONTROLS_RECOMMENDATION, 0)
+        smartspaceMediaDataProvider.onTargetsAvailable(listOf(mediaSmartspaceTarget))
+
+        // THEN smartspace signal is ignored
+        verify(listener, never())
+                .onSmartspaceMediaDataLoaded(anyObject(), anyObject(), anyBoolean())
     }
 
     @Test

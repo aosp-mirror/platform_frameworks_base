@@ -138,17 +138,6 @@ class MediaDataManager(
     private val mediaEntries: LinkedHashMap<String, MediaData> = LinkedHashMap()
     // There should ONLY be at most one Smartspace media recommendation.
     private var smartspaceMediaTarget: SmartspaceTarget? = null
-    internal var appsBlockedFromResume: MutableSet<String> = Utils.getBlockedMediaApps(context)
-        set(value) {
-            // Update list
-            appsBlockedFromResume.clear()
-            appsBlockedFromResume.addAll(value)
-
-            // Remove any existing resume players that are now blocked
-            appsBlockedFromResume.forEach {
-                removeAllForPackage(it)
-            }
-        }
     private var smartspaceSession: SmartspaceSession? = null
 
     @Inject
@@ -690,7 +679,9 @@ class MediaDataManager(
     }
 
     override fun onSmartspaceTargetsUpdated(targets: List<Parcelable>) {
-        Log.d(TAG, "My Smartspace media updates are here")
+        if (!Utils.allowMediaRecommendations(context)) {
+            return
+        }
         val mediaTargets = targets.filterIsInstance<SmartspaceTarget>()
         when (mediaTargets.size) {
             0 -> {
@@ -736,8 +727,7 @@ class MediaDataManager(
     fun onNotificationRemoved(key: String) {
         Assert.isMainThread()
         val removed = mediaEntries.remove(key)
-        if (useMediaResumption && removed?.resumeAction != null &&
-                !isBlockedFromResume(removed.packageName) && removed?.isLocalSession == true) {
+        if (useMediaResumption && removed?.resumeAction != null && removed?.isLocalSession) {
             Log.d(TAG, "Not removing $key because resumable")
             // Move to resume key (aka package name) if that key doesn't already exist.
             val resumeAction = getResumeMediaAction(removed.resumeAction!!)
@@ -763,13 +753,6 @@ class MediaDataManager(
         if (removed != null) {
             notifyMediaDataRemoved(key)
         }
-    }
-
-    private fun isBlockedFromResume(packageName: String?): Boolean {
-        if (packageName == null) {
-            return true
-        }
-        return appsBlockedFromResume.contains(packageName)
     }
 
     fun setMediaResumptionEnabled(isEnabled: Boolean) {
@@ -844,7 +827,6 @@ class MediaDataManager(
             println("externalListeners: ${mediaDataFilter.listeners}")
             println("mediaEntries: $mediaEntries")
             println("useMediaResumption: $useMediaResumption")
-            println("appsBlockedFromResume: $appsBlockedFromResume")
         }
     }
 }

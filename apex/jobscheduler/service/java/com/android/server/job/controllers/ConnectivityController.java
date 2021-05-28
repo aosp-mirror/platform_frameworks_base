@@ -25,12 +25,18 @@ import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.job.JobInfo;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkPolicyManager;
 import android.net.NetworkRequest;
+import android.os.BatteryManager;
+import android.os.BatteryManagerInternal;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -100,6 +106,8 @@ public final class ConnectivityController extends RestrictingController implemen
 
     private final ConnectivityManager mConnManager;
     private final NetworkPolicyManagerInternal mNetPolicyManagerInternal;
+
+    private final ChargingTracker mChargingTracker;
 
     /** List of tracked jobs keyed by source UID. */
     @GuardedBy("mLock")
@@ -229,6 +237,9 @@ public final class ConnectivityController extends RestrictingController implemen
         // network changes against the active network for each UID with jobs.
         final NetworkRequest request = new NetworkRequest.Builder().clearCapabilities().build();
         mConnManager.registerNetworkCallback(request, mNetworkCallback);
+
+        mChargingTracker = new ChargingTracker();
+        mChargingTracker.startTracking();
     }
 
     @GuardedBy("mLock")
@@ -538,6 +549,14 @@ public final class ConnectivityController extends RestrictingController implemen
      */
     private boolean isInsane(JobStatus jobStatus, Network network,
             NetworkCapabilities capabilities, Constants constants) {
+        if (capabilities.hasCapability(NET_CAPABILITY_NOT_METERED)
+                && mChargingTracker.isCharging()) {
+            // We're charging and on an unmetered network. We don't have to be as conservative about
+            // making sure the job will run within its max execution time. Let's just hope the app
+            // supports interruptible work.
+            return false;
+        }
+
         // Use the maximum possible time since it gives us an upper bound, even though the job
         // could end up stopping earlier.
         final long maxJobExecutionTimeMs = mService.getMaxJobExecutionTimeMs(jobStatus);
@@ -922,7 +941,7 @@ public final class ConnectivityController extends RestrictingController implemen
      *                      {@link Network}, or {@code null} to update all tracked jobs.
      */
     @GuardedBy("mLock")
-    private void updateTrackedJobsLocked(int filterUid, Network filterNetwork) {
+    private void updateTrackedJobsLocked(int filterUid, @Nullable Network filterNetwork) {
         boolean changed = false;
         if (filterUid == -1) {
             for (int i = mTrackedJobs.size() - 1; i >= 0; i--) {
@@ -937,7 +956,8 @@ public final class ConnectivityController extends RestrictingController implemen
     }
 
     @GuardedBy("mLock")
-    private boolean updateTrackedJobsLocked(ArraySet<JobStatus> jobs, Network filterNetwork) {
+    private boolean updateTrackedJobsLocked(ArraySet<JobStatus> jobs,
+            @Nullable Network filterNetwork) {
         if (jobs == null || jobs.size() == 0) {
             return false;
         }
@@ -989,6 +1009,51 @@ public final class ConnectivityController extends RestrictingController implemen
                         mStateChangedListener.onRunJobNow(js);
                     }
                 }
+            }
+        }
+    }
+
+    private final class ChargingTracker extends BroadcastReceiver {
+        /**
+         * Track whether we're "charging", where charging means that we're ready to commit to
+         * doing work.
+         */
+        private boolean mCharging;
+
+        ChargingTracker() {}
+
+        public void startTracking() {
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(BatteryManager.ACTION_CHARGING);
+            filter.addAction(BatteryManager.ACTION_DISCHARGING);
+            mContext.registerReceiver(this, filter);
+
+            // Initialise tracker state.
+            final BatteryManagerInternal batteryManagerInternal =
+                    LocalServices.getService(BatteryManagerInternal.class);
+            mCharging = batteryManagerInternal.isPowered(BatteryManager.BATTERY_PLUGGED_ANY);
+        }
+
+        public boolean isCharging() {
+            return mCharging;
+        }
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            synchronized (mLock) {
+                final String action = intent.getAction();
+                if (BatteryManager.ACTION_CHARGING.equals(action)) {
+                    if (mCharging) {
+                        return;
+                    }
+                    mCharging = true;
+                } else if (BatteryManager.ACTION_DISCHARGING.equals(action)) {
+                    if (!mCharging) {
+                        return;
+                    }
+                    mCharging = false;
+                }
+                updateTrackedJobsLocked(-1, null);
             }
         }
     }
