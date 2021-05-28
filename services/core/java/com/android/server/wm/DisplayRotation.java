@@ -1553,6 +1553,11 @@ public class DisplayRotation {
         }
 
         @Override
+        public boolean isKeyguardLocked() {
+            return mService.isKeyguardLocked();
+        }
+
+        @Override
         public boolean isRotationResolverEnabled() {
             return mUserRotationMode == WindowManagerPolicy.USER_ROTATION_FREE
                     && mCameraRotationMode == CAMERA_ROTATION_ENABLED
