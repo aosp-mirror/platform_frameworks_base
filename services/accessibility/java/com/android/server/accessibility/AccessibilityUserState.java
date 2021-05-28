@@ -391,7 +391,7 @@ class AccessibilityUserState {
         return mBoundServices;
     }
 
-    int getClientStateLocked(boolean isUiAutomationRunning, boolean isTracingEnabled) {
+    int getClientStateLocked(boolean isUiAutomationRunning, int traceClientState) {
         int clientState = 0;
         final boolean a11yEnabled = isUiAutomationRunning
                 || isHandlingAccessibilityEventsLocked();
@@ -407,9 +407,9 @@ class AccessibilityUserState {
         if (mIsTextHighContrastEnabled) {
             clientState |= AccessibilityManager.STATE_FLAG_HIGH_TEXT_CONTRAST_ENABLED;
         }
-        if (isTracingEnabled) {
-            clientState |= AccessibilityManager.STATE_FLAG_ACCESSIBILITY_TRACING_ENABLED;
-        }
+
+        clientState |= traceClientState;
+
         return clientState;
     }
 

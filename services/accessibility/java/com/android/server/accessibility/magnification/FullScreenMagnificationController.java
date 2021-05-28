@@ -16,6 +16,8 @@
 
 package com.android.server.accessibility.magnification;
 
+import static android.accessibilityservice.AccessibilityTrace.FLAGS_WINDOW_MANAGER_INTERNAL;
+
 import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
@@ -46,6 +48,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
 import com.android.server.accessibility.AccessibilityManagerService;
+import com.android.server.accessibility.AccessibilityTraceManager;
 import com.android.server.wm.WindowManagerInternal;
 
 import java.util.Locale;
@@ -135,6 +138,10 @@ public class FullScreenMagnificationController {
          */
         @GuardedBy("mLock")
         boolean register() {
+            if (traceEnabled()) {
+                logTrace("setMagnificationCallbacks",
+                        "displayID=" + mDisplayId + ";callback=" + this);
+            }
             mRegistered = mControllerCtx.getWindowManager().setMagnificationCallbacks(
                     mDisplayId, this);
             if (!mRegistered) {
@@ -142,6 +149,10 @@ public class FullScreenMagnificationController {
                 return false;
             }
             mSpecAnimationBridge.setEnabled(true);
+            if (traceEnabled()) {
+                logTrace("getMagnificationRegion",
+                        "displayID=" + mDisplayId + ";region=" + mMagnificationRegion);
+            }
             // Obtain initial state.
             mControllerCtx.getWindowManager().getMagnificationRegion(
                     mDisplayId, mMagnificationRegion);
@@ -162,6 +173,10 @@ public class FullScreenMagnificationController {
         void unregister(boolean delete) {
             if (mRegistered) {
                 mSpecAnimationBridge.setEnabled(false);
+                if (traceEnabled()) {
+                    logTrace("setMagnificationCallbacks",
+                            "displayID=" + mDisplayId + ";callback=null");
+                }
                 mControllerCtx.getWindowManager().setMagnificationCallbacks(
                         mDisplayId, null);
                 mMagnificationRegion.setEmpty();
@@ -431,6 +446,10 @@ public class FullScreenMagnificationController {
         void setForceShowMagnifiableBounds(boolean show) {
             if (mRegistered) {
                 mForceShowMagnifiableBounds = show;
+                if (traceEnabled()) {
+                    logTrace("setForceShowMagnifiableBounds",
+                            "displayID=" + mDisplayId + ";show=" + show);
+                }
                 mControllerCtx.getWindowManager().setForceShowMagnifiableBounds(
                         mDisplayId, show);
             }
@@ -1255,6 +1274,16 @@ public class FullScreenMagnificationController {
         }
     }
 
+    private boolean traceEnabled() {
+        return mControllerCtx.getTraceManager().isA11yTracingEnabledForTypes(
+                FLAGS_WINDOW_MANAGER_INTERNAL);
+    }
+
+    private void logTrace(String methodName, String params) {
+        mControllerCtx.getTraceManager().logTrace(
+                "WindowManagerInternal." + methodName, FLAGS_WINDOW_MANAGER_INTERNAL, params);
+    }
+
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
@@ -1320,6 +1349,13 @@ public class FullScreenMagnificationController {
                     mEnabled = enabled;
                     if (!mEnabled) {
                         mSentMagnificationSpec.clear();
+                        if (mControllerCtx.getTraceManager().isA11yTracingEnabledForTypes(
+                                FLAGS_WINDOW_MANAGER_INTERNAL)) {
+                            mControllerCtx.getTraceManager().logTrace(
+                                    "WindowManagerInternal.setMagnificationSpec",
+                                    FLAGS_WINDOW_MANAGER_INTERNAL,
+                                    "displayID=" + mDisplayId + ";spec=" + mSentMagnificationSpec);
+                        }
                         mControllerCtx.getWindowManager().setMagnificationSpec(
                                 mDisplayId, mSentMagnificationSpec);
                     }
@@ -1367,6 +1403,13 @@ public class FullScreenMagnificationController {
                 }
 
                 mSentMagnificationSpec.setTo(spec);
+                if (mControllerCtx.getTraceManager().isA11yTracingEnabledForTypes(
+                        FLAGS_WINDOW_MANAGER_INTERNAL)) {
+                    mControllerCtx.getTraceManager().logTrace(
+                            "WindowManagerInternal.setMagnificationSpec",
+                            FLAGS_WINDOW_MANAGER_INTERNAL,
+                            "displayID=" + mDisplayId + ";spec=" + mSentMagnificationSpec);
+                }
                 mControllerCtx.getWindowManager().setMagnificationSpec(
                         mDisplayId, mSentMagnificationSpec);
             }
@@ -1455,6 +1498,7 @@ public class FullScreenMagnificationController {
     public static class ControllerContext {
         private final Context mContext;
         private final AccessibilityManagerService mAms;
+        private final AccessibilityTraceManager mTrace;
         private final WindowManagerInternal mWindowManager;
         private final Handler mHandler;
         private final Long mAnimationDuration;
@@ -1469,6 +1513,7 @@ public class FullScreenMagnificationController {
                 long animationDuration) {
             mContext = context;
             mAms = ams;
+            mTrace = ams.getTraceManager();
             mWindowManager = windowManager;
             mHandler = handler;
             mAnimationDuration = animationDuration;
@@ -1488,6 +1533,14 @@ public class FullScreenMagnificationController {
         @NonNull
         public AccessibilityManagerService getAms() {
             return mAms;
+        }
+
+        /**
+         * @return AccessibilityTraceManager
+         */
+        @NonNull
+        public AccessibilityTraceManager getTraceManager() {
+            return mTrace;
         }
 
         /**

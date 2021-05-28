@@ -16,6 +16,9 @@
 
 package com.android.server.accessibility.magnification;
 
+import static android.accessibilityservice.AccessibilityTrace.FLAGS_REMOTE_MAGNIFICATION_ANIMATION_CALLBACK;
+import static android.accessibilityservice.AccessibilityTrace.FLAGS_WINDOW_MAGNIFICATION_CONNECTION;
+import static android.accessibilityservice.AccessibilityTrace.FLAGS_WINDOW_MAGNIFICATION_CONNECTION_CALLBACK;
 import static android.os.IBinder.DeathRecipient;
 
 import android.annotation.NonNull;
@@ -27,6 +30,8 @@ import android.view.accessibility.IWindowMagnificationConnection;
 import android.view.accessibility.IWindowMagnificationConnectionCallback;
 import android.view.accessibility.MagnificationAnimationCallback;
 
+import com.android.server.accessibility.AccessibilityTraceManager;
+
 /**
  * A wrapper of {@link IWindowMagnificationConnection}.
  */
@@ -36,9 +41,12 @@ class WindowMagnificationConnectionWrapper {
     private static final String TAG = "WindowMagnificationConnectionWrapper";
 
     private final @NonNull IWindowMagnificationConnection mConnection;
+    private final @NonNull AccessibilityTraceManager mTrace;
 
-    WindowMagnificationConnectionWrapper(@NonNull IWindowMagnificationConnection connection) {
+    WindowMagnificationConnectionWrapper(@NonNull IWindowMagnificationConnection connection,
+            @NonNull AccessibilityTraceManager trace) {
         mConnection = connection;
+        mTrace = trace;
     }
 
     //Should not use this instance anymore after calling it.
@@ -52,9 +60,15 @@ class WindowMagnificationConnectionWrapper {
 
     boolean enableWindowMagnification(int displayId, float scale, float centerX, float centerY,
             @Nullable MagnificationAnimationCallback callback) {
+        if (mTrace.isA11yTracingEnabledForTypes(FLAGS_WINDOW_MAGNIFICATION_CONNECTION)) {
+            mTrace.logTrace(TAG + ".enableWindowMagnification",
+                    FLAGS_WINDOW_MAGNIFICATION_CONNECTION,
+                    "displayId=" + displayId + ";scale=" + scale + ";centerX=" + centerX
+                    + ";centerY=" + centerY + ";callback=" + callback);
+        }
         try {
             mConnection.enableWindowMagnification(displayId, scale, centerX, centerY,
-                    transformToRemoteCallback(callback));
+                    transformToRemoteCallback(callback, mTrace));
         } catch (RemoteException e) {
             if (DBG) {
                 Slog.e(TAG, "Error calling enableWindowMagnification()", e);
@@ -65,6 +79,10 @@ class WindowMagnificationConnectionWrapper {
     }
 
     boolean setScale(int displayId, float scale) {
+        if (mTrace.isA11yTracingEnabledForTypes(FLAGS_WINDOW_MAGNIFICATION_CONNECTION)) {
+            mTrace.logTrace(TAG + ".setScale", FLAGS_WINDOW_MAGNIFICATION_CONNECTION,
+                    "displayId=" + displayId + ";scale=" + scale);
+        }
         try {
             mConnection.setScale(displayId, scale);
         } catch (RemoteException e) {
@@ -78,8 +96,14 @@ class WindowMagnificationConnectionWrapper {
 
     boolean disableWindowMagnification(int displayId,
             @Nullable MagnificationAnimationCallback callback) {
+        if (mTrace.isA11yTracingEnabledForTypes(FLAGS_WINDOW_MAGNIFICATION_CONNECTION)) {
+            mTrace.logTrace(TAG + ".disableWindowMagnification",
+                    FLAGS_WINDOW_MAGNIFICATION_CONNECTION,
+                    "displayId=" + displayId + ";callback=" + callback);
+        }
         try {
-            mConnection.disableWindowMagnification(displayId, transformToRemoteCallback(callback));
+            mConnection.disableWindowMagnification(displayId,
+                    transformToRemoteCallback(callback, mTrace));
         } catch (RemoteException e) {
             if (DBG) {
                 Slog.e(TAG, "Error calling disableWindowMagnification()", e);
@@ -90,6 +114,10 @@ class WindowMagnificationConnectionWrapper {
     }
 
     boolean moveWindowMagnifier(int displayId, float offsetX, float offsetY) {
+        if (mTrace.isA11yTracingEnabledForTypes(FLAGS_WINDOW_MAGNIFICATION_CONNECTION)) {
+            mTrace.logTrace(TAG + ".moveWindowMagnifier", FLAGS_WINDOW_MAGNIFICATION_CONNECTION,
+                    "displayId=" + displayId + ";offsetX=" + offsetX + ";offsetY=" + offsetY);
+        }
         try {
             mConnection.moveWindowMagnifier(displayId, offsetX, offsetY);
         } catch (RemoteException e) {
@@ -102,6 +130,11 @@ class WindowMagnificationConnectionWrapper {
     }
 
     boolean showMagnificationButton(int displayId, int magnificationMode) {
+        if (mTrace.isA11yTracingEnabledForTypes(FLAGS_WINDOW_MAGNIFICATION_CONNECTION)) {
+            mTrace.logTrace(TAG + ".showMagnificationButton",
+                    FLAGS_WINDOW_MAGNIFICATION_CONNECTION,
+                    "displayId=" + displayId + ";mode=" + magnificationMode);
+        }
         try {
             mConnection.showMagnificationButton(displayId, magnificationMode);
         } catch (RemoteException e) {
@@ -114,6 +147,10 @@ class WindowMagnificationConnectionWrapper {
     }
 
     boolean removeMagnificationButton(int displayId) {
+        if (mTrace.isA11yTracingEnabledForTypes(FLAGS_WINDOW_MAGNIFICATION_CONNECTION)) {
+            mTrace.logTrace(TAG + ".removeMagnificationButton",
+                    FLAGS_WINDOW_MAGNIFICATION_CONNECTION, "displayId=" + displayId);
+        }
         try {
             mConnection.removeMagnificationButton(displayId);
         } catch (RemoteException e) {
@@ -126,6 +163,14 @@ class WindowMagnificationConnectionWrapper {
     }
 
     boolean setConnectionCallback(IWindowMagnificationConnectionCallback connectionCallback) {
+        if (mTrace.isA11yTracingEnabledForTypes(
+                FLAGS_WINDOW_MAGNIFICATION_CONNECTION
+                | FLAGS_WINDOW_MAGNIFICATION_CONNECTION_CALLBACK)) {
+            mTrace.logTrace(TAG + ".setConnectionCallback",
+                    FLAGS_WINDOW_MAGNIFICATION_CONNECTION
+                    | FLAGS_WINDOW_MAGNIFICATION_CONNECTION_CALLBACK,
+                    "callback=" + connectionCallback);
+        }
         try {
             mConnection.setConnectionCallback(connectionCallback);
         } catch (RemoteException e) {
@@ -139,25 +184,38 @@ class WindowMagnificationConnectionWrapper {
 
     private static @Nullable
             IRemoteMagnificationAnimationCallback transformToRemoteCallback(
-            MagnificationAnimationCallback callback) {
+            MagnificationAnimationCallback callback, AccessibilityTraceManager trace) {
         if (callback == null) {
             return null;
         }
-        return new RemoteAnimationCallback(callback);
+        return new RemoteAnimationCallback(callback, trace);
     }
 
     private static class RemoteAnimationCallback extends
             IRemoteMagnificationAnimationCallback.Stub {
-
         private final MagnificationAnimationCallback mCallback;
+        private final AccessibilityTraceManager mTrace;
 
-        RemoteAnimationCallback(@NonNull MagnificationAnimationCallback callback) {
+        RemoteAnimationCallback(@NonNull MagnificationAnimationCallback callback,
+                               @NonNull AccessibilityTraceManager trace) {
             mCallback = callback;
+            mTrace = trace;
+            if (mTrace.isA11yTracingEnabledForTypes(
+                    FLAGS_REMOTE_MAGNIFICATION_ANIMATION_CALLBACK)) {
+                mTrace.logTrace("RemoteAnimationCallback.constructor",
+                        FLAGS_REMOTE_MAGNIFICATION_ANIMATION_CALLBACK, "callback=" + callback);
+            }
         }
 
         @Override
         public void onResult(boolean success) throws RemoteException {
             mCallback.onResult(success);
+            if (mTrace.isA11yTracingEnabledForTypes(
+                    FLAGS_REMOTE_MAGNIFICATION_ANIMATION_CALLBACK)) {
+                mTrace.logTrace("RemoteAnimationCallback.onResult",
+                        FLAGS_REMOTE_MAGNIFICATION_ANIMATION_CALLBACK, "success=" + success);
+            }
+
         }
     }
 }

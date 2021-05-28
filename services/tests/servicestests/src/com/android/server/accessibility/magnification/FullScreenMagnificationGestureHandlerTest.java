@@ -52,6 +52,7 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.accessibility.AccessibilityManagerService;
+import com.android.server.accessibility.AccessibilityTraceManager;
 import com.android.server.accessibility.EventStreamTransformation;
 import com.android.server.accessibility.magnification.FullScreenMagnificationController.MagnificationInfoChangedCallback;
 import com.android.server.testutils.OffsettableClock;
@@ -129,6 +130,10 @@ public class FullScreenMagnificationGestureHandlerTest {
     MagnificationInfoChangedCallback mMagnificationInfoChangedCallback;
     @Mock
     WindowMagnificationPromptController mWindowMagnificationPromptController;
+    @Mock
+    AccessibilityManagerService mMockAccessibilityManagerService;
+    @Mock
+    AccessibilityTraceManager mMockTraceManager;
 
     private OffsettableClock mClock;
     private FullScreenMagnificationGestureHandler mMgh;
@@ -144,7 +149,9 @@ public class FullScreenMagnificationGestureHandlerTest {
                 mock(FullScreenMagnificationController.ControllerContext.class);
         final WindowManagerInternal mockWindowManager = mock(WindowManagerInternal.class);
         when(mockController.getContext()).thenReturn(mContext);
-        when(mockController.getAms()).thenReturn(mock(AccessibilityManagerService.class));
+        when(mockController.getAms()).thenReturn(mMockAccessibilityManagerService);
+        when(mMockAccessibilityManagerService.getTraceManager()).thenReturn(mMockTraceManager);
+        when(mockController.getTraceManager()).thenReturn(mMockTraceManager);
         when(mockController.getWindowManager()).thenReturn(mockWindowManager);
         when(mockController.getHandler()).thenReturn(new Handler(mContext.getMainLooper()));
         when(mockController.newValueAnimator()).thenReturn(new ValueAnimator());
@@ -179,7 +186,7 @@ public class FullScreenMagnificationGestureHandlerTest {
     private FullScreenMagnificationGestureHandler newInstance(boolean detectTripleTap,
             boolean detectShortcutTrigger) {
         FullScreenMagnificationGestureHandler h = new FullScreenMagnificationGestureHandler(
-                mContext, mFullScreenMagnificationController, mMockCallback,
+                mContext, mFullScreenMagnificationController, mMockTraceManager, mMockCallback,
                 detectTripleTap, detectShortcutTrigger,
                 mWindowMagnificationPromptController, DISPLAY_0);
         mHandler = new TestHandler(h.mDetectingState, mClock) {
