@@ -103,6 +103,7 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
     @Mock private IWindowManager mWindowManager;
     @Mock private Executor mBackgroundExecutor;
     @Mock private UiEventLogger mUiEventLogger;
+    @Mock private GlobalActionsInfoProvider mInfoProvider;
     @Mock private RingerModeTracker mRingerModeTracker;
     @Mock private RingerModeLiveData mRingerModeLiveData;
     @Mock private SysUiState mSysUiState;
@@ -146,6 +147,7 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
                 mWindowManager,
                 mBackgroundExecutor,
                 mUiEventLogger,
+                mInfoProvider,
                 mRingerModeTracker,
                 mSysUiState,
                 mHandler
