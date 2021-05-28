@@ -541,7 +541,7 @@
     <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Это устройство принадлежит организации \"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>\" и подключено к приложениям для VPN"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Ваша организация может отслеживать сетевой трафик в рабочем профиле"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"Организация \"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>\" может отслеживать сетевой трафик в вашем рабочем профиле"</string>
-    <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"Администратор может просматривать историю действий в интернете в рабочем аккаунте."</string>
+    <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"История действий в сети доступна администратору в рабочем аккаунте."</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Сеть может отслеживаться"</string>
     <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"Это устройство подключено к приложениям для VPN"</string>
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Ваш рабочий профиль подключен к приложению \"<xliff:g id="VPN_APP">%1$s</xliff:g>\""</string>

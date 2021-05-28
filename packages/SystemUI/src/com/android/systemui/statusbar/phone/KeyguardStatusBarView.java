@@ -116,6 +116,12 @@ public class KeyguardStatusBarView extends RelativeLayout implements
     // right and left padding applied to this view to account for cutouts and rounded corners
     private Pair<Integer, Integer> mPadding = new Pair(0, 0);
 
+    /**
+     * The clipping on the top
+     */
+    private int mTopClipping;
+    private final Rect mClipRect = new Rect(0, 0, 0, 0);
+
     public KeyguardStatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mUserManager = UserManager.get(getContext());
@@ -548,5 +554,26 @@ public class KeyguardStatusBarView extends RelativeLayout implements
     @Override
     public void onSystemChromeAnimationUpdate(ValueAnimator anim) {
         mSystemIconsContainer.setAlpha((float) anim.getAnimatedValue());
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        super.onLayout(changed, l, t, r, b);
+        updateClipping();
+    }
+
+    /**
+     * Set the clipping on the top of the view.
+     */
+    public void setTopClipping(int topClipping) {
+        if (topClipping != mTopClipping) {
+            mTopClipping = topClipping;
+            updateClipping();
+        }
+    }
+
+    private void updateClipping() {
+        mClipRect.set(0, mTopClipping, getWidth(), getHeight());
+        setClipBounds(mClipRect);
     }
 }
