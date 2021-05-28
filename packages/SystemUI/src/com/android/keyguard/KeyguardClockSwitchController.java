@@ -183,9 +183,11 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             lp.addRule(RelativeLayout.BELOW, R.id.lockscreen_clock_view);
 
             mView.addView(mSmartspaceView, ksaIndex, lp);
-            int padding = getContext().getResources()
+            int startPadding = getContext().getResources()
                     .getDimensionPixelSize(R.dimen.below_clock_padding_start);
-            mSmartspaceView.setPadding(padding, 0, padding, 0);
+            int endPadding = getContext().getResources()
+                    .getDimensionPixelSize(R.dimen.below_clock_padding_end);
+            mSmartspaceView.setPaddingRelative(startPadding, 0, endPadding, 0);
 
             // ... but above the large clock
             lp = new RelativeLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT);
