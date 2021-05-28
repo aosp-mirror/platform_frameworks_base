@@ -16,6 +16,9 @@
 
 package com.android.server.accessibility.magnification;
 
+import static android.accessibilityservice.AccessibilityTrace.FLAGS_WINDOW_MAGNIFICATION_CONNECTION;
+import static android.accessibilityservice.AccessibilityTrace.FLAGS_WINDOW_MAGNIFICATION_CONNECTION_CALLBACK;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.BroadcastReceiver;
@@ -39,6 +42,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
 import com.android.server.LocalServices;
+import com.android.server.accessibility.AccessibilityTraceManager;
 import com.android.server.statusbar.StatusBarManagerInternal;
 
 /**
@@ -111,11 +115,14 @@ public class WindowMagnificationManager implements
     }
 
     private final Callback mCallback;
+    private final AccessibilityTraceManager mTrace;
 
-    public WindowMagnificationManager(Context context, int userId, @NonNull Callback callback) {
+    public WindowMagnificationManager(Context context, int userId, @NonNull Callback callback,
+            AccessibilityTraceManager trace) {
         mContext = context;
         mUserId = userId;
         mCallback = callback;
+        mTrace = trace;
     }
 
     /**
@@ -135,7 +142,7 @@ public class WindowMagnificationManager implements
                 mConnectionWrapper = null;
             }
             if (connection != null) {
-                mConnectionWrapper = new WindowMagnificationConnectionWrapper(connection);
+                mConnectionWrapper = new WindowMagnificationConnectionWrapper(connection, mTrace);
             }
 
             if (mConnectionWrapper != null) {
@@ -197,7 +204,10 @@ public class WindowMagnificationManager implements
                 }
             }
         }
-
+        if (mTrace.isA11yTracingEnabledForTypes(FLAGS_WINDOW_MAGNIFICATION_CONNECTION)) {
+            mTrace.logTrace(TAG + ".requestWindowMagnificationConnection",
+                    FLAGS_WINDOW_MAGNIFICATION_CONNECTION, "connect=" + connect);
+        }
         final long identity = Binder.clearCallingIdentity();
         try {
             final StatusBarManagerInternal service = LocalServices.getService(
@@ -511,6 +521,12 @@ public class WindowMagnificationManager implements
 
         @Override
         public void onWindowMagnifierBoundsChanged(int displayId, Rect bounds) {
+            if (mTrace.isA11yTracingEnabledForTypes(
+                    FLAGS_WINDOW_MAGNIFICATION_CONNECTION_CALLBACK)) {
+                mTrace.logTrace(TAG + "ConnectionCallback.onWindowMagnifierBoundsChanged",
+                        FLAGS_WINDOW_MAGNIFICATION_CONNECTION_CALLBACK,
+                        "displayId=" + displayId + ";bounds=" + bounds);
+            }
             synchronized (mLock) {
                 WindowMagnifier magnifier = mWindowMagnifiers.get(displayId);
                 if (magnifier == null) {
@@ -527,11 +543,23 @@ public class WindowMagnificationManager implements
         @Override
         public void onChangeMagnificationMode(int displayId, int magnificationMode)
                 throws RemoteException {
+            if (mTrace.isA11yTracingEnabledForTypes(
+                    FLAGS_WINDOW_MAGNIFICATION_CONNECTION_CALLBACK)) {
+                mTrace.logTrace(TAG + "ConnectionCallback.onChangeMagnificationMode",
+                        FLAGS_WINDOW_MAGNIFICATION_CONNECTION_CALLBACK,
+                        "displayId=" + displayId + ";mode=" + magnificationMode);
+            }
             //TODO: Uses this method to change the magnification mode on non-default display.
         }
 
         @Override
         public void onSourceBoundsChanged(int displayId, Rect sourceBounds) {
+            if (mTrace.isA11yTracingEnabledForTypes(
+                    FLAGS_WINDOW_MAGNIFICATION_CONNECTION_CALLBACK)) {
+                mTrace.logTrace(TAG + "ConnectionCallback.onSourceBoundsChanged",
+                        FLAGS_WINDOW_MAGNIFICATION_CONNECTION_CALLBACK,
+                        "displayId=" + displayId + ";source=" + sourceBounds);
+            }
             synchronized (mLock) {
                 WindowMagnifier magnifier = mWindowMagnifiers.get(displayId);
                 if (magnifier == null) {
@@ -543,11 +571,23 @@ public class WindowMagnificationManager implements
 
         @Override
         public void onPerformScaleAction(int displayId, float scale) {
+            if (mTrace.isA11yTracingEnabledForTypes(
+                    FLAGS_WINDOW_MAGNIFICATION_CONNECTION_CALLBACK)) {
+                mTrace.logTrace(TAG + "ConnectionCallback.onPerformScaleAction",
+                        FLAGS_WINDOW_MAGNIFICATION_CONNECTION_CALLBACK,
+                        "displayId=" + displayId + ";scale=" + scale);
+            }
             mCallback.onPerformScaleAction(displayId, scale);
         }
 
         @Override
         public void onAccessibilityActionPerformed(int displayId) {
+            if (mTrace.isA11yTracingEnabledForTypes(
+                    FLAGS_WINDOW_MAGNIFICATION_CONNECTION_CALLBACK)) {
+                mTrace.logTrace(TAG + "ConnectionCallback.onAccessibilityActionPerformed",
+                        FLAGS_WINDOW_MAGNIFICATION_CONNECTION_CALLBACK,
+                        "displayId=" + displayId);
+            }
             mCallback.onAccessibilityActionPerformed(displayId);
         }
 

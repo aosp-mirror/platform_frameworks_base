@@ -52,6 +52,7 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.accessibility.AccessibilityManagerService;
+import com.android.server.accessibility.AccessibilityTraceManager;
 import com.android.server.accessibility.test.MessageCapturingHandler;
 import com.android.server.wm.WindowManagerInternal;
 import com.android.server.wm.WindowManagerInternal.MagnificationCallbacks;
@@ -93,6 +94,7 @@ public class FullScreenMagnificationControllerTest {
             mock(FullScreenMagnificationController.ControllerContext.class);
     final Context mMockContext = mock(Context.class);
     final AccessibilityManagerService mMockAms = mock(AccessibilityManagerService.class);
+    final AccessibilityTraceManager mMockTraceManager = mock(AccessibilityTraceManager.class);
     final WindowManagerInternal mMockWindowManager = mock(WindowManagerInternal.class);
     private final MagnificationAnimationCallback mAnimationCallback = mock(
             MagnificationAnimationCallback.class);
@@ -113,9 +115,11 @@ public class FullScreenMagnificationControllerTest {
         when(mMockContext.getMainLooper()).thenReturn(looper);
         when(mMockControllerCtx.getContext()).thenReturn(mMockContext);
         when(mMockControllerCtx.getAms()).thenReturn(mMockAms);
+        when(mMockControllerCtx.getTraceManager()).thenReturn(mMockTraceManager);
         when(mMockControllerCtx.getWindowManager()).thenReturn(mMockWindowManager);
         when(mMockControllerCtx.getHandler()).thenReturn(mMessageCapturingHandler);
         when(mMockControllerCtx.getAnimationDuration()).thenReturn(1000L);
+        when(mMockAms.getTraceManager()).thenReturn(mMockTraceManager);
         initMockWindowManager();
 
         mFullScreenMagnificationController = new FullScreenMagnificationController(
