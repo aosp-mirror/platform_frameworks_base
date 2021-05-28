@@ -141,8 +141,10 @@ public class BubbleData {
     private final BubbleOverflow mOverflow;
     private boolean mShowingOverflow;
     private boolean mExpanded;
-    private final int mMaxBubbles;
+    private int mMaxBubbles;
     private int mMaxOverflowBubbles;
+
+    private boolean mNeedsTrimming;
 
     // State tracked during an operation -- keeps track of what listener events to dispatch.
     private Update mStateChange;
@@ -180,7 +182,7 @@ public class BubbleData {
         mOverflowBubbles = new ArrayList<>();
         mPendingBubbles = new HashMap<>();
         mStateChange = new Update(mBubbles, mOverflowBubbles);
-        mMaxBubbles = mContext.getResources().getInteger(R.integer.bubbles_max_rendered);
+        mMaxBubbles = mPositioner.getMaxBubbles();
         mMaxOverflowBubbles = mContext.getResources().getInteger(R.integer.bubbles_max_overflow);
     }
 
@@ -192,6 +194,16 @@ public class BubbleData {
     public void setPendingIntentCancelledListener(
             Bubbles.PendingIntentCanceledListener listener) {
         mCancelledListener = listener;
+    }
+
+    public void onMaxBubblesChanged() {
+        mMaxBubbles = mPositioner.getMaxBubbles();
+        if (!mExpanded) {
+            trim();
+            dispatchPendingChanges();
+        } else {
+            mNeedsTrimming = true;
+        }
     }
 
     public boolean hasBubbles() {
@@ -455,13 +467,19 @@ public class BubbleData {
 
     private void trim() {
         if (mBubbles.size() > mMaxBubbles) {
+            int numtoRemove = mBubbles.size() - mMaxBubbles;
+            ArrayList<Bubble> toRemove = new ArrayList<>();
             mBubbles.stream()
                     // sort oldest first (ascending lastActivity)
                     .sorted(Comparator.comparingLong(Bubble::getLastActivity))
                     // skip the selected bubble
                     .filter((b) -> !b.equals(mSelectedBubble))
-                    .findFirst()
-                    .ifPresent((b) -> doRemove(b.getKey(), Bubbles.DISMISS_AGED));
+                    .forEachOrdered((b) -> {
+                        if (toRemove.size() < numtoRemove) {
+                            toRemove.add(b);
+                        }
+                    });
+            toRemove.forEach((b) -> doRemove(b.getKey(), Bubbles.DISMISS_AGED));
         }
     }
 
@@ -769,6 +787,10 @@ public class BubbleData {
                     mStateChange.orderChanged = true;
                 }
             }
+        }
+        if (mNeedsTrimming) {
+            mNeedsTrimming = false;
+            trim();
         }
         mExpanded = shouldExpand;
         mStateChange.expanded = shouldExpand;
