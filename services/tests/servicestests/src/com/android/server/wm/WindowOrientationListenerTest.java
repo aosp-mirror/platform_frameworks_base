@@ -70,6 +70,7 @@ public class WindowOrientationListenerTest {
         mWindowOrientationListener = new TestableWindowOrientationListener(mMockContext,
                 mHandler);
         mWindowOrientationListener.mRotationResolverService = mFakeRotationResolverInternal;
+        mWindowOrientationListener.mIsScreenLocked = false;
 
         mFakeSensor = new Sensor(mMockInputSensorInfo);
         mFakeSensorEvent = new SensorEvent(mFakeSensor, /* accuracy */ 1, /* timestamp */ 1L,
@@ -156,12 +157,27 @@ public class WindowOrientationListenerTest {
         }
     }
 
+    @Test
+    public void testOnSensorChanged_inLockScreen_doNotCallRotationResolver() {
+        mWindowOrientationListener.mIsScreenLocked = true;
+
+        mWindowOrientationListener.mOrientationJudge.onSensorChanged(mFakeSensorEvent);
+
+        assertThat(mWindowOrientationListener.mIsOnProposedRotationChangedCalled).isFalse();
+    }
+
     final class TestableWindowOrientationListener extends WindowOrientationListener {
-        boolean mIsOnProposedRotationChangedCalled = false;
+        private boolean mIsOnProposedRotationChangedCalled = false;
+        private boolean mIsScreenLocked;
 
         TestableWindowOrientationListener(Context context, Handler handler) {
             super(context, handler);
             this.mOrientationJudge = new OrientationSensorJudge();
+        }
+
+        @Override
+        public boolean isKeyguardLocked() {
+            return mIsScreenLocked;
         }
 
         @Override
