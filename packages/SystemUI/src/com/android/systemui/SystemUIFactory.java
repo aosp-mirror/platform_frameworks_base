@@ -133,6 +133,7 @@ public class SystemUIFactory {
                     .setTaskViewFactory(Optional.ofNullable(null))
                     .setTransitions(Transitions.createEmptyForTesting())
                     .setStartingSurface(Optional.ofNullable(null));
+
         }
         mSysUIComponent = builder.build();
         if (mInitializeComponents) {
