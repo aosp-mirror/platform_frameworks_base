@@ -404,9 +404,6 @@ public class UiTranslationController {
                             // implememtation.
                             callback = new TextViewTranslationCallback();
                             view.setViewTranslationCallback(callback);
-                            if (mViewsToPadContent.contains(autofillId)) {
-                                callback.enableContentPadding();
-                            }
                         } else {
                             if (DEBUG) {
                                 Log.d(TAG, view + " doesn't support showing translation because of "
@@ -415,12 +412,19 @@ public class UiTranslationController {
                             return;
                         }
                     }
+                    callback.setAnimationDurationMillis(ANIMATION_DURATION_MILLIS);
+                    if (mViewsToPadContent.contains(autofillId)) {
+                        callback.enableContentPadding();
+                    }
                     view.onViewTranslationResponse(response);
                     callback.onShowTranslation(view);
                 });
             }
         }
     }
+
+    // TODO: Use a device config value.
+    private static final int ANIMATION_DURATION_MILLIS = 250;
 
     /**
      * Creates a Translator for the given source and target translation specs and start the ui
