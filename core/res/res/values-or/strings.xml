@@ -580,7 +580,8 @@
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"ଆଂଶିକ ଟିପଚିହ୍ନ ଚିହ୍ନଟ କରାଯାଇଛି"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"ଟିପଚିହ୍ନ ପ୍ରୋସେସ୍‍ କରାଯାଇପାରିଲା ନାହିଁ। ଦୟାକରି ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"ସେନ୍ସରକୁ ସଫା କରନ୍ତୁ"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"ଆଙ୍ଗୁଠିକୁ ବହୁତ ଶୀଘ୍ର ମୁଭ୍ କରାଯାଇଛି"</string>
+    <!-- no translation found for fingerprint_acquired_too_fast (6038375140739678098) -->
+    <skip />
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"ଆଙ୍ଗୁଠି ଖୁବ୍‍ ଧୀରେ ନିଆଗଲା। ଦୟାକରି ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"ଅନ୍ୟ ଏକ ଟିପଚିହ୍ନ ବ୍ୟବହାର କରି ଦେଖନ୍ତୁ"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"ବହୁତ ଉଜ୍ଜ୍ୱଳ"</string>

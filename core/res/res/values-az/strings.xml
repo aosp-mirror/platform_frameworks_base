@@ -401,7 +401,7 @@
     <string name="permdesc_foregroundService" msgid="8720071450020922795">"Tətbiqə ön fon xidmətlərini işlətmək icazəsi verin."</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"tətbiq saxlama yaddaşını ölçmək"</string>
     <string name="permdesc_getPackageSize" msgid="742743530909966782">"Tətbiqə özünün kodunu, məlumatını və keş ölçüsünü alma icazəsi verir."</string>
-    <string name="permlab_writeSettings" msgid="8057285063719277394">"sistem ayarlarında dəyişiklik etmək"</string>
+    <string name="permlab_writeSettings" msgid="8057285063719277394">"Sistem ayarlarının dəyişdirilməsi"</string>
     <string name="permdesc_writeSettings" msgid="8293047411196067188">"Tətbiqə sistem ayarları datasını redaktə etmə icazəsi verir. Zərərli tətbiqlər sistem ayarlarını korlaya bilər."</string>
     <string name="permlab_receiveBootCompleted" msgid="6643339400247325379">"başlanğıcda işləyir"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="5565659082718177484">"Tətbiqə sistem yükləməni bitirdiyi zaman dərhal özünü başlatmağa imkan verir. Bu planşeti başlatmağın uzun çəkməsinə səbəb ola bilər və tətbiqə həmişə çalışdıraraq bütün planşeti yavaşlatmağa imkan verir."</string>
@@ -538,7 +538,7 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Tətbiqə yaxınlıqdakı Bluetooth cihazlarını aşkarlamaq və birləşdirməyə icazə verir"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"birləşdirilmiş Bluetooth cihazlarına qoşulmaq"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Tətbiqə birləşdirilmiş Bluetooth cihazlarına qoşulmağa icazə verir"</string>
-    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"yaxınlıqdakı Bluetooth cihazlarında reklam etmək"</string>
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"Yaxınlıqdakı Bluetooth cihazlarına reklam etmək"</string>
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Tətbiqə yaxınlıqdakı Bluetooth cihazlarında reklam etmək imkanı verir"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"yaxınlıqdakı Ultra Genişzolaqlı cihazları arasında nisbi mövqeyi təyin etmək"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Tətbiqə yaxınlıqdakı Ultra Genişzolaqlı cihazları arasında nisbi mövqeyi təyin etməyə icazə verin"</string>
@@ -580,7 +580,8 @@
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Barmaq izinin bir hissəsi aşkarlanıb"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Barmaq izi tanınmadı. Lütfən, yenidən cəhd edin."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"Sensoru silin"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"Barmaq çox sürətlə hərəkət etdirildi"</string>
+    <!-- no translation found for fingerprint_acquired_too_fast (6038375140739678098) -->
+    <skip />
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Barmağınızı çox yavaş hərəkət etdirdiniz. Lütfən, yenidən cəhd edin."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Başqa bir barmaq izini sınayın"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Çox işıqlıdır"</string>
@@ -1403,7 +1404,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Dil və tərtibatı seçmək üçün tıklayın"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCÇDEƏFGĞHXIİJKQLMNOÖPRSŞTUÜVYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCÇDEƏFGĞHİIJKLMNOÖPQRSŞTUÜVWXYZ"</string>
-    <string name="alert_windows_notification_channel_group_name" msgid="6063891141815714246">"Digər tətbiqlər üzərindən görüntüləyin"</string>
+    <string name="alert_windows_notification_channel_group_name" msgid="6063891141815714246">"Tətbiqlərin üzərində"</string>
     <string name="alert_windows_notification_channel_name" msgid="3437528564303192620">"<xliff:g id="NAME">%s</xliff:g> digər tətbiqlər üzərindən göstərilir"</string>
     <string name="alert_windows_notification_title" msgid="6331662751095228536">"<xliff:g id="NAME">%s</xliff:g> tətbiq üzərindən göstərilir"</string>
     <string name="alert_windows_notification_message" msgid="6538171456970725333">"<xliff:g id="NAME">%s</xliff:g> adlı şəxsin bu funksiyadan istifadə etməyini istəmirsinizsə, ayarları açmaq və deaktiv etmək üçün klikləyin."</string>
@@ -1593,7 +1594,7 @@
     <string name="data_usage_wifi_limit_snoozed_title" msgid="1622359254521960508">"Wi-Fi data limiti keçilib"</string>
     <string name="data_usage_limit_snoozed_body" msgid="545146591766765678">"Set limitini <xliff:g id="SIZE">%s</xliff:g> keçmisiniz"</string>
     <string name="data_usage_restricted_title" msgid="126711424380051268">"Arxaplan datası məhdudlaşdırıldı"</string>
-    <string name="data_usage_restricted_body" msgid="5338694433686077733">"Məhdudiyyəti aradan qaldırmaq üçün tıklayın."</string>
+    <string name="data_usage_restricted_body" msgid="5338694433686077733">"Məhdudiyyəti aradan qaldırmaq üçün toxunun."</string>
     <string name="data_usage_rapid_title" msgid="2950192123248740375">"Yüksək mobil data istifadəsi"</string>
     <string name="data_usage_rapid_body" msgid="3886676853263693432">"Tətbiqlər adi halda olduğundan çox data istifadə ediblər"</string>
     <string name="data_usage_rapid_app_body" msgid="5425779218506513861">"<xliff:g id="APP">%s</xliff:g> adi halda olduğundan çox data istifadə edib"</string>
@@ -1705,7 +1706,7 @@
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"<xliff:g id="SERVICE">%1$s</xliff:g> aktiv olarsa, cihazınız data şifrələnməsini genişləndirmək üçün ekran kilidini istifadə etməyəcək."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Tam nəzarət əlçatımlılıq ehtiyaclarınızı ödəyən bəzi tətbiqlər üçün uyğundur."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Baxış və nəzarət ekranı"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Ekrandakı bütün kontenti oxuya və digər tətbiqlərdəki kontenti göstərə bilər."</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Ekrandakı bütün kontenti oxuya və kontenti digər tətbiqlərin üzərində göstərə bilər."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Əməliyyatlara baxın və icra edin"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"O, tətbiq və ya avadanlıq sensoru ilə interaktivliyinizi izləyir və əvəzinizdən tətbiqlərlə qarşılıqlı əlaqəyə girir."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"İcazə verin"</string>

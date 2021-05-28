@@ -267,7 +267,7 @@
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"आवाज बन्द छ"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"ध्वनि खुल्ला छ"</string>
     <string name="global_actions_toggle_airplane_mode" msgid="6911684460146916206">"हवाइजहाज मोड"</string>
-    <string name="global_actions_airplane_mode_on_status" msgid="5508025516695361936">"हवाइजहाज मोड खुला छ"</string>
+    <string name="global_actions_airplane_mode_on_status" msgid="5508025516695361936">"हवाइजहाज मोड अन छ"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="8522219771500505475">"हवाइजहाज मोड बन्द छ"</string>
     <string name="global_action_settings" msgid="4671878836947494217">"सेटिङहरू"</string>
     <string name="global_action_assist" msgid="2517047220311505805">"सहायता दिनुहोस्"</string>
@@ -580,7 +580,8 @@
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"फिंगरप्रिन्ट आंशिक रूपमा पत्ता लाग्यो"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"फिंगरप्रिन्ट प्रशोधन गर्न सकिएन। कृपया फेरि प्रयास गर्नुहोस्।"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"सेन्सर सफा गर्नुहोस्"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"औँला धेरै छिटो सर्‍यो"</string>
+    <!-- no translation found for fingerprint_acquired_too_fast (6038375140739678098) -->
+    <skip />
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"औंला निकै सुस्त सारियो। कृपया फेरि प्रयास गर्नुहोस्।"</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"अर्को फिंगरप्रिन्ट प्रयोग गरी हेर्नुहोस्"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"ज्यादै उज्यालो छ"</string>
@@ -1631,7 +1632,7 @@
     <string name="bluetooth_a2dp_audio_route_name" msgid="4214648773120426288">"ब्लुटुथ अडियो"</string>
     <string name="wireless_display_route_description" msgid="8297563323032966831">"ताररहित प्रदर्शन"</string>
     <string name="media_route_button_content_description" msgid="2299223698196869956">"कास्ट"</string>
-    <string name="media_route_chooser_title" msgid="6646594924991269208">"उपकरणमा जडान गर्नुहोस्"</string>
+    <string name="media_route_chooser_title" msgid="6646594924991269208">"उपकरणमा कनेक्ट गर्नुहोस्"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"स्क्रिन डिभाइसमा कास्ट गर्नुहोस्"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"उपकरणको खोजी गरिँदै..."</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"सेटिंङहरू"</string>

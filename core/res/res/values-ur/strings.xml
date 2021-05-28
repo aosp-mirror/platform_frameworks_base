@@ -580,7 +580,8 @@
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"جزوی فنگر پرنٹ کا پتہ چلا"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"فنگر پرنٹ پر کارروائی نہیں کی جا سکی۔ براہ کرم دوبارہ کوشش کریں۔"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"سینسر صاف کریں"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"انگلی بہت تیزی سے ہٹائی گئی"</string>
+    <!-- no translation found for fingerprint_acquired_too_fast (6038375140739678098) -->
+    <skip />
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"انگلی کو بہت آہستہ ہٹایا گیا۔ براہ کرم دوبارہ کوشش کریں۔"</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"دوسرا فنگر پرنٹ آزمائیں"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"کافی روشنی ہے"</string>
@@ -609,12 +610,10 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"فنگر پرنٹ آئیکن"</string>
-    <!-- no translation found for face_recalibrate_notification_name (7311163114750748686) -->
-    <skip />
+    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"فیس اَنلاک"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"اپنے چہرے کو دوبارہ مندرج کریں"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"شناخت کو بہتر بنانے کے لیے براہ کرم اپنے چہرے کو دوبارہ مندرج کریں"</string>
-    <!-- no translation found for face_setup_notification_title (8843461561970741790) -->
-    <skip />
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"فیس اَنلاک سیٹ اپ کریں"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"اپنے فون کی طرف دیکھ کر اسے غیر مقفل کریں"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"غیر مقفل کرنے کے مزید طریقے سیٹ اپ کریں"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"فنگر پرنٹ شامل کرنے کیلئے تھپتھپائیں"</string>
@@ -641,26 +640,19 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"چہرے کی توثیق نہیں کی جا سکی۔ ہارڈ ویئر دستیاب نہیں ہے۔"</string>
-    <!-- no translation found for face_error_timeout (2598544068593889762) -->
-    <skip />
+    <string name="face_error_timeout" msgid="2598544068593889762">"فیس اَنلاک کو دوبارہ آزمائیں"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"چہرے کا نیا ڈیٹا اسٹور نہیں کر سکتے۔ پہلے پرانا حذف کریں۔"</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"چہرے پر ہونے والی کارروائی منسوخ ہو گئی۔"</string>
-    <!-- no translation found for face_error_user_canceled (5766472033202928373) -->
-    <skip />
+    <string name="face_error_user_canceled" msgid="5766472033202928373">"صارف نے فیس اَنلاک کو منسوخ کر دیا"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"کافی زیادہ کوششیں کی گئیں۔ دوبارہ کوشش کریں۔"</string>
-    <!-- no translation found for face_error_lockout_permanent (3277134834042995260) -->
-    <skip />
-    <!-- no translation found for face_error_lockout_screen_lock (5062609811636860928) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"کافی زیادہ کوششیں۔ فیس اَنلاک کو غیر فعال کر دیا گیا۔"</string>
+    <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"کافی زیادہ کوششیں۔ اس کے بجائے اسکرین لاک درج کریں۔"</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"چہرے کی توثیق نہیں کی جا سکی۔ پھر آزمائيں۔"</string>
-    <!-- no translation found for face_error_not_enrolled (1134739108536328412) -->
-    <skip />
-    <!-- no translation found for face_error_hw_not_present (7940978724978763011) -->
-    <skip />
+    <string name="face_error_not_enrolled" msgid="1134739108536328412">"آپ نے فیس اَنلاک کو سیٹ نہیں کیا ہے"</string>
+    <string name="face_error_hw_not_present" msgid="7940978724978763011">"اس آلے پر فیس اَنلاک تعاون یافتہ نہیں ہے"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"سینسر عارضی طور غیر فعال ہے۔"</string>
     <string name="face_name_template" msgid="3877037340223318119">"چہرہ <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <!-- no translation found for face_app_setting_name (5854024256907828015) -->
-    <skip />
+    <string name="face_app_setting_name" msgid="5854024256907828015">"فیس اَنلاک کا استعمال کریں"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"فیس یا اسکرین لاک استعمال کریں"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"جاری رکھنے کے لیے اپنے چہرے کا استعمال کریں"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"جاری رکھنے کے لیے اپنے چہرے یا اسکرین لاک کا استعمال کریں"</string>
@@ -963,8 +955,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"غیر مقفل کرنے والے علاقے کو پھیلائیں۔"</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"سلائیڈ کے ذریعے غیر مقفل کریں۔"</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"پیٹرن کے ذریعے غیر مقفل کریں۔"</string>
-    <!-- no translation found for keyguard_accessibility_face_unlock (4533832120787386728) -->
-    <skip />
+    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"فیس اَنلاک۔"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"پن کے ذریعے غیر مقفل کریں۔"</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"‏Sim پن غیر مقفل۔"</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"‏Sim Puk غیر مقفل۔"</string>
