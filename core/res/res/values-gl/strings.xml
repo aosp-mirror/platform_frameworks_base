@@ -580,7 +580,8 @@
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Detectouse unha impresión dixital parcial"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Non se puido procesar a impresión dixital. Téntao de novo."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"Limpa o sensor"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"O dedo moveuse demasiado rápido"</string>
+    <!-- no translation found for fingerprint_acquired_too_fast (6038375140739678098) -->
+    <skip />
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"O dedo moveuse demasiado lento. Téntao de novo."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Proba con outra impresión dixital"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Hai demasiada luz"</string>

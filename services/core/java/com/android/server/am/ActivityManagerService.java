@@ -1236,7 +1236,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      * The temp-allowlist that is allowed to start FGS from background.
      */
     @CompositeRWLock({"this", "mProcLock"})
-    final FgsTempAllowList<Integer, FgsTempAllowListItem> mFgsStartTempAllowList =
+    final FgsTempAllowList<FgsTempAllowListItem> mFgsStartTempAllowList =
             new FgsTempAllowList();
 
     static final FgsTempAllowListItem FAKE_TEMP_ALLOW_LIST_ITEM = new FgsTempAllowListItem(
@@ -1246,7 +1246,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      * List of uids that are allowed to have while-in-use permission when FGS is started from
      * background.
      */
-    private final FgsTempAllowList<Integer, String> mFgsWhileInUseTempAllowList =
+    private final FgsTempAllowList<String> mFgsWhileInUseTempAllowList =
             new FgsTempAllowList();
 
     /**
@@ -9380,22 +9380,17 @@ public class ActivityManagerService extends IActivityManager.Stub
             pw.println("  mFgsStartTempAllowList:");
             final long currentTimeNow = System.currentTimeMillis();
             final long elapsedRealtimeNow = SystemClock.elapsedRealtime();
-            final Set<Integer> uids = new ArraySet<>(mFgsStartTempAllowList.keySet());
-            for (Integer uid : uids) {
-                final Pair<Long, FgsTempAllowListItem> entry = mFgsStartTempAllowList.get(uid);
-                if (entry == null) {
-                    continue;
-                }
+            mFgsStartTempAllowList.forEach((uid, entry) -> {
                 pw.print("    " + UserHandle.formatUid(uid) + ": ");
-                entry.second.dump(pw); pw.println();
-                pw.print("ms expiration=");
+                entry.second.dump(pw);
+                pw.print(" expiration=");
                 // Convert entry.mExpirationTime, which is an elapsed time since boot,
                 // to a time since epoch (i.e. System.currentTimeMillis()-based time.)
                 final long expirationInCurrentTime =
                         currentTimeNow - elapsedRealtimeNow + entry.first;
                 TimeUtils.dumpTimeWithDelta(pw, expirationInCurrentTime, currentTimeNow);
                 pw.println();
-            }
+            });
         }
         if (mDebugApp != null || mOrigDebugApp != null || mDebugTransient
                 || mOrigWaitForDebugger) {
@@ -12014,6 +12009,31 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (app == null) {
             Slog.w(TAG, "Unable to bind backup agent for " + packageName);
             return false;
+        }
+        if (app.backupAgentName != null) {
+            final ComponentName backupAgentName = new ComponentName(
+                    app.packageName, app.backupAgentName);
+            int enableState = PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
+            try {
+                enableState = pm.getComponentEnabledSetting(backupAgentName, instantiatedUserId);
+            } catch (RemoteException e) {
+                // can't happen; package manager is process-local
+            }
+            switch (enableState) {
+                case PackageManager.COMPONENT_ENABLED_STATE_DISABLED:
+                case PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER:
+                case PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED:
+                    Slog.w(TAG, "Unable to bind backup agent for " + backupAgentName
+                            + ", the backup agent component is disabled.");
+                    return false;
+
+                case PackageManager.COMPONENT_ENABLED_STATE_DEFAULT:
+                case PackageManager.COMPONENT_ENABLED_STATE_ENABLED:
+                default:
+                    // Since there's no way to declare a backup agent disabled in the manifest,
+                    // assume the case COMPONENT_ENABLED_STATE_DEFAULT to be enabled.
+                    break;
+            }
         }
 
         int oldBackupUid;
@@ -15353,10 +15373,19 @@ public class ActivityManagerService extends IActivityManager.Stub
                     mDeviceIdleTempAllowlist = appids;
                     if (adding) {
                         if (type == TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED) {
+                            // Note, the device idle temp-allowlist are by app-ids, but here
+                            // mFgsStartTempAllowList contains UIDs.
                             mFgsStartTempAllowList.add(changingUid, durationMs,
                                     new FgsTempAllowListItem(durationMs, reasonCode, reason,
                                     callingUid));
                         }
+                    } else {
+                        // Note in the removing case, we need to remove all the UIDs matching
+                        // the appId, because DeviceIdle's temp-allowlist are based on AppIds,
+                        // not UIDs.
+                        // For eacmple, "cmd deviceidle tempallowlist -r PACKAGE" will
+                        // not only remove this app for user 0, but for all users.
+                        mFgsStartTempAllowList.removeAppId(UserHandle.getAppId(changingUid));
                     }
                     setAppIdTempAllowlistStateLSP(changingUid, adding);
                 }
