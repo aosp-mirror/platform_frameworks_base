@@ -389,6 +389,14 @@ public class UiTranslationController {
                     continue;
                 }
                 mActivity.runOnUiThread(() -> {
+                    if (view.getViewTranslationResponse() != null
+                            && view.getViewTranslationResponse().equals(response)) {
+                        if (DEBUG) {
+                            Log.d(TAG, "Duplicate ViewTranslationResponse for " + autofillId
+                                    + ". Ignoring.");
+                        }
+                        return;
+                    }
                     ViewTranslationCallback callback = view.getViewTranslationCallback();
                     if (callback == null) {
                         if (view instanceof TextView) {
