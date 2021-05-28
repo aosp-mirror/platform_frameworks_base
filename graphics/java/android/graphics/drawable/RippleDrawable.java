@@ -1193,9 +1193,6 @@ public class RippleDrawable extends LayerDrawable {
             mRipplePaint = new Paint();
             mRipplePaint.setAntiAlias(true);
             mRipplePaint.setStyle(Paint.Style.FILL);
-            if (mState.mRippleStyle == STYLE_PATTERNED) {
-                mRipplePaint.setDither(true);
-            }
         }
 
         final float x = mHotspotBounds.exactCenterX();
