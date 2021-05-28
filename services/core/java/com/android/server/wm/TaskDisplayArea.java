@@ -49,6 +49,7 @@ import android.util.IntArray;
 import android.util.Slog;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
+import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -1510,8 +1511,10 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         for (int i = mTmpTasks.size() - 1; i >= 0; i--) {
             final Task root = mTmpTasks.get(i);
             for (int j = 0; j < root.getChildCount(); j++) {
-                wct.reparent(root.getChildAt(j).mRemoteToken.toWindowContainerToken(),
-                        null, true /* toTop */);
+                final WindowContainerToken token =
+                        root.getChildAt(j).mRemoteToken.toWindowContainerToken();
+                wct.reparent(token, null, true /* toTop */);
+                wct.setBounds(token, null);
             }
         }
         mAtmService.mWindowOrganizerController.applyTransaction(wct);
