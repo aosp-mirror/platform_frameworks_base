@@ -31,6 +31,7 @@ import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
+import com.android.systemui.statusbar.notification.row.StackScrollerDecorView;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -187,11 +188,17 @@ public class StackStateAnimator {
 
     private void adaptDurationWhenGoingToFullShade(ExpandableView child,
             ExpandableViewState viewState, boolean wasAdded, int animationStaggerCount) {
-        if (wasAdded && mAnimationFilter.hasGoToFullShadeEvent) {
-            child.setTranslationY(child.getTranslationY() + mGoToFullShadeAppearingTranslation);
-            float longerDurationFactor = (float) Math.pow(animationStaggerCount, 0.7f);
-            mAnimationProperties.duration = ANIMATION_DURATION_APPEAR_DISAPPEAR + 50 +
-                    (long) (100 * longerDurationFactor);
+        boolean isDecorView = child instanceof StackScrollerDecorView;
+        boolean needsAdjustment = wasAdded || isDecorView;
+        if (needsAdjustment && mAnimationFilter.hasGoToFullShadeEvent) {
+            int startOffset = 0;
+            if (!isDecorView) {
+                startOffset = mGoToFullShadeAppearingTranslation;
+                float longerDurationFactor = (float) Math.pow(animationStaggerCount, 0.7f);
+                mAnimationProperties.duration = ANIMATION_DURATION_APPEAR_DISAPPEAR + 50
+                        + (long) (100 * longerDurationFactor);
+            }
+            child.setTranslationY(viewState.yTranslation + startOffset);
         }
     }
 
