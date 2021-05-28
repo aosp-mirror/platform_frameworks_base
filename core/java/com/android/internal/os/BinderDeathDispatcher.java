@@ -63,10 +63,6 @@ public class BinderDeathDispatcher<T extends IInterface> {
 
         @Override
         public void binderDied() {
-        }
-
-        @Override
-        public void binderDied(IBinder who) {
             final ArraySet<DeathRecipient> copy;
             synchronized (mLock) {
                 copy = mRecipients;
@@ -81,7 +77,7 @@ public class BinderDeathDispatcher<T extends IInterface> {
             // Let's call it without holding the lock.
             final int size = copy.size();
             for (int i = 0; i < size; i++) {
-                copy.valueAt(i).binderDied(who);
+                copy.valueAt(i).binderDied();
             }
         }
     }
