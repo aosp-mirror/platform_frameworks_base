@@ -106,7 +106,6 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_VISIB
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.ActivityTaskManagerService.H.FIRST_ACTIVITY_TASK_MSG;
-import static com.android.server.wm.ActivityTaskManagerService.SKIP_LAYOUT_REASON_EXPECT_NEXT_RELAYOUT;
 import static com.android.server.wm.ActivityTaskSupervisor.DEFER_RESUME;
 import static com.android.server.wm.ActivityTaskSupervisor.ON_TOP;
 import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
@@ -6290,8 +6289,6 @@ class Task extends WindowContainer<WindowContainer> {
             if (lastResumed != null) {
                 lastResumed.setWillCloseOrEnterPip(true);
             }
-            // There may be a relayout from resuming next activity after the previous is paused.
-            mAtmService.addWindowLayoutReasons(SKIP_LAYOUT_REASON_EXPECT_NEXT_RELAYOUT);
             return true;
         } else if (mResumedActivity == next && next.isState(RESUMED)
                 && taskDisplayArea.allResumedActivitiesComplete()) {
@@ -6501,7 +6498,6 @@ class Task extends WindowContainer<WindowContainer> {
                         ResumeActivityItem.obtain(next.app.getReportedProcState(),
                                 dc.isNextTransitionForward()));
                 mAtmService.getLifecycleManager().scheduleTransaction(transaction);
-                mAtmService.addWindowLayoutReasons(SKIP_LAYOUT_REASON_EXPECT_NEXT_RELAYOUT);
 
                 ProtoLog.d(WM_DEBUG_STATES, "resumeTopActivityLocked: Resumed %s", next);
             } catch (Exception e) {
