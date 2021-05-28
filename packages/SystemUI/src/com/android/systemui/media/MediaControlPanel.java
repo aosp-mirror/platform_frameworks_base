@@ -447,11 +447,8 @@ public class MediaControlPanel {
 
             if (mKey != null) {
                 closeGuts();
-                mKeyguardDismissUtil.executeWhenUnlocked(() -> {
-                    mMediaDataManagerLazy.get().dismissMediaData(mKey,
-                            MediaViewController.GUTS_ANIMATION_DURATION + 100);
-                    return true;
-                }, /* requiresShadeOpen */ true, false);
+                mMediaDataManagerLazy.get().dismissMediaData(mKey,
+                        MediaViewController.GUTS_ANIMATION_DURATION + 100);
             } else {
                 Log.w(TAG, "Dismiss media with null notification. Token uid="
                         + data.getToken().getUid());
@@ -576,11 +573,8 @@ public class MediaControlPanel {
             logSmartspaceCardReported(761, // SMARTSPACE_CARD_DISMISS
                     /* isRecommendationCard */ true);
             closeGuts();
-            mKeyguardDismissUtil.executeWhenUnlocked(() -> {
-                mMediaDataManagerLazy.get().dismissSmartspaceRecommendation(
-                        MediaViewController.GUTS_ANIMATION_DURATION + 100L);
-                return true;
-            }, true /* requiresShadeOpen */, false);
+            mMediaDataManagerLazy.get().dismissSmartspaceRecommendation(
+                    MediaViewController.GUTS_ANIMATION_DURATION + 100L);
         });
 
         mController = null;
