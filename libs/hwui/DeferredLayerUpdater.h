@@ -20,9 +20,12 @@
 #include <SkImage.h>
 #include <SkMatrix.h>
 #include <android/hardware_buffer.h>
-#include <cutils/compiler.h>
 #include <android/surface_texture.h>
+#include <cutils/compiler.h>
+#include <utils/Errors.h>
 
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
 #include <map>
 #include <memory>
 
@@ -103,13 +106,16 @@ private:
      */
     class ImageSlot {
     public:
-        ~ImageSlot() { clear(); }
+        ~ImageSlot() {}
 
         sk_sp<SkImage> createIfNeeded(AHardwareBuffer* buffer, android_dataspace dataspace,
                                       bool forceCreate, GrDirectContext* context);
 
+        void releaseQueueOwnership(GrDirectContext* context);
+
+        void clear(GrDirectContext* context);
+
     private:
-        void clear();
 
         // the dataspace associated with the current image
         android_dataspace mDataspace = HAL_DATASPACE_UNKNOWN;
@@ -122,6 +128,10 @@ private:
          */
         AutoBackendTextureRelease* mTextureRelease = nullptr;
     };
+
+    static status_t createReleaseFence(bool useFenceSync, EGLSyncKHR* eglFence, EGLDisplay* display,
+                                       int* releaseFence, void* handle);
+    static status_t fenceWait(int fence, void* handle);
 
     /**
      * DeferredLayerUpdater stores the SkImages that have been allocated by the BufferQueue
@@ -142,6 +152,7 @@ private:
     SkMatrix* mTransform;
     bool mGLContextAttached;
     bool mUpdateTexImage;
+    int mCurrentSlot = -1;
 
     Layer* mLayer;
 };
