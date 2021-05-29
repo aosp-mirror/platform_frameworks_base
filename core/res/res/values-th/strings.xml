@@ -309,7 +309,7 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"เข้าถึงกิจกรรมการเคลื่อนไหวร่างกายของคุณ"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"กล้องถ่ายรูป"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"ถ่ายภาพและบันทึกวิดีโอ"</string>
-    <string name="permgrouplab_calllog" msgid="7926834372073550288">"ประวัติการโทร"</string>
+    <string name="permgrouplab_calllog" msgid="7926834372073550288">"บันทึกการโทร"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"อ่านและเขียนบันทึกการโทรของโทรศัพท์"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"โทรศัพท์"</string>
     <string name="permgroupdesc_phone" msgid="270048070781478204">"โทรและจัดการการโทร"</string>
@@ -1785,9 +1785,9 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"<xliff:g id="LABEL">%1$s</xliff:g>ที่ทำงาน"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"<xliff:g id="LABEL">%1$s</xliff:g> งานที่ 2"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"<xliff:g id="LABEL">%1$s</xliff:g> งานที่ 3"</string>
-    <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"ขอ PIN ก่อนเลิกตรึง"</string>
+    <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"ขอ PIN ก่อนเลิกปักหมุด"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"ขอรูปแบบการปลดล็อกก่อนเลิกปักหมุด"</string>
-    <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"ขอรหัสผ่านก่อนเลิกตรึง"</string>
+    <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"ขอรหัสผ่านก่อนเลิกปักหมุด"</string>
     <string name="package_installed_device_owner" msgid="7035926868974878525">"ติดตั้งโดยผู้ดูแลระบบ"</string>
     <string name="package_updated_device_owner" msgid="7560272363805506941">"อัปเดตโดยผู้ดูแลระบบ"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"ลบโดยผู้ดูแลระบบ"</string>

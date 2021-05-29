@@ -259,7 +259,7 @@
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"आवाज बन्द छ"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"ध्वनि खुल्ला छ"</string>
     <string name="global_actions_toggle_airplane_mode" msgid="6911684460146916206">"हवाइजहाज मोड"</string>
-    <string name="global_actions_airplane_mode_on_status" msgid="5508025516695361936">"हवाइजहाज मोड खुला छ"</string>
+    <string name="global_actions_airplane_mode_on_status" msgid="5508025516695361936">"हवाइजहाज मोड अन छ"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="8522219771500505475">"हवाइजहाज मोड बन्द छ"</string>
     <string name="global_action_settings" msgid="4671878836947494217">"सेटिङहरू"</string>
     <string name="global_action_assist" msgid="2517047220311505805">"सहायता दिनुहोस्"</string>
@@ -681,7 +681,7 @@
     <string name="policylab_resetPassword" msgid="214556238645096520">"स्क्रिन लक परिवर्तन गर्ने"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"स्क्रिन लक परिवर्तन गर्नुहोस्।"</string>
     <string name="policylab_forceLock" msgid="7360335502968476434">"स्क्रिन लक गर्ने"</string>
-    <string name="policydesc_forceLock" msgid="1008844760853899693">"कसरी र कहिले स्क्रिन लक गर्ने नियन्त्रण गर्नुहोस्।"</string>
+    <string name="policydesc_forceLock" msgid="1008844760853899693">"कसरी र कहिले स्क्रिन लक गर्ने भन्ने कुरा सेट गर्न"</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"सबै डेटा मेट्ने"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"एउटा फ्याक्ट्रि डेटा रिसेट गरेर चेतावनी नआउँदै ट्याबल्टको डेटा मेट्नुहोस्।"</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"फ्याक्ट्री डेटा रिसेट गरेर चेतावनी नदिइकन आफ्नो Android टिभी डिभाइसको डेटा मेटाउनुहोस्।"</string>
@@ -699,7 +699,7 @@
     <string name="policylab_disableCamera" msgid="5749486347810162018">"क्यामेरालाई असक्षम गराउनुहोस्"</string>
     <string name="policydesc_disableCamera" msgid="3204405908799676104">"सबै उपकरण क्यामराहरूको प्रयोग रोक्नुहोस्"</string>
     <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"स्क्रिन लकका केही सुविधा असक्षम पार्ने"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"केही स्क्रिन लक  सुविधाहरूको प्रयोगमा रोक लगाउनुहोस्।"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"स्क्रिन लकका केही सुविधाहरूको प्रयोगमा रोक लगाउन।"</string>
   <string-array name="phoneTypes">
     <item msgid="8996339953292723951">"गृह"</item>
     <item msgid="7740243458912727194">"मोबाइल"</item>
@@ -1561,7 +1561,7 @@
     <string name="bluetooth_a2dp_audio_route_name" msgid="4214648773120426288">"ब्लुटुथ अडियो"</string>
     <string name="wireless_display_route_description" msgid="8297563323032966831">"ताररहित प्रदर्शन"</string>
     <string name="media_route_button_content_description" msgid="2299223698196869956">"कास्ट"</string>
-    <string name="media_route_chooser_title" msgid="6646594924991269208">"उपकरणमा जडान गर्नुहोस्"</string>
+    <string name="media_route_chooser_title" msgid="6646594924991269208">"उपकरणमा कनेक्ट गर्नुहोस्"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"स्क्रिन डिभाइसमा कास्ट गर्नुहोस्"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"उपकरणको खोजी गरिँदै..."</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"सेटिंङहरू"</string>
@@ -1785,7 +1785,7 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"कार्य <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"कार्यालयको दोस्रो <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"कार्यालयको तेस्रो <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"पिन निकाल्नुअघि PIN सोध्नुहोस्"</string>
+    <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"अनपिन गर्नुअघि PIN मागियोस्"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"अनपिन गर्नअघि अनलक प्याटर्न माग्नुहोस्"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"पिन निकाल्नुअघि पासवर्ड सोध्नुहोस्"</string>
     <string name="package_installed_device_owner" msgid="7035926868974878525">"तपाईंका प्रशासकले स्थापना गर्नुभएको"</string>

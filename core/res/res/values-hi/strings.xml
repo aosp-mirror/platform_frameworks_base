@@ -679,13 +679,13 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"स्क्रीन को अनलॉक करते समय ध्यान रखें कि कितनी बार गलत पासवर्ड डाला गया है. अगर बहुत ज़्यादा बार गलत पासवर्ड डाला गया है, तो अपने Android TV डिवाइस को तुरंत लॉक करें या इस उपयोगकर्ता का सभी डेटा मिटाएं."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"स्‍क्रीनका लॉक खोलते समय गलत तरीके से लिखे गए पासवर्ड पर नज़र रखें, और अगर बार-बार गलत पासवर्ड लिखा जाता है तो फ़ोन को लॉक करें या इस उपयोगकर्ता का सभी डेटा मिटा दें."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"स्‍क्रीन लॉक बदलना"</string>
-    <string name="policydesc_resetPassword" msgid="4626419138439341851">"स्‍क्रीन लॉक बदलना."</string>
+    <string name="policydesc_resetPassword" msgid="4626419138439341851">"इससे स्‍क्रीन लॉक बदला जाता है."</string>
     <string name="policylab_forceLock" msgid="7360335502968476434">"स्‍क्रीन लॉक करना"</string>
-    <string name="policydesc_forceLock" msgid="1008844760853899693">"इससे नियंत्रित होगा कि स्‍क्रीन कैसे और कब लॉक हो."</string>
+    <string name="policydesc_forceLock" msgid="1008844760853899693">"इससे यह कंट्रोल होता है कि स्क्रीन कैसे और कब लॉक हो."</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"सारा डेटा मिटाना"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"फ़ैक्‍टरी डेटा रीसेट करके चेतावनी दिए बिना फ़ोन का डेटा मिटाना."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"फ़ैक्ट्री डेटा रीसेट करके अपने Android TV डिवाइस का डेटा बिना चेतावनी दिए मिटाएं."</string>
-    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"फ़ैक्‍टरी डेटा रीसेट करके चेतावनी दिए बिना फ़ोन का डेटा मिटाना."</string>
+    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"इससे फ़ैक्‍टरी डेटा रीसेट करके, चेतावनी दिए बिना फ़ोन का डेटा मिट जाता है."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"उपयोगकर्ता डेटा मिटाएं"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"इस टैबलेट पर मौजूद इस उपयोगकर्ता का डेटा बिना चेतावनी के मिटा दें."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"बिना चेतावनी दिए, इस Android TV डिवाइस से उपयोगकर्ता का डेटा मिटाएं."</string>
@@ -699,7 +699,7 @@
     <string name="policylab_disableCamera" msgid="5749486347810162018">"कैमरों को अक्षम करें"</string>
     <string name="policydesc_disableCamera" msgid="3204405908799676104">"सभी डिवाइस कैमरों का उपयोग रोकें."</string>
     <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"स्‍क्रीन लॉक की कुछ सुविधाएं बंद करना"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"यह कुछ स्‍क्रीन लाॅक सुविधाओं का इस्तेमाल रोकती है."</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"इससे कुछ स्‍क्रीन लॉक सुविधाओं का इस्तेमाल रोका जाता है."</string>
   <string-array name="phoneTypes">
     <item msgid="8996339953292723951">"घर"</item>
     <item msgid="7740243458912727194">"मोबाइल"</item>

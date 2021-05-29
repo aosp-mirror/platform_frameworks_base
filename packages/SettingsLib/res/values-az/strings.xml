@@ -153,7 +153,7 @@
     <string name="unknown" msgid="3544487229740637809">"Naməlum"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"İstifadəçi: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"Bəzi susmaya görələr təyin edilib"</string>
-    <string name="launch_defaults_none" msgid="8049374306261262709">"Susmaya görələr təyin edilməyib."</string>
+    <string name="launch_defaults_none" msgid="8049374306261262709">"Defolt ayarlanmayıb"</string>
     <string name="tts_settings" msgid="8130616705989351312">"Mətndən-danışığa parametrləri"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"Mətndən-nitqə daxiletmə"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"Nitq diapazonu"</string>
