@@ -101,12 +101,12 @@
     <dimen name="bubble_flyout_avatar_message_space">6dp</dimen>
     <!-- Padding between status bar and bubbles when displayed in expanded state -->
     <dimen name="bubble_padding_top">16dp</dimen>
-    <!-- Max amount of space between bubbles when expanded. -->
-    <dimen name="bubble_max_spacing">8dp</dimen>
-    <!-- Size of individual bubbles. -->
-    <dimen name="individual_bubble_size">60dp</dimen>
-    <!-- Size of bubble bitmap. -->
-    <dimen name="bubble_bitmap_size">52dp</dimen>
+    <!-- Space between bubbles when expanded. -->
+    <dimen name="bubble_spacing">3dp</dimen>
+    <!-- Size of the bubble. -->
+    <dimen name="bubble_size">60dp</dimen>
+    <!-- Size of the badge shown on the bubble. -->
+    <dimen name="bubble_badge_size">24dp</dimen>
     <!-- Extra padding added to the touchable rect for bubbles so they are easier to grab. -->
     <dimen name="bubble_touch_padding">12dp</dimen>
     <!-- Size of the circle around the bubbles when they're in the dismiss target. -->
@@ -120,6 +120,8 @@
     <dimen name="bubble_expanded_default_height">180dp</dimen>
     <!-- On large screens the width of the expanded view is restricted to this size. -->
     <dimen name="bubble_expanded_view_tablet_width">412dp</dimen>
+    <!-- Inset to apply to the icon in the overflow button. -->
+    <dimen name="bubble_overflow_icon_inset">30dp</dimen>
     <!-- Default (and minimum) height of bubble overflow -->
     <dimen name="bubble_overflow_height">480dp</dimen>
     <!-- Bubble overflow padding when there are no bubbles  -->
@@ -154,7 +156,7 @@
     <!-- Interior padding of the message bubble -->
     <dimen name="bubble_message_padding">4dp</dimen>
     <!-- Offset between bubbles in their stacked position. -->
-    <dimen name="bubble_stack_offset">10dp</dimen>
+    <dimen name="bubble_stack_offset">12dp</dimen>
     <!-- Offset between stack y and animation y for bubble swap. -->
     <dimen name="bubble_swap_animation_offset">15dp</dimen>
     <!-- How far offscreen the bubble stack rests. There's some padding around the bubble so

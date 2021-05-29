@@ -653,8 +653,8 @@
     <string name="wifi_verbose_logging">Enable Wi\u2011Fi Verbose Logging</string>
     <!-- Setting Checkbox title whether to disable WiFi Scan Throttling. [CHAR LIMIT=40] -->
     <string name="wifi_scan_throttling">Wi\u2011Fi scan throttling</string>
-    <!-- Setting Checkbox title whether to enable WiFi enhanced mac randomization. [CHAR LIMIT=40] -->
-    <string name="wifi_enhanced_mac_randomization">Wi\u2011Fi\u2011enhanced MAC randomization</string>
+    <!-- Setting Checkbox title whether to enable WiFi non-persistent mac randomization. [CHAR LIMIT=80] -->
+    <string name="wifi_enhanced_mac_randomization">Wi\u2011Fi non\u2011persistent MAC randomization</string>
     <!-- Setting Checkbox title whether to always keep mobile data active. [CHAR LIMIT=80] -->
     <string name="mobile_data_always_on">Mobile data always active</string>
     <!-- Setting Checkbox title whether to enable hardware acceleration for tethering. [CHAR LIMIT=80] -->
@@ -1133,7 +1133,7 @@
     <!-- [CHAR_LIMIT=40] Label for battery level chart when charging with duration -->
     <string name="power_charging_duration"><xliff:g id="level">%1$s</xliff:g> - <xliff:g id="time">%2$s</xliff:g> left until full</string>
     <!-- [CHAR_LIMIT=80] Label for battery level chart when charge been limited -->
-    <string name="power_charging_limited"><xliff:g id="level">%1$s</xliff:g> - Optimizing for battery health</string>
+    <string name="power_charging_limited"><xliff:g id="level">%1$s</xliff:g> - Charging temporarily limited</string>
 
     <!-- Battery Info screen. Value for a status item.  Used for diagnostic info screens, precise translation isn't needed -->
     <string name="battery_info_status_unknown">Unknown</string>

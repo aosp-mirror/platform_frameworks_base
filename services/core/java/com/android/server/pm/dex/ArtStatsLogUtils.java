@@ -22,8 +22,8 @@ import static com.android.internal.art.ArtStatsLog.ART_DATUM_REPORTED__COMPILATI
 import static com.android.internal.art.ArtStatsLog.ART_DATUM_REPORTED__COMPILE_FILTER__ART_COMPILATION_FILTER_FAKE_RUN_FROM_APK_FALLBACK;
 import static com.android.internal.art.ArtStatsLog.ART_DATUM_REPORTED__COMPILE_FILTER__ART_COMPILATION_FILTER_FAKE_RUN_FROM_VDEX_FALLBACK;
 
-import android.util.jar.StrictJarFile;
 import android.util.Slog;
+import android.util.jar.StrictJarFile;
 
 import com.android.internal.art.ArtStatsLog;
 import com.android.server.pm.PackageManagerService;
@@ -163,7 +163,7 @@ public class ArtStatsLogUtils {
                 uid,
                 compilationReason,
                 compilerFilter,
-                ArtStatsLog.ART_DATUM_REPORTED__KIND__ART_DATUM_DEX2OAT_DEX_CODE_BYTES,
+                ArtStatsLog.ART_DATUM_REPORTED__KIND__ART_DATUM_DEX2OAT_DEX_CODE_COUNTER_BYTES,
                 getDexBytes(apkPath),
                 dexMetadataType,
                 apkType,
@@ -173,7 +173,7 @@ public class ArtStatsLogUtils {
                 uid,
                 compilationReason,
                 compilerFilter,
-                ArtStatsLog.ART_DATUM_REPORTED__KIND__ART_DATUM_DEX2OAT_TOTAL_TIME,
+                ArtStatsLog.ART_DATUM_REPORTED__KIND__ART_DATUM_DEX2OAT_TOTAL_TIME_COUNTER_MILLIS,
                 compileTime,
                 dexMetadataType,
                 apkType,

@@ -89,5 +89,27 @@ void AutoBackendTextureRelease::newBufferContent(GrDirectContext* context) {
     }
 }
 
+void AutoBackendTextureRelease::releaseQueueOwnership(GrDirectContext* context) {
+    if (!context) {
+        return;
+    }
+
+    LOG_ALWAYS_FATAL_IF(Properties::getRenderPipelineType() != RenderPipelineType::SkiaVulkan);
+    if (mBackendTexture.isValid()) {
+        // Passing in VK_IMAGE_LAYOUT_UNDEFINED means we keep the old layout.
+        GrBackendSurfaceMutableState newState(VK_IMAGE_LAYOUT_UNDEFINED,
+                                              VK_QUEUE_FAMILY_FOREIGN_EXT);
+
+        // The unref for this ref happens in the releaseProc passed into setBackendTextureState. The
+        // releaseProc callback will be made when the work to set the new state has finished on the
+        // gpu.
+        ref();
+        // Note that we don't have an explicit call to set the backend texture back onto the
+        // graphics queue when we use the VkImage again. Internally, Skia will notice that the image
+        // is not on the graphics queue and will do the transition automatically.
+        context->setBackendTextureState(mBackendTexture, newState, nullptr, releaseProc, this);
+    }
+}
+
 } /* namespace uirenderer */
 } /* namespace android */

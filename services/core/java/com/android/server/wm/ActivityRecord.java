@@ -181,7 +181,6 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLAS
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_FREE_RESIZE;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_WINDOWING_MODE_RESIZE;
-import static com.android.server.wm.ActivityTaskManagerService.SKIP_LAYOUT_REASON_ALLOWED;
 import static com.android.server.wm.ActivityTaskManagerService.getInputDispatchingTimeoutMillisLocked;
 import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.IdentifierProto.HASH_CODE;
@@ -672,6 +671,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     // Whether this activity is in size compatibility mode because its bounds don't fit in parent
     // naturally.
     private boolean mInSizeCompatModeForBounds = false;
+
+    // Whether the aspect ratio restrictions applied to the activity bounds in applyAspectRatio().
+    // TODO(b/182268157): Aspect ratio can also be applie in resolveFixedOrientationConfiguration
+    // but that isn't reflected in this boolean.
+    private boolean mIsAspectRatioApplied = false;
 
     // Bounds populated in resolveFixedOrientationConfiguration when this activity is letterboxed
     // for fixed orientation. If not null, they are used as parent container in
@@ -5377,11 +5381,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 mAtmService.deferWindowLayout();
                 try {
                     task.completePauseLocked(true /* resumeNext */, null /* resumingActivity */);
-                    // If there is no possible transition to execute, then allow to skip layout
-                    // because it may be done by next resumed activity.
-                    if (!pausingActivity.mDisplayContent.areOpeningAppsReady()) {
-                        mAtmService.addWindowLayoutReasons(SKIP_LAYOUT_REASON_ALLOWED);
-                    }
                 } finally {
                     mAtmService.continueWindowLayout();
                 }
@@ -7017,6 +7016,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             newParentConfiguration = mTmpConfig;
         }
 
+        mIsAspectRatioApplied = false;
+
         // Can't use resolvedConfig.windowConfiguration.getWindowingMode() because it can be
         // different from windowing mode of the task (PiP) during transition from fullscreen to PiP
         // and back which can cause visible issues (see b/184078928).
@@ -7034,7 +7035,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         if (mCompatDisplayInsets != null) {
             resolveSizeCompatModeConfiguration(newParentConfiguration);
-        } else if (inMultiWindowMode()) {
+        } else if (inMultiWindowMode() && !isFixedOrientationLetterboxAllowed) {
             // We ignore activities' requested orientation in multi-window modes. They may be
             // taken into consideration in resolveFixedOrientationConfiguration call above.
             resolvedConfig.orientation = Configuration.ORIENTATION_UNDEFINED;
@@ -7046,7 +7047,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // If activity in fullscreen mode is letterboxed because of fixed orientation then bounds
         // are already calculated in resolveFixedOrientationConfiguration.
         } else if (!isLetterboxedForFixedOrientationAndAspectRatio()) {
-            resolveFullscreenConfiguration(newParentConfiguration);
+            resolveAspectRatioRestriction(newParentConfiguration);
         }
 
         if (isFixedOrientationLetterboxAllowed || mCompatDisplayInsets != null
@@ -7094,6 +7095,26 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     }
 
+    /**
+     * Returns whether activity bounds are letterboxed.
+     *
+     * <p>Note that letterbox UI may not be shown even when this returns {@code true}. See {@link
+     * LetterboxUiController#shouldShowLetterboxUi} for more context.
+     */
+    boolean areBoundsLetterboxed() {
+        if (mInSizeCompatModeForBounds) {
+            return true;
+        }
+        // Letterbox for fixed orientation. This check returns true only when an activity is
+        // letterboxed for fixed orientation. Aspect ratio restrictions are also applied if
+        // present. But this doesn't return true when the activity is letterboxed only because
+        // of aspect ratio restrictions.
+        if (isLetterboxedForFixedOrientationAndAspectRatio()) {
+            return true;
+        }
+        // Letterbox for limited aspect ratio.
+        return mIsAspectRatioApplied;
+    }
 
     /**
      * Adjusts horizontal position of resolved bounds if they doesn't fill the parent using gravity
@@ -7134,6 +7155,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         } else {
             offsetBounds(resolvedConfig, offsetX, 0 /* offsetY */);
         }
+
+        // Since bounds has changed, the configuration needs to be computed accordingly.
+        task.computeConfigResourceOverrides(resolvedConfig, newParentConfiguration);
     }
 
     /**
@@ -7245,12 +7269,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     /**
-     * Resolves the configuration of activity in fullscreen mode. If the bounds are restricted by
-     * aspect ratio, the position will be centered horizontally in parent's app bounds to balance
-     * the visual appearance. The policy of aspect ratio has higher priority than the requested
-     * override bounds.
+     * Resolves aspect ratio restrictions for an activity. If the bounds are restricted by
+     * aspect ratio, the position will be adjusted later in {@link
+     * updateResolvedBoundsHorizontalPosition} within parent's app bounds to balance the visual
+     * appearance. The policy of aspect ratio has higher priority than the requested override
+     * bounds.
      */
-    private void resolveFullscreenConfiguration(Configuration newParentConfiguration) {
+    private void resolveAspectRatioRestriction(Configuration newParentConfiguration) {
         final Configuration resolvedConfig = getResolvedOverrideConfiguration();
         final Rect parentAppBounds = newParentConfiguration.windowConfiguration.getAppBounds();
         final Rect parentBounds = newParentConfiguration.windowConfiguration.getBounds();
@@ -7258,11 +7283,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // Use tmp bounds to calculate aspect ratio so we can know whether the activity should use
         // restricted size (resolved bounds may be the requested override bounds).
         mTmpBounds.setEmpty();
-        applyAspectRatio(mTmpBounds, parentAppBounds, parentBounds);
+        mIsAspectRatioApplied = applyAspectRatio(mTmpBounds, parentAppBounds, parentBounds);
         // If the out bounds is not empty, it means the activity cannot fill parent's app bounds,
-        // then there is space to be centered.
-        final boolean needToBeCentered = !mTmpBounds.isEmpty();
-        if (needToBeCentered) {
+        // then they should be aligned later in #updateResolvedBoundsHorizontalPosition().
+        if (!mTmpBounds.isEmpty()) {
             resolvedBounds.set(mTmpBounds);
             // Exclude the horizontal decor area.
             resolvedBounds.left = parentAppBounds.left;
@@ -7323,7 +7347,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         resolvedBounds.set(containingBounds);
         // The size of floating task is fixed (only swap), so the aspect ratio is already correct.
         if (!mCompatDisplayInsets.mIsFloating) {
-            applyAspectRatio(resolvedBounds, containingAppBounds, containingBounds);
+            mIsAspectRatioApplied =
+                    applyAspectRatio(resolvedBounds, containingAppBounds, containingBounds);
         }
         // If the bounds are restricted by fixed aspect ratio, the resolved bounds should be put in
         // the container app bounds. Otherwise the entire container bounds are available.
@@ -7641,9 +7666,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     /**
      * Applies aspect ratio restrictions to outBounds. If no restrictions, then no change is
      * made to outBounds.
+     *
+     * @return {@code true} if aspect ratio restrictions were applied.
      */
     // TODO(b/36505427): Consider moving this method and similar ones to ConfigurationContainer.
-    private void applyAspectRatio(Rect outBounds, Rect containingAppBounds,
+    private boolean applyAspectRatio(Rect outBounds, Rect containingAppBounds,
             Rect containingBounds) {
         final float maxAspectRatio = info.getMaxAspectRatio();
         final Task rootTask = getRootTask();
@@ -7655,7 +7682,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 || isInVrUiMode(getConfiguration())) {
             // We don't enforce aspect ratio if the activity task is in multiwindow unless it
             // is in size-compat mode. We also don't set it if we are in VR mode.
-            return;
+            return false;
         }
 
         final int containingAppWidth = containingAppBounds.width();
@@ -7711,7 +7738,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         if (containingAppWidth <= activityWidth && containingAppHeight <= activityHeight) {
             // The display matches or is less than the activity aspect ratio, so nothing else to do.
-            return;
+            return false;
         }
 
         // Compute configuration based on max supported width and height.
@@ -7721,6 +7748,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         outBounds.set(containingBounds.left, containingBounds.top,
                 activityWidth + containingAppBounds.left,
                 activityHeight + containingAppBounds.top);
+
+        return true;
     }
 
     /**

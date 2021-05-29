@@ -32,6 +32,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.shared.system.smartspace.SmartspaceTransitionController;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -53,6 +54,7 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
     private final LockPatternUtils mLockPatternUtils;
     private final KeyguardUpdateMonitorCallback mKeyguardUpdateMonitorCallback =
             new UpdateMonitorCallback();
+    private final SmartspaceTransitionController mSmartspaceTransitionController;
 
     private boolean mCanDismissLockScreen;
     private boolean mShowing;
@@ -96,10 +98,12 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
      */
     @Inject
     public KeyguardStateControllerImpl(Context context,
-            KeyguardUpdateMonitor keyguardUpdateMonitor, LockPatternUtils lockPatternUtils) {
+            KeyguardUpdateMonitor keyguardUpdateMonitor, LockPatternUtils lockPatternUtils,
+            SmartspaceTransitionController smartspaceTransitionController) {
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mLockPatternUtils = lockPatternUtils;
         mKeyguardUpdateMonitor.registerCallback(mKeyguardUpdateMonitorCallback);
+        mSmartspaceTransitionController = smartspaceTransitionController;
 
         update(true /* updateAlways */);
         if (Build.IS_DEBUGGABLE && DEBUG_AUTH_WITH_ADB) {
@@ -158,6 +162,11 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
         mShowing = showing;
         mOccluded = occluded;
         notifyKeyguardChanged();
+
+        // Update the dismiss amount to the full 0f/1f if we explicitly show or hide the keyguard.
+        // Otherwise, the dismiss amount could be left at a random value if we show/hide during a
+        // dismiss gesture, canceling the gesture.
+        notifyKeyguardDismissAmountChanged(showing ? 0f : 1f, false);
     }
 
     private void notifyKeyguardChanged() {
@@ -225,6 +234,12 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
     @Override
     public boolean canDismissLockScreen() {
         return mCanDismissLockScreen;
+    }
+
+    @Override
+    public boolean canPerformSmartSpaceTransition() {
+        return canDismissLockScreen()
+                && mSmartspaceTransitionController.isSmartspaceTransitionPossible();
     }
 
     @Override

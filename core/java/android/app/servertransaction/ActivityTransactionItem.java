@@ -55,15 +55,40 @@ public abstract class ActivityTransactionItem extends ClientTransactionItem {
 
     @NonNull ActivityClientRecord getActivityClientRecord(
             @NonNull ClientTransactionHandler client, IBinder token) {
-        final ActivityClientRecord r = client.getActivityClient(token);
+        return getActivityClientRecord(client, token, false /* includeLaunching */);
+    }
+
+    /**
+     * Get the {@link ActivityClientRecord} instance that corresponds to the provided token.
+     * @param client Target client handler.
+     * @param token Target activity token.
+     * @param includeLaunching Indicate to also find the {@link ActivityClientRecord} in launching
+     *                         activity list. It should be noted that there is no activity in
+     *                         {@link ActivityClientRecord} from the launching activity list.
+     * @return The {@link ActivityClientRecord} instance that corresponds to the provided token.
+     */
+    @NonNull ActivityClientRecord getActivityClientRecord(
+            @NonNull ClientTransactionHandler client, IBinder token, boolean includeLaunching) {
+        ActivityClientRecord r = client.getActivityClient(token);
+        if (r != null) {
+            if (client.getActivity(token) == null) {
+                throw new IllegalArgumentException("Activity must not be null to execute "
+                        + "transaction item");
+            }
+            return r;
+        }
+        // The activity may not be launched yet. Fallback to check launching activity.
+        if (includeLaunching) {
+            r = client.getLaunchingActivity(token);
+        }
         if (r == null) {
             throw new IllegalArgumentException("Activity client record must not be null to execute "
                     + "transaction item");
         }
-        if (client.getActivity(token) == null) {
-            throw new IllegalArgumentException("Activity must not be null to execute "
-                    + "transaction item");
-        }
+
+        // We don't need to check the activity of launching activity client records because they
+        // have not been launched yet.
+
         return r;
     }
 }
