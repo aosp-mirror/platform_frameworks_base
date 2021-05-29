@@ -27,7 +27,6 @@ import static com.android.systemui.classifier.Classifier.QS_COLLAPSE;
 import static com.android.systemui.classifier.Classifier.QUICK_SETTINGS;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_ALL;
-import static com.android.systemui.util.Utils.shouldUseSplitNotificationShade;
 
 import static java.lang.Float.isNaN;
 
@@ -1215,7 +1214,14 @@ public class NotificationPanelViewController extends PanelViewController {
             updateClockAppearance();
         }
         if (!onKeyguard) {
-            stackScrollerPadding = getUnlockedStackScrollerPadding();
+            if (mShouldUseSplitNotificationShade) {
+                // Quick settings are not on the top of the notifications
+                // when in split shade mode (they are on the left side),
+                // so we should not add a padding for them
+                stackScrollerPadding = 0;
+            } else {
+                stackScrollerPadding = getUnlockedStackScrollerPadding();
+            }
         } else {
             stackScrollerPadding = mClockPositionResult.stackScrollerPaddingExpanded;
         }
@@ -1260,7 +1266,7 @@ public class NotificationPanelViewController extends PanelViewController {
                 bypassEnabled, getUnlockedStackScrollerPadding(),
                 computeQsExpansionFraction(),
                 mDisplayCutoutTopInset,
-                shouldUseSplitNotificationShade(mFeatureFlags, mResources));
+                mShouldUseSplitNotificationShade);
         mClockPositionAlgorithm.run(mClockPositionResult);
         boolean animate = mNotificationStackScrollLayoutController.isAddOrRemoveAnimationPending();
         boolean animateClock = animate || mAnimateNextPositionUpdate;
