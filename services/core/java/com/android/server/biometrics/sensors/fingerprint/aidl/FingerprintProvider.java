@@ -172,6 +172,14 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
         return "FingerprintProvider/" + mHalInstanceName;
     }
 
+    boolean hasHalInstance() {
+        if (mTestHalEnabled) {
+            return true;
+        }
+        return (ServiceManager.checkService(IFingerprint.DESCRIPTOR + "/" + mHalInstanceName)
+                != null);
+    }
+
     @Nullable
     @VisibleForTesting
     synchronized IFingerprint getHalInstance() {
@@ -454,7 +462,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
 
     @Override
     public boolean isHardwareDetected(int sensorId) {
-        return getHalInstance() != null;
+        return hasHalInstance();
     }
 
     @Override

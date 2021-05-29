@@ -30,12 +30,6 @@ import android.view.LayoutInflater
 import android.widget.FrameLayout
 import com.android.wm.shell.R
 
-/**
- * The icon in the bubble overflow is scaled down, this is the percent of the normal bubble bitmap
- * size to use.
- */
-const val ICON_BITMAP_SIZE_PERCENT = 0.46f
-
 class BubbleOverflow(
     private val context: Context,
     private val positioner: BubblePositioner
@@ -44,10 +38,9 @@ class BubbleOverflow(
     private lateinit var bitmap: Bitmap
     private lateinit var dotPath: Path
 
-    private var bitmapSize = 0
-    private var iconBitmapSize = 0
     private var dotColor = 0
     private var showDot = false
+    private var overflowIconInset = 0
 
     private val inflater: LayoutInflater = LayoutInflater.from(context)
     private var expandedView: BubbleExpandedView?
@@ -55,8 +48,6 @@ class BubbleOverflow(
 
     init {
         updateResources()
-        bitmapSize = positioner.bubbleBitmapSize
-        iconBitmapSize = (bitmapSize * ICON_BITMAP_SIZE_PERCENT).toInt()
         expandedView = null
         overflowBtn = null
     }
@@ -80,10 +71,10 @@ class BubbleOverflow(
     }
 
     fun updateResources() {
-        bitmapSize = positioner.bubbleBitmapSize
-        iconBitmapSize = (bitmapSize * ICON_BITMAP_SIZE_PERCENT).toInt()
-        val bubbleSize = positioner.bubbleSize
-        overflowBtn?.layoutParams = FrameLayout.LayoutParams(bubbleSize, bubbleSize)
+        overflowIconInset = context.resources.getDimensionPixelSize(
+                R.dimen.bubble_overflow_icon_inset)
+        overflowBtn?.layoutParams = FrameLayout.LayoutParams(positioner.bubbleSize,
+                positioner.bubbleSize)
         expandedView?.updateDimensions()
     }
 
@@ -103,8 +94,7 @@ class BubbleOverflow(
         val iconFactory = BubbleIconFactory(context)
 
         // Update bitmap
-        val fg = InsetDrawable(overflowBtn?.drawable,
-            bitmapSize - iconBitmapSize /* inset */)
+        val fg = InsetDrawable(overflowBtn?.drawable, overflowIconInset)
         bitmap = iconFactory.createBadgedIconBitmap(AdaptiveIconDrawable(
                 ColorDrawable(colorAccent), fg),
             null /* user */, true /* shrinkNonAdaptiveIcons */).icon

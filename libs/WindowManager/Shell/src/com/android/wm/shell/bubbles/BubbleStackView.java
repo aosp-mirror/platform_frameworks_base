@@ -22,6 +22,7 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.DEBUG_BUBBLE_STACK_VIEW;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_BUBBLES;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.wm.shell.bubbles.BubblePositioner.NUM_VISIBLE_WHEN_RESTING;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -242,7 +243,6 @@ public class BubbleStackView extends FrameLayout
 
     @Nullable private RelativeStackPosition mRelativeStackPositionBeforeRotation;
 
-    private int mMaxBubbles;
     private int mBubbleSize;
     private int mBubbleElevation;
     private int mBubbleTouchPadding;
@@ -632,6 +632,7 @@ public class BubbleStackView extends FrameLayout
             // First, see if the magnetized object consumes the event - if so, we shouldn't move the
             // bubble since it's stuck to the target.
             if (!passEventToMagnetizedObject(ev)) {
+                updateBubbleShadows(true /* showForAllBubbles */);
                 if (mBubbleData.isExpanded() || mPositioner.showingInTaskbar()) {
                     mExpandedAnimationController.dragBubbleOut(
                             v, viewInitialX + dx, viewInitialY + dy);
@@ -671,7 +672,7 @@ public class BubbleStackView extends FrameLayout
                             mStackAnimationController.flingStackThenSpringToEdge(
                                     viewInitialX + dx, velX, velY) <= 0;
                     final boolean updateForCollapsedStack = oldOnLeft != mStackOnLeftOrWillBe;
-                    updateBadgesAndZOrder(updateForCollapsedStack);
+                    updateBadges(updateForCollapsedStack);
                     logBubbleEvent(null /* no bubble associated with bubble stack move */,
                             FrameworkStatsLog.BUBBLE_UICHANGED__ACTION__STACK_MOVED);
                 }
@@ -762,8 +763,7 @@ public class BubbleStackView extends FrameLayout
         mBubbleData = data;
 
         Resources res = getResources();
-        mMaxBubbles = res.getInteger(R.integer.bubbles_max_rendered);
-        mBubbleSize = res.getDimensionPixelSize(R.dimen.individual_bubble_size);
+        mBubbleSize = res.getDimensionPixelSize(R.dimen.bubble_size);
         mBubbleElevation = res.getDimensionPixelSize(R.dimen.bubble_elevation);
         mBubbleTouchPadding = res.getDimensionPixelSize(R.dimen.bubble_touch_padding);
         mImeOffset = res.getDimensionPixelSize(R.dimen.pip_ime_offset);
@@ -783,9 +783,9 @@ public class BubbleStackView extends FrameLayout
                 mBubbleController.onAllBubblesAnimatedOut();
             }
         };
-
         mStackAnimationController = new StackAnimationController(
-                floatingContentCoordinator, this::getBubbleCount, onBubbleAnimatedOut, mPositioner);
+                floatingContentCoordinator, this::getBubbleCount, onBubbleAnimatedOut,
+                this::animateShadows /* onStackAnimationFinished */, mPositioner);
 
         mExpandedAnimationController = new ExpandedAnimationController(
                 mPositioner, mExpandedViewPadding, onBubbleAnimatedOut);
@@ -1505,13 +1505,12 @@ public class BubbleStackView extends FrameLayout
         // Set the dot position to the opposite of the side the stack is resting on, since the stack
         // resting slightly off-screen would result in the dot also being off-screen.
         bubble.getIconView().setDotBadgeOnLeft(!mStackOnLeftOrWillBe /* onLeft */);
-
         bubble.getIconView().setOnClickListener(mBubbleClickListener);
         bubble.getIconView().setOnTouchListener(mBubbleTouchListener);
-
         mBubbleContainer.addView(bubble.getIconView(), 0,
                 new FrameLayout.LayoutParams(mPositioner.getBubbleSize(),
                         mPositioner.getBubbleSize()));
+        updateBubbleShadows(false /* showForAllBubbles */);
         animateInFlyoutForBubble(bubble);
         requestUpdate();
         logBubbleEvent(bubble, FrameworkStatsLog.BUBBLE_UICHANGED__ACTION__POSTED);
@@ -1566,7 +1565,8 @@ public class BubbleStackView extends FrameLayout
         };
         if (mIsExpanded || isExpansionAnimating()) {
             reorder.run();
-            updateBadgesAndZOrder(false /* setBadgeForCollapsedStack */);
+            updateBadges(false /* setBadgeForCollapsedStack */);
+            updateZOrder();
         } else if (!isExpansionAnimating()) {
             List<View> bubbleViews = bubbles.stream()
                     .map(b -> b.getIconView()).collect(Collectors.toList());
@@ -1803,7 +1803,8 @@ public class BubbleStackView extends FrameLayout
         }
         beforeExpandedViewAnimation();
 
-        updateBadgesAndZOrder(false /* setBadgeForCollapsedStack */);
+        updateZOrder();
+        updateBadges(false /* setBadgeForCollapsedStack */);
         mBubbleContainer.setActiveController(mExpandedAnimationController);
         updateOverflowVisibility();
         updatePointerPosition();
@@ -2014,7 +2015,8 @@ public class BubbleStackView extends FrameLayout
                                 mExpandedBubble));
                     }
                     updateOverflowVisibility();
-                    updateBadgesAndZOrder(true /* setBadgeForCollapsedStack */);
+                    updateZOrder();
+                    updateBadges(true /* setBadgeForCollapsedStack */);
                     afterExpandedViewAnimation();
                     if (previouslySelected != null) {
                         previouslySelected.setTaskViewVisibility(false);
@@ -2707,14 +2709,56 @@ public class BubbleStackView extends FrameLayout
     }
 
     /**
-     * Sets the appropriate Z-order, badge, and dot position for each bubble in the stack.
-     * Animate dot and badge changes.
+     * Updates whether each of the bubbles should show shadows. When collapsed & resting, only the
+     * visible bubbles (top 2) will show a shadow. When the stack is being dragged, everything
+     * shows a shadow. When an individual bubble is dragged out, it should show a shadow.
      */
-    private void updateBadgesAndZOrder(boolean setBadgeForCollapsedStack) {
+    private void updateBubbleShadows(boolean showForAllBubbles) {
+        int bubbleCount = getBubbleCount();
+        for (int i = 0; i < bubbleCount; i++) {
+            final float z = (mPositioner.getMaxBubbles() * mBubbleElevation) - i;
+            BadgedImageView bv = (BadgedImageView) mBubbleContainer.getChildAt(i);
+            boolean isDraggedOut = mMagnetizedObject != null
+                    && mMagnetizedObject.getUnderlyingObject().equals(bv);
+            if (showForAllBubbles || isDraggedOut) {
+                bv.setZ(z);
+            } else {
+                final float tz = i < NUM_VISIBLE_WHEN_RESTING ? z : 0f;
+                bv.setZ(tz);
+            }
+        }
+    }
+
+    /**
+     * When the bubbles are flung and then rest, the shadows stack up for the bubbles hidden
+     * beneath the top two bubbles, to avoid this we animate the Z translations once the stack
+     * is resting so that they fade away nicely.
+     */
+    private void animateShadows() {
         int bubbleCount = getBubbleCount();
         for (int i = 0; i < bubbleCount; i++) {
             BadgedImageView bv = (BadgedImageView) mBubbleContainer.getChildAt(i);
-            bv.setZ((mMaxBubbles * mBubbleElevation) - i);
+            boolean fullShadow = i < NUM_VISIBLE_WHEN_RESTING;
+            if (!fullShadow) {
+                bv.animate().translationZ(0).start();
+            }
+        }
+    }
+
+    private void updateZOrder() {
+        int bubbleCount = getBubbleCount();
+        for (int i = 0; i < bubbleCount; i++) {
+            BadgedImageView bv = (BadgedImageView) mBubbleContainer.getChildAt(i);
+            bv.setZ(i < NUM_VISIBLE_WHEN_RESTING
+                    ? (mPositioner.getMaxBubbles() * mBubbleElevation) - i
+                    : 0f);
+        }
+    }
+
+    private void updateBadges(boolean setBadgeForCollapsedStack) {
+        int bubbleCount = getBubbleCount();
+        for (int i = 0; i < bubbleCount; i++) {
+            BadgedImageView bv = (BadgedImageView) mBubbleContainer.getChildAt(i);
             if (mIsExpanded) {
                 // If we're not displaying vertically, we always show the badge on the left.
                 boolean onLeft = mPositioner.showBubblesVertically() && !mStackOnLeftOrWillBe;
