@@ -351,8 +351,8 @@
     <string name="quick_settings_ime_label" msgid="3351174938144332051">"Beviteli módszer"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Tartózkodási hely"</string>
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"Hely kikapcsolva"</string>
-    <string name="quick_settings_camera_label" msgid="5612076679385269339">"Hozzáférés a kamerához"</string>
-    <string name="quick_settings_mic_label" msgid="8392773746295266375">"Hozzáférés a mikrofonhoz"</string>
+    <string name="quick_settings_camera_label" msgid="5612076679385269339">"Kameraelérés"</string>
+    <string name="quick_settings_mic_label" msgid="8392773746295266375">"Mikrofonelérés"</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"Rendelkezésre áll"</string>
     <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"Letiltva"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"Médiaeszköz"</string>
@@ -797,7 +797,7 @@
       <item quantity="other">%d perc</item>
       <item quantity="one">%d perc</item>
     </plurals>
-    <string name="battery_panel_title" msgid="5931157246673665963">"Akkumulátorhasználat"</string>
+    <string name="battery_panel_title" msgid="5931157246673665963">"Akkuhasználat"</string>
     <string name="battery_detail_charging_summary" msgid="8821202155297559706">"Az Akkumulátorkímélő módot töltés közben nem lehet használni"</string>
     <string name="battery_detail_switch_title" msgid="6940976502957380405">"Akkumulátorkímélő mód"</string>
     <string name="battery_detail_switch_summary" msgid="3668748557848025990">"Csökkenti a teljesítményt és a háttéradatok használatát"</string>

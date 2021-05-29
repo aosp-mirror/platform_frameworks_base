@@ -120,6 +120,7 @@ public class AccessibilityWindowManagerTest {
     @Mock private AccessibilityWindowManager.AccessibilityEventSender mMockA11yEventSender;
     @Mock private AccessibilitySecurityPolicy mMockA11ySecurityPolicy;
     @Mock private AccessibilitySecurityPolicy.AccessibilityUserManager mMockA11yUserManager;
+    @Mock private AccessibilityTraceManager mMockA11yTraceManager;
 
     @Mock private IBinder mMockHostToken;
     @Mock private IBinder mMockEmbeddedToken;
@@ -140,7 +141,8 @@ public class AccessibilityWindowManagerTest {
                 mMockWindowManagerInternal,
                 mMockA11yEventSender,
                 mMockA11ySecurityPolicy,
-                mMockA11yUserManager);
+                mMockA11yUserManager,
+                mMockA11yTraceManager);
         // Starts tracking window of default display and sets the default display
         // as top focused display before each testing starts.
         startTrackingPerDisplay(Display.DEFAULT_DISPLAY);

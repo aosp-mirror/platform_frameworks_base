@@ -19,6 +19,7 @@ package android.content.res;
 import static android.content.res.Resources.ID_NULL;
 
 import android.annotation.AnyRes;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
@@ -161,9 +162,10 @@ public final class XmlBlock implements AutoCloseable {
         public int getDepth() {
             return mDepth;
         }
+        @Nullable
         public String getText() {
             int id = nativeGetText(mParseState);
-            return id >= 0 ? mStrings.get(id).toString() : null;
+            return id >= 0 ? getSequenceString(mStrings.getSequence(id)) : null;
         }
         public int getLineNumber() {
             return nativeGetLineNumber(mParseState);
@@ -189,25 +191,29 @@ public final class XmlBlock implements AutoCloseable {
             }
             return chars;
         }
+        @Nullable
         public String getNamespace() {
             int id = nativeGetNamespace(mParseState);
-            return id >= 0 ? mStrings.get(id).toString() : "";
+            return id >= 0 ? getSequenceString(mStrings.getSequence(id)) : "";
         }
+        @Nullable
         public String getName() {
             int id = nativeGetName(mParseState);
-            return id >= 0 ? mStrings.get(id).toString() : null;
+            return id >= 0 ? getSequenceString(mStrings.getSequence(id)) : null;
         }
+        @NonNull
         public String getAttributeNamespace(int index) {
             int id = nativeGetAttributeNamespace(mParseState, index);
             if (DEBUG) System.out.println("getAttributeNamespace of " + index + " = " + id);
-            if (id >= 0) return mStrings.get(id).toString();
+            if (id >= 0) return getSequenceString(mStrings.getSequence(id));
             else if (id == -1) return "";
             throw new IndexOutOfBoundsException(String.valueOf(index));
         }
+        @NonNull
         public String getAttributeName(int index) {
             int id = nativeGetAttributeName(mParseState, index);
             if (DEBUG) System.out.println("getAttributeName of " + index + " = " + id);
-            if (id >= 0) return mStrings.get(id).toString();
+            if (id >= 0) return getSequenceString(mStrings.getSequence(id));
             throw new IndexOutOfBoundsException(String.valueOf(index));
         }
         public String getAttributePrefix(int index) {
@@ -220,10 +226,11 @@ public final class XmlBlock implements AutoCloseable {
         public int getAttributeCount() {
             return mEventType == START_TAG ? nativeGetAttributeCount(mParseState) : -1;
         }
+        @NonNull
         public String getAttributeValue(int index) {
             int id = nativeGetAttributeStringValue(mParseState, index);
             if (DEBUG) System.out.println("getAttributeValue of " + index + " = " + id);
-            if (id >= 0) return mStrings.get(id).toString();
+            if (id >= 0) return getSequenceString(mStrings.getSequence(id));
 
             // May be some other type...  check and try to convert if so.
             int t = nativeGetAttributeDataType(mParseState, index);
@@ -390,7 +397,7 @@ public final class XmlBlock implements AutoCloseable {
             int v = nativeGetAttributeData(mParseState, idx);
             if (t == TypedValue.TYPE_STRING) {
                 return XmlUtils.convertValueToList(
-                    mStrings.get(v), options, defaultValue);
+                    mStrings.getSequence(v), options, defaultValue);
             }
             return v;
         }
@@ -444,14 +451,15 @@ public final class XmlBlock implements AutoCloseable {
             }
             throw new RuntimeException("not a float!");
         }
-
+        @Nullable
         public String getIdAttribute() {
             int id = nativeGetIdAttribute(mParseState);
-            return id >= 0 ? mStrings.get(id).toString() : null;
+            return id >= 0 ? getSequenceString(mStrings.getSequence(id)) : null;
         }
+        @Nullable
         public String getClassAttribute() {
             int id = nativeGetClassAttribute(mParseState);
-            return id >= 0 ? mStrings.get(id).toString() : null;
+            return id >= 0 ? getSequenceString(mStrings.getSequence(id)) : null;
         }
 
         public int getIdAttributeResourceValue(int defaultValue) {
@@ -463,6 +471,17 @@ public final class XmlBlock implements AutoCloseable {
             return nativeGetStyleAttribute(mParseState);
         }
 
+        private String getSequenceString(@Nullable CharSequence str) {
+            if (str == null) {
+                // A value of null retrieved from a StringPool indicates that retrieval of the
+                // string failed due to incremental installation. The presence of all the XmlBlock
+                // data is verified when it is created, so this exception must not be possible.
+                throw new IllegalStateException("Retrieving a string from the StringPool of an"
+                        + " XmlBlock should never fail");
+            }
+            return str.toString();
+        }
+
         public void close() {
             synchronized (mBlock) {
                 if (mParseState != 0) {
@@ -472,13 +491,14 @@ public final class XmlBlock implements AutoCloseable {
                 }
             }
         }
-        
+
         protected void finalize() throws Throwable {
             close();
         }
 
+        @Nullable
         /*package*/ final CharSequence getPooledString(int id) {
-            return mStrings.get(id);
+            return mStrings.getSequence(id);
         }
 
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)

@@ -60,7 +60,7 @@ final class AccessibilityShellCommand extends ShellCommand {
             }
             case "start-trace":
             case "stop-trace":
-                return mService.getTraceManager().onShellCommand(cmd);
+                return mService.getTraceManager().onShellCommand(cmd, this);
         }
         return -1;
     }

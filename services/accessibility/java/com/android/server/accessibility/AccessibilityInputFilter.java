@@ -19,6 +19,7 @@ package com.android.server.accessibility;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY;
 
+import android.accessibilityservice.AccessibilityTrace;
 import android.annotation.MainThread;
 import android.content.Context;
 import android.graphics.Region;
@@ -224,7 +225,12 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
             Slog.d(TAG, "Received event: " + event + ", policyFlags=0x"
                     + Integer.toHexString(policyFlags));
         }
-
+        if (mAms.getTraceManager().isA11yTracingEnabledForTypes(
+                AccessibilityTrace.FLAGS_INPUT_FILTER)) {
+            mAms.getTraceManager().logTrace(TAG + ".onInputEvent",
+                    AccessibilityTrace.FLAGS_INPUT_FILTER,
+                    "event=" + event + ";policyFlags=" + policyFlags);
+        }
         if (mEventHandler.size() == 0) {
             if (DEBUG) Slog.d(TAG, "No mEventHandler for event " + event);
             super.onInputEvent(event, policyFlags);
@@ -424,7 +430,8 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
         final ArrayList<Display> displaysList = mAms.getValidDisplayList();
 
         if ((mEnabledFeatures & FLAG_FEATURE_AUTOCLICK) != 0) {
-            mAutoclickController = new AutoclickController(mContext, mUserId);
+            mAutoclickController = new AutoclickController(
+                    mContext, mUserId, mAms.getTraceManager());
             addFirstEventHandlerForAllDisplays(displaysList, mAutoclickController);
         }
 
@@ -462,7 +469,7 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
 
             if ((mEnabledFeatures & FLAG_FEATURE_INJECT_MOTION_EVENTS) != 0) {
                 MotionEventInjector injector = new MotionEventInjector(
-                        mContext.getMainLooper());
+                        mContext.getMainLooper(), mAms.getTraceManager());
                 addFirstEventHandler(displayId, injector);
                 mMotionEventInjectors.put(displayId, injector);
             }
@@ -563,15 +570,15 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
             final Context uiContext = displayContext.createWindowContext(
                     TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY, null /* options */);
             magnificationGestureHandler = new WindowMagnificationGestureHandler(uiContext,
-                    mAms.getWindowMagnificationMgr(), mAms.getMagnificationController(),
-                    detectControlGestures, triggerable,
+                    mAms.getWindowMagnificationMgr(), mAms.getTraceManager(),
+                    mAms.getMagnificationController(), detectControlGestures, triggerable,
                     displayId);
         } else {
             final Context uiContext = displayContext.createWindowContext(
                     TYPE_MAGNIFICATION_OVERLAY, null /* options */);
             magnificationGestureHandler = new FullScreenMagnificationGestureHandler(uiContext,
-                    mAms.getFullScreenMagnificationController(), mAms.getMagnificationController(),
-                    detectControlGestures, triggerable,
+                    mAms.getFullScreenMagnificationController(), mAms.getTraceManager(),
+                    mAms.getMagnificationController(), detectControlGestures, triggerable,
                     new WindowMagnificationPromptController(displayContext, mUserId), displayId);
         }
         return magnificationGestureHandler;

@@ -426,12 +426,12 @@
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Perekam layar"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Mulai"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Berhenti"</string>
-    <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Batalkan pemblokiran mikrofon perangkat?"</string>
-    <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Batalkan pemblokiran kamera perangkat?"</string>
-    <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Batalkan pemblokiran kamera dan mikrofon perangkat?"</string>
-    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Ini akan membatalkan pemblokiran akses untuk semua aplikasi dan layanan yang diizinkan menggunakan mikrofon."</string>
-    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Ini akan membatalkan pemblokiran akses untuk semua aplikasi dan layanan yang diizinkan menggunakan kamera."</string>
-    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Ini akan membatalkan pemblokiran akses untuk semua aplikasi dan layanan yang diizinkan menggunakan kamera atau mikrofon."</string>
+    <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Berhenti memblokir mikrofon perangkat?"</string>
+    <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Berhenti memblokir kamera perangkat?"</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Berhenti memblokir kamera dan mikrofon perangkat?"</string>
+    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Ini akan berhenti memblokir akses untuk semua aplikasi dan layanan yang diizinkan menggunakan mikrofon."</string>
+    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Ini akan berhenti memblokir akses untuk semua aplikasi dan layanan yang diizinkan menggunakan kamera."</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Ini akan berhenti memblokir akses untuk semua aplikasi dan layanan yang diizinkan menggunakan kamera atau mikrofon."</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"Perangkat"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Geser ke atas untuk beralih aplikasi"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Tarik ke kanan untuk beralih aplikasi dengan cepat"</string>

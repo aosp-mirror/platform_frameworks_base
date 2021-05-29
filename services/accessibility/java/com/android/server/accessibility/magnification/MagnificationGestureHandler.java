@@ -20,11 +20,13 @@ import static android.view.InputDevice.SOURCE_TOUCHSCREEN;
 import static android.view.MotionEvent.ACTION_CANCEL;
 import static android.view.MotionEvent.ACTION_UP;
 
+import android.accessibilityservice.AccessibilityTrace;
 import android.annotation.NonNull;
 import android.util.Log;
 import android.util.Slog;
 import android.view.MotionEvent;
 
+import com.android.server.accessibility.AccessibilityTraceManager;
 import com.android.server.accessibility.BaseEventStreamTransformation;
 
 import java.util.ArrayDeque;
@@ -99,14 +101,17 @@ public abstract class MagnificationGestureHandler extends BaseEventStreamTransfo
         void onTripleTapped(int displayId, int mode);
     }
 
+    private final AccessibilityTraceManager mTrace;
     protected final Callback mCallback;
 
     protected MagnificationGestureHandler(int displayId, boolean detectTripleTap,
             boolean detectShortcutTrigger,
+            AccessibilityTraceManager trace,
             @NonNull Callback callback) {
         mDisplayId = displayId;
         mDetectTripleTap = detectTripleTap;
         mDetectShortcutTrigger = detectShortcutTrigger;
+        mTrace = trace;
         mCallback = callback;
 
         mDebugInputEventHistory = DEBUG_EVENT_STREAM ? new ArrayDeque<>() : null;
@@ -117,6 +122,12 @@ public abstract class MagnificationGestureHandler extends BaseEventStreamTransfo
     public final void onMotionEvent(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
         if (DEBUG_ALL) {
             Slog.i(mLogTag, "onMotionEvent(" + event + ")");
+        }
+        if (mTrace.isA11yTracingEnabledForTypes(
+                AccessibilityTrace.FLAGS_INPUT_FILTER | AccessibilityTrace.FLAGS_GESTURE)) {
+            mTrace.logTrace("MagnificationGestureHandler.onMotionEvent",
+                    AccessibilityTrace.FLAGS_INPUT_FILTER | AccessibilityTrace.FLAGS_GESTURE,
+                    "event=" + event + ";rawEvent=" + rawEvent + ";policyFlags=" + policyFlags);
         }
         if (DEBUG_EVENT_STREAM) {
             storeEventInto(mDebugInputEventHistory, event);
