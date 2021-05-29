@@ -1573,6 +1573,7 @@ public class OomAdjuster {
         state.setAdjTarget(null);
         state.setEmpty(false);
         state.setCached(false);
+        state.setNoKillOnForcedAppStandbyAndIdle(false);
         state.resetAllowStartFgsState();
         app.mOptRecord.setShouldNotFreeze(false);
 
@@ -2061,6 +2062,9 @@ public class OomAdjuster {
                             // Similar to BIND_WAIVE_PRIORITY, keep it unfrozen.
                             if (clientAdj < ProcessList.CACHED_APP_MIN_ADJ) {
                                 app.mOptRecord.setShouldNotFreeze(true);
+                                // Similarly, we shouldn't kill it when it's in forced-app-standby
+                                // mode and cached & idle state.
+                                app.mState.setNoKillOnForcedAppStandbyAndIdle(true);
                             }
                             // Not doing bind OOM management, so treat
                             // this guy more like a started service.
@@ -2265,6 +2269,9 @@ public class OomAdjuster {
                         // unfrozen.
                         if (clientAdj < ProcessList.CACHED_APP_MIN_ADJ) {
                             app.mOptRecord.setShouldNotFreeze(true);
+                            // Similarly, we shouldn't kill it when it's in forced-app-standby
+                            // mode and cached & idle state.
+                            app.mState.setNoKillOnForcedAppStandbyAndIdle(true);
                         }
                     }
                     if ((cr.flags&Context.BIND_TREAT_LIKE_ACTIVITY) != 0) {

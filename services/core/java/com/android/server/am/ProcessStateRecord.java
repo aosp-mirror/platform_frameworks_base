@@ -363,6 +363,13 @@ final class ProcessStateRecord {
     @ElapsedRealtimeLong
     private long mLastInvisibleTime;
 
+    /**
+     * Whether or not this process could be killed when it's in forced-app-standby mode
+     * and cached &amp; idle state.
+     */
+    @GuardedBy("mService")
+    private boolean mNoKillOnForcedAppStandbyAndIdle;
+
     // Below are the cached task info for OomAdjuster only
     private static final int VALUE_INVALID = -1;
     private static final int VALUE_FALSE = 0;
@@ -1141,6 +1148,16 @@ final class ProcessStateRecord {
     @ElapsedRealtimeLong
     long getLastInvisibleTime() {
         return mLastInvisibleTime;
+    }
+
+    @GuardedBy("mService")
+    void setNoKillOnForcedAppStandbyAndIdle(boolean shouldNotKill) {
+        mNoKillOnForcedAppStandbyAndIdle = shouldNotKill;
+    }
+
+    @GuardedBy("mService")
+    boolean shouldNotKillOnForcedAppStandbyAndIdle() {
+        return mNoKillOnForcedAppStandbyAndIdle;
     }
 
     @GuardedBy({"mService", "mProcLock"})
