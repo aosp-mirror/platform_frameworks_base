@@ -259,7 +259,7 @@
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"បិទ​សំឡេង"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"បើក​សំឡេង"</string>
     <string name="global_actions_toggle_airplane_mode" msgid="6911684460146916206">"ពេល​ជិះ​យន្តហោះ"</string>
-    <string name="global_actions_airplane_mode_on_status" msgid="5508025516695361936">"បាន​បើក​របៀប​ពេល​ជិះ​យន្ត​ហោះ"</string>
+    <string name="global_actions_airplane_mode_on_status" msgid="5508025516695361936">"បានបើកមុខងារ​ពេល​ជិះ​យន្តហោះ"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="8522219771500505475">"បាន​បិទ​របៀបពេលជិះ​យន្តហោះ​"</string>
     <string name="global_action_settings" msgid="4671878836947494217">"ការ​កំណត់"</string>
     <string name="global_action_assist" msgid="2517047220311505805">"ជំនួយ"</string>
@@ -1785,7 +1785,7 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"កន្លែង​ធ្វើការ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"<xliff:g id="LABEL">%1$s</xliff:g> ការងារទី 2"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"<xliff:g id="LABEL">%1$s</xliff:g> ការងារទី 3"</string>
-    <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"សួរ​រក​កូដ PIN មុន​ពេល​ផ្ដាច់"</string>
+    <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"សួរ​រក​កូដ PIN មុន​ពេលដកខ្ទាស់"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"សួរ​រក​លំនាំ​ដោះ​សោ​មុន​ពេលដោះខ្ទាស់"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"សួរ​រក​ពាក្យ​សម្ងាត់​មុន​ពេល​ផ្ដាច់"</string>
     <string name="package_installed_device_owner" msgid="7035926868974878525">"​ដំឡើង​ដោយ​អ្នកគ្រប់គ្រង​របស់​អ្នក"</string>
