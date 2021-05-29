@@ -160,6 +160,13 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
         return "FaceProvider/" + mHalInstanceName;
     }
 
+    boolean hasHalInstance() {
+        if (mTestHalEnabled) {
+            return true;
+        }
+        return ServiceManager.checkService(IFace.DESCRIPTOR + "/" + mHalInstanceName) != null;
+    }
+
     @Nullable
     @VisibleForTesting
     synchronized IFace getHalInstance() {
@@ -291,7 +298,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
 
     @Override
     public boolean isHardwareDetected(int sensorId) {
-        return getHalInstance() != null;
+        return hasHalInstance();
     }
 
     @Override
