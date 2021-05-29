@@ -16,6 +16,8 @@
 
 package com.android.wm.shell.bubbles.animation;
 
+import static com.android.wm.shell.bubbles.BubblePositioner.NUM_VISIBLE_WHEN_RESTING;
+
 import android.content.res.Resources;
 import android.graphics.Path;
 import android.graphics.PointF;
@@ -209,16 +211,8 @@ public class ExpandedAnimationController
         mBubblePaddingTop = res.getDimensionPixelSize(R.dimen.bubble_padding_top);
         mStackOffsetPx = res.getDimensionPixelSize(R.dimen.bubble_stack_offset);
         mBubbleSizePx = mPositioner.getBubbleSize();
-        mBubblesMaxRendered = res.getInteger(R.integer.bubbles_max_rendered);
-        mBubblesMaxSpace = res.getDimensionPixelSize(R.dimen.bubble_max_spacing);
-        final float availableSpace = mPositioner.isLandscape()
-                ? mPositioner.getAvailableRect().height()
-                : mPositioner.getAvailableRect().width();
-        final float spaceForMaxBubbles = (mExpandedViewPadding * 2)
-                + (mBubblesMaxRendered + 1) * mBubbleSizePx;
-        float spaceBetweenBubbles =
-                (availableSpace - spaceForMaxBubbles) / mBubblesMaxRendered;
-        mSpaceBetweenBubbles = Math.min(spaceBetweenBubbles, mBubblesMaxSpace);
+        mBubblesMaxRendered = mPositioner.getMaxBubbles();
+        mSpaceBetweenBubbles = res.getDimensionPixelSize(R.dimen.bubble_spacing);
     }
 
     /**
@@ -289,7 +283,8 @@ public class ExpandedAnimationController
                 path.lineTo(stackedX, expandedY);
 
                 // Then, draw a line down to the stack position.
-                path.lineTo(stackedX, mCollapsePoint.y + Math.min(index, 1) * mStackOffsetPx);
+                path.lineTo(stackedX, mCollapsePoint.y
+                        + Math.min(index, NUM_VISIBLE_WHEN_RESTING - 1) * mStackOffsetPx);
             }
 
             // The lead bubble should be the bubble with the longest distance to travel when we're

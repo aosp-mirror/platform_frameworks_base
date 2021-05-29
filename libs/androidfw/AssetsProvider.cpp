@@ -85,12 +85,14 @@ const std::string& ZipAssetsProvider::PathOrDebugName::GetDebugName() const {
 }
 
 ZipAssetsProvider::ZipAssetsProvider(ZipArchiveHandle handle, PathOrDebugName&& path,
-                                     time_t last_mod_time)
+                                     package_property_t flags, time_t last_mod_time)
     : zip_handle_(handle, ::CloseArchive),
       name_(std::forward<PathOrDebugName>(path)),
+      flags_(flags),
       last_mod_time_(last_mod_time) {}
 
-std::unique_ptr<ZipAssetsProvider> ZipAssetsProvider::Create(std::string path) {
+std::unique_ptr<ZipAssetsProvider> ZipAssetsProvider::Create(std::string path,
+                                                             package_property_t flags) {
   ZipArchiveHandle handle;
   if (int32_t result = OpenArchive(path.c_str(), &handle); result != 0) {
     LOG(ERROR) << "Failed to open APK '" << path << "': " << ::ErrorCodeString(result);
@@ -109,11 +111,12 @@ std::unique_ptr<ZipAssetsProvider> ZipAssetsProvider::Create(std::string path) {
 
   return std::unique_ptr<ZipAssetsProvider>(
       new ZipAssetsProvider(handle, PathOrDebugName{std::move(path),
-                                                    true /* is_path */}, sb.st_mtime));
+                                                    true /* is_path */}, flags, sb.st_mtime));
 }
 
 std::unique_ptr<ZipAssetsProvider> ZipAssetsProvider::Create(base::unique_fd fd,
                                                              std::string friendly_name,
+                                                             package_property_t flags,
                                                              off64_t offset,
                                                              off64_t len) {
   ZipArchiveHandle handle;
@@ -140,7 +143,7 @@ std::unique_ptr<ZipAssetsProvider> ZipAssetsProvider::Create(base::unique_fd fd,
 
   return std::unique_ptr<ZipAssetsProvider>(
       new ZipAssetsProvider(handle, PathOrDebugName{std::move(friendly_name),
-                                                    false /* is_path */}, sb.st_mtime));
+                                                    false /* is_path */}, flags, sb.st_mtime));
 }
 
 std::unique_ptr<Asset> ZipAssetsProvider::OpenInternal(const std::string& path,
@@ -161,10 +164,11 @@ std::unique_ptr<Asset> ZipAssetsProvider::OpenInternal(const std::string& path,
 
     const int fd = GetFileDescriptor(zip_handle_.get());
     const off64_t fd_offset = GetFileDescriptorOffset(zip_handle_.get());
+    const bool incremental_hardening = (flags_ & PROPERTY_DISABLE_INCREMENTAL_HARDENING) == 0U;
     incfs::IncFsFileMap asset_map;
     if (entry.method == kCompressDeflated) {
       if (!asset_map.Create(fd, entry.offset + fd_offset, entry.compressed_length,
-                            name_.GetDebugName().c_str())) {
+                            name_.GetDebugName().c_str(), incremental_hardening)) {
         LOG(ERROR) << "Failed to mmap file '" << path << "' in APK '" << name_.GetDebugName()
                    << "'";
         return {};
@@ -181,7 +185,7 @@ std::unique_ptr<Asset> ZipAssetsProvider::OpenInternal(const std::string& path,
     }
 
     if (!asset_map.Create(fd, entry.offset + fd_offset, entry.uncompressed_length,
-                          name_.GetDebugName().c_str())) {
+                          name_.GetDebugName().c_str(), incremental_hardening)) {
       LOG(ERROR) << "Failed to mmap file '" << path << "' in APK '" << name_.GetDebugName() << "'";
       return {};
     }

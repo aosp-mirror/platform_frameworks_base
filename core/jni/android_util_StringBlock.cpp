@@ -72,7 +72,7 @@ static jstring android_content_StringBlock_nativeGetString(JNIEnv* env, jobject 
     ResStringPool* osb = reinterpret_cast<ResStringPool*>(token);
     if (osb == NULL) {
         jniThrowNullPointerException(env, NULL);
-        return 0;
+        return NULL;
     }
 
     if (auto str8 = osb->string8At(idx); str8.has_value()) {
@@ -80,9 +80,11 @@ static jstring android_content_StringBlock_nativeGetString(JNIEnv* env, jobject 
     }
 
     auto str = osb->stringAt(idx);
-    if (UNLIKELY(!str.has_value())) {
+    if (IsIOError(str)) {
+        return NULL;
+    } else if (UNLIKELY(!str.has_value())) {
         jniThrowException(env, "java/lang/IndexOutOfBoundsException", NULL);
-        return 0;
+        return NULL;
     }
 
     return env->NewString((const jchar*)str->data(), str->size());
