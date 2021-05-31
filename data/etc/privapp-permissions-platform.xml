@@ -472,6 +472,9 @@ applications that come with the platform
         <permission name="android.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS" />
         <!-- Permission required for CTS test - CtsAlarmManagerTestCases -->
         <permission name="android.permission.UPDATE_DEVICE_STATS" />
+        <!-- Permission required for hotword detection service CTS tests -->
+        <permission name="android.permission.MANAGE_HOTWORD_DETECTION" />
+        <permission name="android.permission.BIND_HOTWORD_DETECTION_SERVICE" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">
