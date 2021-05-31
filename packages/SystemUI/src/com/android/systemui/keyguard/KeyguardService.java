@@ -70,7 +70,7 @@ public class KeyguardService extends Service {
     /**
      * @see #ENABLE_REMOTE_KEYGUARD_ANIMATION_PROPERTY
      */
-    static boolean sEnableRemoteKeyguardAnimation =
+    public static boolean sEnableRemoteKeyguardAnimation =
             SystemProperties.getBoolean(ENABLE_REMOTE_KEYGUARD_ANIMATION_PROPERTY, false);
 
     private final KeyguardViewMediator mKeyguardViewMediator;
