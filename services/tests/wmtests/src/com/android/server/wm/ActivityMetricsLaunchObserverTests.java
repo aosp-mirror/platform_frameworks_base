@@ -306,7 +306,8 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
     private void notifyActivityLaunching(Intent intent) {
         final ActivityMetricsLogger.LaunchingState previousState = mLaunchingState;
         mLaunchingState = mActivityMetricsLogger.notifyActivityLaunching(intent,
-                mLaunchTopByTrampoline ? mTrampolineActivity : null /* caller */);
+                mLaunchTopByTrampoline ? mTrampolineActivity : null /* caller */,
+                mLaunchTopByTrampoline ? mTrampolineActivity.getUid() : 0);
         if (mLaunchTopByTrampoline) {
             // The transition of TrampolineActivity has not been completed, so when the next
             // activity is starting from it, the same launching state should be returned.
@@ -429,7 +430,7 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
                 .setCreateTask(true)
                 .build();
         mActivityMetricsLogger.notifyActivityLaunching(activityOnNewTask.intent,
-                mTrampolineActivity /* caller */);
+                mTrampolineActivity /* caller */, mTrampolineActivity.getUid());
         notifyActivityLaunched(START_SUCCESS, activityOnNewTask);
 
         transitToDrawnAndVerifyOnLaunchFinished(activityOnNewTask);
@@ -453,7 +454,7 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
 
         // Before TopActivity is drawn, it launches another activity on a different display.
         mActivityMetricsLogger.notifyActivityLaunching(activityOnNewDisplay.intent,
-                mTopActivity /* caller */);
+                mTopActivity /* caller */, mTopActivity.getUid());
         notifyActivityLaunched(START_SUCCESS, activityOnNewDisplay);
 
         // There should be 2 events instead of coalescing as one event.
