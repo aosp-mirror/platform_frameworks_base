@@ -1840,7 +1840,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
     <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Spořič baterie za účelem úspory energie:\n\n• Zapne tmavý motiv.\n• Vypne nebo omezí aktivitu na pozadí, některé vizuální efekty a další funkce jako „Ok Google“.\n\n"<annotation id="url">"Další informace"</annotation></string>
     <string name="battery_saver_description" msgid="6794188153647295212">"Spořič baterie za účelem úspory energie:\n\n• Zapne tmavý motiv.\n• Vypne nebo omezí aktivitu na pozadí, některé vizuální efekty a další funkce jako „Ok Google“."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Z důvodu snížení využití dat brání spořič dat některým aplikacím v odesílání nebo příjmu dat na pozadí. Aplikace, kterou právě používáte, data přenášet může, ale může tak činit méně často. V důsledku toho se například obrázky nemusejí zobrazit, dokud na ně neklepnete."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"S cílem snížit spotřebu dat brání spořič dat některým aplikacím odesílat nebo přijímat data na pozadí. Aplikace, kterou právě používáte, data přenášet může, ale může tak činit méně často. V důsledku toho se například obrázky nemusejí zobrazit, dokud na ně neklepnete."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Chcete zapnout Spořič dat?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Zapnout"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">

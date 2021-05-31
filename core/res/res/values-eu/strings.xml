@@ -1263,7 +1263,7 @@
     <string name="select_character" msgid="3352797107930786979">"Txertatu karakterea"</string>
     <string name="sms_control_title" msgid="4748684259903148341">"SMS mezuak bidaltzen"</string>
     <string name="sms_control_message" msgid="6574313876316388239">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; SMS asko ari da bidaltzen. Mezuak bidaltzen jarrai dezan onartu nahi duzu?"</string>
-    <string name="sms_control_yes" msgid="4858845109269524622">"Baimendu"</string>
+    <string name="sms_control_yes" msgid="4858845109269524622">"Eman baimena"</string>
     <string name="sms_control_no" msgid="4845717880040355570">"Ukatu"</string>
     <string name="sms_short_code_confirm_message" msgid="1385416688897538724">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aplikazioak mezu bat bidali nahi du &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; helbidera."</string>
     <string name="sms_short_code_details" msgid="2723725738333388351">"Baliteke horrek mugikorreko kontuan "<b>"gastuak eragitea"</b>"."</string>
@@ -1409,7 +1409,7 @@
     <string name="grant_credentials_permission_message_header" msgid="5365733888842570481">"Aplikazio hauetako bat edo gehiago kontua orain eta etorkizunean atzitzeko baimena eskatzen ari dira."</string>
     <string name="grant_credentials_permission_message_footer" msgid="1886710210516246461">"Eskaera onartu nahi duzu?"</string>
     <string name="grant_permissions_header_text" msgid="3420736827804657201">"Sarbide-eskaera"</string>
-    <string name="allow" msgid="6195617008611933762">"Baimendu"</string>
+    <string name="allow" msgid="6195617008611933762">"Eman baimena"</string>
     <string name="deny" msgid="6632259981847676572">"Ukatu"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"Baimena eskatu da"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"Baimena eskatu da \n<xliff:g id="ACCOUNT">%s</xliff:g> konturako."</string>
@@ -1430,7 +1430,7 @@
     <string name="vpn_text_long" msgid="278540576806169831">"<xliff:g id="SESSION">%s</xliff:g> saiora konektatuta. Sakatu sarea kudeatzeko."</string>
     <string name="vpn_lockdown_connecting" msgid="6096725311950342607">"Beti aktibatuta dagoen VPNa konektatzen…"</string>
     <string name="vpn_lockdown_connected" msgid="2853127976590658469">"Beti aktibatuta dagoen VPNa konektatu da"</string>
-    <string name="vpn_lockdown_disconnected" msgid="5573611651300764955">"Beti aktibatuta dagoen VPN sarea deskonektatuta dago"</string>
+    <string name="vpn_lockdown_disconnected" msgid="5573611651300764955">"Beti aktibatuta dagoen VPNa deskonektatuta dago"</string>
     <string name="vpn_lockdown_error" msgid="4453048646854247947">"Ezin izan da konektatu beti aktibatuta dagoen VPN sarera"</string>
     <string name="vpn_lockdown_config" msgid="8331697329868252169">"Aldatu sarearen edo VPN sarearen ezarpenak"</string>
     <string name="upload_file" msgid="8651942222301634271">"Aukeratu fitxategia"</string>
@@ -1785,7 +1785,7 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"Laneko <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"Laneko 2. <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"Laneko 3. <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Eskatu PIN kodea aingura kendu aurretik"</string>
+    <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Eskatu PINa aingura kendu aurretik"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Eskatu desblokeatzeko eredua aingura kendu aurretik"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Eskatu pasahitza aingura kendu aurretik"</string>
     <string name="package_installed_device_owner" msgid="7035926868974878525">"Administratzaileak instalatu du"</string>
