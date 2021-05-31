@@ -252,7 +252,8 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"वायरलेस डिस्प्ले प्रयोग गर्ने वा नगर्ने"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Wi-Fi भर्बोज लग अन गरियोस्"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wi‑Fi स्क्यान थ्रोटलिङ"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Wi‑Fi द्वारा परिष्कृत MAC एड्रेस बदल्ने सुविधा"</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization (882650208573834301) -->
+    <skip />
     <string name="mobile_data_always_on" msgid="8275958101875563572">"मोबाइल डेटा सधैँ अन होस्"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"टेदरिङको लागि हार्डवेयरको प्रवेग"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"नामकरण नगरिएका ब्लुटुथ डिभाइस देखाइयोस्"</string>
@@ -453,7 +454,8 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"पूरा चार्ज हुन <xliff:g id="TIME">%1$s</xliff:g> लाग्ने छ"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - पूरा चार्ज हुन <xliff:g id="TIME">%2$s</xliff:g> लाग्ने छ"</string>
-    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - ब्याट्री लामो समयसम्म टिक्ने बनाउन अप्टिमाइज गरिँदै छ"</string>
+    <!-- no translation found for power_charging_limited (7956120998372505295) -->
+    <skip />
     <string name="battery_info_status_unknown" msgid="268625384868401114">"अज्ञात"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"चार्ज हुँदै"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"द्रुत गतिमा चार्ज गरिँदै"</string>
@@ -521,7 +523,7 @@
     <string name="alarm_template_far" msgid="6382760514842998629">"<xliff:g id="WHEN">%1$s</xliff:g> मा"</string>
     <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"अवधि"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"प्रत्येक पटक सोधियोस्"</string>
-    <string name="zen_mode_forever" msgid="3339224497605461291">"तपाईंले निष्क्रिय नपार्दासम्म"</string>
+    <string name="zen_mode_forever" msgid="3339224497605461291">"तपाईंले अफ नगरेसम्म"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"अहिले भर्खरै"</string>
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"फोनको स्पिकर"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"यो फोन"</string>
