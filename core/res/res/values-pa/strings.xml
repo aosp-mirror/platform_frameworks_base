@@ -153,7 +153,7 @@
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ਅੱਗੇ ਨਹੀਂ ਭੇਜਿਆ ਗਿਆ"</string>
     <string name="fcComplete" msgid="1080909484660507044">"ਵਿਸ਼ੇਸ਼ਤਾ ਕੋਡ ਪੂਰਾ।"</string>
     <string name="fcError" msgid="5325116502080221346">"ਕਨੈਕਸ਼ਨ ਸਮੱਸਿਆ ਜਾਂ ਅਵੈਧ ਵਿਸ਼ੇਸ਼ਤਾ ਕੋਡ।"</string>
-    <string name="httpErrorOk" msgid="6206751415788256357">"ਠੀਕ"</string>
+    <string name="httpErrorOk" msgid="6206751415788256357">"ਠੀਕ ਹੈ"</string>
     <string name="httpError" msgid="3406003584150566720">"ਇੱਕ ਨੈੱਟਵਰਕ ਅਸ਼ੁੱਧੀ ਹੋਈ ਸੀ।"</string>
     <string name="httpErrorLookup" msgid="3099834738227549349">"URL ਨਹੀਂ ਲੱਭ ਸਕਿਆ।"</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="3976195595501606787">"ਸਾਈਟ ਪ੍ਰਮਾਣੀਕਰਨ ਯੋਜਨਾ ਸਮਰਥਿਤ ਨਹੀਂ ਹੈ।"</string>
@@ -762,7 +762,7 @@
     <string name="phoneTypeTtyTdd" msgid="532038552105328779">"TTY TDD"</string>
     <string name="phoneTypeWorkMobile" msgid="7522314392003565121">"ਕੰਮ ਦਾ ਮੋਬਾਈਲ"</string>
     <string name="phoneTypeWorkPager" msgid="3748332310638505234">"ਦਫ਼ਤਰ ਦਾ ਪੇਜਰ"</string>
-    <string name="phoneTypeAssistant" msgid="757550783842231039">"ਸਹਾਇਕ"</string>
+    <string name="phoneTypeAssistant" msgid="757550783842231039">"Assistant"</string>
     <string name="phoneTypeMms" msgid="1799747455131365989">"MMS"</string>
     <string name="eventTypeCustom" msgid="3257367158986466481">"ਵਿਉਂਂਤੀ"</string>
     <string name="eventTypeBirthday" msgid="7770026752793912283">"ਜਨਮਦਿਨ"</string>
@@ -795,7 +795,7 @@
     <string name="orgTypeOther" msgid="5450675258408005553">"ਹੋਰ"</string>
     <string name="orgTypeCustom" msgid="1126322047677329218">"ਵਿਉਂਂਤੀ"</string>
     <string name="relationTypeCustom" msgid="282938315217441351">"ਵਿਉਂਂਤੀ"</string>
-    <string name="relationTypeAssistant" msgid="4057605157116589315">"ਸਹਾਇਕ"</string>
+    <string name="relationTypeAssistant" msgid="4057605157116589315">"Assistant"</string>
     <string name="relationTypeBrother" msgid="7141662427379247820">"ਭਰਾ"</string>
     <string name="relationTypeChild" msgid="9076258911292693601">"ਬੱਚਾ"</string>
     <string name="relationTypeDomesticPartner" msgid="7825306887697559238">"ਦੇਸੀ ਪਾਰਟਨਰ"</string>
@@ -1081,7 +1081,7 @@
     <string name="VideoView_error_title" msgid="5750686717225068016">"ਵੀਡੀਓ ਸਮੱਸਿਆ"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3782449246085134720">"ਇਹ ਵੀਡੀਓ ਇਸ ਡੀਵਾਈਸ ਤੇ ਸਟ੍ਰੀਮਿੰਗ ਲਈ ਪ੍ਰਮਾਣਕ ਨਹੀਂ ਹੈ।"</string>
     <string name="VideoView_error_text_unknown" msgid="7658683339707607138">"ਇਹ ਵੀਡੀਓ ਪਲੇ ਨਹੀਂ ਕਰ ਸਕਦੇ।"</string>
-    <string name="VideoView_error_button" msgid="5138809446603764272">"ਠੀਕ"</string>
+    <string name="VideoView_error_button" msgid="5138809446603764272">"ਠੀਕ ਹੈ"</string>
     <string name="relative_time" msgid="8572030016028033243">"<xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="noon" msgid="8365974533050605886">"ਦੁਪਹਿਰ"</string>
     <string name="Noon" msgid="6902418443846838189">"ਦੁਪਹਿਰ"</string>
@@ -1114,7 +1114,7 @@
     <string name="app_running_notification_text" msgid="5120815883400228566">"ਹੋਰ ਜਾਣਕਾਰੀ ਜਾਂ ਐਪ ਨੂੰ ਬੰਦ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="ok" msgid="2646370155170753815">"ਠੀਕ ਹੈ"</string>
     <string name="cancel" msgid="6908697720451760115">"ਰੱਦ ਕਰੋ"</string>
-    <string name="yes" msgid="9069828999585032361">"ਠੀਕ"</string>
+    <string name="yes" msgid="9069828999585032361">"ਠੀਕ ਹੈ"</string>
     <string name="no" msgid="5122037903299899715">"ਰੱਦ ਕਰੋ"</string>
     <string name="dialog_alert_title" msgid="651856561974090712">"ਧਿਆਨ ਦਿਓ"</string>
     <string name="loading" msgid="3138021523725055037">"ਲੋਡ ਹੋ ਰਿਹਾ ਹੈ..."</string>
@@ -1169,7 +1169,7 @@
     <string name="anr_activity_process" msgid="3477362583767128667">"<xliff:g id="ACTIVITY">%1$s</xliff:g> ਪ੍ਰਤਿਕਿਰਿਆ ਨਹੀਂ ਦੇ ਰਹੀ ਹੈ"</string>
     <string name="anr_application_process" msgid="4978772139461676184">"<xliff:g id="APPLICATION">%1$s</xliff:g> ਪ੍ਰਤਿਕਿਰਿਆ ਨਹੀਂ ਦੇ ਰਹੀ ਹੈ"</string>
     <string name="anr_process" msgid="1664277165911816067">"ਪ੍ਰਕਿਰਿਆ <xliff:g id="PROCESS">%1$s</xliff:g> ਪ੍ਰਤਿਕਿਰਿਆ ਨਹੀਂ ਦੇ ਰਹੀ ਹੈ"</string>
-    <string name="force_close" msgid="9035203496368973803">"ਠੀਕ"</string>
+    <string name="force_close" msgid="9035203496368973803">"ਠੀਕ ਹੈ"</string>
     <string name="report" msgid="2149194372340349521">"ਰਿਪੋਰਟ ਕਰੋ"</string>
     <string name="wait" msgid="7765985809494033348">"ਉਡੀਕ ਕਰੋ"</string>
     <string name="webpage_unresponsive" msgid="7850879412195273433">"ਸਫ਼ਾ ਅਨਰਿਸਪੌਂਸਿਵ ਬਣ ਗਿਆ ਹੈ।\n\nਕੀ ਤੁਸੀਂ ਇਸਨੂੰ ਬੰਦ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?"</string>
@@ -1294,7 +1294,7 @@
     <string name="perms_description_app" msgid="2747752389870161996">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਵੱਲੋਂ ਮੁਹੱਈਆ ਕੀਤਾ।"</string>
     <string name="no_permissions" msgid="5729199278862516390">"ਕੋਈ ਅਨੁਮਤੀਆਂ ਲੁੜੀਂਦੀਆਂ ਨਹੀਂ"</string>
     <string name="perm_costs_money" msgid="749054595022779685">"ਇਸ ਨਾਲ ਤੁਹਾਨੂੰ ਖਰਚਾ ਪੈ ਸਕਦਾ ਹੈ"</string>
-    <string name="dlg_ok" msgid="5103447663504839312">"ਠੀਕ"</string>
+    <string name="dlg_ok" msgid="5103447663504839312">"ਠੀਕ ਹੈ"</string>
     <string name="usb_charging_notification_title" msgid="1674124518282666955">"ਇਹ ਡੀਵਾਈਸ USB ਰਾਹੀਂ ਚਾਰਜ ਹੋ ਰਿਹਾ ਹੈ"</string>
     <string name="usb_supplying_notification_title" msgid="5378546632408101811">"ਕਨੈਕਟ ਕੀਤਾ ਡੀਵਾਈਸ USB ਰਾਹੀਂ ਚਾਰਜ ਹੋ ਰਿਹਾ ਹੈ"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"USB ਫ਼ਾਈਲ ਟ੍ਰਾਂਸਫ਼ਰ ਚਾਲੂ ਹੈ"</string>

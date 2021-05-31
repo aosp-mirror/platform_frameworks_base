@@ -259,7 +259,7 @@
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"Âm thanh TẮT"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"Âm thanh BẬT"</string>
     <string name="global_actions_toggle_airplane_mode" msgid="6911684460146916206">"Chế độ trên máy bay"</string>
-    <string name="global_actions_airplane_mode_on_status" msgid="5508025516695361936">"Chế độ trên máy bay BẬT"</string>
+    <string name="global_actions_airplane_mode_on_status" msgid="5508025516695361936">"Chế độ trên máy bay đang bật"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="8522219771500505475">"Chế độ trên máy bay TẮT"</string>
     <string name="global_action_settings" msgid="4671878836947494217">"Cài đặt"</string>
     <string name="global_action_assist" msgid="2517047220311505805">"Hỗ trợ"</string>
