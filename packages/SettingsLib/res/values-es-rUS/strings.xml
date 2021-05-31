@@ -91,7 +91,7 @@
     <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"Utilizar para compartir contactos"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Compartir conexión a Internet"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"Mensajes de texto"</string>
-    <string name="bluetooth_profile_sap" msgid="8304170950447934386">"Acceso SIM"</string>
+    <string name="bluetooth_profile_sap" msgid="8304170950447934386">"Acceso a SIM"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"Audio en HD: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"Audio en HD"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Audífonos"</string>
@@ -252,7 +252,8 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Certificación de pantalla inalámbrica"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Habilitar registro detallado de Wi-Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Limitación de búsqueda de Wi-Fi"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Aleatorización de MAC de Wi-Fi Enhanced"</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization (882650208573834301) -->
+    <skip />
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Datos móviles siempre activados"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Aceleración de hardware de conexión mediante dispositivo móvil"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Mostrar dispositivos Bluetooth sin nombre"</string>
@@ -453,7 +454,8 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g>: <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> para completar"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> para completar"</string>
-    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g>: Optimizando el estado de la batería"</string>
+    <!-- no translation found for power_charging_limited (7956120998372505295) -->
+    <skip />
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Desconocido"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Cargando"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Cargando rápido"</string>

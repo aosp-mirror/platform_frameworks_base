@@ -252,7 +252,8 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Certificering van draadloze weergave"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Uitgebreide wifi-logregistr. aanzetten"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wifi-scannen beperken"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Via wifi ondersteunde MAC-herschikking"</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization (882650208573834301) -->
+    <skip />
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Mobiele data altijd actief"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Hardwareversnelling voor tethering"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Bluetooth-apparaten zonder naam tonen"</string>
@@ -283,7 +284,7 @@
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"Kan geen verbinding maken"</string>
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Toon opties voor certificering van draadloze weergave"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Verhoog het logniveau voor wifi, toon per SSID RSSI in wifi-kiezer"</string>
-    <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Verlaagt het batterijverbruik en verbetert de netwerkprestaties"</string>
+    <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Verlaag het batterijverbruik en verbeter de netwerkprestaties"</string>
     <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Als deze modus aanstaat, kan het MAC-adres van dit apparaat veranderen telkens als het apparaat verbinding maakt met een netwerk waarvoor MAC-herschikking aanstaat."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Met datalimiet"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Gratis"</string>
@@ -310,7 +311,7 @@
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"Apps verifiëren via USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Controleer apps die zijn geïnstalleerd via ADB/ADT op schadelijk gedrag"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Toon bluetooth-apparaten zonder naam (alleen MAC-adressen)"</string>
-    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Zet de functie voor absoluut volume van Bluetooth uit in geval van volumeproblemen met externe apparaten, zoals een onacceptabel hoog volume of geen volumeregeling."</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Zet de functie voor absoluut volume van bluetooth uit in geval van volumeproblemen met externe apparaten, zoals een onacceptabel hoog volume of geen volumeregeling."</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Zet de Gabeldorsche-functiestack voor bluetooth aan."</string>
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Hiermee wordt de functie voor verbeterde connectiviteit aangezet."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Lokale terminal"</string>
@@ -370,9 +371,9 @@
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Wis activiteit zodra de gebruiker ermee stopt"</string>
     <string name="app_process_limit_title" msgid="8361367869453043007">"Achtergrondproceslimiet"</string>
     <string name="show_all_anrs" msgid="9160563836616468726">"ANR\'s op de achtergrond"</string>
-    <string name="show_all_anrs_summary" msgid="8562788834431971392">"Toon dialoogvenster App reageert niet voor achtergrond-apps"</string>
+    <string name="show_all_anrs_summary" msgid="8562788834431971392">"Toon dialoogvenster \'App reageert niet\' voor achtergrond-apps"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Kanaalwaarschuwingen voor meldingen tonen"</string>
-    <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Geeft een waarschuwing op het scherm weer wanneer een app een melding post zonder geldig kanaal"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Toont een waarschuwing op het scherm wanneer een app een melding post zonder geldig kanaal"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Toestaan van apps op externe opslag afdwingen"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Hiermee komt elke app in aanmerking voor schrijven naar externe opslag, ongeacht de manifestwaarden"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Formaat activiteiten geforceerd aanpasbaar maken"</string>
@@ -453,7 +454,8 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"Vol over <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - vol over <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - Optimaliseren voor batterijduur"</string>
+    <!-- no translation found for power_charging_limited (7956120998372505295) -->
+    <skip />
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Onbekend"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Opladen"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Snel opladen"</string>
@@ -520,7 +522,7 @@
     <string name="alarm_template" msgid="3346777418136233330">"om <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="6382760514842998629">"op <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"Duur"</string>
-    <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Altijd vragen"</string>
+    <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Vraag altijd"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Totdat je uitzet"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Zojuist"</string>
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Telefoonspeaker"</string>
