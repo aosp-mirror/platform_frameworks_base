@@ -456,6 +456,7 @@
     <string name="keyguard_more_overflow_text" msgid="5819512373606638727">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="7248696377626341060">"Poniżej widać mniej pilne powiadomienia"</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"Kliknij ponownie, by otworzyć"</string>
+    <string name="tap_again" msgid="1315420114387908655">"Kliknij jeszcze raz"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Przesuń w górę, by otworzyć"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Przesuń w górę, by spróbować ponownie"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Odblokuj, by użyć komunikacji NFC"</string>
@@ -867,8 +868,8 @@
     <string name="data_saver" msgid="3484013368530820763">"Oszczędzanie danych"</string>
     <string name="accessibility_data_saver_on" msgid="5394743820189757731">"Oszczędzanie danych jest włączone"</string>
     <string name="accessibility_data_saver_off" msgid="58339669022107171">"Oszczędzanie danych jest wyłączone"</string>
-    <string name="switch_bar_on" msgid="1770868129120096114">"Wł."</string>
-    <string name="switch_bar_off" msgid="5669805115416379556">"Wył."</string>
+    <string name="switch_bar_on" msgid="1770868129120096114">"Włączono"</string>
+    <string name="switch_bar_off" msgid="5669805115416379556">"Wyłączono"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"Niedostępne"</string>
     <string name="tile_disabled" msgid="373212051546573069">"Wyłączono"</string>
     <string name="nav_bar" msgid="4642708685386136807">"Pasek nawigacji"</string>

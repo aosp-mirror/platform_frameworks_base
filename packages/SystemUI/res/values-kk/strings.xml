@@ -351,7 +351,7 @@
     <string name="quick_settings_ime_label" msgid="3351174938144332051">"Енгізу әдісі"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Локация"</string>
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"Орын өшірулі"</string>
-    <string name="quick_settings_camera_label" msgid="5612076679385269339">"Камера пайдалану"</string>
+    <string name="quick_settings_camera_label" msgid="5612076679385269339">"Камераны пайдалану"</string>
     <string name="quick_settings_mic_label" msgid="8392773746295266375">"Микрофон пайдалану"</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"Қолжетімді"</string>
     <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"Бөгелген"</string>
@@ -452,6 +452,7 @@
     <string name="keyguard_more_overflow_text" msgid="5819512373606638727">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="7248696377626341060">"Шұғылдығы азырақ хабарландырулар төменде"</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"Ашу үшін қайта түртіңіз"</string>
+    <string name="tap_again" msgid="1315420114387908655">"Қайта түртіңіз."</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Ашу үшін жоғары қарай сырғытыңыз."</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Әрекетті қайталау үшін жоғары сырғытыңыз."</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC пайдалану үшін құлыпты ашыңыз."</string>
@@ -833,7 +834,7 @@
     <string name="keyboard_shortcut_group_system_recents" msgid="8628108256824616927">"Жақындағылар"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="1055709713218453863">"Артқа"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"Хабарландырулар"</string>
-    <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"Пернелер тіркесімдері"</string>
+    <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"Перне тіркесімдері"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"Пернетақта форматын ауыстыру"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"Қолданбалар"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="771606231466098742">"Көмекші"</string>
