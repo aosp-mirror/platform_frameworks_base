@@ -580,8 +580,7 @@
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Hindi buo ang natukoy na fingerprint"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Hindi maproseso ang fingerprint. Pakisubukan ulit."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"Linisin ang sensor"</string>
-    <!-- no translation found for fingerprint_acquired_too_fast (6038375140739678098) -->
-    <skip />
+    <string name="fingerprint_acquired_too_fast" msgid="6038375140739678098">"I-hold nang mas matagal nang kaunti"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Masyadong mabagal ang paggalaw ng daliri. Pakisubukan ulit."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Sumubok ng ibang fingerprint"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Masyadong maliwanag"</string>
@@ -610,12 +609,10 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Icon ng fingerprint"</string>
-    <!-- no translation found for face_recalibrate_notification_name (7311163114750748686) -->
-    <skip />
+    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Pag-unlock Gamit ang Mukha"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"I-enroll ulit ang iyong mukha"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Para mapahusay ang pagkilala, paki-enroll ulit ang iyong mukha"</string>
-    <!-- no translation found for face_setup_notification_title (8843461561970741790) -->
-    <skip />
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"I-set up ang Pag-unlock Gamit ang Mukha"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"I-unlock ang iyong telepono sa pamamagitan ng pagtingin dito"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Mag-set up ng higit pang paraan para mag-unlock"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"I-tap para magdagdag ng fingerprint"</string>
@@ -642,26 +639,19 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Di ma-verify ang mukha. Di available ang hardware."</string>
-    <!-- no translation found for face_error_timeout (2598544068593889762) -->
-    <skip />
+    <string name="face_error_timeout" msgid="2598544068593889762">"Subukan ulit ang Pag-unlock Gamit ang Mukha"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Hindi ma-store ang data ng mukha. Mag-delete muna ng iba."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Nakansela ang operation kaugnay ng mukha."</string>
-    <!-- no translation found for face_error_user_canceled (5766472033202928373) -->
-    <skip />
+    <string name="face_error_user_canceled" msgid="5766472033202928373">"Kinansela ng user ang Pag-unlock Gamit ang Mukha"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Masyadong maraming pagsubok. Subukang muli mamaya."</string>
-    <!-- no translation found for face_error_lockout_permanent (3277134834042995260) -->
-    <skip />
-    <!-- no translation found for face_error_lockout_screen_lock (5062609811636860928) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Masyado nang maraming beses sinubukan. Na-disable ang Pag-unlock Gamit ang Mukha."</string>
+    <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Masyado nang maraming beses sinubukan. Ilagay na lang ang lock ng screen."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Hindi ma-verify ang mukha. Subukang muli."</string>
-    <!-- no translation found for face_error_not_enrolled (1134739108536328412) -->
-    <skip />
-    <!-- no translation found for face_error_hw_not_present (7940978724978763011) -->
-    <skip />
+    <string name="face_error_not_enrolled" msgid="1134739108536328412">"Hindi mo pa nase-set up ang Pag-unlock Gamit ang Mukha"</string>
+    <string name="face_error_hw_not_present" msgid="7940978724978763011">"Hindi sinusuportahan ang Pag-unlock Gamit ang Mukha sa device na ito"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Pansamantalang na-disable ang sensor."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Mukha <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <!-- no translation found for face_app_setting_name (5854024256907828015) -->
-    <skip />
+    <string name="face_app_setting_name" msgid="5854024256907828015">"Gumamit ng Pag-unlock Gamit ang Mukha"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Gumamit ng mukha o lock ng screen"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Gamitin ang iyong mukha para magpatuloy"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Gamitin ang iyong mukha o lock ng screen para magpatuloy"</string>
@@ -964,8 +954,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"Palakihin ang bahagi ng pag-unlock."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"Pag-unlock ng slide."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"Pag-unlock ng pattern."</string>
-    <!-- no translation found for keyguard_accessibility_face_unlock (4533832120787386728) -->
-    <skip />
+    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"Pag-unlock Gamit ang Mukha."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"Pag-unlock ng pin."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"Pag-unlock ng Pin ng Sim."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"Pag-unlock ng Puk ng Sim."</string>
@@ -2104,7 +2093,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"I-off"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Matuto pa"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Pinalitan ng mga pinahusay na notification ang Mga Adaptive na Notification ng Android sa Android 12. Nagpapakita ng mga iminumungkahing pagkilos at sagot ang feature na ito, at isinasaayos nito ang iyong mga notification.\n\nMaa-access ng mga pinahusay na notification ang content ng notification, kabilang ang personal na impormasyon gaya ng mga pangalan ng contact at mensahe. Magagawa rin ng feature na ito na i-dismiss o tugunan ang mga notification, gaya ng pagsagot sa mga tawag sa telepono, at kontrolin ang Huwag Istorbohin."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Pinalitan ng Mga pinahusay na notification ang Mga Adaptive na Notification ng Android sa Android 12. Nagpapakita ng mga iminumungkahing pagkilos at sagot ang feature na ito, at isinasaayos nito ang iyong mga notification.\n\nMaa-access ng Mga pinahusay na notification ang content ng notification, kabilang ang personal na impormasyon gaya ng mga pangalan ng contact at mensahe. Magagawa rin ng feature na ito na i-dismiss o tugunan ang mga notification, gaya ng pagsagot sa mga tawag sa telepono, at kontrolin ang Huwag Istorbohin."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notification ng impormasyon ng Routine Mode"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Maaaring maubos ang baterya bago ang karaniwang pag-charge"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Na-activate ang Pantipid ng Baterya para patagalin ang buhay ng baterya"</string>

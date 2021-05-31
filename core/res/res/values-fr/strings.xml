@@ -580,8 +580,7 @@
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Empreinte partielle détectée"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Impossible de reconnaître l\'empreinte digitale. Veuillez réessayer."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"Nettoyez le lecteur"</string>
-    <!-- no translation found for fingerprint_acquired_too_fast (6038375140739678098) -->
-    <skip />
+    <string name="fingerprint_acquired_too_fast" msgid="6038375140739678098">"Maintenez un peu plus longtemps"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Vous avez déplacé votre doigt trop lentement. Veuillez réessayer."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Essayez une autre empreinte"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Trop de lumière"</string>
@@ -610,12 +609,10 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Icône d\'empreinte digitale"</string>
-    <!-- no translation found for face_recalibrate_notification_name (7311163114750748686) -->
-    <skip />
+    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Déverrouillage par reconnaissance faciale"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Enregistrer à nouveau votre visage"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Pour améliorer la reconnaissance, veuillez enregistrer à nouveau votre visage"</string>
-    <!-- no translation found for face_setup_notification_title (8843461561970741790) -->
-    <skip />
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"Configurer le déverrouillage facial"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Déverrouillez votre téléphone en le regardant"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Configurer d\'autres méthodes de déverrouillage"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Appuyez pour ajouter une empreinte digitale"</string>
@@ -642,26 +639,19 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Imposs. valider visage. Matériel non disponible."</string>
-    <!-- no translation found for face_error_timeout (2598544068593889762) -->
-    <skip />
+    <string name="face_error_timeout" msgid="2598544068593889762">"Réessayez d\'utiliser le déverrouillage facial"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Impossible stocker nouv. visages. Veuillez en supprimer un."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Opération de reconnaissance faciale annulée."</string>
-    <!-- no translation found for face_error_user_canceled (5766472033202928373) -->
-    <skip />
+    <string name="face_error_user_canceled" msgid="5766472033202928373">"Déverrouillage par reconnaissance faciale annulé par l\'utilisateur"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Trop de tentatives. Réessayez plus tard."</string>
-    <!-- no translation found for face_error_lockout_permanent (3277134834042995260) -->
-    <skip />
-    <!-- no translation found for face_error_lockout_screen_lock (5062609811636860928) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Tentatives trop nombreuses. Déverrouillage par reconnaissance faciale désactivé."</string>
+    <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Tentatives trop nombreuses. Utilisez le verrouillage de l\'écran."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Impossible de valider votre visage. Réessayez."</string>
-    <!-- no translation found for face_error_not_enrolled (1134739108536328412) -->
-    <skip />
-    <!-- no translation found for face_error_hw_not_present (7940978724978763011) -->
-    <skip />
+    <string name="face_error_not_enrolled" msgid="1134739108536328412">"Déverrouillage par reconnaissance faciale non configuré"</string>
+    <string name="face_error_hw_not_present" msgid="7940978724978763011">"Déverrouillage facial indisponible sur cet appareil"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Capteur temporairement désactivé."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Visage <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <!-- no translation found for face_app_setting_name (5854024256907828015) -->
-    <skip />
+    <string name="face_app_setting_name" msgid="5854024256907828015">"Utiliser déverrouillage facial"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Utiliser déverrouillage par authent. faciale ou verrouillage écran"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Utilisez la reconnaissance faciale pour continuer"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Utilisez la reconnaissance faciale ou le verrouillage de l\'écran pour continuer"</string>
@@ -964,8 +954,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"Développer la zone de déverrouillage"</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"Déverrouillage en faisant glisser votre doigt sur l\'écran"</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"Déverrouillage par schéma"</string>
-    <!-- no translation found for keyguard_accessibility_face_unlock (4533832120787386728) -->
-    <skip />
+    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"Déverrouillage par reconnaissance faciale."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"Déverrouillage par code PIN"</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"Déverrouillage de la carte SIM à l\'aide d\'un code."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"Déverrouillage de la carte SIM à l\'aide d\'une clé PUK."</string>
@@ -2100,11 +2089,11 @@
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Cette notification a été élevée d\'un niveau. Appuyez ici pour donner votre avis."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Cette notification a été abaissée d\'un niveau. Appuyez ici pour donner votre avis."</string>
     <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"Notifications améliorées"</string>
-    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"Les actions et réponses suggérées sont maintenant fournies via les notifications améliorées. Les notifications intelligentes Android ne sont plus disponibles."</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"Les suggestions d\'actions et de réponses sont désormais fournies via les notifications améliorées. Les notifications intelligentes Android ne sont plus disponibles."</string>
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Désactiver"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"En savoir plus"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Les notifications améliorées remplacent les notifications intelligentes dans Android 12. Cette fonctionnalité affiche les actions et réponses suggérées, et organise vos notifications.\n\nElle a accès au contenu des notifications, y compris aux informations personnelles comme le nom des contacts et les messages. Elle peut aussi fermer les notifications ou effectuer des actions comme répondre à un appel téléphonique et contrôler Ne pas déranger."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Les notifications améliorées remplacent les notifications intelligentes dans Android 12. Cette fonctionnalité affiche les suggestions d\'actions et de réponses, et organise vos notifications.\n\nElle a accès au contenu des notifications, y compris aux informations personnelles tels que les noms des contacts et les messages. Elle peut aussi fermer les notifications ou effectuer des actions comme répondre à un appel téléphonique et contrôler le mode Ne pas déranger."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notification d\'information du mode Routine"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Vous risquez d\'être à court de batterie plus tôt que prévu"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Économiseur de batterie activé pour prolonger l\'autonomie"</string>

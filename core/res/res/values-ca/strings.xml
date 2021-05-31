@@ -556,8 +556,8 @@
     <string name="permdesc_manageFingerprint" msgid="2025616816437339865">"Permet que l\'aplicació invoqui mètodes per afegir i suprimir plantilles d\'empremtes dactilars que es puguin fer servir."</string>
     <string name="permlab_useFingerprint" msgid="1001421069766751922">"Utilitzar el maquinari d\'empremtes digitals"</string>
     <string name="permdesc_useFingerprint" msgid="412463055059323742">"Permet que l\'aplicació faci servir maquinari d\'empremtes digitals per a l\'autenticació"</string>
-    <string name="permlab_audioWrite" msgid="8501705294265669405">"modificar la teva col·lecció de música"</string>
-    <string name="permdesc_audioWrite" msgid="8057399517013412431">"Permet que l\'aplicació modifiqui la teva col·lecció de música."</string>
+    <string name="permlab_audioWrite" msgid="8501705294265669405">"modificar la teva biblioteca de música"</string>
+    <string name="permdesc_audioWrite" msgid="8057399517013412431">"Permet que l\'aplicació modifiqui la teva biblioteca de música."</string>
     <string name="permlab_videoWrite" msgid="5940738769586451318">"modificar la teva col·lecció de vídeos"</string>
     <string name="permdesc_videoWrite" msgid="6124731210613317051">"Permet que l\'aplicació modifiqui la teva col·lecció de vídeos."</string>
     <string name="permlab_imagesWrite" msgid="1774555086984985578">"modificar la teva col·lecció de fotos"</string>
@@ -580,8 +580,7 @@
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"S\'ha detectat una empremta digital parcial"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"No s\'ha pogut processar l\'empremta digital. Torna-ho a provar."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"Neteja el sensor"</string>
-    <!-- no translation found for fingerprint_acquired_too_fast (6038375140739678098) -->
-    <skip />
+    <string name="fingerprint_acquired_too_fast" msgid="6038375140739678098">"Mantén premut una estona més"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"El dit s\'ha mogut massa lentament. Torna-ho a provar."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Prova una altra empremta digital"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Hi ha massa llum"</string>
@@ -610,12 +609,10 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Icona d\'empremta digital"</string>
-    <!-- no translation found for face_recalibrate_notification_name (7311163114750748686) -->
-    <skip />
+    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Desbloqueig facial"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Torna a registrar la cara"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Per millorar el reconeixement, torna a registrar la cara"</string>
-    <!-- no translation found for face_setup_notification_title (8843461561970741790) -->
-    <skip />
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"Configura Desbloqueig facial"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Mira el telèfon per desbloquejar-lo"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Configura més maneres de desbloquejar el dispositiu"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Toca per afegir una empremta digital"</string>
@@ -642,26 +639,19 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"No es pot verificar la cara. Maquinari no disponible."</string>
-    <!-- no translation found for face_error_timeout (2598544068593889762) -->
-    <skip />
+    <string name="face_error_timeout" msgid="2598544068593889762">"Torna a provar Desbloqueig facial"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"No es poden desar dades facials noves. Suprimeix-ne d\'antigues."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"S\'ha cancel·lat el reconeixement facial."</string>
-    <!-- no translation found for face_error_user_canceled (5766472033202928373) -->
-    <skip />
+    <string name="face_error_user_canceled" msgid="5766472033202928373">"L\'usuari ha cancel·lat Desbloqueig facial"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Massa intents. Torna-ho a provar més tard."</string>
-    <!-- no translation found for face_error_lockout_permanent (3277134834042995260) -->
-    <skip />
-    <!-- no translation found for face_error_lockout_screen_lock (5062609811636860928) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Massa intents. Desbloqueig facial s\'ha desactivat."</string>
+    <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Massa intents. Introdueix el bloqueig de pantalla."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"No es pot verificar la cara. Torna-ho a provar."</string>
-    <!-- no translation found for face_error_not_enrolled (1134739108536328412) -->
-    <skip />
-    <!-- no translation found for face_error_hw_not_present (7940978724978763011) -->
-    <skip />
+    <string name="face_error_not_enrolled" msgid="1134739108536328412">"No has configurat Desbloqueig facial"</string>
+    <string name="face_error_hw_not_present" msgid="7940978724978763011">"Desbloqueig facial no és compatible amb aquest dispositiu"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"El sensor està desactivat temporalment."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Cara <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <!-- no translation found for face_app_setting_name (5854024256907828015) -->
-    <skip />
+    <string name="face_app_setting_name" msgid="5854024256907828015">"Utilitza Desbloqueig facial"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Utilitza el desbloqueig facial o de pantalla"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Utilitza la teva cara per continuar"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Utilitza la cara o el bloqueig de pantalla per continuar"</string>
@@ -964,8 +954,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"Desplega l\'àrea de desbloqueig."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"Desbloqueig lliscant"</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"Desbloqueig mitjançant patró"</string>
-    <!-- no translation found for keyguard_accessibility_face_unlock (4533832120787386728) -->
-    <skip />
+    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"Desbloqueig facial."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"Desbloqueig mitjançant PIN"</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"Desbloqueja la SIM amb el PIN."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"Desbloqueja la SIM amb el PUK."</string>
