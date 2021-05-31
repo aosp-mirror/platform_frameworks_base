@@ -245,13 +245,13 @@
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"هل تريد السماح بإلغاء قفل المصنّع الأصلي للجهاز؟"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"تحذير: لن تعمل ميزات الحماية على هذا الجهاز أثناء تفعيل هذا الإعداد."</string>
     <string name="mock_location_app" msgid="6269380172542248304">"اختيار تطبيق الموقع الجغرافي الوهمي"</string>
-    <string name="mock_location_app_not_set" msgid="6972032787262831155">"لم يتم ضبط تطبيق موقع جغرافي وهمي"</string>
+    <string name="mock_location_app_not_set" msgid="6972032787262831155">"لم يتم ضبط تطبيق موقع جغرافي وهمي."</string>
     <string name="mock_location_app_set" msgid="4706722469342913843">"تطبيق الموقع الزائف: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"الشبكات"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"شهادة عرض شاشة لاسلكي"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"‏تفعيل تسجيل Wi‑Fi Verbose"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"‏تقييد البحث عن شبكات Wi-Fi"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"‏التوزيع العشوائي لعنوان MAC الذي تدعمه شبكة Wi‑Fi"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"‏التوزيع العشوائي لـMAC المتوافق مع Wi‑Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"بيانات الجوّال نشطة دائمًا"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"تسريع الأجهزة للتوصيل"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"عرض أجهزة البلوتوث بدون أسماء"</string>
@@ -319,7 +319,7 @@
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"‏تعيين سلوك التحقق من HDCP"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"تصحيح الأخطاء"</string>
     <string name="debug_app" msgid="8903350241392391766">"اختيار التطبيق لتصحيحه"</string>
-    <string name="debug_app_not_set" msgid="1934083001283807188">"لم يتم ضبط تطبيق لتصحيحه"</string>
+    <string name="debug_app_not_set" msgid="1934083001283807188">"لم يتم ضبط تطبيق لتصحيحه."</string>
     <string name="debug_app_set" msgid="6599535090477753651">"تطبيق التصحيح: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="2543228890535466325">"اختيار تطبيق"</string>
     <string name="no_application" msgid="9038334538870247690">"لا شيء"</string>

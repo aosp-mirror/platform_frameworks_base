@@ -291,14 +291,14 @@
     <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"Selecciona la mida de la memòria intermèdia del registre"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="8631859265777337991">"Vols esborrar l\'emmagatzematge persistent del registrador?"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="6447590867594287413">"Quan deixem de supervisar amb el registrador persistent, hem d\'esborrar les dades del registrador que hi ha al teu dispositiu."</string>
-    <string name="select_logpersist_title" msgid="447071974007104196">"Desa dades registrador permanentment"</string>
+    <string name="select_logpersist_title" msgid="447071974007104196">"Desa dades de registre contínuament al dispositiu"</string>
     <string name="select_logpersist_dialog_title" msgid="7745193591195485594">"Selecciona memòries interm. de registre per emmag. de manera persistent al disp."</string>
     <string name="select_usb_configuration_title" msgid="6339801314922294586">"Selecciona configuració d\'USB"</string>
     <string name="select_usb_configuration_dialog_title" msgid="3579567144722589237">"Selecciona configuració d\'USB"</string>
     <string name="allow_mock_location" msgid="2102650981552527884">"Ubicacions simulades"</string>
     <string name="allow_mock_location_summary" msgid="179780881081354579">"Permet les ubicacions simulades"</string>
     <string name="debug_view_attributes" msgid="3539609843984208216">"Activa la inspecció d\'atributs de visualització"</string>
-    <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"Mantén les dades mòbils sempre actives, fins i tot quan la Wi‑Fi està activada (per canviar de xarxa ràpidament)."</string>
+    <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"Mantén les dades mòbils sempre actives, fins i tot quan la Wi‑Fi està activada (per canviar de xarxa ràpidament)"</string>
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Fes servir l\'acceleració per maquinari per a compartició de xarxa, si està disponible"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"Voleu permetre la depuració per USB?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"La depuració per USB només està indicada per a activitats de desenvolupament. Fes-la servir intercanviar dades entre l\'ordinador i el dispositiu, per instal·lar aplicacions al dispositiu sense rebre notificacions i per llegir dades de registre."</string>
@@ -310,8 +310,8 @@
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"Verifica aplicacions per USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Comprova les aplicacions instal·lades mitjançant ADB/ADT per detectar comportaments perillosos"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Es mostraran els dispositius Bluetooth sense el nom (només l\'adreça MAC)"</string>
-    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Desactiva la funció de volum absolut del Bluetooth en cas que es produeixin problemes de volum amb dispositius remots, com ara un volum massa alt o una manca de control."</string>
-    <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Activa el conjunt de funcions de Bluetooth Gabeldorsche."</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Desactiva la funció de volum absolut del Bluetooth en cas que es produeixin problemes de volum amb dispositius remots, com ara un volum massa alt o una manca de control"</string>
+    <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Activa el conjunt de funcions de Bluetooth Gabeldorsche"</string>
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Activa la funció de connectivitat millorada."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Terminal local"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Activa l\'aplicació de terminal que ofereix accés al shell local"</string>
@@ -342,8 +342,8 @@
     <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"Il·lumina visualitzacions de finestres creades"</string>
     <string name="show_hw_layers_updates" msgid="5268370750002509767">"Mostra actualitzacions de capes de maquinari"</string>
     <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"Il·lumina capes de maquinari en verd en actualitzar-se"</string>
-    <string name="debug_hw_overdraw" msgid="8944851091008756796">"Depura sobredibuix de GPU"</string>
-    <string name="disable_overlays" msgid="4206590799671557143">"Desactiva superposicions maquinari"</string>
+    <string name="debug_hw_overdraw" msgid="8944851091008756796">"Depura el sobredibuix de GPU"</string>
+    <string name="disable_overlays" msgid="4206590799671557143">"Desactiva superposicions de maquinari"</string>
     <string name="disable_overlays_summary" msgid="1954852414363338166">"Utilitza sempre GPU per a la composició de pantalles"</string>
     <string name="simulate_color_space" msgid="1206503300335835151">"Simula l\'espai de color"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"Activa traces d\'OpenGL"</string>
@@ -353,7 +353,7 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Mostra els límits de clips, els marges, etc."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Força direcció dreta-esquerra"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Força direcció de pantalla dreta-esquerra en totes les llengües"</string>
-    <string name="force_msaa" msgid="4081288296137775550">"Força MSAA  4x"</string>
+    <string name="force_msaa" msgid="4081288296137775550">"Força MSAA 4x"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Activa MSAA 4x en aplicacions d\'OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Depura operacions de retall no rectangulars"</string>
     <string name="track_frame_time" msgid="522674651937771106">"Renderització perfil HWUI"</string>
