@@ -155,7 +155,12 @@ class MediaResumeListener @Inject constructor(
         }
     }
 
-    override fun onMediaDataLoaded(key: String, oldKey: String?, data: MediaData) {
+    override fun onMediaDataLoaded(
+        key: String,
+        oldKey: String?,
+        data: MediaData,
+        immediately: Boolean
+    ) {
         if (useMediaResumption) {
             // If this had been started from a resume state, disconnect now that it's live
             mediaBrowser?.disconnect()
