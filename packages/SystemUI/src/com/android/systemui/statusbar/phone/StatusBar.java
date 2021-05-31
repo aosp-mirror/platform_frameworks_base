@@ -105,6 +105,7 @@ import android.util.Log;
 import android.util.MathUtils;
 import android.util.Slog;
 import android.view.Display;
+import android.view.IRemoteAnimationRunner;
 import android.view.IWindowManager;
 import android.view.InsetsState.InternalInsetsType;
 import android.view.KeyEvent;
@@ -164,6 +165,7 @@ import com.android.systemui.emergency.EmergencyGesture;
 import com.android.systemui.fragments.ExtensionFragmentListener;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
+import com.android.systemui.keyguard.KeyguardService;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.ScreenLifecycle;
@@ -267,7 +269,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         OnHeadsUpChangedListener, CommandQueue.Callbacks,
         ColorExtractor.OnColorsChangedListener, ConfigurationListener,
         StatusBarStateController.StateListener,
-        LifecycleOwner, BatteryController.BatteryStateChangeCallback {
+        LifecycleOwner, BatteryController.BatteryStateChangeCallback,
+        ActivityLaunchAnimator.KeyguardHandler {
     public static final boolean MULTIUSER_DEBUG = false;
 
     protected static final int MSG_HIDE_RECENT_APPS = 1020;
@@ -1413,7 +1416,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     private void setUpPresenter() {
         // Set up the initial notification state.
-        mActivityLaunchAnimator = new ActivityLaunchAnimator(mContext);
+        mActivityLaunchAnimator = new ActivityLaunchAnimator(this, mContext);
         mNotificationAnimationProvider = new NotificationLaunchAnimatorControllerProvider(
                 mNotificationShadeWindowViewController,
                 mStackScrollerController.getNotificationListContainer(),
@@ -2072,10 +2075,45 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
     }
 
-    /** Whether we should animate an activity launch. */
-    public boolean areLaunchAnimationsEnabled() {
-        // TODO(b/184121838): Support lock screen launch animations.
-        return mState == StatusBarState.SHADE && !isOccluded();
+    /**
+     * Whether we should animate an activity launch.
+     *
+     * Note: This method must be called *before* dismissing the keyguard.
+     */
+    public boolean shouldAnimateLaunch(boolean isActivityIntent) {
+        // TODO(b/184121838): Support launch animations when occluded.
+        if (isOccluded()) {
+            return false;
+        }
+
+        // Always animate if we are unlocked.
+        if (!mKeyguardStateController.isShowing()) {
+            return true;
+        }
+
+        // If we are locked, only animate if remote unlock animations are enabled and we can dismiss
+        // the lock screen without challenging the user. We also don't animate non-activity
+        // launches as they can break the animation.
+        // TODO(b/184121838): Support non activity launches on the lockscreen.
+        return isActivityIntent
+                && KeyguardService.sEnableRemoteKeyguardAnimation
+                && mKeyguardStateController.canDismissLockScreen();
+    }
+
+    @Override
+    public boolean isOnKeyguard() {
+        return mKeyguardStateController.isShowing();
+    }
+
+    @Override
+    public void hideKeyguardWithAnimation(IRemoteAnimationRunner runner) {
+        if (!mKeyguardStateController.canDismissLockScreen()) {
+            Log.wtf(TAG,
+                    "Unable to hide keyguard with animation as the keyguard can't be dismissed");
+            return;
+        }
+
+        mKeyguardViewMediator.hideWithAnimation(runner);
     }
 
     public boolean isDeviceInVrMode() {
@@ -2796,8 +2834,9 @@ public class StatusBar extends SystemUI implements DemoMode,
         final boolean afterKeyguardGone = mActivityIntentHelper.wouldLaunchResolverActivity(
                 intent, mLockscreenUserManager.getCurrentUserId());
 
-        ActivityLaunchAnimator.Controller animController = wrapAnimationController(
-                animationController, dismissShade);
+        ActivityLaunchAnimator.Controller animController =
+                shouldAnimateLaunch(true /* isActivityIntent */) ? wrapAnimationController(
+                    animationController, dismissShade) : null;
 
         // If we animate, we will dismiss the shade only once the animation is done. This is taken
         // care of by the StatusBarLaunchAnimationController.
@@ -2811,7 +2850,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             int[] result = new int[]{ActivityManager.START_CANCELED};
 
             mActivityLaunchAnimator.startIntentWithAnimation(animController,
-                    areLaunchAnimationsEnabled(), intent.getPackage(), (adapter) -> {
+                    true /* animate */, intent.getPackage(), (adapter) -> {
                         ActivityOptions options = new ActivityOptions(
                                 getActivityOptions(mDisplayId, adapter));
                         options.setDisallowEnterPictureInPictureWhileLaunching(
@@ -4606,6 +4645,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mLockscreenUserManager.getCurrentUserId());
 
         boolean collapse = animationController == null;
+        boolean animate = shouldAnimateLaunch(intent.isActivity());
         executeActionDismissingKeyguard(() -> {
             try {
                 // We wrap animationCallback with a StatusBarLaunchAnimatorController so that the
@@ -4615,7 +4655,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                                 animationController, this, intent.isActivity()) : null;
 
                 mActivityLaunchAnimator.startPendingIntentWithAnimation(
-                        controller, areLaunchAnimationsEnabled(), intent.getCreatorPackage(),
+                        controller, animate, intent.getCreatorPackage(),
                         (animationAdapter) -> intent.sendAndReturnResult(null, 0, null, null, null,
                                 null, getActivityOptions(mDisplayId, animationAdapter)));
             } catch (PendingIntent.CanceledException e) {
