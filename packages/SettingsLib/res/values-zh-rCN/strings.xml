@@ -117,7 +117,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"取消"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"配对之后，所配对的设备将可以在建立连接后访问您的通讯录和通话记录。"</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"无法与“<xliff:g id="DEVICE_NAME">%1$s</xliff:g>”进行配对。"</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"PIN码或配对密钥不正确，无法与<xliff:g id="DEVICE_NAME">%1$s</xliff:g>配对。"</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"PIN 码或密钥不正确，因此无法与“<xliff:g id="DEVICE_NAME">%1$s</xliff:g>”配对。"</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"无法与“<xliff:g id="DEVICE_NAME">%1$s</xliff:g>”进行通信。"</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> 已拒绝配对。"</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"计算机"</string>
@@ -155,7 +155,7 @@
     <string name="launch_defaults_some" msgid="3631650616557252926">"已设置部分默认选项"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"没有默认操作"</string>
     <string name="tts_settings" msgid="8130616705989351312">"文字转语音设置"</string>
-    <string name="tts_settings_title" msgid="7602210956640483039">"文字转语音 (TTS) 输出"</string>
+    <string name="tts_settings_title" msgid="7602210956640483039">"文字转语音输出"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"语速"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"文字转换成语音后的播放速度"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"音高"</string>

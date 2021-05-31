@@ -307,9 +307,9 @@
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"Permitir definições de programação?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"Estas definições destinam-se apenas a programação. Podem fazer com que o seu aparelho e as aplicações nele existentes falhem ou funcionem mal."</string>
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"Verificar aplicações de USB"</string>
-    <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Verificar as aplicações instaladas via ADB/ADT para detetar comportamento perigoso."</string>
+    <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Verificar as aplicações instaladas via ADB/ADT para detetar comportamento perigoso"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"São apresentados os dispositivos Bluetooth sem nomes (apenas endereços MAC)"</string>
-    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Desativa a funcionalidade de volume absoluto do Bluetooth caso existam problemas de volume com dispositivos remotos, como um volume insuportavelmente alto ou a ausência de controlo."</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Desativa a funcionalidade de volume absoluto do Bluetooth caso existam problemas de volume com dispositivos remotos, como um volume insuportavelmente alto ou a ausência de controlo"</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Ativa a pilha de funcionalidades Bluetooth Gabeldorche."</string>
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Ativa a funcionalidade Conetividade melhorada."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Terminal local"</string>
@@ -340,7 +340,7 @@
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"Ver atualizações de vistas"</string>
     <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"Destacar vistas em janelas quando desenhadas"</string>
     <string name="show_hw_layers_updates" msgid="5268370750002509767">"Atualizações de camadas de hardware"</string>
-    <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"Camadas de hard. flash verdes quando estão atuali."</string>
+    <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"Piscar camadas de hardware em verde ao atualizar"</string>
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"Depurar sobreposição GPU"</string>
     <string name="disable_overlays" msgid="4206590799671557143">"Desativar sobreposições HW"</string>
     <string name="disable_overlays_summary" msgid="1954852414363338166">"Utilizar sempre GPU para a composição do ecrã"</string>

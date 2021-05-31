@@ -117,7 +117,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Bekor qilish"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Agar ulanishga ruxsat bersangiz, ulangan vaqtda kontakt va qo‘ng‘iroqlaringiz tarixiga kirishi mumkin."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> bilan biriktirib bo‘lmadi."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> qurilmasiga ulanib bo‘lmadi, chunki PIN-kod yoki parol noto‘g‘ri kiritildi."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> qurilmasiga ulanilmadi, chunki PIN kod yoki parol xato kiritildi."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"“<xliff:g id="DEVICE_NAME">%1$s</xliff:g>” qurilmasi bilan aloqa o‘rnatib bo‘lmayapti."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> biriktirish so‘rovini rad qildi."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Kompyuter"</string>
@@ -155,7 +155,7 @@
     <string name="launch_defaults_some" msgid="3631650616557252926">"Ba’zi birlamchi sozlamalar o‘rnatilgan"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"Birlamchi sozlamalar belgilanmagan"</string>
     <string name="tts_settings" msgid="8130616705989351312">"Matnni nutqqa aylantirish sozlamalari"</string>
-    <string name="tts_settings_title" msgid="7602210956640483039">"Nutq sintezi"</string>
+    <string name="tts_settings_title" msgid="7602210956640483039">"Matnni nutqqa aylantirish"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"Nutq tezligi"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"Matnni o‘qish tezligi"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"Ohang"</string>

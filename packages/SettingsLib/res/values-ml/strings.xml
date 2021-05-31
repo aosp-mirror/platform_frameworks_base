@@ -90,7 +90,7 @@
     <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"കോൺടാക്‌റ്റ് പങ്കിടലിനായി ഉപയോഗിക്കുക"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"ഇന്റർനെറ്റ് കണക്ഷൻ പങ്കിടൽ"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"അക്ഷര സന്ദേശങ്ങൾ"</string>
-    <string name="bluetooth_profile_sap" msgid="8304170950447934386">"SIM ആക്സസ്"</string>
+    <string name="bluetooth_profile_sap" msgid="8304170950447934386">"സിം ആക്സസ്"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD ഓഡിയോ: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD ഓഡിയോ"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"ശ്രവണ സഹായികൾ"</string>

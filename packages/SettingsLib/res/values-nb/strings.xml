@@ -255,8 +255,8 @@
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Mobildata er alltid aktiv"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Maskinvareakselerasjon for internettdeling"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Vis Bluetooth-enheter uten navn"</string>
-    <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"Slå av funksjonen for absolutt volum"</string>
-    <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Aktiver Gabeldorsche"</string>
+    <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"Slå av absolutt volum"</string>
+    <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Slå på Gabeldorsche"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"Bluetooth AVRCP-versjon"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"Velg Bluetooth AVRCP-versjon"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"Bluetooth MAP-versjon"</string>
@@ -281,7 +281,7 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Skriv inn DNS-leverandørens vertsnavn"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"Kunne ikke koble til"</string>
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Vis alternativer for sertifisering av trådløs skjerm"</string>
-    <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Øk Wi-Fi-loggenivå – vis per SSID RSSI i Wi-Fi-velgeren"</string>
+    <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Øk nivået av Wi-Fi-logging – vis per SSID RSSI i Wi-Fi-velgeren"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Reduserer batteriforbruket og forbedrer nettverksytelsen"</string>
     <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Når denne modusen er slått på, kan MAC-adressen til denne enheten endres hver gang den kobler seg til et nettverk som har tilfeldiggjøring av MAC-adresse slått på."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Med datamåling"</string>
@@ -359,7 +359,7 @@
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Slå på GPU-feilsøkingslag"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Tillat GPU-feilsøkingslag for feilsøkingsapper"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Detaljert leverandørlogging"</string>
-    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Inkluder ytterligere enhetsspesifikke leverandørlogger i feilrapporter, som kan inneholde privat informasjon, bruke mer batteri og/eller bruke mer lagringsplass."</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Inkluder flere enhetsspesifikke leverandørlogger i feilrapporter, som kan inneholde privat informasjon, bruke mer batteri og/eller bruke mer lagringsplass."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Animasjonsskala for vindu"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Animasjonsskala for overgang"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Varighetsskala for animasjoner"</string>

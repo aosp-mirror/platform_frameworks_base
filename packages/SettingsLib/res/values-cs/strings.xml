@@ -281,7 +281,7 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Zadejte hostitele poskytovatele DNS"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"Nelze se připojit"</string>
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Zobrazit možnosti certifikace bezdrátového displeje"</string>
-    <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Zvýšit úroveň protokolování Wi‑Fi zobrazenou v SSID a RSSI při výběru sítě Wi‑Fi."</string>
+    <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Zvýšit úroveň protokolování Wi‑Fi zobrazenou v SSID a RSSI při výběru sítě Wi‑Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Snižuje vyčerpávání baterie a vylepšuje výkon sítě"</string>
     <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Když je tento režim aktivován, adresa MAC tohoto zařízení se může změnit pokaždé, když se zařízení připojí k síti s aktivovanou randomizací adres MAC."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Měřená"</string>
@@ -296,7 +296,7 @@
     <string name="select_usb_configuration_dialog_title" msgid="3579567144722589237">"Výběr konfigurace USB"</string>
     <string name="allow_mock_location" msgid="2102650981552527884">"Povolit simulované polohy"</string>
     <string name="allow_mock_location_summary" msgid="179780881081354579">"Povolit simulované polohy"</string>
-    <string name="debug_view_attributes" msgid="3539609843984208216">"Kontrola atributu zobrazení"</string>
+    <string name="debug_view_attributes" msgid="3539609843984208216">"Povolit kontrolu atributu zobrazení"</string>
     <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"Mobilní data budou vždy ponechána aktivní, i když bude aktivní Wi-Fi (za účelem rychlého přepínání sítí)."</string>
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Pokud je k dispozici hardwarová akcelerace tetheringu, použít ji."</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"Povolit ladění přes USB?"</string>
@@ -306,7 +306,7 @@
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"Zrušit přístup k ladění přes USB ze všech počítačů, které jste v minulosti autorizovali?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"Povolit nastavení pro vývojáře?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"Tato nastavení jsou určena pouze pro vývojáře. Mohou způsobit rozbití nebo nesprávné fungování zařízení a nainstalovaných aplikací."</string>
-    <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"Ověřit aplikace z USB"</string>
+    <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"Ověřovat aplikace z USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Kontrolovat škodlivost aplikací nainstalovaných pomocí nástroje ADB/ADT"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Zařízení Bluetooth se budou zobrazovat bez názvů (pouze adresy MAC)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Zakáže funkci absolutní hlasitosti Bluetooth. Zabrání tak problémům s hlasitostí vzdálených zařízení (jako je příliš vysoká hlasitost nebo nemožnost ovládání)."</string>
@@ -332,24 +332,24 @@
     <string name="strict_mode" msgid="889864762140862437">"Přísný režim aktivován"</string>
     <string name="strict_mode_summary" msgid="1838248687233554654">"Rozblikat obrazovku při dlouhých operacích hlavního vlákna"</string>
     <string name="pointer_location" msgid="7516929526199520173">"Umístění ukazatele"</string>
-    <string name="pointer_location_summary" msgid="957120116989798464">"Zobrazit překryvnou vrstvu s aktuálními daty o dotycích"</string>
+    <string name="pointer_location_summary" msgid="957120116989798464">"Překryvná vrstva zobrazuje aktuální data o dotycích"</string>
     <string name="show_touches" msgid="8437666942161289025">"Zobrazovat klepnutí"</string>
-    <string name="show_touches_summary" msgid="3692861665994502193">"Zobrazování vizuální zpětné vazby pro klepnutí"</string>
+    <string name="show_touches_summary" msgid="3692861665994502193">"Zobrazovat vizuální zpětnou vazbu pro klepnutí"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"Zobrazit obnovení obsahu"</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"Rozbliká obsah okna při aktualizaci"</string>
-    <string name="show_hw_screen_updates" msgid="2021286231267747506">"Zobrazit aktualizace"</string>
+    <string name="show_hw_screen_updates" msgid="2021286231267747506">"Ukazovat aktualizace zobrazení"</string>
     <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"Rozblikat zobrazení v oknech při vykreslování"</string>
-    <string name="show_hw_layers_updates" msgid="5268370750002509767">"Zobrazit aktualizace HW vrstev"</string>
+    <string name="show_hw_layers_updates" msgid="5268370750002509767">"Ukazovat aktualizace HW vrstev"</string>
     <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"Rozblikat zeleně hardwarové vrstvy při aktualizaci"</string>
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"Ladit překreslování GPU"</string>
     <string name="disable_overlays" msgid="4206590799671557143">"Zakázat hardwarové vrstvy"</string>
     <string name="disable_overlays_summary" msgid="1954852414363338166">"Vždy použít GPU ke skládání obrazovky"</string>
-    <string name="simulate_color_space" msgid="1206503300335835151">"Simulovat barevný prostor"</string>
+    <string name="simulate_color_space" msgid="1206503300335835151">"Simulace barevného prostoru"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"Povolit trasování OpenGL"</string>
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Směrování zvuku do USB"</string>
     <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Vypnout automatické směrování zvuku do zvukových periferií USB"</string>
     <string name="debug_layout" msgid="1659216803043339741">"Zobrazit ohraničení"</string>
-    <string name="debug_layout_summary" msgid="8825829038287321978">"Zobrazit u výstřižku ohraničení, okraje atd."</string>
+    <string name="debug_layout_summary" msgid="8825829038287321978">"U výstřižku zobrazit ohraničení, okraje atd."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Vynutit rozvržení zprava doleva"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Vynutit ve všech jazycích rozvržení obrazovky zprava doleva"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Vynutit 4x MSAA"</string>

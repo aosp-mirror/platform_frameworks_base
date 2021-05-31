@@ -253,7 +253,7 @@
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Ограничаване на сканирането за Wi-Fi"</string>
     <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Подобр. рандом. на MAC адреса чрез Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Винаги активни мобилни данни"</string>
-    <string name="tethering_hardware_offload" msgid="4116053719006939161">"Хардуерно ускорение за тетъринга"</string>
+    <string name="tethering_hardware_offload" msgid="4116053719006939161">"Хардуерно ускорение на тетъринга"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Показване на устройствата с Bluetooth без имена"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"Деактивиране на пълната сила на звука"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Активиране на Gabeldorsche"</string>
