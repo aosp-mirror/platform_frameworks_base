@@ -62,6 +62,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * Tests for the {@link HdmiCecAtomWriter} class and its usage by the HDMI-CEC framework.
@@ -104,7 +105,7 @@ public class HdmiCecAtomLoggingTest {
                         mIThermalServiceMock, new Handler(mLooper)));
         doReturn(true).when(mIPowerManagerMock).isInteractive();
 
-        mHdmiControlServiceSpy = spy(new HdmiControlService(mContextSpy));
+        mHdmiControlServiceSpy = spy(new HdmiControlService(mContextSpy, Collections.emptyList()));
         doNothing().when(mHdmiControlServiceSpy)
                 .writeStringSystemProperty(anyString(), anyString());
         doReturn(mHdmiCecAtomWriterSpy).when(mHdmiControlServiceSpy).getAtomWriter();

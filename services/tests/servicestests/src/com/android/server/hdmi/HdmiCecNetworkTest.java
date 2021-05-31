@@ -64,7 +64,7 @@ public class HdmiCecNetworkTest {
     @Before
     public void setUp() throws Exception {
         mContext = InstrumentationRegistry.getTargetContext();
-        mHdmiControlService = new HdmiControlService(mContext) {
+        mHdmiControlService = new HdmiControlService(mContext, Collections.emptyList()) {
             @Override
             void invokeDeviceEventListeners(HdmiDeviceInfo device, int status) {
                 mDeviceEventListenerStatuses.add(status);

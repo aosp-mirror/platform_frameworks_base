@@ -51,6 +51,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 /** Tests for {@link DevicePowerStatusAction} */
 @SmallTest
@@ -88,7 +89,7 @@ public class DevicePowerStatusActionTest {
                 mIThermalServiceMock, new Handler(mTestLooper.getLooper())));
         when(mIPowerManagerMock.isInteractive()).thenReturn(true);
 
-        mHdmiControlService = new HdmiControlService(mContextSpy) {
+        mHdmiControlService = new HdmiControlService(mContextSpy, Collections.emptyList()) {
             @Override
             AudioManager getAudioManager() {
                 return new AudioManager() {
@@ -220,6 +221,7 @@ public class DevicePowerStatusActionTest {
         mHdmiControlService.getHdmiCecConfig().setIntValue(
                 HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_VERSION,
                 HdmiControlManager.HDMI_CEC_VERSION_2_0);
+        mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mPlaybackDevice.addAndStartAction(mDevicePowerStatusAction);
         mTestLooper.dispatchAll();
 
@@ -240,6 +242,7 @@ public class DevicePowerStatusActionTest {
         mHdmiControlService.getHdmiCecConfig().setIntValue(
                 HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_VERSION,
                 HdmiControlManager.HDMI_CEC_VERSION_2_0);
+        mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         HdmiCecMessage reportPhysicalAddress = HdmiCecMessageBuilder
                 .buildReportPhysicalAddressCommand(ADDR_TV, 0x0000, HdmiDeviceInfo.DEVICE_TV);
         mNativeWrapper.onCecMessage(reportPhysicalAddress);
@@ -263,6 +266,7 @@ public class DevicePowerStatusActionTest {
         mHdmiControlService.getHdmiCecConfig().setIntValue(
                 HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_VERSION,
                 HdmiControlManager.HDMI_CEC_VERSION_2_0);
+        mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         HdmiCecMessage reportPhysicalAddress = HdmiCecMessageBuilder
                 .buildReportPhysicalAddressCommand(ADDR_TV, 0x0000, HdmiDeviceInfo.DEVICE_TV);
         mNativeWrapper.onCecMessage(reportPhysicalAddress);

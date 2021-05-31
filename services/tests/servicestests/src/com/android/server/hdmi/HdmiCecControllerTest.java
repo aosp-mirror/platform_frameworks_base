@@ -69,6 +69,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Optional;
 
 /** Tests for {@link com.android.server.hdmi.HdmiCecController} class. */
@@ -99,7 +100,7 @@ public class HdmiCecControllerTest {
         mMyLooper = mTestLooper.getLooper();
 
         mHdmiControlServiceSpy = spy(new HdmiControlService(
-                InstrumentationRegistry.getTargetContext()));
+                InstrumentationRegistry.getTargetContext(), Collections.emptyList()));
         doReturn(mMyLooper).when(mHdmiControlServiceSpy).getIoLooper();
         doReturn(mMyLooper).when(mHdmiControlServiceSpy).getServiceLooper();
         doAnswer(__ -> mCecVersion).when(mHdmiControlServiceSpy).getCecVersion();

@@ -38,6 +38,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import java.util.Collections;
+
 /** Tests for {@link SystemAudioInitiationActionFromAvr} */
 @SmallTest
 @Presubmit
@@ -65,7 +67,8 @@ public class SystemAudioInitiationActionFromAvrTest {
 
         Context context = InstrumentationRegistry.getTargetContext();
 
-        HdmiControlService hdmiControlService = new HdmiControlService(context) {
+        HdmiControlService hdmiControlService = new HdmiControlService(context,
+                Collections.emptyList()) {
                     @Override
                     void sendCecCommand(
                             HdmiCecMessage command, @Nullable SendMessageCallback callback) {

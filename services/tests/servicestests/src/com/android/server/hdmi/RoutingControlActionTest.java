@@ -53,6 +53,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @SmallTest
@@ -144,7 +145,8 @@ public class RoutingControlActionTest {
         HdmiCecConfig hdmiCecConfig = new FakeHdmiCecConfig(context);
 
         mHdmiControlService =
-                new HdmiControlService(InstrumentationRegistry.getTargetContext()) {
+                new HdmiControlService(InstrumentationRegistry.getTargetContext(),
+                        Collections.emptyList()) {
                     @Override
                     boolean isControlEnabled() {
                         return true;
