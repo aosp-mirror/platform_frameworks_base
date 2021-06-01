@@ -16,55 +16,39 @@
 
 package com.android.settingslib.enterprise;
 
-import static java.util.Objects.requireNonNull;
-
-import android.annotation.UserIdInt;
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.os.UserManager;
 import android.text.TextUtils;
 
-import com.android.settingslib.RestrictedLockUtils;
+import androidx.annotation.Nullable;
+
 
 /**
  * An {@link ActionDisabledByAdminController} to be used with managed devices.
  */
-class ManagedDeviceActionDisabledByAdminController implements
-        ActionDisabledByAdminController {
-    private @UserIdInt int mEnforcementAdminUserId;
-    private RestrictedLockUtils.EnforcedAdmin mEnforcedAdmin;
-    private final ActionDisabledLearnMoreButtonLauncher mHelper;
-    private final DeviceAdminStringProvider mStringProvider;
+final class ManagedDeviceActionDisabledByAdminController
+        extends BaseActionDisabledByAdminController {
 
-    ManagedDeviceActionDisabledByAdminController(
-            ActionDisabledLearnMoreButtonLauncher helper,
-            DeviceAdminStringProvider stringProvider) {
-        mHelper = requireNonNull(helper);
-        mStringProvider = requireNonNull(stringProvider);
+    ManagedDeviceActionDisabledByAdminController(DeviceAdminStringProvider stringProvider) {
+        super(stringProvider);
     }
 
     @Override
-    public void updateEnforcedAdmin(RestrictedLockUtils.EnforcedAdmin admin, int adminUserId) {
-        mEnforcementAdminUserId = adminUserId;
-        mEnforcedAdmin = requireNonNull(admin, "admin cannot be null");
-    }
+    public void setupLearnMoreButton(Context context) {
+        assertInitialized();
 
-    @Override
-    public void setupLearnMoreButton(Context context, Object alertDialogBuilder) {
         String url = mStringProvider.getLearnMoreHelpPageUrl();
         if (TextUtils.isEmpty(url)) {
-            mHelper.setupLearnMoreButtonToShowAdminPolicies(
-                    context,
-                    alertDialogBuilder,
-                    mEnforcementAdminUserId,
+            mLauncher.setupLearnMoreButtonToShowAdminPolicies(context, mEnforcementAdminUserId,
                     mEnforcedAdmin);
         } else {
-            mHelper.setupLearnMoreButtonToLaunchHelpPage(context, alertDialogBuilder, url);
+            mLauncher.setupLearnMoreButtonToLaunchHelpPage(context, url);
         }
     }
 
     @Override
-    public String getAdminSupportTitle(String restriction) {
+    public String getAdminSupportTitle(@Nullable String restriction) {
         if (restriction == null) {
             return mStringProvider.getDefaultDisabledByPolicyTitle();
         }
@@ -88,9 +72,8 @@ class ManagedDeviceActionDisabledByAdminController implements
 
     @Override
     public CharSequence getAdminSupportContentString(Context context, CharSequence supportMessage) {
-        if (supportMessage != null) {
-            return supportMessage;
-        }
-        return mStringProvider.getDefaultDisabledByPolicyContent();
+        return supportMessage != null
+                ? supportMessage
+                : mStringProvider.getDefaultDisabledByPolicyContent();
     }
 }
