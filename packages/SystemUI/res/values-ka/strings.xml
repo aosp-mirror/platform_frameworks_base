@@ -452,6 +452,7 @@
     <string name="keyguard_more_overflow_text" msgid="5819512373606638727">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="7248696377626341060">"ქვემოთ მითითებულია ნაკლებად სასწრაფო შეტყობინებები"</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"შეეხეთ ისევ გასახსნელად"</string>
+    <string name="tap_again" msgid="1315420114387908655">"შეეხეთ ხელახლა"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"გასახსნელად გადაფურცლეთ ზემოთ"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"ხელახლა საცდელად გადაფურცლეთ ზემოთ"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"განბლოკეთ NFC-ის გამოსაყენებლად"</string>
