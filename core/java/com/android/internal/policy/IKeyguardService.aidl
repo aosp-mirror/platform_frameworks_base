@@ -63,8 +63,10 @@ oneway interface IKeyguardService {
 
      * @param pmWakeReason One of PowerManager.WAKE_REASON_*, detailing the reason we're waking up,
      * such as WAKE_REASON_POWER_BUTTON or WAKE_REASON_GESTURE.
+     * @param cameraGestureTriggered Whether we're waking up due to a power button double tap
+     * gesture.
      */
-    void onStartedWakingUp(int pmWakeReason);
+    void onStartedWakingUp(int pmWakeReason,  boolean cameraGestureTriggered);
 
     /**
      * Called when the device has finished waking up.
