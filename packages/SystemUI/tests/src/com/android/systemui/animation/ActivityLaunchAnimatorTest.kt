@@ -2,6 +2,9 @@ package com.android.systemui.animation
 
 import android.app.ActivityManager
 import android.app.WindowConfiguration
+import android.content.ComponentName
+import android.content.pm.ActivityInfo
+import android.content.pm.ApplicationInfo
 import android.graphics.Point
 import android.graphics.Rect
 import android.os.Looper
@@ -167,10 +170,16 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
 
     private fun fakeWindow(): RemoteAnimationTarget {
         val bounds = Rect(10 /* left */, 20 /* top */, 30 /* right */, 40 /* bottom */)
+        val taskInfo = ActivityManager.RunningTaskInfo()
+        taskInfo.topActivity = ComponentName("com.android.systemui", "FakeActivity")
+        taskInfo.topActivityInfo = ActivityInfo().apply {
+            applicationInfo = ApplicationInfo()
+        }
+
         return RemoteAnimationTarget(
                 0, RemoteAnimationTarget.MODE_OPENING, SurfaceControl(), false, Rect(), Rect(), 0,
                 Point(), Rect(), bounds, WindowConfiguration(), false, SurfaceControl(), Rect(),
-                ActivityManager.RunningTaskInfo()
+                taskInfo
         )
     }
 }
