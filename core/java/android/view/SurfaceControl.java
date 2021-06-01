@@ -34,7 +34,6 @@ import android.annotation.Size;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.Bitmap;
-import android.graphics.BLASTBufferQueue;
 import android.graphics.ColorSpace;
 import android.graphics.GraphicBuffer;
 import android.graphics.Matrix;
@@ -163,6 +162,8 @@ public final class SurfaceControl implements Parcelable {
             IBinder displayToken, long nativeSurfaceObject);
     private static native void nativeSetDisplayLayerStack(long transactionObj,
             IBinder displayToken, int layerStack);
+    private static native void nativeSetDisplayFlags(long transactionObj,
+            IBinder displayToken, int flags);
     private static native void nativeSetDisplayProjection(long transactionObj,
             IBinder displayToken, int orientation,
             int l, int t, int r, int b,
@@ -544,6 +545,15 @@ public final class SurfaceControl implements Parcelable {
      * Updates the value set during Surface creation (see {@link #OPAQUE}).
      */
     private static final int SURFACE_OPAQUE = 0x02;
+
+    /* flags used with setDisplayFlags() (keep in sync with DisplayDevice.h) */
+
+    /**
+     * DisplayDevice flag: This display's transform is sent to inputflinger and used for input
+     * dispatch. This flag is used to disambiguate displays which share a layerstack.
+     * @hide
+     */
+    public static final int DISPLAY_RECEIVES_INPUT = 0x01;
 
     // Display power modes.
     /**
@@ -3162,6 +3172,17 @@ public final class SurfaceControl implements Parcelable {
                 throw new IllegalArgumentException("displayToken must not be null");
             }
             nativeSetDisplayLayerStack(mNativeObject, displayToken, layerStack);
+            return this;
+        }
+
+        /**
+         * @hide
+         */
+        public Transaction setDisplayFlags(IBinder displayToken, int flags) {
+            if (displayToken == null) {
+                throw new IllegalArgumentException("displayToken must not be null");
+            }
+            nativeSetDisplayFlags(mNativeObject, displayToken, flags);
             return this;
         }
 
