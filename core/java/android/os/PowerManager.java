@@ -2107,6 +2107,8 @@ public final class PowerManager {
      * Return whether the given application package name is on the device's power allowlist.
      * Apps can be placed on the allowlist through the settings UI invoked by
      * {@link android.provider.Settings#ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS}.
+     * <p>Being on the power allowlist means that the system will not apply most power saving
+     * features to the app. Guardrails for extreme cases may still be applied.
      */
     public boolean isIgnoringBatteryOptimizations(String packageName) {
         return getPowerWhitelistManager().isWhitelisted(packageName, true);
