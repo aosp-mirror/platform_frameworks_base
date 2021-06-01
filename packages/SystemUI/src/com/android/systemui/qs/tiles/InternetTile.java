@@ -45,7 +45,6 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QSIconView;
-import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTile.SignalState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.AlphaControlledSignalTileView;
@@ -72,7 +71,6 @@ public class InternetTile extends QSTileImpl<SignalState> {
 
     protected final NetworkController mController;
     private final DataUsageController mDataController;
-    private final QSTile.SignalState mStateBeforeClick = newTileState();
     // The last updated tile state, 0: mobile, 1: wifi, 2: ethernet.
     private int mLastTileState = -1;
 
