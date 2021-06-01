@@ -2590,7 +2590,8 @@ public class ChooserActivity extends ResolverActivity implements
             boolean filterLastUsed, ResolverListController resolverListController) {
         return new ChooserListAdapter(context, payloadIntents, initialIntents, rList,
                 filterLastUsed, resolverListController, this,
-                this, context.getPackageManager());
+                this, context.getPackageManager(),
+                getChooserActivityLogger());
     }
 
     @VisibleForTesting
@@ -2599,11 +2600,11 @@ public class ChooserActivity extends ResolverActivity implements
         AbstractResolverComparator resolverComparator;
         if (appPredictor != null) {
             resolverComparator = new AppPredictionServiceResolverComparator(this, getTargetIntent(),
-                    getReferrerPackageName(), appPredictor, userHandle);
+                    getReferrerPackageName(), appPredictor, userHandle, getChooserActivityLogger());
         } else {
             resolverComparator =
                     new ResolverRankerServiceResolverComparator(this, getTargetIntent(),
-                        getReferrerPackageName(), null);
+                        getReferrerPackageName(), null, getChooserActivityLogger());
         }
 
         return new ChooserListController(
