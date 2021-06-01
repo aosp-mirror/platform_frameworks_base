@@ -23,10 +23,12 @@ import static org.mockito.Mockito.verify;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.Lifecycle.Event;
 import androidx.lifecycle.LifecycleEventObserver;
 import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.LifecycleRegistry;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -74,6 +76,34 @@ public class CallbackControllerTest extends SysuiTestCase {
         // move to pause state and make sure the callback gets unregistered.
         observer.getValue().onStateChanged(owner, Event.ON_PAUSE);
         verify(controller).removeCallback(eq(callback));
+    }
+
+    @Test
+    public void testCallbackIsRemovedOnDestroy() {
+        SimpleLifecycleOwner owner = new SimpleLifecycleOwner();
+
+        Object callback = new Object();
+        Controller controller = mock(Controller.class);
+        controller.observe(owner, callback);
+
+        owner.setState(Lifecycle.State.RESUMED);
+        verify(controller).addCallback(callback);
+
+        owner.setState(Lifecycle.State.DESTROYED);
+        verify(controller).removeCallback(callback);
+    }
+
+    private static class SimpleLifecycleOwner implements LifecycleOwner {
+        LifecycleRegistry mLifecycle = new LifecycleRegistry(this);
+        @NonNull
+        @Override
+        public Lifecycle getLifecycle() {
+            return mLifecycle;
+        }
+
+        public void setState(Lifecycle.State state) {
+            mLifecycle.setCurrentState(state);
+        }
     }
 
     private static class Controller implements CallbackController<Object> {
