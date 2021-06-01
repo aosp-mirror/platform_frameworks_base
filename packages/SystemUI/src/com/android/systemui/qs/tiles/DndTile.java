@@ -30,6 +30,8 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.provider.Settings.Global;
@@ -53,11 +55,14 @@ import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.SysUIToast;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.ZenModeController;
@@ -79,7 +84,6 @@ public class DndTile extends QSTileImpl<BooleanState> {
 
     private final ZenModeController mController;
     private final DndDetailAdapter mDetailAdapter;
-    private final ActivityStarter mActivityStarter;
     private final SharedPreferences mSharedPreferences;
     private final BroadcastDispatcher mBroadcastDispatcher;
 
@@ -88,12 +92,21 @@ public class DndTile extends QSTileImpl<BooleanState> {
     private boolean mReceiverRegistered;
 
     @Inject
-    public DndTile(QSHost host, ZenModeController zenModeController,
-            ActivityStarter activityStarter, BroadcastDispatcher broadcastDispatcher,
-            @Main SharedPreferences sharedPreferences) {
-        super(host);
+    public DndTile(
+            QSHost host,
+            @Background Looper backgroundLooper,
+            @Main Handler mainHandler,
+            MetricsLogger metricsLogger,
+            StatusBarStateController statusBarStateController,
+            ActivityStarter activityStarter,
+            QSLogger qsLogger,
+            ZenModeController zenModeController,
+            BroadcastDispatcher broadcastDispatcher,
+            @Main SharedPreferences sharedPreferences
+    ) {
+        super(host, backgroundLooper, mainHandler, metricsLogger, statusBarStateController,
+                activityStarter, qsLogger);
         mController = zenModeController;
-        mActivityStarter = activityStarter;
         mSharedPreferences = sharedPreferences;
         mDetailAdapter = new DndDetailAdapter();
         mBroadcastDispatcher = broadcastDispatcher;

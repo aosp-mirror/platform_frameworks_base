@@ -97,8 +97,12 @@ import static android.net.NetworkPolicyManager.resolveNetworkId;
 import static android.net.NetworkPolicyManager.uidPoliciesToString;
 import static android.net.NetworkPolicyManager.uidRulesToString;
 import static android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK;
+import static android.net.NetworkStats.METERED_ALL;
+import static android.net.NetworkStats.METERED_YES;
+import static android.net.NetworkTemplate.MATCH_CARRIER;
 import static android.net.NetworkTemplate.MATCH_MOBILE;
 import static android.net.NetworkTemplate.MATCH_WIFI;
+import static android.net.NetworkTemplate.buildTemplateCarrierMetered;
 import static android.net.NetworkTemplate.buildTemplateMobileAll;
 import static android.net.TrafficStats.MB_IN_BYTES;
 import static android.net.netstats.provider.NetworkStatsProvider.QUOTA_UNLIMITED;
@@ -350,7 +354,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final int VERSION_SWITCH_UID = 10;
     private static final int VERSION_ADDED_CYCLE = 11;
     private static final int VERSION_ADDED_NETWORK_TYPES = 12;
-    private static final int VERSION_LATEST = VERSION_ADDED_NETWORK_TYPES;
+    private static final int VERSION_SUPPORTED_CARRIER_USAGE = 13;
+    private static final int VERSION_LATEST = VERSION_SUPPORTED_CARRIER_USAGE;
 
     @VisibleForTesting
     public static final int TYPE_WARNING = SystemMessage.NOTE_NET_WARNING;
@@ -375,7 +380,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final String ATTR_RESTRICT_BACKGROUND = "restrictBackground";
     private static final String ATTR_NETWORK_TEMPLATE = "networkTemplate";
     private static final String ATTR_SUBSCRIBER_ID = "subscriberId";
+    private static final String ATTR_SUBSCRIBER_ID_MATCH_RULE = "subscriberIdMatchRule";
     private static final String ATTR_NETWORK_ID = "networkId";
+    private static final String ATTR_TEMPLATE_METERED = "templateMetered";
     @Deprecated private static final String ATTR_CYCLE_DAY = "cycleDay";
     @Deprecated private static final String ATTR_CYCLE_TIMEZONE = "cycleTimezone";
     private static final String ATTR_CYCLE_START = "cycleStart";
@@ -1430,7 +1437,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      */
     @GuardedBy("mNetworkPoliciesSecondLock")
     private int findRelevantSubIdNL(NetworkTemplate template) {
-        // Mobile template is relevant when any active subscriber matches
+        // Carrier template is relevant when any active subscriber matches
         for (int i = 0; i < mSubIdToSubscriberId.size(); i++) {
             final int subId = mSubIdToSubscriberId.keyAt(i);
             final String subscriberId = mSubIdToSubscriberId.valueAt(i);
@@ -1508,6 +1515,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             }
             case TYPE_LIMIT: {
                 switch (policy.template.getMatchRule()) {
+                    case MATCH_CARRIER:
                     case MATCH_MOBILE:
                         title = res.getText(R.string.data_usage_mobile_limit_title);
                         break;
@@ -1536,6 +1544,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             }
             case TYPE_LIMIT_SNOOZED: {
                 switch (policy.template.getMatchRule()) {
+                    case MATCH_CARRIER:
                     case MATCH_MOBILE:
                         title = res.getText(R.string.data_usage_mobile_limit_snoozed_title);
                         break;
@@ -1632,7 +1641,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
         synchronized (mUidRulesFirstLock) {
             synchronized (mNetworkPoliciesSecondLock) {
-                ensureActiveMobilePolicyAL();
+                ensureActiveCarrierPolicyAL();
                 normalizePoliciesNL();
                 updateNetworkEnabledNL();
                 updateNetworkRulesNL();
@@ -1657,17 +1666,17 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     /**
-     * Update mobile policies with data cycle information from {@link CarrierConfigManager}
+     * Update carrier policies with data cycle information from {@link CarrierConfigManager}
      * if necessary.
      *
      * @param subId that has its associated NetworkPolicy updated if necessary
      * @return if any policies were updated
      */
     @GuardedBy("mNetworkPoliciesSecondLock")
-    private boolean maybeUpdateMobilePolicyCycleAL(int subId, String subscriberId) {
-        if (LOGV) Slog.v(TAG, "maybeUpdateMobilePolicyCycleAL()");
+    private boolean maybeUpdateCarrierPolicyCycleAL(int subId, String subscriberId) {
+        if (LOGV) Slog.v(TAG, "maybeUpdateCarrierPolicyCycleAL()");
 
-        // find and update the mobile NetworkPolicy for this subscriber id
+        // find and update the carrier NetworkPolicy for this subscriber id
         boolean policyUpdated = false;
         final NetworkIdentity probeIdent = new NetworkIdentity(TYPE_MOBILE,
                 TelephonyManager.NETWORK_TYPE_UNKNOWN, subscriberId, null, false, true, true,
@@ -1676,21 +1685,21 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             final NetworkTemplate template = mNetworkPolicy.keyAt(i);
             if (template.matches(probeIdent)) {
                 final NetworkPolicy policy = mNetworkPolicy.valueAt(i);
-                policyUpdated |= updateDefaultMobilePolicyAL(subId, policy);
+                policyUpdated |= updateDefaultCarrierPolicyAL(subId, policy);
             }
         }
         return policyUpdated;
     }
 
     /**
-     * Returns the cycle day that should be used for a mobile NetworkPolicy.
+     * Returns the cycle day that should be used for a carrier NetworkPolicy.
      *
      * It attempts to get an appropriate cycle day from the passed in CarrierConfig. If it's unable
      * to do so, it returns the fallback value.
      *
      * @param config The CarrierConfig to read the value from.
      * @param fallbackCycleDay to return if the CarrierConfig can't be read.
-     * @return cycleDay to use in the mobile NetworkPolicy.
+     * @return cycleDay to use in the carrier NetworkPolicy.
      */
     @VisibleForTesting
     int getCycleDayFromCarrierConfig(@Nullable PersistableBundle config,
@@ -1715,14 +1724,14 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     /**
-     * Returns the warning bytes that should be used for a mobile NetworkPolicy.
+     * Returns the warning bytes that should be used for a carrier NetworkPolicy.
      *
      * It attempts to get an appropriate value from the passed in CarrierConfig. If it's unable
      * to do so, it returns the fallback value.
      *
      * @param config The CarrierConfig to read the value from.
      * @param fallbackWarningBytes to return if the CarrierConfig can't be read.
-     * @return warningBytes to use in the mobile NetworkPolicy.
+     * @return warningBytes to use in the carrier NetworkPolicy.
      */
     @VisibleForTesting
     long getWarningBytesFromCarrierConfig(@Nullable PersistableBundle config,
@@ -1748,14 +1757,14 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     /**
-     * Returns the limit bytes that should be used for a mobile NetworkPolicy.
+     * Returns the limit bytes that should be used for a carrier NetworkPolicy.
      *
      * It attempts to get an appropriate value from the passed in CarrierConfig. If it's unable
      * to do so, it returns the fallback value.
      *
      * @param config The CarrierConfig to read the value from.
      * @param fallbackLimitBytes to return if the CarrierConfig can't be read.
-     * @return limitBytes to use in the mobile NetworkPolicy.
+     * @return limitBytes to use in the carrier NetworkPolicy.
      */
     @VisibleForTesting
     long getLimitBytesFromCarrierConfig(@Nullable PersistableBundle config,
@@ -1801,8 +1810,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 synchronized (mNetworkPoliciesSecondLock) {
                     final String subscriberId = mSubIdToSubscriberId.get(subId, null);
                     if (subscriberId != null) {
-                        ensureActiveMobilePolicyAL(subId, subscriberId);
-                        maybeUpdateMobilePolicyCycleAL(subId, subscriberId);
+                        ensureActiveCarrierPolicyAL(subId, subscriberId);
+                        maybeUpdateCarrierPolicyCycleAL(subId, subscriberId);
                     } else {
                         Slog.wtf(TAG, "Missing subscriberId for subId " + subId);
                     }
@@ -1888,10 +1897,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         // TODO: reach into ConnectivityManager to proactively disable bringing
         // up this network, since we know that traffic will be blocked.
 
-        if (template.getMatchRule() == MATCH_MOBILE) {
-            // If mobile data usage hits the limit or if the user resumes the data, we need to
+        if (template.getMatchRule() == MATCH_MOBILE
+                || template.getMatchRule() == MATCH_CARRIER) {
+            // If carrier data usage hits the limit or if the user resumes the data, we need to
             // notify telephony.
 
+            // TODO: It needs to check if it matches the merged WIFI and notify to wifi module.
             final IntArray matchingSubIds = new IntArray();
             synchronized (mNetworkPoliciesSecondLock) {
                 for (int i = 0; i < mSubIdToSubscriberId.size(); i++) {
@@ -2151,7 +2162,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         .truncatedTo(ChronoUnit.DAYS)
                         .toInstant().toEpochMilli();
                 final long totalBytes = getTotalBytes(
-                        NetworkTemplate.buildTemplateMobileAll(snapshot.getSubscriberId()),
+                        buildTemplateCarrierMetered(snapshot.getSubscriberId()),
                         start, startOfDay);
                 final long remainingBytes = limitBytes - totalBytes;
                 // Number of remaining days including current day
@@ -2177,31 +2188,31 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     /**
      * Once any {@link #mNetworkPolicy} are loaded from disk, ensure that we
-     * have at least a default mobile policy defined.
+     * have at least a default carrier policy defined.
      */
     @GuardedBy("mNetworkPoliciesSecondLock")
-    private void ensureActiveMobilePolicyAL() {
-        if (LOGV) Slog.v(TAG, "ensureActiveMobilePolicyAL()");
+    private void ensureActiveCarrierPolicyAL() {
+        if (LOGV) Slog.v(TAG, "ensureActiveCarrierPolicyAL()");
         if (mSuppressDefaultPolicy) return;
 
         for (int i = 0; i < mSubIdToSubscriberId.size(); i++) {
             final int subId = mSubIdToSubscriberId.keyAt(i);
             final String subscriberId = mSubIdToSubscriberId.valueAt(i);
 
-            ensureActiveMobilePolicyAL(subId, subscriberId);
+            ensureActiveCarrierPolicyAL(subId, subscriberId);
         }
     }
 
     /**
      * Once any {@link #mNetworkPolicy} are loaded from disk, ensure that we
-     * have at least a default mobile policy defined.
+     * have at least a default carrier policy defined.
      *
      * @param subId to build a default policy for
      * @param subscriberId that we check for an existing policy
-     * @return true if a mobile network policy was added, or false one already existed.
+     * @return true if a carrier network policy was added, or false one already existed.
      */
     @GuardedBy("mNetworkPoliciesSecondLock")
-    private boolean ensureActiveMobilePolicyAL(int subId, String subscriberId) {
+    private boolean ensureActiveCarrierPolicyAL(int subId, String subscriberId) {
         // Poke around to see if we already have a policy
         final NetworkIdentity probeIdent = new NetworkIdentity(TYPE_MOBILE,
                 TelephonyManager.NETWORK_TYPE_UNKNOWN, subscriberId, null, false, true, true,
@@ -2220,7 +2231,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         Slog.i(TAG, "No policy for subscriber "
                 + NetworkIdentityUtils.scrubSubscriberId(subscriberId)
                 + "; generating default policy");
-        final NetworkPolicy policy = buildDefaultMobilePolicy(subId, subscriberId);
+        final NetworkPolicy policy = buildDefaultCarrierPolicy(subId, subscriberId);
         addNetworkPolicyAL(policy);
         return true;
     }
@@ -2240,8 +2251,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     @VisibleForTesting
-    NetworkPolicy buildDefaultMobilePolicy(int subId, String subscriberId) {
-        final NetworkTemplate template = buildTemplateMobileAll(subscriberId);
+    NetworkPolicy buildDefaultCarrierPolicy(int subId, String subscriberId) {
+        final NetworkTemplate template = buildTemplateCarrierMetered(subscriberId);
         final RecurrenceRule cycleRule = NetworkPolicy
                 .buildRule(ZonedDateTime.now().getDayOfMonth(), ZoneId.systemDefault());
         final NetworkPolicy policy = new NetworkPolicy(template, cycleRule,
@@ -2249,7 +2260,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 SNOOZE_NEVER, SNOOZE_NEVER, true, true);
         synchronized (mUidRulesFirstLock) {
             synchronized (mNetworkPoliciesSecondLock) {
-                updateDefaultMobilePolicyAL(subId, policy);
+                updateDefaultCarrierPolicyAL(subId, policy);
             }
         }
         return policy;
@@ -2263,7 +2274,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * @return if the policy was modified
      */
     @GuardedBy("mNetworkPoliciesSecondLock")
-    private boolean updateDefaultMobilePolicyAL(int subId, NetworkPolicy policy) {
+    private boolean updateDefaultCarrierPolicyAL(int subId, NetworkPolicy policy) {
         if (!policy.inferred) {
             if (LOGD) Slog.d(TAG, "Ignoring user-defined policy " + policy);
             return false;
@@ -2350,13 +2361,32 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         mLoadedRestrictBackground = (version >= VERSION_ADDED_RESTRICT_BACKGROUND)
                                 && readBooleanAttribute(in, ATTR_RESTRICT_BACKGROUND);
                     } else if (TAG_NETWORK_POLICY.equals(tag)) {
-                        final int networkTemplate = readIntAttribute(in, ATTR_NETWORK_TEMPLATE);
+                        int templateType = readIntAttribute(in, ATTR_NETWORK_TEMPLATE);
                         final String subscriberId = in.getAttributeValue(null, ATTR_SUBSCRIBER_ID);
                         final String networkId;
+                        final int subscriberIdMatchRule;
+                        final int templateMeteredness;
                         if (version >= VERSION_ADDED_NETWORK_ID) {
                             networkId = in.getAttributeValue(null, ATTR_NETWORK_ID);
                         } else {
                             networkId = null;
+                        }
+
+                        if (version >= VERSION_SUPPORTED_CARRIER_USAGE) {
+                            subscriberIdMatchRule = readIntAttribute(in,
+                                    ATTR_SUBSCRIBER_ID_MATCH_RULE);
+                            templateMeteredness = readIntAttribute(in, ATTR_TEMPLATE_METERED);
+
+                        } else {
+                            subscriberIdMatchRule = NetworkTemplate.SUBSCRIBER_ID_MATCH_RULE_EXACT;
+                            if (templateType == MATCH_MOBILE) {
+                                Log.d(TAG, "Update template match rule from mobile to carrier and"
+                                        + " force to metered");
+                                templateType = MATCH_CARRIER;
+                                templateMeteredness = METERED_YES;
+                            } else {
+                                templateMeteredness = METERED_ALL;
+                            }
                         }
                         final RecurrenceRule cycleRule;
                         if (version >= VERSION_ADDED_CYCLE) {
@@ -2391,7 +2421,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         if (version >= VERSION_ADDED_METERED) {
                             metered = readBooleanAttribute(in, ATTR_METERED);
                         } else {
-                            switch (networkTemplate) {
+                            switch (templateType) {
                                 case MATCH_MOBILE:
                                     metered = true;
                                     break;
@@ -2411,9 +2441,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         } else {
                             inferred = false;
                         }
-
-                        final NetworkTemplate template = new NetworkTemplate(networkTemplate,
-                                subscriberId, networkId);
+                        final NetworkTemplate template = new NetworkTemplate(templateType,
+                                subscriberId, new String[] { subscriberId },
+                                networkId, templateMeteredness, NetworkStats.ROAMING_ALL,
+                                NetworkStats.DEFAULT_NETWORK_ALL, NetworkTemplate.NETWORK_TYPE_ALL,
+                                NetworkTemplate.OEM_MANAGED_ALL, subscriberIdMatchRule);
                         if (template.isPersistable()) {
                             mNetworkPolicy.put(template, new NetworkPolicy(template, cycleRule,
                                     warningBytes, limitBytes, lastWarningSnooze,
@@ -2621,10 +2653,14 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 if (subscriberId != null) {
                     out.attribute(null, ATTR_SUBSCRIBER_ID, subscriberId);
                 }
+                writeIntAttribute(out, ATTR_SUBSCRIBER_ID_MATCH_RULE,
+                        template.getSubscriberIdMatchRule());
                 final String networkId = template.getNetworkId();
                 if (networkId != null) {
                     out.attribute(null, ATTR_NETWORK_ID, networkId);
                 }
+                writeIntAttribute(out, ATTR_TEMPLATE_METERED,
+                        template.getMeteredness());
                 writeStringAttribute(out, ATTR_CYCLE_START,
                         RecurrenceRule.convertZonedDateTime(policy.cycleRule.start));
                 writeStringAttribute(out, ATTR_CYCLE_END,
@@ -3492,8 +3528,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
                     final String subscriberId = mSubIdToSubscriberId.get(subId, null);
                     if (subscriberId != null) {
-                        ensureActiveMobilePolicyAL(subId, subscriberId);
-                        maybeUpdateMobilePolicyCycleAL(subId, subscriberId);
+                        ensureActiveCarrierPolicyAL(subId, subscriberId);
+                        maybeUpdateCarrierPolicyCycleAL(subId, subscriberId);
                     } else {
                         Slog.wtf(TAG, "Missing subscriberId for subId " + subId);
                     }
@@ -5534,11 +5570,15 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             return;
         }
 
-        // Turn mobile data limit off
+        // Turn carrier/mobile data limit off
         NetworkPolicy[] policies = getNetworkPolicies(mContext.getOpPackageName());
-        NetworkTemplate template = NetworkTemplate.buildTemplateMobileAll(subscriber);
+        NetworkTemplate templateCarrier = buildTemplateCarrierMetered(subscriber);
+        NetworkTemplate templateMobile = buildTemplateMobileAll(subscriber);
         for (NetworkPolicy policy : policies) {
-            if (policy.template.equals(template)) {
+            //  All policies loaded from disk will be carrier templates, and setting will also only
+            //  set carrier templates, but we clear mobile templates just in case one is set by
+            //  some other caller
+            if (policy.template.equals(templateCarrier) || policy.template.equals(templateMobile)) {
                 policy.limitBytes = NetworkPolicy.LIMIT_DISABLED;
                 policy.inferred = false;
                 policy.clearSnooze();
