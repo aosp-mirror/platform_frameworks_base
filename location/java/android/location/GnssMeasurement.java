@@ -214,6 +214,25 @@ public final class GnssMeasurement implements Parcelable {
      *
      * <p> When this bit is unset, the {@link #getAccumulatedDeltaRangeMeters()} corresponds to the
      * carrier phase measurement plus an accumulated integer number of carrier half cycles.
+     *
+     * <p> For signals that have databits, the carrier phase tracking loops typically use a costas
+     * loop discriminator.  This type of tracking loop introduces a half-cycle ambiguity that is
+     * resolved by searching through the received data for known patterns of databits (e.g. GPS uses
+     * the TLM word) which then determines the polarity of the incoming data and resolves the
+     * half-cycle ambiguity.
+     *
+     * <p>Before the half-cycle ambiguity has been resolved it is possible that the ADR_STATE_VALID
+     * flag is set:
+     *
+     * <ul>
+     *   <li> In cases where ADR_STATE_HALF_CYCLE_REPORTED is not set, the
+     *   ADR_STATE_HALF_CYCLE_RESOLVED flag will not be available. Here, a half wave length will be
+     *   added to the returned accumulated delta range uncertainty to indicate the half cycle
+     *   ambiguity.
+     *   <li> In cases where ADR_STATE_HALF_CYCLE_REPORTED is set, half cycle ambiguity will be
+     *   indicated via both the ADR_STATE_HALF_CYCLE_RESOLVED flag and as well a half wave length
+     *   added to the returned accumulated delta range uncertainty.
+     * </ul>
      */
     public static final int ADR_STATE_HALF_CYCLE_RESOLVED = (1<<3);
 
@@ -1038,9 +1057,6 @@ public final class GnssMeasurement implements Parcelable {
      * the double difference of this value between receivers and satellites may be used, together
      * with integer ambiguity resolution, to determine highly precise relative location between
      * receivers.
-     *
-     * <p>This includes ensuring that all half-cycle ambiguities are resolved before this value is
-     * reported as {@link #ADR_STATE_VALID}.
      *
      * <p>The alignment of the phase measurement will not be adjusted by the receiver so the
      * in-phase and quadrature phase components will have a quarter cycle offset as they do when
