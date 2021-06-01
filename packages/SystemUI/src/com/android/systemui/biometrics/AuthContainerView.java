@@ -747,11 +747,6 @@ public class AuthContainerView extends LinearLayout
         return lp;
     }
 
-    private boolean hasFaceAndFingerprintSensors() {
-        final int[] ids = findFaceAndFingerprintSensors();
-        return ids[0] >= 0 && ids[1] >= 0;
-    }
-
     // returns [face, fingerprint] sensor ids (id is -1 if not present)
     private int[] findFaceAndFingerprintSensors() {
         int faceSensorId = -1;
