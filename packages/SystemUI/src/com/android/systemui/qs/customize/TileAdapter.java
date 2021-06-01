@@ -291,6 +291,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
 
     @Override
     public boolean onFailedToRecycleView(Holder holder) {
+        holder.stopDrag();
         holder.clearDrag();
         return true;
     }
@@ -565,12 +566,6 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
 
         public void clearDrag() {
             itemView.clearAnimation();
-            if (mTileView instanceof CustomizeTileView) {
-                mTileView.findViewById(R.id.tile_label).clearAnimation();
-                mTileView.findViewById(R.id.tile_label).setAlpha(1);
-                mTileView.getSecondaryLabel().clearAnimation();
-                mTileView.getSecondaryLabel().setAlpha(.6f);
-            }
         }
 
         public void startDrag() {
@@ -578,14 +573,6 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
                     .setDuration(DRAG_LENGTH)
                     .scaleX(DRAG_SCALE)
                     .scaleY(DRAG_SCALE);
-            if (mTileView instanceof CustomizeTileView) {
-                mTileView.findViewById(R.id.tile_label).animate()
-                        .setDuration(DRAG_LENGTH)
-                        .alpha(0);
-                mTileView.getSecondaryLabel().animate()
-                        .setDuration(DRAG_LENGTH)
-                        .alpha(0);
-            }
         }
 
         public void stopDrag() {
@@ -593,14 +580,6 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
                     .setDuration(DRAG_LENGTH)
                     .scaleX(1)
                     .scaleY(1);
-            if (mTileView instanceof CustomizeTileView) {
-                mTileView.findViewById(R.id.tile_label).animate()
-                        .setDuration(DRAG_LENGTH)
-                        .alpha(1);
-                mTileView.getSecondaryLabel().animate()
-                        .setDuration(DRAG_LENGTH)
-                        .alpha(.6f);
-            }
         }
 
         boolean canRemove() {
