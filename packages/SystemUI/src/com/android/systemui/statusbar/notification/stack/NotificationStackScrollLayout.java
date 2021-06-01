@@ -4667,8 +4667,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println(String.format("[%s: pulsing=%s qsCustomizerShowing=%s visibility=%s"
-                        + " alpha:%f scrollY:%d maxTopPadding:%d showShelfOnly=%s"
-                        + " qsExpandFraction=%f]",
+                        + " alpha=%f scrollY:%d maxTopPadding=%d showShelfOnly=%s"
+                        + " qsExpandFraction=%f"
+                        + " hideAmount=%f]",
                 this.getClass().getSimpleName(),
                 mPulsing ? "T" : "f",
                 mAmbientState.isQsCustomizerShowing() ? "T" : "f",
@@ -4679,7 +4680,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 mAmbientState.getScrollY(),
                 mMaxTopPadding,
                 mShouldShowShelfOnly ? "T" : "f",
-                mQsExpansionFraction));
+                mQsExpansionFraction,
+                mAmbientState.getHideAmount()));
         int childCount = getChildCount();
         pw.println("  Number of children: " + childCount);
         pw.println();
