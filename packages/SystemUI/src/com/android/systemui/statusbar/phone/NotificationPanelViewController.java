@@ -577,6 +577,11 @@ public class NotificationPanelViewController extends PanelViewController {
      */
     private ValueAnimator mQsClippingAnimation = null;
     private final Rect mKeyguardStatusAreaClipBounds = new Rect();
+
+    /**
+     * The alpha of the views which only show on the keyguard but not in shade / shade locked
+     */
+    private float mKeyguardOnlyContentAlpha = 1.0f;
     private int mOldLayoutDirection;
     private NotificationShelfController mNotificationShelfController;
     private int mScrimCornerRadius;
@@ -1412,12 +1417,13 @@ public class NotificationPanelViewController extends PanelViewController {
     }
 
     private void updateClock() {
-        mKeyguardStatusViewController.setAlpha(mClockPositionResult.clockAlpha);
+        float alpha = mClockPositionResult.clockAlpha * mKeyguardOnlyContentAlpha;
+        mKeyguardStatusViewController.setAlpha(alpha);
         if (mKeyguardQsUserSwitchController != null) {
-            mKeyguardQsUserSwitchController.setAlpha(mClockPositionResult.clockAlpha);
+            mKeyguardQsUserSwitchController.setAlpha(alpha);
         }
         if (mKeyguardUserSwitcherController != null) {
-            mKeyguardUserSwitcherController.setAlpha(mClockPositionResult.clockAlpha);
+            mKeyguardUserSwitcherController.setAlpha(alpha);
         }
     }
 
@@ -2024,6 +2030,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private void maybeAnimateBottomAreaAlpha() {
         mBottomAreaShadeAlphaAnimator.cancel();
         if (mBarState == StatusBarState.SHADE_LOCKED) {
+            mBottomAreaShadeAlphaAnimator.setFloatValues(mBottomAreaShadeAlpha, 0.0f);
             mBottomAreaShadeAlphaAnimator.start();
         } else {
             mBottomAreaShadeAlpha = 1f;
@@ -2437,6 +2444,20 @@ public class NotificationPanelViewController extends PanelViewController {
         }
         mTransitionToFullShadeQSPosition = position;
         updateQsExpansion();
+    }
+
+    /**
+     * Set the alpha of the keyguard elements which only show on the lockscreen, but not in
+     * shade locked / shade. This is used when dragging down to the full shade.
+     */
+    public void setKeyguardOnlyContentAlpha(float keyguardAlpha) {
+        mKeyguardOnlyContentAlpha = Interpolators.ALPHA_IN.getInterpolation(keyguardAlpha);
+        if (mBarState == KEYGUARD) {
+            // If the animator is running, it's already fading out the content and this is a reset
+            mBottomAreaShadeAlpha = mKeyguardOnlyContentAlpha;
+            updateKeyguardBottomAreaAlpha();
+        }
+        updateClock();
     }
 
     private void trackMovement(MotionEvent event) {
@@ -2897,6 +2918,7 @@ public class NotificationPanelViewController extends PanelViewController {
         if (ambientIndicationContainer != null) {
             ambientIndicationContainer.setAlpha(alpha);
         }
+        mLockIconViewController.setAlpha(alpha);
     }
 
     /**
