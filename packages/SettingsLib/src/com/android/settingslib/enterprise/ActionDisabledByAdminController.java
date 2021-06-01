@@ -16,6 +16,7 @@
 
 package com.android.settingslib.enterprise;
 
+import android.annotation.UserIdInt;
 import android.content.Context;
 
 import androidx.annotation.Nullable;
@@ -28,10 +29,15 @@ import com.android.settingslib.RestrictedLockUtils;
 public interface ActionDisabledByAdminController {
 
     /**
+     * Sets the {@link ActionDisabledLearnMoreButtonLauncher}.
+     */
+    void initialize(ActionDisabledLearnMoreButtonLauncher launcher);
+
+    /**
      * Handles the adding and setting up of the learn more button. If button is not needed, then
      * this method can be left empty.
      */
-    void setupLearnMoreButton(Context context, Object alertDialogBuilder);
+    void setupLearnMoreButton(Context context);
 
     /**
      * Returns the admin support dialog's title resource id.
@@ -41,11 +47,11 @@ public interface ActionDisabledByAdminController {
     /**
      * Returns the admin support dialog's content string.
      */
-    CharSequence getAdminSupportContentString(
-            Context context, @Nullable CharSequence supportMessage);
+    CharSequence getAdminSupportContentString(Context context,
+            @Nullable CharSequence supportMessage);
 
     /**
      * Updates the enforced admin
      */
-    void updateEnforcedAdmin(RestrictedLockUtils.EnforcedAdmin admin, int adminUserId);
+    void updateEnforcedAdmin(RestrictedLockUtils.EnforcedAdmin admin, @UserIdInt int adminUserId);
 }
