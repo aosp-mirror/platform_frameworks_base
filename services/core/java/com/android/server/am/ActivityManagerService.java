@@ -16067,6 +16067,24 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
+        public ServiceNotificationPolicy applyForegroundServiceNotification(
+                Notification notification, int id, String pkg, int userId) {
+            synchronized (ActivityManagerService.this) {
+                return mServices.applyForegroundServiceNotificationLocked(notification,
+                        id, pkg, userId);
+            }
+        }
+
+        @Override
+        public void onForegroundServiceNotificationUpdate(Notification notification,
+                int id, String pkg, @UserIdInt int userId) {
+            synchronized (ActivityManagerService.this) {
+                mServices.onForegroundServiceNotificationUpdateLocked(notification,
+                        id, pkg, userId);
+            }
+        }
+
+        @Override
         public void stopForegroundServicesForChannel(String pkg, int userId,
                 String channelId) {
             synchronized (ActivityManagerService.this) {

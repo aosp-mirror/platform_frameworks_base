@@ -130,6 +130,7 @@ import android.annotation.UserIdInt;
 import android.annotation.WorkerThread;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
+import android.app.ActivityManagerInternal.ServiceNotificationPolicy;
 import android.app.AlarmManager;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
@@ -3078,6 +3079,20 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
+    protected void maybeReportForegroundServiceUpdate(final NotificationRecord r) {
+        if (r.isForegroundService()) {
+            // snapshot live state for the asynchronous operation
+            final StatusBarNotification sbn = r.getSbn();
+            final Notification notification = sbn.getNotification();
+            final int id = sbn.getId();
+            final String pkg = sbn.getPackageName();
+            final int userId = sbn.getUser().getIdentifier();
+            mHandler.post(() -> {
+                mAmi.onForegroundServiceNotificationUpdate(notification, id, pkg, userId);
+            });
+        }
+    }
+
     private String getHistoryTitle(Notification n) {
         CharSequence title = null;
         if (n.extras != null) {
@@ -5070,7 +5085,7 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public boolean isNotificationPolicyAccessGrantedForPackage(String pkg) {;
+        public boolean isNotificationPolicyAccessGrantedForPackage(String pkg) {
             enforceSystemOrSystemUIOrSamePackage(pkg,
                     "request policy access status for another package");
             return checkPolicyAccess(pkg);
@@ -5725,9 +5740,7 @@ public class NotificationManagerService extends SystemService {
                 summaryNotification.extras.putAll(extras);
                 Intent appIntent = getContext().getPackageManager().getLaunchIntentForPackage(pkg);
                 if (appIntent != null) {
-                    final ActivityManagerInternal ami = LocalServices
-                            .getService(ActivityManagerInternal.class);
-                    summaryNotification.contentIntent = ami.getPendingIntentActivityAsApp(
+                    summaryNotification.contentIntent = mAmi.getPendingIntentActivityAsApp(
                             0, appIntent, PendingIntent.FLAG_IMMUTABLE, null,
                             pkg, appInfo.uid);
                 }
@@ -5778,7 +5791,7 @@ public class NotificationManagerService extends SystemService {
             return "callState";
         }
         return null;
-    };
+    }
 
     private void dumpJson(PrintWriter pw, @NonNull DumpFilter filter) {
         JSONObject dump = new JSONObject();
@@ -6059,6 +6072,11 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
+        public boolean isNotificationShown(String pkg, String tag, int notificationId, int userId) {
+            return isNotificationShownInternal(pkg, tag, notificationId, userId);
+        }
+
+        @Override
         public void removeForegroundServiceFlagFromNotification(String pkg, int notificationId,
                 int userId) {
             checkCallerIsSystem();
@@ -6141,16 +6159,22 @@ public class NotificationManagerService extends SystemService {
                 mustNotHaveFlags, false, userId, REASON_APP_CANCEL, null);
     }
 
+    boolean isNotificationShownInternal(String pkg, String tag, int notificationId, int userId) {
+        synchronized (mNotificationLock) {
+            return findNotificationLocked(pkg, tag, notificationId, userId) != null;
+        }
+    }
+
     void enqueueNotificationInternal(final String pkg, final String opPkg, final int callingUid,
             final int callingPid, final String tag, final int id, final Notification notification,
             int incomingUserId) {
         enqueueNotificationInternal(pkg, opPkg, callingUid, callingPid, tag, id, notification,
-        incomingUserId, false);
+                incomingUserId, false);
     }
 
     void enqueueNotificationInternal(final String pkg, final String opPkg, final int callingUid,
-        final int callingPid, final String tag, final int id, final Notification notification,
-        int incomingUserId, boolean postSilently) {
+            final int callingPid, final String tag, final int id, final Notification notification,
+            int incomingUserId, boolean postSilently) {
         if (DBG) {
             Slog.v(TAG, "enqueueNotificationInternal: pkg=" + pkg + " id=" + id
                     + " notification=" + notification);
@@ -6183,6 +6207,22 @@ public class NotificationManagerService extends SystemService {
         } catch (Exception e) {
             Slog.e(TAG, "Cannot fix notification", e);
             return;
+        }
+
+        // Notifications passed to setForegroundService() have FLAG_FOREGROUND_SERVICE,
+        // but it's also possible that the app has called notify() with an update to an
+        // FGS notification that hasn't yet been displayed.  Make sure we check for any
+        // FGS-related situation up front, outside of any locks so it's safe to call into
+        // the Activity Manager.
+        final ServiceNotificationPolicy policy = mAmi.applyForegroundServiceNotification(
+                notification, id, pkg, userId);
+        if (policy == ServiceNotificationPolicy.UPDATE_ONLY) {
+            // Proceed if the notification is already showing/known, otherwise ignore
+            // because the service lifecycle logic has retained responsibility for its
+            // handling.
+            if (!isNotificationShownInternal(pkg, tag, id, userId)) {
+                return;
+            }
         }
 
         mUsageStats.registerEnqueuedByApp(pkg);
@@ -6287,19 +6327,17 @@ public class NotificationManagerService extends SystemService {
         if (notification.allPendingIntents != null) {
             final int intentCount = notification.allPendingIntents.size();
             if (intentCount > 0) {
-                final ActivityManagerInternal am = LocalServices
-                        .getService(ActivityManagerInternal.class);
                 final long duration = LocalServices.getService(
                         DeviceIdleInternal.class).getNotificationAllowlistDuration();
                 for (int i = 0; i < intentCount; i++) {
                     PendingIntent pendingIntent = notification.allPendingIntents.valueAt(i);
                     if (pendingIntent != null) {
-                        am.setPendingIntentAllowlistDuration(pendingIntent.getTarget(),
+                        mAmi.setPendingIntentAllowlistDuration(pendingIntent.getTarget(),
                                 ALLOWLIST_TOKEN, duration,
                                 TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
                                 REASON_NOTIFICATION_SERVICE,
                                 "NotificationManagerService");
-                        am.setPendingIntentAllowBgActivityStarts(pendingIntent.getTarget(),
+                        mAmi.setPendingIntentAllowBgActivityStarts(pendingIntent.getTarget(),
                                 ALLOWLIST_TOKEN, (FLAG_ACTIVITY_SENDER | FLAG_BROADCAST_SENDER
                                         | FLAG_SERVICE_SENDER));
                     }
@@ -7108,6 +7146,7 @@ public class NotificationManagerService extends SystemService {
 
                     maybeRecordInterruptionLocked(r);
                     maybeRegisterMessageSent(r);
+                    maybeReportForegroundServiceUpdate(r);
 
                     // Log event to statsd
                     mNotificationRecordLogger.maybeLogNotificationPosted(r, old, position,
