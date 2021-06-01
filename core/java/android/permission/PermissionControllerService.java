@@ -542,6 +542,9 @@ public abstract class PermissionControllerService extends Service {
             public void updateUserSensitiveForApp(int uid, @NonNull AndroidFuture callback) {
                 Preconditions.checkNotNull(callback, "callback cannot be null");
 
+                enforceSomePermissionsGrantedToCaller(
+                        Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY);
+
                 try {
                     onUpdateUserSensitivePermissionFlags(uid, () -> callback.complete(null));
                 } catch (Exception e) {
@@ -608,9 +611,7 @@ public abstract class PermissionControllerService extends Service {
                 try {
                     Objects.requireNonNull(permissionGroupName);
                     Objects.requireNonNull(callback);
-                    PermissionControllerService
-                            .this
-                            .onGetGroupOfPlatformPermission(
+                    PermissionControllerService.this.onGetGroupOfPlatformPermission(
                             permissionGroupName, callback::complete);
                 } catch (Throwable t) {
                     callback.completeExceptionally(t);
