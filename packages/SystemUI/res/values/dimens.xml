@@ -561,6 +561,7 @@
     <dimen name="qs_tile_icon_background_stroke_width">-1dp</dimen>
     <dimen name="qs_tile_background_size">56dp</dimen>
     <dimen name="qs_icon_size">20dp</dimen>
+    <dimen name="qs_side_view_size">28dp</dimen>
     <dimen name="qs_label_container_margin">10dp</dimen>
     <dimen name="qs_quick_tile_size">60dp</dimen>
     <dimen name="qs_tile_padding">12dp</dimen>
