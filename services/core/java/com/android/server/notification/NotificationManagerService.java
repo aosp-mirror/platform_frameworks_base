@@ -212,9 +212,7 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
-import android.os.Vibrator;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.service.notification.Adjustment;
@@ -370,11 +368,7 @@ public class NotificationManagerService extends SystemService {
     // 1 second past the ANR timeout.
     static final int FINISH_TOKEN_TIMEOUT = 11 * 1000;
 
-    static final long[] DEFAULT_VIBRATE_PATTERN = {0, 250, 250, 250};
-
     static final long SNOOZE_UNTIL_UNSPECIFIED = -1;
-
-    static final int VIBRATE_PATTERN_MAXLEN = 8 * 2 + 1; // up to eight bumps
 
     static final int INVALID_UID = -1;
     static final String ROOT_PKG = "root";
@@ -483,7 +477,6 @@ public class NotificationManagerService extends SystemService {
     AudioManagerInternal mAudioManagerInternal;
     // Can be null for wear
     @Nullable StatusBarManagerInternal mStatusBar;
-    Vibrator mVibrator;
     private WindowManagerInternal mWindowManagerInternal;
     private AlarmManager mAlarmManager;
     private ICompanionDeviceManager mCompanionManager;
@@ -505,7 +498,6 @@ public class NotificationManagerService extends SystemService {
     private LogicalLight mNotificationLight;
     LogicalLight mAttentionLight;
 
-    private long[] mFallbackVibrationPattern;
     private boolean mUseAttentionLight;
     boolean mHasLight = true;
     boolean mLightEnabled;
@@ -584,6 +576,7 @@ public class NotificationManagerService extends SystemService {
     RankingHelper mRankingHelper;
     @VisibleForTesting
     PreferencesHelper mPreferencesHelper;
+    private VibratorHelper mVibratorHelper;
 
     private final UserProfiles mUserProfiles = new UserProfiles();
     private NotificationListeners mListeners;
@@ -1598,10 +1591,7 @@ public class NotificationManagerService extends SystemService {
         mVibrateNotificationKey = null;
         final long identity = Binder.clearCallingIdentity();
         try {
-            // Stop all vibrations with usage of class alarm (ringtone, alarm, notification usages).
-            int usageFilter =
-                    VibrationAttributes.USAGE_CLASS_ALARM | ~VibrationAttributes.USAGE_CLASS_MASK;
-            mVibrator.cancel(usageFilter);
+            mVibratorHelper.cancelVibration();
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -1995,19 +1985,6 @@ public class NotificationManagerService extends SystemService {
     private SettingsObserver mSettingsObserver;
     protected ZenModeHelper mZenModeHelper;
 
-    static long[] getLongArray(Resources r, int resid, int maxlen, long[] def) {
-        int[] ar = r.getIntArray(resid);
-        if (ar == null) {
-            return def;
-        }
-        final int len = ar.length > maxlen ? maxlen : ar.length;
-        long[] out = new long[len];
-        for (int i=0; i<len; i++) {
-            out[i] = ar[i];
-        }
-        return out;
-    }
-
     public NotificationManagerService(Context context) {
         this(context,
                 new NotificationRecordLoggerImpl(),
@@ -2041,13 +2018,18 @@ public class NotificationManagerService extends SystemService {
     }
 
     @VisibleForTesting
-    void setHints(int hints) {
-        mListenerHints = hints;
+    VibratorHelper getVibratorHelper() {
+        return mVibratorHelper;
     }
 
     @VisibleForTesting
-    void setVibrator(Vibrator vibrator) {
-        mVibrator = vibrator;
+    void setVibratorHelper(VibratorHelper helper) {
+        mVibratorHelper = helper;
+    }
+
+    @VisibleForTesting
+    void setHints(int hints) {
+        mListenerHints = hints;
     }
 
     @VisibleForTesting
@@ -2119,11 +2101,6 @@ public class NotificationManagerService extends SystemService {
     @VisibleForTesting
     void setHandler(WorkerHandler handler) {
         mHandler = handler;
-    }
-
-    @VisibleForTesting
-    void setFallbackVibrationPattern(long[] vibrationPattern) {
-        mFallbackVibrationPattern = vibrationPattern;
     }
 
     @VisibleForTesting
@@ -2200,7 +2177,6 @@ public class NotificationManagerService extends SystemService {
         mPackageManager = packageManager;
         mPackageManagerClient = packageManagerClient;
         mAppOps = appOps;
-        mVibrator = (Vibrator) getContext().getSystemService(Context.VIBRATOR_SERVICE);
         mAppUsageStats = appUsageStats;
         mAlarmManager = (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE);
         mCompanionManager = companionManager;
@@ -2288,6 +2264,7 @@ public class NotificationManagerService extends SystemService {
                 extractorNames);
         mSnoozeHelper = snoozeHelper;
         mGroupHelper = groupHelper;
+        mVibratorHelper = new VibratorHelper(getContext());
         mHistoryManager = historyManager;
 
         // This is a ManagedServices object that keeps track of the listeners.
@@ -2309,10 +2286,6 @@ public class NotificationManagerService extends SystemService {
         mNotificationLight = lightsManager.getLight(LightsManager.LIGHT_ID_NOTIFICATIONS);
         mAttentionLight = lightsManager.getLight(LightsManager.LIGHT_ID_ATTENTION);
 
-        mFallbackVibrationPattern = getLongArray(resources,
-                R.array.config_notificationFallbackVibePattern,
-                VIBRATE_PATTERN_MAXLEN,
-                DEFAULT_VIBRATE_PATTERN);
         mInCallNotificationUri = Uri.parse("file://" +
                 resources.getString(R.string.config_inCallNotificationSound));
         mInCallNotificationAudioAttributes = new AudioAttributes.Builder()
@@ -7439,7 +7412,7 @@ public class NotificationManagerService extends SystemService {
             if (mSystemReady && mAudioManager != null) {
                 Uri soundUri = record.getSound();
                 hasValidSound = soundUri != null && !Uri.EMPTY.equals(soundUri);
-                long[] vibration = record.getVibration();
+                VibrationEffect vibration = record.getVibration();
                 // Demote sound to vibration if vibration missing & phone in vibration mode.
                 if (vibration == null
                         && hasValidSound
@@ -7447,7 +7420,8 @@ public class NotificationManagerService extends SystemService {
                         == AudioManager.RINGER_MODE_VIBRATE)
                         && mAudioManager.getStreamVolume(
                         AudioAttributes.toLegacyStreamType(record.getAudioAttributes())) == 0) {
-                    vibration = mFallbackVibrationPattern;
+                    boolean insistent = (record.getFlags() & Notification.FLAG_INSISTENT) != 0;
+                    vibration = mVibratorHelper.createFallbackVibration(insistent);
                 }
                 hasValidVibrate = vibration != null;
                 boolean hasAudibleAlert = hasValidSound || hasValidVibrate;
@@ -7674,23 +7648,12 @@ public class NotificationManagerService extends SystemService {
         return false;
     }
 
-    private boolean playVibration(final NotificationRecord record, long[] vibration,
+    private boolean playVibration(final NotificationRecord record, final VibrationEffect effect,
             boolean delayVibForSound) {
         // Escalate privileges so we can use the vibrator even if the
         // notifying app does not have the VIBRATE permission.
         final long identity = Binder.clearCallingIdentity();
         try {
-            final VibrationEffect effect;
-            try {
-                final boolean insistent =
-                        (record.getNotification().flags & Notification.FLAG_INSISTENT) != 0;
-                effect = VibrationEffect.createWaveform(
-                        vibration, insistent ? 0 : -1 /*repeatIndex*/);
-            } catch (IllegalArgumentException e) {
-                Slog.e(TAG, "Error creating vibration waveform with pattern: " +
-                        Arrays.toString(vibration));
-                return false;
-            }
             if (delayVibForSound) {
                 new Thread(() -> {
                     // delay the vibration by the same amount as the notification sound
@@ -7727,8 +7690,7 @@ public class NotificationManagerService extends SystemService {
         // to the reason so we can still debug from bugreports
         String reason = "Notification (" + record.getSbn().getOpPkg() + " "
                 + record.getSbn().getUid() + ") " + (delayed ? "(Delayed)" : "");
-        mVibrator.vibrate(Process.SYSTEM_UID, PackageManagerService.PLATFORM_PACKAGE_NAME,
-                effect, reason, record.getAudioAttributes());
+        mVibratorHelper.vibrate(effect, record.getAudioAttributes(), reason);
     }
 
     private boolean isNotificationForCurrentUser(NotificationRecord record) {
