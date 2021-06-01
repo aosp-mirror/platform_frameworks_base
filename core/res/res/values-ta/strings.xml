@@ -580,8 +580,7 @@
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"பகுதியளவு கைரேகை கண்டறியப்பட்டது"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"கைரேகையைச் செயலாக்க முடியவில்லை. மீண்டும் முயலவும்."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"சென்சாரைச் சுத்தம் செய்யவும்"</string>
-    <!-- no translation found for fingerprint_acquired_too_fast (6038375140739678098) -->
-    <skip />
+    <string name="fingerprint_acquired_too_fast" msgid="6038375140739678098">"இன்னும் சிறிது நேரம் விரலை வைத்திருங்கள்"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"விரலை மிகவும் மெதுவாக நகர்த்திவிட்டீர்கள். மீண்டும் முயற்சிக்கவும்."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"வேறு கைரேகையை முயலவும்"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"அதிக வெளிச்சமாக உள்ளது"</string>
@@ -610,12 +609,10 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"கைரேகை ஐகான்"</string>
-    <!-- no translation found for face_recalibrate_notification_name (7311163114750748686) -->
-    <skip />
+    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"முகம் காட்டித் திறத்தல்"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"முகத்தை மீண்டும் பதிவுசெய்யவும்"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"அடையாளத்தை மேம்படுத்த முகத்தை மீண்டும் பதிவுசெய்யவும்"</string>
-    <!-- no translation found for face_setup_notification_title (8843461561970741790) -->
-    <skip />
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"\'முகம் காட்டித் திறத்தல்\' அம்சத்தை அமைத்தல்"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"மொபைலைப் பார்ப்பதன் மூலம் அதைத் திறக்கலாம்"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"திறக்க, மேலும் பல வழிகளை அமையுங்கள்"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"கைரேகையைச் சேர்க்கத் தட்டுங்கள்"</string>
@@ -642,26 +639,19 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"முகத்தைச் சரிபார்க்க இயலவில்லை. வன்பொருள் இல்லை."</string>
-    <!-- no translation found for face_error_timeout (2598544068593889762) -->
-    <skip />
+    <string name="face_error_timeout" msgid="2598544068593889762">"மீண்டும் \'முகம் காட்டித் திறத்தலை\' உபயோகிக்கவும்"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"புதிய முகங்களைச் சேர்க்க இயலவில்லை. பழையது ஒன்றை நீக்கவும்."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"முக அங்கீகாரச் செயல்பாடு ரத்துசெய்யப்பட்டது."</string>
-    <!-- no translation found for face_error_user_canceled (5766472033202928373) -->
-    <skip />
+    <string name="face_error_user_canceled" msgid="5766472033202928373">"பயனரால் \'முகம் காட்டித் திறத்தல்\' ரத்துசெய்யப்பட்டது"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"பலமுறை முயன்றுவிட்டீர்கள். பிறகு முயலவும்."</string>
-    <!-- no translation found for face_error_lockout_permanent (3277134834042995260) -->
-    <skip />
-    <!-- no translation found for face_error_lockout_screen_lock (5062609811636860928) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"பலமுறை முயன்றுவிட்டீர்கள். \'முகம் காட்டித் திறத்தல்\' அம்சம் முடக்கப்பட்டது."</string>
+    <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"பலமுறை முயன்றுவிட்டீர்கள். இதற்குப் பதிலாக, திரைப் பூட்டைப் பயன்படுத்தவும்."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"முகத்தைச் சரிபார்க்க இயலவில்லை. மீண்டும் முயலவும்."</string>
-    <!-- no translation found for face_error_not_enrolled (1134739108536328412) -->
-    <skip />
-    <!-- no translation found for face_error_hw_not_present (7940978724978763011) -->
-    <skip />
+    <string name="face_error_not_enrolled" msgid="1134739108536328412">"\'முகம் காட்டித் திறத்தல்\' அம்சத்தை அமைக்கவில்லை."</string>
+    <string name="face_error_hw_not_present" msgid="7940978724978763011">"இந்தச் சாதனம் \'முகம் காட்டித் திறத்தல்\' அம்சத்தை ஆதரிக்காது"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"சென்சார் தற்காலிகமாக முடக்கப்பட்டுள்ளது."</string>
     <string name="face_name_template" msgid="3877037340223318119">"முகம் <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <!-- no translation found for face_app_setting_name (5854024256907828015) -->
-    <skip />
+    <string name="face_app_setting_name" msgid="5854024256907828015">"முகம் காட்டித் திறத்தலை உபயோகி"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"முகம் காட்டித் திறத்தல் / திரைப் பூட்டைப் பயன்படுத்து"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"தொடர்வதற்கு உங்கள் முகத்தைப் பயன்படுத்துங்கள்"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"தொடர, உங்கள் முகத்தையோ திரைப் பூட்டையோ பயன்படுத்துங்கள்"</string>
@@ -964,8 +954,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"திறப்பதற்கான பகுதியை விவரிக்கவும்."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"ஸ்லைடு மூலம் திறத்தல்."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"பேட்டர்ன் மூலம் திறத்தல்."</string>
-    <!-- no translation found for keyguard_accessibility_face_unlock (4533832120787386728) -->
-    <skip />
+    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"முகம் காட்டித் திறத்தல்."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"Pin மூலம் திறத்தல்."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"சிம்மைத் திறக்கும் பின்."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"சிம்மைத் திறக்கும் Puk."</string>
