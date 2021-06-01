@@ -20,7 +20,6 @@ import static android.provider.Settings.ACTION_MEDIA_CONTROLS_SETTINGS;
 
 import android.app.PendingIntent;
 import android.app.smartspace.SmartspaceAction;
-import android.app.smartspace.SmartspaceTarget;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -34,7 +33,6 @@ import android.graphics.drawable.Icon;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
-import android.os.Bundle;
 import android.text.Layout;
 import android.util.Log;
 import android.view.View;
@@ -74,7 +72,6 @@ import kotlin.Unit;
 public class MediaControlPanel {
     private static final String TAG = "MediaControlPanel";
     private static final float DISABLED_ALPHA = 0.38f;
-    private static final String EXTRAS_MEDIA_SOURCE_PACKAGE_NAME = "package_name";
     private static final String EXTRAS_SMARTSPACE_INTENT =
             "com.google.android.apps.gsa.smartspace.extra.SMARTSPACE_INTENT";
     private static final String KEY_SMARTSPACE_OPEN_IN_FOREGROUND = "KEY_OPEN_IN_FOREGROUND";
@@ -493,27 +490,30 @@ public class MediaControlPanel {
         };
     }
 
-    /** Bind this recommendation view based on the data given. */
-    public void bindRecommendation(@NonNull SmartspaceTarget target, @NonNull int backgroundColor) {
+    /** Bind this recommendation view based on the given data. */
+    public void bindRecommendation(@NonNull SmartspaceMediaData data) {
         if (mRecommendationViewHolder == null) {
             return;
         }
 
-        mInstanceId = target.getSmartspaceTargetId().hashCode();
+        mInstanceId = data.getTargetId().hashCode();
+        mBackgroundColor = data.getBackgroundColor();
         mRecommendationViewHolder.getRecommendations()
-                .setBackgroundTintList(ColorStateList.valueOf(backgroundColor));
-        mBackgroundColor = backgroundColor;
+                .setBackgroundTintList(ColorStateList.valueOf(mBackgroundColor));
 
-        List<SmartspaceAction> mediaRecommendationList = target.getIconGrid();
+        List<SmartspaceAction> mediaRecommendationList = data.getRecommendations();
         if (mediaRecommendationList == null || mediaRecommendationList.isEmpty()) {
             Log.w(TAG, "Empty media recommendations");
             return;
         }
 
         // Set up recommendation card's header.
-        ApplicationInfo applicationInfo = getApplicationInfo(target);
-        if (applicationInfo == null) {
-            Log.w(TAG, "No valid application info is found for media recommendations");
+        ApplicationInfo applicationInfo = null;
+        try {
+            applicationInfo = mContext.getPackageManager()
+                    .getApplicationInfo(data.getPackageName(), 0 /* flags */);
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.w(TAG, "Fail to get media recommendation's app info", e);
             return;
         }
 
@@ -531,7 +531,7 @@ public class MediaControlPanel {
         }
         // Set up media card's tap action if applicable.
         setSmartspaceRecItemOnClickListener(
-                mRecommendationViewHolder.getRecommendations(), target.getBaseAction());
+                mRecommendationViewHolder.getRecommendations(), data.getCardAction());
 
         List<ImageView> mediaCoverItems = mRecommendationViewHolder.getMediaCoverItems();
         List<Integer> mediaCoverItemsResIds = mRecommendationViewHolder.getMediaCoverItemsResIds();
@@ -574,7 +574,7 @@ public class MediaControlPanel {
                     /* isRecommendationCard */ true);
             closeGuts();
             mMediaDataManagerLazy.get().dismissSmartspaceRecommendation(
-                    MediaViewController.GUTS_ANIMATION_DURATION + 100L);
+                    data.getTargetId(), MediaViewController.GUTS_ANIMATION_DURATION + 100L);
         });
 
         mController = null;
@@ -750,38 +750,6 @@ public class MediaControlPanel {
         }
 
         return false;
-    }
-
-    /**
-     * Returns the application info for the media recommendation's source app.
-     *
-     * @param target Smartspace target contains a list of media recommendations. Each item should
-     *               contain the same source app's info.
-     *
-     * @return The source app's application info. This value can be null if no valid application
-     * info can be obtained.
-     */
-    private ApplicationInfo getApplicationInfo(@NonNull SmartspaceTarget target) {
-        List<SmartspaceAction> mediaRecommendationList = target.getIconGrid();
-        if (mediaRecommendationList == null || mediaRecommendationList.isEmpty()) {
-            return null;
-        }
-
-        for (SmartspaceAction recommendation: mediaRecommendationList) {
-            Bundle extras = recommendation.getExtras();
-            if (extras != null && extras.getString(EXTRAS_MEDIA_SOURCE_PACKAGE_NAME) != null) {
-                // Get the logo from app's package name when applicable.
-                String packageName = extras.getString(EXTRAS_MEDIA_SOURCE_PACKAGE_NAME);
-                try {
-                    return mContext.getPackageManager()
-                            .getApplicationInfo(packageName, 0 /* flags */);
-                } catch (PackageManager.NameNotFoundException e) {
-                    Log.w(TAG, "Fail to get media recommendation's app info", e);
-                }
-            }
-        }
-
-        return null;
     }
 
     /**

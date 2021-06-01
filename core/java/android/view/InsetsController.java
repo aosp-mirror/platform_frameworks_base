@@ -829,7 +829,13 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
                 requestedStateStale = requestedVisibilityChanged || imeRequestedVisible;
             }
+        }
 
+        if (mTmpControlArray.size() > 0) {
+            // Update surface positions for animations.
+            for (int i = mRunningAnimations.size() - 1; i >= 0; i--) {
+                mRunningAnimations.get(i).runner.updateSurfacePosition(mTmpControlArray);
+            }
         }
         mTmpControlArray.clear();
 

@@ -1,6 +1,5 @@
 package com.android.systemui.media
 
-import android.app.smartspace.SmartspaceTarget
 import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
@@ -184,7 +183,12 @@ class MediaCarouselController @Inject constructor(
         visualStabilityManager.addReorderingAllowedCallback(visualStabilityCallback,
                 true /* persistent */)
         mediaManager.addListener(object : MediaDataManager.Listener {
-            override fun onMediaDataLoaded(key: String, oldKey: String?, data: MediaData) {
+            override fun onMediaDataLoaded(
+                key: String,
+                oldKey: String?,
+                data: MediaData,
+                immediately: Boolean
+            ) {
                 if (addOrUpdatePlayer(key, oldKey, data)) {
                     MediaPlayerData.getMediaPlayer(key, null)?.let {
                         logSmartspaceCardReported(759, // SMARTSPACE_CARD_RECEIVED
@@ -210,19 +214,23 @@ class MediaCarouselController @Inject constructor(
 
             override fun onSmartspaceMediaDataLoaded(
                 key: String,
-                data: SmartspaceTarget,
+                data: SmartspaceMediaData,
                 shouldPrioritize: Boolean
             ) {
                 Log.d(TAG, "My Smartspace media update is here")
-                addSmartspaceMediaRecommendations(key, data, shouldPrioritize)
-                MediaPlayerData.getMediaPlayer(key, null)?.let {
-                    logSmartspaceCardReported(759, // SMARTSPACE_CARD_RECEIVED
-                            it.mInstanceId,
-                            /* isRecommendationCard */ true,
-                            it.surfaceForSmartspaceLogging)
-                }
-                if (mediaCarouselScrollHandler.visibleToUser) {
-                    logSmartspaceImpression()
+                if (data.isActive) {
+                    addSmartspaceMediaRecommendations(key, data, shouldPrioritize)
+                    MediaPlayerData.getMediaPlayer(key, null)?.let {
+                        logSmartspaceCardReported(759, // SMARTSPACE_CARD_RECEIVED
+                                it.mInstanceId,
+                                /* isRecommendationCard */ true,
+                                it.surfaceForSmartspaceLogging)
+                    }
+                    if (mediaCarouselScrollHandler.visibleToUser) {
+                        logSmartspaceImpression()
+                    }
+                } else {
+                    onSmartspaceMediaDataRemoved(data.targetId, immediately = true)
                 }
             }
 
@@ -230,9 +238,13 @@ class MediaCarouselController @Inject constructor(
                 removePlayer(key)
             }
 
-            override fun onSmartspaceMediaDataRemoved(key: String) {
+            override fun onSmartspaceMediaDataRemoved(key: String, immediately: Boolean) {
                 Log.d(TAG, "My Smartspace media removal request is received")
-                removePlayer(key)
+                if (immediately || visualStabilityManager.isReorderingAllowed) {
+                    onMediaDataRemoved(key)
+                } else {
+                    keysNeedRemoval.add(key)
+                }
             }
         })
         mediaFrame.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
@@ -287,7 +299,7 @@ class MediaCarouselController @Inject constructor(
         // Automatically scroll to the active player if needed
         if (shouldScrollToActivePlayer) {
             shouldScrollToActivePlayer = false
-            val activeMediaIndex = MediaPlayerData.getActiveMediaIndex()
+            val activeMediaIndex = MediaPlayerData.activeMediaIndex()
             if (activeMediaIndex != -1) {
                 mediaCarouselScrollHandler.scrollToActivePlayer(activeMediaIndex)
             }
@@ -333,13 +345,18 @@ class MediaCarouselController @Inject constructor(
 
     private fun addSmartspaceMediaRecommendations(
         key: String,
-        data: SmartspaceTarget,
+        data: SmartspaceMediaData,
         shouldPrioritize: Boolean
     ) {
         Log.d(TAG, "Updating smartspace target in carousel")
         if (MediaPlayerData.getMediaPlayer(key, null) != null) {
             Log.w(TAG, "Skip adding smartspace target in carousel")
             return
+        }
+
+        val existingSmartspaceMediaKey = MediaPlayerData.smartspaceMediaKey()
+        existingSmartspaceMediaKey?.let {
+            MediaPlayerData.removeMediaPlayer(existingSmartspaceMediaKey)
         }
 
         var newRecs = mediaControlPanelFactory.get()
@@ -349,7 +366,7 @@ class MediaCarouselController @Inject constructor(
         val lp = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.WRAP_CONTENT)
         newRecs.recommendationViewHolder?.recommendations?.setLayoutParams(lp)
-        newRecs.bindRecommendation(data, bgColor)
+        newRecs.bindRecommendation(data.copy(backgroundColor = bgColor))
         MediaPlayerData.addMediaRecommendation(key, newRecs, shouldPrioritize)
         updatePlayerToState(newRecs, noAnimation = true)
         reorderAllPlayers()
@@ -378,11 +395,11 @@ class MediaCarouselController @Inject constructor(
 
             if (dismissMediaData) {
                 // Inform the media manager of a potentially late dismissal
-                mediaManager.dismissMediaData(key, 0L /* delaye */)
+                mediaManager.dismissMediaData(key, delay = 0L)
             }
             if (dismissRecommendation) {
                 // Inform the media manager of a potentially late dismissal
-                mediaManager.dismissSmartspaceRecommendation(0L /* delay */)
+                mediaManager.dismissSmartspaceRecommendation(key, delay = 0L)
             }
         }
     }
@@ -392,7 +409,7 @@ class MediaCarouselController @Inject constructor(
         pageIndicator.tintList = ColorStateList.valueOf(getForegroundColor())
 
         MediaPlayerData.mediaData().forEach { (key, data) ->
-            removePlayer(key, dismissMediaData = false)
+            removePlayer(key, dismissMediaData = false, dismissRecommendation = false)
             addOrUpdatePlayer(key = key, oldKey = null, data = data)
         }
     }
@@ -732,13 +749,23 @@ internal object MediaPlayerData {
     fun players() = mediaPlayers.values
 
     /** Returns the index of the first non-timeout media. */
-    fun getActiveMediaIndex(): Int {
+    fun activeMediaIndex(): Int {
         mediaPlayers.entries.forEachIndexed { index, e ->
             if (!e.key.isSsMediaRec && e.key.data.active) {
                 return index
             }
         }
         return -1
+    }
+
+    /** Returns the existing Smartspace target id. */
+    fun smartspaceMediaKey(): String? {
+        mediaData.entries.forEach { e ->
+            if (e.value.isSsMediaRec) {
+                return e.key
+            }
+        }
+        return null
     }
 
     fun playerKeys() = mediaPlayers.keys

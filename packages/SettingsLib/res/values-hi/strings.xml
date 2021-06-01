@@ -196,7 +196,7 @@
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"प्रोफ़ाइल चुनें"</string>
     <string name="category_personal" msgid="6236798763159385225">"निजी"</string>
-    <string name="category_work" msgid="4014193632325996115">"कार्यालय"</string>
+    <string name="category_work" msgid="4014193632325996115">"ऑफ़िस"</string>
     <string name="development_settings_title" msgid="140296922921597393">"डेवलपर के लिए सेटिंग और टूल"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"डेवलपर के लिए सेटिंग और टूल चालू करें"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"ऐप्लिकेशन विकास के लिए विकल्‍प सेट करें"</string>
@@ -252,7 +252,8 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"वायरलेस डिसप्ले सर्टिफ़िकेशन"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"वाई-फ़ाई वर्बोस लॉगिंग चालू करें"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"वाई-फ़ाई के लिए स्कैन की संख्या कम करें"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"बेहतर वाई-फ़ाई नेटवर्क से जुड़ने पर मैक पता बदलने की सुविधा"</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization (882650208573834301) -->
+    <skip />
     <string name="mobile_data_always_on" msgid="8275958101875563572">"मोबाइल डेटा हमेशा चालू"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"हार्डवेयर से तेज़ी लाने के लिए टेदर करें"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"बिना नाम वाले ब्लूटूथ डिवाइस दिखाएं"</string>
@@ -453,7 +454,8 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> में बैटरी पूरी चार्ज हो जाएगी"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> में बैटरी पूरी चार्ज हो जाएगी"</string>
-    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - बैटरी की परफ़ॉर्मेंस बेहतर करने के लिए, ऑप्टिमाइज़ किया जा रहा है"</string>
+    <!-- no translation found for power_charging_limited (7956120998372505295) -->
+    <skip />
     <string name="battery_info_status_unknown" msgid="268625384868401114">"अज्ञात"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"चार्ज हो रही है"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"तेज़ चार्ज हो रही है"</string>

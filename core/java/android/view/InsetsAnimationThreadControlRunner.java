@@ -62,7 +62,12 @@ public class InsetsAnimationThreadControlRunner implements InsetsAnimationContro
 
         @Override
         public void scheduleApplyChangeInsets(InsetsAnimationControlRunner runner) {
-            mControl.applyChangeInsets(null /* outState */);
+            synchronized (mControl) {
+                // This reads the surface position on the animation thread, but the surface position
+                // would be updated on the UI thread, so we need this critical section.
+                // See: updateSurfacePosition.
+                mControl.applyChangeInsets(null /* outState */);
+            }
         }
 
         @Override
@@ -148,8 +153,19 @@ public class InsetsAnimationThreadControlRunner implements InsetsAnimationContro
     }
 
     @Override
+    @UiThread
     public void notifyControlRevoked(@InsetsType int types) {
         mControl.notifyControlRevoked(types);
+    }
+
+    @Override
+    @UiThread
+    public void updateSurfacePosition(SparseArray<InsetsSourceControl> controls) {
+        synchronized (mControl) {
+            // This is called from the UI thread, however, the surface position will be used on the
+            // animation thread, so we need this critical section. See: scheduleApplyChangeInsets.
+            mControl.updateSurfacePosition(controls);
+        }
     }
 
     @Override

@@ -252,7 +252,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Приказ на сертификација на безжична мрежа"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Овозможи преопширно пријавување Wi‑Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Регулирање на скенирањето за Wi‑Fi"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Рандомизација на MAC подобрена со Wi‑Fi"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"Непостојана MAC-рандомизација на Wi‑Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Мобилниот интернет е секогаш активен"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Хардверско забрзување за врзување"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Прикажувај уреди со Bluetooth без имиња"</string>
@@ -453,7 +453,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> до полна батерија"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> до полна батерија"</string>
-    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - Се оптимизира за состојба на батерија"</string>
+    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> - Полнењето е привремено ограничено"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Непознато"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Се полни"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Брзо полнење"</string>
@@ -520,7 +520,7 @@
     <string name="alarm_template" msgid="3346777418136233330">"во <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="6382760514842998629">"во <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"Времетраење"</string>
-    <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Секогаш прашувај"</string>
+    <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Прашувај секогаш"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Додека не го исклучите"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Пред малку"</string>
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Телефонски звучник"</string>

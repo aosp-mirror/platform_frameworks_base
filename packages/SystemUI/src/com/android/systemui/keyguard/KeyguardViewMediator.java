@@ -52,6 +52,7 @@ import android.media.SoundPool;
 import android.os.Bundle;
 import android.os.DeadObjectException;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
@@ -71,6 +72,7 @@ import android.util.Slog;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 import android.view.IRemoteAnimationFinishedCallback;
+import android.view.IRemoteAnimationRunner;
 import android.view.RemoteAnimationTarget;
 import android.view.SyncRtSurfaceTransactionApplier;
 import android.view.View;
@@ -425,6 +427,11 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
      * Callback to run to end the RemoteAnimation on the app/launcher surface behind the keyguard.
      */
     private IRemoteAnimationFinishedCallback mSurfaceBehindRemoteAnimationFinishedCallback;
+
+    /**
+     * The animation runner to use for the next exit animation.
+     */
+    private IRemoteAnimationRunner mKeyguardExitAnimationRunner;
 
     private final DeviceConfig.OnPropertiesChangedListener mOnPropertiesChangedListener =
             new DeviceConfig.OnPropertiesChangedListener() {
@@ -1605,6 +1612,16 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
         Trace.endSection();
     }
 
+    /** Hide the keyguard and let {@code runner} handle the animation. */
+    public void hideWithAnimation(IRemoteAnimationRunner runner) {
+        if (!mShowing) {
+            return;
+        }
+
+        mKeyguardExitAnimationRunner = runner;
+        hideLocked();
+    }
+
     public boolean isSecure() {
         return isSecure(KeyguardUpdateMonitor.getCurrentUser());
     }
@@ -2050,6 +2067,7 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
                 // TODO: We should stop it early by disabling the swipe up flow. Right now swipe up
                 // still completes and makes the screen blank.
                 if (DEBUG) Log.d(TAG, "Split system user, quit unlocking.");
+                mKeyguardExitAnimationRunner = null;
                 return;
             }
             mHiding = true;
@@ -2103,9 +2121,37 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
                 playSounds(false);
             }
 
+            IRemoteAnimationRunner runner = mKeyguardExitAnimationRunner;
+            mKeyguardExitAnimationRunner = null;
+
+            if (KeyguardService.sEnableRemoteKeyguardAnimation && runner != null
+                    && finishedCallback != null) {
+                // Wrap finishedCallback to clean up the keyguard state once the animation is done.
+                IRemoteAnimationFinishedCallback callback =
+                        new IRemoteAnimationFinishedCallback() {
+                            @Override
+                            public void onAnimationFinished() throws RemoteException {
+                                finishedCallback.onAnimationFinished();
+                                onKeyguardExitFinished();
+                                mKeyguardViewControllerLazy.get().hide(0 /* startTime */,
+                                        0 /* fadeoutDuration */);
+                            }
+
+                            @Override
+                            public IBinder asBinder() {
+                                return finishedCallback.asBinder();
+                            }
+                        };
+                try {
+                    runner.onAnimationStart(WindowManager.TRANSIT_KEYGUARD_GOING_AWAY, apps,
+                            wallpapers, nonApps, callback);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Failed to call onAnimationStart", e);
+                }
+
             // When remaining on the shade, there's no need to do a fancy remote animation,
             // it will dismiss the panel in that case.
-            if (KeyguardService.sEnableRemoteKeyguardAnimation
+            } else if (KeyguardService.sEnableRemoteKeyguardAnimation
                     && !mStatusBarStateController.leaveOpenOnKeyguardHide()
                     && apps != null && apps.length > 0) {
                 mSurfaceBehindRemoteAnimationFinishedCallback = finishedCallback;
@@ -2115,9 +2161,6 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
                 mKeyguardUnlockAnimationControllerLazy.get().notifyStartKeyguardExitAnimation(
                         apps[0], startTime, mSurfaceBehindRemoteAnimationRequested);
             } else {
-                setShowingLocked(false);
-                mWakeAndUnlocking = false;
-                mDismissCallbackRegistry.notifyDismissSucceeded();
                 mKeyguardViewControllerLazy.get().hide(startTime, fadeoutDuration);
 
                 // TODO(bc-animation): When remote animation is enabled for keyguard exit animation,
@@ -2140,8 +2183,8 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
                         SyncRtSurfaceTransactionApplier.SurfaceParams params =
                                 new SyncRtSurfaceTransactionApplier.SurfaceParams.Builder(
                                         primary.leash)
-                                .withAlpha(animation.getAnimatedFraction())
-                                .build();
+                                        .withAlpha(animation.getAnimatedFraction())
+                                        .build();
                         applier.scheduleApply(params);
                     });
                     anim.addListener(new AnimatorListenerAdapter() {
@@ -2165,14 +2208,22 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
                     });
                     anim.start();
                 });
-                resetKeyguardDonePendingLocked();
-                mHideAnimationRun = false;
-                adjustStatusBarLocked();
-                sendUserPresentBroadcast();
+
+                onKeyguardExitFinished();
             }
         }
 
         Trace.endSection();
+    }
+
+    private void onKeyguardExitFinished() {
+        setShowingLocked(false);
+        mWakeAndUnlocking = false;
+        mDismissCallbackRegistry.notifyDismissSucceeded();
+        resetKeyguardDonePendingLocked();
+        mHideAnimationRun = false;
+        adjustStatusBarLocked();
+        sendUserPresentBroadcast();
     }
 
     /**
@@ -2211,21 +2262,13 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
         // Block the panel from expanding, in case we were doing a swipe to dismiss gesture.
         mKeyguardViewControllerLazy.get().blockPanelExpansionFromCurrentTouch();
         final boolean wasShowing = mShowing;
-        setShowingLocked(false);
-
-        mWakeAndUnlocking = false;
-        mDismissCallbackRegistry.notifyDismissSucceeded();
+        onKeyguardExitFinished();
 
         if (mKeyguardStateController.isDismissingFromSwipe() || !wasShowing) {
             mKeyguardUnlockAnimationControllerLazy.get().hideKeyguardViewAfterRemoteAnimation();
         }
 
         finishSurfaceBehindRemoteAnimation();
-
-        resetKeyguardDonePendingLocked();
-        mHideAnimationRun = false;
-        adjustStatusBarLocked();
-        sendUserPresentBroadcast();
         mSurfaceBehindRemoteAnimationRequested = false;
         mKeyguardUnlockAnimationControllerLazy.get().notifyFinishedKeyguardExitAnimation();
     }

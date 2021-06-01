@@ -32,7 +32,10 @@ import kotlin.math.roundToInt
  * A class that allows activities to be started in a seamless way from a view that is transforming
  * nicely into the starting window.
  */
-class ActivityLaunchAnimator(context: Context) {
+class ActivityLaunchAnimator(
+    private val keyguardHandler: KeyguardHandler,
+    context: Context
+) {
     private val TAG = this::class.java.simpleName
 
     companion object {
@@ -104,15 +107,22 @@ class ActivityLaunchAnimator(context: Context) {
 
         Log.d(TAG, "Starting intent with a launch animation")
         val runner = Runner(controller)
-        val animationAdapter = RemoteAnimationAdapter(
-            runner,
-            ANIMATION_DURATION,
-            ANIMATION_DURATION - 150 /* statusBarTransitionDelay */
-        )
+        val isOnKeyguard = keyguardHandler.isOnKeyguard()
+
+        // Pass the RemoteAnimationAdapter to the intent starter only if we are not on the keyguard.
+        val animationAdapter = if (!isOnKeyguard) {
+            RemoteAnimationAdapter(
+                    runner,
+                    ANIMATION_DURATION,
+                    ANIMATION_DURATION - 150 /* statusBarTransitionDelay */
+            )
+        } else {
+            null
+        }
 
         // Register the remote animation for the given package to also animate trampoline
         // activity launches.
-        if (packageName != null) {
+        if (packageName != null && animationAdapter != null) {
             try {
                 ActivityTaskManager.getService().registerRemoteAnimationForNextActivityStart(
                     packageName, animationAdapter)
@@ -122,20 +132,30 @@ class ActivityLaunchAnimator(context: Context) {
         }
 
         val launchResult = intentStarter(animationAdapter)
-        val willAnimate = launchResult == ActivityManager.START_TASK_TO_FRONT ||
-            launchResult == ActivityManager.START_SUCCESS
 
-        Log.d(TAG, "launchResult=$launchResult willAnimate=$willAnimate")
+        // Only animate if the app is not already on top and will be opened, unless we are on the
+        // keyguard.
+        val willAnimate =
+                launchResult == ActivityManager.START_TASK_TO_FRONT ||
+                        launchResult == ActivityManager.START_SUCCESS ||
+                        (launchResult == ActivityManager.START_DELIVERED_TO_TOP && isOnKeyguard)
+
+        Log.d(TAG, "launchResult=$launchResult willAnimate=$willAnimate isOnKeyguard=$isOnKeyguard")
         controller.callOnIntentStartedOnMainThread(willAnimate)
 
         // If we expect an animation, post a timeout to cancel it in case the remote animation is
         // never started.
         if (willAnimate) {
             runner.postTimeout()
+
+            // Hide the keyguard using the launch animation instead of the default unlock animation.
+            if (isOnKeyguard) {
+                keyguardHandler.hideKeyguardWithAnimation(runner)
+            }
         }
     }
 
-    internal fun Controller.callOnIntentStartedOnMainThread(willAnimate: Boolean) {
+    private fun Controller.callOnIntentStartedOnMainThread(willAnimate: Boolean) {
         if (Looper.myLooper() != Looper.getMainLooper()) {
             this.launchContainer.context.mainExecutor.execute {
                 this.onIntentStarted(willAnimate)
@@ -177,6 +197,14 @@ class ActivityLaunchAnimator(context: Context) {
          */
         @Throws(PendingIntent.CanceledException::class)
         fun startPendingIntent(animationAdapter: RemoteAnimationAdapter?): Int
+    }
+
+    interface KeyguardHandler {
+        /** Whether we are currently on the keyguard or not. */
+        fun isOnKeyguard(): Boolean
+
+        /** Hide the keyguard and animate using [runner]. */
+        fun hideKeyguardWithAnimation(runner: IRemoteAnimationRunner)
     }
 
     /**
@@ -337,17 +365,17 @@ class ActivityLaunchAnimator(context: Context) {
 
         override fun onAnimationStart(
             @WindowManager.TransitionOldType transit: Int,
-            remoteAnimationTargets: Array<out RemoteAnimationTarget>,
-            remoteAnimationWallpaperTargets: Array<out RemoteAnimationTarget>,
-            remoteAnimationNonAppTargets: Array<out RemoteAnimationTarget>,
-            iRemoteAnimationFinishedCallback: IRemoteAnimationFinishedCallback
+            apps: Array<out RemoteAnimationTarget>?,
+            wallpapers: Array<out RemoteAnimationTarget>?,
+            nonApps: Array<out RemoteAnimationTarget>?,
+            iCallback: IRemoteAnimationFinishedCallback?
         ) {
             removeTimeout()
 
             // The animation was started too late and we already notified the controller that it
             // timed out.
             if (timedOut) {
-                invokeCallback(iRemoteAnimationFinishedCallback)
+                iCallback?.invoke()
                 return
             }
 
@@ -358,30 +386,29 @@ class ActivityLaunchAnimator(context: Context) {
             }
 
             context.mainExecutor.execute {
-                startAnimation(remoteAnimationTargets, remoteAnimationNonAppTargets,
-                        iRemoteAnimationFinishedCallback)
+                startAnimation(apps, nonApps, iCallback)
             }
         }
 
         private fun startAnimation(
-            remoteAnimationTargets: Array<out RemoteAnimationTarget>,
-            remoteAnimationNonAppTargets: Array<out RemoteAnimationTarget>,
-            iCallback: IRemoteAnimationFinishedCallback
+            apps: Array<out RemoteAnimationTarget>?,
+            nonApps: Array<out RemoteAnimationTarget>?,
+            iCallback: IRemoteAnimationFinishedCallback?
         ) {
             Log.d(TAG, "Remote animation started")
-            val window = remoteAnimationTargets.firstOrNull {
+            val window = apps?.firstOrNull {
                 it.mode == RemoteAnimationTarget.MODE_OPENING
             }
 
             if (window == null) {
                 Log.d(TAG, "Aborting the animation as no window is opening")
                 removeTimeout()
-                invokeCallback(iCallback)
+                iCallback?.invoke()
                 controller.onLaunchAnimationCancelled()
                 return
             }
 
-            val navigationBar = remoteAnimationNonAppTargets.firstOrNull {
+            val navigationBar = nonApps?.firstOrNull {
                 it.windowType == WindowManager.LayoutParams.TYPE_NAVIGATION_BAR
             }
 
@@ -439,7 +466,7 @@ class ActivityLaunchAnimator(context: Context) {
 
                 override fun onAnimationEnd(animation: Animator?) {
                     Log.d(TAG, "Animation ended")
-                    invokeCallback(iCallback)
+                    iCallback?.invoke()
                     controller.onLaunchAnimationEnd(isExpandingFullyAbove)
                 }
             })
@@ -519,8 +546,11 @@ class ActivityLaunchAnimator(context: Context) {
             )
 
             // The scale will also be applied to the corner radius, so we divide by the scale to
-            // keep the original radius.
-            val cornerRadius = minOf(state.topCornerRadius, state.bottomCornerRadius) / scale
+            // keep the original radius. We use the max of (topCornerRadius, bottomCornerRadius) to
+            // make sure that the window does not draw itself behind the expanding view. This is
+            // especially important for lock screen animations, where the window is not clipped by
+            // the shade.
+            val cornerRadius = maxOf(state.topCornerRadius, state.bottomCornerRadius) / scale
             val params = SyncRtSurfaceTransactionApplier.SurfaceParams.Builder(window.leash)
                 .withAlpha(1f)
                 .withMatrix(matrix)
@@ -585,9 +615,9 @@ class ActivityLaunchAnimator(context: Context) {
             }
         }
 
-        private fun invokeCallback(iCallback: IRemoteAnimationFinishedCallback) {
+        private fun IRemoteAnimationFinishedCallback.invoke() {
             try {
-                iCallback.onAnimationFinished()
+                onAnimationFinished()
             } catch (e: RemoteException) {
                 e.printStackTrace()
             }
