@@ -16,7 +16,6 @@
 
 package com.android.systemui.media
 
-import android.app.smartspace.SmartspaceTarget
 import javax.inject.Inject
 
 /**
@@ -28,7 +27,12 @@ class MediaDataCombineLatest @Inject constructor() : MediaDataManager.Listener,
     private val listeners: MutableSet<MediaDataManager.Listener> = mutableSetOf()
     private val entries: MutableMap<String, Pair<MediaData?, MediaDeviceData?>> = mutableMapOf()
 
-    override fun onMediaDataLoaded(key: String, oldKey: String?, data: MediaData) {
+    override fun onMediaDataLoaded(
+        key: String,
+        oldKey: String?,
+        data: MediaData,
+        immediately: Boolean
+    ) {
         if (oldKey != null && oldKey != key && entries.contains(oldKey)) {
             entries[key] = data to entries.remove(oldKey)?.second
             update(key, oldKey)
@@ -40,7 +44,7 @@ class MediaDataCombineLatest @Inject constructor() : MediaDataManager.Listener,
 
     override fun onSmartspaceMediaDataLoaded(
         key: String,
-        data: SmartspaceTarget,
+        data: SmartspaceMediaData,
         shouldPrioritize: Boolean
     ) {
         listeners.toSet().forEach { it.onSmartspaceMediaDataLoaded(key, data) }
@@ -50,8 +54,8 @@ class MediaDataCombineLatest @Inject constructor() : MediaDataManager.Listener,
         remove(key)
     }
 
-    override fun onSmartspaceMediaDataRemoved(key: String) {
-        listeners.toSet().forEach { it.onSmartspaceMediaDataRemoved(key) }
+    override fun onSmartspaceMediaDataRemoved(key: String, immediately: Boolean) {
+        listeners.toSet().forEach { it.onSmartspaceMediaDataRemoved(key, immediately) }
     }
 
     override fun onMediaDeviceChanged(
