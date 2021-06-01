@@ -4567,7 +4567,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         // If in a transition, defer commits for activities that are going invisible
-        if (!visible && mAtmService.getTransitionController().inTransition()) {
+        if (!visible && mAtmService.getTransitionController().inTransition(this)) {
             return;
         }
         // If we are preparing an app transition, then delay changing
