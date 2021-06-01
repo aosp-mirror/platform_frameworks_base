@@ -178,6 +178,11 @@ public class StubTransaction extends SurfaceControl.Transaction {
     }
 
     @Override
+    public SurfaceControl.Transaction setDisplayFlags(IBinder displayToken, int flags) {
+        return this;
+    }
+
+    @Override
     public SurfaceControl.Transaction setDisplayProjection(IBinder displayToken,
             int orientation, Rect layerStackRect, Rect displayRect) {
         return this;
