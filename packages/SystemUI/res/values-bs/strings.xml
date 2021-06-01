@@ -454,6 +454,7 @@
     <string name="keyguard_more_overflow_text" msgid="5819512373606638727">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="7248696377626341060">"Prikaži manje važna obavještenja ispod"</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"Dodirnite ponovo da otvorite"</string>
+    <string name="tap_again" msgid="1315420114387908655">"Ponovo dodirnite"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Prevucite da otvorite"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Prevucite prema gore da pokušate ponovo"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Otključajte da koristite NFC"</string>
@@ -769,7 +770,7 @@
     <string name="feedback_demoted" msgid="951884763467110604">"Ovo obavještenje je automatski &lt;b&gt;rangirano niže&lt;/b&gt; u pozadini."</string>
     <string name="feedback_prompt" msgid="3656728972307896379">"Pošaljite programeru svoje povratne informacije. Je li ovo bilo tačno?"</string>
     <string name="feedback_response" msgid="4671729244976641339">"Hvala na povratnim informacijama!"</string>
-    <string name="feedback_ok" msgid="6481426753298857144">"UREDU"</string>
+    <string name="feedback_ok" msgid="6481426753298857144">"Uredu"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6111817750774381094">"Otvorene su kontrole obavještenja za aplikaciju <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="1561909368876911701">"Zatvorene su kontrole obavještenja za aplikaciju <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="notification_channel_switch_accessibility" msgid="8979885820432540252">"Dozvoli obavještenja s ovog kanala"</string>

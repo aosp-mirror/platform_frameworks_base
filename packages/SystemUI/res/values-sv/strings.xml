@@ -306,7 +306,7 @@
     <string name="data_usage_disabled_dialog_enable" msgid="2796648546086408937">"Återuppta"</string>
     <string name="gps_notification_searching_text" msgid="231304732649348313">"Sökning efter GPS pågår"</string>
     <string name="gps_notification_found_text" msgid="3145873880174658526">"Platsen har identifierats av GPS"</string>
-    <string name="accessibility_location_active" msgid="2845747916764660369">"Det finns aktiva platsbegäranden"</string>
+    <string name="accessibility_location_active" msgid="2845747916764660369">"Det finns aktiva platsförfrågningar"</string>
     <string name="accessibility_sensors_off_active" msgid="2619725434618911551">"Sensorer har inaktiverats"</string>
     <string name="accessibility_clear_all" msgid="970525598287244592">"Ta bort alla meddelanden."</string>
     <string name="notification_group_overflow_indicator" msgid="7605120293801012648">"<xliff:g id="NUMBER">%s</xliff:g> till"</string>
@@ -452,6 +452,7 @@
     <string name="keyguard_more_overflow_text" msgid="5819512373606638727">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="7248696377626341060">"Mindre brådskande aviseringar nedan"</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"Tryck igen för att öppna"</string>
+    <string name="tap_again" msgid="1315420114387908655">"Tryck igen"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Öppna genom att svepa uppåt"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Svep uppåt om du vill försöka igen"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Lås upp om du vill använda NFC"</string>
