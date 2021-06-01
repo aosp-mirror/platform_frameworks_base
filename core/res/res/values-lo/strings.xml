@@ -580,8 +580,7 @@
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"ກວດພົບລາຍນິ້ວມືບາງສ່ວນ"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"ບໍ່​ສາ​ມາດ​ດຳ​ເນີນ​ການ​ລາຍ​ນີ້ວ​ມື​ໄດ້. ກະ​ລຸ​ນາ​ລອງ​ໃໝ່​ອີກ."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"ກະລຸນາອະນາໄມເຊັນເຊີ"</string>
-    <!-- no translation found for fingerprint_acquired_too_fast (6038375140739678098) -->
-    <skip />
+    <string name="fingerprint_acquired_too_fast" msgid="6038375140739678098">"ກົດໄວ້ດົນຂຶ້ນອີກໜ້ອຍໜຶ່ງ"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"ຍ້າຍ​ນີ້ວ​ມື​ໄປຊ້າ​ເກີນ​ໄປ. ກະ​ລຸ​ນາ​ລອງ​ໃໝ່​ອີກ."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"ລອງໃຊ້ລາຍນິ້ວມືອື່ນ"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"ແຈ້ງເກີນໄປ"</string>
@@ -610,12 +609,10 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"ໄອຄອນລາຍນິ້ວມື"</string>
-    <!-- no translation found for face_recalibrate_notification_name (7311163114750748686) -->
-    <skip />
+    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"ປົດລັອກດ້ວຍໜ້າ"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"ລົງທະບຽນໃບໜ້າຂອງທ່ານຄືນໃໝ່"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"ເພື່ອປັບປຸງການຈຳແນກ, ກະລຸນາລົງທະບຽນໃບໜ້າຂອງທ່ານຄືນໃໝ່."</string>
-    <!-- no translation found for face_setup_notification_title (8843461561970741790) -->
-    <skip />
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"ຕັ້ງຄ່າການປົດລັອກດ້ວຍໜ້າ"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"ປົດລັອກໂທລະສັບຂອງທ່ານໂດຍການເບິ່ງມັນ"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"ຕັ້ງຄ່າວິທີເພີ່ມເຕີມເພື່ອປົດລັອກ"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"ແຕະເພື່ອເພີ່ມລາຍນິ້ວມື"</string>
@@ -642,26 +639,19 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"ບໍ່ສາມາດຢັ້ງຢືນໃບໜ້າໄດ້. ບໍ່ມີຮາດແວໃຫ້ໃຊ້."</string>
-    <!-- no translation found for face_error_timeout (2598544068593889762) -->
-    <skip />
+    <string name="face_error_timeout" msgid="2598544068593889762">"ກະລຸນາລອງປົດລັອກດ້ວຍໜ້າອີກເທື່ອໜຶ່ງ"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"ບໍ່ສາມາດບັນທຶກຂໍ້ມູນໃບໜ້າໃໝ່ໄດ້. ກະລຸນາລຶບຂໍ້ມູນເກົ່າອອກກ່ອນ."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"ຍົກເລີກການດຳເນີນການກັບໃບໜ້າແລ້ວ."</string>
-    <!-- no translation found for face_error_user_canceled (5766472033202928373) -->
-    <skip />
+    <string name="face_error_user_canceled" msgid="5766472033202928373">"ຜູ້ໃຊ້ຍົກເລີກການປົດລັອກດ້ວຍໜ້າແລ້ວ"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"ມີຄວາມພະຍາຍາມຫຼາຍຄັ້ງເກີນໄປ. ກະລຸນາລອງໃໝ່ໃນພາຍຫຼັງ."</string>
-    <!-- no translation found for face_error_lockout_permanent (3277134834042995260) -->
-    <skip />
-    <!-- no translation found for face_error_lockout_screen_lock (5062609811636860928) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"ພະຍາຍາມຫຼາຍເທື່ອເກີນໄປ. ປິດການນຳໃຊ້ການປົດລັອກດ້ວຍໜ້າແລ້ວ."</string>
+    <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"ພະຍາຍາມຫຼາຍເທື່ອເກີນໄປ. ກະລຸນາເຂົ້າການລັອກໜ້າຈໍແທນ."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"ບໍ່ສາມາດຢັ້ງຢືນໃບໜ້າໄດ້. ກະລຸນາລອງໃໝ່."</string>
-    <!-- no translation found for face_error_not_enrolled (1134739108536328412) -->
-    <skip />
-    <!-- no translation found for face_error_hw_not_present (7940978724978763011) -->
-    <skip />
+    <string name="face_error_not_enrolled" msgid="1134739108536328412">"ທ່ານຍັງບໍ່ໄດ້ຕັ້ງຄ່າການປົດລັອກດ້ວຍໜ້າເທື່ອ"</string>
+    <string name="face_error_hw_not_present" msgid="7940978724978763011">"ອຸປະກອນນີ້ບໍ່ຮອງຮັບການປົດລັອກດ້ວຍໜ້າ"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"ປິດການເຮັດວຽກຂອງເຊັນເຊີໄວ້ຊົ່ວຄາວແລ້ວ."</string>
     <string name="face_name_template" msgid="3877037340223318119">"ໃບໜ້າ <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <!-- no translation found for face_app_setting_name (5854024256907828015) -->
-    <skip />
+    <string name="face_app_setting_name" msgid="5854024256907828015">"ໃຊ້ການປົດລັອກດ້ວຍໜ້າ"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"ໃຊ້ໃບໜ້າ ຫຼື ການລັອກໜ້າຈໍ"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"ໃຊ້ໜ້າທ່ານເພື່ອສືບຕໍ່"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"ໃຊ້ໃບໜ້າ ຫຼື ການລັອກໜ້າຈໍຂອງທ່ານເພື່ອດຳເນີນການຕໍ່"</string>
@@ -964,8 +954,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"ຂະຫຍາຍຂອບເຂດປົດລັອກ."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"ການປົດລັອກດ້ວຍການເລື່ອນ."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"ປົດລັອກດ້ວຍຮູບແບບ."</string>
-    <!-- no translation found for keyguard_accessibility_face_unlock (4533832120787386728) -->
-    <skip />
+    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"ປົດລັອກດ້ວຍໜ້າ."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"ປົດລັອກດ້ວຍ PIN."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"ປົດລັອກ Sim Pin."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"ປົດລັອກ Sim Puk."</string>
