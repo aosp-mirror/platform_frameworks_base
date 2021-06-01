@@ -347,8 +347,13 @@ public class StartingSurfaceDrawer {
     void makeTaskSnapshotWindow(StartingWindowInfo startingWindowInfo, IBinder appToken,
             TaskSnapshot snapshot) {
         final int taskId = startingWindowInfo.taskInfo.taskId;
+        // Remove any existing starting window for this task before adding.
+        removeWindowNoAnimate(taskId);
         final TaskSnapshotWindow surface = TaskSnapshotWindow.create(startingWindowInfo, appToken,
                 snapshot, mSplashScreenExecutor, () -> removeWindowNoAnimate(taskId));
+        if (surface == null) {
+            return;
+        }
         final StartingWindowRecord tView = new StartingWindowRecord(appToken,
                 null/* decorView */, surface);
         mStartingWindowRecords.put(taskId, tView);
