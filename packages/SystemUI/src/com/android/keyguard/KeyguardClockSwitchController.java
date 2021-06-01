@@ -305,10 +305,6 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             // know that it should re-position our SmartSpace.
             if (mKeyguardUnlockAnimationController.isUnlockingWithSmartSpaceTransition()) {
                 mKeyguardUnlockAnimationController.updateLockscreenSmartSpacePosition();
-            } else {
-                // Otherwise, reset Y translation in case it's still offset from a previous shared
-                // element transition.
-                ((View) mSmartspaceView).setTranslationY(0f);
             }
         }
 
