@@ -30,6 +30,7 @@ import static org.mockito.Mockito.when;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
+import android.bluetooth.BluetoothStatusCodes;
 import android.content.Context;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.AudioManager;
@@ -738,7 +739,7 @@ public class CachedBluetoothDeviceTest {
         doAnswer(invocation -> alias[0]).when(mDevice).getAlias();
         doAnswer(invocation -> {
             alias[0] = (String) invocation.getArguments()[0];
-            return true;
+            return BluetoothStatusCodes.SUCCESS;
         }).when(mDevice).setAlias(anyString());
         when(mDevice.getName()).thenReturn(DEVICE_NAME);
         CachedBluetoothDevice cachedBluetoothDevice =
