@@ -144,9 +144,9 @@
     <string name="data_usage_uninstalled_apps" msgid="1933665711856171491">"אפליקציות שהוסרו"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="5533981546921913295">"אפליקציות ומשתמשים שהוסרו"</string>
     <string name="data_usage_ota" msgid="7984667793701597001">"עדכוני מערכת"</string>
-    <string name="tether_settings_title_usb" msgid="3728686573430917722">"‏שיתוף אינטרנט דרך USB"</string>
+    <string name="tether_settings_title_usb" msgid="3728686573430917722">"‏שיתוף אינטרנט ב-USB"</string>
     <string name="tether_settings_title_wifi" msgid="4803402057533895526">"נקודה לשיתוף אינטרנט"</string>
-    <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"‏שיתוף אינטרנט דרך Bluetooth"</string>
+    <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"‏שיתוף אינטרנט ב-Bluetooth"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"שיתוף אינטרנט בין ניידים"</string>
     <string name="tether_settings_title_all" msgid="8910259483383010470">"נקודה לשיתוף אינטרנט"</string>
     <string name="managed_user_title" msgid="449081789742645723">"כל אפליקציות העבודה"</string>
@@ -237,7 +237,7 @@
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"‏adb, ניפוי באגים, פיתוח"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"קיצור של דוח באגים"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"כדי ליצור דוח באגים, יש להציג לחצן בתפריט לניהול צריכת החשמל"</string>
-    <string name="keep_screen_on" msgid="1187161672348797558">"שיישאר פועל"</string>
+    <string name="keep_screen_on" msgid="1187161672348797558">"ללא כניסה למצב שינה"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"המסך לעולם לא יהיה במצב שינה במהלך טעינה"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"‏הפעלת Snoop Log של Bluetooth HCI"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"‏איחוד חבילות Bluetooth. (יש להחליף מצב Bluetooth לאחר שינוי הגדרה זו)"</string>
@@ -252,7 +252,8 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"‏אישור של תצוגת WiFi"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"‏הפעלת רישום מפורט של Wi‑Fi ביומן"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"‏ויסות סריקה לנקודות Wi-Fi"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"‏רנדומיזציה משופרת של כתובות MAC ב-Wi‑Fi"</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization (882650208573834301) -->
+    <skip />
     <string name="mobile_data_always_on" msgid="8275958101875563572">"חבילת הגלישה פעילה תמיד"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"שיפור מהירות באמצעות חומרה לצורך שיתוף אינטרנט בין ניידים"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"‏הצגת מכשירי Bluetooth ללא שמות"</string>
@@ -376,7 +377,7 @@
     <string name="force_allow_on_external" msgid="9187902444231637880">"אילוץ הרשאת אפליקציות באחסון חיצוני"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"מאפשר כתיבה של כל אפליקציה באחסון חיצוני, ללא התחשבות בערכי המניפסט"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"אילוץ יכולת קביעת גודל של הפעילויות"</string>
-    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"אפשר יכולת קביעת גודל של כל הפעילויות לריבוי חלונות, ללא קשר לערך המניפסט."</string>
+    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"מאפשר יכולת קביעת גודל של כל הפעילויות לריבוי חלונות, ללא קשר לערך המניפסט."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"הפעלת האפשרות לשנות את הגודל והמיקום של החלונות"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"הפעלת תמיכה בתכונה הניסיונית של שינוי הגודל והמיקום של החלונות."</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"סיסמת גיבוי שולחן העבודה"</string>
@@ -453,7 +454,8 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g>‏ – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"הזמן הנותר לטעינה מלאה: <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – הזמן הנותר לטעינה מלאה: <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> ﹣ מופעל מיטוב לשמירה על תקינות הסוללה"</string>
+    <!-- no translation found for power_charging_limited (7956120998372505295) -->
+    <skip />
     <string name="battery_info_status_unknown" msgid="268625384868401114">"לא ידוע"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"בטעינה"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"הסוללה נטענת מהר"</string>
@@ -521,7 +523,7 @@
     <string name="zen_alarm_warning" msgid="245729928048586280">"לא תושמע ההתראה הבאה <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template" msgid="3346777418136233330">"בשעה <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="6382760514842998629">"ב-<xliff:g id="WHEN">%1$s</xliff:g>"</string>
-    <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"משך"</string>
+    <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"משך זמן"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"יש לשאול בכל פעם"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"עד הכיבוי"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"הרגע"</string>

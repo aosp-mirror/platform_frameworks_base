@@ -252,7 +252,8 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Wyświetlacz bezprzewodowy"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Szczegółowy dziennik Wi-Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Ograniczanie skanowania Wi-Fi"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Randomizacja MAC ulepszona w zakresie Wi‑Fi"</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization (882650208573834301) -->
+    <skip />
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Mobilna transmisja danych zawsze aktywna"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Akceleracja sprzętowa tetheringu"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Pokaż urządzenia Bluetooth bez nazw"</string>
@@ -383,7 +384,7 @@
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Pełne kopie zapasowe na komputerze nie są obecnie chronione"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Dotknij, by zmienić lub usunąć hasło pełnych kopii zapasowych na komputerze."</string>
     <string name="local_backup_password_toast_success" msgid="4891666204428091604">"Nowe hasło kopii zapasowej zostało ustawione"</string>
-    <string name="local_backup_password_toast_confirmation_mismatch" msgid="2994718182129097733">"Nowe hasła nie pasują do siebie"</string>
+    <string name="local_backup_password_toast_confirmation_mismatch" msgid="2994718182129097733">"Nowe hasła nie są takie same"</string>
     <string name="local_backup_password_toast_validation_failure" msgid="714669442363647122">"Nie udało się ustawić hasła kopii zapasowej"</string>
     <string name="loading_injected_setting_summary" msgid="8394446285689070348">"Ładuję…"</string>
   <string-array name="color_mode_names">
@@ -453,7 +454,8 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> do pełnego naładowania"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> do pełnego naładowania"</string>
-    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> – Optymalizuję, aby utrzymać baterię w dobrym stanie"</string>
+    <!-- no translation found for power_charging_limited (7956120998372505295) -->
+    <skip />
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Nieznane"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Ładowanie"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Szybkie ładowanie"</string>
