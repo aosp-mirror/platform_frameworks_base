@@ -10159,6 +10159,8 @@ public class Notification implements Parcelable
              * {@link Activity#isLaunchedFromBubble()} will return with {@code true}.
              * </p>
              *
+             * Note that the pending intent used here requires PendingIntent.FLAG_MUTABLE.
+             *
              * @throws NullPointerException if intent is null.
              * @throws NullPointerException if icon is null.
              */
