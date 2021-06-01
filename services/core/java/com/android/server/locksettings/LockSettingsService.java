@@ -105,6 +105,7 @@ import android.security.keystore2.AndroidKeyStoreLoadStoreParameter;
 import android.security.keystore2.AndroidKeyStoreProvider;
 import android.service.gatekeeper.GateKeeperResponse;
 import android.service.gatekeeper.IGateKeeperService;
+import android.system.keystore2.Domain;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -254,8 +255,7 @@ public class LockSettingsService extends ILockSettings.Stub {
      * The UIDs that are used for system credential storage in keystore.
      */
     private static final int[] SYSTEM_CREDENTIAL_UIDS = {
-            Process.WIFI_UID, Process.VPN_UID,
-            Process.ROOT_UID, Process.SYSTEM_UID };
+            Process.VPN_UID, Process.ROOT_UID, Process.SYSTEM_UID};
 
     // This class manages life cycle events for encrypted users on File Based Encryption (FBE)
     // devices. The most basic of these is to show/hide notifications about missing features until
@@ -2123,8 +2123,13 @@ public class LockSettingsService extends ILockSettings.Stub {
             // Clear all the users credentials could have been installed in for this user.
             for (int profileId : mUserManager.getProfileIdsWithDisabled(userId)) {
                 for (int uid : SYSTEM_CREDENTIAL_UIDS) {
-                    mKeyStore.clearUid(UserHandle.getUid(profileId, uid));
+                    AndroidKeyStoreMaintenance.clearNamespace(Domain.APP,
+                            UserHandle.getUid(profileId, uid));
                 }
+            }
+            if (mUserManager.getUserInfo(userId).isPrimary()) {
+                AndroidKeyStoreMaintenance.clearNamespace(Domain.SELINUX,
+                        KeyProperties.NAMESPACE_WIFI);
             }
         } finally {
             if (managedUserId != -1 && managedUserDecryptedPassword != null) {
