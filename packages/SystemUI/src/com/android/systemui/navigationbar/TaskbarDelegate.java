@@ -33,19 +33,26 @@ import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.shared.recents.utilities.Utilities;
 import com.android.systemui.statusbar.CommandQueue;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+@Singleton
 public class TaskbarDelegate implements CommandQueue.Callbacks {
 
-    private final OverviewProxyService mOverviewProxyService;
-    private final NavigationBarA11yHelper mNavigationBarA11yHelper;
-    private final SysUiState mSysUiState;
+    private OverviewProxyService mOverviewProxyService;
+    private NavigationBarA11yHelper mNavigationBarA11yHelper;
+    private SysUiState mSysUiState;
     private int mDisplayId;
     private int mNavigationIconHints;
     private final NavigationBarA11yHelper.NavA11yEventListener mNavA11yEventListener =
             this::updateSysuiFlags;
+    @Inject
+    public TaskbarDelegate() { /* no-op */ }
 
-    public TaskbarDelegate(OverviewProxyService overviewProxyService,
+    public void setOverviewProxyService(OverviewProxyService overviewProxyService,
             NavigationBarA11yHelper navigationBarA11yHelper,
             SysUiState sysUiState) {
+        // TODO: adding this in the ctor results in a dagger dependency cycle :(
         mOverviewProxyService = overviewProxyService;
         mNavigationBarA11yHelper = navigationBarA11yHelper;
         mSysUiState = sysUiState;

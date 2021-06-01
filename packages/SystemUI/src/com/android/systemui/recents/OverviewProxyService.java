@@ -34,6 +34,7 @@ import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SUP
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SYSUI_PROXY;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_WINDOW_CORNER_RADIUS;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BOUNCER_SHOWING;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_DEVICE_DOZING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING_OCCLUDED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_TRACING_ENABLED;
@@ -739,12 +740,13 @@ public class OverviewProxyService extends CurrentUserTracker implements
     }
 
     private void onStatusBarStateChanged(boolean keyguardShowing, boolean keyguardOccluded,
-            boolean bouncerShowing) {
+            boolean bouncerShowing, boolean isDozing) {
         mSysUiState.setFlag(SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING,
                         keyguardShowing && !keyguardOccluded)
                 .setFlag(SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING_OCCLUDED,
                         keyguardShowing && keyguardOccluded)
                 .setFlag(SYSUI_STATE_BOUNCER_SHOWING, bouncerShowing)
+                .setFlag(SYSUI_STATE_DEVICE_DOZING, isDozing)
                 .commitUpdate(mContext.getDisplayId());
     }
 
@@ -974,18 +976,6 @@ public class OverviewProxyService extends CurrentUserTracker implements
         }
     }
 
-    public void onRotationProposal(int rotation, boolean isValid) {
-        try {
-            if (mOverviewProxy != null) {
-                mOverviewProxy.onRotationProposal(rotation, isValid);
-            } else {
-                Log.e(TAG_OPS, "Failed to get overview proxy for proposing rotation.");
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG_OPS, "Failed to call onRotationProposal()", e);
-        }
-    }
-
     public void disable(int displayId, int state1, int state2, boolean animate) {
         try {
             if (mOverviewProxy != null) {
@@ -995,6 +985,18 @@ public class OverviewProxyService extends CurrentUserTracker implements
             }
         } catch (RemoteException e) {
             Log.e(TAG_OPS, "Failed to call disable()", e);
+        }
+    }
+
+    public void onRotationProposal(int rotation, boolean isValid) {
+        try {
+            if (mOverviewProxy != null) {
+                mOverviewProxy.onRotationProposal(rotation, isValid);
+            } else {
+                Log.e(TAG_OPS, "Failed to get overview proxy for proposing rotation.");
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG_OPS, "Failed to call onRotationProposal()", e);
         }
     }
 
