@@ -118,7 +118,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Bekor qilish"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Agar ulanishga ruxsat bersangiz, ulangan vaqtda kontakt va qo‘ng‘iroqlaringiz tarixiga kirishi mumkin."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> bilan biriktirib bo‘lmadi."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> qurilmasiga ulanib bo‘lmadi, chunki PIN-kod yoki parol noto‘g‘ri kiritildi."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> qurilmasiga ulanilmadi, chunki PIN kod yoki parol xato kiritildi."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"“<xliff:g id="DEVICE_NAME">%1$s</xliff:g>” qurilmasi bilan aloqa o‘rnatib bo‘lmayapti."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> biriktirish so‘rovini rad qildi."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Kompyuter"</string>
@@ -156,7 +156,7 @@
     <string name="launch_defaults_some" msgid="3631650616557252926">"Ba’zi birlamchi sozlamalar o‘rnatilgan"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"Birlamchi sozlamalar belgilanmagan"</string>
     <string name="tts_settings" msgid="8130616705989351312">"Matnni nutqqa aylantirish sozlamalari"</string>
-    <string name="tts_settings_title" msgid="7602210956640483039">"Nutq sintezi"</string>
+    <string name="tts_settings_title" msgid="7602210956640483039">"Matnni nutqqa aylantirish"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"Nutq tezligi"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"Matnni o‘qish tezligi"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"Ohang"</string>
@@ -252,7 +252,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Simsiz monitor sertifikatlari"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Batafsil Wi-Fi jurnali"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wi‑Fi tarmoqni taqsimlab skanlash"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Wi‑Fi tarmoqdagi tasodifiy MAC manzil"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"Wi‑Fi MAC manzilini muddatli tasodiflash"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Mobil internet doim yoniq tursin"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Modem rejimida apparatli tezlashtirish"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Bluetooth qurilmalarini nomlarisiz ko‘rsatish"</string>
@@ -453,7 +453,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"Quvvat olishiga <xliff:g id="TIME">%1$s</xliff:g> qoldi"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - Quvvat olishiga <xliff:g id="TIME">%2$s</xliff:g> qoldi"</string>
-    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> – Batareya uchun optimizatsiya"</string>
+    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> – Quvvatlash vaqtincha cheklangan"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Noma’lum"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Quvvat olmoqda"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Tezkor quvvat olmoqda"</string>
