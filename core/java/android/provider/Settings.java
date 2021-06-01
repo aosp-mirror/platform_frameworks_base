@@ -11060,7 +11060,7 @@ public final class Settings {
         * @hide
         */
         @UnsupportedAppUsage
-        @Readable(maxTargetSdk = Build.VERSION_CODES.R)
+        @Readable
         public static final String MOBILE_DATA = "mobile_data";
 
         /**
