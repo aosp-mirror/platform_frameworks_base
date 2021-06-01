@@ -181,14 +181,15 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
         mStatusBarStateController = statusBarStateController;
         mActivityStarter = activityStarter;
 
-        mState = newTileState();
-        mTmpState = newTileState();
+        resetStates();
         mUiHandler.post(() -> mLifecycle.setCurrentState(CREATED));
     }
 
     protected final void resetStates() {
         mState = newTileState();
         mTmpState = newTileState();
+        mState.spec = mTileSpec;
+        mTmpState.spec = mTileSpec;
     }
 
     @NonNull
@@ -225,6 +226,8 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
 
     public void setTileSpec(String tileSpec) {
         mTileSpec = tileSpec;
+        mState.spec = tileSpec;
+        mTmpState.spec = tileSpec;
     }
 
     public QSHost getHost() {
