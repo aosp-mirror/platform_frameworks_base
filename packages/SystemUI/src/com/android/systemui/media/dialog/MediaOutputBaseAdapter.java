@@ -202,6 +202,9 @@ public abstract class MediaOutputBaseAdapter extends
         }
 
         void initSeekbar(MediaDevice device) {
+            if (!mController.isVolumeControlEnabled(device)) {
+                disableSeekBar();
+            }
             mSeekBar.setMax(device.getMaxVolume());
             mSeekBar.setMin(0);
             final int currentVolume = device.getCurrentVolume();
@@ -230,6 +233,7 @@ public abstract class MediaOutputBaseAdapter extends
         }
 
         void initSessionSeekbar() {
+            disableSeekBar();
             mSeekBar.setMax(mController.getSessionVolumeMax());
             mSeekBar.setMin(0);
             final int currentVolume = mController.getSessionVolume();
@@ -317,6 +321,11 @@ public abstract class MediaOutputBaseAdapter extends
             drawable.setColorFilter(new PorterDuffColorFilter(list.getDefaultColor(),
                     PorterDuff.Mode.SRC_IN));
             return BluetoothUtils.buildAdvancedDrawable(mContext, drawable);
+        }
+
+        private void disableSeekBar() {
+            mSeekBar.setEnabled(false);
+            mSeekBar.setOnTouchListener((v, event) -> true);
         }
     }
 }
