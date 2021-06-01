@@ -64,18 +64,6 @@
         android:clipToPadding="false"
         android:clipChildren="false">
 
-        <com.android.systemui.scrim.ScrimView
-            android:id="@+id/scrim_notifications"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:importantForAccessibility="no"
-            systemui:ignoreRightInset="true"
-            systemui:layout_constraintStart_toStartOf="parent"
-            systemui:layout_constraintEnd_toEndOf="parent"
-            systemui:layout_constraintTop_toTopOf="parent"
-            systemui:layout_constraintBottom_toBottomOf="parent"
-        />
-
         <include
             layout="@layout/keyguard_status_view"
             android:visibility="gone"/>
