@@ -225,48 +225,61 @@ public class UdfpsController implements DozeReceiver {
         @Override
         public void showUdfpsOverlay(int sensorId, int reason,
                 @NonNull IUdfpsOverlayControllerCallback callback) {
-            final UdfpsEnrollHelper enrollHelper;
-            if (reason == IUdfpsOverlayController.REASON_ENROLL_FIND_SENSOR
-                    || reason == IUdfpsOverlayController.REASON_ENROLL_ENROLLING) {
-                enrollHelper = new UdfpsEnrollHelper(mContext, reason);
-            } else {
-                enrollHelper = null;
-            }
+            mFgExecutor.execute(() -> {
+                final UdfpsEnrollHelper enrollHelper;
+                if (reason == IUdfpsOverlayController.REASON_ENROLL_FIND_SENSOR
+                        || reason == IUdfpsOverlayController.REASON_ENROLL_ENROLLING) {
+                    enrollHelper = new UdfpsEnrollHelper(mContext, reason);
+                } else {
+                    enrollHelper = null;
+                }
 
-            mServerRequest = new ServerRequest(reason, callback, enrollHelper);
-            updateOverlay();
+                mServerRequest = new ServerRequest(reason, callback, enrollHelper);
+                updateOverlay();
+            });
         }
 
         @Override
         public void hideUdfpsOverlay(int sensorId) {
-            mServerRequest = null;
-            updateOverlay();
+            mFgExecutor.execute(() -> {
+                mServerRequest = null;
+                updateOverlay();
+            });
         }
 
         @Override
         public void onEnrollmentProgress(int sensorId, int remaining) {
-            if (mServerRequest == null) {
-                Log.e(TAG, "onEnrollProgress received but serverRequest is null");
-                return;
-            }
-            mServerRequest.onEnrollmentProgress(remaining);
+            mFgExecutor.execute(() -> {
+                if (mServerRequest == null) {
+                    Log.e(TAG, "onEnrollProgress received but serverRequest is null");
+                    return;
+                }
+
+                mServerRequest.onEnrollmentProgress(remaining);
+            });
         }
 
         @Override
         public void onEnrollmentHelp(int sensorId) {
-            if (mServerRequest == null) {
-                Log.e(TAG, "onEnrollmentHelp received but serverRequest is null");
-                return;
-            }
-            mServerRequest.onEnrollmentHelp();
+            mFgExecutor.execute(() -> {
+                if (mServerRequest == null) {
+                    Log.e(TAG, "onEnrollmentHelp received but serverRequest is null");
+                    return;
+                }
+
+                mServerRequest.onEnrollmentHelp();
+            });
         }
 
         @Override
         public void setDebugMessage(int sensorId, String message) {
-            if (mView == null) {
-                return;
-            }
-            mView.setDebugMessage(message);
+            mFgExecutor.execute(() -> {
+                if (mView == null) {
+                    return;
+                }
+
+                mView.setDebugMessage(message);
+            });
         }
     }
 
