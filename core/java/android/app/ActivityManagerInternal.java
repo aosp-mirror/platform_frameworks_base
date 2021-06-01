@@ -48,6 +48,23 @@ import java.util.Set;
  */
 public abstract class ActivityManagerInternal {
 
+    public enum ServiceNotificationPolicy {
+        /**
+         * The Notification is not associated with any foreground service.
+         */
+        NOT_FOREGROUND_SERVICE,
+        /**
+         * The Notification is associated with a foreground service, but the
+         * notification system should handle it just like non-FGS notifications.
+         */
+        SHOW_IMMEDIATELY,
+        /**
+         * The Notification is associated with a foreground service, and the
+         * notification system should ignore it unless it has already been shown (in
+         * which case it should be used to update the currently displayed UI).
+         */
+        UPDATE_ONLY
+    }
 
     // Access modes for handleIncomingUser.
     public static final int ALLOW_NON_FULL = 0;
@@ -456,6 +473,24 @@ public abstract class ActivityManagerInternal {
      */
     public abstract boolean hasForegroundServiceNotification(String pkg, @UserIdInt int userId,
             String channelId);
+
+    /**
+     * Tell the service lifecycle logic that the given Notification content is now
+     * canonical for any foreground-service visibility policy purposes.
+     *
+     * Returns a description of any FGs-related policy around the given Notification:
+     * not associated with an FGS; ensure display; or only update if already displayed.
+     */
+    public abstract ServiceNotificationPolicy applyForegroundServiceNotification(
+            Notification notification, int id, String pkg, @UserIdInt int userId);
+
+    /**
+     * Callback from the notification subsystem that the given FGS notification has
+     * been shown or updated.  This can happen after either Service.startForeground()
+     * or NotificationManager.notify().
+     */
+    public abstract void onForegroundServiceNotificationUpdate(Notification notification,
+            int id, String pkg, @UserIdInt int userId);
 
     /**
      * If the given app has any FGSs whose notifications are in the given channel,
