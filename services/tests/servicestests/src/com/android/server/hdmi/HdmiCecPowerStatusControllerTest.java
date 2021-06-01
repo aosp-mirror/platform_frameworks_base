@@ -47,6 +47,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 @SmallTest
 @Presubmit
@@ -83,7 +84,7 @@ public class HdmiCecPowerStatusControllerTest {
                 mIThermalServiceMock, new Handler(myLooper)));
         when(mIPowerManagerMock.isInteractive()).thenReturn(true);
 
-        mHdmiControlService = new HdmiControlService(contextSpy) {
+        mHdmiControlService = new HdmiControlService(contextSpy, Collections.emptyList()) {
             @Override
             boolean isControlEnabled() {
                 return true;

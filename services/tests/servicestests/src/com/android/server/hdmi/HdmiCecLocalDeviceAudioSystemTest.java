@@ -53,6 +53,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 @SmallTest
 @Presubmit
@@ -96,7 +97,8 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         mMyLooper = mTestLooper.getLooper();
 
         mHdmiControlService =
-            new HdmiControlService(InstrumentationRegistry.getTargetContext()) {
+            new HdmiControlService(InstrumentationRegistry.getTargetContext(),
+                    Collections.emptyList()) {
                 @Override
                 AudioManager getAudioManager() {
                     return new AudioManager() {

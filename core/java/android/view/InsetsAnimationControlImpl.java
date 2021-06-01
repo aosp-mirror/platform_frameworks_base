@@ -44,6 +44,7 @@ import android.annotation.Nullable;
 import android.content.res.CompatibilityInfo;
 import android.graphics.Insets;
 import android.graphics.Matrix;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.ArraySet;
 import android.util.Log;
@@ -201,6 +202,19 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
     @Override
     public void notifyControlRevoked(@InsetsType int types) {
         mControllingTypes &= ~types;
+    }
+
+    @Override
+    public void updateSurfacePosition(SparseArray<InsetsSourceControl> controls) {
+        for (int i = controls.size() - 1; i >= 0; i--) {
+            final InsetsSourceControl control = controls.valueAt(i);
+            final InsetsSourceControl c = mControls.get(control.getType());
+            if (c == null) {
+                continue;
+            }
+            final Point position = control.getSurfacePosition();
+            c.setSurfacePosition(position.x, position.y);
+        }
     }
 
     @Override

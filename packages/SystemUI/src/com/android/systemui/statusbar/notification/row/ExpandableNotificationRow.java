@@ -2291,6 +2291,23 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     @Override
+    public void onTap() {
+        // This notification will expand and animates into the content activity, so we disable the
+        // ripple. We will restore its value once the tap/click is actually performed.
+        if (mEntry.getSbn().getNotification().contentIntent != null) {
+            setRippleAllowed(false);
+        }
+    }
+
+    @Override
+    public boolean performClick() {
+        // We force-disabled the ripple in onTap. When this method is called, the code drawing the
+        // ripple will already have been called so we can restore its value now.
+        updateRippleAllowed();
+        return super.performClick();
+    }
+
+    @Override
     public int getIntrinsicHeight() {
         if (isUserLocked()) {
             return getActualHeight();
