@@ -6859,12 +6859,14 @@ public class NotificationManagerService extends SystemService {
                         mUsageStats.registerClickedByUser(r);
                     }
 
-                    if (mReason == REASON_LISTENER_CANCEL
-                            && r.getNotification().isBubbleNotification()) {
+                    if ((mReason == REASON_LISTENER_CANCEL
+                            && r.getNotification().isBubbleNotification())
+                            || (mReason == REASON_CLICK && r.canBubble()
+                            && r.isFlagBubbleRemoved())) {
                         boolean isBubbleSuppressed = r.getNotification().getBubbleMetadata() != null
                                 && r.getNotification().getBubbleMetadata().isBubbleSuppressed();
                         mNotificationDelegate.onBubbleNotificationSuppressionChanged(
-                                r.getKey(), true /* suppressed */, isBubbleSuppressed);
+                                r.getKey(), true /* notifSuppressed */, isBubbleSuppressed);
                         return;
                     }
 
