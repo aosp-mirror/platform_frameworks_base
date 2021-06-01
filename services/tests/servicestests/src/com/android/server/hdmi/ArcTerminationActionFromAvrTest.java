@@ -45,6 +45,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 /** Tests for {@link ArcTerminationActionFromAvr} */
 @SmallTest
@@ -80,7 +81,7 @@ public class ArcTerminationActionFromAvrTest {
         when(mIPowerManagerMock.isInteractive()).thenReturn(true);
 
         HdmiControlService hdmiControlService =
-                new HdmiControlService(mContextSpy) {
+                new HdmiControlService(mContextSpy, Collections.emptyList()) {
                     @Override
                     void wakeUp() {
                     }

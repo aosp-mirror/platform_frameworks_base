@@ -45,6 +45,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 /** Tests for {@link ActiveSourceAction} */
 @SmallTest
@@ -76,7 +77,7 @@ public class ActiveSourceActionTest {
                 mIThermalServiceMock, new Handler(mTestLooper.getLooper())));
         when(mIPowerManagerMock.isInteractive()).thenReturn(true);
 
-        mHdmiControlService = new HdmiControlService(mContextSpy) {
+        mHdmiControlService = new HdmiControlService(mContextSpy, Collections.emptyList()) {
             @Override
             AudioManager getAudioManager() {
                 return new AudioManager() {

@@ -48,6 +48,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * Test for {@link SystemAudioAutoInitiationAction}.
@@ -86,7 +87,7 @@ public class SystemAudioAutoInitiationActionTest {
                 mIThermalServiceMock, new Handler(myLooper)));
         when(mIPowerManagerMock.isInteractive()).thenReturn(true);
 
-        mHdmiControlService = new HdmiControlService(mContextSpy) {
+        mHdmiControlService = new HdmiControlService(mContextSpy, Collections.emptyList()) {
             @Override
             AudioManager getAudioManager() {
                 return new AudioManager() {

@@ -255,14 +255,14 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         final boolean afterKeyguardGone = isActivityIntent
                 && mActivityIntentHelper.wouldLaunchResolverActivity(intent.getIntent(),
                 mLockscreenUserManager.getCurrentUserId());
-        final boolean wasOccluded = mStatusBar.isOccluded();
+        final boolean animate = mStatusBar.shouldAnimateLaunch(isActivityIntent);
         boolean showOverLockscreen = mKeyguardStateController.isShowing() && intent != null
                 && mActivityIntentHelper.wouldShowOverLockscreen(intent.getIntent(),
                 mLockscreenUserManager.getCurrentUserId());
         ActivityStarter.OnDismissAction postKeyguardAction =
                 () -> handleNotificationClickAfterKeyguardDismissed(
                         entry, row, controller, intent,
-                        isActivityIntent, wasOccluded, showOverLockscreen);
+                        isActivityIntent, animate, showOverLockscreen);
         if (showOverLockscreen) {
             mIsCollapsingToShowActivityOverLockscreen = true;
             postKeyguardAction.onDismiss();
@@ -278,7 +278,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             RemoteInputController controller,
             PendingIntent intent,
             boolean isActivityIntent,
-            boolean wasOccluded,
+            boolean animate,
             boolean showOverLockscreen) {
         mLogger.logHandleClickAfterKeyguardDismissed(entry.getKey());
 
@@ -293,7 +293,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
 
         final Runnable runnable = () -> handleNotificationClickAfterPanelCollapsed(
                 entry, row, controller, intent,
-                isActivityIntent, wasOccluded);
+                isActivityIntent, animate);
 
         if (showOverLockscreen) {
             mShadeController.addPostCollapseAction(runnable);
@@ -314,7 +314,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             RemoteInputController controller,
             PendingIntent intent,
             boolean isActivityIntent,
-            boolean wasOccluded) {
+            boolean animate) {
         String notificationKey = entry.getKey();
         mLogger.logHandleClickAfterPanelCollapsed(notificationKey);
 
@@ -360,8 +360,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             removeHUN(row);
             expandBubbleStackOnMainThread(entry);
         } else {
-            startNotificationIntent(
-                    intent, fillInIntent, entry, row, wasOccluded, isActivityIntent);
+            startNotificationIntent(intent, fillInIntent, entry, row, animate, isActivityIntent);
         }
         if (isActivityIntent || canBubble) {
             mAssistManagerLazy.get().hideAssist();
@@ -426,7 +425,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             Intent fillInIntent,
             NotificationEntry entry,
             ExpandableNotificationRow row,
-            boolean wasOccluded,
+            boolean animate,
             boolean isActivityIntent) {
         mLogger.logStartNotificationIntent(entry.getKey(), intent);
         try {
@@ -436,8 +435,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                             isActivityIntent);
 
             mActivityLaunchAnimator.startPendingIntentWithAnimation(animationController,
-                    !wasOccluded && mStatusBar.areLaunchAnimationsEnabled(),
-                    intent.getCreatorPackage(), (adapter) -> {
+                    animate, intent.getCreatorPackage(), (adapter) -> {
                         long eventTime = row.getAndResetLastActionUpTime();
                         Bundle options = eventTime > 0
                                 ? getActivityOptions(
@@ -460,6 +458,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
     @Override
     public void startNotificationGutsIntent(final Intent intent, final int appUid,
             ExpandableNotificationRow row) {
+        boolean animate = mStatusBar.shouldAnimateLaunch(true /* isActivityIntent */);
         mActivityStarter.dismissKeyguardThenExecute(() -> {
             AsyncTask.execute(() -> {
                 ActivityLaunchAnimator.Controller animationController =
@@ -468,8 +467,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                                 mStatusBar, true /* isActivityIntent */);
 
                 mActivityLaunchAnimator.startIntentWithAnimation(
-                        animationController, mStatusBar.areLaunchAnimationsEnabled(),
-                        intent.getPackage(),
+                        animationController, animate, intent.getPackage(),
                         (adapter) -> TaskStackBuilder.create(mContext)
                                 .addNextIntentWithParentStack(intent)
                                 .startActivities(getActivityOptions(
@@ -483,6 +481,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
 
     @Override
     public void startHistoryIntent(View view, boolean showHistory) {
+        boolean animate = mStatusBar.shouldAnimateLaunch(true /* isActivityIntent */);
         mActivityStarter.dismissKeyguardThenExecute(() -> {
             AsyncTask.execute(() -> {
                 Intent intent = showHistory ? new Intent(
@@ -499,8 +498,8 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                                 ActivityLaunchAnimator.Controller.fromView(view), mStatusBar,
                                 true /* isActivityIntent */);
 
-                mActivityLaunchAnimator.startIntentWithAnimation(animationController,
-                        mStatusBar.areLaunchAnimationsEnabled(), intent.getPackage(),
+                mActivityLaunchAnimator.startIntentWithAnimation(animationController, animate,
+                        intent.getPackage(),
                         (adapter) -> tsb.startActivities(
                                 getActivityOptions(mStatusBar.getDisplayId(), adapter),
                                 UserHandle.CURRENT));

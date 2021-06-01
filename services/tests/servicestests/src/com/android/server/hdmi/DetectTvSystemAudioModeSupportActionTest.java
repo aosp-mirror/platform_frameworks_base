@@ -34,6 +34,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import java.util.Collections;
+
 /** Tests for {@link DetectTvSystemAudioModeSupportAction} class. */
 @SmallTest
 @Presubmit
@@ -53,7 +55,8 @@ public class DetectTvSystemAudioModeSupportActionTest {
     public void SetUp() {
         mDeviceInfoForTests = new HdmiDeviceInfo(1001, 1234);
         HdmiControlService hdmiControlService =
-                new HdmiControlService(InstrumentationRegistry.getTargetContext()) {
+                new HdmiControlService(InstrumentationRegistry.getTargetContext(),
+                        Collections.emptyList()) {
 
                     @Override
                     void sendCecCommand(

@@ -197,7 +197,7 @@
     <string name="choose_profile" msgid="343803890897657450">"ପ୍ରୋଫାଇଲ୍‌ ବାଛନ୍ତୁ"</string>
     <string name="category_personal" msgid="6236798763159385225">"ବ୍ୟକ୍ତିଗତ"</string>
     <string name="category_work" msgid="4014193632325996115">"ୱାର୍କ"</string>
-    <string name="development_settings_title" msgid="140296922921597393">"ଡେଭଲପର୍‌ଙ୍କ ପାଇଁ ବିକଳ୍ପମାନ"</string>
+    <string name="development_settings_title" msgid="140296922921597393">"ଡେଭଲପରଙ୍କ ପାଇଁ ବିକଳ୍ପଗୁଡ଼ିକ"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"ଡେଭଲପର୍‌ ବିକଳ୍ପଗୁଡ଼ିକ ସକ୍ଷମ କରନ୍ତୁ"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"ଆପ୍‌ର ବିକାଶ ପାଇଁ ବିକଳ୍ପମାନ ସେଟ୍‌ କରନ୍ତୁ"</string>
     <string name="development_settings_not_available" msgid="355070198089140951">"ଏହି ଉପଯୋଗକର୍ତ୍ତାଙ୍କ ପାଇଁ ଡେଭଲପରଙ୍କ ବିକଳ୍ପସମୂହ ଉପଲବ୍ଧ ନୁହେଁ"</string>
@@ -252,7 +252,8 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"ୱାୟରଲେସ୍‌ ଡିସ୍‌ପ୍ଲେ ସାର୍ଟିଫିକେସନ୍"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"ୱାଇ-ଫାଇ ଭର୍ବୋସ୍‌ ଲଗିଙ୍ଗ ସକ୍ଷମ କରନ୍ତୁ"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"ୱାଇ-ଫାଇ ସ୍କାନ୍ ନିୟନ୍ତ୍ରଣ"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"ୱାଇ‑ଫାଇ-ଉନ୍ନତ MAC ରେଣ୍ଡମାଇଜେସନ୍"</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization (882650208573834301) -->
+    <skip />
     <string name="mobile_data_always_on" msgid="8275958101875563572">"ମୋବାଇଲ୍‌ ଡାଟା ସର୍ବଦା ସକ୍ରିୟ"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"ଟିଥରିଙ୍ଗ ହାର୍ଡୱେର ଆକ୍ସିଲିରେସନ୍"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"ବ୍ଲୁଟୂଥ୍‍‌ ଡିଭାଇସ୍‌ଗୁଡ଼ିକୁ ନାମ ବିନା ଦେଖନ୍ତୁ"</string>
@@ -453,7 +454,8 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"ପୂର୍ଣ୍ଣ ହେବାକୁ ଆଉ <xliff:g id="TIME">%1$s</xliff:g> ବାକି ଅଛି"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - ପୂର୍ଣ୍ଣ ହେବାକୁ ଆଉ <xliff:g id="TIME">%2$s</xliff:g> ବାକି ଅଛି"</string>
-    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - ବ୍ୟାଟେରୀ ହେଲ୍ଥ ପାଇଁ ଅପ୍ଟିମାଇଜ୍ ହେଉଛି"</string>
+    <!-- no translation found for power_charging_limited (7956120998372505295) -->
+    <skip />
     <string name="battery_info_status_unknown" msgid="268625384868401114">"ଅଜ୍ଞାତ"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"ଚାର୍ଜ ହେଉଛି"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"ଶୀଘ୍ର ଚାର୍ଜ ହେଉଛି"</string>

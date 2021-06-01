@@ -252,7 +252,8 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"ವೈರ್‌ಲೆಸ್ ಪ್ರದರ್ಶನ ಪ್ರಮಾಣೀಕರಣ"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Wi‑Fi ವೆರ್ಬೋಸ್ ಲಾಗಿಂಗ್ ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"ವೈ-ಫೈ ಸ್ಕ್ಯಾನ್ ನಿರ್ಬಂಧಿಸಲಾಗುತ್ತಿದೆ"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Wi‑Fi‑ವರ್ಧಿತ MAC ಯಾದೃಚ್ಛಿಕರಣ"</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization (882650208573834301) -->
+    <skip />
     <string name="mobile_data_always_on" msgid="8275958101875563572">"ಮೊಬೈಲ್ ಡೇಟಾ ಯಾವಾಗಲೂ ಸಕ್ರಿಯ"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"ಟೆಥರಿಂಗ್‍‍ಗಾಗಿ ಹಾರ್ಡ್‍ವೇರ್ ವೇಗವರ್ಧನೆ"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"ಹೆಸರುಗಳಿಲ್ಲದ ಬ್ಲೂಟೂತ್ ಸಾಧನಗಳನ್ನು ತೋರಿಸಿ"</string>
@@ -453,7 +454,8 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"ಭರ್ತಿಯಾಗುವವರೆಗೂ <xliff:g id="TIME">%1$s</xliff:g> - ಉಳಿದಿದೆ"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"ಭರ್ತಿಯಾಗುವವರೆಗೂ <xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> ಉಳಿದಿದೆ"</string>
-    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - ಬ್ಯಾಟರಿಯ ಸುಸ್ಥಿತಿಗಾಗಿ ಆಪ್ಟಿಮೈಸ್ ಮಾಡಲಾಗುತ್ತಿದೆ"</string>
+    <!-- no translation found for power_charging_limited (7956120998372505295) -->
+    <skip />
     <string name="battery_info_status_unknown" msgid="268625384868401114">"ಅಪರಿಚಿತ"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"ಚಾರ್ಜ್ ಆಗುತ್ತಿದೆ"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"ವೇಗದ ಚಾರ್ಜಿಂಗ್"</string>
