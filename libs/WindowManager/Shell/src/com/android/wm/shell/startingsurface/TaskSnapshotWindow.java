@@ -45,6 +45,7 @@ import static com.android.internal.policy.DecorView.STATUS_BAR_COLOR_VIEW_ATTRIB
 import static com.android.internal.policy.DecorView.getNavigationBarRect;
 
 import android.annotation.BinderThread;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManager.TaskDescription;
@@ -141,7 +142,8 @@ public class TaskSnapshotWindow {
     private final float[] mTmpFloat9 = new float[9];
 
     static TaskSnapshotWindow create(StartingWindowInfo info, IBinder appToken,
-            TaskSnapshot snapshot, ShellExecutor mainExecutor, Runnable clearWindowHandler) {
+            TaskSnapshot snapshot, ShellExecutor splashScreenExecutor,
+            @NonNull Runnable clearWindowHandler) {
         final ActivityManager.RunningTaskInfo runningTaskInfo = info.taskInfo;
         final int taskId = runningTaskInfo.taskId;
         if (DEBUG) {
@@ -208,39 +210,38 @@ public class TaskSnapshotWindow {
         final TaskSnapshotWindow snapshotSurface = new TaskSnapshotWindow(
                 surfaceControl, snapshot, layoutParams.getTitle(), taskDescription, appearance,
                 windowFlags, windowPrivateFlags, taskBounds, orientation,
-                topWindowInsetsState, clearWindowHandler, mainExecutor);
+                topWindowInsetsState, clearWindowHandler, splashScreenExecutor);
         final Window window = snapshotSurface.mWindow;
 
         final InsetsState mTmpInsetsState = new InsetsState();
         final InputChannel tmpInputChannel = new InputChannel();
-        mainExecutor.execute(() -> {
-            try {
-                Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "TaskSnapshot#addToDisplay");
-                final int res = session.addToDisplay(window, layoutParams, View.GONE, displayId,
-                        mTmpInsetsState, tmpInputChannel, mTmpInsetsState, mTempControls);
-                Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
-                if (res < 0) {
-                    Slog.w(TAG, "Failed to add snapshot starting window res=" + res);
-                    return;
-                }
-            } catch (RemoteException e) {
-                snapshotSurface.clearWindowSynced();
-            }
-            window.setOuter(snapshotSurface);
-            try {
-                Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "TaskSnapshot#relayout");
-                session.relayout(window, layoutParams, -1, -1, View.VISIBLE, 0, -1,
-                        tmpFrames, tmpMergedConfiguration, surfaceControl, mTmpInsetsState,
-                        mTempControls, TMP_SURFACE_SIZE);
-                Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
-            } catch (RemoteException e) {
-                snapshotSurface.clearWindowSynced();
-            }
 
-            final Rect systemBarInsets = getSystemBarInsets(tmpFrames.frame, topWindowInsetsState);
-            snapshotSurface.setFrames(tmpFrames.frame, systemBarInsets);
-            snapshotSurface.drawSnapshot();
-        });
+        try {
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "TaskSnapshot#addToDisplay");
+            final int res = session.addToDisplay(window, layoutParams, View.GONE, displayId,
+                    mTmpInsetsState, tmpInputChannel, mTmpInsetsState, mTempControls);
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+            if (res < 0) {
+                Slog.w(TAG, "Failed to add snapshot starting window res=" + res);
+                return null;
+            }
+        } catch (RemoteException e) {
+            snapshotSurface.clearWindowSynced();
+        }
+        window.setOuter(snapshotSurface);
+        try {
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "TaskSnapshot#relayout");
+            session.relayout(window, layoutParams, -1, -1, View.VISIBLE, 0, -1,
+                    tmpFrames, tmpMergedConfiguration, surfaceControl, mTmpInsetsState,
+                    mTempControls, TMP_SURFACE_SIZE);
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+        } catch (RemoteException e) {
+            snapshotSurface.clearWindowSynced();
+        }
+
+        final Rect systemBarInsets = getSystemBarInsets(tmpFrames.frame, topWindowInsetsState);
+        snapshotSurface.setFrames(tmpFrames.frame, systemBarInsets);
+        snapshotSurface.drawSnapshot();
         return snapshotSurface;
     }
 
@@ -469,9 +470,7 @@ public class TaskSnapshotWindow {
      * Clear window from drawer, must be post on main executor.
      */
     private void clearWindowSynced() {
-        if (mClearWindowHandler != null) {
-            mClearWindowHandler.run();
-        }
+        mSplashScreenExecutor.executeDelayed(mClearWindowHandler, 0);
     }
 
     private void reportDrawn() {
