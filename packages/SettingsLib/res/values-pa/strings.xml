@@ -252,7 +252,8 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"ਵਾਇਰਲੈੱਸ ਡਿਸਪਲੇ ਪ੍ਰਮਾਣੀਕਰਨ"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"ਵਾਈ-ਫਾਈ ਵਰਬੋਸ ਲੌਗਿੰਗ ਚਾਲੂ ਕਰੋ"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"ਸੀਮਤ ਵਾਈ‑ਫਾਈ ਸਕੈਨ"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"ਵਾਈ-ਫਾਈ ਵਿਸਤ੍ਰਿਤ MAC ਬੇਤਰਤੀਬੀਕਰਨ"</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization (882650208573834301) -->
+    <skip />
     <string name="mobile_data_always_on" msgid="8275958101875563572">"ਮੋਬਾਈਲ ਡਾਟਾ ਹਮੇਸ਼ਾਂ ਕਿਰਿਆਸ਼ੀਲ"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"ਟੈਦਰਿੰਗ ਹਾਰਡਵੇਅਰ ਐਕਸੈੱਲਰੇਸ਼ਨ"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"ਅਨਾਮ ਬਲੂਟੁੱਥ ਡੀਵਾਈਸਾਂ ਦਿਖਾਓ"</string>
@@ -453,7 +454,8 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"ਬੈਟਰੀ ਪੂਰੀ ਚਾਰਜ ਹੋਣ ਵਿੱਚ <xliff:g id="TIME">%1$s</xliff:g> ਬਾਕੀ"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - ਬੈਟਰੀ ਪੂਰੀ ਚਾਰਜ ਹੋਣ ਵਿੱਚ <xliff:g id="TIME">%2$s</xliff:g> ਬਾਕੀ"</string>
-    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - ਬੈਟਰੀ ਦੀ ਸਥਿਤੀ ਲਈ ਅਨੁਕੂਲ ਬਣਾਇਆ ਜਾ ਰਿਹਾ ਹੈ"</string>
+    <!-- no translation found for power_charging_limited (7956120998372505295) -->
+    <skip />
     <string name="battery_info_status_unknown" msgid="268625384868401114">"ਅਗਿਆਤ"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"ਚਾਰਜ ਹੋ ਰਿਹਾ ਹੈ"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"ਤੇਜ਼ ਚਾਰਜ ਹੋ ਰਹੀ ਹੈ"</string>
@@ -502,7 +504,7 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"ਹੋਰ ਸਮਾਂ।"</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"ਘੱਟ ਸਮਾਂ।"</string>
     <string name="cancel" msgid="5665114069455378395">"ਰੱਦ ਕਰੋ"</string>
-    <string name="okay" msgid="949938843324579502">"ਠੀਕ"</string>
+    <string name="okay" msgid="949938843324579502">"ਠੀਕ ਹੈ"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"ਅਲਾਰਮ ਅਤੇ ਰਿਮਾਈਂਡਰ"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"ਅਲਾਰਮ ਅਤੇ ਰਿਮਾਈਂਡਰ ਸੈੱਟ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿਓ"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"ਅਲਾਰਮ ਅਤੇ ਰਿਮਾਈਂਡਰ"</string>
