@@ -87,7 +87,6 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
                 // element transition.
                 if (keyguardStateController.isShowing()) {
                     mView.setChildrenAlphaExcludingClockView(1f);
-                    mKeyguardClockSwitchController.setChildrenAlphaExcludingSmartspace(1f);
                 }
             }
         });
