@@ -452,6 +452,7 @@
     <string name="keyguard_more_overflow_text" msgid="5819512373606638727">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="7248696377626341060">"Pemberitahuan kurang penting di bawah"</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"Ketik lagi untuk membuka"</string>
+    <string name="tap_again" msgid="1315420114387908655">"Ketik sekali lagi"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Leret ke atas untuk buka"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Leret ke atas untuk mencuba lagi"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Buka kunci untuk menggunakan NFC"</string>
@@ -1032,7 +1033,7 @@
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Besarkan sebahagian skrin"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Tukar"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"Butang kebolehaksesan menggantikan gerak isyarat kebolehaksesan\n\n"<annotation id="link">"Lihat tetapan"</annotation></string>
-    <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Gerakkan butang ke tepi untuk menyembunyikannya buat sementara waktu"</string>
+    <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Gerakkan butang ke tepi untuk disembunyikan buat sementara waktu"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Alihkan ke atas sebelah kiri"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Alihkan ke atas sebelah kanan"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"Alihkan ke bawah sebelah kiri"</string>

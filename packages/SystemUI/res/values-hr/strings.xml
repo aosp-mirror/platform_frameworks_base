@@ -454,6 +454,7 @@
     <string name="keyguard_more_overflow_text" msgid="5819512373606638727">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="7248696377626341060">"Manje hitne obavijesti pri dnu"</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"Dodirnite opet za otvaranje"</string>
+    <string name="tap_again" msgid="1315420114387908655">"Dodirnite ponovo"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Prijeđite prstom prema gore da biste otvorili"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Prijeđite prstom prema gore za ponovni pokušaj"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Otključajte da biste upotrijebili NFC"</string>
@@ -565,7 +566,7 @@
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Administrator je uključio mrežni zapisnik koji prati promet na vašem poslovnom profilu, ali ne i na osobnom profilu."</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Povezani ste s aplikacijom <xliff:g id="VPN_APP">%1$s</xliff:g> koja može nadzirati vašu aktivnost na mreži, uključujući e-poštu, aplikacije i web-lokacije."</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Povezani ste s aplikacijama <xliff:g id="VPN_APP_0">%1$s</xliff:g> i <xliff:g id="VPN_APP_1">%2$s</xliff:g> koje mogu nadzirati vašu aktivnost na mreži, uključujući e-poruke, aplikacije i web-lokacije."</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Vaš je radni profil povezan s aplikacijom <xliff:g id="VPN_APP">%1$s</xliff:g> koja može nadzirati vašu aktivnost na mreži, uključujući e-poruke, aplikacije i web-lokacije."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Vaš je poslovni profil povezan s aplikacijom <xliff:g id="VPN_APP">%1$s</xliff:g> koja može nadzirati vašu aktivnost na mreži, uključujući e-poruke, aplikacije i web-lokacije."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"Vaš je osobni profil povezan s aplikacijom <xliff:g id="VPN_APP">%1$s</xliff:g> koja može nadzirati vašu aktivnost na mreži, uključujući e-poruke, aplikacije i web-lokacije."</string>
     <string name="monitoring_description_do_header_generic" msgid="6130190408164834986">"Vašim uređajem upravlja aplikacija <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g>."</string>
     <string name="monitoring_description_do_header_with_name" msgid="2696255132542779511">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> upotrebljava aplikaciju <xliff:g id="DEVICE_OWNER_APP">%2$s</xliff:g> za upravljanje vašim uređajem."</string>
