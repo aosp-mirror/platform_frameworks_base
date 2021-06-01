@@ -2581,7 +2581,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                     public void onAnimationEnded() {
                         mNotificationShadeWindowController.setRequestTopUi(false, TAG);
                     }
-                }, false).show(animationDelay);
+                }, false, sUiEventLogger).show(animationDelay);
     }
 
     @Override
