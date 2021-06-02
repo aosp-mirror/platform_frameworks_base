@@ -394,10 +394,26 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
                 hasItems(new AccessibilityNodeInfo.AccessibilityAction(
                         ACTION_CLICK.getId(), mContext.getResources().getString(
                         R.string.magnification_mode_switch_click_label))));
+        assertThat(nodeInfo.getActionList(),
+                hasItems(new AccessibilityNodeInfo.AccessibilityAction(
+                        R.id.accessibility_action_move_up, mContext.getResources().getString(
+                        R.string.accessibility_control_move_up))));
+        assertThat(nodeInfo.getActionList(),
+                hasItems(new AccessibilityNodeInfo.AccessibilityAction(
+                        R.id.accessibility_action_move_down, mContext.getResources().getString(
+                        R.string.accessibility_control_move_down))));
+        assertThat(nodeInfo.getActionList(),
+                hasItems(new AccessibilityNodeInfo.AccessibilityAction(
+                        R.id.accessibility_action_move_left, mContext.getResources().getString(
+                        R.string.accessibility_control_move_left))));
+        assertThat(nodeInfo.getActionList(),
+                hasItems(new AccessibilityNodeInfo.AccessibilityAction(
+                        R.id.accessibility_action_move_right, mContext.getResources().getString(
+                        R.string.accessibility_control_move_right))));
     }
 
     @Test
-    public void performA11yActions_showWindowModeButton_verifyTapAction() {
+    public void performClickA11yActions_showWindowModeButton_verifyTapAction() {
         mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
         resetAndStubMockImageViewAndAnimator();
 
@@ -405,6 +421,16 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
                 ACTION_CLICK.getId(), null);
 
         verifyTapAction(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
+    }
+
+    @Test
+    public void performMoveLeftA11yAction_showButtonAtRightEdge_moveToLeftEdge() {
+        mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+
+        mSpyImageView.performAccessibilityAction(
+                R.id.accessibility_action_move_left, null);
+
+        assertLayoutPosition(/* toLeftScreenEdge= */true);
     }
 
     @Test
