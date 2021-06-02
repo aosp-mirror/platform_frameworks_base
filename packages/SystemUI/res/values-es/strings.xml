@@ -452,6 +452,7 @@
     <string name="keyguard_more_overflow_text" msgid="5819512373606638727">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="7248696377626341060">"Notificaciones menos urgente abajo"</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"Toca de nuevo para abrir"</string>
+    <string name="tap_again" msgid="1315420114387908655">"Toca de nuevo"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Desliza el dedo hacia arriba para abrir"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Desliza el dedo hacia arriba para volverlo a intentar"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Desbloquea para usar el NFC"</string>
@@ -1004,9 +1005,9 @@
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Hay aplicaciones que usan tu <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" y "</string>
-    <string name="ongoing_privacy_dialog_using_op" msgid="426635338010011796">"En uso por <xliff:g id="APPLICATION_NAME">%1$s</xliff:g>"</string>
+    <string name="ongoing_privacy_dialog_using_op" msgid="426635338010011796">"En uso en <xliff:g id="APPLICATION_NAME">%1$s</xliff:g>"</string>
     <string name="ongoing_privacy_dialog_recent_op" msgid="2736290123662790026">"Uso reciente en <xliff:g id="APPLICATION_NAME">%1$s</xliff:g>"</string>
-    <string name="ongoing_privacy_dialog_enterprise" msgid="3003314125311966061">"(de trabajo)"</string>
+    <string name="ongoing_privacy_dialog_enterprise" msgid="3003314125311966061">"(trabajo)"</string>
     <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"Llamada telefónica"</string>
     <string name="ongoing_privacy_dialog_attribution_text" msgid="4738795925380373994">"(a través de <xliff:g id="APPLICATION_NAME_S_">%s</xliff:g>)"</string>
     <string name="privacy_type_camera" msgid="7974051382167078332">"cámara"</string>
@@ -1031,7 +1032,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Ampliar pantalla completa"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Ampliar parte de la pantalla"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Cambiar"</string>
-    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"El botón Accesibilidad ha reemplazado al gesto de accesibilidad\n\nVer configuración"<annotation id="link"></annotation></string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"El botón Accesibilidad ha reemplazado el gesto de accesibilidad\n\nVer ajustes"<annotation id="link"></annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Mueve el botón hacia el borde para ocultarlo temporalmente"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Mover arriba a la izquierda"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Mover arriba a la derecha"</string>
