@@ -19,6 +19,7 @@ package com.android.server.policy;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AppOpsManager;
+import android.app.AppOpsManager.AttributionFlags;
 import android.app.AppOpsManagerInternal;
 import android.app.SyncNotedAppOp;
 import android.app.role.RoleManager;
@@ -39,6 +40,7 @@ import android.util.ArraySet;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.function.DecFunction;
 import com.android.internal.util.function.HeptFunction;
 import com.android.internal.util.function.HexFunction;
 import com.android.internal.util.function.NonaFunction;
@@ -46,6 +48,7 @@ import com.android.internal.util.function.OctFunction;
 import com.android.internal.util.function.QuadFunction;
 import com.android.internal.util.function.QuintFunction;
 import com.android.internal.util.function.TriFunction;
+import com.android.internal.util.function.UndecFunction;
 import com.android.server.LocalServices;
 
 import java.util.List;
@@ -179,32 +182,37 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
     public SyncNotedAppOp startOperation(IBinder token, int code, int uid,
             @Nullable String packageName, @Nullable String attributionTag,
             boolean startIfModeDefault, boolean shouldCollectAsyncNotedOp, String message,
-            boolean shouldCollectMessage, @NonNull NonaFunction<IBinder, Integer, Integer, String,
-                    String, Boolean, Boolean, String, Boolean, SyncNotedAppOp> superImpl) {
+            boolean shouldCollectMessage, @AttributionFlags int attributionFlags,
+            int attributionChainId, @NonNull UndecFunction<IBinder, Integer, Integer, String,
+                    String, Boolean, Boolean, String, Boolean, Integer, Integer,
+            SyncNotedAppOp> superImpl) {
         return superImpl.apply(token, resolveDatasourceOp(code, uid, packageName, attributionTag),
                 uid, packageName, attributionTag, startIfModeDefault, shouldCollectAsyncNotedOp,
-                message, shouldCollectMessage);
+                message, shouldCollectMessage, attributionFlags, attributionChainId);
     }
 
     @Override
-    public SyncNotedAppOp startProxyOperation(IBinder token, int code,
+    public SyncNotedAppOp startProxyOperation(int code,
             @NonNull AttributionSource attributionSource, boolean startIfModeDefault,
             boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage,
-            boolean skipProxyOperation, @NonNull OctFunction<IBinder, Integer, AttributionSource,
-                    Boolean, Boolean, String, Boolean, Boolean, SyncNotedAppOp> superImpl) {
-        return superImpl.apply(token, resolveDatasourceOp(code, attributionSource.getUid(),
+            boolean skipProxyOperation, @AttributionFlags int proxyAttributionFlags,
+            @AttributionFlags int proxiedAttributionFlags, int attributionChainId,
+            @NonNull DecFunction<Integer, AttributionSource, Boolean, Boolean, String, Boolean,
+                    Boolean, Integer, Integer, Integer, SyncNotedAppOp> superImpl) {
+        return superImpl.apply(resolveDatasourceOp(code, attributionSource.getUid(),
                 attributionSource.getPackageName(), attributionSource.getAttributionTag()),
                 attributionSource, startIfModeDefault, shouldCollectAsyncNotedOp, message,
-                shouldCollectMessage, skipProxyOperation);
+                shouldCollectMessage, skipProxyOperation, proxyAttributionFlags,
+                proxiedAttributionFlags, attributionChainId);
     }
 
     @Override
-    public void finishProxyOperation(IBinder clientId, int code,
-            @NonNull AttributionSource attributionSource,
-            @NonNull TriFunction<IBinder, Integer, AttributionSource, Void> superImpl) {
-        superImpl.apply(clientId, resolveDatasourceOp(code, attributionSource.getUid(),
+    public void finishProxyOperation(int code, @NonNull AttributionSource attributionSource,
+            boolean skipProxyOperation, @NonNull TriFunction<Integer, AttributionSource,
+            Boolean, Void> superImpl) {
+        superImpl.apply(resolveDatasourceOp(code, attributionSource.getUid(),
                 attributionSource.getPackageName(), attributionSource.getAttributionTag()),
-                attributionSource);
+                attributionSource, skipProxyOperation);
     }
 
     private int resolveDatasourceOp(int code, int uid, @NonNull String packageName,

@@ -186,6 +186,7 @@ import android.os.incremental.IIncrementalService;
 import android.os.incremental.IncrementalManager;
 import android.os.storage.StorageManager;
 import android.permission.LegacyPermissionManager;
+import android.permission.PermissionCheckerManager;
 import android.permission.PermissionControllerManager;
 import android.permission.PermissionManager;
 import android.print.IPrintManager;
@@ -1332,6 +1333,14 @@ public final class SystemServiceRegistry {
                     public PermissionControllerManager createService(ContextImpl ctx) {
                         return new PermissionControllerManager(ctx.getOuterContext(),
                                 ctx.getMainThreadHandler());
+                    }});
+
+        registerService(Context.PERMISSION_CHECKER_SERVICE, PermissionCheckerManager.class,
+                new CachedServiceFetcher<PermissionCheckerManager>() {
+                    @Override
+                    public PermissionCheckerManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        return new PermissionCheckerManager(ctx.getOuterContext());
                     }});
 
         registerService(Context.DYNAMIC_SYSTEM_SERVICE, DynamicSystemManager.class,
