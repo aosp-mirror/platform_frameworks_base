@@ -75,6 +75,20 @@ public interface ChooserActivityLogger {
     }
 
     /**
+     * Logs a UiEventReported event for the system sharesheet app share ranking timing out.
+     */
+    default void logSharesheetAppShareRankingTimeout() {
+        log(SharesheetStandardEvent.SHARESHEET_APP_SHARE_RANKING_TIMEOUT, getInstanceId());
+    }
+
+    /**
+     * Logs a UiEventReported event for the system sharesheet when direct share row is empty.
+     */
+    default void logSharesheetEmptyDirectShareRow() {
+        log(SharesheetStandardEvent.SHARESHEET_EMPTY_DIRECT_SHARE_ROW, getInstanceId());
+    }
+
+    /**
      * Logs a UiEventReported event for a given share activity
      * @param event
      * @param instanceId
@@ -168,7 +182,11 @@ public interface ChooserActivityLogger {
         @UiEvent(doc = "Sharesheet direct targets is fully populated.")
         SHARESHEET_DIRECT_LOAD_COMPLETE(323),
         @UiEvent(doc = "Sharesheet direct targets timed out.")
-        SHARESHEET_DIRECT_LOAD_TIMEOUT(324);
+        SHARESHEET_DIRECT_LOAD_TIMEOUT(324),
+        @UiEvent(doc = "Sharesheet app share ranking timed out.")
+        SHARESHEET_APP_SHARE_RANKING_TIMEOUT(831),
+        @UiEvent(doc = "Sharesheet empty direct share row.")
+        SHARESHEET_EMPTY_DIRECT_SHARE_ROW(828);
 
         private final int mId;
         SharesheetStandardEvent(int id) {
