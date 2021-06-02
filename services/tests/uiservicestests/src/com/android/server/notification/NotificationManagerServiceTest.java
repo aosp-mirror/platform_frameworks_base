@@ -3394,16 +3394,16 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         // anything that's currently enqueued or posted
         int userId = UserHandle.getUserId(mUid);
         assertEquals(40,
-                mService.getNotificationCountLocked(PKG, userId, 0, null));
+                mService.getNotificationCount(PKG, userId, 0, null));
         assertEquals(40,
-                mService.getNotificationCountLocked(PKG, userId, 0, "tag2"));
+                mService.getNotificationCount(PKG, userId, 0, "tag2"));
 
         // return all for package "a" - "banana" tag isn't used
         assertEquals(2,
-                mService.getNotificationCountLocked("a", userId, 0, "banana"));
+                mService.getNotificationCount("a", userId, 0, "banana"));
 
         // exclude a known notification - it's excluded from only the posted list, not enqueued
-        assertEquals(39, mService.getNotificationCountLocked(
+        assertEquals(39, mService.getNotificationCount(
                 PKG, userId, sampleIdToExclude, sampleTagToExclude));
     }
 
