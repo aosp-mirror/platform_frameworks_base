@@ -18,6 +18,8 @@ package com.android.systemui.accessibility.floatingmenu;
 
 import static android.util.MathUtils.constrain;
 import static android.util.MathUtils.sq;
+import static android.view.WindowInsets.Type.ime;
+import static android.view.WindowInsets.Type.navigationBars;
 
 import static java.util.Objects.requireNonNull;
 
@@ -29,6 +31,7 @@ import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Insets;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -42,7 +45,9 @@ import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.view.WindowInsets;
 import android.view.WindowManager;
+import android.view.WindowMetrics;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.view.animation.Animation;
@@ -90,6 +95,7 @@ public class AccessibilityFloatingMenuView extends FrameLayout
     private boolean mIsShowing;
     private boolean mIsDownInEnlargedTouchArea;
     private boolean mIsDragging = false;
+    private boolean mImeVisibility;
     @Alignment
     private int mAlignment = Alignment.RIGHT;
     @SizeType
@@ -369,6 +375,8 @@ public class AccessibilityFloatingMenuView extends FrameLayout
 
         mIsShowing = true;
         mWindowManager.addView(this, mCurrentLayoutParams);
+
+        setOnApplyWindowInsetsListener((view, insets) -> onWindowInsetsApplied(insets));
         setSystemGestureExclusion();
     }
 
@@ -379,6 +387,8 @@ public class AccessibilityFloatingMenuView extends FrameLayout
 
         mIsShowing = false;
         mWindowManager.removeView(this);
+
+        setOnApplyWindowInsetsListener(null);
         setSystemGestureExclusion();
     }
 
@@ -565,6 +575,16 @@ public class AccessibilityFloatingMenuView extends FrameLayout
         return mListView.dispatchTouchEvent(event);
     }
 
+    private WindowInsets onWindowInsetsApplied(WindowInsets insets) {
+        final boolean currentImeVisibility = insets.isVisible(ime());
+        if (currentImeVisibility != mImeVisibility) {
+            mImeVisibility = currentImeVisibility;
+            updateLocationWith(mAlignment, mPercentageY);
+        }
+
+        return insets;
+    }
+
     private boolean isMovingTowardsScreenEdge(@Alignment int side, int currentRawX, int downX) {
         return (side == Alignment.RIGHT && currentRawX > downX)
                 || (side == Alignment.LEFT && downX > currentRawX);
@@ -658,6 +678,7 @@ public class AccessibilityFloatingMenuView extends FrameLayout
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                         | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
                 PixelFormat.TRANSLUCENT);
+        params.receiveInsetsIgnoringZOrder = true;
         params.windowAnimations = android.R.style.Animation_Translucent;
         params.gravity = Gravity.START | Gravity.TOP;
         params.x = getMaxWindowX();
@@ -728,8 +749,28 @@ public class AccessibilityFloatingMenuView extends FrameLayout
      */
     private void updateLocationWith(@Alignment int side, float percentageCurrentY) {
         mCurrentLayoutParams.x = (side == Alignment.RIGHT) ? getMaxWindowX() : getMinWindowX();
-        mCurrentLayoutParams.y = (int) (percentageCurrentY * getMaxWindowY());
+        final int currentLayoutY = (int) (percentageCurrentY * getMaxWindowY());
+        mCurrentLayoutParams.y = Math.max(MIN_WINDOW_Y, currentLayoutY - getInterval());
         mWindowManager.updateViewLayout(this, mCurrentLayoutParams);
+    }
+
+    /**
+     * Gets the moving interval to not overlap between the keyboard and menu view.
+     *
+     * @return the moving interval if they overlap each other, otherwise 0.
+     */
+    private int getInterval() {
+        if (!mImeVisibility) {
+            return 0;
+        }
+
+        final WindowMetrics windowMetrics = mWindowManager.getCurrentWindowMetrics();
+        final Insets imeInsets = windowMetrics.getWindowInsets().getInsets(
+                ime() | navigationBars());
+        final int imeY = mScreenHeight - imeInsets.bottom;
+        final int layoutBottomY = mCurrentLayoutParams.y + getWindowHeight();
+
+        return layoutBottomY > imeY ? (layoutBottomY - imeY) : 0;
     }
 
     private void updateOffsetWith(@ShapeType int shapeType, @Alignment int side) {
