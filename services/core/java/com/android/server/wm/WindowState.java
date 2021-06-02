@@ -1500,7 +1500,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         boolean didFrameInsetsChange = setReportResizeHints();
-        boolean configChanged = !isLastConfigReportedToClient();
+        // The latest configuration will be returned by the out parameter of relayout, so it is
+        // unnecessary to report resize if this window is running relayout.
+        final boolean configChanged = !mInRelayout && !isLastConfigReportedToClient();
         if (DEBUG_CONFIGURATION && configChanged) {
             Slog.v(TAG_WM, "Win " + this + " config changed: " + getConfiguration());
         }
