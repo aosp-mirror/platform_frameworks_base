@@ -69,6 +69,7 @@ import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.ImageView;
 
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
@@ -88,8 +89,9 @@ import org.mockito.MockitoAnnotations;
 import java.util.List;
 
 @SmallTest
+@FlakyTest(bugId = 188890599)
 @RunWith(AndroidTestingRunner.class)
-@TestableLooper.RunWithLooper
+@TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class MagnificationModeSwitchTest extends SysuiTestCase {
 
     private static final float FADE_IN_ALPHA = 1f;
