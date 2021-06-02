@@ -295,7 +295,7 @@ static void RuntimeShader_updateShader(JNIEnv* env, jobject, jlong shaderBuilder
     SkShader* shader = reinterpret_cast<SkShader*>(shaderHandle);
 
     SkRuntimeShaderBuilder::BuilderChild child = builder->child(name.c_str());
-    if (child.fIndex == -1) {
+    if (child.fChild == nullptr) {
         ThrowIAEFmt(env, "unable to find shader named %s", name.c_str());
         return;
     }
