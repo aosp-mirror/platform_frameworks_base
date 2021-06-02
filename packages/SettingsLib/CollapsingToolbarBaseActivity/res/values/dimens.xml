@@ -16,10 +16,12 @@
 -->
 <resources>
     <!-- Collapsing toolbar layout dimensions -->
-    <dimen name="toolbar_one_line_height">226dp</dimen>
-    <dimen name="toolbar_two_lines_height">270dp</dimen>
-    <dimen name="toolbar_three_lines_height">314dp</dimen>
+    <dimen name="toolbar_one_line_height">216dp</dimen>
+    <dimen name="toolbar_two_lines_height">260dp</dimen>
+    <dimen name="toolbar_three_lines_height">304dp</dimen>
     <dimen name="scrim_visible_height_trigger">174dp</dimen>
+    <dimen name="scrim_visible_height_trigger_two_lines">218dp</dimen>
+    <dimen name="scrim_visible_height_trigger_three_lines">262dp</dimen>
     <dimen name="expanded_title_margin_start">24dp</dimen>
     <dimen name="expanded_title_margin_end">24dp</dimen>
 </resources>
