@@ -18,6 +18,7 @@ package com.android.systemui.accessibility;
 
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_NONE;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW;
+import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 
 import android.annotation.NonNull;
 import android.annotation.UiContext;
@@ -36,6 +37,7 @@ import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
+import android.view.WindowMetrics;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
@@ -362,21 +364,21 @@ class MagnificationModeSwitch implements MagnificationGestureDetector.OnGestureL
                 PixelFormat.TRANSPARENT);
         params.gravity = Gravity.TOP | Gravity.LEFT;
         params.accessibilityTitle = getAccessibilityWindowTitle(context);
+        params.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
         return params;
     }
 
     private Rect getDraggableWindowBounds() {
         final int layoutMargin = mContext.getResources().getDimensionPixelSize(
                 R.dimen.magnification_switch_button_margin);
-        final Rect boundRect = new Rect(mWindowManager.getCurrentWindowMetrics().getBounds());
-        final Insets systemBars =
-                mWindowManager.getCurrentWindowMetrics().getWindowInsets()
-                        .getInsetsIgnoringVisibility(WindowInsets.Type.systemBars());
-        final Rect insets = new Rect(layoutMargin,
-                systemBars.top + layoutMargin,
-                mParams.width + layoutMargin,
-                mParams.height + layoutMargin + systemBars.bottom);
-        boundRect.inset(insets);
+        final WindowMetrics windowMetrics = mWindowManager.getCurrentWindowMetrics();
+        final Insets windowInsets = windowMetrics.getWindowInsets().getInsetsIgnoringVisibility(
+                WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout());
+        final Rect boundRect = new Rect(windowMetrics.getBounds());
+        boundRect.offsetTo(0, 0);
+        boundRect.inset(0, 0, mParams.width, mParams.height);
+        boundRect.inset(windowInsets);
+        boundRect.inset(layoutMargin, layoutMargin);
         return boundRect;
     }
 
