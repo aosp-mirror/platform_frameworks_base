@@ -1429,7 +1429,7 @@
 
     <!-- Distance that the full shade transition takes in order for media to fully transition to
          the shade -->
-    <dimen name="lockscreen_shade_media_transition_distance">140dp</dimen>
+    <dimen name="lockscreen_shade_media_transition_distance">120dp</dimen>
 
     <!-- Maximum overshoot for the topPadding of notifications when transitioning to the full
          shade -->
