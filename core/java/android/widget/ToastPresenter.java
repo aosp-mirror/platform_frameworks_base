@@ -69,7 +69,7 @@ public class ToastPresenter {
     private final Context mContext;
     private final Resources mResources;
     private final WindowManager mWindowManager;
-    private final AccessibilityManager mAccessibilityManager;
+    private final IAccessibilityManager mAccessibilityManager;
     private final INotificationManager mNotificationManager;
     private final String mPackageName;
     private final WindowManager.LayoutParams mParams;
@@ -83,16 +83,7 @@ public class ToastPresenter {
         mWindowManager = context.getSystemService(WindowManager.class);
         mNotificationManager = notificationManager;
         mPackageName = packageName;
-
-        // We obtain AccessibilityManager manually via its constructor instead of using method
-        // AccessibilityManager.getInstance() for 2 reasons:
-        //   1. We want to be able to inject IAccessibilityManager in tests to verify behavior.
-        //   2. getInstance() caches the instance for the process even if we pass a different
-        //      context to it. This is problematic for multi-user because callers can pass a context
-        //      created via Context.createContextAsUser().
-        mAccessibilityManager = new AccessibilityManager(context, accessibilityManager,
-                context.getUserId());
-
+        mAccessibilityManager = accessibilityManager;
         mParams = createLayoutParams();
     }
 
@@ -283,7 +274,16 @@ public class ToastPresenter {
      * enabled.
      */
     public void trySendAccessibilityEvent(View view, String packageName) {
-        if (!mAccessibilityManager.isEnabled()) {
+        // We obtain AccessibilityManager manually via its constructor instead of using method
+        // AccessibilityManager.getInstance() for 2 reasons:
+        //   1. We want to be able to inject IAccessibilityManager in tests to verify behavior.
+        //   2. getInstance() caches the instance for the process even if we pass a different
+        //      context to it. This is problematic for multi-user because callers can pass a context
+        //      created via Context.createContextAsUser().
+        final AccessibilityManager accessibilityManager =
+                new AccessibilityManager(mContext, mAccessibilityManager, mContext.getUserId());
+        if (!accessibilityManager.isEnabled()) {
+            accessibilityManager.removeClient();
             return;
         }
         AccessibilityEvent event = AccessibilityEvent.obtain(
@@ -291,7 +291,11 @@ public class ToastPresenter {
         event.setClassName(Toast.class.getName());
         event.setPackageName(packageName);
         view.dispatchPopulateAccessibilityEvent(event);
-        mAccessibilityManager.sendAccessibilityEvent(event);
+        accessibilityManager.sendAccessibilityEvent(event);
+        // Every new instance of A11yManager registers an IA11yManagerClient object with the
+        // backing service. This client isn't removed until the calling process is destroyed,
+        // causing a leak here. We explicitly remove the client.
+        accessibilityManager.removeClient();
     }
 
     private void addToastView() {
