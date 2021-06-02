@@ -24,7 +24,7 @@ import android.util.Slog;
 
 /** Helper class to ensure activities are in the right visible state for a container. */
 class EnsureActivitiesVisibleHelper {
-    private final Task mTask;
+    private final TaskFragment mTaskFragment;
     private ActivityRecord mTop;
     private ActivityRecord mStarting;
     private boolean mAboveTop;
@@ -34,12 +34,12 @@ class EnsureActivitiesVisibleHelper {
     private boolean mPreserveWindows;
     private boolean mNotifyClients;
 
-    EnsureActivitiesVisibleHelper(Task container) {
-        mTask = container;
+    EnsureActivitiesVisibleHelper(TaskFragment container) {
+        mTaskFragment = container;
     }
 
     /**
-     * Update all attributes except {@link mTask} to use in subsequent calculations.
+     * Update all attributes except {@link mTaskFragment} to use in subsequent calculations.
      *
      * @param starting The activity that is being started
      * @param configChanges Parts of the configuration that changed for this activity for evaluating
@@ -51,11 +51,11 @@ class EnsureActivitiesVisibleHelper {
     void reset(ActivityRecord starting, int configChanges, boolean preserveWindows,
             boolean notifyClients) {
         mStarting = starting;
-        mTop = mTask.topRunningActivity();
+        mTop = mTaskFragment.topRunningActivity();
         // If the top activity is not fullscreen, then we need to make sure any activities under it
         // are now visible.
         mAboveTop = mTop != null;
-        mContainerShouldBeVisible = mTask.shouldBeVisible(mStarting);
+        mContainerShouldBeVisible = mTaskFragment.shouldBeVisible(mStarting);
         mBehindFullscreenActivity = !mContainerShouldBeVisible;
         mConfigChanges = configChanges;
         mPreserveWindows = preserveWindows;
@@ -85,22 +85,23 @@ class EnsureActivitiesVisibleHelper {
             Slog.v(TAG_VISIBILITY, "ensureActivitiesVisible behind " + mTop
                     + " configChanges=0x" + Integer.toHexString(configChanges));
         }
-        if (mTop != null) {
-            mTask.checkTranslucentActivityWaiting(mTop);
+        if (mTop != null && mTaskFragment.asTask() != null) {
+            // TODO(14709632): Check if this needed to be implemented in TaskFragment.
+            mTaskFragment.asTask().checkTranslucentActivityWaiting(mTop);
         }
 
         // We should not resume activities that being launched behind because these
         // activities are actually behind other fullscreen activities, but still required
         // to be visible (such as performing Recents animation).
         final boolean resumeTopActivity = mTop != null && !mTop.mLaunchTaskBehind
-                && mTask.isTopActivityFocusable()
-                && (starting == null || !starting.isDescendantOf(mTask));
+                && mTaskFragment.isTopActivityFocusable()
+                && (starting == null || !starting.isDescendantOf(mTaskFragment));
 
-        mTask.forAllActivities(a -> {
+        mTaskFragment.forAllActivities(a -> {
             setActivityVisibilityState(a, starting, resumeTopActivity);
         });
-        if (mTask.mAtmService.getTransitionController().getTransitionPlayer() != null) {
-            mTask.getDisplayContent().mWallpaperController.adjustWallpaperWindows();
+        if (mTaskFragment.mAtmService.getTransitionController().getTransitionPlayer() != null) {
+            mTaskFragment.getDisplayContent().mWallpaperController.adjustWallpaperWindows();
         }
     }
 
@@ -179,9 +180,9 @@ class EnsureActivitiesVisibleHelper {
             r.makeInvisible();
         }
 
-        if (!mBehindFullscreenActivity && mTask.isActivityTypeHome() && r.isRootOfTask()) {
+        if (!mBehindFullscreenActivity && mTaskFragment.isActivityTypeHome() && r.isRootOfTask()) {
             if (DEBUG_VISIBILITY) {
-                Slog.v(TAG_VISIBILITY, "Home task: at " + mTask
+                Slog.v(TAG_VISIBILITY, "Home task: at " + mTaskFragment
                         + " containerShouldBeVisible=" + mContainerShouldBeVisible
                         + " behindFullscreenActivity=" + mBehindFullscreenActivity);
             }
@@ -219,7 +220,8 @@ class EnsureActivitiesVisibleHelper {
             r.setVisibility(true);
         }
         if (r != starting) {
-            mTask.mTaskSupervisor.startSpecificActivity(r, andResume, true /* checkConfig */);
+            mTaskFragment.mTaskSupervisor.startSpecificActivity(r, andResume,
+                    true /* checkConfig */);
         }
     }
 }

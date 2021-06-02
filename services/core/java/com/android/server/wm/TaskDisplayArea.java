@@ -37,7 +37,7 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STATES;
 import static com.android.server.wm.ActivityTaskManagerService.TAG_ROOT_TASK;
 import static com.android.server.wm.DisplayContent.alwaysCreateRootTask;
 import static com.android.server.wm.Task.ActivityState.RESUMED;
-import static com.android.server.wm.Task.TASK_VISIBILITY_VISIBLE;
+import static com.android.server.wm.TaskFragment.TASK_FRAGMENT_VISIBILITY_VISIBLE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ROOT_TASK;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
@@ -1229,7 +1229,7 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
                                 + adjacentFlagRootTask);
             }
 
-            if (adjacentFlagRootTask.mAdjacentTask == null) {
+            if (adjacentFlagRootTask.getAdjacentTaskFragment() == null) {
                 throw new UnsupportedOperationException(
                         "Can't set non-adjacent root as launch adjacent flag root tr="
                                 + adjacentFlagRootTask);
@@ -1267,8 +1267,8 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
             // If the adjacent launch is coming from the same root, launch to adjacent root instead.
             if (sourceTask != null
                     && sourceTask.getRootTask().mTaskId == mLaunchAdjacentFlagRootTask.mTaskId
-                    && mLaunchAdjacentFlagRootTask.mAdjacentTask != null) {
-                return mLaunchAdjacentFlagRootTask.mAdjacentTask;
+                    && mLaunchAdjacentFlagRootTask.getAdjacentTaskFragment() != null) {
+                return mLaunchAdjacentFlagRootTask.getAdjacentTaskFragment().asTask();
             } else {
                 return mLaunchAdjacentFlagRootTask;
             }
@@ -1278,8 +1278,10 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
             if (mLaunchRootTasks.get(i).contains(windowingMode, activityType)) {
                 final Task launchRootTask = mLaunchRootTasks.get(i).task;
                 // Return the focusable root task for improving the UX with staged split screen.
-                final Task adjacentRootTask = launchRootTask != null
-                        ? launchRootTask.mAdjacentTask : null;
+                final TaskFragment adjacentTaskFragment = launchRootTask != null
+                        ? launchRootTask.getAdjacentTaskFragment() : null;
+                final Task adjacentRootTask =
+                        adjacentTaskFragment != null ? adjacentTaskFragment.asTask() : null;
                 if (adjacentRootTask != null && adjacentRootTask.isFocusedRootTaskOnDisplay()) {
                     return adjacentRootTask;
                 } else {
@@ -1452,7 +1454,7 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         forAllLeafTasks((task) -> {
             final ActivityRecord resumedActivity = task.getResumedActivity();
             if (resumedActivity != null
-                    && (task.getVisibility(resuming) != TASK_VISIBILITY_VISIBLE
+                    && (task.getVisibility(resuming) != TASK_FRAGMENT_VISIBILITY_VISIBLE
                     || !task.isTopActivityFocusable())) {
                 ProtoLog.d(WM_DEBUG_STATES, "pauseBackTasks: task=%s "
                         + "mResumedActivity=%s", task, resumedActivity);
