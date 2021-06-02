@@ -68,7 +68,8 @@ public class ChooserWrapperActivity extends ChooserActivity {
                         : sOverrides.packageManager;
         return new ChooserListAdapter(context, payloadIntents, initialIntents, rList,
                 filterLastUsed, resolverListController,
-                this, this, packageManager);
+                this, this, packageManager,
+                getChooserActivityLogger());
     }
 
     ChooserListAdapter getAdapter() {
