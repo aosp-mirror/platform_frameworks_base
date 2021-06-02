@@ -124,9 +124,9 @@ public class SplashscreenContentDrawer {
 
     private void updateDensity() {
         mIconSize = mContext.getResources().getDimensionPixelSize(
-                com.android.wm.shell.R.dimen.starting_surface_icon_size);
+                com.android.internal.R.dimen.starting_surface_icon_size);
         mDefaultIconSize = mContext.getResources().getDimensionPixelSize(
-                com.android.wm.shell.R.dimen.default_icon_size);
+                com.android.internal.R.dimen.starting_surface_default_icon_size);
         mBrandingImageWidth = mContext.getResources().getDimensionPixelSize(
                 com.android.wm.shell.R.dimen.starting_surface_brand_image_width);
         mBrandingImageHeight = mContext.getResources().getDimensionPixelSize(
