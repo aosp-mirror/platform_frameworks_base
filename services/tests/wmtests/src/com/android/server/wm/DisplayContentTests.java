@@ -1386,11 +1386,11 @@ public class DisplayContentTests extends WindowTestsBase {
         performLayout(mDisplayContent);
 
         // Force the negative offset to verify it can be updated.
-        mWallpaperWindow.mWinAnimator.mXOffset = mWallpaperWindow.mWinAnimator.mYOffset = -1;
+        mWallpaperWindow.mXOffset = mWallpaperWindow.mYOffset = -1;
         assertTrue(mDisplayContent.mWallpaperController.updateWallpaperOffset(mWallpaperWindow,
                 false /* sync */));
-        assertThat(mWallpaperWindow.mWinAnimator.mXOffset).isGreaterThan(-1);
-        assertThat(mWallpaperWindow.mWinAnimator.mYOffset).isGreaterThan(-1);
+        assertThat(mWallpaperWindow.mXOffset).isGreaterThan(-1);
+        assertThat(mWallpaperWindow.mYOffset).isGreaterThan(-1);
 
         // The wallpaper need to animate with transformed position, so its surface position should
         // not be reset.

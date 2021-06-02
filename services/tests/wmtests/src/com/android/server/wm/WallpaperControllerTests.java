@@ -212,7 +212,7 @@ public class WallpaperControllerTests extends WindowTestsBase {
         // value did, and we do dispatch the zoom to the wallpaper service
         dc.mWallpaperController.setWallpaperZoomOut(homeWindow, newZoom);
         assertEquals(newZoom, wallpaperWindow.mWallpaperZoomOut, .01f);
-        assertEquals(1f, wallpaperWindow.mWinAnimator.mWallpaperScale, .01f);
+        assertEquals(1f, wallpaperWindow.mWallpaperScale, .01f);
         verify(wallpaperWindow.mClient).dispatchWallpaperOffsets(anyFloat(), anyFloat(), anyFloat(),
                 anyFloat(), eq(newZoom), anyBoolean());
     }

@@ -340,7 +340,7 @@ class WallpaperController {
             rawChanged = true;
         }
 
-        boolean changed = wallpaperWin.mWinAnimator.setWallpaperOffset(xOffset, yOffset,
+        boolean changed = wallpaperWin.setWallpaperOffset(xOffset, yOffset,
                 wallpaperWin.mShouldScaleWallpaper
                         ? zoomOutToScale(wallpaperWin.mWallpaperZoomOut) : 1);
 

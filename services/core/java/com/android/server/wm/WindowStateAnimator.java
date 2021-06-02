@@ -169,16 +169,6 @@ class WindowStateAnimator {
 
     int mAttrType;
 
-    // An offset in pixel of the surface contents from the window position. Used for Wallpaper
-    // to provide the effect of scrolling within a large surface. We just use these values as
-    // a cache.
-    int mXOffset = 0;
-    int mYOffset = 0;
-
-    // A scale factor for the surface contents, that will be applied from the center of the visible
-    // region.
-    float mWallpaperScale = 1f;
-
     private final Rect mTmpSize = new Rect();
 
     /**
@@ -502,18 +492,6 @@ class WindowStateAnimator {
         }
 
         final WindowState w = mWin;
-
-        if (!w.mSeamlesslyRotated) {
-            // Used to offset the WSA when stack position changes before a resize.
-            int xOffset = mXOffset;
-            int yOffset = mYOffset;
-            if (!mIsWallpaper) {
-                mSurfaceController.setPosition(t, xOffset, yOffset);
-            } else {
-                setWallpaperPositionAndScale(t, xOffset, yOffset, mWallpaperScale);
-            }
-        }
-
         final Task task = w.getTask();
         if (shouldConsumeMainWindowSizeTransaction()) {
             if (isInBlastSync()) {
@@ -575,14 +553,8 @@ class WindowStateAnimator {
                     "SURFACE controller=%s alpha=%f HScale=%f, VScale=%f: %s",
                     mSurfaceController, mShownAlpha, w.mHScale, w.mVScale, w);
 
-            boolean prepared = true;
-
-            if (mIsWallpaper) {
-                setWallpaperPositionAndScale(t, mXOffset, mYOffset, mWallpaperScale);
-            } else {
-                prepared =
-                    mSurfaceController.prepareToShowInTransaction(t, mShownAlpha);
-            }
+            boolean prepared =
+                mSurfaceController.prepareToShowInTransaction(t, mShownAlpha);
 
             if (prepared && mDrawState == HAS_DRAWN) {
                 if (mLastHidden) {
@@ -633,53 +605,6 @@ class WindowStateAnimator {
         if (displayed) {
             w.mToken.hasVisible = true;
         }
-    }
-
-    boolean setWallpaperOffset(int dx, int dy, float scale) {
-        if (mXOffset == dx && mYOffset == dy && Float.compare(mWallpaperScale, scale) == 0) {
-            return false;
-        }
-        mXOffset = dx;
-        mYOffset = dy;
-        mWallpaperScale = scale;
-
-        if (mSurfaceController != null) {
-            try {
-                if (SHOW_LIGHT_TRANSACTIONS) {
-                    Slog.i(TAG, ">>> OPEN TRANSACTION setWallpaperOffset");
-                }
-                mService.openSurfaceTransaction();
-                setWallpaperPositionAndScale(SurfaceControl.getGlobalTransaction(), dx, dy, scale);
-            } catch (RuntimeException e) {
-                Slog.w(TAG, "Error positioning surface of " + mWin
-                        + " pos=(" + dx + "," + dy + ")", e);
-            } finally {
-                mService.closeSurfaceTransaction("setWallpaperOffset");
-                if (SHOW_LIGHT_TRANSACTIONS) {
-                    Slog.i(TAG, "<<< CLOSE TRANSACTION setWallpaperOffset");
-                }
-            }
-        }
-
-        return true;
-    }
-
-    private void setWallpaperPositionAndScale(SurfaceControl.Transaction t, int dx, int dy,
-            float scale) {
-        DisplayInfo displayInfo = mWin.getDisplayInfo();
-        Matrix matrix = mWin.mTmpMatrix;
-        matrix.setTranslate(dx, dy);
-        matrix.postScale(scale, scale, displayInfo.logicalWidth / 2f,
-                displayInfo.logicalHeight / 2f);
-        matrix.getValues(mWin.mTmpMatrixArray);
-        matrix.reset();
-
-        mSurfaceController.setPosition(t,mWin.mTmpMatrixArray[MTRANS_X],
-                mWin.mTmpMatrixArray[MTRANS_Y]);
-        mSurfaceController.setMatrix(t, mWin.mTmpMatrixArray[MSCALE_X],
-            mWin.mTmpMatrixArray[MSKEW_Y],
-            mWin.mTmpMatrixArray[MSKEW_X],
-            mWin.mTmpMatrixArray[MSCALE_Y]);
     }
 
     /**
