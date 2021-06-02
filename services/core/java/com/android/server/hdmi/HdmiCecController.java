@@ -94,6 +94,21 @@ final class HdmiCecController {
 
     private static final int INVALID_PHYSICAL_ADDRESS = 0xFFFF;
 
+    /*
+     * The three flags below determine the action when a message is received. If CEC_DISABLED_IGNORE
+     * bit is set in ACTION_ON_RECEIVE_MSG, then the message is forwarded irrespective of whether
+     * CEC is enabled or disabled. The other flags/bits are also ignored.
+     */
+    private static final int CEC_DISABLED_IGNORE = 1 << 0;
+
+    /* If CEC_DISABLED_LOG_WARNING bit is set, a warning message is printed if CEC is disabled. */
+    private static final int CEC_DISABLED_LOG_WARNING = 1 << 1;
+
+    /* If CEC_DISABLED_DROP_MSG bit is set, the message is dropped if CEC is disabled. */
+    private static final int CEC_DISABLED_DROP_MSG = 1 << 2;
+
+    private static final int ACTION_ON_RECEIVE_MSG = CEC_DISABLED_LOG_WARNING;
+
     /** Cookie for matching the right end point. */
     protected static final int HDMI_CEC_HAL_DEATH_COOKIE = 353;
 
@@ -568,6 +583,16 @@ final class HdmiCecController {
     @VisibleForTesting
     void onReceiveCommand(HdmiCecMessage message) {
         assertRunOnServiceThread();
+        if (((ACTION_ON_RECEIVE_MSG & CEC_DISABLED_IGNORE) == 0)
+                && !mService.isControlEnabled()
+                && !HdmiCecMessage.isCecTransportMessage(message.getOpcode())) {
+            if ((ACTION_ON_RECEIVE_MSG & CEC_DISABLED_LOG_WARNING) != 0) {
+                HdmiLogger.warning("Message " + message + " received when cec disabled");
+            }
+            if ((ACTION_ON_RECEIVE_MSG & CEC_DISABLED_DROP_MSG) != 0) {
+                return;
+            }
+        }
         if (mService.isAddressAllocated() && !isAcceptableAddress(message.getDestination())) {
             return;
         }
