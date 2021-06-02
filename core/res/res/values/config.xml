@@ -1759,6 +1759,13 @@
         <item>com.android.location.fused</item>
     </string-array>
 
+    <!-- Package name(s) of Advanced Driver Assistance applications. These packages have additional
+    management of access to location, specific to driving assistance use-cases. They must be system
+    packages. This configuration is only applicable to devices that declare
+    PackageManager.FEATURE_AUTOMOTIVE. -->
+    <string-array name="config_locationDriverAssistancePackageNames" translatable="false">
+    </string-array>
+
     <!-- This string array can be overriden to enable test location providers initially. -->
     <!-- Array of "[locationProviderName],[requiresNetwork],
          [requiresSatellite],[requiresCell],[hasMonetaryCost],
