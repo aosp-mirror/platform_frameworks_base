@@ -454,6 +454,7 @@
     <string name="keyguard_more_overflow_text" msgid="5819512373606638727">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="7248696377626341060">"Manje hitna obaveštenja su u nastavku"</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"Dodirnite ponovo da biste otvorili"</string>
+    <string name="tap_again" msgid="1315420114387908655">"Dodirnite ponovo"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Prevucite nagore da biste otvorili"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Prevucite nagore da biste probali ponovo"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Otključajte da biste koristili NFC"</string>
@@ -521,7 +522,7 @@
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Konverzacije"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Obrišite sva nečujna obaveštenja"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Obaveštenja su pauzirana režimom Ne uznemiravaj"</string>
-    <string name="media_projection_action_text" msgid="3634906766918186440">"Započni odmah"</string>
+    <string name="media_projection_action_text" msgid="3634906766918186440">"Započni"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Nema obaveštenja"</string>
     <string name="profile_owned_footer" msgid="2756770645766113964">"Profil se možda nadgleda"</string>
     <string name="vpn_footer" msgid="3457155078010607471">"Mreža se možda nadgleda"</string>
@@ -1010,7 +1011,7 @@
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" i "</string>
     <string name="ongoing_privacy_dialog_using_op" msgid="426635338010011796">"Koristi <xliff:g id="APPLICATION_NAME">%1$s</xliff:g>"</string>
-    <string name="ongoing_privacy_dialog_recent_op" msgid="2736290123662790026">"Nedavno koristila aplikacija <xliff:g id="APPLICATION_NAME">%1$s</xliff:g>"</string>
+    <string name="ongoing_privacy_dialog_recent_op" msgid="2736290123662790026">"Nedavno koristio <xliff:g id="APPLICATION_NAME">%1$s</xliff:g>"</string>
     <string name="ongoing_privacy_dialog_enterprise" msgid="3003314125311966061">"(posao)"</string>
     <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"Telefonski poziv"</string>
     <string name="ongoing_privacy_dialog_attribution_text" msgid="4738795925380373994">"(preko: <xliff:g id="APPLICATION_NAME_S_">%s</xliff:g>)"</string>
