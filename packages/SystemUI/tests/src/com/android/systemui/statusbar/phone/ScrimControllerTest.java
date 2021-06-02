@@ -108,6 +108,8 @@ public class ScrimControllerTest extends SysuiTestCase {
     private DockManager mDockManager;
     @Mock
     private ConfigurationController mConfigurationController;
+    @Mock
+    private UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
 
 
     private static class AnimatorListener implements Animator.AnimatorListener {
@@ -221,7 +223,8 @@ public class ScrimControllerTest extends SysuiTestCase {
         mScrimController = new ScrimController(mLightBarController,
                 mDozeParameters, mAlarmManager, mKeyguardStateController, mDelayedWakeLockBuilder,
                 new FakeHandler(mLooper.getLooper()), mKeyguardUpdateMonitor,
-                mDockManager, mConfigurationController, new FakeExecutor(new FakeSystemClock()));
+                mDockManager, mConfigurationController, new FakeExecutor(new FakeSystemClock()),
+                mUnlockedScreenOffAnimationController);
         mScrimController.setScrimVisibleListener(visible -> mScrimVisibility = visible);
         mScrimController.attachViews(mScrimBehind, mNotificationsScrim, mScrimInFront,
                 mScrimForBubble);

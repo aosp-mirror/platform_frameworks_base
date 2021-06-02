@@ -310,20 +310,29 @@ public class SettingsProvider extends ContentProvider {
 
     private static final Set<String> sAllSecureSettings = new ArraySet<>();
     private static final Set<String> sReadableSecureSettings = new ArraySet<>();
+    private static final ArrayMap<String, Integer> sReadableSecureSettingsWithMaxTargetSdk =
+            new ArrayMap<>();
     static {
-        Settings.Secure.getPublicSettings(sAllSecureSettings, sReadableSecureSettings);
+        Settings.Secure.getPublicSettings(sAllSecureSettings, sReadableSecureSettings,
+                sReadableSecureSettingsWithMaxTargetSdk);
     }
 
     private static final Set<String> sAllSystemSettings = new ArraySet<>();
     private static final Set<String> sReadableSystemSettings = new ArraySet<>();
+    private static final ArrayMap<String, Integer> sReadableSystemSettingsWithMaxTargetSdk =
+            new ArrayMap<>();
     static {
-        Settings.System.getPublicSettings(sAllSystemSettings, sReadableSystemSettings);
+        Settings.System.getPublicSettings(sAllSystemSettings, sReadableSystemSettings,
+                sReadableSystemSettingsWithMaxTargetSdk);
     }
 
     private static final Set<String> sAllGlobalSettings = new ArraySet<>();
     private static final Set<String> sReadableGlobalSettings = new ArraySet<>();
+    private static final ArrayMap<String, Integer> sReadableGlobalSettingsWithMaxTargetSdk =
+            new ArrayMap<>();
     static {
-        Settings.Global.getPublicSettings(sAllGlobalSettings, sReadableGlobalSettings);
+        Settings.Global.getPublicSettings(sAllGlobalSettings, sReadableGlobalSettings,
+                sReadableGlobalSettingsWithMaxTargetSdk);
     }
 
     private final Object mLock = new Object();
@@ -2065,7 +2074,7 @@ public class SettingsProvider extends ContentProvider {
         }
         if ((ai.flags & ApplicationInfo.FLAG_TEST_ONLY) == 0) {
             // Skip checking readable annotations for test_only apps
-            checkReadableAnnotation(settingsType, settingName);
+            checkReadableAnnotation(settingsType, settingName, ai.targetSandboxVersion);
         }
         /**
          * some settings need additional permission check, this is to have a matching security
@@ -2101,35 +2110,55 @@ public class SettingsProvider extends ContentProvider {
     /**
      * Check if the target settings key is readable. Reject if the caller app is trying to access a
      * settings key defined in the Settings.Secure, Settings.System or Settings.Global and is not
-     * annotated as @Readable.
+     * annotated as @Readable. Reject if the caller app is targeting an SDK level that is higher
+     * than the maxTargetSdk specified in the @Readable annotation.
      * Notice that a key string that is not defined in any of the Settings.* classes will still be
      * regarded as readable.
      */
-    private void checkReadableAnnotation(int settingsType, String settingName) {
+    private void checkReadableAnnotation(int settingsType, String settingName,
+            int targetSdkVersion) {
         final Set<String> allFields;
         final Set<String> readableFields;
+        final ArrayMap<String, Integer> readableFieldsWithMaxTargetSdk;
         switch (settingsType) {
             case SETTINGS_TYPE_GLOBAL:
                 allFields = sAllGlobalSettings;
                 readableFields = sReadableGlobalSettings;
+                readableFieldsWithMaxTargetSdk = sReadableGlobalSettingsWithMaxTargetSdk;
                 break;
             case SETTINGS_TYPE_SYSTEM:
                 allFields = sAllSystemSettings;
                 readableFields = sReadableSystemSettings;
+                readableFieldsWithMaxTargetSdk = sReadableSystemSettingsWithMaxTargetSdk;
                 break;
             case SETTINGS_TYPE_SECURE:
                 allFields = sAllSecureSettings;
                 readableFields = sReadableSecureSettings;
+                readableFieldsWithMaxTargetSdk = sReadableSecureSettingsWithMaxTargetSdk;
                 break;
             default:
                 throw new IllegalArgumentException("Invalid settings type: " + settingsType);
         }
 
-        if (allFields.contains(settingName) && !readableFields.contains(settingName)) {
-            throw new SecurityException(
-                    "Settings key: <" + settingName + "> is not readable. From S+, settings keys "
-                            + "annotated with @hide are restricted to system_server and system "
-                            + "apps only, unless they are annotated with @Readable.");
+        if (allFields.contains(settingName)) {
+            if (!readableFields.contains(settingName)) {
+                throw new SecurityException(
+                        "Settings key: <" + settingName + "> is not readable. From S+, settings "
+                                + "keys annotated with @hide are restricted to system_server and "
+                                + "system apps only, unless they are annotated with @Readable."
+                );
+            } else {
+                if (readableFieldsWithMaxTargetSdk.containsKey(settingName)) {
+                    final int maxTargetSdk = readableFieldsWithMaxTargetSdk.get(settingName);
+                    if (targetSdkVersion > maxTargetSdk) {
+                        throw new SecurityException(
+                                "Settings key: <" + settingName + "> is only readable to apps with "
+                                        + "targetSdkVersion lower than or equal to: "
+                                        + maxTargetSdk
+                        );
+                    }
+                }
+            }
         }
     }
 

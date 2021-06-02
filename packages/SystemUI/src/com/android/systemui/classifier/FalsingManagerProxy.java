@@ -79,7 +79,7 @@ public class FalsingManagerProxy implements FalsingManager, Dumpable {
             public void onPluginConnected(FalsingPlugin plugin, Context context) {
                 FalsingManager pluginFalsingManager = plugin.getFalsingManager(context);
                 if (pluginFalsingManager != null) {
-                    mInternalFalsingManager.cleanupInternal();
+                    mInternalFalsingManager.cleanup();
                     mInternalFalsingManager = pluginFalsingManager;
                 }
             }
@@ -109,7 +109,7 @@ public class FalsingManagerProxy implements FalsingManager, Dumpable {
      */
     private void setupFalsingManager() {
         if (mInternalFalsingManager != null) {
-            mInternalFalsingManager.cleanupInternal();
+            mInternalFalsingManager.cleanup();
         }
         mInternalFalsingManager = mBrightLineFalsingManagerProvider.get();
     }
@@ -195,10 +195,10 @@ public class FalsingManagerProxy implements FalsingManager, Dumpable {
     }
 
     @Override
-    public void cleanupInternal() {
+    public void cleanup() {
         mDeviceConfig.removeOnPropertiesChangedListener(mDeviceConfigListener);
         mPluginManager.removePluginListener(mPluginListener);
         mDumpManager.unregisterDumpable(DUMPABLE_TAG);
-        mInternalFalsingManager.cleanupInternal();
+        mInternalFalsingManager.cleanup();
     }
 }

@@ -2086,12 +2086,19 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         // The following policies weren't available to PO, but will be available after migration.
         parentAdmin.disableCamera = doAdmin.disableCamera;
-        parentAdmin.requireAutoTime = doAdmin.requireAutoTime;
         parentAdmin.disableScreenCapture = doAdmin.disableScreenCapture;
         parentAdmin.accountTypesWithManagementDisabled.addAll(
                 doAdmin.accountTypesWithManagementDisabled);
 
         moveDoUserRestrictionsToCopeParent(doAdmin, parentAdmin);
+
+        // From Android 11, {@link setAutoTimeRequired} is no longer used. The user restriction
+        // {@link UserManager#DISALLOW_CONFIG_DATE_TIME} should be used to enforce auto time
+        // settings instead.
+        if (doAdmin.requireAutoTime) {
+            parentAdmin.ensureUserRestrictions().putBoolean(
+                    UserManager.DISALLOW_CONFIG_DATE_TIME, true);
+        }
     }
 
     private void moveDoUserRestrictionsToCopeParent(ActiveAdmin doAdmin, ActiveAdmin parentAdmin) {
@@ -2359,6 +2366,41 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             Slogf.w(LOG_TAG, "ActiveAdmin for DO/PO not found. user=" + user.getIdentifier());
         }
         saveSettingsLocked(user.getIdentifier());
+    }
+
+    /**
+     * Fix left-over restrictions and auto-time policy during COMP -> COPE migration.
+     *
+     * When a COMP device with requireAutoTime policy set was migrated to an
+     * organization-owned profile, a DISALLOW_CONFIG_DATE_TIME restriction is set
+     * on user 0 from the DO user, which becomes unremovable by the organization-owned
+     * profile owner. Fix this by force removing that restriction. Also revert the
+     * parentAdmin.requireAutoTime bit (since the COPE PO cannot unset this bit)
+     * and replace it with DISALLOW_CONFIG_DATE_TIME on the correct
+     * admin, in line with the deprecation recommendation of setAutoTimeRequired().
+     */
+    private void fixupAutoTimeRestrictionDuringOrganizationOwnedDeviceMigration() {
+        for (UserInfo ui : mUserManager.getUsers()) {
+            final int userId = ui.id;
+            if (isProfileOwnerOfOrganizationOwnedDevice(userId)) {
+                final ActiveAdmin parent = getProfileOwnerAdminLocked(userId).parentAdmin;
+                if (parent != null && parent.requireAutoTime) {
+                    // Remove deprecated requireAutoTime
+                    parent.requireAutoTime = false;
+                    saveSettingsLocked(userId);
+
+                    // Remove user restrictions set by the device owner before the upgrade to
+                    // Android 11.
+                    mUserManagerInternal.setDevicePolicyUserRestrictions(UserHandle.USER_SYSTEM,
+                            new Bundle(), new RestrictionsSet(), /* isDeviceOwner */ false);
+
+                    // Apply user restriction to parent active admin instead
+                    parent.ensureUserRestrictions().putBoolean(
+                            UserManager.DISALLOW_CONFIG_DATE_TIME, true);
+                    pushUserRestrictions(userId);
+                }
+            }
+        }
     }
 
     private ComponentName findAdminComponentWithPackageLocked(String packageName, int userId) {
@@ -3020,6 +3062,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private void onLockSettingsReady() {
         synchronized (getLockObject()) {
             migrateUserRestrictionsIfNecessaryLocked();
+            fixupAutoTimeRestrictionDuringOrganizationOwnedDeviceMigration();
             performPolicyVersionUpgrade();
         }
         getUserData(UserHandle.USER_SYSTEM);
@@ -8576,6 +8619,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             admin.defaultEnabledRestrictionsAlreadySet.clear();
             admin.forceEphemeralUsers = false;
             admin.isNetworkLoggingEnabled = false;
+            admin.requireAutoTime = false;
             mUserManagerInternal.setForceEphemeralUsers(admin.forceEphemeralUsers);
         }
         final DevicePolicyData policyData = getUserData(userId);

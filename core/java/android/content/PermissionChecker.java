@@ -16,19 +16,14 @@
 
 package android.content;
 
-import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AppOpsManager;
 import android.os.Binder;
-import android.os.IBinder;
 import android.os.Process;
-import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.permission.IPermissionChecker;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import android.permission.PermissionCheckerManager;
+import android.permission.PermissionCheckerManager.PermissionResult;
 
 /**
  * This class provides permission check APIs that verify both the
@@ -75,7 +70,7 @@ public final class PermissionChecker {
      *
      * @hide
      */
-    public static final int PERMISSION_GRANTED = IPermissionChecker.PERMISSION_GRANTED;
+    public static final int PERMISSION_GRANTED = PermissionCheckerManager.PERMISSION_GRANTED;
 
     /**
      * The permission is denied. Applicable only to runtime and app op permissions.
@@ -89,7 +84,8 @@ public final class PermissionChecker {
      *
      * @hide
      */
-    public static final int PERMISSION_SOFT_DENIED = IPermissionChecker.PERMISSION_SOFT_DENIED;
+    public static final int PERMISSION_SOFT_DENIED =
+            PermissionCheckerManager.PERMISSION_SOFT_DENIED;
 
     /**
      * The permission is denied.
@@ -103,17 +99,11 @@ public final class PermissionChecker {
      *
      * @hide
      */
-    public static final int PERMISSION_HARD_DENIED =  IPermissionChecker.PERMISSION_HARD_DENIED;
+    public static final int PERMISSION_HARD_DENIED =
+            PermissionCheckerManager.PERMISSION_HARD_DENIED;
 
     /** Constant when the PID for which we check permissions is unknown. */
     public static final int PID_UNKNOWN = -1;
-
-    /** @hide */
-    @IntDef({PERMISSION_GRANTED,
-            PERMISSION_SOFT_DENIED,
-            PERMISSION_HARD_DENIED})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface PermissionResult {}
 
     private static volatile IPermissionChecker sService;
 
@@ -157,7 +147,7 @@ public final class PermissionChecker {
      *
      * @see #checkPermissionForPreflight(Context, String, int, int, String)
      */
-    @PermissionResult
+    @PermissionCheckerManager.PermissionResult
     public static int checkPermissionForDataDelivery(@NonNull Context context,
             @NonNull String permission, int pid, int uid, @Nullable String packageName,
             @Nullable String attributionTag, @Nullable String message, boolean startDataDelivery) {
@@ -321,19 +311,13 @@ public final class PermissionChecker {
                 message, startDataDelivery, /*fromDatasource*/ false);
     }
 
+    @SuppressWarnings("ConstantConditions")
     private static int checkPermissionForDataDeliveryCommon(@NonNull Context context,
             @NonNull String permission, @NonNull AttributionSource attributionSource,
             @Nullable String message, boolean startDataDelivery, boolean fromDatasource) {
-        // If the check failed in the middle of the chain, finish any started op.
-        try {
-            final int result = getPermissionCheckerService().checkPermission(permission,
-                    attributionSource.asState(), message, true /*forDataDelivery*/,
-                    startDataDelivery, fromDatasource);
-            return result;
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-        }
-        return PERMISSION_HARD_DENIED;
+        return context.getSystemService(PermissionCheckerManager.class).checkPermission(permission,
+                attributionSource.asState(), message, true /*forDataDelivery*/, startDataDelivery,
+                fromDatasource, AppOpsManager.OP_NONE);
     }
 
     /**
@@ -365,17 +349,13 @@ public final class PermissionChecker {
      * @see #checkPermissionForPreflight(Context, String, AttributionSource)
      */
     @PermissionResult
+    @SuppressWarnings("ConstantConditions")
     public static int checkPermissionAndStartDataDelivery(@NonNull Context context,
             @NonNull String permission, @NonNull AttributionSource attributionSource,
             @Nullable String message) {
-        try {
-            return getPermissionCheckerService().checkPermission(permission,
-                    attributionSource.asState(), message, true /*forDataDelivery*/,
-                    /*startDataDelivery*/ true, /*fromDatasource*/ false);
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-        }
-        return PERMISSION_HARD_DENIED;
+        return context.getSystemService(PermissionCheckerManager.class).checkPermission(
+                permission, attributionSource.asState(), message, true /*forDataDelivery*/,
+                /*startDataDelivery*/ true, /*fromDatasource*/ false, AppOpsManager.OP_NONE);
     }
 
     /**
@@ -404,17 +384,13 @@ public final class PermissionChecker {
      * @see #finishDataDelivery(Context, String, AttributionSource)
      */
     @PermissionResult
+    @SuppressWarnings("ConstantConditions")
     public static int startOpForDataDelivery(@NonNull Context context,
             @NonNull String opName, @NonNull AttributionSource attributionSource,
             @Nullable String message) {
-        try {
-            return getPermissionCheckerService().checkOp(
-                    AppOpsManager.strOpToOp(opName), attributionSource.asState(), message,
-                    true /*forDataDelivery*/, true /*startDataDelivery*/);
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-        }
-        return PERMISSION_HARD_DENIED;
+        return context.getSystemService(PermissionCheckerManager.class).checkOp(
+                AppOpsManager.strOpToOp(opName), attributionSource.asState(), message,
+                true /*forDataDelivery*/, true /*startDataDelivery*/);
     }
 
     /**
@@ -428,13 +404,32 @@ public final class PermissionChecker {
      * @see #startOpForDataDelivery(Context, String, AttributionSource, String)
      * @see #checkPermissionAndStartDataDelivery(Context, String, AttributionSource, String)
      */
+    @SuppressWarnings("ConstantConditions")
     public static void finishDataDelivery(@NonNull Context context, @NonNull String op,
             @NonNull AttributionSource attributionSource) {
-        try {
-            getPermissionCheckerService().finishDataDelivery(op, attributionSource.asState());
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-        }
+        context.getSystemService(PermissionCheckerManager.class).finishDataDelivery(
+                AppOpsManager.strOpToOp(op), attributionSource.asState(),
+                /*fromDatasource*/ false);
+    }
+
+    /**
+     * Finishes an ongoing op for data access chain described by the given {@link
+     * AttributionSource}. Call this method if you are the datasource which would
+     * not finish an op for your attribution source as it was not started.
+     *
+     * @param context Context for accessing resources.
+     * @param op The op to finish.
+     * @param attributionSource The identity for which finish op.
+     *
+     * @see #startOpForDataDelivery(Context, String, AttributionSource, String)
+     * @see #checkPermissionAndStartDataDelivery(Context, String, AttributionSource, String)
+     */
+    @SuppressWarnings("ConstantConditions")
+    public static void finishDataDeliveryFromDatasource(@NonNull Context context,
+            @NonNull String op, @NonNull AttributionSource attributionSource) {
+        context.getSystemService(PermissionCheckerManager.class).finishDataDelivery(
+                AppOpsManager.strOpToOp(op), attributionSource.asState(),
+                /*fromDatasource*/ true);
     }
 
     /**
@@ -466,17 +461,13 @@ public final class PermissionChecker {
      * @see #checkOpForDataDelivery(Context, String, AttributionSource, String)
      */
     @PermissionResult
+    @SuppressWarnings("ConstantConditions")
     public static int checkOpForPreflight(@NonNull Context context,
             @NonNull String opName, @NonNull AttributionSource attributionSource,
             @Nullable String message) {
-        try {
-            return getPermissionCheckerService().checkOp(AppOpsManager.strOpToOp(opName),
-                    attributionSource.asState(), message, false /*forDataDelivery*/,
-                    false /*startDataDelivery*/);
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-        }
-        return PERMISSION_HARD_DENIED;
+        return context.getSystemService(PermissionCheckerManager.class).checkOp(
+                AppOpsManager.strOpToOp(opName), attributionSource.asState(), message,
+                false /*forDataDelivery*/, false /*startDataDelivery*/);
     }
 
     /**
@@ -505,17 +496,13 @@ public final class PermissionChecker {
      * @see #checkOpForPreflight(Context, String, AttributionSource, String)
      */
     @PermissionResult
+    @SuppressWarnings("ConstantConditions")
     public static int checkOpForDataDelivery(@NonNull Context context,
             @NonNull String opName, @NonNull AttributionSource attributionSource,
             @Nullable String message) {
-        try {
-            return getPermissionCheckerService().checkOp(AppOpsManager.strOpToOp(opName),
-                    attributionSource.asState(), message, true /*forDataDelivery*/,
-                    false /*startDataDelivery*/);
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-        }
-        return PERMISSION_HARD_DENIED;
+        return context.getSystemService(PermissionCheckerManager.class).checkOp(
+                AppOpsManager.strOpToOp(opName), attributionSource.asState(), message,
+                true /*forDataDelivery*/, false /*startDataDelivery*/);
     }
 
     /**
@@ -584,16 +571,13 @@ public final class PermissionChecker {
      *     String, boolean)
      */
     @PermissionResult
+    @SuppressWarnings("ConstantConditions")
     public static int checkPermissionForPreflight(@NonNull Context context,
             @NonNull String permission, @NonNull AttributionSource attributionSource) {
-        try {
-            return getPermissionCheckerService().checkPermission(permission,
-                    attributionSource.asState(), null /*message*/, false /*forDataDelivery*/,
-                    /*startDataDelivery*/ false, /*fromDatasource*/ false);
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-        }
-        return PERMISSION_HARD_DENIED;
+        return context.getSystemService(PermissionCheckerManager.class)
+                .checkPermission(permission, attributionSource.asState(), null /*message*/,
+                false /*forDataDelivery*/, /*startDataDelivery*/ false, /*fromDatasource*/ false,
+                AppOpsManager.OP_NONE);
     }
 
     /**
@@ -826,14 +810,5 @@ public final class PermissionChecker {
                 ? context.getPackageName() : null;
         return checkPermissionForPreflight(context, permission, Binder.getCallingPid(),
                 Binder.getCallingUid(), packageName);
-    }
-
-    private static @NonNull IPermissionChecker getPermissionCheckerService() {
-        // Race is fine, we may end up looking up the same instance twice, no big deal.
-        if (sService == null) {
-            final IBinder service = ServiceManager.getService("permission_checker");
-            sService = IPermissionChecker.Stub.asInterface(service);
-        }
-        return sService;
     }
 }

@@ -580,8 +580,7 @@
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Rilevata impronta parziale"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Impossibile elaborare l\'impronta. Riprova."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"Pulisci il sensore"</string>
-    <!-- no translation found for fingerprint_acquired_too_fast (6038375140739678098) -->
-    <skip />
+    <string name="fingerprint_acquired_too_fast" msgid="6038375140739678098">"Tieni premuto un po\' più a lungo"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Movimento del dito troppo lento. Riprova."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Prova con un\'altra impronta"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Troppa luce"</string>

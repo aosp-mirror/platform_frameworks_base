@@ -17,6 +17,7 @@
 package android.permission;
 
 import static android.app.admin.DevicePolicyManager.PERMISSION_GRANT_STATE_DENIED;
+import static android.app.admin.DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED;
 import static android.permission.PermissionControllerManager.COUNT_ONLY_WHEN_GRANTED;
 import static android.permission.PermissionControllerManager.COUNT_WHEN_SYSTEM;
 
@@ -510,7 +511,7 @@ public abstract class PermissionControllerService extends Service {
                     String callerPackageName, AdminPermissionControlParams params,
                     AndroidFuture callback) {
                 checkStringNotEmpty(callerPackageName);
-                if (params.getGrantState() == PERMISSION_GRANT_STATE_DENIED) {
+                if (params.getGrantState() == PERMISSION_GRANT_STATE_GRANTED) {
                     enforceSomePermissionsGrantedToCaller(
                             Manifest.permission.GRANT_RUNTIME_PERMISSIONS);
                 }
