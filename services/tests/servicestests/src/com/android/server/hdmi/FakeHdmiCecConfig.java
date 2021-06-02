@@ -99,6 +99,17 @@ final class FakeHdmiCecConfig extends HdmiCecConfig {
                 R.bool.config_cecPowerStateChangeOnActiveSourceLostStandbyNow_default);
 
         doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecSystemAudioControl_userConfigurable);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecSystemAudioControlEnabled_allowed);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecSystemAudioControlEnabled_default);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecSystemAudioControlDisabled_allowed);
+        doReturn(false).when(resources).getBoolean(
+                R.bool.config_cecSystemAudioControlDisabled_default);
+
+        doReturn(true).when(resources).getBoolean(
                 R.bool.config_cecSystemAudioModeMuting_userConfigurable);
         doReturn(true).when(resources).getBoolean(
                 R.bool.config_cecSystemAudioModeMutingEnabled_allowed);
