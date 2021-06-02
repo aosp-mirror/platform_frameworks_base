@@ -2855,6 +2855,10 @@ package android.view.accessibility {
     method public long getAccessibilityIdForRegion(@NonNull android.graphics.Region);
   }
 
+  public class AccessibilityRecord {
+    method public void setDisplayId(int);
+  }
+
   public final class AccessibilityWindowInfo implements android.os.Parcelable {
     method public static void setNumInstancesInUseCounter(java.util.concurrent.atomic.AtomicInteger);
   }
