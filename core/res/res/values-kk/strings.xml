@@ -580,8 +580,7 @@
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Саусақ ізі жартылай анықталды."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Саусақ ізін өңдеу мүмкін емес. Әрекетті қайталаңыз."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"Датчикті тазалаңыз."</string>
-    <!-- no translation found for fingerprint_acquired_too_fast (6038375140739678098) -->
-    <skip />
+    <string name="fingerprint_acquired_too_fast" msgid="6038375140739678098">"Сәл ұзағырақ ұстаңыз."</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Саусағыңызды тым баяу қозғалттыңыз. Әрекетті қайталап көріңіз."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Басқа саусақ ізін байқап көріңіз."</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Тым жарық."</string>
@@ -610,12 +609,10 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Саусақ ізі белгішесі"</string>
-    <!-- no translation found for face_recalibrate_notification_name (7311163114750748686) -->
-    <skip />
+    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Бет тану"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Бетті қайта тіркеу"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Құрылғы жүзіңізді жақсырақ тануы үшін, бетіңізді қайта тіркеңіз."</string>
-    <!-- no translation found for face_setup_notification_title (8843461561970741790) -->
-    <skip />
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"Бет тану функциясын реттеу"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Телефоныңызға қарап, оның құлпын ашыңыз."</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Құлыпты ашудың басқа тәсілдерін реттеу"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Саусақ ізін қосу үшін түртіңіз."</string>
@@ -642,26 +639,19 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Бетті тану мүмкін емес. Жабдық қолжетімді емес."</string>
-    <!-- no translation found for face_error_timeout (2598544068593889762) -->
-    <skip />
+    <string name="face_error_timeout" msgid="2598544068593889762">"Бет тану функциясын қайта қолданып көріңіз."</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Жаңа бетті сақтау мүмкін емес. Алдымен ескісін жойыңыз."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Бетті танудан бас тартылды."</string>
-    <!-- no translation found for face_error_user_canceled (5766472033202928373) -->
-    <skip />
+    <string name="face_error_user_canceled" msgid="5766472033202928373">"Пайдаланушы бет тану функциясынан бас тартты."</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Тым көп әрекет жасалды. Кейінірек қайталаңыз."</string>
-    <!-- no translation found for face_error_lockout_permanent (3277134834042995260) -->
-    <skip />
-    <!-- no translation found for face_error_lockout_screen_lock (5062609811636860928) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Тым көп әрекет жасалды. Бет тану функциясы өшірілді."</string>
+    <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Тым көп әрекет жасалды. Оның орнына экран құлпын енгізіңіз."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Бетті тану мүмкін емес. Әрекетті қайталаңыз."</string>
-    <!-- no translation found for face_error_not_enrolled (1134739108536328412) -->
-    <skip />
-    <!-- no translation found for face_error_hw_not_present (7940978724978763011) -->
-    <skip />
+    <string name="face_error_not_enrolled" msgid="1134739108536328412">"Бет тану функциясы реттелмеген."</string>
+    <string name="face_error_hw_not_present" msgid="7940978724978763011">"Бұл құрылғы бет тану функциясын қолдамайды."</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Датчик уақытша өшірулі."</string>
     <string name="face_name_template" msgid="3877037340223318119">"<xliff:g id="FACEID">%d</xliff:g> беті"</string>
-    <!-- no translation found for face_app_setting_name (5854024256907828015) -->
-    <skip />
+    <string name="face_app_setting_name" msgid="5854024256907828015">"Бет тану функциясын пайдалану"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Face Lock функциясын немесе экран құлпын пайдалану"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Жалғастыру үшін бетіңізді көрсетіңіз."</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Жалғастыру үшін бетті анықтау функциясын немесе экран құлпын пайдаланыңыз."</string>
@@ -964,8 +954,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"Ашу аймағын кеңейту."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"Сырғыту арқылы ашу."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"Кескін арқылы ашу."</string>
-    <!-- no translation found for keyguard_accessibility_face_unlock (4533832120787386728) -->
-    <skip />
+    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"Бет тану."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"Pin арқылы ашу."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"SIM құлпын PIN кодымен ашу"</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"SIM құлпын PUK кодымен ашу"</string>
@@ -1287,7 +1276,7 @@
     <string name="dump_heap_ready_text" msgid="5849618132123045516">"<xliff:g id="PROC">%1$s</xliff:g> процесінің дамп файлы бөлісуге дайын. Бұл дамп файлында процесс кезінде пайдаланылған кез келген құпия жеке ақпарат (соның ішінде сіз енгізген деректер) болуы мүмкін екенін ескеріңіз."</string>
     <string name="sendText" msgid="493003724401350724">"Мәтін үшін әрекет таңдау"</string>
     <string name="volume_ringtone" msgid="134784084629229029">"Қоңырау шырылының қаттылығы"</string>
-    <string name="volume_music" msgid="7727274216734955095">"Mультимeдиа дыбыс деңгейі"</string>
+    <string name="volume_music" msgid="7727274216734955095">"Mультимeдианың дыбыс деңгейі"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="2614142915948898228">"Bluetooth арқылы ойнату"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"Үнсіз қоңырау әуенін орнату"</string>
     <string name="volume_call" msgid="7625321655265747433">"Сөйлесу кезіндегі дыбыс деңгейі"</string>
@@ -1297,8 +1286,8 @@
     <string name="volume_unknown" msgid="4041914008166576293">"Дыбыс қаттылығы"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"Bluetooth дыбысының қаттылығы"</string>
     <string name="volume_icon_description_ringer" msgid="2187800636867423459">"Қоңырау әуенінің дыбыс қаттылығы"</string>
-    <string name="volume_icon_description_incall" msgid="4491255105381227919">"Сөйлескендегі дыбыс деңгейі"</string>
-    <string name="volume_icon_description_media" msgid="4997633254078171233">"Mультимeдиа дыбыс деңгейі"</string>
+    <string name="volume_icon_description_incall" msgid="4491255105381227919">"Сөйлесу кезіндегі дыбыс деңгейі"</string>
+    <string name="volume_icon_description_media" msgid="4997633254078171233">"Mультимeдианың дыбыс деңгейі"</string>
     <string name="volume_icon_description_notification" msgid="579091344110747279">"Хабар дыбысының қаттылығы"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"Әдепкі рингтон"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"Әдепкі (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>

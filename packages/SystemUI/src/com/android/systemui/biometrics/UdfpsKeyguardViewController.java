@@ -108,6 +108,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         mStatusBarStateController.addCallback(mStateListener);
 
         mUdfpsRequested = false;
+
         mStatusBarState = mStatusBarStateController.getState();
         mQsExpanded = mKeyguardViewManager.isQsExpanded();
         mInputBouncerHiddenAmount = KeyguardBouncer.EXPANSION_HIDDEN;
@@ -125,7 +126,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         mFaceDetectRunning = false;
 
         mStatusBarStateController.removeCallback(mStateListener);
-        mKeyguardViewManager.setAlternateAuthInterceptor(null);
+        mKeyguardViewManager.removeAlternateAuthInterceptor(mAlternateAuthInterceptor);
         mTransitioningFromHome = false;
         mKeyguardUpdateMonitor.requestFaceAuthOnOccludingApp(false);
 
