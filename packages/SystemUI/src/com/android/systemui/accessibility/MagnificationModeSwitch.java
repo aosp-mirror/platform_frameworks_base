@@ -108,15 +108,40 @@ class MagnificationModeSwitch implements MagnificationGestureDetector.OnGestureL
                         R.string.magnification_mode_switch_click_label));
                 info.addAction(clickAction);
                 info.setClickable(true);
+                info.addAction(new AccessibilityAction(R.id.accessibility_action_move_up,
+                        mContext.getString(R.string.accessibility_control_move_up)));
+                info.addAction(new AccessibilityAction(R.id.accessibility_action_move_down,
+                        mContext.getString(R.string.accessibility_control_move_down)));
+                info.addAction(new AccessibilityAction(R.id.accessibility_action_move_left,
+                        mContext.getString(R.string.accessibility_control_move_left)));
+                info.addAction(new AccessibilityAction(R.id.accessibility_action_move_right,
+                        mContext.getString(R.string.accessibility_control_move_right)));
             }
 
             @Override
             public boolean performAccessibilityAction(View host, int action, Bundle args) {
-                if (action == AccessibilityAction.ACTION_CLICK.getId()) {
-                    handleSingleTap();
+                if (performA11yAction(action)) {
                     return true;
                 }
                 return super.performAccessibilityAction(host, action, args);
+            }
+
+            private boolean performA11yAction(int action) {
+                final Rect windowBounds = mWindowManager.getCurrentWindowMetrics().getBounds();
+                if (action == AccessibilityAction.ACTION_CLICK.getId()) {
+                    handleSingleTap();
+                } else if (action == R.id.accessibility_action_move_up) {
+                    moveButton(0, -windowBounds.height());
+                } else if (action == R.id.accessibility_action_move_down) {
+                    moveButton(0, windowBounds.height());
+                } else if (action == R.id.accessibility_action_move_left) {
+                    moveButton(-windowBounds.width(), 0);
+                } else if (action == R.id.accessibility_action_move_right) {
+                    moveButton(windowBounds.width(), 0);
+                } else {
+                    return false;
+                }
+                return true;
             }
         });
         mWindowInsetChangeRunnable = this::onWindowInsetChanged;
