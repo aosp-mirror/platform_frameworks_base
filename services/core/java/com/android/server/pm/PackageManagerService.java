@@ -12888,19 +12888,21 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public void dumpProfiles(String packageName) {
+        /* Only the shell, root, or the app user should be able to dump profiles. */
+        final int callingUid = Binder.getCallingUid();
+        final String[] callerPackageNames = getPackagesForUid(callingUid);
+        if (callingUid != Process.SHELL_UID
+                && callingUid != Process.ROOT_UID
+                && !ArrayUtils.contains(callerPackageNames, packageName)) {
+            throw new SecurityException("dumpProfiles");
+        }
+
         AndroidPackage pkg;
         synchronized (mLock) {
             pkg = mPackages.get(packageName);
             if (pkg == null) {
                 throw new IllegalArgumentException("Unknown package: " + packageName);
             }
-        }
-        /* Only the shell, root, or the app user should be able to dump profiles. */
-        int callingUid = Binder.getCallingUid();
-        if (callingUid != Process.SHELL_UID &&
-            callingUid != Process.ROOT_UID &&
-            callingUid != pkg.getUid()) {
-            throw new SecurityException("dumpProfiles");
         }
 
         synchronized (mInstallLock) {
