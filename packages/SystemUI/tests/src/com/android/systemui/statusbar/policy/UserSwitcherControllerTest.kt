@@ -25,6 +25,7 @@ import android.graphics.Bitmap
 import android.hardware.face.FaceManager
 import android.hardware.fingerprint.FingerprintManager
 import android.os.Handler
+import android.os.UserHandle
 import android.os.UserManager
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
@@ -39,7 +40,9 @@ import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.qs.QSUserSwitcherEvent
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.telephony.TelephonyListenerManager
+import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.settings.SecureSettings
+import com.android.systemui.util.time.FakeSystemClock
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Before
@@ -67,23 +70,36 @@ class UserSwitcherControllerTest : SysuiTestCase() {
     @Mock private lateinit var activityTaskManager: IActivityTaskManager
     @Mock private lateinit var userDetailAdapter: UserSwitcherController.UserDetailAdapter
     @Mock private lateinit var telephonyListenerManager: TelephonyListenerManager
-    @Mock private lateinit var userInfo: UserInfo
     @Mock private lateinit var secureSettings: SecureSettings
     private lateinit var testableLooper: TestableLooper
-    private lateinit var userSwitcherController: UserSwitcherController
+    private lateinit var uiBgExecutor: FakeExecutor
     private lateinit var uiEventLogger: UiEventLoggerFake
+    private lateinit var userSwitcherController: UserSwitcherController
     private lateinit var picture: Bitmap
+    private val ownerId = UserHandle.USER_SYSTEM
+    private val ownerInfo = UserInfo(ownerId, "Owner", null,
+            UserInfo.FLAG_ADMIN or UserInfo.FLAG_FULL or UserInfo.FLAG_INITIALIZED or
+                    UserInfo.FLAG_PRIMARY or UserInfo.FLAG_SYSTEM,
+            UserManager.USER_TYPE_FULL_SYSTEM)
     private val guestId = 1234
+    private val guestInfo = UserInfo(guestId, "Guest", null,
+            UserInfo.FLAG_FULL or UserInfo.FLAG_GUEST, UserManager.USER_TYPE_FULL_GUEST)
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         testableLooper = TestableLooper.get(this)
+        uiBgExecutor = FakeExecutor(FakeSystemClock())
         uiEventLogger = UiEventLoggerFake()
+
+        context.orCreateTestableResources.addOverride(
+                com.android.internal.R.bool.config_guestUserAutoCreated, false)
 
         mContext.addMockSystemService(Context.FACE_SERVICE, mock(FaceManager::class.java))
         mContext.addMockSystemService(Context.FINGERPRINT_SERVICE,
                 mock(FingerprintManager::class.java))
+
+        `when`(userManager.canAddMoreUsers()).thenReturn(true)
 
         userSwitcherController = UserSwitcherController(context,
                 userManager,
@@ -96,7 +112,10 @@ class UserSwitcherControllerTest : SysuiTestCase() {
                 telephonyListenerManager,
                 activityTaskManager,
                 userDetailAdapter,
-                secureSettings)
+                secureSettings,
+                uiBgExecutor)
+        userSwitcherController.mPauseRefreshUsers = true
+
         picture = UserIcons.convertToBitmap(context.getDrawable(R.drawable.ic_avatar_user))
     }
 
@@ -110,8 +129,10 @@ class UserSwitcherControllerTest : SysuiTestCase() {
                 false /* isAddUser */,
                 false /* isRestricted */,
                 true /* isSwitchToEnabled */)
+        `when`(userTracker.userId).thenReturn(ownerId)
+        `when`(userTracker.userInfo).thenReturn(ownerInfo)
 
-        `when`(userManager.createGuest(any(), anyString())).thenReturn(userInfo)
+        `when`(userManager.createGuest(any(), anyString())).thenReturn(guestInfo)
 
         userSwitcherController.onUserListItemClicked(emptyGuestUserRecord)
         testableLooper.processAllMessages()
@@ -122,13 +143,15 @@ class UserSwitcherControllerTest : SysuiTestCase() {
     @Test
     fun testRemoveGuest_removeButtonPressed_isLogged() {
         val currentGuestUserRecord = UserSwitcherController.UserRecord(
-                userInfo,
+                guestInfo,
                 picture,
                 true /* guest */,
                 true /* current */,
                 false /* isAddUser */,
                 false /* isRestricted */,
                 true /* isSwitchToEnabled */)
+        `when`(userTracker.userId).thenReturn(guestInfo.id)
+        `when`(userTracker.userInfo).thenReturn(guestInfo)
 
         userSwitcherController.onUserListItemClicked(currentGuestUserRecord)
         assertNotNull(userSwitcherController.mExitGuestDialog)
@@ -142,13 +165,15 @@ class UserSwitcherControllerTest : SysuiTestCase() {
     @Test
     fun testRemoveGuest_cancelButtonPressed_isNotLogged() {
         val currentGuestUserRecord = UserSwitcherController.UserRecord(
-                userInfo,
+                guestInfo,
                 picture,
                 true /* guest */,
                 true /* current */,
                 false /* isAddUser */,
                 false /* isRestricted */,
                 true /* isSwitchToEnabled */)
+        `when`(userTracker.userId).thenReturn(guestId)
+        `when`(userTracker.userInfo).thenReturn(guestInfo)
 
         userSwitcherController.onUserListItemClicked(currentGuestUserRecord)
         assertNotNull(userSwitcherController.mExitGuestDialog)
@@ -160,7 +185,6 @@ class UserSwitcherControllerTest : SysuiTestCase() {
 
     @Test
     fun testWipeGuest_startOverButtonPressed_isLogged() {
-        val guestInfo = UserInfo(guestId, null, null, 0, UserManager.USER_TYPE_FULL_GUEST)
         val currentGuestUserRecord = UserSwitcherController.UserRecord(
                 guestInfo,
                 picture,
@@ -169,6 +193,8 @@ class UserSwitcherControllerTest : SysuiTestCase() {
                 false /* isAddUser */,
                 false /* isRestricted */,
                 true /* isSwitchToEnabled */)
+        `when`(userTracker.userId).thenReturn(guestId)
+        `when`(userTracker.userInfo).thenReturn(guestInfo)
 
         // Simulate that guest user has already logged in
         `when`(secureSettings.getIntForUser(
@@ -179,7 +205,6 @@ class UserSwitcherControllerTest : SysuiTestCase() {
 
         // Simulate a user switch event
         val intent = Intent(Intent.ACTION_USER_SWITCHED).putExtra(Intent.EXTRA_USER_HANDLE, guestId)
-        `when`(userTracker.userInfo).thenReturn(guestInfo)
 
         assertNotNull(userSwitcherController.mGuestResumeSessionReceiver)
         userSwitcherController.mGuestResumeSessionReceiver.onReceive(context, intent)
@@ -194,7 +219,6 @@ class UserSwitcherControllerTest : SysuiTestCase() {
 
     @Test
     fun testWipeGuest_continueButtonPressed_isLogged() {
-        val guestInfo = UserInfo(guestId, null, null, 0, UserManager.USER_TYPE_FULL_GUEST)
         val currentGuestUserRecord = UserSwitcherController.UserRecord(
                 guestInfo,
                 picture,
@@ -203,6 +227,8 @@ class UserSwitcherControllerTest : SysuiTestCase() {
                 false /* isAddUser */,
                 false /* isRestricted */,
                 true /* isSwitchToEnabled */)
+        `when`(userTracker.userId).thenReturn(guestId)
+        `when`(userTracker.userInfo).thenReturn(guestInfo)
 
         // Simulate that guest user has already logged in
         `when`(secureSettings.getIntForUser(
@@ -213,7 +239,6 @@ class UserSwitcherControllerTest : SysuiTestCase() {
 
         // Simulate a user switch event
         val intent = Intent(Intent.ACTION_USER_SWITCHED).putExtra(Intent.EXTRA_USER_HANDLE, guestId)
-        `when`(userTracker.userInfo).thenReturn(guestInfo)
 
         assertNotNull(userSwitcherController.mGuestResumeSessionReceiver)
         userSwitcherController.mGuestResumeSessionReceiver.onReceive(context, intent)
