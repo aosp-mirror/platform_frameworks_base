@@ -22726,7 +22726,8 @@ public class PackageManagerService extends IPackageManager.Stub
      */
     public int getPreferredActivitiesInternal(List<WatchedIntentFilter> outFilters,
             List<ComponentName> outActivities, String packageName) {
-        if (getInstantAppPackageName(Binder.getCallingUid()) != null) {
+        final int callingUid = Binder.getCallingUid();
+        if (getInstantAppPackageName(callingUid) != null) {
             return 0;
         }
         int num = 0;
@@ -22738,9 +22739,13 @@ public class PackageManagerService extends IPackageManager.Stub
                 final Iterator<PreferredActivity> it = pir.filterIterator();
                 while (it.hasNext()) {
                     final PreferredActivity pa = it.next();
+                    final String prefPackageName = pa.mPref.mComponent.getPackageName();
                     if (packageName == null
-                            || (pa.mPref.mComponent.getPackageName().equals(packageName)
-                                    && pa.mPref.mAlways)) {
+                            || (prefPackageName.equals(packageName) && pa.mPref.mAlways)) {
+                        if (shouldFilterApplicationLocked(
+                                mSettings.getPackageLPr(prefPackageName), callingUid, userId)) {
+                            continue;
+                        }
                         if (outFilters != null) {
                             outFilters.add(new WatchedIntentFilter(pa.getIntentFilter()));
                         }
