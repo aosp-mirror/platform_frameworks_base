@@ -7013,7 +7013,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // TODO(b/181207944): Consider removing the if condition and always run
         // resolveFixedOrientationConfiguration() since this should be applied for all cases.
         if (isFixedOrientationLetterboxAllowed) {
-            resolveFixedOrientationConfiguration(newParentConfiguration);
+            resolveFixedOrientationConfiguration(newParentConfiguration, parentWindowingMode);
         }
 
         if (mCompatDisplayInsets != null) {
@@ -7160,16 +7160,21 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * change and the requested orientation is different from the parent.
      *
      * <p>If letterboxed due to fixed orientation then aspect ratio restrictions are also applied
-     * in this methiod.
+     * in this method.
      */
-    private void resolveFixedOrientationConfiguration(@NonNull Configuration newParentConfig) {
+    private void resolveFixedOrientationConfiguration(@NonNull Configuration newParentConfig,
+            int windowingMode) {
         mLetterboxBoundsForFixedOrientationAndAspectRatio = null;
         if (handlesOrientationChangeFromDescendant()) {
             // No need to letterbox because of fixed orientation. Display will handle
             // fixed-orientation requests.
             return;
         }
-        if (newParentConfig.windowConfiguration.getWindowingMode() == WINDOWING_MODE_PINNED) {
+        if (WindowConfiguration.inMultiWindowMode(windowingMode) && isResizeable()) {
+            // Ignore orientation request for resizable apps in multi window.
+            return;
+        }
+        if (windowingMode == WINDOWING_MODE_PINNED) {
             // PiP bounds have higher priority than the requested orientation. Otherwise the
             // activity may be squeezed into a small piece.
             return;
