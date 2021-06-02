@@ -3529,6 +3529,12 @@
     <!-- If true, all guest users created on the device will be ephemeral. -->
     <bool name="config_guestUserEphemeral">false</bool>
 
+    <!-- Whether device should always have a guest user available. If true, guest user will be
+         created on boot, and a new guest user will be created in the background anytime the current
+         guest user is removed. Instead of showing "Add guest" and "Remove guest", the UI will show
+         "Guest" and "Reset guest". -->
+    <bool name="config_guestUserAutoCreated">false</bool>
+
     <!-- Enforce strong auth on boot. Setting this to false represents a security risk and should
          not be ordinarily done. The only case in which this might be permissible is in a car head
          unit where there are hardware mechanisms to protect the device (physical keys) and not
