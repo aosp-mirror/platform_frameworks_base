@@ -26,11 +26,8 @@ import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 
-import static java.util.Objects.requireNonNull;
-
 import android.content.Context;
 import android.graphics.Rect;
-import android.hardware.display.DisplayManager;
 import android.os.RemoteException;
 import android.testing.AndroidTestingRunner;
 import android.view.Display;
@@ -63,17 +60,12 @@ import java.util.concurrent.TimeoutException;
 public class ScrollCaptureClientTest extends SysuiTestCase {
     private static final float MAX_PAGES = 3.0f;
 
-    private Context mContext;
     private IWindowManager mWm;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         Context context = InstrumentationRegistry.getInstrumentation().getContext();
-        DisplayManager displayManager = requireNonNull(
-                context.getSystemService(DisplayManager.class));
-        mContext = context.createDisplayContext(
-                displayManager.getDisplay(Display.DEFAULT_DISPLAY));
         mWm = mock(IWindowManager.class);
     }
 
