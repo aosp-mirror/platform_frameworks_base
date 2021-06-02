@@ -436,6 +436,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     volatile boolean mPowerKeyHandled;
     volatile boolean mBackKeyHandled;
     volatile boolean mEndCallKeyHandled;
+    volatile boolean mCameraGestureTriggered;
     volatile boolean mCameraGestureTriggeredDuringGoingToSleep;
 
     /**
@@ -3833,6 +3834,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         final MutableBoolean outLaunched = new MutableBoolean(false);
         final boolean gesturedServiceIntercepted = gestureService.interceptPowerKeyDown(event,
                 interactive, outLaunched);
+        if (outLaunched.value) {
+            mCameraGestureTriggered = true;
+        }
         if (outLaunched.value && mRequestedOrSleepingDefaultDisplay) {
             mCameraGestureTriggeredDuringGoingToSleep = true;
         }
@@ -4209,13 +4213,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mDefaultDisplayRotation.updateOrientationListener();
 
         if (mKeyguardDelegate != null) {
-            mKeyguardDelegate.onFinishedGoingToSleep(pmSleepReason,
-                    mCameraGestureTriggeredDuringGoingToSleep);
+            mKeyguardDelegate.onFinishedGoingToSleep(pmSleepReason, mCameraGestureTriggered);
         }
         if (mDisplayFoldController != null) {
             mDisplayFoldController.finishedGoingToSleep();
         }
         mCameraGestureTriggeredDuringGoingToSleep = false;
+        mCameraGestureTriggered = false;
     }
 
     // Called on the PowerManager's Notifier thread.
@@ -4242,8 +4246,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mDefaultDisplayRotation.updateOrientationListener();
 
         if (mKeyguardDelegate != null) {
-            mKeyguardDelegate.onStartedWakingUp(pmWakeReason);
+            mKeyguardDelegate.onStartedWakingUp(pmWakeReason, mCameraGestureTriggered);
         }
+
+        mCameraGestureTriggered = false;
     }
 
     // Called on the PowerManager's Notifier thread.

@@ -53,6 +53,7 @@
             android:paddingEnd="@dimen/keyguard_indication_text_padding"
             android:textAppearance="@style/TextAppearance.Keyguard.BottomArea"
             android:alpha=".8"
+            android:accessibilityLiveRegion="polite"
             android:visibility="gone"/>
 
     </LinearLayout>

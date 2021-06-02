@@ -287,6 +287,8 @@ class LockscreenShadeTransitionController @Inject constructor(
                     // TODO: appear media also in split shade
                     val mediaAmount = if (useSplitShade) 0f else field
                     mediaHierarchyManager.setTransitionToFullShadeAmount(mediaAmount)
+                    // Fade out all content only visible on the lockscreen
+                    notificationPanelController.setKeyguardOnlyContentAlpha(1.0f - scrimProgress)
                 }
             }
         }

@@ -325,7 +325,7 @@
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"ಪೋನ್‌ ಕರೆಯ ಲಾಗ್‌ ಅನ್ನು ಓದಿ ಮತ್ತು ಬರೆಯಿರಿ"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"ಫೋನ್"</string>
     <string name="permgroupdesc_phone" msgid="270048070781478204">"ಫೋನ್ ಕರೆ ಮಾಡಲು ಹಾಗೂ ನಿರ್ವಹಿಸಲು"</string>
-    <string name="permgrouplab_sensors" msgid="9134046949784064495">"ದೇಹದ ಸೆನ್ಸರ್‌"</string>
+    <string name="permgrouplab_sensors" msgid="9134046949784064495">"ಬಾಡಿ ಸೆನ್ಸರ್‌"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"ನಿಮ್ಮ ಮುಖ್ಯ ಲಕ್ಷಣಗಳ ಕುರಿತು ಸೆನ್ಸಾರ್ ಡೇಟಾವನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"ವಿಂಡೋ ವಿಷಯವನ್ನು ಹಿಂಪಡೆಯುತ್ತದೆ"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"ನೀವು ಬಳಸುತ್ತಿರುವ ವಿಂಡೋದ ವಿಷಯ ಪರೀಕ್ಷಿಸುತ್ತದೆ."</string>
@@ -580,8 +580,7 @@
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"ಭಾಗಶಃ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಪತ್ತೆಯಾಗಿದೆ"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಅನ್ನು ಪ್ರಕ್ರಿಯೆಗೊಳಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"ಸೆನ್ಸರ್ ಅನ್ನು ಸ್ವಚ್ಚಗೊಳಿಸಿ"</string>
-    <!-- no translation found for fingerprint_acquired_too_fast (6038375140739678098) -->
-    <skip />
+    <string name="fingerprint_acquired_too_fast" msgid="6038375140739678098">"ಸ್ವಲ್ಪ ಹೆಚ್ಚು ಸಮಯ ಒತ್ತಿ ಹಿಡಿಯಿರಿ"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"ಬೆರಳನ್ನು ತುಂಬಾ ನಿಧಾನವಾಗಿ ಸರಿಸಲಾಗಿದೆ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"ಮತ್ತೊಂದು ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಪ್ರಯತ್ನಿಸಿ"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"ತುಂಬಾ ಪ್ರಕಾಶಮಾನವಾಗಿದೆ"</string>
@@ -983,7 +982,7 @@
     <string name="double_tap_toast" msgid="7065519579174882778">"ಸಲಹೆ: ಝೂಮ್ ಇನ್ ಮತ್ತು ಝೂಮ್ ಔಟ್ ಮಾಡಲು ಡಬಲ್-ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="autofill_this_form" msgid="3187132440451621492">"ಸ್ವಯಂತುಂಬುವಿಕೆ"</string>
     <string name="setup_autofill" msgid="5431369130866618567">"ಸ್ವಯಂತುಂಬುವಿಕೆಯನ್ನು ಹೊಂದಿಸಿ"</string>
-    <string name="autofill_window_title" msgid="4379134104008111961">"<xliff:g id="SERVICENAME">%1$s</xliff:g> ನೊಂದಿಗೆ ಸ್ವಯಂ-ಭರ್ತಿ"</string>
+    <string name="autofill_window_title" msgid="4379134104008111961">"<xliff:g id="SERVICENAME">%1$s</xliff:g> ಸಹಾಯದಿಂದ ಸ್ವಯಂ-ಭರ್ತಿ"</string>
     <string name="autofill_address_name_separator" msgid="8190155636149596125">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3402882515222673691">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="760522655085707045">", "</string>

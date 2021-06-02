@@ -452,6 +452,8 @@
     <string name="keyguard_more_overflow_text" msgid="5819512373606638727">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="7248696377626341060">"નીચે ઓછી તાકીદની સૂચનાઓ"</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"ખોલવા માટે ફરીથી ટૅપ કરો"</string>
+    <!-- no translation found for tap_again (1315420114387908655) -->
+    <skip />
     <string name="keyguard_unlock" msgid="8031975796351361601">"ખોલવા માટે ઉપરની તરફ સ્વાઇપ કરો"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"ફરી પ્રયાસ કરવા માટે ઉપરની તરફ સ્વાઇપ કરો"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFCનો ઉપયોગ કરવા માટે અનલૉક કરો"</string>

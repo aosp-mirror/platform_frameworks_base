@@ -87,6 +87,11 @@ public class LockIconView extends ImageView {
         updateSensorRect(h, w);
     }
 
+    @Override
+    public boolean hasOverlappingRendering() {
+        return false;
+    }
+
     float getLocationTop() {
         return mLockIconCenter.y - mRadius;
     }

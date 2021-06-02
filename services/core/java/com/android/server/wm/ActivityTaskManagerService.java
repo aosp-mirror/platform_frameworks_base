@@ -1381,6 +1381,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 getActivityStartController().obtainStarter(intent, "dream")
                         .setCallingUid(callingUid)
                         .setCallingPid(callingPid)
+                        .setCallingPackage(intent.getPackage())
                         .setActivityInfo(a)
                         .setActivityOptions(options.toBundle())
                         // To start the dream from background, we need to start it from a persistent

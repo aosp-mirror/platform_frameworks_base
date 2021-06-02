@@ -580,8 +580,7 @@
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"A rendszer részleges ujjlenyomatot észlelt"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Nem sikerült feldolgozni az ujjlenyomatot. Próbálkozzon újra."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"Tisztítsa meg az érzékelőt"</string>
-    <!-- no translation found for fingerprint_acquired_too_fast (6038375140739678098) -->
-    <skip />
+    <string name="fingerprint_acquired_too_fast" msgid="6038375140739678098">"Ne mozdítsa meg az ujját még egy kicsit"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Túl lassan húzta az ujját. Próbálkozzon újra."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Próbálkozzon másik ujjlenyomattal"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Túl világos"</string>
@@ -610,12 +609,10 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Ujjlenyomat ikon"</string>
-    <!-- no translation found for face_recalibrate_notification_name (7311163114750748686) -->
-    <skip />
+    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Arcalapú feloldás"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Rögzítsen újra képet az arcáról"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"A felismerés javítása érdekében rögzítsen újra az arcáról készített képet"</string>
-    <!-- no translation found for face_setup_notification_title (8843461561970741790) -->
-    <skip />
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"Az Arcalapú feloldás beállítása"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Feloldhatja a zárolást úgy, hogy ránéz a telefonra"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"További feloldási módszerek beállítása"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Koppintson ide ujjlenyomat hozzáadásához"</string>
@@ -642,26 +639,19 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Sikertelen arcellenőrzés. A hardver nem érhető el."</string>
-    <!-- no translation found for face_error_timeout (2598544068593889762) -->
-    <skip />
+    <string name="face_error_timeout" msgid="2598544068593889762">"Próbálja újra az Arcalapú feloldást"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Nem tárolhatók újabb arcadatok. Törölje valamelyik arcot."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Az arccal kapcsolatos művelet törölve."</string>
-    <!-- no translation found for face_error_user_canceled (5766472033202928373) -->
-    <skip />
+    <string name="face_error_user_canceled" msgid="5766472033202928373">"Az Arcalapú feloldást megszakította a felhasználó"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Túl sok próbálkozás. Próbálja újra később."</string>
-    <!-- no translation found for face_error_lockout_permanent (3277134834042995260) -->
-    <skip />
-    <!-- no translation found for face_error_lockout_screen_lock (5062609811636860928) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Túl sok próbálkozás. Az Arcalapú feloldás letiltva."</string>
+    <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Túl sok próbálkozás. Használja inkább a képernyőzárat."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Nem sikerült ellenőrizni az arcát. Próbálja újra."</string>
-    <!-- no translation found for face_error_not_enrolled (1134739108536328412) -->
-    <skip />
-    <!-- no translation found for face_error_hw_not_present (7940978724978763011) -->
-    <skip />
+    <string name="face_error_not_enrolled" msgid="1134739108536328412">"Nem állította be az Arcalapú feloldást"</string>
+    <string name="face_error_hw_not_present" msgid="7940978724978763011">"Az Arcalapú feloldást nem támogatja ez az eszköz"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Az érzékelő átmenetileg le van tiltva."</string>
     <string name="face_name_template" msgid="3877037340223318119">"<xliff:g id="FACEID">%d</xliff:g> arc"</string>
-    <!-- no translation found for face_app_setting_name (5854024256907828015) -->
-    <skip />
+    <string name="face_app_setting_name" msgid="5854024256907828015">"Arcalapú feloldás használata"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"A folytatás arcalapú feloldással vagy képernyőzárral lehetséges"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"A folytatáshoz használja az arcalapú feloldást"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"A folytatás arcalapú feloldással vagy a képernyőzár feloldásával lehetséges"</string>
@@ -964,8 +954,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"A feloldási terület kiterjesztése."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"Feloldás csúsztatással"</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"Feloldás mintával"</string>
-    <!-- no translation found for keyguard_accessibility_face_unlock (4533832120787386728) -->
-    <skip />
+    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"Arcalapú feloldás."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"Feloldás PIN kóddal"</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"SIM-kártya PIN-kódjának feloldása."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"SIM-kártya PUK-kódjának feloldása."</string>
@@ -2104,7 +2093,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Kikapcsolás"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"További információ"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"A bővített értesítések felváltják az androidos alkalmazkodó értesítéseket az Android 12-es verziójában. Ez a funkció a javasolt műveleteket és válaszokat mutatja, és rendszerezi az értesítéseket.\n\nA bővített értesítések minden értesítéstartalmat olvashatnak (így a személyes adatokat, mint például a névjegyek nevét és az üzeneteket is). Ez a funkció emellett elvetheti az értesítéseket, valamint reagálhat rájuk, például felveheti a telefonhívásokat, és vezérelheti a Ne zavarjanak módot."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"A bővített értesítések felváltják az androidos alkalmazkodó értesítéseket az Android 12-es verziójában. Ez a funkció javasolt műveleteket és válaszokat mutat, és rendszerezi az értesítéseket.\n\nA bővített értesítések minden értesítéstartalmat olvashatnak (így a személyes adatokat, mint például a névjegyek nevét és az üzeneteket is). Ez a funkció emellett elvetheti az értesítéseket, valamint reagálhat rájuk, például felveheti a telefonhívásokat, és vezérelheti a Ne zavarjanak módot."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Információs értesítés a rutinmódról"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Előfordulhat, hogy az akkumulátor lemerül a szokásos töltési időszak előtt"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Akkumulátorkímélő mód aktiválva az akkumulátor üzemidejének növelése érdekében"</string>
