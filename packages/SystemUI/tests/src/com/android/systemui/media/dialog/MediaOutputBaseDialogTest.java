@@ -24,7 +24,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
-import android.media.MediaRouter2Manager;
 import android.media.session.MediaSessionManager;
 import android.os.Bundle;
 import android.testing.AndroidTestingRunner;
@@ -64,7 +63,6 @@ public class MediaOutputBaseDialogTest extends SysuiTestCase {
     private NotificationEntryManager mNotificationEntryManager =
             mock(NotificationEntryManager.class);
     private final UiEventLogger mUiEventLogger = mock(UiEventLogger.class);
-    private final MediaRouter2Manager mRouterManager = mock(MediaRouter2Manager.class);
 
     private MediaOutputBaseDialogImpl mMediaOutputBaseDialogImpl;
     private MediaOutputController mMediaOutputController;
@@ -77,7 +75,7 @@ public class MediaOutputBaseDialogTest extends SysuiTestCase {
     public void setUp() {
         mMediaOutputController = new MediaOutputController(mContext, TEST_PACKAGE, false,
                 mMediaSessionManager, mLocalBluetoothManager, mShadeController, mStarter,
-                mNotificationEntryManager, mUiEventLogger, mRouterManager);
+                mNotificationEntryManager, mUiEventLogger);
         mMediaOutputBaseDialogImpl = new MediaOutputBaseDialogImpl(mContext,
                 mMediaOutputController);
         mMediaOutputBaseDialogImpl.onCreate(new Bundle());

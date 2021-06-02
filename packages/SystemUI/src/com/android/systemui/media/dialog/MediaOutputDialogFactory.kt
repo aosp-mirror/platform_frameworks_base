@@ -18,7 +18,6 @@ package com.android.systemui.media.dialog
 
 import android.content.Context
 import android.media.session.MediaSessionManager
-import android.media.MediaRouter2Manager
 import com.android.internal.logging.UiEventLogger
 import com.android.settingslib.bluetooth.LocalBluetoothManager
 import com.android.systemui.plugins.ActivityStarter
@@ -36,8 +35,7 @@ class MediaOutputDialogFactory @Inject constructor(
     private val shadeController: ShadeController,
     private val starter: ActivityStarter,
     private val notificationEntryManager: NotificationEntryManager,
-    private val uiEventLogger: UiEventLogger,
-    private val routerManager: MediaRouter2Manager
+    private val uiEventLogger: UiEventLogger
 ) {
     companion object {
         var mediaOutputDialog: MediaOutputDialog? = null
@@ -48,7 +46,7 @@ class MediaOutputDialogFactory @Inject constructor(
         mediaOutputDialog?.dismiss()
         mediaOutputDialog = MediaOutputController(context, packageName, aboveStatusBar,
                 mediaSessionManager, lbm, shadeController, starter, notificationEntryManager,
-                uiEventLogger, routerManager).run {
+                uiEventLogger).run {
             MediaOutputDialog(context, aboveStatusBar, this, uiEventLogger)
         }
     }
