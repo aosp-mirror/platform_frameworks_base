@@ -176,7 +176,7 @@ public final class WallpaperColors implements Parcelable {
             shouldRecycle = true;
             Size optimalSize = calculateOptimalSize(bitmap.getWidth(), bitmap.getHeight());
             bitmap = Bitmap.createScaledBitmap(bitmap, optimalSize.getWidth(),
-                    optimalSize.getHeight(), true /* filter */);
+                    optimalSize.getHeight(), false /* filter */);
         }
 
         final Palette palette;
