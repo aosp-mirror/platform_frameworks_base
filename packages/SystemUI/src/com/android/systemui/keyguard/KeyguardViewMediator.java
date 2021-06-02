@@ -106,12 +106,14 @@ import com.android.systemui.keyguard.dagger.KeyguardModule;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.system.QuickStepContract;
+import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.DeviceConfigProxy;
 
@@ -234,6 +236,7 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
     private StatusBarManager mStatusBarManager;
     private final SysuiStatusBarStateController mStatusBarStateController;
     private final Executor mUiBgExecutor;
+    private final UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
 
     private boolean mSystemReady;
     private boolean mBootCompleted;
@@ -385,6 +388,19 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
      * committed when finished going to sleep.
      */
     private boolean mPendingLock;
+
+    /**
+     * Whether a power button gesture (such as double tap for camera) has been detected. This is
+     * delivered directly from {@link KeyguardService}, immediately upon the gesture being detected.
+     * This is used in {@link #onStartedWakingUp} to decide whether to execute the pending lock, or
+     * ignore and reset it because we are actually launching an activity.
+     *
+     * This needs to be delivered directly to us, rather than waiting for
+     * {@link CommandQueue#onCameraLaunchGestureDetected}, because that call is asynchronous and is
+     * often delivered after the call to {@link #onStartedWakingUp}, which results in us locking the
+     * keyguard and then launching the activity behind it.
+     */
+    private boolean mPowerGestureIntercepted = false;
 
     /**
      * Controller for showing individual "work challenge" lock screen windows inside managed profile
@@ -790,7 +806,8 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
             DozeParameters dozeParameters,
             SysuiStatusBarStateController statusBarStateController,
             KeyguardStateController keyguardStateController,
-            Lazy<KeyguardUnlockAnimationController> keyguardUnlockAnimationControllerLazy) {
+            Lazy<KeyguardUnlockAnimationController> keyguardUnlockAnimationControllerLazy,
+            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController) {
         super(context);
         mFalsingCollector = falsingCollector;
         mLockPatternUtils = lockPatternUtils;
@@ -822,6 +839,7 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
 
         mKeyguardStateController = keyguardStateController;
         mKeyguardUnlockAnimationControllerLazy = keyguardUnlockAnimationControllerLazy;
+        mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
     }
 
     public void userActivity() {
@@ -941,6 +959,7 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
         if (DEBUG) Log.d(TAG, "onStartedGoingToSleep(" + offReason + ")");
         synchronized (this) {
             mDeviceInteractive = false;
+            mPowerGestureIntercepted = false;
             mGoingToSleep = true;
 
             // Reset keyguard going away state so we can start listening for fingerprint. We
@@ -1010,7 +1029,6 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
             notifyFinishedGoingToSleep();
 
             if (cameraGestureTriggered) {
-                Log.i(TAG, "Camera gesture was triggered, preventing Keyguard locking.");
 
                 // Just to make sure, make sure the device is awake.
                 mContext.getSystemService(PowerManager.class).wakeUp(SystemClock.uptimeMillis(),
@@ -1025,10 +1043,7 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
                 mPendingReset = false;
             }
 
-            if (mPendingLock) {
-                doKeyguardLocked(null);
-                mPendingLock = false;
-            }
+            maybeHandlePendingLock();
 
             // We do not have timeout and power button instant lock setting for profile lock.
             // So we use the personal setting if there is any. But if there is no device
@@ -1039,6 +1054,20 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
 
         }
         mUpdateMonitor.dispatchFinishedGoingToSleep(offReason);
+    }
+
+    /**
+     * Locks the keyguard if {@link #mPendingLock} is true, unless we're playing the screen off
+     * animation.
+     *
+     * If we are, we will lock the keyguard either when the screen off animation ends, or in
+     * {@link #onStartedWakingUp} if the animation is cancelled.
+     */
+    public void maybeHandlePendingLock() {
+        if (mPendingLock && !mUnlockedScreenOffAnimationController.isScreenOffAnimationPlaying()) {
+            doKeyguardLocked(null);
+            mPendingLock = false;
+        }
     }
 
     private boolean isKeyguardServiceEnabled() {
@@ -1149,12 +1178,15 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
     /**
      * Let's us know when the device is waking up.
      */
-    public void onStartedWakingUp() {
+    public void onStartedWakingUp(boolean cameraGestureTriggered) {
         Trace.beginSection("KeyguardViewMediator#onStartedWakingUp");
 
         // TODO: Rename all screen off/on references to interactive/sleeping
         synchronized (this) {
             mDeviceInteractive = true;
+            if (mPendingLock && !cameraGestureTriggered) {
+                doKeyguardLocked(null);
+            }
             mAnimatingScreenOff = false;
             cancelDoKeyguardLaterLocked();
             cancelDoKeyguardForChildProfilesLocked();
@@ -1971,6 +2003,7 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
 
             mHiding = false;
             mWakeAndUnlocking = false;
+            mPendingLock = false;
             setShowingLocked(true);
             mKeyguardViewControllerLazy.get().show(options);
             resetKeyguardDonePendingLocked();
@@ -2620,7 +2653,12 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
         if (!dozing) {
             mAnimatingScreenOff = false;
         }
-        setShowingLocked(mShowing);
+
+        // Don't hide the keyguard due to a doze change if there's a lock pending, because we're
+        // just going to show it again.
+        if (mShowing || !mPendingLock) {
+            setShowingLocked(mShowing);
+        }
     }
 
     @Override
@@ -2677,14 +2715,7 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
         mAodShowing = aodShowing;
         if (notifyDefaultDisplayCallbacks) {
             notifyDefaultDisplayCallbacks(showing);
-
-            if (!showing || !mAnimatingScreenOff) {
-                // Update the activity lock screen state unless we're animating in the keyguard
-                // for a screen off animation. In that case, we want the activity to remain visible
-                // until the animation completes. setShowingLocked is called again when the
-                // animation ends, so the activity lock screen will be shown at that time.
-                updateActivityLockScreenState(showing, aodShowing);
-            }
+            updateActivityLockScreenState(showing, aodShowing);
         }
     }
 

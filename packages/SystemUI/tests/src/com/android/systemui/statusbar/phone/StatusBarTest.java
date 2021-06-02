@@ -272,6 +272,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private FeatureFlags mFeatureFlags;
     @Mock private IWallpaperManager mWallpaperManager;
     @Mock private KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
+    @Mock private UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
     private ShadeController mShadeController;
     private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
     private InitController mInitController = new InitController();
@@ -441,7 +442,8 @@ public class StatusBarTest extends SysuiTestCase {
                 mLocationPublisher,
                 mLockscreenTransitionController,
                 mFeatureFlags,
-                mKeyguardUnlockAnimationController);
+                mKeyguardUnlockAnimationController,
+                mUnlockedScreenOffAnimationController);
         when(mKeyguardViewMediator.registerStatusBar(any(StatusBar.class), any(ViewGroup.class),
                 any(NotificationPanelViewController.class), any(BiometricUnlockController.class),
                 any(ViewGroup.class), any(KeyguardBypassController.class)))

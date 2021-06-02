@@ -102,6 +102,10 @@ class DetailDialog(
         override fun onReleased() {
             removeDetailTask()
         }
+
+        override fun onBackPressedOnTaskRoot(taskId: Int) {
+            dismiss()
+        }
     }
 
     init {

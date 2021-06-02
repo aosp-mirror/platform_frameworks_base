@@ -580,8 +580,7 @@
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Barmoq izi qismi aniqlandi"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Barmoq izi aniqlanmadi. Qaytadan urining."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"Sensorni tozalang"</string>
-    <!-- no translation found for fingerprint_acquired_too_fast (6038375140739678098) -->
-    <skip />
+    <string name="fingerprint_acquired_too_fast" msgid="6038375140739678098">"Biroz koʻproq bosib turing"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Barmoq juda sekin harakatlandi. Qayta urinib ko‘ring."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Boshqa barmoq izi bilan urining"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Juda yorqin"</string>
@@ -1657,7 +1656,7 @@
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"4 tadan 8 ta raqamgacha bo‘lgan PIN kodni kiriting."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"PUK kod 8 ta raqam bo‘lishi shart."</string>
     <string name="kg_invalid_puk" msgid="4809502818518963344">"To‘g‘ri PUK kodni qayta kiriting. Qayta-qayta urinishlar SIM kartani butunlay o‘chirib qo‘yadi."</string>
-    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="4705368340409816254">"PIN-kod mos kelmadi"</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="4705368340409816254">"PIN kod mos kelmadi"</string>
     <string name="kg_login_too_many_attempts" msgid="699292728290654121">"Grafik kalit juda ko‘p marta chizildi"</string>
     <string name="kg_login_instructions" msgid="3619844310339066827">"Qulfni ochish uchun Google hisobingiz bilan kiring."</string>
     <string name="kg_login_username_hint" msgid="1765453775467133251">"Foydalanuvchi nomi (e-pochta)"</string>

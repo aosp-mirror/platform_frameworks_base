@@ -121,9 +121,10 @@ public class KeyguardServiceWrapper implements IKeyguardService {
     }
 
     @Override
-    public void onStartedWakingUp(@PowerManager.WakeReason int pmWakeReason) {
+    public void onStartedWakingUp(
+            @PowerManager.WakeReason int pmWakeReason, boolean cameraGestureTriggered) {
         try {
-            mService.onStartedWakingUp(pmWakeReason);
+            mService.onStartedWakingUp(pmWakeReason, cameraGestureTriggered);
         } catch (RemoteException e) {
             Slog.w(TAG , "Remote Exception", e);
         }

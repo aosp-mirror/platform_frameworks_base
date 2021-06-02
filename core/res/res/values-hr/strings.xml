@@ -190,8 +190,8 @@
     <string name="ssl_ca_cert_noti_by_administrator" msgid="4564941950768783879">"Administrator radnog profila"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="217337232273211674">"Od strane domene <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
     <string name="work_profile_deleted" msgid="5891181538182009328">"Radni je profil izbrisan"</string>
-    <string name="work_profile_deleted_details" msgid="3773706828364418016">"Administratorska aplikacija radnog profila nedostaje ili je oštećena. Zbog toga su radni profil i povezani podaci izbrisani. Za pomoć se obratite svom administratoru."</string>
-    <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"Vaš radni profil više nije dostupan na ovom uređaju"</string>
+    <string name="work_profile_deleted_details" msgid="3773706828364418016">"Administratorska aplikacija poslovnog profila nedostaje ili je oštećena. Zbog toga su poslovni profil i povezani podaci izbrisani. Za pomoć se obratite svom administratoru."</string>
+    <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"Vaš poslovni profil više nije dostupan na ovom uređaju"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"Previše pokušaja unosa zaporke"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Administrator je ustupio uređaj za osobnu upotrebu"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Uređaj je upravljan"</string>
@@ -305,7 +305,7 @@
     <string name="safeMode" msgid="8974401416068943888">"Siguran način rada"</string>
     <string name="android_system_label" msgid="5974767339591067210">"Sustav Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Prijeđite na osobni profil"</string>
-    <string name="managed_profile_label" msgid="7316778766973512382">"Radni profil"</string>
+    <string name="managed_profile_label" msgid="7316778766973512382">"Poslovni profil"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Kontakti"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"pristupati vašim kontaktima"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Lokacija"</string>
@@ -583,8 +583,7 @@
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Otkriven je djelomični otisak prsta"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Obrada otiska prsta nije uspjela. Pokušajte ponovo."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"Očistite senzor"</string>
-    <!-- no translation found for fingerprint_acquired_too_fast (6038375140739678098) -->
-    <skip />
+    <string name="fingerprint_acquired_too_fast" msgid="6038375140739678098">"Zadržite još malo"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Presporo pomicanje prsta. Pokušajte ponovo."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Isprobajte drugi otisak prsta"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Presvijetlo"</string>
@@ -613,12 +612,10 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Ikona otiska prsta"</string>
-    <!-- no translation found for face_recalibrate_notification_name (7311163114750748686) -->
-    <skip />
+    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Otključavanje licem"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Ponovo registrirajte svoje lice"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Za poboljšanje prepoznavanja ponovo registrirajte svoje lice"</string>
-    <!-- no translation found for face_setup_notification_title (8843461561970741790) -->
-    <skip />
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"Postavite otključavanje licem"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Otključajte telefon gledajući u njega"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Postavite više načina otključavanja"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Dodirnite da biste dodali otisak prsta"</string>
@@ -645,26 +642,19 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Lice nije potvrđeno. Hardver nije dostupan."</string>
-    <!-- no translation found for face_error_timeout (2598544068593889762) -->
-    <skip />
+    <string name="face_error_timeout" msgid="2598544068593889762">"Ponovo pokušajte otključavanje licem"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Podaci o novom licu nisu pohranjeni. Izbrišite neko staro."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Otkazana je radnja s licem."</string>
-    <!-- no translation found for face_error_user_canceled (5766472033202928373) -->
-    <skip />
+    <string name="face_error_user_canceled" msgid="5766472033202928373">"Korisnik je otkazao otključavanje licem"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Previše pokušaja. Pokušajte ponovo kasnije."</string>
-    <!-- no translation found for face_error_lockout_permanent (3277134834042995260) -->
-    <skip />
-    <!-- no translation found for face_error_lockout_screen_lock (5062609811636860928) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Previše pokušaja. Otključavanje licem onemogućeno."</string>
+    <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Previše pokušaja. Umjesto toga prijeđite na zaključavanje zaslona."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Lice nije potvrđeno. Pokušajte ponovo."</string>
-    <!-- no translation found for face_error_not_enrolled (1134739108536328412) -->
-    <skip />
-    <!-- no translation found for face_error_hw_not_present (7940978724978763011) -->
-    <skip />
+    <string name="face_error_not_enrolled" msgid="1134739108536328412">"Niste postavili otključavanje licem"</string>
+    <string name="face_error_hw_not_present" msgid="7940978724978763011">"Otključavanje licem nije podržano na ovom uređaju"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Senzor je privremeno onemogućen."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Lice <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <!-- no translation found for face_app_setting_name (5854024256907828015) -->
-    <skip />
+    <string name="face_app_setting_name" msgid="5854024256907828015">"Upotrijebi otključavanje licem"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Upotreba otključavanja licem ili zaključavanja zaslona"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Autentificirajte se licem da biste nastavili"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Za nastavak se identificirajte licem ili vjerodajnicom zaključavanja zaslona"</string>
@@ -967,8 +957,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"Proširivanje područja za otključavanje."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"Otključavanje klizanjem."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"Uzorak za otključavanje."</string>
-    <!-- no translation found for keyguard_accessibility_face_unlock (4533832120787386728) -->
-    <skip />
+    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"Otključavanje licem."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"Otključavanje PIN-om."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"Otključavanje SIM-a PIN-om."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"Otključavanje SIM-a PUK-om."</string>
@@ -1641,7 +1630,7 @@
     <string name="SetupCallDefault" msgid="5581740063237175247">"Prihvatiti poziv?"</string>
     <string name="activity_resolver_use_always" msgid="5575222334666843269">"Uvijek"</string>
     <string name="activity_resolver_use_once" msgid="948462794469672658">"Samo jednom"</string>
-    <string name="activity_resolver_work_profiles_support" msgid="4071345609235361269">"%1$s ne podržava radni profil"</string>
+    <string name="activity_resolver_work_profiles_support" msgid="4071345609235361269">"%1$s ne podržava poslovni profil"</string>
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"Tabletno računalo"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"Televizor"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"Telefon"</string>

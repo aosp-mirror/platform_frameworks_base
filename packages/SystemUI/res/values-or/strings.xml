@@ -452,6 +452,7 @@
     <string name="keyguard_more_overflow_text" msgid="5819512373606638727">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="7248696377626341060">"ନିମ୍ନରେ କମ୍‍ ଜରୁରୀ ବିଜ୍ଞପ୍ତି"</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"ଖୋଲିବା ପାଇଁ ପୁଣି ଟାପ୍‍ କରନ୍ତୁ"</string>
+    <string name="tap_again" msgid="1315420114387908655">"ପୁଣି ଟାପ୍ କରନ୍ତୁ"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"ଖୋଲିବା ପାଇଁ ଉପରକୁ ସ୍ୱାଇପ୍ କରନ୍ତୁ"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"ପୁଣି ଚେଷ୍ଟା କରିବା ପାଇଁ ଉପରକୁ ସ୍ୱାଇପ୍ କରନ୍ତୁ"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC ବ୍ୟବହାର କରିବାକୁ ଅନଲକ୍ କରନ୍ତୁ"</string>
@@ -797,7 +798,7 @@
       <item quantity="other">%d ମିନିଟ୍‍</item>
       <item quantity="one">%d ମିନିଟ୍‍</item>
     </plurals>
-    <string name="battery_panel_title" msgid="5931157246673665963">"ବ୍ୟାଟେରୀ ବ୍ୟବହାର"</string>
+    <string name="battery_panel_title" msgid="5931157246673665963">"ବ୍ୟାଟେରୀର ବ୍ୟବହାର"</string>
     <string name="battery_detail_charging_summary" msgid="8821202155297559706">"ଚାର୍ଜ କରାଯିବାବେଳେ ବ୍ୟାଟେରୀ ସେଭର୍‍ ଉପଲବ୍ଧ ନଥାଏ"</string>
     <string name="battery_detail_switch_title" msgid="6940976502957380405">"ବ୍ୟାଟେରୀ ସେଭର୍"</string>
     <string name="battery_detail_switch_summary" msgid="3668748557848025990">"କାର୍ଯ୍ୟଦକ୍ଷତା ଓ ବ୍ୟାକ୍‌ଗ୍ରାଉଣ୍ଡ ଡାଟା କମ୍ କରେ"</string>
