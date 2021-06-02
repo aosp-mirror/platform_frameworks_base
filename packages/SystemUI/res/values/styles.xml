@@ -642,7 +642,7 @@
         <item name="android:tint">?android:attr/textColorPrimary</item>
         <item name="android:stateListAnimator">@anim/media_button_state_list_animator</item>
         <item name="android:padding">12dp</item>
-        <item name="android:scaleType">fitCenter</item>
+        <item name="android:scaleType">centerInside</item>
     </style>
 
     <style name="MediaPlayer.OutlineButton">
@@ -662,7 +662,8 @@
 
     <style name="MediaPlayer.AppIcon">
         <item name="android:background">@drawable/qs_media_icon_background</item>
-        <item name="android:backgroundTint">?android:attr/textColorPrimary</item>
+        <item name="android:backgroundTint">@color/media_player_solid_button_bg</item>
+        <item name="android:padding">4dp</item>
     </style>
 
     <style name="MediaPlayer.Album">
