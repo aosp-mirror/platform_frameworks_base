@@ -1625,16 +1625,16 @@
     <eat-comment />
 
     <!-- Allows an application to modify and remove existing voicemails in the system.
-        <p>Protection level: signature|privileged
+        <p>Protection level: signature|privileged|role
     -->
     <permission android:name="com.android.voicemail.permission.WRITE_VOICEMAIL"
-        android:protectionLevel="signature|privileged" />
+        android:protectionLevel="signature|privileged|role" />
 
     <!-- Allows an application to read voicemails in the system.
-         <p>Protection level: signature|privileged
+         <p>Protection level: signature|privileged|role
     -->
     <permission android:name="com.android.voicemail.permission.READ_VOICEMAIL"
-        android:protectionLevel="signature|privileged" />
+        android:protectionLevel="signature|privileged|role" />
 
     <!-- ======================================= -->
     <!-- Permissions for accessing location info -->
