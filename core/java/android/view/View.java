@@ -4727,9 +4727,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         WindowInsetsAnimation.Callback mWindowInsetsAnimationCallback;
 
         /**
-         * This lives here since it's only valid for interactive views.
+         * This lives here since it's only valid for interactive views. This list is null until the
+         * first use.
          */
-        private List<Rect> mSystemGestureExclusionRects;
+        private List<Rect> mSystemGestureExclusionRects = null;
 
         /**
          * Used to track {@link #mSystemGestureExclusionRects}
@@ -11603,8 +11604,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * a precision touch gesture in a small area in either the X or Y dimension, such as
      * an edge swipe or dragging a <code>SeekBar</code> thumb.</p>
      *
-     * <p>Do not modify the provided list after this method is called.</p>
-     *
      * <p>Note: the system will put a limit of <code>200dp</code> on the vertical extent of the
      * exclusions it takes into account. The limit does not apply while the navigation
      * bar is {@link #SYSTEM_UI_FLAG_IMMERSIVE_STICKY stickily} hidden, nor to the
@@ -11618,13 +11617,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (rects.isEmpty() && mListenerInfo == null) return;
 
         final ListenerInfo info = getListenerInfo();
+        if (info.mSystemGestureExclusionRects != null) {
+            info.mSystemGestureExclusionRects.clear();
+            info.mSystemGestureExclusionRects.addAll(rects);
+        } else {
+            info.mSystemGestureExclusionRects = new ArrayList<>(rects);
+        }
         if (rects.isEmpty()) {
-            info.mSystemGestureExclusionRects = null;
             if (info.mPositionUpdateListener != null) {
                 mRenderNode.removePositionUpdateListener(info.mPositionUpdateListener);
             }
         } else {
-            info.mSystemGestureExclusionRects = rects;
             if (info.mPositionUpdateListener == null) {
                 info.mPositionUpdateListener = new RenderNode.PositionUpdateListener() {
                     @Override

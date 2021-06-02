@@ -94,6 +94,7 @@ import com.android.systemui.statusbar.phone.StatusBarLocationPublisher;
 import com.android.systemui.statusbar.phone.StatusBarNotificationActivityStarter;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy;
 import com.android.systemui.statusbar.phone.StatusBarTouchableRegionManager;
+import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -216,7 +217,8 @@ public interface StatusBarPhoneModule {
             StatusBarLocationPublisher locationPublisher,
             LockscreenShadeTransitionController transitionController,
             FeatureFlags featureFlags,
-            KeyguardUnlockAnimationController keyguardUnlockAnimationController) {
+            KeyguardUnlockAnimationController keyguardUnlockAnimationController,
+            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController) {
         return new StatusBar(
                 context,
                 notificationsController,
@@ -303,6 +305,7 @@ public interface StatusBarPhoneModule {
                 locationPublisher,
                 transitionController,
                 featureFlags,
-                keyguardUnlockAnimationController);
+                keyguardUnlockAnimationController,
+                unlockedScreenOffAnimationController);
     }
 }

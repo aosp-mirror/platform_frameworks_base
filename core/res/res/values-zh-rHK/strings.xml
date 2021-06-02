@@ -580,8 +580,7 @@
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"只偵測到部分指紋"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"無法處理指紋。請再試一次。"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"清潔感應器"</string>
-    <!-- no translation found for fingerprint_acquired_too_fast (6038375140739678098) -->
-    <skip />
+    <string name="fingerprint_acquired_too_fast" msgid="6038375140739678098">"請按住更長時間"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"手指移動太慢，請重試。"</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"改用其他指紋"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"太亮"</string>
@@ -610,12 +609,10 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"指紋圖示"</string>
-    <!-- no translation found for face_recalibrate_notification_name (7311163114750748686) -->
-    <skip />
+    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"面孔解鎖"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"重新註冊臉孔"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"如要提高識別能力，請重新註冊您的臉孔"</string>
-    <!-- no translation found for face_setup_notification_title (8843461561970741790) -->
-    <skip />
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"設定「面孔解鎖」"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"直望手機即可解鎖"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"設定更多解鎖方法"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"輕按即可新增指紋"</string>
@@ -642,26 +639,19 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"無法驗證臉孔，硬件無法使用。"</string>
-    <!-- no translation found for face_error_timeout (2598544068593889762) -->
-    <skip />
+    <string name="face_error_timeout" msgid="2598544068593889762">"請再次嘗試「面孔解鎖」"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"無法儲存新的臉容資料，請先刪除舊資料。"</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"臉孔操作已取消。"</string>
-    <!-- no translation found for face_error_user_canceled (5766472033202928373) -->
-    <skip />
+    <string name="face_error_user_canceled" msgid="5766472033202928373">"使用者已取消「面孔解鎖」"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"嘗試次數過多，請稍後再試。"</string>
-    <!-- no translation found for face_error_lockout_permanent (3277134834042995260) -->
-    <skip />
-    <!-- no translation found for face_error_lockout_screen_lock (5062609811636860928) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"嘗試次數過多，因此系統已停用「面孔解鎖」。"</string>
+    <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"嘗試次數過多，請改為解除螢幕鎖定來驗證身分。"</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"無法驗證臉孔。請再試一次。"</string>
-    <!-- no translation found for face_error_not_enrolled (1134739108536328412) -->
-    <skip />
-    <!-- no translation found for face_error_hw_not_present (7940978724978763011) -->
-    <skip />
+    <string name="face_error_not_enrolled" msgid="1134739108536328412">"您尚未設定「面孔解鎖」"</string>
+    <string name="face_error_hw_not_present" msgid="7940978724978763011">"此裝置不支援「面孔解鎖」"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"感應器已暫時停用。"</string>
     <string name="face_name_template" msgid="3877037340223318119">"臉孔 <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <!-- no translation found for face_app_setting_name (5854024256907828015) -->
-    <skip />
+    <string name="face_app_setting_name" msgid="5854024256907828015">"使用「面孔解鎖」"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"使用臉孔或螢幕鎖定"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"如要繼續操作，請使用您的面孔驗證身分"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"請使用臉孔解鎖或螢幕鎖定功能驗證身分，才能繼續操作"</string>
@@ -964,8 +954,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"展開解鎖區域。"</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"滑動解鎖。"</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"圖案解鎖。"</string>
-    <!-- no translation found for keyguard_accessibility_face_unlock (4533832120787386728) -->
-    <skip />
+    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"面孔解鎖。"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"PIN 解鎖。"</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"SIM 卡 PIN 碼解鎖。"</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"SIM 卡 PUK 解鎖。"</string>
@@ -2103,7 +2092,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"確定"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"關閉"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"瞭解詳情"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"在 Android 12 中，我們將 Android 自動調整通知取代成強化通知。此功能可顯示建議操作和回覆，以及整理通知。\n\n強化通知功能可讀取所有通知內容 (包括聯絡人姓名和訊息等個人資料)，以及關閉或回應通知，例如接聽來電和控制「請勿騷擾」功能。"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"強化通知在 Android 12 取代了 Android 自動調整通知。此功能會顯示建議的操作和回覆，更可為您整理通知。\n\n強化通知功能可存取您的通知內容 (包括聯絡人姓名和訊息等個人資料)，亦可以關閉或回應通知，例如接聽來電和控制「請勿騷擾」功能。"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"「日常安排模式」資料通知"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"電量可能會在日常充電前耗盡"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"「省電模式」已啟用，以便延長電池壽命"</string>

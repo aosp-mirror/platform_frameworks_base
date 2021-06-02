@@ -451,4 +451,11 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
 
     private final AccessibilityManager.TouchExplorationStateChangeListener
             mTouchExplorationStateChangeListener = enabled -> updateClickListener();
+
+    /**
+     * Set the alpha of this view.
+     */
+    public void setAlpha(float alpha) {
+        mView.setAlpha(alpha);
+    }
 }

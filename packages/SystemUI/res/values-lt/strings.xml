@@ -456,6 +456,7 @@
     <string name="keyguard_more_overflow_text" msgid="5819512373606638727">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="7248696377626341060">"Mažiau skubūs pranešimai toliau"</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"Palieskite dar kartą, kad atidarytumėte"</string>
+    <string name="tap_again" msgid="1315420114387908655">"Palieskite dar kartą"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Perbraukite aukštyn, kad atidarytumėte"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Jei norite bandyti dar kartą, perbraukite aukštyn"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Norėdami naudoti NFC, atrakinkite"</string>

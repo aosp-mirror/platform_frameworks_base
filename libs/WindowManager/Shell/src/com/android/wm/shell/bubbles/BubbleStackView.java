@@ -938,6 +938,8 @@ public class BubbleStackView extends FrameLayout
             if (ev.getAction() == MotionEvent.ACTION_DOWN) {
                 if (mShowingManage) {
                     showManageMenu(false /* show */);
+                } else if (mStackEduView != null && mStackEduView.getVisibility() == VISIBLE) {
+                    mStackEduView.hide(false);
                 } else if (mBubbleData.isExpanded()) {
                     mBubbleData.setExpanded(false);
                 }
@@ -1152,6 +1154,7 @@ public class BubbleStackView extends FrameLayout
             mStackEduView = new StackEducationView(mContext);
             addView(mStackEduView);
         }
+        mBubbleContainer.bringToFront();
         return mStackEduView.show(mPositioner.getDefaultStartPosition());
     }
 

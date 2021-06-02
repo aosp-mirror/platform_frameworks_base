@@ -580,8 +580,7 @@
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Ofullständigt fingeravtryck upptäcktes"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Det gick inte att bearbeta fingeravtrycket. Försök igen."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"Rengör sensorn"</string>
-    <!-- no translation found for fingerprint_acquired_too_fast (6038375140739678098) -->
-    <skip />
+    <string name="fingerprint_acquired_too_fast" msgid="6038375140739678098">"Håll kvar fingret lite längre"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Du rörde fingret för långsamt. Försök igen."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Testa ett annat fingeravtryck"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Det är för ljust"</string>
@@ -610,12 +609,10 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Ikon för fingeravtryck"</string>
-    <!-- no translation found for face_recalibrate_notification_name (7311163114750748686) -->
-    <skip />
+    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Ansiktslås"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Registrera ansiktet på nytt"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Gör om registreringen av ansiktet så att ansiktsigenkänningen ska fungera bättre"</string>
-    <!-- no translation found for face_setup_notification_title (8843461561970741790) -->
-    <skip />
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"Konfigurera ansiktslås"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Lås upp telefonen genom att titta på den"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Konfigurera fler sätt att låsa upp"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Tryck för att lägga till ett fingeravtryck"</string>
@@ -642,26 +639,19 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Ansiktsverifiering går ej. Otillgänglig maskinvara."</string>
-    <!-- no translation found for face_error_timeout (2598544068593889762) -->
-    <skip />
+    <string name="face_error_timeout" msgid="2598544068593889762">"Försök att använda ansiktslåset igen"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Kan inte lagra ny ansiktsdata. Radera först gammal data."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Ansiktsåtgärden har avbrutits."</string>
-    <!-- no translation found for face_error_user_canceled (5766472033202928373) -->
-    <skip />
+    <string name="face_error_user_canceled" msgid="5766472033202928373">"Ansiktslås avbröts av användaren"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Du har gjort för många försök. Försök igen senare."</string>
-    <!-- no translation found for face_error_lockout_permanent (3277134834042995260) -->
-    <skip />
-    <!-- no translation found for face_error_lockout_screen_lock (5062609811636860928) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"För många försök. Ansiktslås har inaktiverats."</string>
+    <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"För många försök. Ange skärmlås i stället."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Det gick inte att verifiera ansiktet. Försök igen."</string>
-    <!-- no translation found for face_error_not_enrolled (1134739108536328412) -->
-    <skip />
-    <!-- no translation found for face_error_hw_not_present (7940978724978763011) -->
-    <skip />
+    <string name="face_error_not_enrolled" msgid="1134739108536328412">"Du har inte konfigurerat ansiktslås"</string>
+    <string name="face_error_hw_not_present" msgid="7940978724978763011">"Enheten har inget stöd för ansiktslås"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Sensorn har tillfälligt inaktiverats."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Ansikte <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <!-- no translation found for face_app_setting_name (5854024256907828015) -->
-    <skip />
+    <string name="face_app_setting_name" msgid="5854024256907828015">"Använd ansiktslåset"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Använd ansiktslåset eller skärmlåset"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Fortsätt med hjälp av ditt ansikte"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Fortsätt med hjälp av ditt ansikte eller skärmlåset"</string>
@@ -964,8 +954,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"Expandera upplåsningsytan."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"Lås upp genom att dra."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"Lås upp med grafiskt lösenord."</string>
-    <!-- no translation found for keyguard_accessibility_face_unlock (4533832120787386728) -->
-    <skip />
+    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"Ansiktslås."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"Lås upp med PIN-kod."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"Lås upp med SIM-kortets pinkod."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"Lås upp med SIM-kortets PUK-kod."</string>
