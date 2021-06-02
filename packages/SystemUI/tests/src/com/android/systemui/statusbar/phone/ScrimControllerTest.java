@@ -584,7 +584,7 @@ public class ScrimControllerTest extends SysuiTestCase {
         ));
 
         // Back scrim should be visible after start dragging
-        mScrimController.setPanelExpansion(0.5f);
+        mScrimController.setPanelExpansion(0.3f);
         assertScrimAlpha(Map.of(
                 mScrimInFront, TRANSPARENT,
                 mNotificationsScrim, SEMI_TRANSPARENT,
@@ -1046,7 +1046,7 @@ public class ScrimControllerTest extends SysuiTestCase {
     @Test
     public void testScrimsVisible_whenShadeVisible() {
         mScrimController.transitionTo(ScrimState.UNLOCKED);
-        mScrimController.setPanelExpansion(0.5f);
+        mScrimController.setPanelExpansion(0.3f);
         // notifications scrim alpha change require calling setQsPosition
         mScrimController.setQsPosition(0, 300);
         finishAnimationsImmediately();
@@ -1061,7 +1061,7 @@ public class ScrimControllerTest extends SysuiTestCase {
     public void testScrimsVisible_whenShadeVisible_clippingQs() {
         mScrimController.setClipsQsScrim(true);
         mScrimController.transitionTo(ScrimState.UNLOCKED);
-        mScrimController.setPanelExpansion(0.5f);
+        mScrimController.setPanelExpansion(0.3f);
         // notifications scrim alpha change require calling setQsPosition
         mScrimController.setQsPosition(0.5f, 300);
         finishAnimationsImmediately();
@@ -1111,7 +1111,7 @@ public class ScrimControllerTest extends SysuiTestCase {
         mScrimController.transitionTo(ScrimState.SHADE_LOCKED);
 
         assertAlphaAfterExpansion(mNotificationsScrim, /* alpha */ 0.8f, /* expansion */ 0.8f);
-        assertAlphaAfterExpansion(mNotificationsScrim, /* alpha */ 0.2f, /* expansion */ 0.2f);
+        assertAlphaAfterExpansion(mNotificationsScrim, /* alpha */ 0.47f, /* expansion */ 0.2f);
     }
 
     @Test
@@ -1119,7 +1119,7 @@ public class ScrimControllerTest extends SysuiTestCase {
         mScrimController.transitionTo(ScrimState.KEYGUARD);
 
         assertAlphaAfterExpansion(mNotificationsScrim, /* alpha */ 0.2f, /* expansion */ 0.4f);
-        assertAlphaAfterExpansion(mNotificationsScrim, /* alpha */ 0.8f, /* expansion */ 0.2f);
+        assertAlphaAfterExpansion(mNotificationsScrim, /* alpha */ 0.52f, /* expansion */ 0.2f);
     }
 
     @Test
