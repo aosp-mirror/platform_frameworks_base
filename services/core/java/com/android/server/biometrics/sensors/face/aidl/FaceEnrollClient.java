@@ -95,6 +95,12 @@ public class FaceEnrollClient extends EnrollClient<ISession> {
         ReEnrollNotificationUtils.cancelNotification(getContext());
     }
 
+    @NonNull
+    @Override
+    protected Callback wrapCallbackForStart(@NonNull Callback callback) {
+        return new CompositeCallback(createALSCallback(), callback);
+    }
+
     @Override
     public void destroy() {
         try {

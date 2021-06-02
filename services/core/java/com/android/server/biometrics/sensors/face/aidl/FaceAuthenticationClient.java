@@ -99,6 +99,12 @@ class FaceAuthenticationClient extends AuthenticationClient<ISession> implements
                 "face_custom_success_error", 0) == 1;
     }
 
+    @NonNull
+    @Override
+    protected Callback wrapCallbackForStart(@NonNull Callback callback) {
+        return new CompositeCallback(createALSCallback(), callback);
+    }
+
     @Override
     protected void startHalOperation() {
         try {
@@ -229,7 +235,8 @@ class FaceAuthenticationClient extends AuthenticationClient<ISession> implements
         }
     }
 
-    @Override public void onLockoutTimed(long durationMillis) {
+    @Override
+    public void onLockoutTimed(long durationMillis) {
         mLockoutCache.setLockoutModeForUser(getTargetUserId(), LockoutTracker.LOCKOUT_TIMED);
         // Lockout metrics are logged as an error code.
         final int error = BiometricFaceConstants.FACE_ERROR_LOCKOUT;
@@ -242,7 +249,8 @@ class FaceAuthenticationClient extends AuthenticationClient<ISession> implements
         }
     }
 
-    @Override public void onLockoutPermanent() {
+    @Override
+    public void onLockoutPermanent() {
         mLockoutCache.setLockoutModeForUser(getTargetUserId(), LockoutTracker.LOCKOUT_PERMANENT);
         // Lockout metrics are logged as an error code.
         final int error = BiometricFaceConstants.FACE_ERROR_LOCKOUT_PERMANENT;
