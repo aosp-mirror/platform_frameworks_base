@@ -76,7 +76,7 @@ import static com.android.server.wm.Task.ActivityState.STOPPED;
 import static com.android.server.wm.Task.ActivityState.STOPPING;
 import static com.android.server.wm.Task.REPARENT_LEAVE_ROOT_TASK_IN_PLACE;
 import static com.android.server.wm.Task.REPARENT_MOVE_ROOT_TASK_TO_FRONT;
-import static com.android.server.wm.Task.TASK_VISIBILITY_INVISIBLE;
+import static com.android.server.wm.TaskFragment.TASK_FRAGMENT_VISIBILITY_INVISIBLE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT_REPEATS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER_LIGHT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_TRACE;
@@ -1911,7 +1911,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                     return;
                 }
 
-                if (rootTask.getVisibility(null /*starting*/) == TASK_VISIBILITY_INVISIBLE) {
+                if (rootTask.getVisibility(null /* starting */)
+                        == TASK_FRAGMENT_VISIBILITY_INVISIBLE) {
                     return;
                 }
 

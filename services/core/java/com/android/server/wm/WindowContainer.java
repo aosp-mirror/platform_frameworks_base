@@ -3075,6 +3075,11 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     /** Cheap way of doing cast and instanceof. */
+    TaskFragment asTaskFragment() {
+        return null;
+    }
+
+    /** Cheap way of doing cast and instanceof. */
     WindowToken asWindowToken() {
         return null;
     }
