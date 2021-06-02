@@ -48,7 +48,6 @@
             android:layout_width="@dimen/settingslib_restricted_icon_size"
             android:layout_height="@dimen/settingslib_restricted_icon_size"
             android:tint="?android:attr/colorAccent"
-            android:theme="@android:style/Theme.Material"
             android:layout_gravity="center_vertical"
             android:layout_marginEnd="@dimen/settingslib_restricted_icon_margin_end"
             android:src="@*android:drawable/ic_info"
