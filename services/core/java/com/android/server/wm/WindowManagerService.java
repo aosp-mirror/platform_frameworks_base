@@ -2329,6 +2329,17 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 result |= RELAYOUT_RES_SURFACE_CHANGED;
                 if (!win.mWillReplaceWindow) {
+                    // When FLAG_SHOW_WALLPAPER flag is removed from a window, we usually set a flag
+                    // in DC#pendingLayoutChanges and update the wallpaper target later.
+                    // However it's possible that FLAG_SHOW_WALLPAPER flag is removed from a window
+                    // when the window is about to exit, so we update the wallpaper target
+                    // immediately here. Otherwise this window will be stuck in exiting and its
+                    // surface remains on the screen.
+                    // TODO(b/189856716): Allow destroying surface even if it belongs to the
+                    //  keyguard target.
+                    if (wallpaperMayMove) {
+                        displayContent.mWallpaperController.adjustWallpaperWindows();
+                    }
                     focusMayChange = tryStartExitingAnimation(win, winAnimator, focusMayChange);
                 }
             }
