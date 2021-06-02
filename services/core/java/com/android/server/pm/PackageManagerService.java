@@ -1414,8 +1414,8 @@ public class PackageManagerService extends IPackageManager.Stub
             mStaticLibsByDeclaringPackage = new WatchedArrayMap<>();
     private final SnapshotCache<WatchedArrayMap<String, WatchedLongSparseArray<SharedLibraryInfo>>>
             mStaticLibsByDeclaringPackageSnapshot =
-            new SnapshotCache.Auto<>(mSharedLibraries, mSharedLibraries,
-                                     "PackageManagerService.mSharedLibraries");
+            new SnapshotCache.Auto<>(mStaticLibsByDeclaringPackage, mStaticLibsByDeclaringPackage,
+                                     "PackageManagerService.mStaticLibsByDeclaringPackage");
 
     // Mapping from instrumentation class names to info about them.
     @Watched
