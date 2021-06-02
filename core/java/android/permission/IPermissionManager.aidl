@@ -87,7 +87,7 @@ interface IPermissionManager {
 
     boolean isAutoRevokeExempted(String packageName, int userId);
 
-    AttributionSource registerAttributionSource(in AttributionSource source);
+    void registerAttributionSource(in AttributionSource source);
 
     boolean isRegisteredAttributionSource(in AttributionSource source);
 }
