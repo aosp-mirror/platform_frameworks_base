@@ -75,10 +75,18 @@ public final class CompatModePackages {
      * CompatModePackages#DOWNSCALED is the gatekeeper of all per-app buffer downscaling
      * changes.  Disabling this change will prevent the following scaling factors from working:
      * CompatModePackages#DOWNSCALE_90
+     * CompatModePackages#DOWNSCALE_85
      * CompatModePackages#DOWNSCALE_80
+     * CompatModePackages#DOWNSCALE_75
      * CompatModePackages#DOWNSCALE_70
+     * CompatModePackages#DOWNSCALE_65
      * CompatModePackages#DOWNSCALE_60
+     * CompatModePackages#DOWNSCALE_55
      * CompatModePackages#DOWNSCALE_50
+     * CompatModePackages#DOWNSCALE_45
+     * CompatModePackages#DOWNSCALE_40
+     * CompatModePackages#DOWNSCALE_35
+     * CompatModePackages#DOWNSCALE_30
      *
      * If CompatModePackages#DOWNSCALED is enabled for an app package, then the app will be forcibly
      * resized to the highest enabled scaling factor e.g. 80% if both 80% and 70% were enabled.
@@ -100,6 +108,16 @@ public final class CompatModePackages {
 
     /**
      * With CompatModePackages#DOWNSCALED enabled, subsequently enabling change-id
+     * CompatModePackages#DOWNSCALE_85 for a package will force the app to assume it's
+     * running on a display with 85% the vertical and horizontal resolution of the real display.
+     */
+    @ChangeId
+    @Disabled
+    @Overridable
+    public static final long DOWNSCALE_85 = 189969734L;
+
+    /**
+     * With CompatModePackages#DOWNSCALED enabled, subsequently enabling change-id
      * CompatModePackages#DOWNSCALE_80 for a package will force the app to assume it's
      * running on a display with 80% the vertical and horizontal resolution of the real display.
      */
@@ -107,6 +125,16 @@ public final class CompatModePackages {
     @Disabled
     @Overridable
     public static final long DOWNSCALE_80 = 176926753L;
+
+    /**
+     * With CompatModePackages#DOWNSCALED enabled, subsequently enabling change-id
+     * CompatModePackages#DOWNSCALE_75 for a package will force the app to assume it's
+     * running on a display with 75% the vertical and horizontal resolution of the real display.
+     */
+    @ChangeId
+    @Disabled
+    @Overridable
+    public static final long DOWNSCALE_75 = 189969779L;
 
     /**
      * With CompatModePackages#DOWNSCALED enabled, subsequently enabling change-id
@@ -120,6 +148,16 @@ public final class CompatModePackages {
 
     /**
      * With CompatModePackages#DOWNSCALED enabled, subsequently enabling change-id
+     * CompatModePackages#DOWNSCALE_65 for a package will force the app to assume it's
+     * running on a display with 65% the vertical and horizontal resolution of the real display.
+     */
+    @ChangeId
+    @Disabled
+    @Overridable
+    public static final long DOWNSCALE_65 = 189969744L;
+
+    /**
+     * With CompatModePackages#DOWNSCALED enabled, subsequently enabling change-id
      * CompatModePackages#DOWNSCALE_60 for a package will force the app to assume it's
      * running on a display with 60% the vertical and horizontal resolution of the real display.
      */
@@ -130,6 +168,16 @@ public final class CompatModePackages {
 
     /**
      * With CompatModePackages#DOWNSCALED enabled, subsequently enabling change-id
+     * CompatModePackages#DOWNSCALE_55 for a package will force the app to assume it's
+     * running on a display with 55% the vertical and horizontal resolution of the real display.
+     */
+    @ChangeId
+    @Disabled
+    @Overridable
+    public static final long DOWNSCALE_55 = 189970036L;
+
+    /**
+     * With CompatModePackages#DOWNSCALED enabled, subsequently enabling change-id
      * CompatModePackages#DOWNSCALE_50 for a package will force the app to assume it's
      * running on a display with 50% vertical and horizontal resolution of the real display.
      */
@@ -137,6 +185,46 @@ public final class CompatModePackages {
     @Disabled
     @Overridable
     public static final long DOWNSCALE_50 = 176926741L;
+
+    /**
+     * With CompatModePackages#DOWNSCALED enabled, subsequently enabling change-id
+     * CompatModePackages#DOWNSCALE_45 for a package will force the app to assume it's
+     * running on a display with 45% the vertical and horizontal resolution of the real display.
+     */
+    @ChangeId
+    @Disabled
+    @Overridable
+    public static final long DOWNSCALE_45 = 189969782L;
+
+    /**
+     * With CompatModePackages#DOWNSCALED enabled, subsequently enabling change-id
+     * CompatModePackages#DOWNSCALE_40 for a package will force the app to assume it's
+     * running on a display with 40% the vertical and horizontal resolution of the real display.
+     */
+    @ChangeId
+    @Disabled
+    @Overridable
+    public static final long DOWNSCALE_40 = 189970038L;
+
+    /**
+     * With CompatModePackages#DOWNSCALED enabled, subsequently enabling change-id
+     * CompatModePackages#DOWNSCALE_35 for a package will force the app to assume it's
+     * running on a display with 35% the vertical and horizontal resolution of the real display.
+     */
+    @ChangeId
+    @Disabled
+    @Overridable
+    public static final long DOWNSCALE_35 = 189969749L;
+
+    /**
+     * With CompatModePackages#DOWNSCALED enabled, subsequently enabling change-id
+     * CompatModePackages#DOWNSCALE_30 for a package will force the app to assume it's
+     * running on a display with 30% the vertical and horizontal resolution of the real display.
+     */
+    @ChangeId
+    @Disabled
+    @Overridable
+    public static final long DOWNSCALE_30 = 189970040L;
 
     /**
      * On Android TV applications that target pre-S are not expecting to receive a Window larger
@@ -291,17 +379,41 @@ public final class CompatModePackages {
             if (CompatChanges.isChangeEnabled(DOWNSCALE_90, packageName, userHandle)) {
                 return 1f / 0.9f;
             }
+            if (CompatChanges.isChangeEnabled(DOWNSCALE_85, packageName, userHandle)) {
+                return 1f / 0.85f;
+            }
             if (CompatChanges.isChangeEnabled(DOWNSCALE_80, packageName, userHandle)) {
                 return 1f / 0.8f;
+            }
+            if (CompatChanges.isChangeEnabled(DOWNSCALE_75, packageName, userHandle)) {
+                return 1f / 0.75f;
             }
             if (CompatChanges.isChangeEnabled(DOWNSCALE_70, packageName, userHandle)) {
                 return 1f / 0.7f;
             }
+            if (CompatChanges.isChangeEnabled(DOWNSCALE_65, packageName, userHandle)) {
+                return 1f / 0.65f;
+            }
             if (CompatChanges.isChangeEnabled(DOWNSCALE_60, packageName, userHandle)) {
                 return 1f / 0.6f;
             }
+            if (CompatChanges.isChangeEnabled(DOWNSCALE_55, packageName, userHandle)) {
+                return 1f / 0.55f;
+            }
             if (CompatChanges.isChangeEnabled(DOWNSCALE_50, packageName, userHandle)) {
                 return 1f / 0.5f;
+            }
+            if (CompatChanges.isChangeEnabled(DOWNSCALE_45, packageName, userHandle)) {
+                return 1f / 0.45f;
+            }
+            if (CompatChanges.isChangeEnabled(DOWNSCALE_40, packageName, userHandle)) {
+                return 1f / 0.4f;
+            }
+            if (CompatChanges.isChangeEnabled(DOWNSCALE_35, packageName, userHandle)) {
+                return 1f / 0.35f;
+            }
+            if (CompatChanges.isChangeEnabled(DOWNSCALE_30, packageName, userHandle)) {
+                return 1f / 0.3f;
             }
         }
 
