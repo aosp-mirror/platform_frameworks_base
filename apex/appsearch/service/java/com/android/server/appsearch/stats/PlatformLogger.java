@@ -372,7 +372,9 @@ public final class PlatformLogger implements AppSearchLogger {
                 stats.getSchemaStoreRecoveryLatencyMillis(),
                 stats.getDocumentStoreDataStatus(),
                 stats.getDocumentCount(),
-                stats.getSchemaTypeCount());
+                stats.getSchemaTypeCount(),
+                stats.hasReset(),
+                stats.getResetStatusCode());
     }
 
     /**
