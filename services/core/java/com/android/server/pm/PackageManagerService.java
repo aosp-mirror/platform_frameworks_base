@@ -12618,9 +12618,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (!sharedLibraryInfo.isStatic()) {
                     continue;
                 }
-                final PackageSetting staticLibPkgSetting = getPackageSetting(
-                        toStaticSharedLibraryPackageName(sharedLibraryInfo.getName(),
-                                sharedLibraryInfo.getLongVersion()));
+                final PackageSetting staticLibPkgSetting =
+                        getPackageSetting(sharedLibraryInfo.getPackageName());
                 if (staticLibPkgSetting == null) {
                     Slog.wtf(TAG, "Shared lib without setting: " + sharedLibraryInfo);
                     continue;
