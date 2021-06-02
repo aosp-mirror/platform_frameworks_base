@@ -6191,7 +6191,8 @@ public final class ActiveServices {
                 r.mFgsNotificationDeferred,
                 r.mFgsNotificationShown,
                 durationMs,
-                r.mStartForegroundCount);
+                r.mStartForegroundCount,
+                ActivityManagerUtils.hashComponentNameForAtom(r.shortInstanceName));
     }
 
     boolean canAllowWhileInUsePermissionInFgsLocked(int callingPid, int callingUid,
