@@ -167,20 +167,20 @@ public class BubbleExtractor implements NotificationSignalExtractor {
             // TODO: check the shortcut intent / ensure it can show in activity view
             return true;
         }
-        return canLaunchInActivityView(mContext, metadata.getIntent(), pkg);
+        return canLaunchInTaskView(mContext, metadata.getIntent(), pkg);
     }
 
     /**
      * Whether an intent is properly configured to display in an {@link
-     * android.app.ActivityView} for bubbling.
+     * com.android.wm.shell.TaskView} for bubbling.
      *
      * @param context       the context to use.
      * @param pendingIntent the pending intent of the bubble.
      * @param packageName   the notification package name for this bubble.
      */
-    // Keep checks in sync with BubbleController#canLaunchInActivityView.
+    // Keep checks in sync with BubbleController#canLaunchInTaskView.
     @VisibleForTesting
-    protected boolean canLaunchInActivityView(Context context, PendingIntent pendingIntent,
+    protected boolean canLaunchInTaskView(Context context, PendingIntent pendingIntent,
             String packageName) {
         if (pendingIntent == null) {
             Slog.w(TAG, "Unable to create bubble -- no intent");

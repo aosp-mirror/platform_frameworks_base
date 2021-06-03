@@ -687,7 +687,7 @@ public class BubbleController {
         mSysuiProxy.getShouldRestoredEntries(savedBubbleKeys, (entries) -> {
             mMainExecutor.execute(() -> {
                 for (BubbleEntry e : entries) {
-                    if (canLaunchInActivityView(mContext, e)) {
+                    if (canLaunchInTaskView(mContext, e)) {
                         updateBubble(e, true /* suppressFlyout */, false /* showInShade */);
                     }
                 }
@@ -922,14 +922,14 @@ public class BubbleController {
     }
 
     private void onEntryAdded(BubbleEntry entry) {
-        if (canLaunchInActivityView(mContext, entry)) {
+        if (canLaunchInTaskView(mContext, entry)) {
             updateBubble(entry);
         }
     }
 
     private void onEntryUpdated(BubbleEntry entry, boolean shouldBubbleUp) {
         // shouldBubbleUp checks canBubble & for bubble metadata
-        boolean shouldBubble = shouldBubbleUp && canLaunchInActivityView(mContext, entry);
+        boolean shouldBubble = shouldBubbleUp && canLaunchInTaskView(mContext, entry);
         if (!shouldBubble && mBubbleData.hasAnyBubbleWithKey(entry.getKey())) {
             // It was previously a bubble but no longer a bubble -- lets remove it
             removeBubble(entry.getKey(), DISMISS_NO_LONGER_BUBBLE);
@@ -1260,15 +1260,16 @@ public class BubbleController {
     }
 
     /**
-     * Whether an intent is properly configured to display in an {@link android.app.ActivityView}.
+     * Whether an intent is properly configured to display in a
+     * {@link com.android.wm.shell.TaskView}.
      *
-     * Keep checks in sync with NotificationManagerService#canLaunchInActivityView. Typically
+     * Keep checks in sync with BubbleExtractor#canLaunchInTaskView. Typically
      * that should filter out any invalid bubbles, but should protect SysUI side just in case.
      *
      * @param context the context to use.
      * @param entry the entry to bubble.
      */
-    static boolean canLaunchInActivityView(Context context, BubbleEntry entry) {
+    static boolean canLaunchInTaskView(Context context, BubbleEntry entry) {
         PendingIntent intent = entry.getBubbleMetadata() != null
                 ? entry.getBubbleMetadata().getIntent()
                 : null;

@@ -50,7 +50,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewOutlineProvider;
 import android.view.ViewTreeObserver;
-import android.view.WindowInsets;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.widget.FrameLayout;
@@ -1607,7 +1606,7 @@ public class BubbleStackView extends FrameLayout
         if (mIsExpanded && mExpandedBubble != null && mExpandedBubble.getExpandedView() != null
                 && !mExpandedViewTemporarilyHidden) {
             if (mExpandedBubble != null && mExpandedBubble.getExpandedView() != null) {
-                // Before screenshotting, have the real ActivityView show on top of other surfaces
+                // Before screenshotting, have the real TaskView show on top of other surfaces
                 // so that the screenshot doesn't flicker on top of it.
                 mExpandedBubble.getExpandedView().setSurfaceZOrderedOnTop(true);
             }
@@ -2579,8 +2578,8 @@ public class BubbleStackView extends FrameLayout
     }
 
     /**
-     * Requests a snapshot from the currently expanded bubble's ActivityView and displays it in a
-     * SurfaceView. This allows us to load a newly expanded bubble's Activity into the ActivityView,
+     * Requests a snapshot from the currently expanded bubble's TaskView and displays it in a
+     * SurfaceView. This allows us to load a newly expanded bubble's Activity into the TaskView,
      * while animating the (screenshot of the) previously selected bubble's content away.
      *
      * @param onComplete Callback to run once we're done here - called with 'false' if something
@@ -2624,13 +2623,13 @@ public class BubbleStackView extends FrameLayout
         mAnimatingOutSurfaceContainer.setTranslationX(mExpandedViewContainer.getPaddingLeft());
         mAnimatingOutSurfaceContainer.setTranslationY(0);
 
-        final int[] activityViewLocation =
+        final int[] taskViewLocation =
                 mExpandedBubble.getExpandedView().getTaskViewLocationOnScreen();
         final int[] surfaceViewLocation = mAnimatingOutSurfaceView.getLocationOnScreen();
 
-        // Translate the surface to overlap the real ActivityView.
+        // Translate the surface to overlap the real TaskView.
         mAnimatingOutSurfaceContainer.setTranslationY(
-                activityViewLocation[1] - surfaceViewLocation[1]);
+                taskViewLocation[1] - surfaceViewLocation[1]);
 
         // Set the width/height of the SurfaceView to match the snapshot.
         mAnimatingOutSurfaceView.getLayoutParams().width =
