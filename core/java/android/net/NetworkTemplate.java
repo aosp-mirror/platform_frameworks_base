@@ -514,6 +514,10 @@ public class NetworkTemplate implements Parcelable {
         return mSubscriberIdMatchRule;
     }
 
+    public int getMeteredness() {
+        return mMetered;
+    }
+
     /**
      * Test if given {@link NetworkIdentity} matches this template.
      */
