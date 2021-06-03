@@ -4967,7 +4967,8 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     private boolean canBeOrganized() {
-        if (mForceNotOrganized) {
+        if (mForceNotOrganized || !mAtmService.mTaskOrganizerController
+                .isSupportedWindowingMode(getWindowingMode())) {
             return false;
         }
         // All root tasks can be organized
