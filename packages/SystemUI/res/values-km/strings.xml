@@ -435,7 +435,7 @@
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"អូស​ឡើង​លើ​ដើម្បី​ប្តូរ​កម្មវិធី"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"អូសទៅស្ដាំដើម្បីប្ដូរកម្មវិធីបានរហ័ស"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"បិទ/បើក​ទិដ្ឋភាពរួម"</string>
-    <string name="expanded_header_battery_charged" msgid="5307907517976548448">"បាន​បញ្ចូល​ថ្ម​​"</string>
+    <string name="expanded_header_battery_charged" msgid="5307907517976548448">"បាន​សាក​ថ្មពេញ"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"កំពុងសាក​ថ្ម"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="757991461445765011">"<xliff:g id="CHARGING_TIME">%s</xliff:g> រហូត​ដល់ពេញ"</string>
     <string name="expanded_header_battery_not_charging" msgid="809409140358955848">"មិន​កំពុង​បញ្ចូល​ថ្ម"</string>

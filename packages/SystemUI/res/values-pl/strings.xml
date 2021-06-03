@@ -101,7 +101,7 @@
     <string name="screenrecord_start" msgid="330991441575775004">"Rozpocznij"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Rejestruję zawartość ekranu"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Rejestruje zawartość ekranu i dźwięki odtwarzane na urządzeniu"</string>
-    <string name="screenrecord_taps_label" msgid="1595690528298857649">"Pokaż dotknięcia ekranu"</string>
+    <string name="screenrecord_taps_label" msgid="1595690528298857649">"Pokazuj dotknięcia ekranu"</string>
     <string name="screenrecord_stop_text" msgid="6549288689506057686">"Kliknij, by zatrzymać"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"Zatrzymaj"</string>
     <string name="screenrecord_pause_label" msgid="6004054907104549857">"Wstrzymaj"</string>
