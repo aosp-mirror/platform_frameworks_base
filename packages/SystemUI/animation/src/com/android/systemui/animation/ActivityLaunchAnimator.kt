@@ -159,6 +159,7 @@ class ActivityLaunchAnimator(
         // If we expect an animation, post a timeout to cancel it in case the remote animation is
         // never started.
         if (willAnimate) {
+            keyguardHandler.disableKeyguardBlurs()
             runner.postTimeout()
 
             // Hide the keyguard using the launch animation instead of the default unlock animation.
@@ -218,6 +219,9 @@ class ActivityLaunchAnimator(
 
         /** Hide the keyguard and animate using [runner]. */
         fun hideKeyguardWithAnimation(runner: IRemoteAnimationRunner)
+
+        /** Disable window blur so they don't overlap with the window launch animation **/
+        fun disableKeyguardBlurs()
     }
 
     /**

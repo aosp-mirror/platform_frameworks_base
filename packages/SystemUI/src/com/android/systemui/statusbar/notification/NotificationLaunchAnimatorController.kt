@@ -3,7 +3,6 @@ package com.android.systemui.statusbar.notification
 import android.view.ViewGroup
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.animation.ActivityLaunchAnimator
-import com.android.systemui.statusbar.NotificationShadeDepthController
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone
@@ -15,7 +14,6 @@ import kotlin.math.max
 class NotificationLaunchAnimatorControllerProvider(
     private val notificationShadeWindowViewController: NotificationShadeWindowViewController,
     private val notificationListContainer: NotificationListContainer,
-    private val depthController: NotificationShadeDepthController,
     private val headsUpManager: HeadsUpManagerPhone
 ) {
     fun getAnimatorController(
@@ -24,7 +22,6 @@ class NotificationLaunchAnimatorControllerProvider(
         return NotificationLaunchAnimatorController(
             notificationShadeWindowViewController,
             notificationListContainer,
-            depthController,
             notification,
             headsUpManager
         )
@@ -39,7 +36,6 @@ class NotificationLaunchAnimatorControllerProvider(
 class NotificationLaunchAnimatorController(
     private val notificationShadeWindowViewController: NotificationShadeWindowViewController,
     private val notificationListContainer: NotificationListContainer,
-    private val depthController: NotificationShadeDepthController,
     private val notification: ExpandableNotificationRow,
     private val headsUpManager: HeadsUpManagerPhone
 ) : ActivityLaunchAnimator.Controller {
@@ -128,7 +124,6 @@ class NotificationLaunchAnimatorController(
     private fun applyParams(params: ExpandAnimationParameters?) {
         notification.applyExpandAnimationParams(params)
         notificationListContainer.applyExpandAnimationParams(params)
-        depthController.notificationLaunchAnimationParams = params
     }
 
     override fun onLaunchAnimationProgress(

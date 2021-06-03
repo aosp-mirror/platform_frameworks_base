@@ -46,6 +46,7 @@ import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.phone.DozeParameters;
@@ -99,7 +100,8 @@ public class KeyguardModule {
             SysuiStatusBarStateController statusBarStateController,
             KeyguardStateController keyguardStateController,
             Lazy<KeyguardUnlockAnimationController> keyguardUnlockAnimationController,
-            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController) {
+            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
+            Lazy<NotificationShadeDepthController> notificationShadeDepthController) {
         return new KeyguardViewMediator(
                 context,
                 falsingCollector,
@@ -119,7 +121,8 @@ public class KeyguardModule {
                 statusBarStateController,
                 keyguardStateController,
                 keyguardUnlockAnimationController,
-                unlockedScreenOffAnimationController
+                unlockedScreenOffAnimationController,
+                notificationShadeDepthController
         );
     }
 

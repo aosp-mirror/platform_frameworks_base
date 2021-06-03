@@ -123,6 +123,7 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
 
         waitForIdleSync()
         verify(controller).onIntentStarted(willAnimateCaptor.capture())
+        verify(keyguardHandler).disableKeyguardBlurs()
         verify(keyguardHandler).hideKeyguardWithAnimation(any())
 
         assertTrue(willAnimateCaptor.value)
@@ -188,6 +189,10 @@ private class TestLaunchAnimatorKeyguardHandler(
     private val isOnKeyguard: Boolean
 ) : ActivityLaunchAnimator.KeyguardHandler {
     override fun isOnKeyguard(): Boolean = isOnKeyguard
+
+    override fun disableKeyguardBlurs() {
+        // Do nothing
+    }
 
     override fun hideKeyguardWithAnimation(runner: IRemoteAnimationRunner) {
         // Do nothing.
