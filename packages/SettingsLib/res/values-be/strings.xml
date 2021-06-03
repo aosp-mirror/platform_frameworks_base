@@ -252,8 +252,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Сертыфікацыя бесправаднога экрана"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Уключыць падрабязны журнал Wi‑Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Рэгуляванне пошуку сетак Wi‑Fi"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization (882650208573834301) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"Рандамізацыя выпадковых MAC-адрасоў у сетках Wi‑Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Мабільная перадача даных заўсёды актыўная"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Апаратнае паскарэнне ў рэжыме мадэма"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Паказваць прылады Bluetooth без назваў"</string>
@@ -351,7 +350,7 @@
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Адключыць аўдыямаршрутызацыю USB"</string>
     <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Выкл. аўтаперанакіраванне на USB-аўдыяпрылады"</string>
     <string name="debug_layout" msgid="1659216803043339741">"Паказаць межы макета"</string>
-    <string name="debug_layout_summary" msgid="8825829038287321978">"Паказаць межы кліпа, палі і г. д."</string>
+    <string name="debug_layout_summary" msgid="8825829038287321978">"Паказаць межы абрэзкі, палі і г. д."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Прымусовая раскладка справа налева"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Прымусовая раскладка экрана справа налева для ўсіх рэгіянальных налад"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Прымусовае выкананне 4x MSAA"</string>
@@ -374,8 +373,8 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Паведамляць аб тым, што праграма не адказвае"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Паказваць папярэджанні канала апавяшчэннаў"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Паказвае папярэджанне на экране, калі праграма публікуе апавяшчэнне без сапраўднага канала"</string>
-    <string name="force_allow_on_external" msgid="9187902444231637880">"Прымусова дазволіць праграмы на вонкавым сховішчы"</string>
-    <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Робіць любую праграму даступнай для запісу на вонкавае сховішча, незалежна ад значэнняў маніфеста"</string>
+    <string name="force_allow_on_external" msgid="9187902444231637880">"Прымусова дазволіць праграмы ў знешнім сховішчы"</string>
+    <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Робіць любую праграму даступнай для запісу ў знешняе сховішча, незалежна ад значэнняў маніфеста"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Зрабіць вокны дзеянняў даступнымі для змены памеру"</string>
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Зрабіць усе віды дзейнасці даступнымі для змены памеру ў рэжыме некалькіх вокнаў, незалежна ад значэнняў маніфеста."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Уключыць адвольную форму вокнаў"</string>
@@ -454,8 +453,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"Да поўнай зарадкі засталося <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – да поўнай зарадкі засталося: <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_charging_limited (7956120998372505295) -->
-    <skip />
+    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> – Зарадка часова абмежавана"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Невядома"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Зарадка"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Хуткая зарадка"</string>

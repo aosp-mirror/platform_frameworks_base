@@ -236,7 +236,7 @@
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Hãy kết nối mạng Wi-Fi"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, gỡ lỗi, nhà phát triển"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Phím tắt báo cáo lỗi"</string>
-    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Hiển thị một nút trong menu nguồn để báo cáo lỗi"</string>
+    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Hiện một nút trong trình đơn nguồn để báo cáo lỗi"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Không khóa màn hình"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"Màn hình sẽ không bao giờ chuyển sang chế độ ngủ khi sạc"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Bật nhật ký theo dõi HCI Bluetooth"</string>
@@ -252,8 +252,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Chứng nhận hiển thị không dây"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Bật ghi nhật ký chi tiết Wi‑Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Hạn chế quét tìm Wi-Fi"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization (882650208573834301) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"Sắp xếp ngẫu nhiên địa chỉ MAC không ổn định khi kết nối Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Dữ liệu di động luôn hoạt động"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Tăng tốc phần cứng khi chia sẻ Internet"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Hiện các thiết bị Bluetooth không có tên"</string>
@@ -405,7 +404,7 @@
     <string name="transcode_user_control" msgid="6176368544817731314">"Ghi đè tùy chọn chuyển mã mặc định"</string>
     <string name="transcode_enable_all" msgid="2411165920039166710">"Bật tính năng chuyển mã"</string>
     <string name="transcode_default" msgid="3784803084573509491">"Giả định rằng các ứng dụng hỗ trợ định dạng hiện đại"</string>
-    <string name="transcode_notification" msgid="5560515979793436168">"Hiển thị thông báo chuyển mã"</string>
+    <string name="transcode_notification" msgid="5560515979793436168">"Hiện thông báo chuyển mã"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"Vô hiệu hóa bộ nhớ đệm dùng để chuyển mã"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Các dịch vụ đang chạy"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Xem và kiểm soát các dịch vụ đang chạy"</string>
@@ -454,8 +453,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> nữa là pin đầy"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> nữa là pin đầy"</string>
-    <!-- no translation found for power_charging_limited (7956120998372505295) -->
-    <skip />
+    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> – Mức sạc tạm thời bị giới hạn"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Không xác định"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Đang sạc"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Đang sạc nhanh"</string>

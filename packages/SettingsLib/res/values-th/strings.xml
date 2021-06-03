@@ -197,7 +197,7 @@
     <string name="choose_profile" msgid="343803890897657450">"เลือกโปรไฟล์"</string>
     <string name="category_personal" msgid="6236798763159385225">"ส่วนตัว"</string>
     <string name="category_work" msgid="4014193632325996115">"ที่ทำงาน"</string>
-    <string name="development_settings_title" msgid="140296922921597393">"ตัวเลือกสำหรับนักพัฒนาซอฟต์แวร์"</string>
+    <string name="development_settings_title" msgid="140296922921597393">"ตัวเลือกสำหรับนักพัฒนาแอป"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"เปิดใช้ตัวเลือกสำหรับนักพัฒนาซอฟต์แวร์"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"ตั้งค่าตัวเลือกสำหรับการพัฒนาแอปพลิเคชัน"</string>
     <string name="development_settings_not_available" msgid="355070198089140951">"ตัวเลือกสำหรับนักพัฒนาซอฟต์แวร์ไม่สามารถใช้ได้สำหรับผู้ใช้นี้"</string>
@@ -252,8 +252,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"การรับรองการแสดงผลแบบไร้สาย"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"เปิดใช้การบันทึกรายละเอียด Wi-Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"การควบคุมการสแกนหา Wi‑Fi"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization (882650208573834301) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"การสุ่ม MAC ที่มี Wi-Fi ไม่ถาวร"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"เปิดใช้เน็ตมือถือเสมอ"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"การเร่งฮาร์ดแวร์การเชื่อมต่ออินเทอร์เน็ตผ่านมือถือ"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"แสดงอุปกรณ์บลูทูธที่ไม่มีชื่อ"</string>
@@ -282,7 +281,7 @@
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"ชื่อโฮสต์ของผู้ให้บริการ DNS ส่วนตัว"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"ป้อนชื่อโฮสต์ของผู้ให้บริการ DNS"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"เชื่อมต่อไม่ได้"</string>
-    <string name="wifi_display_certification_summary" msgid="8111151348106907513">"แสดงตัวเลือกสำหรับการรับรองการแสดงผล แบบไร้สาย"</string>
+    <string name="wifi_display_certification_summary" msgid="8111151348106907513">"แสดงตัวเลือกสำหรับการรับรองการแสดงผลแบบไร้สาย"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"เพิ่มระดับการบันทึก Wi‑Fi แสดงต่อ SSID RSSI ในตัวเลือก Wi‑Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"ลดการเปลืองแบตเตอรี่และเพิ่มประสิทธิภาพเครือข่าย"</string>
     <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"เมื่อเปิดใช้โหมดนี้ ที่อยู่ MAC ของอุปกรณ์นี้อาจเปลี่ยนทุกครั้งที่เชื่อมต่อกับเครือข่ายที่มีการเปิดใช้การสุ่ม MAC"</string>
@@ -454,8 +453,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"อีก <xliff:g id="TIME">%1$s</xliff:g> จึงจะเต็ม"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - อีก <xliff:g id="TIME">%2$s</xliff:g> จึงจะเต็ม"</string>
-    <!-- no translation found for power_charging_limited (7956120998372505295) -->
-    <skip />
+    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> - จำกัดการชาร์จชั่วคราว"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"ไม่ทราบ"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"กำลังชาร์จ"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"กำลังชาร์จอย่างเร็ว"</string>
