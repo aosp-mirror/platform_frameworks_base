@@ -124,9 +124,6 @@ public class StackAnimationController extends
      */
     private Rect mAnimatingToBounds = new Rect();
 
-    /** Initial starting location for the stack. */
-    @Nullable private BubbleStackView.RelativeStackPosition mStackStartPosition;
-
     /** Whether or not the stack's start position has been set. */
     private boolean mStackMovedToStartPosition = false;
 
