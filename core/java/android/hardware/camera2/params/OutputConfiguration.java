@@ -846,6 +846,14 @@ public final class OutputConfiguration implements Parcelable {
         return 0;
     }
 
+    private static int[] convertIntegerToIntList(List<Integer> integerList) {
+        int[] integerArray = new int[integerList.size()];
+        for (int i = 0; i < integerList.size(); i++) {
+            integerArray[i] = integerList.get(i);
+        }
+        return integerArray;
+    }
+
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         if (dest == null) {
@@ -861,7 +869,9 @@ public final class OutputConfiguration implements Parcelable {
         dest.writeTypedList(mSurfaces);
         dest.writeString(mPhysicalCameraId);
         dest.writeInt(mIsMultiResolution ? 1 : 0);
-        dest.writeList(mSensorPixelModesUsed);
+        // writeList doesn't seem to work well with Integer list.
+        dest.writeIntArray(convertIntegerToIntList(mSensorPixelModesUsed));
+        //dest.writeArray(mSensorPixelModesUsed.toArray());
     }
 
     /**

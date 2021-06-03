@@ -84,6 +84,7 @@ cc_library_shared {
         android: {
             srcs: [
                 "AndroidRuntime.cpp",
+                "com_android_internal_content_F2fsUtils.cpp",
                 "com_android_internal_content_NativeLibraryHelper.cpp",
                 "com_google_android_gles_jni_EGLImpl.cpp",
                 "com_google_android_gles_jni_GLImpl.cpp", // TODO: .arm
@@ -222,7 +223,6 @@ cc_library_shared {
                 "fd_utils.cpp",
                 "android_hardware_input_InputWindowHandle.cpp",
                 "android_hardware_input_InputApplicationHandle.cpp",
-                "permission_utils.cpp",
             ],
 
             static_libs: [
@@ -241,7 +241,6 @@ cc_library_shared {
                 "audioflinger-aidl-cpp",
                 "av-types-aidl-cpp",
                 "android.hardware.camera.device@3.2",
-                "media_permission-aidl-cpp",
                 "libandroidicu",
                 "libbpf_android",
                 "libnetdbpf",
@@ -258,6 +257,7 @@ cc_library_shared {
                 "libgraphicsenv",
                 "libgui",
                 "libmediandk",
+                "libpermission",
                 "libsensor",
                 "libinput",
                 "libcamera_client",

@@ -5,13 +5,18 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.app.ActivityManager
 import android.app.ActivityTaskManager
+import android.app.AppGlobals
 import android.app.PendingIntent
 import android.content.Context
 import android.graphics.Matrix
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffXfermode
 import android.graphics.Rect
 import android.graphics.RectF
+import android.graphics.drawable.GradientDrawable
 import android.os.Looper
 import android.os.RemoteException
+import android.os.UserHandle
 import android.util.Log
 import android.util.MathUtils
 import android.view.IRemoteAnimationFinishedCallback
@@ -26,6 +31,8 @@ import android.view.animation.AnimationUtils
 import android.view.animation.PathInterpolator
 import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.policy.ScreenDecorationsUtils
+import com.android.wm.shell.startingsurface.SplashscreenContentDrawer
+import com.android.wm.shell.startingsurface.SplashscreenContentDrawer.SplashScreenWindowAttrs
 import kotlin.math.roundToInt
 
 /**
@@ -40,9 +47,9 @@ class ActivityLaunchAnimator(
 
     companion object {
         const val ANIMATION_DURATION = 500L
-        const val ANIMATION_DURATION_FADE_OUT_CONTENT = 183L
-        const val ANIMATION_DURATION_FADE_IN_WINDOW = 217L
-        const val ANIMATION_DELAY_FADE_IN_WINDOW = 167L
+        private const val ANIMATION_DURATION_FADE_OUT_CONTENT = 150L
+        private const val ANIMATION_DURATION_FADE_IN_WINDOW = 183L
+        private const val ANIMATION_DELAY_FADE_IN_WINDOW = ANIMATION_DURATION_FADE_OUT_CONTENT
         private const val ANIMATION_DURATION_NAV_FADE_IN = 266L
         private const val ANIMATION_DURATION_NAV_FADE_OUT = 133L
         private const val ANIMATION_DELAY_NAV_FADE_IN =
@@ -53,6 +60,8 @@ class ActivityLaunchAnimator(
         private val WINDOW_FADE_IN_INTERPOLATOR = PathInterpolator(0f, 0f, 0.6f, 1f)
         private val NAV_FADE_IN_INTERPOLATOR = PathInterpolator(0f, 0f, 0f, 1f)
         private val NAV_FADE_OUT_INTERPOLATOR = PathInterpolator(0.2f, 0f, 1f, 1f)
+
+        private val SRC_MODE = PorterDuffXfermode(PorterDuff.Mode.SRC)
 
         /**
          * Given the [linearProgress] of a launch animation, return the linear progress of the
@@ -68,6 +77,8 @@ class ActivityLaunchAnimator(
         }
     }
 
+    private val packageManager = AppGlobals.getPackageManager()
+
     /** The interpolator used for the width, height, Y position and corner radius. */
     private val animationInterpolator = AnimationUtils.loadInterpolator(context,
             R.interpolator.launch_animation_interpolator_y)
@@ -75,6 +86,8 @@ class ActivityLaunchAnimator(
     /** The interpolator used for the X position. */
     private val animationInterpolatorX = AnimationUtils.loadInterpolator(context,
             R.interpolator.launch_animation_interpolator_x)
+
+    private val cornerRadii = FloatArray(8)
 
     /**
      * Start an intent and animate the opening window. The intent will be started by running
@@ -288,10 +301,7 @@ class ActivityLaunchAnimator(
         var right: Int,
 
         var topCornerRadius: Float = 0f,
-        var bottomCornerRadius: Float = 0f,
-
-        var contentAlpha: Float = 1f,
-        var backgroundAlpha: Float = 1f
+        var bottomCornerRadius: Float = 0f
     ) {
         private val startTop = top
         private val startBottom = bottom
@@ -331,6 +341,9 @@ class ActivityLaunchAnimator(
 
         val centerY: Float
             get() = top + height / 2f
+
+        /** Whether the expanded view should be visible or hidden. */
+        var visible: Boolean = true
     }
 
     @VisibleForTesting
@@ -452,22 +465,39 @@ class ActivityLaunchAnimator(
                 0f
             }
 
+            // We add an extra layer with the same color as the app splash screen background color,
+            // which is usually the same color of the app background. We first fade in this layer
+            // to hide the expanding view, then we fade it out with SRC mode to draw a hole in the
+            // launch container and reveal the opening window.
+            val windowBackgroundColor = extractSplashScreenBackgroundColor(window)
+            val windowBackgroundLayer = GradientDrawable().apply {
+                setColor(windowBackgroundColor)
+                alpha = 0
+            }
+
             // Update state.
             val animator = ValueAnimator.ofFloat(0f, 1f)
             this.animator = animator
             animator.duration = ANIMATION_DURATION
             animator.interpolator = Interpolators.LINEAR
 
+            val launchContainerOverlay = launchContainer.overlay
             animator.addListener(object : AnimatorListenerAdapter() {
                 override fun onAnimationStart(animation: Animator?, isReverse: Boolean) {
                     Log.d(TAG, "Animation started")
                     controller.onLaunchAnimationStart(isExpandingFullyAbove)
+
+                    // Add the drawable to the launch container overlay. Overlays always draw
+                    // drawables after views, so we know that it will be drawn above any view added
+                    // by the controller.
+                    launchContainerOverlay.add(windowBackgroundLayer)
                 }
 
                 override fun onAnimationEnd(animation: Animator?) {
                     Log.d(TAG, "Animation ended")
                     iCallback?.invoke()
                     controller.onLaunchAnimationEnd(isExpandingFullyAbove)
+                    launchContainerOverlay.remove(windowBackgroundLayer)
                 }
             })
 
@@ -491,22 +521,59 @@ class ActivityLaunchAnimator(
                 state.bottomCornerRadius =
                     MathUtils.lerp(startBottomCornerRadius, endRadius, progress)
 
-                val contentAlphaProgress = getProgress(linearProgress, 0,
-                        ANIMATION_DURATION_FADE_OUT_CONTENT)
-                state.contentAlpha =
-                        1 - CONTENT_FADE_OUT_INTERPOLATOR.getInterpolation(contentAlphaProgress)
-
-                val backgroundAlphaProgress = getProgress(linearProgress,
-                        ANIMATION_DELAY_FADE_IN_WINDOW, ANIMATION_DURATION_FADE_IN_WINDOW)
-                state.backgroundAlpha =
-                        1 - WINDOW_FADE_IN_INTERPOLATOR.getInterpolation(backgroundAlphaProgress)
+                // The expanding view can/should be hidden once it is completely coverred by the
+                // windowBackgroundLayer.
+                state.visible =
+                        getProgress(linearProgress, 0, ANIMATION_DURATION_FADE_OUT_CONTENT) < 1
 
                 applyStateToWindow(window, state)
+                applyStateToWindowBackgroundLayer(windowBackgroundLayer, state, linearProgress)
                 navigationBar?.let { applyStateToNavigationBar(it, state, linearProgress) }
+
+                // If we started expanding the view, we make it 1 pixel smaller on all sides to
+                // avoid artefacts on the corners caused by anti-aliasing of the view background and
+                // the window background layer.
+                if (state.top != startTop && state.left != startLeft &&
+                        state.bottom != startBottom && state.right != startRight) {
+                    state.top += 1
+                    state.left += 1
+                    state.right -= 1
+                    state.bottom -= 1
+                }
                 controller.onLaunchAnimationProgress(state, progress, linearProgress)
             }
 
             animator.start()
+        }
+
+        /** Extract the background color of the app splash screen. */
+        private fun extractSplashScreenBackgroundColor(window: RemoteAnimationTarget): Int {
+            val taskInfo = window.taskInfo
+            val windowPackage = taskInfo.topActivity.packageName
+            val userId = taskInfo.userId
+            val windowContext = context.createPackageContextAsUser(
+                    windowPackage, Context.CONTEXT_RESTRICTED, UserHandle.of(userId))
+            val activityInfo = taskInfo.topActivityInfo
+            val splashScreenThemeName = packageManager.getSplashScreenTheme(windowPackage, userId)
+            val splashScreenThemeId = if (splashScreenThemeName != null) {
+                windowContext.resources.getIdentifier(splashScreenThemeName, null, null)
+            } else {
+                0
+            }
+
+            val themeResId = when {
+                splashScreenThemeId != 0 -> splashScreenThemeId
+                activityInfo.themeResource != 0 -> activityInfo.themeResource
+                else -> com.android.internal.R.style.Theme_DeviceDefault_DayNight
+            }
+
+            if (themeResId != windowContext.themeResId) {
+                windowContext.setTheme(themeResId)
+            }
+
+            val windowAttrs = SplashScreenWindowAttrs()
+            SplashscreenContentDrawer.getWindowAttrs(windowContext, windowAttrs)
+            return SplashscreenContentDrawer.peekWindowBGColor(windowContext, windowAttrs)
         }
 
         private fun applyStateToWindow(window: RemoteAnimationTarget, state: State) {
@@ -561,6 +628,41 @@ class ActivityLaunchAnimator(
                 .build()
 
             transactionApplier.scheduleApply(params)
+        }
+
+        private fun applyStateToWindowBackgroundLayer(
+            drawable: GradientDrawable,
+            state: State,
+            linearProgress: Float
+        ) {
+            // Update position.
+            drawable.setBounds(state.left, state.top, state.right, state.bottom)
+
+            // Update radius.
+            cornerRadii[0] = state.topCornerRadius
+            cornerRadii[1] = state.topCornerRadius
+            cornerRadii[2] = state.topCornerRadius
+            cornerRadii[3] = state.topCornerRadius
+            cornerRadii[4] = state.bottomCornerRadius
+            cornerRadii[5] = state.bottomCornerRadius
+            cornerRadii[6] = state.bottomCornerRadius
+            cornerRadii[7] = state.bottomCornerRadius
+            drawable.cornerRadii = cornerRadii
+
+            // We first fade in the background layer to hide the expanding view, then fade it out
+            // with SRC mode to draw a hole punch in the status bar and reveal the opening window.
+            val fadeInProgress = getProgress(linearProgress, 0, ANIMATION_DURATION_FADE_OUT_CONTENT)
+            if (fadeInProgress < 1) {
+                val alpha = CONTENT_FADE_OUT_INTERPOLATOR.getInterpolation(fadeInProgress)
+                drawable.alpha = (alpha * 0xFF).roundToInt()
+                drawable.setXfermode(null)
+            } else {
+                val fadeOutProgress = getProgress(linearProgress,
+                        ANIMATION_DELAY_FADE_IN_WINDOW, ANIMATION_DURATION_FADE_IN_WINDOW)
+                val alpha = 1 - WINDOW_FADE_IN_INTERPOLATOR.getInterpolation(fadeOutProgress)
+                drawable.alpha = (alpha * 0xFF).roundToInt()
+                drawable.setXfermode(SRC_MODE)
+            }
         }
 
         private fun applyStateToNavigationBar(

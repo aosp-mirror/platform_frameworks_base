@@ -18,6 +18,8 @@ package com.android.systemui.accessibility.floatingmenu;
 
 import static android.view.View.OVER_SCROLL_ALWAYS;
 import static android.view.View.OVER_SCROLL_NEVER;
+import static android.view.WindowInsets.Type.ime;
+import static android.view.WindowInsets.Type.navigationBars;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -31,9 +33,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Insets;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
@@ -43,7 +47,9 @@ import android.testing.TestableLooper;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewPropertyAnimator;
+import android.view.WindowInsets;
 import android.view.WindowManager;
+import android.view.WindowMetrics;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import androidx.annotation.NonNull;
@@ -79,12 +85,17 @@ public class AccessibilityFloatingMenuViewTest extends SysuiTestCase {
     @Mock
     private ViewPropertyAnimator mAnimator;
 
+    @Mock
+    private WindowMetrics mWindowMetrics;
+
     private MotionEvent mInterceptMotionEvent;
 
     private RecyclerView mListView;
 
     private Rect mAvailableBounds = new Rect(100, 200, 300, 400);
 
+    private int mScreenHeight;
+    private int mMenuWindowHeight;
     private int mMenuHalfWidth;
     private int mMenuHalfHeight;
     private int mScreenHalfWidth;
@@ -111,18 +122,19 @@ public class AccessibilityFloatingMenuViewTest extends SysuiTestCase {
         final int margin =
                 res.getDimensionPixelSize(R.dimen.accessibility_floating_menu_margin);
         final int padding =
-                res.getDimensionPixelSize(R.dimen.accessibility_floating_menu_padding);
+                res.getDimensionPixelSize(R.dimen.accessibility_floating_menu_small_padding);
         final int iconWidthHeight =
                 res.getDimensionPixelSize(R.dimen.accessibility_floating_menu_small_width_height);
         final int menuWidth = padding * 2 + iconWidthHeight;
         final int menuHeight = (padding + iconWidthHeight) * mTargets.size() + padding;
         final int screenWidth = mContext.getResources().getDisplayMetrics().widthPixels;
-        final int screenHeight = mContext.getResources().getDisplayMetrics().heightPixels;
+        mScreenHeight = mContext.getResources().getDisplayMetrics().heightPixels;
         mMenuHalfWidth = menuWidth / 2;
         mMenuHalfHeight = menuHeight / 2;
         mScreenHalfWidth = screenWidth / 2;
-        mScreenHalfHeight = screenHeight / 2;
+        mScreenHalfHeight = mScreenHeight / 2;
         mMaxWindowX = screenWidth - margin - menuWidth;
+        mMenuWindowHeight = menuHeight + margin * 2;
     }
 
     @Test
@@ -464,10 +476,78 @@ public class AccessibilityFloatingMenuViewTest extends SysuiTestCase {
         assertThat(mListView.getOverScrollMode()).isEqualTo(OVER_SCROLL_NEVER);
     }
 
+    @Test
+    public void showMenuView_insetsListener_overlapWithIme_menuViewShifted() {
+        final int offset = 200;
+
+        showMenuWithLatestStatus();
+        final WindowInsets imeInset = fakeImeInsetWith(offset);
+        when(mWindowManager.getCurrentWindowMetrics()).thenReturn(mWindowMetrics);
+        when(mWindowMetrics.getWindowInsets()).thenReturn(imeInset);
+        final int expectedLayoutY = mMenuView.mCurrentLayoutParams.y - offset;
+        mMenuView.dispatchApplyWindowInsets(imeInset);
+
+        assertThat(mMenuView.mCurrentLayoutParams.y).isEqualTo(expectedLayoutY);
+    }
+
+    @Test
+    public void hideIme_onMenuViewShifted_menuViewMovedBack() {
+        final int offset = 200;
+        showMenuWithLatestStatus();
+        final WindowInsets imeInset = fakeImeInsetWith(offset);
+        when(mWindowManager.getCurrentWindowMetrics()).thenReturn(mWindowMetrics);
+        when(mWindowMetrics.getWindowInsets()).thenReturn(imeInset);
+        final int expectedLayoutY = mMenuView.mCurrentLayoutParams.y;
+        mMenuView.dispatchApplyWindowInsets(imeInset);
+
+        mMenuView.dispatchApplyWindowInsets(
+                new WindowInsets.Builder().setVisible(ime(), false).build());
+
+        assertThat(mMenuView.mCurrentLayoutParams.y).isEqualTo(expectedLayoutY);
+    }
+
+    @Test
+    public void showMenuAndIme_withHigherIme_alignScreenTopEdge() {
+        final int offset = 99999;
+
+        showMenuWithLatestStatus();
+        final WindowInsets imeInset = fakeImeInsetWith(offset);
+        when(mWindowManager.getCurrentWindowMetrics()).thenReturn(mWindowMetrics);
+        when(mWindowMetrics.getWindowInsets()).thenReturn(imeInset);
+        mMenuView.dispatchApplyWindowInsets(imeInset);
+
+        assertThat(mMenuView.mCurrentLayoutParams.y).isEqualTo(0);
+    }
+
     @After
     public void tearDown() {
         mInterceptMotionEvent = null;
         mMotionEventHelper.recycleEvents();
+    }
+
+    private void showMenuWithLatestStatus() {
+        mMenuView.show();
+        mMenuView.onTargetsChanged(mTargets);
+        mMenuView.setSizeType(0);
+        mMenuView.setShapeType(0);
+    }
+
+    /**
+     * Based on the current menu status, fake the ime inset component {@link WindowInsets} used
+     * for testing.
+     *
+     * @param offset is used for the y-axis position of ime higher than the y-axis position of menu.
+     * @return the ime inset
+     */
+    private WindowInsets fakeImeInsetWith(int offset) {
+        // Ensure the keyboard has overlapped on the menu view.
+        final int fakeImeHeight =
+                mScreenHeight - (mMenuView.mCurrentLayoutParams.y + mMenuWindowHeight) + offset;
+
+        return new WindowInsets.Builder()
+                .setVisible(ime() | navigationBars(), true)
+                .setInsets(ime() | navigationBars(), Insets.of(0, 0, 0, fakeImeHeight))
+                .build();
     }
 
     private class TestAccessibilityFloatingMenu extends AccessibilityFloatingMenuView {

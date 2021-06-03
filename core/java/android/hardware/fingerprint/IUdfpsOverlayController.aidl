@@ -35,6 +35,10 @@ oneway interface IUdfpsOverlayController {
     // Hides the overlay.
     void hideUdfpsOverlay(int sensorId);
 
+    // Good image captured. Turn off HBM. Success/Reject comes after, which is when hideUdfpsOverlay
+    // will be called.
+    void onAcquiredGood(int sensorId);
+
     // Notifies of enrollment progress changes.
     void onEnrollmentProgress(int sensorId, int remaining);
 

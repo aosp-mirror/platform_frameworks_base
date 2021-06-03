@@ -126,6 +126,7 @@ cc_library_shared {
     ],
 
     shared_libs: [
+        "framework-permission-aidl-cpp",
         "libaudioutils",
         "liblog",
         "libcutils",
@@ -135,7 +136,6 @@ cc_library_shared {
         "libaudioclient",
         "libmediandk",
         "libbinder",
-        "media_permission-aidl-cpp",
     ],
 
     cflags: [

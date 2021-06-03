@@ -19,8 +19,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingStart="@dimen/accessibility_floating_menu_padding"
-    android:paddingEnd="@dimen/accessibility_floating_menu_padding"
+    android:paddingStart="@dimen/accessibility_floating_menu_small_padding"
+    android:paddingEnd="@dimen/accessibility_floating_menu_small_padding"
     android:orientation="vertical"
     android:gravity="center">
 
@@ -28,10 +28,5 @@
         android:id="@+id/icon_view"
         android:layout_width="@dimen/accessibility_floating_menu_small_width_height"
         android:layout_height="@dimen/accessibility_floating_menu_small_width_height"/>
-
-    <View
-        android:id="@+id/transparent_divider"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/accessibility_floating_menu_padding"/>
 
 </LinearLayout>

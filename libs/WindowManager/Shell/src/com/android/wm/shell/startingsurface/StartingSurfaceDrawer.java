@@ -29,6 +29,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.os.IBinder;
@@ -215,6 +216,7 @@ public class StartingSurfaceDrawer {
                 WindowManager.LayoutParams.TYPE_APPLICATION_STARTING);
         params.setFitInsetsSides(0);
         params.setFitInsetsTypes(0);
+        params.format = PixelFormat.TRANSLUCENT;
         int windowFlags = WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
                 | WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
                 | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
