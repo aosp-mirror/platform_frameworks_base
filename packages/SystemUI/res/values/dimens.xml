@@ -151,7 +151,7 @@
     <dimen name="notification_max_heads_up_height_before_s">162dp</dimen>
 
     <!-- Height of a heads up notification in the status bar -->
-    <dimen name="notification_max_heads_up_height">143dp</dimen>
+    <dimen name="notification_max_heads_up_height">136dp</dimen>
 
     <!-- Height of a heads up notification in the status bar -->
     <dimen name="notification_max_heads_up_height_increased">188dp</dimen>
