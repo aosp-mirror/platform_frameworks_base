@@ -699,6 +699,8 @@ public class UserManagerService extends IUserManager.Stub {
         mContext.registerReceiver(mConfigurationChangeReceiver,
                 new IntentFilter(Intent.ACTION_CONFIGURATION_CHANGED),
                 null, mHandler);
+
+        markEphemeralUsersForRemoval();
     }
 
     /**
@@ -709,17 +711,33 @@ public class UserManagerService extends IUserManager.Stub {
         return mLocalService;
     }
 
+    /** Marks all ephemeral users as slated for deletion. **/
+    private void markEphemeralUsersForRemoval() {
+        synchronized (mUsersLock) {
+            final int userSize = mUsers.size();
+            for (int i = 0; i < userSize; i++) {
+                final UserInfo ui = mUsers.valueAt(i).info;
+                if (ui.isEphemeral() && !ui.preCreated && ui.id != UserHandle.USER_SYSTEM) {
+                    addRemovingUserIdLocked(ui.id);
+                    ui.partial = true;
+                    ui.flags |= UserInfo.FLAG_DISABLED;
+                }
+            }
+        }
+    }
+
+    /* Prunes out any partially created or partially removed users. */
     void cleanupPartialUsers() {
-        // Prune out any partially created, partially removed and ephemeral users.
         ArrayList<UserInfo> partials = new ArrayList<>();
         synchronized (mUsersLock) {
             final int userSize = mUsers.size();
             for (int i = 0; i < userSize; i++) {
                 UserInfo ui = mUsers.valueAt(i).info;
-                if ((ui.partial || ui.guestToRemove || (ui.isEphemeral() && !ui.preCreated))
-                        && i != 0) {
+                if ((ui.partial || ui.guestToRemove) && ui.id != UserHandle.USER_SYSTEM) {
                     partials.add(ui);
-                    addRemovingUserIdLocked(ui.id);
+                    if (!mRemovingUserIds.get(ui.id)) {
+                        addRemovingUserIdLocked(ui.id);
+                    }
                     ui.partial = true;
                 }
             }
