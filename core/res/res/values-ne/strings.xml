@@ -476,10 +476,10 @@
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"एपलाई प्रणाली वालपेपर सेट गर्न अनुमति दिन्छ।"</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"तपाईंको वालपेपर आकार समायोजन गर्नुहोस्"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"प्रणाली वालपेपरको आकार सङ्केतहरू मिलाउन एपलाई अनुमति दिन्छ।"</string>
-    <string name="permlab_setTimeZone" msgid="7922618798611542432">"समय क्षेत्र सेट गर्नुहोस्"</string>
-    <string name="permdesc_setTimeZone" product="tablet" msgid="1788868809638682503">"एपलाई ट्याब्लेटको समय क्षेत्र परिवर्तन गर्न अनुमति दिन्छ।"</string>
-    <string name="permdesc_setTimeZone" product="tv" msgid="9069045914174455938">"एपलाई तपाईंको Android टिभी डिभाइसको समय क्षेत्र परिवर्तन गर्ने अनुमति दिन्छ।"</string>
-    <string name="permdesc_setTimeZone" product="default" msgid="4611828585759488256">"एपलाई फोनको समय क्षेत्र परिवर्तन गर्न अनुमति दिन्छ।"</string>
+    <string name="permlab_setTimeZone" msgid="7922618798611542432">"प्रामाणिक समय सेट गर्नुहोस्"</string>
+    <string name="permdesc_setTimeZone" product="tablet" msgid="1788868809638682503">"एपलाई ट्याब्लेटको प्रामाणिक समय परिवर्तन गर्न अनुमति दिन्छ।"</string>
+    <string name="permdesc_setTimeZone" product="tv" msgid="9069045914174455938">"एपलाई तपाईंको Android टिभी डिभाइसको प्रामाणिक समय परिवर्तन गर्ने अनुमति दिन्छ।"</string>
+    <string name="permdesc_setTimeZone" product="default" msgid="4611828585759488256">"एपलाई फोनको प्रामाणिक समय परिवर्तन गर्न अनुमति दिन्छ।"</string>
     <string name="permlab_getAccounts" msgid="5304317160463582791">"उपकरणमा खाताहरू भेट्टाउनुहोस्"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="1784452755887604512">"एपलाई ट्याब्लेटद्वारा ज्ञात खाताहरूको सूची पाउन अनुमति दिन्छ। यसले अनुप्रयोगद्वारा तपाईंले स्थापित गर्नुभएको कुनै पनि खाताहरू समावेश गर्न सक्दछ।"</string>
     <string name="permdesc_getAccounts" product="tv" msgid="437604680436540822">"एपलाई तपाईंको Android टिभी यन्त्रले चिनेका खाताहरूको सूची प्राप्त गर्ने अनुमति दिन्छ। उक्त सूचीमा तपाईंले स्थापना गर्नुभएका एपहरूले बनाएका कुनै पनि खाताहरू पर्न सक्छन्।"</string>
@@ -1469,7 +1469,7 @@
     <string name="sync_undo_deletes" msgid="5786033331266418896">"मेटिएकाहरू पूर्ववत बनाउनुहोस्।"</string>
     <string name="sync_do_nothing" msgid="4528734662446469646">"अहिलेको लागि केही नगर्नुहोस्"</string>
     <string name="choose_account_label" msgid="5557833752759831548">"एउटा खाता छान्‍नुहोस्"</string>
-    <string name="add_account_label" msgid="4067610644298737417">"एउटा खाता थप्नुहोस्"</string>
+    <string name="add_account_label" msgid="4067610644298737417">"खाता हाल्नुहोस्"</string>
     <string name="add_account_button_label" msgid="322390749416414097">"खाता थप्नुहोस्"</string>
     <string name="number_picker_increment_button" msgid="7621013714795186298">"बढाउनुहोस्"</string>
     <string name="number_picker_decrement_button" msgid="5116948444762708204">"घटाउनुहोस्"</string>

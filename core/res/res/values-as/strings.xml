@@ -301,7 +301,7 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"আপোনাৰ কেলেণ্ডাৰ ব্যৱহাৰ কৰিব পাৰে"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"এছএমএছ"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"এছএমএছ বার্তা পঠিয়াব আৰু চাব পাৰে"</string>
-    <string name="permgrouplab_storage" msgid="1938416135375282333">"ফাইল আৰু মিডিয়াবোৰ"</string>
+    <string name="permgrouplab_storage" msgid="1938416135375282333">"ফাইল আৰু মিডিয়া"</string>
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"আপোনাৰ ডিভাইচৰ ফট\', মিডিয়া আৰু ফাইলসমূহ ব্যৱহাৰ কৰিব পাৰে"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"মাইক্ৰ\'ফ\'ন"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"অডিঅ\' ৰেকর্ড কৰিব পাৰে"</string>
