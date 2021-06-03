@@ -501,37 +501,38 @@ public class ContentProviderHelper {
 
             mService.grantImplicitAccess(userId, null, callingUid,
                     UserHandle.getAppId(cpi.applicationInfo.uid));
-        }
 
-        if (caller != null) {
-            // The client will be waiting, and we'll notify it when the provider is ready.
-            synchronized (cpr) {
-                if (cpr.provider == null) {
-                    if (cpr.launchingApp == null) {
-                        Slog.w(TAG, "Unable to launch app "
-                                + cpi.applicationInfo.packageName + "/"
-                                + cpi.applicationInfo.uid + " for provider "
-                                + name + ": launching app became null");
-                        EventLogTags.writeAmProviderLostProcess(
-                                UserHandle.getUserId(cpi.applicationInfo.uid),
-                                cpi.applicationInfo.packageName,
-                                cpi.applicationInfo.uid, name);
-                        return null;
-                    }
+            if (caller != null) {
+                // The client will be waiting, and we'll notify it when the provider is ready.
+                synchronized (cpr) {
+                    if (cpr.provider == null) {
+                        if (cpr.launchingApp == null) {
+                            Slog.w(TAG, "Unable to launch app "
+                                    + cpi.applicationInfo.packageName + "/"
+                                    + cpi.applicationInfo.uid + " for provider "
+                                    + name + ": launching app became null");
+                            EventLogTags.writeAmProviderLostProcess(
+                                    UserHandle.getUserId(cpi.applicationInfo.uid),
+                                    cpi.applicationInfo.packageName,
+                                    cpi.applicationInfo.uid, name);
+                            return null;
+                        }
 
-                    if (conn != null) {
-                        conn.waiting = true;
+                        if (conn != null) {
+                            conn.waiting = true;
+                        }
+                        Message msg = mService.mHandler.obtainMessage(
+                                ActivityManagerService.WAIT_FOR_CONTENT_PROVIDER_TIMEOUT_MSG);
+                        msg.obj = cpr;
+                        mService.mHandler.sendMessageDelayed(msg,
+                                ContentResolver.CONTENT_PROVIDER_READY_TIMEOUT_MILLIS);
                     }
-                    Message msg = mService.mHandler.obtainMessage(
-                            ActivityManagerService.WAIT_FOR_CONTENT_PROVIDER_TIMEOUT_MSG);
-                    msg.obj = cpr;
-                    mService.mHandler.sendMessageDelayed(msg,
-                            ContentResolver.CONTENT_PROVIDER_READY_TIMEOUT_MILLIS);
                 }
+                // Return a holder instance even if we are waiting for the publishing of the
+                // provider, client will check for the holder.provider to see if it needs to wait
+                // for it.
+                return cpr.newHolder(conn, false);
             }
-            // Return a holder instance even if we are waiting for the publishing of the provider,
-            // client will check for the holder.provider to see if it needs to wait for it.
-            return cpr.newHolder(conn, false);
         }
 
         // Because of the provider's external client (i.e., SHELL), we'll have to wait right here.
