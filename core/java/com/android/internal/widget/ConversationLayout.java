@@ -150,7 +150,6 @@ public class ConversationLayout extends FrameLayout
     private Icon mShortcutIcon;
     private View mAppNameDivider;
     private TouchDelegateComposite mTouchDelegate = new TouchDelegateComposite(this);
-    private int mNotificationHeaderSeparatingMargin;
 
     public ConversationLayout(@NonNull Context context) {
         super(context);
@@ -284,8 +283,6 @@ public class ConversationLayout extends FrameLayout
         mAppName.setOnVisibilityChangedListener((visibility) -> {
             onAppNameVisibilityChanged();
         });
-        mNotificationHeaderSeparatingMargin = getResources().getDimensionPixelSize(
-                R.dimen.notification_header_separating_margin);
     }
 
     @RemotableViewMethod
@@ -1031,7 +1028,6 @@ public class ConversationLayout extends FrameLayout
         }
         mTouchDelegate.clear();
         if (mFeedbackIcon.getVisibility() == VISIBLE) {
-            updateFeedbackIconMargins();
             float width = Math.max(mMinTouchSize, mFeedbackIcon.getWidth());
             float height = Math.max(mMinTouchSize, mFeedbackIcon.getHeight());
             final Rect feedbackTouchRect = new Rect();
@@ -1055,12 +1051,6 @@ public class ConversationLayout extends FrameLayout
             touchRect.offset(viewGroup.getLeft(), viewGroup.getTop());
             viewGroup = (ViewGroup) viewGroup.getParent();
         }
-    }
-
-    private void updateFeedbackIconMargins() {
-        MarginLayoutParams lp = (MarginLayoutParams) mFeedbackIcon.getLayoutParams();
-        lp.setMarginStart(mNotificationHeaderSeparatingMargin);
-        mFeedbackIcon.setLayoutParams(lp);
     }
 
     public MessagingLinearLayout getMessagingLinearLayout() {
