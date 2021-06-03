@@ -684,6 +684,9 @@ public final class ActiveServices {
                         + r.shortInstanceName;
                 Slog.w(TAG, msg);
                 showFgsBgRestrictedNotificationLocked(r);
+                logFGSStateChangeLocked(r,
+                        FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED__STATE__DENIED,
+                        0);
                 if (CompatChanges.isChangeEnabled(FGS_START_EXCEPTION_CHANGE_ID, callingUid)) {
                     throw new ForegroundServiceStartNotAllowedException(msg);
                 }
