@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package com.android.systemui.classifier;
+
+import static com.google.common.truth.Truth.assertWithMessage;
 
 import android.net.Uri;
 
@@ -34,10 +36,11 @@ public class FalsingManagerFake implements FalsingManager {
     private boolean mIsSimpleTap;
     private boolean mIsFalseDoubleTap;
     private boolean mIsUnlockingDisabled;
-    private boolean mIsClassiferEnabled;
+    private boolean mIsClassifierEnabled;
     private boolean mShouldEnforceBouncer;
     private boolean mIsReportingEnabled;
     private boolean mIsFalseRobustTap;
+    private boolean mDestroyed;
 
     private final List<FalsingBeliefListener> mFalsingBeliefListeners = new ArrayList<>();
     private final List<FalsingTapListener> mTapListeners = new ArrayList<>();
@@ -64,6 +67,7 @@ public class FalsingManagerFake implements FalsingManager {
 
     @Override
     public boolean isFalseTouch(@Classifier.InteractionType int interactionType) {
+        checkDestroyed();
         return mIsFalseTouch;
     }
 
@@ -81,27 +85,30 @@ public class FalsingManagerFake implements FalsingManager {
 
     @Override
     public boolean isSimpleTap() {
+        checkDestroyed();
         return mIsSimpleTap;
     }
 
     @Override
     public boolean isFalseTap(@Penalty int penalty) {
+        checkDestroyed();
         return mIsFalseRobustTap;
     }
 
     @Override
     public boolean isFalseDoubleTap() {
+        checkDestroyed();
         return mIsFalseDoubleTap;
     }
 
     @VisibleForTesting
-    public void setIsClassiferEnabled(boolean isClassiferEnabled) {
-        mIsClassiferEnabled = isClassiferEnabled;
+    public void setIsClassifierEnabled(boolean isClassifierEnabled) {
+        mIsClassifierEnabled = isClassifierEnabled;
     }
 
     @Override
     public boolean isClassifierEnabled() {
-        return mIsClassiferEnabled;
+        return mIsClassifierEnabled;
     }
 
     @Override
@@ -129,7 +136,13 @@ public class FalsingManagerFake implements FalsingManager {
     }
 
     @Override
-    public void cleanup() {
+    public void cleanupInternal() {
+        mDestroyed = true;
+    }
+
+    private void checkDestroyed() {
+        assertWithMessage("FakeFasingManager has been destroyed")
+                .that(mDestroyed).isFalse();
     }
 
     @Override
