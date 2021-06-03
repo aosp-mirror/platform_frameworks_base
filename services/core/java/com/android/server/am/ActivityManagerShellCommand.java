@@ -230,6 +230,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runBugReport(pw);
                 case "force-stop":
                     return runForceStop(pw);
+                case "fgs-notification-rate-limit":
+                    return runFgsNotificationRateLimit(pw);
                 case "crash":
                     return runCrash(pw);
                 case "kill":
@@ -1100,6 +1102,24 @@ final class ActivityManagerShellCommand extends ShellCommand {
             }
         }
         mInterface.forceStopPackage(getNextArgRequired(), userId);
+        return 0;
+    }
+
+    int runFgsNotificationRateLimit(PrintWriter pw) throws RemoteException {
+        final String toggleValue = getNextArgRequired();
+        final boolean enable;
+        switch (toggleValue) {
+            case "enable":
+                enable = true;
+                break;
+            case "disable":
+                enable = false;
+                break;
+            default:
+                throw new IllegalArgumentException(
+                        "Argument must be either 'enable' or 'disable'");
+        }
+        mInterface.enableFgsNotificationRateLimit(enable);
         return 0;
     }
 
@@ -3303,6 +3323,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("        when done to select where it should be delivered. Options are:");
             pw.println("     --progress: will launch a notification right away to show its progress.");
             pw.println("     --telephony: will dump only telephony sections.");
+            pw.println("  fgs-notification-rate-limit {enable | disable}");
+            pw.println("     Enable/disable rate limit on FGS notification deferral policy.");
             pw.println("  force-stop [--user <USER_ID> | all | current] <PACKAGE>");
             pw.println("      Completely stop the given application package.");
             pw.println("  crash [--user <USER_ID>] <PACKAGE|PID>");

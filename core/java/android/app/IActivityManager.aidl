@@ -686,6 +686,14 @@ interface IActivityManager {
     boolean enableAppFreezer(in boolean enable);
 
     /**
+     * Suppress or reenable the rate limit on foreground service notification deferral.
+     * This is for use within CTS and is protected by android.permission.WRITE_DEVICE_CONFIG.
+     *
+     * @param enable false to suppress rate-limit policy; true to reenable it.
+     */
+    boolean enableFgsNotificationRateLimit(in boolean enable);
+
+    /**
      * Holds the AM lock for the specified amount of milliseconds.
      * This is intended for use by the tests that need to imitate lock contention.
      * The token should be obtained by
