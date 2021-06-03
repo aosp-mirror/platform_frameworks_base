@@ -29,6 +29,7 @@ import android.content.pm.PackageManager;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.biometrics.SensorPropertiesInternal;
 import android.os.UserManager;
+import android.util.DisplayMetrics;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
@@ -48,6 +49,16 @@ public class Utils {
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({CREDENTIAL_PIN, CREDENTIAL_PATTERN, CREDENTIAL_PASSWORD})
     @interface CredentialType {}
+
+    static float dpToPixels(Context context, float dp) {
+        return dp * ((float) context.getResources().getDisplayMetrics().densityDpi
+                / DisplayMetrics.DENSITY_DEFAULT);
+    }
+
+    static float pixelsToDp(Context context, float pixels) {
+        return pixels / ((float) context.getResources().getDisplayMetrics().densityDpi
+                / DisplayMetrics.DENSITY_DEFAULT);
+    }
 
     static void notifyAccessibilityContentChanged(AccessibilityManager am, ViewGroup view) {
         if (!am.isEnabled()) {
