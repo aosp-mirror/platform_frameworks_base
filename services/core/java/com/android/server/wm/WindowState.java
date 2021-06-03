@@ -3840,8 +3840,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         fillClientWindowFramesAndConfiguration(mClientWindowFrames, mLastReportedConfiguration,
                 true /* useLatestConfig */, false /* relayoutVisible */);
-        final boolean reportDraw = drawPending || useBLASTSync() || !mRedrawForSyncReported;
-        final boolean forceRelayout = reportOrientation || isDragResizeChanged() || !mRedrawForSyncReported;
+        final boolean syncRedraw = shouldSendRedrawForSync();
+        final boolean reportDraw = syncRedraw || drawPending;
+        final boolean forceRelayout = syncRedraw || reportOrientation || isDragResizeChanged();
         final DisplayContent displayContent = getDisplayContent();
         final boolean alwaysConsumeSystemBars =
                 displayContent.getDisplayPolicy().areSystemBarsForcedShownLw(this);
@@ -5939,10 +5940,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * for Windows involved in these Syncs
      */
     private boolean shouldSendRedrawForSync() {
+        if (mRedrawForSyncReported) {
+            return false;
+        }
         final Task task = getTask();
-        if (task != null && task.getMainWindowSizeChangeTransaction() != null)
-            return !mRedrawForSyncReported;
-        return useBLASTSync() && !mRedrawForSyncReported;
+        if (task != null && task.getMainWindowSizeChangeTransaction() != null) {
+            return true;
+        }
+        return useBLASTSync();
     }
 
     void requestRedrawForSync() {
