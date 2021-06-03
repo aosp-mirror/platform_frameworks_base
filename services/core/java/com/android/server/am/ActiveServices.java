@@ -2002,7 +2002,9 @@ public final class ActiveServices {
 
         for (int i = 0; i < smap.mServicesByInstanceName.size(); i++) {
             final ServiceRecord sr = smap.mServicesByInstanceName.valueAt(i);
-            if (id != sr.foregroundId || !pkg.equals(sr.appInfo.packageName)) {
+            if (!sr.isForeground
+                    || id != sr.foregroundId
+                    || !pkg.equals(sr.appInfo.packageName)) {
                 // Not this one; keep looking
                 continue;
             }
