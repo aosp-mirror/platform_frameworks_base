@@ -717,7 +717,7 @@
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Энэ контентын хөвөн гарч ирэх товчлолтойгоор таны анхаарлыг татдаг."</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Харилцан ярианы хэсгийн дээд талд хөвж буй бөмбөлөг хэлбэрээр харагдах бөгөөд профайлын зургийг түгжигдсэн дэлгэцэд үзүүлнэ"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Тохиргоо"</string>
-    <string name="notification_priority_title" msgid="2079708866333537093">"Ач холбогдол"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"Чухал"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> нь харилцан ярианы онцлогуудыг дэмждэггүй"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Саяхны бөмбөлөг алга байна"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Саяхны бөмбөлгүүд болон үл хэрэгссэн бөмбөлгүүд энд харагдана"</string>

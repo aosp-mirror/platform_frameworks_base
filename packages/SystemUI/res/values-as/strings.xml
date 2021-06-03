@@ -34,7 +34,7 @@
     <string name="invalid_charger_text" msgid="2339310107232691577">"আপোনাৰ ডিভাইচৰ লগত পোৱা চ্চাৰ্জাৰটো ব্যৱহাৰ কৰক।"</string>
     <string name="battery_low_why" msgid="2056750982959359863">"ছেটিংসমূহ"</string>
     <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"বেটাৰি সঞ্চয়কাৰী অন কৰেনে?"</string>
-    <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"বেটাৰি সঞ্চয়কাৰীৰ বিষয়ে"</string>
+    <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"বেটাৰী সঞ্চয়কাৰীৰ বিষয়ে"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"অন কৰক"</string>
     <string name="battery_saver_start_action" msgid="4553256017945469937">"বেটাৰি সঞ্চয়কাৰী অন কৰক"</string>
     <string name="status_bar_settings_settings_button" msgid="534331565185171556">"ছেটিংসমূহ"</string>

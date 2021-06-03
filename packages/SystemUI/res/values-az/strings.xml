@@ -752,7 +752,7 @@
     <string name="notification_conversation_home_screen" msgid="8347136037958438935">"Əsas ekrana əlavə edin"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"bildiriş nəzarəti"</string>
-    <string name="notification_menu_snooze_description" msgid="4740133348901973244">"bildiriş təxirə salma seçimləri"</string>
+    <string name="notification_menu_snooze_description" msgid="4740133348901973244">"bildirişi ertələmə seçimləri"</string>
     <string name="notification_menu_snooze_action" msgid="5415729610393475019">"Mənə xatırladın"</string>
     <string name="notification_menu_settings_action" msgid="7085494017202764285">"Ayarlar"</string>
     <string name="snooze_undo" msgid="60890935148417175">"GERİ QAYTARIN"</string>
