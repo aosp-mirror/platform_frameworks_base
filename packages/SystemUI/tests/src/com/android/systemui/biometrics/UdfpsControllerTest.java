@@ -95,7 +95,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
     @Mock
     private WindowManager mWindowManager;
     @Mock
-    private UdfpsHbmCallback mHbmCallback;
+    private UdfpsHbmProvider mHbmProvider;
     @Mock
     private StatusBarStateController mStatusBarStateController;
     @Mock
@@ -178,7 +178,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mAccessibilityManager,
                 mScreenLifecycle,
                 mVibrator,
-                Optional.of(mHbmCallback));
+                Optional.of(mHbmProvider));
         verify(mFingerprintManager).setUdfpsOverlayController(mOverlayCaptor.capture());
         mOverlayController = mOverlayCaptor.getValue();
         verify(mScreenLifecycle).addObserver(mScreenObserverCaptor.capture());
