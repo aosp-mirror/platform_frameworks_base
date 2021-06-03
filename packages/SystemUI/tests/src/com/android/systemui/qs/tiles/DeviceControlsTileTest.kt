@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.tiles
 
+import android.content.ComponentName
 import android.os.Handler
 import android.content.Context
 import android.content.Intent
@@ -32,6 +33,7 @@ import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.controller.ControlsController
+import com.android.systemui.controls.controller.StructureInfo
 import com.android.systemui.controls.dagger.ControlsComponent
 import com.android.systemui.controls.management.ControlsListingController
 import com.android.systemui.controls.ui.ControlsUiController
@@ -113,6 +115,8 @@ class DeviceControlsTileTest : SysuiTestCase() {
         `when`(qsHost.uiEventLogger).thenReturn(uiEventLogger)
         `when`(controlsComponent.isEnabled()).thenReturn(true)
         `when`(keyguardStateController.isUnlocked()).thenReturn(true)
+        `when`(controlsController.getPreferredStructure())
+                .thenReturn(StructureInfo(ComponentName("pkg", "cls"), "structure", listOf()))
         secureSettings.putInt(Settings.Secure.LOCKSCREEN_SHOW_CONTROLS, 1)
 
         setupControlsComponent()
