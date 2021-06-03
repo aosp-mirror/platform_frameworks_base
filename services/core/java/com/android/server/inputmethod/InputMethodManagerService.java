@@ -2762,7 +2762,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             return false;
         }
 
-        List<InputMethodInfo> imis = mSettings.getEnabledInputMethodListLocked();
+        List<InputMethodInfo> imis = mSettings.getEnabledInputMethodListWithFilterLocked(
+                InputMethodInfo::shouldShowInInputMethodPicker);
         final int N = imis.size();
         if (N > 2) return true;
         if (N < 1) return false;
