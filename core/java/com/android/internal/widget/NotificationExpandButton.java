@@ -52,7 +52,6 @@ public class NotificationExpandButton extends FrameLayout {
     private int mDefaultTextColor;
     private int mHighlightPillColor;
     private int mHighlightTextColor;
-    private boolean mDisallowColor;
 
     public NotificationExpandButton(Context context) {
         this(context, null, 0, 0);
@@ -108,14 +107,6 @@ public class NotificationExpandButton extends FrameLayout {
         return super.pointInView(localX, localY, slop);
     }
 
-    /**
-     * Disable the use of the accent colors for this view, if true.
-     */
-    public void setGrayedOut(boolean shouldApply) {
-        mDisallowColor = shouldApply;
-        updateColors();
-    }
-
     @Override
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(info);
@@ -164,7 +155,7 @@ public class NotificationExpandButton extends FrameLayout {
     }
 
     private void updateColors() {
-        if (shouldShowNumber() && !mDisallowColor) {
+        if (shouldShowNumber()) {
             if (mHighlightPillColor != 0) {
                 mPillView.setBackgroundTintList(ColorStateList.valueOf(mHighlightPillColor));
             }
