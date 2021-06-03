@@ -691,39 +691,6 @@ public class WindowStateTests extends WindowTestsBase {
     }
 
     @Test
-    public void testGetTransformationMatrix() {
-        final int PARENT_WINDOW_OFFSET = 1;
-        final int DISPLAY_IN_PARENT_WINDOW_OFFSET = 2;
-        final int WINDOW_OFFSET = 3;
-        final float OFFSET_SUM =
-                PARENT_WINDOW_OFFSET + DISPLAY_IN_PARENT_WINDOW_OFFSET + WINDOW_OFFSET;
-
-        final WindowState win0 = createWindow(null, TYPE_APPLICATION, "win0");
-
-        final DisplayContent dc = createNewDisplay();
-        win0.getFrame().offsetTo(PARENT_WINDOW_OFFSET, 0);
-        dc.reparentDisplayContent(win0, win0.getSurfaceControl());
-        dc.updateLocation(win0, DISPLAY_IN_PARENT_WINDOW_OFFSET, 0);
-
-        final float[] values = new float[9];
-        final Matrix matrix = new Matrix();
-        final SurfaceControl.Transaction t = spy(StubTransaction.class);
-        final WindowState win1 = createWindow(null, TYPE_APPLICATION, dc, "win1");
-        win1.mHasSurface = true;
-        win1.mSurfaceControl = mock(SurfaceControl.class);
-        win1.mAttrs.surfaceInsets.set(1, 2, 3, 4);
-        win1.getFrame().offsetTo(WINDOW_OFFSET, 0);
-        // Simulate layout
-        win1.mRelayoutCalled = true;
-        win1.updateSurfacePosition(t);
-        win1.getTransformationMatrix(values, matrix);
-
-        matrix.getValues(values);
-        assertEquals(OFFSET_SUM, values[Matrix.MTRANS_X], 0f);
-        assertEquals(0f, values[Matrix.MTRANS_Y], 0f);
-    }
-
-    @Test
     public void testCantReceiveTouchDuringRecentsAnimation() {
         final WindowState win0 = createWindow(null, TYPE_APPLICATION, "win0");
 

@@ -6971,32 +6971,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    /** @see Session#reparentDisplayContent(IWindow, SurfaceControl, int)  */
-    void reparentDisplayContent(IWindow client, SurfaceControl sc, int displayId) {
-        checkCallerOwnsDisplay(displayId);
-
-        synchronized (mGlobalLock) {
-            int uid = Binder.getCallingUid();
-            final long token = Binder.clearCallingIdentity();
-            try {
-                final WindowState win = windowForClientLocked(null, client, false);
-                if (win == null) {
-                    ProtoLog.w(WM_ERROR, "Bad requesting window %s", client);
-                    return;
-                }
-                getDisplayContentOrCreate(displayId, null).reparentDisplayContent(win, sc);
-                // Notifies AccessibilityController to re-compute the window observer of
-                // this embedded display
-                if (mAccessibilityController != null) {
-                    mAccessibilityController.handleWindowObserverOfEmbeddedDisplay(
-                            displayId, win, uid);
-                }
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
-        }
-    }
-
     /** @see Session#updateDisplayContentLocation(IWindow, int, int, int)  */
     void updateDisplayContentLocation(IWindow client, int x, int y, int displayId) {
         checkCallerOwnsDisplay(displayId);
