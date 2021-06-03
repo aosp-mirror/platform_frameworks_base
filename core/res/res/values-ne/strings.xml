@@ -202,7 +202,7 @@
     <string name="gnss_service" msgid="8907781262179951385">"GNSS सेवा"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"सेन्सरको सूचनासम्बन्धी सेवा"</string>
     <string name="twilight_service" msgid="8964898045693187224">"ट्वाइलाइट सेवा"</string>
-    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"समय क्षेत्र पत्ता लगाउने सुविधा (नेटवर्क कनेक्सन नहुँदा)"</string>
+    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"प्रामाणिक समय पत्ता लगाउने सुविधा (नेटवर्क कनेक्सन नहुँदा)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"GNSS को समय अपडेट गर्ने सेवा"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"सङ्गीत पहिचान गर्ने सुविधा व्यवस्थापन गर्ने सेवा"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"तपाईंको यन्त्र मेटिनेछ"</string>
@@ -496,10 +496,10 @@
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"एपलाई प्रणाली वालपेपर सेट गर्न अनुमति दिन्छ।"</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"तपाईंको वालपेपर आकार समायोजन गर्नुहोस्"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"प्रणाली वालपेपरको आकार सङ्केतहरू मिलाउन एपलाई अनुमति दिन्छ।"</string>
-    <string name="permlab_setTimeZone" msgid="7922618798611542432">"समय क्षेत्र सेट गर्नुहोस्"</string>
-    <string name="permdesc_setTimeZone" product="tablet" msgid="1788868809638682503">"एपलाई ट्याब्लेटको समय क्षेत्र परिवर्तन गर्न अनुमति दिन्छ।"</string>
-    <string name="permdesc_setTimeZone" product="tv" msgid="9069045914174455938">"एपलाई तपाईंको Android टिभी डिभाइसको समय क्षेत्र परिवर्तन गर्ने अनुमति दिन्छ।"</string>
-    <string name="permdesc_setTimeZone" product="default" msgid="4611828585759488256">"एपलाई फोनको समय क्षेत्र परिवर्तन गर्न अनुमति दिन्छ।"</string>
+    <string name="permlab_setTimeZone" msgid="7922618798611542432">"प्रामाणिक समय सेट गर्नुहोस्"</string>
+    <string name="permdesc_setTimeZone" product="tablet" msgid="1788868809638682503">"एपलाई ट्याब्लेटको प्रामाणिक समय परिवर्तन गर्न अनुमति दिन्छ।"</string>
+    <string name="permdesc_setTimeZone" product="tv" msgid="9069045914174455938">"एपलाई तपाईंको Android टिभी डिभाइसको प्रामाणिक समय परिवर्तन गर्ने अनुमति दिन्छ।"</string>
+    <string name="permdesc_setTimeZone" product="default" msgid="4611828585759488256">"एपलाई फोनको प्रामाणिक समय परिवर्तन गर्न अनुमति दिन्छ।"</string>
     <string name="permlab_getAccounts" msgid="5304317160463582791">"उपकरणमा खाताहरू भेट्टाउनुहोस्"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="1784452755887604512">"एपलाई ट्याब्लेटद्वारा ज्ञात खाताहरूको सूची पाउन अनुमति दिन्छ। यसले अनुप्रयोगद्वारा तपाईंले स्थापित गर्नुभएको कुनै पनि खाताहरू समावेश गर्न सक्दछ।"</string>
     <string name="permdesc_getAccounts" product="tv" msgid="437604680436540822">"एपलाई तपाईंको Android टिभी यन्त्रले चिनेका खाताहरूको सूची प्राप्त गर्ने अनुमति दिन्छ। उक्त सूचीमा तपाईंले स्थापना गर्नुभएका एपहरूले बनाएका कुनै पनि खाताहरू पर्न सक्छन्।"</string>
@@ -580,8 +580,7 @@
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"फिंगरप्रिन्ट आंशिक रूपमा पत्ता लाग्यो"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"फिंगरप्रिन्ट प्रशोधन गर्न सकिएन। कृपया फेरि प्रयास गर्नुहोस्।"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"सेन्सर सफा गर्नुहोस्"</string>
-    <!-- no translation found for fingerprint_acquired_too_fast (6038375140739678098) -->
-    <skip />
+    <string name="fingerprint_acquired_too_fast" msgid="6038375140739678098">"औँला अलि बढी समयसम्म सेन्सरमा राख्नुहोस्"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"औंला निकै सुस्त सारियो। कृपया फेरि प्रयास गर्नुहोस्।"</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"अर्को फिंगरप्रिन्ट प्रयोग गरी हेर्नुहोस्"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"ज्यादै उज्यालो छ"</string>
@@ -610,12 +609,10 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"फिंगरप्रिन्ट आइकन"</string>
-    <!-- no translation found for face_recalibrate_notification_name (7311163114750748686) -->
-    <skip />
+    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"फेस अनलक"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"आफ्नो अनुहार पुनः दर्ता गर्नुहोस्"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"अनुहार पहिचानको गुणस्तर सुधार गर्न कृपया आफ्नो अनुहार पुनः दर्ता गर्नुहोस्"</string>
-    <!-- no translation found for face_setup_notification_title (8843461561970741790) -->
-    <skip />
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"फेस अनलक सेटअप गर्नुहोस्"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"फोनमा हेरेकै भरमा फोन अनलक गर्नुहोस्"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"अनलक गर्ने अन्य तरिकाहरू सेटअप गर्नुहोस्"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"फिंगरप्रिन्ट हाल्न ट्याप गर्नुहोस्"</string>
@@ -642,26 +639,19 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"अनुहार पुष्टि गर्न सकिएन। हार्डवेयर उपलब्ध छैन।"</string>
-    <!-- no translation found for face_error_timeout (2598544068593889762) -->
-    <skip />
+    <string name="face_error_timeout" msgid="2598544068593889762">"फेरि फेस अनलक प्रयोग गरी हेर्नुहोस्"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"अनुहारसम्बन्धी नयाँ डेटा भण्डारण गर्न सकिएन। पहिले कुनै पुरानो डेटा मेटाउनुहोस्।"</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"अनुहार पहिचान रद्द गरियो।"</string>
-    <!-- no translation found for face_error_user_canceled (5766472033202928373) -->
-    <skip />
+    <string name="face_error_user_canceled" msgid="5766472033202928373">"प्रयोगकर्ताले फेस अनलक सेटअप गर्ने कार्य रद्द गर्नुभयो"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"धेरैपटक प्रयासहरू भए। पछि फेरि प्रयास गर्नुहोस्‌।"</string>
-    <!-- no translation found for face_error_lockout_permanent (3277134834042995260) -->
-    <skip />
-    <!-- no translation found for face_error_lockout_screen_lock (5062609811636860928) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"निकै धेरै प्रयासहरू भए। फेस अनलक अफ गरिएको छ।"</string>
+    <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"निकै धेरै प्रयासहरू भए। यसको साटो स्क्रिन लक प्रयोग गर्नुहोस्।"</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"अनुहार पुष्टि गर्न सकिएन। फेरि प्रयास गर्नुहोस्।"</string>
-    <!-- no translation found for face_error_not_enrolled (1134739108536328412) -->
-    <skip />
-    <!-- no translation found for face_error_hw_not_present (7940978724978763011) -->
-    <skip />
+    <string name="face_error_not_enrolled" msgid="1134739108536328412">"तपाईंले फेस अनलक सेटअप गर्नुभएको छैन"</string>
+    <string name="face_error_hw_not_present" msgid="7940978724978763011">"यो डिभाइसमा फेस अनलक प्रयोग गर्न मिल्दैन"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"केही समयका लागि सेन्सर असक्षम पारियो।"</string>
     <string name="face_name_template" msgid="3877037340223318119">"अनुहार <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <!-- no translation found for face_app_setting_name (5854024256907828015) -->
-    <skip />
+    <string name="face_app_setting_name" msgid="5854024256907828015">"फेस अनलक प्रयोग गर्नुहोस्"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"फेस अनलक वा स्क्रिन लक प्रयोग गर्नुहोस्"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"जारी राख्न आफ्नो अनुहारको सहायताले पुष्टि गर्नुहोस्"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"जारी राख्न आफ्नो फेस वा स्क्रिन लक प्रयोग गरी पुष्टि गर्नुहोस्"</string>
@@ -964,8 +954,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"अनलक क्षेत्र बढाउनुहोस्।"</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"स्लाइड अनलक।"</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"ढाँचा अनलक।"</string>
-    <!-- no translation found for keyguard_accessibility_face_unlock (4533832120787386728) -->
-    <skip />
+    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"फेस अनलक।"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"Pin अनलक"</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"Sim को Pin मार्फत अनलक गर्ने प्रक्रिया।"</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"Sim को Puk मार्फत अनलक गर्ने प्रक्रिया।"</string>
@@ -1541,7 +1530,7 @@
     <string name="sync_undo_deletes" msgid="5786033331266418896">"मेटिएकाहरू पूर्ववत बनाउनुहोस्।"</string>
     <string name="sync_do_nothing" msgid="4528734662446469646">"अहिलेको लागि केही नगर्नुहोस्"</string>
     <string name="choose_account_label" msgid="5557833752759831548">"एउटा खाता छान्‍नुहोस्"</string>
-    <string name="add_account_label" msgid="4067610644298737417">"एउटा खाता थप्नुहोस्"</string>
+    <string name="add_account_label" msgid="4067610644298737417">"खाता हाल्नुहोस्"</string>
     <string name="add_account_button_label" msgid="322390749416414097">"खाता थप्नुहोस्"</string>
     <string name="number_picker_increment_button" msgid="7621013714795186298">"बढाउनुहोस्"</string>
     <string name="number_picker_decrement_button" msgid="5116948444762708204">"घटाउनुहोस्"</string>
@@ -1878,7 +1867,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"तपाईंका प्रशासकले अद्यावधिक गर्नुभएको"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"तपाईंका प्रशासकले मेट्नुभएको"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ठिक छ"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"ब्याट्री सेभरले अँध्यारो थिम अन गर्छ र ब्याकग्राउन्डमा हुने क्रियाकलाप, केही भिजुअल इफेक्ट, निश्चित सुविधा र केही नेटवर्क कनेक्सनहरू अफ गर्छ वा सीमित रूपमा मात्र चल्न दिन्छ।\n\n"<annotation id="url">"थप जान्नुहोस्"</annotation></string>
+    <!-- no translation found for battery_saver_description_with_learn_more (5444908404021316250) -->
+    <skip />
     <string name="battery_saver_description" msgid="8518809702138617167">"ब्याट्री सेभरले अँध्यारो थिम अन गर्छ र ब्याकग्राउन्डमा हुने क्रियाकलाप, केही भिजुअल इफेक्ट, निश्चित सुविधा र केही नेटवर्क कनेक्सनहरू अफ गर्छ वा सीमित रूपमा मात्र चल्न दिन्छ।"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"डेटा सेभरले डेटा खपत कम गर्न केही एपहरूलाई ब्याकग्राउन्डमा डेटा पठाउन वा प्राप्त गर्न दिँदैन। तपाईंले अहिले प्रयोग गरिरहनुभएको एपले सीमित रूपमा मात्र डेटा चलाउन पाउँछ। उदाहरणका लागि, तपाईंले फोटोमा ट्याप गर्नुभयो भने मात्र फोटो देखिन्छ नत्र देखिँदैन।"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"डेटा सेभर अन गर्ने हो?"</string>

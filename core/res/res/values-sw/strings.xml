@@ -1867,7 +1867,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Imesasishwa na msimamizi wako"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Imefutwa na msimamizi wako"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Sawa"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"Kiokoa Betri huwasha Mandhari meusi na kudhibiti au kuzima shughuli za chinichini, baadhi ya madoido yanayoonekana, vipengele fulani na baadhi ya miunganisho ya mtandao.\n\n"<annotation id="url">"Pata maelezo zaidi"</annotation></string>
+    <!-- no translation found for battery_saver_description_with_learn_more (5444908404021316250) -->
+    <skip />
     <string name="battery_saver_description" msgid="8518809702138617167">"Kiokoa Betri huwasha Mandhari meusi na kudhibiti au kuzima shughuli za chinichini, baadhi ya madoido yanayoonekana, vipengele fulani na baadhi ya miunganisho ya mtandao."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Ili kusaidia kupunguza matumizi ya data, Kiokoa Data huzuia baadhi ya programu kupokea na kutuma data chinichini. Programu ambayo unatumia sasa inaweza kufikia data, lakini si kila wakati. Kwa mfano, haitaonyesha picha hadi utakapozifungua."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Ungependa Kuwasha Kiokoa Data?"</string>

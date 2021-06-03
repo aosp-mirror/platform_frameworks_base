@@ -1867,7 +1867,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Kerfisstjóri uppfærði"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Kerfisstjóri eyddi"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Í lagi"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"Rafhlöðusparnaður kveikir á dökku þema og takmarkar eða slekkur á bakgrunnsvirkni, sumum áhrifum, tilteknum eiginleikum og sumum nettengingum.\n\n"<annotation id="url">"Nánar"</annotation></string>
+    <!-- no translation found for battery_saver_description_with_learn_more (5444908404021316250) -->
+    <skip />
     <string name="battery_saver_description" msgid="8518809702138617167">"Rafhlöðusparnaður kveikir á dökku þema og takmarkar eða slekkur á bakgrunnsvirkni, sumum áhrifum, tilteknum eiginleikum og sumum nettengingum."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Gagnasparnaður getur hjálpað til við að draga úr gagnanotkun með því að hindra forrit í að senda eða sækja gögn í bakgrunni. Forrit sem er í notkun getur náð í gögn, en gerir það kannski sjaldnar. Niðurstaðan getur verið að myndir eru ekki birtar fyrr en þú ýtir á þær, svo dæmi sé tekið."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Kveikja á gagnasparnaði?"</string>

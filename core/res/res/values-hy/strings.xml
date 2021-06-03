@@ -389,10 +389,10 @@
     <string name="permdesc_killBackgroundProcesses" msgid="2357013583055434685">"Թույլ է տալիս հավելվածին վերջ տալ այլ հավելվածների հետնաշերտի գործընթացները: Սա կարող է պատճառ դառնալ, որ այլ հավելվածները դադարեն աշխատել:"</string>
     <string name="permlab_systemAlertWindow" msgid="5757218350944719065">"Այս հավելվածը կարող է ցուցադրվել այլ հավելվածների վրայից"</string>
     <string name="permdesc_systemAlertWindow" msgid="1145660714855738308">"Այս հավելվածը կարող է ցուցադրվել այլ հավելվածների կամ էկրանի այլ հատվածների վերևում: Դա կարող է խոչընդոտել հավելվածի նորմալ օգտագործմանը և փոխել այլ հավելվածների տեսքը:"</string>
-    <string name="permlab_runInBackground" msgid="541863968571682785">"աշխատել ֆոնում"</string>
+    <string name="permlab_runInBackground" msgid="541863968571682785">"աշխատել հետին պլանում"</string>
     <string name="permdesc_runInBackground" msgid="4344539472115495141">"Այս հավելվածը կարող է աշխատել ֆոնային ռեժիմում և ավելի արագ սպառել մարտկոցի լիցքը։"</string>
-    <string name="permlab_useDataInBackground" msgid="783415807623038947">"տվյալներ օգտագործել ֆոնում"</string>
-    <string name="permdesc_useDataInBackground" msgid="1230753883865891987">"Այս հավելվածը կարող է տվյալներ օգտագործել ֆոնում և ավելացնել տվյալների օգտագործման ծավալը։"</string>
+    <string name="permlab_useDataInBackground" msgid="783415807623038947">"տվյալներ օգտագործել հետին պլանում"</string>
+    <string name="permdesc_useDataInBackground" msgid="1230753883865891987">"Այս հավելվածը կարող է տվյալներ օգտագործել հետին պլանում և ավելացնել տվյալների օգտագործման ծավալը։"</string>
     <string name="permlab_persistentActivity" msgid="464970041740567970">"միշտ աշխատեցնել հավելվածը"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="6055271149187369916">"Թույլ է տալիս հավելվածին մնայուն դարձնել իր մասերը հիշողության մեջ: Սա կարող է սահմանափակել այլ հավելվածներին հասանելի հիշողությունը` դանդաղեցնելով պլանշետի աշխատանքը:"</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="6800526387664131321">"Թույլ է տալիս հավելվածին իր տարրերը մշտապես հիշողության մեջ։ Սա կարող է սահմանափակել այլ հավելվածներին հասանելի հիշողությունը և դանդաղեցնել Android TV սարքի աշխատանքը:"</string>
@@ -1867,7 +1867,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Թարմացվել է ձեր ադմինիստրատորի կողմից"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Ջնջվել է ձեր ադմինիստրատորի կողմից"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Եղավ"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"«Մարտկոցի տնտեսում» գործառույթը միացնում է մուգ թեման և անջատում կամ սահմանափակում է աշխատանքը ֆոնային ռեժիմում, որոշ վիզուալ էֆեկտներ, ցանցային միացումներ և այլ գործառույթներ։\n\n"<annotation id="url">"Իմանալ ավելին"</annotation></string>
+    <!-- no translation found for battery_saver_description_with_learn_more (5444908404021316250) -->
+    <skip />
     <string name="battery_saver_description" msgid="8518809702138617167">"«Մարտկոցի տնտեսում» գործառույթը միացնում է մուգ թեման և անջատում կամ սահմանափակում է աշխատանքը ֆոնային ռեժիմում, որոշ վիզուալ էֆեկտներ, ցանցային միացումներ և այլ գործառույթներ։"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Թրաֆիկի տնտեսման ռեժիմում որոշ հավելվածների համար տվյալների ֆոնային փոխանցումն անջատված է։ Հավելվածը, որն օգտագործում եք, կարող է տվյալներ փոխանցել և ստանալ, սակայն ոչ այնքան հաճախ: Օրինակ՝ պատկերները կցուցադրվեն միայն դրանց վրա սեղմելուց հետո։"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Միացնե՞լ թրաֆիկի տնտեսումը"</string>
