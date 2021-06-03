@@ -1455,8 +1455,7 @@ public class DisplayPolicy {
     }
 
     void onDisplayInfoChanged(DisplayInfo info) {
-        mSystemGestures.screenWidth = info.logicalWidth;
-        mSystemGestures.screenHeight = info.logicalHeight;
+        mSystemGestures.onDisplayInfoChanged(info);
     }
 
     private void layoutStatusBar(DisplayFrames displayFrames, Rect contentFrame) {

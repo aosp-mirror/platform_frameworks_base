@@ -153,7 +153,6 @@ applications that come with the platform
         <permission name="android.permission.PACKAGE_USAGE_STATS" />
         <permission name="android.permission.CHANGE_COMPONENT_ENABLED_STATE" />
         <permission name="android.permission.MODIFY_AUDIO_ROUTING" />
-        <permission name="android.permission.GET_RUNTIME_PERMISSION_GROUP_MAPPING" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.phone">

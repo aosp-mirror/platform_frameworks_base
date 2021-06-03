@@ -201,7 +201,7 @@ import static com.android.server.wm.Task.ActivityState.RESUMED;
 import static com.android.server.wm.Task.ActivityState.STARTED;
 import static com.android.server.wm.Task.ActivityState.STOPPED;
 import static com.android.server.wm.Task.ActivityState.STOPPING;
-import static com.android.server.wm.Task.TASK_VISIBILITY_VISIBLE;
+import static com.android.server.wm.TaskFragment.TASK_FRAGMENT_VISIBILITY_VISIBLE;
 import static com.android.server.wm.TaskPersister.DEBUG;
 import static com.android.server.wm.TaskPersister.IMAGE_EXTENSION;
 import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
@@ -5228,7 +5228,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      */
     private boolean shouldBeResumed(ActivityRecord activeActivity) {
         return shouldMakeActive(activeActivity) && isFocusable()
-                && getTask().getVisibility(activeActivity) == TASK_VISIBILITY_VISIBLE
+                && getTask().getVisibility(activeActivity) == TASK_FRAGMENT_VISIBILITY_VISIBLE
                 && canResumeByCompat();
     }
 
@@ -7030,7 +7030,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // TODO(b/181207944): Consider removing the if condition and always run
         // resolveFixedOrientationConfiguration() since this should be applied for all cases.
         if (isFixedOrientationLetterboxAllowed) {
-            resolveFixedOrientationConfiguration(newParentConfiguration);
+            resolveFixedOrientationConfiguration(newParentConfiguration, parentWindowingMode);
         }
 
         if (mCompatDisplayInsets != null) {
@@ -7177,16 +7177,21 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * change and the requested orientation is different from the parent.
      *
      * <p>If letterboxed due to fixed orientation then aspect ratio restrictions are also applied
-     * in this methiod.
+     * in this method.
      */
-    private void resolveFixedOrientationConfiguration(@NonNull Configuration newParentConfig) {
+    private void resolveFixedOrientationConfiguration(@NonNull Configuration newParentConfig,
+            int windowingMode) {
         mLetterboxBoundsForFixedOrientationAndAspectRatio = null;
         if (handlesOrientationChangeFromDescendant()) {
             // No need to letterbox because of fixed orientation. Display will handle
             // fixed-orientation requests.
             return;
         }
-        if (newParentConfig.windowConfiguration.getWindowingMode() == WINDOWING_MODE_PINNED) {
+        if (WindowConfiguration.inMultiWindowMode(windowingMode) && isResizeable()) {
+            // Ignore orientation request for resizable apps in multi window.
+            return;
+        }
+        if (windowingMode == WINDOWING_MODE_PINNED) {
             // PiP bounds have higher priority than the requested orientation. Otherwise the
             // activity may be squeezed into a small piece.
             return;

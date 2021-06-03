@@ -596,10 +596,6 @@ public abstract class AuthBiometricView extends LinearLayout {
         Utils.notifyAccessibilityContentChanged(mAccessibilityManager, this);
     }
 
-    private void setText(TextView view, CharSequence charSequence) {
-        view.setText(charSequence);
-    }
-
     // Remove all pending icon and text animations
     private void removePendingAnimations() {
         mHandler.removeCallbacks(mResetHelpRunnable);
@@ -688,7 +684,7 @@ public abstract class AuthBiometricView extends LinearLayout {
      */
     @VisibleForTesting
     void onAttachedToWindowInternal() {
-        setText(mTitleView, mPromptInfo.getTitle());
+        mTitleView.setText(mPromptInfo.getTitle());
 
         if (isDeviceCredentialAllowed()) {
             final CharSequence credentialButtonText;
@@ -718,7 +714,7 @@ public abstract class AuthBiometricView extends LinearLayout {
             mUseCredentialButton.setText(credentialButtonText);
             mUseCredentialButton.setVisibility(View.VISIBLE);
         } else {
-            setText(mNegativeButton, mPromptInfo.getNegativeButtonText());
+            mNegativeButton.setText(mPromptInfo.getNegativeButtonText());
         }
 
         setTextOrHide(mSubtitleView, mPromptInfo.getSubtitle());

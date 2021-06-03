@@ -449,6 +449,31 @@ public final class HdmiControlManager {
     @Retention(RetentionPolicy.SOURCE)
     public @interface ActiveSourceLostBehavior {}
 
+    // -- Whether System Audio Control is enabled or disabled.
+    /**
+     * System Audio Control enabled.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int SYSTEM_AUDIO_CONTROL_ENABLED = 1;
+    /**
+     * System Audio Control disabled.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int SYSTEM_AUDIO_CONTROL_DISABLED = 0;
+    /**
+     * @hide
+     */
+    @IntDef(prefix = { "SYSTEM_AUDIO_CONTROL_" }, value = {
+            SYSTEM_AUDIO_CONTROL_ENABLED,
+            SYSTEM_AUDIO_CONTROL_DISABLED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SystemAudioControl {}
+
     // -- Whether System Audio Mode muting is enabled or disabled.
     /**
      * System Audio Mode muting enabled.
@@ -745,6 +770,14 @@ public final class HdmiControlManager {
     public static final String CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST =
             "power_state_change_on_active_source_lost";
     /**
+     * Name of a setting deciding whether System Audio Control is enabled.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String CEC_SETTING_NAME_SYSTEM_AUDIO_CONTROL =
+            "system_audio_control";
+    /**
      * Name of a setting deciding whether System Audio Muting is allowed.
      *
      * @hide
@@ -862,6 +895,7 @@ public final class HdmiControlManager {
         CEC_SETTING_NAME_HDMI_CEC_VERSION,
         CEC_SETTING_NAME_POWER_CONTROL_MODE,
         CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST,
+        CEC_SETTING_NAME_SYSTEM_AUDIO_CONTROL,
         CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING,
         CEC_SETTING_NAME_VOLUME_CONTROL_MODE,
         CEC_SETTING_NAME_TV_WAKE_ON_ONE_TOUCH_PLAY,
@@ -2128,6 +2162,58 @@ public final class HdmiControlManager {
         try {
             return mService.getCecSettingStringValue(
                     CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Set the current status of System Audio Control.
+     *
+     * <p>Sets whether HDMI System Audio Control feature is enabled. If enabled,
+     * TV or Audio System will try to turn on the System Audio Mode if there's a
+     * connected CEC-enabled AV Receiver. Then an audio stream will be played on
+     * the AVR instead of TV speaker or Audio System speakers. If disabled, the
+     * System Audio Mode will never be activated.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public void setSystemAudioControl(@NonNull @SystemAudioControl int value) {
+        if (mService == null) {
+            Log.e(TAG, "HdmiControlService is not available");
+            throw new RuntimeException("HdmiControlService is not available");
+        }
+        try {
+            mService.setCecSettingIntValue(CEC_SETTING_NAME_SYSTEM_AUDIO_CONTROL, value);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get the current status of System Audio Control.
+     *
+     * <p>Reflects whether HDMI System Audio Control feature is enabled. If enabled,
+     * TV or Audio System will try to turn on the System Audio Mode if there's a
+     * connected CEC-enabled AV Receiver. Then an audio stream will be played on
+     * the AVR instead of TV speaker or Audio System speakers. If disabled, the
+     * System Audio Mode will never be activated.
+     *
+     * @hide
+     */
+    @SystemApi
+    @NonNull
+    @SystemAudioControl
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public int getSystemAudioControl() {
+        if (mService == null) {
+            Log.e(TAG, "HdmiControlService is not available");
+            throw new RuntimeException("HdmiControlService is not available");
+        }
+        try {
+            return mService.getCecSettingIntValue(CEC_SETTING_NAME_SYSTEM_AUDIO_CONTROL);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

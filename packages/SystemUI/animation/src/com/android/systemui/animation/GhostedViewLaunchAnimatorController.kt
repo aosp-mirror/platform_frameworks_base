@@ -4,8 +4,6 @@ import android.graphics.Canvas
 import android.graphics.ColorFilter
 import android.graphics.Matrix
 import android.graphics.PixelFormat
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffXfermode
 import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
@@ -111,9 +109,7 @@ open class GhostedViewLaunchAnimatorController(
     }
 
     override fun onLaunchAnimationStart(isExpandingFullyAbove: Boolean) {
-        backgroundView = FrameLayout(launchContainer.context).apply {
-            forceHasOverlappingRendering(false)
-        }
+        backgroundView = FrameLayout(launchContainer.context)
         launchContainerOverlay.add(backgroundView)
 
         // We wrap the ghosted view background and use it to draw the expandable background. Its
@@ -125,9 +121,7 @@ open class GhostedViewLaunchAnimatorController(
 
         // Create a ghost of the view that will be moving and fading out. This allows to fade out
         // the content before fading out the background.
-        ghostView = GhostView.addGhost(ghostedView, launchContainer).apply {
-            setLayerType(View.LAYER_TYPE_HARDWARE, null)
-        }
+        ghostView = GhostView.addGhost(ghostedView, launchContainer)
 
         val matrix = ghostView?.animationMatrix ?: Matrix.IDENTITY_MATRIX
         matrix.getValues(initialGhostViewMatrixValues)
@@ -139,7 +133,18 @@ open class GhostedViewLaunchAnimatorController(
         linearProgress: Float
     ) {
         val ghostView = this.ghostView!!
-        ghostView.alpha = state.contentAlpha
+        val backgroundView = this.backgroundView!!
+
+        if (!state.visible) {
+            if (ghostView.visibility == View.VISIBLE) {
+                // Making the ghost view invisible will make the ghosted view visible, so order is
+                // important here.
+                ghostView.visibility = View.INVISIBLE
+                ghostedView.visibility = View.INVISIBLE
+                backgroundView.visibility = View.INVISIBLE
+            }
+            return
+        }
 
         val scale = min(state.widthRatio, state.heightRatio)
         ghostViewMatrix.setValues(initialGhostViewMatrixValues)
@@ -150,14 +155,12 @@ open class GhostedViewLaunchAnimatorController(
         )
         ghostView.animationMatrix = ghostViewMatrix
 
-        val backgroundView = this.backgroundView!!
         backgroundView.top = state.top
         backgroundView.bottom = state.bottom
         backgroundView.left = state.left
         backgroundView.right = state.right
 
         val backgroundDrawable = backgroundDrawable!!
-        backgroundDrawable.alpha = (0xFF * state.backgroundAlpha).toInt()
         backgroundDrawable.wrapped?.let {
             setBackgroundCornerRadius(it, state.topCornerRadius, state.bottomCornerRadius)
         }
@@ -168,6 +171,7 @@ open class GhostedViewLaunchAnimatorController(
 
         GhostView.removeGhost(ghostedView)
         launchContainerOverlay.remove(backgroundView)
+        ghostedView.visibility = View.VISIBLE
         ghostedView.invalidate()
     }
 
@@ -203,10 +207,6 @@ open class GhostedViewLaunchAnimatorController(
     }
 
     private class WrappedDrawable(val wrapped: Drawable?) : Drawable() {
-        companion object {
-            private val SRC_MODE = PorterDuffXfermode(PorterDuff.Mode.SRC)
-        }
-
         private var currentAlpha = 0xFF
         private var previousBounds = Rect()
 
@@ -220,7 +220,6 @@ open class GhostedViewLaunchAnimatorController(
 
             wrapped.alpha = currentAlpha
             wrapped.bounds = bounds
-            setXfermode(wrapped, SRC_MODE)
             applyBackgroundRadii()
 
             wrapped.draw(canvas)
@@ -230,7 +229,6 @@ open class GhostedViewLaunchAnimatorController(
             // background.
             wrapped.alpha = 0
             wrapped.bounds = previousBounds
-            setXfermode(wrapped, null)
             restoreBackgroundRadii()
         }
 
@@ -255,27 +253,6 @@ open class GhostedViewLaunchAnimatorController(
 
         override fun setColorFilter(filter: ColorFilter?) {
             wrapped?.colorFilter = filter
-        }
-
-        private fun setXfermode(background: Drawable, mode: PorterDuffXfermode?) {
-            if (background is InsetDrawable) {
-                background.drawable?.let { setXfermode(it, mode) }
-                return
-            }
-
-            if (background !is LayerDrawable) {
-                background.setXfermode(mode)
-                return
-            }
-
-            // We set the xfermode on the first layer that is not a mask. Most of the time it will
-            // be the "background layer".
-            for (i in 0 until background.numberOfLayers) {
-                if (background.getId(i) != android.R.id.mask) {
-                    background.getDrawable(i).setXfermode(mode)
-                    break
-                }
-            }
         }
 
         fun setBackgroundRadius(topCornerRadius: Float, bottomCornerRadius: Float) {

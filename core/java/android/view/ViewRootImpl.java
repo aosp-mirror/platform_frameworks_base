@@ -2783,7 +2783,7 @@ public final class ViewRootImpl implements ViewParent,
                         & WindowManagerGlobal.RELAYOUT_RES_DRAG_RESIZING_DOCKED) != 0;
                 final boolean dragResizing = freeformResizing || dockedResizing;
                 if (mSurfaceControl.isValid()) {
-                    updateOpacity(params, dragResizing);
+                    updateOpacity(mWindowAttributes, dragResizing);
                 }
 
                 if (DEBUG_LAYOUT) Log.v(mTag, "relayout: frame=" + frame.toShortString()
@@ -7749,9 +7749,10 @@ public final class ViewRootImpl implements ViewParent,
         return relayoutResult;
     }
 
-    private void updateOpacity(@Nullable WindowManager.LayoutParams params, boolean dragResizing) {
+    private void updateOpacity(WindowManager.LayoutParams params, boolean dragResizing) {
         boolean opaque = false;
-        if (params != null && !PixelFormat.formatHasAlpha(params.format)
+
+        if (!PixelFormat.formatHasAlpha(params.format)
                 // Don't make surface with surfaceInsets opaque as they display a
                 // translucent shadow.
                 && params.surfaceInsets.left == 0

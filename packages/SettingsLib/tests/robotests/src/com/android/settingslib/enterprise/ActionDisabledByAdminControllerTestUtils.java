@@ -16,51 +16,81 @@
 
 package com.android.settingslib.enterprise;
 
-import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
 
-import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Context;
+import android.os.UserHandle;
+import android.util.DebugUtils;
 
-import androidx.appcompat.app.AlertDialog;
-
-import com.android.settingslib.RestrictedLockUtils;
+import com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
 
 /**
  * Utils related to the action disabled by admin dialogs.
  */
-class ActionDisabledByAdminControllerTestUtils {
-    static final int LEARN_MORE_ACTION_NONE = 0;
-    static final int LEARN_MORE_ACTION_SHOW_ADMIN_POLICIES = 1;
-    static final int LEARN_MORE_ACTION_LAUNCH_HELP_PAGE = 2;
+// NOTE: must be public because of DebugUtils.constantToString() call
+public final class ActionDisabledByAdminControllerTestUtils {
+
+    static final int ENFORCEMENT_ADMIN_USER_ID = 123;
+    static final UserHandle ENFORCEMENT_ADMIN_USER = UserHandle.of(ENFORCEMENT_ADMIN_USER_ID);
+
+    static final String SUPPORT_MESSAGE = "support message";
+
+    static final ComponentName ADMIN_COMPONENT =
+            new ComponentName("some.package.name", "some.package.name.SomeClass");
+    static final EnforcedAdmin ENFORCED_ADMIN = new EnforcedAdmin(
+                    ADMIN_COMPONENT, UserHandle.of(ENFORCEMENT_ADMIN_USER_ID));
+    static final EnforcedAdmin ENFORCED_ADMIN_WITHOUT_COMPONENT = new EnforcedAdmin(
+            /* component= */ null, UserHandle.of(ENFORCEMENT_ADMIN_USER_ID));
+
+    static final String URL = "https://testexample.com";
+
+    // NOTE: fields below must be public because of DebugUtils.constantToString() call
+    public static final int LEARN_MORE_ACTION_NONE = 0;
+    public static final int LEARN_MORE_ACTION_SHOW_ADMIN_POLICIES = 1;
+    public static final int LEARN_MORE_ACTION_SHOW_ADMIN_SETTINGS = 2;
+    public static final int LEARN_MORE_ACTION_LAUNCH_HELP_PAGE = 3;
 
     private int mLearnMoreButtonAction = LEARN_MORE_ACTION_NONE;
 
     ActionDisabledLearnMoreButtonLauncher createLearnMoreButtonLauncher() {
         return new ActionDisabledLearnMoreButtonLauncher() {
+
             @Override
-            public void setupLearnMoreButtonToShowAdminPolicies(Context context,
-                    Object alertDialogBuilder, int enforcementAdminUserId,
-                    RestrictedLockUtils.EnforcedAdmin enforcedAdmin) {
+            public void setLearnMoreButton(Runnable action) {
+                action.run();
+            }
+
+            @Override
+            protected void launchShowAdminPolicies(Context context, UserHandle user,
+                    ComponentName admin) {
                 mLearnMoreButtonAction = LEARN_MORE_ACTION_SHOW_ADMIN_POLICIES;
             }
 
             @Override
-            public void setupLearnMoreButtonToLaunchHelpPage(Context context,
-                    Object alertDialogBuilder, String url) {
+            protected void launchShowAdminSettings(Context context) {
+                mLearnMoreButtonAction = LEARN_MORE_ACTION_SHOW_ADMIN_SETTINGS;
+            }
+
+            @Override
+            public void showHelpPage(Context context, String url) {
                 mLearnMoreButtonAction = LEARN_MORE_ACTION_LAUNCH_HELP_PAGE;
+            }
+
+            @Override
+            protected boolean isSameProfileGroup(Context context, int enforcementAdminUserId) {
+                return true;
             }
         };
     }
 
     void assertLearnMoreAction(int learnMoreActionShowAdminPolicies) {
-        assertThat(learnMoreActionShowAdminPolicies).isEqualTo(mLearnMoreButtonAction);
+        assertWithMessage("action").that(actionToString(mLearnMoreButtonAction))
+                .isEqualTo(actionToString(learnMoreActionShowAdminPolicies));
     }
 
-    AlertDialog createAlertDialog(ActionDisabledByAdminController mController, Activity activity) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-        mController.setupLearnMoreButton(activity, builder);
-        AlertDialog alertDialog = builder.create();
-        alertDialog.show();
-        return alertDialog;
+    private static String actionToString(int action) {
+        return DebugUtils.constantToString(ActionDisabledByAdminControllerTestUtils.class,
+                "LEARN_MORE_ACTION_", action);
     }
 }

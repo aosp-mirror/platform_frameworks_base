@@ -16,8 +16,6 @@
 
 package android.media;
 
-import static android.media.permission.PermissionUtil.myIdentity;
-
 import android.annotation.CallbackExecutor;
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
@@ -29,12 +27,13 @@ import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.app.ActivityThread;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.AttributionSource;
+import android.content.AttributionSource.ScopedParcelState;
 import android.content.Context;
 import android.media.MediaRecorder.Source;
 import android.media.audiopolicy.AudioMix;
 import android.media.audiopolicy.AudioPolicy;
 import android.media.metrics.LogSessionId;
-import android.media.permission.Identity;
 import android.media.projection.MediaProjection;
 import android.os.Binder;
 import android.os.Build;
@@ -42,6 +41,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Parcel;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -381,7 +381,8 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
      *   {@link AudioManager#AUDIO_SESSION_ID_GENERATE} if the session isn't known at construction
      *   time. See also {@link AudioManager#generateAudioSessionId()} to obtain a session ID before
      *   construction.
-     * @param context An optional context to pull an attribution tag from.
+     * @param context An optional context on whose behalf the recoding is performed.
+     *
      * @throws IllegalArgumentException
      */
     private AudioRecord(AudioAttributes attributes, AudioFormat format, int bufferSizeInBytes,
@@ -449,10 +450,11 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
 
         audioBuffSizeCheck(bufferSizeInBytes);
 
-        Identity identity = myIdentity(context);
-        if (identity.packageName == null) {
+        AttributionSource attributionSource = (context != null)
+                ? context.getAttributionSource() : AttributionSource.myAttributionSource();
+        if (attributionSource.getPackageName() == null) {
             // Command line utility
-            identity.packageName = "uid:" + Binder.getCallingUid();
+            attributionSource = attributionSource.withPackageName("uid:" + Binder.getCallingUid());
         }
 
         int[] sampleRate = new int[] {mSampleRate};
@@ -461,14 +463,15 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
 
         //TODO: update native initialization when information about hardware init failure
         //      due to capture device already open is available.
-        int initResult = native_setup(new WeakReference<AudioRecord>(this),
-                mAudioAttributes, sampleRate, mChannelMask, mChannelIndexMask,
-                mAudioFormat, mNativeBufferSizeInBytes,
-                session, identity, 0 /*nativeRecordInJavaObj*/,
-                maxSharedAudioHistoryMs);
-        if (initResult != SUCCESS) {
-            loge("Error code "+initResult+" when initializing native AudioRecord object.");
-            return; // with mState == STATE_UNINITIALIZED
+        try (ScopedParcelState attributionSourceState = attributionSource.asScopedParcelState()) {
+            int initResult = native_setup(new WeakReference<AudioRecord>(this), mAudioAttributes,
+                    sampleRate, mChannelMask, mChannelIndexMask, mAudioFormat,
+                    mNativeBufferSizeInBytes, session, attributionSourceState.getParcel(),
+                    0 /*nativeRecordInJavaObj*/, maxSharedAudioHistoryMs);
+            if (initResult != SUCCESS) {
+                loge("Error code " + initResult + " when initializing native AudioRecord object.");
+                return; // with mState == STATE_UNINITIALIZED
+            }
         }
 
         mSampleRate = sampleRate[0];
@@ -512,23 +515,27 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
      */
     /* package */ void deferred_connect(long  nativeRecordInJavaObj) {
         if (mState != STATE_INITIALIZED) {
-            int[] session = { 0 };
-            int[] rates = { 0 };
+            int[] session = {0};
+            int[] rates = {0};
             //TODO: update native initialization when information about hardware init failure
             //      due to capture device already open is available.
             // Note that for this native_setup, we are providing an already created/initialized
             // *Native* AudioRecord, so the attributes parameters to native_setup() are ignored.
-            int initResult = native_setup(new WeakReference<AudioRecord>(this),
-                    null /*mAudioAttributes*/,
-                    rates /*mSampleRates*/,
-                    0 /*mChannelMask*/,
-                    0 /*mChannelIndexMask*/,
-                    0 /*mAudioFormat*/,
-                    0 /*mNativeBufferSizeInBytes*/,
-                    session,
-                    myIdentity(null),
-                    nativeRecordInJavaObj,
-                    0);
+            final int initResult;
+            try (ScopedParcelState attributionSourceState = AttributionSource.myAttributionSource()
+                    .asScopedParcelState()) {
+                initResult = native_setup(new WeakReference<>(this),
+                        null /*mAudioAttributes*/,
+                        rates /*mSampleRates*/,
+                        0 /*mChannelMask*/,
+                        0 /*mChannelIndexMask*/,
+                        0 /*mAudioFormat*/,
+                        0 /*mNativeBufferSizeInBytes*/,
+                        session,
+                        attributionSourceState.getParcel(),
+                        nativeRecordInJavaObj,
+                        0);
+            }
             if (initResult != SUCCESS) {
                 loge("Error code "+initResult+" when initializing native AudioRecord object.");
                 return; // with mState == STATE_UNINITIALIZED
@@ -620,8 +627,8 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
 
         /**
          * Sets the context the record belongs to. This context will be used to pull information,
-         * such as attribution tags, which will be associated with the AudioRecord. However, the
-         * context itself will not be retained by the AudioRecord.
+         * such as {@link android.content.AttributionSource}, which will be associated with
+         * the AudioRecord. However, the context itself will not be retained by the AudioRecord.
          * @param context a non-null {@link Context} instance
          * @return the same Builder instance.
          */
@@ -2216,7 +2223,7 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
     //--------------------
 
     /**
-     * @deprecated Use native_setup that takes an Identity object
+     * @deprecated Use native_setup that takes an {@link AttributionSource} object
      * @return
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R,
@@ -2227,18 +2234,20 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
             int[] sampleRate, int channelMask, int channelIndexMask, int audioFormat,
             int buffSizeInBytes, int[] sessionId, String opPackageName,
             long nativeRecordInJavaObj) {
-        Identity identity = myIdentity(null);
-        identity.packageName = opPackageName;
-
-        return native_setup(audiorecordThis, attributes, sampleRate, channelMask, channelIndexMask,
-                audioFormat, buffSizeInBytes, sessionId, identity, nativeRecordInJavaObj, 0);
+        AttributionSource attributionSource = AttributionSource.myAttributionSource()
+                .withPackageName(opPackageName);
+        try (ScopedParcelState attributionSourceState = attributionSource.asScopedParcelState()) {
+            return native_setup(audiorecordThis, attributes, sampleRate, channelMask,
+                    channelIndexMask, audioFormat, buffSizeInBytes, sessionId,
+                    attributionSourceState.getParcel(), nativeRecordInJavaObj, 0);
+        }
     }
 
     private native int native_setup(Object audiorecordThis,
             Object /*AudioAttributes*/ attributes,
             int[] sampleRate, int channelMask, int channelIndexMask, int audioFormat,
-            int buffSizeInBytes, int[] sessionId, Identity identity, long nativeRecordInJavaObj,
-            int maxSharedAudioHistoryMs);
+            int buffSizeInBytes, int[] sessionId, @NonNull Parcel attributionSource,
+            long nativeRecordInJavaObj, int maxSharedAudioHistoryMs);
 
     // TODO remove: implementation calls directly into implementation of native_release()
     private native void native_finalize();
