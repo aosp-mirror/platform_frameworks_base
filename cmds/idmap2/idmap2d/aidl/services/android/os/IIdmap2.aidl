@@ -16,8 +16,8 @@
 
 package android.os;
 
-import android.os.FabricatedOverlayInternal;
 import android.os.FabricatedOverlayInfo;
+import android.os.FabricatedOverlayInternal;
 
 /**
  * @hide
@@ -40,4 +40,5 @@ interface IIdmap2 {
   @nullable FabricatedOverlayInfo createFabricatedOverlay(in FabricatedOverlayInternal overlay);
   List<FabricatedOverlayInfo> getFabricatedOverlayInfos();
   boolean deleteFabricatedOverlay(@utf8InCpp String path);
+  @utf8InCpp String dumpIdmap(@utf8InCpp String overlayApkPath);
 }
