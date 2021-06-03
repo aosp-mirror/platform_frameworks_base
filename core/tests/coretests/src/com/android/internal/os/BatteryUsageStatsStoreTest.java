@@ -18,6 +18,8 @@ package com.android.internal.os;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.Mockito.mock;
+
 import android.content.Context;
 import android.os.BatteryManager;
 import android.os.BatteryUsageStats;
@@ -56,6 +58,7 @@ public class BatteryUsageStatsStoreTest {
         mMockClocks.currentTime = 123;
         mBatteryStats = new MockBatteryStatsImpl(mMockClocks);
         mBatteryStats.setNoAutoReset(true);
+        mBatteryStats.setPowerProfile(mock(PowerProfile.class));
 
         Context context = InstrumentationRegistry.getContext();
 
