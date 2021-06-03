@@ -1866,7 +1866,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Admin tərəfindən yeniləndi"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Admin tərəfindən silindi"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"Enerjiyə Qənaət rejimi Tünd temanı aktivləşdirir, habelə arxa fon fəaliyyətini, bəzi vizual effektləri, müəyyən xüsusiyyətləri və bəzi şəbəkə bağlantılarını məhdudlaşdırır, yaxud söndürür.\n\n"<annotation id="url">"Ətraflı məlumat"</annotation></string>
+    <!-- no translation found for battery_saver_description_with_learn_more (5444908404021316250) -->
+    <skip />
     <string name="battery_saver_description" msgid="8518809702138617167">"Enerjiyə Qənaət rejimi Tünd temanı aktivləşdirir, habelə arxa fon fəaliyyətini, bəzi vizual effektləri, müəyyən xüsusiyyətləri və bəzi şəbəkə bağlantılarını məhdudlaşdırır, yaxud söndürür."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Mobil interneti qənaətlə işlətmək məqsədilə Data Qanaəti bəzi tətbiqlərin fonda data göndərməsinin və qəbulunun qarşısını alır. Hazırda işlətdiyiniz tətbiq nisbətən az müntəzəmliklə data istifadə edə bilər. Örnək olaraq bu, o deməkdir ki, şəkil fayllarına toxunmadıqca onlar açılmayacaq."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Trafikə qənaət edilsin?"</string>

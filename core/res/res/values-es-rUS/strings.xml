@@ -1866,7 +1866,7 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Tu administrador actualizó este paquete"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Tu administrador borró este paquete"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Aceptar"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"El Ahorro de batería activa el Tema oscuro y desactiva o restringe la actividad en segundo plano, algunos efectos visuales, algunas conexiones de red y otras funciones determinadas.\n\n"<annotation id="url">"Más información"</annotation></string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"El Ahorro de batería activa el Tema oscuro y desactiva o restringe la actividad en segundo plano, algunos efectos visuales, algunas conexiones de red y otras funciones determinadas."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"El Ahorro de batería activa el Tema oscuro y desactiva o restringe la actividad en segundo plano, algunos efectos visuales, algunas conexiones de red y otras funciones determinadas."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Para reducir el uso de datos, el modo Ahorro de datos evita que algunas apps envíen y reciban datos en segundo plano. La app que estés usando podrá acceder a los datos, pero con menor frecuencia. De esta forma, por ejemplo, las imágenes no se mostrarán hasta que las presiones."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"¿Deseas activar Ahorro de datos?"</string>
@@ -2151,7 +2151,7 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"Trabajo"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Vista personal"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Vista de trabajo"</string>
-    <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"Tu administrador de IT impide compartir este contenido"</string>
+    <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"Bloqueado por tu administrador de TI"</string>
     <string name="resolver_cant_share_with_work_apps_explanation" msgid="9071442683080586643">"No se pueden usar apps de trabajo para compartir este contenido"</string>
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"No se puede abrir este contenido con apps de trabajo"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"No se pueden usar apps personales para compartir este contenido"</string>

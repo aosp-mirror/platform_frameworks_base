@@ -56,8 +56,8 @@
     </plurals>
     <string name="imei" msgid="2157082351232630390">"IMEI"</string>
     <string name="meid" msgid="3291227361605924674">"MEID"</string>
-    <string name="ClipMmi" msgid="4110549342447630629">"ID de emisor de llamada entrante"</string>
-    <string name="ClirMmi" msgid="6752346475055446417">"Ocultar ID de las llamadas salientes"</string>
+    <string name="ClipMmi" msgid="4110549342447630629">"Identificación del emisor de llamada entrante"</string>
+    <string name="ClirMmi" msgid="6752346475055446417">"Ocultar identificación de las llamadas salientes"</string>
     <string name="ColpMmi" msgid="4736462893284419302">"ID de línea conectada"</string>
     <string name="ColrMmi" msgid="5889782479745764278">"Restricción de ID de línea conectada"</string>
     <string name="CfMmi" msgid="8390012691099787178">"Desvío de llamadas"</string>
@@ -71,12 +71,12 @@
     <string name="RuacMmi" msgid="1876047385848991110">"Rechazo de llamadas molestas no deseadas"</string>
     <string name="CndMmi" msgid="185136449405618437">"Entrega de número de llamada entrante"</string>
     <string name="DndMmi" msgid="8797375819689129800">"No molestar"</string>
-    <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"El ID de emisor presenta el valor predeterminado de restringido. Siguiente llamada: Restringido"</string>
-    <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"El ID de emisor presenta el valor predeterminado de restringido. Siguiente llamada: No restringido"</string>
-    <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"El ID de emisor presenta el valor predeterminado de no restringido. Siguiente llamada: Restringido"</string>
-    <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"El ID de emisor presenta el valor predeterminado de no restringido. Siguiente llamada: No restringido"</string>
+    <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"La identificación del emisor presenta el valor predeterminado de restringido. Siguiente llamada: Restringido"</string>
+    <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"La identificación del emisor presenta el valor predeterminado de restringido. Siguiente llamada: No restringido"</string>
+    <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"La la identificación del emisor presenta el valor predeterminado de no restringido. Siguiente llamada: Restringido"</string>
+    <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"La identificación del emisor presenta el valor predeterminado de no restringido. Siguiente llamada: No restringido"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"El servicio no se suministra."</string>
-    <string name="CLIRPermanent" msgid="166443681876381118">"No puedes modificar el ID de emisor."</string>
+    <string name="CLIRPermanent" msgid="166443681876381118">"No puedes modificar la identificación de emisor."</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"No hay ningún servicio de datos móviles"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Servicio de llamadas de emergencia no disponible"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Sin servicio de voz"</string>
@@ -1866,7 +1866,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Actualizado por el administrador"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Eliminado por el administrador"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Aceptar"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"El modo Ahorro de batería activa el tema oscuro y limita o desactiva la actividad en segundo plano, algunos efectos visuales, ciertas funciones y algunas conexiones de red.\n\n"<annotation id="url">"Más información"</annotation></string>
+    <!-- no translation found for battery_saver_description_with_learn_more (5444908404021316250) -->
+    <skip />
     <string name="battery_saver_description" msgid="8518809702138617167">"El modo Ahorro de batería activa el tema oscuro y limita o desactiva la actividad en segundo plano, algunos efectos visuales, ciertas funciones y algunas conexiones de red."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Ahorro de datos evita que algunas aplicaciones envíen o reciban datos en segundo plano, lo que puede reducir el uso de datos. Una aplicación activa puede acceder a los datos, aunque con menos frecuencia. Esto significa que es posible que, por ejemplo, algunas imágenes no se muestren hasta que las toques."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"¿Activar Ahorro de datos?"</string>
@@ -1970,7 +1971,7 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> no está disponible en este momento. Esta opción se administra en <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Más información"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Anular pausa de aplicación"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"¿Activar apps de trabajo?"</string>
+    <string name="work_mode_off_title" msgid="961171256005852058">"¿Activar aplicaciones de trabajo?"</string>
     <string name="work_mode_off_message" msgid="7319580997683623309">"Accede a tus aplicaciones y notificaciones de trabajo"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Activar"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"La aplicación no está disponible"</string>
@@ -2092,7 +2093,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"Aceptar"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Desactivar"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Más información"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Las notificaciones mejoradas sustituyen a las notificaciones adaptativas en Android 12. Esta nueva función te sugiere acciones y respuestas, y organiza tus notificaciones.\n\nLa función puede acceder al contenido de tus notificaciones, incluida información personal, como nombres de contactos y mensajes. También puede cerrar o responder a notificaciones; por ejemplo, puede contestar llamadas telefónicas y controlar No molestar."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Las notificaciones mejoradas sustituyen a las notificaciones adaptativas en Android 12. Esta nueva función te sugiere acciones y respuestas, y organiza tus notificaciones.\n\nLa función puede acceder al contenido de tus notificaciones, incluida información personal, como nombres de contactos y mensajes. También puede cerrar o responder a notificaciones; por ejemplo, puede contestar llamadas telefónicas y controlar el modo No molestar."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notificación sobre el modo rutina"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Quizás se agote la batería antes de lo habitual"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Se ha activado el modo Ahorro de batería para aumentar la duración de la batería"</string>

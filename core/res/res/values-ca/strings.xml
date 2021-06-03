@@ -311,7 +311,7 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"accedir al calendari"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"enviar i llegir missatges SMS"</string>
-    <string name="permgrouplab_storage" msgid="1938416135375282333">"Fitxers i multimèdia"</string>
+    <string name="permgrouplab_storage" msgid="1938416135375282333">"Fitxers i contingut multimèdia"</string>
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"accedir a fotos, contingut multimèdia i fitxers del dispositiu"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Micròfon"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"gravar àudio"</string>
@@ -338,7 +338,7 @@
     <string name="capability_title_canPerformGestures" msgid="9106545062106728987">"Fer gestos"</string>
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Permet tocar, lliscar, pinçar i fer altres gestos."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Gestos d\'empremtes digitals"</string>
-    <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Captura gestos realitzats en el sensor d\'empremtes dactilars del dispositiu."</string>
+    <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Captura gestos realitzats en el sensor d\'empremtes digitals del dispositiu."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Fes una captura de pantalla"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Pots fer una captura de la pantalla."</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"desactivar o modificar la barra d\'estat"</string>
@@ -596,10 +596,10 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"S\'ha cancel·lat l\'operació d\'empremta digital."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"L\'usuari ha cancel·lat l\'operació d\'empremta digital."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"S\'han produït massa intents. Torna-ho a provar més tard."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"S\'han fet massa intents. S\'ha desactivat el sensor d\'empremtes dactilars."</string>
+    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"S\'han fet massa intents. S\'ha desactivat el sensor d\'empremtes digitals."</string>
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Torna-ho a provar."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"No s\'ha registrat cap empremta digital."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Aquest dispositiu no té sensor d\'empremtes dactilars."</string>
+    <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Aquest dispositiu no té sensor d\'empremtes digitals."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"El sensor està desactivat temporalment."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Dit <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Utilitza l\'empremta digital"</string>
@@ -1866,7 +1866,7 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Actualitzat per l\'administrador"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Suprimit per l\'administrador"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"D\'acord"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"Estalvi de bateria activa el tema fosc i limita o desactiva l\'activitat en segon pla, alguns efectes visuals, determinades funcions i algunes connexions a la xarxa.\n\n"<annotation id="url">"Més informació"</annotation></string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Estalvi de bateria activa el tema fosc i limita o desactiva l\'activitat en segon pla, alguns efectes visuals, determinades funcions i algunes connexions a la xarxa."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"Estalvi de bateria activa el tema fosc i limita o desactiva l\'activitat en segon pla, alguns efectes visuals, determinades funcions i algunes connexions a la xarxa."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Per reduir l\'ús de dades, la funció Economitzador de dades evita que determinades aplicacions enviïn o rebin dades en segon pla. L\'aplicació que estiguis fent servir podrà accedir a les dades, però menys sovint. Això vol dir, per exemple, que les imatges no es mostraran fins que no les toquis."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Activar l\'Economitzador de dades?"</string>

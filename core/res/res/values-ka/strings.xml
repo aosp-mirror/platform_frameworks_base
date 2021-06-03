@@ -1866,7 +1866,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"განახლებულია თქვენი ადმინისტრატორის მიერ"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"წაიშალა თქვენი ადმინისტრატორის მიერ"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"კარგი"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"ბატარეის დამზოგი ჩართავს მუქ თემას და შეზღუდავს ან გამორთავს ფონურ აქტივობას, ზოგიერთ ვიზუალურ ეფექტს, გარკვეულ ფუნქციებსა და ზოგიერთ ქსელთან კავშირს.\n\n"<annotation id="url">"შეიტყვეთ მეტი"</annotation></string>
+    <!-- no translation found for battery_saver_description_with_learn_more (5444908404021316250) -->
+    <skip />
     <string name="battery_saver_description" msgid="8518809702138617167">"ბატარეის დამზოგი ჩართავს მუქ თემას და შეზღუდავს ან გამორთავს ფონურ აქტივობას, ზოგიერთ ვიზუალურ ეფექტს, გარკვეულ ფუნქციებსა და ზოგიერთ ქსელთან კავშირს."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"მობილური ინტერნეტის მოხმარების შემცირების მიზნით, მონაცემთა დამზოგველი ზოგიერთ აპს ფონურ რეჟიმში მონაცემთა გაგზავნასა და მიღებას შეუზღუდავს. თქვენ მიერ ამჟამად გამოყენებული აპი მაინც შეძლებს მობილურ ინტერნეტზე წვდომას, თუმცა ამას ნაკლები სიხშირით განახორციელებს. ეს ნიშნავს, რომ, მაგალითად, სურათები არ გამოჩნდება მანამ, სანამ მათ საგანგებოდ არ შეეხებით."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ჩაირთოს მონაცემთა დამზოგველი?"</string>
@@ -1914,7 +1915,7 @@
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"ავარიული პაუზა"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"სამუშაო კვირის ღამე"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"შაბათ-კვირა"</string>
-    <string name="zen_mode_default_events_name" msgid="2280682960128512257">"მოვლენისას"</string>
+    <string name="zen_mode_default_events_name" msgid="2280682960128512257">"მოვლენა"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"ძილისას"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ზოგიერთ ხმას ადუმებს"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"ფიქსირდება თქვენი მ ოწყობილობის შიდა პრობლემა და შეიძლება არასტაბილური იყოს, სანამ ქარხნულ მონაცემების არ განაახლებთ."</string>
