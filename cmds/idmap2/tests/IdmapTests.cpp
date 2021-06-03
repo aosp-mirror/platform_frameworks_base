@@ -83,7 +83,7 @@ TEST(IdmapTests, IdmapFailParsingDifferentVersion) {
   std::stringstream stream;
   stream << android::kIdmapMagic;
   stream << 0xffffffffU;
-  stream << std::string(kJunkSize, (char)0xffU);
+  stream << std::string(kJunkSize, static_cast<char>(0xffU));
   ASSERT_FALSE(Idmap::FromBinaryStream(stream));
 }
 
@@ -92,7 +92,7 @@ TEST(IdmapTests, IdmapFailParsingDifferentMagic) {
   std::stringstream stream;
   stream << 0xffffffffU;
   stream << android::kIdmapCurrentVersion;
-  stream << std::string(kJunkSize, (char)0xffU);
+  stream << std::string(kJunkSize, static_cast<char>(0xffU));
   ASSERT_FALSE(Idmap::FromBinaryStream(stream));
 }
 
