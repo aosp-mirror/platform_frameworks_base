@@ -41,6 +41,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.util.NotificationMessagingUtil;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.systemui.Prefs;
@@ -263,9 +264,10 @@ public class DependencyProvider {
     @SysUISingleton
     public AccessibilityFloatingMenuController provideAccessibilityFloatingMenuController(
             Context context, AccessibilityButtonTargetsObserver accessibilityButtonTargetsObserver,
-            AccessibilityButtonModeObserver accessibilityButtonModeObserver) {
+            AccessibilityButtonModeObserver accessibilityButtonModeObserver,
+            KeyguardUpdateMonitor keyguardUpdateMonitor) {
         return new AccessibilityFloatingMenuController(context, accessibilityButtonTargetsObserver,
-                accessibilityButtonModeObserver);
+                accessibilityButtonModeObserver, keyguardUpdateMonitor);
     }
 
     /** */
