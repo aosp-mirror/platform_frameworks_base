@@ -59,6 +59,7 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.util.MathUtils;
 import android.view.Choreographer;
 import android.view.MotionEvent;
 import android.view.View;
@@ -246,6 +247,18 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
         mWindowManager.setWindowInsets(new WindowInsets.Builder()
                 .setInsetsIgnoringVisibility(displayCutout(), Insets.of(20, 30, 20, 30))
                 .build());
+        mSpyImageView.onApplyWindowInsets(WindowInsets.CONSUMED);
+
+        assertNotEquals(oldDraggableBounds, mMagnificationModeSwitch.mDraggableWindowBounds);
+    }
+
+    @Test
+    public void onWindowBoundsChanged_buttonIsShowing_draggableBoundsChanged() {
+        mWindowManager.setWindowBounds(new Rect(0, 0, 800, 1000));
+        mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
+        final Rect oldDraggableBounds = new Rect(mMagnificationModeSwitch.mDraggableWindowBounds);
+
+        mWindowManager.setWindowBounds(new Rect(0, 0, 1000, 800));
         mSpyImageView.onApplyWindowInsets(WindowInsets.CONSUMED);
 
         assertNotEquals(oldDraggableBounds, mMagnificationModeSwitch.mDraggableWindowBounds);
@@ -471,6 +484,28 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
                 mWindowManager.getLayoutParamsFromAttachedView();
         assertNotNull(layoutParams);
         assertEquals(newA11yWindowTitle, layoutParams.accessibilityTitle);
+    }
+
+    @Test
+    public void onRotationChanged_buttonIsShowing_expectedYPosition() {
+        final Rect windowBounds = mWindowManager.getCurrentWindowMetrics().getBounds();
+        final int oldWindowHeight = windowBounds.height();
+        mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
+        final float windowHeightFraction =
+                (float) mWindowManager.getLayoutParamsFromAttachedView().y / oldWindowHeight;
+
+        // The window bounds are changed due to the rotation change.
+        final Rect newWindowBounds = new Rect(0, 0, windowBounds.height(), windowBounds.width());
+        mWindowManager.setWindowBounds(newWindowBounds);
+        mMagnificationModeSwitch.onConfigurationChanged(ActivityInfo.CONFIG_ORIENTATION);
+
+        int expectedY = (int) (newWindowBounds.height() * windowHeightFraction);
+        expectedY = MathUtils.constrain(expectedY,
+                mMagnificationModeSwitch.mDraggableWindowBounds.top,
+                mMagnificationModeSwitch.mDraggableWindowBounds.bottom);
+        assertEquals(
+                "The Y position does not keep the same height ratio after the rotation changed.",
+                expectedY, mWindowManager.getLayoutParamsFromAttachedView().y);
     }
 
     private void assertModeUnchanged(int expectedMode) {
