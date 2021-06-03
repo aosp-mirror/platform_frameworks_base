@@ -124,6 +124,7 @@ import com.android.systemui.tuner.TunerService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -302,8 +303,11 @@ public class NotificationStackScrollLayoutController {
         }
     };
 
-    public void setSectionPadding(float padding) {
-        mView.setSectionPadding(padding);
+    /**
+     * Set the overexpansion of the panel to be applied to the view.
+     */
+    public void setOverExpansion(float overExpansion) {
+        mView.setOverExpansion(overExpansion);
     }
 
     private final OnMenuEventListener mMenuEventListener = new OnMenuEventListener() {
@@ -944,10 +948,6 @@ public class NotificationStackScrollLayoutController {
         mView.setOverScrollAmount(amount, onTop, animate);
     }
 
-    public void setOverScrolledPixels(float numPixels, boolean onTop, boolean animate) {
-        mView.setOverScrolledPixels(numPixels, onTop, animate);
-    }
-
     public void resetScrollPosition() {
         mView.resetScrollPosition();
     }
@@ -1052,10 +1052,6 @@ public class NotificationStackScrollLayoutController {
 
     public float getCurrentOverScrollAmount(boolean top) {
         return mView.getCurrentOverScrollAmount(top);
-    }
-
-    public float getCurrentOverScrolledPixels(boolean top) {
-        return mView.getCurrentOverScrolledPixels(top);
     }
 
     public float calculateAppearFraction(float height) {
@@ -1428,6 +1424,13 @@ public class NotificationStackScrollLayoutController {
             extraTopInset = transitionProgress * mNotificationDragDownMovement;
         }
         mView.setExtraTopInsetForFullShadeTransition(extraTopInset);
+    }
+
+    /**
+     * Set a listener to when scrolling changes.
+     */
+    public void setOnScrollListener(Consumer<Integer> listener) {
+        mView.setOnScrollListener(listener);
     }
 
     /**

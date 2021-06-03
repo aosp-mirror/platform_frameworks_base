@@ -53,7 +53,7 @@ public abstract class PanelBar extends FrameLayout {
         if (DEBUG) LOG("go state: %d -> %d", mState, state);
         mState = state;
         if (mPanel != null) {
-            mPanel.getAmbientState().setIsShadeOpening(state == STATE_OPENING);
+            mPanel.setIsShadeOpening(state == STATE_OPENING);
         }
     }
 
