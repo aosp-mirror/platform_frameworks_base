@@ -452,8 +452,7 @@
     <string name="keyguard_more_overflow_text" msgid="5819512373606638727">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="7248696377626341060">"ਹੇਠਾਂ ਘੱਟ ਲਾਜ਼ਮੀ ਸੂਚਨਾਵਾਂ"</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"ਖੋਲ੍ਹਣ ਲਈ ਦੁਬਾਰਾ ਟੈਪ ਕਰੋ"</string>
-    <!-- no translation found for tap_again (1315420114387908655) -->
-    <skip />
+    <string name="tap_again" msgid="1315420114387908655">"ਦੁਬਾਰਾ ਟੈਪ ਕਰੋ"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"ਖੋਲ੍ਹਣ ਲਈ ਉੱਪਰ ਵੱਲ ਸਵਾਈਪ ਕਰੋ"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰਨ ਲਈ ਉੱਤੇ ਵੱਲ ਸਵਾਈਪ ਕਰੋ"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC ਵਰਤਣ ਲਈ ਅਣਲਾਕ ਕਰੋ"</string>
@@ -863,7 +862,7 @@
     <string name="switch_bar_off" msgid="5669805115416379556">"ਬੰਦ"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"ਅਣਉਪਲਬਧ"</string>
     <string name="tile_disabled" msgid="373212051546573069">"ਬੰਦ ਹੈ"</string>
-    <string name="nav_bar" msgid="4642708685386136807">"ਦਿਸ਼ਾ-ਨਿਰਦੇਸ਼ ਪੱਟੀ"</string>
+    <string name="nav_bar" msgid="4642708685386136807">"ਨੈਵੀਗੇਸ਼ਨ ਵਾਲੀ ਪੱਟੀ"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"ਖਾਕਾ"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"ਵਧੇਰੇ ਖੱਬੇ ਬਟਨ ਕਿਸਮ"</string>
     <string name="right_nav_bar_button_type" msgid="4472566498647364715">"ਵਧੇਰੇ ਸੱਜੇ ਬਟਨ ਕਿਸਮ"</string>

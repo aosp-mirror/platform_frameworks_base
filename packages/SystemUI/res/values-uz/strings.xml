@@ -593,7 +593,7 @@
     <string name="hidden_notifications_cancel" msgid="4805370226181001278">"Kerak emas"</string>
     <string name="hidden_notifications_setup" msgid="2064795578526982467">"Sozlash"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <string name="volume_zen_end_now" msgid="5901885672973736563">"O‘chiring"</string>
+    <string name="volume_zen_end_now" msgid="5901885672973736563">"Faolsizlantirish"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"Tovush sozlamalari"</string>
     <string name="accessibility_volume_expand" msgid="7653070939304433603">"Yoyish"</string>
     <string name="accessibility_volume_collapse" msgid="2746845391013829996">"Yig‘ish"</string>

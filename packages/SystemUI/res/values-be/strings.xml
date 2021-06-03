@@ -1158,7 +1158,7 @@
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Сканер адбіткаў пальцаў"</string>
     <string name="accessibility_udfps_disabled_button" msgid="4284034245130239384">"Сканер адбіткаў пальцаў выключаны"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"правесці аўтэнтыфікацыю"</string>
-    <string name="accessibility_enter_hint" msgid="2617864063504824834">"вызначыць прыладу"</string>
+    <string name="accessibility_enter_hint" msgid="2617864063504824834">"адкрыць галоўны экран прылады"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Каб адкрыць, скарыстайце адбітак пальца"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Патрабуецца аўтэнтыфікацыя. Дакраніцеся да сканера адбіткаў пальцаў."</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Бягучы тэлефонны выклік"</string>

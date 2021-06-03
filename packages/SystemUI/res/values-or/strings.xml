@@ -1033,7 +1033,7 @@
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"ସ୍କ୍ରିନର ଅଂଶ ମାଗ୍ନିଫାଏ କରନ୍ତୁ"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"ସ୍ୱିଚ୍ କରନ୍ତୁ"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"ଆକ୍ସେସିବିଲିଟୀ ଜେଶ୍ଚରକୁ ଆକ୍ସେସିବିଲିଟୀ ବଟନରେ ପରିବର୍ତ୍ତନ କରାଯାଇଛି\n\n"<annotation id="link">"ସେଟିଂସ୍ ଦେଖନ୍ତୁ"</annotation></string>
-    <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"ବଟନକୁ ଅସ୍ଥାୟୀ ଭାବେ ଲୁଚାଇବା ପାଇଁ ଧାରକୁ ମୁଭ୍ କରନ୍ତୁ"</string>
+    <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"ବଟନକୁ ଅସ୍ଥାୟୀ ଭାବେ ଲୁଚାଇବା ପାଇଁ ଏହାକୁ ଗୋଟିଏ ଧାରକୁ ମୁଭ୍ କରନ୍ତୁ"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"ଶୀର୍ଷ ବାମକୁ ମୁଭ୍ କରନ୍ତୁ"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"ଶୀର୍ଷ ଡାହାଣକୁ ମୁଭ୍ କରନ୍ତୁ"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"ନିମ୍ନ ବାମକୁ ମୁଭ୍ କରନ୍ତୁ"</string>
