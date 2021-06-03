@@ -20,7 +20,6 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Canvas;
 import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.LayerDrawable;
@@ -30,8 +29,6 @@ import android.view.View;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.systemui.R;
-import com.android.systemui.animation.ActivityLaunchAnimator;
-import com.android.systemui.animation.Interpolators;
 import com.android.systemui.statusbar.notification.ExpandAnimationParameters;
 
 /**
@@ -281,11 +278,6 @@ public class NotificationBackgroundView extends View {
     public void setExpandAnimationParams(ExpandAnimationParameters params) {
         mActualHeight = params.getHeight();
         mActualWidth = params.getWidth();
-        float alphaProgress = Interpolators.ALPHA_IN.getInterpolation(
-                params.getProgress(
-                        ActivityLaunchAnimator.ANIMATION_DELAY_FADE_IN_WINDOW /* delay */,
-                        ActivityLaunchAnimator.ANIMATION_DURATION_FADE_IN_WINDOW /* duration */));
-        mBackground.setAlpha((int) (mDrawableAlpha * (1.0f - alphaProgress)));
         invalidate();
     }
 
@@ -294,8 +286,6 @@ public class NotificationBackgroundView extends View {
         if (mBackground instanceof LayerDrawable) {
             GradientDrawable gradientDrawable =
                     (GradientDrawable) ((LayerDrawable) mBackground).getDrawable(0);
-            gradientDrawable.setXfermode(
-                    running ? new PorterDuffXfermode(PorterDuff.Mode.SRC) : null);
             // Speed optimization: disable AA if transfer mode is not SRC_OVER. AA is not easy to
             // spot during animation anyways.
             gradientDrawable.setAntiAlias(!running);

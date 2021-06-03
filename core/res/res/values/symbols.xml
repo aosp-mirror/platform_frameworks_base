@@ -4307,6 +4307,12 @@
   <java-symbol type="bool" name="config_cecPowerStateChangeOnActiveSourceLostStandbyNow_allowed" />
   <java-symbol type="bool" name="config_cecPowerStateChangeOnActiveSourceLostStandbyNow_default" />
 
+  <java-symbol type="bool" name="config_cecSystemAudioControl_userConfigurable" />
+  <java-symbol type="bool" name="config_cecSystemAudioControlEnabled_allowed" />
+  <java-symbol type="bool" name="config_cecSystemAudioControlEnabled_default" />
+  <java-symbol type="bool" name="config_cecSystemAudioControlDisabled_allowed" />
+  <java-symbol type="bool" name="config_cecSystemAudioControlDisabled_default" />
+
   <java-symbol type="bool" name="config_cecSystemAudioModeMuting_userConfigurable" />
   <java-symbol type="bool" name="config_cecSystemAudioModeMutingEnabled_allowed" />
   <java-symbol type="bool" name="config_cecSystemAudioModeMutingEnabled_default" />
@@ -4392,4 +4398,7 @@
 
   <java-symbol type="bool" name="config_supportsMicToggle" />
   <java-symbol type="bool" name="config_supportsCamToggle" />
+
+  <java-symbol type="dimen" name="starting_surface_icon_size" />
+  <java-symbol type="dimen" name="starting_surface_default_icon_size" />
 </resources>

@@ -26,6 +26,7 @@ import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_ALWAYS;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_DEFAULT;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_IF_ALLOWLISTED;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_NEVER;
+import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
@@ -74,9 +75,9 @@ import static com.android.server.wm.Task.ActivityState.RESUMED;
 import static com.android.server.wm.Task.ActivityState.STARTED;
 import static com.android.server.wm.Task.ActivityState.STOPPED;
 import static com.android.server.wm.Task.ActivityState.STOPPING;
-import static com.android.server.wm.Task.TASK_VISIBILITY_INVISIBLE;
-import static com.android.server.wm.Task.TASK_VISIBILITY_VISIBLE;
-import static com.android.server.wm.Task.TASK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT;
+import static com.android.server.wm.TaskFragment.TASK_FRAGMENT_VISIBILITY_INVISIBLE;
+import static com.android.server.wm.TaskFragment.TASK_FRAGMENT_VISIBILITY_VISIBLE;
+import static com.android.server.wm.TaskFragment.TASK_FRAGMENT_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 import static com.android.server.wm.WindowStateAnimator.ROOT_TASK_CLIP_AFTER_ANIM;
 import static com.android.server.wm.WindowStateAnimator.ROOT_TASK_CLIP_BEFORE_ANIM;
@@ -546,7 +547,7 @@ public class ActivityRecordTests extends WindowTestsBase {
     }
 
     @Test
-    public void ignoreRequestedOrientationInSplitWindows() {
+    public void ignoreRequestedOrientationForResizableInSplitWindows() {
         final ActivityRecord activity = createActivityWith2LevelTask();
         final Task task = activity.getTask();
         final Task rootTask = activity.getRootTask();
@@ -578,13 +579,45 @@ public class ActivityRecordTests extends WindowTestsBase {
         }
         task.setBounds(bounds);
 
-        // Requests orientation that's different from its bounds.
-        activity.setRequestedOrientation(
-                isScreenPortrait ? SCREEN_ORIENTATION_PORTRAIT : SCREEN_ORIENTATION_LANDSCAPE);
+        final int activityCurOrientation = activity.getConfiguration().orientation;
 
-        // Asserts it has orientation derived requested orientation (fixed orientation letterbox).
-        assertEquals(isScreenPortrait ? ORIENTATION_PORTRAIT : ORIENTATION_LANDSCAPE,
-                activity.getConfiguration().orientation);
+        // Requests orientation that's different from its bounds.
+        activity.setRequestedOrientation(activityCurOrientation == ORIENTATION_LANDSCAPE
+                ? SCREEN_ORIENTATION_PORTRAIT : SCREEN_ORIENTATION_LANDSCAPE);
+
+        // Asserts fixed orientation request is ignored, and the orientation is not changed
+        // (fill Task).
+        assertEquals(activityCurOrientation, activity.getConfiguration().orientation);
+        assertFalse(activity.isLetterboxedForFixedOrientationAndAspectRatio());
+    }
+
+    @Test
+    public void respectRequestedOrientationForNonResizableInSplitWindows() {
+        final Task task = new TaskBuilder(mSupervisor)
+                .setCreateParentTask(true).setCreateActivity(true).build();
+        final Task rootTask = task.getRootTask();
+        final ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setParentTask(task)
+                .setOnTop(true)
+                .setResizeMode(RESIZE_MODE_UNRESIZEABLE)
+                .setScreenOrientation(SCREEN_ORIENTATION_PORTRAIT)
+                .build();
+
+        // Task in landscape.
+        rootTask.setWindowingMode(WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
+        task.setBounds(0, 0, 1000, 500);
+        assertEquals(ORIENTATION_LANDSCAPE, task.getConfiguration().orientation);
+
+        // Asserts fixed orientation request is respected, and the orientation is not changed.
+        assertEquals(ORIENTATION_PORTRAIT, activity.getConfiguration().orientation);
+
+        // Clear size compat.
+        activity.clearSizeCompatMode();
+        activity.ensureActivityConfiguration(0 /* globalChanges */, false /* preserveWindow */);
+        activity.mDisplayContent.sendNewConfiguration();
+
+        // Relaunching the app should still respect the orientation request.
+        assertEquals(ORIENTATION_PORTRAIT, activity.getConfiguration().orientation);
         assertTrue(activity.isLetterboxedForFixedOrientationAndAspectRatio());
     }
 
@@ -618,13 +651,14 @@ public class ActivityRecordTests extends WindowTestsBase {
         final Task task = activity.getTask();
         activity.setState(Task.ActivityState.STOPPED, "Testing");
 
-        doReturn(TASK_VISIBILITY_VISIBLE).when(task).getVisibility(null);
+        doReturn(TASK_FRAGMENT_VISIBILITY_VISIBLE).when(task).getVisibility(null);
         assertEquals(true, activity.shouldResumeActivity(null /* activeActivity */));
 
-        doReturn(TASK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT).when(task).getVisibility(null);
+        doReturn(TASK_FRAGMENT_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT)
+                .when(task).getVisibility(null);
         assertEquals(false, activity.shouldResumeActivity(null /* activeActivity */));
 
-        doReturn(TASK_VISIBILITY_INVISIBLE).when(task).getVisibility(null);
+        doReturn(TASK_FRAGMENT_VISIBILITY_INVISIBLE).when(task).getVisibility(null);
         assertEquals(false, activity.shouldResumeActivity(null /* activeActivity */));
     }
 
@@ -638,7 +672,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         activity.addResultLocked(topActivity, "resultWho", 0, 0, new Intent());
         topActivity.finishing = true;
 
-        doReturn(TASK_VISIBILITY_VISIBLE).when(task).getVisibility(null);
+        doReturn(TASK_FRAGMENT_VISIBILITY_VISIBLE).when(task).getVisibility(null);
         assertEquals(true, activity.shouldResumeActivity(null /* activeActivity */));
         assertEquals(false, activity.shouldPauseActivity(null /*activeActivity */));
     }

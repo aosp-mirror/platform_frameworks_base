@@ -9804,10 +9804,6 @@ public class Notification implements Parcelable
          * <p>Apps sending bubbles may set this flag so that the bubble is posted <b>without</b>
          * the associated notification in the notification shade.</p>
          *
-         * <p>Apps sending bubbles can only apply this flag when the app is in the foreground,
-         * otherwise the flag is not respected. The app is considered foreground if it is visible
-         * and on the screen, note that a foreground service does not qualify.</p>
-         *
          * <p>Generally this flag should only be set by the app if the user has performed an
          * action to request or create a bubble, or if the user has seen the content in the
          * notification and the notification is no longer relevant. </p>
@@ -9957,10 +9953,6 @@ public class Notification implements Parcelable
          *
          * <p>Apps sending bubbles may set this flag so that the bubble is posted <b>without</b>
          * the associated notification in the notification shade.</p>
-         *
-         * <p>Apps sending bubbles can only apply this flag when the app is in the foreground,
-         * otherwise the flag is not respected. The app is considered foreground if it is visible
-         * and on the screen, note that a foreground service does not qualify.</p>
          *
          * <p>Generally the app should only set this flag if the user has performed an
          * action to request or create a bubble, or if the user has seen the content in the
@@ -10159,6 +10151,8 @@ public class Notification implements Parcelable
              * {@link Activity#isLaunchedFromBubble()} will return with {@code true}.
              * </p>
              *
+             * Note that the pending intent used here requires PendingIntent.FLAG_MUTABLE.
+             *
              * @throws NullPointerException if intent is null.
              * @throws NullPointerException if icon is null.
              */
@@ -10346,11 +10340,6 @@ public class Notification implements Parcelable
             /**
              * Sets whether the bubble will be posted <b>without</b> the associated notification in
              * the notification shade.
-             *
-             * <p>This flag has no effect if the app posting the bubble is not in the foreground.
-             * The app is considered foreground if it is visible and on the screen, note that
-             * a foreground service does not qualify.
-             * </p>
              *
              * <p>Generally, this flag should only be set if the user has performed an action to
              * request or create a bubble, or if the user has seen the content in the notification

@@ -19,6 +19,8 @@ package com.android.systemui.shared.recents.utilities;
 import android.graphics.Color;
 import android.os.Handler;
 import android.os.Message;
+import android.view.Surface;
+import android.view.View;
 
 /* Common code */
 public class Utilities {
@@ -29,6 +31,23 @@ public class Utilities {
     public static void postAtFrontOfQueueAsynchronously(Handler h, Runnable r) {
         Message msg = h.obtainMessage().setCallback(r);
         h.sendMessageAtFrontOfQueue(msg);
+    }
+
+    public static boolean isRotationAnimationCCW(int from, int to) {
+        // All 180deg WM rotation animations are CCW, match that
+        if (from == Surface.ROTATION_0 && to == Surface.ROTATION_90) return false;
+        if (from == Surface.ROTATION_0 && to == Surface.ROTATION_180) return true; //180d so CCW
+        if (from == Surface.ROTATION_0 && to == Surface.ROTATION_270) return true;
+        if (from == Surface.ROTATION_90 && to == Surface.ROTATION_0) return true;
+        if (from == Surface.ROTATION_90 && to == Surface.ROTATION_180) return false;
+        if (from == Surface.ROTATION_90 && to == Surface.ROTATION_270) return true; //180d so CCW
+        if (from == Surface.ROTATION_180 && to == Surface.ROTATION_0) return true; //180d so CCW
+        if (from == Surface.ROTATION_180 && to == Surface.ROTATION_90) return true;
+        if (from == Surface.ROTATION_180 && to == Surface.ROTATION_270) return false;
+        if (from == Surface.ROTATION_270 && to == Surface.ROTATION_0) return false;
+        if (from == Surface.ROTATION_270 && to == Surface.ROTATION_90) return true; //180d so CCW
+        if (from == Surface.ROTATION_270 && to == Surface.ROTATION_180) return true;
+        return false; // Default
     }
 
     /** Calculates the constrast between two colors, using the algorithm provided by the WCAG v2. */

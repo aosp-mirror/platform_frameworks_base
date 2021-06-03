@@ -619,6 +619,36 @@ public class HdmiControlService extends SystemService {
                     }
                 }, mServiceThreadExecutor);
         mHdmiCecConfig.registerChangeListener(
+                HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_CONTROL,
+                new HdmiCecConfig.SettingChangeListener() {
+                    @Override
+                    public void onChange(String setting) {
+                        boolean enabled = mHdmiCecConfig.getIntValue(
+                                HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_CONTROL)
+                                    == HdmiControlManager.SYSTEM_AUDIO_CONTROL_ENABLED;
+                        if (isTvDeviceEnabled()) {
+                            tv().setSystemAudioControlFeatureEnabled(enabled);
+                        }
+                        if (isAudioSystemDevice()) {
+                            if (audioSystem() == null) {
+                                Slog.e(TAG, "Audio System device has not registered yet."
+                                        + " Can't turn system audio mode on.");
+                            } else {
+                                audioSystem().onSystemAudioControlFeatureSupportChanged(enabled);
+                            }
+                        }
+                    }
+                }, mServiceThreadExecutor);
+        mHdmiCecConfig.registerChangeListener(
+                HdmiControlManager.CEC_SETTING_NAME_VOLUME_CONTROL_MODE,
+                new HdmiCecConfig.SettingChangeListener() {
+                    @Override
+                    public void onChange(String setting) {
+                        setHdmiCecVolumeControlEnabledInternal(getHdmiCecConfig().getIntValue(
+                                HdmiControlManager.CEC_SETTING_NAME_VOLUME_CONTROL_MODE));
+                    }
+                }, mServiceThreadExecutor);
+        mHdmiCecConfig.registerChangeListener(
                 HdmiControlManager.CEC_SETTING_NAME_TV_WAKE_ON_ONE_TOUCH_PLAY,
                 new HdmiCecConfig.SettingChangeListener() {
                     @Override
@@ -757,8 +787,6 @@ public class HdmiControlService extends SystemService {
     private void registerContentObserver() {
         ContentResolver resolver = getContext().getContentResolver();
         String[] settings = new String[] {
-                Global.HDMI_CONTROL_VOLUME_CONTROL_ENABLED,
-                Global.HDMI_SYSTEM_AUDIO_CONTROL_ENABLED,
                 Global.MHL_INPUT_SWITCHING_ENABLED,
                 Global.MHL_POWER_CHARGE_ENABLED,
                 Global.HDMI_CEC_SWITCH_ENABLED,
@@ -781,23 +809,6 @@ public class HdmiControlService extends SystemService {
             String option = uri.getLastPathSegment();
             boolean enabled = readBooleanSetting(option, true);
             switch (option) {
-                case Global.HDMI_CONTROL_VOLUME_CONTROL_ENABLED:
-                    setHdmiCecVolumeControlEnabledInternal(getHdmiCecConfig().getIntValue(
-                            HdmiControlManager.CEC_SETTING_NAME_VOLUME_CONTROL_MODE));
-                    break;
-                case Global.HDMI_SYSTEM_AUDIO_CONTROL_ENABLED:
-                    if (isTvDeviceEnabled()) {
-                        tv().setSystemAudioControlFeatureEnabled(enabled);
-                    }
-                    if (isAudioSystemDevice()) {
-                        if (audioSystem() == null) {
-                            Slog.e(TAG, "Audio System device has not registered yet."
-                                    + " Can't turn system audio mode on.");
-                            break;
-                        }
-                        audioSystem().onSystemAduioControlFeatureSupportChanged(enabled);
-                    }
-                    break;
                 case Global.HDMI_CEC_SWITCH_ENABLED:
                     if (isAudioSystemDevice()) {
                         if (audioSystem() == null) {

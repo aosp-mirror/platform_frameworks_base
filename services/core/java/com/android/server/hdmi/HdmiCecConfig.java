@@ -345,6 +345,16 @@ public class HdmiCecConfig {
                 R.bool.config_cecPowerStateChangeOnActiveSourceLostStandbyNow_allowed,
                 R.bool.config_cecPowerStateChangeOnActiveSourceLostStandbyNow_default);
 
+        Setting systemAudioControl = registerSetting(
+                HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_CONTROL,
+                R.bool.config_cecSystemAudioControl_userConfigurable);
+        systemAudioControl.registerValue(HdmiControlManager.SYSTEM_AUDIO_CONTROL_ENABLED,
+                R.bool.config_cecSystemAudioControlEnabled_allowed,
+                R.bool.config_cecSystemAudioControlEnabled_default);
+        systemAudioControl.registerValue(HdmiControlManager.SYSTEM_AUDIO_CONTROL_DISABLED,
+                R.bool.config_cecSystemAudioControlDisabled_allowed,
+                R.bool.config_cecSystemAudioControlDisabled_default);
+
         Setting systemAudioModeMuting = registerSetting(
                 HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING,
                 R.bool.config_cecSystemAudioModeMuting_userConfigurable);
@@ -507,6 +517,8 @@ public class HdmiCecConfig {
                 return STORAGE_GLOBAL_SETTINGS;
             case HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST:
                 return STORAGE_SHARED_PREFS;
+            case HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_CONTROL:
+                return STORAGE_GLOBAL_SETTINGS;
             case HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING:
                 return STORAGE_SHARED_PREFS;
             case HdmiControlManager.CEC_SETTING_NAME_TV_WAKE_ON_ONE_TOUCH_PLAY:
@@ -544,6 +556,8 @@ public class HdmiCecConfig {
                 return Global.HDMI_CONTROL_VOLUME_CONTROL_ENABLED;
             case HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST:
                 return setting.getName();
+            case HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_CONTROL:
+                return Global.HDMI_SYSTEM_AUDIO_CONTROL_ENABLED;
             case HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING:
                 return setting.getName();
             case HdmiControlManager.CEC_SETTING_NAME_TV_WAKE_ON_ONE_TOUCH_PLAY:

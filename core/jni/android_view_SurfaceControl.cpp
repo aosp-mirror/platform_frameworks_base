@@ -1007,6 +1007,17 @@ static void nativeSetDisplayLayerStack(JNIEnv* env, jclass clazz,
     }
 }
 
+static void nativeSetDisplayFlags(JNIEnv* env, jclass clazz, jlong transactionObj, jobject tokenObj,
+                                  jint flags) {
+    sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
+    if (token == NULL) return;
+
+    {
+        auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+        transaction->setDisplayFlags(token, flags);
+    }
+}
+
 static void nativeSetDisplayProjection(JNIEnv* env, jclass clazz,
         jlong transactionObj,
         jobject tokenObj, jint orientation,
@@ -1864,6 +1875,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetDisplaySurface },
     {"nativeSetDisplayLayerStack", "(JLandroid/os/IBinder;I)V",
             (void*)nativeSetDisplayLayerStack },
+    {"nativeSetDisplayFlags", "(JLandroid/os/IBinder;I)V",
+            (void*)nativeSetDisplayFlags },
     {"nativeSetDisplayProjection", "(JLandroid/os/IBinder;IIIIIIIII)V",
             (void*)nativeSetDisplayProjection },
     {"nativeSetDisplaySize", "(JLandroid/os/IBinder;II)V",

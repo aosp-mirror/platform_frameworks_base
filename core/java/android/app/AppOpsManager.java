@@ -2840,16 +2840,6 @@ public class AppOpsManager {
     private static final ThreadLocal<Integer> sBinderThreadCallingUid = new ThreadLocal<>();
 
     /**
-     * Optimization: we need to propagate to IPCs whether the current thread is collecting
-     * app ops but using only the thread local above is too slow as it requires a map lookup
-     * on every IPC. We add this static var that is lockless and stores an OR-ed mask of the
-     * thread id's currently collecting ops, thus reducing the map lookup to a simple bit
-     * operation except the extremely unlikely case when threads with overlapping id bits
-     * execute op collecting ops.
-     */
-    private static volatile long sThreadsListeningForOpNotedInBinderTransaction = 0L;
-
-    /**
      * If a thread is currently executing a two-way binder transaction, this stores the
      * ops that were noted blaming any app (the caller, the caller of the caller, etc).
      *
@@ -9038,7 +9028,6 @@ public class AppOpsManager {
      * @hide
      */
     public static void startNotedAppOpsCollection(int callingUid) {
-        sThreadsListeningForOpNotedInBinderTransaction |= Thread.currentThread().getId();
         sBinderThreadCallingUid.set(callingUid);
     }
 
@@ -9053,7 +9042,6 @@ public class AppOpsManager {
      */
     public static void finishNotedAppOpsCollection() {
         sBinderThreadCallingUid.remove();
-        sThreadsListeningForOpNotedInBinderTransaction &= ~Thread.currentThread().getId();
         sAppOpsNotedInThisBinderTransaction.remove();
     }
 
@@ -9398,9 +9386,7 @@ public class AppOpsManager {
      * @return whether we are in a binder transaction and collecting appops.
      */
     private static boolean isListeningForOpNotedInBinderTransaction() {
-        return (sThreadsListeningForOpNotedInBinderTransaction
-                        & Thread.currentThread().getId()) != 0
-                && sBinderThreadCallingUid.get() != null;
+        return sBinderThreadCallingUid.get() != null;
     }
 
     /**
