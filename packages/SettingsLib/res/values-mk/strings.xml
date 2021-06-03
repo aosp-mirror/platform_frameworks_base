@@ -92,8 +92,8 @@
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Споделување конекција на интернет"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"Текстуални пораки"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"Пристап до SIM"</string>
-    <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD аудио: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
-    <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD аудио"</string>
+    <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD-аудио: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
+    <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD-аудио"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Слушни помагала"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Поврзано со слушни помагала"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Поврзан со аудио на медиуми"</string>
@@ -258,9 +258,9 @@
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Прикажувај уреди со Bluetooth без имиња"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"Оневозможете апсолутна јачина на звук"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Овозможи Gabeldorsche"</string>
-    <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"Верзија Bluetooth AVRCP"</string>
-    <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"Изберете верзија Bluetooth AVRCP"</string>
-    <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"Верзија на Bluetooth MAP"</string>
+    <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"Верзија на AVRCP за Bluetooth"</string>
+    <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"Изберете верзија на AVRCP за Bluetooth"</string>
+    <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"Верзија на MAP за Bluetooth"</string>
     <string name="bluetooth_select_map_version_dialog_title" msgid="7085934373987428460">"Изберете верзија на Bluetooth MAP"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="952001408455456494">"Кодек за аудио преку Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="7510542404227225545">"Вклучете го аудио кодекот преку Bluetooth\nСелекција"</string>
@@ -310,7 +310,7 @@
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"Потврди апликации преку USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Провери апликации инсталирани преку ADB/ADT за штетно однесување."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Уредите со Bluetooth без имиња (само MAC-адреси) ќе се прикажуваат"</string>
-    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Ја оневозможува карактеристиката за апсолутна јачина на звук преку Bluetooth во случај кога ќе настанат проблеми со далечинските уреди, како на пр., неприфатливо силен звук или недоволна контрола."</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Ја оневозможува функцијата за апсолутна јачина на звук преку Bluetooth во случај кога ќе настанат проблеми со далечинските уреди, како на пр., неприфатливо силен звук или недоволна контрола."</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Ја овозможува функцијата Bluetooth Gabeldorsche."</string>
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Ја овозможува функцијата „Подобрена поврзливост“."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Локален терминал"</string>
@@ -318,8 +318,8 @@
     <string name="hdcp_checking_title" msgid="3155692785074095986">"Проверување HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"Постави однесување на проверка на HDCP"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Отстранување грешки"</string>
-    <string name="debug_app" msgid="8903350241392391766">"Избери апликација за отстранување грешки"</string>
-    <string name="debug_app_not_set" msgid="1934083001283807188">"Нема поставено апликација за отстранување грешки"</string>
+    <string name="debug_app" msgid="8903350241392391766">"Изберете апликација за отстранување грешки"</string>
+    <string name="debug_app_not_set" msgid="1934083001283807188">"Не е поставена апликација за отстранување грешки"</string>
     <string name="debug_app_set" msgid="6599535090477753651">"Апликација за отстранување грешки: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="2543228890535466325">"Избери апликација"</string>
     <string name="no_application" msgid="9038334538870247690">"Ништо"</string>
@@ -328,14 +328,14 @@
     <string name="debug_input_category" msgid="7349460906970849771">"Внесување"</string>
     <string name="debug_drawing_category" msgid="5066171112313666619">"Цртање"</string>
     <string name="debug_hw_drawing_category" msgid="5830815169336975162">"Хардверско забрзување"</string>
-    <string name="media_category" msgid="8122076702526144053">"Медиуми"</string>
+    <string name="media_category" msgid="8122076702526144053">"Аудиовизуелни содржини"</string>
     <string name="debug_monitoring_category" msgid="1597387133765424994">"Следење"</string>
     <string name="strict_mode" msgid="889864762140862437">"Овозможен е строг режим"</string>
-    <string name="strict_mode_summary" msgid="1838248687233554654">"Осветли екран при. долги операции на главна нишка"</string>
+    <string name="strict_mode_summary" msgid="1838248687233554654">"Осветли екран при долги операции на главна нишка"</string>
     <string name="pointer_location" msgid="7516929526199520173">"Локација на покажувач"</string>
     <string name="pointer_location_summary" msgid="957120116989798464">"Прекривката на екран ги покажува тековните податоци на допир"</string>
     <string name="show_touches" msgid="8437666942161289025">"Прикажувај допири"</string>
-    <string name="show_touches_summary" msgid="3692861665994502193">"Прикажи визуелни повратни информации за допири"</string>
+    <string name="show_touches_summary" msgid="3692861665994502193">"Прикажувај визуелни повратни информации за допири"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"Прикажи ажурир. површина"</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"Осветли површ. на прозорци при нивно ажурирање"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"Прикажи ажурирања на прегледи"</string>
@@ -343,7 +343,7 @@
     <string name="show_hw_layers_updates" msgid="5268370750002509767">"Ажурир. слоеви на хардвер"</string>
     <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"Осветли слоеви на хардвер со зелено кога се ажур."</string>
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"Отстр. греш. на GPU"</string>
-    <string name="disable_overlays" msgid="4206590799671557143">"Оневозможи HW преклопувања"</string>
+    <string name="disable_overlays" msgid="4206590799671557143">"Оневозможи HW-преклопувања"</string>
     <string name="disable_overlays_summary" msgid="1954852414363338166">"Секогаш користи GPU за составување екран"</string>
     <string name="simulate_color_space" msgid="1206503300335835151">"Симулирај простор на бои"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"Овозможи траги на OpenGL"</string>
@@ -352,7 +352,7 @@
     <string name="debug_layout" msgid="1659216803043339741">"Прикажи граници на слој"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"Прикажи граници на клип, маргини, итн."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Принудно користи RTL за насока"</string>
-    <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Присилно постави насока на распоред на екран во РТЛ за сите локални стандарди"</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Принудно постави насока на распоред на екранот во RTL за сите локални стандарди"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Принудно користи 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Овозможи 4x MSAA за апликации OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Отстрани грешка на неправоаголни клип операции"</string>
@@ -367,7 +367,7 @@
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"Симул. секундарен екран"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"Апликации"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"Не чувај активности"</string>
-    <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Уништи ја секоја активност штом корисникот ќе го остави"</string>
+    <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Уништи ја секоја активност штом корисникот ќе ја напушти"</string>
     <string name="app_process_limit_title" msgid="8361367869453043007">"Граница на процес во зад."</string>
     <string name="show_all_anrs" msgid="9160563836616468726">"Прикажи заднински ANR"</string>
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Прикажи го дијалогот „Апликацијата не реагира“ за апликации во заднина"</string>
@@ -408,7 +408,7 @@
     <string name="transcode_disable_cache" msgid="3160069309377467045">"Оневозможи го кешот на транскодирањето"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Активни услуги"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Погледнете и контролирајте услуги што се моментално активни"</string>
-    <string name="select_webview_provider_title" msgid="3917815648099445503">"Воведување WebView"</string>
+    <string name="select_webview_provider_title" msgid="3917815648099445503">"Примена на WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"Поставете воведување WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"Овој избор веќе не важи. Обидете се повторно."</string>
     <string name="convert_to_file_encryption" msgid="2828976934129751818">"Конвертирајте до шифрирање датотеки"</string>
@@ -465,7 +465,7 @@
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Контролирано од администраторот"</string>
     <string name="disabled" msgid="8017887509554714950">"Оневозможено"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Дозволено"</string>
-    <string name="external_source_untrusted" msgid="5037891688911672227">"Не е дозволено"</string>
+    <string name="external_source_untrusted" msgid="5037891688911672227">"Без дозвола"</string>
     <string name="install_other_apps" msgid="3232595082023199454">"Непознати апликации"</string>
     <string name="home" msgid="973834627243661438">"Почетна страница за поставки"</string>
   <string-array name="battery_labels">
