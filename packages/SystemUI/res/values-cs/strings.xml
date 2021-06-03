@@ -1140,8 +1140,8 @@
     <string name="location_status_content_description" msgid="2982386178160071305">"<xliff:g id="NAME">%1$s</xliff:g> sdílí polohu"</string>
     <string name="new_story_status" msgid="9012195158584846525">"Nový příběh"</string>
     <string name="new_story_status_content_description" msgid="4963137422622516708">"<xliff:g id="NAME">%1$s</xliff:g> sdílí nový příběh"</string>
-    <string name="video_status" msgid="4548544654316843225">"Sledování"</string>
-    <string name="audio_status" msgid="4237055636967709208">"Poslouchám"</string>
+    <string name="video_status" msgid="4548544654316843225">"Sleduje"</string>
+    <string name="audio_status" msgid="4237055636967709208">"Poslouchá"</string>
     <string name="game_status" msgid="1340694320630973259">"Hraje"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"Přátelé"</string>
     <string name="empty_status" msgid="5938893404951307749">"Pojďme chatovat."</string>

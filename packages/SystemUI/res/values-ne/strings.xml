@@ -452,8 +452,7 @@
     <string name="keyguard_more_overflow_text" msgid="5819512373606638727">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="7248696377626341060">"तल कम जरुरी सूचनाहरू"</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"खोल्न पुनः ट्याप गर्नुहोस्"</string>
-    <!-- no translation found for tap_again (1315420114387908655) -->
-    <skip />
+    <string name="tap_again" msgid="1315420114387908655">"फेरि ट्याप गर्नुहोस्"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"खोल्न माथितिर स्वाइप गर्नुहोस्"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"फेरि प्रयास गर्न माथितिर स्वाइप गर्नुहोस्"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC प्रयोग गर्न स्क्रिन अनलक गर्नुहोस्"</string>
@@ -520,7 +519,7 @@
     <string name="notification_section_header_conversations" msgid="821834744538345661">"वार्तालापहरू"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"सबै मौन सूचनाहरू हटाउनुहोस्"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"बाधा नपुऱ्याउनुहोस् नामक मोडमार्फत पज पारिएका सूचनाहरू"</string>
-    <string name="media_projection_action_text" msgid="3634906766918186440">"अहिले सुरु गर्नुहोस्"</string>
+    <string name="media_projection_action_text" msgid="3634906766918186440">"अहिले न"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"कुनै सूचनाहरू छैनन्"</string>
     <string name="profile_owned_footer" msgid="2756770645766113964">"प्रोफाइल अनुगमन हुन सक्छ"</string>
     <string name="vpn_footer" msgid="3457155078010607471">"सञ्जाल अनुगमित हुन सक्छ"</string>
@@ -783,7 +782,7 @@
     <string name="notification_conversation_unmute" msgid="2692255619510896710">"सतर्क गराउँदै"</string>
     <string name="notification_conversation_bubble" msgid="2242180995373949022">"बबल देखाउनुहोस्"</string>
     <string name="notification_conversation_unbubble" msgid="6908427185031099868">"बबलहरू हटाउनुहोस्"</string>
-    <string name="notification_conversation_home_screen" msgid="8347136037958438935">"गृह स्क्रिनमा थप्नुहोस्"</string>
+    <string name="notification_conversation_home_screen" msgid="8347136037958438935">"होम स्क्रिनमा हाल्नुहोस्"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"सूचना सम्बन्धी नियन्त्रणहरू"</string>
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"सूचना स्नुज गर्ने विकल्पहरू"</string>
