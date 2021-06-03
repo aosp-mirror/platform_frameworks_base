@@ -21,6 +21,7 @@ import android.content.Context;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
 import android.os.Handler;
+import android.util.AtomicFile;
 import android.util.LongArray;
 import android.util.Slog;
 import android.util.TypedXmlPullParser;
@@ -44,6 +45,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Properties;
 import java.util.TreeMap;
 
 /**
@@ -60,12 +62,16 @@ public class BatteryUsageStatsStore {
     private static final String BATTERY_USAGE_STATS_DIR = "battery-usage-stats";
     private static final String SNAPSHOT_FILE_EXTENSION = ".bus";
     private static final String DIR_LOCK_FILENAME = ".lock";
+    private static final String CONFIG_FILENAME = "config";
+    private static final String BATTERY_USAGE_STATS_BEFORE_RESET_TIMESTAMP_PROPERTY =
+            "BATTERY_USAGE_STATS_BEFORE_RESET_TIMESTAMP";
     private static final long MAX_BATTERY_STATS_SNAPSHOT_STORAGE_BYTES = 100 * 1024;
 
     private final Context mContext;
     private final BatteryStatsImpl mBatteryStats;
     private final File mStoreDir;
     private final File mLockFile;
+    private final AtomicFile mConfigFile;
     private final long mMaxStorageBytes;
     private final Handler mHandler;
     private final BatteryUsageStatsProvider mBatteryUsageStatsProvider;
@@ -82,6 +88,7 @@ public class BatteryUsageStatsStore {
         mBatteryStats = batteryStats;
         mStoreDir = new File(systemDir, BATTERY_USAGE_STATS_DIR);
         mLockFile = new File(mStoreDir, DIR_LOCK_FILENAME);
+        mConfigFile = new AtomicFile(new File(mStoreDir, CONFIG_FILENAME));
         mHandler = handler;
         mMaxStorageBytes = maxStorageBytes;
         mBatteryStats.setBatteryResetListener(this::prepareForBatteryStatsReset);
@@ -164,6 +171,53 @@ public class BatteryUsageStatsStore {
             Slog.e(TAG, "Cannot lock battery usage stats directory", e);
         }
         return null;
+    }
+
+    /**
+     * Saves the supplied timestamp of the BATTERY_USAGE_STATS_BEFORE_RESET statsd atom pull
+     * in persistent file.
+     */
+    public void setLastBatteryUsageStatsBeforeResetAtomPullTimestamp(long timestamp) {
+        Properties props = new Properties();
+        try (FileLock lock = lockSnapshotDirectory()) {
+            try (InputStream in = mConfigFile.openRead()) {
+                props.load(in);
+            } catch (IOException e) {
+                Slog.e(TAG, "Cannot load config file " + mConfigFile, e);
+            }
+            props.put(BATTERY_USAGE_STATS_BEFORE_RESET_TIMESTAMP_PROPERTY,
+                    String.valueOf(timestamp));
+            FileOutputStream out = null;
+            try {
+                out = mConfigFile.startWrite();
+                props.store(out, "Statsd atom pull timestamps");
+                mConfigFile.finishWrite(out);
+            } catch (IOException e) {
+                mConfigFile.failWrite(out);
+                Slog.e(TAG, "Cannot save config file " + mConfigFile, e);
+            }
+        } catch (IOException e) {
+            Slog.e(TAG, "Cannot lock battery usage stats directory", e);
+        }
+    }
+
+    /**
+     * Retrieves the previously saved timestamp of the last BATTERY_USAGE_STATS_BEFORE_RESET
+     * statsd atom pull.
+     */
+    public long getLastBatteryUsageStatsBeforeResetAtomPullTimestamp() {
+        Properties props = new Properties();
+        try (FileLock lock = lockSnapshotDirectory()) {
+            try (InputStream in = mConfigFile.openRead()) {
+                props.load(in);
+            } catch (IOException e) {
+                Slog.e(TAG, "Cannot load config file " + mConfigFile, e);
+            }
+        } catch (IOException e) {
+            Slog.e(TAG, "Cannot lock battery usage stats directory", e);
+        }
+        return Long.parseLong(
+                props.getProperty(BATTERY_USAGE_STATS_BEFORE_RESET_TIMESTAMP_PROPERTY, "0"));
     }
 
     private FileLock lockSnapshotDirectory() throws IOException {
