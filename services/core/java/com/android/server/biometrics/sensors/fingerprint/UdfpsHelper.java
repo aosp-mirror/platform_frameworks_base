@@ -113,6 +113,19 @@ public class UdfpsHelper {
         }
     }
 
+    public static void onAcquiredGood(int sensorId,
+            @Nullable IUdfpsOverlayController udfpsOverlayController) {
+        if (udfpsOverlayController == null) {
+            return;
+        }
+
+        try {
+            udfpsOverlayController.onAcquiredGood(sensorId);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Remote exception when sending onAcquiredGood", e);
+        }
+    }
+
     public static void onEnrollmentProgress(int sensorId, int remaining,
             @Nullable IUdfpsOverlayController udfpsOverlayController) {
         if (udfpsOverlayController == null) {
