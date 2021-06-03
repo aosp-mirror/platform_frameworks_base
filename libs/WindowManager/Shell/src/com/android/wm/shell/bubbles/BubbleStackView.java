@@ -2401,7 +2401,8 @@ public class BubbleStackView extends FrameLayout
 
             if (mFlyout.getVisibility() == View.VISIBLE) {
                 mFlyout.animateUpdate(bubble.getFlyoutMessage(), getWidth(),
-                        mStackAnimationController.getStackPosition(), !bubble.showDot());
+                        mStackAnimationController.getStackPosition(), !bubble.showDot(),
+                        mAfterFlyoutHidden /* onHide */);
             } else {
                 mFlyout.setVisibility(INVISIBLE);
                 mFlyout.setupFlyoutStartingAsDot(bubble.getFlyoutMessage(),
@@ -2409,7 +2410,7 @@ public class BubbleStackView extends FrameLayout
                         mStackAnimationController.isStackOnLeftSide(),
                         bubble.getIconView().getDotColor() /* dotColor */,
                         expandFlyoutAfterDelay /* onLayoutComplete */,
-                        mAfterFlyoutHidden,
+                        mAfterFlyoutHidden /* onHide */,
                         bubble.getIconView().getDotCenter(),
                         !bubble.showDot(),
                         mPositioner);

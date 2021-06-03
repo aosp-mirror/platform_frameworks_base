@@ -231,7 +231,8 @@ public class BubbleFlyoutView extends FrameLayout {
      * Fade animation for consecutive flyouts.
      */
     void animateUpdate(Bubble.FlyoutMessage flyoutMessage, float parentWidth, PointF stackPos,
-            boolean hideDot) {
+            boolean hideDot, Runnable onHide) {
+        mOnHide = onHide;
         final Runnable afterFadeOut = () -> {
             updateFlyoutMessage(flyoutMessage, parentWidth);
             // Wait for TextViews to layout with updated height.
