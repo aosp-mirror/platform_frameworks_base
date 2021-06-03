@@ -2216,8 +2216,9 @@ public final class ActiveServices {
      * visibility, starting with both Service.startForeground() and
      * NotificationManager.notify().
      */
-    public void onForegroundServiceNotificationUpdateLocked(Notification notification,
-            final int id, final String pkg, @UserIdInt final int userId) {
+    public void onForegroundServiceNotificationUpdateLocked(boolean shown,
+            Notification notification, final int id, final String pkg,
+            @UserIdInt final int userId) {
         // If this happens to be a Notification for an FGS still in its deferral period,
         // drop the deferral and make sure our content bookkeeping is up to date.
         for (int i = mPendingFgsNotifications.size() - 1; i >= 0; i--) {
@@ -2225,17 +2226,26 @@ public final class ActiveServices {
             if (userId == sr.userId
                     && id == sr.foregroundId
                     && sr.appInfo.packageName.equals(pkg)) {
-                if (DEBUG_FOREGROUND_SERVICE) {
-                    Slog.d(TAG_SERVICE, "Notification shown; canceling deferral of "
-                            + sr);
-                }
+                // Found it.  If 'shown' is false, it means that the notification
+                // subsystem will not be displaying it yet, so all we do is log
+                // the "fgs entered" transition noting deferral, then we're done.
                 maybeLogFGSStateEnteredLocked(sr);
-                sr.mFgsNotificationShown = true;
-                sr.mFgsNotificationDeferred = false;
-                mPendingFgsNotifications.remove(i);
+                if (shown) {
+                    if (DEBUG_FOREGROUND_SERVICE) {
+                        Slog.d(TAG_SERVICE, "Notification shown; canceling deferral of "
+                                + sr);
+                    }
+                    sr.mFgsNotificationShown = true;
+                    sr.mFgsNotificationDeferred = false;
+                    mPendingFgsNotifications.remove(i);
+                } else {
+                    if (DEBUG_FOREGROUND_SERVICE) {
+                        Slog.d(TAG_SERVICE, "FGS notification deferred for " + sr);
+                    }
+                }
             }
         }
-        // And make sure to retain the latest notification content for the FGS
+        // In all cases, make sure to retain the latest notification content for the FGS
         ServiceMap smap = mServiceMap.get(userId);
         if (smap != null) {
             for (int i = 0; i < smap.mServicesByInstanceName.size(); i++) {
